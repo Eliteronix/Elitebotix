@@ -1,4 +1,4 @@
-console.log('Boop Test');
+console.log('Bot is starting...');
 
 require('dotenv').config();
 
@@ -9,7 +9,7 @@ client.login(process.env.BOTTOKEN);
 client.on('ready', readyDiscord);
 
 function readyDiscord() {
-    console.log('Bot is ready');
+    console.log('The Bot is ready.');
 }
 
 client.on('message', gotMessage);
