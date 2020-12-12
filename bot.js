@@ -16,11 +16,12 @@ client.on('message', gotMessage);
 
 function gotMessage(msg) {
     console.log(msg.content);
-    if (msg.content === 'Beep') {
-        //msg.reply('Boop');
-        msg.channel.send('Boop');
-    }
-    if (msg.content === 'owo' && msg.author.username != 'Elitebotix') {
-        msg.channel.send('owo');
+    if(msg.author.username != 'Elitebotix') {
+        if (msg.content === 'Beep') {
+            msg.channel.send('Boop');
+        }
+        if (msg.content === 'owo') {
+            msg.channel.send('owo');
+        }
     }
 }
