@@ -31,17 +31,38 @@ client.on('message', gotMessage);
 //declare function which will be used when message received
 function gotMessage(msg) {
     //log the message
-    console.log(msg);
+    //console.log(msg);
 
     //check if the message wasn't sent by the bot itself or another bot
     if(!(msg.author.bot)) {
+        //console.log('Message is not from a bot');
+
+        //Define if it is a command with prefix
+        //Split the message into an args array
+        if(msg.content.startsWith(prefix)){
+            var prefixCommand = true;
+            var args = msg.content.slice(prefix.length).trim().split(' ');
+        } else {
+            var prefixCommand = false;
+            var args = msg.content.trim().split(' ');
+        }
+        //Delete the first item from the args array and use it for the command variable
+        const command = args.shift().toLowerCase();
 
         //check if the message has a prefix
-        if (msg.content.startsWith(prefix)){
-            //empty for now
+        if (prefixCommand){
+
+            //Check sending arguments with the command
+            if (command === 'args-info') {
+                if (!args.length) {
+                    msg.channel.send(`You didn't provide any arguments.`);
+                } else {
+                    msg.channel.send(`Command name: ${command}\nArguments: ${args}`);
+                }
+            }
         } else {
             //Answer with a random weebEmoji if a weebEmoji was sent
-            if (weebEmojis.includes(msg.content)) {
+            if (weebEmojis.includes(command)) {
                 msg.channel.send(weebEmojis[Math.floor(Math.random()*weebEmojis.length)]);
             }
         }
