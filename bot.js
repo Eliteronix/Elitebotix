@@ -34,7 +34,7 @@ function gotMessage(msg) {
     console.log(msg);
 
     //check if the message wasn't sent by the bot itself or another bot
-    if(!message.author.bot) {
+    if(!(msg.author.bot)) {
 
         //check if the message has a prefix
         if (msg.content.startsWith(prefix)){
