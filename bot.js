@@ -36,9 +36,14 @@ function gotMessage(msg) {
     //check if the message wasn't sent by the bot itself
     if(msg.author.id != botid) {
 
-        //Answer with a random weebEmoji if a weebEmoji was sent
-        if (weebEmojis.includes(msg.content)) {
-            msg.channel.send(weebEmojis[Math.floor(Math.random()*weebEmojis.length)]);
+        //check if the message has a prefix
+        if (msg.content.startsWith(prefix)){
+            //empty for now
+        } else {
+            //Answer with a random weebEmoji if a weebEmoji was sent
+            if (weebEmojis.includes(msg.content)) {
+                msg.channel.send(weebEmojis[Math.floor(Math.random()*weebEmojis.length)]);
+            }
         }
     }
 }
