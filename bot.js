@@ -7,7 +7,7 @@ require('dotenv').config();
 //require the discord.js module
 const Discord = require('discord.js');
 //import the config variables from config.json
-const {prefix, botid} = require('./config.json');
+const {prefix} = require('./config.json');
 //create a Discord client with discord.js
 const client = new Discord.Client();
 //login with the Discord client using the Token from the .env file
@@ -33,8 +33,8 @@ function gotMessage(msg) {
     //log the message
     console.log(msg);
 
-    //check if the message wasn't sent by the bot itself
-    if(msg.author.id != botid) {
+    //check if the message wasn't sent by the bot itself or another bot
+    if(!(msg.author.bot)) {
 
         //check if the message has a prefix
         if (msg.content.startsWith(prefix)){
