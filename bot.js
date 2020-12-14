@@ -44,6 +44,11 @@ function gotMessage(msg) {
             if (weebEmojis.includes(msg.content)) {
                 msg.channel.send(weebEmojis[Math.floor(Math.random()*weebEmojis.length)]);
             }
+
+            //Answer with o7 if the message was f
+            if (msg.content.toLowerCase() === 'f') {
+                msg.channel.send('o7');
+            }
         }
     }
 }
