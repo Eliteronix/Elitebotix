@@ -128,6 +128,27 @@ function gotMessage(msg) {
                         }
                     }
                 }
+            } else if (command === 'help') {
+                //define embed
+                const helpEmbed = new Discord.MessageEmbed()
+                    .setColor('#0099ff')
+                    .setTitle('All available commands')
+                    .setAuthor('e!help')
+                    .addFields(
+                        { name: '\u200B', value: '\u200B' },
+                        { name: 'Miscellanious', value: 'For all the other stuff'},
+                        { name: 'e!help', value: 'Shows all the commands', inline: true},
+                        { name: 'e!args-info', value: 'Shows your arguments', inline: true},
+                        { name: 'owo', value: 'UwU', inline: true},
+                        { name: 'F', value: 'o7', inline: true},
+                        { name: '\u200B', value: '\u200B' },
+                        { name: 'Development', value: 'Feedback, Creator,...'},
+                        { name: 'e!feedback <bug/feature/general>', value: 'Sends feedback to the devs', inline: true},
+                        { name: '\u200B', value: '\u200B' }
+                    )
+                    .setTimestamp()
+                    .setFooter('Feel free to give feedback, to request features or to send bug reports via e!feedback');
+                msg.channel.send(helpEmbed);
             }
         } else {
             //Answer with a random weebEmoji if a weebEmoji was sent
