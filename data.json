@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
     "guild": [
         {
             "guild-id": "727407178499096597",
@@ -23,21 +22,4 @@
             ]
         }
     ]
-=======
-    "guild":{
-        "727407178499096597":{
-            "reaction-roles":{
-                "Headline": "React to this message to get:",
-                "727963227853553696":{
-                    "emoji": ":free:",
-                    "description": "A notification when there is a new free game. (Warning: This is based on a subreddit and may spam / double ping you)"
-                },
-                "727963430954467388":{
-                    "emoji": ":trophy:",
-                    "description": "Access to tournament channels."
-                }
-            }
-        }
-    }
->>>>>>> c8c795e1f5cd537b1a3fb6f703d09fc3e639c95f
 }
