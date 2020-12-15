@@ -1,0 +1,17 @@
+{
+    "guild":{
+        "727407178499096597":{
+            "reaction-roles":{
+                "Headline": "React to this message to get:",
+                "727963227853553696":{
+                    "emoji": ":free:",
+                    "description": "A notification when there is a new free game. (Warning: This is based on a subreddit and may spam / double ping you)"
+                },
+                "727963430954467388":{
+                    "emoji": ":trophy:",
+                    "description": "Access to tournament channels."
+                }
+            }
+        }
+    }
+}
