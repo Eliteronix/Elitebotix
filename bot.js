@@ -143,12 +143,15 @@ function gotMessage(msg) {
                         { name: 'F', value: 'o7', inline: true},
                         { name: '\u200B', value: '\u200B' },
                         { name: 'Development', value: 'Feedback, Creator,...'},
+                        { name: 'e!link', value: 'Sends a link to let the bot join a server', inline: true},
                         { name: 'e!feedback <bug/feature/general>', value: 'Sends feedback to the devs', inline: true},
                         { name: '\u200B', value: '\u200B' }
                     )
                     .setTimestamp()
                     .setFooter('Feel free to give feedback, to request features or to send bug reports via e!feedback');
                 msg.channel.send(helpEmbed);
+            } else if (command === 'link'){
+                msg.channel.send(`https://discord.com/oauth2/authorize?client_id=784836063058329680&scope=bot`);
             }
         } else {
             //Answer with a random weebEmoji if a weebEmoji was sent
