@@ -160,8 +160,14 @@ function gotMessage(msg) {
             }
 
             //Answer with o7 if the message was f
-            if (msg.content.toLowerCase() === 'f') {
+            else if (msg.content.toLowerCase() === 'f') {
                 msg.channel.send('o7');
+            }
+
+            //Dadmode activated
+            else if (command === `i\'m` || command === `im`){
+                const userMessage = args.join(' ');
+                msg.channel.send(`Hi ${userMessage}, I\'m dad!`);
             }
         }
     }
