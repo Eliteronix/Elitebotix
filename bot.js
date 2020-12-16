@@ -77,7 +77,7 @@ function gotMessage(msg) {
                             //join the bug in a variable
                             const bug = args.join(' ');
                             //send the bug into the correct Channel
-                            bugChannel.send(`${bug} - ${msg.author.username}#${msg.author.discriminator}`);
+                            bugChannel.send(`[BUG] ${bug} - ${msg.author.username}#${msg.author.discriminator}`);
                             //send a message to the user
                             msg.channel.send(`Your bug report was sent to the developers.`);
                         } else {
@@ -98,7 +98,7 @@ function gotMessage(msg) {
                             //join the feature in a variable
                             const feature = args.join(' ');
                             //send the feature into the correct Channel
-                            featureChannel.send(`${feature} - ${msg.author.username}#${msg.author.discriminator}`);
+                            featureChannel.send(`[FEATURE] ${feature} - ${msg.author.username}#${msg.author.discriminator}`);
                             //send a message to the user
                             msg.channel.send(`Your feature-request was sent to the developers.`);
                         } else {
@@ -119,7 +119,7 @@ function gotMessage(msg) {
                             //join the feedback in a variable
                             const feedback = args.join(' ');
                             //send the feedback into the correct Channel
-                            feedbackChannel.send(`${feedback} - ${msg.author.username}#${msg.author.discriminator}`);
+                            feedbackChannel.send(`[FEEDBACK] ${feedback} - ${msg.author.username}#${msg.author.discriminator}`);
                             //send a message to the user
                             msg.channel.send(`Your feedback was sent to the developers.`);
                         } else {
