@@ -1,14 +1,11 @@
 module.exports = {
     name: 'args-info',
     description: 'Shows your arguments',
+    args: true,
+    cooldown: 5,
     execute(msg, args, prefixCommand) {
         if (prefixCommand) {
-            //Check if there are arguments for the command
-            if (!args.length) {
-                msg.channel.send(`You didn't provide any arguments.`);
-            } else {
-                msg.channel.send(`Command name: args-info\nArguments: ${args}`);
-            }
+            msg.channel.send(`Command name: args-info\nArguments: ${args}`);
         }
     },
 };

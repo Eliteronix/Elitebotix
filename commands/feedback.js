@@ -1,12 +1,13 @@
 module.exports = {
     name: 'feedback',
     description: 'Sends feedback to the devs',
+    usage: '<bug/feature/request> <description>',
+    args: true,
+    cooldown: 15,
     execute(msg, args, prefixCommand) {
         if (prefixCommand) {
             //check for the first argument
-            if (!args[0]) { //Send message if empty
-                msg.channel.send(`Please specify what kind of feedback you want to give: e!feedback <Bug/Feature/General>`);
-            } else if (args[0].toLowerCase() === 'bug') { //go to bug tree
+            if (args[0].toLowerCase() === 'bug') { //go to bug tree
                 if (!args[1]) { //check for second argument
                     msg.channel.send(`Please add an explaination to your bug after the command.`);
                 } else { //send message in the correct channel
@@ -48,7 +49,7 @@ module.exports = {
                         msg.channel.send(`Your feature-request couldn't reach the developers. Please contact Eliteronix#4208.`);
                     }
                 }
-            } else if (args[0].toLowerCase() === 'general') { //go to general tree
+            } else if (args[0].toLowerCase() === 'feedback') { //go to general tree
                 if (!args[1]) { //check for second argument
                     msg.channel.send(`Please add some text to your feedback after the command.`);
                 } else { //send message in the correct channel

@@ -10,6 +10,7 @@ const fs = require('fs');
 const Discord = require('discord.js');
 //import the config variables from config.json
 const { prefix } = require('./config.json');
+const { noCooldownMessage } = require('./commands/f');
 //create a Discord client with discord.js
 const client = new Discord.Client();
 //Create a collection for the commands
@@ -27,6 +28,9 @@ for (const file of commandFiles) {
 //login with the Discord client using the Token from the .env file
 client.login(process.env.BOTTOKEN);
 
+//Create cooldowns collection
+const cooldowns = new Discord.Collection();
+
 //declare what the discord client should do when it's ready
 client.on('ready', readyDiscord);
 
@@ -41,8 +45,6 @@ client.on('message', gotMessage);
 
 //declare function which will be used when message received
 function gotMessage(msg) {
-    //log the message
-    //console.log(msg);
 
     //check if the message wasn't sent by the bot itself or another bot
     if (!(msg.author.bot)) {
@@ -58,12 +60,66 @@ function gotMessage(msg) {
             var args = msg.content.trim().split(/ +/);
         }
         //Delete the first item from the args array and use it for the command variable
-        const command = args.shift().toLowerCase();
+        const commandName = args.shift().toLowerCase();
 
-        if (!client.commands.has(command)) return;
+        //Set the command and check for possible uses of aliases
+        const command = client.commands.get(commandName)
+            || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+
+        //if there is no command used then break
+        if (!command) return;
+
+        //Check if the command can't be used outside of DMs
+        if (command.guildOnly && msg.channel.type === 'dm') {
+            return msg.reply('I can\'t execute that command inside DMs!');
+        }
+
+        //Check if arguments are provided if needed
+        if (command.args && !args.length) {
+            //Set standard reply
+            let reply = `You didn't provide any arguments.`;
+
+            //Set reply with usage if needed.
+            if (command.usage) {
+                reply += `\nThe proper usage would be: \`${prefix}${command.name} ${command.usage}\``;
+            }
+
+            //Send message
+            return msg.channel.send(reply);
+        }
+
+        //Check if the cooldown collection has the command already; if not write it in
+        if (!cooldowns.has(command.name)) {
+            cooldowns.set(command.name, new Discord.Collection());
+        }
+
+        //Set current time
+        const now = Date.now();
+        //gets the collections for the current command used
+        const timestamps = cooldowns.get(command.name);
+        //set necessary cooldown amount; if non stated in command default to 5; calculate ms afterwards
+        const cooldownAmount = (command.cooldown || 5) * 1000;
+
+        //get expiration times for the cooldowns for the authorID
+        if (timestamps.has(msg.author.id)) {
+            const expirationTime = timestamps.get(msg.author.id) + cooldownAmount;
+
+            //If cooldown didn't expire yet send cooldown message
+            if (command.noCooldownMessage) {
+                return;
+            } else if (now < expirationTime) {
+                const timeLeft = (expirationTime - now) / 1000;
+                return msg.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
+            }
+        }
+
+        //Set timestamp for the used command
+        timestamps.set(msg.author.id, now);
+        //Automatically delete the timestamp after the cooldown
+        setTimeout(() => timestamps.delete(msg.author.id), cooldownAmount);
 
         try {
-            client.commands.get(command).execute(msg, args, prefixCommand);
+            command.execute(msg, args, prefixCommand);
         } catch (error) {
             console.error(error);
             msg.reply('there was an error trying to execute that command! Please contact Eliteronix#4208');
