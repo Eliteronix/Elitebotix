@@ -27,9 +27,6 @@ for (const file of commandFiles) {
 //login with the Discord client using the Token from the .env file
 client.login(process.env.BOTTOKEN);
 
-//declare weebEmojis array
-var weebEmojis = ['owo', 'uwu', 'UwU', 'OwO', 'OuO'];
-
 //declare what the discord client should do when it's ready
 client.on('ready', readyDiscord);
 
@@ -63,34 +60,13 @@ function gotMessage(msg) {
         //Delete the first item from the args array and use it for the command variable
         const command = args.shift().toLowerCase();
 
-        //check if the message has a prefix
-        if (prefixCommand) {
+        if (!client.commands.has(command)) return;
 
-            //Check sending arguments with the command
-            if (command === 'args-info') {
-                client.commands.get('args-info').execute(msg, args);
-            } else if (command === 'feedback') { //Check for feedback command
-                client.commands.get('feedback').execute(msg, args);
-            } else if (command === 'help') {
-                client.commands.get('help').execute(msg, args);
-            } else if (command === 'link') {
-                client.commands.get('link').execute(msg, args);
-            }
-        } else {
-            //Answer with a random weebEmoji if a weebEmoji was sent
-            if (weebEmojis.includes(command)) {
-                client.commands.get('weebEmojis').execute(msg, args);
-            }
-
-            //Answer with o7 if the message was f
-            else if (msg.content.toLowerCase() === 'f') {
-                client.commands.get('f').execute(msg, args);
-            }
-
-            //Dadmode activated
-            else if (command === `i\'m` || command === `im`) {
-                client.commands.get('im').execute(msg, args);
-            }
+        try {
+            client.commands.get(command).execute(msg, args, prefixCommand);
+        } catch (error) {
+            console.error(error);
+            msg.reply('there was an error trying to execute that command! Please contact Eliteronix#4208');
         }
     }
 }
