@@ -41,10 +41,10 @@ function gotMessage(msg) {
         //Split the message into an args array
         if(msg.content.startsWith(prefix)){
             var prefixCommand = true;
-            var args = msg.content.slice(prefix.length).trim().split(' ');
+            var args = msg.content.slice(prefix.length).trim().split(/ +/);
         } else {
             var prefixCommand = false;
-            var args = msg.content.trim().split(' ');
+            var args = msg.content.trim().split(/ +/);
         }
         //Delete the first item from the args array and use it for the command variable
         const command = args.shift().toLowerCase();
