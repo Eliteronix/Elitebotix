@@ -122,7 +122,8 @@ function gotMessage(msg) {
             command.execute(msg, args, prefixCommand);
         } catch (error) {
             console.error(error);
-            msg.reply('there was an error trying to execute that command! Please contact Eliteronix#4208');
+            msg.reply('there was an error trying to execute that command. The developers have been alerted.');
+            client.users.cache.get("138273136285057025").send(`There was an error trying to execute a command.\n\n${error}`);
         }
     }
 }
