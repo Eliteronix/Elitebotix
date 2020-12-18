@@ -46,6 +46,18 @@ client.on('message', gotMessage);
 //declare function which will be used when message received
 function gotMessage(msg) {
 
+    //For the development version
+    //if the message is not in the #elitebotix-test channel then return
+    if(msg.channel.id != '787351833714622535'){
+        return;
+    }
+
+    //For the Production version
+    //if the message is not in the #elitebotix-test channel then return
+    // if(msg.channel.id == '787351833714622535'){
+    //     return;
+    // }
+
     //check if the message wasn't sent by the bot itself or another bot
     if (!(msg.author.bot)) {
         //console.log('Message is not from a bot');
