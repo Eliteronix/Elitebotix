@@ -9,7 +9,7 @@ module.exports = {
 	execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			// eslint-disable-next-line no-undef
-			msg.channel.send(`The server is running on the ${process.env.SERVER} environment`);
+			msg.channel.send(`The server is running on the ${process.env.SERVER} environment.`);
 		}
 	},
 };
