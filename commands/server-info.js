@@ -14,8 +14,10 @@ module.exports = {
                 .setTitle(`${msg.guild.name}`)
                 .setThumbnail(`${msg.guild.iconURL()}`)
                 .addFields(
+                    { name: 'Server Owner', value: `${msg.client.users.cache.find(user => user.id === `${msg.guild.ownerID}`)}`},
+                    { name: 'Region', value: `${msg.guild.region}` },
                     { name: 'Member count', value: `${msg.guild.memberCount}` },
-                    { name: 'Region', value: `${msg.guild.region}` }
+                    { name: 'AFK Timeout', value: `${msg.guild.afkTimeout/60} minutes`}
                 )
                 .setTimestamp();
 
