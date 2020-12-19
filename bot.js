@@ -48,15 +48,19 @@ function gotMessage(msg) {
 
 	//For the development version
 	//if the message is not in the #elitebotix-test channel then return
-	if(msg.channel.id != '787351833714622535'){
-		return;
+	// eslint-disable-next-line no-undef
+	if (process.env.SERVER === 'Dev') {
+		if (msg.channel.id != '787351833714622535') {
+			return;
+		}
+	//For the Live version
+	//if the message is in the #elitebotix-test channel then return
+	// eslint-disable-next-line no-undef
+	} else if (process.env.SERVER === 'Live') {
+		if (msg.channel.id == '787351833714622535') {
+			return;
+		}
 	}
-
-	//For the Production version
-	//if the message is not in the #elitebotix-test channel then return
-	// if(msg.channel.id == '787351833714622535'){
-	//     return;
-	// }
 
 	//check if the message wasn't sent by the bot itself or another bot
 	if (!(msg.author.bot)) {
@@ -78,7 +82,7 @@ function gotMessage(msg) {
 
 		//Set the command and check for possible uses of aliases
 		const command = client.commands.get(commandName)
-            || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+			|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
 		//if there is no command used then break
 		if (!command) return;
