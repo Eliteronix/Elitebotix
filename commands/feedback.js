@@ -1,3 +1,6 @@
+//import the config variables from config.json
+const { prefix } = require('../config.json');
+
 module.exports = {
 	name: 'feedback',
 	description: 'Sends feedback to the devs',
@@ -70,6 +73,8 @@ module.exports = {
 						msg.channel.send('Your feedback couldn\'t reach the developers. Please contact Eliteronix#4208.');
 					}
 				}
+			} else {
+				msg.channel.send(`Please add what kind of feedback you want to give. Proper usage: \`${prefix}${this.name} ${this.usage}\``);
 			}
 		}
 	},
