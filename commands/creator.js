@@ -5,7 +5,6 @@ module.exports = {
 	name: 'creator',
 	description: 'Sends an info card about the developer',
 	aliases: ['developer'],
-	guildOnly: true,
 	cooldown: 5,
 	execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
