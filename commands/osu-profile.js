@@ -8,6 +8,7 @@ module.exports = {
 	name: 'osu-profile',
 	description: 'Sends an info card about the specified player',
 	aliases: ['osu-player', 'osu-user'],
+	usage: '[username] [username] ... (Use "_" instead of spaces)',
 	cooldown: 5,
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
@@ -20,36 +21,59 @@ module.exports = {
 			});
 
 			if (!args[0]) {
-				const userDisplayName = msg.guild.member.displayName; //undefined
+				const userDisplayName = msg.guild.member(msg.author).displayName;
 				osuApi.getUser({ u: userDisplayName })
 					.then(user => {
-						// inside a command, event listener, etc.
 						const playSeconds = user.secondsPlayed % 60;
 						const playMinutes = (user.secondsPlayed - playSeconds) / 60 % 60;
 						const playHours = ((user.secondsPlayed - playSeconds - playMinutes * 60) / 60 / 60) % 24;
 						const playDays = (user.secondsPlayed - playSeconds - playMinutes * 60 - playHours * 60 * 60) / 60 / 60 / 24;
 						const playTimeString = playDays + ' d, ' + playHours + ' h, ' + playMinutes + ' m, ' + playSeconds + ' s';
 
+						const month = new Array();
+						month[0] = 'January';
+						month[1] = 'February';
+						month[2] = 'March';
+						month[3] = 'April';
+						month[4] = 'May';
+						month[5] = 'June';
+						month[6] = 'July';
+						month[7] = 'August';
+						month[8] = 'September';
+						month[9] = 'October';
+						month[10] = 'November';
+						month[11] = 'December';
+						const joinDay = user.raw_joinDate.substring(8, 10);
+						var joinDayEnding = 'th';
+						if(joinDay%10 === 1){
+							joinDayEnding = 'st';
+						} else if(joinDay%10 === 2){
+							joinDayEnding = 'nd';
+						}
+						const joinMonth = month[user.raw_joinDate.substring(5, 7)-1];
+						const joinYear = user.raw_joinDate.substring(0, 4);
+						const joinDate = joinDay + joinDayEnding + ' ' + joinMonth + ' ' + joinYear;
+
 						const playerInfoEmbed = new Discord.MessageEmbed()
 							.setColor('#FF66AB')
 							.setTitle(`${user.name}'s profile info card`)
 							.setThumbnail(`http://s.ppy.sh/a/${user.id}`)
 							.addFields(
-								{ name: 'Name', value: `${user.name}` },
+								{ name: 'Name', value: `${user.name}`, inline: true },
 								{ name: 'Rank', value: `${user.pp.rank}`, inline: true },
-								{ name: 'Country', value: `${user.country}` },
+								{ name: 'Country', value: `${user.country}`, inline: true },
 								{ name: 'Country Rank', value: `#${user.pp.countryRank}`, inline: true },
-								{ name: 'Level', value: `${user.level}` },
+								{ name: 'Level', value: `${user.level}`, inline: true },
 								{ name: 'Accuracy', value: `${user.accuracyFormatted}`, inline: true },
-								{ name: 'Joined', value: `${user.raw_joinDate}` },
+								{ name: 'Joined', value: `${joinDate}`, inline: true },
 								{ name: 'Playtime', value: `${playTimeString}`, inline: true },
-								{ name: 'Ranked Score', value: `${user.scores.ranked}` },
+								{ name: 'Ranked Score', value: `${user.scores.ranked}`, inline: true },
 								{ name: 'Total Score', value: `${user.scores.total}`, inline: true },
-								{ name: 'Silver SS', value: `${user.counts.SSH}` },
+								{ name: 'Silver SS', value: `${user.counts.SSH}`, inline: true },
 								{ name: 'SS', value: `${user.counts.SS}`, inline: true },
-								{ name: 'Silver S', value: `${user.counts.SH}` },
+								{ name: 'Silver S', value: `${user.counts.SH}`, inline: true },
 								{ name: 'S', value: `${user.counts.S}`, inline: true },
-								{ name: 'A', value: `${user.counts.A}` },
+								{ name: 'A', value: `${user.counts.A}`, inline: true },
 								{ name: 'Plays', value: `${user.counts.plays}`, inline: true }
 							)
 							.setTimestamp();
@@ -65,14 +89,38 @@ module.exports = {
 			} else {
 				let i;
 				for (i = 0; i < args.length; i++) {
-					osuApi.getUser({ u: args[i] })
+					const userDisplayName = args[i];
+					osuApi.getUser({ u: userDisplayName })
 						.then(user => {
-							// inside a command, event listener, etc.
 							const playSeconds = user.secondsPlayed % 60;
 							const playMinutes = (user.secondsPlayed - playSeconds) / 60 % 60;
 							const playHours = ((user.secondsPlayed - playSeconds - playMinutes * 60) / 60 / 60) % 24;
 							const playDays = (user.secondsPlayed - playSeconds - playMinutes * 60 - playHours * 60 * 60) / 60 / 60 / 24;
 							const playTimeString = playDays + ' d, ' + playHours + ' h, ' + playMinutes + ' m, ' + playSeconds + ' s';
+
+							const month = new Array();
+							month[0] = 'January';
+							month[1] = 'February';
+							month[2] = 'March';
+							month[3] = 'April';
+							month[4] = 'May';
+							month[5] = 'June';
+							month[6] = 'July';
+							month[7] = 'August';
+							month[8] = 'September';
+							month[9] = 'October';
+							month[10] = 'November';
+							month[11] = 'December';
+							const joinDay = user.raw_joinDate.substring(8, 10);
+							var joinDayEnding = 'th';
+							if(joinDay%10 === 1){
+								joinDayEnding = 'st';
+							} else if(joinDay%10 === 2){
+								joinDayEnding = 'nd';
+							}
+							const joinMonth = month[user.raw_joinDate.substring(5, 7)-1];
+							const joinYear = user.raw_joinDate.substring(0, 4);
+							const joinDate = joinDay + joinDayEnding + ' ' + joinMonth + ' ' + joinYear;
 
 							const playerInfoEmbed = new Discord.MessageEmbed()
 								.setColor('#FF66AB')
@@ -85,7 +133,7 @@ module.exports = {
 									{ name: 'Country Rank', value: `#${user.pp.countryRank}`, inline: true },
 									{ name: 'Level', value: `${user.level}` },
 									{ name: 'Accuracy', value: `${user.accuracyFormatted}`, inline: true },
-									{ name: 'Joined', value: `${user.raw_joinDate}` },
+									{ name: 'Joined', value: `${joinDate}` },
 									{ name: 'Playtime', value: `${playTimeString}`, inline: true },
 									{ name: 'Ranked Score', value: `${user.scores.ranked}` },
 									{ name: 'Total Score', value: `${user.scores.total}`, inline: true },
@@ -102,7 +150,7 @@ module.exports = {
 						})
 						.catch(err => {
 							if (err.message === 'Not found') {
-								msg.channel.send(`Could not find user "${args[i]}".`);
+								msg.channel.send(`Could not find user "${userDisplayName}".`);
 							}
 							console.log(err);
 						});
