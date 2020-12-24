@@ -39,8 +39,12 @@ function readyDiscord() {
 	//log a message when ready
 	console.log('The Bot is ready.');
 }
+//declare what the discord client should do when a new member joins the server
+client.on('guildMemberAdd', member => {
+	//member.guild.channels.get('channelID').send('Welcome'); 
+});
 
-//declare what the discord client should do when it's ready
+//declare what the discord client should do when it receives a message
 client.on('message', gotMessage);
 
 //declare function which will be used when message received
