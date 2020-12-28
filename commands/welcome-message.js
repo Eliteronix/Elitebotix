@@ -7,7 +7,12 @@ module.exports = {
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			let welcomeMessage = args.join(' ');
+			//Set in json
 			msg.channel.send(`The new message \`${welcomeMessage}\` has been set for welcoming new members in this channel.`);
+			var guildID = msg.guild.id;
+			var data = require('./data.json');
+			var obj = JSON.parse(data);
+			msg.channel.send(obj[guildID].welcomeMessage.channel);
 		}
 	},
 };

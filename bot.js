@@ -41,7 +41,13 @@ function readyDiscord() {
 }
 //declare what the discord client should do when a new member joins the server
 client.on('guildMemberAdd', member => {
-	//member.guild.channels.get('channelID').send('Welcome'); 
+	var guildID = member.guild.id;
+	var data = require('./data.json');
+	var obj = JSON.parse(data);
+	if (obj[guildID].welcomeMessage.send) {
+		var welcomeMessage = obj[guildID].welcomeMessage.message;
+		var welcomeChannel = obj[guildID].welcomeMessage.channel;
+	}
 });
 
 //declare what the discord client should do when it receives a message
@@ -57,9 +63,9 @@ function gotMessage(msg) {
 		if (msg.channel.id != '787351833714622535') {
 			return;
 		}
-	//For the Live version
-	//if the message is in the #elitebotix-test channel then return
-	// eslint-disable-next-line no-undef
+		//For the Live version
+		//if the message is in the #elitebotix-test channel then return
+		// eslint-disable-next-line no-undef
 	} else if (process.env.SERVER === 'Live') {
 		if (msg.channel.id == '787351833714622535') {
 			return;
