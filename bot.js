@@ -40,15 +40,15 @@ function readyDiscord() {
 	console.log('The Bot is ready.');
 }
 //declare what the discord client should do when a new member joins the server
-client.on('guildMemberAdd', member => {
-	var guildID = member.guild.id;
-	var data = require('./data.json');
-	var obj = JSON.parse(data);
-	if (obj[guildID].welcomeMessage.send) {
-		var welcomeMessage = obj[guildID].welcomeMessage.message;
-		var welcomeChannel = obj[guildID].welcomeMessage.channel;
-	}
-});
+// client.on('guildMemberAdd', member => {
+// 	var guildID = member.guild.id;
+// 	var data = require('./data.json');
+// 	var obj = JSON.parse(data);
+// 	if (obj[guildID].welcomeMessage.send) {
+// 		var welcomeMessage = obj[guildID].welcomeMessage.message;
+// 		var welcomeChannel = obj[guildID].welcomeMessage.channel;
+// 	}
+// });
 
 //declare what the discord client should do when it receives a message
 client.on('message', gotMessage);
