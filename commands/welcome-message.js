@@ -1,5 +1,5 @@
 
-const fsp = require('fsp');
+// const fsp = require('fsp');
 
 module.exports = {
 	name: 'welcome-message',
@@ -12,21 +12,21 @@ module.exports = {
 			let welcomeMessage = args.join(' ');
 			//Set in json
 			msg.channel.send(`The new message \`${welcomeMessage}\` has been set for welcoming new members in this channel.`);
-			var guildID = msg.guild.id;
-			try {
-				await fsp.readFile('data.json', 'utf8', function (err, data) {
-					if (err) {
-						console.log(err);
-					}
+			// var guildID = msg.guild.id;
+			// try {
+			// 	await fsp.readFile('data.json', 'utf8', function (err, data) {
+			// 		if (err) {
+			// 			console.log(err);
+			// 		}
 
-					var jsonObj = JSON.parse(data);
-					console.log(jsonObj);
-					//msg.channel.send(jsonObj.welcomeMessage.channel);
-				});
-			} catch (e) {
-				console.log(e);
-				throw e;
-			}
+			// 		var jsonObj = JSON.parse(data);
+			// 		console.log(jsonObj);
+			// 		//msg.channel.send(jsonObj.welcomeMessage.channel);
+			// 	});
+			// } catch (e) {
+			// 	console.log(e);
+			// 	throw e;
+			// }
 		}
 	},
 };
