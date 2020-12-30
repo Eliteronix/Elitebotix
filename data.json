@@ -30,37 +30,6 @@
 					]
 				}
 			]
-		},
-		{
-			"guildId": "148058184521744384",
-			"welcomeMessage": {
-				"send": "false",
-				"channel": "727407326448844844",
-				"message": "@member started growing in the woods."
-			},
-			"goodbyeMessage": {
-				"send": "false",
-				"channel": "727407326448844844",
-				"message": "@member returned their nutrients."
-			},
-			"reactionRoles": [
-				{
-					"reactionHeaderId": "727969355186438154",
-					"Headline": "React to this message to get:",
-					"reactionRoles": [
-						{
-							"roleId": "727963227853553696",
-							"emoji": ":free:",
-							"description": "A notification when there is a new free game. (Warning: This is based on a subreddit and may spam / double ping you)"
-						},
-						{
-							"roleId": "727963430954467388",
-							"emoji": ":trophy:",
-							"description": "Access to tournament channels."
-						}
-					]
-				}
-			]
 		}
 	]
 }

@@ -137,7 +137,7 @@ function gotMessage(msg) {
 				return;
 			} else if (now < expirationTime) {
 				const timeLeft = (expirationTime - now) / 1000;
-				return msg.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
+				return msg.reply(`Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
 			}
 		}
 
@@ -150,7 +150,7 @@ function gotMessage(msg) {
 			command.execute(msg, args, prefixCommand);
 		} catch (error) {
 			console.error(error);
-			msg.reply('there was an error trying to execute that command. The developers have been alerted.');
+			msg.reply('There was an error trying to execute that command. The developers have been alerted.');
 			client.users.cache.get('138273136285057025').send(`There was an error trying to execute a command.\n\nMessage by ${msg.author.username}#${msg.author.discriminator}: \`${msg.content}\`\n\n${error}`);
 		}
 	}

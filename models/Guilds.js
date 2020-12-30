@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-	return Guilds = sequelize.define('Guilds', {
+	return sequelize.define('Guilds', {
 		guildId: {
 			type: DataTypes.STRING,
 			primaryKey: true,
@@ -15,13 +15,13 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
-		WelcomeMessageChannel: DataTypes.STRING,
-		WelcomeMessageText: DataTypes.STRING,
+		welcomeMessageChannel: DataTypes.STRING,
+		welcomeMessageText: DataTypes.STRING,
 		sendGoodbyeMessage: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
-		WelcomeGoodbyeChannel: DataTypes.STRING,
-		WelcomeGoodbyeText: DataTypes.STRING,
+		goodbyeMessageChannel: DataTypes.STRING,
+		goodbyeMessageText: DataTypes.STRING,
 	});
 };
