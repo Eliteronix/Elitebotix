@@ -6,7 +6,7 @@ module.exports = {
 	cooldown: 5,
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
-			if (msg.author.id === '138273136285057025') { //Replace with Permission Manage Server
+			if (msg.member.hasPermission('MANAGE_GUILD')) {
 				const guild = await Guilds.findOne({
 					where: { guildId: msg.guild.id },
 				});
@@ -25,7 +25,7 @@ module.exports = {
 					msg.channel.send('Dadmode has been disabled');
 				}
 			} else {
-				msg.channel.send('Insufficient permissions.');
+				msg.channel.send('You need the "Manage Server" permission.');
 			}
 		}
 	},
