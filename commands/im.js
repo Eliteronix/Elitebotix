@@ -1,14 +1,28 @@
+const { Guilds } = require('../dbObjects');
+
 module.exports = {
 	name: 'im',
 	aliases: ['i\'m'],
 	description: 'Answers with the dadmode',
 	cooldown: 2,
 	noCooldownMessage: true,
-	execute(msg, args, prefixCommand) {
+	async execute(msg, args, prefixCommand) {
 		if (!(prefixCommand)) {
 			if (args[0]) {
-				const userMessage = args.join(' ');
-				msg.channel.send(`Hi ${userMessage}, I'm dad!`);
+				const guild = await Guilds.findOne({
+					where: { guildId: msg.guild.id },
+				});
+
+				if (guild) {
+					if (guild.dadmodeEnabled) {
+						const userMessage = args.join(' ');
+						msg.channel.send(`Hi ${userMessage}, I'm dad!`);
+					}
+				} else {
+					Guilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, dadmodeEnabled: true });
+					const userMessage = args.join(' ');
+					msg.channel.send(`Hi ${userMessage}, I'm dad!`);
+				}
 			}
 		}
 	},

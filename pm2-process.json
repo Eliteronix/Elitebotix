@@ -1,7 +1,7 @@
 {
     "script": "bot.js",
     "watch": true,
-    "ignore_watch": ["database\\.sqlite"],
+    "ignore_watch": ["database.sqlite","database.sqlite-journal"],
     "watch_options": {
         "followSymlinks": false
     },
