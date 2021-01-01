@@ -16,12 +16,9 @@ module.exports = {
 					if (guild) {
 						if (guild.sendWelcomeMessage) {
 							const guildWelcomeMessageChannelId = guild.welcomeMessageChannel;
-							msg.channel.send(guildWelcomeMessageChannelId);
 							const guildWelcomeMessageChannel = msg.guild.channels.cache.find(channel => channel.id === guildWelcomeMessageChannelId);
-							msg.channel.send(guildWelcomeMessageChannel);
-							const guildWelcomeMessageChannelName = msg.guild.channels.cache.find(channel => channel.name === guildWelcomeMessageChannel);
-							msg.channel.send(guildWelcomeMessageChannelName);
-							msg.channel.send(`The current Welcome Message is set to channel ${guildWelcomeMessageChannelName}: \`${guild.welcomeMessageText}\``);
+							//const guildWelcomeMessageChannelName = msg.guild.channels.cache.find(channel => channel.name === guildWelcomeMessageChannel);
+							msg.channel.send(`The current Welcome Message is set to channel \`${guildWelcomeMessageChannel.name}\`: \`${guild.welcomeMessageText}\``);
 						} else {
 							msg.channel.send('There is currently no welcome message set.');
 						}

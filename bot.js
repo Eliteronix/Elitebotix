@@ -10,6 +10,8 @@ const fs = require('fs');
 const Discord = require('discord.js');
 //import the config variables from config.json
 const { prefix } = require('./config.json');
+//Import Guilds Table
+const { Guilds } = require('./dbObjects');
 //create a Discord client with discord.js
 const client = new Discord.Client();
 //Create a collection for the commands
@@ -40,15 +42,22 @@ function readyDiscord() {
 	console.log('The Bot is ready.');
 }
 //declare what the discord client should do when a new member joins the server
-// client.on('guildMemberAdd', member => {
-// 	var guildID = member.guild.id;
-// 	var data = require('./data.json');
-// 	var obj = JSON.parse(data);
-// 	if (obj[guildID].welcomeMessage.send) {
-// 		var welcomeMessage = obj[guildID].welcomeMessage.message;
-// 		var welcomeChannel = obj[guildID].welcomeMessage.channel;
-// 	}
-// });
+client.on('guildMemberAdd', memberJoined);
+
+async function memberJoined(member){
+	console.log('memberJoined');
+	const guild = await Guilds.findOne({
+		where: { guildId: member.guild.id },
+	});
+	if(guild){
+		if(guild.sendWelcomeMessage){
+			const guildWelcomeMessageChannelId = guild.welcomeMessageChannel;
+			const guildWelcomeMessageChannel = client.channels.cache.find(channel => channel.id === guildWelcomeMessageChannelId);
+			const guildWelcomeMessageText = guild.welcomeMessageText.replace('@member','<@' + member.user.id + '>');
+			guildWelcomeMessageChannel.send(guildWelcomeMessageText);
+		}
+	}
+}
 
 //declare what the discord client should do when it receives a message
 client.on('message', gotMessage);
@@ -60,7 +69,7 @@ function gotMessage(msg) {
 	//if the message is not in the #elitebotix-test channel then return
 	// eslint-disable-next-line no-undef
 	if (process.env.SERVER === 'Dev') {
-		if (msg.channel.id != '787351833714622535') {
+		if (msg.channel.id != '787351833714622535' && msg.channel.id != '148058549417672704') {
 			return;
 		}
 		//For the Live version
