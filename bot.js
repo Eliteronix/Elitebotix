@@ -10,6 +10,8 @@ const fs = require('fs');
 const Discord = require('discord.js');
 //import the config variables from config.json
 const { prefix } = require('./config.json');
+//Import Guilds Table
+const { Guilds } = require('./dbObjects');
 //create a Discord client with discord.js
 const client = new Discord.Client();
 //Create a collection for the commands
@@ -39,8 +41,25 @@ function readyDiscord() {
 	//log a message when ready
 	console.log('The Bot is ready.');
 }
+//declare what the discord client should do when a new member joins the server
+client.on('guildMemberAdd', memberJoined);
 
-//declare what the discord client should do when it's ready
+async function memberJoined(member){
+	console.log('memberJoined');
+	const guild = await Guilds.findOne({
+		where: { guildId: member.guild.id },
+	});
+	if(guild){
+		if(guild.sendWelcomeMessage){
+			const guildWelcomeMessageChannelId = guild.welcomeMessageChannel;
+			const guildWelcomeMessageChannel = client.channels.cache.find(channel => channel.id === guildWelcomeMessageChannelId);
+			const guildWelcomeMessageText = guild.welcomeMessageText.replace('@member','<@' + member.user.id + '>');
+			guildWelcomeMessageChannel.send(guildWelcomeMessageText);
+		}
+	}
+}
+
+//declare what the discord client should do when it receives a message
 client.on('message', gotMessage);
 
 //declare function which will be used when message received
@@ -50,12 +69,12 @@ function gotMessage(msg) {
 	//if the message is not in the #elitebotix-test channel then return
 	// eslint-disable-next-line no-undef
 	if (process.env.SERVER === 'Dev') {
-		if (msg.channel.id != '787351833714622535') {
+		if (msg.channel.id != '787351833714622535' && msg.channel.id != '148058549417672704') {
 			return;
 		}
-	//For the Live version
-	//if the message is in the #elitebotix-test channel then return
-	// eslint-disable-next-line no-undef
+		//For the Live version
+		//if the message is in the #elitebotix-test channel then return
+		// eslint-disable-next-line no-undef
 	} else if (process.env.SERVER === 'Live') {
 		if (msg.channel.id == '787351833714622535') {
 			return;
@@ -127,7 +146,7 @@ function gotMessage(msg) {
 				return;
 			} else if (now < expirationTime) {
 				const timeLeft = (expirationTime - now) / 1000;
-				return msg.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
+				return msg.reply(`Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
 			}
 		}
 
@@ -140,8 +159,8 @@ function gotMessage(msg) {
 			command.execute(msg, args, prefixCommand);
 		} catch (error) {
 			console.error(error);
-			msg.reply('there was an error trying to execute that command. The developers have been alerted.');
-			client.users.cache.get('138273136285057025').send(`There was an error trying to execute a command.\n\n${error}`);
+			msg.reply('There was an error trying to execute that command. The developers have been alerted.');
+			client.users.cache.get('138273136285057025').send(`There was an error trying to execute a command.\n\nMessage by ${msg.author.username}#${msg.author.discriminator}: \`${msg.content}\`\n\n${error}`);
 		}
 	}
 }

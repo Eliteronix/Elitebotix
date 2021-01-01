@@ -1,25 +1,35 @@
 {
-    "guild": [
-        {
-            "guild-id": "727407178499096597",
-            "reaction-roles": [
-                {
-                    "reaction-Header-id": "727969355186438154",
-                    "Headline": "React to this message to get:",
-                    "reaction-roles": [
-                        {
-                            "role-id": "727963227853553696",
-                            "emoji": ":free:",
-                            "description": "A notification whenthere is a new free game. (Warning: This is based on a subreddit and may spam / double ping you)"
-                        },
-                        {
-                            "role-id": "727963430954467388",
-                            "emoji": ":trophy:",
-                            "description": "Access to tournament channels."
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+	"guild": [
+		{
+			"guildId": "727407178499096597",
+			"welcomeMessage": {
+				"send": "true",
+				"channel": "727407326448844844",
+				"message": "@member started growing in the woods."
+			},
+			"goodbyeMessage": {
+				"send": "true",
+				"channel": "727407326448844844",
+				"message": "@member returned their nutrients."
+			},
+			"reactionRoles": [
+				{
+					"reactionHeaderId": "727969355186438154",
+					"Headline": "React to this message to get:",
+					"reactionRoles": [
+						{
+							"roleId": "727963227853553696",
+							"emoji": ":free:",
+							"description": "A notification when there is a new free game. (Warning: This is based on a subreddit and may spam / double ping you)"
+						},
+						{
+							"roleId": "727963430954467388",
+							"emoji": ":trophy:",
+							"description": "Access to tournament channels."
+						}
+					]
+				}
+			]
+		}
+	]
 }

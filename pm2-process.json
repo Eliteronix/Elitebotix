@@ -1,0 +1,9 @@
+{
+    "script": "bot.js",
+    "watch": true,
+    "ignore_watch": ["database.sqlite","database.sqlite-journal"],
+    "watch_options": {
+        "followSymlinks": false
+    },
+    "name": "Elitebotix Dev"
+}

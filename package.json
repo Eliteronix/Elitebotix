@@ -12,7 +12,10 @@
   "dependencies": {
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
-    "node-osu": "^2.2.0"
+    "fsp": "^0.1.2",
+    "node-osu": "^2.2.0",
+    "sequelize": "^6.3.5",
+    "sqlite3": "^5.0.0"
   },
   "devDependencies": {
     "eslint": "^7.16.0"
