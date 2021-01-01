@@ -2,8 +2,13 @@ const { Guilds } = require('../dbObjects');
 
 module.exports = {
 	name: 'toggledadmode',
-	description: 'Toggles the Dadmode setting for the server', //test
+	//aliases: ['developer'],
+	description: 'Toggles the Dadmode setting for the server',
+	//usage: '<bug/feature/request> <description>',
+	//guildOnly: true,
+	//args: true,
 	cooldown: 5,
+	//noCooldownMessage: true,
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			if (msg.member.hasPermission('MANAGE_GUILD')) {

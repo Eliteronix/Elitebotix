@@ -6,10 +6,13 @@ const osu = require('node-osu');
 
 module.exports = {
 	name: 'osu-profile',
-	description: 'Sends an info card about the specified player',
 	aliases: ['osu-player', 'osu-user'],
+	description: 'Sends an info card about the specified player',
 	usage: '[username] [username] ... (Use "_" instead of spaces)',
+	//guildOnly: true,
+	//args: true,
 	cooldown: 5,
+	//noCooldownMessage: true,
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			// eslint-disable-next-line no-undef

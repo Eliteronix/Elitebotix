@@ -3,10 +3,13 @@ const { prefix } = require('../config.json');
 
 module.exports = {
 	name: 'feedback',
+	//aliases: ['developer'],
 	description: 'Sends feedback to the devs',
 	usage: '<bug/feature/request> <description>',
+	//guildOnly: true,
 	args: true,
 	cooldown: 15,
+	//noCooldownMessage: true,
 	execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			//check for the first argument

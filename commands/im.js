@@ -4,6 +4,9 @@ module.exports = {
 	name: 'im',
 	aliases: ['i\'m'],
 	description: 'Answers with the dadmode',
+	//usage: '<bug/feature/request> <description>',
+	//guildOnly: true,
+	//args: true,
 	cooldown: 2,
 	noCooldownMessage: true,
 	async execute(msg, args, prefixCommand) {

@@ -3,9 +3,13 @@ const Discord = require('discord.js');
 
 module.exports = {
 	name: 'creator',
-	description: 'Sends an info card about the developer',
 	aliases: ['developer'],
+	description: 'Sends an info card about the developer',
+	//usage: '<bug/feature/request> <description>',
+	//guildOnly: true,
+	//args: true,
 	cooldown: 5,
+	//noCooldownMessage: true,
 	execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			// inside a command, event listener, etc.
