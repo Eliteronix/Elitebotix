@@ -45,7 +45,6 @@ function readyDiscord() {
 client.on('guildMemberAdd', memberJoined);
 
 async function memberJoined(member){
-	console.log('memberJoined');
 	const guild = await Guilds.findOne({
 		where: { guildId: member.guild.id },
 	});
@@ -55,6 +54,24 @@ async function memberJoined(member){
 			const guildWelcomeMessageChannel = client.channels.cache.find(channel => channel.id === guildWelcomeMessageChannelId);
 			const guildWelcomeMessageText = guild.welcomeMessageText.replace('@member','<@' + member.user.id + '>');
 			guildWelcomeMessageChannel.send(guildWelcomeMessageText);
+		}
+	}
+}
+
+//declare what the discord client should do when a new member joins the server
+client.on('guildMemberRemove', memberLeaved);
+
+async function memberLeaved(member){
+	console.log('Goodbye');
+	const guild = await Guilds.findOne({
+		where: { guildId: member.guild.id },
+	});
+	if(guild){
+		if(guild.sendGoodbyeMessage){
+			const guildGoodbyeMessageChannelId = guild.goodbyeMessageChannel;
+			const guildGoodbyeMessageChannel = client.channels.cache.find(channel => channel.id === guildGoodbyeMessageChannelId);
+			const guildGoodbyeMessageText = guild.goodbyeMessageText.replace('@member',member.user.username + '#' + member.user.discriminator);
+			guildGoodbyeMessageChannel.send(guildGoodbyeMessageText);
 		}
 	}
 }

@@ -1,7 +1,9 @@
 module.exports = {
 	name: 'reload',
+	//aliases: ['developer'],
 	description: 'Reloads a command',
 	usage: '<command>',
+	//guildOnly: true,
 	args: true,
 	cooldown: 5,
 	noCooldownMessage: true,

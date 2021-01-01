@@ -3,10 +3,13 @@ const { prefix } = require('../config.json');
 
 module.exports = {
 	name: 'help',
-	description: 'List all commands or get info about a specific command.',
 	aliases: ['commands'],
+	description: 'List all commands or get info about a specific command.',
 	usage: '[command name]',
+	//guildOnly: true,
+	//args: true,
 	cooldown: 5,
+	//noCooldownMessage: true,
 	execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			//define variables
