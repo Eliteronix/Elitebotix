@@ -44,15 +44,15 @@ function readyDiscord() {
 //declare what the discord client should do when a new member joins the server
 client.on('guildMemberAdd', memberJoined);
 
-async function memberJoined(member){
+async function memberJoined(member) {
 	const guild = await Guilds.findOne({
 		where: { guildId: member.guild.id },
 	});
-	if(guild){
-		if(guild.sendWelcomeMessage){
+	if (guild) {
+		if (guild.sendWelcomeMessage) {
 			const guildWelcomeMessageChannelId = guild.welcomeMessageChannel;
 			const guildWelcomeMessageChannel = client.channels.cache.find(channel => channel.id === guildWelcomeMessageChannelId);
-			const guildWelcomeMessageText = guild.welcomeMessageText.replace('@member','<@' + member.user.id + '>');
+			const guildWelcomeMessageText = guild.welcomeMessageText.replace('@member', '<@' + member.user.id + '>');
 			guildWelcomeMessageChannel.send(guildWelcomeMessageText);
 		}
 	}
@@ -61,15 +61,15 @@ async function memberJoined(member){
 //declare what the discord client should do when a new member joins the server
 client.on('guildMemberRemove', memberLeaved);
 
-async function memberLeaved(member){
+async function memberLeaved(member) {
 	const guild = await Guilds.findOne({
 		where: { guildId: member.guild.id },
 	});
-	if(guild){
-		if(guild.sendGoodbyeMessage){
+	if (guild) {
+		if (guild.sendGoodbyeMessage) {
 			const guildGoodbyeMessageChannelId = guild.goodbyeMessageChannel;
 			const guildGoodbyeMessageChannel = client.channels.cache.find(channel => channel.id === guildGoodbyeMessageChannelId);
-			const guildGoodbyeMessageText = guild.goodbyeMessageText.replace('@member',member.user.username + '#' + member.user.discriminator);
+			const guildGoodbyeMessageText = guild.goodbyeMessageText.replace('@member', member.user.username + '#' + member.user.discriminator);
 			guildGoodbyeMessageChannel.send(guildGoodbyeMessageText);
 		}
 	}
@@ -125,6 +125,13 @@ function gotMessage(msg) {
 		//Check if the command can't be used outside of DMs
 		if (command.guildOnly && msg.channel.type === 'dm') {
 			return msg.reply('I can\'t execute that command inside DMs!');
+		}
+
+		if (command.permissions) {
+			const authorPerms = msg.channel.permissionsFor(msg.member);
+			if (!authorPerms || !authorPerms.has(command.permissions)) {
+				return msg.reply(`you need the ${command.permissionsTranslated} permission to do this!`);
+			}
 		}
 
 		//Check if arguments are provided if needed

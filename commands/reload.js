@@ -3,6 +3,8 @@ module.exports = {
 	//aliases: ['developer'],
 	description: 'Reloads a command',
 	usage: '<command>',
+	//permissions: 'MANAGE_MESSAGES',
+	//permissionsTranslated: 'Manage Server',
 	//guildOnly: true,
 	args: true,
 	cooldown: 5,

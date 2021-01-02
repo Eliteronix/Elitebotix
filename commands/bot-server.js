@@ -6,6 +6,8 @@ module.exports = {
 	//aliases: ['developer'],
 	description: 'Sends a message with the bots server',
 	//usage: '<bug/feature/request> <description>',
+	//permissions: 'KICK_MEMBERS',
+	//permissionsTranslated: 'Manage Server',
 	//guildOnly: true,
 	//args: true,
 	cooldown: 5,

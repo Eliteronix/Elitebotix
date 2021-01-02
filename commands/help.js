@@ -6,6 +6,8 @@ module.exports = {
 	aliases: ['commands'],
 	description: 'List all commands or get info about a specific command.',
 	usage: '[command name]',
+	//permissions: 'MANAGE_GUILD',
+	//permissionsTranslated: 'Manage Server',
 	//guildOnly: true,
 	//args: true,
 	cooldown: 5,

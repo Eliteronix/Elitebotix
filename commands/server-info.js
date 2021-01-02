@@ -6,6 +6,8 @@ module.exports = {
 	//aliases: ['developer'],
 	description: 'Sends an info card about the server',
 	//usage: '<bug/feature/request> <description>',
+	//permissions: 'MANAGE_MESSAGES',
+	//permissionsTranslated: 'Manage Server',
 	guildOnly: true,
 	//args: true,
 	cooldown: 5,

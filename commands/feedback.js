@@ -6,6 +6,8 @@ module.exports = {
 	//aliases: ['developer'],
 	description: 'Sends feedback to the devs',
 	usage: '<bug/feature/request> <description>',
+	//permissions: 'KICK_MEMBERS',
+	//permissionsTranslated: 'Manage Server',
 	//guildOnly: true,
 	args: true,
 	cooldown: 15,

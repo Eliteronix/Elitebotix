@@ -9,6 +9,8 @@ module.exports = {
 	aliases: ['osu-player', 'osu-user'],
 	description: 'Sends an info card about the specified player',
 	usage: '[username] [username] ... (Use "_" instead of spaces)',
+	//permissions: 'MANAGE_GUILD',
+	//permissionsTranslated: 'Manage Server',
 	//guildOnly: true,
 	//args: true,
 	cooldown: 5,

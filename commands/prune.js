@@ -3,6 +3,8 @@ module.exports = {
 	aliases: ['delete', 'delete-messages'],
 	description: 'Deletes the specified amount of messages; Messages have to be less than 2 weeks old',
 	usage: '<amount> (has to be between 1 and 99)',
+	permissions: 'MANAGE_MESSAGES',
+	permissionsTranslated: 'Manage Messages',
 	guildOnly: true,
 	args: true,
 	cooldown: 15,
