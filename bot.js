@@ -62,7 +62,6 @@ async function memberJoined(member){
 client.on('guildMemberRemove', memberLeaved);
 
 async function memberLeaved(member){
-	console.log('Goodbye');
 	const guild = await Guilds.findOne({
 		where: { guildId: member.guild.id },
 	});
