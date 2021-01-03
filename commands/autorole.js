@@ -18,39 +18,44 @@ module.exports = {
 		if (prefixCommand) {
 			if (args[0] === 'add') {
 				if (msg.mentions.roles.first()) {
-					const autoRoleId = args[1].replace('<@', '').replace('>', '');
-
+					const autoRoleId = args[1].replace('<@&', '').replace('>', '');
+					let autoRoleName = msg.guild.roles.cache.get(args[1].replace('<@&', '').replace('>', ''));
 					const autoRole = await AutoRoles.findOne({
 						where: { guildId: msg.guild.id, roleId: autoRoleId },
 					});
 
 					if (autoRole) {
-						msg.channel.send('The role is already an autorole.');
+						msg.channel.send(`${autoRoleName.name} is already an autorole.`);
 					} else {
 						AutoRoles.create({ guildId: msg.guild.id, roleId: autoRoleId });
-						msg.channel.send('The role has been added as an autorole.');
+						msg.channel.send(`${autoRoleName.name} has been added as an autorole.`);
 					}
 				} else {
 					msg.reply('you didn\'t mention any roles.');
 				}
 			} else if (args[0] === 'remove') {
 				if (msg.mentions.roles.first()) {
-					const autoRoleId = args[1].replace('<@', '').replace('>', '');
+					const autoRoleId = args[1].replace('<@&', '').replace('>', '');
+					let autoRoleName = msg.guild.roles.cache.get(args[1].replace('<@&', '').replace('>', ''));
 					const rowCount = await AutoRoles.destroy({ where: { guildId: msg.guild.id, roleId: autoRoleId } });
 					if (rowCount > 0) {
-						msg.channel.send('The role has been removed from autoroles.');
+						msg.channel.send(`${autoRoleName.name} has been removed from autoroles.`);
 					} else {
-						msg.channel.send('The role was no autorole.');
+						msg.channel.send(`${autoRoleName.name} was no autorole.`);
 					}
 				} else {
 					msg.reply('you didn\'t mention any roles.');
 				}
 			} else if (args[0] === 'list') {
 				const autoRolesList = await AutoRoles.findAll({ where: { guildId: msg.guild.id } });
-				const autoRolesString = autoRolesList.map(t => t.roleId).join(', ') || 'No autoroles found.';
+				for(let i = 0; i < autoRolesList.length; i++){
+					let autoRole = msg.guild.roles.cache.get(autoRolesList[i].roleId);
+					autoRolesList[i] = autoRole.name;
+				}
+				const autoRolesString = autoRolesList.join(', ') || 'No autoroles found.';
 				msg.channel.send(`List of autoroles: ${autoRolesString}`);
 			} else {
-				msg.channel.send(`Please add if you want to add, remove or list the autorole. Proper usage: \`${prefix}${this.name} ${this.usage}\``);
+				msg.channel.send(`Please add if you want to add, remove or list the autorole(s). Proper usage: \`${prefix}${this.name} ${this.usage}\``);
 			}
 		}
 	},

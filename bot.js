@@ -12,6 +12,8 @@ const Discord = require('discord.js');
 const { prefix } = require('./config.json');
 //Import Guilds Table
 const { Guilds } = require('./dbObjects');
+//Import AutoRoles Table
+const { AutoRoles } = require('./dbObjects');
 //create a Discord client with discord.js
 const client = new Discord.Client();
 //Create a collection for the commands
@@ -55,6 +57,12 @@ async function memberJoined(member) {
 			const guildWelcomeMessageText = guild.welcomeMessageText.replace('@member', '<@' + member.user.id + '>');
 			guildWelcomeMessageChannel.send(guildWelcomeMessageText);
 		}
+	}
+
+	const autoRolesList = await AutoRoles.findAll({ where: { guildId: member.guild.id } });
+	for (let i = 0; i < autoRolesList.length; i++) {
+		let autoRole = member.guild.roles.cache.get(autoRolesList[i].roleId);
+		member.roles.add(autoRole);
 	}
 }
 
