@@ -10,6 +10,7 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 require('./models/Guilds')(sequelize, Sequelize.DataTypes);
 require('./models/ReactionRoles')(sequelize, Sequelize.DataTypes);
 require('./models/ReactionRolesHeader')(sequelize, Sequelize.DataTypes);
+require('./models/AutoRoles')(sequelize, Sequelize.DataTypes);
 
 sequelize.sync({ alter: true })
 	.then(async () => {

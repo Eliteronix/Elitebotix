@@ -5,62 +5,60 @@ module.exports = {
 	//aliases: ['developer'],
 	description: 'Sends the specified message into the channel the user used the command in as soon as a new member arrives.',
 	usage: '<current/disable/message to send> (use "@member" to mention the new member)',
+	permissions: 'MANAGE_GUILD',
+	permissionsTranslated: 'Manage Server',
 	//guildOnly: true,
 	args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
-			if (msg.member.hasPermission('MANAGE_GUILD')) {
-				if (args[0] === 'current') {
-					const guild = await Guilds.findOne({
-						where: { guildId: msg.guild.id },
-					});
-					if (guild) {
-						if (guild.sendWelcomeMessage) {
-							const guildWelcomeMessageChannelId = guild.welcomeMessageChannel;
-							const guildWelcomeMessageChannel = msg.guild.channels.cache.find(channel => channel.id === guildWelcomeMessageChannelId);
-							msg.channel.send(`The current welcome message is set to channel \`${guildWelcomeMessageChannel.name}\`: \`${guild.welcomeMessageText}\``);
-						} else {
-							msg.channel.send('There is currently no welcome message set.');
-						}
+			if (args[0] === 'current') {
+				const guild = await Guilds.findOne({
+					where: { guildId: msg.guild.id },
+				});
+				if (guild) {
+					if (guild.sendWelcomeMessage) {
+						const guildWelcomeMessageChannelId = guild.welcomeMessageChannel;
+						const guildWelcomeMessageChannel = msg.guild.channels.cache.find(channel => channel.id === guildWelcomeMessageChannelId);
+						msg.channel.send(`The current welcome message is set to channel \`${guildWelcomeMessageChannel.name}\`: \`${guild.welcomeMessageText}\``);
 					} else {
-						Guilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendWelcomeMessage: false });
 						msg.channel.send('There is currently no welcome message set.');
 					}
-				} else if(args[0] === 'disable'){
-					const guild = await Guilds.findOne({
-						where: { guildId: msg.guild.id },
-					});
-					if (guild){
-						if(guild.sendWelcomeMessage){
-							guild.sendWelcomeMessage = false;
-							guild.save();
-							msg.channel.send('Welcome messages have been disabled for this server.');
-						} else {
-							msg.channel.send('Welcome messages are already disabled for this server.');
-						}
+				} else {
+					Guilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendWelcomeMessage: false });
+					msg.channel.send('There is currently no welcome message set.');
+				}
+			} else if (args[0] === 'disable') {
+				const guild = await Guilds.findOne({
+					where: { guildId: msg.guild.id },
+				});
+				if (guild) {
+					if (guild.sendWelcomeMessage) {
+						guild.sendWelcomeMessage = false;
+						guild.save();
+						msg.channel.send('Welcome messages have been disabled for this server.');
 					} else {
-						Guilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendWelcomeMessage: false });
 						msg.channel.send('Welcome messages are already disabled for this server.');
 					}
 				} else {
-					let welcomeMessage = args.join(' ');
-					const guild = await Guilds.findOne({
-						where: { guildId: msg.guild.id },
-					});
-					if(guild){
-						guild.sendWelcomeMessage = true;
-						guild.welcomeMessageChannel = msg.channel.id;
-						guild.welcomeMessageText = welcomeMessage;
-						guild.save();
-					} else {
-						Guilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendWelcomeMessage: true, welcomeMessageChannel: msg.channel.id, welcomeMessageText: welcomeMessage });
-					}
-					msg.channel.send(`The new message \`${welcomeMessage}\` has been set for welcoming new members in the channel \`${msg.channel.name}\`.`);
+					Guilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendWelcomeMessage: false });
+					msg.channel.send('Welcome messages are already disabled for this server.');
 				}
 			} else {
-				msg.channel.send('You need the "Manage Server" permission.');
+				let welcomeMessage = args.join(' ');
+				const guild = await Guilds.findOne({
+					where: { guildId: msg.guild.id },
+				});
+				if (guild) {
+					guild.sendWelcomeMessage = true;
+					guild.welcomeMessageChannel = msg.channel.id;
+					guild.welcomeMessageText = welcomeMessage;
+					guild.save();
+				} else {
+					Guilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendWelcomeMessage: true, welcomeMessageChannel: msg.channel.id, welcomeMessageText: welcomeMessage });
+				}
+				msg.channel.send(`The new message \`${welcomeMessage}\` has been set for welcoming new members in the channel \`${msg.channel.name}\`.`);
 			}
 		}
 	},

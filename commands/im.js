@@ -5,6 +5,8 @@ module.exports = {
 	aliases: ['i\'m'],
 	description: 'Answers with the dadmode',
 	//usage: '<bug/feature/request> <description>',
+	//permissions: 'MANAGE_GUILD',
+	//permissionsTranslated: 'Manage Server',
 	//guildOnly: true,
 	//args: true,
 	cooldown: 2,
