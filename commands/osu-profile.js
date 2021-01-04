@@ -25,16 +25,18 @@ module.exports = {
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
 
-			if (!args[0]) {
+			if (!args[0]) {//Get profile by author if no argument
 				const userDisplayName = msg.guild.member(msg.author).displayName;
 				osuApi.getUser({ u: userDisplayName })
 					.then(user => {
+						//Calculate Playtimes
 						const playSeconds = user.secondsPlayed % 60;
 						const playMinutes = (user.secondsPlayed - playSeconds) / 60 % 60;
 						const playHours = ((user.secondsPlayed - playSeconds - playMinutes * 60) / 60 / 60) % 24;
 						const playDays = (user.secondsPlayed - playSeconds - playMinutes * 60 - playHours * 60 * 60) / 60 / 60 / 24;
 						const playTimeString = playDays + ' d, ' + playHours + ' h, ' + playMinutes + ' m, ' + playSeconds + ' s';
 
+						//Set join time
 						const month = new Array();
 						month[0] = 'January';
 						month[1] = 'February';
@@ -59,6 +61,7 @@ module.exports = {
 						const joinYear = user.raw_joinDate.substring(0, 4);
 						const joinDate = joinDay + joinDayEnding + ' ' + joinMonth + ' ' + joinYear;
 
+						//Send embed
 						const playerInfoEmbed = new Discord.MessageEmbed()
 							.setColor('#FF66AB')
 							.setTitle(`${user.name}'s profile info card`)
@@ -92,17 +95,20 @@ module.exports = {
 						console.log(err);
 					});
 			} else {
+				//Get profiles by arguments
 				let i;
 				for (i = 0; i < args.length; i++) {
 					const userDisplayName = args[i];
 					osuApi.getUser({ u: userDisplayName })
 						.then(user => {
+							//Calculate playtime
 							const playSeconds = user.secondsPlayed % 60;
 							const playMinutes = (user.secondsPlayed - playSeconds) / 60 % 60;
 							const playHours = ((user.secondsPlayed - playSeconds - playMinutes * 60) / 60 / 60) % 24;
 							const playDays = (user.secondsPlayed - playSeconds - playMinutes * 60 - playHours * 60 * 60) / 60 / 60 / 24;
 							const playTimeString = playDays + ' d, ' + playHours + ' h, ' + playMinutes + ' m, ' + playSeconds + ' s';
 
+							//Set jointime
 							const month = new Array();
 							month[0] = 'January';
 							month[1] = 'February';
@@ -127,6 +133,7 @@ module.exports = {
 							const joinYear = user.raw_joinDate.substring(0, 4);
 							const joinDate = joinDay + joinDayEnding + ' ' + joinMonth + ' ' + joinYear;
 
+							//Send embed
 							const playerInfoEmbed = new Discord.MessageEmbed()
 								.setColor('#FF66AB')
 								.setTitle(`${user.name}'s profile info card`)

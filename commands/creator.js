@@ -14,7 +14,7 @@ module.exports = {
 	//noCooldownMessage: true,
 	execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
-			// inside a command, event listener, etc.
+			//Create new embed
 			const creatorInfoEmbed = new Discord.MessageEmbed()
 				.setColor('#0492C2')
 				.setTitle('Creator info card')
