@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 
 module.exports = {
 	name: 'server-info',
-	//aliases: ['developer'],
+	aliases: ['guild-info'],
 	description: 'Sends an info card about the server',
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'MANAGE_MESSAGES',
