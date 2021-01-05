@@ -1,6 +1,6 @@
 module.exports = {
 	name: 'reactionrole',
-	aliases: ['reactionroles'],
+	aliases: ['reactionroles','rr'],
 	description: 'Create and manage reaction roles',
 	usage: '<bug/feature/request> <description>', //Change
 	permissions: 'MANAGE_ROLES',
@@ -11,7 +11,14 @@ module.exports = {
 	//noCooldownMessage: true,
 	execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
-			console.log(msg);
+			//e!rr add embed <name> //Write ID in Footer
+			//e!rr remove embed <name> or <ID>
+			//e!rr add role <embedId> <@role> <emoji> <description>
+			//e!rr remove role <embedId> <@role> <emoji> <description>
+			
+			//reactionRoles.forEach(entry => {
+  			//	embed.addField(entry, 'looped field');
+			//});
 		}
 	},
 };
