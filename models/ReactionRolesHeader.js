@@ -2,8 +2,8 @@ module.exports = (sequelize, DataTypes) => {
 	return sequelize.define('ReactionRolesHeader', {
 		reactionRolesHeaderId: {
 			type: DataTypes.INTEGER,
-			autoIncrement: true,
 			primaryKey: true,
+			autoIncrement: true,
 		},
 		guildId: {
 			type: DataTypes.STRING,
@@ -12,7 +12,6 @@ module.exports = (sequelize, DataTypes) => {
 		reactionHeaderId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
-			primaryKey: true,
 		},
 		reactionTitle: {
 			type: DataTypes.STRING,

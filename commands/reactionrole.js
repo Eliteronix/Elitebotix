@@ -32,7 +32,7 @@ module.exports = {
 						//Join the name string
 						const embedName = args.join(' ');
 						const reactionRolesHeader = await ReactionRolesHeader.findOne({
-							order: Sequelize.fn('max', Sequelize.col('reactionHeaderId')),
+							order: Sequelize.fn('max', Sequelize.col('reactionRolesHeaderId')),
 						});
 						let embedId;
 						if(reactionRolesHeader){
