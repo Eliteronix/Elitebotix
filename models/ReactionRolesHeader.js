@@ -13,9 +13,23 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 			allowNullValue: false,
 		},
+		reactionChannelHeaderId: {
+			type: DataTypes.STRING,
+			allowNullValue: false,
+		},
 		reactionTitle: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+		},
+		reactionColor: {
+			type: DataTypes.STRING,
+			allowNullValue: false,
+		},
+		reactionDescription: {
+			type: DataTypes.STRING,
+		},
+		reactionImage: {
+			type: DataTypes.STRING,
 		},
 	});
 };

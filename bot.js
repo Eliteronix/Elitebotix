@@ -15,7 +15,7 @@ const { Guilds } = require('./dbObjects');
 //Import AutoRoles Table
 const { AutoRoles } = require('./dbObjects');
 //create a Discord client with discord.js
-const client = new Discord.Client();
+const client = new Discord.Client({ partials: ['MESSAGE', 'REACTION'] });
 //Create a collection for the commands
 client.commands = new Discord.Collection();
 //get all command files
