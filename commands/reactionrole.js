@@ -7,7 +7,7 @@ const { ReactionRolesHeader } = require('../dbObjects');
 module.exports = {
 	name: 'reactionrole',
 	aliases: ['reactionroles', 'rr'],
-	description: 'Create and manage reaction roles', //Maybe change color, description.. afterwards with set
+	description: 'Create and manage reaction roles',
 	usage: '<embed/role> <add/remove/change> <name of new embed/existing embed ID> <emoji> <@role> <@description>', //Change
 	permissions: 'MANAGE_ROLES',
 	permissionsTranslated: 'Manage Roles',
