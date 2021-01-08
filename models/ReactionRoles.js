@@ -5,8 +5,8 @@ module.exports = (sequelize, DataTypes) => {
 			primaryKey: true,
 			autoIncrement: true,
 		},
-		reactionRolesHeader: {
-			type: DataTypes.STRING,
+		headerId: {
+			type: DataTypes.INTEGER,
 			allowNullValue: false,
 		},
 		roleId: {
