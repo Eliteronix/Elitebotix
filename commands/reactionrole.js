@@ -110,47 +110,9 @@ module.exports = {
 								args.shift();
 								args.shift();
 								reactionRolesHeader.reactionTitle = args.join(' ');
-								reactionRolesHeader.save();
-
-								//Create embed
-								const reactionRoleEmbed = new Discord.MessageEmbed()
-									.setColor(reactionRolesHeader.reactionColor)
-									.setTitle(args.join(' '))
-									.setThumbnail(reactionRolesHeader.reactionImage)
-									.setFooter(`Reactionrole - EmbedID: ${reactionRolesHeader.reactionRolesHeaderId}`);
-
-								if (reactionRolesHeader.reactionDescription) {
-									reactionRoleEmbed.setDescription(reactionRolesHeader.reactionDescription);
-								}
-
-								//Add roles
-								const reactionRoles = await ReactionRoles.findAll({
-									where: { headerId: reactionRolesHeader.reactionRolesHeaderId }
-								});
-
-								reactionRoles.forEach(reactionRole => {
-									reactionRoleEmbed.addField(reactionRole.emoji + ' ' + reactionRole.roleId, reactionRole.description);
-								});
-
-								//Get the ID of the message
-								const embedMessageId = reactionRolesHeader.reactionHeaderId;
-								//get the ID of the channel
-								const embedChannelId = reactionRolesHeader.reactionChannelHeaderId;
-								//Get the channel object
-								let embedChannel;
-								try {
-									embedChannel = msg.guild.channels.cache.get(embedChannelId);
-								} catch (e) {
-									msg.channel.send('Couldn\'t find an embed with this EmbedID');
-									ReactionRolesHeader.destroy({
-										where: { guildId: msg.guild.id, reactionRolesHeaderId: args[2] },
-									});
-									return console.log(e);
-								}
-								//Get the message object
-								const embedMessage = await embedChannel.messages.fetch(embedMessageId);
-								//Edit the message
-								embedMessage.edit(reactionRoleEmbed);
+								reactionRolesHeader.save().then(
+									editEmbed(msg, reactionRolesHeader)
+								);
 							} else {
 								msg.channel.send('Couldn\'t find an embed with this EmbedID');
 							}
@@ -167,44 +129,9 @@ module.exports = {
 								args.shift();
 								args.shift();
 								reactionRolesHeader.reactionDescription = args.join(' ');
-								reactionRolesHeader.save();
-
-								//Create embed
-								const reactionRoleEmbed = new Discord.MessageEmbed()
-									.setColor(reactionRolesHeader.reactionColor)
-									.setTitle(reactionRolesHeader.reactionTitle)
-									.setDescription(args.join(' '))
-									.setThumbnail(reactionRolesHeader.reactionImage)
-									.setFooter(`Reactionrole - EmbedID: ${reactionRolesHeader.reactionRolesHeaderId}`);
-
-								//Add roles
-								const reactionRoles = await ReactionRoles.findAll({
-									where: { headerId: reactionRolesHeader.reactionRolesHeaderId }
-								});
-
-								reactionRoles.forEach(reactionRole => {
-									reactionRoleEmbed.addField(reactionRole.emoji + ' ' + reactionRole.roleId, reactionRole.description);
-								});
-
-								//Get the ID of the message
-								const embedMessageId = reactionRolesHeader.reactionHeaderId;
-								//get the ID of the channel
-								const embedChannelId = reactionRolesHeader.reactionChannelHeaderId;
-								//Get the channel object
-								let embedChannel;
-								try {
-									embedChannel = msg.guild.channels.cache.get(embedChannelId);
-								} catch (e) {
-									msg.channel.send('Couldn\'t find an embed with this EmbedID');
-									ReactionRolesHeader.destroy({
-										where: { guildId: msg.guild.id, reactionRolesHeaderId: args[2] },
-									});
-									return console.log(e);
-								}
-								//Get the message object
-								const embedMessage = await embedChannel.messages.fetch(embedMessageId);
-								//Edit the message
-								embedMessage.edit(reactionRoleEmbed);
+								reactionRolesHeader.save().then(
+									editEmbed(msg, reactionRolesHeader)
+								);
 							} else {
 								msg.channel.send('Couldn\'t find an embed with this EmbedID');
 							}
@@ -225,44 +152,9 @@ module.exports = {
 									args.shift();
 									args.shift();
 									reactionRolesHeader.reactionColor = embedColor;
-									reactionRolesHeader.save();
-
-									//Create embed
-									const reactionRoleEmbed = new Discord.MessageEmbed()
-										.setColor(embedColor)
-										.setTitle(reactionRolesHeader.reactionTitle)
-										.setDescription(reactionRolesHeader.reactionDescription)
-										.setThumbnail(reactionRolesHeader.reactionImage)
-										.setFooter(`Reactionrole - EmbedID: ${reactionRolesHeader.reactionRolesHeaderId}`);
-
-									//Add roles
-									const reactionRoles = await ReactionRoles.findAll({
-										where: { headerId: reactionRolesHeader.reactionRolesHeaderId }
-									});
-
-									reactionRoles.forEach(reactionRole => {
-										reactionRoleEmbed.addField(reactionRole.emoji + ' ' + reactionRole.roleId, reactionRole.description);
-									});
-
-									//Get the ID of the message
-									const embedMessageId = reactionRolesHeader.reactionHeaderId;
-									//get the ID of the channel
-									const embedChannelId = reactionRolesHeader.reactionChannelHeaderId;
-									//Get the channel object
-									let embedChannel;
-									try {
-										embedChannel = msg.guild.channels.cache.get(embedChannelId);
-									} catch (e) {
-										msg.channel.send('Couldn\'t find an embed with this EmbedID');
-										ReactionRolesHeader.destroy({
-											where: { guildId: msg.guild.id, reactionRolesHeaderId: args[2] },
-										});
-										return console.log(e);
-									}
-									//Get the message object
-									const embedMessage = await embedChannel.messages.fetch(embedMessageId);
-									//Edit the message
-									embedMessage.edit(reactionRoleEmbed);
+									reactionRolesHeader.save().then(
+										editEmbed(msg, reactionRolesHeader)
+									);
 								} else {
 									msg.channel.send('Couldn\'t find an embed with this EmbedID');
 								}
@@ -285,44 +177,9 @@ module.exports = {
 								args.shift();
 								args.shift();
 								reactionRolesHeader.reactionImage = embedImage;
-								reactionRolesHeader.save();
-
-								//Create embed
-								const reactionRoleEmbed = new Discord.MessageEmbed()
-									.setColor(reactionRolesHeader.reactionColor)
-									.setTitle(reactionRolesHeader.reactionTitle)
-									.setDescription(reactionRolesHeader.reactionDescription)
-									.setThumbnail(embedImage)
-									.setFooter(`Reactionrole - EmbedID: ${reactionRolesHeader.reactionRolesHeaderId}`);
-
-								//Add roles
-								const reactionRoles = await ReactionRoles.findAll({
-									where: { headerId: reactionRolesHeader.reactionRolesHeaderId }
-								});
-
-								reactionRoles.forEach(reactionRole => {
-									reactionRoleEmbed.addField(reactionRole.emoji + ' ' + reactionRole.roleId, reactionRole.description);
-								});
-
-								//Get the ID of the message
-								const embedMessageId = reactionRolesHeader.reactionHeaderId;
-								//get the ID of the channel
-								const embedChannelId = reactionRolesHeader.reactionChannelHeaderId;
-								//Get the channel object
-								let embedChannel;
-								try {
-									embedChannel = msg.guild.channels.cache.get(embedChannelId);
-								} catch (e) {
-									msg.channel.send('Couldn\'t find an embed with this EmbedID');
-									ReactionRolesHeader.destroy({
-										where: { guildId: msg.guild.id, reactionRolesHeaderId: args[2] },
-									});
-									return console.log(e);
-								}
-								//Get the message object
-								const embedMessage = await embedChannel.messages.fetch(embedMessageId);
-								//Edit the message
-								embedMessage.edit(reactionRoleEmbed);
+								reactionRolesHeader.save().then(
+									editEmbed(msg, reactionRolesHeader)
+								);
 							} else {
 								msg.channel.send('Couldn\'t find an embed with this EmbedID');
 							}
@@ -346,36 +203,43 @@ module.exports = {
 						if (msg.mentions.roles.first()) {
 							if (args[6]) {
 								//Try to get an entry from the db where the same emoji was used for this Header
-								
-								//CHECK FOR THE SAME GUILD
-								
-								const reactionRolesEmoji = await ReactionRoles.findOne({
-									where: { reactionRolesHeaderId: args[2], emoji: args[3] },
+
+								const headerId = args[2];
+								const roleMentioned = args[4].replace('<@&', '').replace('>', '');
+
+								//Get embed from the db
+								const reactionRolesHeader = await ReactionRolesHeader.findOne({
+									where: { guildId: msg.guild.id, reactionRolesHeaderId: headerId },
 								});
 
-								const roleMentioned = args[5].replace('<@&', '').replace('>', '');
+								if (reactionRolesHeader) {
+									const reactionRolesEmoji = await ReactionRoles.findOne({
+										where: { reactionRolesHeaderId: headerId, emoji: args[3] },
+									});
 
-								const reactionRolesRole = await ReactionRoles.findOne({
-									where: { reactionRolesHeaderId: args[2], roleId: roleMentioned },
-								});
+									const reactionRolesRole = await ReactionRoles.findOne({
+										where: { reactionRolesHeaderId: headerId, roleId: roleMentioned },
+									});
 
-								if (reactionRolesEmoji) {
-									return msg.channel.send('There is already a reactionrole with this emoji in the specified embed.');
-								} else if (reactionRolesRole) {
-									return msg.channel.send('There is already a reactionrole with this role in the specified embed.');
+									if (reactionRolesEmoji) {
+										return msg.channel.send('There is already a reactionrole with this emoji in the specified embed.');
+									} else if (reactionRolesRole) {
+										return msg.channel.send('There is already a reactionrole with this role in the specified embed.');
+									} else {
+										const emoji = args[3];
+										args.shift();
+										args.shift();
+										args.shift();
+										args.shift();
+										args.shift();
+										ReactionRoles.create({ headerId: headerId, roleId: roleMentioned, emoji: emoji, description: args.join(' ') });
+										msg.channel.send('The role has been added as an reactionrole.'); //Specify which role (print the name)
+
+										//Edit embed
+										editEmbed(msg, reactionRolesHeader);
+									}
 								} else {
-									const headerId = args[2];
-									const emoji = args[3];
-									args.shift();
-									args.shift();
-									args.shift();
-									args.shift();
-									args.shift();
-									args.shift();
-									ReactionRoles.create({ headerId: headerId, roleId: roleMentioned, emoji: emoji, description: args.join(' ') });
-									msg.channel.send('The role has been added as an reactionrole.'); //Specify which role (print the name)
-
-									//Edit embed
+									msg.channel.send('Couldn\'t find an embed with this EmbedID');
 								}
 							} else {
 								msg.channel.send('You didn\'t provide a description for the role!');
@@ -408,3 +272,50 @@ module.exports = {
 		}
 	},
 };
+
+async function editEmbed(msg, reactionRolesHeader) {
+	//Create embed
+	const reactionRoleEmbed = new Discord.MessageEmbed()
+		.setColor(reactionRolesHeader.reactionColor)
+		.setTitle(reactionRolesHeader.reactionTitle)
+		.setThumbnail(reactionRolesHeader.reactionImage)
+		.setFooter(`Reactionrole - EmbedID: ${reactionRolesHeader.reactionRolesHeaderId}`);
+
+	//Set description if available
+	if(reactionRolesHeader.reactionDescription){
+		reactionRoleEmbed.setDescription(reactionRolesHeader.reactionDescription);
+	}
+
+	//Get roles from db
+	const reactionRoles = await ReactionRoles.findAll({
+		where: { headerId: reactionRolesHeader.reactionRolesHeaderId }
+	});
+
+	//Add roles to embed
+	reactionRoles.forEach(reactionRole => {
+		//Get role object
+		let reactionRoleName = msg.guild.roles.cache.get(reactionRole.roleId);
+		//Add field to embed
+		reactionRoleEmbed.addField(reactionRole.emoji + ': ' + reactionRoleName.name, reactionRole.description);
+	});
+
+	//Get the ID of the message
+	const embedMessageId = reactionRolesHeader.reactionHeaderId;
+	//get the ID of the channel
+	const embedChannelId = reactionRolesHeader.reactionChannelHeaderId;
+	//Get the channel object
+	let embedChannel;
+	try {
+		embedChannel = msg.guild.channels.cache.get(embedChannelId);
+	} catch (e) {
+		msg.channel.send('Couldn\'t find an embed with this EmbedID');
+		ReactionRolesHeader.destroy({
+			where: { guildId: msg.guild.id, reactionRolesHeaderId: reactionRolesHeader.reactionRolesHeaderId },
+		});
+		return console.log(e);
+	}
+	//Get the message object
+	const embedMessage = await embedChannel.messages.fetch(embedMessageId);
+	//Edit the message
+	embedMessage.edit(reactionRoleEmbed);
+}
