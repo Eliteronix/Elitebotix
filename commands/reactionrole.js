@@ -287,7 +287,53 @@ module.exports = {
 					}
 					//Check the second argument
 				} else if (args[1] === 'change') {
-					//e!rr role		change 	<embedId>	<emoji>		<emoji/description>
+					//Check the third argument if it is an possible embedID
+					if (!(isNaN(args[2]))) {
+						//Get headerId
+						const headerId = args[2];
+
+						//Get embed from the db
+						const reactionRolesHeader = await ReactionRolesHeader.findOne({
+							where: { guildId: msg.guild.id, reactionRolesHeaderId: headerId },
+						});
+
+						//Check if there was an embed found in the same guild
+						if (reactionRolesHeader) {
+							//Get emoji
+							const emoji = args[3];
+							//Try to get a reactionRole from the db where there is the same emoji for the embed
+							const reactionRolesEmoji = await ReactionRoles.findOne({
+								where: { headerId: headerId, emoji: emoji },
+							});
+
+							//Check if there is an reactionRole with this emoji
+							if (reactionRolesEmoji) {
+								if (args[4] === 'emoji') {
+									reactionRolesEmoji.emoji = args[5];
+									reactionRolesEmoji.save()
+										.then(editEmbed(msg, reactionRolesHeader));
+								} else if (args[4] === 'description') {
+									args.shift();
+									args.shift();
+									args.shift();
+									args.shift();
+									args.shift();
+									reactionRolesEmoji.description = args.join(' ');
+									reactionRolesEmoji.save()
+										.then(editEmbed(msg, reactionRolesHeader));
+								} else {
+									msg.channel.send('Please specify if you want to change the emoji or the description.');
+								}
+							} else {
+								msg.channel.send('Couldn\'t find a reactionrole with this emoji in the specified embed.');
+							}
+						} else {
+							msg.channel.send('Couldn\'t find an embed with this EmbedID');
+						}
+					} else {
+						msg.channel.send('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
+					}
+					//e!rr role		change 	<embedId>	<emoji>		<emoji/description> <emoji/description>
 					//Also check prints again because somewhere the role should be printed instead of just a role
 				} else {
 					//incorrect second argument
