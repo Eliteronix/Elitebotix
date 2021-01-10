@@ -1,6 +1,9 @@
 //require the discord.js module
 const Discord = require('discord.js');
 
+//import the config variables from config.json
+const { prefix } = require('../config.json');
+
 //require the ReactionRolesHeader Table
 const { ReactionRolesHeader, ReactionRoles } = require('../dbObjects');
 
@@ -8,7 +11,7 @@ module.exports = {
 	name: 'reactionrole',
 	aliases: ['reactionroles', 'rr'],
 	description: 'Create and manage reaction roles',
-	usage: '<embed/role> <add/remove/change> <name of new embed/existing embed ID> <emoji> <@role> <@description>', //Change
+	usage: 'help <- For a detailed help in using the command',
 	permissions: 'MANAGE_ROLES',
 	permissionsTranslated: 'Manage Roles',
 	guildOnly: true,
@@ -54,6 +57,7 @@ module.exports = {
 						ReactionRolesHeader.create({ guildId: embedMessage.guild.id, reactionHeaderId: embedMessage.id, reactionChannelHeaderId: msg.channel.id, reactionTitle: embedName, reactionColor: '#0099ff' });
 					} else {
 						msg.channel.send('Please specify what name you want to give the embed you want to create.');
+						sendHelp(msg);
 					}
 
 					//Check the second argument
@@ -94,6 +98,7 @@ module.exports = {
 						}
 					} else {
 						msg.channel.send('Please specify what ID the embed has you want to remove. (Can be found in the footer of the embed.)');
+						sendHelp(msg);
 					}
 				} else if (args[1] === 'change') {
 					if (!(isNaN(args[2]))) {
@@ -185,13 +190,16 @@ module.exports = {
 							}
 						} else {
 							msg.channel.send('Please specify what you want to change: <title/description/color/image>');
+							sendHelp(msg);
 						}
 					} else {
 						msg.channel.send('Please specify what ID the embed has you want to change. (Can be found in the footer of the embed.)');
+						sendHelp(msg);
 					}
 				} else {
 					//incorrect second argument
 					msg.channel.send('Please specify if you want to add, remove or change the embed.');
+					sendHelp(msg);
 				}
 				//Check the first argument
 			} else if (args[0] === 'role') {
@@ -247,12 +255,15 @@ module.exports = {
 								}
 							} else {
 								msg.channel.send('You didn\'t provide a description for the role!');
+								sendHelp(msg);
 							}
 						} else {
 							msg.channel.send('You didn\'t specify the role you want to add to the embed!');
+							sendHelp(msg);
 						}
 					} else {
 						msg.channel.send('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
+						sendHelp(msg);
 					}
 					//Check the second argument
 				} else if (args[1] === 'remove') {
@@ -284,6 +295,7 @@ module.exports = {
 						}
 					} else {
 						msg.channel.send('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
+						sendHelp(msg);
 					}
 					//Check the second argument
 				} else if (args[1] === 'change') {
@@ -323,6 +335,7 @@ module.exports = {
 										.then(editEmbed(msg, reactionRolesHeader));
 								} else {
 									msg.channel.send('Please specify if you want to change the emoji or the description.');
+									sendHelp(msg);
 								}
 							} else {
 								msg.channel.send('Couldn\'t find a reactionrole with this emoji in the specified embed.');
@@ -332,16 +345,19 @@ module.exports = {
 						}
 					} else {
 						msg.channel.send('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
+						sendHelp(msg);
 					}
-					//e!rr role		change 	<embedId>	<emoji>		<emoji/description> <emoji/description>
-					//Also check prints again because somewhere the role should be printed instead of just a role
 				} else {
 					//incorrect second argument
 					msg.channel.send('Please specify if you want to add or remove the embed.');
+					sendHelp(msg);
 				}
+			} else if (args[0] === 'help'){
+				sendHelp(msg);
 			} else {
 				//Incorrect first argument
 				msg.channel.send('Please provide what kind of object you want to add / remove.');
+				sendHelp(msg);
 			}
 		}
 	},
@@ -401,4 +417,18 @@ async function editEmbed(msg, reactionRolesHeader) {
 		//Add reaction
 		await embedMessage.react(reactionRoles[i].emoji);
 	}
+}
+
+async function sendHelp(msg){
+	let helpString = `Correct usage for creating a new embed:\n\`\`\`${prefix}reactionrole embed add <name of the embed>\`\`\``;
+	helpString += `Correct usage for removing an existing embed:\n\`\`\`${prefix}reactionrole embed remove <embedID which can be found in the footer>\`\`\``;
+	helpString += `Correct usage for changing an existing embed's appearance:\n\`\`\`${prefix}reactionrole embed change <embedID> <title/description/color/Image> <new title/description/color/Image>\`\`\``;
+	helpString += `Correct usage for adding a role to an embed:\n\`\`\`${prefix}reactionrole role add <embedID> <emoji for the role> <@role> <description>\`\`\``;
+	helpString += `Correct usage for removing a role from an embed:\n\`\`\`${prefix}reactionrole role remove <embedID> <emoji of the role>\`\`\``;
+	helpString += `Correct usage for changing a role in an embed:\n\`\`\`${prefix}reactionrole role change <embedID> <emoji of the role> <emoji/description> <new emoji/description>\`\`\``;
+	msg.channel.send(helpString);
+
+	const reactionRolesHeader = await ReactionRolesHeader.findAll();
+
+	console.log(reactionRolesHeader);
 }

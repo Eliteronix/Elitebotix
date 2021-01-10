@@ -129,17 +129,48 @@ client.on('messageReactionAdd', async (reaction, user) => {
 			where: { headerId: reactionRolesHeader.reactionRolesHeaderId, emoji: reaction._emoji.name }
 		});
 
+		//Get role object
 		const reactionRoleObject = reaction.message.guild.roles.cache.get(reactionRole.roleId);
-
-		//const guild = reaction.message.guild;
-
-		const member = reaction.message.guild.members.fetch(user.id);
-
-		console.log(member);
-
-		console.log(member.roles);
-
+		//Get member
+		const member = await reaction.message.guild.members.fetch(user.id);
+		//Assign role
 		member.roles.add(reactionRoleObject);
+	} else {
+		console.log(`There was an error trying to get a ReactionRolesHeader from the db for message ${reaction.message.id}, in ${reaction.message.guild.name} on a reaction.`);
+	}
+});
+
+client.on('messageReactionRemove', async (reaction, user) => {
+
+	//Check if the reaction is partial or not
+	if (reaction.partial) {
+		// If the message this reaction belongs to was removed the fetching might result in an API error, which needs to be handled
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Something went wrong when fetching the message: ', error);
+			// Return as `reaction.message.author` may be undefined/null
+			return;
+		}
+	}
+
+	//Get the header message from the db
+	const reactionRolesHeader = await ReactionRolesHeader.findOne({
+		where: { guildId: reaction.message.guild.id, reactionHeaderId: reaction.message.id }
+	});
+
+	if (reactionRolesHeader) {
+		//Get the reactionRole from the db
+		const reactionRole = await ReactionRoles.findOne({
+			where: { headerId: reactionRolesHeader.reactionRolesHeaderId, emoji: reaction._emoji.name }
+		});
+
+		//Get role object
+		const reactionRoleObject = reaction.message.guild.roles.cache.get(reactionRole.roleId);
+		//Get member
+		const member = await reaction.message.guild.members.fetch(user.id);
+		//Remove role
+		member.roles.remove(reactionRoleObject);
 	} else {
 		console.log(`There was an error trying to get a ReactionRolesHeader from the db for message ${reaction.message.id}, in ${reaction.message.guild.name} on a reaction.`);
 	}

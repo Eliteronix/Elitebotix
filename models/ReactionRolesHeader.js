@@ -31,5 +31,6 @@ module.exports = (sequelize, DataTypes) => {
 		reactionImage: {
 			type: DataTypes.STRING,
 		},
+		paranoid: true,
 	});
 };
