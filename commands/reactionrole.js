@@ -197,12 +197,11 @@ module.exports = {
 			} else if (args[0] === 'role') {
 				//Check the second argument
 				if (args[1] === 'add') {
-					//Check the the third argument if it is an possible embedID
+					//Check the third argument if it is an possible embedID
 					if (!(isNaN(args[2]))) {
 						//Check if there is a role mentioned in the message
-						if (msg.mentions.roles.first()) {
+						if (msg.mentions.roles.first() && args[4].startsWith('<@&')) {
 							if (args[6]) {
-								//Try to get an entry from the db where the same emoji was used for this Header
 
 								const headerId = args[2];
 								const roleMentioned = args[4].replace('<@&', '').replace('>', '');
@@ -213,13 +212,18 @@ module.exports = {
 								});
 
 								if (reactionRolesHeader) {
+									console.log(args[3]);
+									console.log(headerId);
+									console.log(roleMentioned);
 									const reactionRolesEmoji = await ReactionRoles.findOne({
-										where: { reactionRolesHeaderId: headerId, emoji: args[3] },
+										where: { headerId: headerId, emoji: args[3] },
 									});
+									console.log(reactionRolesEmoji);
 
 									const reactionRolesRole = await ReactionRoles.findOne({
-										where: { reactionRolesHeaderId: headerId, roleId: roleMentioned },
+										where: { headerId: headerId, roleId: roleMentioned },
 									});
+									console.log(reactionRolesRole);
 
 									if (reactionRolesEmoji) {
 										return msg.channel.send('There is already a reactionrole with this emoji in the specified embed.');
@@ -250,13 +254,41 @@ module.exports = {
 					} else {
 						msg.channel.send('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
 					}
-					//Check for double emoji
 					//Check the second argument
 				} else if (args[1] === 'remove') {
+					//Check the third argument if it is an possible embedID
+					if (!(isNaN(args[2]))) {
+						//Check for a fourth argument
+						if (args[3]) {
+							//Get headerId
+							const headerId = args[2];
+							const emoji = args[3];
 
+							//Get embed from the db
+							const reactionRolesHeader = await ReactionRolesHeader.findOne({
+								where: { guildId: msg.guild.id, reactionRolesHeaderId: headerId },
+							});
+
+							if (reactionRolesHeader) {
+								const rowCount = await ReactionRoles.destroy({
+									where: { headerId: headerId, emoji: emoji }
+								});
+
+								if (rowCount > 0) {
+									//Edit embed
+									editEmbed(msg, reactionRolesHeader);
+								} else {
+									msg.channel.send('There were no reactionrole found in the embed with this emoji.');
+								}
+							}
+						}
+					} else {
+						msg.channel.send('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
+					}
 					//Check the second argument
 				} else if (args[1] === 'change') {
-
+					//e!rr role		change 	<embedId>	<emoji>		<emoji/description>
+					//Also check prints again because somewhere the role should be printed instead of just a role
 				} else {
 					//incorrect second argument
 					msg.channel.send('Please specify if you want to add or remove the embed.');
@@ -265,10 +297,6 @@ module.exports = {
 				//Incorrect first argument
 				msg.channel.send('Please provide what kind of object you want to add / remove.');
 			}
-			//e!rr embed 	add 	<name> //Write ID in Footer
-			//e!rr embed 	remove 	<name> or <ID>
-			//e!rr role 	add 	<embedId> 	<emoji>		<@role> 	<description>
-			//e!rr role 	remove 	<embedId> 	<emoji>
 		}
 	},
 };
@@ -282,7 +310,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		.setFooter(`Reactionrole - EmbedID: ${reactionRolesHeader.reactionRolesHeaderId}`);
 
 	//Set description if available
-	if(reactionRolesHeader.reactionDescription){
+	if (reactionRolesHeader.reactionDescription) {
 		reactionRoleEmbed.setDescription(reactionRolesHeader.reactionDescription);
 	}
 
@@ -318,4 +346,13 @@ async function editEmbed(msg, reactionRolesHeader) {
 	const embedMessage = await embedChannel.messages.fetch(embedMessageId);
 	//Edit the message
 	embedMessage.edit(reactionRoleEmbed);
+
+	//Remove all reactions from the embed
+	embedMessage.reactions.removeAll().catch(error => console.error('Failed to clear reactions: ', error));
+
+	//Add reactions to embed
+	for (let i = 0; i < reactionRoles.length; i++) {
+		//Add reaction
+		await embedMessage.react(reactionRoles[i].emoji);
+	}
 }
