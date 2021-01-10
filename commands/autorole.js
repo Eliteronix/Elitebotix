@@ -5,7 +5,7 @@ const { prefix } = require('../config.json');
 
 module.exports = {
 	name: 'autorole',
-	aliases: ['autoroles'],
+	aliases: ['autoroles','ar'],
 	description: 'Assigns roles on joining the server; Recommended for use in a private channel to not mention every user with that role',
 	usage: '<add/remove/list> <@role>',
 	permissions: 'MANAGE_ROLES',
