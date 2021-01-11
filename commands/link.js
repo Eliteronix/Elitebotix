@@ -11,8 +11,8 @@ module.exports = {
 	//noCooldownMessage: true,
 	execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
-			//Link with permissions
-			msg.channel.send('Here is a link to add the bot to your server: https://discordapp.com/oauth2/authorize?client_id=784836063058329680&scope=bot&permissions=76832');
+			//Link with permissions | Manage Roles, Read Messages, Send Messages, Manage Messages, Read Message History, Add Reactions, View Channel
+			msg.channel.send('Here is a link to add the bot to your server: https://discordapp.com/oauth2/authorize?client_id=784836063058329680&scope=bot&permissions=268512320');
 		}
 	},
 };
