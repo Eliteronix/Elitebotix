@@ -422,13 +422,11 @@ async function editEmbed(msg, reactionRolesHeader) {
 async function sendHelp(msg){
 	let helpString = `Correct usage for creating a new embed:\n\`\`\`${prefix}reactionrole embed add <name of the embed>\`\`\``;
 	helpString += `Correct usage for removing an existing embed:\n\`\`\`${prefix}reactionrole embed remove <embedID which can be found in the footer>\`\`\``;
-	helpString += `Correct usage for changing an existing embed's appearance:\n\`\`\`${prefix}reactionrole embed change <embedID> <title/description/color/Image> <new title/description/color/Image>\`\`\``;
+	helpString += `Correct usage for changing an existing embed's appearance:\n\`\`\`${prefix}reactionrole embed change <embedID> <title/description/color/Image> <new title/description/color/Image URL>\`\`\``;
 	helpString += `Correct usage for adding a role to an embed:\n\`\`\`${prefix}reactionrole role add <embedID> <emoji for the role> <@role> <description>\`\`\``;
 	helpString += `Correct usage for removing a role from an embed:\n\`\`\`${prefix}reactionrole role remove <embedID> <emoji of the role>\`\`\``;
 	helpString += `Correct usage for changing a role in an embed:\n\`\`\`${prefix}reactionrole role change <embedID> <emoji of the role> <emoji/description> <new emoji/description>\`\`\``;
 	msg.channel.send(helpString);
 
 	const reactionRolesHeader = await ReactionRolesHeader.findAll();
-
-	console.log(reactionRolesHeader);
 }
