@@ -14,7 +14,6 @@ module.exports = {
 	//noCooldownMessage: true,
 	execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
-			// inside a command, event listener, etc.
 			const guildInfoEmbed = new Discord.MessageEmbed()
 				.setColor('#ffcc00')
 				.setTitle(`${msg.guild.name}`)
