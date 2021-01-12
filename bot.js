@@ -180,7 +180,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
 client.on('message', gotMessage);
 
 //declare function which will be used when message received
-function gotMessage(msg) {
+async function gotMessage(msg) {
 
 	//For the development version
 	//if the message is not in the #elitebotix-test channel then return
@@ -202,13 +202,34 @@ function gotMessage(msg) {
 	if (!(msg.author.bot)) {
 		//console.log('Message is not from a bot');
 
+		//Get guild from the db
+		const guild = await Guilds.findOne({
+			where: { guildId: msg.guild.id },
+		});
+
+		//Define prefix command
+		let guildPrefix;
+
+		//Check if a guild record was found
+		if (guild) {
+			if (guild.customPrefixUsed) {
+				guildPrefix = guild.customPrefix;
+			} else {
+				//Set prefix to standard prefix
+				guildPrefix = prefix;
+			}
+		} else {
+			//Set prefix to standard prefix
+			guildPrefix = prefix;
+		}
+
 		//Define if it is a command with prefix
 		//Split the message into an args array
-		var prefixCommand;
-		var args;
-		if (msg.content.startsWith(prefix)) {
+		let prefixCommand;
+		let args;
+		if (msg.content.startsWith(guildPrefix)) {
 			prefixCommand = true;
-			args = msg.content.slice(prefix.length).trim().split(/ +/);
+			args = msg.content.slice(guildPrefix.length).trim().split(/ +/);
 		} else {
 			prefixCommand = false;
 			args = msg.content.trim().split(/ +/);
@@ -242,7 +263,7 @@ function gotMessage(msg) {
 
 			//Set reply with usage if needed.
 			if (command.usage) {
-				reply += `\nThe proper usage would be: \`${prefix}${command.name} ${command.usage}\``;
+				reply += `\nThe proper usage would be: \`${guildPrefix}${command.name} ${command.usage}\``;
 			}
 
 			//Send message
