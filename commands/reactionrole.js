@@ -1,6 +1,9 @@
 //require the discord.js module
 const Discord = require('discord.js');
 
+//Import Guilds Table
+const { Guilds } = require('../dbObjects');
+
 //import the config variables from config.json
 const { prefix } = require('../config.json');
 
@@ -420,13 +423,32 @@ async function editEmbed(msg, reactionRolesHeader) {
 }
 
 async function sendHelp(msg){
-	let helpString = `Correct usage for creating a new embed:\n\`\`\`${prefix}reactionrole embed add <name of the embed>\`\`\``;
-	helpString += `Correct usage for removing an existing embed:\n\`\`\`${prefix}reactionrole embed remove <embedID which can be found in the footer>\`\`\``;
-	helpString += `Correct usage for changing an existing embed's appearance:\n\`\`\`${prefix}reactionrole embed change <embedID> <title/description/color/Image> <new title/description/color/Image URL>\`\`\``;
-	helpString += `Correct usage for adding a role to an embed:\n\`\`\`${prefix}reactionrole role add <embedID> <emoji for the role> <@role> <description>\`\`\``;
-	helpString += `Correct usage for removing a role from an embed:\n\`\`\`${prefix}reactionrole role remove <embedID> <emoji of the role>\`\`\``;
-	helpString += `Correct usage for changing a role in an embed:\n\`\`\`${prefix}reactionrole role change <embedID> <emoji of the role> <emoji/description> <new emoji/description>\`\`\``;
-	msg.channel.send(helpString);
+	//Get guild from the db
+	const guild = await Guilds.findOne({
+		where: { guildId: msg.guild.id },
+	});
 
-	const reactionRolesHeader = await ReactionRolesHeader.findAll();
+	//Define prefix command
+	let guildPrefix;
+
+	//Check if a guild record was found
+	if (guild) {
+		if (guild.customPrefixUsed) {
+			guildPrefix = guild.customPrefix;
+		} else {
+			//Set prefix to standard prefix
+			guildPrefix = prefix;
+		}
+	} else {
+		//Set prefix to standard prefix
+		guildPrefix = prefix;
+	}
+
+	let helpString = `Correct usage for creating a new embed:\n\`\`\`${guildPrefix}reactionrole embed add <name of the embed>\`\`\``;
+	helpString += `Correct usage for removing an existing embed:\n\`\`\`${guildPrefix}reactionrole embed remove <embedID which can be found in the footer>\`\`\``;
+	helpString += `Correct usage for changing an existing embed's appearance:\n\`\`\`${guildPrefix}reactionrole embed change <embedID> <title/description/color/Image> <new title/description/color/Image URL>\`\`\``;
+	helpString += `Correct usage for adding a role to an embed:\n\`\`\`${guildPrefix}reactionrole role add <embedID> <emoji for the role> <@role> <description>\`\`\``;
+	helpString += `Correct usage for removing a role from an embed:\n\`\`\`${guildPrefix}reactionrole role remove <embedID> <emoji of the role>\`\`\``;
+	helpString += `Correct usage for changing a role in an embed:\n\`\`\`${guildPrefix}reactionrole role change <embedID> <emoji of the role> <emoji/description> <new emoji/description>\`\`\``;
+	msg.channel.send(helpString);
 }

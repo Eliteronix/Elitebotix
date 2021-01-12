@@ -32,7 +32,7 @@ module.exports = {
 
 			let membername;
 
-			if(member.nickname){
+			if (member.nickname) {
 				membername = member.nickname;
 			} else {
 				membername = user.username;
@@ -40,7 +40,7 @@ module.exports = {
 
 			let dadmodeEnabled;
 
-			if(guild.dadmodeEnabled){
+			if (guild.dadmodeEnabled) {
 				dadmodeEnabled = 'Enabled';
 			} else {
 				dadmodeEnabled = 'Disabled';
@@ -48,7 +48,7 @@ module.exports = {
 
 			let welcomeMessage;
 
-			if(guild.sendWelcomeMessage){
+			if (guild.sendWelcomeMessage) {
 				welcomeMessage = 'Enabled';
 			} else {
 				welcomeMessage = 'Disabled';
@@ -56,7 +56,7 @@ module.exports = {
 
 			let goodbyeMessage;
 
-			if(guild.sendGoodbyeMessage){
+			if (guild.sendGoodbyeMessage) {
 				goodbyeMessage = 'Enabled';
 			} else {
 				goodbyeMessage = 'Disabled';
@@ -65,12 +65,29 @@ module.exports = {
 			//get all autoRoles for the guild
 			const autoRolesList = await AutoRoles.findAll({ where: { guildId: msg.guild.id } });
 			//iterate for every autorole in the array
-			for(let i = 0; i < autoRolesList.length; i++){
+			for (let i = 0; i < autoRolesList.length; i++) {
 				//get role object by role Id
 				let autoRole = msg.guild.roles.cache.get(autoRolesList[i].roleId);
 				//Set array index to the role name for the output
 				autoRolesList[i] = autoRole.name;
 			}
+
+			//Define prefix command
+			let guildPrefix;
+
+			//Check if a guild record was found
+			if (guild) {
+				if (guild.customPrefixUsed) {
+					guildPrefix = guild.customPrefix;
+				} else {
+					//Set prefix to standard prefix
+					guildPrefix = prefix;
+				}
+			} else {
+				//Set prefix to standard prefix
+				guildPrefix = prefix;
+			}
+
 			//Set the output string
 			const autoRolesString = autoRolesList.join(', ') || 'None.';
 
@@ -80,7 +97,7 @@ module.exports = {
 				.setThumbnail(`${user.displayAvatarURL({ dynamic: true })}`)
 				.addFields(
 					{ name: 'Dadmode', value: `${dadmodeEnabled}` },
-					{ name: 'Prefix', value: `${prefix}` },
+					{ name: 'Prefix', value: `${guildPrefix}` },
 					{ name: 'Welcome-Messages', value: `${welcomeMessage}` },
 					{ name: 'Goodbye-Messages', value: `${goodbyeMessage}` },
 					{ name: 'Autoroles', value: `${autoRolesString}` },

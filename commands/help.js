@@ -1,3 +1,6 @@
+//Import Guilds Table
+const { Guilds } = require('../dbObjects');
+
 //Get the prefix
 const { prefix } = require('../config.json');
 
@@ -12,18 +15,39 @@ module.exports = {
 	//args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
-	execute(msg, args, prefixCommand) {
+	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			//define variables
 			const data = [];
 			const { commands } = msg.client;
+
+			//Get guild from the db
+			const guild = await Guilds.findOne({
+				where: { guildId: msg.guild.id },
+			});
+
+			//Define prefix command
+			let guildPrefix;
+
+			//Check if a guild record was found
+			if (guild) {
+				if (guild.customPrefixUsed) {
+					guildPrefix = guild.customPrefix;
+				} else {
+					//Set prefix to standard prefix
+					guildPrefix = prefix;
+				}
+			} else {
+				//Set prefix to standard prefix
+				guildPrefix = prefix;
+			}
 
 			//Check if all the commands should be returned
 			if (!args.length) {
 				data.push('Here\'s a list of all my commands:');
 				//filter commands collection for noCooldownMessage and push the result
 				data.push(commands.filter(commands => commands.noCooldownMessage != true).map(command => command.name).join(', '));
-				data.push(`\nYou can send \`${prefix}help [command name]\` to get info on a specific command!`);
+				data.push(`\nYou can send \`${guildPrefix}help [command name]\` to get info on a specific command!`);
 
 				//Send all the commands (Split the message into multiple pieces if necessary)
 				return msg.author.send(data, { split: true })
@@ -50,7 +74,7 @@ module.exports = {
 			data.push(`**Name:** ${command.name}`);
 			if (command.aliases) data.push(`**Aliases:** ${command.aliases.join(', ')}`);
 			if (command.description) data.push(`**Description:** ${command.description}`);
-			if (command.usage) data.push(`**Usage:** ${prefix}${command.name} ${command.usage}`);
+			if (command.usage) data.push(`**Usage:** ${guildPrefix}${command.name} ${command.usage}`);
 			data.push(`**Cooldown:** ${command.cooldown || 3} second(s)`);
 
 			//Send the information

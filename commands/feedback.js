@@ -1,3 +1,6 @@
+//Import Guilds Table
+const { Guilds } = require('../dbObjects');
+
 //import the config variables from config.json
 const { prefix } = require('../config.json');
 
@@ -12,7 +15,7 @@ module.exports = {
 	args: true,
 	cooldown: 15,
 	//noCooldownMessage: true,
-	execute(msg, args, prefixCommand) {
+	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			//check for the first argument
 			if (args[0].toLowerCase() === 'bug') { //go to bug tree
@@ -79,7 +82,28 @@ module.exports = {
 					}
 				}
 			} else {
-				msg.channel.send(`Please add what kind of feedback you want to give. Proper usage: \`${prefix}${this.name} ${this.usage}\``);
+				//Get guild from the db
+				const guild = await Guilds.findOne({
+					where: { guildId: msg.guild.id },
+				});
+
+				//Define prefix command
+				let guildPrefix;
+
+				//Check if a guild record was found
+				if (guild) {
+					if (guild.customPrefixUsed) {
+						guildPrefix = guild.customPrefix;
+					} else {
+						//Set prefix to standard prefix
+						guildPrefix = prefix;
+					}
+				} else {
+					//Set prefix to standard prefix
+					guildPrefix = prefix;
+				}
+
+				msg.channel.send(`Please add what kind of feedback you want to give. Proper usage: \`${guildPrefix}${this.name} ${this.usage}\``);
 			}
 		}
 	},

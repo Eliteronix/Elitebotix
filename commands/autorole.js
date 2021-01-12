@@ -1,11 +1,11 @@
-const { AutoRoles } = require('../dbObjects');
+const { AutoRoles, Guilds } = require('../dbObjects');
 
 //import the config variables from config.json
 const { prefix } = require('../config.json');
 
 module.exports = {
 	name: 'autorole',
-	aliases: ['autoroles','ar'],
+	aliases: ['autoroles', 'ar'],
 	description: 'Assigns roles on joining the server; Recommended for use in a private channel to not mention every user with that role',
 	usage: '<add/remove/list> <@role>',
 	permissions: 'MANAGE_ROLES',
@@ -41,7 +41,7 @@ module.exports = {
 					//If no roles were mentioned
 					msg.reply('you didn\'t mention any roles.');
 				}
-			//check for first argument
+				//check for first argument
 			} else if (args[0] === 'remove') {
 				//check if any roles were mentioned
 				if (msg.mentions.roles.first()) {
@@ -61,12 +61,12 @@ module.exports = {
 					//if no roles were mentioned
 					msg.reply('you didn\'t mention any roles.');
 				}
-			//Check first argument
+				//Check first argument
 			} else if (args[0] === 'list') {
 				//get all autoRoles for the guild
 				const autoRolesList = await AutoRoles.findAll({ where: { guildId: msg.guild.id } });
 				//iterate for every autorole in the array
-				for(let i = 0; i < autoRolesList.length; i++){
+				for (let i = 0; i < autoRolesList.length; i++) {
 					//get role object by role Id
 					let autoRole = msg.guild.roles.cache.get(autoRolesList[i].roleId);
 					//Set array index to the role name for the output
@@ -77,8 +77,29 @@ module.exports = {
 				//Output autorole list
 				msg.channel.send(`List of autoroles: ${autoRolesString}`);
 			} else {
+				//Get guild from the db
+				const guild = await Guilds.findOne({
+					where: { guildId: msg.guild.id },
+				});
+
+				//Define prefix command
+				let guildPrefix;
+
+				//Check if a guild record was found
+				if (guild) {
+					if (guild.customPrefixUsed) {
+						guildPrefix = guild.customPrefix;
+					} else {
+						//Set prefix to standard prefix
+						guildPrefix = prefix;
+					}
+				} else {
+					//Set prefix to standard prefix
+					guildPrefix = prefix;
+				}
+
 				//If no proper first argument is given
-				msg.channel.send(`Please add if you want to add, remove or list the autorole(s). Proper usage: \`${prefix}${this.name} ${this.usage}\``);
+				msg.channel.send(`Please add if you want to add, remove or list the autorole(s). Proper usage: \`${guildPrefix}${this.name} ${this.usage}\``);
 			}
 		}
 	},
