@@ -75,17 +75,23 @@ module.exports = {
 			//Define prefix command
 			let guildPrefix;
 
-			//Check if a guild record was found
-			if (guild) {
-				if (guild.customPrefixUsed) {
-					guildPrefix = guild.customPrefix;
+			//Check if the channel type is not a dm
+			if (msg.channel.type === 'dm') {
+				//Set prefix to standard prefix
+				guildPrefix = prefix;
+			} else {
+				//Check if a guild record was found
+				if (guild) {
+					if (guild.customPrefixUsed) {
+						guildPrefix = guild.customPrefix;
+					} else {
+						//Set prefix to standard prefix
+						guildPrefix = prefix;
+					}
 				} else {
 					//Set prefix to standard prefix
 					guildPrefix = prefix;
 				}
-			} else {
-				//Set prefix to standard prefix
-				guildPrefix = prefix;
 			}
 
 			//Set the output string

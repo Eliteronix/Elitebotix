@@ -77,25 +77,31 @@ module.exports = {
 				//Output autorole list
 				msg.channel.send(`List of autoroles: ${autoRolesString}`);
 			} else {
-				//Get guild from the db
-				const guild = await Guilds.findOne({
-					where: { guildId: msg.guild.id },
-				});
-
 				//Define prefix command
 				let guildPrefix;
 
-				//Check if a guild record was found
-				if (guild) {
-					if (guild.customPrefixUsed) {
-						guildPrefix = guild.customPrefix;
+				//Check if the channel type is not a dm
+				if (msg.channel.type === 'dm') {
+					//Set prefix to standard prefix
+					guildPrefix = prefix;
+				} else {
+					//Get guild from the db
+					const guild = await Guilds.findOne({
+						where: { guildId: msg.guild.id },
+					});
+
+					//Check if a guild record was found
+					if (guild) {
+						if (guild.customPrefixUsed) {
+							guildPrefix = guild.customPrefix;
+						} else {
+							//Set prefix to standard prefix
+							guildPrefix = prefix;
+						}
 					} else {
 						//Set prefix to standard prefix
 						guildPrefix = prefix;
 					}
-				} else {
-					//Set prefix to standard prefix
-					guildPrefix = prefix;
 				}
 
 				//If no proper first argument is given

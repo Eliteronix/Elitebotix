@@ -200,27 +200,31 @@ async function gotMessage(msg) {
 
 	//check if the message wasn't sent by the bot itself or another bot
 	if (!(msg.author.bot)) {
-		//console.log('Message is not from a bot');
-
-		//Get guild from the db
-		const guild = await Guilds.findOne({
-			where: { guildId: msg.guild.id },
-		});
-
 		//Define prefix command
 		let guildPrefix;
 
-		//Check if a guild record was found
-		if (guild) {
-			if (guild.customPrefixUsed) {
-				guildPrefix = guild.customPrefix;
+		//Check if the channel type is not a dm
+		if (msg.channel.type === 'dm') {
+			//Set prefix to standard prefix
+			guildPrefix = prefix;
+		} else {
+			//Get guild from the db
+			const guild = await Guilds.findOne({
+				where: { guildId: msg.guild.id },
+			});
+
+			//Check if a guild record was found
+			if (guild) {
+				if (guild.customPrefixUsed) {
+					guildPrefix = guild.customPrefix;
+				} else {
+					//Set prefix to standard prefix
+					guildPrefix = prefix;
+				}
 			} else {
 				//Set prefix to standard prefix
 				guildPrefix = prefix;
 			}
-		} else {
-			//Set prefix to standard prefix
-			guildPrefix = prefix;
 		}
 
 		//Define if it is a command with prefix
