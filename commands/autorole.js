@@ -42,11 +42,8 @@ module.exports = {
 
 						//Assign the role to every member
 						guildMembers.forEach(autoRole => {
-							console.log('3');
-							console.log(autoRole);
 							autoRole.roles.add(autoRoleName);
 						});
-						console.log('4');
 					}
 				} else {
 					//If no roles were mentioned
