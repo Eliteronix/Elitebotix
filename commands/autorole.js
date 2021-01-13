@@ -36,6 +36,17 @@ module.exports = {
 						//If autorole doesn't exist in db then create it
 						AutoRoles.create({ guildId: msg.guild.id, roleId: autoRoleId });
 						msg.channel.send(`${autoRoleName.name} has been added as an autorole.`);
+
+						//Get all members of the guild
+						const guildMembers = await msg.guild.members.fetch();
+
+						//Assign the role to every member
+						guildMembers.forEach(autoRole => {
+							console.log('3');
+							console.log(autoRole);
+							autoRole.roles.add(autoRoleName);
+						});
+						console.log('4');
 					}
 				} else {
 					//If no roles were mentioned
