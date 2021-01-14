@@ -14,6 +14,9 @@ const { prefix } = require('./config.json');
 const { Guilds } = require('./dbObjects');
 //Import AutoRoles Table
 const { AutoRoles, ReactionRolesHeader, ReactionRoles } = require('./dbObjects');
+//Import Sequelize for operations
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 //create a Discord client with discord.js
 const client = new Discord.Client({ partials: ['MESSAGE', 'REACTION'] });
 //Create a collection for the commands
@@ -124,17 +127,38 @@ client.on('messageReactionAdd', async (reaction, user) => {
 	});
 
 	if (reactionRolesHeader) {
-		//Get the reactionRole from the db
+		//Get the reactionRole from the db by all the string (works for general emojis)
 		const reactionRole = await ReactionRoles.findOne({
 			where: { headerId: reactionRolesHeader.reactionRolesHeaderId, emoji: reaction._emoji.name }
 		});
 
-		//Get role object
-		const reactionRoleObject = reaction.message.guild.roles.cache.get(reactionRole.roleId);
-		//Get member
-		const member = await reaction.message.guild.members.fetch(user.id);
-		//Assign role
-		member.roles.add(reactionRoleObject);
+		if (reactionRole) {
+			//Get role object
+			const reactionRoleObject = reaction.message.guild.roles.cache.get(reactionRole.roleId);
+			//Get member
+			const member = await reaction.message.guild.members.fetch(user.id);
+			//Assign role
+			member.roles.add(reactionRoleObject);
+		} else {
+			//Put the emoji name into the correct format for comparing it in case it's an guild emoji
+			let emoji = '<:' + reaction._emoji.name + ':';
+
+			//Get the reactionRole from the db by all the string (works for general emojis)
+			const reactionRoleBackup = await ReactionRoles.findOne({
+				where: { headerId: reactionRolesHeader.reactionRolesHeaderId, emoji: { [Op.like]: emoji+'%' } }
+			});
+
+			if (reactionRoleBackup) {
+				//Get role object
+				const reactionRoleBackupObject = reaction.message.guild.roles.cache.get(reactionRoleBackup.roleId);
+				//Get member
+				const member = await reaction.message.guild.members.fetch(user.id);
+				//Assign role
+				member.roles.add(reactionRoleBackupObject);
+			} else {
+				console.log(`There was an error trying to get a ReactionRole from the db for message ${reaction.message.id}, in ${reaction.message.guild.name} on a reaction.`);
+			}
+		}
 	} else {
 		console.log(`There was an error trying to get a ReactionRolesHeader from the db for message ${reaction.message.id}, in ${reaction.message.guild.name} on a reaction.`);
 	}
@@ -160,17 +184,38 @@ client.on('messageReactionRemove', async (reaction, user) => {
 	});
 
 	if (reactionRolesHeader) {
-		//Get the reactionRole from the db
+		//Get the reactionRole from the db by all the string (works for general emojis)
 		const reactionRole = await ReactionRoles.findOne({
 			where: { headerId: reactionRolesHeader.reactionRolesHeaderId, emoji: reaction._emoji.name }
 		});
 
-		//Get role object
-		const reactionRoleObject = reaction.message.guild.roles.cache.get(reactionRole.roleId);
-		//Get member
-		const member = await reaction.message.guild.members.fetch(user.id);
-		//Remove role
-		member.roles.remove(reactionRoleObject);
+		if (reactionRole) {
+			//Get role object
+			const reactionRoleObject = reaction.message.guild.roles.cache.get(reactionRole.roleId);
+			//Get member
+			const member = await reaction.message.guild.members.fetch(user.id);
+			//Assign role
+			member.roles.add(reactionRoleObject);
+		} else {
+			//Put the emoji name into the correct format for comparing it in case it's an guild emoji
+			let emoji = '<:' + reaction._emoji.name + ':';
+
+			//Get the reactionRole from the db by all the string (works for general emojis)
+			const reactionRoleBackup = await ReactionRoles.findOne({
+				where: { headerId: reactionRolesHeader.reactionRolesHeaderId, emoji: { [Op.like]: emoji+'%' } }
+			});
+
+			if (reactionRoleBackup) {
+				//Get role object
+				const reactionRoleBackupObject = reaction.message.guild.roles.cache.get(reactionRoleBackup.roleId);
+				//Get member
+				const member = await reaction.message.guild.members.fetch(user.id);
+				//Assign role
+				member.roles.remove(reactionRoleBackupObject);
+			} else {
+				console.log(`There was an error trying to get a ReactionRole from the db for message ${reaction.message.id}, in ${reaction.message.guild.name} on a reaction.`);
+			}
+		}
 	} else {
 		console.log(`There was an error trying to get a ReactionRolesHeader from the db for message ${reaction.message.id}, in ${reaction.message.guild.name} on a reaction.`);
 	}
