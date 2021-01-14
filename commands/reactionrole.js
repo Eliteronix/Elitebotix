@@ -121,6 +121,8 @@ module.exports = {
 								reactionRolesHeader.save().then(
 									editEmbed(msg, reactionRolesHeader)
 								);
+
+								msg.channel.send('The title for the specified embed has been changed.');
 							} else {
 								msg.channel.send('Couldn\'t find an embed with this EmbedID');
 							}
@@ -140,6 +142,8 @@ module.exports = {
 								reactionRolesHeader.save().then(
 									editEmbed(msg, reactionRolesHeader)
 								);
+
+								msg.channel.send('The description for the specified embed has been changed.');
 							} else {
 								msg.channel.send('Couldn\'t find an embed with this EmbedID');
 							}
@@ -163,6 +167,8 @@ module.exports = {
 									reactionRolesHeader.save().then(
 										editEmbed(msg, reactionRolesHeader)
 									);
+
+									msg.channel.send('The color for the specified embed has been changed.');
 								} else {
 									msg.channel.send('Couldn\'t find an embed with this EmbedID');
 								}
@@ -188,6 +194,8 @@ module.exports = {
 								reactionRolesHeader.save().then(
 									editEmbed(msg, reactionRolesHeader)
 								);
+
+								msg.channel.send('The image for the specified embed has been changed.');
 							} else {
 								msg.channel.send('Couldn\'t find an embed with this EmbedID');
 							}
