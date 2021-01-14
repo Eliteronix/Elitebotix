@@ -195,7 +195,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
 			//Get member
 			const member = await reaction.message.guild.members.fetch(user.id);
 			//Assign role
-			member.roles.add(reactionRoleObject);
+			member.roles.remove(reactionRoleObject);
 		} else {
 			//Put the emoji name into the correct format for comparing it in case it's an guild emoji
 			let emoji = '<:' + reaction._emoji.name + ':';
