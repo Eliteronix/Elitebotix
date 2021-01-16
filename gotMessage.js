@@ -1,0 +1,162 @@
+//import the config variables from config.json
+const { prefix } = require('./config.json');
+
+//Import Guilds Table
+const { Guilds } = require('./dbObjects');
+
+//require the file system module
+const fs = require('fs');
+
+//require the discord.js module
+const Discord = require('discord.js');
+
+//Create cooldowns collection
+const cooldowns = new Discord.Collection();
+
+module.exports = async function (msg) {
+	//Create a collection for the commands
+	msg.client.commands = new Discord.Collection();
+
+	//get all command files
+	const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+
+	//Add the commands from the command files to the client.commands collection
+	for (const file of commandFiles) {
+		const command = require(`./commands/${file}`);
+
+		// set a new item in the Collection
+		// with the key as the command name and the value as the exported module
+		msg.client.commands.set(command.name, command);
+	}
+
+	//For the development version
+	//if the message is not in the #elitebotix-test channel then return
+	// eslint-disable-next-line no-undef
+	if (process.env.SERVER === 'Dev') {
+		if (msg.channel.id != '787351833714622535' && msg.channel.id != '148058549417672704') {
+			return;
+		}
+		//For the Live version
+		//if the message is in the #elitebotix-test channel then return
+		// eslint-disable-next-line no-undef
+	} else if (process.env.SERVER === 'Live') {
+		if (msg.channel.id == '787351833714622535') {
+			return;
+		}
+	}
+
+	//check if the message wasn't sent by the bot itself or another bot
+	if (!(msg.author.bot)) {
+		//Define prefix command
+		let guildPrefix;
+
+		//Check if the channel type is not a dm
+		if (msg.channel.type === 'dm') {
+			//Set prefix to standard prefix
+			guildPrefix = prefix;
+		} else {
+			//Get guild from the db
+			const guild = await Guilds.findOne({
+				where: { guildId: msg.guild.id },
+			});
+
+			//Check if a guild record was found
+			if (guild) {
+				if (guild.customPrefixUsed) {
+					guildPrefix = guild.customPrefix;
+				} else {
+					//Set prefix to standard prefix
+					guildPrefix = prefix;
+				}
+			} else {
+				//Set prefix to standard prefix
+				guildPrefix = prefix;
+			}
+		}
+
+		//Define if it is a command with prefix
+		//Split the message into an args array
+		let prefixCommand;
+		let args;
+		if (msg.content.startsWith(guildPrefix)) {
+			prefixCommand = true;
+			args = msg.content.slice(guildPrefix.length).trim().split(/ +/);
+		} else {
+			prefixCommand = false;
+			args = msg.content.trim().split(/ +/);
+		}
+		//Delete the first item from the args array and use it for the command variable
+		const commandName = args.shift().toLowerCase();
+
+		//Set the command and check for possible uses of aliases
+		const command = msg.client.commands.get(commandName)
+			|| msg.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+
+		//if there is no command used then break
+		if (!command) return;
+
+		//Check if the command can't be used outside of DMs
+		if (command.guildOnly && msg.channel.type === 'dm') {
+			return msg.reply('I can\'t execute that command inside DMs!');
+		}
+
+		if (command.permissions) {
+			const authorPerms = msg.channel.permissionsFor(msg.member);
+			if (!authorPerms || !authorPerms.has(command.permissions)) {
+				return msg.reply(`you need the ${command.permissionsTranslated} permission to do this!`);
+			}
+		}
+
+		//Check if arguments are provided if needed
+		if (command.args && !args.length) {
+			//Set standard reply
+			let reply = 'You didn\'t provide any arguments.';
+
+			//Set reply with usage if needed.
+			if (command.usage) {
+				reply += `\nThe proper usage would be: \`${guildPrefix}${command.name} ${command.usage}\``;
+			}
+
+			//Send message
+			return msg.channel.send(reply);
+		}
+
+		//Check if the cooldown collection has the command already; if not write it in
+		if (!cooldowns.has(command.name)) {
+			cooldowns.set(command.name, new Discord.Collection());
+		}
+
+		//Set current time
+		const now = Date.now();
+		//gets the collections for the current command used
+		const timestamps = cooldowns.get(command.name);
+		//set necessary cooldown amount; if non stated in command default to 5; calculate ms afterwards
+		const cooldownAmount = (command.cooldown || 5) * 1000;
+
+		//get expiration times for the cooldowns for the authorID
+		if (timestamps.has(msg.author.id)) {
+			const expirationTime = timestamps.get(msg.author.id) + cooldownAmount;
+
+			//If cooldown didn't expire yet send cooldown message
+			if (command.noCooldownMessage) {
+				return;
+			} else if (now < expirationTime) {
+				const timeLeft = (expirationTime - now) / 1000;
+				return msg.reply(`Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
+			}
+		}
+
+		//Set timestamp for the used command
+		timestamps.set(msg.author.id, now);
+		//Automatically delete the timestamp after the cooldown
+		setTimeout(() => timestamps.delete(msg.author.id), cooldownAmount);
+
+		try {
+			command.execute(msg, args, prefixCommand);
+		} catch (error) {
+			console.error(error);
+			msg.reply('There was an error trying to execute that command. The developers have been alerted.');
+			msg.client.users.cache.get('138273136285057025').send(`There was an error trying to execute a command.\n\nMessage by ${msg.author.username}#${msg.author.discriminator}: \`${msg.content}\`\n\n${error}`);
+		}
+	}
+};
