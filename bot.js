@@ -21,8 +21,10 @@ const memberLeaved = require('./memberLeaved');
 //Get reactionAdded
 const reactionAdded = require('./reactionAdded');
 
-//Get reactionAdded
+//Get reactionRemoved
 const reactionRemoved = require('./reactionRemoved');
+//Get voiceStateUpdate
+const voiceStateUpdate = require('./voiceStateUpdate');
 
 //login with the Discord client using the Token from the .env file
 // eslint-disable-next-line no-undef
@@ -57,3 +59,5 @@ client.on('messageReactionRemove', reactionRemoved);
 
 //declare what the discord client should do when it receives a message
 client.on('message', gotMessage);
+
+client.on('voiceStateUpdate', voiceStateUpdate);
