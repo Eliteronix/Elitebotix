@@ -30,17 +30,24 @@ module.exports = async function (msg) {
 	}
 
 	//For the development version
-	//if the message is not in the #elitebotix-test channel then return
+	//if the message is not in the Dev-Servers then return
 	// eslint-disable-next-line no-undef
 	if (process.env.SERVER === 'Dev') {
-		if (msg.channel.id != '787351833714622535' && msg.channel.id != '148058549417672704') {
+		if (msg.guild.id != '800641468321759242' && msg.guild.id != '800641735658176553') {
+			return;
+		}
+		//For the QA version
+		//if the message is in the QA-Servers then return
+		// eslint-disable-next-line no-undef
+	} else if (process.env.SERVER === 'QA') {
+		if (msg.guild.id != '800641367083974667' && msg.guild.id != '800641819086946344') {
 			return;
 		}
 		//For the Live version
-		//if the message is in the #elitebotix-test channel then return
+		//if the message is in the Dev/QA-Servers then return
 		// eslint-disable-next-line no-undef
 	} else if (process.env.SERVER === 'Live') {
-		if (msg.channel.id == '787351833714622535') {
+		if (msg.guild.id === '800641468321759242' || msg.guild.id === '800641735658176553' || msg.guild.id === '800641367083974667' || msg.guild.id === '800641819086946344') {
 			return;
 		}
 	}
