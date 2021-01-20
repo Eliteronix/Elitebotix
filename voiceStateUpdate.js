@@ -1,5 +1,5 @@
 //Import Tables
-const { TemporaryVoice } = require('./dbObjects');
+const { DBTemporaryVoices } = require('./dbObjects');
 
 module.exports = async function (oldMember, newMember) {
 
@@ -36,7 +36,7 @@ module.exports = async function (oldMember, newMember) {
 		//Clone the channel and get the new channel
 		let createdChannel = await newUserChannel.clone();
 
-		TemporaryVoice.create({ guildId: createdChannel.guild.id, channelId: createdChannel.id });
+		DBTemporaryVoices.create({ guildId: createdChannel.guild.id, channelId: createdChannel.id });
 		
 		//Get Member ID
 		const newMemberId = newMember.id;
@@ -64,21 +64,18 @@ module.exports = async function (oldMember, newMember) {
 	}
 	
 	if (oldUserChannel){
-		const TemporaryVoice = await TemporaryVoice.findAll();
-
-		console.log(TemporaryVoice);
-
-		if(TemporaryVoice){
-			// console.log('Starts with emoji');
-		}
-		// console.log(oldUserChannel.guild.voiceStates);
-		const voiceStates = oldUserChannel.guild.voiceStates.cache;
-
-		voiceStates.forEach(voiceState => {
-			// console.log(voiceState.channelID);
-			// if(voiceState.channelID === ){
-
-			// }
+		const DBTemporaryVoices = await DBTemporaryVoices.findOne({
+			where: { guildId: oldUserChannel.guild.id, channelId: oldUserChannel.id }
 		});
+
+		if(DBTemporaryVoices){	
+			const voiceStates = oldUserChannel.guild.voiceStates.cache;
+				
+			voiceStates.forEach(voiceState => {
+				if(voiceState.channelID === DBTemporaryVoices.channelId){
+					
+				}
+			});	
+		}
 	}
 };
