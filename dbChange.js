@@ -109,16 +109,16 @@ async function moveData() {
 	console.log('----------DBTemporaryVoices----------');
 	console.log(DBTemporaryVoicesList);
 	
-	// await AutoRoles.drop();
-	// console.log('AutoRoles dropped!');
-	// await ReactionRoles.drop();
-	// console.log('ReactionRoles dropped!');
-	// await ReactionRolesHeader.drop();
-	// console.log('ReactionRolesHeader dropped!');
-	// await TemporaryVoice.drop();
-	// console.log('TemporaryVoice dropped!');
-	// await Guilds.drop();
-	// console.log('Guilds dropped!');
+	await AutoRoles.drop();
+	console.log('AutoRoles dropped!');
+	await ReactionRoles.drop();
+	console.log('ReactionRoles dropped!');
+	await ReactionRolesHeader.drop();
+	console.log('ReactionRolesHeader dropped!');
+	await TemporaryVoice.drop();
+	console.log('TemporaryVoice dropped!');
+	await Guilds.drop();
+	console.log('Guilds dropped!');
 	
 	console.log('Following files have to be adapted to the new Tables:');
 	console.log('voiceStateUpdate.js: TemporaryVoice');
