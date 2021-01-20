@@ -1,5 +1,5 @@
 //Import Tables
-const { DBTemporaryVoices, DBAutoRoles, DBGuilds, DBReactionRoles, DBReactionRolesHeader, AutoRoles, Guilds, ReactionRoles, ReactionRolesHeader } = require('./dbObjects');
+const { DBTemporaryVoices, DBAutoRoles, DBGuilds, DBReactionRoles, DBReactionRolesHeader, AutoRoles, Guilds, ReactionRoles, ReactionRolesHeader, TemporaryVoice } = require('./dbObjects');
 
 const Sequelize = require('sequelize');
 
@@ -105,16 +105,16 @@ async function moveData() {
 	console.log('----------DBReactionRolesHeader----------');
 	console.log(DBReactionRolesHeaderList);
 
-	// await AutoRoles.drop();
-	// console.log('AutoRoles dropped!');
-	// await ReactionRoles.drop();
-	// console.log('ReactionRoles dropped!');
-	// await ReactionRolesHeader.drop();
-	// console.log('ReactionRolesHeader dropped!');
-	// await TemporaryVoice.drop();
-	// console.log('TemporaryVoice dropped!');
-	// await Guilds.drop();
-	// console.log('Guilds dropped!');
+	await AutoRoles.drop();
+	console.log('AutoRoles dropped!');
+	await ReactionRoles.drop();
+	console.log('ReactionRoles dropped!');
+	await ReactionRolesHeader.drop();
+	console.log('ReactionRolesHeader dropped!');
+	await TemporaryVoice.drop();
+	console.log('TemporaryVoice dropped!');
+	await Guilds.drop();
+	console.log('Guilds dropped!');
 
 	console.log('Following files have to be adapted to the new Tables:');
 	console.log('dbObjects.js: All of them');
