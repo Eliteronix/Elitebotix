@@ -42,7 +42,7 @@ function readyDiscord() {
 		status: 'online',  //You can show online, idle....
 		game: {
 			name: 'Using e!help',  //The message shown
-			type: 'PLAYING' //PLAYING: WATCHING: LISTENING: STREAMING:
+			type: 'PLAYING:' //PLAYING: WATCHING: LISTENING: STREAMING:
 		}
 	});
 }
