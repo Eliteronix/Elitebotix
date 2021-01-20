@@ -1,4 +1,4 @@
-const { Guilds } = require('../dbObjects');
+const { DBGuilds } = require('../dbObjects');
 
 module.exports = {
 	name: 'prefix',
@@ -14,7 +14,7 @@ module.exports = {
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			//Get guild from db
-			const guild = await Guilds.findOne({
+			const guild = await DBGuilds.findOne({
 				where: { guildId: msg.guild.id },
 			});
 
@@ -27,7 +27,7 @@ module.exports = {
 				msg.channel.send(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
 			} else {
 				//Create new record for the guild in the db
-				Guilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, customPrefixUsed: true, customPrefix: args[0] });
+				DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, customPrefixUsed: true, customPrefix: args[0] });
 
 				msg.channel.send(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
 			}

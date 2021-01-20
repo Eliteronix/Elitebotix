@@ -1,5 +1,5 @@
 //Import Guilds Table
-const { Guilds } = require('./dbObjects');
+const { DBGuilds } = require('./dbObjects');
 
 module.exports = async function (member) {
 	
@@ -27,7 +27,7 @@ module.exports = async function (member) {
 	}
 	
 	//Get the guild dataset from the db
-	const guild = await Guilds.findOne({
+	const guild = await DBGuilds.findOne({
 		where: { guildId: member.guild.id },
 	});
 

@@ -13,5 +13,6 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 			allowNullValue: false,
 		},
+		paranoid: true,
 	});
 };

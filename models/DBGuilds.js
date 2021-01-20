@@ -27,5 +27,6 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		goodbyeMessageChannel: DataTypes.STRING,
 		goodbyeMessageText: DataTypes.STRING,
+		paranoid: true,
 	});
 };

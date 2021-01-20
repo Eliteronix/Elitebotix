@@ -5,7 +5,7 @@ const Discord = require('discord.js');
 const { prefix } = require('../config.json');
 
 //Get Guilds Table
-const { Guilds, AutoRoles } = require('../dbObjects');
+const { DBGuilds, DBAutoRoles } = require('../dbObjects');
 
 module.exports = {
 	name: 'settings',
@@ -26,7 +26,7 @@ module.exports = {
 
 			const user = msg.client.users.cache.find(user => user.id === '784836063058329680');
 
-			const guild = await Guilds.findOne({
+			const guild = await DBGuilds.findOne({
 				where: { guildId: msg.guild.id },
 			});
 
@@ -63,7 +63,7 @@ module.exports = {
 			}
 
 			//get all autoRoles for the guild
-			const autoRolesList = await AutoRoles.findAll({ where: { guildId: msg.guild.id } });
+			const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: msg.guild.id } });
 			//iterate for every autorole in the array
 			for (let i = 0; i < autoRolesList.length; i++) {
 				//get role object by role Id

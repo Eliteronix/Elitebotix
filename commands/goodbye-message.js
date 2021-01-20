@@ -1,4 +1,4 @@
-const { Guilds } = require('../dbObjects');
+const { DBGuilds } = require('../dbObjects');
 
 module.exports = {
 	name: 'goodbye-message',
@@ -16,7 +16,7 @@ module.exports = {
 			//Check first argument of the command
 			if (args[0] === 'current') {
 				//get guild from db
-				const guild = await Guilds.findOne({
+				const guild = await DBGuilds.findOne({
 					where: { guildId: msg.guild.id },
 				});
 
@@ -35,14 +35,14 @@ module.exports = {
 					}
 				} else {
 					//Create guild in the db in case the guild is not in the db yet
-					Guilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendGoodbyeMessage: false });
+					DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendGoodbyeMessage: false });
 					//Send that no goodbye message is set
 					msg.channel.send('There is currently no goodbye message set.');
 				}
 			//Check first argument of the command
 			} else if (args[0] === 'disable') {
 				//get guild from db
-				const guild = await Guilds.findOne({
+				const guild = await DBGuilds.findOne({
 					where: { guildId: msg.guild.id },
 				});
 
@@ -61,7 +61,7 @@ module.exports = {
 					}
 				} else {
 					//Create guild in the db in case the guild is not in the db yet
-					Guilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendGoodbyeMessage: false });
+					DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendGoodbyeMessage: false });
 					//Send that no goodbye message is set
 					msg.channel.send('Goodbye messages are already disabled for this server.');
 				}
@@ -70,7 +70,7 @@ module.exports = {
 				//Define goodbye message from the rest of the arguments
 				let goodbyeMessage = args.join(' ');
 				//get guild from db
-				const guild = await Guilds.findOne({
+				const guild = await DBGuilds.findOne({
 					where: { guildId: msg.guild.id },
 				});
 
@@ -83,7 +83,7 @@ module.exports = {
 					guild.save();
 				} else {
 					//if guild was not found, create it in db
-					Guilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendGoodbyeMessage: true, goodbyeMessageChannel: msg.channel.id, goodbyeMessageText: goodbyeMessage });
+					DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendGoodbyeMessage: true, goodbyeMessageChannel: msg.channel.id, goodbyeMessageText: goodbyeMessage });
 				}
 				msg.channel.send(`The new message \`${goodbyeMessage}\` has been set for leaving members in the channel \`${msg.channel.name}\`.`);
 			}

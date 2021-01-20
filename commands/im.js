@@ -1,4 +1,4 @@
-const { Guilds } = require('../dbObjects');
+const { DBGuilds } = require('../dbObjects');
 
 module.exports = {
 	name: 'im',
@@ -15,7 +15,7 @@ module.exports = {
 		if (!(prefixCommand)) {
 			if (args[0]) {
 				//get guild from db
-				const guild = await Guilds.findOne({
+				const guild = await DBGuilds.findOne({
 					where: { guildId: msg.guild.id },
 				});
 
@@ -29,7 +29,7 @@ module.exports = {
 					}
 				} else {
 					//Create guild dataset in db if not there yet
-					Guilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, dadmodeEnabled: true });
+					DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, dadmodeEnabled: true });
 					//Send dad answer
 					const userMessage = args.join(' ');
 					msg.channel.send(`Hi ${userMessage}, I'm dad!`);

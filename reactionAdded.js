@@ -1,5 +1,5 @@
 //Import Tables
-const { ReactionRolesHeader, ReactionRoles } = require('./dbObjects');
+const { DBReactionRolesHeader, DBReactionRoles } = require('./dbObjects');
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
@@ -43,19 +43,19 @@ module.exports = async function (reaction, user) {
 	}
 
 	//Get the header message from the db
-	const reactionRolesHeader = await ReactionRolesHeader.findOne({
+	const dbReactionRolesHeader = await DBReactionRolesHeader.findOne({
 		where: { guildId: reaction.message.guild.id, reactionHeaderId: reaction.message.id }
 	});
 
-	if (reactionRolesHeader) {
+	if (dbReactionRolesHeader) {
 		//Get the reactionRole from the db by all the string (works for general emojis)
-		const reactionRole = await ReactionRoles.findOne({
-			where: { headerId: reactionRolesHeader.reactionRolesHeaderId, emoji: reaction._emoji.name }
+		const dbReactionRole = await DBReactionRoles.findOne({
+			where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, emoji: reaction._emoji.name }
 		});
 
-		if (reactionRole) {
+		if (dbReactionRole) {
 			//Get role object
-			const reactionRoleObject = reaction.message.guild.roles.cache.get(reactionRole.roleId);
+			const reactionRoleObject = reaction.message.guild.roles.cache.get(dbReactionRole.roleId);
 			//Get member
 			const member = await reaction.message.guild.members.fetch(user.id);
 			//Assign role
@@ -65,13 +65,13 @@ module.exports = async function (reaction, user) {
 			let emoji = '<:' + reaction._emoji.name + ':';
 
 			//Get the reactionRole from the db by all the string (works for general emojis)
-			const reactionRoleBackup = await ReactionRoles.findOne({
-				where: { headerId: reactionRolesHeader.reactionRolesHeaderId, emoji: { [Op.like]: emoji + '%' } }
+			const dbReactionRoleBackup = await DBReactionRoles.findOne({
+				where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, emoji: { [Op.like]: emoji + '%' } }
 			});
 
-			if (reactionRoleBackup) {
+			if (dbReactionRoleBackup) {
 				//Get role object
-				const reactionRoleBackupObject = reaction.message.guild.roles.cache.get(reactionRoleBackup.roleId);
+				const reactionRoleBackupObject = reaction.message.guild.roles.cache.get(dbReactionRoleBackup.roleId);
 				//Get member
 				const member = await reaction.message.guild.members.fetch(user.id);
 				//Assign role

@@ -32,12 +32,12 @@ module.exports = async function (oldMember, newMember) {
 	const newUserChannel = oldMember.client.channels.cache.get(newUserChannelId);
 	const oldUserChannel = oldMember.client.channels.cache.get(oldUserChannelId);
 
-	if(newUserChannel && newUserChannel.name.startsWith('➕')){
+	if (newUserChannel && newUserChannel.name.startsWith('➕')) {
 		//Clone the channel and get the new channel
 		let createdChannel = await newUserChannel.clone();
 
 		DBTemporaryVoices.create({ guildId: createdChannel.guild.id, channelId: createdChannel.id });
-		
+
 		//Get Member ID
 		const newMemberId = newMember.id;
 		//Get member
@@ -45,12 +45,12 @@ module.exports = async function (oldMember, newMember) {
 
 		//Get the name of the user
 		let memberName = member.user.username;
-		if(member.nickname){
+		if (member.nickname) {
 			memberName = member.nickname;
 		}
 
 		let channelName = '🕓 ' + memberName;
-		if(memberName.toLowerCase().endsWith('x') || memberName.toLowerCase().endsWith('s')){
+		if (memberName.toLowerCase().endsWith('x') || memberName.toLowerCase().endsWith('s')) {
 			channelName = channelName + '\' voice';
 		} else {
 			channelName = channelName + '\'s voice';
@@ -62,20 +62,20 @@ module.exports = async function (oldMember, newMember) {
 		//Move user
 		member.voice.setChannel(createdChannel);
 	}
-	
-	if (oldUserChannel){
+
+	if (oldUserChannel) {
 		const DBTemporaryVoices = await DBTemporaryVoices.findOne({
 			where: { guildId: oldUserChannel.guild.id, channelId: oldUserChannel.id }
 		});
 
-		if(DBTemporaryVoices){	
+		if (DBTemporaryVoices) {
 			const voiceStates = oldUserChannel.guild.voiceStates.cache;
-				
+
 			voiceStates.forEach(voiceState => {
-				if(voiceState.channelID === DBTemporaryVoices.channelId){
-					
+				if (voiceState.channelID === DBTemporaryVoices.channelId) {
+
 				}
-			});	
+			});
 		}
 	}
 };

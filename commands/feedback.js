@@ -1,5 +1,5 @@
 //Import Guilds Table
-const { Guilds } = require('../dbObjects');
+const { DBGuilds } = require('../dbObjects');
 
 //import the config variables from config.json
 const { prefix } = require('../config.json');
@@ -91,7 +91,7 @@ module.exports = {
 					guildPrefix = prefix;
 				} else {
 					//Get guild from the db
-					const guild = await Guilds.findOne({
+					const guild = await DBGuilds.findOne({
 						where: { guildId: msg.guild.id },
 					});
 

@@ -1,4 +1,4 @@
-const { Guilds } = require('../dbObjects');
+const { DBGuilds } = require('../dbObjects');
 
 module.exports = {
 	name: 'db-guilds',
@@ -13,7 +13,7 @@ module.exports = {
 	noCooldownMessage: true,
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
-			const guildList = await Guilds.findAll();
+			const guildList = await DBGuilds.findAll();
 			console.log(guildList);
 		}
 	},

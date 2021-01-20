@@ -1,4 +1,4 @@
-const { AutoRoles } = require('../dbObjects');
+const { DBAutoRoles } = require('../dbObjects');
 
 module.exports = {
 	name: 'db-autoroles',
@@ -13,7 +13,7 @@ module.exports = {
 	noCooldownMessage: true,
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
-			const autoRoleList = await AutoRoles.findAll();
+			const autoRoleList = await DBAutoRoles.findAll();
 			console.log(autoRoleList);
 		}
 	},
