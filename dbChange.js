@@ -44,8 +44,8 @@ async function moveData() {
 	const AutoRolesList = await AutoRoles.findAll();
 	const GuildsList = await Guilds.findAll();
 	const ReactionRolesList = await ReactionRoles.findAll();
-	// const ReactionRolesHeaderList = await ReactionRolesHeader.findAll();
-	// const TemporaryVoiceList = await TemporaryVoice.findAll();
+	const ReactionRolesHeaderList = await ReactionRolesHeader.findAll();
+	const TemporaryVoiceList = await TemporaryVoice.findAll();
 
 	console.log('----------AutoRoles----------');
 	console.log(AutoRolesList);
@@ -62,7 +62,10 @@ async function moveData() {
 	console.log(GuildsList);
 	for (let i = 0; i < GuildsList.length; i++) {
 		await DBGuilds.create({
-			guildId: GuildsList[i].guildId, roleId: GuildsList[i].roleId //Change fields
+			guildId: GuildsList[i].guildId, guildName: GuildsList[i].guildName, customPrefixUsed: GuildsList[i].customPrefixUsed, customPrefix: GuildsList[i].customPrefix,
+			dadmodeEnabled: GuildsList[i].dadmodeEnabled, sendWelcomeMessage: GuildsList[i].sendWelcomeMessage, welcomeMessageChannel: GuildsList[i].welcomeMessageChannel,
+			welcomeMessageText: GuildsList[i].welcomeMessageText, sendGoodbyeMessage: GuildsList[i].sendGoodbyeMessage, 
+			goodbyeMessageChannel: GuildsList[i].goodbyeMessageChannel, goodbyeMessageText: GuildsList[i].goodbyeMessageText
 		});
 	}
 	const DBGuildsList = await DBGuilds.findAll();
@@ -73,12 +76,38 @@ async function moveData() {
 	console.log(ReactionRolesList);
 	for (let i = 0; i < ReactionRolesList.length; i++) {
 		await DBReactionRoles.create({
-			guildId: ReactionRolesList[i].guildId, roleId: ReactionRolesList[i].roleId //Change fields
+			dbReactionRolesHeaderId: ReactionRolesList[i].headerId, roleId: ReactionRolesList[i].roleId, emoji: ReactionRolesList[i].emoji, 
+			description: ReactionRolesList[i].description
 		});
 	}
 	const DBReactionRolesList = await DBReactionRoles.findAll();
 	console.log('----------DBReactionRoles----------');
 	console.log(DBReactionRolesList);
+	
+	console.log('----------ReactionRolesHeader----------');
+	console.log(ReactionRolesHeaderList);
+	for (let i = 0; i < ReactionRolesHeaderList.length; i++) {
+		await DBReactionRolesHeader.create({
+			guildId: ReactionRolesHeaderList[i].guildId, reactionHeaderId: ReactionRolesHeaderList[i].reactionHeaderId, 
+			reactionChannelHeaderId: ReactionRolesHeaderList[i].reactionChannelHeaderId, reactionTitle: ReactionRolesHeaderList[i].reactionTitle, 
+			reactionTitle: ReactionRolesHeaderList[i].reactionTitle, reactionColor: ReactionRolesHeaderList[i].reactionColor, 
+			reactionDescription: ReactionRolesHeaderList[i].reactionDescription, reactionImage: ReactionRolesHeaderList[i].reactionImage
+		});
+	}
+	const DBReactionRolesHeaderList = await DBReactionRolesHeader.findAll();
+	console.log('----------DBReactionRolesHeader----------');
+	console.log(DBReactionRolesHeaderList);
+	
+	console.log('----------TemporaryVoice----------');
+	console.log(TemporaryVoiceList);
+	for (let i = 0; i < TemporaryVoiceList.length; i++) {
+		await DBTemporaryVoices.create({
+			guildId: TemporaryVoiceList[i].guildId, channelId: TemporaryVoiceList[i].channelId
+		});
+	}
+	const DBTemporaryVoicesList = await DBTemporaryVoices.findAll();
+	console.log('----------DBTemporaryVoices----------');
+	console.log(DBTemporaryVoicesList);
 
 	sequelize.close();
 }
