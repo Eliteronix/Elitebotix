@@ -108,6 +108,29 @@ async function moveData() {
 	const DBTemporaryVoicesList = await DBTemporaryVoices.findAll();
 	console.log('----------DBTemporaryVoices----------');
 	console.log(DBTemporaryVoicesList);
+	
+	console.log('Following files have to be adapted to the new Tables:');
+	console.log('voiceStateUpdate.js: TemporaryVoice');
+	console.log('reactionRemoved.js: ReactionRolesHeader, ReactionRoles');
+	console.log('reactionAdded.js: ReactionRolesHeader, ReactionRoles');
+	console.log('memberLeaved.js: Guilds');
+	console.log('memberJoined.js: Guilds, AutoRoles');
+	console.log('gotMessage.js: Guilds');
+	console.log('dbObjects.js: All of them');
+	console.log('dbInit.js: All of them');
+	console.log('MODELS: Delete the old models');
+	console.log('autorole.js: AutoRoles, Guilds');
+	console.log('db-autoroles.js: AutoRoles');
+	console.log('db-guilds.js: Guilds');
+	console.log('feedback.js: Guilds');
+	console.log('goodbye-message.js: Guilds');
+	console.log('help.js: Guilds');
+	console.log('im.js: Guilds');
+	console.log('prefix.js: Guilds');
+	console.log('reactionrole.js: Guilds, ReactionRolesHeader, ReactionRoles');
+	console.log('settings.js: Guilds, AutoRoles');
+	console.log('toggledadmode.js: Guilds, AutoRoles');
+	console.log('welcome-message.js: Guilds');
 
 	sequelize.close();
 }
