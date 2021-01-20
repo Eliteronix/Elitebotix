@@ -1,14 +1,11 @@
 //require the discord.js module
 const Discord = require('discord.js');
 
-//Import Guilds Table
-const { Guilds } = require('../dbObjects');
+//Import Tables
+const { Guilds, ReactionRolesHeader, ReactionRoles } = require('../dbObjects');
 
 //import the config variables from config.json
 const { prefix } = require('../config.json');
-
-//require the ReactionRolesHeader Table
-const { ReactionRolesHeader, ReactionRoles } = require('../dbObjects');
 
 module.exports = {
 	name: 'reactionrole',
