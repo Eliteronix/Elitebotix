@@ -71,11 +71,16 @@ module.exports = async function (oldMember, newMember) {
 		if (DBTemporaryVoices) {
 			const voiceStates = oldUserChannel.guild.voiceStates.cache;
 
+			let usersLeft = false;
+			
 			voiceStates.forEach(voiceState => {
 				if (voiceState.channelID === DBTemporaryVoices.channelId) {
-
+					usersLeft = true;
 				}
 			});
+			
+			await oldUserChannel.delete();
+			await DBTemporaryVoices.destroy();
 		}
 	}
 };
