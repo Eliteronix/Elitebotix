@@ -1,5 +1,5 @@
 //Import Tables
-const { DBTemporaryVoices } = require('./dbObjects');
+const { DBGuilds, DBTemporaryVoices } = require('./dbObjects');
 
 module.exports = async function (oldMember, newMember) {
 
@@ -56,31 +56,39 @@ module.exports = async function (oldMember, newMember) {
 			channelName = channelName + '\'s voice';
 		}
 		//Rename the channel
-		createdChannel.edit({ name: `${channelName}` });
+		await createdChannel.edit({ name: `${channelName}` });
 		//Set all permissions for the creator
-
+		await createdChannel.overwritePermissions([
+			{
+				id: newMember.id,
+				allow: ['MANAGE_CHANNELS','MANAGE_ROLES','MUTE_MEMBERS','DEAFEN_MEMBERS','MOVE_MEMBERS','CONNECT','SPEAK','VIEW_CHANNEL','CREATE_INSTANT_INVITE','STREAM','USE_VAD'],
+			},
+		]);
 		//Move user
 		member.voice.setChannel(createdChannel);
 	}
 
 	if (oldUserChannel) {
-		const DBTemporaryVoices = await DBTemporaryVoices.findOne({
+
+		const dbTemporaryVoices = await DBTemporaryVoices.findOne({
 			where: { guildId: oldUserChannel.guild.id, channelId: oldUserChannel.id }
 		});
 
-		if (DBTemporaryVoices) {
+		if (dbTemporaryVoices) {
 			const voiceStates = oldUserChannel.guild.voiceStates.cache;
 
 			let usersLeft = false;
-			
+
 			voiceStates.forEach(voiceState => {
-				if (voiceState.channelID === DBTemporaryVoices.channelId) {
+				if (voiceState.channelID === dbTemporaryVoices.channelId) {
 					usersLeft = true;
 				}
 			});
-			
-			await oldUserChannel.delete();
-			await DBTemporaryVoices.destroy();
+
+			if (!(usersLeft)) {
+				await oldUserChannel.delete();
+				await dbTemporaryVoices.destroy();
+			}
 		}
 	}
 };

@@ -27,6 +27,8 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		goodbyeMessageChannel: DataTypes.STRING,
 		goodbyeMessageText: DataTypes.STRING,
+		temporaryVoices: DataTypes.BOOLEAN,
+		addTemporaryText: DataTypes.BOOLEAN,
 		paranoid: true,
 	});
 };
