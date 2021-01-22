@@ -38,13 +38,15 @@ function readyDiscord() {
 	//log a message when ready
 	console.log('The Bot is ready.');
 
-	client.user.setPresence({
-		status: 'online',  //You can show online, idle....
-		game: {
-			name: 'Using e!help',  //The message shown
-			type: 'PLAYING:' //PLAYING: WATCHING: LISTENING: STREAMING:
-		}
-	});
+	if(process.env.SERVER === 'Live'){
+		client.user.setPresence({
+			status: 'online',  //You can show online, idle....
+			game: {
+				name: 'Using e!help',  //The message shown
+				type: 'PLAYING:' //PLAYING: WATCHING: LISTENING: STREAMING:
+			}
+		});   
+	}
 }
 
 //declare what the discord client should do when a new member joins the server
