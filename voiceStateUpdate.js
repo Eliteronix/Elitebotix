@@ -42,8 +42,20 @@ module.exports = async function (oldMember, newMember) {
 			if(dbGuild.temporaryVoices){
 				//Clone the channel and get the new channel
 				let createdChannel = await newUserChannel.clone();
+				
+				let createdText;
+				
+				if(dbGuild.addTemporaryText){
+					const createdCategoryId = createdChannel.parentID;
+					
+					
+					//Move further down to avoid waiting time
+					createdText = await newMember.guild.createChannel('temporaryText', 'text');
+					
+					createdText.setParent(createdCategoryId);
+				}
 
-				DBTemporaryVoices.create({ guildId: createdChannel.guild.id, channelId: createdChannel.id });
+				DBTemporaryVoices.create({ guildId: createdChannel.guild.id, channelId: createdChannel.id, textChannelId: createdText.id });
 
 				//Get Member ID
 				const newMemberId = newMember.id;
