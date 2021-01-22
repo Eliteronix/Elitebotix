@@ -105,19 +105,21 @@ module.exports = async function (oldMember, newMember) {
 						allow: ['MANAGE_CHANNELS', 'MANAGE_ROLES', 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'CONNECT', 'SPEAK', 'VIEW_CHANNEL', 'CREATE_INSTANT_INVITE', 'STREAM', 'USE_VAD'],
 					},
 				]);
-				//Set all permissions for the creator and deny @everyone to view the text channel
-				let everyone = newMember.guild.roles.cache.find(r => r.name === '@everyone');
-				await createdText.overwritePermissions([
-					{
-						id: newMember.id,
-						allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'SEND_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'ADD_REACTIONS', 'USE_EXTERNAL_EMOJIS', 'MENTION_EVERYONE', 'MANAGE_MESSAGES', 'READ_MESSAGE_HISTORY', 'SEND_TTS_MESSAGES'],
-					},
-					{
-						id: everyone.id,
-						deny: ['VIEW_CHANNEL'],
-					},
-				]);
-				createdText.send(`<@${newMemberId}>, you are now admin for this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel.`);
+				if(createdText){
+					//Set all permissions for the creator and deny @everyone to view the text channel
+					let everyone = newMember.guild.roles.cache.find(r => r.name === '@everyone');
+					await createdText.overwritePermissions([
+						{
+							id: newMember.id,
+							allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'SEND_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'ADD_REACTIONS', 'USE_EXTERNAL_EMOJIS', 'MENTION_EVERYONE', 'MANAGE_MESSAGES', 'READ_MESSAGE_HISTORY', 'SEND_TTS_MESSAGES'],
+						},
+						{
+							id: everyone.id,
+							deny: ['VIEW_CHANNEL'],
+						},
+					]);
+					createdText.send(`<@${newMemberId}>, you are now admin for this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel.`);
+				}
 			}
 		}
 	} else if (dbTemporaryVoicesNew && newUserChannel.id === dbTemporaryVoicesNew.channelId && newMember.id !== dbTemporaryVoicesNew.creatorId) {
