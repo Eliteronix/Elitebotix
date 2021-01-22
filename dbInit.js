@@ -7,10 +7,11 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 	storage: 'database.sqlite',
 });
 
-require('./models/Guilds')(sequelize, Sequelize.DataTypes);
-require('./models/ReactionRoles')(sequelize, Sequelize.DataTypes);
-require('./models/ReactionRolesHeader')(sequelize, Sequelize.DataTypes);
-require('./models/AutoRoles')(sequelize, Sequelize.DataTypes);
+require('./models/DBGuilds')(sequelize, Sequelize.DataTypes);
+require('./models/DBReactionRoles')(sequelize, Sequelize.DataTypes);
+require('./models/DBReactionRolesHeader')(sequelize, Sequelize.DataTypes);
+require('./models/DBAutoRoles')(sequelize, Sequelize.DataTypes);
+require('./models/DBTemporaryVoices')(sequelize, Sequelize.DataTypes);
 
 sequelize.sync({ alter: true })
 	.then(async () => {

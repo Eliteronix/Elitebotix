@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-	return sequelize.define('AutoRoles', {
-		autoRolesId: {
+	return sequelize.define('DBTemporaryVoices', {
+		id: {
 			type: DataTypes.INTEGER,
 			primaryKey: true,
 			autoIncrement: true,
@@ -9,9 +9,12 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 			allowNullValue: false,
 		},
-		roleId: {
+		channelId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
 		},
+		textChannelId: DataTypes.STRING,
+		creatorId: DataTypes.STRING,
+		paranoid: true,
 	});
 };

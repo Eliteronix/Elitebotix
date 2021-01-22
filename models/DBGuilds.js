@@ -1,8 +1,12 @@
 module.exports = (sequelize, DataTypes) => {
-	return sequelize.define('Guilds', {
+	return sequelize.define('DBGuilds', {
+		id: {
+			type: DataTypes.INTEGER,
+			primaryKey: true,
+			autoIncrement: true,
+		},
 		guildId: {
 			type: DataTypes.STRING,
-			primaryKey: true,
 		},
 		guildName: DataTypes.STRING,
 		customPrefixUsed: DataTypes.BOOLEAN,
@@ -23,5 +27,8 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		goodbyeMessageChannel: DataTypes.STRING,
 		goodbyeMessageText: DataTypes.STRING,
+		temporaryVoices: DataTypes.BOOLEAN,
+		addTemporaryText: DataTypes.BOOLEAN,
+		paranoid: true,
 	});
 };

@@ -1,5 +1,5 @@
 //Import Tables
-const { Guilds, AutoRoles } = require('./dbObjects');
+const { DBGuilds, DBAutoRoles } = require('./dbObjects');
 
 module.exports = async function (member) {
 	
@@ -27,7 +27,7 @@ module.exports = async function (member) {
 	}
 	
 	//Get the guild dataset from the db
-	const guild = await Guilds.findOne({
+	const guild = await DBGuilds.findOne({
 		where: { guildId: member.guild.id },
 	});
 
@@ -47,7 +47,7 @@ module.exports = async function (member) {
 	}
 
 	//get all autoroles for the guild
-	const autoRolesList = await AutoRoles.findAll({ where: { guildId: member.guild.id } });
+	const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: member.guild.id } });
 	//iterate for every autorole gathered
 	for (let i = 0; i < autoRolesList.length; i++) {
 		//get the role object from the array

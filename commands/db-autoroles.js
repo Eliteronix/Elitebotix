@@ -1,9 +1,9 @@
-const { DBGuilds } = require('../dbObjects');
+const { DBAutoRoles } = require('../dbObjects');
 
 module.exports = {
-	name: 'db-guilds',
+	name: 'db-autoroles',
 	//aliases: ['developer'],
-	description: 'Sends all the guilds found in the db',
+	description: 'Sends all the AutoRoles found in the db',
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
@@ -13,8 +13,8 @@ module.exports = {
 	noCooldownMessage: true,
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
-			const guildList = await DBGuilds.findAll();
-			console.log(guildList);
+			const autoRoleList = await DBAutoRoles.findAll();
+			console.log(autoRoleList);
 		}
 	},
 };

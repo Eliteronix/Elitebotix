@@ -2,7 +2,7 @@
 const { prefix } = require('./config.json');
 
 //Import Guilds Table
-const { Guilds } = require('./dbObjects');
+const { DBGuilds } = require('./dbObjects');
 
 //require the file system module
 const fs = require('fs');
@@ -63,7 +63,7 @@ module.exports = async function (msg) {
 			guildPrefix = prefix;
 		} else {
 			//Get guild from the db
-			const guild = await Guilds.findOne({
+			const guild = await DBGuilds.findOne({
 				where: { guildId: msg.guild.id },
 			});
 

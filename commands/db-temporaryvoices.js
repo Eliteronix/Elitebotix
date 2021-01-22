@@ -1,9 +1,9 @@
-const { DBGuilds } = require('../dbObjects');
+const { DBTemporaryVoices } = require('../dbObjects');
 
 module.exports = {
-	name: 'db-guilds',
+	name: 'db-temporaryvoices',
 	//aliases: ['developer'],
-	description: 'Sends all the guilds found in the db',
+	description: 'Sends all the TemporaryVoices found in the db',
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
@@ -13,8 +13,8 @@ module.exports = {
 	noCooldownMessage: true,
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
-			const guildList = await DBGuilds.findAll();
-			console.log(guildList);
+			const TemporaryVoicesList = await DBTemporaryVoices.findAll();
+			console.log(TemporaryVoicesList);
 		}
 	},
 };

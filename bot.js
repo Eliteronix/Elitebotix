@@ -21,8 +21,10 @@ const memberLeaved = require('./memberLeaved');
 //Get reactionAdded
 const reactionAdded = require('./reactionAdded');
 
-//Get reactionAdded
+//Get reactionRemoved
 const reactionRemoved = require('./reactionRemoved');
+//Get voiceStateUpdate
+const voiceStateUpdate = require('./voiceStateUpdate');
 
 //login with the Discord client using the Token from the .env file
 // eslint-disable-next-line no-undef
@@ -36,13 +38,15 @@ function readyDiscord() {
 	//log a message when ready
 	console.log('The Bot is ready.');
 
-	client.user.setPresence({
-		status: 'online',  //You can show online, idle....
-		game: {
-			name: 'Using e!help',  //The message shown
-			type: 'PLAYING' //PLAYING: WATCHING: LISTENING: STREAMING:
-		}
-	});
+	if(process.env.SERVER === 'Live'){
+		client.user.setPresence({
+			status: 'online',  //You can show online, idle....
+			game: {
+				name: 'Using e!help',  //The message shown
+				type: 'PLAYING:' //PLAYING: WATCHING: LISTENING: STREAMING:
+			}
+		});   
+	}
 }
 
 //declare what the discord client should do when a new member joins the server
@@ -57,3 +61,5 @@ client.on('messageReactionRemove', reactionRemoved);
 
 //declare what the discord client should do when it receives a message
 client.on('message', gotMessage);
+
+client.on('voiceStateUpdate', voiceStateUpdate);

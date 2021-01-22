@@ -1,11 +1,11 @@
 module.exports = (sequelize, DataTypes) => {
-	return sequelize.define('ReactionRoles', {
-		reactionRolesId: {
+	return sequelize.define('DBReactionRoles', {
+		id: {
 			type: DataTypes.INTEGER,
 			primaryKey: true,
 			autoIncrement: true,
 		},
-		headerId: {
+		dbReactionRolesHeaderId: {
 			type: DataTypes.INTEGER,
 			allowNullValue: false,
 		},
@@ -21,5 +21,6 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 			allowNullValue: false,
 		},
+		paranoid: true,
 	});
 };

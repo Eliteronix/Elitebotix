@@ -1,4 +1,4 @@
-const { AutoRoles, Guilds } = require('../dbObjects');
+const { DBAutoRoles, DBGuilds } = require('../dbObjects');
 
 //import the config variables from config.json
 const { prefix } = require('../config.json');
@@ -25,7 +25,7 @@ module.exports = {
 					//get role object with id
 					let autoRoleName = msg.guild.roles.cache.get(args[1].replace('<@&', '').replace('>', ''));
 					//try to find that autorole in the db
-					const autoRole = await AutoRoles.findOne({
+					const autoRole = await DBAutoRoles.findOne({
 						where: { guildId: msg.guild.id, roleId: autoRoleId },
 					});
 
@@ -34,7 +34,7 @@ module.exports = {
 						msg.channel.send(`${autoRoleName.name} is already an autorole.`);
 					} else {
 						//If autorole doesn't exist in db then create it
-						AutoRoles.create({ guildId: msg.guild.id, roleId: autoRoleId });
+						DBAutoRoles.create({ guildId: msg.guild.id, roleId: autoRoleId });
 						msg.channel.send(`${autoRoleName.name} has been added as an autorole.`);
 
 						//Get all members of the guild
@@ -58,7 +58,7 @@ module.exports = {
 					//get role object with id
 					let autoRoleName = msg.guild.roles.cache.get(args[1].replace('<@&', '').replace('>', ''));
 					//Delete roles with roleId and guildId
-					const rowCount = await AutoRoles.destroy({ where: { guildId: msg.guild.id, roleId: autoRoleId } });
+					const rowCount = await DBAutoRoles.destroy({ where: { guildId: msg.guild.id, roleId: autoRoleId } });
 					//Send feedback message accordingly
 					if (rowCount > 0) {
 						msg.channel.send(`${autoRoleName.name} has been removed from autoroles.`);
@@ -72,7 +72,7 @@ module.exports = {
 				//Check first argument
 			} else if (args[0] === 'list') {
 				//get all autoRoles for the guild
-				const autoRolesList = await AutoRoles.findAll({ where: { guildId: msg.guild.id } });
+				const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: msg.guild.id } });
 				//iterate for every autorole in the array
 				for (let i = 0; i < autoRolesList.length; i++) {
 					//get role object by role Id
@@ -94,7 +94,7 @@ module.exports = {
 					guildPrefix = prefix;
 				} else {
 					//Get guild from the db
-					const guild = await Guilds.findOne({
+					const guild = await DBGuilds.findOne({
 						where: { guildId: msg.guild.id },
 					});
 

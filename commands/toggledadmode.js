@@ -1,4 +1,4 @@
-const { Guilds } = require('../dbObjects');
+const { DBGuilds } = require('../dbObjects');
 
 module.exports = {
 	name: 'toggledadmode',
@@ -7,14 +7,14 @@ module.exports = {
 	//usage: '<bug/feature/request> <description>',
 	permissions: 'MANAGE_GUILD',
 	permissionsTranslated: 'Manage Server',
-	//guildOnly: true,
+	guildOnly: true,
 	//args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			//get guild from db
-			const guild = await Guilds.findOne({
+			const guild = await DBGuilds.findOne({
 				where: { guildId: msg.guild.id },
 			});
 
@@ -32,7 +32,7 @@ module.exports = {
 				}
 			} else {
 				//Create guild in db if it wasn't there yet and disable it by default
-				Guilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, dadmodeEnabled: false });
+				DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, dadmodeEnabled: false });
 				msg.channel.send('Dadmode has been disabled');
 			}
 		}
