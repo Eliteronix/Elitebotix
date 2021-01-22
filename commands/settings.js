@@ -97,6 +97,18 @@ module.exports = {
 			//Set the output string
 			const autoRolesString = autoRolesList.join(', ') || 'None.';
 
+			let temporaryVoicesSetting = 'Disabled';
+
+			if(guild.temporaryVoices){
+				temporaryVoicesSetting = 'Enabled';
+			}
+
+			let temporaryText = 'Disabled';
+
+			if(guild.addTemporaryText){
+				temporaryText = 'Enabled';
+			}
+
 			const guildBotInfoEmbed = new Discord.MessageEmbed()
 				.setColor('#ffcc00')
 				.setTitle(`${membername} server settings`)
@@ -107,6 +119,8 @@ module.exports = {
 					{ name: 'Welcome-Messages', value: `${welcomeMessage}` },
 					{ name: 'Goodbye-Messages', value: `${goodbyeMessage}` },
 					{ name: 'Autoroles', value: `${autoRolesString}` },
+					{ name: 'Temporary Voices', value: `${temporaryVoicesSetting}` },
+					{ name: 'Temporary Text', value: `${temporaryText}` },
 				)
 				.setTimestamp();
 

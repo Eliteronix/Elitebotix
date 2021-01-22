@@ -7,7 +7,7 @@ module.exports = {
 	//usage: '<bug/feature/request> <description>',
 	permissions: 'MANAGE_GUILD',
 	permissionsTranslated: 'Manage Server',
-	//guildOnly: true,
+	guildOnly: true,
 	//args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,

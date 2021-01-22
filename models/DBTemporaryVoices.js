@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
 			allowNullValue: false,
 		},
 		textChannelId: DataTypes.STRING,
+		creatorId: DataTypes.STRING,
 		paranoid: true,
 	});
 };
