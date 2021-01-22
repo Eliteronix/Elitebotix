@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 			allowNullValue: false,
 		},
+		textChannelId: DataTypes.STRING,
 		paranoid: true,
 	});
 };
