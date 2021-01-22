@@ -33,42 +33,55 @@ module.exports = async function (oldMember, newMember) {
 	const oldUserChannel = oldMember.client.channels.cache.get(oldUserChannelId);
 
 	if (newUserChannel && newUserChannel.name.startsWith('➕')) {
-		//Clone the channel and get the new channel
-		let createdChannel = await newUserChannel.clone();
+	
+		const dbGuild = DBGuilds.findOne({
+			where: { guildId: newMember.guild.id }
+		});
+		
+		if(dbGuild){
+			if(dbGuild.temporaryVoices){
+				//Clone the channel and get the new channel
+				let createdChannel = await newUserChannel.clone();
 
-		DBTemporaryVoices.create({ guildId: createdChannel.guild.id, channelId: createdChannel.id });
+				DBTemporaryVoices.create({ guildId: createdChannel.guild.id, channelId: createdChannel.id });
 
-		//Get Member ID
-		const newMemberId = newMember.id;
-		//Get member
-		const member = await newMember.guild.members.fetch(newMemberId);
+				//Get Member ID
+				const newMemberId = newMember.id;
+				//Get member
+				const member = await newMember.guild.members.fetch(newMemberId);
 
-		//Get the name of the user
-		let memberName = member.user.username;
-		if (member.nickname) {
-			memberName = member.nickname;
+				//Get the name of the user
+				let memberName = member.user.username;
+				if (member.nickname) {
+					memberName = member.nickname;
+				}
+
+				let channelName = '🕓 ' + memberName;
+				if (memberName.toLowerCase().endsWith('x') || memberName.toLowerCase().endsWith('s')) {
+					channelName = channelName + '\' voice';
+				} else {
+					channelName = channelName + '\'s voice';
+				}
+				//Rename the channel
+				await createdChannel.edit({ name: `${channelName}` });
+				//Set all permissions for the creator
+				await createdChannel.overwritePermissions([
+					{
+						id: newMember.id,
+						allow: ['MANAGE_CHANNELS','MANAGE_ROLES','MUTE_MEMBERS','DEAFEN_MEMBERS','MOVE_MEMBERS','CONNECT','SPEAK','VIEW_CHANNEL','CREATE_INSTANT_INVITE','STREAM','USE_VAD'],
+					},
+				]);
+				//Move user
+				member.voice.setChannel(createdChannel);
+			}
 		}
-
-		let channelName = '🕓 ' + memberName;
-		if (memberName.toLowerCase().endsWith('x') || memberName.toLowerCase().endsWith('s')) {
-			channelName = channelName + '\' voice';
-		} else {
-			channelName = channelName + '\'s voice';
-		}
-		//Rename the channel
-		await createdChannel.edit({ name: `${channelName}` });
-		//Set all permissions for the creator
-		await createdChannel.overwritePermissions([
-			{
-				id: newMember.id,
-				allow: ['MANAGE_CHANNELS','MANAGE_ROLES','MUTE_MEMBERS','DEAFEN_MEMBERS','MOVE_MEMBERS','CONNECT','SPEAK','VIEW_CHANNEL','CREATE_INSTANT_INVITE','STREAM','USE_VAD'],
-			},
-		]);
-		//Move user
-		member.voice.setChannel(createdChannel);
 	}
 
 	if (oldUserChannel) {
+		
+		const dbGuild = DBGuilds.findOne({
+			where: { guildId: oldMember.guild.id }
+		});
 
 		const dbTemporaryVoices = await DBTemporaryVoices.findOne({
 			where: { guildId: oldUserChannel.guild.id, channelId: oldUserChannel.id }
