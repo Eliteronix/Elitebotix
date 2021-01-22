@@ -94,7 +94,7 @@ module.exports = async function (oldMember, newMember) {
 					} else {
 						textChannelName = textChannelName + '\'s text';
 					}
-					createdText.edit({ name: `${textChannelName}` });
+					await createdText.edit({ name: `${textChannelName}` });
 				}
 				//Move user
 				member.voice.setChannel(createdChannel);
