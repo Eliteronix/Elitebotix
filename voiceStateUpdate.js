@@ -128,12 +128,8 @@ module.exports = async function (oldMember, newMember) {
 		if (dbTemporaryVoicesNew.textChannelId) {
 			textChannel = oldMember.client.channels.cache.get(dbTemporaryVoicesNew.textChannelId);
 		}
-		await textChannel.overwritePermissions([
-			{
-				id: newMember.id,
-				allow: ['VIEW_CHANNEL', 'CREATE_INSTANT_INVITE', 'SEND_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'ADD_REACTIONS', 'USE_EXTERNAL_EMOJIS', 'READ_MESSAGE_HISTORY'],
-			},
-		]);
+		const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
+		await textChannel.updateOverwrite(newUser, { VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, SEND_MESSAGES: true, EMBED_LINKS: true, ATTACH_FILES: true, ADD_REACTIONS: true, USE_EXTERNAL_EMOJIS: true, READ_MESSAGE_HISTORY: true });
 		textChannel.send(`<@${newMember.id}>, you now have access to this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel. You will also lose access to this channel if you leave the voice channel.`);
 	}
 
@@ -168,12 +164,8 @@ module.exports = async function (oldMember, newMember) {
 				await oldUserChannel.delete();
 				await dbTemporaryVoices.destroy();
 			} else if(oldMember.id !== dbTemporaryVoices.creatorId){
-				await textChannel.overwritePermissions([
-					{
-						id: newMember.id,
-						deny: ['VIEW_CHANNEL'],
-					},
-				]);
+				const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
+				await textChannel.updateOverwrite(newUser, { VIEW_CHANNEL: false });
 			}
 		}
 	}
