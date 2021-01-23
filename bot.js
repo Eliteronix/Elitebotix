@@ -38,12 +38,13 @@ function readyDiscord() {
 	//log a message when ready
 	console.log('The Bot is ready.');
 
+	// eslint-disable-next-line no-undef
 	if(process.env.SERVER === 'Live'){
 		client.user.setPresence({
 			status: 'online',  //You can show online, idle....
-			game: {
+			activity: {
 				name: 'Using e!help',  //The message shown
-				type: 'PLAYING:' //PLAYING: WATCHING: LISTENING: STREAMING:
+				type: 'PLAYING' //PLAYING: WATCHING: LISTENING: STREAMING:
 			}
 		});   
 	}
