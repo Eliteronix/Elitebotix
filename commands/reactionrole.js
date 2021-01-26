@@ -228,18 +228,13 @@ module.exports = {
 								});
 
 								if (reactionRolesHeader) {
-									console.log(args[3]);
-									console.log(headerId);
-									console.log(roleMentioned);
 									const reactionRolesEmoji = await DBReactionRoles.findOne({
 										where: { dbReactionRolesHeaderId: headerId, emoji: args[3] },
 									});
-									console.log(reactionRolesEmoji);
 
 									const reactionRolesRole = await DBReactionRoles.findOne({
 										where: { dbReactionRolesHeaderId: headerId, roleId: roleMentioned },
 									});
-									console.log(reactionRolesRole);
 
 									if (reactionRolesEmoji) {
 										return msg.channel.send('There is already a reactionrole with this emoji in the specified embed.');
@@ -377,7 +372,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		.setColor(reactionRolesHeader.reactionColor)
 		.setTitle(reactionRolesHeader.reactionTitle)
 		.setThumbnail(reactionRolesHeader.reactionImage)
-		.setFooter(`Reactionrole - EmbedID: ${reactionRolesHeader.reactionRolesHeaderId}`);
+		.setFooter(`Reactionrole - EmbedID: ${reactionRolesHeader.id}`);
 
 	//Set description if available
 	if (reactionRolesHeader.reactionDescription) {
@@ -386,7 +381,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 
 	//Get roles from db
 	const reactionRoles = await DBReactionRoles.findAll({
-		where: { dbReactionRolesHeaderId: reactionRolesHeader.reactionRolesHeaderId }
+		where: { dbReactionRolesHeaderId: reactionRolesHeader.id }
 	});
 
 	//Add roles to embed
@@ -408,7 +403,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 	} catch (e) {
 		msg.channel.send('Couldn\'t find an embed with this EmbedID');
 		DBReactionRolesHeader.destroy({
-			where: { guildId: msg.guild.id, id: reactionRolesHeader.reactionRolesHeaderId },
+			where: { guildId: msg.guild.id, id: reactionRolesHeader.id },
 		});
 		return console.log(e);
 	}
