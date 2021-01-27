@@ -51,7 +51,7 @@ module.exports = {
 						const beatmapInfoEmbed = new Discord.MessageEmbed()
 							.setColor('#FF66AB')
 							.setTitle(`${beatmaps[0].artist} - ${beatmaps[0].title}`)
-							.setURL(`https://osu.ppy.sh/beatmapsets/${beatmaps[0].id}#${linkMode}/${beatmaps[0].beatmapSetId}`)
+							.setURL(`https://osu.ppy.sh/beatmapsets/${beatmaps[0].beatmapSetId}#${linkMode}/${beatmaps[0].id}`)
 							.setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}.jpg`)
 							.addFields(
 								{ name: 'Creator', value: `${beatmaps[0].creator}` },
