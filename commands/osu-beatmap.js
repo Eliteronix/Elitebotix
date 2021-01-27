@@ -27,9 +27,7 @@ module.exports = {
 
 			for (let i = 0; i < args.length; i++) {
 				osuApi.getBeatmaps({ b: args[i] })
-					.then(beatmaps => {
-						console.log(beatmaps);
-						
+					.then(beatmaps => {						
 						let linkMode;
 						if(beatmaps[0].mode === 'Standard'){
 							linkMode = 'osu';
