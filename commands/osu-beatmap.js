@@ -29,7 +29,18 @@ module.exports = {
 				osuApi.getBeatmaps({ b: args[i] })
 					.then(beatmaps => {
 						console.log(beatmaps);
-
+						
+						let linkMode;
+						if(beatmaps[0].mode === 'Standard'){
+							linkMode = 'osu';
+						} else if(beatmaps[0].mode === 'Taiko'){
+							linkMode = 'taiko';
+						} else if(beatmaps[0].mode === 'Mania'){
+							linkMode = 'mania';
+						} else if(beatmaps[0].mode === 'Catch the Beat'){
+							linkMode = 'fruits';
+						}
+						
 						const totalLengthSeconds = (beatmaps[0].length.total%60)+'';
 						const totalLengthMinutes = (beatmaps[0].length.total-beatmaps[0].length.total%60)/60;
 						const totalLength = totalLengthMinutes + ':' + totalLengthSeconds.padStart(2, '0');
@@ -40,6 +51,7 @@ module.exports = {
 						const beatmapInfoEmbed = new Discord.MessageEmbed()
 							.setColor('#FF66AB')
 							.setTitle(`${beatmaps[0].artist} - ${beatmaps[0].title}`)
+							.setURL(`https://osu.ppy.sh/beatmapsets/${beatmaps[0].id}#${linkMode}/${beatmaps[0].beatmapSetId}`)
 							.setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}.jpg`)
 							.addFields(
 								{ name: 'Creator', value: `${beatmaps[0].creator}` },
