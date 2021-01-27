@@ -27,9 +27,7 @@ module.exports = {
 
 			for (let i = 0; i < args.length; i++) {
 				osuApi.getBeatmaps({ b: args[i] })
-					.then(beatmaps => {
-						console.log(beatmaps);
-						
+					.then(beatmaps => {						
 						let linkMode;
 						if(beatmaps[0].mode === 'Standard'){
 							linkMode = 'osu';
@@ -54,20 +52,20 @@ module.exports = {
 							.setURL(`https://osu.ppy.sh/beatmapsets/${beatmaps[0].beatmapSetId}#${linkMode}/${beatmaps[0].id}`)
 							.setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}.jpg`)
 							.addFields(
-								{ name: 'Creator', value: `${beatmaps[0].creator}` },
-								{ name: 'Mode', value: `${beatmaps[0].mode}` },
+								{ name: 'Creator', value: `${beatmaps[0].creator}`, inline: true },
+								{ name: 'Mode', value: `${beatmaps[0].mode}`, inline: true },
 								{ name: 'Ranked Status', value: `${beatmaps[0].approvalStatus}`, inline: true },
-								{ name: 'BPM', value: `${beatmaps[0].bpm}` },
+								{ name: 'BPM', value: `${beatmaps[0].bpm}`, inline: true },
 								{ name: 'Max Combo', value: `${beatmaps[0].maxCombo}`, inline: true },
-								{ name: 'Difficulty Name', value: `${beatmaps[0].version}` },
-								{ name: 'Star Rating', value: `${beatmaps[0].difficulty.rating}` },
+								{ name: 'Difficulty Name', value: `${beatmaps[0].version}`, inline: true },
+								{ name: 'Star Rating', value: `${beatmaps[0].difficulty.rating}`, inline: true },
 								{ name: 'Circle Size', value: `${beatmaps[0].difficulty.size}`, inline: true },
-								{ name: 'Overall Difficulty', value: `${beatmaps[0].difficulty.overall}` },
+								{ name: 'Overall Difficulty', value: `${beatmaps[0].difficulty.overall}`, inline: true },
 								{ name: 'Approach Rate', value: `${beatmaps[0].difficulty.approach}`, inline: true },
-								{ name: 'HP Drain', value: `${beatmaps[0].difficulty.drain}` },
-								{ name: 'Length (Total)', value: `${totalLength}` },
+								{ name: 'HP Drain', value: `${beatmaps[0].difficulty.drain}`, inline: true },
+								{ name: 'Length (Total)', value: `${totalLength}`, inline: true },
 								{ name: 'Length (Drain)', value: `${drainLength}`, inline: true },
-								{ name: 'Rating', value: `${beatmaps[0].rating}` },
+								{ name: 'Rating', value: `${beatmaps[0].rating}`, inline: true },
 							)
 							.setFooter(`ID: ${beatmaps[0].id}`)
 							.setTimestamp();
