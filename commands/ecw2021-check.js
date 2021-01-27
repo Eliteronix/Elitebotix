@@ -10,7 +10,7 @@ const osu = require('node-osu');
 module.exports = {
 	name: 'ecw2021-check',
 	//aliases: ['osu-map', 'beatmap-info'],
-	description: 'Sends an info card about the viability of the beatmap',
+	description: 'Sends an info card about the viability of the beatmap for the Elitiri Cup Winter 2021',
 	usage: '<NM/HD/HR/DT/FM> <Top/Middle/Lower/Beginner> <id>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
