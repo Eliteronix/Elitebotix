@@ -85,6 +85,17 @@ module.exports = {
 						.setColor('#00FF00')
 						.setTitle('The Beatmap is viable for the tournament');
 
+					console.log(beatmaps[0]);
+
+					//The map has to have audio
+					if (!(beatmaps[0].hasAudio)) {
+						viabilityEmbed
+							.setColor('#FF0000')
+							.setTitle('The Beatmap is NOT viable for the tournament')
+							.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
+							.addField('Map has no audio', 'The map has to have audio / can\'t be muted');
+					}
+
 					//Mode has to be standard osu!
 					if (beatmaps[0].mode !== 'Standard') {
 						viabilityEmbed
@@ -171,6 +182,8 @@ module.exports = {
 					//Difficulty: Maps have to be between the specified diffculty
 					if (args[1] === 'Top' && args[0] === 'NM' && beatmaps[0].difficulty.rating < topLowerDiff ||
 						args[1] === 'Top' && args[0] === 'HD' && beatmaps[0].difficulty.rating < topLowerDiff ||
+						args[1] === 'Top' && args[0] === 'HR' && beatmaps[0].difficulty.rating < topLowerDiff ||
+						args[1] === 'Top' && args[0] === 'DT' && beatmaps[0].difficulty.rating < topLowerDiff ||						
 						args[1] === 'Top' && args[0] === 'FM' && beatmaps[0].difficulty.rating < topLowerDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
@@ -185,6 +198,8 @@ module.exports = {
 							.addField('The Star Rating is too high', `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}`);
 					} else if (args[1] === 'Middle' && args[0] === 'NM' && beatmaps[0].difficulty.rating < middleLowerDiff ||
 						args[1] === 'Middle' && args[0] === 'HD' && beatmaps[0].difficulty.rating < middleLowerDiff ||
+						args[1] === 'Middle' && args[0] === 'HR' && beatmaps[0].difficulty.rating < middleLowerDiff ||
+						args[1] === 'Middle' && args[0] === 'DT' && beatmaps[0].difficulty.rating < middleLowerDiff ||
 						args[1] === 'Middle' && args[0] === 'FM' && beatmaps[0].difficulty.rating < middleLowerDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
@@ -199,6 +214,8 @@ module.exports = {
 							.addField('The Star Rating is too high', `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}`);
 					} else if (args[1] === 'Lower' && args[0] === 'NM' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
 						args[1] === 'Lower' && args[0] === 'HD' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
+						args[1] === 'Lower' && args[0] === 'HR' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
+						args[1] === 'Lower' && args[0] === 'DT' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
 						args[1] === 'Lower' && args[0] === 'FM' && beatmaps[0].difficulty.rating < lowerLowerDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
@@ -213,6 +230,8 @@ module.exports = {
 							.addField('The Star Rating is too high', `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}`);
 					} else if (args[1] === 'Beginner' && args[0] === 'NM' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
 						args[1] === 'Beginner' && args[0] === 'HD' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
+						args[1] === 'Beginner' && args[0] === 'HR' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
+						args[1] === 'Beginner' && args[0] === 'DT' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
 						args[1] === 'Beginner' && args[0] === 'FM' && beatmaps[0].difficulty.rating < beginnerLowerDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
