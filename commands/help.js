@@ -24,7 +24,7 @@ module.exports = {
 			//Define prefix command
 			let guildPrefix;
 
-			//Check if the channel type is not a dm
+			//Check if the channel type is a dm
 			if (msg.channel.type === 'dm') {
 				//Set prefix to standard prefix
 				guildPrefix = prefix;
@@ -54,6 +54,7 @@ module.exports = {
 				//filter commands collection for noCooldownMessage and push the result
 				data.push(commands.filter(commands => commands.noCooldownMessage != true).map(command => command.name).join(', '));
 				data.push(`\nYou can send \`${guildPrefix}help [command name]\` to get info on a specific command!`);
+				data.push('\nTo stay informed about changes go to <https://discord.com/invite/Asz5Gfe> and follow <#804658828883787784>');
 
 				//Send all the commands (Split the message into multiple pieces if necessary)
 				return msg.author.send(data, { split: true })
