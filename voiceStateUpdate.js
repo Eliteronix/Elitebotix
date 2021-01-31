@@ -99,12 +99,8 @@ module.exports = async function (oldMember, newMember) {
 				//Move user
 				member.voice.setChannel(createdChannel);
 				//Set all permissions for the creator
-				await createdChannel.overwritePermissions([
-					{
-						id: newMember.id,
-						allow: ['MANAGE_CHANNELS', 'MANAGE_ROLES', 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'CONNECT', 'SPEAK', 'VIEW_CHANNEL', 'CREATE_INSTANT_INVITE', 'STREAM', 'USE_VAD'],
-					},
-				]);
+				const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
+				await createdChannel.updateOverwrite(newUser, { MANAGE_CHANNELS: true, MANAGE_ROLES: true, MUTE_MEMBERS:true, DEAFEN_MEMBERS: true, MOVE_MEMBERS: true, CONNECT: true, SPEAK: true, VIEW_CHANNEL: true, CREATE_INSTANT_INVITE:true, STREAM: true, USE_VAD: true });
 				if(createdText){
 					//Set all permissions for the creator and deny @everyone to view the text channel
 					let everyone = newMember.guild.roles.cache.find(r => r.name === '@everyone');
@@ -118,7 +114,7 @@ module.exports = async function (oldMember, newMember) {
 							deny: ['VIEW_CHANNEL'],
 						},
 					]);
-					createdText.send(`<@${newMemberId}>, you are now admin for this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel.`);
+					createdText.send(`<@${newMemberId}>, you are now admin for this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel.\n\nNote that bots also don't have permissions to read messages in this channel except if they have admin rights. This is the case if they don't appear in the user list on the right side. To change that, update the permissions in the channel for the bot you want to use.`);
 				}
 			}
 		}
