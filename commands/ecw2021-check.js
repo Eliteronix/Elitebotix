@@ -21,11 +21,11 @@ module.exports = {
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 
-			if (args[0] !== 'NM' && args[0] !== 'HD' && args[0] !== 'HR' && args[0] !== 'DT' && args[0] !== 'FM') {
+			if (args[0].toLowerCase() !== 'nm' && args[0].toLowerCase() !== 'hd' && args[0].toLowerCase() !== 'hr' && args[0].toLowerCase() !== 'dt' && args[0].toLowerCase() !== 'fm') {
 				return msg.channel.send('Please specify in which pool the map is supposed to be. (NM, HD, HR, DT, FM)');
 			}
 
-			if (args[1] !== 'Top' && args[1] !== 'Middle' && args[1] !== 'Lower' && args[1] !== 'Beginner') {
+			if (args[1].toLowerCase() !== 'top' && args[1].toLowerCase() !== 'middle' && args[1].toLowerCase() !== 'lower' && args[1].toLowerCase() !== 'beginner') {
 				return msg.channel.send('Please specify in which bracket the map is supposed to be. (Top, Middle, Lower, Beginner)');
 			}
 
@@ -124,7 +124,7 @@ module.exports = {
 					}
 
 					//Drain Time: NM,HD,HR,DT (after recalculations),FM: 1:30-4:30
-					if (args[0] === 'NM' && beatmaps[0].length.drain < 90 || args[0] === 'HD' && beatmaps[0].length.drain < 90 || args[0] === 'HR' && beatmaps[0].length.drain < 90 || args[0] === 'FM' && beatmaps[0].length.drain < 90) {
+					if (args[0].toLowerCase() === 'nm' && beatmaps[0].length.drain < 90 || args[0].toLowerCase() === 'hd' && beatmaps[0].length.drain < 90 || args[0].toLowerCase() === 'hr' && beatmaps[0].length.drain < 90 || args[0].toLowerCase() === 'fm' && beatmaps[0].length.drain < 90) {
 						viabilityEmbed
 							.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
@@ -133,7 +133,7 @@ module.exports = {
 					}
 
 					//Drain Time: NM,HD,HR,DT (after recalculations),FM: 1:30-4:30
-					if (args[0] === 'NM' && beatmaps[0].length.drain > 270 || args[0] === 'HD' && beatmaps[0].length.drain > 270 || args[0] === 'HR' && beatmaps[0].length.drain > 270 || args[0] === 'FM' && beatmaps[0].length.drain > 270) {
+					if (args[0].toLowerCase() === 'nm' && beatmaps[0].length.drain > 270 || args[0].toLowerCase() === 'hd' && beatmaps[0].length.drain > 270 || args[0].toLowerCase() === 'hr' && beatmaps[0].length.drain > 270 || args[0].toLowerCase() === 'fm' && beatmaps[0].length.drain > 270) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
 							.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
@@ -141,7 +141,7 @@ module.exports = {
 					}
 
 					//Drain Time: NM,HD,HR,DT (after recalculations),FM: 1:30-4:30
-					if (args[0] === 'DT' && beatmaps[0].length.drain < 135) {
+					if (args[0].toLowerCase() === 'dt' && beatmaps[0].length.drain < 135) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
 							.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
@@ -149,7 +149,7 @@ module.exports = {
 					}
 
 					//Drain Time: NM,HD,HR,DT (after recalculations),FM: 1:30-4:30
-					if (args[0] === 'DT' && beatmaps[0].length.drain > 405) {
+					if (args[0].toLowerCase() === 'dt' && beatmaps[0].length.drain > 405) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
 							.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
@@ -157,7 +157,7 @@ module.exports = {
 					}
 
 					//Circle Size: FM maps may not exceed the circle size of 5 when played NoMod
-					if (args[0] === 'FM' && beatmaps[0].difficulty.size > 5) {
+					if (args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.size > 5) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
 							.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
@@ -180,71 +180,71 @@ module.exports = {
 					const beginnerUpperDiff = 5.1;
 
 					//Difficulty: Maps have to be between the specified diffculty
-					if (args[1] === 'Top' && args[0] === 'NM' && beatmaps[0].difficulty.rating < topLowerDiff ||
-						args[1] === 'Top' && args[0] === 'HD' && beatmaps[0].difficulty.rating < topLowerDiff ||
-						args[1] === 'Top' && args[0] === 'HR' && beatmaps[0].difficulty.rating < topLowerDiff ||
-						args[1] === 'Top' && args[0] === 'DT' && beatmaps[0].difficulty.rating < topLowerDiff ||						
-						args[1] === 'Top' && args[0] === 'FM' && beatmaps[0].difficulty.rating < topLowerDiff) {
+					if (args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating < topLowerDiff ||
+						args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating < topLowerDiff ||
+						args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'hr' && beatmaps[0].difficulty.rating < topLowerDiff ||
+						args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'dt' && beatmaps[0].difficulty.rating < topLowerDiff ||						
+						args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating < topLowerDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
 							.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 							.addField('The Star Rating is too low', `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}`);
-					} else if (args[1] === 'Top' && args[0] === 'NM' && beatmaps[0].difficulty.rating > topUpperDiff ||
-						args[1] === 'Top' && args[0] === 'HD' && beatmaps[0].difficulty.rating > topUpperDiff ||
-						args[1] === 'Top' && args[0] === 'FM' && beatmaps[0].difficulty.rating > topUpperDiff) {
+					} else if (args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating > topUpperDiff ||
+						args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating > topUpperDiff ||
+						args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating > topUpperDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
 							.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 							.addField('The Star Rating is too high', `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}`);
-					} else if (args[1] === 'Middle' && args[0] === 'NM' && beatmaps[0].difficulty.rating < middleLowerDiff ||
-						args[1] === 'Middle' && args[0] === 'HD' && beatmaps[0].difficulty.rating < middleLowerDiff ||
-						args[1] === 'Middle' && args[0] === 'HR' && beatmaps[0].difficulty.rating < middleLowerDiff ||
-						args[1] === 'Middle' && args[0] === 'DT' && beatmaps[0].difficulty.rating < middleLowerDiff ||
-						args[1] === 'Middle' && args[0] === 'FM' && beatmaps[0].difficulty.rating < middleLowerDiff) {
+					} else if (args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating < middleLowerDiff ||
+						args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating < middleLowerDiff ||
+						args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'hr' && beatmaps[0].difficulty.rating < middleLowerDiff ||
+						args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'dt' && beatmaps[0].difficulty.rating < middleLowerDiff ||
+						args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating < middleLowerDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
 							.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 							.addField('The Star Rating is too low', `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}`);
-					} else if (args[1] === 'Middle' && args[0] === 'NM' && beatmaps[0].difficulty.rating > middleUpperDiff ||
-						args[1] === 'Middle' && args[0] === 'HD' && beatmaps[0].difficulty.rating > middleUpperDiff ||
-						args[1] === 'Middle' && args[0] === 'FM' && beatmaps[0].difficulty.rating > middleUpperDiff) {
+					} else if (args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating > middleUpperDiff ||
+						args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating > middleUpperDiff ||
+						args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating > middleUpperDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
 							.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 							.addField('The Star Rating is too high', `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}`);
-					} else if (args[1] === 'Lower' && args[0] === 'NM' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
-						args[1] === 'Lower' && args[0] === 'HD' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
-						args[1] === 'Lower' && args[0] === 'HR' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
-						args[1] === 'Lower' && args[0] === 'DT' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
-						args[1] === 'Lower' && args[0] === 'FM' && beatmaps[0].difficulty.rating < lowerLowerDiff) {
+					} else if (args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
+						args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
+						args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'hr' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
+						args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'dt' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
+						args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating < lowerLowerDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
 							.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 							.addField('The Star Rating is too low', `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}`);
-					} else if (args[1] === 'Lower' && args[0] === 'NM' && beatmaps[0].difficulty.rating > lowerUpperDiff ||
-						args[1] === 'Lower' && args[0] === 'HD' && beatmaps[0].difficulty.rating > lowerUpperDiff ||
-						args[1] === 'Lower' && args[0] === 'FM' && beatmaps[0].difficulty.rating > lowerUpperDiff) {
+					} else if (args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating > lowerUpperDiff ||
+						args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating > lowerUpperDiff ||
+						args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating > lowerUpperDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
 							.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 							.addField('The Star Rating is too high', `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}`);
-					} else if (args[1] === 'Beginner' && args[0] === 'NM' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
-						args[1] === 'Beginner' && args[0] === 'HD' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
-						args[1] === 'Beginner' && args[0] === 'HR' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
-						args[1] === 'Beginner' && args[0] === 'DT' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
-						args[1] === 'Beginner' && args[0] === 'FM' && beatmaps[0].difficulty.rating < beginnerLowerDiff) {
+					} else if (args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
+						args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
+						args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'hr' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
+						args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'dt' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
+						args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating < beginnerLowerDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
 							.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 							.addField('The Star Rating is too low', `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}`);
-					} else if (args[1] === 'Beginner' && args[0] === 'NM' && beatmaps[0].difficulty.rating > beginnerUpperDiff ||
-						args[1] === 'Beginner' && args[0] === 'HD' && beatmaps[0].difficulty.rating > beginnerUpperDiff ||
-						args[1] === 'Beginner' && args[0] === 'FM' && beatmaps[0].difficulty.rating > beginnerUpperDiff) {
+					} else if (args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating > beginnerUpperDiff ||
+						args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating > beginnerUpperDiff ||
+						args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating > beginnerUpperDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
 							.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 							.addField('The Star Rating is too high', `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}`);
-					} else if (args[0] === 'HR' || args[0] === 'DT') {
+					} else if (args[0].toLowerCase() === 'hr' || args[0].toLowerCase() === 'dt') {
 						viabilityEmbed
 							.addField('Star Rating not checked', 'The Star Rating for HR and DT maps is not automatically being checked at the moment but they should be in the range of the bracket after recalculations');
 					}
