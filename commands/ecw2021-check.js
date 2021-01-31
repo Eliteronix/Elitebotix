@@ -85,8 +85,6 @@ module.exports = {
 						.setColor('#00FF00')
 						.setTitle('The Beatmap is viable for the tournament');
 
-					console.log(beatmaps[0]);
-
 					//The map has to have audio
 					if (!(beatmaps[0].hasAudio)) {
 						viabilityEmbed
