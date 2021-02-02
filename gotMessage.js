@@ -33,6 +33,9 @@ module.exports = async function (msg) {
 	//if the message is not in the Dev-Servers then return
 	// eslint-disable-next-line no-undef
 	if (process.env.SERVER === 'Dev') {
+		if (msg.channel.type === 'dm') {
+			return;
+		}
 		if (msg.channel.type !== 'dm' && msg.guild.id != '800641468321759242' && msg.guild.id != '800641735658176553') {
 			return;
 		}
@@ -40,6 +43,9 @@ module.exports = async function (msg) {
 		//if the message is in the QA-Servers then return
 		// eslint-disable-next-line no-undef
 	} else if (process.env.SERVER === 'QA') {
+		if (msg.channel.type === 'dm') {
+			return;
+		}
 		if (msg.channel.type !== 'dm' && msg.guild.id != '800641367083974667' && msg.guild.id != '800641819086946344') {
 			return;
 		}
@@ -47,8 +53,10 @@ module.exports = async function (msg) {
 		//if the message is in the Dev/QA-Servers then return
 		// eslint-disable-next-line no-undef
 	} else if (process.env.SERVER === 'Live') {
-		if (msg.channel.type === 'dm' || msg.guild.id === '800641468321759242' || msg.guild.id === '800641735658176553' || msg.guild.id === '800641367083974667' || msg.guild.id === '800641819086946344') {
-			return;
+		if (msg.channel.type !== 'dm') {
+			if (msg.guild.id === '800641468321759242' || msg.guild.id === '800641735658176553' || msg.guild.id === '800641367083974667' || msg.guild.id === '800641819086946344') {
+				return;
+			}
 		}
 	}
 
