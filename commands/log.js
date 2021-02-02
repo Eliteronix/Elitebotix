@@ -9,6 +9,7 @@ module.exports = {
 	//args: true,
 	cooldown: 5,
 	noCooldownMessage: true,
+	tags: 'developer',
 	execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			console.log(msg);

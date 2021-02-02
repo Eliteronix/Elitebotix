@@ -9,6 +9,7 @@ module.exports = {
 	//args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
+	tags: 'general',
 	execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			//Link with permissions | Administrator, Manage Roles, Manage Channels, Read Messages, Send Messages, Manage Messages, Read Message History, Add Reactions, All Voice Perm

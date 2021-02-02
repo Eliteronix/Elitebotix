@@ -15,9 +15,19 @@ module.exports = {
 	//args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
+	tags: 'general',
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			//define variables
+			const categories = ['general', 'server-admin', 'osu'];
+
+			//Developer
+			if (msg.author.id === '138273136285057025') {
+				categories.push('developer');
+			}
+
+			//ecw2021 player
+
 			const data = [];
 			const { commands } = msg.client;
 
@@ -48,12 +58,31 @@ module.exports = {
 				}
 			}
 
-			//Check if all the commands should be returned
+			//Check if all the general commands should be returned
 			if (!args.length) {
-				data.push('Here\'s a list of all my commands:');
+				data.push('Here\'s a list of all my `general` commands:`');
 				//filter commands collection for noCooldownMessage and push the result
-				data.push(commands.filter(commands => commands.noCooldownMessage != true).map(command => command.name).join(', '));
-				data.push(`\nYou can send \`${guildPrefix}help [command name]\` to get info on a specific command!`);
+				data.push(commands.filter(commands => commands.tags === 'general').map(command => command.name).join('`, `'));
+				data.push(`\`\nYou can send \`${guildPrefix}help [command name]\` to get info on a specific command!`);
+				data.push(`\nAll the command categories: \`general\`, \`server-admin\`, \`osu\`\nYou can send \`${guildPrefix}help [category name]\` to get a list of commands for a specific category!`);
+				data.push('\nTo stay informed about changes go to <https://discord.com/invite/Asz5Gfe> and follow <#804658828883787784>');
+
+				//Send all the commands (Split the message into multiple pieces if necessary)
+				return msg.author.send(data, { split: true })
+					.then(() => {
+						if (msg.channel.type === 'dm') return;
+						msg.reply('I\'ve sent you a DM with all my commands!');
+					})
+					.catch(error => {
+						console.error(`Could not send help DM to ${msg.author.tag}.\n`, error);
+						msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
+					});
+			} else if (args[0] === 'general' || args[0] === 'server-admin' || args[0] === 'osu') {
+				data.push(`Here's a list of all my \`${args[0]}\` commands:\``);
+				//filter commands collection for noCooldownMessage and push the result
+				data.push(commands.filter(commands => commands.tags === args[0]).map(command => command.name).join('`, `'));
+				data.push(`\`\nYou can send \`${guildPrefix}help [command name]\` to get info on a specific command!`);
+				data.push(`\nAll the command categories: \`general\`, \`server-admin\`, \`osu\`\nYou can send \`${guildPrefix}help [category name]\` to get a list of commands for a specific category!`);
 				data.push('\nTo stay informed about changes go to <https://discord.com/invite/Asz5Gfe> and follow <#804658828883787784>');
 
 				//Send all the commands (Split the message into multiple pieces if necessary)

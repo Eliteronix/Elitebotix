@@ -15,6 +15,7 @@ module.exports = {
 	//args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
+	tags: 'osu',
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			if (!args[0]) {//Get profile by author if no argument

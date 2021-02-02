@@ -9,6 +9,7 @@ module.exports = {
 	//args: true,
 	cooldown: 5,
 	noCooldownMessage: true,
+	tags: 'hidden-general',
 	execute(msg, args, prefixCommand) {
 		if (!(prefixCommand)) {
 			msg.channel.send('o7');
