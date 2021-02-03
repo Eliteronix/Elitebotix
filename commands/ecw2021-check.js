@@ -114,7 +114,7 @@ module.exports = {
 					}
 
 					//Map status: Ranked/Approved -> Allowed (except Aspire maps)
-					if (beatmaps[0].approvalStatus !== 'Ranked') {
+					if (beatmaps[0].approvalStatus !== 'Ranked' && beatmaps[0].approvalStatus !== 'Approved') {
 						viabilityEmbed
 							.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
@@ -180,9 +180,7 @@ module.exports = {
 
 					//Difficulty: Maps have to be between the specified diffculty
 					if (args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating < topLowerDiff ||
-						args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating < topLowerDiff ||
-						args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'hr' && beatmaps[0].difficulty.rating < topLowerDiff ||
-						args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'dt' && beatmaps[0].difficulty.rating < topLowerDiff ||						
+						args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating < topLowerDiff ||					
 						args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating < topLowerDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
@@ -197,8 +195,6 @@ module.exports = {
 							.addField('The Star Rating is too high', `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}`);
 					} else if (args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating < middleLowerDiff ||
 						args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating < middleLowerDiff ||
-						args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'hr' && beatmaps[0].difficulty.rating < middleLowerDiff ||
-						args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'dt' && beatmaps[0].difficulty.rating < middleLowerDiff ||
 						args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating < middleLowerDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
@@ -213,8 +209,6 @@ module.exports = {
 							.addField('The Star Rating is too high', `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}`);
 					} else if (args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
 						args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
-						args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'hr' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
-						args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'dt' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
 						args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating < lowerLowerDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
@@ -229,8 +223,6 @@ module.exports = {
 							.addField('The Star Rating is too high', `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}`);
 					} else if (args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
 						args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
-						args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'hr' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
-						args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'dt' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
 						args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating < beginnerLowerDiff) {
 						viabilityEmbed.setColor('#FF0000')
 							.setTitle('The Beatmap is NOT viable for the tournament')
