@@ -9,7 +9,7 @@ module.exports = {
 	args: true,
 	cooldown: 5,
 	noCooldownMessage: true,
-	tags: 'developer',
+	tags: 'debug',
 	prefixCommand: true,
 	execute(msg, args) {
 		//get command to refresh

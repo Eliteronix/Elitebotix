@@ -2,6 +2,8 @@
 const { DBGuilds } = require('./dbObjects');
 
 module.exports = async function (member) {
+
+	console.log(member);
 	
 	//For the development version
 	//if the message is not in the Dev-Servers then return
