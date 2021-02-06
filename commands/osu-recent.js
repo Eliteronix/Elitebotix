@@ -6,7 +6,7 @@ const osu = require('node-osu');
 
 module.exports = {
 	name: 'osu-recent',
-	//aliases: ['osu-player', 'osu-user'],
+	aliases: ['ors','o-rs'],
 	description: 'Sends an info card about the last score of the specified player',
 	usage: '[username] [username] ... (Use "_" instead of spaces)',
 	//permissions: 'MANAGE_GUILD',
