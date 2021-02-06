@@ -6,7 +6,7 @@ const osu = require('node-osu');
 
 module.exports = {
 	name: 'osu-beatmap',
-	aliases: ['osu-map', 'beatmap-info'],
+	aliases: ['osu-map', 'beatmap-info','o-bm'],
 	description: 'Sends an info card about the specified beatmap',
 	usage: '<id> [id] [id] ...',
 	//permissions: 'MANAGE_GUILD',

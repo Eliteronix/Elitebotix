@@ -6,7 +6,7 @@ const osu = require('node-osu');
 
 module.exports = {
 	name: 'osu-profile',
-	aliases: ['osu-player', 'osu-user'],
+	aliases: ['osu-player', 'osu-user','o-u','o-p'],
 	description: 'Sends an info card about the specified player',
 	usage: '[username] [username] ... (Use "_" instead of spaces)',
 	//permissions: 'MANAGE_GUILD',
