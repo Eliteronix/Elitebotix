@@ -10,13 +10,13 @@ module.exports = {
 	cooldown: 5,
 	noCooldownMessage: true,
 	tags: 'hidden-general',
-	execute(msg, args, prefixCommand) {
-		if (!(prefixCommand)) {
-			//declare weebEmojis array
-			var weebEmojis = ['owo', 'uwu', 'UwU', 'OwO', 'OuO'];
+	//prefixCommand: true,
+	// eslint-disable-next-line no-unused-vars
+	execute(msg, args) {
+		//declare weebEmojis array
+		var weebEmojis = ['owo', 'uwu', 'UwU', 'OwO', 'OuO'];
 
-			//send the message
-			msg.channel.send(weebEmojis[Math.floor(Math.random() * weebEmojis.length)]);
-		}
+		//send the message
+		msg.channel.send(weebEmojis[Math.floor(Math.random() * weebEmojis.length)]);
 	},
 };

@@ -10,9 +10,9 @@ module.exports = {
 	cooldown: 5,
 	noCooldownMessage: true,
 	tags: 'developer',
-	execute(msg, args, prefixCommand) {
-		if (prefixCommand) {
-			msg.reply(msg.content);
-		}
+	prefixCommand: true,
+	// eslint-disable-next-line no-unused-vars
+	execute(msg, args) {
+		msg.reply(msg.content);
 	},
 };

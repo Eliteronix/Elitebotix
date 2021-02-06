@@ -10,24 +10,23 @@ module.exports = {
 	cooldown: 15,
 	//noCooldownMessage: true,
 	tags: 'server-admin',
-	execute(msg, args, prefixCommand) {
-		if (prefixCommand) {
-			//Set amount by argument + 1
-			const amount = parseInt(args[0]) + 1;
+	prefixCommand: true,
+	execute(msg, args) {
+		//Set amount by argument + 1
+		const amount = parseInt(args[0]) + 1;
 
-			//Check if it is a number
-			if (isNaN(amount)) {
-				return msg.reply('that doesn\'t seem to be a valid number.');
-				//Check if the number is between 1 and 100
-			} else if (amount <= 1 || amount > 100) {
-				return msg.reply('you need to input a number between 1 and 99.');
-			}
-
-			//Delete messages which are less than 2 weeks old
-			msg.channel.bulkDelete(amount, true).catch(err => {
-				console.error(err);
-				msg.channel.send('there was an error trying to prune messages in this channel!');
-			});
+		//Check if it is a number
+		if (isNaN(amount)) {
+			return msg.reply('that doesn\'t seem to be a valid number.');
+			//Check if the number is between 1 and 100
+		} else if (amount <= 1 || amount > 100) {
+			return msg.reply('you need to input a number between 1 and 99.');
 		}
+
+		//Delete messages which are less than 2 weeks old
+		msg.channel.bulkDelete(amount, true).catch(err => {
+			console.error(err);
+			msg.channel.send('there was an error trying to prune messages in this channel!');
+		});
 	},
 };

@@ -12,10 +12,10 @@ module.exports = {
 	cooldown: 5,
 	noCooldownMessage: true,
 	tags: 'developer',
-	async execute(msg, args, prefixCommand) {
-		if (prefixCommand) {
-			const TemporaryVoicesList = await DBTemporaryVoices.findAll();
-			console.log(TemporaryVoicesList);
-		}
+	prefixCommand: true,
+	// eslint-disable-next-line no-unused-vars
+	async execute(msg, args) {
+		const TemporaryVoicesList = await DBTemporaryVoices.findAll();
+		console.log(TemporaryVoicesList);
 	},
 };

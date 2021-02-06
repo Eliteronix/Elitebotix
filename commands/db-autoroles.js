@@ -12,10 +12,10 @@ module.exports = {
 	cooldown: 5,
 	noCooldownMessage: true,
 	tags: 'developer',
-	async execute(msg, args, prefixCommand) {
-		if (prefixCommand) {
-			const autoRoleList = await DBAutoRoles.findAll();
-			console.log(autoRoleList);
-		}
+	prefixCommand: true,
+	// eslint-disable-next-line no-unused-vars
+	async execute(msg, args) {
+		const autoRoleList = await DBAutoRoles.findAll();
+		console.log(autoRoleList);
 	},
 };
