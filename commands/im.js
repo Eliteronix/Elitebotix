@@ -11,6 +11,7 @@ module.exports = {
 	//args: true,
 	cooldown: 2,
 	noCooldownMessage: true,
+	tags: 'hidden-general',
 	async execute(msg, args, prefixCommand) {
 		if (!(prefixCommand)) {
 			if (args[0]) {

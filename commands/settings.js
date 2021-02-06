@@ -18,6 +18,7 @@ module.exports = {
 	//args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
+	tags: 'general',
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 

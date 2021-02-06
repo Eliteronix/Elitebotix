@@ -11,6 +11,7 @@ module.exports = {
 	//args: true,
 	cooldown: 5,
 	noCooldownMessage: true,
+	tags: 'developer',
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			const TemporaryVoicesList = await DBTemporaryVoices.findAll();

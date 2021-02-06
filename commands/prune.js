@@ -9,6 +9,7 @@ module.exports = {
 	args: true,
 	cooldown: 15,
 	//noCooldownMessage: true,
+	tags: 'server-admin',
 	execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			//Set amount by argument + 1

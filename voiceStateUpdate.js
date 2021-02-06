@@ -40,7 +40,7 @@ module.exports = async function (oldMember, newMember) {
 		});
 	}
 
-	if (newUserChannel && newUserChannel.name.startsWith('➕') && !(dbTemporaryVoicesNew)) {
+	if (newUserChannel && newUserChannel.name.startsWith('➕') && !(dbTemporaryVoicesNew) && newUserChannel !== oldUserChannel) {
 
 		const dbGuild = await DBGuilds.findOne({
 			where: { guildId: newMember.guild.id }
@@ -118,7 +118,7 @@ module.exports = async function (oldMember, newMember) {
 				}
 			}
 		}
-	} else if (dbTemporaryVoicesNew && newUserChannel.id === dbTemporaryVoicesNew.channelId && newMember.id !== dbTemporaryVoicesNew.creatorId) {
+	} else if (dbTemporaryVoicesNew && newUserChannel.id === dbTemporaryVoicesNew.channelId && newMember.id !== dbTemporaryVoicesNew.creatorId && newUserChannel !== oldUserChannel) {
 		let textChannel;
 
 		if (dbTemporaryVoicesNew.textChannelId) {
@@ -129,7 +129,7 @@ module.exports = async function (oldMember, newMember) {
 		textChannel.send(`<@${newMember.id}>, you now have access to this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel. You will also lose access to this channel if you leave the voice channel.`);
 	}
 
-	if (oldUserChannel) {
+	if (oldUserChannel && newUserChannel !== oldUserChannel) {
 
 		const dbTemporaryVoices = await DBTemporaryVoices.findOne({
 			where: { guildId: oldUserChannel.guild.id, channelId: oldUserChannel.id }

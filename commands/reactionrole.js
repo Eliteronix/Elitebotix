@@ -18,6 +18,7 @@ module.exports = {
 	args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
+	tags: 'server-admin',
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 			//Check the first argument
