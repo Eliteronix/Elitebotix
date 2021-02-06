@@ -97,7 +97,6 @@ module.exports = async function (msg) {
 			prefixCommand = true;
 			args = msg.content.slice(guildPrefix.length).trim().split(/ +/);
 		} else {
-			prefixCommand = false;
 			args = msg.content.trim().split(/ +/);
 		}
 		//Delete the first item from the args array and use it for the command variable
@@ -109,6 +108,9 @@ module.exports = async function (msg) {
 
 		//if there is no command used then break
 		if (!command) return;
+
+		//Check if prefix has to be used or not
+		if(command.prefixCommand !== prefixCommand) return;
 
 		//Check if the command can't be used outside of DMs
 		if (command.guildOnly && msg.channel.type === 'dm') {

@@ -6,7 +6,7 @@ const osu = require('node-osu');
 
 module.exports = {
 	name: 'osu-recent',
-	aliases: ['ors','o-rs'],
+	aliases: ['ors', 'o-rs'],
 	description: 'Sends an info card about the last score of the specified player',
 	usage: '[username] [username] ... (Use "_" instead of spaces)',
 	//permissions: 'MANAGE_GUILD',
@@ -16,18 +16,17 @@ module.exports = {
 	cooldown: 5,
 	//noCooldownMessage: true,
 	tags: 'osu',
-	async execute(msg, args, prefixCommand) {
-		if (prefixCommand) {
-			if (!args[0]) {//Get profile by author if no argument
-				const userDisplayName = msg.guild.member(msg.author).displayName;
+	prefixCommand: true,
+	async execute(msg, args) {
+		if (!args[0]) {//Get profile by author if no argument
+			const userDisplayName = msg.guild.member(msg.author).displayName;
+			getScore(msg, userDisplayName);
+		} else {
+			//Get profiles by arguments
+			let i;
+			for (i = 0; i < args.length; i++) {
+				const userDisplayName = args[i];
 				getScore(msg, userDisplayName);
-			} else {
-				//Get profiles by arguments
-				let i;
-				for (i = 0; i < args.length; i++) {
-					const userDisplayName = args[i];
-					getScore(msg, userDisplayName);
-				}
 			}
 		}
 	},
