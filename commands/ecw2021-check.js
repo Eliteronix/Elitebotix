@@ -18,7 +18,7 @@ module.exports = {
 	args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
-	tags: 'ecw2021',
+	tags: 'osu', //'ecw2021'
 	async execute(msg, args, prefixCommand) {
 		if (prefixCommand) {
 
