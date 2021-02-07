@@ -1,9 +1,9 @@
-const { DBTemporaryVoices } = require('../dbObjects');
+const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
-	name: 'db-temporaryvoices',
+	name: 'db-discordusers',
 	//aliases: ['developer'],
-	description: 'Sends all the TemporaryVoices found in the db',
+	description: 'Sends all the DiscordUsers found in the db',
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
@@ -15,8 +15,8 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
-		console.log('TemporaryVoices:');
-		const TemporaryVoicesList = await DBTemporaryVoices.findAll();
-		console.log(TemporaryVoicesList);
+		console.log('DiscordUsers:');
+		const discordUsersList = await DBDiscordUsers.findAll();
+		console.log(discordUsersList);
 	},
 };

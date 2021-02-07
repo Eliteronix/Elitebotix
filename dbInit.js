@@ -12,6 +12,7 @@ require('./models/DBReactionRoles')(sequelize, Sequelize.DataTypes);
 require('./models/DBReactionRolesHeader')(sequelize, Sequelize.DataTypes);
 require('./models/DBAutoRoles')(sequelize, Sequelize.DataTypes);
 require('./models/DBTemporaryVoices')(sequelize, Sequelize.DataTypes);
+require('./models/DBDiscordUsers')(sequelize, Sequelize.DataTypes);
 
 sequelize.sync({ alter: true })
 	.then(async () => {

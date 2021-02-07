@@ -15,6 +15,7 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
+		console.log('Autoroles:');
 		const autoRoleList = await DBAutoRoles.findAll();
 		console.log(autoRoleList);
 	},
