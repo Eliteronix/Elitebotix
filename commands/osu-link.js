@@ -1,5 +1,8 @@
 //Import Tables
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBGuilds, DBDiscordUsers } = require('../dbObjects');
+
+//import the config variables from config.json
+const { prefix } = require('../config.json');
 
 //Require node-osu module
 const osu = require('node-osu');
@@ -8,7 +11,7 @@ module.exports = {
 	name: 'osu-link',
 	aliases: ['osu-connect'],
 	description: 'Allows you to link your Discord Account to your osu! Account',
-	usage: '<osu! username>',
+	usage: '<connect/current/disconnect/resendcode> [osu! username]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//guildOnly: true,
@@ -21,17 +24,60 @@ module.exports = {
 
 		//current / Disconnect / Resend //Check for existing users with that osu account //Add e!osu-verify <code>
 
+		if (args[0] === 'connect') {
+
+		} else if (args[0] === 'current') {
+
+		} else if (args[0] === 'disconnect') {
+
+		} else if (args[0] === 'resendcode') {
+
+		} else {
+			//Define prefix command
+			let guildPrefix;
+
+			//Check if the channel type is not a dm
+			if (msg.channel.type === 'dm') {
+				//Set prefix to standard prefix
+				guildPrefix = prefix;
+			} else {
+				//Get guild from the db
+				const guild = await DBGuilds.findOne({
+					where: { guildId: msg.guild.id },
+				});
+
+				//Check if a guild record was found
+				if (guild) {
+					if (guild.customPrefixUsed) {
+						guildPrefix = guild.customPrefix;
+					} else {
+						//Set prefix to standard prefix
+						guildPrefix = prefix;
+					}
+				} else {
+					//Set prefix to standard prefix
+					guildPrefix = prefix;
+				}
+			}
+
+			msg.channel.send(`Please specify what you want to do: \`${guildPrefix}osu-link <connect/current/disconnect/resendcode> [osu! username]\``);
+		}
+
+
+
 		const verificationCode = Math.random().toString(36).substring(2);
 
 		console.log(verificationCode);
 
+
+		//else
 		//get discordUser from db
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { userId: msg.author.id },
 		});
 
 		if (discordUser) {
-			if(discordUser.osuUserId){
+			if (discordUser.osuUserId) {
 
 			} else {
 
