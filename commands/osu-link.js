@@ -7,11 +7,14 @@ const { prefix } = require('../config.json');
 //Require node-osu module
 const osu = require('node-osu');
 
+//Require Banchojs module
+const Banchojs = require("bancho.js");
+
 module.exports = {
 	name: 'osu-link',
 	aliases: ['osu-connect'],
 	description: 'Allows you to link your Discord Account to your osu! Account',
-	usage: '<connect/current/disconnect/resendcode> [osu! username]',
+	usage: '<connect/current/disconnect/verify> [osu! username/verification code]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//guildOnly: true,
@@ -21,100 +24,6 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args) {
-		
-		//Define prefix command
-					let guildPrefix;
-
-					//Check if the channel type is not a dm
-					if (msg.channel.type === 'dm') {
-						//Set prefix to standard prefix
-						guildPrefix = prefix;
-					} else {
-						//Get guild from the db
-						const guild = await DBGuilds.findOne({
-							where: { guildId: msg.guild.id },
-						});
-
-						//Check if a guild record was found
-						if (guild) {
-							if (guild.customPrefixUsed) {
-								guildPrefix = guild.customPrefix;
-							} else {
-								//Set prefix to standard prefix
-								guildPrefix = prefix;
-							}
-						} else {
-							//Set prefix to standard prefix
-							guildPrefix = prefix;
-						}
-					}
-
-		//current / Disconnect / Resend //Check for existing users with that osu account //Add e!osu-verify <code>
-
-		if (args[0] === 'connect') {
-
-		} else if (args[0] === 'current') {
-
-		} else if (args[0] === 'disconnect') {
-
-		} else if (args[0] === 'resendcode') {
-			//get discordUser from db
-			const discordUser = await DBDiscordUsers.findOne({
-				where: { userId: msg.author.id },
-			});
-
-			if(discordUser){
-				if(discordUser.osuVerified){
-					msg.channel.send(`Your osu! account \`${}\` is already verified\nIf you need to connect a different account use \`${guildPrefx}osu-link <disconnect>\` first.`);
-				} else {
-					if(discordUser.osuUserId){
-						const verificationCode = Math.random().toString(36).substring(2);
-					
-						discordUser.osuVerificationCode = verificationCode;
-						discordUser.save();
-					
-						//SEND THE VERIFICATION CODE TO THE USER INGAME
-					
-						msg.channel.send('A new verification code has been sent to you using osu! dms!');
-					} else {					
-						msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <osu! username>\``);
-					}
-				}
-			}
-		} else {
-			msg.channel.send(`Please specify what you want to do: \`${guildPrefix}osu-link <connect/current/disconnect/resendcode> [osu! username]\``);
-		}
-
-
-
-		const verificationCode = Math.random().toString(36).substring(2);
-
-
-		//else
-		//get discordUser from db
-		const discordUser = await DBDiscordUsers.findOne({
-			where: { userId: msg.author.id },
-		});
-
-		if (discordUser) {
-			if (discordUser.osuUserId) {
-
-			} else {
-
-				discordUser.osuUserId = osuUser.id;
-				discordUser.osuVerificationCode = verificationCode;
-				discordUser.save();
-			}
-		} else {
-			if (args[0]) {
-
-
-				DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode });
-			} else {
-				DBDiscordUsers.create({ userId: msg.author.id });
-			}
-		}
-
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -123,31 +32,199 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		if (!args[0]) {//Get profile by author if no argument
-			const userDisplayName = msg.guild.member(msg.author).displayName;
-			osuApi.getUser({ u: userDisplayName })
-				.then(user => {
+		//get discordUser from db
+		const discordUser = await DBDiscordUsers.findOne({
+			where: { userId: msg.author.id },
+		});
 
-				})
-				.catch(err => {
-					if (err.message === 'Not found') {
-						msg.channel.send(`Could not find user "${userDisplayName}".`);
-					}
-					console.log(err);
-				});
+		//Define prefix command
+		let guildPrefix;
+
+		//Check if the channel type is not a dm
+		if (msg.channel.type === 'dm') {
+			//Set prefix to standard prefix
+			guildPrefix = prefix;
 		} else {
-			//Get profile by argument
-			const userDisplayName = args[0];
-			osuApi.getUser({ u: userDisplayName })
-				.then(user => {
+			//Get guild from the db
+			const guild = await DBGuilds.findOne({
+				where: { guildId: msg.guild.id },
+			});
 
-				})
-				.catch(err => {
-					if (err.message === 'Not found') {
-						msg.channel.send(`Could not find user "${userDisplayName}".`);
+			//Check if a guild record was found
+			if (guild) {
+				if (guild.customPrefixUsed) {
+					guildPrefix = guild.customPrefix;
+				} else {
+					//Set prefix to standard prefix
+					guildPrefix = prefix;
+				}
+			} else {
+				//Set prefix to standard prefix
+				guildPrefix = prefix;
+			}
+		}
+
+		//Check for people that already have their discord account linked to that osu! account
+
+		if (args[0] === 'connect') {
+			if (args[1]) {
+				osuApi.getUser({ u: args[1] })
+					.then(osuUser => {
+						if (discordUser) {
+							const verificationCode = Math.random().toString(36).substring(2);
+
+							discordUser.osuUserId = osuUser.id;
+							discordUser.osuVerificationCode = verificationCode;
+							discordUser.osuVerified = false;
+							discordUser.save();
+
+							// eslint-disable-next-line no-undef
+							const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
+							bancho.connect().then(() => {
+								const IRCUser = new Banchojs.BanchoUser(bancho, osuUser.name);
+								const verifyMessage = new Banchojs.OutgoingBanchoMessage(bancho, IRCUser, `[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account.\nIf this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord.`);
+								verifyMessage.send();
+								bancho.disconnect();
+							}).catch(console.error);
+
+							msg.channel.send('A verification code has been sent to you using osu! dms!');
+						} else {
+							const verificationCode = Math.random().toString(36).substring(2);
+							DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode });
+						}
+					})
+					.catch(err => {
+						if (err.message === 'Not found') {
+							msg.channel.send(`Could not find osu! account \`${args[1]}\`.`);
+						}
+						console.log(err);
+					});
+			} else {
+				msg.channel.send(`Please specify to which osu! account you want to connect.\nUsage: \`${guildPrefix}osu-link connect <osu! username>\``);
+			}
+		} else if (args[0] === 'current') {
+			if (discordUser) {
+				if (discordUser.osuUserId) {
+					osuApi.getUser({ u: discordUser.osuUserId })
+						.then(osuUser => {
+							let verified = 'No';
+
+							if (discordUser.osuVerified) {
+								verified = 'yes';
+							}
+
+							msg.channel.send(`Currently linked osu! account: \`${osuUser.name}\`.\nVerified: \`${verified}\``);
+						})
+						.catch(err => {
+							if (err.message === 'Not found') {
+								msg.channel.send(`Could not find osu! account for id \`${discordUser.osuUserId}\`.`);
+							}
+							console.log(err);
+						});
+				} else {
+					msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <osu! username>\``);
+				}
+			} else {
+				msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <osu! username>\``);
+			}
+		} else if (args[0] === 'disconnect') {
+			if (discordUser) {
+				if (discordUser.osuUserId) {
+					discordUser.osuUserId = '';
+					discordUser.osuVerificationCode = '';
+					discordUser.osuVerified = false;
+					discordUser.save();
+
+					msg.channel.send(`There is no longer an osu! account linked to your discord account.\nUse \`${guildPrefix}osu-link <connect> <osu! username>\` to link an osu! account to your discord account.`);
+				} else {
+					msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <osu! username>\``);
+				}
+			} else {
+				msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <osu! username>\``);
+			}
+		} else if (args[0] === 'verify') {
+			if (!args[1]) {
+				if (discordUser) {
+					if (discordUser.osuVerified) {
+						osuApi.getUser({ u: discordUser.osuUserId })
+							.then(osuUser => {
+								msg.channel.send(`Your osu! account \`${osuUser.name}\` is already verified\nIf you need to connect a different account use \`${guildPrefix}osu-link <disconnect>\` first.`);
+							})
+							.catch(err => {
+								if (err.message === 'Not found') {
+									msg.channel.send(`Could not find osu! account for id \`${discordUser.osuUserId}\`.`);
+								}
+								console.log(err);
+							});
+					} else {
+						if (discordUser.osuUserId) {
+							osuApi.getUser({ u: discordUser.osuUserId })
+								.then(osuUser => {
+									const verificationCode = Math.random().toString(36).substring(2);
+
+									discordUser.osuVerificationCode = verificationCode;
+									discordUser.save();
+
+									// eslint-disable-next-line no-undef
+									const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
+									bancho.connect().then(() => {
+										const IRCUser = new Banchojs.BanchoUser(bancho, osuUser.name);
+										const verifyMessage = new Banchojs.OutgoingBanchoMessage(bancho, IRCUser, `[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account.\nIf this was you please send 'e!osu-verify ${verificationCode}' to Elitebotix.`);
+										verifyMessage.send();
+										bancho.disconnect();
+									}).catch(console.error);
+
+									msg.channel.send('A new verification code has been sent to you using osu! dms!');
+								})
+								.catch(err => {
+									if (err.message === 'Not found') {
+										msg.channel.send(`Could not find osu! account for id \`${discordUser.osuUserId}\`.`);
+									}
+									console.log(err);
+								});
+						} else {
+							msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <osu! username>\``);
+						}
 					}
-					console.log(err);
-				});
+				} else {
+					msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <osu! username>\``);
+				}
+			} else {
+				if (discordUser) {
+					if (discordUser.osuUserId) {
+						if (discordUser.osuVerificationCode === args[1]) {
+							osuApi.getUser({ u: discordUser.osuUserId })
+								.then(osuUser => {
+									discordUser.verified = true;
+									msg.channel.send(`Your connection to the osu! account \`${osuUser.name}\` is now verified.`);
+								})
+								.catch(err => {
+									if (err.message === 'Not found') {
+										msg.channel.send(`Could not find osu! account for id \`${discordUser.osuUserId}\`.`);
+									}
+									console.log(err);
+								});
+						} else {
+							osuApi.getUser({ u: discordUser.osuUserId })
+								.then(osuUser => {
+									msg.channel.send(`The sent code \`${args[1]}\` is not the same code which was sent to \`${osuUser.name}\`.`);
+								})
+								.catch(err => {
+									if (err.message === 'Not found') {
+										msg.channel.send(`Could not find osu! account for id \`${discordUser.osuUserId}\`.`);
+									}
+									console.log(err);
+								});
+						}
+					} else {
+						msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <osu! username>\``);
+					}
+				} else {
+					msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <osu! username>\``);
+				}
+			}
+		} else {
+			msg.channel.send(`Please specify what you want to do: \`${guildPrefix}osu-link <connect/current/disconnect/resendcode> [osu! username]\``);
 		}
 	},
 };
