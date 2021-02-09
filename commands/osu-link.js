@@ -21,6 +21,33 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args) {
+		
+		//Define prefix command
+					let guildPrefix;
+
+					//Check if the channel type is not a dm
+					if (msg.channel.type === 'dm') {
+						//Set prefix to standard prefix
+						guildPrefix = prefix;
+					} else {
+						//Get guild from the db
+						const guild = await DBGuilds.findOne({
+							where: { guildId: msg.guild.id },
+						});
+
+						//Check if a guild record was found
+						if (guild) {
+							if (guild.customPrefixUsed) {
+								guildPrefix = guild.customPrefix;
+							} else {
+								//Set prefix to standard prefix
+								guildPrefix = prefix;
+							}
+						} else {
+							//Set prefix to standard prefix
+							guildPrefix = prefix;
+						}
+					}
 
 		//current / Disconnect / Resend //Check for existing users with that osu account //Add e!osu-verify <code>
 
@@ -31,43 +58,36 @@ module.exports = {
 		} else if (args[0] === 'disconnect') {
 
 		} else if (args[0] === 'resendcode') {
+			//get discordUser from db
+			const discordUser = await DBDiscordUsers.findOne({
+				where: { userId: msg.author.id },
+			});
 
-		} else {
-			//Define prefix command
-			let guildPrefix;
-
-			//Check if the channel type is not a dm
-			if (msg.channel.type === 'dm') {
-				//Set prefix to standard prefix
-				guildPrefix = prefix;
-			} else {
-				//Get guild from the db
-				const guild = await DBGuilds.findOne({
-					where: { guildId: msg.guild.id },
-				});
-
-				//Check if a guild record was found
-				if (guild) {
-					if (guild.customPrefixUsed) {
-						guildPrefix = guild.customPrefix;
-					} else {
-						//Set prefix to standard prefix
-						guildPrefix = prefix;
-					}
+			if(discordUser){
+				if(discordUser.osuVerified){
+					msg.channel.send(`Your osu! account \`${}\` is already verified\nIf you need to connect a different account use \`${guildPrefx}osu-link <disconnect>\` first.`);
 				} else {
-					//Set prefix to standard prefix
-					guildPrefix = prefix;
+					if(discordUser.osuUserId){
+						const verificationCode = Math.random().toString(36).substring(2);
+					
+						discordUser.osuVerificationCode = verificationCode;
+						discordUser.save();
+					
+						//SEND THE VERIFICATION CODE TO THE USER INGAME
+					
+						msg.channel.send('A new verification code has been sent to you using osu! dms!');
+					} else {					
+						msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <osu! username>\``);
+					}
 				}
 			}
-
+		} else {
 			msg.channel.send(`Please specify what you want to do: \`${guildPrefix}osu-link <connect/current/disconnect/resendcode> [osu! username]\``);
 		}
 
 
 
 		const verificationCode = Math.random().toString(36).substring(2);
-
-		console.log(verificationCode);
 
 
 		//else
