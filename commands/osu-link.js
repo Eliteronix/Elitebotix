@@ -8,7 +8,7 @@ const { prefix } = require('../config.json');
 const osu = require('node-osu');
 
 //Require Banchojs module
-const Banchojs = require("bancho.js");
+const Banchojs = require('bancho.js');
 
 module.exports = {
 	name: 'osu-link',
