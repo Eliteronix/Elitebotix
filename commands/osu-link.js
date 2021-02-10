@@ -81,13 +81,12 @@ module.exports = {
 							// eslint-disable-next-line no-undef
 							const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
 							bancho.connect().then(() => {
-								const IRCUser = new Banchojs.BanchoUser(bancho, osuUser.name);
-								const verifyMessage = new Banchojs.OutgoingBanchoMessage(bancho, IRCUser, `[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account.\nIf this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord.`);
-								verifyMessage.send();
+								const IRCUser = bancho.getUser(osuUser.name);
+								IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account.`);
+								IRCUser.sendMessage(`[Elitebotix]: If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord.`);
 								bancho.disconnect();
+								msg.channel.send('A verification code has been sent to you using osu! dms!');
 							}).catch(console.error);
-
-							msg.channel.send('A verification code has been sent to you using osu! dms!');
 						} else {
 							const verificationCode = Math.random().toString(36).substring(2);
 							DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode });
@@ -110,7 +109,7 @@ module.exports = {
 							let verified = 'No';
 
 							if (discordUser.osuVerified) {
-								verified = 'yes';
+								verified = 'Yes';
 							}
 
 							msg.channel.send(`Currently linked osu! account: \`${osuUser.name}\`.\nVerified: \`${verified}\``);
@@ -168,13 +167,12 @@ module.exports = {
 									// eslint-disable-next-line no-undef
 									const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
 									bancho.connect().then(() => {
-										const IRCUser = new Banchojs.BanchoUser(bancho, osuUser.name);
-										const verifyMessage = new Banchojs.OutgoingBanchoMessage(bancho, IRCUser, `[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account.\nIf this was you please send 'e!osu-verify ${verificationCode}' to Elitebotix.`);
-										verifyMessage.send();
+										const IRCUser = bancho.getUser(osuUser.name);
+										IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account.`);
+										IRCUser.sendMessage(`[Elitebotix]: If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord.`);
 										bancho.disconnect();
+										msg.channel.send('A verification code has been sent to you using osu! dms!');
 									}).catch(console.error);
-
-									msg.channel.send('A new verification code has been sent to you using osu! dms!');
 								})
 								.catch(err => {
 									if (err.message === 'Not found') {
@@ -195,7 +193,8 @@ module.exports = {
 						if (discordUser.osuVerificationCode === args[1]) {
 							osuApi.getUser({ u: discordUser.osuUserId })
 								.then(osuUser => {
-									discordUser.verified = true;
+									discordUser.osuVerified = true;
+									discordUser.save();
 									msg.channel.send(`Your connection to the osu! account \`${osuUser.name}\` is now verified.`);
 								})
 								.catch(err => {
@@ -207,7 +206,7 @@ module.exports = {
 						} else {
 							osuApi.getUser({ u: discordUser.osuUserId })
 								.then(osuUser => {
-									msg.channel.send(`The sent code \`${args[1]}\` is not the same code which was sent to \`${osuUser.name}\`.`);
+									msg.channel.send(`The sent code \`${args[1]}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse \`${guildPrefix}osu-link verify\` to resend the code.`);
 								})
 								.catch(err => {
 									if (err.message === 'Not found') {
@@ -224,7 +223,7 @@ module.exports = {
 				}
 			}
 		} else {
-			msg.channel.send(`Please specify what you want to do: \`${guildPrefix}osu-link <connect/current/disconnect/resendcode> [osu! username]\``);
+			msg.channel.send(`Please specify what you want to do: \`${guildPrefix}osu-link <connect/current/disconnect/verify> [osu! username]\``);
 		}
 	},
 };

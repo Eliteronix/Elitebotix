@@ -11,9 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bancho.js": "^0.9.7",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "fsp": "^0.1.2",
+    "limiter": "^1.1.5",
     "node-osu": "^2.2.0",
     "sequelize": "^6.3.5",
     "sqlite3": "^5.0.0"
