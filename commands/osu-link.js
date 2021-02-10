@@ -19,7 +19,7 @@ module.exports = {
 	//permissionsTranslated: 'Manage Server',
 	//guildOnly: true,
 	args: true,
-	cooldown: 5,
+	cooldown: 15,
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
@@ -68,15 +68,17 @@ module.exports = {
 
 		if (args[0] === 'connect') {
 			if (args[1]) {
+				if(args[2]){
+					args.shift();
+					return msg.channel.send(`You provided multiple arguments (\`${args.join('`, `')}\`). If your name has spaces please replace them with an \`_\` like this: \`${args.join('_')}\`.`);
+				}
+
 				osuApi.getUser({ u: args[1] })
 					.then(async (osuUser) => {
-						console.log(osuUser.id);
 						//get discordUser from db
 						const existingVerifiedDiscordUser = await DBDiscordUsers.findOne({
-							where: { userId: osuUser.id, osuVerified: true },
+							where: { osuUserId: osuUser.id, osuVerified: true },
 						});
-
-						console.log(existingVerifiedDiscordUser);
 
 						if(existingVerifiedDiscordUser){
 							return msg.channel.send(`There is already a discord account linked and verified for \`${args[1]}\``);
