@@ -1,5 +1,11 @@
+//Import Tables
+const { DBDiscordUsers } = require('../dbObjects');
+
 //Require discord.js module
 const Discord = require('discord.js');
+
+//Require node-osu module
+const osu = require('node-osu');
 
 module.exports = {
 	name: 'user-profile',
@@ -44,7 +50,7 @@ async function sendUserEmbed(msg, user) {
 
 		let userDisplayName = user.username;
 
-		if(member.nickname){
+		if (member.nickname) {
 			userDisplayName = member.nickname;
 		}
 
@@ -56,5 +62,31 @@ async function sendUserEmbed(msg, user) {
 		);
 	}
 
+	//get discordUser from db
+	const discordUser = await DBDiscordUsers.findOne({
+		where: { userId: user.id },
+	});
+
+	if (discordUser && discordUser.osuUserId) {
+		// eslint-disable-next-line no-undef
+		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+		});
+
+		const osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
+		if (discordUser.osuVerified) {
+			userInfoEmbed.addFields(
+				{ name: 'osu! Account', value: `☑️ ${osuUser.name}` },
+			);
+		} else {
+			userInfoEmbed.addFields(
+				{ name: 'osu! Account', value: `❌ ${osuUser.name}` },
+			);
+		}
+
+	}
 	msg.channel.send(userInfoEmbed);
 }

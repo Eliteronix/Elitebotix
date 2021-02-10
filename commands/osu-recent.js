@@ -1,3 +1,6 @@
+//Import Tables
+const { DBDiscordUsers } = require('../dbObjects');
+
 //Require discord.js module
 const Discord = require('discord.js');
 
@@ -19,8 +22,17 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args) {
 		if (!args[0]) {//Get profile by author if no argument
-			const userDisplayName = msg.guild.member(msg.author).displayName;
-			getScore(msg, userDisplayName);
+			//get discordUser from db
+			const discordUser = await DBDiscordUsers.findOne({
+				where: { userId: msg.author.id },
+			});
+
+			if (discordUser && discordUser.osuUserId) {
+				getScore(msg, discordUser.osuUserId);
+			} else {
+				const userDisplayName = msg.guild.member(msg.author).displayName;
+				getScore(msg, userDisplayName);
+			}
 		} else {
 			//Get profiles by arguments
 			let i;
