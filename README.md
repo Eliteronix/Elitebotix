@@ -5,6 +5,7 @@ Files to add:
 osu-link.js
 DBDiscordUsers.js
 user-profile.js
+db-discordusers.js
 
 Files to update:
 memberLeaved.js
@@ -34,7 +35,6 @@ ecw2021-check.js
 echo.js
 db-temporaryvoices.js
 db-guilds.js
-db-discordusers.js
 dbInit.js
 dbObjects.js
 db-autoroles.js
