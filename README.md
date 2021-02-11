@@ -1,15 +1,44 @@
 # Elitebotix
  Repository for Discord bot Elitebotix
-The bot is in development and following the tutorials by The Coding Train
-More features will get added
 
+Files to add:
+osu-link.js
+DBDiscordUsers.js
+user-profile.js
 
-How to deploy:
-    curl -sL https://deb.nodesource.com/setup_15.x | sudo -E bash -
-    sudo apt install -y nodejs
-    add the .env file for using the bot tokens
-    sudo npm install --global pm2
-    pm2 start bot.js --name "Elitebotix" --watch
-    pm2 startup
-    copy the given command and execute it
-    pm2 save
+Files to update:
+memberLeaved.js
+help.js
+.env
+bot.js
+im.js
+link.js
+log.js
+osu-beatmap.js
+osu-profile.js
+gotMessage.js
+osu-recent.js
+owo.js
+prefix.js
+prune.js
+reactionrole.js
+reload.js
+server-info.js
+settings.js
+tempvoice.js
+toggledadmode.js
+goodbye-message.js
+feedback.js
+f.js
+ecw2021-check.js
+echo.js
+db-temporaryvoices.js
+db-guilds.js
+db-discordusers.js
+dbInit.js
+dbObjects.js
+db-autoroles.js
+welcome-message.js
+creator.js
+bot-server.js
+autorole.js
