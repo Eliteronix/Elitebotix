@@ -54,12 +54,17 @@ async function sendUserEmbed(msg, user) {
 			userDisplayName = member.nickname;
 		}
 
-		const memberRoles = '<@&' + msg.member.roles.cache.filter(role => role.name !== '@everyone').map(role => role.id).join('>, <@&') + '>';
-
 		userInfoEmbed.addFields(
-			{ name: 'Nickname', value: `${userDisplayName}` },
-			{ name: 'Roles', value: `${memberRoles}` }
+			{ name: 'Nickname', value: `${userDisplayName}` }
 		);
+
+		const memberRoles = '<@&' + member.roles.cache.filter(role => role.name !== '@everyone').map(role => role.id).join('>, <@&') + '>';
+
+		if(memberRoles !== '<@&>'){
+			userInfoEmbed.addFields(
+				{ name: 'Roles', value: `${memberRoles}` }
+			);
+		}
 	}
 
 	//get discordUser from db
