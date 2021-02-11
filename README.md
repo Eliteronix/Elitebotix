@@ -1,6 +1,9 @@
 # Elitebotix
  Repository for Discord bot Elitebotix
 
+Node:
+bancho.js
+
 Files to add:
 osu-link.js
 DBDiscordUsers.js
