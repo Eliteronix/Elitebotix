@@ -97,9 +97,10 @@ module.exports = {
 							const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
 							bancho.connect().then(() => {
 								const IRCUser = bancho.getUser(osuUser.name);
-								IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account.`);
-								IRCUser.sendMessage(`[Elitebotix]: If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord.`);
-								IRCUser.sendMessage('[Elitebotix]: If this was not you then don\'t worry, there won\'t be any consequences and you can just ignore these messages.');
+								// IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account.`);
+								// IRCUser.sendMessage(`[Elitebotix]: If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord.`);
+								// IRCUser.sendMessage('[Elitebotix]: If this was not you then don\'t worry, there won\'t be any consequences and you can just ignore these messages.');
+								IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 								bancho.disconnect();
 								processingMessage.delete();
 								msg.channel.send(`A verification code has been sent to \`${args[1]}\` using osu! dms!`);
@@ -179,9 +180,10 @@ module.exports = {
 									const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
 									bancho.connect().then(() => {
 										const IRCUser = bancho.getUser(osuUser.name);
-										IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account.`);
-										IRCUser.sendMessage(`[Elitebotix]: If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord.`);
-										IRCUser.sendMessage('[Elitebotix]: If this was not you then don\'t worry, there won\'t be any consequences and you can just ignore these messages.');
+										// IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account.`);
+										// IRCUser.sendMessage(`[Elitebotix]: If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord.`);
+										// IRCUser.sendMessage('[Elitebotix]: If this was not you then don\'t worry, there won\'t be any consequences and you can just ignore these messages.');
+										IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 										bancho.disconnect();
 										processingMessage.delete();
 										msg.channel.send('A verification code has been sent to you using osu! dms!');
