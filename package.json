@@ -11,6 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+<<<<<<< Updated upstream
+=======
+    "bancho.js": "^0.9.7",
+    "canvas": "^2.6.1",
+>>>>>>> Stashed changes
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "fsp": "^0.1.2",
