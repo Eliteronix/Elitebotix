@@ -1,3 +1,6 @@
+//Import Tables
+const { DBDiscordUsers } = require('../dbObjects');
+
 //Require discord.js module
 const Discord = require('discord.js');
 
@@ -6,7 +9,7 @@ const osu = require('node-osu');
 
 module.exports = {
 	name: 'osu-recent',
-	//aliases: ['osu-player', 'osu-user'],
+	aliases: ['ors', 'o-rs'],
 	description: 'Sends an info card about the last score of the specified player',
 	usage: '[username] [username] ... (Use "_" instead of spaces)',
 	//permissions: 'MANAGE_GUILD',
@@ -15,18 +18,27 @@ module.exports = {
 	//args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
-	async execute(msg, args, prefixCommand) {
-		if (prefixCommand) {
-			if (!args[0]) {//Get profile by author if no argument
+	tags: 'osu',
+	prefixCommand: true,
+	async execute(msg, args) {
+		if (!args[0]) {//Get profile by author if no argument
+			//get discordUser from db
+			const discordUser = await DBDiscordUsers.findOne({
+				where: { userId: msg.author.id },
+			});
+
+			if (discordUser && discordUser.osuUserId) {
+				getScore(msg, discordUser.osuUserId);
+			} else {
 				const userDisplayName = msg.guild.member(msg.author).displayName;
 				getScore(msg, userDisplayName);
-			} else {
-				//Get profiles by arguments
-				let i;
-				for (i = 0; i < args.length; i++) {
-					const userDisplayName = args[i];
-					getScore(msg, userDisplayName);
-				}
+			}
+		} else {
+			//Get profiles by arguments
+			let i;
+			for (i = 0; i < args.length; i++) {
+				const userDisplayName = args[i];
+				getScore(msg, userDisplayName);
 			}
 		}
 	},

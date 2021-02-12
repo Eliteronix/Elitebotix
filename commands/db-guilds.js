@@ -11,10 +11,12 @@ module.exports = {
 	//args: true,
 	cooldown: 5,
 	noCooldownMessage: true,
-	async execute(msg, args, prefixCommand) {
-		if (prefixCommand) {
-			const guildList = await DBGuilds.findAll();
-			console.log(guildList);
-		}
+	tags: 'debug',
+	prefixCommand: true,
+	// eslint-disable-next-line no-unused-vars
+	async execute(msg, args) {
+		console.log('Guilds:');
+		const guildList = await DBGuilds.findAll();
+		console.log(guildList);
 	},
 };

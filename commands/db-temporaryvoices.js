@@ -11,10 +11,12 @@ module.exports = {
 	//args: true,
 	cooldown: 5,
 	noCooldownMessage: true,
-	async execute(msg, args, prefixCommand) {
-		if (prefixCommand) {
-			const TemporaryVoicesList = await DBTemporaryVoices.findAll();
-			console.log(TemporaryVoicesList);
-		}
+	tags: 'debug',
+	prefixCommand: true,
+	// eslint-disable-next-line no-unused-vars
+	async execute(msg, args) {
+		console.log('TemporaryVoices:');
+		const TemporaryVoicesList = await DBTemporaryVoices.findAll();
+		console.log(TemporaryVoicesList);
 	},
 };

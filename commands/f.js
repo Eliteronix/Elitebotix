@@ -9,9 +9,10 @@ module.exports = {
 	//args: true,
 	cooldown: 5,
 	noCooldownMessage: true,
-	execute(msg, args, prefixCommand) {
-		if (!(prefixCommand)) {
-			msg.channel.send('o7');
-		}
+	tags: 'hidden-general',
+	//prefixCommand: true,
+	// eslint-disable-next-line no-unused-vars
+	execute(msg, args) {
+		msg.channel.send('o7');
 	},
 };

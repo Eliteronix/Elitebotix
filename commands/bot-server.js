@@ -12,10 +12,11 @@ module.exports = {
 	//args: true,
 	cooldown: 5,
 	noCooldownMessage: true,
-	execute(msg, args, prefixCommand) {
-		if (prefixCommand) {
-			// eslint-disable-next-line no-undef
-			msg.channel.send(`The server is running on the ${process.env.SERVER} environment.`);
-		}
+	tags: 'debug',
+	prefixCommand: true,
+	// eslint-disable-next-line no-unused-vars
+	execute(msg, args) {
+		// eslint-disable-next-line no-undef
+		msg.channel.send(`The server is running on the ${process.env.SERVER} environment.`);
 	},
 };
