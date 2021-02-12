@@ -165,17 +165,17 @@ module.exports = {
 				//Calculate all star ratings
 				// const starRating = await calculateStarRating(beatmaps[0].id, [], true);
 				//Top:
-				const topLowerDiff = 6.1;
-				const topUpperDiff = 7.2;
+				const topLowerDiff = 5.61;
+				const topUpperDiff = 7.04;
 				//Middle:
-				const middleLowerDiff = 5.5;
-				const middleUpperDiff = 6.2;
+				const middleLowerDiff = 5.09;
+				const middleUpperDiff = 6.3;
 				//Lower:
-				const lowerLowerDiff = 4.7;
-				const lowerUpperDiff = 5.6;
+				const lowerLowerDiff = 4.55;
+				const lowerUpperDiff = 5.74;
 				//Middle:
-				const beginnerLowerDiff = 4.0;
-				const beginnerUpperDiff = 5.1;
+				const beginnerLowerDiff = 4.06;
+				const beginnerUpperDiff = 5.34;
 
 				//Difficulty: Maps have to be between the specified diffculty
 				if (args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating < topLowerDiff ||

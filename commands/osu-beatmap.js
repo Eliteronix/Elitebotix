@@ -1,7 +1,4 @@
-//Require discord.js module
 const Discord = require('discord.js');
-
-//Require node-osu module
 const osu = require('node-osu');
 
 module.exports = {
