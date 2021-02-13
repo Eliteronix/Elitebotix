@@ -68,7 +68,7 @@ module.exports = {
 
 		if (args[0] === 'connect') {
 			if (args[1]) {
-				if(args[2]){
+				if (args[2]) {
 					args.shift();
 					return msg.channel.send(`You provided multiple arguments (\`${args.join('`, `')}\`). If your name has spaces please replace them with an \`_\` like this: \`${args.join('_')}\`.`);
 				}
@@ -80,7 +80,7 @@ module.exports = {
 							where: { osuUserId: osuUser.id, osuVerified: true },
 						});
 
-						if(existingVerifiedDiscordUser){
+						if (existingVerifiedDiscordUser) {
 							return msg.channel.send(`There is already a discord account linked and verified for \`${args[1]}\``);
 						}
 
@@ -93,34 +93,38 @@ module.exports = {
 							discordUser.osuVerified = false;
 							discordUser.save();
 
+							await processingMessage.edit('Connecting to bancho...');
 							// eslint-disable-next-line no-undef
 							const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
-							bancho.connect().then(() => {
+							bancho.connect().then(async () => {
+								await processingMessage.edit('Getting user...');
 								const IRCUser = bancho.getUser(osuUser.name);
 								// IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account.`);
 								// IRCUser.sendMessage(`[Elitebotix]: If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord.`);
 								// IRCUser.sendMessage('[Elitebotix]: If this was not you then don\'t worry, there won\'t be any consequences and you can just ignore these messages.');
+								await processingMessage.edit('Sending message...');
 								IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 								bancho.disconnect();
-								processingMessage.delete();
-								msg.channel.send(`A verification code has been sent to \`${args[1]}\` using osu! dms!`);
+								processingMessage.edit(`A verification code has been sent to \`${args[1]}\` using osu! dms!`);
 							}).catch(console.error);
 						} else {
 							const processingMessage = await msg.channel.send('Processing...');
 							const verificationCode = Math.random().toString(36).substring(8);
 							DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode });
 
+							await processingMessage.edit('Connecting to bancho...');
 							// eslint-disable-next-line no-undef
 							const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
-							bancho.connect().then(() => {
+							bancho.connect().then(async () => {
+								await processingMessage.edit('Getting user...');
 								const IRCUser = bancho.getUser(osuUser.name);
 								// IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account.`);
 								// IRCUser.sendMessage(`[Elitebotix]: If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord.`);
 								// IRCUser.sendMessage('[Elitebotix]: If this was not you then don\'t worry, there won\'t be any consequences and you can just ignore these messages.');
+								await processingMessage.edit('Sending message...');
 								IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 								bancho.disconnect();
-								processingMessage.delete();
-								msg.channel.send(`A verification code has been sent to \`${args[1]}\` using osu! dms!`);
+								processingMessage.edit(`A verification code has been sent to \`${args[1]}\` using osu! dms!`);
 							}).catch(console.error);
 						}
 					})
@@ -189,17 +193,19 @@ module.exports = {
 									discordUser.osuVerificationCode = verificationCode;
 									discordUser.save();
 
+									await processingMessage.edit('Connecting to bancho...');
 									// eslint-disable-next-line no-undef
 									const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
-									bancho.connect().then(() => {
+									bancho.connect().then(async () => {
+										await processingMessage.edit('Getting user...');
 										const IRCUser = bancho.getUser(osuUser.name);
 										// IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account.`);
 										// IRCUser.sendMessage(`[Elitebotix]: If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord.`);
 										// IRCUser.sendMessage('[Elitebotix]: If this was not you then don\'t worry, there won\'t be any consequences and you can just ignore these messages.');
+										await processingMessage.edit('Sending message...');
 										IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 										bancho.disconnect();
-										processingMessage.delete();
-										msg.channel.send('A verification code has been sent to you using osu! dms!');
+										processingMessage.edit(`A verification code has been sent to ${osuUser.name} using osu! dms!`);
 									}).catch(console.error);
 								})
 								.catch(err => {
