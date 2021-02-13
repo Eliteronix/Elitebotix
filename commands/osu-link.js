@@ -91,6 +91,8 @@ module.exports = {
 							discordUser.osuUserId = osuUser.id;
 							discordUser.osuVerificationCode = verificationCode;
 							discordUser.osuVerified = false;
+							discordUser.osuPP = osuUser.pp.raw;
+							discordUser.osuRank = osuUser.pp.rank;
 							discordUser.save();
 
 							await processingMessage.edit('Connecting to bancho...');
@@ -110,7 +112,7 @@ module.exports = {
 						} else {
 							const processingMessage = await msg.channel.send('Processing...');
 							const verificationCode = Math.random().toString(36).substring(8);
-							DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode });
+							DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
 
 							await processingMessage.edit('Connecting to bancho...');
 							// eslint-disable-next-line no-undef
@@ -131,8 +133,9 @@ module.exports = {
 					.catch(err => {
 						if (err.message === 'Not found') {
 							msg.channel.send(`Could not find osu! account \`${args[1]}\`.`);
+						} else {
+							console.log(err);
 						}
-						console.log(err);
 					});
 			} else {
 				msg.channel.send(`Please specify to which osu! account you want to connect.\nUsage: \`${guildPrefix}osu-link connect <osu! username ("_" for " ")>\``);
@@ -147,13 +150,18 @@ module.exports = {
 							verified = 'Yes';
 						}
 
+						discordUser.osuPP = osuUser.pp.raw;
+						discordUser.osuRank = osuUser.pp.rank;
+						discordUser.save();
+
 						msg.channel.send(`Currently linked osu! account: \`${osuUser.name}\`.\nVerified: \`${verified}\``);
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {
 							msg.channel.send(`Could not find osu! account for id \`${discordUser.osuUserId}\`.`);
+						} else {
+							console.log(err);
 						}
-						console.log(err);
 					});
 			} else {
 				msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <osu! username ("_" for " ")>\``);
@@ -163,6 +171,8 @@ module.exports = {
 				discordUser.osuUserId = '';
 				discordUser.osuVerificationCode = '';
 				discordUser.osuVerified = false;
+				discordUser.osuPP = '';
+				discordUser.osuRank = '';
 				discordUser.save();
 
 				msg.channel.send(`There is no longer an osu! account linked to your discord account.\nUse \`${guildPrefix}osu-link <connect> <osu! username ("_" for " ")>\` to link an osu! account to your discord account.`);
@@ -175,13 +185,17 @@ module.exports = {
 					if (discordUser.osuVerified) {
 						osuApi.getUser({ u: discordUser.osuUserId })
 							.then(osuUser => {
+								discordUser.osuPP = osuUser.pp.raw;
+								discordUser.osuRank = osuUser.pp.rank;
+								discordUser.save();
 								msg.channel.send(`Your osu! account \`${osuUser.name}\` is already verified\nIf you need to connect a different account use \`${guildPrefix}osu-link <disconnect>\` first.`);
 							})
 							.catch(err => {
 								if (err.message === 'Not found') {
 									msg.channel.send(`Could not find osu! account for id \`${discordUser.osuUserId}\`.`);
+								} else {
+									console.log(err);
 								}
-								console.log(err);
 							});
 					} else {
 						if (discordUser.osuUserId) {
@@ -191,6 +205,8 @@ module.exports = {
 									const verificationCode = Math.random().toString(36).substring(8);
 
 									discordUser.osuVerificationCode = verificationCode;
+									discordUser.osuPP = osuUser.pp.raw;
+									discordUser.osuRank = osuUser.pp.rank;
 									discordUser.save();
 
 									await processingMessage.edit('Connecting to bancho...');
@@ -211,8 +227,9 @@ module.exports = {
 								.catch(err => {
 									if (err.message === 'Not found') {
 										msg.channel.send(`Could not find osu! account for id \`${discordUser.osuUserId}\`.`);
+									} else {
+										console.log(err);
 									}
-									console.log(err);
 								});
 						} else {
 							msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <osu! username ("_" for " ")>\``);
@@ -227,25 +244,32 @@ module.exports = {
 						osuApi.getUser({ u: discordUser.osuUserId })
 							.then(osuUser => {
 								discordUser.osuVerified = true;
+								discordUser.osuPP = osuUser.pp.raw;
+								discordUser.osuRank = osuUser.pp.rank;
 								discordUser.save();
 								msg.channel.send(`Your connection to the osu! account \`${osuUser.name}\` is now verified.`);
 							})
 							.catch(err => {
 								if (err.message === 'Not found') {
 									msg.channel.send(`Could not find osu! account for id \`${discordUser.osuUserId}\`.`);
+								} else {
+									console.log(err);
 								}
-								console.log(err);
 							});
 					} else {
 						osuApi.getUser({ u: discordUser.osuUserId })
 							.then(osuUser => {
+								discordUser.osuPP = osuUser.pp.raw;
+								discordUser.osuRank = osuUser.pp.rank;
+								discordUser.save();
 								msg.channel.send(`The sent code \`${args[1]}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse \`${guildPrefix}osu-link verify\` to resend the code.`);
 							})
 							.catch(err => {
 								if (err.message === 'Not found') {
 									msg.channel.send(`Could not find osu! account for id \`${discordUser.osuUserId}\`.`);
+								} else {
+									console.log(err);
 								}
-								console.log(err);
 							});
 					}
 				} else {

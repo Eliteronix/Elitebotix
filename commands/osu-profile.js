@@ -51,6 +51,22 @@ async function getProfile(msg, username) {
 
 	osuApi.getUser({ u: username })
 		.then(async (user) => {
+			//get discordUser from db to update pp and rank
+			DBDiscordUsers.findOne({
+				where: { osuUserId: user.id },
+			})
+				.then(discordUser => {
+					if(discordUser && discordUser.osuUserId){
+						discordUser.osuPP = user.pp.raw;
+						discordUser.osuRank = user.pp.rank;
+						discordUser.save();
+					}
+				})
+				.catch(err => {
+					console.log(err);
+				});
+
+
 			let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 			const canvasWidth = 700;
@@ -90,8 +106,9 @@ async function getProfile(msg, username) {
 		.catch(err => {
 			if (err.message === 'Not found') {
 				msg.channel.send(`Could not find user "${username}".`);
+			} else {
+				console.log(err);
 			}
-			console.log(err);
 		});
 }
 
@@ -258,13 +275,13 @@ async function drawPlays(input) {
 
 	ctx.font = 'bold 16px sans-serif';
 	ctx.textAlign = 'center';
-	
-	const playHours = Math.floor(user.secondsPlayed/60/60);
 
-	ctx.fillText('Hours:', canvas.width / 8*7, canvas.height / 2 + 6 - 40 + yOffset);
-	ctx.fillText(humanReadable(playHours.toString()), canvas.width / 8*7, canvas.height / 2 + 6 - 20 + yOffset);
-	ctx.fillText('Plays:', canvas.width / 8*7, canvas.height / 2 + 6 + 20 + yOffset);
-	ctx.fillText(humanReadable(user.counts.plays), canvas.width / 8*7, canvas.height / 2 + 6 + 40 + yOffset);
+	const playHours = Math.floor(user.secondsPlayed / 60 / 60);
+
+	ctx.fillText('Hours:', canvas.width / 8 * 7, canvas.height / 2 + 6 - 40 + yOffset);
+	ctx.fillText(humanReadable(playHours.toString()), canvas.width / 8 * 7, canvas.height / 2 + 6 - 20 + yOffset);
+	ctx.fillText('Plays:', canvas.width / 8 * 7, canvas.height / 2 + 6 + 20 + yOffset);
+	ctx.fillText(humanReadable(user.counts.plays), canvas.width / 8 * 7, canvas.height / 2 + 6 + 40 + yOffset);
 	const output = [canvas, ctx, user];
 	return output;
 }
