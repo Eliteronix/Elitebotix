@@ -149,6 +149,8 @@ async function drawRank(input) {
 	let ctx = input[1];
 	let user = input[2];
 
+	const yOffset = 5;
+
 	const globalRank = humanReadable(user.pp.rank);
 	const countryRank = humanReadable(user.pp.countryRank);
 	let pp = humanReadable(Math.floor(user.pp.raw).toString());
@@ -157,8 +159,8 @@ async function drawRank(input) {
 	ctx.font = '18px sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText(`World Rank: #${globalRank} | ${user.country} Rank: #${countryRank}`, canvas.width / 2, 60);
-	ctx.fillText(`PP: ${pp}`, canvas.width / 2, 83);
+	ctx.fillText(`Global Rank: #${globalRank} | ${user.country} Rank: #${countryRank}`, canvas.width / 2, 60 + yOffset);
+	ctx.fillText(`PP: ${pp}`, canvas.width / 2, 83 + yOffset);
 
 	const output = [canvas, ctx, user];
 	return output;
@@ -169,7 +171,7 @@ async function drawLevel(input) {
 	let ctx = input[1];
 	let user = input[2];
 
-	const yOffset = 20;
+	const yOffset = 25;
 
 	// Write the text for the floored level of the player
 	ctx.font = '40px sans-serif';
@@ -213,15 +215,18 @@ async function drawLevel(input) {
 		totalScore = humanReadable(Math.floor(totalScore / 1000).toString()) + 'K';
 	}
 
-	const ranksOffset = 30;
+	const ranksOffset = 40;
 
 	//Score and Accuracy
 	ctx.font = 'bold 14px sans-serif';
 	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'right';
-	ctx.fillText('Ranked: ' + rankedScore, canvas.width / 2 - canvas.height / 4 - 5, canvas.height / 2 + ranksOffset * -1 + 6 + yOffset);
-	ctx.fillText('Total: ' + totalScore, canvas.width / 2 - canvas.height / 4 - 10, canvas.height / 2 + 6 + yOffset);
-	ctx.fillText('Acc: ' + user.accuracyFormatted, canvas.width / 2 - canvas.height / 4 - 5, canvas.height / 2 + ranksOffset * 1 + 6 + yOffset);
+	ctx.textAlign = 'center';
+	ctx.fillText('Ranked:', canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * -1 + 6 - 8 + yOffset);
+	ctx.fillText(rankedScore, canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * -1 + 6 + 8 + yOffset);
+	ctx.fillText('Total:', canvas.width / 4 + 15, canvas.height / 2 + 6 - 8+ yOffset);
+	ctx.fillText(totalScore, canvas.width / 4 + 15, canvas.height / 2 + 6 + 8 + yOffset);
+	ctx.fillText('Acc:', canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * 1 + 6 - 8 + yOffset);
+	ctx.fillText(user.accuracyFormatted, canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * 1 + 6 + 8 + yOffset);
 
 	const output = [canvas, ctx, user];
 	return output;
@@ -232,7 +237,7 @@ async function drawRanks(input) {
 	let ctx = input[1];
 	let user = input[2];
 
-	const yOffset = 20;
+	const yOffset = 25;
 
 	const ranksOffset = 30;
 
@@ -271,7 +276,7 @@ async function drawPlays(input) {
 	let ctx = input[1];
 	let user = input[2];
 
-	const yOffset = 20;
+	const yOffset = 25;
 
 	ctx.font = 'bold 16px sans-serif';
 	ctx.textAlign = 'center';
@@ -323,7 +328,7 @@ async function drawFooter(input) {
 	const joinDate = joinDay + joinDayEnding + ' ' + joinMonth + ' ' + joinYear;
 
 	ctx.textAlign = 'left';
-	ctx.fillText(`Player joined on ${joinDate}`, 5, canvas.height - 5);
+	ctx.fillText(`Started playing osu! on ${joinDate}`, 5, canvas.height - 5);
 
 	ctx.textAlign = 'right';
 	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 5, canvas.height - 5);
@@ -337,7 +342,7 @@ async function drawAvatar(input) {
 	let ctx = input[1];
 	let user = input[2];
 
-	const yOffset = 20;
+	const yOffset = 25;
 
 	//Get a circle in the middle for inserting the player avatar
 	ctx.beginPath();
