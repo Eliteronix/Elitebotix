@@ -49,6 +49,8 @@ module.exports = {
 								osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
 							} else if (discordUser.updatedAt.getDate() < dd) {
 								osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
+							} else if (discordUser.osuPP === null || discordUser.osuRank === null) {
+								osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
 							}
 
 							if (osuUser) {
@@ -73,7 +75,7 @@ module.exports = {
 						.setTitle(`${msg.guild.name}'s osu! leaderboard`)
 						.setTimestamp();
 
-					if(msg.guild.iconURL()){
+					if (msg.guild.iconURL()) {
 						leaderBoardEmbed.setThumbnail(`${msg.guild.iconURL()}`);
 					}
 
