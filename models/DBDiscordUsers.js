@@ -19,6 +19,12 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		osuPP: {
+			type: DataTypes.STRING,
+		},
+		osuRank: {
+			type: DataTypes.STRING,
+		},
 		paranoid: true,
 	});
 };
