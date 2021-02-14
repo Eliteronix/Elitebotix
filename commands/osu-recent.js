@@ -237,7 +237,8 @@ async function getScore(msg, username) {
 		.catch(err => {
 			if (err.message === 'Not found') {
 				msg.channel.send(`Could not find user "${username}".`);
+			} else {
+				console.log(err);
 			}
-			console.log(err);
 		});
 }

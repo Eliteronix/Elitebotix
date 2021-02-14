@@ -73,8 +73,9 @@ module.exports = {
 				.catch(err => {
 					if (err.message === 'Not found') {
 						msg.channel.send(`Could not find beatmap "${args[i]}".`);
+					} else {
+						console.log(err);
 					}
-					console.log(err);
 				});
 		}
 	},
