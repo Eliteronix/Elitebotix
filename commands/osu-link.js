@@ -72,7 +72,7 @@ module.exports = {
 		} else if (args[0] === 'current') {
 			current(msg, osuApi, discordUser, guildPrefix);
 		} else if (args[0] === 'disconnect') {
-			disconnect(msg, args, guildPrefix);
+			disconnect(msg, discordUser, guildPrefix);
 		} else if (args[0] === 'verify') {
 			verify(msg, args, osuApi, discordUser, guildPrefix);
 		} else {
@@ -106,6 +106,7 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 					discordUser.osuUserId = osuUser.id;
 					discordUser.osuVerificationCode = verificationCode;
 					discordUser.osuVerified = false;
+					discordUser.osuName = osuUser.name;
 					discordUser.osuPP = osuUser.pp.raw;
 					discordUser.osuRank = osuUser.pp.rank;
 					discordUser.save();
@@ -124,7 +125,7 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 				} else {
 					const processingMessage = await msg.channel.send('Processing...');
 					const verificationCode = Math.random().toString(36).substring(8);
-					DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
+					DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuName: osuUser.name, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
 
 					await processingMessage.edit('Connecting to bancho...');
 					// eslint-disable-next-line no-undef
@@ -161,6 +162,7 @@ async function current(msg, osuApi, discordUser, guildPrefix) {
 					verified = 'Yes';
 				}
 
+				discordUser.osuName = osuUser.name;
 				discordUser.osuPP = osuUser.pp.raw;
 				discordUser.osuRank = osuUser.pp.rank;
 				discordUser.save();
@@ -180,12 +182,15 @@ async function current(msg, osuApi, discordUser, guildPrefix) {
 }
 
 async function disconnect(msg, discordUser, guildPrefix) {
+	console.log('Disconnect');
+	console.log(discordUser);
 	if (discordUser && discordUser.osuUserId) {
-		discordUser.osuUserId = '';
-		discordUser.osuVerificationCode = '';
+		discordUser.osuUserId = null;
+		discordUser.osuVerificationCode = null;
 		discordUser.osuVerified = false;
-		discordUser.osuPP = '';
-		discordUser.osuRank = '';
+		discordUser.osuName = null;
+		discordUser.osuPP = null;
+		discordUser.osuRank = null;
 		discordUser.save();
 
 		msg.channel.send(`There is no longer an osu! account linked to your discord account.\nUse \`${guildPrefix}osu-link <connect> <osu! username ("_" for " ")>\` to link an osu! account to your discord account.`);
@@ -200,6 +205,7 @@ async function verify(msg, args, osuApi, discordUser, guildPrefix) {
 			if (discordUser.osuVerified) {
 				osuApi.getUser({ u: discordUser.osuUserId })
 					.then(osuUser => {
+						discordUser.osuName = osuUser.name;
 						discordUser.osuPP = osuUser.pp.raw;
 						discordUser.osuRank = osuUser.pp.rank;
 						discordUser.save();
@@ -220,6 +226,7 @@ async function verify(msg, args, osuApi, discordUser, guildPrefix) {
 							const verificationCode = Math.random().toString(36).substring(8);
 
 							discordUser.osuVerificationCode = verificationCode;
+							discordUser.osuName = osuUser.name;
 							discordUser.osuPP = osuUser.pp.raw;
 							discordUser.osuRank = osuUser.pp.rank;
 							discordUser.save();
@@ -256,6 +263,7 @@ async function verify(msg, args, osuApi, discordUser, guildPrefix) {
 				osuApi.getUser({ u: discordUser.osuUserId })
 					.then(osuUser => {
 						discordUser.osuVerified = true;
+						discordUser.osuName = osuUser.name;
 						discordUser.osuPP = osuUser.pp.raw;
 						discordUser.osuRank = osuUser.pp.rank;
 						discordUser.save();
@@ -271,6 +279,7 @@ async function verify(msg, args, osuApi, discordUser, guildPrefix) {
 			} else {
 				osuApi.getUser({ u: discordUser.osuUserId })
 					.then(osuUser => {
+						discordUser.osuName = osuUser.name;
 						discordUser.osuPP = osuUser.pp.raw;
 						discordUser.osuRank = osuUser.pp.rank;
 						discordUser.save();
