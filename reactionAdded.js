@@ -80,7 +80,5 @@ module.exports = async function (reaction, user) {
 				console.log(`There was an error trying to get a ReactionRole from the db for message ${reaction.message.id}, in ${reaction.message.guild.name} on a reaction.`);
 			}
 		}
-	} else {
-		console.log(`There was an error trying to get a ReactionRolesHeader from the db for message ${reaction.message.id}, in ${reaction.message.guild.name} on a reaction.`);
 	}
 };
