@@ -57,6 +57,7 @@ async function getProfile(msg, username) {
 			})
 				.then(discordUser => {
 					if(discordUser && discordUser.osuUserId){
+						discordUser.osuName = user.name;
 						discordUser.osuPP = user.pp.raw;
 						discordUser.osuRank = user.pp.rank;
 						discordUser.save();

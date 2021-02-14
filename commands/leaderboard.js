@@ -31,6 +31,9 @@ module.exports = {
 					processingMessage.edit('Grabbing osu! accounts...');
 					let osuAccounts = [];
 					for (let i = 0; i < members.length; i++) {
+						if(i%25 === 0){
+							processingMessage.edit(`Grabbing osu! accounts...\nLooked at ${i} out of ${members.length} server members so far.`);
+						}
 						const discordUser = await DBDiscordUsers.findOne({
 							where: { userId: members[i].id },
 						});
@@ -49,11 +52,12 @@ module.exports = {
 								osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
 							} else if (discordUser.updatedAt.getDate() < dd) {
 								osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
-							} else if (discordUser.osuPP === null || discordUser.osuRank === null) {
+							} else if (discordUser.osuPP === null || discordUser.osuRank === null || discordUser.osuName === null) {
 								osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
 							}
 
 							if (osuUser) {
+								discordUser.osuName = osuUser.name;
 								discordUser.osuPP = osuUser.pp.raw;
 								discordUser.osuRank = osuUser.pp.rank;
 								await discordUser.save();
@@ -73,6 +77,7 @@ module.exports = {
 					const leaderBoardEmbed = new Discord.MessageEmbed()
 						.setColor('#FF66AB')
 						.setTitle(`${msg.guild.name}'s osu! leaderboard`)
+						.setDescription('Leaderboard consists of all players that have their osu! account connected to the bot.\nData is being updated once a day or when `osu-profile <username>` is being used.`')
 						.setTimestamp();
 
 					if (msg.guild.iconURL()) {
@@ -94,9 +99,7 @@ module.exports = {
 							verified = '☑️';
 						}
 
-						const osuUser = await osuApi.getUser({ u: osuAccounts[i].osuUserId });
-
-						leaderBoardEmbed.addField(`${i + 1}. ${userDisplayName} / ${member.user.username}#${member.user.discriminator}`, `#${humanReadable(osuAccounts[i].osuRank)} | ${humanReadable(Math.floor(osuAccounts[i].osuPP).toString())}pp | Account: ${osuUser.name} ${verified}`);
+						leaderBoardEmbed.addField(`${i + 1}. ${userDisplayName} / ${member.user.username}#${member.user.discriminator}`, `#${humanReadable(osuAccounts[i].osuRank)} | ${humanReadable(Math.floor(osuAccounts[i].osuPP).toString())}pp | Account: ${osuAccounts[i].osuName} ${verified}`);
 					}
 
 					processingMessage.delete();
