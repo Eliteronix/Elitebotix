@@ -28,7 +28,6 @@ module.exports = {
 			msg.guild.members.fetch()
 				.then(async (guildMembers) => {
 					const members = guildMembers.array();
-					processingMessage.edit('Grabbing osu! accounts...');
 					let osuAccounts = [];
 					for (let i = 0; i < members.length; i++) {
 						if(i%100 === 0){
