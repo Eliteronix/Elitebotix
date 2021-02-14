@@ -31,7 +31,7 @@ module.exports = {
 					processingMessage.edit('Grabbing osu! accounts...');
 					let osuAccounts = [];
 					for (let i = 0; i < members.length; i++) {
-						if(i%25 === 0){
+						if(i%200 === 0){
 							processingMessage.edit(`Grabbing osu! accounts...\nLooked at ${i} out of ${members.length} server members so far.`);
 						}
 						const discordUser = await DBDiscordUsers.findOne({
