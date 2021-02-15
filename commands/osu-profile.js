@@ -319,7 +319,7 @@ async function drawFooter(input) {
 	month[11] = 'December';
 	const joinDay = user.raw_joinDate.substring(8, 10);
 	var joinDayEnding = 'th';
-	if (joinDay === '01' || joinDay === '21') {
+	if (joinDay === '01' || joinDay === '21' || joinDay === '31') {
 		joinDayEnding = 'st';
 	} else if (joinDay === '02' || joinDay === '22') {
 		joinDayEnding = 'nd';
