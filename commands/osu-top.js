@@ -4,9 +4,9 @@ const osu = require('node-osu');
 const Canvas = require('canvas');
 
 module.exports = {
-	name: 'osu-profile',
-	aliases: ['osu-player', 'osu-user', 'o-u', 'o-p'],
-	description: 'Sends an info card about the specified player',
+	name: 'osu-top',
+	aliases: ['osu-plays', 'osu-topplays'],
+	description: 'Sends an info card about the topplays of the specified player',
 	usage: '[username] [username] ... (Use "_" instead of spaces)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
@@ -24,23 +24,23 @@ module.exports = {
 			});
 
 			if (discordUser && discordUser.osuUserId) {
-				getProfile(msg, discordUser.osuUserId);
+				getTopPlays(msg, discordUser.osuUserId);
 			} else {
 				const userDisplayName = msg.guild.member(msg.author).displayName;
-				getProfile(msg, userDisplayName);
+				getTopPlays(msg, userDisplayName);
 			}
 		} else {
 			//Get profiles by arguments
 			let i;
 			for (i = 0; i < args.length; i++) {
 				const userDisplayName = args[i];
-				getProfile(msg, userDisplayName);
+				getTopPlays(msg, userDisplayName);
 			}
 		}
 	},
 };
 
-async function getProfile(msg, username) {
+async function getTopPlays(msg, username) {
 	// eslint-disable-next-line no-undef
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -51,12 +51,12 @@ async function getProfile(msg, username) {
 
 	osuApi.getUser({ u: username })
 		.then(async (user) => {
-			//get discordUser from db to update pp and rank
+			// get discordUser from db to update pp and rank
 			DBDiscordUsers.findOne({
 				where: { osuUserId: user.id },
 			})
 				.then(discordUser => {
-					if(discordUser && discordUser.osuUserId){
+					if (discordUser && discordUser.osuUserId) {
 						discordUser.osuName = user.name;
 						discordUser.osuPP = user.pp.raw;
 						discordUser.osuRank = user.pp.rank;
@@ -71,7 +71,7 @@ async function getProfile(msg, username) {
 			let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 			const canvasWidth = 700;
-			const canvasHeight = 350;
+			const canvasHeight = 700;
 
 			//Create Canvas
 			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -79,7 +79,8 @@ async function getProfile(msg, username) {
 			//Get context and load the image
 			const ctx = canvas.getContext('2d');
 			const background = await Canvas.loadImage('./other/osu-background.png');
-			ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+			ctx.drawImage(background, 0, 0, canvas.width, canvas.height / 2);
+			ctx.drawImage(background, 0, canvas.height / 2, canvas.width, canvas.height / 2);
 
 			let elements = [canvas, ctx, user];
 
@@ -92,6 +93,8 @@ async function getProfile(msg, username) {
 			elements = await drawRanks(elements);
 
 			elements = await drawPlays(elements);
+
+			elements = await drawTopPlays(elements);
 
 			elements = await drawFooter(elements);
 
@@ -111,18 +114,6 @@ async function getProfile(msg, username) {
 				console.log(err);
 			}
 		});
-}
-
-function humanReadable(input) {
-	let output = '';
-	for (let i = 0; i < input.length; i++) {
-		if (i > 0 && (input.length - i) % 3 === 0) {
-			output = output + '.';
-		}
-		output = output + input.charAt(i);
-	}
-
-	return output;
 }
 
 async function drawTitle(input) {
@@ -178,11 +169,11 @@ async function drawLevel(input) {
 	ctx.font = '40px sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText(Math.floor(user.level), canvas.width / 10, canvas.height / 2 + 15 + yOffset);
+	ctx.fillText(Math.floor(user.level), canvas.width / 10, canvas.height / 4 + 15 + yOffset);
 
 	//Add a faint circle around the level
 	ctx.beginPath();
-	ctx.arc(canvas.width / 10, canvas.height / 2 + yOffset, 50, 0, 2 * Math.PI);
+	ctx.arc(canvas.width / 10, canvas.height / 4 + yOffset, 50, 0, 2 * Math.PI);
 	ctx.strokeStyle = '#373e40';
 	ctx.lineWidth = 5;
 	ctx.stroke();
@@ -192,7 +183,7 @@ async function drawLevel(input) {
 
 	//Add a stroke around the level by how much it is completed
 	ctx.beginPath();
-	ctx.arc(canvas.width / 10, canvas.height / 2 + yOffset, 50, Math.PI * -0.5, (Math.PI * 2) * levelPercentage + Math.PI * -0.5);
+	ctx.arc(canvas.width / 10, canvas.height / 4 + yOffset, 50, Math.PI * -0.5, (Math.PI * 2) * levelPercentage + Math.PI * -0.5);
 	ctx.strokeStyle = '#D1EDF2';
 	ctx.lineWidth = 5;
 	ctx.stroke();
@@ -222,12 +213,12 @@ async function drawLevel(input) {
 	ctx.font = 'bold 14px sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText('Ranked:', canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * -1 + 6 - 8 + yOffset);
-	ctx.fillText(rankedScore, canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * -1 + 6 + 8 + yOffset);
-	ctx.fillText('Total:', canvas.width / 4 + 15, canvas.height / 2 + 6 - 8+ yOffset);
-	ctx.fillText(totalScore, canvas.width / 4 + 15, canvas.height / 2 + 6 + 8 + yOffset);
-	ctx.fillText('Acc:', canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * 1 + 6 - 8 + yOffset);
-	ctx.fillText(user.accuracyFormatted, canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * 1 + 6 + 8 + yOffset);
+	ctx.fillText('Ranked:', canvas.width / 4 + 15, canvas.height / 4 + ranksOffset * -1 + 6 - 8 + yOffset);
+	ctx.fillText(rankedScore, canvas.width / 4 + 15, canvas.height / 4 + ranksOffset * -1 + 6 + 8 + yOffset);
+	ctx.fillText('Total:', canvas.width / 4 + 15, canvas.height / 4 + 6 - 8 + yOffset);
+	ctx.fillText(totalScore, canvas.width / 4 + 15, canvas.height / 4 + 6 + 8 + yOffset);
+	ctx.fillText('Acc:', canvas.width / 4 + 15, canvas.height / 4 + ranksOffset * 1 + 6 - 8 + yOffset);
+	ctx.fillText(user.accuracyFormatted, canvas.width / 4 + 15, canvas.height / 4 + ranksOffset * 1 + 6 + 8 + yOffset);
 
 	const output = [canvas, ctx, user];
 	return output;
@@ -246,28 +237,28 @@ async function drawRanks(input) {
 	ctx.textAlign = 'left';
 	//get SSH
 	const SSH = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS-Silver.6681366c.svg');
-	ctx.drawImage(SSH, canvas.width / 2 + canvas.height / 4 - 8, canvas.height / 2 - 8 + ranksOffset * -2 + yOffset, 32, 16);
-	ctx.fillText(humanReadable(user.counts.SSH), canvas.width / 2 + canvas.height / 4 + 32, canvas.height / 2 + ranksOffset * -2 + 6 + yOffset);
+	ctx.drawImage(SSH, canvas.width / 2 + canvas.height / 8 - 8, canvas.height / 4 - 8 + ranksOffset * -2 + yOffset, 32, 16);
+	ctx.fillText(humanReadable(user.counts.SSH), canvas.width / 2 + canvas.height / 8 + 32, canvas.height / 4 + ranksOffset * -2 + 6 + yOffset);
 
 	//get SS
 	const SS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS.a21de890.svg');
-	ctx.drawImage(SS, canvas.width / 2 + canvas.height / 4 + 5, canvas.height / 2 - 8 + ranksOffset * -1 + yOffset, 32, 16);
-	ctx.fillText(humanReadable(user.counts.SS), canvas.width / 2 + canvas.height / 4 + 45, canvas.height / 2 + ranksOffset * -1 + 6 + yOffset);
+	ctx.drawImage(SS, canvas.width / 2 + canvas.height / 8 + 5, canvas.height / 4 - 8 + ranksOffset * -1 + yOffset, 32, 16);
+	ctx.fillText(humanReadable(user.counts.SS), canvas.width / 2 + canvas.height / 8 + 45, canvas.height / 4 + ranksOffset * -1 + 6 + yOffset);
 
 	//get SH
 	const SH = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-S-Silver.811ae28c.svg');
-	ctx.drawImage(SH, canvas.width / 2 + canvas.height / 4 + 10, canvas.height / 2 - 8 + yOffset, 32, 16);
-	ctx.fillText(humanReadable(user.counts.SH), canvas.width / 2 + canvas.height / 4 + 50, canvas.height / 2 + 6 + yOffset);
+	ctx.drawImage(SH, canvas.width / 2 + canvas.height / 8 + 10, canvas.height / 4 - 8 + yOffset, 32, 16);
+	ctx.fillText(humanReadable(user.counts.SH), canvas.width / 2 + canvas.height / 8 + 50, canvas.height / 4 + 6 + yOffset);
 
 	//get S
 	const S = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-S.3b4498a9.svg');
-	ctx.drawImage(S, canvas.width / 2 + canvas.height / 4 + 5, canvas.height / 2 - 8 + ranksOffset * 1 + yOffset, 32, 16);
-	ctx.fillText(humanReadable(user.counts.S), canvas.width / 2 + canvas.height / 4 + 45, canvas.height / 2 + ranksOffset * 1 + 6 + yOffset);
+	ctx.drawImage(S, canvas.width / 2 + canvas.height / 8 + 5, canvas.height / 4 - 8 + ranksOffset * 1 + yOffset, 32, 16);
+	ctx.fillText(humanReadable(user.counts.S), canvas.width / 2 + canvas.height / 8 + 45, canvas.height / 4 + ranksOffset * 1 + 6 + yOffset);
 
 	//get A
 	const A = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-A.d785e824.svg');
-	ctx.drawImage(A, canvas.width / 2 + canvas.height / 4 - 8, canvas.height / 2 - 8 + ranksOffset * 2 + yOffset, 32, 16);
-	ctx.fillText(humanReadable(user.counts.A), canvas.width / 2 + canvas.height / 4 + 32, canvas.height / 2 + ranksOffset * 2 + 6 + yOffset);
+	ctx.drawImage(A, canvas.width / 2 + canvas.height / 8 - 8, canvas.height / 4 - 8 + ranksOffset * 2 + yOffset, 32, 16);
+	ctx.fillText(humanReadable(user.counts.A), canvas.width / 2 + canvas.height / 8 + 32, canvas.height / 4 + ranksOffset * 2 + 6 + yOffset);
 	const output = [canvas, ctx, user];
 	return output;
 }
@@ -284,10 +275,10 @@ async function drawPlays(input) {
 
 	const playHours = Math.floor(user.secondsPlayed / 60 / 60);
 
-	ctx.fillText('Hours:', canvas.width / 8 * 7, canvas.height / 2 + 6 - 40 + yOffset);
-	ctx.fillText(humanReadable(playHours.toString()), canvas.width / 8 * 7, canvas.height / 2 + 6 - 20 + yOffset);
-	ctx.fillText('Plays:', canvas.width / 8 * 7, canvas.height / 2 + 6 + 20 + yOffset);
-	ctx.fillText(humanReadable(user.counts.plays), canvas.width / 8 * 7, canvas.height / 2 + 6 + 40 + yOffset);
+	ctx.fillText('Hours:', canvas.width / 8 * 7, canvas.height / 4 + 6 - 40 + yOffset);
+	ctx.fillText(humanReadable(playHours.toString()), canvas.width / 8 * 7, canvas.height / 4 + 6 - 20 + yOffset);
+	ctx.fillText('Plays:', canvas.width / 8 * 7, canvas.height / 4 + 6 + 20 + yOffset);
+	ctx.fillText(humanReadable(user.counts.plays), canvas.width / 8 * 7, canvas.height / 4 + 6 + 40 + yOffset);
 	const output = [canvas, ctx, user];
 	return output;
 }
@@ -340,6 +331,45 @@ async function drawFooter(input) {
 	return output;
 }
 
+async function drawTopPlays(input) {
+	let canvas = input[0];
+	let ctx = input[1];
+	let user = input[2];
+
+	// eslint-disable-next-line no-undef
+	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+	});
+
+	// Write the title of the player
+	ctx.font = 'bold 25px sans-serif';
+	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = 'center';
+	ctx.fillText('Top Plays', canvas.width / 2, canvas.height / 2 - 20);
+
+	const scores = await osuApi.getUserBest({ u: user.name });
+
+	for (let i = 0; i < scores.length && i < 5; i++) {
+		roundedRect(ctx, 10, canvas.height / 2 + canvas.height / 10 * i - 10, canvas.width - 20, canvas.height / 12, 5);
+
+		const rankImage = await Canvas.loadImage(getRankImage(scores[i].rank));
+		ctx.drawImage(rankImage, 20, canvas.height / 2 + canvas.height / 10 * i - 10 + canvas.height / 12 / 2 - 16, 64, 32);
+
+		// Write the title of the player
+		ctx.font = 'bold 25px sans-serif';
+		ctx.fillStyle = '#FF66AB';
+		ctx.textAlign = 'center';
+		ctx.fillText(Math.floor(scores[i].pp) + 'pp', 625,  canvas.height / 2 + canvas.height / 10 * i - 8 + canvas.height / 10 / 2);
+		
+	}
+
+	const output = [canvas, ctx, user];
+	return output;
+}
+
 async function drawAvatar(input) {
 	let canvas = input[0];
 	let ctx = input[1];
@@ -349,18 +379,67 @@ async function drawAvatar(input) {
 
 	//Get a circle in the middle for inserting the player avatar
 	ctx.beginPath();
-	ctx.arc(canvas.width / 2, canvas.height / 2 + yOffset, canvas.height / 4, 0, Math.PI * 2, true);
+	ctx.arc(canvas.width / 2, canvas.height / 4 + yOffset, canvas.height / 8, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
 
 	//Draw a shape onto the main canvas in the middle 
 	try {
 		const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${user.id}`);
-		ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 4, canvas.height / 4 + yOffset, canvas.height / 2, canvas.height / 2);
+		ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 8, canvas.height / 8 + yOffset, canvas.height / 4, canvas.height / 4);
 	} catch (error) {
 		const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-		ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 4, canvas.height / 4 + yOffset, canvas.height / 2, canvas.height / 2);
+		ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 8, canvas.height / 8 + yOffset, canvas.height / 4, canvas.height / 4);
 	}
 	const output = [canvas, ctx, user];
 	return output;
+}
+
+function humanReadable(input) {
+	let output = '';
+	for (let i = 0; i < input.length; i++) {
+		if (i > 0 && (input.length - i) % 3 === 0) {
+			output = output + '.';
+		}
+		output = output + input.charAt(i);
+	}
+
+	return output;
+}
+
+function getRankImage(rank) {
+
+	let URL = 'https://osu.ppy.sh/assets/images/GradeSmall-D.6b170c4c.svg'; //D Rank
+
+	if (rank === 'XH') {
+		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-SS-Silver.6681366c.svg';
+	} else if (rank === 'X') {
+		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-SS.a21de890.svg';
+	} else if (rank === 'SH') {
+		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-S-Silver.811ae28c.svg';
+	} else if (rank === 'S') {
+		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-S.3b4498a9.svg';
+	} else if (rank === 'A') {
+		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-A.d785e824.svg';
+	} else if (rank === 'B') {
+		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-B.e19fc91b.svg';
+	} else if (rank === 'C') {
+		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-C.6bb75adc.svg';
+	}
+	return URL;
+}
+
+function roundedRect(ctx, x, y, width, height, radius) {
+	ctx.beginPath();
+	ctx.moveTo(x, y + radius);
+	ctx.lineTo(x, y + height - radius);
+	ctx.arcTo(x, y + height, x + radius, y + height, radius);
+	ctx.lineTo(x + width - radius, y + height);
+	ctx.arcTo(x + width, y + height, x + width, y + height - radius, radius);
+	ctx.lineTo(x + width, y + radius);
+	ctx.arcTo(x + width, y, x + width - radius, y, radius);
+	ctx.lineTo(x + radius, y);
+	ctx.arcTo(x, y, x, y + radius, radius);
+	ctx.fillStyle = 'rgba(70, 57, 63, 0.75)';
+	ctx.fill();
 }
