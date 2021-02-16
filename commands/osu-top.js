@@ -71,7 +71,7 @@ async function getTopPlays(msg, username) {
 			let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 			const canvasWidth = 700;
-			const canvasHeight = 700;
+			const canvasHeight = 350;
 
 			//Create Canvas
 			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -79,26 +79,15 @@ async function getTopPlays(msg, username) {
 			//Get context and load the image
 			const ctx = canvas.getContext('2d');
 			const background = await Canvas.loadImage('./other/osu-background.png');
-			ctx.drawImage(background, 0, 0, canvas.width, canvas.height / 2);
-			ctx.drawImage(background, 0, canvas.height / 2, canvas.width, canvas.height / 2);
+			ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
 			let elements = [canvas, ctx, user];
 
 			elements = await drawTitle(elements);
 
-			elements = await drawRank(elements);
+			elements = await drawTopPlays(elements, osuApi);
 
-			elements = await drawLevel(elements);
-
-			elements = await drawRanks(elements);
-
-			elements = await drawPlays(elements);
-
-			elements = await drawTopPlays(elements);
-
-			elements = await drawFooter(elements);
-
-			await drawAvatar(elements);
+			await drawFooter(elements);
 
 			//Create as an attachment
 			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'osu-profile.png');
@@ -121,164 +110,17 @@ async function drawTitle(input) {
 	let ctx = input[1];
 	let user = input[2];
 
-	let title = `${user.name}'s profile`;
+	let title = `${user.name}'s top plays`;
 	if (user.name.endsWith('s') || user.name.endsWith('x')) {
-		title = `${user.name}' profile`;
+		title = `${user.name}' top plays`;
 	}
 
 	// Write the title of the player
-	ctx.font = '30px sans-serif';
+	ctx.font = '25px sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText(title, canvas.width / 2, 35);
 
-	const output = [canvas, ctx, user];
-	return output;
-}
-
-async function drawRank(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let user = input[2];
-
-	const yOffset = 5;
-
-	const globalRank = humanReadable(user.pp.rank);
-	const countryRank = humanReadable(user.pp.countryRank);
-	let pp = humanReadable(Math.floor(user.pp.raw).toString());
-
-	// Write the title of the player
-	ctx.font = '18px sans-serif';
-	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'center';
-	ctx.fillText(`Global Rank: #${globalRank} | ${user.country} Rank: #${countryRank}`, canvas.width / 2, 60 + yOffset);
-	ctx.fillText(`PP: ${pp}`, canvas.width / 2, 83 + yOffset);
-
-	const output = [canvas, ctx, user];
-	return output;
-}
-
-async function drawLevel(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let user = input[2];
-
-	const yOffset = 25;
-
-	// Write the text for the floored level of the player
-	ctx.font = '40px sans-serif';
-	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'center';
-	ctx.fillText(Math.floor(user.level), canvas.width / 10, canvas.height / 4 + 15 + yOffset);
-
-	//Add a faint circle around the level
-	ctx.beginPath();
-	ctx.arc(canvas.width / 10, canvas.height / 4 + yOffset, 50, 0, 2 * Math.PI);
-	ctx.strokeStyle = '#373e40';
-	ctx.lineWidth = 5;
-	ctx.stroke();
-
-	//calculate percentage of level completed
-	const levelPercentage = (user.level % 1);
-
-	//Add a stroke around the level by how much it is completed
-	ctx.beginPath();
-	ctx.arc(canvas.width / 10, canvas.height / 4 + yOffset, 50, Math.PI * -0.5, (Math.PI * 2) * levelPercentage + Math.PI * -0.5);
-	ctx.strokeStyle = '#D1EDF2';
-	ctx.lineWidth = 5;
-	ctx.stroke();
-
-	//floor scores
-	let rankedScore = user.scores.ranked;
-	if (rankedScore > 9999999999) {
-		rankedScore = humanReadable(Math.floor(rankedScore / 1000000000).toString()) + 'B';
-	} else if (rankedScore > 9999999) {
-		rankedScore = humanReadable(Math.floor(rankedScore / 1000000).toString()) + 'M';
-	} else if (rankedScore > 9999) {
-		rankedScore = humanReadable(Math.floor(rankedScore / 1000).toString()) + 'K';
-	}
-
-	let totalScore = user.scores.total;
-	if (totalScore > 9999999999) {
-		totalScore = humanReadable(Math.floor(totalScore / 1000000000).toString()) + 'B';
-	} else if (totalScore > 9999999) {
-		totalScore = humanReadable(Math.floor(totalScore / 1000000).toString()) + 'M';
-	} else if (totalScore > 9999) {
-		totalScore = humanReadable(Math.floor(totalScore / 1000).toString()) + 'K';
-	}
-
-	const ranksOffset = 40;
-
-	//Score and Accuracy
-	ctx.font = 'bold 14px sans-serif';
-	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'center';
-	ctx.fillText('Ranked:', canvas.width / 4 + 15, canvas.height / 4 + ranksOffset * -1 + 6 - 8 + yOffset);
-	ctx.fillText(rankedScore, canvas.width / 4 + 15, canvas.height / 4 + ranksOffset * -1 + 6 + 8 + yOffset);
-	ctx.fillText('Total:', canvas.width / 4 + 15, canvas.height / 4 + 6 - 8 + yOffset);
-	ctx.fillText(totalScore, canvas.width / 4 + 15, canvas.height / 4 + 6 + 8 + yOffset);
-	ctx.fillText('Acc:', canvas.width / 4 + 15, canvas.height / 4 + ranksOffset * 1 + 6 - 8 + yOffset);
-	ctx.fillText(user.accuracyFormatted, canvas.width / 4 + 15, canvas.height / 4 + ranksOffset * 1 + 6 + 8 + yOffset);
-
-	const output = [canvas, ctx, user];
-	return output;
-}
-
-async function drawRanks(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let user = input[2];
-
-	const yOffset = 25;
-
-	const ranksOffset = 30;
-
-	ctx.font = 'bold 16px sans-serif';
-	ctx.textAlign = 'left';
-	//get SSH
-	const SSH = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS-Silver.6681366c.svg');
-	ctx.drawImage(SSH, canvas.width / 2 + canvas.height / 8 - 8, canvas.height / 4 - 8 + ranksOffset * -2 + yOffset, 32, 16);
-	ctx.fillText(humanReadable(user.counts.SSH), canvas.width / 2 + canvas.height / 8 + 32, canvas.height / 4 + ranksOffset * -2 + 6 + yOffset);
-
-	//get SS
-	const SS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS.a21de890.svg');
-	ctx.drawImage(SS, canvas.width / 2 + canvas.height / 8 + 5, canvas.height / 4 - 8 + ranksOffset * -1 + yOffset, 32, 16);
-	ctx.fillText(humanReadable(user.counts.SS), canvas.width / 2 + canvas.height / 8 + 45, canvas.height / 4 + ranksOffset * -1 + 6 + yOffset);
-
-	//get SH
-	const SH = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-S-Silver.811ae28c.svg');
-	ctx.drawImage(SH, canvas.width / 2 + canvas.height / 8 + 10, canvas.height / 4 - 8 + yOffset, 32, 16);
-	ctx.fillText(humanReadable(user.counts.SH), canvas.width / 2 + canvas.height / 8 + 50, canvas.height / 4 + 6 + yOffset);
-
-	//get S
-	const S = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-S.3b4498a9.svg');
-	ctx.drawImage(S, canvas.width / 2 + canvas.height / 8 + 5, canvas.height / 4 - 8 + ranksOffset * 1 + yOffset, 32, 16);
-	ctx.fillText(humanReadable(user.counts.S), canvas.width / 2 + canvas.height / 8 + 45, canvas.height / 4 + ranksOffset * 1 + 6 + yOffset);
-
-	//get A
-	const A = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-A.d785e824.svg');
-	ctx.drawImage(A, canvas.width / 2 + canvas.height / 8 - 8, canvas.height / 4 - 8 + ranksOffset * 2 + yOffset, 32, 16);
-	ctx.fillText(humanReadable(user.counts.A), canvas.width / 2 + canvas.height / 8 + 32, canvas.height / 4 + ranksOffset * 2 + 6 + yOffset);
-	const output = [canvas, ctx, user];
-	return output;
-}
-
-async function drawPlays(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let user = input[2];
-
-	const yOffset = 25;
-
-	ctx.font = 'bold 16px sans-serif';
-	ctx.textAlign = 'center';
-
-	const playHours = Math.floor(user.secondsPlayed / 60 / 60);
-
-	ctx.fillText('Hours:', canvas.width / 8 * 7, canvas.height / 4 + 6 - 40 + yOffset);
-	ctx.fillText(humanReadable(playHours.toString()), canvas.width / 8 * 7, canvas.height / 4 + 6 - 20 + yOffset);
-	ctx.fillText('Plays:', canvas.width / 8 * 7, canvas.height / 4 + 6 + 20 + yOffset);
-	ctx.fillText(humanReadable(user.counts.plays), canvas.width / 8 * 7, canvas.height / 4 + 6 + 40 + yOffset);
 	const output = [canvas, ctx, user];
 	return output;
 }
@@ -293,37 +135,6 @@ async function drawFooter(input) {
 	// Write the title of the player
 	ctx.font = '12px sans-serif';
 	ctx.fillStyle = '#ffffff';
-
-	//Set join time
-	const month = new Array();
-	month[0] = 'January';
-	month[1] = 'February';
-	month[2] = 'March';
-	month[3] = 'April';
-	month[4] = 'May';
-	month[5] = 'June';
-	month[6] = 'July';
-	month[7] = 'August';
-	month[8] = 'September';
-	month[9] = 'October';
-	month[10] = 'November';
-	month[11] = 'December';
-	const joinDay = user.raw_joinDate.substring(8, 10);
-	var joinDayEnding = 'th';
-	if (joinDay === '01' || joinDay === '21' || joinDay === '31') {
-		joinDayEnding = 'st';
-	} else if (joinDay === '02' || joinDay === '22') {
-		joinDayEnding = 'nd';
-	} else if (joinDay === '03' || joinDay === '23') {
-		joinDayEnding = 'rd';
-	}
-	const joinMonth = month[user.raw_joinDate.substring(5, 7) - 1];
-	const joinYear = user.raw_joinDate.substring(0, 4);
-	const joinDate = joinDay + joinDayEnding + ' ' + joinMonth + ' ' + joinYear;
-
-	ctx.textAlign = 'left';
-	ctx.fillText(`Started playing osu! on ${joinDate}`, 5, canvas.height - 5);
-
 	ctx.textAlign = 'right';
 	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 5, canvas.height - 5);
 
@@ -331,66 +142,46 @@ async function drawFooter(input) {
 	return output;
 }
 
-async function drawTopPlays(input) {
+async function drawTopPlays(input, osuApi) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
-
-	// eslint-disable-next-line no-undef
-	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-	});
-
-	// Write the title of the player
-	ctx.font = 'bold 25px sans-serif';
-	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'center';
-	ctx.fillText('Top Plays', canvas.width / 2, canvas.height / 2 - 20);
 
 	const scores = await osuApi.getUserBest({ u: user.name });
 
-	for (let i = 0; i < scores.length && i < 5; i++) {
-		roundedRect(ctx, 10, canvas.height / 2 + canvas.height / 10 * i - 10, canvas.width - 20, canvas.height / 12, 5);
+	for (let i = 0; i < scores.length && i < 10; i++) {
+		roundedRect(ctx, 10, canvas.height / 12 * 1.5 + canvas.height / 12 * i, canvas.width - 20, canvas.height / 13, 5);
 
 		const rankImage = await Canvas.loadImage(getRankImage(scores[i].rank));
-		ctx.drawImage(rankImage, 20, canvas.height / 2 + canvas.height / 10 * i - 10 + canvas.height / 12 / 2 - 16, 64, 32);
+		ctx.drawImage(rankImage, 20, canvas.height / 12 * 1.5 + canvas.height / 12 * i + canvas.height / 12 / 2 - 8, 32, 16);
 
-		// Write the title of the player
-		ctx.font = 'bold 25px sans-serif';
+		ctx.font = 'bold 15px sans-serif';
 		ctx.fillStyle = '#FF66AB';
-		ctx.textAlign = 'center';
-		ctx.fillText(Math.floor(scores[i].pp) + 'pp', 625,  canvas.height / 2 + canvas.height / 10 * i - 8 + canvas.height / 10 / 2);
+		ctx.textAlign = 'right';
+		ctx.fillText(Math.floor(scores[i].pp) + 'pp', 680,  canvas.height / 12 * 1.5 + canvas.height / 12 * i + canvas.height / 12 / 2 + 5);
+
+		const beatmap = await osuApi.getBeatmaps({ b: scores[i].beatmapId });
+
+		ctx.font = 'bold 12px sans-serif';
+		ctx.fillStyle = '#FFFFFF';
+		ctx.textAlign = 'left';
+		ctx.fillText(`${beatmap[0].title} by ${beatmap[0].artist}`, 60,  canvas.height / 12 * 1.5 + canvas.height / 12 * i + canvas.height / 12 / 2);
+
+		ctx.font = 'bold 10px sans-serif';
+		ctx.fillStyle = '#FFCC22';
+		ctx.textAlign = 'left';
+		ctx.fillText(beatmap[0].version, 60,  canvas.height / 12 * 1.5 + canvas.height / 12 * i + canvas.height / 12 / 2 + 10);
+
+		const accuracy = (scores[i].counts[300] * 100 + scores[i].counts[100] * 33.33 + scores[i].counts[50] * 16.67) / (parseInt(scores[i].counts[300]) + parseInt(scores[i].counts[100]) + parseInt(scores[i].counts[50]) + parseInt(scores[i].counts.miss));
 		
+		const combo = `(${scores[i].maxCombo}/${beatmap[0].maxCombo})`;
+
+		ctx.font = 'bold 10px sans-serif';
+		ctx.fillStyle = '#FFCC22';
+		ctx.textAlign = 'right';
+		ctx.fillText(combo + ' ' + Math.round(accuracy*100)/100+'%', 600,  canvas.height / 12 * 1.5 + canvas.height / 12 * i + canvas.height / 12 / 2 + 5);
 	}
 
-	const output = [canvas, ctx, user];
-	return output;
-}
-
-async function drawAvatar(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let user = input[2];
-
-	const yOffset = 25;
-
-	//Get a circle in the middle for inserting the player avatar
-	ctx.beginPath();
-	ctx.arc(canvas.width / 2, canvas.height / 4 + yOffset, canvas.height / 8, 0, Math.PI * 2, true);
-	ctx.closePath();
-	ctx.clip();
-
-	//Draw a shape onto the main canvas in the middle 
-	try {
-		const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${user.id}`);
-		ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 8, canvas.height / 8 + yOffset, canvas.height / 4, canvas.height / 4);
-	} catch (error) {
-		const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-		ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 8, canvas.height / 8 + yOffset, canvas.height / 4, canvas.height / 4);
-	}
 	const output = [canvas, ctx, user];
 	return output;
 }
@@ -403,7 +194,6 @@ function humanReadable(input) {
 		}
 		output = output + input.charAt(i);
 	}
-
 	return output;
 }
 
