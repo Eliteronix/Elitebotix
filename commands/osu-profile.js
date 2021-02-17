@@ -101,7 +101,7 @@ async function getProfile(msg, username) {
 			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'osu-profile.png');
 
 			//Send attachment
-			await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>`, attachment);
+			await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`e!osu-top ${user.name}\` for top plays`, attachment);
 			processingMessage.delete();
 		})
 		.catch(err => {

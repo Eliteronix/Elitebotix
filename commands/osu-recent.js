@@ -72,29 +72,6 @@ async function getScore(msg, username) {
 						linkMode = 'fruits';
 					}
 
-					//Get Mods
-					// 1 -> NF
-					// 2 -> Easy
-					// 4 -> Nothing
-					// 8 -> Hidden
-
-					// 16 -> HardRock
-					// 32 -> Sudden Death
-					// 64 -> DoubleTime
-					// 128 -> Relax
-
-					// 256 -> HalfTime
-					// 512 -> NightCore
-					// 1024 -> Flashlight
-					// 2048 -> Nothing
-
-					// 4096 -> SpunOut
-					// 8192 -> AutoPilot
-					// 16384 -> Nothing
-
-					// 16416 -> Perfect + Nothing (16384)
-					// 576 -> Nightcore + DoubleTime
-
 					let mods = '';
 					let modsBits = scores[0].raw_mods;
 					let PFpossible = false;
@@ -154,6 +131,7 @@ async function getScore(msg, username) {
 						modsBits = modsBits - 8;
 					}
 					if (modsBits >= 4) {
+						mods = 'TD' + mods;
 						modsBits = modsBits - 4;
 					}
 					if (modsBits >= 2) {
