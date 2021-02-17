@@ -37,8 +37,20 @@ module.exports = {
 			//Get profiles by arguments
 			let i;
 			for (i = 0; i < args.length; i++) {
-				const userDisplayName = args[i];
-				getScore(msg, userDisplayName);
+				if (args[i].startsWith('<@!') && args[i].endsWith('>')) {
+					const discordUser = await DBDiscordUsers.findOne({
+						where: { userId: args[i].replace('<@!','').replace('>','') },
+					});
+
+					if (discordUser && discordUser.osuUserId) {
+						getScore(msg, discordUser.osuUserId);
+					} else {
+						msg.channel.send(`${args[i]} doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`e!osu-link <username>\`.`);
+						getScore(msg, args[i]);
+					}
+				} else {
+					getScore(msg, args[i]);
+				}
 			}
 		}
 	},
