@@ -121,7 +121,7 @@ async function drawTitle(input) {
 		title = `✰ ${user.name}' top plays ✰`;
 	}
 
-	roundedRect(ctx, canvas.width/2 - title.length*8.5, 10, title.length*17, canvas.height / 12, 5, '28', '28', '28', 0.75);
+	roundedRect(ctx, canvas.width/2 - title.length*8.5, canvas.height/50, title.length*17, canvas.height / 12, 5, '28', '28', '28', 0.75);
 
 	// Write the title of the player
 	ctx.font = '30px sans-serif';
