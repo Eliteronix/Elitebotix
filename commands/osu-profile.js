@@ -33,8 +33,20 @@ module.exports = {
 			//Get profiles by arguments
 			let i;
 			for (i = 0; i < args.length; i++) {
-				const userDisplayName = args[i];
-				getProfile(msg, userDisplayName);
+				if (args[i].startsWith('<@!') && args[i].endsWith('>')) {
+					const discordUser = await DBDiscordUsers.findOne({
+						where: { userId: args[i].replace('<@!','').replace('>','') },
+					});
+
+					if (discordUser && discordUser.osuUserId) {
+						getProfile(msg, discordUser.osuUserId);
+					} else {
+						msg.channel.send(`${args[i]} doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`e!osu-link <username>\`.`);
+						getProfile(msg, args[i]);
+					}
+				} else {
+					getProfile(msg, args[i]);
+				}
 			}
 		}
 	},
@@ -56,7 +68,7 @@ async function getProfile(msg, username) {
 				where: { osuUserId: user.id },
 			})
 				.then(discordUser => {
-					if(discordUser && discordUser.osuUserId){
+					if (discordUser && discordUser.osuUserId) {
 						discordUser.osuName = user.name;
 						discordUser.osuPP = user.pp.raw;
 						discordUser.osuRank = user.pp.rank;
@@ -224,7 +236,7 @@ async function drawLevel(input) {
 	ctx.textAlign = 'center';
 	ctx.fillText('Ranked:', canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * -1 + 6 - 8 + yOffset);
 	ctx.fillText(rankedScore, canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * -1 + 6 + 8 + yOffset);
-	ctx.fillText('Total:', canvas.width / 4 + 15, canvas.height / 2 + 6 - 8+ yOffset);
+	ctx.fillText('Total:', canvas.width / 4 + 15, canvas.height / 2 + 6 - 8 + yOffset);
 	ctx.fillText(totalScore, canvas.width / 4 + 15, canvas.height / 2 + 6 + 8 + yOffset);
 	ctx.fillText('Acc:', canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * 1 + 6 - 8 + yOffset);
 	ctx.fillText(user.accuracyFormatted, canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * 1 + 6 + 8 + yOffset);
