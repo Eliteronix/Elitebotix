@@ -1,7 +1,8 @@
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBGuilds, DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
+const { prefix } = require('../config.json');
 
 module.exports = {
 	name: 'osu-top',
@@ -32,11 +33,10 @@ module.exports = {
 			}
 		} else {
 			//Get profiles by arguments
-			let i;
-			for (i = 0; i < args.length; i++) {
+			for (let i = 0; i < args.length; i++) {
 				if (args[i].startsWith('<@!') && args[i].endsWith('>')) {
 					const discordUser = await DBDiscordUsers.findOne({
-						where: { userId: args[i].replace('<@!','').replace('>','') },
+						where: { userId: args[i].replace('<@!', '').replace('>', '') },
 					});
 
 					if (discordUser && discordUser.osuUserId) {
@@ -46,14 +46,26 @@ module.exports = {
 						getTopPlays(msg, args[i]);
 					}
 				} else {
-					getTopPlays(msg, args[i]);
+
+					if (args.length === 1 && !(args[0].startsWith('<@!')) && !(args[0].endsWith('>'))) {
+						const discordUser = await DBDiscordUsers.findOne({
+							where: { userId: msg.author.id }
+						});
+						if (!(discordUser) || discordUser && !(discordUser.osuUserId)) {
+							getTopPlays(msg, args[i], true);
+						} else {
+							getTopPlays(msg, args[i]);
+						}
+					} else {
+						getTopPlays(msg, args[i]);
+					}
 				}
 			}
 		}
 	}
 };
 
-async function getTopPlays(msg, username) {
+async function getTopPlays(msg, username, noLinkedAccount) {
 	// eslint-disable-next-line no-undef
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -107,11 +119,39 @@ async function getTopPlays(msg, username) {
 			//Create as an attachment
 			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'osu-profile.png');
 
+			//Define prefix command
+			let guildPrefix;
+
+			//Check if the channel type is not a dm
+			if (msg.channel.type === 'dm') {
+				//Set prefix to standard prefix
+				guildPrefix = prefix;
+			} else {
+				//Get guild from the db
+				const guild = await DBGuilds.findOne({
+					where: { guildId: msg.guild.id },
+				});
+
+				//Check if a guild record was found
+				if (guild) {
+					if (guild.customPrefixUsed) {
+						guildPrefix = guild.customPrefix;
+					} else {
+						//Set prefix to standard prefix
+						guildPrefix = prefix;
+					}
+				} else {
+					//Set prefix to standard prefix
+					guildPrefix = prefix;
+				}
+			}
+
 			//Send attachment
-			await msg.channel.send(
-				`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`e!osu-profile ${user.name}\` for a profile card`,
-				attachment
-			);
+			if (noLinkedAccount) {
+				await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`${guildPrefix}osu-profile ${user.name}\` for a profile card\nFeel free to use \`${guildPrefix}osu-link ${user.name}\` if the specified account is yours.`, attachment);
+			} else {
+				await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`e!osu-profile ${user.name}\` for a profile card`, attachment);
+			}
 			processingMessage.delete();
 		})
 		.catch(err => {
@@ -133,7 +173,7 @@ async function drawTitle(input) {
 		title = `✰ ${user.name}' top plays ✰`;
 	}
 
-	roundedRect(ctx, canvas.width/2 - title.length*8.5, canvas.height/50, title.length*17, canvas.height / 12, 5, '28', '28', '28', 0.75);
+	roundedRect(ctx, canvas.width / 2 - title.length * 8.5, canvas.height / 50, title.length * 17, canvas.height / 12, 5, '28', '28', '28', 0.75);
 
 	// Write the title of the player
 	ctx.font = '30px sans-serif';
@@ -181,9 +221,9 @@ async function drawTopPlays(input, osuApi) {
 
 		const beatmap = await osuApi.getBeatmaps({ b: scores[i].beatmapId });
 		let beatmapTitle = `${beatmap[0].title} by ${beatmap[0].artist}`;
-		const maxSize = canvas.width/250*19;
+		const maxSize = canvas.width / 250 * 19;
 		if (beatmapTitle.length > maxSize) {
-			beatmapTitle = beatmapTitle.substring(0, maxSize-3)+'...';
+			beatmapTitle = beatmapTitle.substring(0, maxSize - 3) + '...';
 		}
 
 		ctx.font = 'bold 15px sans-serif';
