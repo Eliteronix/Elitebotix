@@ -1,7 +1,8 @@
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBGuilds, DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
+const { prefix } = require('../config.json');
 
 module.exports = {
 	name: 'osu-profile',
@@ -31,11 +32,10 @@ module.exports = {
 			}
 		} else {
 			//Get profiles by arguments
-			let i;
-			for (i = 0; i < args.length; i++) {
+			for (let i = 0; i < args.length; i++) {
 				if (args[i].startsWith('<@!') && args[i].endsWith('>')) {
 					const discordUser = await DBDiscordUsers.findOne({
-						where: { userId: args[i].replace('<@!','').replace('>','') },
+						where: { userId: args[i].replace('<@!', '').replace('>', '') },
 					});
 
 					if (discordUser && discordUser.osuUserId) {
@@ -45,14 +45,26 @@ module.exports = {
 						getProfile(msg, args[i]);
 					}
 				} else {
-					getProfile(msg, args[i]);
+
+					if (args.length === 1 && !(args[0].startsWith('<@!')) && !(args[0].endsWith('>'))) {
+						const discordUser = await DBDiscordUsers.findOne({
+							where: { userId: msg.author.id }
+						});
+						if (!(discordUser) || discordUser && !(discordUser.osuUserId)) {
+							getProfile(msg, args[i], true);
+						} else {
+							getProfile(msg, args[i]);
+						}
+					} else {
+						getProfile(msg, args[i]);
+					}
 				}
 			}
 		}
 	},
 };
 
-async function getProfile(msg, username) {
+async function getProfile(msg, username, noLinkedAccount) {
 	// eslint-disable-next-line no-undef
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -112,8 +124,39 @@ async function getProfile(msg, username) {
 			//Create as an attachment
 			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'osu-profile.png');
 
+			//Define prefix command
+			let guildPrefix;
+
+			//Check if the channel type is not a dm
+			if (msg.channel.type === 'dm') {
+				//Set prefix to standard prefix
+				guildPrefix = prefix;
+			} else {
+				//Get guild from the db
+				const guild = await DBGuilds.findOne({
+					where: { guildId: msg.guild.id },
+				});
+
+				//Check if a guild record was found
+				if (guild) {
+					if (guild.customPrefixUsed) {
+						guildPrefix = guild.customPrefix;
+					} else {
+						//Set prefix to standard prefix
+						guildPrefix = prefix;
+					}
+				} else {
+					//Set prefix to standard prefix
+					guildPrefix = prefix;
+				}
+			}
+
 			//Send attachment
-			await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`e!osu-top ${user.name}\` for top plays`, attachment);
+			if (noLinkedAccount) {
+				await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`${guildPrefix}osu-top ${user.name}\` for top plays\nFeel free to use \`${guildPrefix}osu-link ${user.name}\` if the specified account is yours.`, attachment);
+			} else {
+				await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`e!osu-top ${user.name}\` for top plays`, attachment);
+			}
 			processingMessage.delete();
 		})
 		.catch(err => {
