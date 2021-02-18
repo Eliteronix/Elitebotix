@@ -153,7 +153,7 @@ async function getProfile(msg, username, noLinkedAccount) {
 
 			//Send attachment
 			if (noLinkedAccount) {
-				await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`${guildPrefix}osu-top ${user.name}\` for top plays\nFeel free to use \`${guildPrefix}osu-link ${user.name}\` if the specified account is yours.`, attachment);
+				await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`${guildPrefix}osu-top ${user.name}\` for top plays\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(' ','_')}\` if the specified account is yours.`, attachment);
 			} else {
 				await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`e!osu-top ${user.name}\` for top plays`, attachment);
 			}
