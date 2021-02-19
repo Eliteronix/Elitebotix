@@ -1,11 +1,6 @@
-//Require discord.js module
 const Discord = require('discord.js');
-
-//import the config variables from config.json
-const { prefix } = require('../config.json');
-
-//Get Guilds Table
 const { DBGuilds, DBAutoRoles } = require('../dbObjects');
+const getGuildPrefix = require('../getGuildPrefix');
 
 module.exports = {
 	name: 'settings',
@@ -73,27 +68,7 @@ module.exports = {
 			autoRolesList[i] = autoRole.name;
 		}
 
-		//Define prefix command
-		let guildPrefix;
-
-		//Check if the channel type is not a dm
-		if (msg.channel.type === 'dm') {
-			//Set prefix to standard prefix
-			guildPrefix = prefix;
-		} else {
-			//Check if a guild record was found
-			if (guild) {
-				if (guild.customPrefixUsed) {
-					guildPrefix = guild.customPrefix;
-				} else {
-					//Set prefix to standard prefix
-					guildPrefix = prefix;
-				}
-			} else {
-				//Set prefix to standard prefix
-				guildPrefix = prefix;
-			}
-		}
+		let guildPrefix = await getGuildPrefix(msg);
 
 		//Set the output string
 		const autoRolesString = autoRolesList.join(', ') || 'None.';

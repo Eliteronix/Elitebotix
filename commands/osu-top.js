@@ -1,8 +1,8 @@
-const { DBGuilds, DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { prefix } = require('../config.json');
+const getGuildPrefix = require('../getGuildPrefix');
 
 module.exports = {
 	name: 'osu-top',
@@ -120,31 +120,7 @@ async function getTopPlays(msg, username, noLinkedAccount) {
 			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'osu-profile.png');
 
 			//Define prefix command
-			let guildPrefix;
-
-			//Check if the channel type is not a dm
-			if (msg.channel.type === 'dm') {
-				//Set prefix to standard prefix
-				guildPrefix = prefix;
-			} else {
-				//Get guild from the db
-				const guild = await DBGuilds.findOne({
-					where: { guildId: msg.guild.id },
-				});
-
-				//Check if a guild record was found
-				if (guild) {
-					if (guild.customPrefixUsed) {
-						guildPrefix = guild.customPrefix;
-					} else {
-						//Set prefix to standard prefix
-						guildPrefix = prefix;
-					}
-				} else {
-					//Set prefix to standard prefix
-					guildPrefix = prefix;
-				}
-			}
+			let guildPrefix = await getGuildPrefix(msg);
 
 			//Send attachment
 			if (noLinkedAccount) {

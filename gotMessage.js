@@ -52,8 +52,7 @@ module.exports = async function (msg) {
 
 	//check if the message wasn't sent by the bot itself or another bot
 	if (!(msg.author.bot)) {
-		//Define prefix command
-		const guildPrefix = getGuildPrefix(msg);
+		const guildPrefix = await getGuildPrefix(msg);
 
 		//Define if it is a command with prefix
 		//Split the message into an args array
