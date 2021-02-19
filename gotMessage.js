@@ -1,16 +1,6 @@
-//import the config variables from config.json
-const { prefix } = require('./config.json');
-
-//Import Guilds Table
-const { DBGuilds } = require('./dbObjects');
-
-//require the file system module
+const getGuildPrefix = require('./getGuildPrefix');
 const fs = require('fs');
-
-//require the discord.js module
 const Discord = require('discord.js');
-
-//Create cooldowns collection
 const cooldowns = new Discord.Collection();
 
 module.exports = async function (msg) {
@@ -63,31 +53,7 @@ module.exports = async function (msg) {
 	//check if the message wasn't sent by the bot itself or another bot
 	if (!(msg.author.bot)) {
 		//Define prefix command
-		let guildPrefix;
-
-		//Check if the channel type is not a dm
-		if (msg.channel.type === 'dm') {
-			//Set prefix to standard prefix
-			guildPrefix = prefix;
-		} else {
-			//Get guild from the db
-			const guild = await DBGuilds.findOne({
-				where: { guildId: msg.guild.id },
-			});
-
-			//Check if a guild record was found
-			if (guild) {
-				if (guild.customPrefixUsed) {
-					guildPrefix = guild.customPrefix;
-				} else {
-					//Set prefix to standard prefix
-					guildPrefix = prefix;
-				}
-			} else {
-				//Set prefix to standard prefix
-				guildPrefix = prefix;
-			}
-		}
+		const guildPrefix = getGuildPrefix(msg);
 
 		//Define if it is a command with prefix
 		//Split the message into an args array
