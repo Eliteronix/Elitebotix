@@ -1,14 +1,7 @@
-//Import Tables
-const { DBGuilds, DBDiscordUsers } = require('../dbObjects');
-
-//import the config variables from config.json
-const { prefix } = require('../config.json');
-
-//Require node-osu module
+const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-
-//Require Banchojs module
 const Banchojs = require('bancho.js');
+const getGuildPrefix = require('../getGuildPrefix');
 
 module.exports = {
 	name: 'osu-link',
@@ -37,32 +30,7 @@ module.exports = {
 			where: { userId: msg.author.id },
 		});
 
-		//Define prefix command
-		let guildPrefix;
-
-		//Check if the channel type is not a dm
-		if (msg.channel.type === 'dm') {
-			//Set prefix to standard prefix
-			guildPrefix = prefix;
-		} else {
-			//Get guild from the db
-			const guild = await DBGuilds.findOne({
-				where: { guildId: msg.guild.id },
-			});
-
-			//Check if a guild record was found
-			if (guild) {
-				if (guild.customPrefixUsed) {
-					guildPrefix = guild.customPrefix;
-				} else {
-					//Set prefix to standard prefix
-					guildPrefix = prefix;
-				}
-			} else {
-				//Set prefix to standard prefix
-				guildPrefix = prefix;
-			}
-		}
+		let guildPrefix = await getGuildPrefix(msg);
 
 		//Check for people that already have their discord account linked to that osu! account
 

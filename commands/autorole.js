@@ -1,7 +1,5 @@
-const { DBAutoRoles, DBGuilds } = require('../dbObjects');
-
-//import the config variables from config.json
-const { prefix } = require('../config.json');
+const { DBAutoRoles } = require('../dbObjects');
+const getGuildPrefix = require('../getGuildPrefix');
 
 module.exports = {
 	name: 'autorole',
@@ -86,32 +84,7 @@ module.exports = {
 			//Output autorole list
 			msg.channel.send(`List of autoroles: ${autoRolesString}`);
 		} else {
-			//Define prefix command
-			let guildPrefix;
-
-			//Check if the channel type is not a dm
-			if (msg.channel.type === 'dm') {
-				//Set prefix to standard prefix
-				guildPrefix = prefix;
-			} else {
-				//Get guild from the db
-				const guild = await DBGuilds.findOne({
-					where: { guildId: msg.guild.id },
-				});
-
-				//Check if a guild record was found
-				if (guild) {
-					if (guild.customPrefixUsed) {
-						guildPrefix = guild.customPrefix;
-					} else {
-						//Set prefix to standard prefix
-						guildPrefix = prefix;
-					}
-				} else {
-					//Set prefix to standard prefix
-					guildPrefix = prefix;
-				}
-			}
+			let guildPrefix = await getGuildPrefix(msg);
 
 			//If no proper first argument is given
 			msg.channel.send(`Please add if you want to add, remove or list the autorole(s). Proper usage: \`${guildPrefix}${this.name} ${this.usage}\``);

@@ -1,7 +1,5 @@
 const { DBGuilds } = require('../dbObjects');
-
-//import the config variables from config.json
-const { prefix } = require('../config.json');
+const getGuildPrefix = require('../getGuildPrefix');
 
 module.exports = {
 	name: 'tempvoice',
@@ -29,27 +27,7 @@ module.exports = {
 				guild.temporaryVoices = true;
 				guild.save();
 
-				//Define prefix command
-				let guildPrefix;
-
-				//Check if the channel type is not a dm
-				if (msg.channel.type === 'dm') {
-					//Set prefix to standard prefix
-					guildPrefix = prefix;
-				} else {
-					//Check if a guild record was found
-					if (guild) {
-						if (guild.customPrefixUsed) {
-							guildPrefix = guild.customPrefix;
-						} else {
-							//Set prefix to standard prefix
-							guildPrefix = prefix;
-						}
-					} else {
-						//Set prefix to standard prefix
-						guildPrefix = prefix;
-					}
-				}
+				let guildPrefix = await getGuildPrefix(msg);
 
 				if (guild.addTemporaryText) {
 					msg.channel.send(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
@@ -79,27 +57,7 @@ module.exports = {
 				//Create guild in db if it wasn't there yet
 				DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, temporaryVoices: true, addTemporaryText: true });
 
-				//Define prefix command
-				let guildPrefix;
-
-				//Check if the channel type is not a dm
-				if (msg.channel.type === 'dm') {
-					//Set prefix to standard prefix
-					guildPrefix = prefix;
-				} else {
-					//Check if a guild record was found
-					if (guild) {
-						if (guild.customPrefixUsed) {
-							guildPrefix = guild.customPrefix;
-						} else {
-							//Set prefix to standard prefix
-							guildPrefix = prefix;
-						}
-					} else {
-						//Set prefix to standard prefix
-						guildPrefix = prefix;
-					}
-				}
+				let guildPrefix = await getGuildPrefix(msg);
 
 				msg.channel.send(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
 			} else if (args[0] === 'disable') {

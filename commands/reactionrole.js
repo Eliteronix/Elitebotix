@@ -1,11 +1,6 @@
-//require the discord.js module
 const Discord = require('discord.js');
-
-//Import Tables
-const { DBGuilds, DBReactionRolesHeader, DBReactionRoles } = require('../dbObjects');
-
-//import the config variables from config.json
-const { prefix } = require('../config.json');
+const { DBReactionRolesHeader, DBReactionRoles } = require('../dbObjects');
+const getGuildPrefix = require('../getGuildPrefix');
 
 module.exports = {
 	name: 'reactionrole',
@@ -423,32 +418,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 }
 
 async function sendHelp(msg) {
-	//Define prefix command
-	let guildPrefix;
-
-	//Check if the channel type is not a dm
-	if (msg.channel.type === 'dm') {
-		//Set prefix to standard prefix
-		guildPrefix = prefix;
-	} else {
-		//Get guild from the db
-		const guild = await DBGuilds.findOne({
-			where: { guildId: msg.guild.id },
-		});
-
-		//Check if a guild record was found
-		if (guild) {
-			if (guild.customPrefixUsed) {
-				guildPrefix = guild.customPrefix;
-			} else {
-				//Set prefix to standard prefix
-				guildPrefix = prefix;
-			}
-		} else {
-			//Set prefix to standard prefix
-			guildPrefix = prefix;
-		}
-	}
+	let guildPrefix = await getGuildPrefix(msg);
 
 	let helpString = `Correct usage for creating a new embed:\n\`\`\`${guildPrefix}reactionrole embed add <name of the embed>\`\`\``;
 	helpString += `Correct usage for removing an existing embed:\n\`\`\`${guildPrefix}reactionrole embed remove <embedID which can be found in the footer>\`\`\``;
