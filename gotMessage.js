@@ -2,7 +2,7 @@ const getGuildPrefix = require('./getGuildPrefix');
 const fs = require('fs');
 const Discord = require('discord.js');
 const cooldowns = new Discord.Collection();
-const { distance, closest } = require('fastest-levenshtein');
+const { closest } = require('fastest-levenshtein');
 
 module.exports = async function (msg) {
 	//Create a collection for the commands
@@ -99,7 +99,6 @@ module.exports = async function (msg) {
 			}
 
 			const closestMatch = closest(commandName, commandNames);
-			console.log(distance(commandName, closestMatch));
 
 			if (args[0]) {
 				msg.channel.send(`Could not find command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch} ${args.join(' ')}\`?`);
