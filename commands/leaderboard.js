@@ -1,6 +1,8 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
+const Canvas = require('canvas');
+const getGuildPrefix = require('../getGuildPrefix');
 
 module.exports = {
 	name: 'leaderboard',
@@ -24,13 +26,15 @@ module.exports = {
 				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
+			
 			let processingMessage = await msg.channel.send('Processing guild members...');
+			
 			msg.guild.members.fetch()
 				.then(async (guildMembers) => {
 					const members = guildMembers.array();
 					let osuAccounts = [];
 					for (let i = 0; i < members.length; i++) {
-						if(i%100 === 0){
+						if (i % 150 === 0) {
 							processingMessage.edit(`Grabbing osu! accounts...\nLooked at ${i} out of ${members.length} server members so far.`);
 						}
 						const discordUser = await DBDiscordUsers.findOne({
@@ -72,37 +76,35 @@ module.exports = {
 
 					processingMessage.edit('Creating leaderboard...');
 
-					//Send embed
-					const leaderBoardEmbed = new Discord.MessageEmbed()
-						.setColor('#FF66AB')
-						.setTitle(`${msg.guild.name}'s osu! leaderboard`)
-						.setDescription('Leaderboard consists of all players that have their osu! account connected to the bot.\nData is being updated once a day or when `osu-profile <username>` is being used.`')
-						.setTimestamp();
+					const canvasWidth = 1000;
+					const canvasHeight = 125 + 20 + osuAccounts.length * 80;
 
-					if (msg.guild.iconURL()) {
-						leaderBoardEmbed.setThumbnail(`${msg.guild.iconURL()}`);
+					//Create Canvas
+					const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+					//Get context and load the image
+					const ctx = canvas.getContext('2d');
+					const background = await Canvas.loadImage('./other/osu-background.png');
+					for(let i = 0; i < canvas.height/500; i++){
+						ctx.drawImage(background, 0, i*500, 1000, 500);
 					}
 
-					for (let i = 0; i < osuAccounts.length; i++) {
-						const member = await msg.guild.members.fetch(osuAccounts[i].userId);
+					let elements = [canvas, ctx, osuAccounts];
 
-						let userDisplayName = member.user.username;
+					elements = await drawTitle(elements, msg);
 
-						if (member.nickname) {
-							userDisplayName = member.nickname;
-						}
+					elements = await drawAccounts(elements, msg);
 
-						let verified = '❌';
+					await drawFooter(elements);
 
-						if (osuAccounts[i].osuVerified) {
-							verified = '☑️';
-						}
+					//Create as an attachment
+					const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'osu-profile.png');
 
-						leaderBoardEmbed.addField(`${i + 1}. ${userDisplayName} / ${member.user.username}#${member.user.discriminator}`, `#${humanReadable(osuAccounts[i].osuRank)} | ${humanReadable(Math.floor(osuAccounts[i].osuPP).toString())}pp | Account: ${osuAccounts[i].osuName} ${verified}`);
-					}
+					const guildPrefix = await getGuildPrefix(msg);
 
+					//Send attachment
+					await msg.channel.send(`The leaderboard consists of all players that have their osu! account connected to the bot.\nUse \`${guildPrefix}osu-link <username>\` to connect your osu! account.\nData is being updated once a day or when \`${guildPrefix}osu-profile <username>\` is being used.`, attachment);
 					processingMessage.delete();
-					msg.channel.send(leaderBoardEmbed);
 				})
 				.catch(err => {
 					processingMessage.edit('Error');
@@ -146,5 +148,83 @@ function humanReadable(input) {
 		output = output + input.charAt(i);
 	}
 
+	return output;
+}
+
+async function drawTitle(input, msg) {
+	let canvas = input[0];
+	let ctx = input[1];
+	let osuAccounts = input[2];
+
+	// Write the title of the map
+	ctx.font = 'bold 35px sans-serif';
+	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = 'center';
+	ctx.fillText(`${msg.guild.name}'s osu! leaderboard`, canvas.width / 2, 50);
+
+	const output = [canvas, ctx, osuAccounts];
+	return output;
+}
+
+async function drawAccounts(input, msg) {
+	let canvas = input[0];
+	let ctx = input[1];
+	let osuAccounts = input[2];
+
+	// Write the players
+	ctx.textAlign = 'left';
+
+	for (let i = 0; i < osuAccounts.length; i++) {
+		const member = await msg.guild.members.fetch(osuAccounts[i].userId);
+
+		let userDisplayName = member.user.username;
+
+		if (member.nickname) {
+			userDisplayName = member.nickname;
+		}
+
+		let verified = '⨯';
+
+		if (osuAccounts[i].osuVerified) {
+			verified = '✔';
+		}
+
+		if(i === 0){
+			ctx.fillStyle = '#E2B007';
+		} else if(i === 1) {
+			ctx.fillStyle = '#C4CACE';
+		} else if(i === 2) {
+			ctx.fillStyle = '#CC8E34';
+		} else {
+			ctx.fillStyle = '#ffffff';
+		}
+
+		ctx.font = 'bold 20px sans-serif';
+		ctx.fillText(`${i + 1}.`, canvas.width / 1000 * 225, 125 + i*80);
+		ctx.fillText(`${userDisplayName} | ${member.user.username}#${member.user.discriminator}`, canvas.width / 1000 * 300, 125 + i*80);
+		ctx.font = '20px sans-serif';
+		ctx.fillText(`#${humanReadable(osuAccounts[i].osuRank)}`, canvas.width / 1000 * 300, 155 + i*80);
+		ctx.fillText(`${humanReadable(Math.floor(osuAccounts[i].osuPP).toString())}pp`, canvas.width / 1000 * 450, 155 + i*80);
+		ctx.fillText(`${verified} ${osuAccounts[i].osuName}`, canvas.width / 1000 * 600, 155 + i*80);
+	}
+
+	const output = [canvas, ctx, osuAccounts];
+	return output;
+}
+
+async function drawFooter(input) {
+	let canvas = input[0];
+	let ctx = input[1];
+	let osuAccounts = input[2];
+
+	let today = new Date().toLocaleDateString();
+
+	ctx.font = 'bold 15px sans-serif';
+	ctx.fillStyle = '#ffffff';
+
+	ctx.textAlign = 'right';
+	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
+
+	const output = [canvas, ctx, osuAccounts];
 	return output;
 }
