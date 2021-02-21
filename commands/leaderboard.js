@@ -77,7 +77,7 @@ module.exports = {
 					processingMessage.edit('Creating leaderboard...');
 
 					const canvasWidth = 1000;
-					const canvasHeight = 125 + 20 + osuAccounts.length * 80;
+					const canvasHeight = 125 + 20 + osuAccounts.length * 90;
 
 					//Create Canvas
 					const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -199,13 +199,13 @@ async function drawAccounts(input, msg) {
 			ctx.fillStyle = '#ffffff';
 		}
 
-		ctx.font = 'bold 20px sans-serif';
-		ctx.fillText(`${i + 1}.`, canvas.width / 1000 * 225, 125 + i*80);
-		ctx.fillText(`${userDisplayName} | ${member.user.username}#${member.user.discriminator}`, canvas.width / 1000 * 300, 125 + i*80);
-		ctx.font = '20px sans-serif';
-		ctx.fillText(`#${humanReadable(osuAccounts[i].osuRank)}`, canvas.width / 1000 * 300, 155 + i*80);
-		ctx.fillText(`${humanReadable(Math.floor(osuAccounts[i].osuPP).toString())}pp`, canvas.width / 1000 * 450, 155 + i*80);
-		ctx.fillText(`${verified} ${osuAccounts[i].osuName}`, canvas.width / 1000 * 600, 155 + i*80);
+		ctx.font = 'bold 25px sans-serif';
+		ctx.fillText(`${i + 1}.`, canvas.width / 1000 * 125, 125 + i*90);
+		ctx.fillText(`${userDisplayName} | ${member.user.username}#${member.user.discriminator}`, canvas.width / 1000 * 200, 125 + i*90);
+		ctx.font = '25px sans-serif';
+		ctx.fillText(`#${humanReadable(osuAccounts[i].osuRank)}`, canvas.width / 1000 * 200, 160 + i*90);
+		ctx.fillText(`${humanReadable(Math.floor(osuAccounts[i].osuPP).toString())}pp`, canvas.width / 1000 * 400, 160 + i*90);
+		ctx.fillText(`${verified} ${osuAccounts[i].osuName}`, canvas.width / 1000 * 550, 160 + i*90);
 	}
 
 	const output = [canvas, ctx, osuAccounts];
