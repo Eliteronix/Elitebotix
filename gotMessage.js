@@ -2,6 +2,7 @@ const getGuildPrefix = require('./getGuildPrefix');
 const fs = require('fs');
 const Discord = require('discord.js');
 const cooldowns = new Discord.Collection();
+const { distance, closest } = require('fastest-levenshtein');
 
 module.exports = async function (msg) {
 	//Create a collection for the commands
@@ -65,17 +66,58 @@ module.exports = async function (msg) {
 			args = msg.content.trim().split(/ +/);
 		}
 		//Delete the first item from the args array and use it for the command variable
-		const commandName = args.shift().toLowerCase();
+		let commandName = args.shift().toLowerCase();
 
 		//Set the command and check for possible uses of aliases
-		const command = msg.client.commands.get(commandName)
+		let command = msg.client.commands.get(commandName)
 			|| msg.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
 		//if there is no command used then break
-		if (!command) return;
+		if (!command && prefixCommand === true) {
+			let commandNames = [];
+			const commandArray = msg.client.commands.array();
+
+			//define variables
+			const categories = ['general', 'server-admin', 'osu'];
+
+			//Developer
+			if (msg.author.id === '138273136285057025') {
+				categories.push('debug');
+			}
+
+			const authorPerms = msg.channel.permissionsFor(msg.member);
+
+			for (let i = 0; i < commandArray.length; i++) {
+				if (commandArray[i].prefixCommand === true && categories.includes(commandArray[i].tags) && authorPerms.has(commandArray[i].permissions)) {
+					commandNames.push(commandArray[i].name);
+					if (commandArray[i].aliases) {
+						for (let j = 0; j < commandArray[i].aliases.length; j++) {
+							commandNames.push(commandArray[i].aliases[j]);
+						}
+					}
+				}
+			}
+
+			const closestMatch = closest(commandName, commandNames);
+			console.log(distance(commandName, closestMatch));
+
+			if (args[0]) {
+				msg.channel.send(`Could not find command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch} ${args.join(' ')}\`?`);
+			} else {
+				msg.channel.send(`Could not find command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch}\`?`);
+			}
+
+			return;
+
+			//Code below is for using the closestMatch found instead
+			// commandName = closestMatch;
+
+			// command = msg.client.commands.get(commandName)
+			// 	|| msg.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+		}
 
 		//Check if prefix has to be used or not
-		if(command.prefixCommand !== prefixCommand) return;
+		if (command.prefixCommand !== prefixCommand) return;
 
 		//Check if the command can't be used outside of DMs
 		if (command.guildOnly && msg.channel.type === 'dm') {
