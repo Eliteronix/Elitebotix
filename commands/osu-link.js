@@ -150,8 +150,6 @@ async function current(msg, osuApi, discordUser, guildPrefix) {
 }
 
 async function disconnect(msg, discordUser, guildPrefix) {
-	console.log('Disconnect');
-	console.log(discordUser);
 	if (discordUser && discordUser.osuUserId) {
 		discordUser.osuUserId = null;
 		discordUser.osuVerificationCode = null;
