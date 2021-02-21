@@ -115,6 +115,10 @@ module.exports = async function (msg) {
 			// 	|| msg.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 		}
 
+		if (!command) {
+			return;
+		}
+
 		//Check if prefix has to be used or not
 		if (command.prefixCommand !== prefixCommand) return;
 
