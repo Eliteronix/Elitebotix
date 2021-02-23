@@ -67,7 +67,7 @@ async function getBeatmap(msg, beatmap) {
 	await drawBackground(elements);
 
 	//Create as an attachment
-	const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'osu-profile.png');
+	const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-beatmap-${beatmap.id}.png`);
 
 	//Send attachment
 	await msg.channel.send(`Website: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>`, attachment);
@@ -166,10 +166,17 @@ function drawStats(input) {
 	ctx.fillText('Difficulty Rating', canvas.width / 1000 * 330, canvas.height / 500 * 250);
 	ctx.font = 'bold 30px sans-serif';
 	ctx.fillText(`${Math.round(beatmap.difficulty.rating * 100) / 100} ★`, canvas.width / 1000 * 330, canvas.height / 500 * 280);
+	
+	let beatmapMapper = beatmap.creator;
+	const maxSizeMapper = parseInt(canvas.width / 1000 * 12);
+	if (beatmapMapper.length > maxSizeMapper) {
+		beatmapMapper = beatmapMapper.substring(0, maxSizeMapper - 3) + '...';
+	}
+
 	ctx.font = 'bold 15px sans-serif';
 	ctx.fillText('Mapper', canvas.width / 1000 * 330, canvas.height / 500 * 330);
 	ctx.font = 'bold 30px sans-serif';
-	ctx.fillText(beatmap.creator, canvas.width / 1000 * 330, canvas.height / 500 * 360);
+	ctx.fillText(beatmapMapper, canvas.width / 1000 * 330, canvas.height / 500 * 360);
 	ctx.font = 'bold 15px sans-serif';
 	ctx.fillText('User Rating', canvas.width / 1000 * 330, canvas.height / 500 * 420);
 	ctx.font = 'bold 20px sans-serif';
