@@ -93,9 +93,7 @@ async function getTopPlays(msg, username, noLinkedAccount) {
 					console.log(err);
 				});
 
-			let processingMessage = await msg.channel.send(
-				`[${user.name}] Processing...`
-			);
+			let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 			const canvasWidth = 1000;
 			const canvasHeight = 500;
