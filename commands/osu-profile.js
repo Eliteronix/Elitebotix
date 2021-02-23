@@ -122,7 +122,7 @@ async function getProfile(msg, username, noLinkedAccount) {
 			await drawAvatar(elements);
 
 			//Create as an attachment
-			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'osu-profile.png');
+			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-profile-${user.id}.png`);
 
 			let guildPrefix = await getGuildPrefix(msg);
 

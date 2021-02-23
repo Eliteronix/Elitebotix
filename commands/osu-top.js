@@ -117,7 +117,7 @@ async function getTopPlays(msg, username, noLinkedAccount) {
 			await drawFooter(elements);
 
 			//Create as an attachment
-			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'osu-profile.png');
+			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}.png`);
 
 			//Define prefix command
 			let guildPrefix = await getGuildPrefix(msg);

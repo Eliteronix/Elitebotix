@@ -98,7 +98,7 @@ module.exports = {
 					await drawFooter(elements);
 
 					//Create as an attachment
-					const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'osu-profile.png');
+					const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-leaderboard-${msg.guild.name}.png`);
 
 					const guildPrefix = await getGuildPrefix(msg);
 
