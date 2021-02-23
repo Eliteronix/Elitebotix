@@ -13,7 +13,7 @@ module.exports = {
 	args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
-	tags: 'osu', //'ecw2021'
+	tags: 'debug', //'ecw2021'
 	prefixCommand: true,
 	async execute(msg, args) {
 		if (args[0].toLowerCase() !== 'nm' && args[0].toLowerCase() !== 'hd' && args[0].toLowerCase() !== 'hr' && args[0].toLowerCase() !== 'dt' && args[0].toLowerCase() !== 'fm') {
