@@ -64,141 +64,14 @@ async function getScore(msg, username) {
 	osuApi.getUserRecent({ u: username })
 		.then(scores => {
 			if (!(scores[0])) {
-				return msg.channel.send(`Couldn't find any recent scores for ${username}`);
+				return msg.channel.send(`Couldn't find any recent scores for \`${username}\``);
 			}
 			osuApi.getBeatmaps({ b: scores[0].beatmapId })
 				.then(async (beatmaps) => {
 					const user = await osuApi.getUser({ u: username });
 
-					let mods = '';
-					let modsBits = scores[0].raw_mods;
-					let PFpossible = false;
-					let hasNC = false;
-					if (modsBits >= 16384) {
-						PFpossible = true;
-						modsBits = modsBits - 16384;
-					}
-					if (modsBits >= 8192) {
-						mods = 'AP';
-						modsBits = modsBits - 8192;
-					}
-					if (modsBits >= 4096) {
-						mods = 'SO' + mods;
-						modsBits = modsBits - 4096;
-					}
-					if (modsBits >= 2048) {
-						modsBits = modsBits - 2048;
-					}
-					if (modsBits >= 1024) {
-						mods = 'FL' + mods;
-						modsBits = modsBits - 1024;
-					}
-					if (modsBits >= 512) {
-						hasNC = true;
-						mods = 'NC' + mods;
-						modsBits = modsBits - 512;
-					}
-					if (modsBits >= 256) {
-						mods = 'HT' + mods;
-						modsBits = modsBits - 256;
-					}
-					if (modsBits >= 128) {
-						mods = 'RX' + mods;
-						modsBits = modsBits - 128;
-					}
-					if (modsBits >= 64) {
-						if (!(hasNC)) {
-							mods = 'DT' + mods;
-						}
-						modsBits = modsBits - 64;
-					}
-					if (modsBits >= 32) {
-						if (PFpossible) {
-							mods = 'PF' + mods;
-						} else {
-							mods = 'SD' + mods;
-						}
-						modsBits = modsBits - 32;
-					}
-					if (modsBits >= 16) {
-						mods = 'HR' + mods;
-						modsBits = modsBits - 16;
-					}
-					if (modsBits >= 8) {
-						mods = 'HD' + mods;
-						modsBits = modsBits - 8;
-					}
-					if (modsBits >= 4) {
-						mods = 'TD' + mods;
-						modsBits = modsBits - 4;
-					}
-					if (modsBits >= 2) {
-						mods = 'EZ' + mods;
-						modsBits = modsBits - 2;
-					}
-					if (modsBits >= 1) {
-						mods = 'NF' + mods;
-						modsBits = modsBits - 1;
-					}
-
-					let modsReadable = '';
-					for (let i = 0; i < mods.length; i++) {
-						if (i > 0 && (mods.length - i) % 2 === 0) {
-							modsReadable = modsReadable + ',';
-						}
-						modsReadable = modsReadable + mods.charAt(i);
-					}
-					if (modsReadable === '') {
-						modsReadable = 'NoMod';
-					}
-
-					//Rank
-					let grade = scores[0].rank;
-					if (grade === 'X') {
-						grade = 'SS';
-					} else if (grade === 'XH') {
-						grade = 'Silver SS';
-					} else if (grade === 'SH') {
-						grade = 'Silver S';
-					}
-
-					//Make Score Human readable
-					let score = '';
-					for (let i = 0; i < scores[0].score.length; i++) {
-						if (i > 0 && (scores[0].score.length - i) % 3 === 0) {
-							score = score + '.';
-						}
-						score = score + scores[0].score.charAt(i);
-					}
-
-					//PP
-					let pp = 'None';
-					if (scores[0].pp) {
-						pp = scores[0].pp;
-					}
-
 					//Calculate accuracy
 					const accuracy = (scores[0].counts[300] * 100 + scores[0].counts[100] * 33.33 + scores[0].counts[50] * 16.67) / (parseInt(scores[0].counts[300]) + parseInt(scores[0].counts[100]) + parseInt(scores[0].counts[50]) + parseInt(scores[0].counts.miss));
-
-					//Send embed
-					const scoresInfoEmbed = new Discord.MessageEmbed()
-						.addFields(
-							{ name: 'Mode', value: `${beatmaps[0].mode}`, inline: true },
-							{ name: 'Mods', value: `${modsReadable}`, inline: true },
-							{ name: 'Player', value: `${user.name}`, inline: true },
-							{ name: 'BPM', value: `${beatmaps[0].bpm}`, inline: true },
-							{ name: 'Grade', value: `${grade}`, inline: true },
-							{ name: 'Score', value: `${score}`, inline: true },
-							{ name: 'PP', value: `${pp}`, inline: true },
-							{ name: 'Accuracy', value: `${accuracy.toFixed(2)}%`, inline: true },
-							{ name: 'Combo', value: `${scores[0].maxCombo}/${beatmaps[0].maxCombo}`, inline: true },
-							{ name: '300', value: `${scores[0].counts[300]}`, inline: true },
-							{ name: '100', value: `${scores[0].counts[100]}`, inline: true },
-							{ name: '50', value: `${scores[0].counts[50]}`, inline: true },
-							{ name: 'Miss', value: `${scores[0].counts.miss}`, inline: true },
-						);
-
-					msg.channel.send(scoresInfoEmbed);
 
 					let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
@@ -219,8 +92,6 @@ async function getScore(msg, username) {
 
 					elements = await drawCover(elements);
 
-					// elements = await drawLevel(elements);
-
 					// elements = await drawRanks(elements);
 
 					// elements = await drawPlays(elements);
@@ -236,7 +107,7 @@ async function getScore(msg, username) {
 
 					// //Send attachment
 					// if (noLinkedAccount) {
-					await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nWebsite: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\nUse \`${guildPrefix}osu-top ${user.name.replace(' ', '_')}\` for top plays\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(' ', '_')}\` if the specified account is yours.`, attachment);
+					await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\nUse \`${guildPrefix}osu-top ${user.name.replace(' ', '_')}\` for top plays\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(' ', '_')}\` if the specified account is yours.`, attachment);
 					// } else {
 					// 	await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`e!osu-top ${user.name.replace(' ', '_')}\` for top plays`, attachment);
 					// }
@@ -248,25 +119,30 @@ async function getScore(msg, username) {
 		})
 		.catch(err => {
 			if (err.message === 'Not found') {
-				msg.channel.send(`Could not find user "${username}".`);
+				msg.channel.send(`Couldn't find any recent scores for \`${username}\``);
 			} else {
 				console.log(err);
 			}
 		});
 }
 
-function drawTitle(input){
+async function drawTitle(input) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let score = input[2];
 	let beatmap = input[3];
+
+	const gameMode = getGameMode(beatmap);
+	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
+	ctx.drawImage(modePic, canvas.width / 1000 * 10, canvas.height / 500 * 40, canvas.height / 500 * 35, canvas.height / 500 * 35);
 
 	// Write the title of the beatmap
 	ctx.font = '30px sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'left';
 	ctx.fillText(`${beatmap.title} by ${beatmap.artist}`, canvas.width / 100, canvas.height / 500 * 35);
-	ctx.fillText(`${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 100, canvas.height / 500 * 70);
+	ctx.font = '25px sans-serif';
+	ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100}   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
 
 	const output = [canvas, ctx, score, beatmap];
 	return output;
@@ -278,15 +154,44 @@ async function drawCover(input) {
 	let score = input[2];
 	let beatmap = input[3];
 
+	let background;
+
 	//Draw a shape onto the main canvas in the top left
 	try {
-		const background = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapSetId}/covers/cover.jpg`);
-		ctx.drawImage(background, 0, canvas.height/6.25, canvas.width, background.height/background.width*canvas.width);
-		console.log(background);
+		background = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapSetId}/covers/cover.jpg`);
+		ctx.drawImage(background, 0, canvas.height / 6.25, canvas.width, background.height / background.width * canvas.width);
 	} catch (error) {
-		const background = await Canvas.loadImage('https://osu.ppy.sh/assets/images/default-bg.7594e945.png');
-		ctx.drawImage(background, 0, 0, canvas.width, background.height/background.width*canvas.width);
+		background = await Canvas.loadImage('https://osu.ppy.sh/assets/images/default-bg.7594e945.png');
+		ctx.drawImage(background, 0, canvas.height / 6.25, canvas.width, background.height / background.width * canvas.width);
 	}
+
+	//Check for HD mod
+
+	let gradeSS;
+	let gradeS;
+
+	const mods = getMods(score.raw_mods);
+
+	if(mods.includes('HD')){
+		gradeSS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS-Silver.6681366c.svg');
+		gradeS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-S-Silver.811ae28c.svg');
+	} else {
+		gradeSS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS.a21de890.svg');
+		gradeS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-S.3b4498a9.svg');
+	}
+
+	const gradeA = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-A.d785e824.svg');
+	const gradeB = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-B.e19fc91b.svg');
+	const gradeC = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-C.6bb75adc.svg');
+	const gradeD = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-D.6b170c4c.svg');
+
+	ctx.drawImage(gradeSS, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 40 + canvas.height / 6.25, 32, 16);
+	ctx.drawImage(gradeS, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 68 + canvas.height / 6.25, 32, 16);
+	ctx.drawImage(gradeA, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 96 + canvas.height / 6.25, 32, 16);
+	ctx.drawImage(gradeB, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 124 + canvas.height / 6.25, 32, 16);
+	ctx.drawImage(gradeC, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 152 + canvas.height / 6.25, 32, 16);
+	ctx.drawImage(gradeD, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 180 + canvas.height / 6.25, 32, 16);
+
 	const output = [canvas, ctx, score, beatmap];
 	return output;
 }
@@ -317,27 +222,6 @@ function humanReadable(input) {
 		output = output + input.charAt(i);
 	}
 	return output;
-}
-
-function getRankImage(rank) {
-	let URL = 'https://osu.ppy.sh/assets/images/GradeSmall-D.6b170c4c.svg'; //D Rank
-
-	if (rank === 'XH') {
-		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-SS-Silver.6681366c.svg';
-	} else if (rank === 'X') {
-		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-SS.a21de890.svg';
-	} else if (rank === 'SH') {
-		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-S-Silver.811ae28c.svg';
-	} else if (rank === 'S') {
-		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-S.3b4498a9.svg';
-	} else if (rank === 'A') {
-		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-A.d785e824.svg';
-	} else if (rank === 'B') {
-		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-B.e19fc91b.svg';
-	} else if (rank === 'C') {
-		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-C.6bb75adc.svg';
-	}
-	return URL;
 }
 
 function roundedRect(ctx, x, y, width, height, radius, R, G, B, A) {
@@ -460,4 +344,18 @@ function getModImage(mod) {
 	}
 
 	return URL;
+}
+
+function getGameMode(beatmap) {
+	let gameMode;
+	if (beatmap.mode === 'Standard') {
+		gameMode = 'osu';
+	} else if (beatmap.mode === 'Taiko') {
+		gameMode = 'taiko';
+	} else if (beatmap.mode === 'Mania') {
+		gameMode = 'mania';
+	} else if (beatmap.mode === 'Catch the Beat') {
+		gameMode = 'fruits';
+	}
+	return gameMode;
 }
