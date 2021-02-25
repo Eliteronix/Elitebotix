@@ -153,6 +153,7 @@ async function drawCover(input) {
 
 	let background;
 
+	ctx.globalAlpha = 0.6;
 	//Draw a shape onto the main canvas in the top left
 	try {
 		background = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapSetId}/covers/cover.jpg`);
@@ -161,6 +162,7 @@ async function drawCover(input) {
 		background = await Canvas.loadImage('https://osu.ppy.sh/assets/images/default-bg.7594e945.png');
 		ctx.drawImage(background, 0, canvas.height / 6.25, canvas.width, background.height / background.width * canvas.width);
 	}
+	ctx.globalAlpha = 1;
 
 	//Check for HD mod
 
@@ -182,12 +184,42 @@ async function drawCover(input) {
 	const gradeC = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-C.6bb75adc.svg');
 	const gradeD = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-D.6b170c4c.svg');
 
-	ctx.globalAlpha = 0.25;
+	ctx.globalAlpha = 0.2;
+
+	console.log(score);
+	if (score.rank === 'XH' || score.rank === 'X') {
+		ctx.globalAlpha = 1;
+	}
 	ctx.drawImage(gradeSS, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 40 + canvas.height / 6.25, 32, 16);
+	if (score.rank === 'XH' || score.rank === 'X') {
+		ctx.globalAlpha = 0.5;
+	} else if (score.rank === 'SH' || score.rank === 'S') {
+		ctx.globalAlpha = 1;
+	}
 	ctx.drawImage(gradeS, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 68 + canvas.height / 6.25, 32, 16);
+	if (score.rank === 'SH' || score.rank === 'S') {
+		ctx.globalAlpha = 0.5;
+	} else if (score.rank === 'A') {
+		ctx.globalAlpha = 1;
+	}
 	ctx.drawImage(gradeA, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 96 + canvas.height / 6.25, 32, 16);
+	if (score.rank === 'A') {
+		ctx.globalAlpha = 0.5;
+	} else if (score.rank === 'B') {
+		ctx.globalAlpha = 1;
+	}
 	ctx.drawImage(gradeB, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 124 + canvas.height / 6.25, 32, 16);
+	if (score.rank === 'B') {
+		ctx.globalAlpha = 0.5;
+	} else if (score.rank === 'C') {
+		ctx.globalAlpha = 1;
+	}
 	ctx.drawImage(gradeC, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 152 + canvas.height / 6.25, 32, 16);
+	if (score.rank === 'C') {
+		ctx.globalAlpha = 0.5;
+	} else if (score.rank === 'D') {
+		ctx.globalAlpha = 1;
+	}
 	ctx.drawImage(gradeD, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 180 + canvas.height / 6.25, 32, 16);
 
 	ctx.globalAlpha = 1;
@@ -249,11 +281,38 @@ async function drawCover(input) {
 	ctx.lineWidth = 4;
 	ctx.stroke();
 
-	console.log(mods);
+	//Write rank
+	ctx.font = '70px sans-serif';
+	ctx.textAlign = 'center';
+	ctx.strokeStyle = 'black';
+	ctx.lineWidth = 4;
+	ctx.strokeText(score.rank.replace('X', ''), canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
+	ctx.fillStyle = '#FFFFFF';
+	ctx.fillText(score.rank.replace('X', ''), canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
+
+	//mods
 	for (let i = 0; i < mods.length; i++) {
 		const modImage = await Canvas.loadImage(getModImage(mods[i]));
-		ctx.drawImage(modImage, canvas.width / 900 * 300 + canvas.height/500*27*i, (background.height / background.width * canvas.width) / 250 * 28 + canvas.height / 6.25, canvas.width/1000*33, canvas.height/500*23);
+		ctx.drawImage(modImage, canvas.width / 900 * 300 + canvas.width / 1000 * 40 * i, (background.height / background.width * canvas.width) / 250 * 28 + canvas.height / 6.25, canvas.width / 1000 * 33, canvas.height / 500 * 23);
 	}
+
+	//Write Score
+	ctx.font = '60px sans-serif';
+	ctx.textAlign = 'left';
+	ctx.strokeStyle = 'black';
+	ctx.lineWidth = 4;
+	ctx.strokeText(humanReadable(score.score), canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 100 + canvas.height / 6.25);
+	ctx.fillStyle = '#FFFFFF';
+	ctx.fillText(humanReadable(score.score), canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 100 + canvas.height / 6.25);
+
+	//Write Played By and Submitted on
+	ctx.font = '10px sans-serif';
+	ctx.textAlign = 'left';
+	ctx.strokeStyle = 'black';
+	ctx.lineWidth = 1;
+	ctx.strokeText(score.raw_date, canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 150 + canvas.height / 6.25);
+	ctx.fillStyle = '#FFFFFF';
+	ctx.fillText(score.raw_date, canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 150 + canvas.height / 6.25);
 
 	const output = [canvas, ctx, score, beatmap];
 	return output;
