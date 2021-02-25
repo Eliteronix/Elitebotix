@@ -182,6 +182,7 @@ async function drawCover(input) {
 	const gradeC = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-C.6bb75adc.svg');
 	const gradeD = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-D.6b170c4c.svg');
 
+	ctx.globalAlpha = 0.25;
 	ctx.drawImage(gradeSS, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 40 + canvas.height / 6.25, 32, 16);
 	ctx.drawImage(gradeS, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 68 + canvas.height / 6.25, 32, 16);
 	ctx.drawImage(gradeA, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 96 + canvas.height / 6.25, 32, 16);
@@ -189,7 +190,7 @@ async function drawCover(input) {
 	ctx.drawImage(gradeC, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 152 + canvas.height / 6.25, 32, 16);
 	ctx.drawImage(gradeD, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 180 + canvas.height / 6.25, 32, 16);
 
-	//https://stackoverflow.com/questions/14193956/draw-arc-will-linear-gradient-html5-canvas
+	ctx.globalAlpha = 1;
 
 	//Calculate accuracy
 	const accuracy = ((score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss))) / 100;
@@ -205,6 +206,7 @@ async function drawCover(input) {
 	gradient.addColorStop(1, '#B2FE67'); // Green
 
 
+	//Draw inner circle
 	ctx.beginPath();
 	ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 90, Math.PI * -0.5, (2 * Math.PI) * accuracy + Math.PI * -0.5);
 	ctx.strokeStyle = gradient;
@@ -246,6 +248,12 @@ async function drawCover(input) {
 	ctx.strokeStyle = '#FF5858'; //Red / D Color
 	ctx.lineWidth = 4;
 	ctx.stroke();
+
+	console.log(mods);
+	for (let i = 0; i < mods.length; i++) {
+		const modImage = await Canvas.loadImage(getModImage(mods[i]));
+		ctx.drawImage(modImage, canvas.width / 900 * 300 + canvas.height/500*27*i, (background.height / background.width * canvas.width) / 250 * 28 + canvas.height / 6.25, canvas.width/1000*33, canvas.height/500*23);
+	}
 
 	const output = [canvas, ctx, score, beatmap];
 	return output;
