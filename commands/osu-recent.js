@@ -70,9 +70,6 @@ async function getScore(msg, username) {
 				.then(async (beatmaps) => {
 					const user = await osuApi.getUser({ u: username });
 
-					//Calculate accuracy
-					const accuracy = (scores[0].counts[300] * 100 + scores[0].counts[100] * 33.33 + scores[0].counts[50] * 16.67) / (parseInt(scores[0].counts[300]) + parseInt(scores[0].counts[100]) + parseInt(scores[0].counts[50]) + parseInt(scores[0].counts.miss));
-
 					let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 					const canvasWidth = 1000;
@@ -172,7 +169,7 @@ async function drawCover(input) {
 
 	const mods = getMods(score.raw_mods);
 
-	if(mods.includes('HD')){
+	if (mods.includes('HD')) {
 		gradeSS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS-Silver.6681366c.svg');
 		gradeS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-S-Silver.811ae28c.svg');
 	} else {
@@ -191,6 +188,64 @@ async function drawCover(input) {
 	ctx.drawImage(gradeB, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 124 + canvas.height / 6.25, 32, 16);
 	ctx.drawImage(gradeC, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 152 + canvas.height / 6.25, 32, 16);
 	ctx.drawImage(gradeD, canvas.width / 900 * 50, (background.height / background.width * canvas.width) / 250 * 180 + canvas.height / 6.25, 32, 16);
+
+	//https://stackoverflow.com/questions/14193956/draw-arc-will-linear-gradient-html5-canvas
+
+	//Calculate accuracy
+	const accuracy = ((score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss))) / 100;
+
+	ctx.beginPath();
+	ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 90, 0, (2 * Math.PI));
+	ctx.strokeStyle = '#000000';
+	ctx.lineWidth = 23;
+	ctx.stroke();
+
+	var gradient = ctx.createLinearGradient(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 28 + canvas.height / 6.25, canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 208 + canvas.height / 6.25);
+	gradient.addColorStop(0, '#65C8FA'); //Blue
+	gradient.addColorStop(1, '#B2FE67'); // Green
+
+
+	ctx.beginPath();
+	ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 90, Math.PI * -0.5, (2 * Math.PI) * accuracy + Math.PI * -0.5);
+	ctx.strokeStyle = gradient;
+	ctx.lineWidth = 23;
+	ctx.stroke();
+
+	ctx.beginPath();
+	ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 75, Math.PI * -0.5, (2 * Math.PI) + Math.PI * -0.5);
+	ctx.strokeStyle = '#BE0089'; //Red/Pink / SS Color
+	ctx.lineWidth = 4;
+	ctx.stroke();
+
+	ctx.beginPath();
+	ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 75, Math.PI * -0.5, (2 * Math.PI) * 0.99 + Math.PI * -0.5);
+	ctx.strokeStyle = '#0D8790'; //Blue / S Color
+	ctx.lineWidth = 4;
+	ctx.stroke();
+
+	ctx.beginPath();
+	ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 75, Math.PI * -0.5, (2 * Math.PI) * 0.92 + Math.PI * -0.5);
+	ctx.strokeStyle = '#72C904'; //Green / A Color
+	ctx.lineWidth = 4;
+	ctx.stroke();
+
+	ctx.beginPath();
+	ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 75, Math.PI * -0.5, (2 * Math.PI) * 0.86 + Math.PI * -0.5);
+	ctx.strokeStyle = '#D99D03'; //Yellow / B Color
+	ctx.lineWidth = 4;
+	ctx.stroke();
+
+	ctx.beginPath();
+	ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 75, Math.PI * -0.5, (2 * Math.PI) * 0.8 + Math.PI * -0.5);
+	ctx.strokeStyle = '#EA7948'; //Orange / C Color
+	ctx.lineWidth = 4;
+	ctx.stroke();
+
+	ctx.beginPath();
+	ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 75, Math.PI * -0.5, (2 * Math.PI) * 0.6 + Math.PI * -0.5);
+	ctx.strokeStyle = '#FF5858'; //Red / D Color
+	ctx.lineWidth = 4;
+	ctx.stroke();
 
 	const output = [canvas, ctx, score, beatmap];
 	return output;
