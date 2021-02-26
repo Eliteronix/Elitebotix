@@ -70,6 +70,16 @@ async function getScore(msg, username) {
 				.then(async (beatmaps) => {
 					const user = await osuApi.getUser({ u: username });
 
+					const beatmapMode = getBeatmapModeId(beatmaps[0]);
+
+					let lookedUpScore;
+
+					try {
+						lookedUpScore = await osuApi.getScores({ b: scores[0].beatmapId, u: user.id, m: beatmapMode, mods: scores[0].raw_mods });
+					} catch (err) {
+						//No score found
+					}
+
 					let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 					const canvasWidth = 1000;
@@ -83,19 +93,17 @@ async function getScore(msg, username) {
 					const background = await Canvas.loadImage('./other/osu-background.png');
 					ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-					let elements = [canvas, ctx, scores[0], beatmaps[0]];
+					let elements = [canvas, ctx, scores[0], beatmaps[0], user, lookedUpScore[0]];
 
 					elements = await drawTitle(elements);
 
-					elements = await drawCover(elements, user);
+					elements = await drawCover(elements);
 
-					// elements = await drawRanks(elements);
+					elements = await drawFooter(elements);
 
-					// elements = await drawPlays(elements);
+					elements = await drawAccInfo(elements);
 
-					// elements = await drawFooter(elements);
-
-					await drawFooter(elements);
+					await drawUserInfo(elements);
 
 					//Create as an attachment
 					const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmaps[0].id}.png`);
@@ -128,6 +136,8 @@ async function drawTitle(input) {
 	let ctx = input[1];
 	let score = input[2];
 	let beatmap = input[3];
+	let user = input[4];
+	let lookedUpScore = input[5];
 
 	const gameMode = getGameMode(beatmap);
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
@@ -141,15 +151,17 @@ async function drawTitle(input) {
 	ctx.font = '25px sans-serif';
 	ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100}   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
 
-	const output = [canvas, ctx, score, beatmap];
+	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
 	return output;
 }
 
-async function drawCover(input, user) {
+async function drawCover(input) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let score = input[2];
 	let beatmap = input[3];
+	let user = input[4];
+	let lookedUpScore = input[5];
 
 	let background;
 
@@ -163,8 +175,6 @@ async function drawCover(input, user) {
 		ctx.drawImage(background, 0, canvas.height / 6.25, canvas.width, background.height / background.width * canvas.width);
 	}
 	ctx.globalAlpha = 1;
-
-	//Check for HD mod
 
 	let gradeSS;
 	let gradeS;
@@ -285,9 +295,9 @@ async function drawCover(input, user) {
 	ctx.textAlign = 'center';
 	ctx.strokeStyle = 'black';
 	ctx.lineWidth = 4;
-	ctx.strokeText(score.rank.replace('X', ''), canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
+	ctx.strokeText(score.rank.replace('X', 'SS').replace('H',''), canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
 	ctx.fillStyle = '#FFFFFF';
-	ctx.fillText(score.rank.replace('X', ''), canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
+	ctx.fillText(score.rank.replace('X', 'SS').replace('H',''), canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
 
 	//mods
 	for (let i = 0; i < mods.length; i++) {
@@ -307,33 +317,33 @@ async function drawCover(input, user) {
 	roundedRect(ctx, canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 125 + canvas.height / 6.25, 220, 50, 5, '00', '00', '00', 0.75);
 
 	let month = 'January';
-	if(score.raw_date.substring(5,7) === '02'){
+	if (score.raw_date.substring(5, 7) === '02') {
 		month = 'February';
-	} else if(score.raw_date.substring(5,7) === '03'){
+	} else if (score.raw_date.substring(5, 7) === '03') {
 		month = 'March';
-	}  else if(score.raw_date.substring(5,7) === '04'){
+	} else if (score.raw_date.substring(5, 7) === '04') {
 		month = 'April';
-	} else if(score.raw_date.substring(5,7) === '05'){
+	} else if (score.raw_date.substring(5, 7) === '05') {
 		month = 'May';
-	} else if(score.raw_date.substring(5,7) === '06'){
+	} else if (score.raw_date.substring(5, 7) === '06') {
 		month = 'June';
-	} else if(score.raw_date.substring(5,7) === '07'){
+	} else if (score.raw_date.substring(5, 7) === '07') {
 		month = 'July';
-	} else if(score.raw_date.substring(5,7) === '08'){
+	} else if (score.raw_date.substring(5, 7) === '08') {
 		month = 'August';
-	} else if(score.raw_date.substring(5,7) === '09'){
+	} else if (score.raw_date.substring(5, 7) === '09') {
 		month = 'September';
-	} else if(score.raw_date.substring(5,7) === '10'){
+	} else if (score.raw_date.substring(5, 7) === '10') {
 		month = 'October';
-	} else if(score.raw_date.substring(5,7) === '11'){
+	} else if (score.raw_date.substring(5, 7) === '11') {
 		month = 'November';
-	} else if(score.raw_date.substring(5,7) === '12'){
+	} else if (score.raw_date.substring(5, 7) === '12') {
 		month = 'December';
 	}
-	const formattedSubmitDate = `${score.raw_date.substring(8,10)} ${month} ${score.raw_date.substring(0,4)} ${score.raw_date.substring(11,16)}`;
+	const formattedSubmitDate = `${score.raw_date.substring(8, 10)} ${month} ${score.raw_date.substring(0, 4)} ${score.raw_date.substring(11, 16)}`;
 
 	//Write Played By and Submitted on
-	ctx.font = '11px sans-serif';
+	ctx.font = '10px sans-serif';
 	ctx.textAlign = 'left';
 	ctx.fillStyle = '#FFFFFF';
 	ctx.fillText('Played by', canvas.width / 900 * 310, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
@@ -341,7 +351,7 @@ async function drawCover(input, user) {
 	ctx.fillText('Submitted on', canvas.width / 900 * 310, (background.height / background.width * canvas.width) / 250 * 162 + canvas.height / 6.25);
 	ctx.fillText(formattedSubmitDate, canvas.width / 900 * 380, (background.height / background.width * canvas.width) / 250 * 162 + canvas.height / 6.25);
 
-	const output = [canvas, ctx, score, beatmap];
+	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
 	return output;
 }
 
@@ -350,6 +360,8 @@ async function drawFooter(input) {
 	let ctx = input[1];
 	let score = input[2];
 	let beatmap = input[3];
+	let user = input[4];
+	let lookedUpScore = input[5];
 
 	let today = new Date().toLocaleDateString();
 
@@ -358,7 +370,120 @@ async function drawFooter(input) {
 	ctx.textAlign = 'right';
 	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
 
-	const output = [canvas, ctx, score, beatmap];
+	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
+	return output;
+}
+
+async function drawAccInfo(input) {
+	let canvas = input[0];
+	let ctx = input[1];
+	let score = input[2];
+	let beatmap = input[3];
+	let user = input[4];
+	let lookedUpScore = input[5];
+	
+	//Calculate accuracy
+	const accuracy = (score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss));
+
+	//Acc
+	roundedRect(ctx, canvas.width / 1000 * 600, canvas.height / 500 * 365, 110, 50, 5, '00', '00', '00', 0.5);
+	ctx.font = '18px sans-serif';
+	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = 'center';
+	ctx.fillText('Accuracy', canvas.width / 1000 * 600 + 55, canvas.height / 500 * 385);
+	ctx.fillText(`${Math.round(accuracy*100)/100}%`, canvas.width / 1000 * 600 + 55, canvas.height / 500 * 410);
+	//Combo
+	roundedRect(ctx, canvas.width / 1000 * 735, canvas.height / 500 * 365, 110, 50, 5, '00', '00', '00', 0.5);
+	ctx.font = '18px sans-serif';
+	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = 'center';
+	ctx.fillText('Max Combo', canvas.width / 1000 * 735 + 55, canvas.height / 500 * 385);
+	if(score.perfect){
+		ctx.fillStyle = '#B3FF66';
+	}
+	ctx.fillText(`${score.maxCombo}x`, canvas.width / 1000 * 735 + 55, canvas.height / 500 * 410);
+	
+	let pp = 'None';
+	if(lookedUpScore && lookedUpScore.pp && lookedUpScore.score === score.score){
+		pp = Math.floor(lookedUpScore.pp);
+	}
+
+	//PP
+	roundedRect(ctx, canvas.width / 1000 * 870, canvas.height / 500 * 365, 110, 50, 5, '00', '00', '00', 0.5);
+	ctx.font = '18px sans-serif';
+	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = 'center';
+	ctx.fillText('PP', canvas.width / 1000 * 870 + 55, canvas.height / 500 * 385);
+	ctx.fillText(`${pp}`, canvas.width / 1000 * 870 + 55, canvas.height / 500 * 410);
+	//300
+	roundedRect(ctx, canvas.width / 1000 * 600, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
+	ctx.font = '18px sans-serif';
+	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = 'center';
+	ctx.fillText('300s', canvas.width / 1000 * 600 + 40, canvas.height / 500 * 445);
+	ctx.fillText(`${score.counts[300]}`, canvas.width / 1000 * 600 + 40, canvas.height / 500 * 470);
+	//100
+	roundedRect(ctx, canvas.width / 1000 * 700, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
+	ctx.font = '18px sans-serif';
+	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = 'center';
+	ctx.fillText('100s', canvas.width / 1000 * 700 + 40, canvas.height / 500 * 445);
+	ctx.fillText(`${score.counts[100]}`, canvas.width / 1000 * 700 + 40, canvas.height / 500 * 470);
+	//50
+	roundedRect(ctx, canvas.width / 1000 * 800, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
+	ctx.font = '18px sans-serif';
+	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = 'center';
+	ctx.fillText('50s', canvas.width / 1000 * 800 + 40, canvas.height / 500 * 445);
+	ctx.fillText(`${score.counts[50]}`, canvas.width / 1000 * 800 + 40, canvas.height / 500 * 470);
+	//Miss
+	roundedRect(ctx, canvas.width / 1000 * 900, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
+	ctx.font = '18px sans-serif';
+	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = 'center';
+	ctx.fillText('Miss', canvas.width / 1000 * 900 + 40, canvas.height / 500 * 445);
+	ctx.fillText(`${score.counts.miss}`, canvas.width / 1000 * 900 + 40, canvas.height / 500 * 470);
+
+	// ctx.fillText(`Player: ${user.name}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 25);
+	// ctx.fillText(`Rank: #${humanReadable(user.pp.rank)}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 55);
+	// ctx.fillText(`PP: ${humanReadable(Math.floor(user.pp.raw).toString())}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 85);
+
+	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
+	return output;
+}
+
+async function drawUserInfo(input) {
+	let canvas = input[0];
+	let ctx = input[1];
+	let score = input[2];
+	let beatmap = input[3];
+	let user = input[4];
+	let lookedUpScore = input[5];
+
+	const userBackground = await Canvas.loadImage('https://osu.ppy.sh/images/headers/profile-covers/c3.jpg');
+
+	roundedImage(ctx, userBackground, canvas.width / 900 * 50, canvas.height / 500 * 375, userBackground.width / 10 * 2, userBackground.height / 10 * 2, 5);
+
+	let userAvatar;
+
+	try {
+		userAvatar = await Canvas.loadImage(`http://s.ppy.sh/a/${user.id}`);
+	} catch (error) {
+		userAvatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
+	}
+
+	roundedRect(ctx, canvas.width / 900 * 50 + userBackground.height / 10 * 2, canvas.height / 500 * 375 + 5, userBackground.width / 10 * 2 - userBackground.height / 10 * 2 - 5, userBackground.height / 10 * 2 - 10, 5, '00', '00', '00', 0.5);
+
+	ctx.font = '20px sans-serif';
+	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = 'left';
+	ctx.fillText(`Player: ${user.name}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 25);
+	ctx.fillText(`Rank: #${humanReadable(user.pp.rank)}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 55);
+	ctx.fillText(`PP: ${humanReadable(Math.floor(user.pp.raw).toString())}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 85);
+
+	roundedImage(ctx, userAvatar, canvas.width / 900 * 50 + 5, canvas.height / 500 * 375 + 5, userBackground.height / 10 * 2 - 10, userBackground.height / 10 * 2 - 10, 5);
+
+	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
 	return output;
 }
 
@@ -386,6 +511,23 @@ function roundedRect(ctx, x, y, width, height, radius, R, G, B, A) {
 	ctx.arcTo(x, y, x, y + radius, radius);
 	ctx.fillStyle = `rgba(${R}, ${G}, ${B}, ${A})`;
 	ctx.fill();
+}
+
+function roundedImage(ctx, image, x, y, width, height, radius) {
+	ctx.beginPath();
+	ctx.moveTo(x, y + radius);
+	ctx.lineTo(x, y + height - radius);
+	ctx.arcTo(x, y + height, x + radius, y + height, radius);
+	ctx.lineTo(x + width - radius, y + height);
+	ctx.arcTo(x + width, y + height, x + width, y + height - radius, radius);
+	ctx.lineTo(x + width, y + radius);
+	ctx.arcTo(x + width, y, x + width - radius, y, radius);
+	ctx.lineTo(x + radius, y);
+	ctx.arcTo(x, y, x, y + radius, radius);
+	ctx.closePath();
+	ctx.clip();
+
+	ctx.drawImage(image, x, y, width, height);
 }
 
 function getMods(input) {
@@ -505,6 +647,20 @@ function getGameMode(beatmap) {
 		gameMode = 'mania';
 	} else if (beatmap.mode === 'Catch the Beat') {
 		gameMode = 'fruits';
+	}
+	return gameMode;
+}
+
+function getBeatmapModeId(beatmap) {
+	let gameMode;
+	if (beatmap.mode === 'Standard') {
+		gameMode = 0;
+	} else if (beatmap.mode === 'Taiko') {
+		gameMode = 1;
+	} else if (beatmap.mode === 'Mania') {
+		gameMode = 3;
+	} else if (beatmap.mode === 'Catch the Beat') {
+		gameMode = 2;
 	}
 	return gameMode;
 }
