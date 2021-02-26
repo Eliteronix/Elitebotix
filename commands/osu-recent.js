@@ -408,7 +408,7 @@ async function drawAccInfo(input) {
 	
 	let pp = 'None';
 	if(lookedUpScore && lookedUpScore.pp && lookedUpScore.score === score.score){
-		pp = Math.floor(lookedUpScore.pp);
+		pp = Math.round(lookedUpScore.pp);
 	}
 
 	//PP
@@ -446,10 +446,6 @@ async function drawAccInfo(input) {
 	ctx.textAlign = 'center';
 	ctx.fillText('Miss', canvas.width / 1000 * 900 + 40, canvas.height / 500 * 445);
 	ctx.fillText(`${score.counts.miss}`, canvas.width / 1000 * 900 + 40, canvas.height / 500 * 470);
-
-	// ctx.fillText(`Player: ${user.name}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 25);
-	// ctx.fillText(`Rank: #${humanReadable(user.pp.rank)}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 55);
-	// ctx.fillText(`PP: ${humanReadable(Math.floor(user.pp.raw).toString())}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 85);
 
 	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
 	return output;
