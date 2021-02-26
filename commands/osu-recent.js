@@ -87,7 +87,7 @@ async function getScore(msg, username) {
 
 					elements = await drawTitle(elements);
 
-					elements = await drawCover(elements);
+					elements = await drawCover(elements, user);
 
 					// elements = await drawRanks(elements);
 
@@ -145,7 +145,7 @@ async function drawTitle(input) {
 	return output;
 }
 
-async function drawCover(input) {
+async function drawCover(input, user) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let score = input[2];
@@ -186,7 +186,6 @@ async function drawCover(input) {
 
 	ctx.globalAlpha = 0.2;
 
-	console.log(score);
 	if (score.rank === 'XH' || score.rank === 'X') {
 		ctx.globalAlpha = 1;
 	}
@@ -305,14 +304,42 @@ async function drawCover(input) {
 	ctx.fillStyle = '#FFFFFF';
 	ctx.fillText(humanReadable(score.score), canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 100 + canvas.height / 6.25);
 
+	roundedRect(ctx, canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 125 + canvas.height / 6.25, 220, 50, 5, '00', '00', '00', 0.75);
+
+	let month = 'January';
+	if(score.raw_date.substring(5,7) === '02'){
+		month = 'February';
+	} else if(score.raw_date.substring(5,7) === '03'){
+		month = 'March';
+	}  else if(score.raw_date.substring(5,7) === '04'){
+		month = 'April';
+	} else if(score.raw_date.substring(5,7) === '05'){
+		month = 'May';
+	} else if(score.raw_date.substring(5,7) === '06'){
+		month = 'June';
+	} else if(score.raw_date.substring(5,7) === '07'){
+		month = 'July';
+	} else if(score.raw_date.substring(5,7) === '08'){
+		month = 'August';
+	} else if(score.raw_date.substring(5,7) === '09'){
+		month = 'September';
+	} else if(score.raw_date.substring(5,7) === '10'){
+		month = 'October';
+	} else if(score.raw_date.substring(5,7) === '11'){
+		month = 'November';
+	} else if(score.raw_date.substring(5,7) === '12'){
+		month = 'December';
+	}
+	const formattedSubmitDate = `${score.raw_date.substring(8,10)} ${month} ${score.raw_date.substring(0,4)} ${score.raw_date.substring(11,16)}`;
+
 	//Write Played By and Submitted on
-	ctx.font = '10px sans-serif';
+	ctx.font = '11px sans-serif';
 	ctx.textAlign = 'left';
-	ctx.strokeStyle = 'black';
-	ctx.lineWidth = 1;
-	ctx.strokeText(score.raw_date, canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 150 + canvas.height / 6.25);
 	ctx.fillStyle = '#FFFFFF';
-	ctx.fillText(score.raw_date, canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 150 + canvas.height / 6.25);
+	ctx.fillText('Played by', canvas.width / 900 * 310, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
+	ctx.fillText(user.name, canvas.width / 900 * 380, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
+	ctx.fillText('Submitted on', canvas.width / 900 * 310, (background.height / background.width * canvas.width) / 250 * 162 + canvas.height / 6.25);
+	ctx.fillText(formattedSubmitDate, canvas.width / 900 * 380, (background.height / background.width * canvas.width) / 250 * 162 + canvas.height / 6.25);
 
 	const output = [canvas, ctx, score, beatmap];
 	return output;
