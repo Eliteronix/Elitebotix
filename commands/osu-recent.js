@@ -93,7 +93,10 @@ async function getScore(msg, username) {
 					const background = await Canvas.loadImage('./other/osu-background.png');
 					ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-					let elements = [canvas, ctx, scores[0], beatmaps[0], user, lookedUpScore[0]];
+					let elements = [canvas, ctx, scores[0], beatmaps[0], user];
+					if(lookedUpScore){
+						elements = [canvas, ctx, scores[0], beatmaps[0], user, lookedUpScore[0]];
+					}
 
 					elements = await drawTitle(elements);
 
