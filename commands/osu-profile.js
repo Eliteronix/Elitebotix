@@ -18,6 +18,7 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args) {
+		const guildPrefix = getGuildPrefix(msg);
 		if (!args[0]) {//Get profile by author if no argument
 			//get discordUser from db
 			const discordUser = await DBDiscordUsers.findOne({
@@ -41,7 +42,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getProfile(msg, discordUser.osuUserId);
 					} else {
-						msg.channel.send(`\`${args[i]}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`e!osu-link <username>\`.`);
+						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
 						getProfile(msg, args[i]);
 					}
 				} else {
@@ -136,7 +137,7 @@ async function getProfile(msg, username, noLinkedAccount) {
 		})
 		.catch(err => {
 			if (err.message === 'Not found') {
-				msg.channel.send(`Could not find user \`${username}\`.`);
+				msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 			} else {
 				console.log(err);
 			}

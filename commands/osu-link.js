@@ -53,6 +53,9 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 	if (args[0]) {
 		if (args[1]) {
 			args.shift();
+			for(let i = 0; i < args.length; i++){
+				args[i] = args[i].replace(/`/g, '');
+			}
 			return msg.channel.send(`You provided multiple arguments (\`${args.join('`, `')}\`). If your name has spaces please replace them with an \`_\` like this: \`${args.join('_')}\`.`);
 		}
 
@@ -64,7 +67,7 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 				});
 
 				if (existingVerifiedDiscordUser) {
-					return msg.channel.send(`There is already a discord account linked and verified for \`${args[0]}\``);
+					return msg.channel.send(`There is already a discord account linked and verified for \`${args[0].replace(/`/g, '')}\``);
 				}
 
 				if (discordUser) {
@@ -110,7 +113,7 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find osu! account \`${args[0]}\`.`);
+					msg.channel.send(`Could not find osu! account \`${args[0].replace(/`/g, '')}\`.`);
 				} else {
 					console.log(err);
 				}
@@ -249,7 +252,7 @@ async function verify(msg, args, osuApi, discordUser, guildPrefix) {
 						discordUser.osuPP = osuUser.pp.raw;
 						discordUser.osuRank = osuUser.pp.rank;
 						discordUser.save();
-						msg.channel.send(`The sent code \`${args[1]}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse \`${guildPrefix}osu-link verify\` to resend the code.`);
+						msg.channel.send(`The sent code \`${args[1].replace(/`/g, '')}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse \`${guildPrefix}osu-link verify\` to resend the code.`);
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {

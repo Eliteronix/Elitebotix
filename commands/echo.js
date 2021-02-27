@@ -13,6 +13,6 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	execute(msg, args) {
-		msg.reply(`\`${msg.content}\``);
+		msg.reply(`\`${msg.content.replace(/`/g, '')}\``);
 	},
 };

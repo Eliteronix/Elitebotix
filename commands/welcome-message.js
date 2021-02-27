@@ -29,7 +29,7 @@ module.exports = {
 					const guildWelcomeMessageChannelId = guild.welcomeMessageChannel;
 					//get the channel object by the id
 					const guildWelcomeMessageChannel = msg.guild.channels.cache.find(channel => channel.id === guildWelcomeMessageChannelId);
-					msg.channel.send(`The current welcome message is set to channel \`${guildWelcomeMessageChannel.name}\`: \`${guild.welcomeMessageText}\``);
+					msg.channel.send(`The current welcome message is set to channel \`${guildWelcomeMessageChannel.name}\`: \`${guild.welcomeMessageText.replace(/`/g, '')}\``);
 				} else {
 					//if no welcome message is set
 					msg.channel.send('There is currently no welcome message set.');
@@ -86,7 +86,7 @@ module.exports = {
 				//if guild was not found, create it in db
 				DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendWelcomeMessage: true, welcomeMessageChannel: msg.channel.id, welcomeMessageText: welcomeMessage });
 			}
-			msg.channel.send(`The new message \`${welcomeMessage}\` has been set for welcoming new members in the channel \`${msg.channel.name}\`.`);
+			msg.channel.send(`The new message \`${welcomeMessage.replace(/`/g, '')}\` has been set for welcoming new members in the channel \`${msg.channel.name}\`.`);
 		}
 	},
 };
