@@ -18,6 +18,7 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args) {
+		const guildPrefix = getGuildPrefix(msg);
 		if (!args[0]) {//Get profile by author if no argument
 			//get discordUser from db
 			const discordUser = await DBDiscordUsers.findOne({
@@ -41,7 +42,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getScore(msg, discordUser.osuUserId);
 					} else {
-						msg.channel.send(`\`${args[i]}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`e!osu-link <username>\`.`);
+						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
 						getScore(msg, args[i]);
 					}
 				} else {
@@ -75,7 +76,7 @@ async function getScore(msg, username, noLinkedAccount) {
 	osuApi.getUserRecent({ u: username })
 		.then(scores => {
 			if (!(scores[0])) {
-				return msg.channel.send(`Couldn't find any recent scores for \`${username}\``);
+				return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\``);
 			}
 			osuApi.getBeatmaps({ b: scores[0].beatmapId })
 				.then(async (beatmaps) => {
@@ -138,7 +139,7 @@ async function getScore(msg, username, noLinkedAccount) {
 		})
 		.catch(err => {
 			if (err.message === 'Not found') {
-				msg.channel.send(`Couldn't find any recent scores for \`${username}\``);
+				msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\``);
 			} else {
 				console.log(err);
 			}

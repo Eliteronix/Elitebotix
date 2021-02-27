@@ -29,7 +29,7 @@ module.exports = {
 					const guildGoodbyeMessageChannelId = guild.goodbyeMessageChannel;
 					//get the channel object by the id
 					const guildGoodbyeMessageChannel = msg.guild.channels.cache.find(channel => channel.id === guildGoodbyeMessageChannelId);
-					msg.channel.send(`The current goodbye message is set to channel \`${guildGoodbyeMessageChannel.name}\`: \`${guild.goodbyeMessageText}\``);
+					msg.channel.send(`The current goodbye message is set to channel \`${guildGoodbyeMessageChannel.name}\`: \`${guild.goodbyeMessageText.replace(/`/g, '')}\``);
 				} else {
 					//if no goodbye message is set
 					msg.channel.send('There is currently no goodbye message set.');
@@ -86,7 +86,7 @@ module.exports = {
 				//if guild was not found, create it in db
 				DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, sendGoodbyeMessage: true, goodbyeMessageChannel: msg.channel.id, goodbyeMessageText: goodbyeMessage });
 			}
-			msg.channel.send(`The new message \`${goodbyeMessage}\` has been set for leaving members in the channel \`${msg.channel.name}\`.`);
+			msg.channel.send(`The new message \`${goodbyeMessage.replace(/`/g, '')}\` has been set for leaving members in the channel \`${msg.channel.name}\`.`);
 		}
 	},
 };
