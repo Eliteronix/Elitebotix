@@ -32,8 +32,7 @@ module.exports = {
 			}
 		} else {
 			//Get profiles by arguments
-			let i;
-			for (i = 0; i < args.length; i++) {
+			for (let i = 0; i < args.length; i++) {
 				if (args[i].startsWith('<@!') && args[i].endsWith('>')) {
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: args[i].replace('<@!', '').replace('>', '') },
@@ -46,14 +45,26 @@ module.exports = {
 						getScore(msg, args[i]);
 					}
 				} else {
-					getScore(msg, args[i]);
+
+					if (args.length === 1 && !(args[0].startsWith('<@!')) && !(args[0].endsWith('>'))) {
+						const discordUser = await DBDiscordUsers.findOne({
+							where: { userId: msg.author.id }
+						});
+						if (!(discordUser) || discordUser && !(discordUser.osuUserId)) {
+							getScore(msg, args[i], true);
+						} else {
+							getScore(msg, args[i]);
+						}
+					} else {
+						getScore(msg, args[i]);
+					}
 				}
 			}
 		}
 	},
 };
 
-async function getScore(msg, username) {
+async function getScore(msg, username, noLinkedAccount) {
 	// eslint-disable-next-line no-undef
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -94,7 +105,7 @@ async function getScore(msg, username) {
 					ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
 					let elements = [canvas, ctx, scores[0], beatmaps[0], user];
-					if(lookedUpScore){
+					if (lookedUpScore) {
 						elements = [canvas, ctx, scores[0], beatmaps[0], user, lookedUpScore[0]];
 					}
 
@@ -114,11 +125,11 @@ async function getScore(msg, username) {
 					let guildPrefix = await getGuildPrefix(msg);
 
 					// //Send attachment
-					// if (noLinkedAccount) {
-					await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\nUse \`${guildPrefix}osu-top ${user.name.replace(' ', '_')}\` for top plays\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(' ', '_')}\` if the specified account is yours.`, attachment);
-					// } else {
-					// 	await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`e!osu-top ${user.name.replace(' ', '_')}\` for top plays`, attachment);
-					// }
+					if (noLinkedAccount) {
+						await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\nUse \`${guildPrefix}osu-top ${user.name.replace(' ', '_')}\` for top plays and \`${guildPrefix}osu-profile ${user.name.replace(' ', '_')}\` for a profile card.\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(' ', '_')}\` if the specified account is yours.`, attachment);
+					} else {
+						await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\nUse \`${guildPrefix}osu-top ${user.name.replace(' ', '_')}\` for top plays and \`${guildPrefix}osu-profile ${user.name.replace(' ', '_')}\` for a profile card.`, attachment);
+					}
 					processingMessage.delete();
 				})
 				.catch(err => {
@@ -298,9 +309,9 @@ async function drawCover(input) {
 	ctx.textAlign = 'center';
 	ctx.strokeStyle = 'black';
 	ctx.lineWidth = 4;
-	ctx.strokeText(score.rank.replace('X', 'SS').replace('H',''), canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
+	ctx.strokeText(score.rank.replace('X', 'SS').replace('H', ''), canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
 	ctx.fillStyle = '#FFFFFF';
-	ctx.fillText(score.rank.replace('X', 'SS').replace('H',''), canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
+	ctx.fillText(score.rank.replace('X', 'SS').replace('H', ''), canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
 
 	//mods
 	for (let i = 0; i < mods.length; i++) {
@@ -384,7 +395,7 @@ async function drawAccInfo(input) {
 	let beatmap = input[3];
 	let user = input[4];
 	let lookedUpScore = input[5];
-	
+
 	//Calculate accuracy
 	const accuracy = (score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss));
 
@@ -394,20 +405,20 @@ async function drawAccInfo(input) {
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('Accuracy', canvas.width / 1000 * 600 + 55, canvas.height / 500 * 385);
-	ctx.fillText(`${Math.round(accuracy*100)/100}%`, canvas.width / 1000 * 600 + 55, canvas.height / 500 * 410);
+	ctx.fillText(`${Math.round(accuracy * 100) / 100}%`, canvas.width / 1000 * 600 + 55, canvas.height / 500 * 410);
 	//Combo
 	roundedRect(ctx, canvas.width / 1000 * 735, canvas.height / 500 * 365, 110, 50, 5, '00', '00', '00', 0.5);
 	ctx.font = '18px sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('Max Combo', canvas.width / 1000 * 735 + 55, canvas.height / 500 * 385);
-	if(score.perfect){
+	if (score.perfect) {
 		ctx.fillStyle = '#B3FF66';
 	}
 	ctx.fillText(`${score.maxCombo}x`, canvas.width / 1000 * 735 + 55, canvas.height / 500 * 410);
-	
+
 	let pp = 'None';
-	if(lookedUpScore && lookedUpScore.pp && lookedUpScore.score === score.score){
+	if (lookedUpScore && lookedUpScore.pp && lookedUpScore.score === score.score) {
 		pp = Math.round(lookedUpScore.pp);
 	}
 
