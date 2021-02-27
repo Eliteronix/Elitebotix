@@ -41,7 +41,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getScore(msg, discordUser.osuUserId);
 					} else {
-						msg.channel.send(`${args[i]} doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`e!osu-link <username>\`.`);
+						msg.channel.send(`\`${args[i]}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`e!osu-link <username>\`.`);
 						getScore(msg, args[i]);
 					}
 				} else {

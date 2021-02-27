@@ -13,6 +13,8 @@ module.exports = {
 	//prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	execute(msg, args) {
-		msg.channel.send('o7');
+		if(!(args[1])){
+			msg.channel.send('o7');
+		}
 	},
 };

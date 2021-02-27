@@ -41,7 +41,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getProfile(msg, discordUser.osuUserId);
 					} else {
-						msg.channel.send(`${args[i]} doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`e!osu-link <username>\`.`);
+						msg.channel.send(`\`${args[i]}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`e!osu-link <username>\`.`);
 						getProfile(msg, args[i]);
 					}
 				} else {
@@ -136,7 +136,7 @@ async function getProfile(msg, username, noLinkedAccount) {
 		})
 		.catch(err => {
 			if (err.message === 'Not found') {
-				msg.channel.send(`Could not find user "${username}".`);
+				msg.channel.send(`Could not find user \`${username}\`.`);
 			} else {
 				console.log(err);
 			}
