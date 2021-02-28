@@ -4,7 +4,7 @@ module.exports = {
 	name: 'feedback',
 	//aliases: ['developer'],
 	description: 'Sends feedback to the devs',
-	usage: '<bug/feature/request> <description>',
+	usage: '<bug/feature/feedback> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	//guildOnly: true,
