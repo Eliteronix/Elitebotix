@@ -223,7 +223,7 @@ async function drawFooter(input) {
 	ctx.fillStyle = '#ffffff';
 
 	ctx.textAlign = 'right';
-	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
+	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);
 
 	const output = [canvas, ctx, osuAccounts];
 	return output;
