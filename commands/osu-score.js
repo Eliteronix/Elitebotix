@@ -5,67 +5,87 @@ const Canvas = require('canvas');
 const getGuildPrefix = require('../getGuildPrefix');
 
 module.exports = {
-	name: 'osu-recent',
-	aliases: ['ors', 'o-rs'],
+	name: 'osu-score',
+	aliases: ['os', 'o-s'],
 	description: 'Sends an info card about the last score of the specified player',
-	usage: '[username] [username] ... (Use "_" instead of spaces)',
+	usage: '<beatmapID> [username] [username] ... (Use "_" instead of spaces)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//guildOnly: true,
-	//args: true,
+	args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args) {
 		const guildPrefix = getGuildPrefix(msg);
-		if (!args[0]) {//Get profile by author if no argument
-			//get discordUser from db
-			const discordUser = await DBDiscordUsers.findOne({
-				where: { userId: msg.author.id },
-			});
+		// eslint-disable-next-line no-undef
+		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+		});
 
-			if (discordUser && discordUser.osuUserId) {
-				getScore(msg, discordUser.osuUserId);
-			} else {
-				const userDisplayName = msg.guild.member(msg.author).displayName;
-				getScore(msg, userDisplayName);
-			}
-		} else {
-			//Get profiles by arguments
-			for (let i = 0; i < args.length; i++) {
-				if (args[i].startsWith('<@!') && args[i].endsWith('>')) {
+		const beatmapId = args.shift();
+
+		osuApi.getBeatmaps({ b: beatmapId })
+			.then(async (beatmaps) => {
+				if (!args[0]) {//Get profile by author if no argument
+					//get discordUser from db
 					const discordUser = await DBDiscordUsers.findOne({
-						where: { userId: args[i].replace('<@!', '').replace('>', '') },
+						where: { userId: msg.author.id },
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getScore(msg, discordUser.osuUserId);
+						getScore(msg, beatmaps[0], discordUser.osuUserId);
 					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-						getScore(msg, args[i]);
+						const userDisplayName = msg.guild.member(msg.author).displayName;
+						getScore(msg, beatmaps[0], userDisplayName);
 					}
 				} else {
+					//Get profiles by arguments
+					for (let i = 0; i < args.length; i++) {
+						if (args[i].startsWith('<@!') && args[i].endsWith('>')) {
+							const discordUser = await DBDiscordUsers.findOne({
+								where: { userId: args[i].replace('<@!', '').replace('>', '') },
+							});
 
-					if (args.length === 1 && !(args[0].startsWith('<@!')) && !(args[0].endsWith('>'))) {
-						const discordUser = await DBDiscordUsers.findOne({
-							where: { userId: msg.author.id }
-						});
-						if (!(discordUser) || discordUser && !(discordUser.osuUserId)) {
-							getScore(msg, args[i], true);
+							if (discordUser && discordUser.osuUserId) {
+								getScore(msg, beatmaps[0], discordUser.osuUserId);
+							} else {
+								msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+								getScore(msg, beatmaps[0], args[i]);
+							}
 						} else {
-							getScore(msg, args[i]);
+
+							if (args.length === 1 && !(args[0].startsWith('<@!')) && !(args[0].endsWith('>'))) {
+								const discordUser = await DBDiscordUsers.findOne({
+									where: { userId: msg.author.id }
+								});
+								if (!(discordUser) || discordUser && !(discordUser.osuUserId)) {
+									getScore(msg, beatmaps[0], args[i], true);
+								} else {
+									getScore(msg, beatmaps[0], args[i]);
+								}
+							} else {
+								getScore(msg, beatmaps[0], args[i]);
+							}
 						}
-					} else {
-						getScore(msg, args[i]);
 					}
 				}
-			}
-		}
+			})
+			.catch(err => {
+				if (err.message === 'Not found') {
+					msg.channel.send(`Couldn't find beatmap \`${beatmapId.replace(/`/g, '')}\``);
+				} else {
+					console.log(err);
+				}
+			});
 	},
 };
 
-async function getScore(msg, username, noLinkedAccount) {
+async function getScore(msg, beatmap, username, noLinkedAccount) {
 	// eslint-disable-next-line no-undef
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -73,76 +93,57 @@ async function getScore(msg, username, noLinkedAccount) {
 		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
 		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 	});
-	osuApi.getUserRecent({ u: username })
-		.then(scores => {
+	osuApi.getScores({ b: beatmap.id, u: username })
+		.then(async(scores) => {
 			if (!(scores[0])) {
 				return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\``);
 			}
-			osuApi.getBeatmaps({ b: scores[0].beatmapId })
-				.then(async (beatmaps) => {
-					const user = await osuApi.getUser({ u: username });
+			const user = await osuApi.getUser({ u: username });
 
-					const beatmapMode = getBeatmapModeId(beatmaps[0]);
+			let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
-					let lookedUpScore;
+			const canvasWidth = 1000;
+			const canvasHeight = 500;
 
-					try {
-						lookedUpScore = await osuApi.getScores({ b: scores[0].beatmapId, u: user.id, m: beatmapMode, mods: scores[0].raw_mods });
-					} catch (err) {
-						//No score found
-					}
+			//Create Canvas
+			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-					let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
+			//Get context and load the image
+			const ctx = canvas.getContext('2d');
+			const background = await Canvas.loadImage('./other/osu-background.png');
+			ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-					const canvasWidth = 1000;
-					const canvasHeight = 500;
+			let elements = [canvas, ctx, scores[0], beatmap, user];
 
-					//Create Canvas
-					const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+			elements = await drawTitle(elements);
 
-					//Get context and load the image
-					const ctx = canvas.getContext('2d');
-					const background = await Canvas.loadImage('./other/osu-background.png');
-					ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+			elements = await drawCover(elements);
 
-					let elements = [canvas, ctx, scores[0], beatmaps[0], user];
-					if (lookedUpScore) {
-						elements = [canvas, ctx, scores[0], beatmaps[0], user, lookedUpScore[0]];
-					}
+			elements = await drawFooter(elements);
 
-					elements = await drawTitle(elements);
+			elements = await drawAccInfo(elements);
 
-					elements = await drawCover(elements);
+			await drawUserInfo(elements);
 
-					elements = await drawFooter(elements);
+			//Create as an attachment
+			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.id}.png`);
 
-					elements = await drawAccInfo(elements);
+			let guildPrefix = await getGuildPrefix(msg);
 
-					await drawUserInfo(elements);
+			//declare hints array
+			var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`];
 
-					//Create as an attachment
-					const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmaps[0].id}.png`);
-
-					let guildPrefix = await getGuildPrefix(msg);
-
-					//declare hints array
-					var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-score <beatmapID> ${user.name.replace(/ /g, '_')}\` for the best score on a map.`];
-
-					//Send attachment
-					if (noLinkedAccount) {
-						await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
-					} else {
-						await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
-					}
-					processingMessage.delete();
-				})
-				.catch(err => {
-					console.log(err);
-				});
+			// //Send attachment
+			if (noLinkedAccount) {
+				await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+			} else {
+				await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+			}
+			processingMessage.delete();
 		})
 		.catch(err => {
 			if (err.message === 'Not found') {
-				msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\``);
+				msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\``);
 			} else {
 				console.log(err);
 			}
@@ -155,7 +156,6 @@ async function drawTitle(input) {
 	let score = input[2];
 	let beatmap = input[3];
 	let user = input[4];
-	let lookedUpScore = input[5];
 
 	const gameMode = getGameMode(beatmap);
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
@@ -169,7 +169,7 @@ async function drawTitle(input) {
 	ctx.font = '25px sans-serif';
 	ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100}   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
 
-	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
+	const output = [canvas, ctx, score, beatmap, user];
 	return output;
 }
 
@@ -179,7 +179,6 @@ async function drawCover(input) {
 	let score = input[2];
 	let beatmap = input[3];
 	let user = input[4];
-	let lookedUpScore = input[5];
 
 	let background;
 
@@ -369,7 +368,7 @@ async function drawCover(input) {
 	ctx.fillText('Submitted on', canvas.width / 900 * 310, (background.height / background.width * canvas.width) / 250 * 162 + canvas.height / 6.25);
 	ctx.fillText(formattedSubmitDate, canvas.width / 900 * 380, (background.height / background.width * canvas.width) / 250 * 162 + canvas.height / 6.25);
 
-	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
+	const output = [canvas, ctx, score, beatmap, user];
 	return output;
 }
 
@@ -379,7 +378,6 @@ async function drawFooter(input) {
 	let score = input[2];
 	let beatmap = input[3];
 	let user = input[4];
-	let lookedUpScore = input[5];
 
 	let today = new Date().toLocaleDateString();
 
@@ -388,7 +386,7 @@ async function drawFooter(input) {
 	ctx.textAlign = 'right';
 	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
 
-	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
+	const output = [canvas, ctx, score, beatmap, user];
 	return output;
 }
 
@@ -398,7 +396,6 @@ async function drawAccInfo(input) {
 	let score = input[2];
 	let beatmap = input[3];
 	let user = input[4];
-	let lookedUpScore = input[5];
 
 	//Calculate accuracy
 	const accuracy = (score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss));
@@ -422,8 +419,8 @@ async function drawAccInfo(input) {
 	ctx.fillText(`${score.maxCombo}x`, canvas.width / 1000 * 735 + 55, canvas.height / 500 * 410);
 
 	let pp = 'None';
-	if (lookedUpScore && lookedUpScore.pp && lookedUpScore.score === score.score) {
-		pp = Math.round(lookedUpScore.pp);
+	if (score.pp) {
+		pp = Math.round(score.pp);
 	}
 
 	//PP
@@ -462,7 +459,7 @@ async function drawAccInfo(input) {
 	ctx.fillText('Miss', canvas.width / 1000 * 900 + 40, canvas.height / 500 * 445);
 	ctx.fillText(`${score.counts.miss}`, canvas.width / 1000 * 900 + 40, canvas.height / 500 * 470);
 
-	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
+	const output = [canvas, ctx, score, beatmap, user];
 	return output;
 }
 
@@ -472,7 +469,6 @@ async function drawUserInfo(input) {
 	let score = input[2];
 	let beatmap = input[3];
 	let user = input[4];
-	let lookedUpScore = input[5];
 
 	const userBackground = await Canvas.loadImage('https://osu.ppy.sh/images/headers/profile-covers/c3.jpg');
 
@@ -497,7 +493,7 @@ async function drawUserInfo(input) {
 
 	roundedImage(ctx, userAvatar, canvas.width / 900 * 50 + 5, canvas.height / 500 * 375 + 5, userBackground.height / 10 * 2 - 10, userBackground.height / 10 * 2 - 10, 5);
 
-	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
+	const output = [canvas, ctx, score, beatmap, user];
 	return output;
 }
 
@@ -661,20 +657,6 @@ function getGameMode(beatmap) {
 		gameMode = 'mania';
 	} else if (beatmap.mode === 'Catch the Beat') {
 		gameMode = 'fruits';
-	}
-	return gameMode;
-}
-
-function getBeatmapModeId(beatmap) {
-	let gameMode;
-	if (beatmap.mode === 'Standard') {
-		gameMode = 0;
-	} else if (beatmap.mode === 'Taiko') {
-		gameMode = 1;
-	} else if (beatmap.mode === 'Mania') {
-		gameMode = 3;
-	} else if (beatmap.mode === 'Catch the Beat') {
-		gameMode = 2;
 	}
 	return gameMode;
 }

@@ -127,11 +127,14 @@ async function getProfile(msg, username, noLinkedAccount) {
 
 			let guildPrefix = await getGuildPrefix(msg);
 
+			//declare hints array
+			var hints = [`Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-score <beatmapID> ${user.name.replace(/ /g, '_')}\` for the best score on a map.`];
+
 			//Send attachment
 			if (noLinkedAccount) {
-				await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays and \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+				await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
 			} else {
-				await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays and \`e!osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, attachment);
+				await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
 			}
 			processingMessage.delete();
 		})
