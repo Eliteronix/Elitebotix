@@ -127,9 +127,9 @@ async function getScore(msg, username, noLinkedAccount) {
 
 					// //Send attachment
 					if (noLinkedAccount) {
-						await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\nUse \`${guildPrefix}osu-top ${user.name.replace(' ', '_')}\` for top plays and \`${guildPrefix}osu-profile ${user.name.replace(' ', '_')}\` for a profile card.\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(' ', '_')}\` if the specified account is yours.`, attachment);
+						await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\nUse \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays and \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
 					} else {
-						await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\nUse \`${guildPrefix}osu-top ${user.name.replace(' ', '_')}\` for top plays and \`${guildPrefix}osu-profile ${user.name.replace(' ', '_')}\` for a profile card.`, attachment);
+						await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\nUse \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays and \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, attachment);
 					}
 					processingMessage.delete();
 				})

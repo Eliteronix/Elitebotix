@@ -123,9 +123,9 @@ async function getTopPlays(msg, username, noLinkedAccount) {
 
 			//Send attachment
 			if (noLinkedAccount) {
-				await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`${guildPrefix}osu-recent ${user.name.replace(' ','_')}\` for recent plays and \`${guildPrefix}osu-profile ${user.name.replace(' ','_')}\` for a profile card\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(' ','_')}\` if the specified account is yours.`, attachment);
+				await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays and \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
 			} else {
-				await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`${guildPrefix}osu-recent ${user.name.replace(' ','_')}\` for recent plays and \`${guildPrefix}osu-profile ${user.name.replace(' ','_')}\` for a profile card.`, attachment);
+				await msg.channel.send(`${user.name}: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nUse \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays and \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, attachment);
 			}
 			processingMessage.delete();
 		})
