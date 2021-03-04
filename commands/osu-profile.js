@@ -19,6 +19,41 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args) {
 		const guildPrefix = getGuildPrefix(msg);
+
+		let server = 'bancho';
+		let mode = 0;
+
+		//Check user settings
+
+		for (let i = 0; i < args.length; i++) {
+			if (args[i] === '--s' || args[i] === '--standard') {
+				mode = 0;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--t' || args[i] === '--taiko') {
+				mode = 1;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--c' || args[i] === '--catch') {
+				mode = 2;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--m' || args[i] === '--mania') {
+				mode = 3;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--r' || args[i] === '--ripple') {
+				server = 'ripple';
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--b' || args[i] === '--bancho') {
+				server = 'bancho';
+				args.splice(i, 1);
+				i--;
+			}
+
+		}
+
 		if (!args[0]) {//Get profile by author if no argument
 			//get discordUser from db
 			const discordUser = await DBDiscordUsers.findOne({
@@ -26,10 +61,10 @@ module.exports = {
 			});
 
 			if (discordUser && discordUser.osuUserId) {
-				getProfile(msg, discordUser.osuUserId);
+				getProfile(msg, discordUser.osuUserId, server, mode);
 			} else {
 				const userDisplayName = msg.guild.member(msg.author).displayName;
-				getProfile(msg, userDisplayName);
+				getProfile(msg, userDisplayName, server, mode);
 			}
 		} else {
 			//Get profiles by arguments
@@ -40,10 +75,10 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getProfile(msg, discordUser.osuUserId);
+						getProfile(msg, discordUser.osuUserId, server, mode);
 					} else {
 						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-						getProfile(msg, args[i]);
+						getProfile(msg, args[i], server, mode);
 					}
 				} else {
 
@@ -52,12 +87,12 @@ module.exports = {
 							where: { userId: msg.author.id }
 						});
 						if (!(discordUser) || discordUser && !(discordUser.osuUserId)) {
-							getProfile(msg, args[i], true);
+							getProfile(msg, args[i], server, mode, true);
 						} else {
-							getProfile(msg, args[i]);
+							getProfile(msg, args[i], server, mode);
 						}
 					} else {
-						getProfile(msg, args[i]);
+						getProfile(msg, args[i], server, mode);
 					}
 				}
 			}
@@ -65,86 +100,91 @@ module.exports = {
 	},
 };
 
-async function getProfile(msg, username, noLinkedAccount) {
-	// eslint-disable-next-line no-undef
-	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-	});
-
-	osuApi.getUser({ u: username })
-		.then(async (user) => {
-			//get discordUser from db to update pp and rank
-			DBDiscordUsers.findOne({
-				where: { osuUserId: user.id },
-			})
-				.then(discordUser => {
-					if (discordUser && discordUser.osuUserId) {
-						discordUser.osuName = user.name;
-						discordUser.osuPP = user.pp.raw;
-						discordUser.osuRank = user.pp.rank;
-						discordUser.save();
-					}
-				})
-				.catch(err => {
-					console.log(err);
-				});
-
-
-			let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
-
-			const canvasWidth = 700;
-			const canvasHeight = 350;
-
-			//Create Canvas
-			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
-
-			//Get context and load the image
-			const ctx = canvas.getContext('2d');
-			const background = await Canvas.loadImage('./other/osu-background.png');
-			ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-
-			let elements = [canvas, ctx, user];
-
-			elements = await drawTitle(elements);
-
-			elements = await drawRank(elements);
-
-			elements = await drawLevel(elements);
-
-			elements = await drawRanks(elements);
-
-			elements = await drawPlays(elements);
-
-			elements = await drawFooter(elements);
-
-			await drawAvatar(elements);
-
-			//Create as an attachment
-			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-profile-${user.id}.png`);
-
-			let guildPrefix = await getGuildPrefix(msg);
-
-			//declare hints array
-			var hints = [`Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-score <beatmapID> ${user.name.replace(/ /g, '_')}\` for the best score on a map.`];
-
-			//Send attachment
-			if (noLinkedAccount) {
-				await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
-			} else {
-				await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
-			}
-			processingMessage.delete();
-		})
-		.catch(err => {
-			if (err.message === 'Not found') {
-				msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
-			} else {
-				console.log(err);
-			}
+async function getProfile(msg, username, server, mode, noLinkedAccount) {
+	console.log(server, mode);
+	if (server === 'bancho') {
+		// eslint-disable-next-line no-undef
+		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
+
+		osuApi.getUser({ u: username, m: mode })
+			.then(async (user) => {
+				//get discordUser from db to update pp and rank
+				DBDiscordUsers.findOne({
+					where: { osuUserId: user.id },
+				})
+					.then(discordUser => {
+						if (discordUser && discordUser.osuUserId) {
+							discordUser.osuName = user.name;
+							discordUser.osuPP = user.pp.raw;
+							discordUser.osuRank = user.pp.rank;
+							discordUser.save();
+						}
+					})
+					.catch(err => {
+						console.log(err);
+					});
+
+				// Has to be adapted for all 4 gamemodes
+
+
+				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
+
+				const canvasWidth = 700;
+				const canvasHeight = 350;
+
+				//Create Canvas
+				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+				//Get context and load the image
+				const ctx = canvas.getContext('2d');
+				const background = await Canvas.loadImage('./other/osu-background.png');
+				ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+				let elements = [canvas, ctx, user];
+
+				elements = await drawTitle(elements, server, mode);
+
+				elements = await drawRank(elements);
+
+				elements = await drawLevel(elements);
+
+				elements = await drawRanks(elements);
+
+				elements = await drawPlays(elements);
+
+				elements = await drawFooter(elements);
+
+				await drawAvatar(elements);
+
+				//Create as an attachment
+				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-profile-${getGameModeName(mode)}-${user.id}.png`);
+
+				let guildPrefix = await getGuildPrefix(msg);
+
+				//declare hints array
+				var hints = [`Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-score <beatmapID> ${user.name.replace(/ /g, '_')}\` for the best score on a map.`];
+
+				//Send attachment
+				if (noLinkedAccount) {
+					await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+				} else {
+					await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+				}
+				processingMessage.delete();
+			})
+			.catch(err => {
+				if (err.message === 'Not found') {
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+				} else {
+					console.log(err);
+				}
+			});
+	}
 }
 
 function humanReadable(input) {
@@ -159,14 +199,16 @@ function humanReadable(input) {
 	return output;
 }
 
-async function drawTitle(input) {
+async function drawTitle(input, server, mode) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
 
-	let title = `${user.name}'s profile`;
+	let gameMode = getGameModeName(mode);
+
+	let title = `${user.name}'s ${gameMode} profile`;
 	if (user.name.endsWith('s') || user.name.endsWith('x')) {
-		title = `${user.name}' profile`;
+		title = `${user.name}' ${gameMode} profile`;
 	}
 
 	// Write the title of the player
@@ -397,4 +439,16 @@ async function drawAvatar(input) {
 	}
 	const output = [canvas, ctx, user];
 	return output;
+}
+
+function getGameModeName(ID){
+	let gameMode = 'standard';
+	if (ID === 1) {
+		gameMode = 'taiko';
+	} else if (ID === 2) {
+		gameMode = 'catch';
+	} else if (ID === 3) {
+		gameMode = 'mania';
+	}
+	return gameMode;
 }
