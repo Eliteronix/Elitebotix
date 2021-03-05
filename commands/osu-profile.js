@@ -24,6 +24,17 @@ module.exports = {
 		let mode = 0;
 
 		//Check user settings
+		const commandUser = await DBDiscordUsers.findOne({
+			where: { userId: msg.author.id },
+		});
+
+		if(commandUser && commandUser.osuMainServer){
+			server = commandUser.osuMainServer;
+		}
+
+		if(commandUser && commandUser.osuMainMode){
+			mode = commandUser.osuMainMode;
+		}
 
 		for (let i = 0; i < args.length; i++) {
 			if (args[i] === '--s' || args[i] === '--standard') {
@@ -55,13 +66,9 @@ module.exports = {
 		}
 
 		if (!args[0]) {//Get profile by author if no argument
-			//get discordUser from db
-			const discordUser = await DBDiscordUsers.findOne({
-				where: { userId: msg.author.id },
-			});
 
-			if (discordUser && discordUser.osuUserId) {
-				getProfile(msg, discordUser.osuUserId, server, mode);
+			if (commandUser && commandUser.osuUserId) {
+				getProfile(msg, commandUser.osuUserId, server, mode);
 			} else {
 				const userDisplayName = msg.guild.member(msg.author).displayName;
 				getProfile(msg, userDisplayName, server, mode);
@@ -83,10 +90,7 @@ module.exports = {
 				} else {
 
 					if (args.length === 1 && !(args[0].startsWith('<@!')) && !(args[0].endsWith('>'))) {
-						const discordUser = await DBDiscordUsers.findOne({
-							where: { userId: msg.author.id }
-						});
-						if (!(discordUser) || discordUser && !(discordUser.osuUserId)) {
+						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
 							getProfile(msg, args[i], server, mode, true);
 						} else {
 							getProfile(msg, args[i], server, mode);
