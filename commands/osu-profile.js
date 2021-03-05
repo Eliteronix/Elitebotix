@@ -101,7 +101,6 @@ module.exports = {
 };
 
 async function getProfile(msg, username, server, mode, noLinkedAccount) {
-	console.log(server, mode);
 	if (server === 'bancho') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
