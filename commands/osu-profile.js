@@ -3,6 +3,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
 const getGuildPrefix = require('../getGuildPrefix');
+const fetch = require('node-fetch');
 
 module.exports = {
 	name: 'osu-profile',
@@ -28,11 +29,11 @@ module.exports = {
 			where: { userId: msg.author.id },
 		});
 
-		if(commandUser && commandUser.osuMainServer){
+		if (commandUser && commandUser.osuMainServer) {
 			server = commandUser.osuMainServer;
 		}
 
-		if(commandUser && commandUser.osuMainMode){
+		if (commandUser && commandUser.osuMainMode) {
 			mode = commandUser.osuMainMode;
 		}
 
@@ -123,26 +124,25 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 					.then(discordUser => {
 						if (discordUser && discordUser.osuUserId) {
 							discordUser.osuName = user.name;
-							if(mode === 0){
+							if (mode === 0) {
 								discordUser.osuPP = user.pp.raw;
 								discordUser.osuRank = user.pp.rank;
-							} else if(mode === 1){
-
-							} else if(mode === 2){
-
-							} else if(mode === 3){
-
+							} else if (mode === 1) {
+								discordUser.taikoPP = user.pp.raw;
+								discordUser.taikoRank = user.pp.rank;
+							} else if (mode === 2) {
+								discordUser.catchPP = user.pp.raw;
+								discordUser.catchRank = user.pp.rank;
+							} else if (mode === 3) {
+								discordUser.maniaPP = user.pp.raw;
+								discordUser.maniaRank = user.pp.rank;
 							}
-
 							discordUser.save();
 						}
 					})
 					.catch(err => {
 						console.log(err);
 					});
-
-				// Has to be adapted for all 4 gamemodes
-
 
 				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
@@ -188,6 +188,18 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 					await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
 				}
 				processingMessage.delete();
+			})
+			.catch(err => {
+				if (err.message === 'Not found') {
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+				} else {
+					console.log(err);
+				}
+			});
+	} else if (server === 'ripple') {
+		fetch(`https://www.ripple.moe/api/get_user?u=${username}`)
+			.then(async (reponse) => {
+				console.log(await reponse.json());
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
@@ -453,7 +465,7 @@ async function drawAvatar(input) {
 	return output;
 }
 
-function getGameModeName(ID){
+function getGameModeName(ID) {
 	let gameMode = 'standard';
 	if (ID === 1) {
 		gameMode = 'taiko';
