@@ -198,8 +198,46 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 			});
 	} else if (server === 'ripple') {
 		fetch(`https://www.ripple.moe/api/get_user?u=${username}`)
-			.then(async (reponse) => {
-				console.log(await reponse.json());
+			.then(async (response) => {
+				const responseJson = await response.json();
+				if (!responseJson[0]) {
+					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+				}
+
+				let user = {
+					id: responseJson[0].user_id,
+					name: responseJson[0].username,
+					counts: {
+						'300': parseInt(responseJson[0].count300),
+						'100': parseInt(responseJson[0].count100),
+						'50': parseInt(responseJson[0].count50),
+						'SSH': parseInt(responseJson[0].count_rank_ssh),
+						'SS': parseInt(responseJson[0].count_rank_ss),
+						'SH': parseInt(responseJson[0].count_rank_sh),
+						'S': parseInt(responseJson[0].count_rank_s),
+						'A': parseInt(responseJson[0].count_rank_a),
+						'plays': parseInt(responseJson[0].playcount)
+					},
+					scores: {
+						ranked: parseInt(responseJson[0].ranked_score),
+						total: parseInt(responseJson[0].total_score)
+					},
+					pp: {
+						raw: parseFloat(responseJson[0].pp_raw),
+						rank: parseInt(responseJson[0].pp_rank),
+						countryRank: parseInt(responseJson[0].pp_country_rank)
+					},
+					country: responseJson[0].country,
+					level: parseFloat(responseJson[0].level),
+					accuracy: parseFloat(responseJson[0].accuracy),
+					secondsPlayed: parseInt(responseJson[0].total_seconds_played),
+					raw_joinDate: responseJson[0].join_date,
+					events: []
+				};
+
+
+				console.log(responseJson[0]);
+				console.log(user);
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
