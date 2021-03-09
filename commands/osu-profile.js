@@ -183,9 +183,9 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 
 				//Send attachment
 				if (noLinkedAccount) {
-					await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+					await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
 				} else {
-					await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+					await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
 				}
 				processingMessage.delete();
 			})
@@ -235,9 +235,6 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 					events: []
 				};
 
-				console.log(responseJson[0]);
-				console.log(user);
-
 				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 				const canvasWidth = 700;
@@ -274,7 +271,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				var hints = [`Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-score <beatmapID> ${user.name.replace(/ /g, '_')}\` for the best score on a map.`];
 
 				//Send attachment
-				await msg.channel.send(`\`${user.name}\`: <https://ripple.moe/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+				await msg.channel.send(`\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
 				processingMessage.delete();
 			})
 			.catch(err => {
@@ -570,6 +567,18 @@ function getGameModeName(ID) {
 		gameMode = 'taiko';
 	} else if (ID === 2) {
 		gameMode = 'catch';
+	} else if (ID === 3) {
+		gameMode = 'mania';
+	}
+	return gameMode;
+}
+
+function getLinkModeName(ID) {
+	let gameMode = 'osu';
+	if (ID === 1) {
+		gameMode = 'taiko';
+	} else if (ID === 2) {
+		gameMode = 'fruits';
 	} else if (ID === 3) {
 		gameMode = 'mania';
 	}
