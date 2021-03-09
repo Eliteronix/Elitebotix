@@ -163,13 +163,13 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 
 				elements = await drawRank(elements);
 
-				elements = await drawLevel(elements);
+				elements = await drawLevel(elements, server);
 
 				elements = await drawRanks(elements);
 
-				elements = await drawPlays(elements);
+				elements = await drawPlays(elements, server);
 
-				elements = await drawFooter(elements);
+				elements = await drawFooter(elements, server);
 
 				await drawAvatar(elements);
 
@@ -235,9 +235,47 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 					events: []
 				};
 
-
 				console.log(responseJson[0]);
 				console.log(user);
+
+				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
+
+				const canvasWidth = 700;
+				const canvasHeight = 350;
+
+				//Create Canvas
+				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+				//Get context and load the image
+				const ctx = canvas.getContext('2d');
+				const background = await Canvas.loadImage('./other/osu-background.png');
+				ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+				let elements = [canvas, ctx, user];
+
+				elements = await drawTitle(elements, server, mode);
+
+				elements = await drawRank(elements);
+
+				elements = await drawLevel(elements, server);
+
+				elements = await drawPlays(elements, server);
+
+				elements = await drawFooter(elements, server);
+
+				await drawAvatar(elements);
+
+				//Create as an attachment
+				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-profile-${getGameModeName(mode)}-${user.id}.png`);
+
+				let guildPrefix = await getGuildPrefix(msg);
+
+				//declare hints array
+				var hints = [`Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-score <beatmapID> ${user.name.replace(/ /g, '_')}\` for the best score on a map.`];
+
+				//Send attachment
+				await msg.channel.send(`\`${user.name}\`: <https://ripple.moe/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+				processingMessage.delete();
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
@@ -251,11 +289,14 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 
 function humanReadable(input) {
 	let output = '';
-	for (let i = 0; i < input.length; i++) {
-		if (i > 0 && (input.length - i) % 3 === 0) {
-			output = output + '.';
+	if (input) {
+		input = input.toString();
+		for (let i = 0; i < input.length; i++) {
+			if (i > 0 && (input.length - i) % 3 === 0) {
+				output = output + '.';
+			}
+			output = output + input.charAt(i);
 		}
-		output = output + input.charAt(i);
 	}
 
 	return output;
@@ -271,6 +312,10 @@ async function drawTitle(input, server, mode) {
 	let title = `${user.name}'s ${gameMode} profile`;
 	if (user.name.endsWith('s') || user.name.endsWith('x')) {
 		title = `${user.name}' ${gameMode} profile`;
+	}
+
+	if (server !== 'bancho') {
+		title = `[${server}] ${title}`;
 	}
 
 	// Write the title of the player
@@ -292,7 +337,7 @@ async function drawRank(input) {
 
 	const globalRank = humanReadable(user.pp.rank);
 	const countryRank = humanReadable(user.pp.countryRank);
-	let pp = humanReadable(Math.floor(user.pp.raw).toString());
+	let pp = humanReadable(Math.floor(user.pp.raw));
 
 	// Write the title of the player
 	ctx.font = '18px sans-serif';
@@ -305,7 +350,7 @@ async function drawRank(input) {
 	return output;
 }
 
-async function drawLevel(input) {
+async function drawLevel(input, server) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -338,20 +383,20 @@ async function drawLevel(input) {
 	//floor scores
 	let rankedScore = user.scores.ranked;
 	if (rankedScore > 9999999999) {
-		rankedScore = humanReadable(Math.floor(rankedScore / 1000000000).toString()) + 'B';
+		rankedScore = humanReadable(Math.floor(rankedScore / 1000000000)) + 'B';
 	} else if (rankedScore > 9999999) {
-		rankedScore = humanReadable(Math.floor(rankedScore / 1000000).toString()) + 'M';
+		rankedScore = humanReadable(Math.floor(rankedScore / 1000000)) + 'M';
 	} else if (rankedScore > 9999) {
-		rankedScore = humanReadable(Math.floor(rankedScore / 1000).toString()) + 'K';
+		rankedScore = humanReadable(Math.floor(rankedScore / 1000)) + 'K';
 	}
 
 	let totalScore = user.scores.total;
 	if (totalScore > 9999999999) {
-		totalScore = humanReadable(Math.floor(totalScore / 1000000000).toString()) + 'B';
+		totalScore = humanReadable(Math.floor(totalScore / 1000000000)) + 'B';
 	} else if (totalScore > 9999999) {
-		totalScore = humanReadable(Math.floor(totalScore / 1000000).toString()) + 'M';
+		totalScore = humanReadable(Math.floor(totalScore / 1000000)) + 'M';
 	} else if (totalScore > 9999) {
-		totalScore = humanReadable(Math.floor(totalScore / 1000).toString()) + 'K';
+		totalScore = humanReadable(Math.floor(totalScore / 1000)) + 'K';
 	}
 
 	const ranksOffset = 40;
@@ -365,7 +410,11 @@ async function drawLevel(input) {
 	ctx.fillText('Total:', canvas.width / 4 + 15, canvas.height / 2 + 6 - 8 + yOffset);
 	ctx.fillText(totalScore, canvas.width / 4 + 15, canvas.height / 2 + 6 + 8 + yOffset);
 	ctx.fillText('Acc:', canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * 1 + 6 - 8 + yOffset);
-	ctx.fillText(user.accuracyFormatted, canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * 1 + 6 + 8 + yOffset);
+	if (server !== 'ripple') {
+		ctx.fillText(user.accuracyFormatted, canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * 1 + 6 + 8 + yOffset);
+	} else {
+		ctx.fillText(`${Math.round(user.accuracy * 100) / 100}%`, canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * 1 + 6 + 8 + yOffset);
+	}
 
 	const output = [canvas, ctx, user];
 	return output;
@@ -410,27 +459,35 @@ async function drawRanks(input) {
 	return output;
 }
 
-async function drawPlays(input) {
+async function drawPlays(input, server) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
 
-	const yOffset = 25;
+	let yOffset = 25;
 
 	ctx.font = 'bold 16px sans-serif';
 	ctx.textAlign = 'center';
 
 	const playHours = Math.floor(user.secondsPlayed / 60 / 60);
 
-	ctx.fillText('Hours:', canvas.width / 8 * 7, canvas.height / 2 + 6 - 40 + yOffset);
-	ctx.fillText(humanReadable(playHours.toString()), canvas.width / 8 * 7, canvas.height / 2 + 6 - 20 + yOffset);
-	ctx.fillText('Plays:', canvas.width / 8 * 7, canvas.height / 2 + 6 + 20 + yOffset);
-	ctx.fillText(humanReadable(user.counts.plays), canvas.width / 8 * 7, canvas.height / 2 + 6 + 40 + yOffset);
+	if (server !== 'ripple') {
+		ctx.fillText('Hours:', canvas.width / 8 * 7, canvas.height / 2 + 6 - 40 + yOffset);
+		ctx.fillText(humanReadable(playHours), canvas.width / 8 * 7, canvas.height / 2 + 6 - 20 + yOffset);
+		ctx.fillText('Plays:', canvas.width / 8 * 7, canvas.height / 2 + 6 + 20 + yOffset);
+		ctx.fillText(humanReadable(user.counts.plays), canvas.width / 8 * 7, canvas.height / 2 + 6 + 40 + yOffset);
+	}
+
+	if (server === 'ripple') {
+		yOffset = yOffset - 30;
+		ctx.fillText('Plays:', canvas.width / 16 * 13, canvas.height / 2 + 6 + 20 + yOffset);
+		ctx.fillText(humanReadable(user.counts.plays), canvas.width / 16 * 13, canvas.height / 2 + 6 + 40 + yOffset);
+	}
 	const output = [canvas, ctx, user];
 	return output;
 }
 
-async function drawFooter(input) {
+async function drawFooter(input, server) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -441,35 +498,39 @@ async function drawFooter(input) {
 	ctx.font = '12px sans-serif';
 	ctx.fillStyle = '#ffffff';
 
-	//Set join time
-	const month = new Array();
-	month[0] = 'January';
-	month[1] = 'February';
-	month[2] = 'March';
-	month[3] = 'April';
-	month[4] = 'May';
-	month[5] = 'June';
-	month[6] = 'July';
-	month[7] = 'August';
-	month[8] = 'September';
-	month[9] = 'October';
-	month[10] = 'November';
-	month[11] = 'December';
-	const joinDay = user.raw_joinDate.substring(8, 10);
-	var joinDayEnding = 'th';
-	if (joinDay === '01' || joinDay === '21' || joinDay === '31') {
-		joinDayEnding = 'st';
-	} else if (joinDay === '02' || joinDay === '22') {
-		joinDayEnding = 'nd';
-	} else if (joinDay === '03' || joinDay === '23') {
-		joinDayEnding = 'rd';
-	}
-	const joinMonth = month[user.raw_joinDate.substring(5, 7) - 1];
-	const joinYear = user.raw_joinDate.substring(0, 4);
-	const joinDate = joinDay + joinDayEnding + ' ' + joinMonth + ' ' + joinYear;
+	if (server !== 'ripple') {
+		//Set join time
+		const month = new Array();
+		month[0] = 'January';
+		month[1] = 'February';
+		month[2] = 'March';
+		month[3] = 'April';
+		month[4] = 'May';
+		month[5] = 'June';
+		month[6] = 'July';
+		month[7] = 'August';
+		month[8] = 'September';
+		month[9] = 'October';
+		month[10] = 'November';
+		month[11] = 'December';
 
-	ctx.textAlign = 'left';
-	ctx.fillText(`Started playing osu! on ${joinDate}`, 5, canvas.height - 5);
+		const joinDay = user.raw_joinDate.substring(8, 10);
+
+		var joinDayEnding = 'th';
+		if (joinDay === '01' || joinDay === '21' || joinDay === '31') {
+			joinDayEnding = 'st';
+		} else if (joinDay === '02' || joinDay === '22') {
+			joinDayEnding = 'nd';
+		} else if (joinDay === '03' || joinDay === '23') {
+			joinDayEnding = 'rd';
+		}
+		const joinMonth = month[user.raw_joinDate.substring(5, 7) - 1];
+		const joinYear = user.raw_joinDate.substring(0, 4);
+		const joinDate = joinDay + joinDayEnding + ' ' + joinMonth + ' ' + joinYear;
+
+		ctx.textAlign = 'left';
+		ctx.fillText(`Started playing osu! on ${joinDate}`, 5, canvas.height - 5);
+	}
 
 	ctx.textAlign = 'right';
 	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 5, canvas.height - 5);
