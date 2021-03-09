@@ -28,6 +28,32 @@ module.exports = (sequelize, DataTypes) => {
 		osuRank: {
 			type: DataTypes.STRING,
 		},
+		taikoPP: {
+			type: DataTypes.STRING,
+		},
+		taikoRank: {
+			type: DataTypes.STRING,
+		},
+		catchPP: {
+			type: DataTypes.STRING,
+		},
+		catchRank: {
+			type: DataTypes.STRING,
+		},
+		maniaPP: {
+			type: DataTypes.STRING,
+		},
+		maniaRank: {
+			type: DataTypes.STRING,
+		},
+		osuMainServer: {
+			type: DataTypes.STRING,
+			defaultValue: 'bancho',
+		},
+		osuMainMode: {
+			type: DataTypes.INTEGER,
+			defaultValue: 0,
+		},
 		paranoid: true,
 	});
 };
