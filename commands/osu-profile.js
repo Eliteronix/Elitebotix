@@ -197,7 +197,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				}
 			});
 	} else if (server === 'ripple') {
-		fetch(`https://www.ripple.moe/api/get_user?u=${username}`)
+		fetch(`https://www.ripple.moe/api/get_user?u=${username}&m=${mode}`)
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
