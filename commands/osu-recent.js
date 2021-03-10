@@ -159,7 +159,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 
 						elements = await drawAccInfo(elements);
 
-						await drawUserInfo(elements);
+						await drawUserInfo(elements, server);
 
 						//Create as an attachment
 						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmaps[0].id}.png`);
@@ -290,7 +290,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 		
 								elements = await drawAccInfo(elements);
 		
-								await drawUserInfo(elements);
+								await drawUserInfo(elements, server);
 		
 								//Create as an attachment
 								const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmaps[0].id}.png`);
@@ -595,6 +595,7 @@ async function drawAccInfo(input) {
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('Max Combo', canvas.width / 1000 * 735 + 55, canvas.height / 500 * 385);
+	seems to be wrong
 	if (score.perfect) {
 		ctx.fillStyle = '#B3FF66';
 	}
@@ -645,13 +646,22 @@ async function drawAccInfo(input) {
 	return output;
 }
 
-async function drawUserInfo(input) {
+async function drawUserInfo(input, server) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let score = input[2];
 	let beatmap = input[3];
 	let user = input[4];
 	let lookedUpScore = input[5];
+
+	if(server !== 'bancho'){
+		ctx.save();
+		//ctx.translate(newx, newy);
+		ctx.rotate(-Math.PI/2);
+		ctx.textAlign = 'center';
+		ctx.fillText(`[${server}]`, -canvas.height/500*425, 50);
+		ctx.restore();
+	}
 
 	const userBackground = await Canvas.loadImage('https://osu.ppy.sh/images/headers/profile-covers/c3.jpg');
 

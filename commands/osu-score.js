@@ -7,7 +7,7 @@ const getGuildPrefix = require('../getGuildPrefix');
 module.exports = {
 	name: 'osu-score',
 	aliases: ['os', 'o-s'],
-	description: 'Sends an info card about the last score of the specified player',
+	description: 'Sends an info card about the score of the specified player on the map',
 	usage: '<beatmapID> [username] [username] ... (Use "_" instead of spaces)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
