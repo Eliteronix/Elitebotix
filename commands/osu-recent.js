@@ -189,14 +189,13 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 				}
 			});
 	} else if (server === 'ripple') {
+		let processingMessage = await msg.channel.send(`[\`${username.replace(/`/g, '')}\`] Processing...`);
 		fetch(`https://www.ripple.moe/api/get_user_recent?u=${username}&m=${mode}`)
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
 					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`.`);
 				}
-
-				console.log(responseJson[0]);
 
 				let score = {
 					score: responseJson[0].score,
@@ -269,10 +268,6 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 									raw_joinDate: responseJson[0].join_date,
 									events: []
 								};
-
-								console.log(user);
-
-								let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 								const canvasWidth = 1000;
 								const canvasHeight = 500;
@@ -677,7 +672,7 @@ async function drawUserInfo(input) {
 	ctx.textAlign = 'left';
 	ctx.fillText(`Player: ${user.name}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 25);
 	ctx.fillText(`Rank: #${humanReadable(user.pp.rank)}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 55);
-	ctx.fillText(`PP: ${humanReadable(Math.floor(user.pp.raw).toString())}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 85);
+	ctx.fillText(`PP: ${humanReadable(Math.floor(user.pp.raw))}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 85);
 
 	roundedImage(ctx, userAvatar, canvas.width / 900 * 50 + 5, canvas.height / 500 * 375 + 5, userBackground.height / 10 * 2 - 10, userBackground.height / 10 * 2 - 10, 5);
 
@@ -687,12 +682,16 @@ async function drawUserInfo(input) {
 
 function humanReadable(input) {
 	let output = '';
-	for (let i = 0; i < input.length; i++) {
-		if (i > 0 && (input.length - i) % 3 === 0) {
-			output = output + '.';
+	if (input) {
+		input = input.toString();
+		for (let i = 0; i < input.length; i++) {
+			if (i > 0 && (input.length - i) % 3 === 0) {
+				output = output + '.';
+			}
+			output = output + input.charAt(i);
 		}
-		output = output + input.charAt(i);
 	}
+
 	return output;
 }
 
