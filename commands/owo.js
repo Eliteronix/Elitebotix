@@ -13,10 +13,12 @@ module.exports = {
 	//prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	execute(msg, args) {
-		//declare weebEmojis array
-		var weebEmojis = ['owo', 'uwu', 'UwU', 'OwO', 'OuO'];
+		if (!(args[0])) {
+			//declare weebEmojis array
+			var weebEmojis = ['owo', 'uwu', 'UwU', 'OwO', 'OuO'];
 
-		//send the message
-		msg.channel.send(weebEmojis[Math.floor(Math.random() * weebEmojis.length)]);
+			//send the message
+			msg.channel.send(weebEmojis[Math.floor(Math.random() * weebEmojis.length)]);
+		}
 	},
 };
