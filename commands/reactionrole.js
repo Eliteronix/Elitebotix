@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const { DBReactionRolesHeader, DBReactionRoles } = require('../dbObjects');
-const getGuildPrefix = require('../getGuildPrefix');
+const { getGuildPrefix } = require('../utils');
 
 module.exports = {
 	name: 'reactionrole',

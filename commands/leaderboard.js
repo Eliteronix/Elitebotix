@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const getGuildPrefix = require('../getGuildPrefix');
+const { getGuildPrefix, humanReadable } = require('../utils');
 
 module.exports = {
 	name: 'leaderboard',
@@ -137,18 +137,6 @@ function quicksort(list, start = 0, end = undefined) {
 		quicksort(list, p + 1, end);
 	}
 	return list;
-}
-
-function humanReadable(input) {
-	let output = '';
-	for (let i = 0; i < input.length; i++) {
-		if (i > 0 && (input.length - i) % 3 === 0) {
-			output = output + '.';
-		}
-		output = output + input.charAt(i);
-	}
-
-	return output;
 }
 
 async function drawTitle(input, msg) {

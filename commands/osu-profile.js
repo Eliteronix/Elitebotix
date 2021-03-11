@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const getGuildPrefix = require('../getGuildPrefix');
+const { getGuildPrefix, humanReadable, getGameModeName, getLinkModeName } = require('../utils');
 const fetch = require('node-fetch');
 
 module.exports = {
@@ -284,21 +284,6 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 	}
 }
 
-function humanReadable(input) {
-	let output = '';
-	if (input) {
-		input = input.toString();
-		for (let i = 0; i < input.length; i++) {
-			if (i > 0 && (input.length - i) % 3 === 0) {
-				output = output + '.';
-			}
-			output = output + input.charAt(i);
-		}
-	}
-
-	return output;
-}
-
 async function drawTitle(input, server, mode) {
 	let canvas = input[0];
 	let ctx = input[1];
@@ -559,28 +544,4 @@ async function drawAvatar(input) {
 	}
 	const output = [canvas, ctx, user];
 	return output;
-}
-
-function getGameModeName(ID) {
-	let gameMode = 'standard';
-	if (ID === 1) {
-		gameMode = 'taiko';
-	} else if (ID === 2) {
-		gameMode = 'catch';
-	} else if (ID === 3) {
-		gameMode = 'mania';
-	}
-	return gameMode;
-}
-
-function getLinkModeName(ID) {
-	let gameMode = 'osu';
-	if (ID === 1) {
-		gameMode = 'taiko';
-	} else if (ID === 2) {
-		gameMode = 'fruits';
-	} else if (ID === 3) {
-		gameMode = 'mania';
-	}
-	return gameMode;
 }

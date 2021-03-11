@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const Banchojs = require('bancho.js');
-const getGuildPrefix = require('../getGuildPrefix');
+const { getGuildPrefix } = require('../utils');
 
 module.exports = {
 	name: 'osu-link',
