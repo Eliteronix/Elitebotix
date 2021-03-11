@@ -3,6 +3,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
 const getGuildPrefix = require('../getGuildPrefix');
+const fetch = require('node-fetch');
 
 module.exports = {
 	name: 'osu-recent',
@@ -19,17 +20,59 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args) {
 		const guildPrefix = getGuildPrefix(msg);
+
+		let server = 'bancho';
+		let mode = 0;
+
+		//Check user settings
+		const commandUser = await DBDiscordUsers.findOne({
+			where: { userId: msg.author.id },
+		});
+
+		if (commandUser && commandUser.osuMainServer) {
+			server = commandUser.osuMainServer;
+		}
+
+		if (commandUser && commandUser.osuMainMode) {
+			mode = commandUser.osuMainMode;
+		}
+
+		for (let i = 0; i < args.length; i++) {
+			if (args[i] === '--s' || args[i] === '--standard') {
+				mode = 0;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--t' || args[i] === '--taiko') {
+				mode = 1;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--c' || args[i] === '--catch') {
+				mode = 2;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--m' || args[i] === '--mania') {
+				mode = 3;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--r' || args[i] === '--ripple') {
+				server = 'ripple';
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--b' || args[i] === '--bancho') {
+				server = 'bancho';
+				args.splice(i, 1);
+				i--;
+			}
+
+		}
+
 		if (!args[0]) {//Get profile by author if no argument
 			//get discordUser from db
-			const discordUser = await DBDiscordUsers.findOne({
-				where: { userId: msg.author.id },
-			});
-
-			if (discordUser && discordUser.osuUserId) {
-				getScore(msg, discordUser.osuUserId);
+			if (commandUser && commandUser.osuUserId) {
+				getScore(msg, commandUser.osuUserId, server, mode);
 			} else {
 				const userDisplayName = msg.guild.member(msg.author).displayName;
-				getScore(msg, userDisplayName);
+				getScore(msg, userDisplayName, server, mode);
 			}
 		} else {
 			//Get profiles by arguments
@@ -40,24 +83,21 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getScore(msg, discordUser.osuUserId);
+						getScore(msg, discordUser.osuUserId, server, mode);
 					} else {
 						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-						getScore(msg, args[i]);
+						getScore(msg, args[i], server, mode);
 					}
 				} else {
 
 					if (args.length === 1 && !(args[0].startsWith('<@!')) && !(args[0].endsWith('>'))) {
-						const discordUser = await DBDiscordUsers.findOne({
-							where: { userId: msg.author.id }
-						});
-						if (!(discordUser) || discordUser && !(discordUser.osuUserId)) {
-							getScore(msg, args[i], true);
+						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
+							getScore(msg, args[i], server, mode, true);
 						} else {
-							getScore(msg, args[i]);
+							getScore(msg, args[i], server, mode);
 						}
 					} else {
-						getScore(msg, args[i]);
+						getScore(msg, args[i], server, mode);
 					}
 				}
 			}
@@ -65,88 +105,258 @@ module.exports = {
 	},
 };
 
-async function getScore(msg, username, noLinkedAccount) {
-	// eslint-disable-next-line no-undef
-	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-	});
-	osuApi.getUserRecent({ u: username })
-		.then(scores => {
-			if (!(scores[0])) {
-				return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\``);
-			}
-			osuApi.getBeatmaps({ b: scores[0].beatmapId })
-				.then(async (beatmaps) => {
-					const user = await osuApi.getUser({ u: username });
-
-					const beatmapMode = getBeatmapModeId(beatmaps[0]);
-
-					let lookedUpScore;
-
-					try {
-						lookedUpScore = await osuApi.getScores({ b: scores[0].beatmapId, u: user.id, m: beatmapMode, mods: scores[0].raw_mods });
-					} catch (err) {
-						//No score found
-					}
-
-					let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
-
-					const canvasWidth = 1000;
-					const canvasHeight = 500;
-
-					//Create Canvas
-					const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
-
-					//Get context and load the image
-					const ctx = canvas.getContext('2d');
-					const background = await Canvas.loadImage('./other/osu-background.png');
-					ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-
-					let elements = [canvas, ctx, scores[0], beatmaps[0], user];
-					if (lookedUpScore) {
-						elements = [canvas, ctx, scores[0], beatmaps[0], user, lookedUpScore[0]];
-					}
-
-					elements = await drawTitle(elements);
-
-					elements = await drawCover(elements);
-
-					elements = await drawFooter(elements);
-
-					elements = await drawAccInfo(elements);
-
-					await drawUserInfo(elements);
-
-					//Create as an attachment
-					const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmaps[0].id}.png`);
-
-					let guildPrefix = await getGuildPrefix(msg);
-
-					//declare hints array
-					var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-score <beatmapID> ${user.name.replace(/ /g, '_')}\` for the best score on a map.`];
-
-					//Send attachment
-					if (noLinkedAccount) {
-						await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
-					} else {
-						await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
-					}
-					processingMessage.delete();
-				})
-				.catch(err => {
-					console.log(err);
-				});
-		})
-		.catch(err => {
-			if (err.message === 'Not found') {
-				msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\``);
-			} else {
-				console.log(err);
-			}
+async function getScore(msg, username, server, mode, noLinkedAccount) {
+	if (server === 'bancho') {
+		// eslint-disable-next-line no-undef
+		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
+		osuApi.getUserRecent({ u: username, m: mode })
+			.then(scores => {
+				if (!(scores[0])) {
+					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\``);
+				}
+				osuApi.getBeatmaps({ b: scores[0].beatmapId })
+					.then(async (beatmaps) => {
+						const user = await osuApi.getUser({ u: username, m: mode });
+
+						//get discordUser from db to update pp and rank
+						DBDiscordUsers.findOne({
+							where: { osuUserId: user.id },
+						})
+							.then(discordUser => {
+								if (discordUser && discordUser.osuUserId) {
+									discordUser.osuName = user.name;
+									if (mode === 0) {
+										discordUser.osuPP = user.pp.raw;
+										discordUser.osuRank = user.pp.rank;
+									} else if (mode === 1) {
+										discordUser.taikoPP = user.pp.raw;
+										discordUser.taikoRank = user.pp.rank;
+									} else if (mode === 2) {
+										discordUser.catchPP = user.pp.raw;
+										discordUser.catchRank = user.pp.rank;
+									} else if (mode === 3) {
+										discordUser.maniaPP = user.pp.raw;
+										discordUser.maniaRank = user.pp.rank;
+									}
+									discordUser.save();
+								}
+							})
+							.catch(err => {
+								console.log(err);
+							});
+
+						const beatmapMode = getBeatmapModeId(beatmaps[0]);
+
+						let lookedUpScore;
+
+						try {
+							lookedUpScore = await osuApi.getScores({ b: scores[0].beatmapId, u: user.id, m: beatmapMode, mods: scores[0].raw_mods });
+						} catch (err) {
+							//No score found
+						}
+
+						let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
+
+						const canvasWidth = 1000;
+						const canvasHeight = 500;
+
+						//Create Canvas
+						const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+						//Get context and load the image
+						const ctx = canvas.getContext('2d');
+						const background = await Canvas.loadImage('./other/osu-background.png');
+						ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+						let elements = [canvas, ctx, scores[0], beatmaps[0], user];
+						if (lookedUpScore) {
+							elements = [canvas, ctx, scores[0], beatmaps[0], user, lookedUpScore[0]];
+						}
+
+						elements = await drawTitle(elements);
+
+						elements = await drawCover(elements);
+
+						elements = await drawFooter(elements);
+
+						elements = await drawAccInfo(elements);
+
+						await drawUserInfo(elements, server);
+
+						//Create as an attachment
+						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmaps[0].id}.png`);
+
+						let guildPrefix = await getGuildPrefix(msg);
+
+						//declare hints array
+						var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-score <beatmapID> ${user.name.replace(/ /g, '_')}\` for the best score on a map.`];
+
+						//Send attachment
+						if (noLinkedAccount) {
+							await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+						} else {
+							await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+						}
+						processingMessage.delete();
+					})
+					.catch(err => {
+						console.log(err);
+					});
+			})
+			.catch(err => {
+				if (err.message === 'Not found') {
+					msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`.`);
+				} else {
+					console.log(err);
+				}
+			});
+	} else if (server === 'ripple') {
+		let processingMessage = await msg.channel.send(`[\`${username.replace(/`/g, '')}\`] Processing...`);
+		fetch(`https://www.ripple.moe/api/get_user_recent?u=${username}&m=${mode}`)
+			.then(async (response) => {
+				const responseJson = await response.json();
+				if (!responseJson[0]) {
+					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`.`);
+				}
+
+				let score = {
+					score: responseJson[0].score,
+					user: {
+						name: null,
+						id: responseJson[0].user_id
+					},
+					beatmapId: responseJson[0].beatmap_id,
+					counts: {
+						'50': responseJson[0].count50,
+						'100': responseJson[0].count100,
+						'300': responseJson[0].count300,
+						geki: responseJson[0].countgeki,
+						katu: responseJson[0].countkatu,
+						miss: responseJson[0].countmiss
+					},
+					maxCombo: responseJson[0].maxcombo,
+					perfect: false,
+					raw_date: responseJson[0].date,
+					rank: responseJson[0].rank,
+					pp: responseJson[0].pp,
+					hasReplay: false,
+					raw_mods: responseJson[0].enabled_mods,
+					beatmap: undefined
+				};
+
+				if (responseJson[0].perfect === '1') {
+					score.perfect = true;
+				}
+
+				// eslint-disable-next-line no-undef
+				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+				});
+				osuApi.getBeatmaps({ b: score.beatmapId })
+					.then(async (beatmaps) => {
+						fetch(`https://www.ripple.moe/api/get_user?u=${username}&m=${mode}`)
+							.then(async (response) => {
+								const responseJson = await response.json();
+								if (!responseJson[0]) {
+									return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+								}
+
+								let user = {
+									id: responseJson[0].user_id,
+									name: responseJson[0].username,
+									counts: {
+										'300': parseInt(responseJson[0].count300),
+										'100': parseInt(responseJson[0].count100),
+										'50': parseInt(responseJson[0].count50),
+										'SSH': parseInt(responseJson[0].count_rank_ssh),
+										'SS': parseInt(responseJson[0].count_rank_ss),
+										'SH': parseInt(responseJson[0].count_rank_sh),
+										'S': parseInt(responseJson[0].count_rank_s),
+										'A': parseInt(responseJson[0].count_rank_a),
+										'plays': parseInt(responseJson[0].playcount)
+									},
+									scores: {
+										ranked: parseInt(responseJson[0].ranked_score),
+										total: parseInt(responseJson[0].total_score)
+									},
+									pp: {
+										raw: parseFloat(responseJson[0].pp_raw),
+										rank: parseInt(responseJson[0].pp_rank),
+										countryRank: parseInt(responseJson[0].pp_country_rank)
+									},
+									country: responseJson[0].country,
+									level: parseFloat(responseJson[0].level),
+									accuracy: parseFloat(responseJson[0].accuracy),
+									secondsPlayed: parseInt(responseJson[0].total_seconds_played),
+									raw_joinDate: responseJson[0].join_date,
+									events: []
+								};
+
+								const canvasWidth = 1000;
+								const canvasHeight = 500;
+
+								//Create Canvas
+								const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+								//Get context and load the image
+								const ctx = canvas.getContext('2d');
+								const background = await Canvas.loadImage('./other/osu-background.png');
+								ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+								let elements = [canvas, ctx, score, beatmaps[0], user, score];
+
+								elements = await drawTitle(elements);
+
+								elements = await drawCover(elements);
+
+								elements = await drawFooter(elements);
+
+								elements = await drawAccInfo(elements);
+
+								await drawUserInfo(elements, server);
+
+								//Create as an attachment
+								const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmaps[0].id}.png`);
+
+								let guildPrefix = await getGuildPrefix(msg);
+
+								//declare hints array
+								var hints = [`Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-score <beatmapID> ${user.name.replace(/ /g, '_')}\` for the best score on a map.`];
+
+								//Send attachment
+								await msg.channel.send(`\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+								processingMessage.delete();
+
+							})
+							.catch(err => {
+								if (err.message === 'Not found') {
+									msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+								} else {
+									console.log(err);
+								}
+							});
+
+					})
+					.catch(err => {
+						console.log(err);
+					});
+			})
+			.catch(err => {
+				if (err.message === 'Not found') {
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+				} else {
+					console.log(err);
+				}
+			});
+	}
 }
 
 async function drawTitle(input) {
@@ -416,6 +626,7 @@ async function drawAccInfo(input) {
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('Max Combo', canvas.width / 1000 * 735 + 55, canvas.height / 500 * 385);
+
 	if (score.perfect) {
 		ctx.fillStyle = '#B3FF66';
 	}
@@ -466,13 +677,22 @@ async function drawAccInfo(input) {
 	return output;
 }
 
-async function drawUserInfo(input) {
+async function drawUserInfo(input, server) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let score = input[2];
 	let beatmap = input[3];
 	let user = input[4];
 	let lookedUpScore = input[5];
+
+	if (server !== 'bancho') {
+		ctx.save();
+		//ctx.translate(newx, newy);
+		ctx.rotate(-Math.PI / 2);
+		ctx.textAlign = 'center';
+		ctx.fillText(`[${server}]`, -canvas.height / 500 * 425, 50);
+		ctx.restore();
+	}
 
 	const userBackground = await Canvas.loadImage('https://osu.ppy.sh/images/headers/profile-covers/c3.jpg');
 
@@ -493,7 +713,7 @@ async function drawUserInfo(input) {
 	ctx.textAlign = 'left';
 	ctx.fillText(`Player: ${user.name}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 25);
 	ctx.fillText(`Rank: #${humanReadable(user.pp.rank)}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 55);
-	ctx.fillText(`PP: ${humanReadable(Math.floor(user.pp.raw).toString())}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 85);
+	ctx.fillText(`PP: ${humanReadable(Math.floor(user.pp.raw))}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 85);
 
 	roundedImage(ctx, userAvatar, canvas.width / 900 * 50 + 5, canvas.height / 500 * 375 + 5, userBackground.height / 10 * 2 - 10, userBackground.height / 10 * 2 - 10, 5);
 
@@ -503,12 +723,16 @@ async function drawUserInfo(input) {
 
 function humanReadable(input) {
 	let output = '';
-	for (let i = 0; i < input.length; i++) {
-		if (i > 0 && (input.length - i) % 3 === 0) {
-			output = output + '.';
+	if (input) {
+		input = input.toString();
+		for (let i = 0; i < input.length; i++) {
+			if (i > 0 && (input.length - i) % 3 === 0) {
+				output = output + '.';
+			}
+			output = output + input.charAt(i);
 		}
-		output = output + input.charAt(i);
 	}
+
 	return output;
 }
 
@@ -545,10 +769,75 @@ function roundedImage(ctx, image, x, y, width, height, radius) {
 }
 
 function getMods(input) {
+
 	let mods = [];
 	let modsBits = input;
 	let PFpossible = false;
 	let hasNC = false;
+	if (modsBits >= 1073741824) {
+		mods.push('MI');
+		modsBits = modsBits - 1073741824;
+	}
+	if (modsBits >= 536870912) {
+		mods.push('V2');
+		modsBits = modsBits - 536870912;
+	}
+	if (modsBits >= 268435456) {
+		mods.push('2K');
+		modsBits = modsBits - 268435456;
+	}
+	if (modsBits >= 134217728) {
+		mods.push('3K');
+		modsBits = modsBits - 134217728;
+	}
+	if (modsBits >= 67108864) {
+		mods.push('1K');
+		modsBits = modsBits - 67108864;
+	}
+	if (modsBits >= 33554432) {
+		mods.push('KC');
+		modsBits = modsBits - 33554432;
+	}
+	if (modsBits >= 16777216) {
+		mods.push('9K');
+		modsBits = modsBits - 16777216;
+	}
+	if (modsBits >= 8388608) {
+		mods.push('TG');
+		modsBits = modsBits - 8388608;
+	}
+	if (modsBits >= 4194304) {
+		mods.push('CI');
+		modsBits = modsBits - 4194304;
+	}
+	if (modsBits >= 2097152) {
+		mods.push('RD');
+		modsBits = modsBits - 2097152;
+	}
+	if (modsBits >= 1048576) {
+		mods.push('FI');
+		modsBits = modsBits - 1048576;
+	}
+	if (modsBits >= 524288) {
+		mods.push('8K');
+		modsBits = modsBits - 524288;
+	}
+	if (modsBits >= 262144) {
+		mods.push('7K');
+		modsBits = modsBits - 262144;
+	}
+	if (modsBits >= 131072) {
+		mods.push('6K');
+		modsBits = modsBits - 131072;
+	}
+	if (modsBits >= 65536) {
+		mods.push('5K');
+		modsBits = modsBits - 65536;
+	}
+	if (modsBits >= 32768) {
+		mods.push('4K');
+		modsBits = modsBits - 32768;
+	}
 	if (modsBits >= 16384) {
 		PFpossible = true;
 		modsBits = modsBits - 16384;
@@ -646,6 +935,22 @@ function getModImage(mod) {
 		URL = 'https://osu.ppy.sh/assets/images/mod_spun-out.989be71e.png';
 	} else if (mod === 'TD') {
 		URL = 'https://osu.ppy.sh/assets/images/mod_touchdevice.e5fa4271.png';
+	} else if (mod === 'FI') {
+		URL = 'https://osu.ppy.sh/assets/images/mod_fader@2x.03843f9a.png';
+	} else if (mod === 'MI') {
+		URL = 'https://osu.ppy.sh/assets/images/mod_mirror@2x.3f255fca.png';
+	} else if (mod === '4K') {
+		URL = 'https://osu.ppy.sh/assets/images/mod_4K.fb93bec4.png';
+	} else if (mod === '5K') {
+		URL = 'https://osu.ppy.sh/assets/images/mod_5K.c5928e1c.png';
+	} else if (mod === '6K') {
+		URL = 'https://osu.ppy.sh/assets/images/mod_6K.1050cc50.png';
+	}else if (mod === '7K'){
+		URL = 'https://osu.ppy.sh/assets/images/mod_7K.f8a7b7cc.png';
+	}else if (mod === '8K'){
+		URL = 'https://osu.ppy.sh/assets/images/mod_8K.13caafe8.png';
+	}else if (mod === '9K'){
+		URL = 'https://osu.ppy.sh/assets/images/mod_9K.ffde81fe.png';
 	}
 
 	return URL;
@@ -675,6 +980,18 @@ function getBeatmapModeId(beatmap) {
 		gameMode = 3;
 	} else if (beatmap.mode === 'Catch the Beat') {
 		gameMode = 2;
+	}
+	return gameMode;
+}
+
+function getLinkModeName(ID) {
+	let gameMode = 'osu';
+	if (ID === 1) {
+		gameMode = 'taiko';
+	} else if (ID === 2) {
+		gameMode = 'fruits';
+	} else if (ID === 3) {
+		gameMode = 'mania';
 	}
 	return gameMode;
 }
