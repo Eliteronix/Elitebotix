@@ -159,7 +159,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount) {
 
 				let elements = [canvas, ctx, user];
 
-				elements = await drawTitle(elements);
+				elements = await drawTitle(elements, server, mode);
 
 				elements = await drawTopPlays(elements, server, mode);
 
@@ -242,7 +242,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount) {
 
 				let elements = [canvas, ctx, user];
 
-				elements = await drawTitle(elements);
+				elements = await drawTitle(elements, server, mode);
 
 				elements = await drawTopPlays(elements, server, mode, msg);
 
@@ -271,14 +271,22 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount) {
 	}
 }
 
-async function drawTitle(input) {
+async function drawTitle(input, server, mode) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
 
-	let title = `✰ ${user.name}'s top plays ✰`;
+	let serverDisplay = '';
+
+	if(server !== 'bancho'){
+		serverDisplay = `[${server}] `;
+	}
+
+	let gameMode = getGameModeName(mode);
+
+	let title = `✰ ${serverDisplay}${user.name}'s ${gameMode} top plays ✰`;
 	if (user.name.endsWith('s') || user.name.endsWith('x')) {
-		title = `✰ ${user.name}' top plays ✰`;
+		title = `✰ ${serverDisplay}${user.name}' ${gameMode} top plays ✰`;
 	}
 
 	roundedRect(ctx, canvas.width / 2 - title.length * 8.5, canvas.height / 50, title.length * 17, canvas.height / 12, 5, '28', '28', '28', 0.75);
@@ -651,11 +659,11 @@ function getModImage(mod) {
 		URL = 'https://osu.ppy.sh/assets/images/mod_5K.c5928e1c.png';
 	} else if (mod === '6K') {
 		URL = 'https://osu.ppy.sh/assets/images/mod_6K.1050cc50.png';
-	}else if (mod === '7K'){
+	} else if (mod === '7K') {
 		URL = 'https://osu.ppy.sh/assets/images/mod_7K.f8a7b7cc.png';
-	}else if (mod === '8K'){
+	} else if (mod === '8K') {
 		URL = 'https://osu.ppy.sh/assets/images/mod_8K.13caafe8.png';
-	}else if (mod === '9K'){
+	} else if (mod === '9K') {
 		URL = 'https://osu.ppy.sh/assets/images/mod_9K.ffde81fe.png';
 	}
 
@@ -668,6 +676,18 @@ function getLinkModeName(ID) {
 		gameMode = 'taiko';
 	} else if (ID === 2) {
 		gameMode = 'fruits';
+	} else if (ID === 3) {
+		gameMode = 'mania';
+	}
+	return gameMode;
+}
+
+function getGameModeName(ID) {
+	let gameMode = 'standard';
+	if (ID === 1) {
+		gameMode = 'taiko';
+	} else if (ID === 2) {
+		gameMode = 'catch';
 	} else if (ID === 3) {
 		gameMode = 'mania';
 	}
