@@ -753,10 +753,75 @@ function roundedImage(ctx, image, x, y, width, height, radius) {
 }
 
 function getMods(input) {
+
 	let mods = [];
 	let modsBits = input;
 	let PFpossible = false;
 	let hasNC = false;
+	if (modsBits >= 1073741824) {
+		mods.push('MI');
+		modsBits = modsBits - 1073741824;
+	}
+	if (modsBits >= 536870912) {
+		mods.push('V2');
+		modsBits = modsBits - 536870912;
+	}
+	if (modsBits >= 268435456) {
+		mods.push('2K');
+		modsBits = modsBits - 268435456;
+	}
+	if (modsBits >= 134217728) {
+		mods.push('3K');
+		modsBits = modsBits - 134217728;
+	}
+	if (modsBits >= 67108864) {
+		mods.push('1K');
+		modsBits = modsBits - 67108864;
+	}
+	if (modsBits >= 33554432) {
+		mods.push('KC');
+		modsBits = modsBits - 33554432;
+	}
+	if (modsBits >= 16777216) {
+		mods.push('9K');
+		modsBits = modsBits - 16777216;
+	}
+	if (modsBits >= 8388608) {
+		mods.push('TG');
+		modsBits = modsBits - 8388608;
+	}
+	if (modsBits >= 4194304) {
+		mods.push('CI');
+		modsBits = modsBits - 4194304;
+	}
+	if (modsBits >= 2097152) {
+		mods.push('RD');
+		modsBits = modsBits - 2097152;
+	}
+	if (modsBits >= 1048576) {
+		mods.push('FI');
+		modsBits = modsBits - 1048576;
+	}
+	if (modsBits >= 524288) {
+		mods.push('8K');
+		modsBits = modsBits - 524288;
+	}
+	if (modsBits >= 262144) {
+		mods.push('7K');
+		modsBits = modsBits - 262144;
+	}
+	if (modsBits >= 131072) {
+		mods.push('6K');
+		modsBits = modsBits - 131072;
+	}
+	if (modsBits >= 65536) {
+		mods.push('5K');
+		modsBits = modsBits - 65536;
+	}
+	if (modsBits >= 32768) {
+		mods.push('4K');
+		modsBits = modsBits - 32768;
+	}
 	if (modsBits >= 16384) {
 		PFpossible = true;
 		modsBits = modsBits - 16384;
@@ -854,6 +919,22 @@ function getModImage(mod) {
 		URL = 'https://osu.ppy.sh/assets/images/mod_spun-out.989be71e.png';
 	} else if (mod === 'TD') {
 		URL = 'https://osu.ppy.sh/assets/images/mod_touchdevice.e5fa4271.png';
+	} else if (mod === 'FI') {
+		URL = 'https://osu.ppy.sh/assets/images/mod_fader@2x.03843f9a.png';
+	} else if (mod === 'MI') {
+		URL = 'https://osu.ppy.sh/assets/images/mod_mirror@2x.3f255fca.png';
+	} else if (mod === '4K') {
+		URL = 'https://osu.ppy.sh/assets/images/mod_4K.fb93bec4.png';
+	} else if (mod === '5K') {
+		URL = 'https://osu.ppy.sh/assets/images/mod_5K.c5928e1c.png';
+	} else if (mod === '6K') {
+		URL = 'https://osu.ppy.sh/assets/images/mod_6K.1050cc50.png';
+	}else if (mod === '7K'){
+		URL = 'https://osu.ppy.sh/assets/images/mod_7K.f8a7b7cc.png';
+	}else if (mod === '8K'){
+		URL = 'https://osu.ppy.sh/assets/images/mod_8K.13caafe8.png';
+	}else if (mod === '9K'){
+		URL = 'https://osu.ppy.sh/assets/images/mod_9K.ffde81fe.png';
 	}
 
 	return URL;
