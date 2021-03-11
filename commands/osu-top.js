@@ -398,7 +398,12 @@ async function drawTopPlays(input, server, mode, msg) {
 
 		const accuracy = (scores[i].counts[300] * 100 + scores[i].counts[100] * 33.33 + scores[i].counts[50] * 16.67) / (parseInt(scores[i].counts[300]) + parseInt(scores[i].counts[100]) + parseInt(scores[i].counts[50]) + parseInt(scores[i].counts.miss));
 
-		const combo = `(${scores[i].maxCombo}/${beatmap[0].maxCombo})`;
+		let combo;
+		if(mode === 3){
+			combo = `(${scores[i].maxCombo}/${parseInt(beatmap[0].objects.normal)+parseInt(beatmap[0].objects.slider)+parseInt(beatmap[0].objects.spinner)})`;
+		} else {
+			combo = `(${scores[i].maxCombo}/${beatmap[0].maxCombo})`;
+		}
 
 		ctx.font = 'bold 10px sans-serif';
 		ctx.fillStyle = '#FFCC22';
