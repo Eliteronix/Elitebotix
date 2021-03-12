@@ -9,6 +9,8 @@ module.exports = {
 	usage: 'help <- For a detailed help in using the command',
 	permissions: 'MANAGE_ROLES',
 	permissionsTranslated: 'Manage Roles',
+	botPermissions: ['MANAGE_ROLES', 'MANAGE_MESSAGES'],
+	botPermissionsTranslated: 'Manage Roles and Manage Messages',
 	guildOnly: true,
 	args: true,
 	cooldown: 5,

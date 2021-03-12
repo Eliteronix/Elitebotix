@@ -107,12 +107,6 @@ module.exports = async function (msg) {
 			}
 
 			return;
-
-			//Code below is for using the closestMatch found instead
-			// commandName = closestMatch;
-
-			// command = msg.client.commands.get(commandName)
-			// 	|| msg.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 		}
 
 		if (!command) {
@@ -127,10 +121,21 @@ module.exports = async function (msg) {
 			return msg.reply('I can\'t execute that command inside DMs!');
 		}
 
+		//Check permissions of the user
 		if (command.permissions) {
 			const authorPerms = msg.channel.permissionsFor(msg.member);
 			if (!authorPerms || !authorPerms.has(command.permissions)) {
 				return msg.reply(`you need the ${command.permissionsTranslated} permission to do this!`);
+			}
+		}
+
+		//Check permissions of the bot
+		if (msg.channel.type !== 'dm') {
+			if (command.botPermissions) {
+				const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch('784836063058329680'));
+				if (!botPermissions.has(command.botPermissions)) {
+					return msg.reply(`I need the ${command.botPermissionsTranslated} permission to do this!`);
+				}
 			}
 		}
 

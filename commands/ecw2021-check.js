@@ -9,6 +9,8 @@ module.exports = {
 	usage: '<NM/HD/HR/DT/FM> <Top/Middle/Lower/Beginner> <id>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
+	//botPermissions: 'MANAGE_ROLES',
+	//botPermissionsTranslated: 'Manage Roles',
 	//guildOnly: true,
 	args: true,
 	cooldown: 5,

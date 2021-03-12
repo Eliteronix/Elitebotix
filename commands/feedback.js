@@ -7,6 +7,8 @@ module.exports = {
 	usage: '<bug/feature/feedback> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
+	//botPermissions: 'MANAGE_ROLES',
+	//botPermissionsTranslated: 'Manage Roles',
 	//guildOnly: true,
 	args: true,
 	cooldown: 15,

@@ -8,6 +8,8 @@ module.exports = {
 	usage: '<enable/disable/text> <for \'text\' option: enable/disable>',
 	permissions: 'MANAGE_GUILD',
 	permissionsTranslated: 'Manage Server',
+	botPermissions: ['MANAGE_CHANNELS', 'MOVE_MEMBERS', 'MANAGE_ROLES'],
+	botPermissionsTranslated: 'Manage Channels, Manage Roles and Move Members',
 	guildOnly: true,
 	args: true,
 	cooldown: 5,
@@ -40,6 +42,12 @@ module.exports = {
 				msg.channel.send('Temporary channels have been disabled.');
 			} else if (args[0] === 'text') {
 				if (args[1] === 'enable') {
+					//Check permissions of the bot
+					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch('784836063058329680'));
+					if (!botPermissions.has('ADMINISTRATOR')) {
+						return msg.reply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');
+					}
+
 					guild.addTemporaryText = true;
 					guild.save();
 					msg.channel.send('Text channels will now be created alongside temporary voice channels.');
@@ -66,6 +74,12 @@ module.exports = {
 				msg.channel.send('Temporary channels have been disabled.');
 			} else if (args[0] === 'text') {
 				if (args[1] === 'enable') {
+					//Check permissions of the bot
+					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch('784836063058329680'));
+					if (!botPermissions.has('ADMINISTRATOR')) {
+						return msg.reply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');
+					}
+
 					//Create guild in db if it wasn't there yet
 					DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, temporaryVoices: false, addTemporaryText: true });
 					msg.channel.send('Text channels will now be created alongside temporary voice channels.');

@@ -1,10 +1,9 @@
-//require the dotenv node module
-require('dotenv').config();
+const { DBReactionRolesHeader } = require('../dbObjects');
 
 module.exports = {
-	name: 'bot-server',
+	name: 'db-reactionrolesheader',
 	//aliases: ['developer'],
-	description: 'Sends a message with the bots server',
+	description: 'Sends all the ReactionRolesHeaders found in the db',
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
@@ -17,8 +16,9 @@ module.exports = {
 	tags: 'debug',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	execute(msg, args) {
-		// eslint-disable-next-line no-undef
-		msg.channel.send(`The server is running on the ${process.env.SERVER} environment.`);
+	async execute(msg, args) {
+		console.log('ReactionRolesHeaders:');
+		const DBReactionRolesHeadersList = await DBReactionRolesHeader.findAll();
+		console.log(DBReactionRolesHeadersList);
 	},
 };

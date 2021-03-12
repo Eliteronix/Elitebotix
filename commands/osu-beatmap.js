@@ -10,6 +10,8 @@ module.exports = {
 	usage: '<id> [id] [id] ...',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
+	botPermissions: 'ATTACH_FILES',
+	botPermissionsTranslated: 'Attach Files',
 	//guildOnly: true,
 	args: true,
 	cooldown: 5,

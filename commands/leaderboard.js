@@ -11,6 +11,8 @@ module.exports = {
 	usage: '<osu> (the only supported game at the moment)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
+	botPermissions: 'ATTACH_FILES',
+	botPermissionsTranslated: 'Attach Files',
 	guildOnly: true,
 	args: true,
 	cooldown: 60,
