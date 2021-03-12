@@ -31,9 +31,9 @@ module.exports = {
 
 		//Check if all the general commands should be returned
 		if (!args.length) {
-			data.push('Here\'s a list of all my `general` commands:`');
+			data.push('Here\'s a list of all my `general` commands:');
 			//filter commands collection for noCooldownMessage and push the result
-			data.push(commands.filter(commands => commands.tags === 'general').map(command => command.name).join('`, `'));
+			data.push('`' + commands.filter(commands => commands.tags === 'general').map(command => command.name).join('`, `'));
 			data.push(`\`\nYou can send \`${guildPrefix}help [command name]\` to get info on a specific command!`);
 			data.push(`\nAll the command categories: \`${categories.join('`, `')}\`\nYou can send \`${guildPrefix}help [category name]\` to get a list of commands for a specific category!`);
 			data.push('\nTo stay informed about changes go to <https://discord.com/invite/Asz5Gfe> and follow <#804658828883787784>');
@@ -49,9 +49,9 @@ module.exports = {
 					msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
 				});
 		} else if (categories.includes(args[0])) {
-			data.push(`Here's a list of all my \`${args[0]}\` commands:\``);
+			data.push(`Here's a list of all my \`${args[0]}\` commands:`);
 			//filter commands collection for noCooldownMessage and push the result
-			data.push(commands.filter(commands => commands.tags === args[0]).map(command => command.name).join('`, `'));
+			data.push('`' + commands.filter(commands => commands.tags === args[0]).map(command => command.name).join('`, `'));
 			data.push(`\`\nYou can send \`${guildPrefix}help [command name]\` to get info on a specific command!`);
 			data.push(`\nAll the command categories: \`${categories.join('`, `')}\`\nYou can send \`${guildPrefix}help [category name]\` to get a list of commands for a specific category!`);
 			data.push('\nTo stay informed about changes go to <https://discord.com/invite/Asz5Gfe> and follow <#804658828883787784>');
