@@ -1,5 +1,5 @@
 const { DBAutoRoles } = require('../dbObjects');
-const getGuildPrefix = require('../getGuildPrefix');
+const { getGuildPrefix } = require('../utils');
 
 module.exports = {
 	name: 'autorole',

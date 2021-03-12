@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
+const { getGameMode } = require('../utils');
 
 module.exports = {
 	name: 'osu-beatmap',
@@ -270,18 +271,4 @@ async function drawBackground(input) {
 	}
 	const output = [canvas, ctx, beatmap];
 	return output;
-}
-
-function getGameMode(beatmap) {
-	let gameMode;
-	if (beatmap.mode === 'Standard') {
-		gameMode = 'osu';
-	} else if (beatmap.mode === 'Taiko') {
-		gameMode = 'taiko';
-	} else if (beatmap.mode === 'Mania') {
-		gameMode = 'mania';
-	} else if (beatmap.mode === 'Catch the Beat') {
-		gameMode = 'fruits';
-	}
-	return gameMode;
 }
