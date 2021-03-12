@@ -21,8 +21,10 @@ module.exports = {
 	async execute(msg, args) {
 		const guildPrefix = getGuildPrefix(msg);
 
-		let commandUser, server, mode = await getOsuUserServerMode(msg, args);
-		console.log(commandUser, server, mode);
+		const commandConfig = await getOsuUserServerMode(msg, args);
+		const commandUser = commandConfig[0];
+		const server = commandConfig[1];
+		const mode = commandConfig[2];
 
 		if (!args[0]) {
 			//Get profile by author if no argument
@@ -72,8 +74,6 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount) {
 			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
-
-		console.log('osutop');
 
 		osuApi.getUser({ u: username, m: mode })
 			.then(async (user) => {

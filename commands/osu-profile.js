@@ -21,7 +21,10 @@ module.exports = {
 	async execute(msg, args) {
 		const guildPrefix = getGuildPrefix(msg);
 
-		let commandUser, server, mode = await getOsuUserServerMode(msg, args);
+		const commandConfig = await getOsuUserServerMode(msg, args);
+		const commandUser = commandConfig[0];
+		const server = commandConfig[1];
+		const mode = commandConfig[2];
 
 		if (!args[0]) {//Get profile by author if no argument
 

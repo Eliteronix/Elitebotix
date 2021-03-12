@@ -469,6 +469,7 @@ module.exports = {
 			}
 
 		}
-		return discordUser, server, mode;
+		const outputArray = [discordUser, server, mode];
+		return outputArray;
 	}
 };
