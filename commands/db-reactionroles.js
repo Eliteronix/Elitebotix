@@ -1,7 +1,7 @@
 const { DBReactionRoles } = require('../dbObjects');
 
 module.exports = {
-	name: 'db-reactionrolesheader',
+	name: 'db-reactionroles',
 	//aliases: ['developer'],
 	description: 'Sends all the ReactionRoles found in the db',
 	//usage: '<bug/feature/request> <description>',
