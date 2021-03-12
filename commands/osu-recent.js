@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode } = require('../utils');
 const fetch = require('node-fetch');
 
 module.exports = {
@@ -21,50 +21,7 @@ module.exports = {
 	async execute(msg, args) {
 		const guildPrefix = getGuildPrefix(msg);
 
-		let server = 'bancho';
-		let mode = 0;
-
-		//Check user settings
-		const commandUser = await DBDiscordUsers.findOne({
-			where: { userId: msg.author.id },
-		});
-
-		if (commandUser && commandUser.osuMainServer) {
-			server = commandUser.osuMainServer;
-		}
-
-		if (commandUser && commandUser.osuMainMode) {
-			mode = commandUser.osuMainMode;
-		}
-
-		for (let i = 0; i < args.length; i++) {
-			if (args[i] === '--s' || args[i] === '--standard') {
-				mode = 0;
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--t' || args[i] === '--taiko') {
-				mode = 1;
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--c' || args[i] === '--catch') {
-				mode = 2;
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--m' || args[i] === '--mania') {
-				mode = 3;
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--r' || args[i] === '--ripple') {
-				server = 'ripple';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--b' || args[i] === '--bancho') {
-				server = 'bancho';
-				args.splice(i, 1);
-				i--;
-			}
-
-		}
+		let commandUser, server, mode = await getOsuUserServerMode(msg, args);
 
 		if (!args[0]) {//Get profile by author if no argument
 			//get discordUser from db
@@ -122,33 +79,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 				osuApi.getBeatmaps({ b: scores[0].beatmapId })
 					.then(async (beatmaps) => {
 						const user = await osuApi.getUser({ u: username, m: mode });
-
-						//get discordUser from db to update pp and rank
-						DBDiscordUsers.findOne({
-							where: { osuUserId: user.id },
-						})
-							.then(discordUser => {
-								if (discordUser && discordUser.osuUserId) {
-									discordUser.osuName = user.name;
-									if (mode === 0) {
-										discordUser.osuPP = user.pp.raw;
-										discordUser.osuRank = user.pp.rank;
-									} else if (mode === 1) {
-										discordUser.taikoPP = user.pp.raw;
-										discordUser.taikoRank = user.pp.rank;
-									} else if (mode === 2) {
-										discordUser.catchPP = user.pp.raw;
-										discordUser.catchRank = user.pp.rank;
-									} else if (mode === 3) {
-										discordUser.maniaPP = user.pp.raw;
-										discordUser.maniaRank = user.pp.rank;
-									}
-									discordUser.save();
-								}
-							})
-							.catch(err => {
-								console.log(err);
-							});
+						updateOsuDetailsforUser(user, mode);
 
 						const beatmapMode = getBeatmapModeId(beatmaps[0]);
 
@@ -224,34 +155,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`.`);
 				}
 
-				let score = {
-					score: responseJson[0].score,
-					user: {
-						name: null,
-						id: responseJson[0].user_id
-					},
-					beatmapId: responseJson[0].beatmap_id,
-					counts: {
-						'50': responseJson[0].count50,
-						'100': responseJson[0].count100,
-						'300': responseJson[0].count300,
-						geki: responseJson[0].countgeki,
-						katu: responseJson[0].countkatu,
-						miss: responseJson[0].countmiss
-					},
-					maxCombo: responseJson[0].maxcombo,
-					perfect: false,
-					raw_date: responseJson[0].date,
-					rank: responseJson[0].rank,
-					pp: responseJson[0].pp,
-					hasReplay: false,
-					raw_mods: responseJson[0].enabled_mods,
-					beatmap: undefined
-				};
-
-				if (responseJson[0].perfect === '1') {
-					score.perfect = true;
-				}
+				let score = rippleToBanchoScore(responseJson[0]);
 
 				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -269,36 +173,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 									return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 								}
 
-								let user = {
-									id: responseJson[0].user_id,
-									name: responseJson[0].username,
-									counts: {
-										'300': parseInt(responseJson[0].count300),
-										'100': parseInt(responseJson[0].count100),
-										'50': parseInt(responseJson[0].count50),
-										'SSH': parseInt(responseJson[0].count_rank_ssh),
-										'SS': parseInt(responseJson[0].count_rank_ss),
-										'SH': parseInt(responseJson[0].count_rank_sh),
-										'S': parseInt(responseJson[0].count_rank_s),
-										'A': parseInt(responseJson[0].count_rank_a),
-										'plays': parseInt(responseJson[0].playcount)
-									},
-									scores: {
-										ranked: parseInt(responseJson[0].ranked_score),
-										total: parseInt(responseJson[0].total_score)
-									},
-									pp: {
-										raw: parseFloat(responseJson[0].pp_raw),
-										rank: parseInt(responseJson[0].pp_rank),
-										countryRank: parseInt(responseJson[0].pp_country_rank)
-									},
-									country: responseJson[0].country,
-									level: parseFloat(responseJson[0].level),
-									accuracy: parseFloat(responseJson[0].accuracy),
-									secondsPlayed: parseInt(responseJson[0].total_seconds_played),
-									raw_joinDate: responseJson[0].join_date,
-									events: []
-								};
+								let user = rippleToBanchoUser(responseJson[0]);
 
 								const canvasWidth = 1000;
 								const canvasHeight = 500;

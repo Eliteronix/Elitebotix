@@ -1,4 +1,4 @@
-const { DBGuilds } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers } = require('./dbObjects');
 const { prefix } = require('./config.json');
 
 module.exports = {
@@ -42,7 +42,7 @@ module.exports = {
 				output = output + input.charAt(i);
 			}
 		}
-	
+
 		return output;
 	},
 	roundedRect: function (ctx, x, y, width, height, radius, R, G, B, A) {
@@ -81,7 +81,7 @@ module.exports = {
 	},
 	getModImage: function (mod) {
 		let URL = 'https://osu.ppy.sh/assets/images/mod_no-mod.d04b9d35.png';
-	
+
 		if (mod === 'NF') {
 			URL = 'https://osu.ppy.sh/assets/images/mod_no-fail.ca1a6374.png';
 		} else if (mod === 'EZ') {
@@ -123,7 +123,7 @@ module.exports = {
 		} else if (mod === '9K') {
 			URL = 'https://osu.ppy.sh/assets/images/mod_9K.ffde81fe.png';
 		}
-	
+
 		return URL;
 	},
 	getMods: function (input) {
@@ -262,7 +262,7 @@ module.exports = {
 			mods.push('NF');
 			modsBits = modsBits - 1;
 		}
-	
+
 		return mods;
 	},
 	getLinkModeName: function (ID) {
@@ -313,7 +313,7 @@ module.exports = {
 		ctx.arcTo(x, y, x, y + radius, radius);
 		ctx.closePath();
 		ctx.clip();
-	
+
 		ctx.drawImage(image, x, y, width, height);
 	},
 	getBeatmapModeId: function (beatmap) {
@@ -329,4 +329,146 @@ module.exports = {
 		}
 		return gameMode;
 	},
+	rippleToBanchoScore: function (inputScore) {
+		let outputScore = {
+			score: inputScore.score,
+			user: {
+				name: null,
+				id: inputScore.user_id
+			},
+			beatmapId: inputScore.beatmap_id,
+			counts: {
+				'50': inputScore.count50,
+				'100': inputScore.count100,
+				'300': inputScore.count300,
+				geki: inputScore.countgeki,
+				katu: inputScore.countkatu,
+				miss: inputScore.countmiss
+			},
+			maxCombo: inputScore.maxcombo,
+			perfect: false,
+			raw_date: inputScore.date,
+			rank: inputScore.rank,
+			pp: inputScore.pp,
+			hasReplay: false,
+			raw_mods: inputScore.enabled_mods,
+			beatmap: undefined
+		};
+
+		if (inputScore.perfect === '1') {
+			outputScore.perfect = true;
+		}
+		return outputScore;
+	},
+	rippleToBanchoUser: function (inputUser) {
+		let outputUser = {
+			id: inputUser.user_id,
+			name: inputUser.username,
+			counts: {
+				'300': parseInt(inputUser.count300),
+				'100': parseInt(inputUser.count100),
+				'50': parseInt(inputUser.count50),
+				'SSH': parseInt(inputUser.count_rank_ssh),
+				'SS': parseInt(inputUser.count_rank_ss),
+				'SH': parseInt(inputUser.count_rank_sh),
+				'S': parseInt(inputUser.count_rank_s),
+				'A': parseInt(inputUser.count_rank_a),
+				'plays': parseInt(inputUser.playcount)
+			},
+			scores: {
+				ranked: parseInt(inputUser.ranked_score),
+				total: parseInt(inputUser.total_score)
+			},
+			pp: {
+				raw: parseFloat(inputUser.pp_raw),
+				rank: parseInt(inputUser.pp_rank),
+				countryRank: parseInt(inputUser.pp_country_rank)
+			},
+			country: inputUser.country,
+			level: parseFloat(inputUser.level),
+			accuracy: parseFloat(inputUser.accuracy),
+			secondsPlayed: parseInt(inputUser.total_seconds_played),
+			raw_joinDate: inputUser.join_date,
+			events: []
+		};
+
+		return outputUser;
+	},
+	updateOsuDetailsforUser: async function (user, mode) {
+		console.log('Updating user');
+		//get discordUser from db to update pp and rank
+		DBDiscordUsers.findOne({
+			where: { osuUserId: user.id },
+		})
+			.then(discordUser => {
+				if (discordUser && discordUser.osuUserId) {
+					discordUser.osuName = user.name;
+					if (mode === 0) {
+						discordUser.osuPP = user.pp.raw;
+						discordUser.osuRank = user.pp.rank;
+					} else if (mode === 1) {
+						discordUser.taikoPP = user.pp.raw;
+						discordUser.taikoRank = user.pp.rank;
+					} else if (mode === 2) {
+						discordUser.catchPP = user.pp.raw;
+						discordUser.catchRank = user.pp.rank;
+					} else if (mode === 3) {
+						discordUser.maniaPP = user.pp.raw;
+						discordUser.maniaRank = user.pp.rank;
+					}
+					discordUser.save();
+				}
+			})
+			.catch(err => {
+				console.log(err);
+			});
+		return;
+	},
+	getOsuUserServerMode: async function (msg, args) {
+		let server = 'bancho';
+		let mode = 0;
+
+		//Check user settings
+		const discordUser = await DBDiscordUsers.findOne({
+			where: { userId: msg.author.id },
+		});
+
+		if (discordUser && discordUser.osuMainServer) {
+			server = discordUser.osuMainServer;
+		}
+
+		if (discordUser && discordUser.osuMainMode) {
+			mode = discordUser.osuMainMode;
+		}
+
+		for (let i = 0; i < args.length; i++) {
+			if (args[i] === '--s' || args[i] === '--standard') {
+				mode = 0;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--t' || args[i] === '--taiko') {
+				mode = 1;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--c' || args[i] === '--catch') {
+				mode = 2;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--m' || args[i] === '--mania') {
+				mode = 3;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--r' || args[i] === '--ripple') {
+				server = 'ripple';
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--b' || args[i] === '--bancho') {
+				server = 'bancho';
+				args.splice(i, 1);
+				i--;
+			}
+
+		}
+		return discordUser, server, mode;
+	}
 };
