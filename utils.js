@@ -395,7 +395,6 @@ module.exports = {
 		return outputUser;
 	},
 	updateOsuDetailsforUser: async function (user, mode) {
-		console.log('Updating user');
 		//get discordUser from db to update pp and rank
 		DBDiscordUsers.findOne({
 			where: { osuUserId: user.id },
