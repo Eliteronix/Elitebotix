@@ -8,6 +8,8 @@ module.exports = {
 	usage: '<add/remove/list> <@role>',
 	permissions: 'MANAGE_ROLES',
 	permissionsTranslated: 'Manage Roles',
+	botPermissions: 'MANAGE_ROLES',
+	botPermissionsTranslated: 'Manage Roles',
 	guildOnly: true,
 	args: true,
 	cooldown: 5,

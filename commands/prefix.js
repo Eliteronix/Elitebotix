@@ -7,6 +7,8 @@ module.exports = {
 	usage: '<new prefix like \'!\' or \'.\'>',
 	permissions: 'MANAGE_GUILD',
 	permissionsTranslated: 'Manage Server',
+	//botPermissions: 'MANAGE_ROLES',
+	//botPermissionsTranslated: 'Manage Roles',
 	guildOnly: true,
 	args: true,
 	cooldown: 5,

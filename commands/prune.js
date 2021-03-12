@@ -5,6 +5,8 @@ module.exports = {
 	usage: '<amount> (has to be between 1 and 99)',
 	permissions: 'MANAGE_MESSAGES',
 	permissionsTranslated: 'Manage Messages',
+	botPermissions: 'MANAGE_MESSAGES',
+	botPermissionsTranslated: 'Manage Messages',
 	guildOnly: true,
 	args: true,
 	cooldown: 15,
