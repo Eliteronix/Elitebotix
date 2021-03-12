@@ -15,7 +15,7 @@ module.exports = {
 	args: true,
 	cooldown: 60,
 	//noCooldownMessage: true,
-	tags: 'osu',
+	tags: 'general',
 	prefixCommand: true,
 	async execute(msg, args) {
 		if (args[0] === 'osu') {
