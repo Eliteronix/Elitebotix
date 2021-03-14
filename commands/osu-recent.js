@@ -22,7 +22,7 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args) {
 		const guildPrefix = getGuildPrefix(msg);
-		
+
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
 		const server = commandConfig[1];
@@ -489,6 +489,21 @@ async function drawAccInfo(input) {
 	let beatmap = input[3];
 	let user = input[4];
 	let lookedUpScore = input[5];
+
+	if (score.rank === 'F') {
+		//Calculate Completion
+		const beatmapObjects = parseInt(beatmap.objects.normal) + parseInt(beatmap.objects.slider) + parseInt(beatmap.objects.spinner);
+		const scoreHits = parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss);
+		const completion = 100 / beatmapObjects * scoreHits;
+
+		//Draw completion
+		roundedRect(ctx, canvas.width / 1000 * 453, canvas.height / 500 * 395, 110, 50, 5, '00', '00', '00', 0.5);
+		ctx.font = '18px sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		ctx.fillText('Completion', canvas.width / 1000 * 453 + 55, canvas.height / 500 * 415);
+		ctx.fillText(`${Math.round(completion * 100) / 100}%`, canvas.width / 1000 * 453 + 55, canvas.height / 500 * 440);
+	}
 
 	//Calculate accuracy
 	const accuracy = (score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss));
