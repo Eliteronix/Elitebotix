@@ -1,5 +1,7 @@
 # ArrayBuffer
 
+Class `Napi::ArrayBuffer` inherits from class [`Napi::Object`][].
+
 The `Napi::ArrayBuffer` class corresponds to the
 [JavaScript `ArrayBuffer`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
 class.
@@ -127,3 +129,21 @@ void* Napi::ArrayBuffer::Data() const;
 ```
 
 Returns a pointer the wrapped data.
+
+### Detach
+
+```cpp
+void Napi::ArrayBuffer::Detach();
+```
+
+Invokes the `ArrayBuffer` detach operation on a detachable `ArrayBuffer`.
+
+### IsDetached
+
+```cpp
+bool Napi::ArrayBuffer::IsDetached() const;
+```
+
+Returns `true` if this `ArrayBuffer` has been detached.
+
+[`Napi::Object`]: ./object.md
