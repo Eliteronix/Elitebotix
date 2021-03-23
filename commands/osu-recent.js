@@ -4,6 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('canvas');
 const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode } = require('../utils');
 const fetch = require('node-fetch');
+const { calculateStarRating } = require('osu-sr-calculator');
 
 module.exports = {
 	name: 'osu-recent',
@@ -257,7 +258,24 @@ async function drawTitle(input) {
 	ctx.textAlign = 'left';
 	ctx.fillText(`${beatmap.title} by ${beatmap.artist}`, canvas.width / 100, canvas.height / 500 * 35);
 	ctx.font = '25px sans-serif';
-	ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100}   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
+
+	const mods = getMods(score.raw_mods);
+
+	if(mods.includes('NC')){
+		for(let i = 0, changed = false; i < mods.length && changed === false; i++){
+			if(mods[i] === 'NC'){
+				mods[i] = 'DT';
+				changed = true;
+			}
+		}
+	}
+
+	if (mods.includes('DT') || mods.includes('HT') || mods.includes('HR') || mods.includes('EZ')) {
+		const starRating = await calculateStarRating(beatmap.id, mods);
+		ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100} (${Math.round(starRating[mods.join('')] * 100) / 100} with ${mods.join('')})   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
+	} else {
+		ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100}   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
+	}
 
 	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
 	return output;

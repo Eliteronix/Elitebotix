@@ -4,6 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('canvas');
 const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode } = require('../utils');
 const fetch = require('node-fetch');
+const { calculateStarRating } = require('osu-sr-calculator');
 
 module.exports = {
 	name: 'osu-score',
@@ -170,38 +171,38 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount) {
 						}
 
 						let user = rippleToBanchoUser(responseJson[0]);
-		
+
 						const canvasWidth = 1000;
 						const canvasHeight = 500;
-		
+
 						//Create Canvas
 						const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
-		
+
 						//Get context and load the image
 						const ctx = canvas.getContext('2d');
 						const background = await Canvas.loadImage('./other/osu-background.png');
 						ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-		
+
 						let elements = [canvas, ctx, score, beatmap, user];
-		
+
 						elements = await drawTitle(elements);
-		
+
 						elements = await drawCover(elements);
-		
+
 						elements = await drawFooter(elements);
-		
+
 						elements = await drawAccInfo(elements);
-		
+
 						await drawUserInfo(elements, server);
-		
+
 						//Create as an attachment
 						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.id}.png`);
-		
+
 						let guildPrefix = await getGuildPrefix(msg);
-		
+
 						//declare hints array
 						var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`];
-		
+
 						// //Send attachment
 						if (noLinkedAccount) {
 							await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
@@ -246,7 +247,24 @@ async function drawTitle(input) {
 	ctx.textAlign = 'left';
 	ctx.fillText(`${beatmap.title} by ${beatmap.artist}`, canvas.width / 100, canvas.height / 500 * 35);
 	ctx.font = '25px sans-serif';
-	ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100}   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
+
+	const mods = getMods(score.raw_mods);
+
+	if(mods.includes('NC')){
+		for(let i = 0, changed = false; i < mods.length && changed === false; i++){
+			if(mods[i] === 'NC'){
+				mods[i] = 'DT';
+				changed = true;
+			}
+		}
+	}
+
+	if (mods.includes('DT') || mods.includes('HT') || mods.includes('HR') || mods.includes('EZ')) {
+		const starRating = await calculateStarRating(beatmap.id, mods);
+		ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100} (${Math.round(starRating[mods.join('')] * 100) / 100} with ${mods.join('')})   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
+	} else {
+		ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100}   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
+	}
 
 	const output = [canvas, ctx, score, beatmap, user];
 	return output;
@@ -549,12 +567,12 @@ async function drawUserInfo(input, server) {
 	let beatmap = input[3];
 	let user = input[4];
 
-	if(server !== 'bancho'){
+	if (server !== 'bancho') {
 		ctx.save();
 		//ctx.translate(newx, newy);
-		ctx.rotate(-Math.PI/2);
+		ctx.rotate(-Math.PI / 2);
 		ctx.textAlign = 'center';
-		ctx.fillText(`[${server}]`, -canvas.height/500*425, 50);
+		ctx.fillText(`[${server}]`, -canvas.height / 500 * 425, 50);
 		ctx.restore();
 	}
 
