@@ -22,7 +22,7 @@
     "node-fetch": "^2.6.1",
     "node-osu": "^2.2.1",
     "sequelize": "^6.6.2",
-    "sqlite3": "^5.0.0"
+    "sqlite3": "^5.0.2"
   },
   "devDependencies": {
     "eslint": "^7.22.0"
