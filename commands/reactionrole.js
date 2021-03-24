@@ -39,7 +39,7 @@ module.exports = {
 					//Predict the next embedId
 					let embedId;
 					if (reactionRolesHeader) {
-						embedId = reactionRolesHeader.reactionRolesHeaderId + 1;
+						embedId = reactionRolesHeader.id + 1;
 					} else {
 						embedId = '1';
 					}
