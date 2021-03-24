@@ -78,8 +78,15 @@ module.exports = {
 			for (let i = 0; i < autoRolesList.length; i++) {
 				//get role object by role Id
 				let autoRole = msg.guild.roles.cache.get(autoRolesList[i].roleId);
-				//Set array index to the role name for the output
-				autoRolesList[i] = autoRole.name;
+
+				//Check if deleted role
+				if(autoRole){
+					//Set array index to the role name for the output
+					autoRolesList[i] = autoRole.name;
+				} else {
+					DBAutoRoles.destroy({ where: { guildId: msg.guild.id, roleId: autoRolesList[i].roleId } });
+					autoRolesList.shift();
+				}
 			}
 			//Set the output string
 			const autoRolesString = autoRolesList.join(', ') || 'No autoroles found.';

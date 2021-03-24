@@ -52,7 +52,14 @@ module.exports = async function (member) {
 	for (let i = 0; i < autoRolesList.length; i++) {
 		//get the role object from the array
 		let autoRole = member.guild.roles.cache.get(autoRolesList[i].roleId);
-		//add the role to the member
-		member.roles.add(autoRole);
+
+		//Check if deleted role
+		if(autoRole){
+			//add the role to the member
+			member.roles.add(autoRole);
+		} else {
+			DBAutoRoles.destroy({ where: { guildId: member.guild.id, roleId: autoRolesList[i].roleId } });
+			autoRolesList.shift();
+		}
 	}
 };
