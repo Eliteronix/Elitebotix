@@ -167,10 +167,10 @@ async function drawAccounts(input, msg) {
 	for (let i = 0; i < osuAccounts.length; i++) {
 		const member = await msg.guild.members.fetch(osuAccounts[i].userId);
 
-		let userDisplayName = member.user.username;
+		let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
 
 		if (member.nickname) {
-			userDisplayName = member.nickname;
+			userDisplayName = `${member.nickname} / ${userDisplayName}`;
 		}
 
 		let verified = '⨯';
@@ -191,7 +191,7 @@ async function drawAccounts(input, msg) {
 
 		ctx.font = 'bold 25px sans-serif';
 		ctx.fillText(`${i + 1}.`, canvas.width / 1000 * 125, 125 + i*90);
-		ctx.fillText(`${userDisplayName} | ${member.user.username}#${member.user.discriminator}`, canvas.width / 1000 * 200, 125 + i*90);
+		ctx.fillText(userDisplayName, canvas.width / 1000 * 200, 125 + i*90);
 		ctx.font = '25px sans-serif';
 		ctx.fillText(`#${humanReadable(osuAccounts[i].osuRank)}`, canvas.width / 1000 * 200, 160 + i*90);
 		ctx.fillText(`${humanReadable(Math.floor(osuAccounts[i].osuPP).toString())}pp`, canvas.width / 1000 * 400, 160 + i*90);
