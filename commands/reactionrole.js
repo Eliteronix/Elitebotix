@@ -215,7 +215,7 @@ module.exports = {
 				if (!(isNaN(args[2]))) {
 					//Check if there is a role mentioned in the message
 					if (msg.mentions.roles.first() && args[4].startsWith('<@&')) {
-						if (args[6]) {
+						if (args[5]) {
 
 							const headerId = args[2];
 							const roleMentioned = args[4].replace('<@&', '').replace('>', '');
