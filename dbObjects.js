@@ -13,5 +13,6 @@ const DBReactionRolesHeader = require('./models/DBReactionRolesHeader')(sequeliz
 const DBAutoRoles = require('./models/DBAutoRoles')(sequelize, Sequelize.DataTypes);
 const DBTemporaryVoices = require('./models/DBTemporaryVoices')(sequelize, Sequelize.DataTypes);
 const DBDiscordUsers = require('./models/DBDiscordUsers')(sequelize, Sequelize.DataTypes);
+const DBServerUserActivity = require('./models/DBServerUserActivity')(sequelize, Sequelize.DataTypes);
 
-module.exports = { DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBAutoRoles, DBTemporaryVoices, DBDiscordUsers };
+module.exports = { DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBAutoRoles, DBTemporaryVoices, DBDiscordUsers, DBServerUserActivity };

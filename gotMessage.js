@@ -1,4 +1,4 @@
-const { getGuildPrefix } = require('./utils');
+const { getGuildPrefix, updateServerUserActivity } = require('./utils');
 const fs = require('fs');
 const Discord = require('discord.js');
 const cooldowns = new Discord.Collection();
@@ -50,6 +50,8 @@ module.exports = async function (msg) {
 			}
 		}
 	}
+	//Update user activity
+	updateServerUserActivity(msg);
 
 	//check if the message wasn't sent by the bot itself or another bot
 	if (!(msg.author.bot)) {
