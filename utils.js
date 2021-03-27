@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity } = require('./dbObjects');
 const { prefix } = require('./config.json');
 
 module.exports = {
@@ -470,5 +470,23 @@ module.exports = {
 		}
 		const outputArray = [discordUser, server, mode];
 		return outputArray;
+	},
+	updateServerUserActivity: async function (msg) {
+		if(msg.channel.type !== 'dm'){
+			const now = new Date();
+			now.setSeconds(now.getSeconds() - 15);
+			const serverUserActivity = await DBServerUserActivity.findOne({
+				where: { guildId: msg.guild.id, userId: msg.author.id },
+			});
+
+			if(serverUserActivity && serverUserActivity.updatedAt < now){
+				serverUserActivity.points = serverUserActivity.points + 1;
+				serverUserActivity.save();
+			}
+
+			if(!serverUserActivity){
+				DBServerUserActivity.create({ guildId: msg.guild.id, userId: msg.author.id });
+			}
+		}
 	}
 };
