@@ -38,7 +38,7 @@ module.exports = async function (member) {
 			//get the channel id for the welcome message
 			const guildWelcomeMessageChannelId = guild.welcomeMessageChannel;
 			//get the channel object from the id
-			const guildWelcomeMessageChannel = member.client.channels.cache.find(channel => channel.id === guildWelcomeMessageChannelId);
+			const guildWelcomeMessageChannel = await member.client.channels.cache.find(channel => channel.id === guildWelcomeMessageChannelId);
 			//get the welcome message text
 			const guildWelcomeMessageText = guild.welcomeMessageText.replace('@member', '<@' + member.user.id + '>');
 			//send the welcome message text into the channel
