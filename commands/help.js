@@ -46,8 +46,7 @@ module.exports = {
 					if (msg.channel.type === 'dm') return;
 					msg.reply('I\'ve sent you a DM with all my commands!');
 				})
-				.catch(error => {
-					console.error(`Could not send help DM to ${msg.author.tag}.\n`, error);
+				.catch(() => {
 					msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
 				});
 		} else if (categories.includes(args[0])) {
@@ -64,8 +63,7 @@ module.exports = {
 					if (msg.channel.type === 'dm') return;
 					msg.reply('I\'ve sent you a DM with all my commands!');
 				})
-				.catch(error => {
-					console.error(`Could not send help DM to ${msg.author.tag}.\n`, error);
+				.catch(() => {
 					msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
 				});
 		}
