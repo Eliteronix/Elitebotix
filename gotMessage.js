@@ -201,8 +201,9 @@ module.exports = async function (msg) {
 			command.execute(msg, args, prefixCommand);
 		} catch (error) {
 			console.error(error);
+			const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
 			msg.reply('There was an error trying to execute that command. The developers have been alerted.');
-			msg.client.users.cache.get('138273136285057025').send(`There was an error trying to execute a command.\n\nMessage by ${msg.author.username}#${msg.author.discriminator}: \`${msg.content}\`\n\n${error}`);
+			eliteronixUser.send(`There was an error trying to execute a command.\n\nMessage by ${msg.author.username}#${msg.author.discriminator}: \`${msg.content}\`\n\n${error}`);
 		}
 	}
 };
