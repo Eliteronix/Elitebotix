@@ -38,7 +38,7 @@ module.exports = {
 
 		let dadmodeEnabled;
 
-		if (guild.dadmodeEnabled) {
+		if (guild && guild.dadmodeEnabled) {
 			dadmodeEnabled = 'Enabled';
 		} else {
 			dadmodeEnabled = 'Disabled';
@@ -46,7 +46,7 @@ module.exports = {
 
 		let welcomeMessage;
 
-		if (guild.sendWelcomeMessage) {
+		if (guild && guild.sendWelcomeMessage) {
 			welcomeMessage = 'Enabled';
 		} else {
 			welcomeMessage = 'Disabled';
@@ -54,7 +54,7 @@ module.exports = {
 
 		let goodbyeMessage;
 
-		if (guild.sendGoodbyeMessage) {
+		if (guild && guild.sendGoodbyeMessage) {
 			goodbyeMessage = 'Enabled';
 		} else {
 			goodbyeMessage = 'Disabled';
@@ -77,13 +77,13 @@ module.exports = {
 
 		let temporaryVoicesSetting = 'Disabled';
 
-		if (guild.temporaryVoices) {
+		if (guild && guild.temporaryVoices) {
 			temporaryVoicesSetting = 'Enabled';
 		}
 
 		let temporaryText = 'Disabled';
 
-		if (guild.addTemporaryText) {
+		if (guild && guild.addTemporaryText) {
 			temporaryText = 'Enabled';
 		}
 
