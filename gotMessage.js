@@ -3,6 +3,7 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const cooldowns = new Discord.Collection();
 const { closest } = require('fastest-levenshtein');
+const { Permissions } = require('discord.js');
 
 module.exports = async function (msg) {
 	//Create a collection for the commands
@@ -87,7 +88,18 @@ module.exports = async function (msg) {
 				categories.push('debug');
 			}
 
-			const authorPerms = msg.channel.permissionsFor(msg.member);
+			let authorPerms;
+
+			if(msg.channel.type !== 'dm'){
+				authorPerms = msg.channel.permissionsFor(msg.member);
+			} else {
+				const flags = [
+					'SEND_MESSAGES',
+					'ATTACH_FILES',
+				];
+	
+				authorPerms = new Permissions(flags);
+			}
 
 			for (let i = 0; i < commandArray.length; i++) {
 				if (commandArray[i].prefixCommand === true && categories.includes(commandArray[i].tags) && authorPerms.has(commandArray[i].permissions)) {
