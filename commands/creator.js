@@ -17,12 +17,14 @@ module.exports = {
 	tags: 'general',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	execute(msg, args) {
+	async execute(msg, args) {
+		const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
+
 		//Create new embed
 		const creatorInfoEmbed = new Discord.MessageEmbed()
 			.setColor('#0492C2')
 			.setTitle('Creator info card')
-			.setThumbnail(`${msg.client.users.cache.find(user => user.id === '138273136285057025').avatarURL()}`)
+			.setThumbnail(`${eliteronixUser.avatarURL()}`)
 			.addFields(
 				{ name: 'Discord', value: 'Eliteronix#4208' },
 				{ name: 'Github', value: 'Eliteronix' },
