@@ -534,16 +534,20 @@ async function drawAccInfo(input) {
 	ctx.fillText('Accuracy', canvas.width / 1000 * 600 + 55, canvas.height / 500 * 385);
 	ctx.fillText(`${Math.round(accuracy * 100) / 100}%`, canvas.width / 1000 * 600 + 55, canvas.height / 500 * 410);
 	//Combo
-	roundedRect(ctx, canvas.width / 1000 * 735, canvas.height / 500 * 365, 110, 50, 5, '00', '00', '00', 0.5);
+	roundedRect(ctx, canvas.width / 1000 * 725, canvas.height / 500 * 365, 130, 50, 5, '00', '00', '00', 0.5);
 	ctx.font = '18px sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('Max Combo', canvas.width / 1000 * 735 + 55, canvas.height / 500 * 385);
 
+	let combo = `${score.maxCombo}x`;
+
 	if (score.perfect) {
 		ctx.fillStyle = '#B3FF66';
+	} else {
+		combo = `${score.maxCombo}/${beatmap.maxCombo}x`;
 	}
-	ctx.fillText(`${score.maxCombo}x`, canvas.width / 1000 * 735 + 55, canvas.height / 500 * 410);
+	ctx.fillText(combo, canvas.width / 1000 * 735 + 55, canvas.height / 500 * 410);
 
 	let pp = 'None';
 	if (lookedUpScore && lookedUpScore.pp && lookedUpScore.score === score.score) {
