@@ -137,13 +137,16 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount) {
 				//declare hints array
 				var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`];
 
-				// //Send attachment
+				let sentMessage;
+
+				//Send attachment
 				if (noLinkedAccount) {
-					await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+					sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
 				} else {
-					await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+					sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
 				}
 				processingMessage.delete();
+				sentMessage.react('<:COMPARE:827974793365159997>');
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
@@ -203,14 +206,16 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount) {
 						//declare hints array
 						var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`];
 
-						// //Send attachment
+						let sentMessage;
+
+						//Send attachment
 						if (noLinkedAccount) {
-							await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+							sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
 						} else {
-							await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+							sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
 						}
 						processingMessage.delete();
-
+						sentMessage.react('<:COMPARE:827974793365159997>');
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {
@@ -250,9 +255,9 @@ async function drawTitle(input) {
 
 	const mods = getMods(score.raw_mods);
 
-	if(mods.includes('NC')){
-		for(let i = 0, changed = false; i < mods.length && changed === false; i++){
-			if(mods[i] === 'NC'){
+	if (mods.includes('NC')) {
+		for (let i = 0, changed = false; i < mods.length && changed === false; i++) {
+			if (mods[i] === 'NC') {
 				mods[i] = 'DT';
 				changed = true;
 			}
@@ -510,7 +515,7 @@ async function drawAccInfo(input) {
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('Max Combo', canvas.width / 1000 * 735 + 55, canvas.height / 500 * 385);
-	
+
 	let combo = `${score.maxCombo}x`;
 
 	if (score.perfect) {
