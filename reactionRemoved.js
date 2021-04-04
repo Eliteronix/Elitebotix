@@ -6,27 +6,34 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user){
-	
 	//For the development version
 	//if the message is not in the Dev-Servers then return
 	// eslint-disable-next-line no-undef
 	if (process.env.SERVER === 'Dev') {
-		if (reaction.message.guild.id != '800641468321759242' && reaction.message.guild.id != '800641735658176553') {
+		if (reaction.message.channel.type === 'dm') {
+			return;
+		}
+		if (reaction.message.channel.type !== 'dm' && reaction.message.guild.id != '800641468321759242' && reaction.message.guild.id != '800641735658176553') {
 			return;
 		}
 		//For the QA version
 		//if the message is in the QA-Servers then return
 		// eslint-disable-next-line no-undef
 	} else if (process.env.SERVER === 'QA') {
-		if (reaction.message.guild.id != '800641367083974667' && reaction.message.guild.id != '800641819086946344') {
+		if (reaction.message.channel.type === 'dm') {
+			return;
+		}
+		if (reaction.message.channel.type !== 'dm' && reaction.message.guild.id != '800641367083974667' && reaction.message.guild.id != '800641819086946344') {
 			return;
 		}
 		//For the Live version
 		//if the message is in the Dev/QA-Servers then return
 		// eslint-disable-next-line no-undef
 	} else if (process.env.SERVER === 'Live') {
-		if (reaction.message.guild.id === '800641468321759242' || reaction.message.guild.id === '800641735658176553' || reaction.message.guild.id === '800641367083974667' || reaction.message.guild.id === '800641819086946344') {
-			return;
+		if (reaction.message.channel.type !== 'dm') {
+			if (reaction.message.guild.id === '800641468321759242' || reaction.message.guild.id === '800641735658176553' || reaction.message.guild.id === '800641367083974667' || reaction.message.guild.id === '800641819086946344') {
+				return;
+			}
 		}
 	}
 
