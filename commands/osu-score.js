@@ -99,7 +99,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount) {
 		osuApi.getScores({ b: beatmap.id, u: username, m: mode })
 			.then(async (scores) => {
 				if (!(scores[0])) {
-					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\``);
+					return msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.id}\`.`);
 				}
 				const user = await osuApi.getUser({ u: username, m: mode });
 				updateOsuDetailsforUser(user, mode);
@@ -150,7 +150,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount) {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\``);
+					msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.id}\`.`);
 				} else {
 					console.log(err);
 				}
@@ -161,7 +161,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount) {
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`.`);
+					return msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.id}\`.`);
 				}
 
 				let score = rippleToBanchoScore(responseJson[0]);
