@@ -6,7 +6,7 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user) {
-	
+
 	//For the development version
 	//if the message is not in the Dev-Servers then return
 	// eslint-disable-next-line no-undef
@@ -29,7 +29,7 @@ module.exports = async function (reaction, user) {
 			return;
 		}
 	}
-	
+
 	//Check if the reaction is partial or not
 	if (reaction.partial) {
 		// If the message this reaction belongs to was removed the fetching might result in an API error, which needs to be handled
@@ -39,6 +39,35 @@ module.exports = async function (reaction, user) {
 			console.error('Something went wrong when fetching the message: ', error);
 			// Return as `reaction.message.author` may be undefined/null
 			return;
+		}
+	}
+
+	if (user.id === '784836063058329680') {
+		return;
+	}
+
+	if (reaction._emoji.id === '827974793365159997') {
+		const scoreRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+\nTry `.+/gm;
+		if (reaction.message.content.match(scoreRegex)) {
+			const beginningRegex = /.+\nSpectate: .+\nBeatmap: <https:\/\/osu.ppy.sh\/b\//gm;
+			const endingRegex = />\nosu! direct:.+\nTry.+/gm;
+			const beatmapId = reaction.message.content.replace(beginningRegex, '').replace(endingRegex, '');
+
+			let args = [beatmapId];
+
+			const command = require('./commands/osu-score.js');
+
+			//Set author of the message to the reacting user to not break the commands
+			reaction.message.author = user;
+
+			try {
+				command.execute(reaction.message, args, true);
+			} catch (error) {
+				console.error(error);
+				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+			}
 		}
 	}
 
