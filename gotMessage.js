@@ -90,14 +90,14 @@ module.exports = async function (msg) {
 
 			let authorPerms;
 
-			if(msg.channel.type !== 'dm'){
+			if (msg.channel.type !== 'dm') {
 				authorPerms = msg.channel.permissionsFor(msg.member);
 			} else {
 				const flags = [
 					'SEND_MESSAGES',
 					'ATTACH_FILES',
 				];
-	
+
 				authorPerms = new Permissions(flags);
 			}
 
@@ -114,11 +114,22 @@ module.exports = async function (msg) {
 
 			const closestMatch = closest(commandName, commandNames);
 
-			if (args[0]) {
-				msg.channel.send(`Could not find command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch} ${args.join(' ')}\`?`);
-			} else {
-				msg.channel.send(`Could not find command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch}\`?`);
+			let closestMatchMessage;
+
+			//.replace(/`/g, '')
+
+			for (let i = 0; i < args.length; i++) {
+				args[i] = args[i].replace(/`/g, '');
 			}
+
+			if (args[0]) {
+				closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch} ${args.join(' ')}\`?`);
+			} else {
+				closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch}\`?`);
+			}
+
+			await closestMatchMessage.react('✅');
+			await closestMatchMessage.react('❌');
 
 			return;
 		}

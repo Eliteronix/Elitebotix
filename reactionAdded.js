@@ -53,6 +53,27 @@ module.exports = async function (reaction, user) {
 		return;
 	}
 
+	const didYouMeanRegex = /<@.+>, I could not find the command `.+`.\nDid you mean `.+`?/gm;
+	if (reaction.message.content.substring(3).startsWith(user.id) && reaction.message.content.match(didYouMeanRegex)
+		|| reaction.message.content.substring(2).startsWith(user.id) && reaction.message.content.match(didYouMeanRegex)) {
+		if (reaction._emoji.name === '✅') {
+			let newMessage = reaction.message;
+			newMessage.author = user;
+
+			const didYouMeanBeginningRegex = /<@.+>, I could not find the command `.+`.\nDid you mean `/gm;
+			newMessage.content = reaction.message.content.substring(0, reaction.message.content.length - 2).replace(didYouMeanBeginningRegex, '');
+
+			//Get gotMessage
+			const gotMessage = require('./gotMessage');
+
+			gotMessage(newMessage);
+
+			return reaction.message.delete();
+		} else if (reaction._emoji.name === '❌') {
+			return reaction.message.delete();
+		}
+	}
+
 	if (reaction._emoji.id === '827974793365159997') {
 		const scoreRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+\nTry `.+/gm;
 		if (reaction.message.content.match(scoreRegex)) {
