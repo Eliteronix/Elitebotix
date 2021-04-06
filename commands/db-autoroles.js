@@ -1,5 +1,6 @@
 const { DBAutoRoles } = require('../dbObjects');
 const Discord = require('discord.js');
+const ObjectsToCsv = require('objects-to-csv');
 
 module.exports = {
 	name: 'db-autoroles',
@@ -20,8 +21,11 @@ module.exports = {
 	async execute(msg, args) {
 		const autoRoleList = await DBAutoRoles.findAll();
 		const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
+
+		const csv = new ObjectsToCsv(autoRoleList);
+		console.log(csv);
 		// eslint-disable-next-line no-undef
-		eliteronixUser.send(`DBAutoRoles - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`);
+		eliteronixUser.send(`DBAutoRoles - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`, csv);
 
 		for (let i = 0; i < autoRoleList.length; i++) {
 			// inside a command, event listener, etc.
@@ -41,6 +45,7 @@ module.exports = {
 				.setFooter(`${process.env.SERVER} Environment on ${process.env.PROVIDER}`);
 
 			eliteronixUser.send(embed);
+			
 		}
 	},
 };
