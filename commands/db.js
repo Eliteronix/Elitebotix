@@ -155,7 +155,7 @@ module.exports = {
 				});
 			}
 		} else {
-			return msg.reply('No corresponding table found');
+			return msg.reply('no corresponding table found');
 		}
 
 		const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
