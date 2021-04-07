@@ -5,19 +5,19 @@ const Canvas = require('canvas');
 const { getGuildPrefix, humanReadable } = require('../utils');
 
 module.exports = {
-	name: 'osu-leaderboard',
-	aliases: ['osu-guild-leaderboard', 'osu-ranking', 'osu-guild-ranking'],
+	name: 'leaderboard',
+	aliases: ['guild-leaderboard', 'ranking', 'guild-ranking'],
 	description: 'Sends a leaderboard of all the players in the guild that have their account connected',
-	// usage: '<osu> (the only supported game at the moment)',
+	usage: '<osu> (the only supported game at the moment)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: 'ATTACH_FILES',
 	botPermissionsTranslated: 'Attach Files',
 	guildOnly: true,
-	// args: true,
+	args: true,
 	cooldown: 60,
 	//noCooldownMessage: true,
-	tags: 'osu',
+	tags: 'general',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
