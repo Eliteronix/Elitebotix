@@ -1,4 +1,4 @@
-//Import Tables
+const Discord = require('discord.js');
 const { DBReactionRolesHeader, DBReactionRoles } = require('./dbObjects');
 
 //Import Sequelize for operations
@@ -113,10 +113,17 @@ module.exports = async function (reaction, user) {
 		if (dbReactionRole) {
 			//Get role object
 			const reactionRoleObject = reaction.message.guild.roles.cache.get(dbReactionRole.roleId);
-			//Get member
-			const member = await reaction.message.guild.members.fetch(user.id);
-			//Assign role
-			member.roles.add(reactionRoleObject);
+
+			//Check if deleted role
+			if (reactionRoleObject) {
+				//Get member
+				const member = await reaction.message.guild.members.fetch(user.id);
+				//Assign role
+				member.roles.add(reactionRoleObject);
+			} else {
+				DBReactionRoles.destroy({ where: { guildId: reaction.message.guild.id, roleId: dbReactionRole.roleId } });
+				editEmbed(reaction.message, dbReactionRolesHeader);
+			}
 		} else {
 			//Put the emoji name into the correct format for comparing it in case it's an guild emoji
 			let emoji = '<:' + reaction._emoji.name + ':';
@@ -129,13 +136,76 @@ module.exports = async function (reaction, user) {
 			if (dbReactionRoleBackup) {
 				//Get role object
 				const reactionRoleBackupObject = reaction.message.guild.roles.cache.get(dbReactionRoleBackup.roleId);
-				//Get member
-				const member = await reaction.message.guild.members.fetch(user.id);
-				//Assign role
-				member.roles.add(reactionRoleBackupObject);
+
+				//Check if deleted role
+				if (reactionRoleBackupObject) {
+					//Get member
+					const member = await reaction.message.guild.members.fetch(user.id);
+					//Assign role
+					member.roles.add(reactionRoleBackupObject);
+				} else {
+					DBReactionRoles.destroy({ where: { guildId: reaction.message.guild.id, roleId: dbReactionRoleBackup.roleId } });
+					editEmbed(reaction.message, dbReactionRolesHeader);
+				}
 			} else {
 				console.log(`There was an error trying to get a ReactionRole from the db for message ${reaction.message.id}, in ${reaction.message.guild.name} on a reaction.`);
 			}
 		}
 	}
 };
+
+async function editEmbed(msg, reactionRolesHeader) {
+	//Create embed
+	const reactionRoleEmbed = new Discord.MessageEmbed()
+		.setColor(reactionRolesHeader.reactionColor)
+		.setTitle(reactionRolesHeader.reactionTitle)
+		.setThumbnail(reactionRolesHeader.reactionImage)
+		.setFooter(`Reactionrole - EmbedID: ${reactionRolesHeader.id}`);
+
+	//Set description if available
+	if (reactionRolesHeader.reactionDescription) {
+		reactionRoleEmbed.setDescription(reactionRolesHeader.reactionDescription);
+	}
+
+	//Get roles from db
+	const reactionRoles = await DBReactionRoles.findAll({
+		where: { dbReactionRolesHeaderId: reactionRolesHeader.id }
+	});
+
+	//Add roles to embed
+	reactionRoles.forEach(reactionRole => {
+		//Get role object
+		let reactionRoleName = msg.guild.roles.cache.get(reactionRole.roleId);
+		//Add field to embed
+		reactionRoleEmbed.addField(reactionRole.emoji + ': ' + reactionRoleName.name, reactionRole.description);
+	});
+
+	//Get the ID of the message
+	const embedMessageId = reactionRolesHeader.reactionHeaderId;
+	//get the ID of the channel
+	const embedChannelId = reactionRolesHeader.reactionChannelHeaderId;
+	//Get the channel object
+	let embedChannel;
+	try {
+		embedChannel = msg.guild.channels.cache.get(embedChannelId);
+	} catch (e) {
+		msg.channel.send('Couldn\'t find an embed with this EmbedID');
+		DBReactionRolesHeader.destroy({
+			where: { guildId: msg.guild.id, id: reactionRolesHeader.id },
+		});
+		return console.log(e);
+	}
+	//Get the message object
+	const embedMessage = await embedChannel.messages.fetch(embedMessageId);
+	//Edit the message
+	embedMessage.edit(reactionRoleEmbed);
+
+	//Remove all reactions from the embed
+	embedMessage.reactions.removeAll().catch(error => console.error('Failed to clear reactions: ', error));
+
+	//Add reactions to embed
+	for (let i = 0; i < reactionRoles.length; i++) {
+		//Add reaction
+		await embedMessage.react(reactionRoles[i].emoji);
+	}
+}
