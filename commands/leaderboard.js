@@ -1,6 +1,6 @@
 module.exports = {
 	name: 'leaderboard',
-	aliases: ['guild-leaderboard', 'ranking', 'guild-ranking'],
+	aliases: ['leaderboard', 'ranking'],
 	description: 'Sends a leaderboard of all the players in the guild that have their account connected',
 	usage: '<osu> (the only supported game at the moment)',
 	//permissions: 'MANAGE_GUILD',

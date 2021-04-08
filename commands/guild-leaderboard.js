@@ -1,85 +1,52 @@
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBServerUserActivity } = require('../dbObjects');
 const Discord = require('discord.js');
-const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable } = require('../utils');
+const { humanReadable } = require('../utils');
 
 module.exports = {
-	name: 'leaderboard',
-	aliases: ['guild-leaderboard', 'ranking', 'guild-ranking'],
-	description: 'Sends a leaderboard of all the players in the guild that have their account connected',
-	usage: '<osu> (the only supported game at the moment)',
+	name: 'server-leaderboard',
+	aliases: ['guild-leaderboard', 'guild-ranking'],
+	description: 'Sends a leaderboard of the top users in the guild',
+	// usage: '<osu> (the only supported game at the moment)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: 'ATTACH_FILES',
 	botPermissionsTranslated: 'Attach Files',
 	guildOnly: true,
-	args: true,
+	// args: true,
 	cooldown: 60,
 	//noCooldownMessage: true,
 	tags: 'general',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
-		// eslint-disable-next-line no-undef
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
-
 		let processingMessage = await msg.channel.send('Processing guild members...');
 
 		msg.guild.members.fetch()
 			.then(async (guildMembers) => {
 				const members = guildMembers.array();
-				let osuAccounts = [];
+				let discordUsers = [];
 				for (let i = 0; i < members.length; i++) {
 					if (i % 150 === 0) {
-						processingMessage.edit(`Grabbing osu! accounts...\nLooked at ${i} out of ${members.length} server members so far.`);
+						processingMessage.edit(`Grabbing discord activities...\nLooked at ${i} out of ${members.length} server members so far.`);
 					}
-					const discordUser = await DBDiscordUsers.findOne({
+					const serverUserActivity = await DBServerUserActivity.findOne({
 						where: { userId: members[i].id },
 					});
 
-					if (discordUser && discordUser.osuUserId) {
-						const today = new Date();
-						const dd = String(today.getDate());
-						const mm = String(today.getMonth() + 1);
-						const yyyy = today.getFullYear();
-
-						let osuUser;
-
-						if (discordUser.updatedAt.getFullYear() < yyyy) {
-							osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
-						} else if (discordUser.updatedAt.getMonth() + 1 < mm) {
-							osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
-						} else if (discordUser.updatedAt.getDate() < dd) {
-							osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
-						} else if (discordUser.osuPP === null || discordUser.osuRank === null || discordUser.osuName === null) {
-							osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
-						}
-
-						if (osuUser) {
-							discordUser.osuName = osuUser.name;
-							discordUser.osuPP = osuUser.pp.raw;
-							discordUser.osuRank = osuUser.pp.rank;
-							await discordUser.save();
-						}
-
-						osuAccounts.push(discordUser);
+					if(serverUserActivity){
+						discordUsers.push(serverUserActivity);
 					}
 				}
 
 				processingMessage.edit('Sorting accounts...');
 
-				quicksort(osuAccounts);
+				quicksort(discordUsers);
 
 				processingMessage.edit('Creating leaderboard...');
 
 				const canvasWidth = 1000;
-				const canvasHeight = 125 + 20 + osuAccounts.length * 90;
+				const canvasHeight = 125 + 20 + discordUsers.length * 90;
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -91,21 +58,19 @@ module.exports = {
 					ctx.drawImage(background, 0, i * 500, 1000, 500);
 				}
 
-				let elements = [canvas, ctx, osuAccounts];
+				let elements = [canvas, ctx, discordUsers];
 
 				elements = await drawTitle(elements, msg);
 
-				elements = await drawAccounts(elements, msg);
+				elements = await drawUsers(elements, msg);
 
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-leaderboard-${msg.guild.name}.png`);
-
-				const guildPrefix = await getGuildPrefix(msg);
+				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `guild-leaderboard-${msg.guild.name}.png`);
 
 				//Send attachment
-				await msg.channel.send(`The leaderboard consists of all players that have their osu! account connected to the bot.\nUse \`${guildPrefix}osu-link <username>\` to connect your osu! account.\nData is being updated once a day or when \`${guildPrefix}osu-profile <username>\` is being used.`, attachment);
+				await msg.channel.send('The leaderboard shows the most active users of the server.', attachment);
 				processingMessage.delete();
 			})
 			.catch(err => {
@@ -119,7 +84,7 @@ function partition(list, start, end) {
 	const pivot = list[end];
 	let i = start;
 	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].osuPP) >= parseFloat(pivot.osuPP)) {
+		if (parseFloat(list[j].points) >= parseFloat(pivot.points)) {
 			[list[j], list[i]] = [list[i], list[j]];
 			i++;
 		}
@@ -143,39 +108,33 @@ function quicksort(list, start = 0, end = undefined) {
 async function drawTitle(input, msg) {
 	let canvas = input[0];
 	let ctx = input[1];
-	let osuAccounts = input[2];
+	let discordUsers = input[2];
 
 	// Write the title of the map
 	ctx.font = 'bold 35px sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText(`${msg.guild.name}'s osu! leaderboard`, canvas.width / 2, 50);
+	ctx.fillText(`${msg.guild.name}'s activity leaderboard`, canvas.width / 2, 50);
 
-	const output = [canvas, ctx, osuAccounts];
+	const output = [canvas, ctx, discordUsers];
 	return output;
 }
 
-async function drawAccounts(input, msg) {
+async function drawUsers(input, msg) {
 	let canvas = input[0];
 	let ctx = input[1];
-	let osuAccounts = input[2];
+	let discordUsers = input[2];
 
 	// Write the players
 	ctx.textAlign = 'left';
 
-	for (let i = 0; i < osuAccounts.length; i++) {
-		const member = await msg.guild.members.fetch(osuAccounts[i].userId);
+	for (let i = 0; i < discordUsers.length && i < 10; i++) {
+		const member = await msg.guild.members.fetch(discordUsers[i].userId);
 
 		let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
 
 		if (member.nickname) {
 			userDisplayName = `${member.nickname} / ${userDisplayName}`;
-		}
-
-		let verified = '⨯';
-
-		if (osuAccounts[i].osuVerified) {
-			verified = '✔';
 		}
 
 		if (i === 0) {
@@ -192,19 +151,17 @@ async function drawAccounts(input, msg) {
 		ctx.fillText(`${i + 1}.`, canvas.width / 1000 * 125, 125 + i * 90);
 		ctx.fillText(userDisplayName, canvas.width / 1000 * 200, 125 + i * 90);
 		ctx.font = '25px sans-serif';
-		ctx.fillText(`#${humanReadable(osuAccounts[i].osuRank)}`, canvas.width / 1000 * 200, 160 + i * 90);
-		ctx.fillText(`${humanReadable(Math.floor(osuAccounts[i].osuPP).toString())}pp`, canvas.width / 1000 * 400, 160 + i * 90);
-		ctx.fillText(`${verified} ${osuAccounts[i].osuName}`, canvas.width / 1000 * 550, 160 + i * 90);
+		ctx.fillText(`${humanReadable(discordUsers[i].points)} points`, canvas.width / 1000 * 200, 160 + i * 90);
 	}
 
-	const output = [canvas, ctx, osuAccounts];
+	const output = [canvas, ctx, discordUsers];
 	return output;
 }
 
 async function drawFooter(input) {
 	let canvas = input[0];
 	let ctx = input[1];
-	let osuAccounts = input[2];
+	let discordUsers = input[2];
 
 	let today = new Date().toLocaleDateString();
 
@@ -214,6 +171,6 @@ async function drawFooter(input) {
 	ctx.textAlign = 'right';
 	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);
 
-	const output = [canvas, ctx, osuAccounts];
+	const output = [canvas, ctx, discordUsers];
 	return output;
 }
