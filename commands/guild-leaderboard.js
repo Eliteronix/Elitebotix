@@ -54,8 +54,8 @@ module.exports = {
 				//Get context and load the image
 				const ctx = canvas.getContext('2d');
 				const background = await Canvas.loadImage('./other/discord-background.png');
-				for (let i = 0; i < canvas.height / 500; i++) {
-					ctx.drawImage(background, 0, i * 500, 1000, 500);
+				for (let i = 0; i < canvas.height / 1080; i++) {
+					ctx.drawImage(background, 0, i * 1080, 1920, 1080);
 				}
 
 				let elements = [canvas, ctx, discordUsers];
