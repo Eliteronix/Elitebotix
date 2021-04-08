@@ -121,7 +121,7 @@ module.exports = async function (reaction, user) {
 				//Assign role
 				member.roles.add(reactionRoleObject);
 			} else {
-				DBReactionRoles.destroy({ where: { guildId: reaction.message.guild.id, roleId: dbReactionRole.roleId } });
+				DBReactionRoles.destroy({ where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, roleId: dbReactionRole.roleId } });
 				editEmbed(reaction.message, dbReactionRolesHeader);
 			}
 		} else {
@@ -144,7 +144,7 @@ module.exports = async function (reaction, user) {
 					//Assign role
 					member.roles.add(reactionRoleBackupObject);
 				} else {
-					DBReactionRoles.destroy({ where: { guildId: reaction.message.guild.id, roleId: dbReactionRoleBackup.roleId } });
+					DBReactionRoles.destroy({ where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, roleId: dbReactionRoleBackup.roleId } });
 					editEmbed(reaction.message, dbReactionRolesHeader);
 				}
 			} else {
