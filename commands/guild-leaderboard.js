@@ -24,14 +24,14 @@ module.exports = {
 
 		msg.guild.members.fetch()
 			.then(async (guildMembers) => {
-				const members = guildMembers.array();
+				const members = guildMembers.filter(member => member.user.bot !== true).array();
 				let discordUsers = [];
 				for (let i = 0; i < members.length; i++) {
 					if (i % 150 === 0) {
 						processingMessage.edit(`Grabbing discord activities...\nLooked at ${i} out of ${members.length} server members so far.`);
 					}
 					const serverUserActivity = await DBServerUserActivity.findOne({
-						where: { userId: members[i].id },
+						where: { userId: members[i].id, guildId: msg.guild.id },
 					});
 
 					if(serverUserActivity){
@@ -53,7 +53,7 @@ module.exports = {
 
 				//Get context and load the image
 				const ctx = canvas.getContext('2d');
-				const background = await Canvas.loadImage('./other/osu-background.png');
+				const background = await Canvas.loadImage('./other/discord-background.png');
 				for (let i = 0; i < canvas.height / 500; i++) {
 					ctx.drawImage(background, 0, i * 500, 1000, 500);
 				}
@@ -128,7 +128,7 @@ async function drawUsers(input, msg) {
 	// Write the players
 	ctx.textAlign = 'left';
 
-	for (let i = 0; i < discordUsers.length && i < 10; i++) {
+	for (let i = 0; i < discordUsers.length; i++) {
 		const member = await msg.guild.members.fetch(discordUsers[i].userId);
 
 		let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
