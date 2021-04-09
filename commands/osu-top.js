@@ -275,15 +275,51 @@ async function drawTopPlays(input, server, mode, msg) {
 			beatmapTitle = beatmapTitle.substring(0, maxSize - 3) + '...';
 		}
 
+		//Write title per map
 		ctx.font = 'bold 15px sans-serif';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.textAlign = 'left';
 		ctx.fillText(beatmapTitle, (canvas.width / 35) * 3, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 12 / 2);
 
+		//Write Difficulty per map
 		ctx.font = 'bold 10px sans-serif';
 		ctx.fillStyle = '#FFCC22';
 		ctx.textAlign = 'left';
 		ctx.fillText(beatmap[0].version, (canvas.width / 35) * 3, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 12 / 2 + canvas.height / 35);
+
+		let today = new Date();
+
+		const todayMilliseconds = today.getTime();	//Get the time (milliseconds since January 1, 1970)
+
+		const scoreMilliseconds = Date.parse(scores[i].raw_date); //Get the time (milliseconds since January 1, 1970)
+
+		let timeDifference = todayMilliseconds - scoreMilliseconds;
+
+		let achievedTime = new Date().toLocaleDateString();
+
+		// timeDifference = 545678;
+
+		if (timeDifference < 60000) { //if achieved in the last minute
+			achievedTime = `${Math.round(timeDifference / 1000)} second(s) ago`;
+		} else if (timeDifference < 3600000) { //if achieved in the last hour
+			achievedTime = `${Math.round(timeDifference / 60000)} minute(s) ago`;
+		} else if (timeDifference < 86400000) { //if achieved in the last 24 hours
+			achievedTime = `${Math.round(timeDifference / 3600000)} hour(s) ago`;
+		} else if (timeDifference < 2678400000) { //if achieved in the last 31 days
+			achievedTime = `${Math.round(timeDifference / 86400000)} day(s) ago`;
+		} else if (timeDifference < 31536000000){ //if achieved in the last year
+			achievedTime = `${Math.round(timeDifference / 2678400000)} month(s) ago`;
+		} else { //else achieved years ago
+			achievedTime = `${Math.round(timeDifference / 31536000000)} year(s) ago`;
+		}
+
+
+
+		//Write achieved on per map
+		ctx.font = 'bold 10px sans-serif';
+		ctx.fillStyle = '#A08C95';
+		ctx.textAlign = 'left';
+		ctx.fillText(achievedTime, (canvas.width / 35) * 3 + parseInt(beatmap[0].version.length) * 6 + canvas.width / 50, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 12 / 2 + canvas.height / 35);
 
 		const accuracy = (scores[i].counts[300] * 100 + scores[i].counts[100] * 33.33 + scores[i].counts[50] * 16.67) / (parseInt(scores[i].counts[300]) + parseInt(scores[i].counts[100]) + parseInt(scores[i].counts[50]) + parseInt(scores[i].counts.miss));
 
