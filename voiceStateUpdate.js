@@ -49,16 +49,34 @@ module.exports = async function (oldMember, newMember) {
 		if (dbGuild) {
 			if (dbGuild.temporaryVoices) {
 				//Clone the channel and get the new channel
-				let createdChannel = await newUserChannel.clone();
+				let createdChannel;
+				try {
+					createdChannel = await newUserChannel.clone();
+				} catch (e) {
+					if (e.message === 'Missing Access') {
+						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+						return owner.send(`I could not create a new temporary voicechannel because I am missing the \`Manage Channels\` permission on \`${member.guild.name}\`.`);
+					} else {
+						return console.log(e);
+					}
+				}
 
 				let createdText;
 
 				if (dbGuild.addTemporaryText) {
 					const createdCategoryId = createdChannel.parentID;
 
-
-					//Move further down to avoid waiting time
-					createdText = await newMember.guild.channels.create('temporaryText', 'text');
+					try {
+						//Move further down to avoid waiting time
+						createdText = await newMember.guild.channels.create('temporaryText', 'text');
+					} catch (e) {
+						if (e.message === 'Missing Access') {
+							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+							return owner.send(`I could not create a new temporary voicechannel because I am missing the \`Manage Channels\` permission on \`${member.guild.name}\`.`);
+						} else {
+							return console.log(e);
+						}
+					}
 
 					await createdText.setParent(createdCategoryId);
 
@@ -96,24 +114,51 @@ module.exports = async function (oldMember, newMember) {
 					}
 					await createdText.edit({ name: `${textChannelName}` });
 				}
-				//Move user
-				member.voice.setChannel(createdChannel);
+				try {
+					//Move user
+					member.voice.setChannel(createdChannel);
+				} catch (e) {
+					if (e.message === 'Missing Access') {
+						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+						return owner.send(`I could not move a user to their temporary voicechannel because I am missing the \`Move Members\` permission on \`${member.guild.name}\`.`);
+					} else {
+						return console.log(e);
+					}
+				}
 				//Set all permissions for the creator
 				const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
-				await createdChannel.updateOverwrite(newUser, { MANAGE_CHANNELS: true, MANAGE_ROLES: true, MUTE_MEMBERS:true, DEAFEN_MEMBERS: true, MOVE_MEMBERS: true, CONNECT: true, SPEAK: true, VIEW_CHANNEL: true, CREATE_INSTANT_INVITE:true, STREAM: true, USE_VAD: true });
-				if(createdText){
+				try {
+					await createdChannel.updateOverwrite(newUser, { MANAGE_CHANNELS: true, MANAGE_ROLES: true, MUTE_MEMBERS: true, DEAFEN_MEMBERS: true, MOVE_MEMBERS: true, CONNECT: true, SPEAK: true, VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, STREAM: true, USE_VAD: true });
+				} catch (e) {
+					if (e.message === 'Missing Access') {
+						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+						return owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${member.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
+					} else {
+						return console.log(e);
+					}
+				}
+				if (createdText) {
 					//Set all permissions for the creator and deny @everyone to view the text channel
 					let everyone = newMember.guild.roles.cache.find(r => r.name === '@everyone');
-					await createdText.overwritePermissions([
-						{
-							id: newMember.id,
-							allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'SEND_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'ADD_REACTIONS', 'USE_EXTERNAL_EMOJIS', 'MENTION_EVERYONE', 'MANAGE_MESSAGES', 'READ_MESSAGE_HISTORY', 'SEND_TTS_MESSAGES'],
-						},
-						{
-							id: everyone.id,
-							deny: ['VIEW_CHANNEL'],
-						},
-					]);
+					try {
+						await createdText.overwritePermissions([
+							{
+								id: newMember.id,
+								allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'SEND_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'ADD_REACTIONS', 'USE_EXTERNAL_EMOJIS', 'MENTION_EVERYONE', 'MANAGE_MESSAGES', 'READ_MESSAGE_HISTORY', 'SEND_TTS_MESSAGES'],
+							},
+							{
+								id: everyone.id,
+								deny: ['VIEW_CHANNEL'],
+							},
+						]);
+					} catch (e) {
+						if (e.message === 'Missing Access') {
+							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+							return owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${member.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
+						} else {
+							return console.log(e);
+						}
+					}
 					createdText.send(`<@${newMemberId}>, you are now admin for this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel.\n\nNote that bots also don't have permissions to read messages in this channel except if they have admin rights. This is the case if they don't appear in the user list on the right side. To change that, update the permissions in the channel for the bot you want to use.`);
 				}
 			}
@@ -125,7 +170,16 @@ module.exports = async function (oldMember, newMember) {
 			textChannel = oldMember.client.channels.cache.get(dbTemporaryVoicesNew.textChannelId);
 		}
 		const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
-		await textChannel.updateOverwrite(newUser, { VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, SEND_MESSAGES: true, EMBED_LINKS: true, ATTACH_FILES: true, ADD_REACTIONS: true, USE_EXTERNAL_EMOJIS: true, READ_MESSAGE_HISTORY: true });
+		try {
+			await textChannel.updateOverwrite(newUser, { VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, SEND_MESSAGES: true, EMBED_LINKS: true, ATTACH_FILES: true, ADD_REACTIONS: true, USE_EXTERNAL_EMOJIS: true, READ_MESSAGE_HISTORY: true });
+		} catch (e) {
+			if (e.message === 'Missing Access') {
+				const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerID);
+				return owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${newMember.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
+			} else {
+				return console.log(e);
+			}
+		}
 		textChannel.send(`<@${newMember.id}>, you now have access to this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel. You will also lose access to this channel if you leave the voice channel.`);
 	}
 
@@ -155,13 +209,42 @@ module.exports = async function (oldMember, newMember) {
 
 			if (!(usersLeft)) {
 				if (dbTemporaryVoices.textChannelId) {
-					await textChannel.delete();
+					try {
+						await textChannel.delete();
+					} catch (e) {
+						if (e.message === 'Missing Access') {
+							const owner = await oldMember.client.users.cache.find(user => user.id === oldMember.guild.ownerID);
+							return owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${oldMember.guild.name}\`.`);
+						} else {
+							return console.log(e);
+						}
+					}
 				}
-				await oldUserChannel.delete();
+				try {
+					await oldUserChannel.delete();
+				} catch (e) {
+					if (e.message === 'Missing Access') {
+						await dbTemporaryVoices.destroy();
+						const owner = await oldMember.client.users.cache.find(user => user.id === oldMember.guild.ownerID);
+						return owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${oldMember.guild.name}\`.`);
+					} else {
+						await dbTemporaryVoices.destroy();
+						return console.log(e);
+					}
+				}
 				await dbTemporaryVoices.destroy();
-			} else if(oldMember.id !== dbTemporaryVoices.creatorId){
+			} else if (oldMember.id !== dbTemporaryVoices.creatorId) {
 				const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
-				await textChannel.updateOverwrite(newUser, { VIEW_CHANNEL: false });
+				try {
+					await textChannel.updateOverwrite(newUser, { VIEW_CHANNEL: false });
+				} catch (e) {
+					if (e.message === 'Missing Access') {
+						const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerID);
+						return owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${newMember.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
+					} else {
+						return console.log(e);
+					}
+				}
 			}
 		}
 	}
