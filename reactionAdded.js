@@ -118,8 +118,17 @@ module.exports = async function (reaction, user) {
 			if (reactionRoleObject) {
 				//Get member
 				const member = await reaction.message.guild.members.fetch(user.id);
-				//Assign role
-				member.roles.add(reactionRoleObject);
+				try {
+					//Assign role
+					await member.roles.add(reactionRoleObject);
+				} catch (e) {
+					if (e.message === 'Missing Access') {
+						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+						return owner.send(`I could not assign a reactionrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
+					} else {
+						return console.log(e);
+					}
+				}
 			} else {
 				DBReactionRoles.destroy({ where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, roleId: dbReactionRole.roleId } });
 				editEmbed(reaction.message, dbReactionRolesHeader);
@@ -141,8 +150,17 @@ module.exports = async function (reaction, user) {
 				if (reactionRoleBackupObject) {
 					//Get member
 					const member = await reaction.message.guild.members.fetch(user.id);
-					//Assign role
-					member.roles.add(reactionRoleBackupObject);
+					try {
+						//Assign role
+						await member.roles.add(reactionRoleBackupObject);
+					} catch (e) {
+						if (e.message === 'Missing Access') {
+							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+							return owner.send(`I could not assign a reactionrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
+						} else {
+							return console.log(e);
+						}
+					}
 				} else {
 					DBReactionRoles.destroy({ where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, roleId: dbReactionRoleBackup.roleId } });
 					editEmbed(reaction.message, dbReactionRolesHeader);
@@ -205,7 +223,16 @@ async function editEmbed(msg, reactionRolesHeader) {
 
 	//Add reactions to embed
 	for (let i = 0; i < reactionRoles.length; i++) {
-		//Add reaction
-		await embedMessage.react(reactionRoles[i].emoji);
+		try {
+			//Add reaction
+			await embedMessage.react(reactionRoles[i].emoji);
+		} catch (e) {
+			if (e.message === 'Missing Access') {
+				const owner = await msg.client.users.cache.find(user => user.id === msg.guild.ownerID);
+				return owner.send(`I could not add reactions to a reactionrole-embed because I'm missing the \`Add Reactions\` permission on \`${msg.guild.name}\`.`);
+			} else {
+				return console.log(e);
+			}
+		}
 	}
 }

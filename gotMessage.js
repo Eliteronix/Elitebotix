@@ -128,8 +128,12 @@ module.exports = async function (msg) {
 				closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch}\`?`);
 			}
 
-			await closestMatchMessage.react('✅');
-			await closestMatchMessage.react('❌');
+			try{
+				await closestMatchMessage.react('✅');
+				await closestMatchMessage.react('❌');
+			} catch(e){
+				msg.channel.send('I don\'t have permissions to add reactions. Please notify an admin so that you just need to click an emote to fix your typos.');
+			}
 
 			return;
 		}

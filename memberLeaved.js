@@ -2,7 +2,7 @@
 const { DBGuilds } = require('./dbObjects');
 
 module.exports = async function (member) {
-	
+
 	//For the development version
 	//if the message is not in the Dev-Servers then return
 	// eslint-disable-next-line no-undef
@@ -26,10 +26,10 @@ module.exports = async function (member) {
 		}
 	}
 
-	if(member.id === 784836063058329680){
+	if (member.id === 784836063058329680) {
 		return;
 	}
-	
+
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
 		where: { guildId: member.guild.id },
@@ -45,8 +45,17 @@ module.exports = async function (member) {
 			const guildGoodbyeMessageChannel = await member.client.channels.cache.find(channel => channel.id === guildGoodbyeMessageChannelId);
 			//get the goodbye message text
 			const guildGoodbyeMessageText = guild.goodbyeMessageText.replace('@member', member.user.username + '#' + member.user.discriminator);
-			//send the goodbye message text into the channel
-			guildGoodbyeMessageChannel.send(guildGoodbyeMessageText);
+			try {
+				//send the goodbye message text into the channel
+				guildGoodbyeMessageChannel.send(guildGoodbyeMessageText);
+			} catch (e) {
+				if (e.message === 'Missing Access') {
+					const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+					return owner.send(`I could not send a welcome message for a new user into the channel \`${guildGoodbyeMessageChannel.name}\` on \`${member.guild.name}\` due to missing permissions.`);
+				} else {
+					return console.log(e);
+				}
+			}
 		}
 	}
 };
