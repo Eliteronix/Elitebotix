@@ -58,6 +58,10 @@ module.exports = async function (msg) {
 	if (!(msg.author.bot)) {
 		const guildPrefix = await getGuildPrefix(msg);
 
+		if(msg.content === '<@!784836063058329680>' || msg.content === '<@784836063058329680>'){
+			msg.content = 'e!help';
+		}
+
 		//Define if it is a command with prefix
 		//Split the message into an args array
 		let prefixCommand;
