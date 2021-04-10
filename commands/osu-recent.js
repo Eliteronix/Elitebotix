@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname } = require('../utils');
 const fetch = require('node-fetch');
 const { calculateStarRating } = require('osu-sr-calculator');
 
@@ -34,7 +34,7 @@ module.exports = {
 			if (commandUser && commandUser.osuUserId) {
 				getScore(msg, commandUser.osuUserId, server, mode);
 			} else {
-				const userDisplayName = msg.guild.member(msg.author).displayName;
+				const userDisplayName = await getMessageUserDisplayname(msg);
 				getScore(msg, userDisplayName, server, mode);
 			}
 		} else {

@@ -494,5 +494,16 @@ module.exports = {
 				DBServerUserActivity.create({ guildId: msg.guild.id, userId: msg.author.id });
 			}
 		}
+	},
+	getMessageUserDisplayname: async function (msg) {
+		let userDisplayName = msg.author.username;
+		if(msg.channel.type !== 'dm'){
+			const guildDisplayName = msg.guild.member(msg.author).displayName;
+			if(guildDisplayName){
+				userDisplayName = msg.guild.member(msg.author).displayName;
+			}
+		}
+
+		return userDisplayName;
 	}
 };
