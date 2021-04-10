@@ -472,19 +472,25 @@ module.exports = {
 		return outputArray;
 	},
 	updateServerUserActivity: async function (msg) {
-		if(msg.channel.type !== 'dm'){
+		if (msg.channel.type !== 'dm') {
 			const now = new Date();
 			now.setSeconds(now.getSeconds() - 15);
 			const serverUserActivity = await DBServerUserActivity.findOne({
 				where: { guildId: msg.guild.id, userId: msg.author.id },
 			});
 
-			if(serverUserActivity && serverUserActivity.updatedAt < now){
-				serverUserActivity.points = serverUserActivity.points + 1;
-				serverUserActivity.save();
+			if (serverUserActivity && serverUserActivity.updatedAt < now) {
+				msg.channel.messages.fetch({ limit: 100 })
+					.then(async (messages) => {
+						const messagesArray = messages.filter(m => m.author.id === msg.author.id && m.content === msg.content).array();
+						if (!messagesArray[1]) {
+							serverUserActivity.points = serverUserActivity.points + 1;
+							serverUserActivity.save();
+						}
+					});
 			}
 
-			if(!serverUserActivity){
+			if (!serverUserActivity) {
 				DBServerUserActivity.create({ guildId: msg.guild.id, userId: msg.author.id });
 			}
 		}
