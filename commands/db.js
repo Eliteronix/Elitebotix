@@ -158,8 +158,6 @@ module.exports = {
 			const dbList = await DBProcessQueue.findAll();
 			dbTableName = 'DBProcessQueue';
 
-			console.log(dbList);
-
 			for (let i = 0; i < dbList.length; i++) {
 				data.push({
 					id: dbList[i].id,
