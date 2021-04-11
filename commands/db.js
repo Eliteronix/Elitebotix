@@ -1,4 +1,4 @@
-const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices } = require('../dbObjects');
+const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue } = require('../dbObjects');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
 
@@ -154,9 +154,27 @@ module.exports = {
 					updatedAt: dbList[i].updatedAt,
 				});
 			}
+		} else if (args[0] === 'processqueue') {
+			const dbList = await DBProcessQueue.findAll();
+			dbTableName = 'DBProcessQueue';
+
+			console.log(dbList);
+
+			for (let i = 0; i < dbList.length; i++) {
+				data.push({
+					id: dbList[i].id,
+					guildId: dbList[i].guildId,
+					task: dbList[i].task,
+					priority: dbList[i].priority,
+					filters: dbList[i].filters,
+					additions: dbList[i].additions,
+					createdAt: dbList[i].createdAt,
+					updatedAt: dbList[i].updatedAt,
+				});
+			}
 		} else {
 			return msg.reply('no corresponding table found');
-		}
+		}		
 
 		const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
 		let csv = new ObjectsToCsv(data);
