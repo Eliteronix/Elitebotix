@@ -540,7 +540,9 @@ module.exports = {
 				nextTask.beingExecuted = true;
 				await nextTask.save();
 
-				task.execute(nextTask);
+				await task.execute(nextTask);
+
+				nextTask.destroy();
 			} catch (e) {
 				console.log('Error executing process queue task', e);
 				console.log('Process Queue entry:', nextTask);

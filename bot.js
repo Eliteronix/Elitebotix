@@ -71,4 +71,4 @@ client.on('voiceStateUpdate', voiceStateUpdate);
 
 client.on('guildCreate', guildCreate);
 
-client.setInterval(() => executeNextProcessQueueTask(), 10000);
+client.setInterval(() => executeNextProcessQueueTask(), 1000);
