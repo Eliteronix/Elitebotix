@@ -27,8 +27,11 @@ const reactionRemoved = require('./reactionRemoved');
 //Get voiceStateUpdate
 const voiceStateUpdate = require('./voiceStateUpdate');
 
-//Get voiceStateUpdate
+//Get guildCreate
 const guildCreate = require('./guildCreate');
+
+//Get executeNextProcessQueueTask
+const { executeNextProcessQueueTask } = require('./utils');
 
 //login with the Discord client using the Token from the .env file
 // eslint-disable-next-line no-undef
@@ -67,3 +70,5 @@ client.on('message', gotMessage);
 client.on('voiceStateUpdate', voiceStateUpdate);
 
 client.on('guildCreate', guildCreate);
+
+client.setInterval(() => executeNextProcessQueueTask(), 10000);

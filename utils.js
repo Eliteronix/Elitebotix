@@ -1,5 +1,6 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue } = require('./dbObjects');
 const { prefix } = require('./config.json');
+// const { createProcessQueueTask } = require('./utils');
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -486,24 +487,65 @@ module.exports = {
 						if (!messagesArray[1]) {
 							serverUserActivity.points = serverUserActivity.points + 1;
 							serverUserActivity.save();
+							const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 } });
+							if (!existingTask) {
+								DBProcessQueue.create({ guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 });
+							}
 						}
 					});
 			}
 
 			if (!serverUserActivity) {
 				DBServerUserActivity.create({ guildId: msg.guild.id, userId: msg.author.id });
+				const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 } });
+				if (!existingTask) {
+					DBProcessQueue.create({ guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 });
+				}
 			}
 		}
 	},
 	getMessageUserDisplayname: async function (msg) {
 		let userDisplayName = msg.author.username;
-		if(msg.channel.type !== 'dm'){
+		if (msg.channel.type !== 'dm') {
 			const guildDisplayName = msg.guild.member(msg.author).displayName;
-			if(guildDisplayName){
+			if (guildDisplayName) {
 				userDisplayName = msg.guild.member(msg.author).displayName;
 			}
 		}
 
 		return userDisplayName;
-	}
+	},
+	executeNextProcessQueueTask: async function () {
+		const taskInWork = await DBProcessQueue.findOne({
+			where: { beingExecuted: true }
+		});
+		if(taskInWork){
+			return;
+		}
+		const nextPriorityTasklevel = await DBProcessQueue.findOne({
+			order: [
+				['priority', 'DESC']
+			]
+		});
+		if (nextPriorityTasklevel) {
+			const nextTask = await DBProcessQueue.findOne({
+				where: { priority: nextPriorityTasklevel.priority },
+				order: [
+					['createdAt', 'ASC']
+				]
+			});
+			try {
+				const task = require(`./processQueueTasks/${nextTask.task}.js`);
+
+				nextTask.beingExecuted = true;
+				await nextTask.save();
+
+				task.execute(nextTask);
+			} catch (e) {
+				console.log('Error executing process queue task', e);
+				console.log('Process Queue entry:', nextTask);
+				nextTask.destroy();
+			}
+		}
+	},
 };
