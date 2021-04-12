@@ -1,4 +1,4 @@
-const { DBActivityRoles } = require('../dbObjects');
+const { DBActivityRoles, DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix } = require('../utils');
 
 module.exports = {
@@ -38,21 +38,21 @@ module.exports = {
 					let percentageCutoff;
 					let pointsCutoff;
 					for (let i = 0; i < args.length; i++) {
-						if(args[i].startsWith('top') && args[i].endsWith('%')){
-							const percentage = args[i].substring(3,args[i].length-1);
-							if(isNaN(percentage)){
+						if (args[i].startsWith('top') && args[i].endsWith('%')) {
+							const percentage = args[i].substring(3, args[i].length - 1);
+							if (isNaN(percentage)) {
 								return msg.channel.send(`\`${percentage.replace(/`/g, '')}\` is not a valid percentage. (\`${args[i].replace(/`/g, '')}\`)`);
 							}
 							percentageCutoff = percentage;
-						} else if (args[i].endsWith('points')){
-							const points = args[i].substring(0,args[i].length-6);
-							if(isNaN(points)){
+						} else if (args[i].endsWith('points')) {
+							const points = args[i].substring(0, args[i].length - 6);
+							if (isNaN(points)) {
 								return msg.channel.send(`\`${points.replace(/`/g, '')}\` is not a valid amount of points. (\`${args[i].replace(/`/g, '')}\`)`);
 							}
 							pointsCutoff = points;
-						} else if(args[i].startsWith('top')) {
-							const rank = args[i].substring(3,args[i].length);
-							if(isNaN(rank)){
+						} else if (args[i].startsWith('top')) {
+							const rank = args[i].substring(3, args[i].length);
+							if (isNaN(rank)) {
 								return msg.channel.send(`\`${rank.replace(/`/g, '')}\` is not a valid rank. (\`${args[i].replace(/`/g, '')}\`)`);
 							}
 							rankCutoff = rank;
@@ -61,6 +61,10 @@ module.exports = {
 
 					//If activityrole doesn't exist in db then create it
 					DBActivityRoles.create({ guildId: msg.guild.id, roleId: activityRoleId, percentageCutoff: percentageCutoff, pointsCutoff: pointsCutoff, rankCutoff: rankCutoff });
+					const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 } });
+					if (!existingTask) {
+						DBProcessQueue.create({ guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 });
+					}
 					msg.channel.send(`${activityRoleName.name} has been added as an activityrole. The roles will get updated periodically and will not happen right after a user reached a new milestone.`);
 				}
 			} else {
@@ -79,6 +83,11 @@ module.exports = {
 				const rowCount = await DBActivityRoles.destroy({ where: { guildId: msg.guild.id, roleId: activityRoleId } });
 				//Send feedback message accordingly
 				if (rowCount > 0) {
+					msg.guild.members.forEach(member => {
+						if (member.roles.find(r => r.id == activityRoleName.id)){
+							member.removeRole(activityRoleName.id);
+						}
+					});
 					msg.channel.send(`${activityRoleName.name} has been removed from activityroles.`);
 				} else {
 					msg.channel.send(`${activityRoleName.name} was no activityrole.`);
@@ -113,7 +122,7 @@ module.exports = {
 			let guildPrefix = await getGuildPrefix(msg);
 
 			//If no proper first argument is given
-			msg.channel.send(`Please add if you want to add, remove or list the activityrole(s). Proper usage: \`${guildPrefix}${this.name} ${this.usage}\``);
+			msg.channel.send(`Please declare if you want to add, remove or list the activityrole(s). Proper usage: \`${guildPrefix}${this.name} ${this.usage}\``);
 		}
 	},
 };
