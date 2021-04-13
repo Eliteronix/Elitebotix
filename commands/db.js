@@ -1,4 +1,4 @@
-const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue } = require('../dbObjects');
+const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles } = require('../dbObjects');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
 
@@ -166,6 +166,24 @@ module.exports = {
 					priority: dbList[i].priority,
 					filters: dbList[i].filters,
 					additions: dbList[i].additions,
+					beingExecuted: dbList[i].beingExecuted,
+					createdAt: dbList[i].createdAt,
+					updatedAt: dbList[i].updatedAt,
+				});
+			}
+		} else if (args[0] === 'activityroles') {
+			const dbList = await DBActivityRoles.findAll();
+			dbTableName = 'DBActivityRoles';
+
+			for (let i = 0; i < dbList.length; i++) {
+				data.push({
+					id: dbList[i].id,
+					guildId: dbList[i].guildId,
+					roleId: dbList[i].roleId,
+					rankCutoff: dbList[i].rankCutoff,
+					percentageCutoff: dbList[i].percentageCutoff,
+					pointsCutoff: dbList[i].pointsCutoff,
+					paranoid: dbList[i].paranoid,
 					createdAt: dbList[i].createdAt,
 					updatedAt: dbList[i].updatedAt,
 				});

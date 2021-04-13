@@ -515,7 +515,7 @@ module.exports = {
 
 		return userDisplayName;
 	},
-	executeNextProcessQueueTask: async function () {
+	executeNextProcessQueueTask: async function (client) {
 		const taskInWork = await DBProcessQueue.findOne({
 			where: { beingExecuted: true }
 		});
@@ -540,7 +540,7 @@ module.exports = {
 				nextTask.beingExecuted = true;
 				await nextTask.save();
 
-				await task.execute(nextTask);
+				await task.execute(client, nextTask);
 
 				nextTask.destroy();
 			} catch (e) {
