@@ -166,6 +166,7 @@ module.exports = {
 					priority: dbList[i].priority,
 					filters: dbList[i].filters,
 					additions: dbList[i].additions,
+					beingExecuted: dbList[i].beingExecuted,
 					createdAt: dbList[i].createdAt,
 					updatedAt: dbList[i].updatedAt,
 				});
