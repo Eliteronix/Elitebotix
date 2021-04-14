@@ -1,6 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue } = require('./dbObjects');
 const { prefix } = require('./config.json');
-// const { createProcessQueueTask } = require('./utils');
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -519,7 +518,7 @@ module.exports = {
 		const taskInWork = await DBProcessQueue.findOne({
 			where: { beingExecuted: true }
 		});
-		if(taskInWork){
+		if (taskInWork) {
 			return;
 		}
 		const nextPriorityTasklevel = await DBProcessQueue.findOne({
@@ -549,5 +548,5 @@ module.exports = {
 				nextTask.destroy();
 			}
 		}
-	},
+	}
 };
