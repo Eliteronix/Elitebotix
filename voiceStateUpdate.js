@@ -135,7 +135,7 @@ module.exports = async function (oldMember, newMember) {
 							}
 						}
 						try {
-							await createdChannel.delete();
+							return await createdChannel.delete();
 						} catch (e) {
 							if (e.message === 'Missing Access') {
 								const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerID);
