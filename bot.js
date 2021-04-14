@@ -33,6 +33,10 @@ const guildCreate = require('./guildCreate');
 //Get executeNextProcessQueueTask
 const { executeNextProcessQueueTask } = require('./utils');
 
+//Get MOTD/getMapsOnTime
+const { getMOTDMapsOnTime } = require('./MOTD/getMapsOnTime');
+
+
 //login with the Discord client using the Token from the .env file
 // eslint-disable-next-line no-undef
 client.login(process.env.BOTTOKEN);
@@ -72,3 +76,5 @@ client.on('voiceStateUpdate', voiceStateUpdate);
 client.on('guildCreate', guildCreate);
 
 client.setInterval(() => executeNextProcessQueueTask(client), 1000);
+
+client.setInterval(() => getMOTDMapsOnTime(client), 60000);
