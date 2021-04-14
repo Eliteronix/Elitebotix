@@ -116,11 +116,34 @@ module.exports = async function (oldMember, newMember) {
 				}
 				try {
 					//Move user
-					member.voice.setChannel(createdChannel);
+					await member.voice.setChannel(createdChannel);
 				} catch (e) {
 					if (e.message === 'Missing Access') {
 						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
 						return owner.send(`I could not move a user to their temporary voicechannel because I am missing the \`Move Members\` permission on \`${member.guild.name}\`.`);
+					} else if (e.message === 'Target user is not connected to voice.'){
+						if (createdText) {
+							try {
+								await createdText.delete();
+							} catch (e) {
+								if (e.message === 'Missing Access') {
+									const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerID);
+									return owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${newMember.guild.name}\`.`);
+								} else {
+									return console.log(e);
+								}
+							}
+						}
+						try {
+							await createdChannel.delete();
+						} catch (e) {
+							if (e.message === 'Missing Access') {
+								const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerID);
+								return owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${newMember.guild.name}\`.`);
+							} else {
+								return console.log(e);
+							}
+						}
 					} else {
 						return console.log(e);
 					}
