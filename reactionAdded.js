@@ -101,7 +101,10 @@ module.exports = async function (reaction, user) {
 
 	//Get the header message from the db
 	const dbReactionRolesHeader = await DBReactionRolesHeader.findOne({
-		where: { guildId: reaction.message.guild.id, reactionHeaderId: reaction.message.id }
+		where: {
+			guildId: reaction.message.guild.id,
+			reactionHeaderId: reaction.message.id
+		}
 	});
 
 	if (dbReactionRolesHeader) {
