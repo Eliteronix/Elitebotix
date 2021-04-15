@@ -32,10 +32,7 @@ module.exports = {
 				}
 			} else {
 				//Create guild dataset in db if not there yet
-				DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, dadmodeEnabled: true });
-				//Send dad answer
-				const userMessage = args.join(' ');
-				msg.channel.send(`Hi \`${userMessage.replace(/`/g, '')}\`, I'm dad!`);
+				DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, dadmodeEnabled: false });
 			}
 		}
 	},
