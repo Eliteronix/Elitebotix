@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
 		customPrefix: DataTypes.STRING,
 		dadmodeEnabled: {
 			type: DataTypes.BOOLEAN,
-			defaultValue: true,
+			defaultValue: false,
 		},
 		sendWelcomeMessage: {
 			type: DataTypes.BOOLEAN,
