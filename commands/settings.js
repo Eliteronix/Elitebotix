@@ -52,6 +52,14 @@ module.exports = {
 			saluteEnabled = 'Disabled';
 		}
 
+		let owoEnabled;
+
+		if (guild && guild.owoEnabled) {
+			owoEnabled = 'Enabled';
+		} else {
+			owoEnabled = 'Disabled';
+		}
+
 		let welcomeMessage;
 
 		if (guild && guild.sendWelcomeMessage) {
@@ -102,6 +110,7 @@ module.exports = {
 			.addFields(
 				{ name: 'Dadmode', value: `${dadmodeEnabled}` },
 				{ name: 'Salute', value: `${saluteEnabled}` },
+				{ name: 'owo', value: `${owoEnabled}` },
 				{ name: 'Prefix', value: `${guildPrefix}` },
 				{ name: 'Welcome-Messages', value: `${welcomeMessage}` },
 				{ name: 'Goodbye-Messages', value: `${goodbyeMessage}` },
