@@ -25,7 +25,11 @@ module.exports = {
 		//Check if guild exists in db
 		if (guild) {
 			//reverse owo and save dataset
-			guild.owoEnabled = !(guild.owoEnabled);
+			if(guild.owoEnabled === true){
+				guild.owoEnabled = false;
+			} else {
+				guild.owoEnabled = true;
+			}
 			guild.save();
 
 			//output change

@@ -25,7 +25,11 @@ module.exports = {
 		//Check if guild exists in db
 		if (guild) {
 			//reverse salute and save dataset
-			guild.saluteEnabled = !(guild.saluteEnabled);
+			if(guild.saluteEnabled === true){
+				guild.saluteEnabled = false;
+			} else {
+				guild.saluteEnabled = true;
+			}
 			guild.save();
 
 			//output change

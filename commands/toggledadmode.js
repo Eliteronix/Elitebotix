@@ -25,7 +25,11 @@ module.exports = {
 		//Check if guild exists in db
 		if (guild) {
 			//reverse dadmode and save dataset
-			guild.dadmodeEnabled = !(guild.dadmodeEnabled);
+			if(guild.dadmodeEnabled === true){
+				guild.dadmodeEnabled = false;
+			} else {
+				guild.dadmodeEnabled = true;
+			}
 			guild.save();
 
 			//output change
