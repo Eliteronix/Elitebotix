@@ -75,6 +75,8 @@ module.exports = {
 					customPrefixUsed: dbList[i].customPrefixUsed,
 					customPrefix: dbList[i].customPrefix,
 					dadmodeEnabled: dbList[i].dadmodeEnabled,
+					saluteEnabled: dbList[i].saluteEnabled,
+					owoEnabled: dbList[i].owoEnabled,
 					sendWelcomeMessage: dbList[i].sendWelcomeMessage,
 					welcomeMessageChannel: dbList[i].welcomeMessageChannel,
 					welcomeMessageText: dbList[i].welcomeMessageText,
