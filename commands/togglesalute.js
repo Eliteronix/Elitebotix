@@ -1,9 +1,9 @@
 const { DBGuilds } = require('../dbObjects');
 
 module.exports = {
-	name: 'toggledadmode',
+	name: 'togglesalute',
 	//aliases: ['developer'],
-	description: 'Toggles the Dadmode setting for the server',
+	description: 'Toggles the salute setting for the server (sends an o7 after a \'F\')',
 	//usage: '<bug/feature/request> <description>',
 	permissions: 'MANAGE_GUILD',
 	permissionsTranslated: 'Manage Server',
@@ -24,20 +24,20 @@ module.exports = {
 
 		//Check if guild exists in db
 		if (guild) {
-			//reverse dadmode and save dataset
-			guild.dadmodeEnabled = !(guild.dadmodeEnabled);
+			//reverse salute and save dataset
+			guild.saluteEnabled = !(guild.saluteEnabled);
 			guild.save();
 
 			//output change
-			if (guild.dadmodeEnabled) {
-				msg.channel.send('Dadmode has been enabled');
+			if (guild.saluteEnabled) {
+				msg.channel.send('Salute has been enabled');
 			} else {
-				msg.channel.send('Dadmode has been disabled');
+				msg.channel.send('Salute has been disabled');
 			}
 		} else {
 			//Create guild in db if it wasn't there yet and disable it by default
-			DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, dadmodeEnabled: true });
-			msg.channel.send('Dadmode has been activated');
+			DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, saluteEnabled: true });
+			msg.channel.send('Salute has been activated');
 		}
 	},
 };

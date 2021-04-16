@@ -56,9 +56,39 @@ module.exports = async function (msg) {
 
 	//check if the message wasn't sent by the bot itself or another bot
 	if (!(msg.author.bot)) {
+		if (msg.author. id === '138273136285057025' && msg.content === 'e!dbinit') {
+			console.log('Syncing database...');
+			const Sequelize = require('sequelize');
+
+			const sequelize = new Sequelize('database', 'username', 'password', {
+				host: 'localhost',
+				dialect: 'sqlite',
+				logging: false,
+				storage: 'database.sqlite',
+			});
+
+			require('./models/DBGuilds')(sequelize, Sequelize.DataTypes);
+			require('./models/DBReactionRoles')(sequelize, Sequelize.DataTypes);
+			require('./models/DBReactionRolesHeader')(sequelize, Sequelize.DataTypes);
+			require('./models/DBAutoRoles')(sequelize, Sequelize.DataTypes);
+			require('./models/DBTemporaryVoices')(sequelize, Sequelize.DataTypes);
+			require('./models/DBDiscordUsers')(sequelize, Sequelize.DataTypes);
+			require('./models/DBServerUserActivity')(sequelize, Sequelize.DataTypes);
+			require('./models/DBProcessQueue')(sequelize, Sequelize.DataTypes);
+			require('./models/DBActivityRoles')(sequelize, Sequelize.DataTypes);
+
+			await sequelize.sync({ alter: true })
+				.then(async () => {
+					console.log('Database synced');
+					sequelize.close();
+				})
+				.catch(console.error);
+			return;
+		}
+
 		const guildPrefix = await getGuildPrefix(msg);
 
-		if(msg.content === '<@!784836063058329680>' || msg.content === '<@784836063058329680>'){
+		if (msg.content === '<@!784836063058329680>' || msg.content === '<@784836063058329680>') {
 			msg.content = 'e!help';
 		}
 
@@ -132,10 +162,10 @@ module.exports = async function (msg) {
 				closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch}\`?`);
 			}
 
-			try{
+			try {
 				await closestMatchMessage.react('✅');
 				await closestMatchMessage.react('❌');
-			} catch(e){
+			} catch (e) {
 				msg.channel.send('I don\'t have permissions to add reactions. Please notify an admin so that you just need to click an emote to fix your typos.');
 			}
 
