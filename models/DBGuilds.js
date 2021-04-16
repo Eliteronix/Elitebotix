@@ -15,6 +15,14 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		saluteEnabled: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
+		owoEnabled: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		sendWelcomeMessage: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,

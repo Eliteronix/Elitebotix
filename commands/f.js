@@ -1,3 +1,5 @@
+const { DBGuilds } = require('../dbObjects');
+
 module.exports = {
 	name: 'f',
 	//aliases: ['developer'],
@@ -14,9 +16,23 @@ module.exports = {
 	tags: 'hidden-general',
 	//prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	execute(msg, args) {
+	async execute(msg, args) {
 		if(!(args[0])){
-			msg.channel.send('o7');
+			//get guild from db
+			const guild = await DBGuilds.findOne({
+				where: { guildId: msg.guild.id },
+			});
+
+			//check if guild is in db
+			if (guild) {
+				//check if salute is enabled
+				if (guild.saluteEnabled) {
+					msg.channel.send('o7');
+				}
+			} else {
+				//Create guild dataset in db if not there yet
+				DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, saluteEnabled: false });
+			}
 		}
 	},
 };

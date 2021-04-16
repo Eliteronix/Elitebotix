@@ -44,6 +44,14 @@ module.exports = {
 			dadmodeEnabled = 'Disabled';
 		}
 
+		let saluteEnabled;
+
+		if (guild && guild.saluteEnabled) {
+			saluteEnabled = 'Enabled';
+		} else {
+			saluteEnabled = 'Disabled';
+		}
+
 		let welcomeMessage;
 
 		if (guild && guild.sendWelcomeMessage) {
@@ -93,6 +101,7 @@ module.exports = {
 			.setThumbnail(`${user.displayAvatarURL({ dynamic: true })}`)
 			.addFields(
 				{ name: 'Dadmode', value: `${dadmodeEnabled}` },
+				{ name: 'Salute', value: `${saluteEnabled}` },
 				{ name: 'Prefix', value: `${guildPrefix}` },
 				{ name: 'Welcome-Messages', value: `${welcomeMessage}` },
 				{ name: 'Goodbye-Messages', value: `${goodbyeMessage}` },
