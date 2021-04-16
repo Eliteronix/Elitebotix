@@ -9,7 +9,7 @@ module.exports = {
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	//guildOnly: true,
+	guildOnly: true,
 	//args: true,
 	cooldown: 5,
 	noCooldownMessage: true,
