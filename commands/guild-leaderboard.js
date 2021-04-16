@@ -20,16 +20,13 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
-		let processingMessage = await msg.channel.send('Processing guild members...');
+		let processingMessage = await msg.channel.send('Processing guild leaderboard...');
 
 		msg.guild.members.fetch()
 			.then(async (guildMembers) => {
 				const members = guildMembers.filter(member => member.user.bot !== true).array();
 				let discordUsers = [];
 				for (let i = 0; i < members.length; i++) {
-					if (i % 150 === 0) {
-						processingMessage.edit(`Grabbing discord activities...\nLooked at ${i} out of ${members.length} server members so far.`);
-					}
 					const serverUserActivity = await DBServerUserActivity.findOne({
 						where: { userId: members[i].id, guildId: msg.guild.id },
 					});
@@ -39,11 +36,7 @@ module.exports = {
 					}
 				}
 
-				processingMessage.edit('Sorting accounts...');
-
 				quicksort(discordUsers);
-
-				processingMessage.edit('Creating leaderboard...');
 
 				const canvasWidth = 1000;
 				const canvasHeight = 125 + 20 + discordUsers.length * 90;

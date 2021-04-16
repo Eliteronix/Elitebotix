@@ -29,16 +29,13 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		let processingMessage = await msg.channel.send('Processing guild members...');
+		let processingMessage = await msg.channel.send('Processing osu! leaderboard...');
 
 		msg.guild.members.fetch()
 			.then(async (guildMembers) => {
 				const members = guildMembers.array();
 				let osuAccounts = [];
 				for (let i = 0; i < members.length; i++) {
-					if (i % 150 === 0) {
-						processingMessage.edit(`Grabbing osu! accounts...\nLooked at ${i} out of ${members.length} server members so far.`);
-					}
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: members[i].id },
 					});
@@ -72,11 +69,7 @@ module.exports = {
 					}
 				}
 
-				processingMessage.edit('Sorting accounts...');
-
 				quicksort(osuAccounts);
-
-				processingMessage.edit('Creating leaderboard...');
 
 				const canvasWidth = 1000;
 				const canvasHeight = 125 + 20 + osuAccounts.length * 90;
