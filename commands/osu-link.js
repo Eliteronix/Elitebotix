@@ -84,13 +84,10 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 					discordUser.osuRank = osuUser.pp.rank;
 					discordUser.save();
 
-					await processingMessage.edit('Connecting to bancho...');
 					// eslint-disable-next-line no-undef
 					const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
 					bancho.connect().then(async () => {
-						await processingMessage.edit('Getting user...');
 						const IRCUser = bancho.getUser(osuUser.name);
-						await processingMessage.edit('Sending message...');
 						IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 						bancho.disconnect();
 						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.`);
@@ -100,13 +97,10 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 					const verificationCode = Math.random().toString(36).substring(8);
 					DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuName: osuUser.name, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
 
-					await processingMessage.edit('Connecting to bancho...');
 					// eslint-disable-next-line no-undef
 					const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
 					bancho.connect().then(async () => {
-						await processingMessage.edit('Getting user...');
 						const IRCUser = bancho.getUser(osuUser.name);
-						await processingMessage.edit('Sending message...');
 						IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 						bancho.disconnect();
 						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.`);
@@ -202,13 +196,10 @@ async function verify(msg, args, osuApi, discordUser, guildPrefix) {
 							discordUser.osuRank = osuUser.pp.rank;
 							discordUser.save();
 
-							await processingMessage.edit('Connecting to bancho...');
 							// eslint-disable-next-line no-undef
 							const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
 							bancho.connect().then(async () => {
-								await processingMessage.edit('Getting user...');
 								const IRCUser = bancho.getUser(osuUser.name);
-								await processingMessage.edit('Sending message...');
 								IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 								bancho.disconnect();
 								processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.`);
