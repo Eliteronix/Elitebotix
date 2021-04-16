@@ -29,7 +29,7 @@ module.exports = {
 			osuApi.getBeatmaps({ m: 0, since: yesterdayMySQLFormat }) //mySQL date YYYY-MM-DD hh:mm:ss
 				.then(async (beatmaps) => {
 					for (let i = 0; i < beatmaps.length; i++) {
-						if (beatmaps[i].approvalStatus !== 'Ranked') {
+						if (beatmaps[i].approvalStatus !== 'Ranked' || beatmaps[i].length.total > 300) {
 							beatmaps.splice(i, 1);
 							i--;
 						}
@@ -45,7 +45,7 @@ module.exports = {
 					data.push(`Maps from \`${todayDay}.${todayMonth}.${todayYear}\``);
 
 					for (let i = 0; i < beatmaps.length; i++) {
-						data.push(`${Math.round(beatmaps[i].difficulty.rating * 100) / 100}* | ${beatmaps[i].artist} - ${beatmaps[i].title} [${beatmaps[i].version}]`);
+						data.push(`${Math.round(beatmaps[i].difficulty.rating * 100) / 100}* | ${beatmaps[i].length.total} | ${beatmaps[i].artist} - ${beatmaps[i].title} [${beatmaps[i].version}]`);
 					}
 
 					const mapsOfTheDayChannel = await client.channels.fetch('831959379800621147');
