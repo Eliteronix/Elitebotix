@@ -1,5 +1,5 @@
 module.exports = {
-	getMOTDMapsOnTime: async function (client) {
+	givePointsToPlayers: async function (client) {
 		console.log(client);
 
 		//Players gain Points from qualifications -> Should probably have a max and then go down
