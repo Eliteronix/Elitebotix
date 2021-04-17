@@ -85,7 +85,7 @@ module.exports = {
 		const mappoolEmbed = new Discord.MessageEmbed()
 			.setColor('#C45686')
 			.setTitle(`Mappool ${humanReadable(upperRank)} - ${humanReadable(lowerRank)}`)
-			.setDescription(`Mappool from ${todayDay}.${todayMonth}.${todayYear} for ${upperRank} - ${lowerRank}`)
+			.setDescription(`Mappool from ${todayDay}.${todayMonth}.${todayYear} for ${humanReadable(upperRank)} - ${humanReadable(lowerRank)}`)
 			.setFooter(`Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`);
 
 		for (let i = 0; i < mappoolInOrder.length; i++) {
