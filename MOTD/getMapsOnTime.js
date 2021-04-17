@@ -1,4 +1,6 @@
 const osu = require('node-osu');
+const { calculateStarRating } = require('osu-sr-calculator');
+const { setMapsForBracket } = require('./setMapsForBracket');
 
 module.exports = {
 	getMOTDMapsOnTime: async function (client) {
@@ -28,28 +30,110 @@ module.exports = {
 
 			osuApi.getBeatmaps({ m: 0, since: yesterdayMySQLFormat }) //mySQL date YYYY-MM-DD hh:mm:ss
 				.then(async (beatmaps) => {
+					let NMBeatmaps = [];
+
+					let DTBeatmaps = [];
+
 					for (let i = 0; i < beatmaps.length; i++) {
-						if (beatmaps[i].approvalStatus !== 'Ranked' || beatmaps[i].length.total > 300) {
-							beatmaps.splice(i, 1);
-							i--;
+						if (beatmaps[i].approvalStatus === 'Ranked' && beatmaps[i].length.total <= 300) {
+							NMBeatmaps.push(beatmaps[i]);
+						}
+						if (beatmaps[i].approvalStatus === 'Ranked' && beatmaps[i].length.total <= 450) {
+							const beatmap = {
+								id: beatmaps[i].id,
+								beatmapSetId: beatmaps[i].beatmapSetId,
+								hash: beatmaps[i].hash,
+								title: beatmaps[i].title,
+								creator: beatmaps[i].creator,
+								version: beatmaps[i].version,
+								source: beatmaps[i].source,
+								artist: beatmaps[i].artist,
+								genre: beatmaps[i].genre,
+								language: beatmaps[i].language,
+								rating: beatmaps[i].rating,
+								bpm: beatmaps[i].bpm,
+								mode: beatmaps[i].mode,
+								tags: beatmaps[i].tags,
+								approvalStatus: beatmaps[i].approvalStatus,
+								raw_submitDate: beatmaps[i].raw_submitDate,
+								raw_approvedDate: beatmaps[i].raw_approvedDate,
+								raw_lastUpdate: beatmaps[i].raw_lastUpdate,
+								maxCombo: beatmaps[i].maxCombo,
+								objects: {
+									normal: beatmaps[i].objects.normal,
+									slider: beatmaps[i].objects.slider,
+									spinner: beatmaps[i].objects.spinner
+								},
+								difficulty: {
+									rating: beatmaps[i].difficulty.rating,
+									aim: beatmaps[i].difficulty.aim,
+									speed: beatmaps[i].difficulty.speed,
+									size: beatmaps[i].difficulty.size,
+									overall: beatmaps[i].difficulty.overall,
+									approach: beatmaps[i].difficulty.approach,
+									drain: beatmaps[i].difficulty.drain
+								},
+								length: {
+									total: beatmaps[i].length.total,
+									drain: beatmaps[i].length.drain
+								},
+								counts: {
+									favorites: beatmaps[i].counts.favorites,
+									favourites: beatmaps[i].counts.favourites,
+									plays: beatmaps[i].counts.plays,
+									passes: beatmaps[i].counts.passes
+								},
+								hasDownload: beatmaps[i].hasDownload,
+								hasAudio: beatmaps[i].hasAudio,
+							};
+
+							DTBeatmaps.push(beatmap);
 						}
 					}
 
-					quicksort(beatmaps);
+					for (let i = 0; i < DTBeatmaps.length; i++) {
+						const starRating = await calculateStarRating(DTBeatmaps[i].id, ['DT'], false, true);
 
-					let data = [];
+						DTBeatmaps[i].difficulty.rating = starRating.DT.total;
+						DTBeatmaps[i].difficulty.aim = starRating.DT.aim;
+						DTBeatmaps[i].difficulty.speed = starRating.DT.speed;
+						DTBeatmaps[i].length.total = Math.round(DTBeatmaps[i].length.total / 3 * 2);
+						DTBeatmaps[i].length.drain = Math.round(DTBeatmaps[i].length.drain / 3 * 2);
+						DTBeatmaps[i].bpm = DTBeatmaps[i].bpm * 1.5;
+
+					}
+
+					quicksort(NMBeatmaps);
+
+					quicksort(DTBeatmaps);
 
 					const todayYear = today.getUTCFullYear();
 					const todayMonth = (today.getUTCMonth() + 1).toString().padStart(2, '0');
 					const todayDay = (today.getUTCDate()).toString().padStart(2, '0');
-					data.push(`Maps from \`${todayDay}.${todayMonth}.${todayYear}\``);
 
-					for (let i = 0; i < beatmaps.length; i++) {
-						data.push(`${Math.round(beatmaps[i].difficulty.rating * 100) / 100}* | ${beatmaps[i].length.total} | ${beatmaps[i].artist} - ${beatmaps[i].title} [${beatmaps[i].version}]`);
+					let data = [];
+					data.push(`NoMod maps from \`${todayDay}.${todayMonth}.${todayYear}\``);
+
+					for (let i = 0; i < NMBeatmaps.length; i++) {
+						data.push(`${NMBeatmaps[i].artist} - ${NMBeatmaps[i].title} | [${NMBeatmaps[i].version}]`);
+						data.push(`${Math.round(NMBeatmaps[i].difficulty.rating * 100) / 100}* | ${Math.floor(NMBeatmaps[i].length.total/60)}:${NMBeatmaps[i].length.total%60} | ${NMBeatmaps[i].bpm} BPM | CS ${NMBeatmaps[i].difficulty.size} | HP ${NMBeatmaps[i].difficulty.drain} | OD ${NMBeatmaps[i].difficulty.overall} | AR ${NMBeatmaps[i].difficulty.approach} | [Website](<https://osu.ppy.sh/b/${NMBeatmaps[i].id}>) | osu! direct: <osu://dl/${NMBeatmaps[i].beatmapSetId}>`);
+					}
+
+					data.push(`DoubleTime maps from \`${todayDay}.${todayMonth}.${todayYear}\``);
+
+					for (let i = 0; i < DTBeatmaps.length; i++) {
+						data.push(`${DTBeatmaps[i].artist} - ${DTBeatmaps[i].title} | [${DTBeatmaps[i].version}]`);
+						data.push(`${Math.round(DTBeatmaps[i].difficulty.rating * 100) / 100}* | ${Math.floor(DTBeatmaps[i].length.total/60)}:${DTBeatmaps[i].length.total%60} | ${DTBeatmaps[i].bpm} BPM | CS ${DTBeatmaps[i].difficulty.size} | HP ${DTBeatmaps[i].difficulty.drain} | OD ${DTBeatmaps[i].difficulty.overall} | AR ${DTBeatmaps[i].difficulty.approach} | [Website](<https://osu.ppy.sh/b/${DTBeatmaps[i].id}>) | osu! direct: <osu://dl/${DTBeatmaps[i].beatmapSetId}>`);
 					}
 
 					const mapsOfTheDayChannel = await client.channels.fetch('831959379800621147');
 					mapsOfTheDayChannel.send(data, { split: true });
+
+					//Trigger Mappool creation for the different brackets
+					setMapsForBracket(client, 10, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002');
+					setMapsForBracket(client, 6.5, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813');
+					setMapsForBracket(client, 6, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890');
+					setMapsForBracket(client, 5.5, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752');
 				})
 				.catch(e => {
 					console.log(e);
