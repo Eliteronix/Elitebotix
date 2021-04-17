@@ -72,9 +72,9 @@ module.exports = {
 		for (let i = 0; i < mappoolInOrder.length; i++) {
 			mappoolLength = mappoolLength + parseInt(mappoolInOrder[i].length.total);
 			if (i === 0) {
-				gameLength = gameLength + 15 * 60;
+				gameLength = gameLength + 600;
 			} else {
-				gameLength = gameLength + 2 * 60 + parseInt(mappoolInOrder[i].length.total);
+				gameLength = gameLength + 60 + parseInt(mappoolInOrder[i].length.total);
 			}
 		}
 
