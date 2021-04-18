@@ -7,7 +7,7 @@ module.exports = {
 	getMOTDMapsOnTime: async function (client) {
 		const today = new Date();
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'Dev' && today.getUTCHours() === 13 && today.getUTCMinutes() === 16) {
+		if (process.env.SERVER === 'QA' && today.getUTCHours() === 18 && today.getUTCMinutes() === 0) {
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
