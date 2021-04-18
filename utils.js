@@ -548,5 +548,21 @@ module.exports = {
 				nextTask.destroy();
 			}
 		}
+	},
+	refreshOsuRank: async function () {
+		const today = new Date();
+		let yesterday = new Date();
+		yesterday.setDate(today.getDate() - 1);
+
+		const discordUsers = await DBDiscordUsers.findAll();
+
+		for (let i = 0; i < discordUsers.length; i++) {
+			if (discordUsers[i].osuUserId && discordUsers[i].updatedAt < yesterday) {
+				const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUsers[i].userId } });
+				if (!existingTask) {
+					DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUsers[i].userId });
+				}
+			}
+		}
 	}
 };
