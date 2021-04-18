@@ -89,7 +89,7 @@ module.exports = async function (msg) {
 		const guildPrefix = await getGuildPrefix(msg);
 
 		if (msg.content === '<@!784836063058329680>' || msg.content === '<@784836063058329680>') {
-			msg.content = 'e!help';
+			msg.content = `${guildPrefix}help`;
 		}
 
 		//Define if it is a command with prefix
