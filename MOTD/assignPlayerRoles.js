@@ -30,6 +30,16 @@ module.exports = {
 					});
 
 					if (registeredPlayer) {
+						const MOTDRole = await guild.roles.cache.get('833313361483530261');
+						try {
+							if (!members[i].roles.cache.has(MOTDRole.id)) {
+								//Assign role if not there yet
+								await members[i].roles.add(MOTDRole);
+							}
+						} catch (e) {
+							return console.log(e);
+						}
+
 						let correctRole = '';
 						if (parseInt(registeredPlayer.osuRank) < 10000) {
 							correctRole = '833313544400535613';
