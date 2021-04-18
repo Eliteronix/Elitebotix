@@ -1,12 +1,13 @@
 const osu = require('node-osu');
 const { calculateStarRating } = require('osu-sr-calculator');
+const { assignPlayerRoles } = require('./assignPlayerRoles');
 const { setMapsForBracket } = require('./setMapsForBracket');
 
 module.exports = {
 	getMOTDMapsOnTime: async function (client) {
 		const today = new Date();
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'QA' && today.getUTCHours() === 18 && today.getUTCMinutes() === 0) {
+		if (process.env.SERVER === 'Dev' && today.getUTCHours() === 13 && today.getUTCMinutes() === 16) {
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -129,11 +130,13 @@ module.exports = {
 					const mapsOfTheDayChannel = await client.channels.fetch('831959379800621147');
 					mapsOfTheDayChannel.send(data, { split: true });
 
-					//Trigger Mappool creation for the different brackets
-					setMapsForBracket(client, 10, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002');
-					setMapsForBracket(client, 6.5, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813');
-					setMapsForBracket(client, 6, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890');
-					setMapsForBracket(client, 5.5, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752');
+					await assignPlayerRoles(client);
+
+					// Trigger Mappool creation for the different brackets
+					setMapsForBracket(client, 10, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613');
+					setMapsForBracket(client, 6.5, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813', '833313704136540171');
+					setMapsForBracket(client, 6, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890', '833313763188801578');
+					setMapsForBracket(client, 5.5, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752', '833313827172646912');
 				})
 				.catch(e => {
 					console.log(e);

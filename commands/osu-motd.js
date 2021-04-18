@@ -1,0 +1,72 @@
+const { DBDiscordUsers } = require('../dbObjects');
+const { getGuildPrefix } = require('../utils');
+
+module.exports = {
+	name: 'osu-motd',
+	aliases: ['motd'],
+	description: 'Allows you to join the `Maps of the Day` competition!',
+	usage: '<server/register/unregister>',
+	//permissions: 'MANAGE_GUILD',
+	//permissionsTranslated: 'Manage Server',
+	//botPermissions: 'MANAGE_ROLES',
+	//botPermissionsTranslated: 'Manage Roles',
+	//guildOnly: true,
+	args: true,
+	cooldown: 10,
+	//noCooldownMessage: true,
+	tags: 'osu',
+	prefixCommand: true,
+	async execute(msg, args) {
+		if (args[0].toLowerCase() === 'server') {
+			sendMessage(msg, 'The discord server for the competition can be found here: <https://discord.com/invite/Asz5Gfe>\nAfter joining be sure to head to <#801000891750547496> and assign yourself the MOTD role!\nEverything else will be done automatically when you registered!');
+		} else if (args[0].toLowerCase() === 'register') {
+			const guildPrefix = await getGuildPrefix(msg);
+
+			//get discordUser from db
+			const discordUser = await DBDiscordUsers.findOne({
+				where: { userId: msg.author.id },
+			});
+
+			if (discordUser && discordUser.osuUserId) {
+				if (discordUser.osuMOTDRegistered) {
+					return sendMessage(msg, `You are already registered for the \`Maps of the Day\` competition.\nBe sure to join the server if you didn't already. (\`${guildPrefix}osu-motd server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`);
+				}
+				if (discordUser.osuVerified) {
+					discordUser.osuMOTDRegistered = true;
+					discordUser.save();
+					sendMessage(msg, `You successfully registered for the \`Maps of the Day\` competition.\nBe sure to join the server if you didn't already. (\`${guildPrefix}osu-motd server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`);
+				} else {
+					sendMessage(msg, `It seems like you don't have your connected osu! account verified.\nPlease use \`${guildPrefix}osu-link verify\` to send a verification code to your osu! dms and follow the instructions.`);
+				}
+			} else {
+				sendMessage(msg, `It seems like you don't have your osu! account connected to the bot.\nPlease use \`${guildPrefix}osu-link osu-username\` to connect you account and verify it.`);
+			}
+		} else if (args[0].toLowerCase() === 'unregister') {
+			//get discordUser from db
+			const discordUser = await DBDiscordUsers.findOne({
+				where: { userId: msg.author.id },
+			});
+
+			if (discordUser && discordUser.osuMOTDRegistered) {
+				discordUser.osuMOTDRegistered = false;
+				discordUser.save();
+				sendMessage(msg, 'You have been unregistered from the `Maps of the Day` competition.\nStill thank you for showing interest!\nYou can always register again by using `e!osu-motd register`!');
+			} else {
+				sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `e!osu-motd register`!');
+			}
+		} else {
+			msg.channel.send('Please specify what you want to do: `server`, `register`, `unregister`');
+		}
+	},
+};
+
+function sendMessage(msg, content) {
+	msg.author.send(content)
+		.then(() => {
+			if (msg.channel.type === 'dm') return;
+			msg.reply('I\'ve sent you a DM with some info!');
+		})
+		.catch(() => {
+			msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
+		});
+}
