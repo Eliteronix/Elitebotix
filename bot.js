@@ -31,7 +31,7 @@ const voiceStateUpdate = require('./voiceStateUpdate');
 const guildCreate = require('./guildCreate');
 
 //Get executeNextProcessQueueTask
-const { executeNextProcessQueueTask } = require('./utils');
+const { executeNextProcessQueueTask, refreshOsuRank } = require('./utils');
 
 //Get MOTD/getMapsOnTime
 const { getMOTDMapsOnTime } = require('./MOTD/getMapsOnTime');
@@ -78,3 +78,5 @@ client.on('guildCreate', guildCreate);
 client.setInterval(() => executeNextProcessQueueTask(client), 1000);
 
 client.setInterval(() => getMOTDMapsOnTime(client), 60000);
+
+client.setInterval(() => refreshOsuRank(), 600000);
