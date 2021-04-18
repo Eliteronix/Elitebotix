@@ -54,6 +54,10 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.INTEGER,
 			defaultValue: 0,
 		},
+		osuMOTDRegistered: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		paranoid: true,
 	});
 };
