@@ -2,10 +2,9 @@ const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
 	assignPlayerRoles: async function (client) {
-		console.log('Assignment started');
 		const guild = await client.guilds.fetch('727407178499096597');
 
-		guild.members.fetch()
+		await guild.members.fetch()
 			.then(async (guildMembers) => {
 
 				const members = guildMembers.filter(member => member.user.bot !== true).array();
