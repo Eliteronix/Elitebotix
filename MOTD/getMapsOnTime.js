@@ -117,26 +117,26 @@ module.exports = {
 
 					for (let i = 0; i < NMBeatmaps.length; i++) {
 						data.push(`${NMBeatmaps[i].artist} - ${NMBeatmaps[i].title} | [${NMBeatmaps[i].version}]`);
-						data.push(`${Math.round(NMBeatmaps[i].difficulty.rating * 100) / 100}* | ${Math.floor(NMBeatmaps[i].length.total/60)}:${NMBeatmaps[i].length.total%60} | ${NMBeatmaps[i].bpm} BPM | CS ${NMBeatmaps[i].difficulty.size} | HP ${NMBeatmaps[i].difficulty.drain} | OD ${NMBeatmaps[i].difficulty.overall} | AR ${NMBeatmaps[i].difficulty.approach} | [Website](<https://osu.ppy.sh/b/${NMBeatmaps[i].id}>) | osu! direct: <osu://dl/${NMBeatmaps[i].beatmapSetId}>`);
+						data.push(`${Math.round(NMBeatmaps[i].difficulty.rating * 100) / 100}* | ${Math.floor(NMBeatmaps[i].length.total / 60)}:${NMBeatmaps[i].length.total % 60} | ${NMBeatmaps[i].bpm} BPM | CS ${NMBeatmaps[i].difficulty.size} | HP ${NMBeatmaps[i].difficulty.drain} | OD ${NMBeatmaps[i].difficulty.overall} | AR ${NMBeatmaps[i].difficulty.approach} | [Website](<https://osu.ppy.sh/b/${NMBeatmaps[i].id}>) | osu! direct: <osu://dl/${NMBeatmaps[i].beatmapSetId}>`);
 					}
 
 					data.push(`DoubleTime maps from \`${todayDay}.${todayMonth}.${todayYear}\``);
 
 					for (let i = 0; i < DTBeatmaps.length; i++) {
 						data.push(`${DTBeatmaps[i].artist} - ${DTBeatmaps[i].title} | [${DTBeatmaps[i].version}]`);
-						data.push(`${Math.round(DTBeatmaps[i].difficulty.rating * 100) / 100}* | ${Math.floor(DTBeatmaps[i].length.total/60)}:${DTBeatmaps[i].length.total%60} | ${DTBeatmaps[i].bpm} BPM | CS ${DTBeatmaps[i].difficulty.size} | HP ${DTBeatmaps[i].difficulty.drain} | OD ${DTBeatmaps[i].difficulty.overall} | AR ${DTBeatmaps[i].difficulty.approach} | [Website](<https://osu.ppy.sh/b/${DTBeatmaps[i].id}>) | osu! direct: <osu://dl/${DTBeatmaps[i].beatmapSetId}>`);
+						data.push(`${Math.round(DTBeatmaps[i].difficulty.rating * 100) / 100}* | ${Math.floor(DTBeatmaps[i].length.total / 60)}:${DTBeatmaps[i].length.total % 60} | ${DTBeatmaps[i].bpm} BPM | CS ${DTBeatmaps[i].difficulty.size} | HP ${DTBeatmaps[i].difficulty.drain} | OD ${DTBeatmaps[i].difficulty.overall} | AR ${DTBeatmaps[i].difficulty.approach} | [Website](<https://osu.ppy.sh/b/${DTBeatmaps[i].id}>) | osu! direct: <osu://dl/${DTBeatmaps[i].beatmapSetId}>`);
 					}
 
 					const mapsOfTheDayChannel = await client.channels.fetch('831959379800621147');
 					mapsOfTheDayChannel.send(data, { split: true });
 
-					await assignPlayerRoles(client);
+					const allPlayers = await assignPlayerRoles(client);
 
 					// Trigger Mappool creation for the different brackets
-					setMapsForBracket(client, 10, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613');
-					setMapsForBracket(client, 6.5, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813', '833313704136540171');
-					setMapsForBracket(client, 6, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890', '833313763188801578');
-					setMapsForBracket(client, 5.5, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752', '833313827172646912');
+					setMapsForBracket(client, 8, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613', allPlayers[0]);
+					setMapsForBracket(client, 6.5, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813', '833313704136540171', allPlayers[1]);
+					setMapsForBracket(client, 6, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890', '833313763188801578', allPlayers[2]);
+					setMapsForBracket(client, 5.5, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752', '833313827172646912', allPlayers[3]);
 				})
 				.catch(e => {
 					console.log(e);

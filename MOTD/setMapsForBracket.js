@@ -105,5 +105,7 @@ module.exports = {
 		const mapsOfTheDayChannel = await client.channels.fetch(channelID);
 		mapsOfTheDayChannel.send(`<@&${roleId}> The new mappool is out!\nYou have 10 minutes to get your best possible score on the Qualifier map!`);
 		mapsOfTheDayChannel.send(mappoolEmbed);
+
+		//Qualifier
 	}
 };

@@ -1,5 +1,5 @@
 module.exports = {
-	getPlayerScores: async function (client) {
+	qualifier: async function (client) {
 		console.log(client);
 
 		// Grab scores of the players at the end of the quali phase
