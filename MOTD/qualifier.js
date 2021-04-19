@@ -21,10 +21,34 @@ module.exports = {
 
 		// Catch case of less than 17 players
 		if (players.length < 17) {
-			return knockoutLobby(client, mappool, players);
+			return knockoutLobby(client, mappool, 1, players, users);
 		}
 
 		// Catch case of qualifiers actually being played
-		
+		divideIntoGroups(client, mappool, 1, players, users);
 	}
 };
+
+function divideIntoGroups(client, mappool, lobbyNumber, players, users) {
+	let thisLobbyPlayers = [];
+	let otherPlayers = [];
+
+	let thisLobbyUsers = [];
+	let otherUsers = [];
+
+	for (let i = 0; i < players.length; i++) {
+		if (i < 16) {
+			thisLobbyPlayers.push(players[i]);
+			thisLobbyUsers.push(users[i]);
+		} else {
+			otherPlayers.push(players[i]);
+			otherUsers.push(users[i]);
+		}
+	}
+
+	knockoutLobby(client, mappool, lobbyNumber, thisLobbyPlayers, thisLobbyUsers);
+
+	if (otherPlayers.length > 0) {
+		divideIntoGroups(client, mappool, lobbyNumber + 1, otherPlayers, otherUsers);
+	}
+}
