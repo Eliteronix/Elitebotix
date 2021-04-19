@@ -1,8 +1,9 @@
 const Discord = require('discord.js');
 const { humanReadable } = require('../utils.js');
+const { qualifier } = require('./qualifier.js');
 
 module.exports = {
-	setMapsForBracket: async function (client, SRLimit, NMBeatmaps, DTBeatmaps, upperRank, lowerRank, channelID, roleId) {
+	setMapsForBracket: async function (client, SRLimit, NMBeatmaps, DTBeatmaps, upperRank, lowerRank, channelID, roleId, players) {
 
 		let possibleNMBeatmaps = [];
 		let possibleDTBeatmaps = [];
@@ -106,6 +107,6 @@ module.exports = {
 		mapsOfTheDayChannel.send(`<@&${roleId}> The new mappool is out!\nYou have 10 minutes to get your best possible score on the Qualifier map!`);
 		mapsOfTheDayChannel.send(mappoolEmbed);
 
-		//Qualifier
+		qualifier(client, mappoolInOrder, players);
 	}
 };

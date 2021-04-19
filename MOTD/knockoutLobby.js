@@ -1,8 +1,7 @@
 module.exports = {
-	knockOutLobby: async function (client) {
-		console.log(client);
+	knockOutLobby: async function (client, mappool, players) {
+		//Map [0] has been played already
 
 		
-		//5 + 5
 	}
 };

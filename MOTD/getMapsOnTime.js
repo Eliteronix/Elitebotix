@@ -2,6 +2,7 @@ const osu = require('node-osu');
 const { calculateStarRating } = require('osu-sr-calculator');
 const { assignPlayerRoles } = require('./assignPlayerRoles');
 const { setMapsForBracket } = require('./setMapsForBracket');
+const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
 	getMOTDMapsOnTime: async function (client) {
@@ -130,7 +131,9 @@ module.exports = {
 					const mapsOfTheDayChannel = await client.channels.fetch('831959379800621147');
 					mapsOfTheDayChannel.send(data, { split: true });
 
-					const allPlayers = await assignPlayerRoles(client);
+					const allPlayers = await getPlayers(client);
+
+					await assignPlayerRoles(client);
 
 					// Trigger Mappool creation for the different brackets
 					setMapsForBracket(client, 8, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613', allPlayers[0]);
@@ -168,4 +171,45 @@ function quicksort(list, start = 0, end = undefined) {
 		quicksort(list, p + 1, end);
 	}
 	return list;
+}
+
+async function getPlayers(client) {
+	const registeredUsers = await DBDiscordUsers.findAll({
+		osuMOTDRegistered: 1
+	});
+
+	let topBracketPlayers = [];
+	let middleBracketPlayers = [];
+	let lowerBracketPlayers = [];
+	let beginnerBracketPlayers = [];
+
+	for (let i = 0; i < registeredUsers.length; i++) {
+		if (registeredUsers[i].osuUserId) {
+			if (registeredUsers[i].osuRank < 10000) {
+				topBracketPlayers.push(registeredUsers[i]);
+			} else if (registeredUsers[i].osuRank < 50000) {
+				middleBracketPlayers.push(registeredUsers[i]);
+			} else if (registeredUsers[i].osuRank < 100000) {
+				lowerBracketPlayers.push(registeredUsers[i]);
+			} else if (registeredUsers[i].osuRank < 10000000) {
+				beginnerBracketPlayers.push(registeredUsers[i]);
+			}
+		} else {
+			registeredUsers[i].osuMOTDRegistered = 0;
+			await registeredUsers[i].save();
+
+			client.users.fetch(registeredUsers[i].userId)
+				.then(async (user) => {
+					user.send('It seems like you removed your connected osu! account and have been removed as a player for the `Maps of the Day` competition because of that.\nIf you want to take part again please reconnect your osu! account and use `e!osu-motd register` again.');
+				});
+		}
+	}
+
+	let allPlayers = [];
+	allPlayers.push(topBracketPlayers);
+	allPlayers.push(middleBracketPlayers);
+	allPlayers.push(lowerBracketPlayers);
+	allPlayers.push(beginnerBracketPlayers);
+
+	return allPlayers;
 }
