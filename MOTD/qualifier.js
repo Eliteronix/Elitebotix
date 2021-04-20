@@ -1,4 +1,6 @@
+const osu = require('node-osu');
 const { knockoutLobby } = require('./knockoutLobby.js');
+const { getMods } = require('../utils.js');
 
 module.exports = {
 	qualifier: async function (client, mappool, players) {
@@ -9,7 +11,7 @@ module.exports = {
 		let users = [];
 
 		for (let i = 0; i < players.length; i++) {
-			const user = client.users.fetch(players[i].userId);
+			const user = await client.users.fetch(players[i].userId);
 			users.push(user);
 		}
 
@@ -25,20 +27,24 @@ module.exports = {
 		}
 
 		// Catch case of qualifiers actually being played
-		//Qualifiers
 		//Send messages to inform players
 		await sendQualifierMessages(client, mappool[0], users);
 
 		//wait 10 minutes
-		await setTimeout(function () {
+		await setTimeout(async function () {
+			//Grab qualifier results of all players
+			let results = await getQualifierResults(mappool[0], players);
 
-		}, 1000 * 60 * 10);
+			quicksort(results);
 
-		//Grab qualifier results of all players
-		const results = await getQualifierResults(mappool[0], players);
+			const playersUsers = sortPlayersByResults(results, players, users);
 
-		//Divide sorted players into knockout lobbies
-		divideIntoGroups(client, mappool, 1, players, users);
+			players = playersUsers[0];
+			users = playersUsers[1];
+
+			//Divide sorted players into knockout lobbies
+			divideIntoGroups(client, mappool, 1, players, users);
+		}, 1000 * 60);
 	}
 };
 
@@ -69,12 +75,13 @@ function divideIntoGroups(client, mappool, lobbyNumber, players, users) {
 async function sendQualifierMessages(client, map, users) {
 	for (let i = 0; i < users.length; i++) {
 		let data = [];
-		data.push(`There are ${users.length} players registered today for this bracket!`);
+		data.push(`There are ${users.length} players registered today for your bracket!`);
 		data.push('Try to get your best score possible in the next 10 minutes on the following map to qualify for a knockout lobby.');
-		data.push('**The map is FreeMod - `NF` will be countered and scores will be doubled - Don\'t use `ScoreV2`, `Relax`, `Autopilot`, `Auto`**');
+		data.push('**The map is FreeMod - scores with `NF` will be doubled - Don\'t use `ScoreV2`, `Relax`, `Autopilot` or `Auto`**');
+		data.push('\nTodays qualifier map:');
 		data.push(`${map.artist} - ${map.title} [${map.version}]`);
-		data.push(`${Math.round(map[i].difficulty.rating * 100) / 100}* | ${Math.floor(map[i].length.total / 60)}:${(map[i].length.total % 60).toString().padStart(2, '0')} | ${map[i].bpm} BPM | CS ${map[i].difficulty.size} | HP ${map[i].difficulty.drain} | OD ${map[i].difficulty.overall} | AR ${map[i].difficulty.approach}`);
-		data.push(`Website: <https://osu.ppy.sh/b/${map[i].id}> | osu! direct: <osu://dl/${map[i].beatmapSetId}>`);
+		data.push(`${Math.round(map.difficulty.rating * 100) / 100}* | ${Math.floor(map.length.total / 60)}:${(map.length.total % 60).toString().padStart(2, '0')} | ${map.bpm} BPM | CS ${map.difficulty.size} | HP ${map.difficulty.drain} | OD ${map.difficulty.overall} | AR ${map.difficulty.approach}`);
+		data.push(`Website: https://osu.ppy.sh/b/${map.id} | osu! direct: <osu://dl/${map.beatmapSetId}>`);
 		await users[i].send(data, { split: true })
 			.catch(async () => {
 				const channel = await client.channels.fetch('833803740162949191');
@@ -84,9 +91,82 @@ async function sendQualifierMessages(client, map, users) {
 }
 
 async function getQualifierResults(map, players) {
+	// eslint-disable-next-line no-undef
+	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+	});
+
 	let results = [];
 
-	
+	for (let i = 0; i < players.length; i++) {
+		const score = await osuApi.getScores({ b: map.id, u: players[i].osuUserId })
+			.then(async (scores) => {
+				const mods = await getMods(scores[0].raw_mods);
+				if (mods.includes('NF')) {
+					scores[0].score = parseInt(scores[0].score) * 2;
+				}
+				return scores[0];
+			})
+			.catch(err => {
+				if (err.message === 'Not found') {
+					return null;
+				} else {
+					console.log(err);
+				}
+			});
+
+		results.push(score);
+	}
 
 	return results;
+}
+
+function sortPlayersByResults(results, playersInput, usersInput) {
+	let playersOutput = [];
+	let usersOutput = [];
+
+	for (let i = 0; i < results.length; i++) {
+		for (let j = 0; j < playersInput.length; j++) {
+			if(results[i].user.id === playersInput[j].osuUserId){
+				playersOutput.push(playersInput[j]);
+				usersOutput.push(usersInput[j]);
+				//Close inner loop
+				j = playersInput.length;
+			}
+		}
+	}
+
+	let output = [];
+	output.push(playersOutput);
+	output.push(usersOutput);
+
+	return output;
+}
+
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].score) <= parseFloat(pivot.score)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
 }

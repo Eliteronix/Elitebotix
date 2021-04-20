@@ -1,6 +1,7 @@
 module.exports = {
-	knockOutLobby: async function (client, mappool, lobbyNumber, players, users) {
+	knockoutLobby: async function (client, mappool, lobbyNumber, players, users) {
 		//Map [0] has been played already
+		console.log(lobbyNumber, users);
 
 		//Map [1] 16 -> 14
 		//Map [2] 14 -> 12

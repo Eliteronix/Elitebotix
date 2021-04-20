@@ -175,7 +175,7 @@ function quicksort(list, start = 0, end = undefined) {
 
 async function getPlayers(client) {
 	const registeredUsers = await DBDiscordUsers.findAll({
-		osuMOTDRegistered: 1
+		where: { osuMOTDRegistered: 1 }
 	});
 
 	let topBracketPlayers = [];
