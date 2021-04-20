@@ -15,10 +15,10 @@ module.exports = {
 			users.push(user);
 		}
 
-		// Catch the case of only one player playing Sadge
+		// // Catch the case of only one player playing Sadge
 		if (players.length === 1) {
 			// Send message to user
-			return users[0].send('There aren\'t any other players registered for this bracket at the moment :(\nMaybe try asking your friends and there will be another one competition tomorrow :)')
+			return users[0].send('There aren\'t any other players registered for your bracket at the moment.\nMaybe try asking your friends and there will be another competition tomorrow.')
 				.catch(async () => {
 					const channel = await client.channels.fetch('833803740162949191');
 					channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
@@ -35,7 +35,7 @@ module.exports = {
 		await sendQualifierMessages(client, mappool[0], users);
 
 		//wait 10 minutes
-		await setTimeout(async function () {
+		setTimeout(async function () {
 			//Grab qualifier results of all players
 			let results = await getQualifierResults(mappool[0], players);
 
@@ -46,9 +46,29 @@ module.exports = {
 			players = playersUsers[0];
 			users = playersUsers[1];
 
+			//Get rid of people without scores
+			for (let i = 0; i < results.length; i++) {
+				if (results[i] < 0) {
+					users[i].send('You failed to submit a score for todays qualifier map and have been removed from todays competition.\nCome back tomorrow for another round.')
+						.catch(async () => {
+							const channel = await client.channels.fetch('833803740162949191');
+							channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+						});
+					results.splice(i, 1);
+					players.splice(i, 1);
+					users.splice(i, 1);
+				} else {
+					i = results.length;
+				}
+			}
+
+			if (players.length === 0) {
+				return;
+			}
+
 			//Divide sorted players into knockout lobbies
 			divideIntoGroups(client, mappool, 1, players, users);
-		}, 1000 * 60);
+		}, 1000 * 60 * 10);
 	}
 };
 
@@ -81,9 +101,9 @@ async function sendQualifierMessages(client, map, users) {
 		let data = [];
 		data.push(`There are ${users.length} players registered today for your bracket!`);
 		data.push('Try to get your best score possible in the next 10 minutes on the following map to qualify for a knockout lobby.');
-		data.push('**The map is FreeMod - scores with `NF` will be doubled - Don\'t use `ScoreV2`, `Relax`, `Autopilot` or `Auto`**');
+		data.push('**The map is FreeMod - Scores with `NF` will be doubled - Don\'t use `ScoreV2`, `Relax`, `Autopilot` or `Auto`**');
 		data.push('\nTodays qualifier map:');
-		data.push(`${map.artist} - ${map.title} [${map.version}]`);
+		data.push(`${map.artist} - ${map.title} [${map.version}] | Mapper: ${map.creator}`);
 		data.push(`${Math.round(map.difficulty.rating * 100) / 100}* | ${Math.floor(map.length.total / 60)}:${(map.length.total % 60).toString().padStart(2, '0')} | ${map.bpm} BPM | CS ${map.difficulty.size} | HP ${map.difficulty.drain} | OD ${map.difficulty.overall} | AR ${map.difficulty.approach}`);
 		data.push(`Website: https://osu.ppy.sh/b/${map.id} | osu! direct: <osu://dl/${map.beatmapSetId}>`);
 		await users[i].send(data, { split: true })
@@ -108,7 +128,7 @@ async function getQualifierResults(map, players) {
 	for (let i = 0; i < players.length; i++) {
 		const score = await osuApi.getScores({ b: map.id, u: players[i].osuUserId })
 			.then(async (scores) => {
-				const mods = await getMods(scores[0].raw_mods);
+				const mods = getMods(scores[0].raw_mods);
 				if (mods.includes('NF')) {
 					scores[0].score = parseInt(scores[0].score) * 2;
 				}
@@ -116,7 +136,32 @@ async function getQualifierResults(map, players) {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					return null;
+					const score = {
+						score: '-1',
+						user: {
+							name: players[i].osuName,
+							id: players[i].osuUserId
+						},
+						beatmapId: null,
+						counts: {
+							'50': '-1',
+							'100': '-1',
+							'300': '-1',
+							geki: '-1',
+							katu: '-1',
+							miss: '-1'
+						},
+						maxCombo: '-1',
+						perfect: true,
+						raw_date: '-1',
+						rank: 'F',
+						pp: '-1',
+						hasReplay: false,
+						raw_mods: 0,
+						beatmap: undefined,
+					};
+
+					return score;
 				} else {
 					console.log(err);
 				}
