@@ -18,7 +18,11 @@ module.exports = {
 		// Catch the case of only one player playing Sadge
 		if (players.length === 1) {
 			// Send message to user
-			return users[0].send('There aren\'t any other players registered for this bracket at the moment :(\nMaybe try asking your friends and there will be another one competition tomorrow :)');
+			return users[0].send('There aren\'t any other players registered for this bracket at the moment :(\nMaybe try asking your friends and there will be another one competition tomorrow :)')
+				.catch(async () => {
+					const channel = await client.channels.fetch('833803740162949191');
+					channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+				});
 		}
 
 		// Catch case of less than 17 players
@@ -130,7 +134,7 @@ function sortPlayersByResults(results, playersInput, usersInput) {
 
 	for (let i = 0; i < results.length; i++) {
 		for (let j = 0; j < playersInput.length; j++) {
-			if(results[i].user.id === playersInput[j].osuUserId){
+			if (results[i].user.id === playersInput[j].osuUserId) {
 				playersOutput.push(playersInput[j]);
 				usersOutput.push(usersInput[j]);
 				//Close inner loop
