@@ -80,7 +80,7 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapNumb
 		//Remove players by inactivity
 		for (let i = 0; i < results.length; i++) {
 			if (results[i] < 0) {
-				users[i].send('You failed to submit a score for the first knockout map and have been removed from todays competition.\nCome back tomorrow for another round.')
+				users[i].send('You failed to submit a score for the last knockout map and have been removed from todays competition.\nCome back tomorrow for another round.')
 					.catch(async () => {
 						const channel = await client.channels.fetch('833803740162949191');
 						channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
