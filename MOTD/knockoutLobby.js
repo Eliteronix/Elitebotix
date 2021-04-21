@@ -5,7 +5,7 @@ module.exports = {
 	knockoutLobby: async function (client, mappool, lobbyNumber, players, users) {
 		//Map [0] has been played already
 		//Send message about which lobby the player is in and who he / she is against
-		sendLobbyMessages(client, lobbyNumber, players, users);
+		await sendLobbyMessages(client, lobbyNumber, players, users);
 
 		//Case of just one player
 		if (players.length === 1) {
@@ -42,7 +42,7 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 		await users[i].send(data, { split: true })
 			.catch(async () => {
 				const channel = await client.channels.fetch('833803740162949191');
-				channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+				await channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 			});
 	}
 }
@@ -77,8 +77,8 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 	}
 
 	//Update the players about the current map
-	sendMapMessages(client, mappool[mapIndex], mapIndex, knockoutNumber, users, doubleTimeMap);
-	//wait map + 60 seconds
+	await sendMapMessages(client, mappool[mapIndex], mapIndex, knockoutNumber, users, doubleTimeMap);
+	//wait map + 90 seconds
 	setTimeout(async function () {
 		//Fetch the results of the map
 		let results = await getKnockoutScores(mappool[mapIndex], players, doubleTimeMap);
@@ -94,7 +94,7 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 		let knockedOutPlayerNames = '';
 
 		//Send leaderboard of that map
-		sendMapLeaderboard(client, results, users);
+		await sendMapLeaderboard(client, results, players, users);
 
 		//Remove players by inactivity
 		for (let i = 0; i < results.length; i++) {
@@ -104,15 +104,15 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 						const channel = await client.channels.fetch('833803740162949191');
 						channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 					});
-				results.splice(i, 1);
-				players.splice(i, 1);
-				users.splice(i, 1);
-				knockedOutPlayers++;
 				if (knockedOutPlayerNames === '') {
 					knockedOutPlayerNames = `\`${players[i].osuName}\``;
 				} else {
 					knockedOutPlayerNames = `${knockedOutPlayerNames}, \`${players[i].osuName}\``;
 				}
+				results.splice(i, 1);
+				players.splice(i, 1);
+				users.splice(i, 1);
+				knockedOutPlayers++;
 			} else {
 				i = results.length;
 			}
@@ -126,15 +126,15 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 						const channel = await client.channels.fetch('833803740162949191');
 						channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 					});
-				results.splice(i, 1);
-				players.splice(i, 1);
-				users.splice(i, 1);
-				knockedOutPlayers++;
 				if (knockedOutPlayerNames === '') {
 					knockedOutPlayerNames = `\`${players[i].osuName}\``;
 				} else {
 					knockedOutPlayerNames = `${knockedOutPlayerNames}, \`${players[i].osuName}\``;
 				}
+				results.splice(i, 1);
+				players.splice(i, 1);
+				users.splice(i, 1);
+				knockedOutPlayers++;
 			}
 		}
 
@@ -163,7 +163,7 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 
 		//Start the next round
 		knockoutMap(client, mappool, lobbyNumber, players, users, mapIndex + 1);
-	}, parseInt(mappool[mapIndex].length.total) * 1000 + 1000 * 60);
+	}, parseInt(mappool[mapIndex].length.total) * 1000 + 1000 * 90);
 }
 
 async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, doubleTime) {
@@ -272,17 +272,17 @@ function sortPlayersByResults(results, playersInput, usersInput) {
 	return output;
 }
 
-async function sendMapLeaderboard(client, results, users) {
+async function sendMapLeaderboard(client, results, players, users) {
 	let data = [];
 	data.push('Here is the leaderboard for the last map:');
 	for (let i = 0; i < results.length; i++) {
-		data.push(`\`${results[i].user.name}\`: ${humanReadable(parseInt(results[i].score))}`);
+		data.push(`\`${players[results.length - i - 1].osuName}\`: ${humanReadable(parseInt(results[results.length - i - 1].score))}`);
 	}
 	for (let i = 0; i < users.length; i++) {
 		await users[i].send(data, { split: true })
 			.catch(async () => {
 				const channel = await client.channels.fetch('833803740162949191');
-				channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+				await channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 			});
 	}
 }
