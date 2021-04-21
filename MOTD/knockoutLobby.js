@@ -15,100 +15,7 @@ module.exports = {
 				});
 		}
 
-		//Map [1] 16 -> 14
-		let knockoutNumber = 2;
-		if (players.length < 16) {
-			knockoutNumber = 1;
-		}
-		sendMapMessages(client, mappool[1], 1, knockoutNumber, users, false);
-		//wait map + 60 seconds
-		setTimeout(async function () {
-			let results = await getKnockoutScores(mappool[1], players, false);
-
-			quicksort(results);
-
-			const playersUsers = sortPlayersByResults(results, players, users);
-
-			players = playersUsers[0];
-			users = playersUsers[1];
-
-			let knockedOutPlayers = 0;
-			let knockedOutPlayerNames = '';
-
-			//Send leaderboard of that map
-			sendMapLeaderboard(client, results, users);
-
-			//Remove players by inactivity
-			for (let i = 0; i < results.length; i++) {
-				if (results[i] < 0) {
-					users[i].send('You failed to submit a score for the first knockout map and have been removed from todays competition.\nCome back tomorrow for another round.')
-						.catch(async () => {
-							const channel = await client.channels.fetch('833803740162949191');
-							channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
-						});
-					results.splice(i, 1);
-					players.splice(i, 1);
-					users.splice(i, 1);
-					knockedOutPlayers++;
-					if (knockedOutPlayerNames === '') {
-						knockedOutPlayerNames = `\`${players[i].osuName}\``;
-					} else {
-						knockedOutPlayerNames = `${knockedOutPlayerNames}, \`${players[i].osuName}\``;
-					}
-				} else {
-					i = results.length;
-				}
-			}
-
-			if (knockedOutPlayers < knockoutNumber) {
-				for (let i = 0; i < players.length && knockedOutPlayers < knockoutNumber; i++) {
-					users[i].send('You were knocked out by score. Thank you for playing and come back tomorrow for another round!')
-						.catch(async () => {
-							const channel = await client.channels.fetch('833803740162949191');
-							channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
-						});
-					results.splice(i, 1);
-					players.splice(i, 1);
-					users.splice(i, 1);
-					knockedOutPlayers++;
-					if (knockedOutPlayerNames === '') {
-						knockedOutPlayerNames = `\`${players[i].osuName}\``;
-					} else {
-						knockedOutPlayerNames = `${knockedOutPlayerNames}, \`${players[i].osuName}\``;
-					}
-				}
-			}
-
-			if (players.length === 0) {
-				return;
-			}
-
-			for (let i = 0; i < users.length; i++) {
-				users[i].send(`Knocked out players this round:\n${knockedOutPlayerNames}`)
-					.catch(async () => {
-						const channel = await client.channels.fetch('833803740162949191');
-						channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
-					});
-			}
-
-			if (players.length === 1) {
-				return users[0].send('All other players have been knocked out of todays competition.\nGG, thank you for playing and come back tomorrow for another round.')
-					.catch(async () => {
-						const channel = await client.channels.fetch('833803740162949191');
-						channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
-					});
-			}
-
-			//Map [2] 14 -> 12
-			//Map [3] 12 -> 10
-			//Map [4] 10 -> 8 --DT
-			//Map [5] 8 -> 6
-			//Map [6] 6 -> 5
-			//Map [7] 5 -> 4
-			//Map [8] 4 -> 3 --DT
-			//Map [9] 3 -> 2
-			//Map [10] 2 -> 1
-		}, parseInt(mappool[1].length.total) * 1000 + 1000 * 60);
+		knockoutMap(client, mappool, lobbyNumber, players, users, 1);
 	}
 };
 
@@ -135,6 +42,104 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 				channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 			});
 	}
+}
+
+async function knockoutMap(client, mappool, lobbyNumber, players, users, mapNumber) {
+	//Map [1] 16 -> 14
+	//Map [2] 14 -> 12
+	//Map [3] 12 -> 10
+	//Map [4] 10 -> 8 --DT
+	//Map [5] 8 -> 6
+	//Map [6] 6 -> 5
+	//Map [7] 5 -> 4
+	//Map [8] 4 -> 3 --DT
+	//Map [9] 3 -> 2
+	//Map [10] 2 -> 1
+	let knockoutNumber = 2;
+	if (players.length < 16) {
+		knockoutNumber = 1;
+	}
+	sendMapMessages(client, mappool[mapNumber], 1, knockoutNumber, users, false);
+	//wait map + 60 seconds
+	setTimeout(async function () {
+		let results = await getKnockoutScores(mappool[mapNumber], players, false);
+
+		quicksort(results);
+
+		const playersUsers = sortPlayersByResults(results, players, users);
+
+		players = playersUsers[0];
+		users = playersUsers[1];
+
+		let knockedOutPlayers = 0;
+		let knockedOutPlayerNames = '';
+
+		//Send leaderboard of that map
+		sendMapLeaderboard(client, results, users);
+
+		//Remove players by inactivity
+		for (let i = 0; i < results.length; i++) {
+			if (results[i] < 0) {
+				users[i].send('You failed to submit a score for the first knockout map and have been removed from todays competition.\nCome back tomorrow for another round.')
+					.catch(async () => {
+						const channel = await client.channels.fetch('833803740162949191');
+						channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+					});
+				results.splice(i, 1);
+				players.splice(i, 1);
+				users.splice(i, 1);
+				knockedOutPlayers++;
+				if (knockedOutPlayerNames === '') {
+					knockedOutPlayerNames = `\`${players[i].osuName}\``;
+				} else {
+					knockedOutPlayerNames = `${knockedOutPlayerNames}, \`${players[i].osuName}\``;
+				}
+			} else {
+				i = results.length;
+			}
+		}
+
+		if (knockedOutPlayers < knockoutNumber) {
+			for (let i = 0; i < players.length && knockedOutPlayers < knockoutNumber; i++) {
+				users[i].send('You were knocked out by score. Thank you for playing and come back tomorrow for another round!')
+					.catch(async () => {
+						const channel = await client.channels.fetch('833803740162949191');
+						channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+					});
+				results.splice(i, 1);
+				players.splice(i, 1);
+				users.splice(i, 1);
+				knockedOutPlayers++;
+				if (knockedOutPlayerNames === '') {
+					knockedOutPlayerNames = `\`${players[i].osuName}\``;
+				} else {
+					knockedOutPlayerNames = `${knockedOutPlayerNames}, \`${players[i].osuName}\``;
+				}
+			}
+		}
+
+		if (players.length === 0) {
+			return;
+		}
+
+		for (let i = 0; i < users.length; i++) {
+			users[i].send(`Knocked out players this round:\n${knockedOutPlayerNames}`)
+				.catch(async () => {
+					const channel = await client.channels.fetch('833803740162949191');
+					channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+				});
+		}
+
+		if (players.length === 1) {
+			return users[0].send('All other players have been knocked out of todays competition.\nGG, thank you for playing and come back tomorrow for another round.')
+				.catch(async () => {
+					const channel = await client.channels.fetch('833803740162949191');
+					channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+				});
+		}
+
+		knockoutMap(client, mappool, lobbyNumber, players, users, mapNumber + 1);
+	}, parseInt(mappool[mapNumber].length.total) * 1000 + 1000 * 60);
 }
 
 async function sendMapMessages(client, map, mapNumber, knockoutNumber, users, doubleTime) {
