@@ -156,6 +156,12 @@ async function disconnect(msg, discordUser, guildPrefix) {
 		discordUser.osuName = null;
 		discordUser.osuPP = null;
 		discordUser.osuRank = null;
+		discordUser.taikoPP = null;
+		discordUser.taikoRank = null;
+		discordUser.catchPP = null;
+		discordUser.catchRank = null;
+		discordUser.maniaPP = null;
+		discordUser.maniaRank = null;
 		discordUser.save();
 
 		msg.channel.send(`There is no longer an osu! account linked to your discord account.\nUse \`${guildPrefix}osu-link <connect> <osu! username ("_" for " ")>\` to link an osu! account to your discord account.`);

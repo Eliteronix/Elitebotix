@@ -1,18 +1,21 @@
 const Discord = require('discord.js');
 const { humanReadable } = require('../utils.js');
+const { qualifier } = require('./qualifier.js');
 
 module.exports = {
-	setMapsForBracket: async function (client, SRLimit, NMBeatmaps, DTBeatmaps, upperRank, lowerRank, channelID, roleId) {
+	setMapsForBracket: async function (client, SRLimit, NMBeatmaps, DTBeatmaps, upperRank, lowerRank, channelID, roleId, players) {
 
 		let possibleNMBeatmaps = [];
 		let possibleDTBeatmaps = [];
 
+		//Filter NM maps by difficulty limit
 		for (let i = 0; i < NMBeatmaps.length; i++) {
 			if (Math.round(NMBeatmaps[i].difficulty.rating * 100) / 100 < SRLimit) {
 				possibleNMBeatmaps.push(NMBeatmaps[i]);
 			}
 		}
 
+		//Filter DT maps by difficulty limit
 		for (let i = 0; i < DTBeatmaps.length; i++) {
 			if (Math.round(DTBeatmaps[i].difficulty.rating * 100) / 100 < SRLimit) {
 				possibleDTBeatmaps.push(DTBeatmaps[i]);
@@ -21,10 +24,12 @@ module.exports = {
 
 		let selectedNMMaps = [];
 
+		//Get the 9 hardest NM maps
 		for (let i = 0; i < 9; i++) {
 			selectedNMMaps.push(possibleNMBeatmaps[possibleNMBeatmaps.length - 9 + i]);
 		}
 
+		//Push the chosen maps in correct order
 		const mappoolInOrder = [];
 
 		// Max 16 players join the lobby
@@ -69,23 +74,25 @@ module.exports = {
 		let mappoolLength = 0;
 		let gameLength = 0;
 
+		//Calculate match times
 		for (let i = 0; i < mappoolInOrder.length; i++) {
 			mappoolLength = mappoolLength + parseInt(mappoolInOrder[i].length.total);
 			if (i === 0) {
 				gameLength = gameLength + 600;
 			} else {
-				gameLength = gameLength + 60 + parseInt(mappoolInOrder[i].length.total);
+				gameLength = gameLength + 90 + parseInt(mappoolInOrder[i].length.total);
 			}
 		}
 
+		//Prepare official mappool message
 		const today = new Date();
 		const todayYear = today.getUTCFullYear();
 		const todayMonth = (today.getUTCMonth() + 1).toString().padStart(2, '0');
 		const todayDay = (today.getUTCDate()).toString().padStart(2, '0');
 		const mappoolEmbed = new Discord.MessageEmbed()
 			.setColor('#C45686')
-			.setTitle(`Mappool ${humanReadable(upperRank)} - ${humanReadable(lowerRank)}`)
-			.setDescription(`Mappool from ${todayDay}.${todayMonth}.${todayYear} for ${humanReadable(upperRank)} - ${humanReadable(lowerRank)}`)
+			.setTitle(`Mappool from ${todayDay}.${todayMonth}.${todayYear} for ${humanReadable(upperRank)} - ${humanReadable(lowerRank)}`)
+			.setDescription(`Mappool for ${humanReadable(upperRank)} - ${humanReadable(lowerRank)} on ${todayDay}.${todayMonth}.${todayYear}`)
 			.setFooter(`Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`);
 
 		for (let i = 0; i < mappoolInOrder.length; i++) {
@@ -102,8 +109,12 @@ module.exports = {
 			mappoolEmbed.addField(embedName, embedValue);
 		}
 
+		//Send official message into the correct channel
 		const mapsOfTheDayChannel = await client.channels.fetch(channelID);
 		mapsOfTheDayChannel.send(`<@&${roleId}> The new mappool is out!\nYou have 10 minutes to get your best possible score on the Qualifier map!`);
 		mapsOfTheDayChannel.send(mappoolEmbed);
+
+		//Start qualifier process
+		qualifier(client, mappoolInOrder, players);
 	}
 };

@@ -2,9 +2,11 @@ const osu = require('node-osu');
 const { calculateStarRating } = require('osu-sr-calculator');
 const { assignPlayerRoles } = require('./assignPlayerRoles');
 const { setMapsForBracket } = require('./setMapsForBracket');
+const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
 	getMOTDMapsOnTime: async function (client) {
+		//Start everything in that minute
 		const today = new Date();
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'QA' && today.getUTCHours() === 18 && today.getUTCMinutes() === 0) {
@@ -18,6 +20,7 @@ module.exports = {
 
 			let yesterday = new Date();
 
+			//Calculate yesterday
 			yesterday.setDate(today.getDate() - 1);
 
 			const yesterdayYear = yesterday.getUTCFullYear();
@@ -29,6 +32,7 @@ module.exports = {
 
 			const yesterdayMySQLFormat = `${yesterdayYear}-${yesterdayMonth}-${yesterdayDay} ${yesterdayHour}:${yesterdayMinute}:${yesterdaySecond}`;
 
+			//Get all maps since yesterday
 			osuApi.getBeatmaps({ m: 0, since: yesterdayMySQLFormat }) //mySQL date YYYY-MM-DD hh:mm:ss
 				.then(async (beatmaps) => {
 					let NMBeatmaps = [];
@@ -36,10 +40,14 @@ module.exports = {
 					let DTBeatmaps = [];
 
 					for (let i = 0; i < beatmaps.length; i++) {
+						//Push all maps which are ranked and below 5 minutes
 						if (beatmaps[i].approvalStatus === 'Ranked' && beatmaps[i].length.total <= 300) {
 							NMBeatmaps.push(beatmaps[i]);
 						}
+
+						//Push all maps which are ranked and below 7:30 minutes (for DT)
 						if (beatmaps[i].approvalStatus === 'Ranked' && beatmaps[i].length.total <= 450) {
+							//Create a new object for each map to avoid overwriting due to reference
 							const beatmap = {
 								id: beatmaps[i].id,
 								beatmapSetId: beatmaps[i].beatmapSetId,
@@ -92,6 +100,7 @@ module.exports = {
 						}
 					}
 
+					//Calculate Difficulties and other stuff for DT
 					for (let i = 0; i < DTBeatmaps.length; i++) {
 						const starRating = await calculateStarRating(DTBeatmaps[i].id, ['DT'], false, true);
 
@@ -104,10 +113,12 @@ module.exports = {
 
 					}
 
+					//Sort the maps by difficulty each
 					quicksort(NMBeatmaps);
 
 					quicksort(DTBeatmaps);
 
+					//Prepare messages to send into admin channel with all maps
 					const todayYear = today.getUTCFullYear();
 					const todayMonth = (today.getUTCMonth() + 1).toString().padStart(2, '0');
 					const todayDay = (today.getUTCDate()).toString().padStart(2, '0');
@@ -117,26 +128,29 @@ module.exports = {
 
 					for (let i = 0; i < NMBeatmaps.length; i++) {
 						data.push(`${NMBeatmaps[i].artist} - ${NMBeatmaps[i].title} | [${NMBeatmaps[i].version}]`);
-						data.push(`${Math.round(NMBeatmaps[i].difficulty.rating * 100) / 100}* | ${Math.floor(NMBeatmaps[i].length.total/60)}:${NMBeatmaps[i].length.total%60} | ${NMBeatmaps[i].bpm} BPM | CS ${NMBeatmaps[i].difficulty.size} | HP ${NMBeatmaps[i].difficulty.drain} | OD ${NMBeatmaps[i].difficulty.overall} | AR ${NMBeatmaps[i].difficulty.approach} | [Website](<https://osu.ppy.sh/b/${NMBeatmaps[i].id}>) | osu! direct: <osu://dl/${NMBeatmaps[i].beatmapSetId}>`);
 					}
 
 					data.push(`DoubleTime maps from \`${todayDay}.${todayMonth}.${todayYear}\``);
 
 					for (let i = 0; i < DTBeatmaps.length; i++) {
 						data.push(`${DTBeatmaps[i].artist} - ${DTBeatmaps[i].title} | [${DTBeatmaps[i].version}]`);
-						data.push(`${Math.round(DTBeatmaps[i].difficulty.rating * 100) / 100}* | ${Math.floor(DTBeatmaps[i].length.total/60)}:${DTBeatmaps[i].length.total%60} | ${DTBeatmaps[i].bpm} BPM | CS ${DTBeatmaps[i].difficulty.size} | HP ${DTBeatmaps[i].difficulty.drain} | OD ${DTBeatmaps[i].difficulty.overall} | AR ${DTBeatmaps[i].difficulty.approach} | [Website](<https://osu.ppy.sh/b/${DTBeatmaps[i].id}>) | osu! direct: <osu://dl/${DTBeatmaps[i].beatmapSetId}>`);
 					}
 
+					//Send raw data into admin channel
 					const mapsOfTheDayChannel = await client.channels.fetch('831959379800621147');
 					mapsOfTheDayChannel.send(data, { split: true });
 
+					//Get all players for today
+					const allPlayers = await getPlayers(client);
+
+					//Assign roles to all players currently registered and remove unneeded roles
 					await assignPlayerRoles(client);
 
 					// Trigger Mappool creation for the different brackets
-					setMapsForBracket(client, 10, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613');
-					setMapsForBracket(client, 6.5, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813', '833313704136540171');
-					setMapsForBracket(client, 6, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890', '833313763188801578');
-					setMapsForBracket(client, 5.5, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752', '833313827172646912');
+					setMapsForBracket(client, 8, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613', allPlayers[0]);
+					setMapsForBracket(client, 6.5, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813', '833313704136540171', allPlayers[1]);
+					setMapsForBracket(client, 6, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890', '833313763188801578', allPlayers[2]);
+					setMapsForBracket(client, 5.5, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752', '833313827172646912', allPlayers[3]);
 				})
 				.catch(e => {
 					console.log(e);
@@ -168,4 +182,45 @@ function quicksort(list, start = 0, end = undefined) {
 		quicksort(list, p + 1, end);
 	}
 	return list;
+}
+
+async function getPlayers(client) {
+	const registeredUsers = await DBDiscordUsers.findAll({
+		where: { osuMOTDRegistered: 1 }
+	});
+
+	let topBracketPlayers = [];
+	let middleBracketPlayers = [];
+	let lowerBracketPlayers = [];
+	let beginnerBracketPlayers = [];
+
+	for (let i = 0; i < registeredUsers.length; i++) {
+		if (registeredUsers[i].osuUserId) {
+			if (registeredUsers[i].osuRank < 10000) {
+				topBracketPlayers.push(registeredUsers[i]);
+			} else if (registeredUsers[i].osuRank < 50000) {
+				middleBracketPlayers.push(registeredUsers[i]);
+			} else if (registeredUsers[i].osuRank < 100000) {
+				lowerBracketPlayers.push(registeredUsers[i]);
+			} else if (registeredUsers[i].osuRank < 10000000) {
+				beginnerBracketPlayers.push(registeredUsers[i]);
+			}
+		} else {
+			registeredUsers[i].osuMOTDRegistered = 0;
+			await registeredUsers[i].save();
+
+			client.users.fetch(registeredUsers[i].userId)
+				.then(async (user) => {
+					user.send('It seems like you removed your connected osu! account and have been removed as a player for the `Maps of the Day` competition because of that.\nIf you want to take part again please reconnect your osu! account and use `e!osu-motd register` again.');
+				});
+		}
+	}
+
+	let allPlayers = [];
+	allPlayers.push(topBracketPlayers);
+	allPlayers.push(middleBracketPlayers);
+	allPlayers.push(lowerBracketPlayers);
+	allPlayers.push(beginnerBracketPlayers);
+
+	return allPlayers;
 }
