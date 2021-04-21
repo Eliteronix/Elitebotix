@@ -2,13 +2,17 @@ const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
 	assignPlayerRoles: async function (client) {
+		//Fetch server
 		const guild = await client.guilds.fetch('727407178499096597');
 
+		//Fetch all members
 		await guild.members.fetch()
 			.then(async (guildMembers) => {
 
+				//Filter members and push into array
 				const members = guildMembers.filter(member => member.user.bot !== true).array();
 
+				//Set all 4 bracket role ids as a reference
 				const bracketRoles = [
 					'833313544400535613',
 					'833313704136540171',
@@ -16,6 +20,7 @@ module.exports = {
 					'833313827172646912'
 				];
 
+				//Get all 4 bracket role objects
 				let bracketRoleObjects = [];
 
 				for (let i = 0; i < bracketRoles.length; i++) {
@@ -23,13 +28,19 @@ module.exports = {
 					bracketRoleObjects.push(role);
 				}
 
+				//Fetch standard MOTD role for every registered user
+				const MOTDRole = await guild.roles.cache.get('833313361483530261');
+
+				//Iterate through all members
 				for (let i = 0; i < members.length; i++) {
+					//Find out if they are registered or not
 					const registeredPlayer = await DBDiscordUsers.findOne({
 						where: { userId: members[i].user.id, osuMOTDRegistered: true }
 					});
 
+					//check for registration
 					if (registeredPlayer) {
-						const MOTDRole = await guild.roles.cache.get('833313361483530261');
+						//Assign MOTD role if not there yet
 						try {
 							if (!members[i].roles.cache.has(MOTDRole.id)) {
 								//Assign role if not there yet
@@ -39,6 +50,7 @@ module.exports = {
 							console.log(e);
 						}
 
+						//Check which bracket role should be received
 						let correctRole = '';
 						if (parseInt(registeredPlayer.osuRank) < 10000) {
 							correctRole = '833313544400535613';
@@ -50,6 +62,7 @@ module.exports = {
 							correctRole = '833313827172646912';
 						}
 
+						//Assign or remove needed bracket roles
 						for (let j = 0; j < bracketRoles.length; j++) {
 							if (correctRole === bracketRoles[j]) {
 								try {
@@ -73,6 +86,16 @@ module.exports = {
 						}
 					} else {
 						//Remove roles from players that aren't signed up anymore
+						for (let j = 0; j < bracketRoleObjects.length; j++) {
+							try {
+								if (members[i].roles.cache.has(bracketRoleObjects[j].id)) {
+									//Remove role if not removed yet
+									await members[i].roles.remove(bracketRoleObjects[j]);
+								}
+							} catch (e) {
+								console.log(e);
+							}
+						}
 					}
 				}
 			});

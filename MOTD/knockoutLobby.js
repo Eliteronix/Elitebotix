@@ -4,8 +4,10 @@ const { getMods, humanReadable } = require('../utils.js');
 module.exports = {
 	knockoutLobby: async function (client, mappool, lobbyNumber, players, users) {
 		//Map [0] has been played already
+		//Send message about which lobby the player is in and who he / she is against
 		sendLobbyMessages(client, lobbyNumber, players, users);
 
+		//Case of just one player
 		if (players.length === 1) {
 			// give points to player
 			return users[0].send('You will win your lobby by default.\nCome back tomorrow for another competition!')
@@ -15,6 +17,7 @@ module.exports = {
 				});
 		}
 
+		//Start the first knockout map
 		knockoutMap(client, mappool, lobbyNumber, players, users, 1);
 	}
 };
@@ -32,7 +35,7 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 
 	for (let i = 0; i < users.length; i++) {
 		let data = [];
-		data.push(`You are in lobby ${lobbyNumber}`);
+		data.push(`You are in lobby #${lobbyNumber}`);
 		data.push('Your lobby consists of the following players:');
 		data.push(playerList);
 
@@ -45,6 +48,7 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 }
 
 async function knockoutMap(client, mappool, lobbyNumber, players, users, mapIndex) {
+	//Set array for how many players should get through maximum
 	let expectedPlayers = [];
 	expectedPlayers.push(16); //Map [0] Qualifiers -> 16
 	expectedPlayers.push(14); //Map [1] 16 -> 14
@@ -58,20 +62,25 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 	expectedPlayers.push(2); //Map [9] 3 -> 2
 	expectedPlayers.push(1); //Map [10] 2 -> 1
 
+	//Calculate the amount of knockouts needed
 	let knockoutNumber = expectedPlayers[mapIndex] - expectedPlayers[mapIndex - 1];
+	//Set the amount to 1 if less players are in the lobby
 	if (players.length < expectedPlayers[mapIndex - 1]) {
 		knockoutNumber = 1;
 	}
 
+	//Set if it is a doubletime map or not
 	let doubleTimeMap = false;
 
 	if (mapIndex === 4 || mapIndex === 8) {
 		doubleTimeMap = true;
 	}
 
+	//Update the players about the current map
 	sendMapMessages(client, mappool[mapIndex], mapIndex, knockoutNumber, users, doubleTimeMap);
 	//wait map + 60 seconds
 	setTimeout(async function () {
+		//Fetch the results of the map
 		let results = await getKnockoutScores(mappool[mapIndex], players, doubleTimeMap);
 
 		quicksort(results);
@@ -89,7 +98,7 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 
 		//Remove players by inactivity
 		for (let i = 0; i < results.length; i++) {
-			if (results[i] < 0) {
+			if (results[i].score < 0) {
 				users[i].send('You failed to submit a score for the last knockout map and have been removed from todays competition.\nCome back tomorrow for another round.')
 					.catch(async () => {
 						const channel = await client.channels.fetch('833803740162949191');
@@ -109,6 +118,7 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 			}
 		}
 
+		//Remove as many players as needed if there weren't enough players inactive
 		if (knockedOutPlayers < knockoutNumber) {
 			for (let i = 0; i < players.length && knockedOutPlayers < knockoutNumber; i++) {
 				users[i].send('You were knocked out by score. Thank you for playing and come back tomorrow for another round!')
@@ -128,10 +138,12 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 			}
 		}
 
+		//Stop round if no one is left
 		if (players.length === 0) {
 			return;
 		}
 
+		//Inform the rest of the players about the knockout for this round
 		for (let i = 0; i < users.length; i++) {
 			users[i].send(`Knocked out players this round:\n${knockedOutPlayerNames}`)
 				.catch(async () => {
@@ -140,6 +152,7 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 				});
 		}
 
+		//Message the winner if only one person is left
 		if (players.length === 1) {
 			return users[0].send('All other players have been knocked out of todays competition.\nGG, thank you for playing and come back tomorrow for another round.')
 				.catch(async () => {
@@ -148,6 +161,7 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 				});
 		}
 
+		//Start the next round
 		knockoutMap(client, mappool, lobbyNumber, players, users, mapIndex + 1);
 	}, parseInt(mappool[mapIndex].length.total) * 1000 + 1000 * 60);
 }
@@ -190,6 +204,9 @@ async function getKnockoutScores(map, players, doubleTime) {
 					scores[0].score = parseInt(scores[0].score) * 2;
 				}
 				if (doubleTime && !mods.includes('DT')) {
+					scores[0].score = '-1';
+				}
+				if (scores[0].beatmapId !== map.id) {
 					scores[0].score = '-1';
 				}
 				return scores[0];

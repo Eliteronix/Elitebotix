@@ -4,18 +4,20 @@ const { getMods } = require('../utils.js');
 
 module.exports = {
 	qualifier: async function (client, mappool, players) {
+		//Return if there aren't any players
 		if (players.length === 0) {
 			return;
 		}
 
 		let users = [];
 
+		//Grab all the discord users
 		for (let i = 0; i < players.length; i++) {
 			const user = await client.users.fetch(players[i].userId);
 			users.push(user);
 		}
 
-		// // Catch the case of only one player playing Sadge
+		// Catch the case of only one player playing Sadge
 		if (players.length === 1) {
 			// Send message to user
 			return users[0].send('There aren\'t any other players registered for your bracket at the moment.\nMaybe try asking your friends and there will be another competition tomorrow.')
@@ -39,8 +41,10 @@ module.exports = {
 			//Grab qualifier results of all players
 			let results = await getQualifierResults(mappool[0], players);
 
+			//Sort results
 			quicksort(results);
 
+			//Sort players and users by the results order
 			const playersUsers = sortPlayersByResults(results, players, users);
 
 			players = playersUsers[0];
@@ -48,7 +52,7 @@ module.exports = {
 
 			//Get rid of people without scores
 			for (let i = 0; i < results.length; i++) {
-				if (results[i] < 0) {
+				if (results[i].score < 0) {
 					users[i].send('You failed to submit a score for todays qualifier map and have been removed from todays competition.\nCome back tomorrow for another round.')
 						.catch(async () => {
 							const channel = await client.channels.fetch('833803740162949191');
@@ -62,6 +66,7 @@ module.exports = {
 				}
 			}
 
+			//Return if there aren't any players
 			if (players.length === 0) {
 				return;
 			}
