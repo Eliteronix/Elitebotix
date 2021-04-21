@@ -44,25 +44,35 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 	}
 }
 
-async function knockoutMap(client, mappool, lobbyNumber, players, users, mapNumber) {
-	//Map [1] 16 -> 14
-	//Map [2] 14 -> 12
-	//Map [3] 12 -> 10
-	//Map [4] 10 -> 8 --DT
-	//Map [5] 8 -> 6
-	//Map [6] 6 -> 5
-	//Map [7] 5 -> 4
-	//Map [8] 4 -> 3 --DT
-	//Map [9] 3 -> 2
-	//Map [10] 2 -> 1
-	let knockoutNumber = 2;
-	if (players.length < 16) {
+async function knockoutMap(client, mappool, lobbyNumber, players, users, mapIndex) {
+	let expectedPlayers = [];
+	expectedPlayers.push(16); //Map [0] Qualifiers -> 16
+	expectedPlayers.push(14); //Map [1] 16 -> 14
+	expectedPlayers.push(12); //Map [2] 14 -> 12
+	expectedPlayers.push(10); //Map [3] 12 -> 10
+	expectedPlayers.push(8); //Map [4] 10 -> 8 --DT
+	expectedPlayers.push(6); //Map [5] 8 -> 6
+	expectedPlayers.push(5); //Map [6] 6 -> 5
+	expectedPlayers.push(4); //Map [7] 5 -> 4
+	expectedPlayers.push(3); //Map [8] 4 -> 3 --DT
+	expectedPlayers.push(2); //Map [9] 3 -> 2
+	expectedPlayers.push(1); //Map [10] 2 -> 1
+
+	let knockoutNumber = expectedPlayers[mapIndex] - expectedPlayers[mapIndex - 1];
+	if (players.length < expectedPlayers[mapIndex - 1]) {
 		knockoutNumber = 1;
 	}
-	sendMapMessages(client, mappool[mapNumber], 1, knockoutNumber, users, false);
+
+	let doubleTimeMap = false;
+
+	if (mapIndex === 4 || mapIndex === 8) {
+		doubleTimeMap = true;
+	}
+
+	sendMapMessages(client, mappool[mapIndex], mapIndex, knockoutNumber, users, doubleTimeMap);
 	//wait map + 60 seconds
 	setTimeout(async function () {
-		let results = await getKnockoutScores(mappool[mapNumber], players, false);
+		let results = await getKnockoutScores(mappool[mapIndex], players, doubleTimeMap);
 
 		quicksort(results);
 
@@ -138,11 +148,11 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapNumb
 				});
 		}
 
-		knockoutMap(client, mappool, lobbyNumber, players, users, mapNumber + 1);
-	}, parseInt(mappool[mapNumber].length.total) * 1000 + 1000 * 60);
+		knockoutMap(client, mappool, lobbyNumber, players, users, mapIndex + 1);
+	}, parseInt(mappool[mapIndex].length.total) * 1000 + 1000 * 60);
 }
 
-async function sendMapMessages(client, map, mapNumber, knockoutNumber, users, doubleTime) {
+async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, doubleTime) {
 	for (let i = 0; i < users.length; i++) {
 		let data = [];
 		let DTMap = '';
@@ -150,7 +160,7 @@ async function sendMapMessages(client, map, mapNumber, knockoutNumber, users, do
 			DTMap = '+DoubleTime';
 		}
 		data.push(`**The map is FreeMod${DTMap} - Scores with \`NF\` will be doubled - Don't use \`ScoreV2\`, \`Relax\`, \`Autopilot\` or \`Auto\`**`);
-		data.push(`\n${mapNumber}. knockout map (${knockoutNumber} players will be knocked out):`);
+		data.push(`\n${mapIndex}. knockout map (${knockoutNumber} players will be knocked out):`);
 		data.push(`${map.artist} - ${map.title} [${map.version}] | Mapper: ${map.creator}`);
 		data.push(`${Math.round(map.difficulty.rating * 100) / 100}* | ${Math.floor(map.length.total / 60)}:${(map.length.total % 60).toString().padStart(2, '0')} | ${map.bpm} BPM | CS ${map.difficulty.size} | HP ${map.difficulty.drain} | OD ${map.difficulty.overall} | AR ${map.difficulty.approach}`);
 		data.push(`Website: https://osu.ppy.sh/b/${map.id} | osu! direct: <osu://dl/${map.beatmapSetId}>`);
