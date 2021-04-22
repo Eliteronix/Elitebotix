@@ -36,12 +36,11 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 		}
 	}
 
+	let data = [];
+	data.push(`You are in lobby #${lobbyNumber}`);
+	data.push('Your lobby consists of the following players:');
+	data.push(playerList);
 	for (let i = 0; i < users.length; i++) {
-		let data = [];
-		data.push(`You are in lobby #${lobbyNumber}`);
-		data.push('Your lobby consists of the following players:');
-		data.push(playerList);
-
 		await users[i].send(data, { split: true })
 			.catch(async () => {
 				const channel = await client.channels.fetch('833803740162949191');
@@ -169,21 +168,22 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 
 		//Start the next round
 		knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, mapIndex + 1);
-	}, parseInt(mappool[mapIndex].length.total) * 1000 + 1000 * 90);
+	}, parseInt(mappool[mapIndex].length.total) * 1000 + 1000 * 150);
 }
 
 async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, doubleTime) {
+	let data = [];
+	let DTMap = '';
+	if (doubleTime) {
+		DTMap = '+DoubleTime';
+	}
+	data.push(`\n${mapIndex}. knockout map (${knockoutNumber} players will be knocked out):`);
+	data.push(`**You have ${Math.floor(map.length.total / 60) + 2}:${(map.length.total % 60).toString().padStart(2, '0')} minutes to play the map. Last submitted score will count (fails included).**`);
+	data.push(`**The map is FreeMod${DTMap} - Scores with \`NF\` will be doubled - Don't use \`ScoreV2\`, \`Relax\`, \`Autopilot\` or \`Auto\`**`);
+	data.push(`${map.artist} - ${map.title} [${map.version}] | Mapper: ${map.creator}`);
+	data.push(`${Math.round(map.difficulty.rating * 100) / 100}* | ${Math.floor(map.length.total / 60)}:${(map.length.total % 60).toString().padStart(2, '0')} | ${map.bpm} BPM | CS ${map.difficulty.size} | HP ${map.difficulty.drain} | OD ${map.difficulty.overall} | AR ${map.difficulty.approach}`);
+	data.push(`Website: https://osu.ppy.sh/b/${map.id} | osu! direct: <osu://dl/${map.beatmapSetId}>`);
 	for (let i = 0; i < users.length; i++) {
-		let data = [];
-		let DTMap = '';
-		if (doubleTime) {
-			DTMap = '+DoubleTime';
-		}
-		data.push(`**The map is FreeMod${DTMap} - Scores with \`NF\` will be doubled - Don't use \`ScoreV2\`, \`Relax\`, \`Autopilot\` or \`Auto\`**`);
-		data.push(`\n${mapIndex}. knockout map (${knockoutNumber} players will be knocked out):`);
-		data.push(`${map.artist} - ${map.title} [${map.version}] | Mapper: ${map.creator}`);
-		data.push(`${Math.round(map.difficulty.rating * 100) / 100}* | ${Math.floor(map.length.total / 60)}:${(map.length.total % 60).toString().padStart(2, '0')} | ${map.bpm} BPM | CS ${map.difficulty.size} | HP ${map.difficulty.drain} | OD ${map.difficulty.overall} | AR ${map.difficulty.approach}`);
-		data.push(`Website: https://osu.ppy.sh/b/${map.id} | osu! direct: <osu://dl/${map.beatmapSetId}>`);
 		await users[i].send(data, { split: true })
 			.catch(async () => {
 				const channel = await client.channels.fetch('833803740162949191');

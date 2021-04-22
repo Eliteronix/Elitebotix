@@ -5,7 +5,7 @@ const { setMapsForBracket } = require('./setMapsForBracket');
 const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
-	getMOTDMapsOnTime: async function (client) {
+	initializeMOTD: async function (client) {
 		//Start everything in that minute
 		const today = new Date();
 		// eslint-disable-next-line no-undef
