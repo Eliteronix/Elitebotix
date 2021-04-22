@@ -1,5 +1,6 @@
 const osu = require('node-osu');
 const { getMods, humanReadable } = require('../utils.js');
+const { assignKnockoutPoints } = require('./givePointsToPlayers.js');
 
 module.exports = {
 	knockoutLobby: async function (client, mappool, lobbyNumber, players, users) {
@@ -9,7 +10,7 @@ module.exports = {
 
 		//Case of just one player
 		if (players.length === 1) {
-			// give points to player
+			assignKnockoutPoints(players[0], players, 1, 10);
 			return users[0].send('You will win your lobby by default.\nCome back tomorrow for another competition!')
 				.catch(async () => {
 					const channel = await client.channels.fetch('833803740162949191');
@@ -17,8 +18,10 @@ module.exports = {
 				});
 		}
 
+		let startingPlayers = players;
+
 		//Start the first knockout map
-		knockoutMap(client, mappool, lobbyNumber, players, users, 1);
+		knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, 1);
 	}
 };
 
@@ -33,12 +36,11 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 		}
 	}
 
+	let data = [];
+	data.push(`You are in lobby #${lobbyNumber}`);
+	data.push('Your lobby consists of the following players:');
+	data.push(playerList);
 	for (let i = 0; i < users.length; i++) {
-		let data = [];
-		data.push(`You are in lobby #${lobbyNumber}`);
-		data.push('Your lobby consists of the following players:');
-		data.push(playerList);
-
 		await users[i].send(data, { split: true })
 			.catch(async () => {
 				const channel = await client.channels.fetch('833803740162949191');
@@ -47,7 +49,7 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 	}
 }
 
-async function knockoutMap(client, mappool, lobbyNumber, players, users, mapIndex) {
+async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, mapIndex) {
 	//Set array for how many players should get through maximum
 	let expectedPlayers = [];
 	expectedPlayers.push(16); //Map [0] Qualifiers -> 16
@@ -99,6 +101,7 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 		//Remove players by inactivity
 		for (let i = 0; i < results.length; i++) {
 			if (results[i].score < 0) {
+				assignKnockoutPoints(players[i], startingPlayers, players.length, mapIndex);
 				users[i].send('You failed to submit a score for the last knockout map and have been removed from todays competition.\nCome back tomorrow for another round.')
 					.catch(async () => {
 						const channel = await client.channels.fetch('833803740162949191');
@@ -121,6 +124,7 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 		//Remove as many players as needed if there weren't enough players inactive
 		if (knockedOutPlayers < knockoutNumber) {
 			for (let i = 0; i < players.length && knockedOutPlayers < knockoutNumber; i++) {
+				assignKnockoutPoints(players[i], startingPlayers, players.length, mapIndex);
 				users[i].send('You were knocked out by score. Thank you for playing and come back tomorrow for another round!')
 					.catch(async () => {
 						const channel = await client.channels.fetch('833803740162949191');
@@ -154,6 +158,7 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 
 		//Message the winner if only one person is left
 		if (players.length === 1) {
+			assignKnockoutPoints(players[0], startingPlayers, players.length, mapIndex);
 			return users[0].send('All other players have been knocked out of todays competition.\nGG, thank you for playing and come back tomorrow for another round.')
 				.catch(async () => {
 					const channel = await client.channels.fetch('833803740162949191');
@@ -162,22 +167,23 @@ async function knockoutMap(client, mappool, lobbyNumber, players, users, mapInde
 		}
 
 		//Start the next round
-		knockoutMap(client, mappool, lobbyNumber, players, users, mapIndex + 1);
-	}, parseInt(mappool[mapIndex].length.total) * 1000 + 1000 * 90);
+		knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, mapIndex + 1);
+	}, parseInt(mappool[mapIndex].length.total) * 1000 + 1000 * 150);
 }
 
 async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, doubleTime) {
+	let data = [];
+	let DTMap = '';
+	if (doubleTime) {
+		DTMap = '+DoubleTime';
+	}
+	data.push(`\n${mapIndex}. knockout map (${knockoutNumber} players will be knocked out):`);
+	data.push(`**You have ${Math.floor(map.length.total / 60) + 2}:${(map.length.total % 60).toString().padStart(2, '0')} minutes to play the map. Last submitted score will count (fails included).**`);
+	data.push(`**The map is FreeMod${DTMap} - Scores with \`NF\` will be doubled - Don't use \`ScoreV2\`, \`Relax\`, \`Autopilot\` or \`Auto\`**`);
+	data.push(`${map.artist} - ${map.title} [${map.version}] | Mapper: ${map.creator}`);
+	data.push(`${Math.round(map.difficulty.rating * 100) / 100}* | ${Math.floor(map.length.total / 60)}:${(map.length.total % 60).toString().padStart(2, '0')} | ${map.bpm} BPM | CS ${map.difficulty.size} | HP ${map.difficulty.drain} | OD ${map.difficulty.overall} | AR ${map.difficulty.approach}`);
+	data.push(`Website: https://osu.ppy.sh/b/${map.id} | osu! direct: <osu://dl/${map.beatmapSetId}>`);
 	for (let i = 0; i < users.length; i++) {
-		let data = [];
-		let DTMap = '';
-		if (doubleTime) {
-			DTMap = '+DoubleTime';
-		}
-		data.push(`**The map is FreeMod${DTMap} - Scores with \`NF\` will be doubled - Don't use \`ScoreV2\`, \`Relax\`, \`Autopilot\` or \`Auto\`**`);
-		data.push(`\n${mapIndex}. knockout map (${knockoutNumber} players will be knocked out):`);
-		data.push(`${map.artist} - ${map.title} [${map.version}] | Mapper: ${map.creator}`);
-		data.push(`${Math.round(map.difficulty.rating * 100) / 100}* | ${Math.floor(map.length.total / 60)}:${(map.length.total % 60).toString().padStart(2, '0')} | ${map.bpm} BPM | CS ${map.difficulty.size} | HP ${map.difficulty.drain} | OD ${map.difficulty.overall} | AR ${map.difficulty.approach}`);
-		data.push(`Website: https://osu.ppy.sh/b/${map.id} | osu! direct: <osu://dl/${map.beatmapSetId}>`);
 		await users[i].send(data, { split: true })
 			.catch(async () => {
 				const channel = await client.channels.fetch('833803740162949191');

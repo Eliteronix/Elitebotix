@@ -80,7 +80,7 @@ module.exports = {
 			if (i === 0) {
 				gameLength = gameLength + 600;
 			} else {
-				gameLength = gameLength + 90 + parseInt(mappoolInOrder[i].length.total);
+				gameLength = gameLength + 150 + parseInt(mappoolInOrder[i].length.total);
 			}
 		}
 
@@ -111,7 +111,7 @@ module.exports = {
 
 		//Send official message into the correct channel
 		const mapsOfTheDayChannel = await client.channels.fetch(channelID);
-		mapsOfTheDayChannel.send(`<@&${roleId}> The new mappool is out!\nYou have 10 minutes to get your best possible score on the Qualifier map!`);
+		mapsOfTheDayChannel.send(`<@&${roleId}> The new mappool is out!\nThe bot will send you a DM in a moment. Please follow the instructions given.`);
 		mapsOfTheDayChannel.send(mappoolEmbed);
 
 		//Start qualifier process

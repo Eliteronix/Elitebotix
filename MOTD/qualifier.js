@@ -1,5 +1,6 @@
 const osu = require('node-osu');
 const { knockoutLobby } = require('./knockoutLobby.js');
+const { assignQualifierPoints } = require('./givePointsToPlayers.js');
 const { getMods } = require('../utils.js');
 
 module.exports = {
@@ -70,6 +71,9 @@ module.exports = {
 			if (players.length === 0) {
 				return;
 			}
+
+			//Assign all points to the players
+			assignQualifierPoints(players);
 
 			//Divide sorted players into knockout lobbies
 			divideIntoGroups(client, mappool, 1, players, users);

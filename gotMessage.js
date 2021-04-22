@@ -76,6 +76,7 @@ module.exports = async function (msg) {
 			require('./models/DBServerUserActivity')(sequelize, Sequelize.DataTypes);
 			require('./models/DBProcessQueue')(sequelize, Sequelize.DataTypes);
 			require('./models/DBActivityRoles')(sequelize, Sequelize.DataTypes);
+			require('./models/DBMOTDPoints')(sequelize, Sequelize.DataTypes);
 
 			await sequelize.sync({ alter: true })
 				.then(async () => {

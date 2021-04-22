@@ -34,7 +34,7 @@ const guildCreate = require('./guildCreate');
 const { executeNextProcessQueueTask, refreshOsuRank } = require('./utils');
 
 //Get MOTD/getMapsOnTime
-const { getMOTDMapsOnTime } = require('./MOTD/getMapsOnTime');
+const { initializeMOTD } = require('./MOTD/initializeMOTD');
 
 
 //login with the Discord client using the Token from the .env file
@@ -77,6 +77,6 @@ client.on('guildCreate', guildCreate);
 
 client.setInterval(() => executeNextProcessQueueTask(client), 1000);
 
-client.setInterval(() => getMOTDMapsOnTime(client), 60000);
+client.setInterval(() => initializeMOTD(client), 60000);
 
 client.setInterval(() => refreshOsuRank(), 600000);
