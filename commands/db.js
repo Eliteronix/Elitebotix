@@ -1,4 +1,4 @@
-const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles } = require('../dbObjects');
+const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints } = require('../dbObjects');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
 
@@ -190,9 +190,32 @@ module.exports = {
 					updatedAt: dbList[i].updatedAt,
 				});
 			}
+		} else if (args[0] === 'motdpoints') {
+			const dbList = await DBMOTDPoints.findAll();
+			dbTableName = 'DBMOTDPoints';
+
+			for (let i = 0; i < dbList.length; i++) {
+				data.push({
+					id: dbList[i].id,
+					userId: dbList[i].userId,
+					osuUserId: dbList[i].osuUserId,
+					osuRank: dbList[i].osuRank,
+					totalPoints: dbList[i].totalPoints,
+					qualifierPoints: dbList[i].qualifierPoints,
+					qualifierRank: dbList[i].qualifierRank,
+					qualifierPlayers: dbList[i].qualifierPlayers,
+					knockoutPoints: dbList[i].knockoutPoints,
+					knockoutRank: dbList[i].knockoutRank,
+					knockoutPlayers: dbList[i].knockoutPlayers,
+					matchDate: dbList[i].matchDate,
+					paranoid: dbList[i].paranoid,
+					createdAt: dbList[i].createdAt,
+					updatedAt: dbList[i].updatedAt,
+				});
+			}
 		} else {
 			return msg.reply('no corresponding table found');
-		}		
+		}
 
 		const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
 		let csv = new ObjectsToCsv(data);
