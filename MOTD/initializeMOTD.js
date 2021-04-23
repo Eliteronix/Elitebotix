@@ -2,6 +2,7 @@ const osu = require('node-osu');
 const { calculateStarRating } = require('osu-sr-calculator');
 const { assignPlayerRoles } = require('./assignPlayerRoles');
 const { setMapsForBracket } = require('./setMapsForBracket');
+const { createLeaderboard } = require('./createLeaderboard');
 const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
@@ -155,6 +156,37 @@ module.exports = {
 				.catch(e => {
 					console.log(e);
 				});
+			// eslint-disable-next-line no-undef
+		} else if (process.env.SERVER === 'QA' && today.getUTCHours() === 19 && today.getUTCMinutes() === 30) {
+			//Maybe create all leaderboards daily anyway?
+			//Get Dates
+			let weekAgo = today;
+			weekAgo.setUTCDate(today.getUTCDate() - 7);
+			let yesterday = today;
+			yesterday.setUTCDate(today.getUTCDate() - 1);
+			let tomorrow = today;
+			tomorrow.setUTCDate(today.getUTCDate() + 1);
+
+			//Daily Leaderboards
+			createLeaderboard(client, 1, 9999, yesterday, 1, channelID);
+			createLeaderboard(client, 10000, 49999, yesterday, 1, channelID);
+			createLeaderboard(client, 50000, 99999, yesterday, 1, channelID);
+			createLeaderboard(client, 100000, 9999999, yesterday, 1, channelID);
+
+			if (today.getUTCDay() === 7) { //Sunday
+				//Weekly Leaderboard
+				createLeaderboard(client, 1, 9999, weekAgo, 1, channelID);
+				createLeaderboard(client, 10000, 49999, weekAgo, 1, channelID);
+				createLeaderboard(client, 50000, 99999, weekAgo, 1, channelID);
+				createLeaderboard(client, 100000, 9999999, weekAgo, 1, channelID);
+			}
+			if (tomorrow.getUTCDate() === 1) {
+				console.log('Monthly Leaderboard');
+			}
+			if (tomorrow.getUTCDate() === 1 && (today.getUTCMonth() === 3 || today.getUTCMonth() === 6 || today.getUTCMonth() === 9 || today.getUTCMonth() === 12)) {
+				console.log('Quarter Yearly Leaderboard');
+			}
+			console.log('All Time Leaderboard');
 		}
 	}
 };
