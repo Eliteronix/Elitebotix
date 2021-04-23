@@ -1,13 +1,17 @@
 const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
-	createLeaderboard: async function (client, upperRank, lowerRank, since, topAmount, channelID) {
+	createLeaderboard: async function (client, since, topAmount, channelID) {
 		const allBrackets = await getPlayers(client);
 
 		for (let i = 0; i < allBrackets.length; i++) {
 			const bracketPlayers = allBrackets[i];
-			
 
+			let bracketPlayerResults = [];
+
+			for (let j = 0; j < bracketPlayers.length; j++) {
+				
+			}
 		}
 	}
 };
