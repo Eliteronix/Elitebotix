@@ -51,7 +51,7 @@ module.exports = {
 				userId: player.userId,
 				osuUserId: player.osuUserId,
 				osuRank: player.osuRank,
-				totalPoints: allPlayers.length - rank + 1,
+				totalPoints: (allPlayers.length - rank + 1) * 2,
 				qualifierPoints: allPlayers.length - rank + 1,
 				qualifierRank: rank,
 				qualifierPlayers: allPlayers.length,

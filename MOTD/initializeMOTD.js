@@ -2,6 +2,7 @@ const osu = require('node-osu');
 const { calculateStarRating } = require('osu-sr-calculator');
 const { assignPlayerRoles } = require('./assignPlayerRoles');
 const { setMapsForBracket } = require('./setMapsForBracket');
+const { createLeaderboard } = require('./createLeaderboard');
 const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
@@ -155,6 +156,39 @@ module.exports = {
 				.catch(e => {
 					console.log(e);
 				});
+			// eslint-disable-next-line no-undef
+		} else if (process.env.SERVER === 'QA' && today.getUTCHours() === 19 && today.getUTCMinutes() === 30) {
+			//Maybe create all leaderboards daily anyway?
+			//Get Dates
+			let todayMorning = today;
+			todayMorning.setHours(0);
+
+			//Daily Leaderboards
+			createLeaderboard(client, todayMorning, 1, 'Daily', '835187330087911505');
+
+			let mondayMorning = todayMorning;
+			mondayMorning.setUTCDate(mondayMorning.getUTCDate() - (mondayMorning.getUTCDay() - 1));
+
+			//Weekly Leaderboard
+			createLeaderboard(client, mondayMorning, 4, 'Weekly', '835187571625164800');
+
+			let monthMorning = todayMorning;
+			monthMorning.setUTCDate(1);
+
+			//Monthly Leaderboard
+			createLeaderboard(client, monthMorning, 20, 'Monthly', '835187660183699487');
+
+			let quarterMorning = monthMorning;
+			quarterMorning.setUTCMonth(monthMorning.getUTCMonth() - (monthMorning.getUTCMonth() % 3));
+
+			//Quarter Yearly Leaderboard
+			createLeaderboard(client, quarterMorning, 60, 'Quarter Yearly', '835187745210499073');
+
+			let beginningOfTime = monthMorning;
+			beginningOfTime.setUTCFullYear(2000);
+
+			//All Time Leaderboard
+			createLeaderboard(client, beginningOfTime, 1000000, 'All Time', '835187880229339187');
 		}
 	}
 };
