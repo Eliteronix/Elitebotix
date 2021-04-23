@@ -105,7 +105,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 				users[i].send('You failed to submit a score for the last knockout map and have been removed from todays competition.\nCome back tomorrow for another round.')
 					.catch(async () => {
 						const channel = await client.channels.fetch('833803740162949191');
-						channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+						channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 					});
 				if (knockedOutPlayerNames === '') {
 					knockedOutPlayerNames = `\`${players[i].osuName}\``;
@@ -116,6 +116,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 				players.splice(i, 1);
 				users.splice(i, 1);
 				knockedOutPlayers++;
+				i--;
 			} else {
 				i = results.length;
 			}
@@ -128,7 +129,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 				users[i].send('You were knocked out by score. Thank you for playing and come back tomorrow for another round!')
 					.catch(async () => {
 						const channel = await client.channels.fetch('833803740162949191');
-						channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+						channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 					});
 				if (knockedOutPlayerNames === '') {
 					knockedOutPlayerNames = `\`${players[i].osuName}\``;
@@ -139,6 +140,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 				players.splice(i, 1);
 				users.splice(i, 1);
 				knockedOutPlayers++;
+				i--;
 			}
 		}
 
@@ -159,7 +161,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 		//Message the winner if only one person is left
 		if (players.length === 1) {
 			assignKnockoutPoints(players[0], startingPlayers, players.length, mapIndex);
-			return users[0].send('All other players have been knocked out of todays competition.\nGG, thank you for playing and come back tomorrow for another round.')
+			return users[0].send('All other players have been knocked out of todays competition which means **you have won!**\nCongratulations, thank you for playing and come back tomorrow for another round.')
 				.catch(async () => {
 					const channel = await client.channels.fetch('833803740162949191');
 					channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);

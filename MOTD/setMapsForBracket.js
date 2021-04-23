@@ -76,11 +76,13 @@ module.exports = {
 
 		//Calculate match times
 		for (let i = 0; i < mappoolInOrder.length; i++) {
-			mappoolLength = mappoolLength + parseInt(mappoolInOrder[i].length.total);
-			if (i === 0) {
-				gameLength = gameLength + 600;
-			} else {
-				gameLength = gameLength + 150 + parseInt(mappoolInOrder[i].length.total);
+			if (!(i === 0 && players.length < 17)) {
+				mappoolLength = mappoolLength + parseInt(mappoolInOrder[i].length.total);
+				if (i === 0) {
+					gameLength = gameLength + 600;
+				} else {
+					gameLength = gameLength + 150 + parseInt(mappoolInOrder[i].length.total);
+				}
 			}
 		}
 
@@ -96,17 +98,19 @@ module.exports = {
 			.setFooter(`Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`);
 
 		for (let i = 0; i < mappoolInOrder.length; i++) {
-			let mapPrefix = '';
-			if (i === 0) {
-				mapPrefix = 'Qualifier:';
-			} else if (i === 4 || i === 8) {
-				mapPrefix = `Knockout #${i} (DT):`;
-			} else {
-				mapPrefix = `Knockout #${i}:`;
+			if (!(i === 0 && players.length < 17)) {
+				let mapPrefix = '';
+				if (i === 0) {
+					mapPrefix = 'Qualifier:';
+				} else if (i === 4 || i === 8) {
+					mapPrefix = `Knockout #${i} (DT):`;
+				} else {
+					mapPrefix = `Knockout #${i}:`;
+				}
+				const embedName = `${mapPrefix} ${mappoolInOrder[i].artist} - ${mappoolInOrder[i].title} | [${mappoolInOrder[i].version}]`;
+				const embedValue = `${Math.round(mappoolInOrder[i].difficulty.rating * 100) / 100}* | ${Math.floor(mappoolInOrder[i].length.total / 60)}:${(mappoolInOrder[i].length.total % 60).toString().padStart(2, '0')} | ${mappoolInOrder[i].bpm} BPM | CS ${mappoolInOrder[i].difficulty.size} | HP ${mappoolInOrder[i].difficulty.drain} | OD ${mappoolInOrder[i].difficulty.overall} | AR ${mappoolInOrder[i].difficulty.approach}\n[Website](<https://osu.ppy.sh/b/${mappoolInOrder[i].id}>) | osu! direct: <osu://dl/${mappoolInOrder[i].beatmapSetId}>`;
+				mappoolEmbed.addField(embedName, embedValue);
 			}
-			const embedName = `${mapPrefix} ${mappoolInOrder[i].artist} - ${mappoolInOrder[i].title} | [${mappoolInOrder[i].version}]`;
-			const embedValue = `${Math.round(mappoolInOrder[i].difficulty.rating * 100) / 100}* | ${Math.floor(mappoolInOrder[i].length.total / 60)}:${(mappoolInOrder[i].length.total % 60).toString().padStart(2, '0')} | ${mappoolInOrder[i].bpm} BPM | CS ${mappoolInOrder[i].difficulty.size} | HP ${mappoolInOrder[i].difficulty.drain} | OD ${mappoolInOrder[i].difficulty.overall} | AR ${mappoolInOrder[i].difficulty.approach}\n[Website](<https://osu.ppy.sh/b/${mappoolInOrder[i].id}>) | osu! direct: <osu://dl/${mappoolInOrder[i].beatmapSetId}>`;
-			mappoolEmbed.addField(embedName, embedValue);
 		}
 
 		//Send official message into the correct channel
