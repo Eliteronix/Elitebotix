@@ -1,8 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
-const Discord = require('discord.js');
 const osu = require('node-osu');
-const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable } = require('../utils');
+const { getGuildPrefix, humanReadable, createLeaderboard } = require('../utils');
 
 module.exports = {
 	name: 'osu-leaderboard',
@@ -71,29 +69,32 @@ module.exports = {
 
 				quicksort(osuAccounts);
 
-				const canvasWidth = 1000;
-				const canvasHeight = 125 + 20 + osuAccounts.length * 90;
+				let leaderboardData = [];
 
-				//Create Canvas
-				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+				for (let i = 0; i < osuAccounts.length; i++) {
+					const member = await msg.guild.members.fetch(osuAccounts[i].userId);
 
-				//Get context and load the image
-				const ctx = canvas.getContext('2d');
-				const background = await Canvas.loadImage('./other/osu-background.png');
-				for (let i = 0; i < canvas.height / 500; i++) {
-					ctx.drawImage(background, 0, i * 500, 1000, 500);
+					let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
+
+					if (member.nickname) {
+						userDisplayName = `${member.nickname} / ${userDisplayName}`;
+					}
+
+					let verified = '⨯';
+
+					if (osuAccounts[i].osuVerified) {
+						verified = '✔';
+					}
+
+					let dataset = {
+						name: userDisplayName,
+						value: `#${humanReadable(osuAccounts[i].osuRank)} | ${humanReadable(Math.floor(osuAccounts[i].osuPP).toString())}pp | ${verified} ${osuAccounts[i].osuName}`,
+					};
+
+					leaderboardData.push(dataset);
 				}
 
-				let elements = [canvas, ctx, osuAccounts];
-
-				elements = await drawTitle(elements, msg);
-
-				elements = await drawAccounts(elements, msg);
-
-				await drawFooter(elements);
-
-				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-leaderboard-${msg.guild.name}.png`);
+				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${msg.guild.name}'s osu! leaderboard`, `osu-leaderboard-${msg.guild.name}.png`);
 
 				const guildPrefix = await getGuildPrefix(msg);
 
@@ -131,82 +132,4 @@ function quicksort(list, start = 0, end = undefined) {
 		quicksort(list, p + 1, end);
 	}
 	return list;
-}
-
-async function drawTitle(input, msg) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let osuAccounts = input[2];
-
-	// Write the title of the map
-	ctx.font = 'bold 35px sans-serif';
-	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'center';
-	ctx.fillText(`${msg.guild.name}'s osu! leaderboard`, canvas.width / 2, 50);
-
-	const output = [canvas, ctx, osuAccounts];
-	return output;
-}
-
-async function drawAccounts(input, msg) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let osuAccounts = input[2];
-
-	// Write the players
-	ctx.textAlign = 'left';
-
-	for (let i = 0; i < osuAccounts.length; i++) {
-		const member = await msg.guild.members.fetch(osuAccounts[i].userId);
-
-		let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
-
-		if (member.nickname) {
-			userDisplayName = `${member.nickname} / ${userDisplayName}`;
-		}
-
-		let verified = '⨯';
-
-		if (osuAccounts[i].osuVerified) {
-			verified = '✔';
-		}
-
-		if (i === 0) {
-			ctx.fillStyle = '#E2B007';
-		} else if (i === 1) {
-			ctx.fillStyle = '#C4CACE';
-		} else if (i === 2) {
-			ctx.fillStyle = '#CC8E34';
-		} else {
-			ctx.fillStyle = '#ffffff';
-		}
-
-		ctx.font = 'bold 25px sans-serif';
-		ctx.fillText(`${i + 1}.`, canvas.width / 1000 * 125, 125 + i * 90);
-		ctx.fillText(userDisplayName, canvas.width / 1000 * 200, 125 + i * 90);
-		ctx.font = '25px sans-serif';
-		ctx.fillText(`#${humanReadable(osuAccounts[i].osuRank)}`, canvas.width / 1000 * 200, 160 + i * 90);
-		ctx.fillText(`${humanReadable(Math.floor(osuAccounts[i].osuPP).toString())}pp`, canvas.width / 1000 * 400, 160 + i * 90);
-		ctx.fillText(`${verified} ${osuAccounts[i].osuName}`, canvas.width / 1000 * 550, 160 + i * 90);
-	}
-
-	const output = [canvas, ctx, osuAccounts];
-	return output;
-}
-
-async function drawFooter(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let osuAccounts = input[2];
-
-	let today = new Date().toLocaleDateString();
-
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillStyle = '#ffffff';
-
-	ctx.textAlign = 'right';
-	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);
-
-	const output = [canvas, ctx, osuAccounts];
-	return output;
 }

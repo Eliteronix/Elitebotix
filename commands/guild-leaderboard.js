@@ -1,7 +1,5 @@
 const { DBServerUserActivity } = require('../dbObjects');
-const Discord = require('discord.js');
-const Canvas = require('canvas');
-const { humanReadable } = require('../utils');
+const { createLeaderboard, humanReadable } = require('../utils.js');
 
 module.exports = {
 	name: 'server-leaderboard',
@@ -31,39 +29,37 @@ module.exports = {
 						where: { userId: members[i].id, guildId: msg.guild.id },
 					});
 
-					if(serverUserActivity){
+					if (serverUserActivity) {
 						discordUsers.push(serverUserActivity);
 					}
 				}
 
 				quicksort(discordUsers);
 
-				const canvasWidth = 1000;
-				const canvasHeight = 125 + 20 + discordUsers.length * 90;
+				let leaderboardData = [];
 
-				//Create Canvas
-				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+				for (let i = 0; i < discordUsers.length; i++) {
+					const member = await msg.guild.members.fetch(discordUsers[i].userId);
 
-				//Get context and load the image
-				const ctx = canvas.getContext('2d');
-				const background = await Canvas.loadImage('./other/discord-background.png');
-				for (let i = 0; i < canvas.height / 1080; i++) {
-					ctx.drawImage(background, 0, i * 1080, 1920, 1080);
+					let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
+
+					if (member.nickname) {
+						userDisplayName = `${member.nickname} / ${userDisplayName}`;
+					}
+
+					let dataset = {
+						name: userDisplayName,
+						value: `${humanReadable(discordUsers[i].points)} points`,
+					};
+
+					leaderboardData.push(dataset);
 				}
 
-				let elements = [canvas, ctx, discordUsers];
-
-				elements = await drawTitle(elements, msg);
-
-				elements = await drawUsers(elements, msg);
-
-				await drawFooter(elements);
-
-				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `guild-leaderboard-${msg.guild.name}.png`);
+				const attachment = await createLeaderboard(leaderboardData, 'discord-background.png', `${msg.guild.name}'s activity leaderboard`, `guild-leaderboard-${msg.guild.name}.png`);
 
 				//Send attachment
 				await msg.channel.send('The leaderboard shows the most active users of the server.', attachment);
+
 				processingMessage.delete();
 			})
 			.catch(err => {
@@ -96,74 +92,4 @@ function quicksort(list, start = 0, end = undefined) {
 		quicksort(list, p + 1, end);
 	}
 	return list;
-}
-
-async function drawTitle(input, msg) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let discordUsers = input[2];
-
-	// Write the title of the map
-	ctx.font = 'bold 35px sans-serif';
-	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'center';
-	ctx.fillText(`${msg.guild.name}'s activity leaderboard`, canvas.width / 2, 50);
-
-	const output = [canvas, ctx, discordUsers];
-	return output;
-}
-
-async function drawUsers(input, msg) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let discordUsers = input[2];
-
-	// Write the players
-	ctx.textAlign = 'left';
-
-	for (let i = 0; i < discordUsers.length; i++) {
-		const member = await msg.guild.members.fetch(discordUsers[i].userId);
-
-		let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
-
-		if (member.nickname) {
-			userDisplayName = `${member.nickname} / ${userDisplayName}`;
-		}
-
-		if (i === 0) {
-			ctx.fillStyle = '#E2B007';
-		} else if (i === 1) {
-			ctx.fillStyle = '#C4CACE';
-		} else if (i === 2) {
-			ctx.fillStyle = '#CC8E34';
-		} else {
-			ctx.fillStyle = '#ffffff';
-		}
-
-		ctx.font = 'bold 25px sans-serif';
-		ctx.fillText(`${i + 1}.`, canvas.width / 1000 * 125, 125 + i * 90);
-		ctx.fillText(userDisplayName, canvas.width / 1000 * 200, 125 + i * 90);
-		ctx.font = '25px sans-serif';
-		ctx.fillText(`${humanReadable(discordUsers[i].points)} points`, canvas.width / 1000 * 200, 160 + i * 90);
-	}
-
-	const output = [canvas, ctx, discordUsers];
-	return output;
-}
-
-async function drawFooter(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let discordUsers = input[2];
-
-	let today = new Date().toLocaleDateString();
-
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillStyle = '#ffffff';
-
-	ctx.textAlign = 'right';
-	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);
-
-	const output = [canvas, ctx, discordUsers];
-	return output;
 }

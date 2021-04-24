@@ -1,5 +1,7 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue } = require('./dbObjects');
 const { prefix } = require('./config.json');
+const Canvas = require('canvas');
+const Discord = require('discord.js');
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -564,5 +566,109 @@ module.exports = {
 				}
 			}
 		}
+	},
+	async createLeaderboard(data, backgroundFile, title, filename) {
+		let columns = 1;
+		let canvasWidth = 900;
+		let rows = data.length;
+		if (data.length > 63) {
+			columns = 5;
+			rows = 2 + Math.floor((data.length - 3) / columns) + 1;
+		} else if (data.length > 48) {
+			columns = 4;
+			rows = 2 + Math.floor((data.length - 3) / columns) + 1;
+		} else if (data.length > 33) {
+			columns = 3;
+			rows = 2 + Math.floor((data.length - 3) / columns) + 1;
+		} else if (data.length > 15) {
+			columns = 2;
+			rows = 2 + Math.floor((data.length - 3) / columns) + 1;
+		}
+		canvasWidth = canvasWidth * columns;
+		const canvasHeight = 125 + 20 + rows * 90;
+
+		//Create Canvas
+		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+		//Get context and load the image
+		const ctx = canvas.getContext('2d');
+
+		const background = await Canvas.loadImage(`./other/${backgroundFile}`);
+
+		for (let i = 0; i < canvas.height / background.height; i++) {
+			for (let j = 0; j < canvas.width / background.width; j++) {
+				ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+			}
+		}
+
+		// Write the title of the leaderboard
+		ctx.font = 'bold 35px sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		ctx.fillText(title, canvas.width / 2, 50);
+
+		// Write the data
+		ctx.textAlign = 'center';
+
+		for (let i = 0; i < data.length; i++) {
+			let xPosition = canvas.width / 2;
+			let yPositionName = 125 + i * 90;
+			let yPositionValue = 160 + i * 90;
+			if (columns > 1) {
+				if (i === 0) {
+					xPosition = canvas.width / 2;
+				} else if (i === 1) {
+					if (columns === 2) {
+						xPosition = canvas.width / 3;
+					} else {
+						xPosition = canvas.width / 4;
+					}
+				} else if (i === 2) {
+					if (columns === 2) {
+						xPosition = (canvas.width / 3) * 2;
+					} else {
+						xPosition = (canvas.width / 4) * 3;
+					}
+					yPositionName = 125 + (Math.floor((i - 3) / columns) + 2) * 90;
+					yPositionValue = 160 + (Math.floor((i - 3) / columns) + 2) * 90;
+				} else {
+					//Create standard xPosition
+					xPosition = (canvas.width / (columns + 1)) * (((i - 3) % columns) + 1);
+					//Stretch it
+					let max = canvas.width / (columns + 1) / 2;
+					let iterator = (i - 3) % columns;
+					let standardizedIterator = iterator - (columns - 1) / 2;
+					let lengthScaled = max / (columns / 2) * standardizedIterator;
+					xPosition += lengthScaled;
+					yPositionName = 125 + (Math.floor((i - 3) / columns) + 2) * 90;
+					yPositionValue = 160 + (Math.floor((i - 3) / columns) + 2) * 90;
+				}
+			}
+			if (i === 0) {
+				ctx.fillStyle = '#E2B007';
+			} else if (i === 1) {
+				ctx.fillStyle = '#C4CACE';
+			} else if (i === 2) {
+				ctx.fillStyle = '#CC8E34';
+			} else {
+				ctx.fillStyle = '#ffffff';
+			}
+
+			ctx.font = 'bold 25px sans-serif';
+			ctx.fillText(`${i + 1}. ${data[i].name}`, xPosition, yPositionName);
+			ctx.font = '25px sans-serif';
+			ctx.fillText(data[i].value, xPosition, yPositionValue);
+		}
+
+		let today = new Date().toLocaleDateString();
+
+		ctx.font = 'bold 15px sans-serif';
+		ctx.fillStyle = '#ffffff';
+
+		ctx.textAlign = 'right';
+		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);
+
+		//Create as an attachment and return
+		return new Discord.MessageAttachment(canvas.toBuffer(), filename);
 	}
 };

@@ -1,7 +1,5 @@
 const { DBDiscordUsers, DBMOTDPoints } = require('../dbObjects');
-const Discord = require('discord.js');
-const Canvas = require('canvas');
-const { humanReadable } = require('../utils.js');
+const { createLeaderboard, humanReadable } = require('../utils.js');
 
 module.exports = {
 	createLeaderboard: async function (client, since, topAmount, title, channelID) {
@@ -72,18 +70,15 @@ module.exports = {
 
 			quicksort(bracketPlayerResults);
 
-			//Create leaderboard
-			const canvasWidth = 1000;
-			const canvasHeight = 125 + 20 + bracketPlayerResults.length * 90;
+			let leaderboardData = [];
 
-			//Create Canvas
-			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+			for (let i = 0; i < bracketPlayerResults.length; i++) {
+				let dataset = {
+					name: bracketPlayerResults[i].osuName,
+					value: `Points: ${humanReadable(bracketPlayerResults[i].totalPoints.toString())} (${humanReadable(bracketPlayerResults[i].qualifierPoints.toString())} from Qualifiers | ${humanReadable(bracketPlayerResults[i].knockoutPoints.toString())} from Knockout | ${humanReadable(bracketPlayerResults[i].playedRounds.toString())} Rounds)`,
+				};
 
-			//Get context and load the image
-			const ctx = canvas.getContext('2d');
-			const background = await Canvas.loadImage('./other/osu-background.png');
-			for (let i = 0; i < canvas.height / 500; i++) {
-				ctx.drawImage(background, 0, i * 500, 1000, 500);
+				leaderboardData.push(dataset);
 			}
 
 			let bracketName = 'Top-Bracket';
@@ -96,16 +91,7 @@ module.exports = {
 				bracketName = 'Beginner-Bracket';
 			}
 
-			let elements = [canvas, ctx, bracketPlayerResults];
-
-			elements = await drawTitle(elements, title, bracketName);
-
-			elements = await drawAccounts(elements);
-
-			await drawFooter(elements);
-
-			//Create as an attachment
-			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-MOTD-leaderboard-${bracketName}-${title}.png`);
+			const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `osu! ${title} MOTD leaderboard for ${bracketName}`, `osu-MOTD-leaderboard-${bracketName}-${title}.png`);
 
 			let content = 'Daily Update';
 
@@ -197,66 +183,4 @@ async function getPlayers(client) {
 	allPlayers.push(beginnerBracketPlayers);
 
 	return allPlayers;
-}
-
-async function drawTitle(input, title, bracketName) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let playerResults = input[2];
-
-	// Write the title of the map
-	ctx.font = 'bold 35px sans-serif';
-	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'center';
-	ctx.fillText(`osu! ${title} MOTD leaderboard for ${bracketName}`, canvas.width / 2, 50);
-
-	const output = [canvas, ctx, playerResults];
-	return output;
-}
-
-async function drawAccounts(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let playerResults = input[2];
-
-	// Write the players
-	ctx.textAlign = 'left';
-
-	for (let i = 0; i < playerResults.length; i++) {
-		if (i === 0) {
-			ctx.fillStyle = '#E2B007';
-		} else if (i === 1) {
-			ctx.fillStyle = '#C4CACE';
-		} else if (i === 2) {
-			ctx.fillStyle = '#CC8E34';
-		} else {
-			ctx.fillStyle = '#ffffff';
-		}
-
-		ctx.font = 'bold 25px sans-serif';
-		ctx.fillText(`${i + 1}.`, canvas.width / 1000 * 125, 125 + i * 90);
-		ctx.fillText(playerResults[i].osuName, canvas.width / 1000 * 200, 125 + i * 90);
-		ctx.font = '25px sans-serif';
-		ctx.fillText(`Points: ${humanReadable(playerResults[i].totalPoints.toString())} (${humanReadable(playerResults[i].qualifierPoints.toString())} from Qualifiers | ${humanReadable(playerResults[i].knockoutPoints.toString())} from Knockout | ${humanReadable(playerResults[i].playedRounds.toString())} Rounds)`, canvas.width / 1000 * 200, 160 + i * 90);
-	}
-
-	const output = [canvas, ctx, playerResults];
-	return output;
-}
-
-async function drawFooter(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let playerResults = input[2];
-
-	let today = new Date().toLocaleDateString();
-
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillStyle = '#ffffff';
-
-	ctx.textAlign = 'right';
-	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);
-
-	const output = [canvas, ctx, playerResults];
-	return output;
 }
