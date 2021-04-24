@@ -137,9 +137,9 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 
 						//Send attachment
 						if (noLinkedAccount) {
-							sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+							sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
 						} else {
-							sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/u/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+							sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmaps[0].id}>\nosu! direct: <osu://dl/${beatmaps[0].beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
 						}
 						processingMessage.delete();
 						sentMessage.react('<:COMPARE:827974793365159997>');
