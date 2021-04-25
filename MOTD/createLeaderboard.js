@@ -103,7 +103,7 @@ module.exports = {
 
 			if (title === 'Daily') {
 				content = `Leaderboard from \`${todayFormatted}\``;
-			} else if (title === 'Weekly' && today.getUTCDay() === 7) { //Sunday
+			} else if (title === 'Weekly' && today.getUTCDay() === 0) { //Sunday
 				content = `Leaderboard from \`${todayFormatted}\``;
 			} else if (title === 'Monthly' && tomorrow.getUTCDate() === 1) { //1st of the month is tomorrow
 				content = `Leaderboard from \`${todayFormatted}\``;
