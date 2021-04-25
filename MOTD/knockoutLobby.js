@@ -179,12 +179,12 @@ async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, dou
 	if (doubleTime) {
 		DTMap = '+DoubleTime';
 	}
-	data.push(`\n${mapIndex}. knockout map (${knockoutNumber} players will be knocked out):`);
+	data.push(`\n${mapIndex}. knockout map (${knockoutNumber} player(s) will be knocked out):`);
 	data.push(`**You have ${Math.floor(map.length.total / 60) + 2}:${(map.length.total % 60).toString().padStart(2, '0')} minutes to play the map. Last submitted score will count (fails included).**`);
 	data.push(`**The map is FreeMod${DTMap} - Scores with \`NF\` will be doubled - Don't use \`ScoreV2\`, \`Relax\`, \`Autopilot\` or \`Auto\`**`);
-	data.push(`${map.artist} - ${map.title} [${map.version}] | Mapper: ${map.creator}`);
+	data.push(`${map.artist} - ${map.title} **[${map.version}]** | Mapper: ${map.creator}`);
 	data.push(`${Math.round(map.difficulty.rating * 100) / 100}* | ${Math.floor(map.length.total / 60)}:${(map.length.total % 60).toString().padStart(2, '0')} | ${map.bpm} BPM | CS ${map.difficulty.size} | HP ${map.difficulty.drain} | OD ${map.difficulty.overall} | AR ${map.difficulty.approach}`);
-	data.push(`Website: https://osu.ppy.sh/b/${map.id} | osu! direct: <osu://dl/${map.beatmapSetId}>`);
+	data.push(`Website: https://osu.ppy.sh/b/${map.id} | osu! direct: <osu://dl/${map.beatmapSetId}> -> **Be sure to select the correct difficulty**`);
 	for (let i = 0; i < users.length; i++) {
 		await users[i].send(data, { split: true })
 			.catch(async () => {

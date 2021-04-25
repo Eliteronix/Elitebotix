@@ -46,6 +46,7 @@ module.exports = {
 			qualifierDataset.knockoutPoints = knockoutPoints;
 			qualifierDataset.knockoutRank = rank;
 			qualifierDataset.knockoutPlayers = allPlayers.length;
+			qualifierDataset.save();
 		} else {
 			DBMOTDPoints.create({
 				userId: player.userId,
