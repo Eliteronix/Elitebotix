@@ -17,7 +17,7 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args) {
 		//define variables
-		const categories = ['general', 'server-admin', 'osu'];
+		const categories = ['general', 'server-admin', 'misc', 'osu'];
 
 		//Developer
 		if (msg.author.id === '138273136285057025') {
