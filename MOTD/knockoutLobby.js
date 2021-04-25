@@ -102,10 +102,10 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 		for (let i = 0; i < results.length; i++) {
 			if (results[i].score < 0) {
 				assignKnockoutPoints(players[i], startingPlayers, players.length, mapIndex);
-				users[i].send('You failed to submit a score for the last knockout map and have been removed from todays competition.\nCome back tomorrow for another round.')
+				await users[i].send('You failed to submit a score for the last knockout map and have been removed from todays competition.\nCome back tomorrow for another round.')
 					.catch(async () => {
 						const channel = await client.channels.fetch('833803740162949191');
-						channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+						await channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 					});
 				if (knockedOutPlayerNames === '') {
 					knockedOutPlayerNames = `\`${players[i].osuName}\``;
@@ -126,10 +126,10 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 		if (knockedOutPlayers < knockoutNumber) {
 			for (let i = 0; i < players.length && knockedOutPlayers < knockoutNumber; i++) {
 				assignKnockoutPoints(players[i], startingPlayers, players.length, mapIndex);
-				users[i].send('You were knocked out by score. Thank you for playing and come back tomorrow for another round!')
+				await users[i].send('You were knocked out by score. Thank you for playing and come back tomorrow for another round!')
 					.catch(async () => {
 						const channel = await client.channels.fetch('833803740162949191');
-						channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+						await channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 					});
 				if (knockedOutPlayerNames === '') {
 					knockedOutPlayerNames = `\`${players[i].osuName}\``;

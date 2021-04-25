@@ -18,6 +18,7 @@ module.exports = {
 		}
 	},
 	assignKnockoutPoints: async function (player, allPlayers, rank, round) {
+		console.log('assignKnockoutPoints:', player, allPlayers.length, rank, round);
 		let today = new Date();
 		today.setUTCHours(18);
 		today.setUTCMinutes(0);
