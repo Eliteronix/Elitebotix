@@ -39,9 +39,9 @@ module.exports = {
 		} else {
 			//Get profiles by arguments
 			for (let i = 0; i < args.length; i++) {
-				if (args[i].startsWith('<@!') && args[i].endsWith('>')) {
+				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
 					const discordUser = await DBDiscordUsers.findOne({
-						where: { userId: args[i].replace('<@!', '').replace('>', '') },
+						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
 					});
 
 					if (discordUser && discordUser.osuUserId) {
@@ -52,7 +52,7 @@ module.exports = {
 					}
 				} else {
 
-					if (args.length === 1 && !(args[0].startsWith('<@!')) && !(args[0].endsWith('>'))) {
+					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
 							getTopPlays(msg, args[i], server, mode, true);
 						} else {
@@ -307,7 +307,7 @@ async function drawTopPlays(input, server, mode, msg) {
 			achievedTime = `${Math.round(timeDifference / 3600000)} hour(s) ago`;
 		} else if (timeDifference < 2678400000) { //if achieved in the last 31 days
 			achievedTime = `${Math.round(timeDifference / 86400000)} day(s) ago`;
-		} else if (timeDifference < 31536000000){ //if achieved in the last year
+		} else if (timeDifference < 31536000000) { //if achieved in the last year
 			achievedTime = `${Math.round(timeDifference / 2678400000)} month(s) ago`;
 		} else { //else achieved years ago
 			achievedTime = `${Math.round(timeDifference / 31536000000)} year(s) ago`;
