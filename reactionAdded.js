@@ -54,8 +54,8 @@ module.exports = async function (reaction, user) {
 	}
 
 	const didYouMeanRegex = /<@.+>, I could not find the command `.+`.\nDid you mean `.+`?/gm;
-	if (reaction.message.content.substring(3).startsWith(user.id) && reaction.message.content.match(didYouMeanRegex)
-		|| reaction.message.content.substring(2).startsWith(user.id) && reaction.message.content.match(didYouMeanRegex)) {
+	if (reaction.message.content && reaction.message.content.substring(3).startsWith(user.id) && reaction.message.content.match(didYouMeanRegex)
+		|| reaction.message.content && reaction.message.content.substring(2).startsWith(user.id) && reaction.message.content.match(didYouMeanRegex)) {
 		if (reaction._emoji.name === '✅') {
 			let newMessage = reaction.message;
 			newMessage.author = user;
@@ -97,6 +97,10 @@ module.exports = async function (reaction, user) {
 				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 			}
 		}
+	}
+
+	if (reaction.message.channel.type === 'dm') {
+		return;
 	}
 
 	//Get the header message from the db

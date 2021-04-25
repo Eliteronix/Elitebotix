@@ -56,7 +56,7 @@ module.exports = async function (msg) {
 
 	//check if the message wasn't sent by the bot itself or another bot
 	if (!(msg.author.bot)) {
-		if (msg.author. id === '138273136285057025' && msg.content === 'e!dbinit') {
+		if (msg.author.id === '138273136285057025' && msg.content === 'e!dbinit') {
 			console.log('Syncing database...');
 			const Sequelize = require('sequelize');
 
@@ -163,11 +163,13 @@ module.exports = async function (msg) {
 				closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch}\`?`);
 			}
 
-			try {
-				await closestMatchMessage.react('✅');
-				await closestMatchMessage.react('❌');
-			} catch (e) {
-				msg.channel.send('I don\'t have permissions to add reactions. Please notify an admin so that you just need to click an emote to fix your typos.');
+			if (msg.channel.type !== 'dm') {
+				try {
+					await closestMatchMessage.react('✅');
+					await closestMatchMessage.react('❌');
+				} catch (e) {
+					msg.channel.send('I don\'t have permissions to add reactions. Please notify an admin so that you just need to click an emote to fix your typos.');
+				}
 			}
 
 			return;
