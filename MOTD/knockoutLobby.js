@@ -186,10 +186,11 @@ async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, dou
 	data.push(`${Math.round(map.difficulty.rating * 100) / 100}* | ${Math.floor(map.length.total / 60)}:${(map.length.total % 60).toString().padStart(2, '0')} | ${map.bpm} BPM | CS ${map.difficulty.size} | HP ${map.difficulty.drain} | OD ${map.difficulty.overall} | AR ${map.difficulty.approach}`);
 	data.push(`Website: https://osu.ppy.sh/b/${map.id} | osu! direct: <osu://dl/${map.beatmapSetId}> -> **Be sure to select the correct difficulty**`);
 	for (let i = 0; i < users.length; i++) {
+		console.log('sendMapMessages', users.length, users[i]);
 		await users[i].send(data, { split: true })
 			.catch(async () => {
 				const channel = await client.channels.fetch('833803740162949191');
-				channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+				await channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 			});
 	}
 }
