@@ -40,9 +40,9 @@ module.exports = {
 		} else {
 			//Get profiles by arguments
 			for (let i = 0; i < args.length; i++) {
-				if (args[i].startsWith('<@!') && args[i].endsWith('>')) {
+				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
 					const discordUser = await DBDiscordUsers.findOne({
-						where: { userId: args[i].replace('<@!', '').replace('>', '') },
+						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
 					});
 
 					if (discordUser && discordUser.osuUserId) {
@@ -53,7 +53,7 @@ module.exports = {
 					}
 				} else {
 
-					if (args.length === 1 && !(args[0].startsWith('<@!')) && !(args[0].endsWith('>'))) {
+					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
 							getScore(msg, args[i], server, mode, true);
 						} else {
