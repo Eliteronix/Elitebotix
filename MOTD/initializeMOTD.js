@@ -119,28 +119,6 @@ module.exports = {
 
 					quicksort(DTBeatmaps);
 
-					//Prepare messages to send into admin channel with all maps
-					const todayYear = today.getUTCFullYear();
-					const todayMonth = (today.getUTCMonth() + 1).toString().padStart(2, '0');
-					const todayDay = (today.getUTCDate()).toString().padStart(2, '0');
-
-					let data = [];
-					data.push(`NoMod maps from \`${todayDay}.${todayMonth}.${todayYear}\``);
-
-					for (let i = 0; i < NMBeatmaps.length; i++) {
-						data.push(`${NMBeatmaps[i].artist} - ${NMBeatmaps[i].title} | [${NMBeatmaps[i].version}]`);
-					}
-
-					data.push(`DoubleTime maps from \`${todayDay}.${todayMonth}.${todayYear}\``);
-
-					for (let i = 0; i < DTBeatmaps.length; i++) {
-						data.push(`${DTBeatmaps[i].artist} - ${DTBeatmaps[i].title} | [${DTBeatmaps[i].version}]`);
-					}
-
-					//Send raw data into admin channel
-					const mapsOfTheDayChannel = await client.channels.fetch('831959379800621147');
-					mapsOfTheDayChannel.send(data, { split: true });
-
 					//Get all players for today
 					const allPlayers = await getPlayers(client);
 
