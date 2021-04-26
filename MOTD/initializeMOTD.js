@@ -160,31 +160,41 @@ module.exports = {
 		} else if (process.env.SERVER === 'QA' && today.getUTCHours() === 19 && today.getUTCMinutes() === 30) {
 			//Maybe create all leaderboards daily anyway?
 			//Get Dates
-			let todayMorning = today;
+			let todayMorning = new Date();
 			todayMorning.setHours(0);
 
 			//Daily Leaderboards
 			createLeaderboard(client, todayMorning, 1, 'Daily', '835187330087911505');
 
-			let mondayMorning = todayMorning;
+			let mondayMorning = new Date();
+			mondayMorning.setHours(0);
 			mondayMorning.setUTCDate(mondayMorning.getUTCDate() - (mondayMorning.getUTCDay() - 1));
 
 			//Weekly Leaderboard
 			createLeaderboard(client, mondayMorning, 4, 'Weekly', '835187571625164800');
 
-			let monthMorning = todayMorning;
+			let monthMorning = new Date();
+			monthMorning.setHours(0);
+			monthMorning.setUTCDate(monthMorning.getUTCDate() - (monthMorning.getUTCDay() - 1));
 			monthMorning.setUTCDate(1);
 
 			//Monthly Leaderboard
 			createLeaderboard(client, monthMorning, 20, 'Monthly', '835187660183699487');
 
-			let quarterMorning = monthMorning;
-			quarterMorning.setUTCMonth(monthMorning.getUTCMonth() - (monthMorning.getUTCMonth() % 3));
+			let quarterMorning = new Date();
+			quarterMorning.setHours(0);
+			quarterMorning.setUTCDate(quarterMorning.getUTCDate() - (quarterMorning.getUTCDay() - 1));
+			quarterMorning.setUTCDate(1);
+			quarterMorning.setUTCMonth(quarterMorning.getUTCMonth() - (quarterMorning.getUTCMonth() % 3));
 
 			//Quarter Yearly Leaderboard
 			createLeaderboard(client, quarterMorning, 60, 'Quarter Yearly', '835187745210499073');
 
-			let beginningOfTime = monthMorning;
+			let beginningOfTime = new Date();
+			beginningOfTime.setHours(0);
+			beginningOfTime.setUTCDate(beginningOfTime.getUTCDate() - (beginningOfTime.getUTCDay() - 1));
+			beginningOfTime.setUTCDate(1);
+			beginningOfTime.setUTCMonth(beginningOfTime.getUTCMonth() - (beginningOfTime.getUTCMonth() % 3));
 			beginningOfTime.setUTCFullYear(2000);
 
 			//All Time Leaderboard
