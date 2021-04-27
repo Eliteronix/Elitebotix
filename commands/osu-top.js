@@ -7,7 +7,7 @@ const fetch = require('node-fetch');
 
 module.exports = {
 	name: 'osu-top',
-	aliases: ['osu-plays', 'osu-topplays'],
+	aliases: ['osu-plays', 'osu-topplays', 'osu-best'],
 	description: 'Sends an info card about the topplays of the specified player',
 	usage: '[username] [username] ... (Use "_" instead of spaces)',
 	//permissions: 'MANAGE_GUILD',
