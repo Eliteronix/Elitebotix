@@ -603,6 +603,9 @@ module.exports = {
 
 		// Write the title of the leaderboard
 		ctx.font = 'bold 35px sans-serif';
+		if(title.length > 40){
+			ctx.font = 'bold 30px sans-serif';
+		}
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText(title, canvas.width / 2, 50);
