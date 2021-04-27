@@ -102,7 +102,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 		for (let i = 0; i < results.length; i++) {
 			if (results[i].score < 0) {
 				assignKnockoutPoints(players[i], startingPlayers, players.length, mapIndex);
-				await users[i].send('You failed to submit a score for the last knockout map and have been removed from todays competition.\nCome back tomorrow for another round.')
+				await users[i].send(`You failed to submit a valid score for the last knockout map and have been removed from todays competition.\nReason for the knockout: ${results[i].pp}\nCome back tomorrow for another round.`)
 					.catch(async () => {
 						const channel = await client.channels.fetch('833803740162949191');
 						await channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
@@ -204,20 +204,27 @@ async function getKnockoutScores(map, players, doubleTime) {
 		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 	});
 
+	//pp field is abused for reason of knockout
 	let results = [];
 	for (let i = 0; i < players.length; i++) {
 		const score = await osuApi.getUserRecent({ u: players[i].osuUserId })
 			.then(async (scores) => {
-				const mods = getMods(scores[0].raw_mods);
+				let mods = getMods(scores[0].raw_mods);
 				if (mods.includes('NF')) {
 					scores[0].score = parseInt(scores[0].score) * 2;
 				}
 				if (doubleTime && !mods.includes('DT')) {
 					scores[0].score = '-1';
+					scores[0].pp = 'You didn\'t use DoubleTime on a DoubleTime map.';
 				}
 				if (scores[0].beatmapId !== map.id) {
 					scores[0].score = '-1';
+					scores[0].pp = 'It seems like your last submitted score was played on the wrong beatmap. Maybe it was the wrong difficulty?';
 				}
+				if (!mods[0]) {
+					mods.push('NM');
+				}
+				scores[0].raw_mods = mods;
 				return scores[0];
 			})
 			.catch(err => {
@@ -241,9 +248,9 @@ async function getKnockoutScores(map, players, doubleTime) {
 						perfect: true,
 						raw_date: '-1',
 						rank: 'F',
-						pp: '-1',
+						pp: 'No scores found from the last 24 hours',
 						hasReplay: false,
-						raw_mods: 0,
+						raw_mods: ['?'],
 						beatmap: undefined,
 					};
 
@@ -285,7 +292,7 @@ async function sendMapLeaderboard(client, results, players, users) {
 	let data = [];
 	data.push('Here is the leaderboard for the last map:');
 	for (let i = 0; i < results.length; i++) {
-		data.push(`\`${players[results.length - i - 1].osuName}\`: ${humanReadable(parseInt(results[results.length - i - 1].score))}`);
+		data.push(`\`${players[results.length - i - 1].osuName}\`: ${humanReadable(parseInt(results[results.length - i - 1].score))} (${results[results.length - i - 1].raw_mods.join('')})`);
 	}
 	for (let i = 0; i < users.length; i++) {
 		await users[i].send(data, { split: true })
