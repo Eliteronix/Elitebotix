@@ -16,7 +16,7 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
 		let max = 100;
-		if (args[0] && !isNaN(args[0])) {
+		if (args[0] && !isNaN(args[0]) && args[0] > 1) {
 			max = parseInt(args[0]);
 		}
 
