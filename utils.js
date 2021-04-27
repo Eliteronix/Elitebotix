@@ -603,7 +603,7 @@ module.exports = {
 
 		// Write the title of the leaderboard
 		ctx.font = 'bold 35px sans-serif';
-		if(title.length > 40){
+		if(columns === 1 && title.length > 40){
 			ctx.font = 'bold 30px sans-serif';
 		}
 		ctx.fillStyle = '#ffffff';
