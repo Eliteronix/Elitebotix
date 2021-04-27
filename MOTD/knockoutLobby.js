@@ -3,7 +3,7 @@ const { getMods, humanReadable } = require('../utils.js');
 const { assignKnockoutPoints } = require('./givePointsToPlayers.js');
 
 module.exports = {
-	knockoutLobby: async function (client, mappool, lobbyNumber, players, users) {
+	knockoutLobby: async function (client, mappool, lobbyNumber, players, users, isFirstRound) {
 		//Map [0] has been played already
 		//Send message about which lobby the player is in and who he / she is against
 		await sendLobbyMessages(client, lobbyNumber, players, users);
@@ -21,7 +21,7 @@ module.exports = {
 		let startingPlayers = players;
 
 		//Start the first knockout map
-		knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, 1);
+		knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, 1, isFirstRound);
 	}
 };
 
@@ -49,7 +49,7 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 	}
 }
 
-async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, mapIndex) {
+async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, mapIndex, isFirstRound) {
 	//Set array for how many players should get through maximum
 	let expectedPlayers = [];
 	expectedPlayers.push(16); //Map [0] Qualifiers -> 16
@@ -101,7 +101,16 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 		//Remove players by inactivity
 		for (let i = 0; i < results.length; i++) {
 			if (results[i].score < 0) {
-				assignKnockoutPoints(players[i], startingPlayers, players.length, mapIndex);
+				if (isFirstRound) {
+					for (let j = 0; j < startingPlayers.length; j++) {
+						if (startingPlayers[j].userId === players[i].userId) {
+							startingPlayers.splice(j, 1);
+							j = startingPlayers.length;
+						}
+					}
+				} else {
+					assignKnockoutPoints(players[i], startingPlayers, players.length, mapIndex);
+				}
 				await users[i].send(`You failed to submit a valid score for the last knockout map and have been removed from todays competition.\nReason for the knockout: ${results[i].pp}\nCome back tomorrow for another round.`)
 					.catch(async () => {
 						const channel = await client.channels.fetch('833803740162949191');
@@ -169,7 +178,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 		}
 
 		//Start the next round
-		knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, mapIndex + 1);
+		knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, mapIndex + 1, false);
 	}, parseInt(mappool[mapIndex].length.total) * 1000 + 1000 * 150);
 }
 
