@@ -605,6 +605,8 @@ module.exports = {
 		ctx.font = 'bold 35px sans-serif';
 		if(columns === 1 && title.length > 40){
 			ctx.font = 'bold 30px sans-serif';
+		} else if (columns === 1 && title.length > 50){
+			ctx.font = 'bold 25px sans-serif';
 		}
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
