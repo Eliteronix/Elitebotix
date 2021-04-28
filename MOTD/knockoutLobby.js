@@ -237,11 +237,11 @@ async function getKnockoutScores(map, players, doubleTime) {
 					if (scores[0].raw_date < startOfRound) {
 						scores[0].score = '-1';
 						scores[0].pp = 'It seems like you didn\'t submit a score in time for the beatmap in this round.';
-						scores[0].raw_date = ['Invalid Score'];
+						scores[0].raw_mods = ['Invalid Score'];
 					} else {
 						scores[0].score = '-1';
 						scores[0].pp = 'It seems like your last submitted score was played on the wrong beatmap. Maybe it was the wrong difficulty?';
-						scores[0].raw_date = ['Invalid Score'];
+						scores[0].raw_mods = ['Invalid Score'];
 					}
 				}
 				return scores[0];
@@ -314,10 +314,10 @@ async function sendMapLeaderboard(client, results, players, users) {
 	for (let i = 0; i < results.length; i++) {
 		//Calculate accuracy
 		const accuracy = (results[results.length - i - 1].counts[300] * 100 + results[results.length - i - 1].counts[100] * 33.33 + results[results.length - i - 1].counts[50] * 16.67) / (parseInt(results[results.length - i - 1].counts[300]) + parseInt(results[results.length - i - 1].counts[100]) + parseInt(results[results.length - i - 1].counts[50]) + parseInt(results[results.length - i - 1].counts.miss));
-		if(results[results.length - i - 1].score === '-1'){
+		if (results[results.length - i - 1].score === '-1') {
 			data.push(`\`${players[results.length - i - 1].osuName}\`: ${humanReadable(parseInt(results[results.length - i - 1].score))} | ${results[results.length - i - 1].raw_mods.join('')}`);
 		} else {
-			data.push(`\`${players[results.length - i - 1].osuName}\`: ${humanReadable(parseInt(results[results.length - i - 1].score))} | ${accuracy}% | ${results[results.length - i - 1].maxCombo}x | ${results[results.length - i - 1].counts.miss} miss | ${results[results.length - i - 1].raw_mods.join('')}`);
+			data.push(`\`${players[results.length - i - 1].osuName}\`: ${humanReadable(parseInt(results[results.length - i - 1].score))} | ${Math.round(accuracy * 100) / 100}% | ${results[results.length - i - 1].maxCombo}x | ${results[results.length - i - 1].counts.miss} miss | ${results[results.length - i - 1].raw_mods.join('')}`);
 		}
 	}
 	for (let i = 0; i < users.length; i++) {

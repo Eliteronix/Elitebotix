@@ -151,11 +151,11 @@ async function getQualifierResults(map, players) {
 					if (scores[0].raw_date < startOfRound) {
 						scores[0].score = '-1';
 						scores[0].pp = 'It seems like you didn\'t submit a score in time for the beatmap in this round.';
-						scores[0].raw_date = ['Invalid Score'];
+						scores[0].raw_mods = ['Invalid Score'];
 					} else {
 						scores[0].score = '-1';
 						scores[0].pp = 'It seems like your last submitted score was played on the wrong beatmap. Maybe it was the wrong difficulty?';
-						scores[0].raw_date = ['Invalid Score'];
+						scores[0].raw_mods = ['Invalid Score'];
 					}
 				}
 				return scores[0];
