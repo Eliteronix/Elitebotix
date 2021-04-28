@@ -188,7 +188,8 @@ async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, dou
 	if (doubleTime) {
 		DTMap = '+DoubleTime';
 	}
-	data.push(`\n${mapIndex}. knockout map (${knockoutNumber} player(s) will be knocked out):`);
+	//Invisible seperator before the \n to ensure line break
+	data.push(`⁣\n${mapIndex}. knockout map (${knockoutNumber} player(s) will be knocked out):`);
 	data.push(`**You have ${Math.floor(map.length.total / 60) + 2}:${(map.length.total % 60).toString().padStart(2, '0')} minutes to play the map. Last submitted score will count (fails included).**`);
 	data.push(`**Mods: FreeMod${DTMap}**`);
 	data.push(`${map.artist} - ${map.title} **[${map.version}]** | Mapper: ${map.creator}`);
@@ -308,9 +309,16 @@ function sortPlayersByResults(results, playersInput, usersInput) {
 
 async function sendMapLeaderboard(client, results, players, users) {
 	let data = [];
-	data.push('Here is the leaderboard for the last map:');
+	//Invisible seperator to ensure line break
+	data.push('⁣\n**Last maps scores:**');
 	for (let i = 0; i < results.length; i++) {
-		data.push(`\`${players[results.length - i - 1].osuName}\`: ${humanReadable(parseInt(results[results.length - i - 1].score))} (${results[results.length - i - 1].raw_mods.join('')})`);
+		//Calculate accuracy
+		const accuracy = (results[results.length - i - 1].counts[300] * 100 + results[results.length - i - 1].counts[100] * 33.33 + results[results.length - i - 1].counts[50] * 16.67) / (parseInt(results[results.length - i - 1].counts[300]) + parseInt(results[results.length - i - 1].counts[100]) + parseInt(results[results.length - i - 1].counts[50]) + parseInt(results[results.length - i - 1].counts.miss));
+		if(results[results.length - i - 1].score === '-1'){
+			data.push(`\`${players[results.length - i - 1].osuName}\`: ${humanReadable(parseInt(results[results.length - i - 1].score))} | ${results[results.length - i - 1].raw_mods.join('')}`);
+		} else {
+			data.push(`\`${players[results.length - i - 1].osuName}\`: ${humanReadable(parseInt(results[results.length - i - 1].score))} | ${accuracy}% | ${results[results.length - i - 1].maxCombo}x | ${results[results.length - i - 1].counts.miss} miss | ${results[results.length - i - 1].raw_mods.join('')}`);
+		}
 	}
 	for (let i = 0; i < users.length; i++) {
 		await users[i].send(data, { split: true })
