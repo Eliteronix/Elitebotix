@@ -158,12 +158,20 @@ module.exports = async function (msg) {
 			}
 
 			if (args[0]) {
-				closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch} ${args.join(' ')}\`?`);
+				try {
+					closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch} ${args.join(' ')}\`?`);
+				} catch (e){
+					//Nothing as its an optional feature
+				}
 			} else {
-				closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch}\`?`);
+				try {
+					closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch}\`?`);
+				} catch (e){
+					//Nothing as its an optional feature
+				}
 			}
 
-			if (msg.channel.type !== 'dm') {
+			if (msg.channel.type !== 'dm' && closestMatchMessage) {
 				try {
 					await closestMatchMessage.react('✅');
 					await closestMatchMessage.react('❌');
