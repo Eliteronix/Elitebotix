@@ -265,7 +265,7 @@ module.exports = {
 			modsBits = modsBits - 1;
 		}
 
-		return mods;
+		return mods.reverse();
 	},
 	getLinkModeName: function (ID) {
 		let gameMode = 'osu';
