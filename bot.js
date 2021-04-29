@@ -31,7 +31,7 @@ const voiceStateUpdate = require('./voiceStateUpdate');
 const guildCreate = require('./guildCreate');
 
 //Get executeNextProcessQueueTask
-const { executeNextProcessQueueTask, refreshOsuRank } = require('./utils');
+const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask } = require('./utils');
 
 //Get MOTD/getMapsOnTime
 const { initializeMOTD } = require('./MOTD/initializeMOTD');
@@ -59,6 +59,8 @@ function readyDiscord() {
 			}
 		});   
 	}
+
+	restartProcessQueueTask();
 }
 
 client.on('guildMemberAdd', memberJoined);

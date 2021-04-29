@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
 		osuName: {
 			type: DataTypes.STRING,
 		},
+		osuBadges: {
+			type: DataTypes.INTEGER,
+			defaultValue: 0,
+		},
 		osuPP: {
 			type: DataTypes.STRING,
 		},

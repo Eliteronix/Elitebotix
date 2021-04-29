@@ -2,6 +2,7 @@ const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue } = requi
 const { prefix } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
+const fetch = require('node-fetch');
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -401,7 +402,7 @@ module.exports = {
 		DBDiscordUsers.findOne({
 			where: { osuUserId: user.id },
 		})
-			.then(discordUser => {
+			.then(async (discordUser) => {
 				if (discordUser && discordUser.osuUserId) {
 					discordUser.osuName = user.name;
 					if (mode === 0) {
@@ -417,6 +418,7 @@ module.exports = {
 						discordUser.maniaPP = user.pp.raw;
 						discordUser.maniaRank = user.pp.rank;
 					}
+					discordUser.badges = await getOsuBadgeNumberByIdFunction(discordUser.osuUserId);
 					discordUser.save();
 				}
 			})
@@ -603,9 +605,9 @@ module.exports = {
 
 		// Write the title of the leaderboard
 		ctx.font = 'bold 35px sans-serif';
-		if(columns === 1 && title.length > 40){
+		if (columns === 1 && title.length > 40) {
 			ctx.font = 'bold 30px sans-serif';
-		} else if (columns === 1 && title.length > 50){
+		} else if (columns === 1 && title.length > 50) {
 			ctx.font = 'bold 25px sans-serif';
 		}
 		ctx.fillStyle = '#ffffff';
@@ -675,5 +677,30 @@ module.exports = {
 
 		//Create as an attachment and return
 		return new Discord.MessageAttachment(canvas.toBuffer(), filename);
+	},
+	async getOsuBadgeNumberById(osuUserId) {
+		return await getOsuBadgeNumberByIdFunction(osuUserId);
+	},
+	async restartProcessQueueTask() {
+		const taskInWork = await DBProcessQueue.findOne({
+			where: { beingExecuted: true }
+		});
+		if (taskInWork) {
+			taskInWork.beingExecuted = 0;
+			taskInWork.save();
+		}
 	}
 };
+
+async function getOsuBadgeNumberByIdFunction(osuUserId) {
+	const count = (str) => {
+		const re = /https:\\\/\\\/assets.ppy.sh\\\/profile-badges\\\//g;
+		return ((str || '').match(re) || []).length;
+	};
+
+	return await fetch(`https://osu.ppy.sh/users/${osuUserId}/osu`)
+		.then(async (res) => {
+			let htmlCode = await res.text();
+			return count(htmlCode);
+		});
+}
