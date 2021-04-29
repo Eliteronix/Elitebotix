@@ -75,7 +75,7 @@ module.exports = {
 			for (let i = 0; i < bracketPlayerResults.length; i++) {
 				let dataset = {
 					name: bracketPlayerResults[i].osuName,
-					value: `Points: ${humanReadable(bracketPlayerResults[i].totalPoints.toString())} (${humanReadable(bracketPlayerResults[i].qualifierPoints.toString())} from Qualifiers | ${humanReadable(bracketPlayerResults[i].knockoutPoints.toString())} from Knockout | ${humanReadable(bracketPlayerResults[i].playedRounds.toString())} Rounds)`,
+					value: `Points: ${humanReadable(bracketPlayerResults[i].totalPoints.toString())} (${humanReadable(bracketPlayerResults[i].qualifierPoints.toString())} from Qualifiers | ${humanReadable(bracketPlayerResults[i].knockoutPoints.toString())} from Knockout | ${humanReadable(bracketPlayerResults[i].playedRounds.toString())} Day(s))`,
 				};
 
 				leaderboardData.push(dataset);
