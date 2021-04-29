@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const Banchojs = require('bancho.js');
-const { getGuildPrefix } = require('../utils');
+const { getGuildPrefix, getOsuBadgeNumberById } = require('../utils');
 
 module.exports = {
 	name: 'osu-link',
@@ -55,7 +55,7 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 	if (args[0]) {
 		if (args[1]) {
 			args.shift();
-			for(let i = 0; i < args.length; i++){
+			for (let i = 0; i < args.length; i++) {
 				args[i] = args[i].replace(/`/g, '');
 			}
 			return msg.channel.send(`You provided multiple arguments (\`${args.join('`, `')}\`). If your name has spaces please replace them with an \`_\` like this: \`${args.join('_')}\`.`);
@@ -82,6 +82,7 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 					discordUser.osuName = osuUser.name;
 					discordUser.osuPP = osuUser.pp.raw;
 					discordUser.osuRank = osuUser.pp.rank;
+					discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 					discordUser.save();
 
 					// eslint-disable-next-line no-undef
@@ -95,7 +96,8 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 				} else {
 					const processingMessage = await msg.channel.send('Processing...');
 					const verificationCode = Math.random().toString(36).substring(8);
-					DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuName: osuUser.name, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
+					let badges = await getOsuBadgeNumberById(osuUser.id);
+					DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuName: osuUser.name, osuBadges: badges, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
 
 					// eslint-disable-next-line no-undef
 					const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
@@ -122,7 +124,7 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 async function current(msg, osuApi, discordUser, guildPrefix) {
 	if (discordUser && discordUser.osuUserId) {
 		osuApi.getUser({ u: discordUser.osuUserId })
-			.then(osuUser => {
+			.then(async (osuUser) => {
 				let verified = 'No';
 
 				if (discordUser.osuVerified) {
@@ -132,6 +134,7 @@ async function current(msg, osuApi, discordUser, guildPrefix) {
 				discordUser.osuName = osuUser.name;
 				discordUser.osuPP = osuUser.pp.raw;
 				discordUser.osuRank = osuUser.pp.rank;
+				discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 				discordUser.save();
 
 				msg.channel.send(`Currently linked osu! account: \`${osuUser.name}\`.\nVerified: \`${verified}\``);
@@ -154,6 +157,7 @@ async function disconnect(msg, discordUser, guildPrefix) {
 		discordUser.osuVerificationCode = null;
 		discordUser.osuVerified = false;
 		discordUser.osuName = null;
+		discordUser.osuBadges = 0;
 		discordUser.osuPP = null;
 		discordUser.osuRank = null;
 		discordUser.taikoPP = null;
@@ -175,10 +179,11 @@ async function verify(msg, args, osuApi, discordUser, guildPrefix) {
 		if (discordUser) {
 			if (discordUser.osuVerified) {
 				osuApi.getUser({ u: discordUser.osuUserId })
-					.then(osuUser => {
+					.then(async (osuUser) => {
 						discordUser.osuName = osuUser.name;
 						discordUser.osuPP = osuUser.pp.raw;
 						discordUser.osuRank = osuUser.pp.rank;
+						discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 						discordUser.save();
 						msg.channel.send(`Your osu! account \`${osuUser.name}\` is already verified\nIf you need to connect a different account use \`${guildPrefix}osu-link <disconnect>\` first.`);
 					})
@@ -200,6 +205,7 @@ async function verify(msg, args, osuApi, discordUser, guildPrefix) {
 							discordUser.osuName = osuUser.name;
 							discordUser.osuPP = osuUser.pp.raw;
 							discordUser.osuRank = osuUser.pp.rank;
+							discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 							discordUser.save();
 
 							// eslint-disable-next-line no-undef
@@ -229,11 +235,12 @@ async function verify(msg, args, osuApi, discordUser, guildPrefix) {
 		if (discordUser && discordUser.osuUserId) {
 			if (discordUser.osuVerificationCode === args[1]) {
 				osuApi.getUser({ u: discordUser.osuUserId })
-					.then(osuUser => {
+					.then(async (osuUser) => {
 						discordUser.osuVerified = true;
 						discordUser.osuName = osuUser.name;
 						discordUser.osuPP = osuUser.pp.raw;
 						discordUser.osuRank = osuUser.pp.rank;
+						discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 						discordUser.save();
 						msg.channel.send(`Your connection to the osu! account \`${osuUser.name}\` is now verified.`);
 					})
@@ -246,10 +253,11 @@ async function verify(msg, args, osuApi, discordUser, guildPrefix) {
 					});
 			} else {
 				osuApi.getUser({ u: discordUser.osuUserId })
-					.then(osuUser => {
+					.then(async (osuUser) => {
 						discordUser.osuName = osuUser.name;
 						discordUser.osuPP = osuUser.pp.raw;
 						discordUser.osuRank = osuUser.pp.rank;
+						discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 						discordUser.save();
 						msg.channel.send(`The sent code \`${args[1].replace(/`/g, '')}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse \`${guildPrefix}osu-link verify\` to resend the code.`);
 					})
@@ -267,6 +275,6 @@ async function verify(msg, args, osuApi, discordUser, guildPrefix) {
 	}
 }
 
-function linkAccountMessage(msg, guildPrefix){
+function linkAccountMessage(msg, guildPrefix) {
 	msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <username ("_" for " ")>\``);
 }

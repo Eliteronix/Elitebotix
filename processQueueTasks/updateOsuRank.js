@@ -1,4 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
+const { getOsuBadgeNumberById } = require('../utils.js');
 const osu = require('node-osu');
 
 module.exports = {
@@ -24,19 +25,21 @@ module.exports = {
 		discordUser.osuRank = osuUser.pp.rank;
 
 		const taikoUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 1 });
-		
+
 		discordUser.taikoPP = taikoUser.pp.raw;
 		discordUser.taikoRank = taikoUser.pp.rank;
 
 		const catchUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 2 });
-		
+
 		discordUser.catchPP = catchUser.pp.raw;
 		discordUser.catchRank = catchUser.pp.rank;
 
 		const maniaUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 3 });
-		
+
 		discordUser.maniaPP = maniaUser.pp.raw;
 		discordUser.maniaRank = maniaUser.pp.rank;
+
+		discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 
 		discordUser.save();
 	},

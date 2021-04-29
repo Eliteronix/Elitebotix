@@ -48,6 +48,7 @@ module.exports = {
 					osuVerificationCode: dbList[i].osuVerificationCode,
 					osuVerified: dbList[i].osuVerified,
 					osuName: dbList[i].osuName,
+					osuBadges: dbList[i].osuBadges,
 					osuPP: dbList[i].osuPP,
 					osuRank: dbList[i].osuRank,
 					taikoPP: dbList[i].taikoPP,
