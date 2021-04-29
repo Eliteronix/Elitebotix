@@ -79,13 +79,13 @@ async function getProfile(msg, username, mode, noLinkedAccount) {
 			const guildPrefix = getGuildPrefix(msg);
 
 			let badgeAmount = await getOsuBadgeNumberById(user.id);
-			let BWSRank = Math.round(Math.pow(user.pp.rank, Math.pow(0.9937, Math.pow(badgeAmount, 2))) * 100) / 100;
+			let BWSRank = Math.round(Math.pow(user.pp.rank, Math.pow(0.9937, Math.pow(badgeAmount, 2))));
 
 			let data = [];
 			data.push(`${user.name} is rank #${humanReadable(user.pp.rank)}`);
 			if (badgeAmount > 0) {
 				data.push(`${user.name} has ${badgeAmount} badges.`);
-				data.push(`Using \`rank^(0.9937^(badges^2))\` their BWS rank is #${BWSRank}`);
+				data.push(`Using \`rank^(0.9937^(badges^2))\` their BWS rank is #${humanReadable(BWSRank)}`);
 			} else {
 				data.push(`${user.name} has ${badgeAmount} badges and their rank will therefore stay the same using BWS.`);
 			}
