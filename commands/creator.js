@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 
 module.exports = {
 	name: 'creator',
-	aliases: ['developer'],
+	aliases: ['developer', 'donate', 'support'],
 	description: 'Sends an info card about the developer',
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'KICK_MEMBERS',
@@ -23,12 +23,15 @@ module.exports = {
 		//Create new embed
 		const creatorInfoEmbed = new Discord.MessageEmbed()
 			.setColor('#0492C2')
-			.setTitle('Creator info card')
+			.setTitle('Developer info card')
+			.setDescription('I\'m currently working on this bot on my own.\nFeel free to support me using the links below.')
 			.setThumbnail(`${eliteronixUser.avatarURL()}`)
 			.addFields(
-				{ name: 'Discord', value: 'Eliteronix#4208' },
-				{ name: 'Github', value: 'Eliteronix' },
-				{ name: 'Twitter', value: '@Eliteronix' }
+				{ name: 'Discord', value: '[Eliteronix#4208](https://discord.com/invite/Asz5Gfe)' },
+				{ name: 'Github', value: '[Eliteronix](https://github.com/Eliteronix)' },
+				{ name: 'Twitter', value: '[@Eliteronix](https://twitter.com/Eliteronix)' },
+				{ name: 'Paypal', value: '[paypal.me/Eliteronix](https://paypal.me/Eliteronix)' },
+				{ name: 'Twitch', value: '[Eliteronix](https://twitch.tv/Eliteronix)' }
 			)
 			.setTimestamp();
 
