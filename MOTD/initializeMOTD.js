@@ -218,13 +218,14 @@ async function getPlayers(client) {
 
 	for (let i = 0; i < registeredUsers.length; i++) {
 		if (registeredUsers[i].osuUserId) {
-			if (registeredUsers[i].osuRank < 10000) {
+			let BWSRank = Math.round(Math.pow(registeredUsers[i].osuRank, Math.pow(0.9937, Math.pow(registeredUsers[i].osuBadges, 2))));
+			if (BWSRank < 10000) {
 				topBracketPlayers.push(registeredUsers[i]);
-			} else if (registeredUsers[i].osuRank < 50000) {
+			} else if (BWSRank < 50000) {
 				middleBracketPlayers.push(registeredUsers[i]);
-			} else if (registeredUsers[i].osuRank < 100000) {
+			} else if (BWSRank < 100000) {
 				lowerBracketPlayers.push(registeredUsers[i]);
-			} else if (registeredUsers[i].osuRank < 10000000) {
+			} else if (BWSRank < 10000000) {
 				beginnerBracketPlayers.push(registeredUsers[i]);
 			}
 		} else {

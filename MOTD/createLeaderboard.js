@@ -26,11 +26,12 @@ module.exports = {
 				});
 
 				for (let k = 0; k < playerResults.length; k++) {
+					let BWSRank = Math.round(Math.pow(playerResults[k].osuRank, Math.pow(0.9937, Math.pow(bracketPlayers[j].osuBadges, 2))));
 					if (playerResults[k].matchDate < since || //Time
-						i === 0 && playerResults[k].osuRank > 9999 //Top Bracket
-						|| i === 1 && (playerResults[k].osuRank < 10000 || playerResults[k].osuRank > 49999) // Middle Bracket
-						|| i === 2 && (playerResults[k].osuRank < 50000 || playerResults[k].osuRank > 99999) // Lower Bracket
-						|| i === 3 && playerResults[k].osuRank < 100000) { //Beginner Bracket
+						i === 0 && BWSRank > 9999 //Top Bracket
+						|| i === 1 && (BWSRank < 10000 || BWSRank > 49999) // Middle Bracket
+						|| i === 2 && (BWSRank < 50000 || BWSRank > 99999) // Lower Bracket
+						|| i === 3 && BWSRank < 100000) { //Beginner Bracket
 						playerResults.splice(k, 1);
 						k--;
 					}
@@ -156,13 +157,14 @@ async function getPlayers(client) {
 
 	for (let i = 0; i < registeredUsers.length; i++) {
 		if (registeredUsers[i].osuUserId) {
-			if (registeredUsers[i].osuRank < 10000) {
+			let BWSRank = Math.round(Math.pow(registeredUsers[i].osuRank, Math.pow(0.9937, Math.pow(registeredUsers[i].osuBadges, 2))));
+			if (BWSRank < 10000) {
 				topBracketPlayers.push(registeredUsers[i]);
-			} else if (registeredUsers[i].osuRank < 50000) {
+			} else if (BWSRank < 50000) {
 				middleBracketPlayers.push(registeredUsers[i]);
-			} else if (registeredUsers[i].osuRank < 100000) {
+			} else if (BWSRank < 100000) {
 				lowerBracketPlayers.push(registeredUsers[i]);
-			} else if (registeredUsers[i].osuRank < 10000000) {
+			} else if (BWSRank < 10000000) {
 				beginnerBracketPlayers.push(registeredUsers[i]);
 			}
 		} else {
