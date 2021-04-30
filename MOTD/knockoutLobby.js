@@ -10,7 +10,7 @@ module.exports = {
 
 		//Case of just one player
 		if (players.length === 1) {
-			assignKnockoutPoints(players[0], players, 1, 10);
+			assignKnockoutPoints(players[0], players, 1, 11);
 			return users[0].send('You will win your lobby by default.\nCome back tomorrow for another competition!')
 				.catch(async () => {
 					const channel = await client.channels.fetch('833803740162949191');
@@ -169,7 +169,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 
 		//Message the winner if only one person is left
 		if (players.length === 1) {
-			assignKnockoutPoints(players[0], startingPlayers, players.length, mapIndex);
+			assignKnockoutPoints(players[0], startingPlayers, players.length, mapIndex + 1);
 			return users[0].send('All other players have been knocked out of todays competition which means **you have won!**\nCongratulations, thank you for playing and come back tomorrow for another round.')
 				.catch(async () => {
 					const channel = await client.channels.fetch('833803740162949191');

@@ -37,10 +37,13 @@ module.exports = {
 
 				if (qualifierDataset && maximumPointsFromQualis < qualifierDataset.qualifierPoints) {
 					maximumPointsFromQualis = qualifierDataset.qualifierPoints;
+					console.log('Max points from qualis', maximumPointsFromQualis);
 				}
 			}
 
-			let knockoutPoints = Math.round(parseFloat(parseInt(maximumPointsFromQualis) * (parseInt(round) / 10)));
+			let knockoutPoints = Math.round(parseInt(maximumPointsFromQualis) * (parseInt(round) / 10));
+			console.log('Round', round, 'KnockoutPoints', knockoutPoints);
+
 
 			qualifierDataset.totalPoints = parseInt(qualifierDataset.qualifierPoints) + knockoutPoints;
 			qualifierDataset.knockoutPoints = knockoutPoints;
