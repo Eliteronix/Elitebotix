@@ -52,13 +52,14 @@ module.exports = {
 
 						//Check which bracket role should be received
 						let correctRole = '';
-						if (parseInt(registeredPlayer.osuRank) < 10000) {
+						let BWSRank = Math.round(Math.pow(registeredPlayer.osuRank, Math.pow(0.9937, Math.pow(registeredPlayer.osuBadges, 2))));
+						if (BWSRank < 10000) {
 							correctRole = '833313544400535613';
-						} else if (parseInt(registeredPlayer.osuRank) < 50000) {
+						} else if (BWSRank < 50000) {
 							correctRole = '833313704136540171';
-						} else if (parseInt(registeredPlayer.osuRank) < 100000) {
+						} else if (BWSRank < 100000) {
 							correctRole = '833313763188801578';
-						} else if (parseInt(registeredPlayer.osuRank) < 10000000) {
+						} else if (BWSRank < 10000000) {
 							correctRole = '833313827172646912';
 						}
 
