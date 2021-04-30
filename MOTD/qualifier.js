@@ -62,6 +62,7 @@ module.exports = {
 					results.splice(i, 1);
 					players.splice(i, 1);
 					users.splice(i, 1);
+					i--;
 				} else {
 					i = results.length;
 				}
