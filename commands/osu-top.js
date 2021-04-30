@@ -9,7 +9,7 @@ module.exports = {
 	name: 'osu-top',
 	aliases: ['osu-plays', 'osu-topplays', 'osu-best'],
 	description: 'Sends an info card about the topplays of the specified player',
-	usage: '[username] [username] ... (Use "_" instead of spaces)',
+	usage: '[username] [username] ... (Use "_" instead of spaces; Use --b for bancho / --r for ripple; Use --o/--t/--c/--m for modes)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: 'ATTACH_FILES',
@@ -121,7 +121,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount) {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --r for ripple; Use --o/--t/--c/--m for modes)`);
 				} else {
 					console.log(err);
 				}
@@ -132,7 +132,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount) {
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --o/--t/--c/--m for modes)`);
 				}
 
 				let user = rippleToBanchoUser(responseJson[0]);
@@ -171,7 +171,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount) {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --o/--t/--c/--m for modes)`);
 				} else {
 					console.log(err);
 				}
