@@ -45,6 +45,8 @@ module.exports = {
 			//Sort results
 			quicksort(results);
 
+			console.log(results);
+
 			//Sort players and users by the results order
 			const playersUsers = sortPlayersByResults(results, players, users);
 
@@ -226,7 +228,7 @@ function partition(list, start, end) {
 	const pivot = list[end];
 	let i = start;
 	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].score) <= parseFloat(pivot.score)) {
+		if (parseFloat(list[j].score) >= parseFloat(pivot.score)) {
 			[list[j], list[i]] = [list[i], list[j]];
 			i++;
 		}
