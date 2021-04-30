@@ -100,7 +100,7 @@ module.exports = {
 			let tomorrow = new Date();
 			tomorrow.setUTCDate(today.getUTCDate() + 1);
 
-			const todayFormatted = `${today.getUTCDate()}.${today.getUTCMonth().toString().padStart(2, '0')}.${today.getUTCFullYear()}`;
+			const todayFormatted = `${today.getUTCDate()}.${(today.getUTCMonth() + 1).toString().padStart(2, '0')}.${today.getUTCFullYear()}`;
 
 			if (title === 'Daily') {
 				content = `Leaderboard from \`${todayFormatted}\``;
