@@ -36,6 +36,7 @@ module.exports = {
 				});
 
 				if (qualifierDataset && parseInt(maximumPointsFromQualis) < parseInt(qualifierDataset.qualifierPoints)) {
+					console.log(maximumPointsFromQualis, 'is less than', qualifierDataset.qualifierPoints);
 					maximumPointsFromQualis = parseInt(qualifierDataset.qualifierPoints);
 					console.log('Max points from qualis', maximumPointsFromQualis);
 				}
