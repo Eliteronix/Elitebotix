@@ -134,7 +134,7 @@ async function getQualifierResults(map, players) {
 	let results = [];
 
 	for (let i = 0; i < players.length; i++) {
-		const score = await osuApi.getUserRecent({ u: players[i].osuUserId })
+		const score = await osuApi.getScores({ b: map.id, u: players[i].osuUserId, m: 0 })
 			.then(async (scores) => {
 				let mods = getMods(scores[0].raw_mods);
 				if (!mods[0]) {
