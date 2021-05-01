@@ -65,7 +65,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 	expectedPlayers.push(1); //Map [10] 2 -> 1
 
 	//Calculate the amount of knockouts needed
-	let knockoutNumber = expectedPlayers[mapIndex] - expectedPlayers[mapIndex - 1];
+	let knockoutNumber = expectedPlayers[mapIndex - 1] - expectedPlayers[mapIndex];
 	//Set the amount to 1 if less players are in the lobby
 	if (players.length < expectedPlayers[mapIndex - 1]) {
 		knockoutNumber = 1;
