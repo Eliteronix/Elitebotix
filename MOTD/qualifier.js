@@ -45,8 +45,6 @@ module.exports = {
 			//Sort results
 			quicksort(results);
 
-			console.log(results);
-
 			//Sort players and users by the results order
 			const playersUsers = sortPlayersByResults(results, players, users);
 
@@ -59,14 +57,12 @@ module.exports = {
 					users[i].send('You failed to submit a score for todays qualifier map and have been removed from todays competition.\nCome back tomorrow for another round.')
 						.catch(async () => {
 							const channel = await client.channels.fetch('833803740162949191');
-							channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+							channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 						});
 					results.splice(i, 1);
 					players.splice(i, 1);
 					users.splice(i, 1);
 					i--;
-				} else {
-					i = results.length;
 				}
 			}
 

@@ -50,7 +50,6 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 }
 
 async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, mapIndex, isFirstRound) {
-	console.log('Round | isFirstRound:', mapIndex, isFirstRound);
 	//Set array for how many players should get through maximum
 	let expectedPlayers = [];
 	expectedPlayers.push(16); //Map [0] Qualifiers -> 16

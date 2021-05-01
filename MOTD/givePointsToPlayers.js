@@ -35,8 +35,8 @@ module.exports = {
 					where: { userId: allPlayers[i].userId, osuUserId: allPlayers[i].osuUserId, matchDate: today }
 				});
 
-				if (qualifierDataset && maximumPointsFromQualis < qualifierDataset.qualifierPoints) {
-					maximumPointsFromQualis = qualifierDataset.qualifierPoints;
+				if (qualifierDataset && parseInt(maximumPointsFromQualis) < parseInt(qualifierDataset.qualifierPoints)) {
+					maximumPointsFromQualis = parseInt(qualifierDataset.qualifierPoints);
 					console.log('Max points from qualis', maximumPointsFromQualis);
 				}
 			}
