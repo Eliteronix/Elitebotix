@@ -608,9 +608,9 @@ module.exports = {
 		// Write the title of the leaderboard
 		ctx.font = 'bold 35px comfortaa, sans-serif';
 		if (columns === 1 && title.length > 40) {
-			ctx.font = 'bold 30px comfortaa, sans-serif';
+			ctx.font = 'bold 27px comfortaa, sans-serif';
 		} else if (columns === 1 && title.length > 50) {
-			ctx.font = 'bold 25px comfortaa, sans-serif';
+			ctx.font = 'bold 20px comfortaa, sans-serif';
 		}
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
