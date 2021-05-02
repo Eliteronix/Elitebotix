@@ -49,6 +49,8 @@ async function getBeatmap(msg, beatmap) {
 	const canvasWidth = 1000;
 	const canvasHeight = 500;
 
+	Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
 	//Create Canvas
 	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
@@ -101,7 +103,7 @@ async function drawTitle(input) {
 	}
 
 	// Write the title of the map
-	ctx.font = 'bold 25px sans-serif';
+	ctx.font = 'bold 25px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText(beatmapTitle, canvas.width / 3 * 2, canvas.height / 100 * 7);
@@ -157,75 +159,75 @@ function drawStats(input) {
 	}
 
 	// Write the stats of the map
-	ctx.font = 'bold 30px sans-serif';
+	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'left';
 	//First column
-	ctx.font = 'bold 15px sans-serif';
+	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Ranked Status', canvas.width / 1000 * 330, canvas.height / 500 * 170);
-	ctx.font = 'bold 30px sans-serif';
+	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(beatmap.approvalStatus, canvas.width / 1000 * 330, canvas.height / 500 * 200);
-	ctx.font = 'bold 15px sans-serif';
+	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Difficulty Rating', canvas.width / 1000 * 330, canvas.height / 500 * 250);
-	ctx.font = 'bold 30px sans-serif';
+	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(`${Math.round(beatmap.difficulty.rating * 100) / 100} ★`, canvas.width / 1000 * 330, canvas.height / 500 * 280);
-	
+
 	let beatmapMapper = beatmap.creator;
 	const maxSizeMapper = parseInt(canvas.width / 1000 * 12);
 	if (beatmapMapper.length > maxSizeMapper) {
 		beatmapMapper = beatmapMapper.substring(0, maxSizeMapper - 3) + '...';
 	}
 
-	ctx.font = 'bold 15px sans-serif';
+	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Mapper', canvas.width / 1000 * 330, canvas.height / 500 * 330);
-	ctx.font = 'bold 30px sans-serif';
+	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(beatmapMapper, canvas.width / 1000 * 330, canvas.height / 500 * 360);
-	ctx.font = 'bold 15px sans-serif';
+	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('User Rating', canvas.width / 1000 * 330, canvas.height / 500 * 420);
-	ctx.font = 'bold 20px sans-serif';
+	ctx.font = 'bold 20px comfortaa, sans-serif';
 	ctx.fillText(userRatingDisplay, canvas.width / 1000 * 330, canvas.height / 500 * 440);
 
 	//Second column
-	ctx.font = 'bold 15px sans-serif';
+	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Circle Size', canvas.width / 1000 * 580, canvas.height / 500 * 170);
-	ctx.font = 'bold 30px sans-serif';
+	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(`CS ${beatmap.difficulty.size}`, canvas.width / 1000 * 580, canvas.height / 500 * 200);
-	ctx.font = 'bold 15px sans-serif';
+	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Approach Rate', canvas.width / 1000 * 580, canvas.height / 500 * 250);
-	ctx.font = 'bold 30px sans-serif';
+	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(`AR ${beatmap.difficulty.approach}`, canvas.width / 1000 * 580, canvas.height / 500 * 280);
-	ctx.font = 'bold 15px sans-serif';
+	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Overall Difficulty', canvas.width / 1000 * 580, canvas.height / 500 * 330);
-	ctx.font = 'bold 30px sans-serif';
+	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(`OD ${beatmap.difficulty.overall}`, canvas.width / 1000 * 580, canvas.height / 500 * 360);
-	ctx.font = 'bold 15px sans-serif';
+	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('HP Drain', canvas.width / 1000 * 580, canvas.height / 500 * 410);
-	ctx.font = 'bold 30px sans-serif';
+	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(`HP ${beatmap.difficulty.drain}`, canvas.width / 1000 * 580, canvas.height / 500 * 440);
 
 	//Third column
-	if(beatmap.mode === 'Mania'){
-		ctx.font = 'bold 15px sans-serif';
+	if (beatmap.mode === 'Mania') {
+		ctx.font = 'bold 15px comfortaa, sans-serif';
 		ctx.fillText('# of objects', canvas.width / 1000 * 750, canvas.height / 500 * 170);
-		ctx.font = 'bold 30px sans-serif';
-		ctx.fillText(`${parseInt(beatmap.objects.normal)+parseInt(beatmap.objects.slider)+parseInt(beatmap.objects.spinner)}`, canvas.width / 1000 * 750, canvas.height / 500 * 200);
+		ctx.font = 'bold 30px comfortaa, sans-serif';
+		ctx.fillText(`${parseInt(beatmap.objects.normal) + parseInt(beatmap.objects.slider) + parseInt(beatmap.objects.spinner)}`, canvas.width / 1000 * 750, canvas.height / 500 * 200);
 	} else {
-		ctx.font = 'bold 15px sans-serif';
+		ctx.font = 'bold 15px comfortaa, sans-serif';
 		ctx.fillText('Maximum Combo', canvas.width / 1000 * 750, canvas.height / 500 * 170);
-		ctx.font = 'bold 30px sans-serif';
+		ctx.font = 'bold 30px comfortaa, sans-serif';
 		ctx.fillText(`${beatmap.maxCombo}x`, canvas.width / 1000 * 750, canvas.height / 500 * 200);
 	}
-	ctx.font = 'bold 15px sans-serif';
+	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Beats per Minute', canvas.width / 1000 * 750, canvas.height / 500 * 250);
-	ctx.font = 'bold 30px sans-serif';
+	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(`${beatmap.bpm} BPM`, canvas.width / 1000 * 750, canvas.height / 500 * 280);
-	ctx.font = 'bold 15px sans-serif';
+	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Length', canvas.width / 1000 * 750, canvas.height / 500 * 330);
-	ctx.font = 'bold 30px sans-serif';
+	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(`${totalLength} Total`, canvas.width / 1000 * 750, canvas.height / 500 * 360);
-	ctx.font = 'bold 15px sans-serif';
+	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Length (Drain)', canvas.width / 1000 * 750, canvas.height / 500 * 410);
-	ctx.font = 'bold 30px sans-serif';
+	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(`${drainLength} Drain`, canvas.width / 1000 * 750, canvas.height / 500 * 440);
 
 	const output = [canvas, ctx, beatmap];
@@ -239,7 +241,7 @@ async function drawFooter(input) {
 
 	let today = new Date().toLocaleDateString();
 
-	ctx.font = 'bold 15px sans-serif';
+	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 
 	ctx.textAlign = 'left';
