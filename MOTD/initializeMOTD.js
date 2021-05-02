@@ -146,7 +146,11 @@ module.exports = {
 
 			let mondayMorning = new Date();
 			mondayMorning.setHours(0);
-			mondayMorning.setUTCDate(mondayMorning.getUTCDate() - (mondayMorning.getUTCDay() - 1));
+			if (mondayMorning.getUTCDay() === 0) {
+				mondayMorning.setUTCDate(mondayMorning.getUTCDate() - 6);
+			} else {
+				mondayMorning.setUTCDate(mondayMorning.getUTCDate() - (mondayMorning.getUTCDay() - 1));
+			}
 
 			//Weekly Leaderboard
 			createLeaderboard(client, mondayMorning, 4, 'Weekly', '835187571625164800');

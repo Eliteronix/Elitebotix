@@ -134,7 +134,7 @@ async function getQualifierResults(map, players) {
 	let results = [];
 
 	for (let i = 0; i < players.length; i++) {
-		const score = await osuApi.getScores({ b: map.id, u: players[i].osuUserId, m: 0 })
+		const score = await osuApi.getScores({ b: map.id, u: players[i].osuUserId })
 			.then(async (scores) => {
 				let mods = getMods(scores[0].raw_mods);
 				if (!mods[0]) {
@@ -143,19 +143,6 @@ async function getQualifierResults(map, players) {
 				scores[0].raw_mods = mods;
 				if (mods.includes('NF')) {
 					scores[0].score = parseInt(scores[0].score) * 2;
-				}
-				if (scores[0].beatmapId !== map.id) {
-					let startOfRound = new Date();
-					startOfRound.setUTCSeconds(startOfRound.getUTCSeconds() - parseInt(map.length.total) - 150);
-					if (scores[0].raw_date < startOfRound) {
-						scores[0].score = '-1';
-						scores[0].pp = 'It seems like you didn\'t submit a score in time for the beatmap in this round.';
-						scores[0].raw_mods = ['Invalid Score'];
-					} else {
-						scores[0].score = '-1';
-						scores[0].pp = 'It seems like your last submitted score was played on the wrong beatmap. Maybe it was the wrong difficulty?';
-						scores[0].raw_mods = ['Invalid Score'];
-					}
 				}
 				return scores[0];
 			})
