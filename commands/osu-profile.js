@@ -86,6 +86,8 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				const canvasWidth = 700;
 				const canvasHeight = 350;
 
+				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
@@ -148,6 +150,8 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				const canvasWidth = 700;
 				const canvasHeight = 350;
 
+				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
@@ -209,7 +213,7 @@ async function drawTitle(input, server, mode) {
 	}
 
 	// Write the title of the player
-	ctx.font = '30px sans-serif';
+	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText(title, canvas.width / 2, 35);
@@ -230,7 +234,7 @@ async function drawRank(input) {
 	let pp = humanReadable(Math.floor(user.pp.raw));
 
 	// Write the title of the player
-	ctx.font = '18px sans-serif';
+	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText(`Global Rank: #${globalRank} | ${user.country} Rank: #${countryRank}`, canvas.width / 2, 60 + yOffset);
@@ -248,7 +252,7 @@ async function drawLevel(input, server) {
 	const yOffset = 25;
 
 	// Write the text for the floored level of the player
-	ctx.font = '40px sans-serif';
+	ctx.font = '40px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText(Math.floor(user.level), canvas.width / 10, canvas.height / 2 + 15 + yOffset);
@@ -292,7 +296,7 @@ async function drawLevel(input, server) {
 	const ranksOffset = 40;
 
 	//Score and Accuracy
-	ctx.font = 'bold 14px sans-serif';
+	ctx.font = 'bold 14px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('Ranked:', canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * -1 + 6 - 8 + yOffset);
@@ -319,7 +323,7 @@ async function drawRanks(input) {
 
 	const ranksOffset = 30;
 
-	ctx.font = 'bold 16px sans-serif';
+	ctx.font = 'bold 16px comfortaa, sans-serif';
 	ctx.textAlign = 'left';
 	//get SSH
 	const SSH = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS-Silver.6681366c.svg');
@@ -356,7 +360,7 @@ async function drawPlays(input, server) {
 
 	let yOffset = 25;
 
-	ctx.font = 'bold 16px sans-serif';
+	ctx.font = 'bold 16px comfortaa, sans-serif';
 	ctx.textAlign = 'center';
 
 	const playHours = Math.floor(user.secondsPlayed / 60 / 60);
@@ -385,7 +389,7 @@ async function drawFooter(input, server) {
 	let today = new Date().toLocaleDateString();
 
 	// Write the title of the player
-	ctx.font = '12px sans-serif';
+	ctx.font = '12px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 
 	if (server !== 'ripple') {

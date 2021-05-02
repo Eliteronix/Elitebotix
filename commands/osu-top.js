@@ -86,6 +86,8 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount) {
 				const canvasWidth = 1000;
 				const canvasHeight = 500;
 
+				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
@@ -139,6 +141,8 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount) {
 
 				const canvasWidth = 1000;
 				const canvasHeight = 500;
+
+				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -200,7 +204,7 @@ async function drawTitle(input, server, mode) {
 	roundedRect(ctx, canvas.width / 2 - title.length * 8.5, canvas.height / 50, title.length * 17, canvas.height / 12, 5, '28', '28', '28', 0.75);
 
 	// Write the title of the player
-	ctx.font = '30px sans-serif';
+	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText(title, canvas.width / 2, canvas.height / 12);
@@ -216,7 +220,7 @@ async function drawFooter(input) {
 
 	let today = new Date().toLocaleDateString();
 
-	ctx.font = '12px sans-serif';
+	ctx.font = '12px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'right';
 	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
@@ -263,7 +267,7 @@ async function drawTopPlays(input, server, mode, msg) {
 		const rankImage = await Canvas.loadImage(getRankImage(scores[i].rank));
 		ctx.drawImage(rankImage, canvas.width / 35, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 13 / 2 - canvas.height / 31.25 / 2, canvas.width / 31.25, canvas.height / 31.25);
 
-		ctx.font = 'bold 18px sans-serif';
+		ctx.font = 'bold 18px comfortaa, sans-serif';
 		ctx.fillStyle = '#FF66AB';
 		ctx.textAlign = 'right';
 		ctx.fillText(humanReadable(Math.floor(scores[i].pp)) + 'pp', (canvas.width / 35) * 34, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 13 / 2 + canvas.height / 70);
@@ -276,13 +280,13 @@ async function drawTopPlays(input, server, mode, msg) {
 		}
 
 		//Write title per map
-		ctx.font = 'bold 15px sans-serif';
+		ctx.font = 'bold 15px comfortaa, sans-serif';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.textAlign = 'left';
 		ctx.fillText(beatmapTitle, (canvas.width / 35) * 3, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 12 / 2);
 
 		//Write Difficulty per map
-		ctx.font = 'bold 10px sans-serif';
+		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.fillStyle = '#FFCC22';
 		ctx.textAlign = 'left';
 		ctx.fillText(beatmap[0].version, (canvas.width / 35) * 3, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 12 / 2 + canvas.height / 35);
@@ -316,7 +320,7 @@ async function drawTopPlays(input, server, mode, msg) {
 
 
 		//Write achieved on per map
-		ctx.font = 'bold 10px sans-serif';
+		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.fillStyle = '#A08C95';
 		ctx.textAlign = 'left';
 		ctx.fillText(achievedTime, (canvas.width / 35) * 3 + parseInt(beatmap[0].version.length) * 6 + canvas.width / 50, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 12 / 2 + canvas.height / 35);
@@ -331,7 +335,7 @@ async function drawTopPlays(input, server, mode, msg) {
 			combo = `(${scores[i].maxCombo}/${beatmap[0].maxCombo})`;
 		}
 
-		ctx.font = 'bold 10px sans-serif';
+		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.fillStyle = '#FFCC22';
 		ctx.textAlign = 'right';
 		ctx.fillText(combo, (canvas.width / 28) * 23.4, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 12 / 2 + canvas.height / 35);

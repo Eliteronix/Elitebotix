@@ -102,6 +102,8 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 						const canvasWidth = 1000;
 						const canvasHeight = 500;
 
+						Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
 						//Create Canvas
 						const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
@@ -187,6 +189,8 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 								const canvasWidth = 1000;
 								const canvasHeight = 500;
 
+								Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
 								//Create Canvas
 								const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
@@ -257,11 +261,11 @@ async function drawTitle(input) {
 	ctx.drawImage(modePic, canvas.width / 1000 * 10, canvas.height / 500 * 40, canvas.height / 500 * 35, canvas.height / 500 * 35);
 
 	// Write the title of the beatmap
-	ctx.font = '30px sans-serif';
+	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'left';
 	ctx.fillText(`${beatmap.title} by ${beatmap.artist}`, canvas.width / 100, canvas.height / 500 * 35);
-	ctx.font = '25px sans-serif';
+	ctx.font = '25px comfortaa, sans-serif';
 
 	const mods = getMods(score.raw_mods);
 
@@ -421,7 +425,7 @@ async function drawCover(input) {
 	ctx.stroke();
 
 	//Write rank
-	ctx.font = '70px sans-serif';
+	ctx.font = '70px comfortaa, sans-serif';
 	ctx.textAlign = 'center';
 	ctx.strokeStyle = 'black';
 	ctx.lineWidth = 4;
@@ -436,7 +440,7 @@ async function drawCover(input) {
 	}
 
 	//Write Score
-	ctx.font = '60px sans-serif';
+	ctx.font = '60px comfortaa, sans-serif';
 	ctx.textAlign = 'left';
 	ctx.strokeStyle = 'black';
 	ctx.lineWidth = 4;
@@ -473,7 +477,7 @@ async function drawCover(input) {
 	const formattedSubmitDate = `${score.raw_date.substring(8, 10)} ${month} ${score.raw_date.substring(0, 4)} ${score.raw_date.substring(11, 16)}`;
 
 	//Write Played By and Submitted on
-	ctx.font = '10px sans-serif';
+	ctx.font = '10px comfortaa, sans-serif';
 	ctx.textAlign = 'left';
 	ctx.fillStyle = '#FFFFFF';
 	ctx.fillText('Played by', canvas.width / 900 * 310, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
@@ -495,7 +499,7 @@ async function drawFooter(input) {
 
 	let today = new Date().toLocaleDateString();
 
-	ctx.font = '12px sans-serif';
+	ctx.font = '12px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'right';
 	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
@@ -520,7 +524,7 @@ async function drawAccInfo(input) {
 
 		//Draw completion
 		roundedRect(ctx, canvas.width / 1000 * 453, canvas.height / 500 * 395, 110, 50, 5, '00', '00', '00', 0.5);
-		ctx.font = '18px sans-serif';
+		ctx.font = '18px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText('Completion', canvas.width / 1000 * 453 + 55, canvas.height / 500 * 415);
@@ -532,14 +536,14 @@ async function drawAccInfo(input) {
 
 	//Acc
 	roundedRect(ctx, canvas.width / 1000 * 600, canvas.height / 500 * 365, 110, 50, 5, '00', '00', '00', 0.5);
-	ctx.font = '18px sans-serif';
+	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('Accuracy', canvas.width / 1000 * 600 + 55, canvas.height / 500 * 385);
 	ctx.fillText(`${Math.round(accuracy * 100) / 100}%`, canvas.width / 1000 * 600 + 55, canvas.height / 500 * 410);
 	//Combo
 	roundedRect(ctx, canvas.width / 1000 * 725, canvas.height / 500 * 365, 130, 50, 5, '00', '00', '00', 0.5);
-	ctx.font = '18px sans-serif';
+	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('Max Combo', canvas.width / 1000 * 735 + 55, canvas.height / 500 * 385);
@@ -560,35 +564,35 @@ async function drawAccInfo(input) {
 
 	//PP
 	roundedRect(ctx, canvas.width / 1000 * 870, canvas.height / 500 * 365, 110, 50, 5, '00', '00', '00', 0.5);
-	ctx.font = '18px sans-serif';
+	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('PP', canvas.width / 1000 * 870 + 55, canvas.height / 500 * 385);
 	ctx.fillText(`${pp}`, canvas.width / 1000 * 870 + 55, canvas.height / 500 * 410);
 	//300
 	roundedRect(ctx, canvas.width / 1000 * 600, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
-	ctx.font = '18px sans-serif';
+	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('300s', canvas.width / 1000 * 600 + 40, canvas.height / 500 * 445);
 	ctx.fillText(`${score.counts[300]}`, canvas.width / 1000 * 600 + 40, canvas.height / 500 * 470);
 	//100
 	roundedRect(ctx, canvas.width / 1000 * 700, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
-	ctx.font = '18px sans-serif';
+	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('100s', canvas.width / 1000 * 700 + 40, canvas.height / 500 * 445);
 	ctx.fillText(`${score.counts[100]}`, canvas.width / 1000 * 700 + 40, canvas.height / 500 * 470);
 	//50
 	roundedRect(ctx, canvas.width / 1000 * 800, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
-	ctx.font = '18px sans-serif';
+	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('50s', canvas.width / 1000 * 800 + 40, canvas.height / 500 * 445);
 	ctx.fillText(`${score.counts[50]}`, canvas.width / 1000 * 800 + 40, canvas.height / 500 * 470);
 	//Miss
 	roundedRect(ctx, canvas.width / 1000 * 900, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
-	ctx.font = '18px sans-serif';
+	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('Miss', canvas.width / 1000 * 900 + 40, canvas.height / 500 * 445);
@@ -629,7 +633,7 @@ async function drawUserInfo(input, server) {
 
 	roundedRect(ctx, canvas.width / 900 * 50 + userBackground.height / 10 * 2, canvas.height / 500 * 375 + 5, userBackground.width / 10 * 2 - userBackground.height / 10 * 2 - 5, userBackground.height / 10 * 2 - 10, 5, '00', '00', '00', 0.5);
 
-	ctx.font = '20px sans-serif';
+	ctx.font = '20px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'left';
 	ctx.fillText(`Player: ${user.name}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 25);

@@ -592,6 +592,8 @@ module.exports = {
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
+		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
 		//Get context and load the image
 		const ctx = canvas.getContext('2d');
 
@@ -604,11 +606,11 @@ module.exports = {
 		}
 
 		// Write the title of the leaderboard
-		ctx.font = 'bold 35px sans-serif';
+		ctx.font = 'bold 35px comfortaa, sans-serif';
 		if (columns === 1 && title.length > 40) {
-			ctx.font = 'bold 30px sans-serif';
+			ctx.font = 'bold 30px comfortaa, sans-serif';
 		} else if (columns === 1 && title.length > 50) {
-			ctx.font = 'bold 25px sans-serif';
+			ctx.font = 'bold 25px comfortaa, sans-serif';
 		}
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
@@ -661,15 +663,15 @@ module.exports = {
 				ctx.fillStyle = '#ffffff';
 			}
 
-			ctx.font = 'bold 25px sans-serif';
+			ctx.font = 'bold 25px comfortaa, sans-serif';
 			ctx.fillText(`${i + 1}. ${data[i].name}`, xPosition, yPositionName);
-			ctx.font = '25px sans-serif';
+			ctx.font = '25px comfortaa, sans-serif';
 			ctx.fillText(data[i].value, xPosition, yPositionValue);
 		}
 
 		let today = new Date().toLocaleDateString();
 
-		ctx.font = 'bold 15px sans-serif';
+		ctx.font = 'bold 15px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
 
 		ctx.textAlign = 'right';
