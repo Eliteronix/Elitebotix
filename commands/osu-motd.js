@@ -14,7 +14,7 @@ module.exports = {
 	args: true,
 	cooldown: 10,
 	//noCooldownMessage: true,
-	tags: 'osu',
+	tags: 'debug',
 	prefixCommand: true,
 	async execute(msg, args) {
 		if (args[0].toLowerCase() === 'server') {

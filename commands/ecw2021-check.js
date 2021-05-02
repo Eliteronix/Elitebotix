@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const Canvas = require('canvas');
+const { calculateStarRating } = require('osu-sr-calculator');
 
 module.exports = {
 	name: 'ecw2021-check',
@@ -36,7 +36,7 @@ module.exports = {
 
 		osuApi.getBeatmaps({ b: args[2] })
 			.then(async (beatmaps) => {
-				getBeatmap(msg, beatmaps[0]);
+				getBeatmap(msg, args);
 
 				const viabilityEmbed = new Discord.MessageEmbed()
 					.setColor('#00FF00')
@@ -135,66 +135,64 @@ module.exports = {
 				const beginnerLowerDiff = 4.06;
 				const beginnerUpperDiff = 5.34;
 
+				if (args[0].toLowerCase() === 'hr') {
+					const starRating = await calculateStarRating(beatmaps[0].id, ['HR'], false, true);
+
+					beatmaps[0].difficulty.rating = starRating.HR.total;
+					beatmaps[0].difficulty.aim = starRating.HR.aim;
+					beatmaps[0].difficulty.speed = starRating.HR.speed;
+				} else if (args[0].toLowerCase() === 'dt') {
+					const starRating = await calculateStarRating(beatmaps[0].id, ['DT'], false, true);
+
+					beatmaps[0].difficulty.rating = starRating.DT.total;
+					beatmaps[0].difficulty.aim = starRating.DT.aim;
+					beatmaps[0].difficulty.speed = starRating.DT.speed;
+					beatmaps[0].length.total = Math.round(beatmaps[0].length.total / 3 * 2);
+					beatmaps[0].length.drain = Math.round(beatmaps[0].length.drain / 3 * 2);
+					beatmaps[0].bpm = beatmaps[0].bpm * 1.5;
+				}
+
 				//Difficulty: Maps have to be between the specified diffculty
-				if (args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating < topLowerDiff ||
-					args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating < topLowerDiff ||
-					args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating < topLowerDiff) {
+				if (args[1].toLowerCase() === 'top' && beatmaps[0].difficulty.rating < topLowerDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('The Star Rating is too low', `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating > topUpperDiff ||
-					args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating > topUpperDiff ||
-					args[1].toLowerCase() === 'top' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating > topUpperDiff) {
+						.addField(`The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}`);
+				} else if (args[1].toLowerCase() === 'top' && beatmaps[0].difficulty.rating > topUpperDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('The Star Rating is too high', `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating < middleLowerDiff ||
-					args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating < middleLowerDiff ||
-					args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating < middleLowerDiff) {
+						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}`);
+				} else if (args[1].toLowerCase() === 'middle' && beatmaps[0].difficulty.rating < middleLowerDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('The Star Rating is too low', `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating > middleUpperDiff ||
-					args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating > middleUpperDiff ||
-					args[1].toLowerCase() === 'middle' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating > middleUpperDiff) {
+						.addField(`The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}`);
+				} else if (args[1].toLowerCase() === 'middle' && beatmaps[0].difficulty.rating > middleUpperDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('The Star Rating is too high', `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
-					args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating < lowerLowerDiff ||
-					args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating < lowerLowerDiff) {
+						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}`);
+				} else if (args[1].toLowerCase() === 'lower' && beatmaps[0].difficulty.rating < lowerLowerDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('The Star Rating is too low', `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating > lowerUpperDiff ||
-					args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating > lowerUpperDiff ||
-					args[1].toLowerCase() === 'lower' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating > lowerUpperDiff) {
+						.addField(`The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}`);
+				} else if (args[1].toLowerCase() === 'lower' && beatmaps[0].difficulty.rating > lowerUpperDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('The Star Rating is too high', `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
-					args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating < beginnerLowerDiff ||
-					args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating < beginnerLowerDiff) {
+						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}`);
+				} else if (args[1].toLowerCase() === 'beginner' && beatmaps[0].difficulty.rating < beginnerLowerDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('The Star Rating is too low', `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'nm' && beatmaps[0].difficulty.rating > beginnerUpperDiff ||
-					args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'hd' && beatmaps[0].difficulty.rating > beginnerUpperDiff ||
-					args[1].toLowerCase() === 'beginner' && args[0].toLowerCase() === 'fm' && beatmaps[0].difficulty.rating > beginnerUpperDiff) {
+						.addField(`The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}`);
+				} else if (args[1].toLowerCase() === 'beginner' && beatmaps[0].difficulty.rating > beginnerUpperDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('The Star Rating is too high', `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}`);
-				} else if (args[0].toLowerCase() === 'hr' || args[0].toLowerCase() === 'dt') {
-					viabilityEmbed
-						.addField('Star Rating not checked', 'The Star Rating for HR and DT maps is not automatically being checked at the moment but they should be in the range of the bracket after recalculations');
+						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}`);
 				}
 
 				msg.channel.send(viabilityEmbed);
@@ -210,241 +208,15 @@ module.exports = {
 	}
 };
 
-async function getBeatmap(msg, beatmap) {
-	let processingMessage = await msg.channel.send(`[${beatmap.id}] Processing...`);
-
-	const canvasWidth = 1000;
-	const canvasHeight = 500;
-
-	//Create Canvas
-	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
-
-	//Get context and load the image
-	const ctx = canvas.getContext('2d');
-	const background = await Canvas.loadImage('./other/osu-background.png');
-	ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-
-	let elements = [canvas, ctx, beatmap];
-
-	elements = await drawTitle(elements);
-
-	elements = await drawMode(elements);
-
-	elements = await drawStats(elements);
-
-	elements = await drawFooter(elements);
-
-	await drawBackground(elements);
-
-	//Create as an attachment
-	const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'osu-profile.png');
-
-	//Send attachment
-	await msg.channel.send(`Website: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>`, attachment);
-	processingMessage.delete();
-}
-
-async function drawTitle(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let beatmap = input[2];
-
-	let beatmapTitle = `${beatmap.title}`;
-	const maxSizeTitle = parseInt(canvas.width / 1000 * 40);
-	if (beatmapTitle.length > maxSizeTitle) {
-		beatmapTitle = beatmapTitle.substring(0, maxSizeTitle - 3) + '...';
-	}
-
-	let beatmapArtist = `by ${beatmap.artist}`;
-	const maxSizeArtist = parseInt(canvas.width / 1000 * 40);
-	if (beatmapArtist.length > maxSizeArtist) {
-		beatmapArtist = beatmapArtist.substring(0, maxSizeArtist - 3) + '...';
-	}
-
-	let beatmapDifficulty = `[${beatmap.version}]`;
-	const maxSizeDifficulty = parseInt(canvas.width / 1000 * 40);
-	if (beatmapDifficulty.length > maxSizeDifficulty) {
-		beatmapDifficulty = beatmapDifficulty.substring(0, maxSizeDifficulty - 3) + '...';
-	}
-
-	// Write the title of the map
-	ctx.font = 'bold 25px sans-serif';
-	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'center';
-	ctx.fillText(beatmapTitle, canvas.width / 3 * 2, canvas.height / 100 * 7);
-	ctx.fillText(beatmapArtist, canvas.width / 3 * 2, canvas.height / 50 * 7);
-	ctx.fillText(beatmapDifficulty, canvas.width / 3 * 2, canvas.height / 100 * 21);
-
-	const output = [canvas, ctx, beatmap];
-	return output;
-}
-
-async function drawMode(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let beatmap = input[2];
-
-	const gameMode = getGameMode(beatmap);
-	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
-	ctx.drawImage(modePic, (canvas.height / 3 - canvas.height / 3 / 4 * 3) / 2, canvas.height / 3 * 2 + (canvas.height / 3 - canvas.height / 3 / 4 * 3) / 4, canvas.height / 3 / 4 * 3, canvas.height / 3 / 4 * 3);
-
-	const output = [canvas, ctx, beatmap];
-	return output;
-}
-
-function drawStats(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let beatmap = input[2];
-
-	const totalLengthSeconds = (beatmap.length.total % 60) + '';
-	const totalLengthMinutes = (beatmap.length.total - beatmap.length.total % 60) / 60;
-	const totalLength = totalLengthMinutes + ':' + totalLengthSeconds.padStart(2, '0');
-	const drainLengthSeconds = (beatmap.length.drain % 60) + '';
-	const drainLengthMinutes = (beatmap.length.drain - beatmap.length.drain % 60) / 60;
-	const drainLength = drainLengthMinutes + ':' + drainLengthSeconds.padStart(2, '0');
-
-	//Round user rating and display as 10 stars
-	const userRating = Math.round(beatmap.rating);
-	let userRatingDisplay;
-	for (let i = 0; i < 10; i++) {
-		if (i < userRating) {
-			if (userRatingDisplay) {
-				userRatingDisplay = userRatingDisplay + '★';
-			} else {
-				userRatingDisplay = '★';
-			}
-		} else {
-			if (userRatingDisplay) {
-				userRatingDisplay = userRatingDisplay + '☆';
-			} else {
-				userRatingDisplay = '☆';
-			}
-		}
-	}
-
-	// Write the stats of the map
-	ctx.font = 'bold 30px sans-serif';
-	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'left';
-	//First column
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillText('Ranked Status', canvas.width / 1000 * 330, canvas.height / 500 * 170);
-	ctx.font = 'bold 30px sans-serif';
-	ctx.fillText(beatmap.approvalStatus, canvas.width / 1000 * 330, canvas.height / 500 * 200);
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillText('Difficulty Rating', canvas.width / 1000 * 330, canvas.height / 500 * 250);
-	ctx.font = 'bold 30px sans-serif';
-	ctx.fillText(`${Math.round(beatmap.difficulty.rating * 100) / 100} ★`, canvas.width / 1000 * 330, canvas.height / 500 * 280);
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillText('Mapper', canvas.width / 1000 * 330, canvas.height / 500 * 330);
-	ctx.font = 'bold 30px sans-serif';
-	ctx.fillText(beatmap.creator, canvas.width / 1000 * 330, canvas.height / 500 * 360);
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillText('User Rating', canvas.width / 1000 * 330, canvas.height / 500 * 420);
-	ctx.font = 'bold 20px sans-serif';
-	ctx.fillText(userRatingDisplay, canvas.width / 1000 * 330, canvas.height / 500 * 440);
-
-	//Second column
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillText('Circle Size', canvas.width / 1000 * 580, canvas.height / 500 * 170);
-	ctx.font = 'bold 30px sans-serif';
-	ctx.fillText(`CS ${beatmap.difficulty.size}`, canvas.width / 1000 * 580, canvas.height / 500 * 200);
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillText('Approach Rate', canvas.width / 1000 * 580, canvas.height / 500 * 250);
-	ctx.font = 'bold 30px sans-serif';
-	ctx.fillText(`AR ${beatmap.difficulty.approach}`, canvas.width / 1000 * 580, canvas.height / 500 * 280);
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillText('Overall Difficulty', canvas.width / 1000 * 580, canvas.height / 500 * 330);
-	ctx.font = 'bold 30px sans-serif';
-	ctx.fillText(`OD ${beatmap.difficulty.overall}`, canvas.width / 1000 * 580, canvas.height / 500 * 360);
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillText('HP Drain', canvas.width / 1000 * 580, canvas.height / 500 * 410);
-	ctx.font = 'bold 30px sans-serif';
-	ctx.fillText(`HP ${beatmap.difficulty.drain}`, canvas.width / 1000 * 580, canvas.height / 500 * 440);
-
-	//Third column
-	if(beatmap.mode === 'Mania'){
-		ctx.font = 'bold 15px sans-serif';
-		ctx.fillText('# of objects', canvas.width / 1000 * 750, canvas.height / 500 * 170);
-		ctx.font = 'bold 30px sans-serif';
-		ctx.fillText(`${parseInt(beatmap.objects.normal)+parseInt(beatmap.objects.slider)+parseInt(beatmap.objects.spinner)}`, canvas.width / 1000 * 750, canvas.height / 500 * 200);
-	} else {
-		ctx.font = 'bold 15px sans-serif';
-		ctx.fillText('Maximum Combo', canvas.width / 1000 * 750, canvas.height / 500 * 170);
-		ctx.font = 'bold 30px sans-serif';
-		ctx.fillText(`${beatmap.maxCombo}x`, canvas.width / 1000 * 750, canvas.height / 500 * 200);
-	}
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillText('Beats per Minute', canvas.width / 1000 * 750, canvas.height / 500 * 250);
-	ctx.font = 'bold 30px sans-serif';
-	ctx.fillText(`${beatmap.bpm} BPM`, canvas.width / 1000 * 750, canvas.height / 500 * 280);
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillText('Length', canvas.width / 1000 * 750, canvas.height / 500 * 330);
-	ctx.font = 'bold 30px sans-serif';
-	ctx.fillText(`${totalLength} Total`, canvas.width / 1000 * 750, canvas.height / 500 * 360);
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillText('Length (Drain)', canvas.width / 1000 * 750, canvas.height / 500 * 410);
-	ctx.font = 'bold 30px sans-serif';
-	ctx.fillText(`${drainLength} Drain`, canvas.width / 1000 * 750, canvas.height / 500 * 440);
-
-	const output = [canvas, ctx, beatmap];
-	return output;
-}
-
-async function drawFooter(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let beatmap = input[2];
-
-	let today = new Date().toLocaleDateString();
-
-	ctx.font = 'bold 15px sans-serif';
-	ctx.fillStyle = '#ffffff';
-
-	ctx.textAlign = 'left';
-	ctx.fillText(`ID: ${beatmap.id}`, canvas.width / 140, canvas.height - canvas.height / 70);
-
-	ctx.textAlign = 'right';
-	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
-
-	const output = [canvas, ctx, beatmap];
-	return output;
-}
-
-async function drawBackground(input) {
-	let canvas = input[0];
-	let ctx = input[1];
-	let beatmap = input[2];
-
-	//Get a circle in the middle for inserting the map background
-	ctx.beginPath();
-	ctx.arc(0, 0, canvas.height / 3 * 2, 0, Math.PI * 2, true);
-	ctx.closePath();
-	ctx.clip();
-
-	//Draw a shape onto the main canvas in the top left
+async function getBeatmap(msg, args) {
+	let command = require('./osu-beatmap.js');
+	let newArgs = [args[2]];
 	try {
-		const background = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapSetId}/covers/cover.jpg`);
-		ctx.drawImage(background, background.width / 2 - background.height / 2, 0, background.height, background.height, 0, 0, canvas.height / 3 * 2, canvas.height / 3 * 2);
+		command.execute(msg, newArgs, true);
 	} catch (error) {
-		const background = await Canvas.loadImage('https://osu.ppy.sh/assets/images/default-bg.7594e945.png');
-		ctx.drawImage(background, background.width / 2 - background.height / 2, 0, background.height, background.height, 0, 0, canvas.height / 3 * 2, canvas.height / 3 * 2);
+		console.error(error);
+		const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
+		msg.reply('There was an error trying to execute that command. The developers have been alerted.');
+		eliteronixUser.send(`There was an error trying to execute a command.\n\nMessage by ${msg.author.username}#${msg.author.discriminator}: \`${msg.content}\`\n\n${error}`);
 	}
-	const output = [canvas, ctx, beatmap];
-	return output;
-}
-
-function getGameMode(beatmap) {
-	let gameMode;
-	if (beatmap.mode === 'Standard') {
-		gameMode = 'osu';
-	} else if (beatmap.mode === 'Taiko') {
-		gameMode = 'taiko';
-	} else if (beatmap.mode === 'Mania') {
-		gameMode = 'mania';
-	} else if (beatmap.mode === 'Catch the Beat') {
-		gameMode = 'fruits';
-	}
-	return gameMode;
 }
