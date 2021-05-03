@@ -19,7 +19,7 @@ module.exports = {
 	async execute(msg, args) {
 		if(msg.mentions.users.first()){
 			// eslint-disable-next-line no-undef
-			let url = `https://g.tenor.com/v1/search?q=slap&key=${process.env.TENORTOKEN}&contentfilter=high`;
+			let url = `https://g.tenor.com/v1/search?q=slap%20anime&key=${process.env.TENORTOKEN}&contentfilter=high`;
 			let response = await fetch(url);
 			let json = await response.json();
 			const index = Math.floor(Math.random() * json.results.length);
