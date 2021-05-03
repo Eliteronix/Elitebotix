@@ -9,7 +9,7 @@ module.exports = {
 	name: 'osu-top',
 	aliases: ['osu-plays', 'osu-topplays', 'osu-best'],
 	description: 'Sends an info card about the topplays of the specified player',
-	usage: '[username] [username] ... (Use "_" instead of spaces; Use --b for bancho / --r for ripple; Use --o/--t/--c/--m for modes; --n / --new / --recent for recent scores)',
+	usage: '[username] [username] ... (Use "_" instead of spaces; Use --b for bancho / --r for ripple; Use --o/--t/--c/--m for modes; --n / --new / --recent for recent scores; --25 for top 25...)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: 'ATTACH_FILES',
@@ -38,13 +38,28 @@ module.exports = {
 			}
 		}
 
+		let limit = 10;
+
+		for (let i = 0; i < args.length; i++) {
+			if (args[i].startsWith('--') && !isNaN(args[i].replace('--', ''))) {
+				limit = parseInt(args[i].replace('--', ''));
+				if (limit > 100) {
+					limit = 100;
+				} else if (limit < 1) {
+					limit = 1;
+				}
+				args.splice(i, 1);
+				i--;
+			}
+		}
+
 		if (!args[0]) {
 			//Get profile by author if no argument
 			if (commandUser && commandUser.osuUserId) {
-				getTopPlays(msg, commandUser.osuUserId, server, mode, false, recentScores);
+				getTopPlays(msg, commandUser.osuUserId, server, mode, false, recentScores, limit);
 			} else {
 				const userDisplayName = await getMessageUserDisplayname(msg);
-				getTopPlays(msg, userDisplayName, server, mode, false, recentScores);
+				getTopPlays(msg, userDisplayName, server, mode, false, recentScores, limit);
 			}
 		} else {
 			//Get profiles by arguments
@@ -55,21 +70,21 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getTopPlays(msg, discordUser.osuUserId, server, mode, false, recentScores);
+						getTopPlays(msg, discordUser.osuUserId, server, mode, false, recentScores, limit);
 					} else {
 						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-						getTopPlays(msg, args[i], server, mode, false, recentScores);
+						getTopPlays(msg, args[i], server, mode, false, recentScores, limit);
 					}
 				} else {
 
 					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getTopPlays(msg, args[i], server, mode, true, recentScores);
+							getTopPlays(msg, args[i], server, mode, true, recentScores, limit);
 						} else {
-							getTopPlays(msg, args[i], server, mode, false, recentScores);
+							getTopPlays(msg, args[i], server, mode, false, recentScores, limit);
 						}
 					} else {
-						getTopPlays(msg, args[i], server, mode, false, recentScores);
+						getTopPlays(msg, args[i], server, mode, false, recentScores, limit);
 					}
 				}
 			}
@@ -77,7 +92,7 @@ module.exports = {
 	}
 };
 
-async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentScores) {
+async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentScores, limit) {
 	if (server === 'bancho') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -94,7 +109,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentS
 				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 				const canvasWidth = 1000;
-				const canvasHeight = 500;
+				const canvasHeight = 83 + limit * 41.66666;
 
 				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
 
@@ -104,13 +119,17 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentS
 				//Get context and load the image
 				const ctx = canvas.getContext('2d');
 				const background = await Canvas.loadImage('./other/osu-background.png');
-				ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+				for (let i = 0; i < canvas.height / background.height; i++) {
+					for (let j = 0; j < canvas.width / background.width; j++) {
+						ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+					}
+				}
 
 				let elements = [canvas, ctx, user];
 
-				elements = await drawTitle(elements, server, mode);
+				elements = await drawTitle(elements, server, mode, recentScores);
 
-				elements = await drawTopPlays(elements, server, mode, msg, recentScores);
+				elements = await drawTopPlays(elements, server, mode, msg, recentScores, limit);
 
 				await drawFooter(elements);
 
@@ -150,7 +169,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentS
 				let user = rippleToBanchoUser(responseJson[0]);
 
 				const canvasWidth = 1000;
-				const canvasHeight = 500;
+				const canvasHeight = 83 + limit * 41.66666;
 
 				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
 
@@ -164,7 +183,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentS
 
 				let elements = [canvas, ctx, user];
 
-				elements = await drawTitle(elements, server, mode);
+				elements = await drawTitle(elements, server, mode, recentScores);
 
 				elements = await drawTopPlays(elements, server, mode, msg, recentScores);
 
@@ -193,7 +212,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentS
 	}
 }
 
-async function drawTitle(input, server, mode) {
+async function drawTitle(input, server, mode, recentScores) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -204,20 +223,26 @@ async function drawTitle(input, server, mode) {
 		serverDisplay = `[${server}] `;
 	}
 
-	let gameMode = getGameModeName(mode);
-
-	let title = `✰ ${serverDisplay}${user.name}'s ${gameMode} top plays ✰`;
-	if (user.name.endsWith('s') || user.name.endsWith('x')) {
-		title = `✰ ${serverDisplay}${user.name}' ${gameMode} top plays ✰`;
+	let recent = '';
+	
+	if (recentScores) {
+		recent = 'most recent ';
 	}
 
-	roundedRect(ctx, canvas.width / 2 - title.length * 8.5, canvas.height / 50, title.length * 17, canvas.height / 12, 5, '28', '28', '28', 0.75);
+	let gameMode = getGameModeName(mode);
+
+	let title = `✰ ${serverDisplay}${user.name}'s ${recent}${gameMode} top plays ✰`;
+	if (user.name.endsWith('s') || user.name.endsWith('x')) {
+		title = `✰ ${serverDisplay}${user.name}' ${recent}${gameMode} top plays ✰`;
+	}
+
+	roundedRect(ctx, canvas.width / 2 - title.length * 8.5, 500 / 50, title.length * 17, 500 / 12, 5, '28', '28', '28', 0.75);
 
 	// Write the title of the player
 	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText(title, canvas.width / 2, canvas.height / 12);
+	ctx.fillText(title, canvas.width / 2, 500 / 12);
 
 	const output = [canvas, ctx, user];
 	return output;
@@ -233,13 +258,13 @@ async function drawFooter(input) {
 	ctx.font = '12px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'right';
-	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
+	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 5);
 
 	const output = [canvas, ctx, user];
 	return output;
 }
 
-async function drawTopPlays(input, server, mode, msg, recentScores) {
+async function drawTopPlays(input, server, mode, msg, recentScores, showLimit) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -254,7 +279,7 @@ async function drawTopPlays(input, server, mode, msg, recentScores) {
 
 	let scores = [];
 
-	let limit = 10;
+	let limit = showLimit;
 
 	if (recentScores) {
 		limit = 100;
@@ -281,16 +306,16 @@ async function drawTopPlays(input, server, mode, msg, recentScores) {
 		quicksort(scores);
 	}
 
-	for (let i = 0; i < scores.length && i < 10; i++) {
-		roundedRect(ctx, canvas.width / 70, canvas.height / 8 + (canvas.height / 12) * i, canvas.width - canvas.width / 35, canvas.height / 13, canvas.height / 70, '70', '57', '63', 0.75);
+	for (let i = 0; i < scores.length && i < showLimit; i++) {
+		roundedRect(ctx, canvas.width / 70, 500 / 8 + (500 / 12) * i, canvas.width - canvas.width / 35, 500 / 13, 500 / 70, '70', '57', '63', 0.75);
 
 		const rankImage = await Canvas.loadImage(getRankImage(scores[i].rank));
-		ctx.drawImage(rankImage, canvas.width / 35, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 13 / 2 - canvas.height / 31.25 / 2, canvas.width / 31.25, canvas.height / 31.25);
+		ctx.drawImage(rankImage, canvas.width / 35, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 - 500 / 31.25 / 2, canvas.width / 31.25, 500 / 31.25);
 
 		ctx.font = 'bold 18px comfortaa, sans-serif';
 		ctx.fillStyle = '#FF66AB';
 		ctx.textAlign = 'right';
-		ctx.fillText(humanReadable(Math.floor(scores[i].pp)) + 'pp', (canvas.width / 35) * 34, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 13 / 2 + canvas.height / 70);
+		ctx.fillText(humanReadable(Math.floor(scores[i].pp)) + 'pp', (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
 
 		const beatmap = await osuApi.getBeatmaps({ b: scores[i].beatmapId });
 		let beatmapTitle = `${beatmap[0].title} by ${beatmap[0].artist}`;
@@ -303,13 +328,13 @@ async function drawTopPlays(input, server, mode, msg, recentScores) {
 		ctx.font = 'bold 15px comfortaa, sans-serif';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.textAlign = 'left';
-		ctx.fillText(beatmapTitle, (canvas.width / 35) * 3, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 12 / 2);
+		ctx.fillText(beatmapTitle, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2);
 
 		//Write Difficulty per map
 		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.fillStyle = '#FFCC22';
 		ctx.textAlign = 'left';
-		ctx.fillText(beatmap[0].version, (canvas.width / 35) * 3, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 12 / 2 + canvas.height / 35);
+		ctx.fillText(beatmap[0].version, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 
 		let today = new Date();
 
@@ -337,13 +362,11 @@ async function drawTopPlays(input, server, mode, msg, recentScores) {
 			achievedTime = `${Math.round(timeDifference / 31536000000)} year(s) ago`;
 		}
 
-
-
 		//Write achieved on per map
 		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.fillStyle = '#A08C95';
 		ctx.textAlign = 'left';
-		ctx.fillText(achievedTime, (canvas.width / 35) * 3 + parseInt(beatmap[0].version.length) * 6 + canvas.width / 50, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 12 / 2 + canvas.height / 35);
+		ctx.fillText(achievedTime, (canvas.width / 35) * 3 + parseInt(beatmap[0].version.length) * 6 + canvas.width / 50, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 
 		const accuracy = (scores[i].counts[300] * 100 + scores[i].counts[100] * 33.33 + scores[i].counts[50] * 16.67) / (parseInt(scores[i].counts[300]) + parseInt(scores[i].counts[100]) + parseInt(scores[i].counts[50]) + parseInt(scores[i].counts.miss));
 
@@ -358,13 +381,13 @@ async function drawTopPlays(input, server, mode, msg, recentScores) {
 		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.fillStyle = '#FFCC22';
 		ctx.textAlign = 'right';
-		ctx.fillText(combo, (canvas.width / 28) * 23.4, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 12 / 2 + canvas.height / 35);
-		ctx.fillText(Math.round(accuracy * 100) / 100 + '%', (canvas.width / 28) * 24.75, canvas.height / 8 + (canvas.height / 12) * i + canvas.height / 12 / 2 + canvas.height / 35);
+		ctx.fillText(combo, (canvas.width / 28) * 23.4, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+		ctx.fillText(Math.round(accuracy * 100) / 100 + '%', (canvas.width / 28) * 24.75, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 
 		const mods = getMods(scores[i].raw_mods);
 		for (let j = 0; j < mods.length; j++) {
 			const modImage = await Canvas.loadImage(getModImage(mods[mods.length - j - 1]));
-			ctx.drawImage(modImage, (canvas.width / 28) * 24.75 - (canvas.width / 1000 * 23) * (j + 1), canvas.height / 8 + (canvas.height / 12) * i + (canvas.height / 12) / 5, canvas.width / 1000 * 23, canvas.height / 125 * 4);
+			ctx.drawImage(modImage, (canvas.width / 28) * 24.75 - (canvas.width / 1000 * 23) * (j + 1), 500 / 8 + (500 / 12) * i + (500 / 12) / 5, canvas.width / 1000 * 23, 500 / 125 * 4);
 		}
 	}
 
