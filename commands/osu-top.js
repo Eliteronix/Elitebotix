@@ -9,7 +9,7 @@ module.exports = {
 	name: 'osu-top',
 	aliases: ['osu-plays', 'osu-topplays', 'osu-best'],
 	description: 'Sends an info card about the topplays of the specified player',
-	usage: '[username] [username] ... (Use "_" instead of spaces; Use --b for bancho / --r for ripple; Use --o/--t/--c/--m for modes)',
+	usage: '[username] [username] ... (Use "_" instead of spaces; Use --b for bancho / --r for ripple; Use --o/--t/--c/--m for modes; --n / --new / --recent for recent scores)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: 'ATTACH_FILES',
@@ -28,13 +28,23 @@ module.exports = {
 		const server = commandConfig[1];
 		const mode = commandConfig[2];
 
+		let recentScores = false;
+
+		for (let i = 0; i < args.length; i++) {
+			if (args[i] === '--new' || args[i] === '--recent' || args[i] === '--n') {
+				recentScores = true;
+				args.splice(i, 1);
+				i--;
+			}
+		}
+
 		if (!args[0]) {
 			//Get profile by author if no argument
 			if (commandUser && commandUser.osuUserId) {
-				getTopPlays(msg, commandUser.osuUserId, server, mode);
+				getTopPlays(msg, commandUser.osuUserId, server, mode, false, recentScores);
 			} else {
 				const userDisplayName = await getMessageUserDisplayname(msg);
-				getTopPlays(msg, userDisplayName, server, mode);
+				getTopPlays(msg, userDisplayName, server, mode, false, recentScores);
 			}
 		} else {
 			//Get profiles by arguments
@@ -45,21 +55,21 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getTopPlays(msg, discordUser.osuUserId, server, mode);
+						getTopPlays(msg, discordUser.osuUserId, server, mode, false, recentScores);
 					} else {
 						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-						getTopPlays(msg, args[i], server, mode);
+						getTopPlays(msg, args[i], server, mode, false, recentScores);
 					}
 				} else {
 
 					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getTopPlays(msg, args[i], server, mode, true);
+							getTopPlays(msg, args[i], server, mode, true, recentScores);
 						} else {
-							getTopPlays(msg, args[i], server, mode);
+							getTopPlays(msg, args[i], server, mode, false, recentScores);
 						}
 					} else {
-						getTopPlays(msg, args[i], server, mode);
+						getTopPlays(msg, args[i], server, mode, false, recentScores);
 					}
 				}
 			}
@@ -67,7 +77,7 @@ module.exports = {
 	}
 };
 
-async function getTopPlays(msg, username, server, mode, noLinkedAccount) {
+async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentScores) {
 	if (server === 'bancho') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -100,7 +110,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount) {
 
 				elements = await drawTitle(elements, server, mode);
 
-				elements = await drawTopPlays(elements, server, mode);
+				elements = await drawTopPlays(elements, server, mode, msg, recentScores);
 
 				await drawFooter(elements);
 
@@ -156,7 +166,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount) {
 
 				elements = await drawTitle(elements, server, mode);
 
-				elements = await drawTopPlays(elements, server, mode, msg);
+				elements = await drawTopPlays(elements, server, mode, msg, recentScores);
 
 				await drawFooter(elements);
 
@@ -229,7 +239,7 @@ async function drawFooter(input) {
 	return output;
 }
 
-async function drawTopPlays(input, server, mode, msg) {
+async function drawTopPlays(input, server, mode, msg, recentScores) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -244,10 +254,16 @@ async function drawTopPlays(input, server, mode, msg) {
 
 	let scores = [];
 
+	let limit = 10;
+
+	if (recentScores) {
+		limit = 100;
+	}
+
 	if (server === 'bancho') {
-		scores = await osuApi.getUserBest({ u: user.name, m: mode });
+		scores = await osuApi.getUserBest({ u: user.name, m: mode, limit: limit });
 	} else if (server === 'ripple') {
-		const response = await fetch(`https://www.ripple.moe/api/get_user_best?u=${user.name}&m=${mode}`);
+		const response = await fetch(`https://www.ripple.moe/api/get_user_best?u=${user.name}&m=${mode}&limit=${limit}`);
 		const responseJson = await response.json();
 		if (!responseJson[0]) {
 			return msg.channel.send(`Could not find user \`${user.name.replace(/`/g, '')}\`.`);
@@ -255,10 +271,14 @@ async function drawTopPlays(input, server, mode, msg) {
 
 		for (let i = 0; i < responseJson.length; i++) {
 
-			let score = rippleToBanchoScore(responseJson[0]);
+			let score = rippleToBanchoScore(responseJson[i]);
 
 			scores.push(score);
 		}
+	}
+
+	if (recentScores) {
+		quicksort(scores);
 	}
 
 	for (let i = 0; i < scores.length && i < 10; i++) {
@@ -350,4 +370,29 @@ async function drawTopPlays(input, server, mode, msg) {
 
 	const output = [canvas, ctx, user];
 	return output;
+}
+
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (Date.parse(list[j].raw_date) >= Date.parse(pivot.raw_date)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
 }
