@@ -525,31 +525,44 @@ module.exports = {
 		if (taskInWork) {
 			return;
 		}
-		const nextPriorityTasklevel = await DBProcessQueue.findOne({
+		let now = new Date();
+		let nextPriorityTasklevel = await DBProcessQueue.findAll({
 			order: [
 				['priority', 'DESC']
 			]
 		});
-		if (nextPriorityTasklevel) {
-			const nextTask = await DBProcessQueue.findOne({
-				where: { priority: nextPriorityTasklevel.priority },
+		for (let i = 0; i < nextPriorityTasklevel.length; i++) {
+			if (nextPriorityTasklevel[i].date && nextPriorityTasklevel[i].date > now) {
+				nextPriorityTasklevel.splice(i, 1);
+				i--;
+			}
+		}
+		if (nextPriorityTasklevel.length > 0) {
+			let nextTask = await DBProcessQueue.findAll({
+				where: { priority: nextPriorityTasklevel[0].priority },
 				order: [
 					['createdAt', 'ASC']
 				]
 			});
+			for (let i = 0; i < nextTask.length; i++) {
+				if (nextTask[i].date && nextTask[i].date > now) {
+					nextTask.splice(i, 1);
+					i--;
+				}
+			}
 			try {
-				const task = require(`./processQueueTasks/${nextTask.task}.js`);
+				const task = require(`./processQueueTasks/${nextTask[0].task}.js`);
 
-				nextTask.beingExecuted = true;
-				await nextTask.save();
+				nextTask[0].beingExecuted = true;
+				await nextTask[0].save();
 
-				await task.execute(client, nextTask);
+				await task.execute(client, nextTask[0]);
 
-				nextTask.destroy();
+				nextTask[0].destroy();
 			} catch (e) {
 				console.log('Error executing process queue task', e);
-				console.log('Process Queue entry:', nextTask);
-				nextTask.destroy();
+				console.log('Process Queue entry:', nextTask[0]);
+				nextTask[0].destroy();
 			}
 		}
 	},
