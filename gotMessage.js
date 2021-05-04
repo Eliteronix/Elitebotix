@@ -116,7 +116,7 @@ module.exports = async function (msg) {
 			const commandArray = msg.client.commands.array();
 
 			//define variables
-			const categories = ['general', 'server-admin', 'osu'];
+			const categories = ['general', 'server-admin', 'osu', 'misc'];
 
 			//Developer
 			if (msg.author.id === '138273136285057025') {

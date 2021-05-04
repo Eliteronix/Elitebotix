@@ -1,3 +1,5 @@
+
+
 module.exports = (sequelize, DataTypes) => {
 	return sequelize.define('DBProcessQueue', {
 		id: {
@@ -16,6 +18,9 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		filters: DataTypes.STRING,
 		additions: DataTypes.STRING,
+		date: {
+			type: DataTypes.DATE,
+		},
 		beingExecuted: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
