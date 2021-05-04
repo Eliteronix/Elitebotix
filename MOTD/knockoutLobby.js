@@ -80,7 +80,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 
 	//Update the players about the current map
 	await sendMapMessages(client, mappool[mapIndex], mapIndex, knockoutNumber, users, doubleTimeMap);
-	//wait map + 90 seconds
+	//wait map + 120 seconds
 	setTimeout(async function () {
 		//Fetch the results of the map
 		let results = await getKnockoutScores(mappool[mapIndex], players, doubleTimeMap);
@@ -179,7 +179,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 
 		//Start the next round
 		knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, mapIndex + 1, false);
-	}, parseInt(mappool[mapIndex].length.total) * 1000 + 1000 * 150);
+	}, parseInt(mappool[mapIndex].length.total) * 1000 + 1000 * 120);
 }
 
 async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, doubleTime) {

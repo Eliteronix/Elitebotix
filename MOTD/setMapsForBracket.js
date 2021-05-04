@@ -81,7 +81,7 @@ module.exports = {
 				if (i === 0) {
 					gameLength = gameLength + 600;
 				} else {
-					gameLength = gameLength + 150 + parseInt(mappoolInOrder[i].length.total);
+					gameLength = gameLength + 120 + parseInt(mappoolInOrder[i].length.total);
 				}
 			}
 		}
