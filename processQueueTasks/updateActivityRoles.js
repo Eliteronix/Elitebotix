@@ -10,7 +10,17 @@ module.exports = {
 			return;
 		}
 
-		const guild = await client.guilds.fetch(processQueueEntry.guildId);
+		let guild;
+
+		try {
+			guild = await client.guilds.fetch(processQueueEntry.guildId);
+		} catch (e) {
+			if (e.message === 'Missing Access') {
+				return;
+			} else {
+				return console.log(e);
+			}
+		}
 
 		let activityRoleObjects = [];
 
@@ -77,7 +87,7 @@ module.exports = {
 
 						if (shouldHaveRole) {
 							try {
-								if(!member.roles.cache.has(activityRoles[j].roleId)){
+								if (!member.roles.cache.has(activityRoles[j].roleId)) {
 									//Assign role if not there yet
 									await member.roles.add(activityRoleObjects[j]);
 								}
@@ -95,7 +105,7 @@ module.exports = {
 							}
 						} else {
 							try {
-								if(member.roles.cache.has(activityRoles[j].roleId)){
+								if (member.roles.cache.has(activityRoles[j].roleId)) {
 									//remove role if the role is there
 									await member.roles.remove(activityRoleObjects[j]);
 								}
