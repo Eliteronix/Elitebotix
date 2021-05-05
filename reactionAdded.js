@@ -57,18 +57,27 @@ module.exports = async function (reaction, user) {
 	if (reaction.message.content && reaction.message.content.substring(3).startsWith(user.id) && reaction.message.content.match(didYouMeanRegex)
 		|| reaction.message.content && reaction.message.content.substring(2).startsWith(user.id) && reaction.message.content.match(didYouMeanRegex)) {
 		if (reaction._emoji.name === '✅') {
-			let newMessage = reaction.message;
-			newMessage.author = user;
+			//Grab old message and change content instead
+			reaction.message.channel.messages.fetch({ limit: 100 }).then(async (messages) => {
+				const wrongContent = reaction.message.content.replace(/<@.+>, I could not find the command `/gm, '').replace(/`.\nDid you mean `.+`?/gm, '');
+				const messagesArray = messages.filter(m => m.author.id === user.id && m.content.startsWith(wrongContent)).array();
 
-			const didYouMeanBeginningRegex = /<@.+>, I could not find the command `.+`.\nDid you mean `/gm;
-			newMessage.content = reaction.message.content.substring(0, reaction.message.content.length - 2).replace(didYouMeanBeginningRegex, '');
+				if (messagesArray.length > 0) {
+					let newMessage = messagesArray[messagesArray.length - 1];
 
-			//Get gotMessage
-			const gotMessage = require('./gotMessage');
+					const didYouMeanBeginningRegex = /<@.+>, I could not find the command `.+`.\nDid you mean `/gm;
+					newMessage.content = reaction.message.content.substring(0, reaction.message.content.length - 2).replace(didYouMeanBeginningRegex, '');
 
-			gotMessage(newMessage);
+					//Get gotMessage
+					const gotMessage = require('./gotMessage');
 
-			return reaction.message.delete();
+					gotMessage(newMessage);
+
+					return reaction.message.delete();
+				} else {
+					reaction.message.channel.send(`<@${user.id}>, the autocorrected message seems to be too old to retrieve. Please send a new one.`);
+				}
+			});
 		} else if (reaction._emoji.name === '❌') {
 			return reaction.message.delete();
 		}
