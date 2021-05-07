@@ -34,8 +34,6 @@ module.exports = {
 
 			const weather = result[0];
 
-			console.log(weather);
-
 			const canvasHeight = 500;
 			const canvasWidth = 1000;
 
