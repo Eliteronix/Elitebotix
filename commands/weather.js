@@ -64,10 +64,13 @@ module.exports = {
 			// Write the weather of the current day
 			ctx.font = 'bold 30px comfortaa, sans-serif';
 			ctx.textAlign = 'center';
-			ctx.fillText(`${weather.current.day} at ${weather.current.observationtime.substring(0, 5)}`, 350, 175);
-			ctx.fillText(`Temp.: ${weather.current.temperature}°${degreeType} | Feels Like: ${weather.current.feelslike}°${degreeType}`, 350, 250);
-			ctx.fillText(`Humidity: ${weather.current.humidity}`, 350, 325);
-			ctx.fillText(`Wind: ${weather.current.winddisplay}`, 350, 400);
+			ctx.fillText(`Data from ${weather.current.day} at ${weather.current.observationtime.substring(0, 5)}`, 375, 150);
+			ctx.fillText(`Temp.: ${weather.current.temperature}°${degreeType} | Feels Like: ${weather.current.feelslike}°${degreeType}`, 375, 200);
+			ctx.fillText(`Humidity: ${weather.current.humidity}`, 375, 250);
+			ctx.fillText(`Wind: ${weather.current.winddisplay}`, 375, 300);
+			ctx.font = 'bold 25px comfortaa, sans-serif';
+			ctx.fillText(`Forecast for today: ${weather.forecast[1].skytextday}`, 375, 390);
+			ctx.fillText(`${weather.forecast[2].low} - ${weather.forecast[2].high}°${degreeType} | ${weather.forecast[2].precip}% Rain`, 375, 425);
 
 			// Write the forecast
 			ctx.font = 'bold 25px comfortaa, sans-serif';
