@@ -39,7 +39,7 @@ module.exports = {
 					});
 
 					//check for registration
-					if (registeredPlayer) {
+					if (registeredPlayer && !registeredPlayer.osuMOTDMuted) {
 						//Assign MOTD role if not there yet
 						try {
 							if (!members[i].roles.cache.has(MOTDRole.id)) {

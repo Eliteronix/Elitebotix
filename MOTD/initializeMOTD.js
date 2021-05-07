@@ -10,7 +10,7 @@ module.exports = {
 		//Start everything in that minute
 		const today = new Date();
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'QA' && today.getUTCHours() === 18 && today.getUTCMinutes() === 0) {
+		if (process.env.SERVER === 'Dev' && today.getUTCHours() === 21 && today.getUTCMinutes() === 47) {
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -122,8 +122,11 @@ module.exports = {
 					//Get all players for today
 					const allPlayers = await getPlayers(client);
 
-					//Assign roles to all players currently registered and remove unneeded roles
-					await assignPlayerRoles(client);
+					// eslint-disable-next-line no-undef
+					if (process.env.SERVER !== 'Dev') {
+						//Assign roles to all players currently registered and remove unneeded roles
+						await assignPlayerRoles(client);
+					}
 
 					// Trigger Mappool creation for the different brackets
 					setMapsForBracket(client, 8, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613', allPlayers[0]);
@@ -221,25 +224,37 @@ async function getPlayers(client) {
 	let beginnerBracketPlayers = [];
 
 	for (let i = 0; i < registeredUsers.length; i++) {
-		if (registeredUsers[i].osuUserId) {
-			// let BWSRank = Math.round(Math.pow(registeredUsers[i].osuRank, Math.pow(0.9937, Math.pow(registeredUsers[i].osuBadges, 2))));
-			// if (BWSRank < 10000) {
-			// 	topBracketPlayers.push(registeredUsers[i]);
-			// } else if (BWSRank < 50000) {
-			// 	middleBracketPlayers.push(registeredUsers[i]);
-			// } else if (BWSRank < 100000) {
-			lowerBracketPlayers.push(registeredUsers[i]);
-			// } else if (BWSRank < 10000000) {
-			// 	beginnerBracketPlayers.push(registeredUsers[i]);
-			// }
-		} else {
-			registeredUsers[i].osuMOTDRegistered = 0;
-			await registeredUsers[i].save();
+		if (!registeredUsers[i].osuMOTDMuted) {
+			if (registeredUsers[i].osuUserId) {
+				// eslint-disable-next-line no-undef
+				if (process.env.SERVER === 'Dev') {
+					for (let j = 0; j < 20; j++) {
+						// topBracketPlayers.push(registeredUsers[i]);
+						// middleBracketPlayers.push(registeredUsers[i]);
+						lowerBracketPlayers.push(registeredUsers[i]);
+						// beginnerBracketPlayers.push(registeredUsers[i]);
+					}
+				} else {
+					// let BWSRank = Math.round(Math.pow(registeredUsers[i].osuRank, Math.pow(0.9937, Math.pow(registeredUsers[i].osuBadges, 2))));
+					// if (BWSRank < 10000) {
+					// 	topBracketPlayers.push(registeredUsers[i]);
+					// } else if (BWSRank < 50000) {
+					// 	middleBracketPlayers.push(registeredUsers[i]);
+					// } else if (BWSRank < 100000) {
+					lowerBracketPlayers.push(registeredUsers[i]);
+					// } else if (BWSRank < 10000000) {
+					// 	beginnerBracketPlayers.push(registeredUsers[i]);
+					// }
+				}
+			} else {
+				registeredUsers[i].osuMOTDRegistered = 0;
+				await registeredUsers[i].save();
 
-			client.users.fetch(registeredUsers[i].userId)
-				.then(async (user) => {
-					user.send('It seems like you removed your connected osu! account and have been removed as a player for the `Maps of the Day` competition because of that.\nIf you want to take part again please reconnect your osu! account and use `e!osu-motd register` again.');
-				});
+				client.users.fetch(registeredUsers[i].userId)
+					.then(async (user) => {
+						user.send('It seems like you removed your connected osu! account and have been removed as a player for the `Maps of the Day` competition because of that.\nIf you want to take part again please reconnect your osu! account and use `e!osu-motd register` again.');
+					});
+			}
 		}
 	}
 

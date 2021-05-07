@@ -59,6 +59,8 @@ module.exports = {
 					maniaRank: dbList[i].maniaRank,
 					osuMainServer: dbList[i].osuMainServer,
 					osuMainMode: dbList[i].osuMainMode,
+					osuMOTDRegistered: dbList[i].osuMOTDRegistered,
+					osuMOTDMuted: dbList[i].osuMOTDMuted,
 					paranoid: dbList[i].paranoid,
 					createdAt: dbList[i].createdAt,
 					updatedAt: dbList[i].updatedAt,

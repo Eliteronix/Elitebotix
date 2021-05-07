@@ -1,7 +1,7 @@
 const osu = require('node-osu');
 const { knockoutLobby } = require('./knockoutLobby.js');
 const { assignQualifierPoints } = require('./givePointsToPlayers.js');
-const { getMods } = require('../utils.js');
+const { getMods, humanReadable } = require('../utils.js');
 
 module.exports = {
 	qualifier: async function (client, mappool, players) {
@@ -74,6 +74,15 @@ module.exports = {
 			//Assign all points to the players
 			assignQualifierPoints(players);
 
+			//Get rid of people without scores
+			for (let i = 0; i < users.length; i++) {
+				await users[i].send(`You placed \`${i + 1}.\` out of \`${users.length}\` players with a score of \`${humanReadable(results[i].score)}\``)
+					.catch(async () => {
+						const channel = await client.channels.fetch('833803740162949191');
+						channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+					});
+			}
+
 			//Divide sorted players into knockout lobbies
 			divideIntoGroups(client, mappool, 1, players, users);
 		}, 1000 * 60 * 10);
@@ -107,12 +116,12 @@ function divideIntoGroups(client, mappool, lobbyNumber, players, users) {
 async function sendQualifierMessages(client, map, users) {
 	let data = [];
 	data.push(`There are ${users.length} players registered today for your bracket!`);
-	data.push('Try to get your best score possible in the next 10 minutes on the following map to qualify for a knockout lobby (fails are excluded).');
+	data.push('Try to get your **best score** possible in the next **10 minutes** on the following map to qualify for a knockout lobby **(fails are excluded)**.');
 	data.push('\nTodays qualifier map:');
-	data.push('**The map is FreeMod - Scores with `NF` will be doubled - Don\'t use `ScoreV2`, `Relax`, `Autopilot` or `Auto`**');
+	data.push('Mods: **FreeMod**');
 	data.push(`${map.artist} - ${map.title} **[${map.version}]** | Mapper: ${map.creator}`);
 	data.push(`${Math.round(map.difficulty.rating * 100) / 100}* | ${Math.floor(map.length.total / 60)}:${(map.length.total % 60).toString().padStart(2, '0')} | ${map.bpm} BPM | CS ${map.difficulty.size} | HP ${map.difficulty.drain} | OD ${map.difficulty.overall} | AR ${map.difficulty.approach}`);
-	data.push(`Website: https://osu.ppy.sh/b/${map.id} | osu! direct: <osu://dl/${map.beatmapSetId}> -> **Be sure to select the correct difficulty**`);
+	data.push(`Website: https://osu.ppy.sh/b/${map.id} | osu! direct: <osu://dl/${map.beatmapSetId}>`);
 	for (let i = 0; i < users.length; i++) {
 		await users[i].send(data, { split: true })
 			.catch(async () => {
