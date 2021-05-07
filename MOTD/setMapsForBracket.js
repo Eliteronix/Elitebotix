@@ -115,8 +115,11 @@ module.exports = {
 
 		//Send official message into the correct channel
 		const mapsOfTheDayChannel = await client.channels.fetch(channelID);
-		mapsOfTheDayChannel.send(`<@&${roleId}> The new mappool is out!\nThe bot will send you a DM in a moment. Please follow the instructions given.`);
-		mapsOfTheDayChannel.send(mappoolEmbed);
+		// eslint-disable-next-line no-undef
+		if (process.env.SERVER !== 'Dev') {
+			mapsOfTheDayChannel.send(`<@&${roleId}> The new mappool is out!\nThe bot will send you a DM in a moment. Please follow the instructions given.`);
+			mapsOfTheDayChannel.send(mappoolEmbed);
+		}
 
 		//Start qualifier process
 		qualifier(client, mappoolInOrder, players);

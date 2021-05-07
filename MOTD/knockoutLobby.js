@@ -190,7 +190,7 @@ async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, dou
 	}
 	//Invisible seperator before the \n to ensure line break
 	data.push(`⁣\n${mapIndex}. knockout map (${knockoutNumber} player(s) will be knocked out):`);
-	data.push(`You have **${Math.floor(map.length.total / 60) + 2}:${(map.length.total % 60).toString().padStart(2, '0')} minutes** to play the map. Last submitted score will count (fails included).`);
+	data.push(`You have **${Math.floor(map.length.total / 60) + 2}:${(map.length.total % 60).toString().padStart(2, '0')} minutes** to play the map. **Last submitted score will count (fails included)**.`);
 	data.push(`Mods: FreeMod${DTMap}`);
 	data.push(`${map.artist} - ${map.title} **[${map.version}]** | Mapper: ${map.creator}`);
 	data.push(`${Math.round(map.difficulty.rating * 100) / 100}* | ${Math.floor(map.length.total / 60)}:${(map.length.total % 60).toString().padStart(2, '0')} | ${map.bpm} BPM | CS ${map.difficulty.size} | HP ${map.difficulty.drain} | OD ${map.difficulty.overall} | AR ${map.difficulty.approach}`);
