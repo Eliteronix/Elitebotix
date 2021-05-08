@@ -619,15 +619,8 @@ module.exports = {
 		}
 
 		// Write the title of the leaderboard
-		ctx.font = 'bold 35px comfortaa, sans-serif';
-		if (columns === 1 && title.length > 40) {
-			ctx.font = 'bold 27px comfortaa, sans-serif';
-		} else if (columns === 1 && title.length > 50) {
-			ctx.font = 'bold 20px comfortaa, sans-serif';
-		}
 		ctx.fillStyle = '#ffffff';
-		ctx.textAlign = 'center';
-		ctx.fillText(title, canvas.width / 2, 50);
+		fitTextOnMiddleCanvas(ctx, title, 35, 'comfortaa, sans-serif', 50, canvas.width, 50);
 
 		// Write the data
 		ctx.textAlign = 'center';
@@ -704,6 +697,71 @@ module.exports = {
 			taskInWork.beingExecuted = 0;
 			taskInWork.save();
 		}
+	},
+	async createMOTDAttachment(stagename, beatmap, doubletime) {
+		let canvasWidth = 1000;
+		const canvasHeight = 1000;
+
+		//Create Canvas
+		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+		//Get context and load the image
+		const ctx = canvas.getContext('2d');
+
+		const background = await Canvas.loadImage('./other/osu-background.png');
+
+		for (let i = 0; i < canvas.height / background.height; i++) {
+			for (let j = 0; j < canvas.width / background.width; j++) {
+				ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+			}
+		}
+
+		// Write the stage of the map
+		ctx.font = 'bold 50px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		ctx.fillText(stagename, canvas.width / 2, 60);
+
+		ctx.fillStyle = 'rgba(173, 216, 230, 0.25)';
+		ctx.fillRect(100, 100, 800, 800);
+
+		// Write the map infos
+		ctx.font = 'bold 50px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		fitTextOnMiddleCanvas(ctx, beatmap.artist, 50, 'comfortaa, sans-serif', 200, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, beatmap.title, 50, 'comfortaa, sans-serif', 250, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, `Mapper: ${beatmap.creator}`, 50, 'comfortaa, sans-serif', 300, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, `[${beatmap.version}]`, 100, 'comfortaa, sans-serif', 400, canvas.width, 220);
+		let doubletimeMod = '';
+		if (doubletime) {
+			doubletimeMod = '+DoubleTime';
+			ctx.fillStyle = '#966FD6';
+			ctx.beginPath();
+			ctx.arc(810, 625, 75, 0, 2 * Math.PI);
+			ctx.fill();
+			ctx.fillStyle = '#ffffff';
+			ctx.font = 'bold 65px comfortaa, sans-serif';
+			ctx.fillText('DT', 810, 650);
+		}
+		fitTextOnMiddleCanvas(ctx, `Mods: Freemod${doubletimeMod}`, 50, 'comfortaa, sans-serif', 500, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, '(All mods allowed except: Relax, Autopilot, Auto, ScoreV2)', 25, 'comfortaa, sans-serif', 525, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, `Length: ${Math.floor(beatmap.length.total / 60)}:${(beatmap.length.total % 60).toString().padStart(2, '0')}`, 50, 'comfortaa, sans-serif', 600, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, `SR: ${Math.round(beatmap.difficulty.rating * 100) / 100} | ${beatmap.bpm} BPM`, 50, 'comfortaa, sans-serif', 700, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, `CS ${beatmap.difficulty.size} | HP ${beatmap.difficulty.drain} | OD ${beatmap.difficulty.overall} | AR ${beatmap.difficulty.approach}`, 50, 'comfortaa, sans-serif', 800, canvas.width, 220);
+
+		let today = new Date().toLocaleDateString();
+
+		ctx.font = 'bold 15px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+
+		ctx.textAlign = 'right';
+		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);
+
+		//Create as an attachment and return
+		return new Discord.MessageAttachment(canvas.toBuffer(), `${stagename}.png`);
 	}
 };
 
@@ -718,4 +776,23 @@ async function getOsuBadgeNumberByIdFunction(osuUserId) {
 			let htmlCode = await res.text();
 			return count(htmlCode);
 		});
+}
+
+function fitTextOnMiddleCanvas(ctx, text, startingSize, fontface, yPosition, width, widthReduction) {
+
+	// start with a large font size
+	var fontsize = startingSize;
+
+	// lower the font size until the text fits the canvas
+	do {
+		fontsize--;
+		ctx.font = fontsize + 'px ' + fontface;
+	} while (ctx.measureText(text).width > width - widthReduction);
+
+	// draw the text
+	ctx.textAlign = 'center';
+	ctx.fillText(text, width / 2, yPosition);
+
+	return fontsize;
+
 }

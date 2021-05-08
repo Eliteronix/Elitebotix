@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getMods, humanReadable } = require('../utils.js');
+const { getMods, humanReadable, createMOTDAttachment } = require('../utils.js');
 const { assignKnockoutPoints } = require('./givePointsToPlayers.js');
 
 module.exports = {
@@ -184,19 +184,13 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 
 async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, doubleTime) {
 	let data = [];
-	let DTMap = '';
-	if (doubleTime) {
-		DTMap = '**+DoubleTime**';
-	}
 	//Invisible seperator before the \n to ensure line break
 	data.push(`⁣\n${mapIndex}. knockout map (${knockoutNumber} player(s) will be knocked out):`);
 	data.push(`You have **${Math.floor(map.length.total / 60) + 2}:${(map.length.total % 60).toString().padStart(2, '0')} minutes** to play the map. **Last submitted score will count (fails included)**.`);
-	data.push(`Mods: FreeMod${DTMap}`);
-	data.push(`${map.artist} - ${map.title} **[${map.version}]** | Mapper: ${map.creator}`);
-	data.push(`${Math.round(map.difficulty.rating * 100) / 100}* | ${Math.floor(map.length.total / 60)}:${(map.length.total % 60).toString().padStart(2, '0')} | ${map.bpm} BPM | CS ${map.difficulty.size} | HP ${map.difficulty.drain} | OD ${map.difficulty.overall} | AR ${map.difficulty.approach}`);
-	data.push(`Website: https://osu.ppy.sh/b/${map.id} | osu! direct: <osu://dl/${map.beatmapSetId}>`);
+	data.push(`Website: <https://osu.ppy.sh/b/${map.id}> | osu! direct: <osu://dl/${map.beatmapSetId}>`);
+	const attachment = await createMOTDAttachment(`${mapIndex}. Knockout Map`, map, doubleTime);
 	for (let i = 0; i < users.length; i++) {
-		await users[i].send(data, { split: true })
+		await users[i].send(data, attachment, { split: true })
 			.catch(async () => {
 				const channel = await client.channels.fetch('833803740162949191');
 				await channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
