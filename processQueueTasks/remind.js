@@ -6,6 +6,8 @@ module.exports = {
 			//Nothing
 		});
 
-		user.send(`Reminder: ${args[1]}`);
+		if(user){
+			user.send(`Reminder: ${args[1]}`);
+		}
 	},
 };
