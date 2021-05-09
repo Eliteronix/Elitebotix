@@ -228,23 +228,26 @@ async function getPlayers(client) {
 			if (registeredUsers[i].osuUserId) {
 				// eslint-disable-next-line no-undef
 				if (process.env.SERVER === 'Dev') {
-					for (let j = 0; j < 20; j++) {
+					for (let j = 0; j < 17; j++) {
 						// topBracketPlayers.push(registeredUsers[i]);
 						// middleBracketPlayers.push(registeredUsers[i]);
 						lowerBracketPlayers.push(registeredUsers[i]);
 						// beginnerBracketPlayers.push(registeredUsers[i]);
 					}
-				} else {
-					// let BWSRank = Math.round(Math.pow(registeredUsers[i].osuRank, Math.pow(0.9937, Math.pow(registeredUsers[i].osuBadges, 2))));
-					// if (BWSRank < 10000) {
-					// 	topBracketPlayers.push(registeredUsers[i]);
-					// } else if (BWSRank < 50000) {
-					// 	middleBracketPlayers.push(registeredUsers[i]);
-					// } else if (BWSRank < 100000) {
+					// eslint-disable-next-line no-undef
+				} else if (process.env.SERVER === 'QA') {
 					lowerBracketPlayers.push(registeredUsers[i]);
-					// } else if (BWSRank < 10000000) {
-					// 	beginnerBracketPlayers.push(registeredUsers[i]);
-					// }
+				} else {
+					let BWSRank = Math.round(Math.pow(registeredUsers[i].osuRank, Math.pow(0.9937, Math.pow(registeredUsers[i].osuBadges, 2))));
+					if (BWSRank < 10000) {
+						topBracketPlayers.push(registeredUsers[i]);
+					} else if (BWSRank < 50000) {
+						middleBracketPlayers.push(registeredUsers[i]);
+					} else if (BWSRank < 100000) {
+						lowerBracketPlayers.push(registeredUsers[i]);
+					} else if (BWSRank < 10000000) {
+						beginnerBracketPlayers.push(registeredUsers[i]);
+					}
 				}
 			} else {
 				registeredUsers[i].osuMOTDRegistered = 0;
