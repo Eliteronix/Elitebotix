@@ -152,7 +152,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentS
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --r for ripple; Use --o/--t/--c/--m for modes)`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --r for ripple; Use --o/--t/--c/--m for modes; --n / --new / --recent for recent scores; --25 for top 25...)`);
 				} else {
 					console.log(err);
 				}
@@ -163,7 +163,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentS
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --o/--t/--c/--m for modes)`);
+					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --o/--t/--c/--m for modes; --n / --new / --recent for recent scores; --25 for top 25...)`);
 				}
 
 				let user = rippleToBanchoUser(responseJson[0]);
@@ -204,7 +204,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentS
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --o/--t/--c/--m for modes)`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --o/--t/--c/--m for modes; --n / --new / --recent for recent scores; --25 for top 25...)`);
 				} else {
 					console.log(err);
 				}
