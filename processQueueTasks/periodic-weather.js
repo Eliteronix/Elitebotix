@@ -40,7 +40,7 @@ module.exports = {
 				date.setUTCMilliseconds(0);
 				date.setUTCHours(date.getUTCHours() + 1);
 
-				if (args[1] === 'Daily') {
+				if (args[1] === 'daily') {
 					date.setUTCHours(0);
 					date.setUTCDate(date.getUTCDate() + 1);
 				}

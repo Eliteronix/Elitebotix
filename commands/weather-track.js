@@ -5,12 +5,12 @@ module.exports = {
 	name: 'weather-track',
 	// aliases: ['developer', 'donate', 'support'],
 	description: 'Sends info about the weather of the given location each time period',
-	usage: '[hourly/daily] [F/Fahrenheit] <location/zipcode>',
+	usage: '[hourly/daily] [F/Fahrenheit] <location/zipcode> | <List> | <remove> <C/F> <location>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	// guildOnly: true,
+	guildOnly: true,
 	args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
@@ -37,6 +37,29 @@ module.exports = {
 			}
 
 			return msg.channel.send(trackingListString || 'No weather tracking tasks found in this channel.');
+		} else if (args[0].toLowerCase() === 'remove') {
+			const trackingList = await DBProcessQueue.findAll({
+				where: { task: 'periodic-weather' }
+			});
+
+			let degreeType = '';
+
+			if (args[1].toLowerCase() === 'c') {
+				degreeType = 'C';
+			} else if (args[1].toLowerCase() === 'f') {
+				degreeType = 'F';
+			} else {
+				return msg.channel.send('Please specify if it is a tracker in `C` or in `F` as the second argument.');
+			}
+
+			for (let i = 0; i < trackingList.length; i++) {
+				if (trackingList[i].additions.startsWith(msg.channel.id) && trackingList[i].additions.includes(`;${degreeType};`) && trackingList[i].additions.toLowerCase().includes(`;${args[2].toLowerCase()} ${args[3].toLowerCase()}`)) {
+					trackingList[i].destroy();
+					return msg.channel.send('The specified tracker has been removed.');
+				}
+			}
+
+			return msg.channel.send('Couldn\'t find a weather tracker to remove.');
 		} else if (args[0].toLowerCase() === 'hourly') {
 			timePeriod = 'hourly';
 			args.shift();
@@ -67,7 +90,7 @@ module.exports = {
 			date.setUTCMilliseconds(0);
 			date.setUTCHours(date.getUTCHours() + 1);
 
-			if (timePeriod === 'Daily') {
+			if (timePeriod === 'daily') {
 				date.setUTCHours(0);
 				date.setUTCDate(date.getUTCDate() + 1);
 			}
