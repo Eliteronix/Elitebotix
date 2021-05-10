@@ -31,12 +31,13 @@ module.exports = {
 					i--;
 				} else {
 					const args = trackingList[i].additions.split(';');
-					trackingListString += `\n\`${args[1]}\``;
+					trackingListString += `\n\`${args[2]}\``;
 				}
 			}
 
 			return msg.channel.send(trackingListString || 'No osu! tracking tasks found in this channel.', {split: true});
 		} else if (args[0].toLowerCase() === 'remove') {
+			args.shift();
 			if(args[1]){
 				return msg.channel.send('Please specify which user shouldn\'t be tracked anymore.');
 			}
@@ -46,7 +47,7 @@ module.exports = {
 			});
 
 			for (let i = 0; i < trackingList.length; i++) {
-				if (trackingList[i].additions.startsWith(msg.channel.id) && trackingList[i].additions.toLowerCase().includes(`;${args[1].toLowerCase()}`)) {
+				if (trackingList[i].additions.startsWith(msg.channel.id) && trackingList[i].additions.toLowerCase().replace(/ /g, '_').includes(`;${args.join('_').toLowerCase()}`)) {
 					trackingList[i].destroy();
 					return msg.channel.send('The specified tracker has been removed.');
 				}
@@ -71,7 +72,7 @@ module.exports = {
 
 				date.setUTCMinutes(date.getUTCMinutes() + 15);
 
-				DBProcessQueue.create({ guildId: 'None', task: 'osu-track', priority: 8, additions: `${msg.channel.id};${user.name}`, date: date });
+				DBProcessQueue.create({ guildId: 'None', task: 'osu-track', priority: 8, additions: `${msg.channel.id};${user.id};${user.name}`, date: date });
 
 				msg.channel.send(`The user ${user.name} will be tracked in this channel.`);
 			})

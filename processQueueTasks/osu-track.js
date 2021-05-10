@@ -1,4 +1,5 @@
 const { DBProcessQueue } = require('../dbObjects');
+const osu = require('node-osu');
 
 module.exports = {
 	async execute(client, processQueueEntry) {
@@ -7,23 +8,135 @@ module.exports = {
 		const channel = await client.channels.fetch(args[0]).catch(async () => {
 			//Nothing
 		});
+		args.shift();
 
 		if (channel) {
-			//Grab recent stuff and send it in
+			// eslint-disable-next-line no-undef
+			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+			});
 
-			let date = new Date();
+			await osuApi.getUser({ u: args[0] })
+				.then(async (user) => {
+					let recentActivity = false;
+					//Grab recent events and send it in
+					if (user.events.length > 0) {
+						let scoreCommand = require('../commands/osu-score.js');
+						for (let i = 0; i < user.events.length; i++) {
+							//This only works if the local timezone is UTC
+							if (processQueueEntry.createdAt.getTime() <= Date.parse(user.events[i].raw_date)) {
+								recentActivity = true;
+								let msg = {
+									content: `e!osu-score ${user.events[i].beatmapId} ${user.name}`,
+									guild: channel.guild,
+									channel: channel,
+									author: {
+										id: 0
+									}
+								};
+								scoreCommand.execute(msg, [user.events[i].beatmapId, user.name]);
+							}
+						}
+					}
 
-			console.log(date);
+					//Grab recent top play number and send those in
+					const osuHadPlays = await lookForTopPlays(processQueueEntry, args, channel, user, 0);
+					const taikoHadPlays = await lookForTopPlays(processQueueEntry, args, channel, user, 1);
+					const catchHadPlays = await lookForTopPlays(processQueueEntry, args, channel, user, 2);
+					const maniaHadPlays = await lookForTopPlays(processQueueEntry, args, channel, user, 3);
 
-			date.setTime(date.getTime() + (date.getTime() - processQueueEntry.createdAt.getTime()));
+					if (osuHadPlays || taikoHadPlays || catchHadPlays || maniaHadPlays) {
+						recentActivity = true;
+					}
 
-			date.setUTCMinutes(date.getUTCMinutes() + 5);
+					if (recentActivity) {
+						console.log('There was recent activity for', processQueueEntry.additions);
 
-			console.log(processQueueEntry.additions);
+						let date = new Date();
 
-			DBProcessQueue.create({ guildId: processQueueEntry.guildId, task: processQueueEntry.task, priority: processQueueEntry.priority, additions: processQueueEntry.additions, date: date });
+						date.setUTCMinutes(date.getUTCMinutes() + 15);
+
+						return await DBProcessQueue.create({ guildId: processQueueEntry.guildId, task: processQueueEntry.task, priority: processQueueEntry.priority, additions: `${channel.id};${user.id};${user.name}`, date: date });
+					}
+
+					//Retry later because there was no activity
+
+					console.log('There was no activity for', processQueueEntry.additions);
+
+					let date = new Date();
+
+					date.setTime(date.getTime() + (date.getTime() - processQueueEntry.createdAt.getTime()));
+
+					date.setUTCMinutes(date.getUTCMinutes() + 5);
+
+					return await DBProcessQueue.create({ guildId: processQueueEntry.guildId, task: processQueueEntry.task, priority: processQueueEntry.priority, additions: `${channel.id};${user.id};${user.name}`, date: date });
+				})
+				.catch(async (err) => {
+					if (err.message === 'Not found') {
+						await channel.send(`Could not find user \`${args[1]}\` anymore and I will therefore stop tracking them. Maybe they changed their name?`);
+					} else {
+						console.log(err);
+					}
+				});
 
 		}
 
 	},
 };
+
+async function lookForTopPlays(processQueueEntry, args, channel, user, mode) {
+	let recentActivity = false;
+
+	// eslint-disable-next-line no-undef
+	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+	});
+
+	let numberRecentPlays = await osuApi.getUserBest({ u: user.id, limit: 100, m: mode })
+		.then(scores => {
+			let recentPlaysAmount = 0;
+			for (let i = 0; i < scores.length; i++) {
+				//This only works if the local timezone is UTC
+				if (processQueueEntry.createdAt.getTime() <= Date.parse(scores[i].raw_date)) {
+					recentPlaysAmount++;
+				}
+			}
+			return recentPlaysAmount;
+		})
+		.catch(
+			//Nothing
+		);
+
+	if (numberRecentPlays > 0) {
+		recentActivity = true;
+		let msg = {
+			content: `e!osu-top ${user.name} --recent --${numberRecentPlays} --`,
+			guild: channel.guild,
+			channel: channel,
+			author: {
+				id: 0
+			}
+		};
+		let topCommand = require('../commands/osu-top.js');
+		if (mode === 0) {
+			msg.content = msg.content + 'o';
+			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--o']);
+		} else if (mode === 1) {
+			msg.content = msg.content + 't';
+			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--t']);
+		} else if (mode === 2) {
+			msg.content = msg.content + 'c';
+			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--c']);
+		} else {
+			msg.content = msg.content + 'm';
+			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--m']);
+		}
+	}
+	return recentActivity;
+}
