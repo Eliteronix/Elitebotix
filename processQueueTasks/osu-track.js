@@ -53,8 +53,6 @@ module.exports = {
 					}
 
 					if (recentActivity) {
-						console.log('There was recent activity for', processQueueEntry.additions);
-
 						let date = new Date();
 
 						date.setUTCMinutes(date.getUTCMinutes() + 15);
@@ -63,8 +61,6 @@ module.exports = {
 					}
 
 					//Retry later because there was no activity
-
-					console.log('There was no activity for', processQueueEntry.additions);
 
 					let date = new Date();
 
@@ -75,15 +71,14 @@ module.exports = {
 					return await DBProcessQueue.create({ guildId: processQueueEntry.guildId, task: processQueueEntry.task, priority: processQueueEntry.priority, additions: `${channel.id};${user.id};${user.name}`, date: date });
 				})
 				.catch(async (err) => {
+					console.log(err);
 					if (err.message === 'Not found') {
 						await channel.send(`Could not find user \`${args[1]}\` anymore and I will therefore stop tracking them. Maybe they changed their name?`);
 					} else {
 						console.log(err);
 					}
 				});
-
 		}
-
 	},
 };
 
@@ -109,9 +104,10 @@ async function lookForTopPlays(processQueueEntry, args, channel, user, mode) {
 			}
 			return recentPlaysAmount;
 		})
-		.catch(
-			//Nothing
-		);
+		// eslint-disable-next-line no-unused-vars
+		.catch(err => {
+			return 0;
+		});
 
 	if (numberRecentPlays > 0) {
 		recentActivity = true;
