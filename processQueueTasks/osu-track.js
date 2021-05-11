@@ -1,6 +1,9 @@
 const { DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
 
+//Events have to say the global rank on the map
+//Events should be limited to top 50
+
 module.exports = {
 	async execute(client, processQueueEntry) {
 		let args = processQueueEntry.additions.split(';');
@@ -61,7 +64,6 @@ module.exports = {
 					}
 
 					//Retry later because there was no activity
-
 					let date = new Date();
 
 					date.setTime(date.getTime() + (date.getTime() - processQueueEntry.createdAt.getTime()));
