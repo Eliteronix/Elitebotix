@@ -30,17 +30,27 @@ module.exports = {
 						let scoreCommand = require('../commands/osu-score.js');
 						for (let i = 0; i < user.events.length; i++) {
 							//This only works if the local timezone is UTC
-							if (processQueueEntry.createdAt.getTime() <= Date.parse(user.events[i].raw_date)) {
+							let mapRank = user.events[i].html.replace(/.+<\/a><\/b> achieved rank #/gm, '').replace(/.+<\/a><\/b> achieved .+rank #/gm, '').replace(/ on <a href='\/b\/.+/gm, '').replace('</b>', '');
+							let modeName = user.events[i].html.replace(/.+<\/a> \(osu!/gm, '');
+							modeName = modeName.substring(0, modeName.length - 1);
+							if (modeName.length === 0) {
+								modeName = 'osu!';
+							}
+							if (parseInt(mapRank) <= 50 && processQueueEntry.createdAt.getTime() <= Date.parse(user.events[i].raw_date)) {
+								console.log(user.name, mapRank, modeName);
 								recentActivity = true;
 								let msg = {
-									content: `e!osu-score ${user.events[i].beatmapId} ${user.name}`,
 									guild: channel.guild,
 									channel: channel,
 									author: {
 										id: 0
 									}
 								};
-								scoreCommand.execute(msg, [user.events[i].beatmapId, user.name]);
+								let newArgs = [user.events[i].beatmapId, user.name];
+								if (modeName !== 'osu!') {
+									newArgs.push(`--${modeName.substring(0, 1)}`);
+								}
+								scoreCommand.execute(msg, newArgs);
 							}
 						}
 					}
@@ -114,7 +124,6 @@ async function lookForTopPlays(processQueueEntry, args, channel, user, mode) {
 	if (numberRecentPlays > 0) {
 		recentActivity = true;
 		let msg = {
-			content: `e!osu-top ${user.name} --recent --${numberRecentPlays} --`,
 			guild: channel.guild,
 			channel: channel,
 			author: {
@@ -123,16 +132,12 @@ async function lookForTopPlays(processQueueEntry, args, channel, user, mode) {
 		};
 		let topCommand = require('../commands/osu-top.js');
 		if (mode === 0) {
-			msg.content = msg.content + 'o';
-			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--o']);
+			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`]);
 		} else if (mode === 1) {
-			msg.content = msg.content + 't';
 			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--t']);
 		} else if (mode === 2) {
-			msg.content = msg.content + 'c';
 			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--c']);
 		} else {
-			msg.content = msg.content + 'm';
 			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--m']);
 		}
 	}
