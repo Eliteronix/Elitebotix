@@ -32,7 +32,7 @@ module.exports = {
 		let mapRank = 0;
 
 		for (let i = 0; i < args.length; i++) {
-			if (args[i] === '--event') {
+			if (args[i].startsWith('--event')) {
 				mapRank = args[i].substring(7);
 				args.splice(i, 1);
 				i--;
@@ -146,7 +146,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 				//If coming from osu-tracking
 				if (mapRank > 0) {
-					await msg.channel.send(`\`${user.name}\` achieved rank **#${mapRank}** on \`${beatmap.artist} - ${beatmap.title} [${beatmap.version}]\`!`, attachment);
+					await msg.channel.send(`\`${user.name}\` achieved rank **#${mapRank}**!`, attachment);
 				} else {
 					let guildPrefix = await getGuildPrefix(msg);
 
@@ -521,7 +521,7 @@ async function drawAccInfo(input, mapRank) {
 
 	if (mapRank > 0) {
 		//Draw completion
-		roundedRect(ctx, canvas.width / 1000 * 453, canvas.height / 500 * 395, 110, 50, 5, '00', '00', '00', 0.5);
+		roundedRect(ctx, canvas.width / 1000 * 450, canvas.height / 500 * 395, 116, 50, 5, '00', '00', '00', 0.5);
 		ctx.font = '18px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';

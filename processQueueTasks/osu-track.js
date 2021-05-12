@@ -37,7 +37,6 @@ module.exports = {
 								modeName = 'osu!';
 							}
 							if (parseInt(mapRank) <= 50 && processQueueEntry.createdAt.getTime() <= Date.parse(user.events[i].raw_date)) {
-								console.log(user.name, mapRank, modeName);
 								recentActivity = true;
 								let msg = {
 									guild: channel.guild,
