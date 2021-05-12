@@ -29,6 +29,16 @@ module.exports = {
 		const server = commandConfig[1];
 		const mode = commandConfig[2];
 
+		let mapRank = 0;
+
+		for (let i = 0; i < args.length; i++) {
+			if (args[i].startsWith('--event')) {
+				mapRank = args[i].substring(7);
+				args.splice(i, 1);
+				i--;
+			}
+		}
+
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -43,10 +53,10 @@ module.exports = {
 			.then(async (beatmaps) => {
 				if (!args[0]) {//Get profile by author if no argument
 					if (commandUser && commandUser.osuUserId) {
-						getScore(msg, beatmaps[0], commandUser.osuUserId, server, mode);
+						getScore(msg, beatmaps[0], commandUser.osuUserId, server, mode, false, mapRank);
 					} else {
 						const userDisplayName = await getMessageUserDisplayname(msg);
-						getScore(msg, beatmaps[0], userDisplayName, server, mode);
+						getScore(msg, beatmaps[0], userDisplayName, server, mode, false, mapRank);
 					}
 				} else {
 					//Get profiles by arguments
@@ -57,21 +67,21 @@ module.exports = {
 							});
 
 							if (discordUser && discordUser.osuUserId) {
-								getScore(msg, beatmaps[0], discordUser.osuUserId, server, mode);
+								getScore(msg, beatmaps[0], discordUser.osuUserId, server, mode, false, mapRank);
 							} else {
 								msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-								getScore(msg, beatmaps[0], args[i], server, mode);
+								getScore(msg, beatmaps[0], args[i], server, mode, false, mapRank);
 							}
 						} else {
 
 							if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 								if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-									getScore(msg, beatmaps[0], args[i], server, mode, true);
+									getScore(msg, beatmaps[0], args[i], server, mode, true, mapRank);
 								} else {
-									getScore(msg, beatmaps[0], args[i], server, mode);
+									getScore(msg, beatmaps[0], args[i], server, mode, false, mapRank);
 								}
 							} else {
-								getScore(msg, beatmaps[0], args[i], server, mode);
+								getScore(msg, beatmaps[0], args[i], server, mode, false, mapRank);
 							}
 						}
 					}
@@ -87,7 +97,7 @@ module.exports = {
 	},
 };
 
-async function getScore(msg, beatmap, username, server, mode, noLinkedAccount) {
+async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, mapRank) {
 	if (server === 'bancho') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -127,28 +137,34 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount) {
 
 				elements = await drawFooter(elements);
 
-				elements = await drawAccInfo(elements);
+				elements = await drawAccInfo(elements, mapRank);
 
 				await drawUserInfo(elements, server);
 
 				//Create as an attachment
 				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.id}.png`);
 
-				let guildPrefix = await getGuildPrefix(msg);
-
-				//declare hints array
-				var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`];
-
-				let sentMessage;
-
-				//Send attachment
-				if (noLinkedAccount) {
-					sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+				//If coming from osu-tracking
+				if (mapRank > 0) {
+					await msg.channel.send(`\`${user.name}\` achieved rank **#${mapRank}**!`, attachment);
 				} else {
-					sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+					let guildPrefix = await getGuildPrefix(msg);
+
+					//declare hints array
+					var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`];
+
+					let sentMessage;
+
+					//Send attachment
+					if (noLinkedAccount) {
+						sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+					} else {
+						sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+					}
+					sentMessage.react('<:COMPARE:827974793365159997>');
 				}
+
 				processingMessage.delete();
-				sentMessage.react('<:COMPARE:827974793365159997>');
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
@@ -496,12 +512,22 @@ async function drawFooter(input) {
 	return output;
 }
 
-async function drawAccInfo(input) {
+async function drawAccInfo(input, mapRank) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let score = input[2];
 	let beatmap = input[3];
 	let user = input[4];
+
+	if (mapRank > 0) {
+		//Draw completion
+		roundedRect(ctx, canvas.width / 1000 * 450, canvas.height / 500 * 395, 116, 50, 5, '00', '00', '00', 0.5);
+		ctx.font = '18px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		ctx.fillText('Global Rank', canvas.width / 1000 * 453 + 55, canvas.height / 500 * 415);
+		ctx.fillText(`#${mapRank}`, canvas.width / 1000 * 453 + 55, canvas.height / 500 * 440);
+	}
 
 	//Calculate accuracy
 	const accuracy = (score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss));
