@@ -34,6 +34,8 @@ module.exports = {
 		for (let i = 0; i < args.length; i++) {
 			if (args[i] === '--event') {
 				mapRank = args[i].substring(7);
+				args.splice(i, 1);
+				i--;
 			}
 		}
 

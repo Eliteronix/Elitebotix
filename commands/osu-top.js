@@ -48,6 +48,8 @@ module.exports = {
 				i--;
 			} else if (args[i] === '--tracking') {
 				tracking = true;
+				args.splice(i, 1);
+				i--;
 			}
 		}
 
