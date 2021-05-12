@@ -35,10 +35,10 @@ module.exports = {
 				}
 			}
 
-			return msg.channel.send(trackingListString || 'No osu! tracking tasks found in this channel.', {split: true});
+			return msg.channel.send(trackingListString || 'No osu! tracking tasks found in this channel.', { split: true });
 		} else if (args[0].toLowerCase() === 'remove') {
 			args.shift();
-			if(args[1]){
+			if (args[1]) {
 				return msg.channel.send('Please specify which user shouldn\'t be tracked anymore.');
 			}
 
@@ -68,13 +68,29 @@ module.exports = {
 
 		osuApi.getUser({ u: args.join('_') })
 			.then(async (user) => {
-				let date = new Date();
+				//Check for duplicates
+				const duplicates = await DBProcessQueue.findAll({
+					where: { task: 'osu-track' }
+				});
 
-				date.setUTCMinutes(date.getUTCMinutes() + 15);
+				for (let i = 0; i < duplicates.length; i++) {
+					if (!duplicates[i].additions.startsWith(`${msg.channel.id};${user.id}`)) {
+						duplicates.splice(i, 1);
+						i--;
+					}
+				}
 
-				DBProcessQueue.create({ guildId: 'None', task: 'osu-track', priority: 8, additions: `${msg.channel.id};${user.id};${user.name}`, date: date });
+				if (duplicates.length === 0) {
+					let date = new Date();
 
-				msg.channel.send(`The user ${user.name} will be tracked in this channel.`);
+					date.setUTCMinutes(date.getUTCMinutes() + 15);
+
+					DBProcessQueue.create({ guildId: 'None', task: 'osu-track', priority: 8, additions: `${msg.channel.id};${user.id};${user.name}`, date: date });
+
+					msg.channel.send(`The user ${user.name} will be tracked in this channel.`);
+				} else {
+					msg.channel.send(`The user ${user.name} is already being tracked in this channel.`);
+				}
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
