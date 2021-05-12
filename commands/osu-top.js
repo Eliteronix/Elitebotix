@@ -138,7 +138,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentS
 
 				//If created by osu-tracking
 				if (tracking) {
-					await msg.channel.send(`\`${user.name}\` got ${limit} new top plays!`, attachment);
+					await msg.channel.send(`\`${user.name}\` got ${limit} new top play(s)!`, attachment);
 				} else {
 					//Define prefix command
 					let guildPrefix = await getGuildPrefix(msg);
