@@ -2,7 +2,7 @@ const { DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
 
 //Events have to say the global rank on the map
-//Events should be limited to top 50
+//Text has to be different
 
 module.exports = {
 	async execute(client, processQueueEntry) {
@@ -46,7 +46,7 @@ module.exports = {
 										id: 0
 									}
 								};
-								let newArgs = [user.events[i].beatmapId, user.name];
+								let newArgs = [user.events[i].beatmapId, user.name, `--event${mapRank}`];
 								if (modeName !== 'osu!') {
 									newArgs.push(`--${modeName.substring(0, 1)}`);
 								}
@@ -132,13 +132,13 @@ async function lookForTopPlays(processQueueEntry, args, channel, user, mode) {
 		};
 		let topCommand = require('../commands/osu-top.js');
 		if (mode === 0) {
-			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`]);
+			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--tracking']);
 		} else if (mode === 1) {
-			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--t']);
+			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--tracking', '--t']);
 		} else if (mode === 2) {
-			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--c']);
+			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--tracking', '--c']);
 		} else {
-			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--m']);
+			topCommand.execute(msg, [user.name, '--recent', `--${numberRecentPlays}`, '--tracking', '--m']);
 		}
 	}
 	return recentActivity;

@@ -29,19 +29,15 @@ module.exports = {
 		const mode = commandConfig[2];
 
 		let recentScores = false;
+		let limit = 10;
+		let tracking = false;
 
 		for (let i = 0; i < args.length; i++) {
 			if (args[i] === '--new' || args[i] === '--recent' || args[i] === '--n') {
 				recentScores = true;
 				args.splice(i, 1);
 				i--;
-			}
-		}
-
-		let limit = 10;
-
-		for (let i = 0; i < args.length; i++) {
-			if (args[i].startsWith('--') && !isNaN(args[i].replace('--', ''))) {
+			} else if (args[i].startsWith('--') && !isNaN(args[i].replace('--', ''))) {
 				limit = parseInt(args[i].replace('--', ''));
 				if (limit > 100) {
 					limit = 100;
@@ -50,16 +46,18 @@ module.exports = {
 				}
 				args.splice(i, 1);
 				i--;
+			} else if (args[i] === '--tracking') {
+				tracking = true;
 			}
 		}
 
 		if (!args[0]) {
 			//Get profile by author if no argument
 			if (commandUser && commandUser.osuUserId) {
-				getTopPlays(msg, commandUser.osuUserId, server, mode, false, recentScores, limit);
+				getTopPlays(msg, commandUser.osuUserId, server, mode, false, recentScores, limit, tracking);
 			} else {
 				const userDisplayName = await getMessageUserDisplayname(msg);
-				getTopPlays(msg, userDisplayName, server, mode, false, recentScores, limit);
+				getTopPlays(msg, userDisplayName, server, mode, false, recentScores, limit, tracking);
 			}
 		} else {
 			//Get profiles by arguments
@@ -70,21 +68,21 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getTopPlays(msg, discordUser.osuUserId, server, mode, false, recentScores, limit);
+						getTopPlays(msg, discordUser.osuUserId, server, mode, false, recentScores, limit, tracking);
 					} else {
 						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-						getTopPlays(msg, args[i], server, mode, false, recentScores, limit);
+						getTopPlays(msg, args[i], server, mode, false, recentScores, limit, tracking);
 					}
 				} else {
 
 					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getTopPlays(msg, args[i], server, mode, true, recentScores, limit);
+							getTopPlays(msg, args[i], server, mode, true, recentScores, limit, tracking);
 						} else {
-							getTopPlays(msg, args[i], server, mode, false, recentScores, limit);
+							getTopPlays(msg, args[i], server, mode, false, recentScores, limit, tracking);
 						}
 					} else {
-						getTopPlays(msg, args[i], server, mode, false, recentScores, limit);
+						getTopPlays(msg, args[i], server, mode, false, recentScores, limit, tracking);
 					}
 				}
 			}
@@ -92,7 +90,7 @@ module.exports = {
 	}
 };
 
-async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentScores, limit) {
+async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentScores, limit, tracking) {
 	if (server === 'bancho') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -136,18 +134,24 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentS
 				//Create as an attachment
 				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}.png`);
 
-				//Define prefix command
-				let guildPrefix = await getGuildPrefix(msg);
-
-				//declare hints array
-				var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`, `Try \`${guildPrefix}osu-score <beatmapID> ${user.name.replace(/ /g, '_')}\` for the best score on a map.`];
-
-				//Send attachment
-				if (noLinkedAccount) {
-					await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+				//If created by osu-tracking
+				if (tracking) {
+					await msg.channel.send(`\`${user.name}\` got ${limit} new top plays!`, attachment);
 				} else {
-					await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+					//Define prefix command
+					let guildPrefix = await getGuildPrefix(msg);
+
+					//declare hints array
+					var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`, `Try \`${guildPrefix}osu-score <beatmapID> ${user.name.replace(/ /g, '_')}\` for the best score on a map.`];
+
+					//Send attachment
+					if (noLinkedAccount) {
+						await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+					} else {
+						await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+					}
 				}
+
 				processingMessage.delete();
 			})
 			.catch(err => {
@@ -224,7 +228,7 @@ async function drawTitle(input, server, mode, recentScores) {
 	}
 
 	let recent = '';
-	
+
 	if (recentScores) {
 		recent = 'most recent ';
 	}
