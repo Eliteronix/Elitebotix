@@ -762,6 +762,8 @@ module.exports = {
 
 		//Create as an attachment and return
 		return new Discord.MessageAttachment(canvas.toBuffer(), `${stagename}.png`);
+	}, pause(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 };
 
