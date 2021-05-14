@@ -794,7 +794,6 @@ async function getOsuBadgeNumberByIdFunction(osuUserId) {
 					badgeNameArray.push(badgeName);
 				}
 			}
-			console.log(badgeNameArray);
 			return badgeNameArray.length;
 		});
 }
