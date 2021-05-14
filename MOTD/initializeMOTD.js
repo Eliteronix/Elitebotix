@@ -10,7 +10,7 @@ module.exports = {
 		//Start everything in that minute
 		const today = new Date();
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'QA' && today.getUTCHours() === 18 && today.getUTCMinutes() === 0) {
+		if (process.env.SERVER === 'Live' && today.getUTCHours() === 18 && today.getUTCMinutes() === 0) {
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -111,7 +111,6 @@ module.exports = {
 						DTBeatmaps[i].length.total = Math.round(DTBeatmaps[i].length.total / 3 * 2);
 						DTBeatmaps[i].length.drain = Math.round(DTBeatmaps[i].length.drain / 3 * 2);
 						DTBeatmaps[i].bpm = DTBeatmaps[i].bpm * 1.5;
-
 					}
 
 					//Sort the maps by difficulty each
@@ -138,7 +137,7 @@ module.exports = {
 					console.log(e);
 				});
 			// eslint-disable-next-line no-undef
-		} else if (process.env.SERVER === 'QA' && today.getUTCHours() === 19 && today.getUTCMinutes() === 30) {
+		} else if (process.env.SERVER === 'Live' && today.getUTCHours() === 19 && today.getUTCMinutes() === 30) {
 			//Maybe create all leaderboards daily anyway?
 			//Get Dates
 			let todayMorning = new Date();
