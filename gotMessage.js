@@ -160,13 +160,13 @@ module.exports = async function (msg) {
 			if (args[0]) {
 				try {
 					closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch} ${args.join(' ')}\`?`);
-				} catch (e){
+				} catch (e) {
 					//Nothing as its an optional feature
 				}
 			} else {
 				try {
 					closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch}\`?`);
-				} catch (e){
+				} catch (e) {
 					//Nothing as its an optional feature
 				}
 			}
@@ -253,7 +253,9 @@ module.exports = async function (msg) {
 		}
 
 		//Set timestamp for the used command
-		timestamps.set(msg.author.id, now);
+		if (msg.author.id !== '138273136285057025') {
+			timestamps.set(msg.author.id, now);
+		}
 		//Automatically delete the timestamp after the cooldown
 		setTimeout(() => timestamps.delete(msg.author.id), cooldownAmount);
 
