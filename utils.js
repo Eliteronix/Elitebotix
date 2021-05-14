@@ -777,21 +777,24 @@ async function getOsuBadgeNumberByIdFunction(osuUserId) {
 			const rawBadgesArray = cleanedMatch.split('},{');
 			const badgeNameArray = [];
 			for (let i = 0; i < rawBadgesArray.length; i++) {
-				const badgeArray = rawBadgesArray[i].split('","');
-				const badgeName = badgeArray[1].replace('description":"', '');
-				if (!badgeName.startsWith('Beatmap Spotlights: ')
-					&& !badgeName.includes(' contribution to the ')
-					&& !badgeName.includes(' contributor')
-					&& !badgeName.includes('Mapper\'s Favourite ')
-					&& !badgeName.includes('Community Favourite ')
-					&& !badgeName.includes('Mapping')
-					&& !badgeName.includes('Aspire')
-					&& !badgeName.includes('Beatmapping')
-					&& !badgeName.includes('osu!idol')
-					&& badgeName !== 'The official voice behind osu!'
-					&& !badgeName.includes('Newspaper ')
-					&& !badgeName.includes('Pending Cup ')) {
-					badgeNameArray.push(badgeName);
+				if (rawBadgesArray[i] !== '') {
+					const badgeArray = rawBadgesArray[i].split('","');
+					console.log(rawBadgesArray);
+					const badgeName = badgeArray[1].replace('description":"', '');
+					if (!badgeName.startsWith('Beatmap Spotlights: ')
+						&& !badgeName.includes(' contribution to the ')
+						&& !badgeName.includes(' contributor')
+						&& !badgeName.includes('Mapper\'s Favourite ')
+						&& !badgeName.includes('Community Favourite ')
+						&& !badgeName.includes('Mapping')
+						&& !badgeName.includes('Aspire')
+						&& !badgeName.includes('Beatmapping')
+						&& !badgeName.includes('osu!idol')
+						&& badgeName !== 'The official voice behind osu!'
+						&& !badgeName.includes('Newspaper ')
+						&& !badgeName.includes('Pending Cup ')) {
+						badgeNameArray.push(badgeName);
+					}
 				}
 			}
 			return badgeNameArray.length;
