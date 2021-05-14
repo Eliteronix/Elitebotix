@@ -121,13 +121,8 @@ module.exports = {
 					});
 			} catch (error) {
 				if (error.message === 'ESOCKETTIMEDOUT') {
-					console.log(error.message);
-					console.log(error);
-					console.log('Waiting before retrying');
 					await pause(15000);
-					console.log('Retrying now');
 				} else {
-					console.log(error.message);
 					console.log(error);
 					triesBeforeError = Infinity;
 				}
