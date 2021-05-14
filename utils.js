@@ -569,7 +569,7 @@ module.exports = {
 	refreshOsuRank: async function () {
 		const today = new Date();
 		let yesterday = new Date();
-		yesterday.setDate(today.getDate() - 1);
+		yesterday.setDate(today.getHours - 12);
 
 		const discordUsers = await DBDiscordUsers.findAll();
 
@@ -768,15 +768,33 @@ module.exports = {
 };
 
 async function getOsuBadgeNumberByIdFunction(osuUserId) {
-	const count = (str) => {
-		const re = /https:\\\/\\\/assets.ppy.sh\\\/profile-badges\\\//g;
-		return ((str || '').match(re) || []).length;
-	};
-
 	return await fetch(`https://osu.ppy.sh/users/${osuUserId}/osu`)
 		.then(async (res) => {
 			let htmlCode = await res.text();
-			return count(htmlCode);
+			const badgesRegex = /,"badges".+,"beatmap_playcounts_count":/gm;
+			const matches = badgesRegex.exec(htmlCode);
+			const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"beatmap_playcounts_count":', '');
+			const rawBadgesArray = cleanedMatch.split('},{');
+			const badgeNameArray = [];
+			for (let i = 0; i < rawBadgesArray.length; i++) {
+				const badgeArray = rawBadgesArray[i].split('","');
+				const badgeName = badgeArray[1].replace('description":"', '');
+				if (!badgeName.startsWith('Beatmap Spotlights: ')
+					&& !badgeName.includes(' contribution to the ')
+					&& !badgeName.includes(' contributor')
+					&& !badgeName.includes('Mapper\'s Favourite ')
+					&& !badgeName.includes('Community Favourite ')
+					&& !badgeName.includes('Mapping')
+					&& !badgeName.includes('Aspire')
+					&& !badgeName.includes('Beatmapping')
+					&& !badgeName.includes('osu!idol')
+					&& badgeName !== 'The official voice behind osu!'
+					&& !badgeName.includes('Newspaper ')
+					&& !badgeName.includes('Pending Cup ')) {
+					badgeNameArray.push(badgeName);
+				}
+			}
+			return badgeNameArray.length;
 		});
 }
 
