@@ -779,7 +779,6 @@ async function getOsuBadgeNumberByIdFunction(osuUserId) {
 			for (let i = 0; i < rawBadgesArray.length; i++) {
 				if (rawBadgesArray[i] !== '') {
 					const badgeArray = rawBadgesArray[i].split('","');
-					console.log(rawBadgesArray);
 					const badgeName = badgeArray[1].replace('description":"', '');
 					if (!badgeName.startsWith('Beatmap Spotlights: ')
 						&& !badgeName.includes(' contribution to the ')
