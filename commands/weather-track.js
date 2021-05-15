@@ -96,40 +96,40 @@ module.exports = {
 			}
 
 			const duplicate = await DBProcessQueue.findOne({
-				where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};${timePeriod};${degreeType};${result[0].location.name}` }
+				where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}` }
 			});
 
 			if (duplicate) {
-				return msg.channel.send(`The weather for ${result[0].location.name} is already being provided ${timePeriod} in this channel.`);
+				return msg.channel.send(`The weather for ${args.join(' ')} is already being provided ${timePeriod} in this channel.`);
 			}
 
 			if (timePeriod === 'hourly') {
 				const dailyDuplicate = await DBProcessQueue.findOne({
-					where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};daily;${degreeType};${result[0].location.name}` }
+					where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};daily;${degreeType};${args.join(' ')}` }
 				});
 
 				if (dailyDuplicate) {
-					dailyDuplicate.additions = `${msg.channel.id};${timePeriod};${degreeType};${result[0].location.name}`;
+					dailyDuplicate.additions = `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`;
 					dailyDuplicate.save();
 
-					return msg.channel.send(`The weather for ${result[0].location.name} will now be provided hourly instead of daily.`);
+					return msg.channel.send(`The weather for ${args.join(' ')} will now be provided hourly instead of daily.`);
 				}
 			} else {
 				const hourlyDuplicate = await DBProcessQueue.findOne({
-					where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};hourly;${degreeType};${result[0].location.name}` }
+					where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};hourly;${degreeType};${args.join(' ')}` }
 				});
 
 				if (hourlyDuplicate) {
-					hourlyDuplicate.additions = `${msg.channel.id};${timePeriod};${degreeType};${result[0].location.name}`;
+					hourlyDuplicate.additions = `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`;
 					hourlyDuplicate.save();
 
-					return msg.channel.send(`The weather for ${result[0].location.name} will now be provided daily instead of hourly.`);
+					return msg.channel.send(`The weather for ${args.join(' ')} will now be provided daily instead of hourly.`);
 				}
 			}
 
-			DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};${timePeriod};${degreeType};${result[0].location.name}`, date: date });
+			DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`, date: date });
 
-			msg.channel.send(`The weather for ${result[0].location.name} will be provided ${timePeriod} in this channel.`);
+			msg.channel.send(`The weather for ${args.join(' ')} will be provided ${timePeriod} in this channel.`);
 		});
 	},
 };
