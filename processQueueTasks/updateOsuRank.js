@@ -39,8 +39,8 @@ module.exports = {
 		discordUser.maniaPP = maniaUser.pp.raw;
 		discordUser.maniaRank = maniaUser.pp.rank;
 
-		discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
+		discordUser.osuBadges = await getOsuBadgeNumberById(discordUser.osuUserId);
 
-		discordUser.save();
+		await discordUser.save();
 	},
 };

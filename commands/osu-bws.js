@@ -79,6 +79,16 @@ async function getProfile(msg, username, mode, noLinkedAccount) {
 			const guildPrefix = getGuildPrefix(msg);
 
 			let badgeAmount = await getOsuBadgeNumberById(user.id);
+
+			const discordUser = await DBDiscordUsers.findOne({
+				where: { osuUserId: user.id }
+			});
+
+			if (discordUser) {
+				discordUser.osuBadges = badgeAmount;
+				await discordUser.save();
+			}
+
 			let BWSRank = Math.round(Math.pow(user.pp.rank, Math.pow(0.9937, Math.pow(badgeAmount, 2))));
 
 			let data = [];
