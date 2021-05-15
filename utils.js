@@ -568,13 +568,13 @@ module.exports = {
 	},
 	refreshOsuRank: async function () {
 		const today = new Date();
-		let yesterday = new Date();
-		yesterday.setDate(today.getHours - 12);
+		let date = new Date();
+		date.setHours(today.getHours - 12);
 
 		const discordUsers = await DBDiscordUsers.findAll();
 
 		for (let i = 0; i < discordUsers.length; i++) {
-			if (discordUsers[i].osuUserId && discordUsers[i].updatedAt < yesterday) {
+			if (discordUsers[i].osuUserId && discordUsers[i].updatedAt < date) {
 				const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUsers[i].userId } });
 				if (!existingTask) {
 					DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUsers[i].userId });
