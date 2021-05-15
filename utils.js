@@ -569,7 +569,7 @@ module.exports = {
 	refreshOsuRank: async function () {
 		const today = new Date();
 		let date = new Date();
-		date.setHours(today.getHours - 12);
+		date.setHours(today.getHours() - 12);
 
 		const discordUsers = await DBDiscordUsers.findAll();
 
