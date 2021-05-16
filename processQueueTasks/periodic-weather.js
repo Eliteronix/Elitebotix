@@ -29,7 +29,7 @@ module.exports = {
 
 				messagesArray[messagesArray.length - 1].content = `${guildPrefix}weather ${degreeType}${args[3]}`;
 
-				command.execute(messagesArray[messagesArray.length - 1], args, true);
+				command.execute(messagesArray[messagesArray.length - 1], [degreeType, args[3].split(' ')], true);
 
 				messagesArray[messagesArray.length - 1].delete();
 
@@ -45,7 +45,7 @@ module.exports = {
 					date.setUTCDate(date.getUTCDate() + 1);
 				}
 
-				await DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: processQueueEntry.additions, date: date });
+				await DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${args[0]};${args[1]};${args[2]};${args[3]}`, date: date });
 			});
 		}
 	},
