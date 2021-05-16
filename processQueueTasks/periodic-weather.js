@@ -12,7 +12,7 @@ module.exports = {
 		if (channel) {
 			let command = require('../commands/weather.js');
 
-			channel.messages.fetch({ limit: 100 }).then(async (messages) => {
+			await channel.messages.fetch({ limit: 100 }).then(async (messages) => {
 				const messagesArray = messages.filter(m => m.content === `Weather for ${args[3]}`).array();
 
 				if (messagesArray.length === 0) {
@@ -45,9 +45,8 @@ module.exports = {
 					date.setUTCDate(date.getUTCDate() + 1);
 				}
 
-				DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: processQueueEntry.additions, date: date });
+				await DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: processQueueEntry.additions, date: date });
 			});
 		}
-
 	},
 };

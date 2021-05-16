@@ -112,7 +112,7 @@ module.exports = {
 						//Create as an attachment
 						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'elitebotix-changelog.png');
 
-						msg.channel.send(`Weather for ${weather.location.name}`, attachment);
+						msg.channel.send(`Weather for ${args.join(' ')}`, attachment);
 
 						return triesBeforeError = Infinity;
 					})
