@@ -34,6 +34,7 @@ module.exports = {
 				await findWeather({ search: args.join(' '), degreeType: degreeType })
 					.then(async (result) => {
 						if (!result[0]) {
+							triesBeforeError = Infinity;
 							return msg.channel.send(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
 						}
 
