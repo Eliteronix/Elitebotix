@@ -69,7 +69,7 @@ module.exports = {
 						ctx.textAlign = 'center';
 						ctx.fillText(`Data from ${weather.current.day} at ${weather.current.observationtime.substring(0, 5)}`, 375, 150);
 						ctx.fillText(`Temp.: ${weather.current.temperature}°${degreeType} | Feels Like: ${weather.current.feelslike}°${degreeType}`, 375, 200);
-						ctx.fillText(`Humidity: ${weather.current.humidity}`, 375, 250);
+						ctx.fillText(`Humidity: ${weather.current.humidity}%`, 375, 250);
 						ctx.fillText(`Wind: ${weather.current.winddisplay}`, 375, 300);
 						ctx.font = 'bold 25px comfortaa, sans-serif';
 						ctx.fillText(`Forecast for today: ${weather.forecast[1].skytextday}`, 375, 390);

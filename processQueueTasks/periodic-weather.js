@@ -29,7 +29,19 @@ module.exports = {
 
 				messagesArray[messagesArray.length - 1].content = `${guildPrefix}weather ${degreeType}${args[3]}`;
 
-				command.execute(messagesArray[messagesArray.length - 1], [degreeType, args[3].split(' ')], true);
+				console.log('args[3]', args[3]);
+				let locationArguments = args[3].split(' ');
+				console.log('locationArguments', locationArguments);
+				let newArgs = [degreeType];
+
+				for (let i = 0; i < locationArguments.length; i++) {
+					newArgs.push(locationArguments[i]);
+				}
+
+				console.log('newArgs', newArgs);
+				console.log('theoretical message content', messagesArray[messagesArray.length - 1].content);
+
+				command.execute(messagesArray[messagesArray.length - 1], newArgs, true);
 
 				messagesArray[messagesArray.length - 1].delete();
 
