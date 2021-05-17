@@ -38,22 +38,24 @@ module.exports = {
 
 			return msg.channel.send(trackingListString || 'No weather tracking tasks found in this channel.');
 		} else if (args[0].toLowerCase() === 'remove') {
+			args.shift();
 			const trackingList = await DBProcessQueue.findAll({
 				where: { task: 'periodic-weather' }
 			});
 
 			let degreeType = '';
 
-			if (args[1].toLowerCase() === 'c') {
+			if (args[0].toLowerCase() === 'c') {
 				degreeType = 'C';
-			} else if (args[1].toLowerCase() === 'f') {
+			} else if (args[0].toLowerCase() === 'f') {
 				degreeType = 'F';
 			} else {
 				return msg.channel.send('Please specify if it is a tracker in `C` or in `F` as the second argument.');
 			}
+			args.shift();
 
 			for (let i = 0; i < trackingList.length; i++) {
-				if (trackingList[i].additions.startsWith(msg.channel.id) && trackingList[i].additions.includes(`;${degreeType};`) && trackingList[i].additions.toLowerCase().includes(`;${args[2].toLowerCase()} ${args[3].toLowerCase()}`)) {
+				if (trackingList[i].additions.startsWith(msg.channel.id) && trackingList[i].additions.includes(`;${degreeType};`) && trackingList[i].additions.endsWith(`;${args.join(' ')}`)) {
 					trackingList[i].destroy();
 					return msg.channel.send('The specified tracker has been removed.');
 				}

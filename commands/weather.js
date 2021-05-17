@@ -25,6 +25,8 @@ module.exports = {
 		if (args[0].toLowerCase() === 'f' || args[0].toLowerCase() === 'fahrenheit') {
 			degreeType = 'F';
 			args.shift();
+		} else if (args[0].toLowerCase() === 'c' || args[0].toLowerCase() === 'celcius') {
+			args.shift();
 		}
 
 		const findWeather = util.promisify(weather.find);
@@ -34,6 +36,7 @@ module.exports = {
 				await findWeather({ search: args.join(' '), degreeType: degreeType })
 					.then(async (result) => {
 						if (!result[0]) {
+							triesBeforeError = Infinity;
 							return msg.channel.send(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
 						}
 
@@ -69,7 +72,7 @@ module.exports = {
 						ctx.textAlign = 'center';
 						ctx.fillText(`Data from ${weather.current.day} at ${weather.current.observationtime.substring(0, 5)}`, 375, 150);
 						ctx.fillText(`Temp.: ${weather.current.temperature}°${degreeType} | Feels Like: ${weather.current.feelslike}°${degreeType}`, 375, 200);
-						ctx.fillText(`Humidity: ${weather.current.humidity}`, 375, 250);
+						ctx.fillText(`Humidity: ${weather.current.humidity}%`, 375, 250);
 						ctx.fillText(`Wind: ${weather.current.winddisplay}`, 375, 300);
 						ctx.font = 'bold 25px comfortaa, sans-serif';
 						ctx.fillText(`Forecast for today: ${weather.forecast[1].skytextday}`, 375, 390);
@@ -112,7 +115,7 @@ module.exports = {
 						//Create as an attachment
 						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'elitebotix-changelog.png');
 
-						msg.channel.send(`Weather for ${weather.location.name}`, attachment);
+						msg.channel.send(`Weather for ${args.join(' ')}`, attachment);
 
 						return triesBeforeError = Infinity;
 					})

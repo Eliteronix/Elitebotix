@@ -12,7 +12,7 @@ module.exports = {
 		if (channel) {
 			let command = require('../commands/weather.js');
 
-			channel.messages.fetch({ limit: 100 }).then(async (messages) => {
+			await channel.messages.fetch({ limit: 100 }).then(async (messages) => {
 				const messagesArray = messages.filter(m => m.content === `Weather for ${args[3]}`).array();
 
 				if (messagesArray.length === 0) {
@@ -22,14 +22,21 @@ module.exports = {
 
 				const guildPrefix = getGuildPrefix(messagesArray[messagesArray.length - 1]);
 
-				let degreeType = '';
+				let degreeType = 'C';
 				if (args[2] === 'F') {
 					degreeType = 'F ';
 				}
 
 				messagesArray[messagesArray.length - 1].content = `${guildPrefix}weather ${degreeType}${args[3]}`;
 
-				command.execute(messagesArray[messagesArray.length - 1], args, true);
+				let locationArguments = args[3].split(' ');
+				let newArgs = [degreeType];
+
+				for (let i = 0; i < locationArguments.length; i++) {
+					newArgs.push(locationArguments[i]);
+				}
+
+				command.execute(messagesArray[messagesArray.length - 1], newArgs, true);
 
 				messagesArray[messagesArray.length - 1].delete();
 
@@ -45,9 +52,8 @@ module.exports = {
 					date.setUTCDate(date.getUTCDate() + 1);
 				}
 
-				DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: processQueueEntry.additions, date: date });
+				await DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${args[0]};${args[1]};${args[2]};${args[3]}`, date: date });
 			});
 		}
-
 	},
 };
