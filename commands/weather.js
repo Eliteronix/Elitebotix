@@ -25,6 +25,8 @@ module.exports = {
 		if (args[0].toLowerCase() === 'f' || args[0].toLowerCase() === 'fahrenheit') {
 			degreeType = 'F';
 			args.shift();
+		} else if (args[0].toLowerCase() === 'c' || args[0].toLowerCase() === 'celcius') {
+			args.shift();
 		}
 
 		const findWeather = util.promisify(weather.find);
