@@ -187,7 +187,7 @@ async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, dou
 	//Invisible seperator before the \n to ensure line break
 	data.push(`⁣\n${mapIndex}. knockout map (${knockoutNumber} player(s) will be knocked out):`);
 	data.push(`You have **${Math.floor(map.length.total / 60) + 2}:${(map.length.total % 60).toString().padStart(2, '0')} minutes** to play the map. **Last submitted score will count (fails included)**.`);
-	data.push(`Website: <https://osu.ppy.sh/b/${map.id}> | osu! direct: <osu://dl/${map.beatmapSetId}>`);
+	data.push(`Website: <https://osu.ppy.sh/b/${map.id}> | osu! direct: <osu://b/${map.id}>`);
 	const attachment = await createMOTDAttachment(`${mapIndex}. Knockout Map`, map, doubleTime);
 	for (let i = 0; i < users.length; i++) {
 		await users[i].send(data, attachment, { split: true })

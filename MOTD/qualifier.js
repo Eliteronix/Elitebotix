@@ -118,7 +118,7 @@ async function sendQualifierMessages(client, map, users) {
 	data.push(`There are ${users.length} players registered today for your bracket!`);
 	data.push('Try to get your **best score** possible in the next **10 minutes** on the following map to qualify for a knockout lobby **(fails are excluded)**.');
 	data.push('\nTodays qualifier map:');
-	data.push(`Website: <https://osu.ppy.sh/b/${map.id}> | osu! direct: <osu://dl/${map.beatmapSetId}>`);
+	data.push(`Website: <https://osu.ppy.sh/b/${map.id}> | osu! direct: <osu://b/${map.id}>`);
 	const attachment = await createMOTDAttachment('Qualifier', map, false);
 	for (let i = 0; i < users.length; i++) {
 		await users[i].send(data, attachment, { split: true })

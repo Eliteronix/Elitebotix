@@ -75,7 +75,7 @@ async function getBeatmap(msg, beatmap) {
 	const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-beatmap-${beatmap.id}.png`);
 
 	//Send attachment
-	await msg.channel.send(`Website: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://dl/${beatmap.beatmapSetId}>`, attachment);
+	await msg.channel.send(`Website: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>`, attachment);
 	processingMessage.delete();
 }
 
