@@ -5,7 +5,7 @@ module.exports = {
 	name: 'remindme',
 	aliases: ['reminder'],
 	description: 'Sends a reminder at the specified time',
-	usage: '<#y/#m/#w/#d/#h/#min> <message>',
+	usage: '<#y/#mo/#w/#d/#h/#m> <message>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -29,16 +29,16 @@ module.exports = {
 			let splice = true;
 			if (args[i].endsWith('y') && !isNaN(args[i].replace('y', ''))) {
 				years += parseInt(args[i].replace('y', ''));
-			} else if (args[i].endsWith('m') && !isNaN(args[i].replace('m', ''))) {
-				months += parseInt(args[i].replace('m', ''));
+			} else if (args[i].endsWith('mo') && !isNaN(args[i].replace('mo', ''))) {
+				months += parseInt(args[i].replace('mo', ''));
 			} else if (args[i].endsWith('w') && !isNaN(args[i].replace('w', ''))) {
 				weeks += parseInt(args[i].replace('w', ''));
 			} else if (args[i].endsWith('d') && !isNaN(args[i].replace('d', ''))) {
 				days += parseInt(args[i].replace('d', ''));
 			} else if (args[i].endsWith('h') && !isNaN(args[i].replace('h', ''))) {
 				hours += parseInt(args[i].replace('h', ''));
-			} else if (args[i].endsWith('min') && !isNaN(args[i].replace('min', ''))) {
-				minutes += parseInt(args[i].replace('min', ''));
+			} else if (args[i].endsWith('m') && !isNaN(args[i].replace('m', ''))) {
+				minutes += parseInt(args[i].replace('m', ''));
 			} else {
 				splice = false;
 			}
@@ -49,7 +49,7 @@ module.exports = {
 			}
 		}
 
-		if(args.length === 0){
+		if (args.length === 0) {
 			const guildPrefix = await getGuildPrefix(msg);
 			return msg.channel.send(`You didn't provide a message.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
 		}
@@ -62,7 +62,7 @@ module.exports = {
 		date.setUTCHours(date.getUTCHours() + hours);
 		date.setUTCMinutes(date.getUTCMinutes() + minutes);
 
-		if(now.getTime() === date.getTime()){
+		if (now.getTime() === date.getTime()) {
 			const guildPrefix = await getGuildPrefix(msg);
 			return msg.channel.send(`You didn't specify when I should remind you.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
 		}
