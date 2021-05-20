@@ -22,7 +22,8 @@ module.exports = {
 		if (players.length === 1) {
 			// Send message to user
 			return users[0].send('There aren\'t any other players registered for your bracket at the moment.\nMaybe try asking your friends and there will be another competition tomorrow.')
-				.catch(async () => {
+				.catch(async (error) => {
+					console.log(error);
 					const channel = await client.channels.fetch('833803740162949191');
 					channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 				});
@@ -55,7 +56,8 @@ module.exports = {
 			for (let i = 0; i < results.length; i++) {
 				if (results[i].score < 0) {
 					users[i].send('You failed to submit a score for todays qualifier map and have been removed from todays competition.\nCome back tomorrow for another round.')
-						.catch(async () => {
+						.catch(async (error) => {
+							console.log(error);
 							const channel = await client.channels.fetch('833803740162949191');
 							channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 						});
@@ -77,7 +79,8 @@ module.exports = {
 			//Get rid of people without scores
 			for (let i = 0; i < users.length; i++) {
 				await users[i].send(`You placed \`${i + 1}.\` out of \`${users.length}\` players with a score of \`${humanReadable(results[i].score)}\``)
-					.catch(async () => {
+					.catch(async (error) => {
+						console.log(error);
 						const channel = await client.channels.fetch('833803740162949191');
 						channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 					});
@@ -122,7 +125,8 @@ async function sendQualifierMessages(client, map, users) {
 	const attachment = await createMOTDAttachment('Qualifier', map, false);
 	for (let i = 0; i < users.length; i++) {
 		await users[i].send(data, attachment, { split: true })
-			.catch(async () => {
+			.catch(async (error) => {
+				console.log(error);
 				const channel = await client.channels.fetch('833803740162949191');
 				channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 			});

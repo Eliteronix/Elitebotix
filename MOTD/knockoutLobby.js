@@ -12,7 +12,8 @@ module.exports = {
 		if (players.length === 1) {
 			assignKnockoutPoints(players[0], players, 1, 11);
 			return users[0].send('You will win your lobby by default.\nCome back tomorrow for another competition!')
-				.catch(async () => {
+				.catch(async (error) => {
+					console.log(error);
 					const channel = await client.channels.fetch('833803740162949191');
 					channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 				});
@@ -42,7 +43,8 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 	data.push(playerList);
 	for (let i = 0; i < users.length; i++) {
 		await users[i].send(data, { split: true })
-			.catch(async () => {
+			.catch(async (error) => {
+				console.log(error);
 				const channel = await client.channels.fetch('833803740162949191');
 				await channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 			});
@@ -112,7 +114,8 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 					assignKnockoutPoints(players[i], startingPlayers, players.length, mapIndex);
 				}
 				await users[i].send(`You failed to submit a valid score for the last knockout map and have been removed from todays competition.\nReason for the knockout: ${results[i].pp}\nCome back tomorrow for another round.`)
-					.catch(async () => {
+					.catch(async (error) => {
+						console.log(error);
 						const channel = await client.channels.fetch('833803740162949191');
 						await channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 					});
@@ -136,7 +139,8 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 			for (let i = 0; i < players.length && knockedOutPlayers < knockoutNumber; i++) {
 				assignKnockoutPoints(players[i], startingPlayers, players.length, mapIndex);
 				await users[i].send('You were knocked out by score. Thank you for playing and come back tomorrow for another round!')
-					.catch(async () => {
+					.catch(async (error) => {
+						console.log(error);
 						const channel = await client.channels.fetch('833803740162949191');
 						await channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 					});
@@ -161,7 +165,8 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 		//Inform the rest of the players about the knockout for this round
 		for (let i = 0; i < users.length; i++) {
 			users[i].send(`Knocked out players this round:\n${knockedOutPlayerNames}`)
-				.catch(async () => {
+				.catch(async (error) => {
+					console.log(error);
 					const channel = await client.channels.fetch('833803740162949191');
 					channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 				});
@@ -171,7 +176,8 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 		if (players.length === 1) {
 			assignKnockoutPoints(players[0], startingPlayers, players.length, mapIndex + 1);
 			return users[0].send('All other players have been knocked out of todays competition which means **you have won!**\nCongratulations, thank you for playing and come back tomorrow for another round.')
-				.catch(async () => {
+				.catch(async (error) => {
+					console.log(error);
 					const channel = await client.channels.fetch('833803740162949191');
 					channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 				});
@@ -191,7 +197,8 @@ async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, dou
 	const attachment = await createMOTDAttachment(`${mapIndex}. Knockout Map`, map, doubleTime);
 	for (let i = 0; i < users.length; i++) {
 		await users[i].send(data, attachment, { split: true })
-			.catch(async () => {
+			.catch(async (error) => {
+				console.log(error);
 				const channel = await client.channels.fetch('833803740162949191');
 				await channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 			});
@@ -316,7 +323,8 @@ async function sendMapLeaderboard(client, results, players, users) {
 	}
 	for (let i = 0; i < users.length; i++) {
 		await users[i].send(data, { split: true })
-			.catch(async () => {
+			.catch(async (error) => {
+				console.log(error);
 				const channel = await client.channels.fetch('833803740162949191');
 				await channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 			});
