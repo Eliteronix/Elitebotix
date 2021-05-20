@@ -91,7 +91,7 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 						const IRCUser = bancho.getUser(osuUser.name);
 						IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 						bancho.disconnect();
-						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.`);
+						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 					}).catch(console.error);
 				} else {
 					const processingMessage = await msg.channel.send('Processing...');
@@ -105,7 +105,7 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 						const IRCUser = bancho.getUser(osuUser.name);
 						IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 						bancho.disconnect();
-						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.`);
+						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 					}).catch(console.error);
 				}
 			})
@@ -214,7 +214,7 @@ async function verify(msg, args, osuApi, discordUser, guildPrefix) {
 								const IRCUser = bancho.getUser(osuUser.name);
 								IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 								bancho.disconnect();
-								processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.`);
+								processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 							}).catch(console.error);
 						})
 						.catch(err => {
