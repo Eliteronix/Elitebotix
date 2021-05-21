@@ -147,15 +147,24 @@ async function getQualifierResults(map, players) {
 	for (let i = 0; i < players.length; i++) {
 		const score = await osuApi.getScores({ b: map.id, u: players[i].osuUserId })
 			.then(async (scores) => {
-				let mods = getMods(scores[0].raw_mods);
-				if (!mods[0]) {
-					mods.push('NM');
+				let score = scores[0];
+
+				for (let j = 0; j < scores.length; j++) {
+					let mods = getMods(scores[j].raw_mods);
+					if (!mods[0]) {
+						mods.push('NM');
+					}
+					scores[j].raw_mods = mods;
+					if (mods.includes('NF')) {
+						scores[j].score = parseInt(scores[j].score) * 2;
+					}
+
+					if (parseInt(score.score) <= parseInt(scores[j].score)) {
+						score = scores[j];
+					}
 				}
-				scores[0].raw_mods = mods;
-				if (mods.includes('NF')) {
-					scores[0].score = parseInt(scores[0].score) * 2;
-				}
-				return scores[0];
+
+				return score;
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
