@@ -184,7 +184,7 @@ module.exports = {
 			//All Time Leaderboard
 			createLeaderboard(client, beginningOfTime, 1000000, 'All Time', '835187880229339187');
 			// eslint-disable-next-line no-undef
-		} else if (process.env.SERVER === 'Live' && today.getUTCMinutes() === 30 || process.env.SERVER === 'Live' && today.getUTCMinutes() === 0) {
+		} else if (process.env.SERVER === 'Live' && today.getUTCMinutes() % 5 === 0) {
 			//Assign roles to all players currently registered and remove unneeded roles
 			await assignPlayerRoles(client);
 		}
