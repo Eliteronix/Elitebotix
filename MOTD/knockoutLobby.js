@@ -52,6 +52,11 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 }
 
 async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, mapIndex, isFirstRound) {
+	//Increases knockoutmap number to start/continue with harder maps and give more points
+	while (12 - players.length > mapIndex) {
+		mapIndex++;
+	}
+
 	//Set array for how many players should get through maximum
 	let expectedPlayers = [];
 	expectedPlayers.push(16); //Map [0] Qualifiers -> 16
