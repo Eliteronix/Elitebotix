@@ -227,7 +227,7 @@ async function getKnockoutScores(map, players, doubleTime) {
 				if (mods.includes('NF')) {
 					scores[0].score = parseInt(scores[0].score) * 2;
 				}
-				if (doubleTime && !mods.includes('DT')) {
+				if (doubleTime && !mods.includes('DT') && !mods.includes('NC')) {
 					scores[0].score = '-1';
 					scores[0].pp = 'You didn\'t use DoubleTime on a DoubleTime map.';
 					scores[0].raw_mods.push(' - Didn\'t use DT');
