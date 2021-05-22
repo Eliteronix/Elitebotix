@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getMods, humanReadable, createMOTDAttachment } = require('../utils.js');
+const { getMods, humanReadable, createMOTDAttachment, getAccuracy } = require('../utils.js');
 const { assignKnockoutPoints } = require('./givePointsToPlayers.js');
 
 module.exports = {
@@ -52,9 +52,22 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 }
 
 async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, mapIndex, isFirstRound) {
+	let skipped = false;
 	//Increases knockoutmap number to start/continue with harder maps and give more points
 	while (12 - players.length > mapIndex) {
 		mapIndex++;
+		skipped = true;
+	}
+
+	if (skipped) {
+		for (let i = 0; i < users.length; i++) {
+			await users[i].send('One or more knockout maps have been skipped due to a lower amount of players left in the lobby.')
+				.catch(async (error) => {
+					console.log(error);
+					const channel = await client.channels.fetch('833803740162949191');
+					await channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+				});
+		}
 	}
 
 	//Set array for how many players should get through maximum
@@ -319,7 +332,7 @@ async function sendMapLeaderboard(client, results, players, users) {
 	data.push('⁣\n**Last maps scores:**');
 	for (let i = 0; i < results.length; i++) {
 		//Calculate accuracy
-		const accuracy = (results[results.length - i - 1].counts[300] * 100 + results[results.length - i - 1].counts[100] * 33.33 + results[results.length - i - 1].counts[50] * 16.67) / (parseInt(results[results.length - i - 1].counts[300]) + parseInt(results[results.length - i - 1].counts[100]) + parseInt(results[results.length - i - 1].counts[50]) + parseInt(results[results.length - i - 1].counts.miss));
+		const accuracy = getAccuracy(results[results.length - i - 1], 0) * 100;
 		if (results[results.length - i - 1].score === '-1') {
 			data.push(`\`${players[results.length - i - 1].osuName}\`: ${humanReadable(parseInt(results[results.length - i - 1].score))} | ${results[results.length - i - 1].raw_mods.join('')}`);
 		} else {

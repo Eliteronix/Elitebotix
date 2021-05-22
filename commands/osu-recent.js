@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy } = require('../utils');
 const fetch = require('node-fetch');
 const { calculateStarRating } = require('osu-sr-calculator');
 
@@ -119,11 +119,11 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 
 						elements = await drawTitle(elements);
 
-						elements = await drawCover(elements);
+						elements = await drawCover(elements, mode);
 
 						elements = await drawFooter(elements);
 
-						elements = await drawAccInfo(elements);
+						elements = await drawAccInfo(elements, mode);
 
 						await drawUserInfo(elements, server);
 
@@ -203,11 +203,11 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 
 								elements = await drawTitle(elements);
 
-								elements = await drawCover(elements);
+								elements = await drawCover(elements, mode);
 
 								elements = await drawFooter(elements);
 
-								elements = await drawAccInfo(elements);
+								elements = await drawAccInfo(elements, mode);
 
 								await drawUserInfo(elements, server);
 
@@ -289,7 +289,7 @@ async function drawTitle(input) {
 	return output;
 }
 
-async function drawCover(input) {
+async function drawCover(input, mode) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let score = input[2];
@@ -368,7 +368,7 @@ async function drawCover(input) {
 	ctx.globalAlpha = 1;
 
 	//Calculate accuracy
-	const accuracy = ((score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss))) / 100;
+	let accuracy = getAccuracy(score, mode);
 
 	ctx.beginPath();
 	ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 90, 0, (2 * Math.PI));
@@ -508,7 +508,7 @@ async function drawFooter(input) {
 	return output;
 }
 
-async function drawAccInfo(input) {
+async function drawAccInfo(input, mode) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let score = input[2];
@@ -532,7 +532,7 @@ async function drawAccInfo(input) {
 	}
 
 	//Calculate accuracy
-	const accuracy = (score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss));
+	let accuracy = getAccuracy(score, mode) * 100;
 
 	//Acc
 	roundedRect(ctx, canvas.width / 1000 * 600, canvas.height / 500 * 365, 110, 50, 5, '00', '00', '00', 0.5);
