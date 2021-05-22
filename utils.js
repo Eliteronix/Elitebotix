@@ -40,7 +40,7 @@ module.exports = {
 			input = input.toString();
 			for (let i = 0; i < input.length; i++) {
 				if (i > 0 && (input.length - i) % 3 === 0) {
-					output = output + '.';
+					output = output + ',';
 				}
 				output = output + input.charAt(i);
 			}
@@ -764,6 +764,19 @@ module.exports = {
 		return new Discord.MessageAttachment(canvas.toBuffer(), `${stagename}.png`);
 	}, pause(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
+	},
+	getAccuracy(score, mode) {
+		let accuracy = ((score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss))) / 100;
+
+		if (mode === 1) {
+			accuracy = (parseInt(score.counts[300]) + parseInt(score.counts[100] * 0.5)) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss));
+		} else if (mode === 2) {
+			let objects = parseInt(score.counts[300]) + parseInt(score.counts[50]) + parseInt(score.counts.miss);
+			accuracy = (objects / (objects + parseInt(score.counts.katu) + parseInt(score.counts.miss)));
+		} else if (mode === 3) {
+			accuracy = (50 * parseInt(score.counts[50]) + 100 * parseInt(score.counts[100]) + 200 * parseInt(score.counts.katu) + 300 * (parseInt(score.counts[300]) + parseInt(score.counts.geki))) / (300 * (parseInt(score.counts.miss) + parseInt(score.counts[50]) + parseInt(score.counts[100]) + parseInt(score.counts.katu) + parseInt(score.counts[300]) + parseInt(score.counts.geki)));
+		}
+		return accuracy;
 	}
 };
 
