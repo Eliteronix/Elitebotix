@@ -49,6 +49,10 @@ module.exports = async function (reaction, user) {
 		}
 	}
 
+	if (reaction.message.channel.type === 'dm') {
+		return;
+	}
+
 	//Get the header message from the db
 	const dbReactionRolesHeader = await DBReactionRolesHeader.findOne({
 		where: {
