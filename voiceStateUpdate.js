@@ -162,7 +162,7 @@ module.exports = async function (oldMember, newMember) {
 				}
 				if (createdText) {
 					//Set all permissions for the creator and deny @everyone to view the text channel
-					let everyone = newMember.guild.roles.everyone;
+					let everyone = newMember.guild.roles.cache.find(r => r.name === '@everyone');
 					try {
 						await createdText.overwritePermissions([
 							{
