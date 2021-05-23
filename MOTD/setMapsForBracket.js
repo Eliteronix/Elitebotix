@@ -1,3 +1,4 @@
+const osu = require('node-osu');
 const Discord = require('discord.js');
 const { humanReadable } = require('../utils.js');
 const { qualifier } = require('./qualifier.js');
@@ -19,6 +20,23 @@ module.exports = {
 		for (let i = 0; i < DTBeatmaps.length; i++) {
 			if (Math.round(DTBeatmaps[i].difficulty.rating * 100) / 100 < SRLimit) {
 				possibleDTBeatmaps.push(DTBeatmaps[i]);
+			}
+		}
+
+		if (possibleNMBeatmaps.length < 9) {
+			// eslint-disable-next-line no-undef
+			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+			});
+
+			//Get The Big Black
+			const bigBlack = await osuApi.getBeatmaps({ m: 0, b: '131891' });
+
+			while (possibleNMBeatmaps.length < 9) {
+				possibleNMBeatmaps.push(bigBlack);
 			}
 		}
 
