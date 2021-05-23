@@ -1,7 +1,7 @@
 const osu = require('node-osu');
 const { knockoutLobby } = require('./knockoutLobby.js');
 const { assignQualifierPoints } = require('./givePointsToPlayers.js');
-const { getMods, humanReadable, createMOTDAttachment } = require('../utils.js');
+const { getMods, humanReadable, createMOTDAttachment, pause } = require('../utils.js');
 
 module.exports = {
 	qualifier: async function (client, mappool, players) {
@@ -21,12 +21,7 @@ module.exports = {
 		// Catch the case of only one player playing Sadge
 		if (players.length === 1) {
 			// Send message to user
-			return users[0].send('There aren\'t any other players registered for your bracket at the moment.\nMaybe try asking your friends and there will be another competition tomorrow.')
-				.catch(async (error) => {
-					console.log(error);
-					const channel = await client.channels.fetch('833803740162949191');
-					channel.send(`<@${users[0].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
-				});
+			return await messageUserWithRetries(client, users[0], 'There aren\'t any other players registered for your bracket at the moment.\nMaybe try asking your friends and there will be another competition tomorrow.');
 		}
 
 		// Catch case of less than 17 players
@@ -55,12 +50,7 @@ module.exports = {
 			//Get rid of people without scores
 			for (let i = 0; i < results.length; i++) {
 				if (results[i].score < 0) {
-					users[i].send('You failed to submit a score for todays qualifier map and have been removed from todays competition.\nCome back tomorrow for another round.')
-						.catch(async (error) => {
-							console.log(error);
-							const channel = await client.channels.fetch('833803740162949191');
-							channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
-						});
+					messageUserWithRetries(client, users[i], 'You failed to submit a score for todays qualifier map and have been removed from todays competition.\nCome back tomorrow for another round.');
 					results.splice(i, 1);
 					players.splice(i, 1);
 					users.splice(i, 1);
@@ -76,14 +66,9 @@ module.exports = {
 			//Assign all points to the players
 			assignQualifierPoints(players);
 
-			//Get rid of people without scores
+			//Message people what scores they got
 			for (let i = 0; i < users.length; i++) {
-				await users[i].send(`You placed \`${i + 1}.\` out of \`${users.length}\` players with a score of \`${humanReadable(results[i].score)}\``)
-					.catch(async (error) => {
-						console.log(error);
-						const channel = await client.channels.fetch('833803740162949191');
-						channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
-					});
+				await messageUserWithRetries(client, users[i], `You placed \`${i + 1}.\` out of \`${users.length}\` players with a score of \`${humanReadable(results[i].score)}\``);
 			}
 
 			//Divide sorted players into knockout lobbies
@@ -124,12 +109,7 @@ async function sendQualifierMessages(client, map, users) {
 	data.push(`Website: <https://osu.ppy.sh/b/${map.id}> | osu! direct: <osu://b/${map.id}>`);
 	const attachment = await createMOTDAttachment('Qualifier', map, false);
 	for (let i = 0; i < users.length; i++) {
-		await users[i].send(data, attachment, { split: true })
-			.catch(async (error) => {
-				console.log(error);
-				const channel = await client.channels.fetch('833803740162949191');
-				channel.send(`<@${users[i].id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
-			});
+		await messageUserWithRetries(client, users[i], data, attachment);
 	}
 }
 
@@ -250,4 +230,40 @@ function quicksort(list, start = 0, end = undefined) {
 		quicksort(list, p + 1, end);
 	}
 	return list;
+}
+
+async function messageUserWithRetries(client, user, content, attachment) {
+	for (let i = 0; i < 3; i++) {
+		try {
+			if (attachment) {
+				await user.send(content, attachment)
+					.then(() => {
+						i = Infinity;
+					})
+					.catch(async (error) => {
+						throw (error);
+					});
+			} else {
+				await user.send(content)
+					.then(() => {
+						i = Infinity;
+					})
+					.catch(async (error) => {
+						throw (error);
+					});
+			}
+		} catch (error) {
+			if (error.message === 'Cannot send messages to this user') {
+				if (i === 2) {
+					const channel = await client.channels.fetch('833803740162949191');
+					channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+				} else {
+					pause(5000);
+				}
+			} else {
+				i = Infinity;
+				console.log(error);
+			}
+		}
+	}
 }
