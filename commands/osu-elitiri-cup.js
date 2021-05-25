@@ -35,6 +35,22 @@ module.exports = {
 				where: { userId: msg.author.id },
 			});
 
+			let bracketName = '';
+			let BWSRank = Math.round(Math.pow(discordUser.osuRank, Math.pow(0.9937, Math.pow(discordUser.osuBadges, 2))));
+
+			if (BWSRank > 999 && BWSRank < 10000) {
+				bracketName = 'Top Bracket';
+			} else if (BWSRank > 9999 && BWSRank < 50000) {
+				bracketName = 'Middle Bracket';
+			} else if (BWSRank > 49999 && BWSRank < 100000) {
+				bracketName = 'Lower Bracket';
+			} else if (BWSRank > 99999) {
+				bracketName = 'Beginner Bracket';
+			}
+
+			if (bracketName === '') {
+				sendMessage(msg, `Your BWS rank is #${BWSRank} and you are not able to join any of the brackets because of that.`);
+			}
 
 			if (discordUser && discordUser.osuUserId) {
 				if (discordUser.osuVerified) {
@@ -46,10 +62,8 @@ module.exports = {
 						osuBadges: discordUser.osuBadges,
 						osuPP: discordUser.osuPP,
 						osuRank: discordUser.osuRank,
+						bracketName: bracketName,
 					});
-					// 		bracketName: {
-					// 			type: DataTypes.STRING,
-					// 		},
 					// 		saturdayEarlyAvailability: {
 					// 			type: DataTypes.INTEGER,
 					// 		},
@@ -68,7 +82,7 @@ module.exports = {
 					// 		upperDifficulty: {
 					// 			type: DataTypes.FLOAT,
 					// 		},			
-					sendMessage(msg, `You successfully registered for the \`Maps of the Day\` competition.\nBe sure to join the server and read <#834833321438740490> if you didn't already. (\`${guildPrefix}osu-motd server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`);
+					sendMessage(msg, `You successfully registered for the \`Elitiri Cup Summer 2021\` torunament.\nBe sure to join the server and read <#834833321438740490> if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!`);
 				} else {
 					sendMessage(msg, `It seems like you don't have your connected osu! account verified.\nPlease use \`${guildPrefix}osu-link verify\` to send a verification code to your osu! dms, follow the instructions and try again afterwards.`);
 				}
