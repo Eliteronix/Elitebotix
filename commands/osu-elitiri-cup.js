@@ -5,7 +5,7 @@ module.exports = {
 	name: 'osu-elitiri-cup',
 	aliases: ['elitiri-cup', 'elitiri-cup-summer', 'elitiri-cup-summer-2021', 'ecs', 'ecs2021'],
 	description: 'Allows you to sign up for the `Elitiri Cup Summer 2021` tournament!',
-	usage: '<server/register/unregister>',
+	usage: '<register> <desired upper SR limit> <desired lower SR limit> | <unregister> | <server> | <availability>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -18,12 +18,12 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args) {
 		if (args[0].toLowerCase() === 'server') {
-			sendMessage(msg, 'The discord server for the competition can be found here: <https://discord.com/invite/Asz5Gfe>\nAfter joining be sure to head to <#801000891750547496> and assign yourself the Elitiri Cup role!\nEverything else will be done automatically when you registered!');
+			sendMessage(msg, 'The discord server for the competition can be found here: <https://discord.com/invite/Asz5Gfe>\nAfter joining be sure to head to <#727987472772104272> and assign yourself the Elitiri Cup role!\nEverything else will be done automatically when you registered!');
 		} else if (args[0].toLowerCase() === 'register') {
 			const guildPrefix = await getGuildPrefix(msg);
 			//get elitiriSignUp from db
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-				where: { userId: msg.author.id },
+				where: { userId: msg.author.id, tournamentName: 'Elitiri Cup Summer 2021' },
 			});
 
 			if (elitiriSignUp) {
@@ -35,25 +35,37 @@ module.exports = {
 				where: { userId: msg.author.id },
 			});
 
-			let bracketName = '';
-			let BWSRank = Math.round(Math.pow(discordUser.osuRank, Math.pow(0.9937, Math.pow(discordUser.osuBadges, 2))));
-
-			if (BWSRank > 999 && BWSRank < 10000) {
-				bracketName = 'Top Bracket';
-			} else if (BWSRank > 9999 && BWSRank < 50000) {
-				bracketName = 'Middle Bracket';
-			} else if (BWSRank > 49999 && BWSRank < 100000) {
-				bracketName = 'Lower Bracket';
-			} else if (BWSRank > 99999) {
-				bracketName = 'Beginner Bracket';
-			}
-
-			if (bracketName === '') {
-				sendMessage(msg, `Your BWS rank is #${BWSRank} and you are not able to join any of the brackets because of that.`);
-			}
-
 			if (discordUser && discordUser.osuUserId) {
 				if (discordUser.osuVerified) {
+					let bracketName = '';
+					let BWSRank = Math.round(Math.pow(discordUser.osuRank, Math.pow(0.9937, Math.pow(discordUser.osuBadges, 2))));
+
+					if (BWSRank > 999 && BWSRank < 10000) {
+						bracketName = 'Top Bracket';
+					} else if (BWSRank > 9999 && BWSRank < 50000) {
+						bracketName = 'Middle Bracket';
+					} else if (BWSRank > 49999 && BWSRank < 100000) {
+						bracketName = 'Lower Bracket';
+					} else if (BWSRank > 99999) {
+						bracketName = 'Beginner Bracket';
+					}
+
+					if (bracketName === '') {
+						return sendMessage(msg, `Your BWS rank is #${BWSRank} and you are not able to join any of the brackets because of that.`);
+					}
+
+					if (!args[2]) {
+						return sendMessage(msg, `You didn't provide valid difficulty boundaries for your sign up. Please provide a number between 0 and 10 for your desired difficulties of the mappools.\nUsage: \`${guildPrefix}${this.name} register <lower SR between 0-10> <upper SR between 0-10>\``);
+					}
+
+					if (isNaN(args[1]) || args[1] < 0 || args[1] > 10) {
+						return sendMessage(msg, `${args[1]} is not a valid number. Please provide a number between 0 and 10 for your desired lower difficulty of the mappools.\nUsage: \`${guildPrefix}${this.name} register <lower SR between 0-10> <upper SR between 0-10>\``);
+					}
+
+					if (isNaN(args[2]) || args[2] < 0 || args[2] > 10) {
+						return sendMessage(msg, `${args[2]} is not a valid number. Please provide a number between 0 and 10 for your desired upper difficulty of the mappools.\nUsage: \`${guildPrefix}${this.name} register <lower SR between 0-10> <upper SR between 0-10>\``);
+					}
+
 					DBElitiriCupSignUp.create({
 						userId: msg.author.id,
 						discordTag: `${msg.author.username}#${msg.author.discriminator}`,
@@ -63,26 +75,15 @@ module.exports = {
 						osuPP: discordUser.osuPP,
 						osuRank: discordUser.osuRank,
 						bracketName: bracketName,
+						lowerDifficulty: parseFloat(args[1]),
+						upperDifficulty: parseFloat(args[2]),
+						saturdayEarlyAvailability: null,
+						saturdayLateAvailability: null,
+						sundayEarlyAvailability: null,
+						sundayLateAvailability: null,
+						tournamentName: 'Elitiri Cup Summer 2021'
 					});
-					// 		saturdayEarlyAvailability: {
-					// 			type: DataTypes.INTEGER,
-					// 		},
-					// 		saturdayLateAvailability: {
-					// 			type: DataTypes.INTEGER,
-					// 		},
-					// 		sundayEarlyAvailability: {
-					// 			type: DataTypes.INTEGER,
-					// 		},
-					// 		sundayLateAvailability: {
-					// 			type: DataTypes.INTEGER,
-					// 		},
-					// 		lowerDifficulty: {
-					// 			type: DataTypes.FLOAT,
-					// 		},
-					// 		upperDifficulty: {
-					// 			type: DataTypes.FLOAT,
-					// 		},			
-					sendMessage(msg, `You successfully registered for the \`Elitiri Cup Summer 2021\` torunament.\nBe sure to join the server and read <#834833321438740490> if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!`);
+					sendMessage(msg, `You successfully registered for the \`Elitiri Cup Summer 2021\` tournament.\nBe sure to join the server and read <#727987472772104272> if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!`);
 				} else {
 					sendMessage(msg, `It seems like you don't have your connected osu! account verified.\nPlease use \`${guildPrefix}osu-link verify\` to send a verification code to your osu! dms, follow the instructions and try again afterwards.`);
 				}
@@ -98,12 +99,47 @@ module.exports = {
 
 			if (elitiriSignUp) {
 				elitiriSignUp.destroy();
-				sendMessage(msg, `You have been unregistered from the \`Elitiri Cup Summer 2021\` torunament.\nStill thank you for showing interest!\nYou can register again by using \`${guildPrefix}${this.name} register\`!`);
+				sendMessage(msg, `You have been unregistered from the \`Elitiri Cup Summer 2021\` tournament.\nStill thank you for showing interest!\nYou can register again by using \`${guildPrefix}${this.name} register\`!`);
 			} else {
 				sendMessage(msg, `You aren't signed up for the \`Elitiri Cup Summer 2021\` tournament at the moment.\nYou can register by using \`${guildPrefix}${this.name} register\`!`);
 			}
+		} else if (args[0].toLowerCase() === 'availability') {
+			const guildPrefix = await getGuildPrefix(msg);
+			//get elitiriSignUp from db
+			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
+				where: { userId: msg.author.id },
+			});
+
+			if (elitiriSignUp) {
+				if (!args[1]) {
+					if (elitiriSignUp.saturdayEarlyAvailability === null) {
+						return sendMessage(msg, `You currently don't have any availabilities set.\nUsage: \`${guildPrefix}${this.name} availability xx-xx xx-xx\`\nExample: \`${guildPrefix}${this.name} availability 14-21 16-20\``);
+					}
+					return sendMessage(msg, `Your current \`Elitiri Cup Summer 2021\` availabilities are:\nSaturday: ${elitiriSignUp.saturdayEarlyAvailability} - ${elitiriSignUp.saturdayLateAvailability} UTC\nSunday: ${elitiriSignUp.sundayEarlyAvailability} - ${elitiriSignUp.sundayLateAvailability} UTC\nUsage: \`${guildPrefix}${this.name} availability xx-xx xx-xx\`\nExample: \`${guildPrefix}${this.name} availability 14-21 16-20\``);
+				}
+				if (!args[2]) {
+					return sendMessage(msg, `You used the wrong format for submitting your availability in UTC.\nUsage: \`${guildPrefix}${this.name} availability xx-xx xx-xx\`\nExample: \`${guildPrefix}${this.name} availability 14-21 16-20\``);
+				}
+				let saturdayAvailability = args[1].split('-');
+				let sundayAvailability = args[2].split('-');
+				if (saturdayAvailability.length < 2 || sundayAvailability.length < 2
+					|| isNaN(saturdayAvailability[0]) || saturdayAvailability[0] < 0 || saturdayAvailability[0] > 24
+					|| isNaN(saturdayAvailability[1]) || saturdayAvailability[1] < 0 || saturdayAvailability[1] > 24
+					|| isNaN(sundayAvailability[0]) || sundayAvailability[0] < 0 || sundayAvailability[0] > 24
+					|| isNaN(sundayAvailability[1]) || sundayAvailability[1] < 0 || sundayAvailability[1] > 24) {
+					return sendMessage(msg, `You used the wrong format for submitting your availability in UTC.\nUsage: \`${guildPrefix}${this.name} availability xx-xx xx-xx\`\nExample: \`${guildPrefix}${this.name} availability 14-21 16-20\``);
+				}
+				elitiriSignUp.saturdayEarlyAvailability = parseInt(saturdayAvailability[0]);
+				elitiriSignUp.saturdayLateAvailability = parseInt(saturdayAvailability[1]);
+				elitiriSignUp.sundayEarlyAvailability = parseInt(sundayAvailability[0]);
+				elitiriSignUp.sundayLateAvailability = parseInt(sundayAvailability[1]);
+				await elitiriSignUp.save();
+				sendMessage(msg, `Your \`Elitiri Cup Summer 2021\` availabilities have been updated.\nYour new availabilities are:\nSaturday: ${elitiriSignUp.saturdayEarlyAvailability} - ${elitiriSignUp.saturdayLateAvailability} UTC\nSunday: ${elitiriSignUp.sundayEarlyAvailability} - ${elitiriSignUp.sundayLateAvailability} UTC`);
+			} else {
+				sendMessage(msg, `You are not yet registered for the \`Elitiri Cup Summer 2021\` tournament.\nYou can register by using \`${guildPrefix}${this.name} register\`!`);
+			}
 		} else {
-			msg.channel.send('Please specify what you want to do: `server`, `register`, `unregister`');
+			msg.channel.send('Please specify what you want to do: `server`, `register`, `unregister`, `availability`');
 		}
 	},
 };

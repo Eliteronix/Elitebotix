@@ -49,6 +49,9 @@ module.exports = (sequelize, DataTypes) => {
 		upperDifficulty: {
 			type: DataTypes.FLOAT,
 		},
+		tournamentName: {
+			type: DataTypes.STRING,
+		},
 		paranoid: true,
 	});
 };
