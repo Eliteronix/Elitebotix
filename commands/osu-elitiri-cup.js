@@ -1,4 +1,4 @@
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers, DBElitiriCupSignUp } = require('../dbObjects');
 const { getGuildPrefix } = require('../utils');
 
 module.exports = {
@@ -21,19 +21,53 @@ module.exports = {
 			sendMessage(msg, 'The discord server for the competition can be found here: <https://discord.com/invite/Asz5Gfe>\nAfter joining be sure to head to <#801000891750547496> and assign yourself the Elitiri Cup role!\nEverything else will be done automatically when you registered!');
 		} else if (args[0].toLowerCase() === 'register') {
 			const guildPrefix = await getGuildPrefix(msg);
+			//get elitiriSignUp from db
+			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
+				where: { userId: msg.author.id },
+			});
+
+			if (elitiriSignUp) {
+				return sendMessage(msg, `You are already registered for the \`Elitiri Cup Summer 2021\` tournament.\nBe sure to join the server if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!`);
+			}
 
 			//get discordUser from db
 			const discordUser = await DBDiscordUsers.findOne({
 				where: { userId: msg.author.id },
 			});
 
+
 			if (discordUser && discordUser.osuUserId) {
-				if (discordUser.osuMOTDRegistered) {
-					return sendMessage(msg, `You are already registered for the \`Maps of the Day\` competition.\nBe sure to join the server if you didn't already. (\`${guildPrefix}osu-motd server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`);
-				}
 				if (discordUser.osuVerified) {
-					discordUser.osuMOTDRegistered = true;
-					discordUser.save();
+					DBElitiriCupSignUp.create({
+						userId: msg.author.id,
+						discordTag: `${msg.author.username}#${msg.author.discriminator}`,
+						osuUserId: discordUser.osuUserId,
+						osuName: discordUser.osuName,
+						osuBadges: discordUser.osuBadges,
+						osuPP: discordUser.osuPP,
+						osuRank: discordUser.osuRank,
+					});
+					// 		bracketName: {
+					// 			type: DataTypes.STRING,
+					// 		},
+					// 		saturdayEarlyAvailability: {
+					// 			type: DataTypes.INTEGER,
+					// 		},
+					// 		saturdayLateAvailability: {
+					// 			type: DataTypes.INTEGER,
+					// 		},
+					// 		sundayEarlyAvailability: {
+					// 			type: DataTypes.INTEGER,
+					// 		},
+					// 		sundayLateAvailability: {
+					// 			type: DataTypes.INTEGER,
+					// 		},
+					// 		lowerDifficulty: {
+					// 			type: DataTypes.FLOAT,
+					// 		},
+					// 		upperDifficulty: {
+					// 			type: DataTypes.FLOAT,
+					// 		},			
 					sendMessage(msg, `You successfully registered for the \`Maps of the Day\` competition.\nBe sure to join the server and read <#834833321438740490> if you didn't already. (\`${guildPrefix}osu-motd server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`);
 				} else {
 					sendMessage(msg, `It seems like you don't have your connected osu! account verified.\nPlease use \`${guildPrefix}osu-link verify\` to send a verification code to your osu! dms, follow the instructions and try again afterwards.`);
@@ -42,17 +76,17 @@ module.exports = {
 				sendMessage(msg, `It seems like you don't have your osu! account connected to the bot.\nPlease use \`${guildPrefix}osu-link osu-username\` to connect you account and verify it.`);
 			}
 		} else if (args[0].toLowerCase() === 'unregister') {
-			//get discordUser from db
-			const discordUser = await DBDiscordUsers.findOne({
+			const guildPrefix = await getGuildPrefix(msg);
+			//get elitiriSignUp from db
+			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: { userId: msg.author.id },
 			});
 
-			if (discordUser && discordUser.osuMOTDRegistered) {
-				discordUser.osuMOTDRegistered = false;
-				discordUser.save();
-				sendMessage(msg, 'You have been unregistered from the `Maps of the Day` competition.\nStill thank you for showing interest!\nYou can always register again by using `e!osu-motd register`!');
+			if (elitiriSignUp) {
+				elitiriSignUp.destroy();
+				sendMessage(msg, `You have been unregistered from the \`Elitiri Cup Summer 2021\` torunament.\nStill thank you for showing interest!\nYou can register again by using \`${guildPrefix}${this.name} register\`!`);
 			} else {
-				sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `e!osu-motd register`!');
+				sendMessage(msg, `You aren't signed up for the \`Elitiri Cup Summer 2021\` tournament at the moment.\nYou can register by using \`${guildPrefix}${this.name} register\`!`);
 			}
 		} else {
 			msg.channel.send('Please specify what you want to do: `server`, `register`, `unregister`');
