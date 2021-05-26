@@ -1,4 +1,4 @@
-const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints } = require('../dbObjects');
+const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp } = require('../dbObjects');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
 
@@ -212,6 +212,33 @@ module.exports = {
 					knockoutRank: dbList[i].knockoutRank,
 					knockoutPlayers: dbList[i].knockoutPlayers,
 					matchDate: dbList[i].matchDate,
+					paranoid: dbList[i].paranoid,
+					createdAt: dbList[i].createdAt,
+					updatedAt: dbList[i].updatedAt,
+				});
+			}
+		} else if (args[0] === 'elitiricupsignup') {
+			const dbList = await DBElitiriCupSignUp.findAll();
+			dbTableName = 'DBElitiriCupSignUp';
+
+			for (let i = 0; i < dbList.length; i++) {
+				data.push({
+					id: dbList[i].id,
+					userId: dbList[i].userId,
+					discordTag: dbList[i].discordTag,
+					osuUserId: dbList[i].osuUserId,
+					osuName: dbList[i].osuName,
+					osuBadges: dbList[i].osuBadges,
+					osuPP: dbList[i].osuPP,
+					osuRank: dbList[i].osuRank,
+					bracketName: dbList[i].bracketName,
+					saturdayEarlyAvailability: dbList[i].saturdayEarlyAvailability,
+					saturdayLateAvailability: dbList[i].saturdayLateAvailability,
+					sundayEarlyAvailability: dbList[i].sundayEarlyAvailability,
+					sundayLateAvailability: dbList[i].sundayLateAvailability,
+					lowerDifficulty: dbList[i].lowerDifficulty,
+					upperDifficulty: dbList[i].upperDifficulty,
+					tournamentName: dbList[i].tournamentName,
 					paranoid: dbList[i].paranoid,
 					createdAt: dbList[i].createdAt,
 					updatedAt: dbList[i].updatedAt,

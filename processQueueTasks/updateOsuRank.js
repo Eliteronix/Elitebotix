@@ -1,4 +1,4 @@
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp } = require('../dbObjects');
 const { getOsuBadgeNumberById } = require('../utils.js');
 const osu = require('node-osu');
 
@@ -42,5 +42,20 @@ module.exports = {
 		discordUser.osuBadges = await getOsuBadgeNumberById(discordUser.osuUserId);
 
 		await discordUser.save();
+
+		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
+			where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Cup Summer 2021' }
+		});
+
+		if (elitiriSignUp) {
+			console.log(discordUser.osuName);
+			const task = await DBProcessQueue.findOne({
+				where: { guildId: 'None', task: 'refreshElitiriSignUp', additions: discordUser.osuUserId }
+			});
+
+			if (!task) {
+				DBProcessQueue.create({ guildId: 'None', task: 'refreshElitiriSignUp', priority: 3, additions: discordUser.osuUserId });
+			}
+		}
 	},
 };

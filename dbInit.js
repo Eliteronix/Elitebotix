@@ -18,6 +18,7 @@ require('./models/DBServerUserActivity')(sequelize, Sequelize.DataTypes);
 require('./models/DBProcessQueue')(sequelize, Sequelize.DataTypes);
 require('./models/DBActivityRoles')(sequelize, Sequelize.DataTypes);
 require('./models/DBMOTDPoints')(sequelize, Sequelize.DataTypes);
+require('./models/DBElitiriCupSignUp')(sequelize, Sequelize.DataTypes);
 
 sequelize.sync({ alter: true })
 	.then(async () => {

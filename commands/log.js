@@ -14,7 +14,7 @@ module.exports = {
 	tags: 'debug',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	execute(msg, args) {
+	async execute(msg, args) {
 		console.log(msg);
 	},
 };
