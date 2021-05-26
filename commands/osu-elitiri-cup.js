@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBElitiriCupSignUp } = require('../dbObjects');
+const { DBDiscordUsers, DBElitiriCupSignUp, DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix } = require('../utils');
 
 module.exports = {
@@ -66,7 +66,7 @@ module.exports = {
 						return sendMessage(msg, `${args[2]} is not a valid number. Please provide a number between 0 and 10 for your desired upper difficulty of the mappools.\nUsage: \`${guildPrefix}${this.name} register <lower SR between 0-10> <upper SR between 0-10>\``);
 					}
 
-					DBElitiriCupSignUp.create({
+					await DBElitiriCupSignUp.create({
 						userId: msg.author.id,
 						discordTag: `${msg.author.username}#${msg.author.discriminator}`,
 						osuUserId: discordUser.osuUserId,
@@ -84,6 +84,7 @@ module.exports = {
 						tournamentName: 'Elitiri Cup Summer 2021'
 					});
 					sendMessage(msg, `You successfully registered for the \`Elitiri Cup Summer 2021\` tournament.\nBe sure to join the server and read <#727987472772104272> if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!`);
+					createProcessQueueTask();
 				} else {
 					sendMessage(msg, `It seems like you don't have your connected osu! account verified.\nPlease use \`${guildPrefix}osu-link verify\` to send a verification code to your osu! dms, follow the instructions and try again afterwards.`);
 				}
@@ -100,6 +101,7 @@ module.exports = {
 			if (elitiriSignUp) {
 				elitiriSignUp.destroy();
 				sendMessage(msg, `You have been unregistered from the \`Elitiri Cup Summer 2021\` tournament.\nStill thank you for showing interest!\nYou can register again by using \`${guildPrefix}${this.name} register\`!`);
+				createProcessQueueTask();
 			} else {
 				sendMessage(msg, `You aren't signed up for the \`Elitiri Cup Summer 2021\` tournament at the moment.\nYou can register by using \`${guildPrefix}${this.name} register\`!`);
 			}
@@ -135,6 +137,7 @@ module.exports = {
 				elitiriSignUp.sundayLateAvailability = parseInt(sundayAvailability[1]);
 				await elitiriSignUp.save();
 				sendMessage(msg, `Your \`Elitiri Cup Summer 2021\` availabilities have been updated.\nYour new availabilities are:\nSaturday: ${elitiriSignUp.saturdayEarlyAvailability} - ${elitiriSignUp.saturdayLateAvailability} UTC\nSunday: ${elitiriSignUp.sundayEarlyAvailability} - ${elitiriSignUp.sundayLateAvailability} UTC`);
+				createProcessQueueTask();
 			} else {
 				sendMessage(msg, `You are not yet registered for the \`Elitiri Cup Summer 2021\` tournament.\nYou can register by using \`${guildPrefix}${this.name} register\`!`);
 			}
@@ -153,4 +156,15 @@ function sendMessage(msg, content) {
 		.catch(() => {
 			msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
 		});
+}
+
+async function createProcessQueueTask() {
+	const task = await DBProcessQueue.findOne({
+		where: { task: 'elitiriCupSignUps', beingExecuted: false }
+	});
+	if (!task) {
+		let date = new Date();
+		date.setUTCMinutes(date.getUTCMinutes() + 1);
+		DBProcessQueue.create({ guildId: 'None', task: 'elitiriCupSignUps', priority: 3, date: date });
+	}
 }
