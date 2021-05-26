@@ -84,7 +84,7 @@ module.exports = {
 						tournamentName: 'Elitiri Cup Summer 2021'
 					});
 					sendMessage(msg, `You successfully registered for the \`Elitiri Cup Summer 2021\` tournament.\nBe sure to join the server and read <#727987472772104272> if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!`);
-					createProcessQueueTask();
+					createProcessQueueTask(elitiriSignUp.bracketName);
 				} else {
 					sendMessage(msg, `It seems like you don't have your connected osu! account verified.\nPlease use \`${guildPrefix}osu-link verify\` to send a verification code to your osu! dms, follow the instructions and try again afterwards.`);
 				}
@@ -101,7 +101,7 @@ module.exports = {
 			if (elitiriSignUp) {
 				elitiriSignUp.destroy();
 				sendMessage(msg, `You have been unregistered from the \`Elitiri Cup Summer 2021\` tournament.\nStill thank you for showing interest!\nYou can register again by using \`${guildPrefix}${this.name} register\`!`);
-				createProcessQueueTask();
+				createProcessQueueTask(elitiriSignUp.bracketName);
 			} else {
 				sendMessage(msg, `You aren't signed up for the \`Elitiri Cup Summer 2021\` tournament at the moment.\nYou can register by using \`${guildPrefix}${this.name} register\`!`);
 			}
@@ -137,7 +137,7 @@ module.exports = {
 				elitiriSignUp.sundayLateAvailability = parseInt(sundayAvailability[1]);
 				await elitiriSignUp.save();
 				sendMessage(msg, `Your \`Elitiri Cup Summer 2021\` availabilities have been updated.\nYour new availabilities are:\nSaturday: ${elitiriSignUp.saturdayEarlyAvailability} - ${elitiriSignUp.saturdayLateAvailability} UTC\nSunday: ${elitiriSignUp.sundayEarlyAvailability} - ${elitiriSignUp.sundayLateAvailability} UTC`);
-				createProcessQueueTask();
+				createProcessQueueTask(elitiriSignUp.bracketName);
 			} else {
 				sendMessage(msg, `You are not yet registered for the \`Elitiri Cup Summer 2021\` tournament.\nYou can register by using \`${guildPrefix}${this.name} register\`!`);
 			}
@@ -158,13 +158,13 @@ function sendMessage(msg, content) {
 		});
 }
 
-async function createProcessQueueTask() {
+async function createProcessQueueTask(bracketName) {
 	const task = await DBProcessQueue.findOne({
-		where: { task: 'elitiriCupSignUps', beingExecuted: false }
+		where: { task: 'elitiriCupSignUps', beingExecuted: false, additions: bracketName }
 	});
 	if (!task) {
 		let date = new Date();
 		date.setUTCMinutes(date.getUTCMinutes() + 1);
-		DBProcessQueue.create({ guildId: 'None', task: 'elitiriCupSignUps', priority: 3, date: date });
+		DBProcessQueue.create({ guildId: 'None', task: 'elitiriCupSignUps', priority: 3, date: date, additions: bracketName });
 	}
 }
