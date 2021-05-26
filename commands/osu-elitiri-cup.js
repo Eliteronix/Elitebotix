@@ -27,7 +27,7 @@ module.exports = {
 			});
 
 			if (elitiriSignUp) {
-				return sendMessage(msg, `You are already registered for the \`Elitiri Cup Summer 2021\` tournament.\nBe sure to join the server if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!`);
+				return sendMessage(msg, `You are already registered for the \`Elitiri Cup Summer 2021\` tournament.\nBe sure to join the server if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!\n\nAlso please **be sure to set your availabilities** by using \`${guildPrefix}${this.name} availability\``);
 			}
 
 			//get discordUser from db
@@ -83,7 +83,7 @@ module.exports = {
 						sundayLateAvailability: null,
 						tournamentName: 'Elitiri Cup Summer 2021'
 					});
-					sendMessage(msg, `You successfully registered for the \`Elitiri Cup Summer 2021\` tournament.\nBe sure to join the server and read <#727987472772104272> if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!`);
+					sendMessage(msg, `You successfully registered for the \`Elitiri Cup Summer 2021\` tournament.\nBe sure to join the server and read <#727987472772104272> if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!\n\nAlso please **be sure to set your availabilities** by using \`${guildPrefix}${this.name} availability\``);
 					createProcessQueueTask(elitiriSignUp.bracketName);
 				} else {
 					sendMessage(msg, `It seems like you don't have your connected osu! account verified.\nPlease use \`${guildPrefix}osu-link verify\` to send a verification code to your osu! dms, follow the instructions and try again afterwards.`);
