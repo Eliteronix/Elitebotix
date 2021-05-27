@@ -1,12 +1,13 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { calculateStarRating } = require('osu-sr-calculator');
+const { DBElitiriCupSignUp } = require('../dbObjects.js');
 
 module.exports = {
-	name: 'ecw2021-check',
+	name: 'ecs2021-check',
 	//aliases: ['osu-map', 'beatmap-info'],
-	description: 'Sends an info card about the viability of the beatmap for the Elitiri Cup Winter 2021',
-	usage: '<NM/HD/HR/DT/FM> <Top/Middle/Lower/Beginner> <id>',
+	description: 'Sends an info card about the viability of the beatmap for the Elitiri Cup Summer 2021',
+	usage: '<NM/HD/HR/DT/FM> <id> [Bracket]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -15,15 +16,31 @@ module.exports = {
 	args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
-	tags: 'debug', //'ecw2021'
+	tags: 'ecs2021',
 	prefixCommand: true,
 	async execute(msg, args) {
+		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
+			where: { tournamentName: 'Elitiri Cup Summer 2021', userId: msg.author.id }
+		});
+
+		if (!elitiriSignUp && !args[2]) {
+			return msg.channel.send('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
+		} else if (!elitiriSignUp && args[2].toLowerCase() !== 'top' && args[2].toLowerCase() !== 'middle' && args[2].toLowerCase() !== 'lower' && args[2].toLowerCase() !== 'beginner') {
+			return msg.channel.send('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
+		}
+
 		if (args[0].toLowerCase() !== 'nm' && args[0].toLowerCase() !== 'hd' && args[0].toLowerCase() !== 'hr' && args[0].toLowerCase() !== 'dt' && args[0].toLowerCase() !== 'fm') {
 			return msg.channel.send('Please specify in which pool the map is supposed to be. (NM, HD, HR, DT, FM)');
 		}
 
-		if (args[1].toLowerCase() !== 'top' && args[1].toLowerCase() !== 'middle' && args[1].toLowerCase() !== 'lower' && args[1].toLowerCase() !== 'beginner') {
-			return msg.channel.send('Please specify in which bracket the map is supposed to be. (Top, Middle, Lower, Beginner)');
+		let bracket = '';
+		if (elitiriSignUp) {
+			let bracketNameParts = elitiriSignUp.bracketName.split(' ');
+			bracket = bracketNameParts[0].toLowerCase();
+		}
+
+		if (args[2]) {
+			bracket = args[2].toLowerCase();
 		}
 
 		// eslint-disable-next-line no-undef
@@ -34,13 +51,13 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		osuApi.getBeatmaps({ b: args[2] })
+		osuApi.getBeatmaps({ b: args[1] })
 			.then(async (beatmaps) => {
 				getBeatmap(msg, args);
 
 				const viabilityEmbed = new Discord.MessageEmbed()
 					.setColor('#00FF00')
-					.setTitle('The Beatmap is viable for the tournament')
+					.setTitle(`The Beatmap is viable for the tournament (${bracket} bracket)`)
 					.setFooter(`ID: ${beatmaps[0].id}; Checked by ${msg.author.username}#${msg.author.discriminator}`);
 
 				//The map has to have audio
@@ -79,8 +96,8 @@ module.exports = {
 						.addField('Map is not Ranked', 'The map has to be Ranked');
 				}
 
-				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 1:30-4:30
-				if (args[0].toLowerCase() === 'nm' && beatmaps[0].length.drain < 90 || args[0].toLowerCase() === 'hd' && beatmaps[0].length.drain < 90 || args[0].toLowerCase() === 'hr' && beatmaps[0].length.drain < 90 || args[0].toLowerCase() === 'fm' && beatmaps[0].length.drain < 90) {
+				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 2:10-4:30
+				if (args[0].toLowerCase() === 'nm' && beatmaps[0].length.drain < 130 || args[0].toLowerCase() === 'hd' && beatmaps[0].length.drain < 130 || args[0].toLowerCase() === 'hr' && beatmaps[0].length.drain < 130 || args[0].toLowerCase() === 'fm' && beatmaps[0].length.drain < 130) {
 					viabilityEmbed
 						.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
@@ -88,7 +105,7 @@ module.exports = {
 						.addField('Map is too short', 'The Drain time should not be below 1:30');
 				}
 
-				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 1:30-4:30
+				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 2:10-4:30
 				if (args[0].toLowerCase() === 'nm' && beatmaps[0].length.drain > 270 || args[0].toLowerCase() === 'hd' && beatmaps[0].length.drain > 270 || args[0].toLowerCase() === 'hr' && beatmaps[0].length.drain > 270 || args[0].toLowerCase() === 'fm' && beatmaps[0].length.drain > 270) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
@@ -96,15 +113,15 @@ module.exports = {
 						.addField('Map is too long', 'The Drain time should not be above 4:30');
 				}
 
-				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 1:30-4:30
-				if (args[0].toLowerCase() === 'dt' && beatmaps[0].length.drain < 135) {
+				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 2:10-4:30
+				if (args[0].toLowerCase() === 'dt' && beatmaps[0].length.drain < 195) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 						.addField('Map is too short', 'The Drain time should not be below 1:30 (after DT)');
 				}
 
-				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 1:30-4:30
+				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 2:10-4:30
 				if (args[0].toLowerCase() === 'dt' && beatmaps[0].length.drain > 405) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
@@ -120,8 +137,6 @@ module.exports = {
 						.addField('Map is has too small Circle Size', 'FreeMod maps may not exceed circle size 5 when played NoMod');
 				}
 
-				//Calculate all star ratings
-				// const starRating = await calculateStarRating(beatmaps[0].id, [], true);
 				//Top:
 				const topLowerDiff = 5.61;
 				const topUpperDiff = 7.04;
@@ -153,42 +168,42 @@ module.exports = {
 				}
 
 				//Difficulty: Maps have to be between the specified diffculty
-				if (args[1].toLowerCase() === 'top' && beatmaps[0].difficulty.rating < topLowerDiff) {
+				if (bracket === 'top' && beatmaps[0].difficulty.rating < topLowerDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 						.addField(`The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'top' && beatmaps[0].difficulty.rating > topUpperDiff) {
+				} else if (bracket === 'top' && beatmaps[0].difficulty.rating > topUpperDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'middle' && beatmaps[0].difficulty.rating < middleLowerDiff) {
+				} else if (bracket === 'middle' && beatmaps[0].difficulty.rating < middleLowerDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 						.addField(`The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'middle' && beatmaps[0].difficulty.rating > middleUpperDiff) {
+				} else if (bracket === 'middle' && beatmaps[0].difficulty.rating > middleUpperDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'lower' && beatmaps[0].difficulty.rating < lowerLowerDiff) {
+				} else if (bracket === 'lower' && beatmaps[0].difficulty.rating < lowerLowerDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 						.addField(`The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'lower' && beatmaps[0].difficulty.rating > lowerUpperDiff) {
+				} else if (bracket === 'lower' && beatmaps[0].difficulty.rating > lowerUpperDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'beginner' && beatmaps[0].difficulty.rating < beginnerLowerDiff) {
+				} else if (bracket === 'beginner' && beatmaps[0].difficulty.rating < beginnerLowerDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
 						.addField(`The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}`);
-				} else if (args[1].toLowerCase() === 'beginner' && beatmaps[0].difficulty.rating > beginnerUpperDiff) {
+				} else if (bracket === 'beginner' && beatmaps[0].difficulty.rating > beginnerUpperDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle('The Beatmap is NOT viable for the tournament')
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
@@ -210,7 +225,7 @@ module.exports = {
 
 async function getBeatmap(msg, args) {
 	let command = require('./osu-beatmap.js');
-	let newArgs = [args[2]];
+	let newArgs = [args[1]];
 	try {
 		command.execute(msg, newArgs, true);
 	} catch (error) {
