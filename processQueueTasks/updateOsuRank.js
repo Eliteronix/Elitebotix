@@ -48,7 +48,6 @@ module.exports = {
 		});
 
 		if (elitiriSignUp) {
-			console.log(discordUser.osuName);
 			const task = await DBProcessQueue.findOne({
 				where: { guildId: 'None', task: 'refreshElitiriSignUp', additions: discordUser.osuUserId }
 			});
