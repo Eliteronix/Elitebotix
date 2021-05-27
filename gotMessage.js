@@ -78,6 +78,7 @@ module.exports = async function (msg) {
 			require('./models/DBActivityRoles')(sequelize, Sequelize.DataTypes);
 			require('./models/DBMOTDPoints')(sequelize, Sequelize.DataTypes);
 			require('./models/DBElitiriCupSignUp')(sequelize, Sequelize.DataTypes);
+			require('./models/DBElitiriCupSubmissions')(sequelize, Sequelize.DataTypes);
 
 			await sequelize.sync({ alter: true })
 				.then(async () => {

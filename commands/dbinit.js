@@ -37,6 +37,7 @@ module.exports = {
 			require('../models/DBActivityRoles')(sequelize, Sequelize.DataTypes);
 			require('../models/DBMOTDPoints')(sequelize, Sequelize.DataTypes);
 			require('../models/DBElitiriCupSignUp')(sequelize, Sequelize.DataTypes);
+			require('../models/DBElitiriCupSubmissions')(sequelize, Sequelize.DataTypes);
 
 			sequelize.sync({ alter: true })
 				.then(async () => {
