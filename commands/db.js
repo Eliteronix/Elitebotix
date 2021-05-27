@@ -1,4 +1,4 @@
-const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp } = require('../dbObjects');
+const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
 
@@ -239,6 +239,36 @@ module.exports = {
 					lowerDifficulty: dbList[i].lowerDifficulty,
 					upperDifficulty: dbList[i].upperDifficulty,
 					tournamentName: dbList[i].tournamentName,
+					paranoid: dbList[i].paranoid,
+					createdAt: dbList[i].createdAt,
+					updatedAt: dbList[i].updatedAt,
+				});
+			}
+		} else if (args[0] === 'elitiricupsubmissions') {
+			const dbList = await DBElitiriCupSubmissions.findAll();
+			dbTableName = 'DBElitiriCupSubmissions';
+
+			for (let i = 0; i < dbList.length; i++) {
+				data.push({
+					id: dbList[i].id,
+					osuUserId: dbList[i].osuUserId,
+					osuName: dbList[i].osuName,
+					bracketName: dbList[i].bracketName,
+					tournamentName: dbList[i].tournamentName,
+					modPool: dbList[i].modPool,
+					title: dbList[i].title,
+					artist: dbList[i].artist,
+					difficulty: dbList[i].difficulty,
+					starRating: dbList[i].starRating,
+					drainLength: dbList[i].drainLength,
+					circleSize: dbList[i].circleSize,
+					approachRate: dbList[i].approachRate,
+					overallDifficulty: dbList[i].overallDifficulty,
+					hpDrain: dbList[i].hpDrain,
+					mapper: dbList[i].mapper,
+					beatmapId: dbList[i].beatmapId,
+					beatmapsetId: dbList[i].beatmapsetId,
+					bpm: dbList[i].bpm,
 					paranoid: dbList[i].paranoid,
 					createdAt: dbList[i].createdAt,
 					updatedAt: dbList[i].updatedAt,
