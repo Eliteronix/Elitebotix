@@ -4,6 +4,7 @@ const Discord = require('discord.js');
 const cooldowns = new Discord.Collection();
 const { closest } = require('fastest-levenshtein');
 const { Permissions } = require('discord.js');
+const { DBElitiriCupSignUp } = require('./dbObjects');
 
 module.exports = async function (msg) {
 	//Create a collection for the commands
@@ -123,6 +124,15 @@ module.exports = async function (msg) {
 			//Developer
 			if (msg.author.id === '138273136285057025') {
 				categories.push('debug');
+			}
+
+			//ecs2021 player
+			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
+				where: { tournamentName: 'Elitiri Cup Summer 2021', userId: msg.author.id }
+			});
+
+			if (elitiriSignUp) {
+				categories.push('ecs2021');
 			}
 
 			let authorPerms;
