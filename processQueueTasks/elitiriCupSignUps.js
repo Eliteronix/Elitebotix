@@ -17,6 +17,10 @@ module.exports = {
 };
 
 async function updateSheet(spreadsheetID, bracketName) {
+	// eslint-disable-next-line no-undef
+	// if (process.env.SERVER !== 'Live') {
+	// 	return;
+	// }
 	// Initialize the sheet - doc ID is the long id in the sheets URL
 	const doc = new GoogleSpreadsheet(spreadsheetID);
 
@@ -60,7 +64,7 @@ async function updateSheet(spreadsheetID, bracketName) {
 			if (bracketPlayers[i].saturdayEarlyAvailability) {
 				time = `${bracketPlayers[i].saturdayEarlyAvailability} - ${bracketPlayers[i].saturdayLateAvailability} UTC | ${bracketPlayers[i].sundayEarlyAvailability} - ${bracketPlayers[i].sundayLateAvailability} UTC`;
 			} else {
-				time = 'No availabilities set by the player';
+				time = 'No availabilities set';
 			}
 			connected = 'Yes';
 			badges = bracketPlayers[i].osuBadges;
