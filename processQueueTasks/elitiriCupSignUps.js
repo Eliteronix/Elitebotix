@@ -1,5 +1,5 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { DBElitiriCupSignUp } = require('../dbObjects');
+const { DBElitiriCupSignUp, DBProcessQueue } = require('../dbObjects');
 
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
@@ -113,6 +113,15 @@ async function updateSheet(spreadsheetID, bracketName) {
 		if (i % 150 === 0 || i === 495) {
 			await sheet.saveUpdatedCells();
 		}
+	}
+
+	const task = await DBProcessQueue.findOne({
+		where: { task: 'elitiriRoleAssignment' }
+	});
+	if (!task) {
+		DBProcessQueue.create({
+			guildId: 'None', task: 'elitiriRoleAssignment', priority: 3
+		});
 	}
 }
 
