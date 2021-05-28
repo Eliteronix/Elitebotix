@@ -253,12 +253,12 @@ async function messageUserWithRetries(client, user, content, attachment) {
 					});
 			}
 		} catch (error) {
-			if (error.message === 'Cannot send messages to this user') {
+			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
 				if (i === 2) {
 					const channel = await client.channels.fetch('833803740162949191');
 					channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 				} else {
-					pause(5000);
+					await pause(5000);
 				}
 			} else {
 				i = Infinity;
