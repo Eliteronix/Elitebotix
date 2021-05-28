@@ -7,7 +7,7 @@ const { getGuildPrefix, pause } = require('../utils.js');
 module.exports = {
 	name: 'ecs2021-submit',
 	//aliases: ['osu-map', 'beatmap-info'],
-	description: 'Sends an info card about the viability of the beatmap for the Elitiri Cup Summer 2021',
+	description: 'Allows you to submit beatmaps for the Elitiri Cup Summer 2021',
 	usage: '<NM/HD/HR/DT/FM> <id> | <list>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
