@@ -180,25 +180,91 @@ module.exports = {
 				}
 			}
 		} else if (args[0] === 'createPools') {
+			let allMaps;
+			if (args[1] === 'top') {
+				allMaps = await DBElitiriCupSubmissions.findAll({
+					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Top Bracket' }
+				});
+			} else if (args[1] === 'middle') {
+				allMaps = await DBElitiriCupSubmissions.findAll({
+					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Middle Bracket' }
+				});
+			} else if (args[1] === 'lower') {
+				allMaps = await DBElitiriCupSubmissions.findAll({
+					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Lower Bracket' }
+				});
+			} else if (args[1] === 'beginner') {
+				allMaps = await DBElitiriCupSubmissions.findAll({
+					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Beginner Bracket' }
+				});
+			} else {
+				return msg.channel.send('Please specify for which bracket the pools should be created. (`top`, `middle`, `lower`, `beginner`)');
+			}
+
+			quicksort(allMaps);
+
+			let allNMMaps = [];
+			let allHDMaps = [];
+			let allHRMaps = [];
+			let allDTMaps = [];
+			let allFMMaps = [];
+
+			for (let i = 0; i < allMaps.length; i++) {
+				if (allMaps[i].modPool === 'NM') {
+					allNMMaps.push(allMaps[i]);
+				} else if (allMaps[i].modPool === 'HD') {
+					allHDMaps.push(allMaps[i]);
+				} else if (allMaps[i].modPool === 'HR') {
+					allHRMaps.push(allMaps[i]);
+				} else if (allMaps[i].modPool === 'DT') {
+					allDTMaps.push(allMaps[i]);
+				} else {
+					allFMMaps.push(allMaps[i]);
+				}
+			}
+
+			let MappoolSizes = {
+				totalNM: 39,
+				totalHD: 17,
+				totalHR: 17,
+				totalDT: 17,
+				totalFM: 15,
+				Qual: { NM: 4, HD: 2, HR: 2, DT: 2, FM: 0 },
+				Ro32: { NM: 4, HD: 2, HR: 2, DT: 2, FM: 2 },
+				Ro16: { NM: 5, HD: 2, HR: 2, DT: 2, FM: 2 },
+				QF: { NM: 6, HD: 2, HR: 2, DT: 2, FM: 2 },
+				SF: { NM: 6, HD: 3, HR: 3, DT: 3, FM: 3 },
+				F: { NM: 7, HD: 3, HR: 3, DT: 3, FM: 3 },
+				GF: { NM: 7, HD: 3, HR: 3, DT: 3, FM: 3 }
+			};
+
+			let potentialQualifierMaps = [];
+			let potentialRoundOf32Maps = [];
+			let potentialRoundOf16Maps = [];
+			let potentialQuarterfinalMaps = [];
+			let potentialSemifinalMaps = [];
+			let potentialFinalMaps = [];
+			let potentialGrandfinalMaps = [];
+
 
 		}
 	}
 };
 
-module.exports = {
-	// eslint-disable-next-line no-unused-vars
-	async execute(client, processQueueEntry) {
-		if (processQueueEntry.additions === 'Top Bracket') {
-			await updateSheet('1FeGwyeI-GLLej4HxfOJ0R4A9ZAnJ7ofdMPgKrgnpBG8', processQueueEntry.additions);
-		} else if (processQueueEntry.additions === 'Middle Bracket') {
-			await updateSheet('1swtWHJoO5vdUq6LPS4-eXziIDc4dZ2QJIRhNWyU9PVE', processQueueEntry.additions);
-		} else if (processQueueEntry.additions === 'Lower Bracket') {
-			await updateSheet('1jjZm93sA0XQs6Zfgh1Ev-46IuNunobDiW80uQMM8K2k', processQueueEntry.additions);
-		} else if (processQueueEntry.additions === 'Beginner Bracket') {
-			await updateSheet('1AIyEGG2_X2gwy01XQl2pINc2yYU8XicrdfyOEvZYY-Q', processQueueEntry.additions);
-		}
-	},
-};
+// module.exports = {
+// 	// eslint-disable-next-line no-unused-vars
+// 	async execute(client, processQueueEntry) {
+// 		if (processQueueEntry.additions === 'Top Bracket') {
+// 			await updateSheet('1FeGwyeI-GLLej4HxfOJ0R4A9ZAnJ7ofdMPgKrgnpBG8', processQueueEntry.additions);
+// 		} else if (processQueueEntry.additions === 'Middle Bracket') {
+// 			await updateSheet('1swtWHJoO5vdUq6LPS4-eXziIDc4dZ2QJIRhNWyU9PVE', processQueueEntry.additions);
+// 		} else if (processQueueEntry.additions === 'Lower Bracket') {
+// 			await updateSheet('1jjZm93sA0XQs6Zfgh1Ev-46IuNunobDiW80uQMM8K2k', processQueueEntry.additions);
+// 		} else if (processQueueEntry.additions === 'Beginner Bracket') {
+// 			await updateSheet('1AIyEGG2_X2gwy01XQl2pINc2yYU8XicrdfyOEvZYY-Q', processQueueEntry.additions);
+// 		}
+// 	},
+// };
 
 // async function updateSheet(spreadsheetID, bracketName) {
 // 	// eslint-disable-next-line no-undef
@@ -309,27 +375,27 @@ module.exports = {
 // 	}
 // }
 
-// function partition(list, start, end) {
-// 	const pivot = list[end];
-// 	let i = start;
-// 	for (let j = start; j < end; j += 1) {
-// 		if (parseFloat(list[j].osuRank) <= parseFloat(pivot.osuRank)) {
-// 			[list[j], list[i]] = [list[i], list[j]];
-// 			i++;
-// 		}
-// 	}
-// 	[list[i], list[end]] = [list[end], list[i]];
-// 	return i;
-// }
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].starRating) <= parseFloat(pivot.starRating)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
 
-// function quicksort(list, start = 0, end = undefined) {
-// 	if (end === undefined) {
-// 		end = list.length - 1;
-// 	}
-// 	if (start < end) {
-// 		const p = partition(list, start, end);
-// 		quicksort(list, start, p - 1);
-// 		quicksort(list, p + 1, end);
-// 	}
-// 	return list;
-// }
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
+}
