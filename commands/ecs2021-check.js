@@ -102,7 +102,7 @@ module.exports = {
 						.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('Map is too short', 'The Drain time should not be below 1:30');
+						.addField('Map is too short', 'The Drain time should not be below 2:10');
 				}
 
 				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 2:10-4:30
@@ -118,7 +118,7 @@ module.exports = {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('Map is too short', 'The Drain time should not be below 1:30 (after DT)');
+						.addField('Map is too short', 'The Drain time should not be below 2:10 (after DT)');
 				}
 
 				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 2:10-4:30
