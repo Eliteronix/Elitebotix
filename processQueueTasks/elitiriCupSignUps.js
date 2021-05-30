@@ -18,9 +18,10 @@ module.exports = {
 
 async function updateSheet(spreadsheetID, bracketName) {
 	// eslint-disable-next-line no-undef
-	// if (process.env.SERVER !== 'Live') {
-	// 	return;
-	// }
+	if (process.env.SERVER !== 'Live') {
+		return;
+	}
+
 	// Initialize the sheet - doc ID is the long id in the sheets URL
 	const doc = new GoogleSpreadsheet(spreadsheetID);
 
