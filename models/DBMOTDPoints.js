@@ -36,6 +36,12 @@ module.exports = (sequelize, DataTypes) => {
 		knockoutPlayers: {
 			type: DataTypes.STRING,
 		},
+		knockoutRound: {
+			type: DataTypes.STRING,
+		},
+		maxQualifierPoints: {
+			type: DataTypes.STRING,
+		},
 		matchDate: {
 			type: DataTypes.DATE,
 		},

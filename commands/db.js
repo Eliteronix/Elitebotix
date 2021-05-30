@@ -211,6 +211,8 @@ module.exports = {
 					knockoutPoints: dbList[i].knockoutPoints,
 					knockoutRank: dbList[i].knockoutRank,
 					knockoutPlayers: dbList[i].knockoutPlayers,
+					knockoutRound: dbList[i].knockoutRound,
+					maxQualifierPoints: dbList[i].maxQualifierPoints,
 					matchDate: dbList[i].matchDate,
 					paranoid: dbList[i].paranoid,
 					createdAt: dbList[i].createdAt,
