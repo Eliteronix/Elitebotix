@@ -123,7 +123,7 @@ module.exports = {
 		startOfSubmission.setUTCSeconds(0);
 		startOfSubmission.setUTCMinutes(0);
 		startOfSubmission.setUTCHours(12);
-		startOfSubmission.setUTCDate(21);
+		startOfSubmission.setUTCDate(28);
 		startOfSubmission.setUTCMonth(5); //Zero Indexed
 		startOfSubmission.setUTCFullYear(2021);
 		if (now < startOfSubmission) {
@@ -135,7 +135,7 @@ module.exports = {
 		endOfSubmission.setUTCSeconds(59);
 		endOfSubmission.setUTCMinutes(59);
 		endOfSubmission.setUTCHours(23);
-		endOfSubmission.setUTCDate(11);
+		endOfSubmission.setUTCDate(18);
 		endOfSubmission.setUTCMonth(6); //Zero Indexed
 		endOfSubmission.setUTCFullYear(2021);
 		if (now > endOfSubmission) {

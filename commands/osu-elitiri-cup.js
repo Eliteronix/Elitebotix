@@ -26,7 +26,7 @@ module.exports = {
 			endOfRegs.setUTCSeconds(59);
 			endOfRegs.setUTCMinutes(59);
 			endOfRegs.setUTCHours(23);
-			endOfRegs.setUTCDate(20);
+			endOfRegs.setUTCDate(27);
 			endOfRegs.setUTCMonth(5); //Zero Indexed
 			endOfRegs.setUTCFullYear(2021);
 			if (now > endOfRegs) {
@@ -111,7 +111,7 @@ module.exports = {
 			endOfRegs.setUTCSeconds(59);
 			endOfRegs.setUTCMinutes(59);
 			endOfRegs.setUTCHours(23);
-			endOfRegs.setUTCDate(20);
+			endOfRegs.setUTCDate(27);
 			endOfRegs.setUTCMonth(5); //Zero Indexed
 			endOfRegs.setUTCFullYear(2021);
 			if (now > endOfRegs) {
