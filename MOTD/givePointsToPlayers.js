@@ -40,26 +40,32 @@ module.exports = {
 				}
 			}
 
-			let knockoutPoints = Math.round(parseInt(maximumPointsFromQualis) * (parseInt(round) / 10));
+			let knockoutPoints = Math.round(parseInt(maximumPointsFromQualis) * (parseInt(round) / 10 * 2));
 
 
-			qualifierDataset.totalPoints = parseInt(qualifierDataset.qualifierPoints) + knockoutPoints;
+			qualifierDataset.totalPoints = parseInt(qualifierDataset.qualifierPoints) + parseInt(knockoutPoints);
 			qualifierDataset.knockoutPoints = knockoutPoints;
 			qualifierDataset.knockoutRank = rank;
 			qualifierDataset.knockoutPlayers = allPlayers.length;
+			qualifierDataset.knockoutRound = round;
+			qualifierDataset.maxQualifierPoints = maximumPointsFromQualis;
 			qualifierDataset.save();
 		} else {
+			let qualifierPoints = allPlayers.length - rank + 1;
+			let knockoutPoints = allPlayers.length * (parseInt(round) / 10 * 2);
 			DBMOTDPoints.create({
 				userId: player.userId,
 				osuUserId: player.osuUserId,
 				osuRank: player.osuRank,
-				totalPoints: (allPlayers.length - rank + 1) * 2,
-				qualifierPoints: allPlayers.length - rank + 1,
+				totalPoints: parseInt(qualifierPoints) + parseInt(knockoutPoints),
+				qualifierPoints: qualifierPoints,
 				qualifierRank: rank,
 				qualifierPlayers: allPlayers.length,
-				knockoutPoints: allPlayers.length - rank + 1,
+				knockoutPoints: knockoutPoints,
 				knockoutRank: rank,
 				knockoutPlayers: allPlayers.length,
+				knockoutRound: round,
+				maxQualifierPoints: allPlayers.length,
 				matchDate: today
 			});
 		}
@@ -84,6 +90,8 @@ async function createQualifierResult(player, playerAmount, playerRank) {
 		knockoutPoints: -1,
 		knockoutRank: -1,
 		knockoutPlayers: -1,
+		knockoutRound: -1,
+		maxQualifierPoints: -1,
 		matchDate: today
 	});
 }

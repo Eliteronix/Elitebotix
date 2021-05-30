@@ -48,7 +48,7 @@ module.exports = {
 	name: 'ecs2021-admin',
 	//aliases: ['osu-map', 'beatmap-info'],
 	description: 'Admin control for the Elitiri Cup',
-	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability>',
+	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> | <createPools> <top/middle/lower/beginner>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -530,7 +530,7 @@ module.exports = {
 
 			await doc.loadInfo(); // loads document properties and worksheet
 
-			let sheet = doc.sheetsByTitle['Mappool'];
+			let sheet = doc.sheetsByTitle['Mappool Top Secret'];
 
 			await sheet.loadCells('M4:P703');
 
