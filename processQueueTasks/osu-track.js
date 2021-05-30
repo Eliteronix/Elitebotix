@@ -29,6 +29,14 @@ module.exports = {
 					if (user.events.length > 0) {
 						let scoreCommand = require('../commands/osu-score.js');
 						for (let i = 0; i < user.events.length; i++) {
+							//Remove older scores on the map to avoid duplicates
+							for (let j = i + 1; j < user.events.length; j++) {
+								if (user.events[i].beatmapId === user.events[j].beatmapId) {
+									user.events.splice(j, 1);
+									j--;
+								}
+							}
+
 							//This only works if the local timezone is UTC
 							let mapRank = user.events[i].html.replace(/.+<\/a><\/b> achieved rank #/gm, '').replace(/.+<\/a><\/b> achieved .+rank #/gm, '').replace(/ on <a href='\/b\/.+/gm, '').replace('</b>', '');
 							let modeName = user.events[i].html.replace(/.+<\/a> \(osu!/gm, '');
