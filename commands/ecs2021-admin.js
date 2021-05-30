@@ -513,9 +513,9 @@ module.exports = {
 			}
 
 			// eslint-disable-next-line no-undef
-			// if (process.env.SERVER !== 'Live') {
-			// 	return;
-			// }
+			if (process.env.SERVER !== 'Live') {
+				return;
+			}
 
 			// Initialize the sheet - doc ID is the long id in the sheets URL
 			const doc = new GoogleSpreadsheet('1o_4d_b-yRuVkbQNdArlVUwlXFo1oUz7qQTYLjJDxHBI');
