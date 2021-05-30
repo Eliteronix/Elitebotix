@@ -530,104 +530,50 @@ module.exports = {
 
 			await doc.loadInfo(); // loads document properties and worksheet
 
-			const sheet = doc.sheetsByTitle['Mappool'];
+			let sheet = doc.sheetsByTitle['Mappool'];
 
 			await sheet.loadCells('M4:P703');
 
-			for (let i = 0; i < qualifierPool.length; i++) {
-				const link = `https://osu.ppy.sh/beatmapsets/${qualifierPool[i].beatmapsetId}#osu/${qualifierPool[i].beatmapId}`;
-				const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
-				linkCell.value = link;
-
-				const starRatingCell = sheet.getCell(rowOffset + i, 13); //getCell(row, column) zero-indexed
-				starRatingCell.value = Math.round(qualifierPool[i].starRating * 100) / 100;
-
-				const pickerCell = sheet.getCell(rowOffset + i, 15); //getCell(row, column) zero-indexed
-				pickerCell.value = qualifierPool[i].osuName;
-			}
+			sheet = insertPoolIntoSpreadsheet(sheet, qualifierPool, rowOffset);
 
 			rowOffset += 100;
-			for (let i = 0; i < Ro32Pool.length; i++) {
-				const link = `https://osu.ppy.sh/beatmapsets/${Ro32Pool[i].beatmapsetId}#osu/${Ro32Pool[i].beatmapId}`;
-				const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
-				linkCell.value = link;
-
-				const starRatingCell = sheet.getCell(rowOffset + i, 13); //getCell(row, column) zero-indexed
-				starRatingCell.value = Math.round(Ro32Pool[i].starRating * 100) / 100;
-
-				const pickerCell = sheet.getCell(rowOffset + i, 15); //getCell(row, column) zero-indexed
-				pickerCell.value = Ro32Pool[i].osuName;
-			}
+			sheet = insertPoolIntoSpreadsheet(sheet, Ro32Pool, rowOffset);
 
 			rowOffset += 100;
-			for (let i = 0; i < Ro16Pool.length; i++) {
-				const link = `https://osu.ppy.sh/beatmapsets/${Ro16Pool[i].beatmapsetId}#osu/${Ro16Pool[i].beatmapId}`;
-				const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
-				linkCell.value = link;
-
-				const starRatingCell = sheet.getCell(rowOffset + i, 13); //getCell(row, column) zero-indexed
-				starRatingCell.value = Math.round(Ro16Pool[i].starRating * 100) / 100;
-
-				const pickerCell = sheet.getCell(rowOffset + i, 15); //getCell(row, column) zero-indexed
-				pickerCell.value = Ro16Pool[i].osuName;
-			}
+			sheet = insertPoolIntoSpreadsheet(sheet, Ro16Pool, rowOffset);
 
 			rowOffset += 100;
-			for (let i = 0; i < QuarterfinalPool.length; i++) {
-				const link = `https://osu.ppy.sh/beatmapsets/${QuarterfinalPool[i].beatmapsetId}#osu/${QuarterfinalPool[i].beatmapId}`;
-				const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
-				linkCell.value = link;
-
-				const starRatingCell = sheet.getCell(rowOffset + i, 13); //getCell(row, column) zero-indexed
-				starRatingCell.value = Math.round(QuarterfinalPool[i].starRating * 100) / 100;
-
-				const pickerCell = sheet.getCell(rowOffset + i, 15); //getCell(row, column) zero-indexed
-				pickerCell.value = QuarterfinalPool[i].osuName;
-			}
+			sheet = insertPoolIntoSpreadsheet(sheet, QuarterfinalPool, rowOffset);
 
 			rowOffset += 100;
-			for (let i = 0; i < SemifinalPool.length; i++) {
-				const link = `https://osu.ppy.sh/beatmapsets/${SemifinalPool[i].beatmapsetId}#osu/${SemifinalPool[i].beatmapId}`;
-				const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
-				linkCell.value = link;
-
-				const starRatingCell = sheet.getCell(rowOffset + i, 13); //getCell(row, column) zero-indexed
-				starRatingCell.value = Math.round(SemifinalPool[i].starRating * 100) / 100;
-
-				const pickerCell = sheet.getCell(rowOffset + i, 15); //getCell(row, column) zero-indexed
-				pickerCell.value = SemifinalPool[i].osuName;
-			}
+			sheet = insertPoolIntoSpreadsheet(sheet, SemifinalPool, rowOffset);
 
 			rowOffset += 100;
-			for (let i = 0; i < FinalPool.length; i++) {
-				const link = `https://osu.ppy.sh/beatmapsets/${FinalPool[i].beatmapsetId}#osu/${FinalPool[i].beatmapId}`;
-				const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
-				linkCell.value = link;
-
-				const starRatingCell = sheet.getCell(rowOffset + i, 13); //getCell(row, column) zero-indexed
-				starRatingCell.value = Math.round(FinalPool[i].starRating * 100) / 100;
-
-				const pickerCell = sheet.getCell(rowOffset + i, 15); //getCell(row, column) zero-indexed
-				pickerCell.value = FinalPool[i].osuName;
-			}
+			sheet = insertPoolIntoSpreadsheet(sheet, FinalPool, rowOffset);
 
 			rowOffset += 100;
-			for (let i = 0; i < GrandfinalPool.length; i++) {
-				const link = `https://osu.ppy.sh/beatmapsets/${GrandfinalPool[i].beatmapsetId}#osu/${GrandfinalPool[i].beatmapId}`;
-				const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
-				linkCell.value = link;
-
-				const starRatingCell = sheet.getCell(rowOffset + i, 13); //getCell(row, column) zero-indexed
-				starRatingCell.value = Math.round(GrandfinalPool[i].starRating * 100) / 100;
-
-				const pickerCell = sheet.getCell(rowOffset + i, 15); //getCell(row, column) zero-indexed
-				pickerCell.value = GrandfinalPool[i].osuName;
-			}
+			sheet = insertPoolIntoSpreadsheet(sheet, GrandfinalPool, rowOffset);
 
 			await sheet.saveUpdatedCells();
 		}
 	}
 };
+
+function insertPoolIntoSpreadsheet(sheet, pool, rowOffset) {
+	for (let i = 0; i < pool.length; i++) {
+		const link = `https://osu.ppy.sh/beatmapsets/${pool[i].beatmapsetId}#osu/${pool[i].beatmapId}`;
+		const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
+		linkCell.value = link;
+
+		// const starRatingCell = sheet.getCell(rowOffset + i, 13); //getCell(row, column) zero-indexed
+		// starRatingCell.value = Math.round(pool[i].starRating * 100) / 100;
+
+		const pickerCell = sheet.getCell(rowOffset + i, 15); //getCell(row, column) zero-indexed
+		pickerCell.value = pool[i].osuName;
+	}
+
+	return sheet;
+}
 
 function addRandomMapAndRemoveDuplicatesToFrom(destPool, originPool) {
 	const map = originPool[Math.floor(Math.random() * originPool.length)];
