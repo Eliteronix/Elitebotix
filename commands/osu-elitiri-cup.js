@@ -20,6 +20,19 @@ module.exports = {
 		if (args[0].toLowerCase() === 'server') {
 			sendMessage(msg, 'The discord server for the competition can be found here: <https://discord.com/invite/Asz5Gfe>\nAfter joining be sure to head to <#727987472772104272> and assign yourself the Elitiri Cup role!\nEverything else will be done automatically when you registered!');
 		} else if (args[0].toLowerCase() === 'register') {
+			let now = new Date();
+			let endOfRegs = new Date();
+			endOfRegs.setUTCMilliseconds(999);
+			endOfRegs.setUTCSeconds(59);
+			endOfRegs.setUTCMinutes(59);
+			endOfRegs.setUTCHours(23);
+			endOfRegs.setUTCDate(20);
+			endOfRegs.setUTCMonth(5); //Zero Indexed
+			endOfRegs.setUTCFullYear(2021);
+			if (now > endOfRegs) {
+				return msg.channel.send('The registration period has ended.');
+			}
+
 			const guildPrefix = await getGuildPrefix(msg);
 			//get elitiriSignUp from db
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
@@ -92,6 +105,19 @@ module.exports = {
 				sendMessage(msg, `It seems like you don't have your osu! account connected to the bot.\nPlease use \`${guildPrefix}osu-link osu-username\` to connect you account and verify it.`);
 			}
 		} else if (args[0].toLowerCase() === 'unregister') {
+			let now = new Date();
+			let endOfRegs = new Date();
+			endOfRegs.setUTCMilliseconds(999);
+			endOfRegs.setUTCSeconds(59);
+			endOfRegs.setUTCMinutes(59);
+			endOfRegs.setUTCHours(23);
+			endOfRegs.setUTCDate(20);
+			endOfRegs.setUTCMonth(5); //Zero Indexed
+			endOfRegs.setUTCFullYear(2021);
+			if (now > endOfRegs) {
+				return msg.channel.send('The registration period has ended and signups can\'t be changed anymore.');
+			}
+
 			const guildPrefix = await getGuildPrefix(msg);
 			//get elitiriSignUp from db
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
