@@ -117,6 +117,31 @@ module.exports = {
 			return;
 		}
 
+		let now = new Date();
+		let startOfSubmission = new Date();
+		startOfSubmission.setUTCMilliseconds(0);
+		startOfSubmission.setUTCSeconds(0);
+		startOfSubmission.setUTCMinutes(0);
+		startOfSubmission.setUTCHours(12);
+		startOfSubmission.setUTCDate(21);
+		startOfSubmission.setUTCMonth(5); //Zero Indexed
+		startOfSubmission.setUTCFullYear(2021);
+		if (now < startOfSubmission) {
+			return msg.channel.send('The submission period hasn\'t started yet and maps can\'t be submitted yet.');
+		}
+
+		let endOfSubmission = new Date();
+		endOfSubmission.setUTCMilliseconds(999);
+		endOfSubmission.setUTCSeconds(59);
+		endOfSubmission.setUTCMinutes(59);
+		endOfSubmission.setUTCHours(23);
+		endOfSubmission.setUTCDate(11);
+		endOfSubmission.setUTCMonth(6); //Zero Indexed
+		endOfSubmission.setUTCFullYear(2021);
+		if (now > endOfSubmission) {
+			return msg.channel.send('The submission period has ended and maps can\'t be changed anymore.');
+		}
+
 		if (args[0].toLowerCase() !== 'nm' && args[0].toLowerCase() !== 'hd' && args[0].toLowerCase() !== 'hr' && args[0].toLowerCase() !== 'dt' && args[0].toLowerCase() !== 'fm') {
 			return msg.channel.send('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
 		}
@@ -361,7 +386,7 @@ module.exports = {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find beatmap \`${args[2].replace(/`/g, '')}\`.`);
+					msg.channel.send(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
 				} else {
 					console.log(err);
 				}
