@@ -669,16 +669,32 @@ module.exports = {
 					yPositionName = 125 + (Math.floor((i - 3) / columns) + 2) * 90;
 					yPositionValue = 160 + (Math.floor((i - 3) / columns) + 2) * 90;
 				} else {
-					//Create standard xPosition
-					xPosition = (canvas.width / (columns + 1)) * (((i - 3) % columns) + 1);
-					//Stretch it
-					let max = canvas.width / (columns + 1) / 2;
-					let iterator = (i - 3) % columns;
-					let standardizedIterator = iterator - (columns - 1) / 2;
-					let lengthScaled = max / (columns / 2) * standardizedIterator;
-					xPosition += lengthScaled;
-					yPositionName = 125 + (Math.floor((i - 3) / columns) + 2) * 90;
-					yPositionValue = 160 + (Math.floor((i - 3) / columns) + 2) * 90;
+					if (i === 0 || i === 1 || i === 2 || i === 3) {
+						console.log(i);
+					}
+					if (dataStart === 0) {
+						//Create standard xPosition
+						xPosition = (canvas.width / (columns + 1)) * (((i - 3) % columns) + 1);
+						//Stretch it
+						let max = canvas.width / (columns + 1) / 2;
+						let iterator = (i - 3) % columns;
+						let standardizedIterator = iterator - (columns - 1) / 2;
+						let lengthScaled = max / (columns / 2) * standardizedIterator;
+						xPosition += lengthScaled;
+						yPositionName = 125 + (Math.floor((i - 3) / columns) + 2) * 90;
+						yPositionValue = 160 + (Math.floor((i - 3) / columns) + 2) * 90;
+					} else {
+						//Create standard xPosition
+						xPosition = (canvas.width / (columns + 1)) * ((i % columns) + 1);
+						//Stretch it
+						let max = canvas.width / (columns + 1) / 2;
+						let iterator = i % columns;
+						let standardizedIterator = iterator - (columns - 1) / 2;
+						let lengthScaled = max / (columns / 2) * standardizedIterator;
+						xPosition += lengthScaled;
+						yPositionName = 125 + (Math.floor(i / columns) + 1) * 90;
+						yPositionValue = 160 + (Math.floor(i / columns) + 1) * 90;
+					}
 				}
 			}
 			if (i + dataStart === 0) {
@@ -689,6 +705,10 @@ module.exports = {
 				ctx.fillStyle = '#CC8E34';
 			} else {
 				ctx.fillStyle = '#ffffff';
+			}
+
+			if (i === 0 || i === 1 || i === 2 || i === 3) {
+				console.log(xPosition, yPositionName, yPositionValue);
 			}
 
 			ctx.font = 'bold 25px comfortaa, sans-serif';
