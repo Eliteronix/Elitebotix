@@ -669,9 +669,6 @@ module.exports = {
 					yPositionName = 125 + (Math.floor((i - 3) / columns) + 2) * 90;
 					yPositionValue = 160 + (Math.floor((i - 3) / columns) + 2) * 90;
 				} else {
-					if (i === 0 || i === 1 || i === 2 || i === 3) {
-						console.log(i);
-					}
 					if (dataStart === 0) {
 						//Create standard xPosition
 						xPosition = (canvas.width / (columns + 1)) * (((i - 3) % columns) + 1);
@@ -705,10 +702,6 @@ module.exports = {
 				ctx.fillStyle = '#CC8E34';
 			} else {
 				ctx.fillStyle = '#ffffff';
-			}
-
-			if (i === 0 || i === 1 || i === 2 || i === 3) {
-				console.log(xPosition, yPositionName, yPositionValue);
 			}
 
 			ctx.font = 'bold 25px comfortaa, sans-serif';
