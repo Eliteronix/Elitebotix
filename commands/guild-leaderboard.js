@@ -5,7 +5,7 @@ module.exports = {
 	name: 'server-leaderboard',
 	aliases: ['guild-leaderboard', 'guild-ranking'],
 	description: 'Sends a leaderboard of the top users in the guild',
-	// usage: '<osu> (the only supported game at the moment)',
+	usage: '<page>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: 'ATTACH_FILES',

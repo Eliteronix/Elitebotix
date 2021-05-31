@@ -2,7 +2,7 @@ module.exports = {
 	name: 'leaderboard',
 	aliases: ['leaderboard', 'ranking'],
 	description: 'Sends a leaderboard of all the players in the guild that have their account connected',
-	usage: '<server/osu>',
+	usage: '<server/osu> <page>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: 'ATTACH_FILES',
@@ -17,7 +17,7 @@ module.exports = {
 		let command;
 		if (args[0] === 'osu') {
 			command = require('./osu-leaderboard.js');
-		} else if (args[0] === 'guild' || args[0] === 'server' || args[0] === 'chat'){
+		} else if (args[0] === 'guild' || args[0] === 'server' || args[0] === 'chat') {
 			command = require('./guild-leaderboard.js');
 		} else {
 			return;
