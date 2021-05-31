@@ -118,14 +118,14 @@ module.exports = {
 
 					quicksort(DTBeatmaps);
 
-					//Get all players for today
-					const allPlayers = await getPlayers(client);
-
 					// eslint-disable-next-line no-undef
 					if (process.env.SERVER !== 'Dev') {
 						//Assign roles to all players currently registered and remove unneeded roles
 						await assignPlayerRoles(client);
 					}
+
+					//Get all players for today
+					const allPlayers = await getPlayers(client);
 
 					// Trigger Mappool creation for the different brackets
 					setMapsForBracket(client, 8, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613', allPlayers[0]);
