@@ -582,7 +582,29 @@ module.exports = {
 			}
 		}
 	},
-	async createLeaderboard(data, backgroundFile, title, filename) {
+	async createLeaderboard(data, backgroundFile, title, filename, page) {
+		let dataPerPage = 100;
+		if (page && (page - 1) * dataPerPage > data.length) {
+			page = null;
+		}
+		let totalPages = Math.floor((data.length - 1) / dataPerPage) + 1;
+
+		let dataStart = 0;
+		let dataEnd = Infinity;
+		if (page) {
+			dataStart = dataPerPage * (page - 1);
+			dataEnd = dataPerPage * page;
+
+			for (let i = 0; i < dataStart; i++) {
+				data.splice(0, 1);
+			}
+
+			for (let i = dataPerPage; i < data.length; i++) {
+				data.splice(dataPerPage, 1);
+				i--;
+			}
+		}
+
 		let columns = 1;
 		let canvasWidth = 900;
 		let rows = data.length;
@@ -625,20 +647,20 @@ module.exports = {
 		// Write the data
 		ctx.textAlign = 'center';
 
-		for (let i = 0; i < data.length; i++) {
+		for (let i = 0; i < data.length && dataStart + i < dataEnd; i++) {
 			let xPosition = canvas.width / 2;
 			let yPositionName = 125 + i * 90;
 			let yPositionValue = 160 + i * 90;
 			if (columns > 1) {
-				if (i === 0) {
+				if (i + dataStart === 0) {
 					xPosition = canvas.width / 2;
-				} else if (i === 1) {
+				} else if (i + dataStart === 1) {
 					if (columns === 2) {
 						xPosition = canvas.width / 3;
 					} else {
 						xPosition = canvas.width / 4;
 					}
-				} else if (i === 2) {
+				} else if (i + dataStart === 2) {
 					if (columns === 2) {
 						xPosition = (canvas.width / 3) * 2;
 					} else {
@@ -659,18 +681,18 @@ module.exports = {
 					yPositionValue = 160 + (Math.floor((i - 3) / columns) + 2) * 90;
 				}
 			}
-			if (i === 0) {
+			if (i + dataStart === 0) {
 				ctx.fillStyle = '#E2B007';
-			} else if (i === 1) {
+			} else if (i + dataStart === 1) {
 				ctx.fillStyle = '#C4CACE';
-			} else if (i === 2) {
+			} else if (i + dataStart === 2) {
 				ctx.fillStyle = '#CC8E34';
 			} else {
 				ctx.fillStyle = '#ffffff';
 			}
 
 			ctx.font = 'bold 25px comfortaa, sans-serif';
-			ctx.fillText(`${i + 1}. ${data[i].name}`, xPosition, yPositionName);
+			ctx.fillText(`${i + 1 + dataStart}. ${data[i].name}`, xPosition, yPositionName);
 			ctx.font = '25px comfortaa, sans-serif';
 			ctx.fillText(data[i].value, xPosition, yPositionValue);
 		}
@@ -679,6 +701,11 @@ module.exports = {
 
 		ctx.font = 'bold 15px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
+
+		if (page) {
+			ctx.textAlign = 'left';
+			ctx.fillText(`Page ${page} / ${totalPages}`, canvas.width / 140, canvas.height - 10);
+		}
 
 		ctx.textAlign = 'right';
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);

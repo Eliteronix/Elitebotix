@@ -55,7 +55,13 @@ module.exports = {
 					leaderboardData.push(dataset);
 				}
 
-				const attachment = await createLeaderboard(leaderboardData, 'discord-background.png', `${msg.guild.name}'s activity leaderboard`, `guild-leaderboard-${msg.guild.name}.png`);
+				let page;
+
+				if (args[0] && !isNaN(args[0])) {
+					page = parseInt(args[0]);
+				}
+
+				const attachment = await createLeaderboard(leaderboardData, 'discord-background.png', `${msg.guild.name}'s activity leaderboard`, `guild-leaderboard-${msg.guild.name}.png`, page);
 
 				//Send attachment
 				await msg.channel.send('The leaderboard shows the most active users of the server.', attachment);

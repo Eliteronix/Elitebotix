@@ -94,7 +94,13 @@ module.exports = {
 					leaderboardData.push(dataset);
 				}
 
-				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${msg.guild.name}'s osu! leaderboard`, `osu-leaderboard-${msg.guild.name}.png`);
+				let page;
+
+				if (args[0] && !isNaN(args[0])) {
+					page = parseInt(args[0]);
+				}
+
+				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${msg.guild.name}'s osu! leaderboard`, `osu-leaderboard-${msg.guild.name}.png`, page);
 
 				const guildPrefix = await getGuildPrefix(msg);
 
