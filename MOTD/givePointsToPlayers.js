@@ -9,7 +9,7 @@
 // players losing in the 5th round receive 50% of 16 points
 // the winner receives 100% of 16 points
 
-const { DBMOTDPoints } = require('../dbObjects');
+const { DBMOTDPoints, DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
 	assignQualifierPoints: async function (allPlayers) {
@@ -68,6 +68,17 @@ module.exports = {
 				maxQualifierPoints: allPlayers.length,
 				matchDate: today
 			});
+		}
+
+		const discordUser = await DBDiscordUsers.findOne({
+			where: { userId: player.userId }
+		});
+
+		if (discordUser) {
+			let now = new Date();
+			discordUser.osuMOTDlastRoundPlayed = now;
+			discordUser.osuMOTDerrorFirstOccurence = null;
+			discordUser.save();
 		}
 	}
 };

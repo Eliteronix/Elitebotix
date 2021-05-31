@@ -5,7 +5,7 @@ module.exports = {
 	name: 'osu-motd',
 	aliases: ['motd'],
 	description: 'Allows you to join the `Maps of the Day` competition!',
-	usage: '<server/register/unregister/mute/unmute>',
+	usage: '<server/register/unregister/mute/unmute> <#y/#mo/#w/#d/#h/#m>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -62,8 +62,99 @@ module.exports = {
 
 			if (discordUser && discordUser.osuMOTDRegistered) {
 				if (discordUser.osuMOTDMuted) {
-					sendMessage(msg, 'The `Maps of the Day` competition has already been muted for you.\nTo receive messages and pings again use `e!osu-motd unmute`.');
+					if (args[1]) {
+						let years = 0;
+						let months = 0;
+						let weeks = 0;
+						let days = 0;
+						let hours = 0;
+						let minutes = 0;
+
+						for (let i = 0; i < args.length; i++) {
+							let splice = true;
+							if (args[i].endsWith('y') && !isNaN(args[i].replace('y', ''))) {
+								years += parseInt(args[i].replace('y', ''));
+							} else if (args[i].endsWith('mo') && !isNaN(args[i].replace('mo', ''))) {
+								months += parseInt(args[i].replace('mo', ''));
+							} else if (args[i].endsWith('w') && !isNaN(args[i].replace('w', ''))) {
+								weeks += parseInt(args[i].replace('w', ''));
+							} else if (args[i].endsWith('d') && !isNaN(args[i].replace('d', ''))) {
+								days += parseInt(args[i].replace('d', ''));
+							} else if (args[i].endsWith('h') && !isNaN(args[i].replace('h', ''))) {
+								hours += parseInt(args[i].replace('h', ''));
+							} else if (args[i].endsWith('m') && !isNaN(args[i].replace('m', ''))) {
+								minutes += parseInt(args[i].replace('m', ''));
+							} else {
+								splice = false;
+							}
+
+							if (splice) {
+								args.splice(i, 1);
+								i--;
+							}
+						}
+						let now = new Date();
+						let date = new Date();
+						date.setUTCFullYear(date.getUTCFullYear() + years);
+						date.setUTCMonth(date.getUTCMonth() + months);
+						date.setUTCDate(date.getUTCDate() + weeks * 7 + days);
+						date.setUTCHours(date.getUTCHours() + hours);
+						date.setUTCMinutes(date.getUTCMinutes() + minutes);
+
+						if (now !== date) {
+							discordUser.osuMOTDmutedUntil = date;
+							discordUser.save();
+						}
+					}
+					sendMessage(msg, 'The `Maps of the Day` competition has already been muted for you - the time has been update if a period was specified.\nTo receive messages and pings again use `e!osu-motd unmute`.');
 				} else {
+					if (args[1]) {
+						let years = 0;
+						let months = 0;
+						let weeks = 0;
+						let days = 0;
+						let hours = 0;
+						let minutes = 0;
+
+						for (let i = 0; i < args.length; i++) {
+							let splice = true;
+							if (args[i].endsWith('y') && !isNaN(args[i].replace('y', ''))) {
+								years += parseInt(args[i].replace('y', ''));
+							} else if (args[i].endsWith('mo') && !isNaN(args[i].replace('mo', ''))) {
+								months += parseInt(args[i].replace('mo', ''));
+							} else if (args[i].endsWith('w') && !isNaN(args[i].replace('w', ''))) {
+								weeks += parseInt(args[i].replace('w', ''));
+							} else if (args[i].endsWith('d') && !isNaN(args[i].replace('d', ''))) {
+								days += parseInt(args[i].replace('d', ''));
+							} else if (args[i].endsWith('h') && !isNaN(args[i].replace('h', ''))) {
+								hours += parseInt(args[i].replace('h', ''));
+							} else if (args[i].endsWith('m') && !isNaN(args[i].replace('m', ''))) {
+								minutes += parseInt(args[i].replace('m', ''));
+							} else {
+								splice = false;
+							}
+
+							if (splice) {
+								args.splice(i, 1);
+								i--;
+							}
+						}
+						let now = new Date();
+						let date = new Date();
+						date.setUTCFullYear(date.getUTCFullYear() + years);
+						date.setUTCMonth(date.getUTCMonth() + months);
+						date.setUTCDate(date.getUTCDate() + weeks * 7 + days);
+						date.setUTCHours(date.getUTCHours() + hours);
+						date.setUTCMinutes(date.getUTCMinutes() + minutes);
+
+						if (now !== date) {
+							discordUser.osuMOTDmutedUntil = date;
+						} else {
+							date.setUTCDate(date.getUTCDate() + 7);
+							discordUser.osuMOTDmutedUntil = date;
+						}
+					}
+
 					discordUser.osuMOTDMuted = true;
 					discordUser.save();
 					sendMessage(msg, 'The `Maps of the Day` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use `e!osu-motd unmute`.');
@@ -80,10 +171,11 @@ module.exports = {
 			if (discordUser && discordUser.osuMOTDRegistered) {
 				if (discordUser.osuMOTDMuted) {
 					discordUser.osuMOTDMuted = false;
+					discordUser.osuMOTDmutedUntil = null;
 					discordUser.save();
 					sendMessage(msg, 'The `Maps of the Day` competition has been unmuted for you. You will start receiving messages again.');
 				} else {
-					sendMessage(msg, 'The `Maps of the Day` competition has never been muted for you.');
+					sendMessage(msg, 'The `Maps of the Day` competition was not muted for you.');
 				}
 			} else {
 				sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `e!osu-motd register`!');

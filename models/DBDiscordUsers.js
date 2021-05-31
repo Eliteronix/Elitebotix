@@ -66,6 +66,15 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		osuMOTDlastRoundPlayed: {
+			type: DataTypes.DATE,
+		},
+		osuMOTDerrorFirstOccurence: {
+			type: DataTypes.DATE,
+		},
+		osuMOTDmutedUntil: {
+			type: DataTypes.DATE,
+		},
 		paranoid: true,
 	});
 };

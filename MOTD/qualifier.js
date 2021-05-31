@@ -2,6 +2,7 @@ const osu = require('node-osu');
 const { knockoutLobby } = require('./knockoutLobby.js');
 const { assignQualifierPoints } = require('./givePointsToPlayers.js');
 const { getMods, humanReadable, createMOTDAttachment, pause } = require('../utils.js');
+const { DBDiscordUsers } = require('../dbObjects.js');
 
 module.exports = {
 	qualifier: async function (client, mappool, players) {
@@ -237,16 +238,34 @@ async function messageUserWithRetries(client, user, content, attachment) {
 		try {
 			if (attachment) {
 				await user.send(content, attachment)
-					.then(() => {
+					.then(async () => {
 						i = Infinity;
+
+						const discordUser = await DBDiscordUsers.findOne({
+							where: { userId: user.id }
+						});
+
+						if (discordUser && discordUser.osuMOTDerrorFirstOccurence !== null) {
+							discordUser.osuMOTDerrorFirstOccurence = null;
+							discordUser.save();
+						}
 					})
 					.catch(async (error) => {
 						throw (error);
 					});
 			} else {
 				await user.send(content)
-					.then(() => {
+					.then(async () => {
 						i = Infinity;
+
+						const discordUser = await DBDiscordUsers.findOne({
+							where: { userId: user.id }
+						});
+
+						if (discordUser && discordUser.osuMOTDerrorFirstOccurence !== null) {
+							discordUser.osuMOTDerrorFirstOccurence = null;
+							discordUser.save();
+						}
 					})
 					.catch(async (error) => {
 						throw (error);
@@ -257,6 +276,16 @@ async function messageUserWithRetries(client, user, content, attachment) {
 				if (i === 2) {
 					const channel = await client.channels.fetch('833803740162949191');
 					channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+
+					const discordUser = await DBDiscordUsers.findOne({
+						where: { userId: user.id }
+					});
+
+					if (discordUser && discordUser.osuMOTDerrorFirstOccurence === null) {
+						let now = new Date();
+						discordUser.osuMOTDerrorFirstOccurence = now;
+						discordUser.save();
+					}
 				} else {
 					await pause(5000);
 				}

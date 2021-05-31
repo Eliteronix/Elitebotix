@@ -38,8 +38,61 @@ module.exports = {
 						where: { userId: members[i].user.id, osuMOTDRegistered: true }
 					});
 
+					if (registeredPlayer && registeredPlayer.osuMOTDMuted && registeredPlayer.osuMOTDmutedUntil === null) {
+						let week = new Date();
+						week.setUTCDate(week.getUTCDate() + 7);
+						registeredPlayer.osuMOTDmutedUntil = week;
+						registeredPlayer.save();
+					}
+
 					//check for registration
 					if (registeredPlayer && !registeredPlayer.osuMOTDMuted) {
+
+						let now = new Date();
+						if (registeredPlayer.osuMOTDlastRoundPlayed === null) {
+							registeredPlayer.osuMOTDlastRoundPlayed = now;
+							registeredPlayer.save();
+						}
+
+						if (registeredPlayer.osuMOTDmutedUntil && registeredPlayer.osuMOTDmutedUntil < now) {
+							registeredPlayer.osuMOTDMuted = false;
+							registeredPlayer.osuMOTDmutedUntil = null;
+							registeredPlayer.save();
+							try {
+								members[i].user.send('The `Maps of the Day` competition is no longer muted for you.\nFeel free to mute it again by using `e!osu-motd mute <#mo/#w/#d/#h>`.');
+							} catch {
+								//Nothing
+							}
+						}
+
+						let seasonAgo = new Date();
+						seasonAgo.setUTCDate(seasonAgo.getUTCDate() - 90);
+						let weeksAgo = new Date();
+						weeksAgo.setUTCDate(weeksAgo.getUTCDate() - 14);
+						if (seasonAgo > registeredPlayer.osuMOTDlastRoundPlayed) {
+							registeredPlayer.osuMOTDRegistered = false;
+							registeredPlayer.osuMOTDlastRoundPlayed = null;
+							registeredPlayer.osuMOTDMuted = false;
+							registeredPlayer.osuMOTDerrorFirstOccurence = null;
+							registeredPlayer.osuMOTDmutedUntil = null;
+							registeredPlayer.save();
+							try {
+								members[i].user.send('You were removed from the `Maps of the Day` competition due to inactivity.\nFeel free to register again by using `e!osu-motd register` when you want to play.');
+							} catch {
+								//Nothing
+							}
+							continue;
+						} else if (registeredPlayer.osuMOTDerrorFirstOccurence && weeksAgo > registeredPlayer.osuMOTDerrorFirstOccurence) {
+							registeredPlayer.osuMOTDRegistered = false;
+							registeredPlayer.osuMOTDlastRoundPlayed = null;
+							registeredPlayer.osuMOTDMuted = false;
+							registeredPlayer.osuMOTDerrorFirstOccurence = null;
+							registeredPlayer.osuMOTDmutedUntil = null;
+							registeredPlayer.save();
+							continue;
+						}
+
+
 						//Assign MOTD role if not there yet
 						try {
 							if (!members[i].roles.cache.has(MOTDRole.id)) {
