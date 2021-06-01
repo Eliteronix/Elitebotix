@@ -355,7 +355,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 					const channel = await client.channels.fetch('833803740162949191');
 					channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 				} else {
-					await pause(5000);
+					await pause(2500);
 				}
 			} else {
 				i = Infinity;
