@@ -18,7 +18,7 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args) {
-		const guildPrefix = getGuildPrefix(msg);
+		const guildPrefix = await getGuildPrefix(msg);
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
@@ -76,7 +76,7 @@ async function getProfile(msg, username, mode, noLinkedAccount) {
 		.then(async (user) => {
 			updateOsuDetailsforUser(user, mode);
 
-			const guildPrefix = getGuildPrefix(msg);
+			const guildPrefix = await getGuildPrefix(msg);
 
 			let badgeAmount = await getOsuBadgeNumberById(user.id);
 
