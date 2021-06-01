@@ -17,7 +17,7 @@ module.exports = {
 			createQualifierResult(allPlayers[i], allPlayers.length, i + 1);
 		}
 	},
-	assignKnockoutPoints: async function (player, allPlayers, rank, round) {
+	assignKnockoutPoints: async function (client, player, allPlayers, rank, round) {
 		let today = new Date();
 		today.setUTCHours(18);
 		today.setUTCMinutes(0);
@@ -50,10 +50,17 @@ module.exports = {
 			qualifierDataset.knockoutRound = round;
 			qualifierDataset.maxQualifierPoints = maximumPointsFromQualis;
 			qualifierDataset.save();
+
+			try {
+				const user = await client.users.fetch(player.userId);
+				user.send(`You got a total of **${qualifierDataset.totalPoints} points** today! (${qualifierDataset.qualifierPoints} from Qualifiers | ${qualifierDataset.knockoutPoints} from Knockouts)`);
+			} catch {
+				//Nothing
+			}
 		} else {
 			let qualifierPoints = allPlayers.length - rank + 1;
 			let knockoutPoints = allPlayers.length * (parseInt(round) / 10 * 2);
-			DBMOTDPoints.create({
+			const motdPoints = await DBMOTDPoints.create({
 				userId: player.userId,
 				osuUserId: player.osuUserId,
 				osuRank: player.osuRank,
@@ -68,6 +75,13 @@ module.exports = {
 				maxQualifierPoints: allPlayers.length,
 				matchDate: today
 			});
+
+			try {
+				const user = await client.users.fetch(player.userId);
+				user.send(`You got a total of **${motdPoints.totalPoints} points** today! (${motdPoints.qualifierPoints} from Qualifiers | ${motdPoints.knockoutPoints} from Knockouts)`);
+			} catch {
+				//Nothing
+			}
 		}
 
 		const discordUser = await DBDiscordUsers.findOne({

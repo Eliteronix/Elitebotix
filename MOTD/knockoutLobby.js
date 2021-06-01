@@ -10,7 +10,7 @@ module.exports = {
 
 		//Case of just one player
 		if (players.length === 1) {
-			assignKnockoutPoints(players[0], players, 1, 11);
+			assignKnockoutPoints(client, players[0], players, 1, 11);
 			return await messageUserWithRetries(client, users[0], 'You will win your lobby by default.\nCome back tomorrow for another competition!');
 		}
 
@@ -114,7 +114,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 						}
 					}
 				} else {
-					assignKnockoutPoints(players[i], startingPlayers, players.length, mapIndex);
+					assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
 				}
 				await messageUserWithRetries(client, users[i], `You failed to submit a valid score for the last knockout map and have been removed from todays competition.\nReason for the knockout: ${results[i].pp}\nCome back tomorrow for another round.`);
 				if (knockedOutPlayerNames === '') {
@@ -135,7 +135,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 		//Remove as many players as needed if there weren't enough players inactive
 		if (knockedOutPlayers < knockoutNumber) {
 			for (let i = 0; i < players.length && knockedOutPlayers < knockoutNumber; i++) {
-				assignKnockoutPoints(players[i], startingPlayers, players.length, mapIndex);
+				assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
 				await messageUserWithRetries(client, users[i], 'You were knocked out by score. Thank you for playing and come back tomorrow for another round!');
 				if (knockedOutPlayerNames === '') {
 					knockedOutPlayerNames = `\`${players[i].osuName}\``;
@@ -162,7 +162,7 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 
 		//Message the winner if only one person is left
 		if (players.length === 1) {
-			assignKnockoutPoints(players[0], startingPlayers, players.length, mapIndex + 1);
+			assignKnockoutPoints(client, players[0], startingPlayers, players.length, mapIndex + 1);
 			return await messageUserWithRetries(client, users[0], 'All other players have been knocked out of todays competition which means **you have won!**\nCongratulations, thank you for playing and come back tomorrow for another round.');
 		}
 
