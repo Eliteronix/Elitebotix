@@ -67,8 +67,8 @@ module.exports = {
 
 						let seasonAgo = new Date();
 						seasonAgo.setUTCDate(seasonAgo.getUTCDate() - 90);
-						let weeksAgo = new Date();
-						weeksAgo.setUTCDate(weeksAgo.getUTCDate() - 14);
+						let weekAgo = new Date();
+						weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
 						if (seasonAgo > registeredPlayer.osuMOTDlastRoundPlayed) {
 							registeredPlayer.osuMOTDRegistered = false;
 							registeredPlayer.osuMOTDlastRoundPlayed = null;
@@ -82,7 +82,7 @@ module.exports = {
 								//Nothing
 							}
 							continue;
-						} else if (registeredPlayer.osuMOTDerrorFirstOccurence && weeksAgo > registeredPlayer.osuMOTDerrorFirstOccurence) {
+						} else if (registeredPlayer.osuMOTDerrorFirstOccurence && weekAgo > registeredPlayer.osuMOTDerrorFirstOccurence) {
 							registeredPlayer.osuMOTDRegistered = false;
 							registeredPlayer.osuMOTDlastRoundPlayed = null;
 							registeredPlayer.osuMOTDMuted = false;
