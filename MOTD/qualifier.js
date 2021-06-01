@@ -287,7 +287,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 						discordUser.save();
 					}
 				} else {
-					await pause(5000);
+					await pause(2500);
 				}
 			} else {
 				i = Infinity;
