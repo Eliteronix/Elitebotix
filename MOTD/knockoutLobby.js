@@ -3,7 +3,7 @@ const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause } = req
 const { assignKnockoutPoints } = require('./givePointsToPlayers.js');
 
 module.exports = {
-	knockoutLobby: async function (client, mappool, lobbyNumber, players, users, isFirstRound) {
+	knockoutLobby: async function (client, bancho, mappool, lobbyNumber, players, users, isFirstRound) {
 		//Map [0] has been played already
 		//Send message about which lobby the player is in and who he / she is against
 		await sendLobbyMessages(client, lobbyNumber, players, users);
@@ -16,8 +16,21 @@ module.exports = {
 
 		let startingPlayers = players;
 
+		console.log('Connecting now');
+
+		await bancho.connect().then(async () => {
+			console.log('Connected');
+
+			const multiplayerLobby = await bancho.createLobby(`MOTD: (Lobby) vs (#${lobbyNumber})`);
+
+			console.log(multiplayerLobby);
+
+			bancho.disconnect();
+		}).catch(console.error);
+
+		console.log('The end has been reached');
 		//Start the first knockout map
-		knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, 1, isFirstRound);
+		// knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, 1, isFirstRound);
 	}
 };
 

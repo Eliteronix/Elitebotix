@@ -6,11 +6,11 @@ const { createLeaderboard } = require('./createLeaderboard');
 const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
-	initializeMOTD: async function (client) {
+	initializeMOTD: async function (client, bancho) {
 		//Start everything in that minute
 		const today = new Date();
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'Live' && today.getUTCHours() === 18 && today.getUTCMinutes() === 0) {
+		if (process.env.SERVER === 'Dev' && today.getUTCHours() === 21 && today.getUTCMinutes() === 36) {
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -128,10 +128,10 @@ module.exports = {
 					const allPlayers = await getPlayers(client);
 
 					// Trigger Mappool creation for the different brackets
-					setMapsForBracket(client, 8, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613', allPlayers[0]);
-					setMapsForBracket(client, 6.6, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813', '833313704136540171', allPlayers[1]);
-					setMapsForBracket(client, 6.2, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890', '833313763188801578', allPlayers[2]);
-					setMapsForBracket(client, 5.8, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752', '833313827172646912', allPlayers[3]);
+					setMapsForBracket(client, bancho, 8, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613', allPlayers[0]);
+					setMapsForBracket(client, bancho, 6.6, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813', '833313704136540171', allPlayers[1]);
+					setMapsForBracket(client, bancho, 6.2, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890', '833313763188801578', allPlayers[2]);
+					setMapsForBracket(client, bancho, 5.8, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752', '833313827172646912', allPlayers[3]);
 				})
 				.catch(e => {
 					console.log(e);
@@ -231,7 +231,7 @@ async function getPlayers(client) {
 			if (registeredUsers[i].osuUserId) {
 				// eslint-disable-next-line no-undef
 				if (process.env.SERVER === 'Dev') {
-					for (let j = 0; j < 17; j++) {
+					for (let j = 0; j < 2; j++) {
 						// topBracketPlayers.push(registeredUsers[i]);
 						// middleBracketPlayers.push(registeredUsers[i]);
 						lowerBracketPlayers.push(registeredUsers[i]);

@@ -36,6 +36,9 @@ const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask } =
 //Get MOTD/getMapsOnTime
 const { initializeMOTD } = require('./MOTD/initializeMOTD');
 
+const Banchojs = require('bancho.js');
+// eslint-disable-next-line no-undef
+const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1 });
 
 //login with the Discord client using the Token from the .env file
 // eslint-disable-next-line no-undef
@@ -71,7 +74,7 @@ client.on('messageReactionAdd', reactionAdded);
 
 client.on('messageReactionRemove', reactionRemoved);
 
-client.on('message', gotMessage);
+client.on('message', msg => gotMessage(msg, bancho));
 
 client.on('voiceStateUpdate', voiceStateUpdate);
 
@@ -79,6 +82,6 @@ client.on('guildCreate', guildCreate);
 
 client.setInterval(() => executeNextProcessQueueTask(client), 300);
 
-client.setInterval(() => initializeMOTD(client), 60000);
+client.setInterval(() => initializeMOTD(client, bancho), 60000);
 
 client.setInterval(() => refreshOsuRank(), 600000);

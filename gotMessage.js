@@ -6,7 +6,7 @@ const { closest } = require('fastest-levenshtein');
 const { Permissions } = require('discord.js');
 const { DBElitiriCupSignUp } = require('./dbObjects');
 
-module.exports = async function (msg) {
+module.exports = async function (msg, bancho) {
 	//Create a collection for the commands
 	msg.client.commands = new Discord.Collection();
 
@@ -52,6 +52,7 @@ module.exports = async function (msg) {
 			}
 		}
 	}
+
 	//Update user activity
 	updateServerUserActivity(msg);
 
@@ -272,7 +273,8 @@ module.exports = async function (msg) {
 		setTimeout(() => timestamps.delete(msg.author.id), cooldownAmount);
 
 		try {
-			command.execute(msg, args, prefixCommand);
+			let additionalObjects = [bancho];
+			command.execute(msg, args, additionalObjects);
 		} catch (error) {
 			console.error(error);
 			const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
