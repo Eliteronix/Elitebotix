@@ -21,26 +21,30 @@ module.exports = {
 		await bancho.connect().then(async () => {
 			console.log('Connected');
 
-			const multiplayerChannel = await bancho.createLobby(`MOTD: (Lobby) vs (#${lobbyNumber})`);
+			const channel = await bancho.createLobby(`MOTD: (Lobby) vs (#${lobbyNumber})`);
+			const lobby = channel.lobby;
 
-			const password = Math.random().toString(36);
+			const password = Math.random().toString(36).substring(8);
 
-			await multiplayerChannel.lobby.setPassword(password);
-
-			const multiLink = `osu://mp/${multiplayerChannel.lobby.id}/${password}`;
+			await Promise.all([lobby.setPassword(password), lobby.setMap(mappool[1].id)]);
+			console.log('Multiplayer link: https://osu.ppy.sh/mp/' + lobby.id);
 
 			for (let i = 0; i < users.length; i++) {
-				await multiplayerChannel.sendMessage(`!mp invite ${players[i].osuUserId}`);
-				console.log(`!mp invite ${players[i].osuUserId}`);
-				// await multiplayerChannel.lobby.invitePlayer(players[i].osuUserId);
-				await messageUserWithRetries(client, users[i], `Your Knockoutlobby has been created.\nPlease join using this link: <${multiLink}>`);
+				await channel.sendMessage(`!mp invite #${players[i].osuUserId}`);
+				await messageUserWithRetries(client, users[i], `Your Knockoutlobby has been created.\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 			}
 
-			await multiplayerChannel.lobby.setMap(mappool[1].id);
+			lobby.on('playerJoined', (obj) => {
+				console.log('playerJoined');
+				if (obj.player.user.isClient())
+					lobby.setHost('#' + obj.player.user.id);
+			});
+			lobby.on('matchFinished', () => {
+				console.log('YEP');
+			});
 
-			console.log(multiplayerChannel);
-
-			bancho.disconnect();
+			// await lobby.closeLobby();
+			// await bancho.disconnect();
 		}).catch(console.error);
 		//Start the first knockout map
 		// knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, 1, isFirstRound);
