@@ -36,7 +36,7 @@ module.exports = {
 			const bigBlack = await osuApi.getBeatmaps({ m: 0, b: '131891' });
 
 			while (possibleNMBeatmaps.length < 9) {
-				possibleNMBeatmaps.push(bigBlack);
+				possibleNMBeatmaps.push(bigBlack[0]);
 			}
 		}
 

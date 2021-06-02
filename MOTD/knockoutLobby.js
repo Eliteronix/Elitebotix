@@ -21,26 +21,27 @@ module.exports = {
 		await bancho.connect().then(async () => {
 			console.log('Connected');
 
-			const multiplayerLobby = await bancho.createLobby(`MOTD: (Lobby) vs (#${lobbyNumber})`);
+			const multiplayerChannel = await bancho.createLobby(`MOTD: (Lobby) vs (#${lobbyNumber})`);
 
 			const password = Math.random().toString(36);
 
-			await multiplayerLobby.setPassword(password);
+			await multiplayerChannel.lobby.setPassword(password);
 
-			const multiLink = `osu://mp/${multiplayerLobby.id}/${password}`;
+			const multiLink = `osu://mp/${multiplayerChannel.lobby.id}/${password}`;
 
 			for (let i = 0; i < users.length; i++) {
+				await multiplayerChannel.sendMessage(`!mp invite ${players[i].osuUserId}`);
+				console.log(`!mp invite ${players[i].osuUserId}`);
+				// await multiplayerChannel.lobby.invitePlayer(players[i].osuUserId);
 				await messageUserWithRetries(client, users[i], `Your Knockoutlobby has been created.\nPlease join using this link: <${multiLink}>`);
 			}
 
-			await multiplayerLobby.setMap(mappool[1].id);
+			await multiplayerChannel.lobby.setMap(mappool[1].id);
 
-			console.log(multiplayerLobby);
+			console.log(multiplayerChannel);
 
 			bancho.disconnect();
 		}).catch(console.error);
-
-		console.log('The end has been reached');
 		//Start the first knockout map
 		// knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, 1, isFirstRound);
 	}
