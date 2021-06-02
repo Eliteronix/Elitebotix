@@ -23,6 +23,18 @@ module.exports = {
 
 			const multiplayerLobby = await bancho.createLobby(`MOTD: (Lobby) vs (#${lobbyNumber})`);
 
+			const password = Math.random().toString(36);
+
+			await multiplayerLobby.setPassword(password);
+
+			const multiLink = `osu://mp/${multiplayerLobby.id}/${password}`;
+
+			for (let i = 0; i < users.length; i++) {
+				await messageUserWithRetries(client, users[i], `Your Knockoutlobby has been created.\nPlease join using this link: <${multiLink}>`);
+			}
+
+			await multiplayerLobby.setMap(mappool[1].id);
+
 			console.log(multiplayerLobby);
 
 			bancho.disconnect();
