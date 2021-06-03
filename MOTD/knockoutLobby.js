@@ -16,15 +16,24 @@ module.exports = {
 
 		let startingPlayers = players;
 
-		let startingPlayerIds = [];
+		let playerIds = [];
 		for (let i = 0; i < startingPlayers.length; i++) {
-			startingPlayerIds.push(startingPlayers[i].osuUserId);
+			playerIds.push(startingPlayers[i].osuUserId);
 		}
 
-		console.log('Connecting now');
+		let mapIndex = 1;
+		//Increases knockoutmap number to start/continue with harder maps and give more points
+		while (12 - players.length > mapIndex) {
+			mapIndex++;
+		}
+
+		let doubleTime = '';
+		if (mapIndex === 4 || mapIndex === 8) {
+			doubleTime = ' DT';
+		}
 
 		await bancho.connect().then(async () => {
-			console.log('Connected');
+			let lobbyStatus = 'Joining phase';
 
 			const channel = await bancho.createLobby(`MOTD: (Lobby) vs (#${lobbyNumber})`);
 			const lobby = channel.lobby;
@@ -32,34 +41,176 @@ module.exports = {
 			const password = Math.random().toString(36).substring(8);
 
 			await Promise.all([lobby.setPassword(password),]);
-			await channel.sendMessage(`!mp map ${mappool[1].id} 0`);
-			await channel.sendMessage('!mp mods FreeMod');
+			await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
+			await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
 
 			for (let i = 0; i < users.length; i++) {
 				await channel.sendMessage(`!mp invite #${players[i].osuUserId}`);
 				await messageUserWithRetries(client, users[i], `Your Knockoutlobby has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 			}
 
-			await channel.sendMessage('!mp timer 300');
+			await channel.sendMessage('!mp timer 180');
 
-			channel.on('message', (msg) => {
-				console.log(msg.message);
-
+			channel.on('message', async (msg) => {
 				if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
 					//Banchobot countdown finished
-					console.log('The bots countdown has finished');
+					if (lobbyStatus === 'Joining phase') {
+						lobbyStatus = 'Waiting for start';
+
+						await channel.sendMessage('Everyone please ready up!');
+						await channel.sendMessage('!mp timer 120');
+					} else if (lobbyStatus === 'Waiting for start') {
+						await channel.sendMessage('!mp start 10');
+
+						lobbyStatus === 'Map being played';
+					}
 				}
 			});
-			lobby.on('playerJoined', (obj) => {
-				if (!startingPlayerIds.includes(obj.player.user.id.toString())) {
+			lobby.on('playerJoined', async (obj) => {
+				if (!playerIds.includes(obj.player.user.id.toString())) {
 					channel.sendMessage(`!mp kick #${obj.player.user.id}`);
+				} else if (lobbyStatus === 'Joining phase') {
+					let allPlayersJoined = true;
+					for (let i = 0; i < players.length && allPlayersJoined; i++) {
+						if (!lobby.playersById[players[i].osuUserId.toString()]) {
+							allPlayersJoined = false;
+						}
+					}
+					if (allPlayersJoined) {
+						lobbyStatus = 'Waiting for start';
+
+						await channel.sendMessage('Everyone please ready up!');
+						await channel.sendMessage('!mp timer 120');
+					}
 				}
 			});
-			lobby.on('allPlayersReady', () => {
-				console.log('allPlayersReady');
+			lobby.on('allPlayersReady', async () => {
+				if (lobbyStatus === 'Waiting for start') {
+					await channel.sendMessage('!mp start 10');
+
+					lobbyStatus === 'Map being played';
+				}
 			});
-			lobby.on('matchFinished', (scores) => {
-				console.log(scores);
+			lobby.on('matchFinished', async (results) => {
+				let knockedOutPlayers = 0;
+				let knockedOutPlayerNames = '';
+				let knockedOutPlayerIds = [];
+				//Remove players that didn't play
+				for (let i = 0; i < players.length; i++) {
+					let submittedScore = false;
+					for (let j = 0; j < results.length; j++) {
+						if (results[j].player.user.id.toString() === players[i].osuUserId) {
+							submittedScore = true;
+						}
+					}
+
+					if (!submittedScore) {
+						console.log(players[i].osuName, 'Didn\'t submit a score');
+						knockedOutPlayers++;
+						knockedOutPlayerIds.push(players[i].osuUserId);
+						if (knockedOutPlayerNames === '') {
+							knockedOutPlayerNames = `${players[i].osuName}`;
+						} else {
+							knockedOutPlayerNames = `${knockedOutPlayerNames}, ${players[i].osuName}`;
+						}
+
+						if (!isFirstRound) {
+							assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
+						}
+						players.splice(i, 1);
+						users.splice(i, 1);
+						i--;
+					}
+				}
+
+				quicksort(results);
+
+				const playersUsers = sortPlayersByResultsBanchojs(results, players, users);
+
+				players = playersUsers[0];
+				users = playersUsers[1];
+
+				playerIds = [];
+				for (let i = 0; i < players.length; i++) {
+					playerIds.push(players[i].osuUserId);
+				}
+
+				//Set array for how many players should get through maximum
+				let expectedPlayers = [];
+				expectedPlayers.push(16); //Map [0] Qualifiers -> 16
+				expectedPlayers.push(14); //Map [1] 16 -> 14
+				expectedPlayers.push(12); //Map [2] 14 -> 12
+				expectedPlayers.push(10); //Map [3] 12 -> 10
+				expectedPlayers.push(8); //Map [4] 10 -> 8 --DT
+				expectedPlayers.push(6); //Map [5] 8 -> 6
+				expectedPlayers.push(5); //Map [6] 6 -> 5
+				expectedPlayers.push(4); //Map [7] 5 -> 4
+				expectedPlayers.push(3); //Map [8] 4 -> 3 --DT
+				expectedPlayers.push(2); //Map [9] 3 -> 2
+				expectedPlayers.push(1); //Map [10] 2 -> 1
+
+				//Calculate the amount of knockouts needed
+				let knockoutNumber = expectedPlayers[mapIndex - 1] - expectedPlayers[mapIndex];
+				//Set the amount to 1 if less players are in the lobby
+				if (players.length < expectedPlayers[mapIndex - 1]) {
+					knockoutNumber = 1;
+				}
+
+				//Remove as many players as needed if there weren't enough players inactive
+				if (knockedOutPlayers < knockoutNumber) {
+					for (let i = 0; i < players.length && knockedOutPlayers < knockoutNumber; i++) {
+						console.log(players[i].osuName, 'Was too bad');
+						assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
+						if (knockedOutPlayerNames === '') {
+							knockedOutPlayerNames = `\`${players[i].osuName}\``;
+						} else {
+							knockedOutPlayerNames = `${knockedOutPlayerNames}, \`${players[i].osuName}\``;
+						}
+						knockedOutPlayers++;
+						knockedOutPlayerIds.push(players[i].osuUserId);
+						results.splice(i, 1);
+						players.splice(i, 1);
+						users.splice(i, 1);
+						i--;
+					}
+				}
+
+				await channel.sendMessage(`Knocked out players this round: ${knockedOutPlayerNames}`);
+				await pause(15000);
+
+				for (let i = 0; i < knockedOutPlayerIds.length; i++) {
+					await channel.sendMessage(`!mp kick #${knockedOutPlayerIds[i]}`);
+				}
+
+				if (players.length === 1) {
+					lobbyStatus = 'Lobby finished';
+
+					await channel.sendMessage(`Congratulations ${players[0].osuName}! You won todays knockout lobby. Come back tomorrow for another round!`);
+					await pause(30000);
+					await channel.sendMessage('!mp close');
+				} else if (players.length === 0) {
+					lobbyStatus = 'Lobby finished';
+					await channel.sendMessage('!mp close');
+				} else {
+					mapIndex++;
+					//Increases knockoutmap number to start/continue with harder maps and give more points
+					while (12 - players.length > mapIndex) {
+						mapIndex++;
+					}
+
+					doubleTime = '';
+					if (mapIndex === 4 || mapIndex === 8) {
+						doubleTime = ' DT';
+					}
+
+					await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
+					await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
+
+					lobbyStatus = 'Waiting for start';
+					await channel.sendMessage('!mp timer 120');
+
+					isFirstRound = false;
+				}
 			});
 
 			// await lobby.closeLobby();
@@ -320,6 +471,28 @@ function sortPlayersByResults(results, playersInput, usersInput) {
 	for (let i = 0; i < results.length; i++) {
 		for (let j = 0; j < playersInput.length; j++) {
 			if (results[i].user.id === playersInput[j].osuUserId) {
+				playersOutput.push(playersInput[j]);
+				usersOutput.push(usersInput[j]);
+				//Close inner loop
+				j = playersInput.length;
+			}
+		}
+	}
+
+	let output = [];
+	output.push(playersOutput);
+	output.push(usersOutput);
+
+	return output;
+}
+
+function sortPlayersByResultsBanchojs(results, playersInput, usersInput) {
+	let playersOutput = [];
+	let usersOutput = [];
+
+	for (let i = 0; i < results.length; i++) {
+		for (let j = 0; j < playersInput.length; j++) {
+			if (results[i].player.user.id.toString() === playersInput[j].osuUserId) {
 				playersOutput.push(playersInput[j]);
 				usersOutput.push(usersInput[j]);
 				//Close inner loop
