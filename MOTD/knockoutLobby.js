@@ -16,6 +16,11 @@ module.exports = {
 
 		let startingPlayers = players;
 
+		let startingPlayerIds = [];
+		for (let i = 0; i < startingPlayers.length; i++) {
+			startingPlayerIds.push(startingPlayers[i].osuUserId);
+		}
+
 		console.log('Connecting now');
 
 		await bancho.connect().then(async () => {
@@ -29,17 +34,24 @@ module.exports = {
 			await Promise.all([lobby.setPassword(password),]);
 			await channel.sendMessage(`!mp map ${mappool[1].id} 0`);
 			await channel.sendMessage('!mp mods FreeMod');
-			console.log('Multiplayer link: https://osu.ppy.sh/mp/' + lobby.id);
 
 			for (let i = 0; i < users.length; i++) {
 				await channel.sendMessage(`!mp invite #${players[i].osuUserId}`);
-				await messageUserWithRetries(client, users[i], `Your Knockoutlobby has been created.\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+				await messageUserWithRetries(client, users[i], `Your Knockoutlobby has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 			}
+
+			await channel.sendMessage('!mp timer 300');
+
 			channel.on('message', (msg) => {
-				console.log(msg);
+				console.log(msg.message);
+
+				if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
+					//Banchobot countdown finished
+					console.log('The bots countdown has finished');
+				}
 			});
 			lobby.on('playerJoined', (obj) => {
-				if (!startingPlayers.includes(obj.player.user.id)) {
+				if (!startingPlayerIds.includes(obj.player.user.id.toString())) {
 					channel.sendMessage(`!mp kick #${obj.player.user.id}`);
 				}
 			});

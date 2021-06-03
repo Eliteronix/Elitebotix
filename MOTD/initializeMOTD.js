@@ -10,7 +10,7 @@ module.exports = {
 		//Start everything in that minute
 		const today = new Date();
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'Dev' && today.getUTCHours() === 19 && today.getUTCMinutes() === 45) {
+		if (process.env.SERVER === 'Dev' && today.getUTCHours() === 10 && today.getUTCMinutes() === 33) {
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
