@@ -26,21 +26,28 @@ module.exports = {
 
 			const password = Math.random().toString(36).substring(8);
 
-			await Promise.all([lobby.setPassword(password), lobby.setMap(mappool[1].id)]);
+			await Promise.all([lobby.setPassword(password),]);
+			await channel.sendMessage(`!mp map ${mappool[1].id} 0`);
+			await channel.sendMessage('!mp mods FreeMod');
 			console.log('Multiplayer link: https://osu.ppy.sh/mp/' + lobby.id);
 
 			for (let i = 0; i < users.length; i++) {
 				await channel.sendMessage(`!mp invite #${players[i].osuUserId}`);
 				await messageUserWithRetries(client, users[i], `Your Knockoutlobby has been created.\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 			}
-
-			lobby.on('playerJoined', (obj) => {
-				console.log('playerJoined');
-				if (obj.player.user.isClient())
-					lobby.setHost('#' + obj.player.user.id);
+			channel.on('message', (msg) => {
+				console.log(msg);
 			});
-			lobby.on('matchFinished', () => {
-				console.log('YEP');
+			lobby.on('playerJoined', (obj) => {
+				if (!startingPlayers.includes(obj.player.user.id)) {
+					channel.sendMessage(`!mp kick #${obj.player.user.id}`);
+				}
+			});
+			lobby.on('allPlayersReady', () => {
+				console.log('allPlayersReady');
+			});
+			lobby.on('matchFinished', (scores) => {
+				console.log(scores);
 			});
 
 			// await lobby.closeLobby();
