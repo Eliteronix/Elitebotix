@@ -192,9 +192,15 @@ module.exports = {
 					await channel.sendMessage('!mp close');
 				} else {
 					mapIndex++;
+					let skipped = false;
 					//Increases knockoutmap number to start/continue with harder maps and give more points
 					while (12 - players.length > mapIndex) {
 						mapIndex++;
+						skipped = true;
+					}
+
+					if (skipped) {
+						await channel.sendMessage('One or more maps have been skipped due to a lower amount of players.');
 					}
 
 					doubleTime = '';
