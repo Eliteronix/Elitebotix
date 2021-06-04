@@ -105,7 +105,6 @@ module.exports = {
 					}
 
 					if (!submittedScore) {
-						console.log(players[i].osuName, 'Didn\'t submit a score');
 						knockedOutPlayers++;
 						knockedOutPlayerIds.push(players[i].osuUserId);
 						if (knockedOutPlayerNames === '') {
@@ -159,7 +158,6 @@ module.exports = {
 				//Remove as many players as needed if there weren't enough players inactive
 				if (knockedOutPlayers < knockoutNumber) {
 					for (let i = 0; i < players.length && knockedOutPlayers < knockoutNumber; i++) {
-						console.log(players[i].osuName, 'Was too bad');
 						assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
 						if (knockedOutPlayerNames === '') {
 							knockedOutPlayerNames = `\`${players[i].osuName}\``;
@@ -186,6 +184,7 @@ module.exports = {
 					lobbyStatus = 'Lobby finished';
 
 					await channel.sendMessage(`Congratulations ${players[0].osuName}! You won todays knockout lobby. Come back tomorrow for another round!`);
+					assignKnockoutPoints(client, players[0], startingPlayers, players.length, mapIndex + 1);
 					await pause(30000);
 					await channel.sendMessage('!mp close');
 				} else if (players.length === 0) {
