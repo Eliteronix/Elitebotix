@@ -59,7 +59,7 @@ module.exports = {
 			}
 		} else {
 			let qualifierPoints = allPlayers.length - rank + 1;
-			let knockoutPoints = allPlayers.length * (parseInt(round) / 10 * 2);
+			let knockoutPoints = Math.round(allPlayers.length * (parseInt(round) / 10 * 2));
 			const motdPoints = await DBMOTDPoints.create({
 				userId: player.userId,
 				osuUserId: player.osuUserId,

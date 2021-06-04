@@ -10,7 +10,7 @@ module.exports = {
 		//Start everything in that minute
 		const today = new Date();
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'Dev' && today.getUTCHours() === 21 && today.getUTCMinutes() === 15) {
+		if (process.env.SERVER === 'Dev' && today.getUTCHours() === 20 && today.getUTCMinutes() === 45) {
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -231,7 +231,7 @@ async function getPlayers(client) {
 			if (registeredUsers[i].osuUserId) {
 				// eslint-disable-next-line no-undef
 				if (process.env.SERVER === 'Dev') {
-					for (let j = 0; j < 2; j++) {
+					for (let j = 0; j < 1; j++) {
 						// topBracketPlayers.push(registeredUsers[i]);
 						// middleBracketPlayers.push(registeredUsers[i]);
 						lowerBracketPlayers.push(registeredUsers[i]);
