@@ -1,6 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-const Banchojs = require('bancho.js');
 const { getGuildPrefix, getOsuBadgeNumberById } = require('../utils');
 
 module.exports = {
@@ -18,7 +17,9 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, additionalObjects) {
+		const bancho = additionalObjects[0];
+
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -38,20 +39,20 @@ module.exports = {
 
 		if (args[0] === 'connect') {
 			args.shift();
-			connect(msg, args, osuApi, discordUser, guildPrefix);
+			connect(msg, args, osuApi, bancho, discordUser, guildPrefix);
 		} else if (args[0] === 'current') {
 			current(msg, osuApi, discordUser, guildPrefix);
 		} else if (args[0] === 'disconnect') {
 			disconnect(msg, discordUser, guildPrefix);
 		} else if (args[0] === 'verify') {
-			verify(msg, args, osuApi, discordUser, guildPrefix);
+			verify(msg, args, osuApi, bancho, discordUser, guildPrefix);
 		} else {
-			connect(msg, args, osuApi, discordUser, guildPrefix);
+			connect(msg, args, osuApi, bancho, discordUser, guildPrefix);
 		}
 	},
 };
 
-async function connect(msg, args, osuApi, discordUser, guildPrefix) {
+async function connect(msg, args, osuApi, bancho, discordUser, guildPrefix) {
 	if (args[0]) {
 		if (args[1]) {
 			args.shift();
@@ -85,28 +86,34 @@ async function connect(msg, args, osuApi, discordUser, guildPrefix) {
 					discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 					discordUser.save();
 
-					// eslint-disable-next-line no-undef
-					const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
-					bancho.connect().then(async () => {
-						const IRCUser = bancho.getUser(osuUser.name);
-						IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
-						bancho.disconnect();
-						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
-					}).catch(console.error);
+					try {
+						await bancho.connect();
+					} catch (error) {
+						if (!error.message === 'Already connected/connecting') {
+							throw (error);
+						}
+					}
+
+					const IRCUser = bancho.getUser(osuUser.name);
+					IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
+					processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 				} else {
 					const processingMessage = await msg.channel.send('Processing...');
 					const verificationCode = Math.random().toString(36).substring(8);
 					let badges = await getOsuBadgeNumberById(osuUser.id);
 					DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuName: osuUser.name, osuBadges: badges, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
 
-					// eslint-disable-next-line no-undef
-					const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
-					bancho.connect().then(async () => {
-						const IRCUser = bancho.getUser(osuUser.name);
-						IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
-						bancho.disconnect();
-						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
-					}).catch(console.error);
+					try {
+						await bancho.connect();
+					} catch (error) {
+						if (!error.message === 'Already connected/connecting') {
+							throw (error);
+						}
+					}
+
+					const IRCUser = bancho.getUser(osuUser.name);
+					IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
+					processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 				}
 			})
 			.catch(err => {
@@ -174,7 +181,7 @@ async function disconnect(msg, discordUser, guildPrefix) {
 	}
 }
 
-async function verify(msg, args, osuApi, discordUser, guildPrefix) {
+async function verify(msg, args, osuApi, bancho, discordUser, guildPrefix) {
 	if (!args[1]) {
 		if (discordUser) {
 			if (discordUser.osuVerified) {
@@ -208,14 +215,17 @@ async function verify(msg, args, osuApi, discordUser, guildPrefix) {
 							discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 							discordUser.save();
 
-							// eslint-disable-next-line no-undef
-							const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC });
-							bancho.connect().then(async () => {
-								const IRCUser = bancho.getUser(osuUser.name);
-								IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
-								bancho.disconnect();
-								processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
-							}).catch(console.error);
+							try {
+								await bancho.connect();
+							} catch (error) {
+								if (!error.message === 'Already connected/connecting') {
+									throw (error);
+								}
+							}
+
+							const IRCUser = bancho.getUser(osuUser.name);
+							IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
+							processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 						})
 						.catch(err => {
 							if (err.message === 'Not found') {

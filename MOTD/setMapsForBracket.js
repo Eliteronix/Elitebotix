@@ -4,7 +4,7 @@ const { humanReadable } = require('../utils.js');
 const { qualifier } = require('./qualifier.js');
 
 module.exports = {
-	setMapsForBracket: async function (client, SRLimit, NMBeatmaps, DTBeatmaps, upperRank, lowerRank, channelID, roleId, players) {
+	setMapsForBracket: async function (client, bancho, bracketName, SRLimit, NMBeatmaps, DTBeatmaps, upperRank, lowerRank, channelID, roleId, players) {
 
 		let possibleNMBeatmaps = [];
 		let possibleDTBeatmaps = [];
@@ -36,7 +36,7 @@ module.exports = {
 			const bigBlack = await osuApi.getBeatmaps({ m: 0, b: '131891' });
 
 			while (possibleNMBeatmaps.length < 9) {
-				possibleNMBeatmaps.push(bigBlack);
+				possibleNMBeatmaps.push(bigBlack[0]);
 			}
 		}
 
@@ -140,6 +140,6 @@ module.exports = {
 		}
 
 		//Start qualifier process
-		qualifier(client, mappoolInOrder, players);
+		qualifier(client, bancho, bracketName, mappoolInOrder, players);
 	}
 };

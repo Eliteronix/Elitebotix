@@ -5,7 +5,7 @@ const { getMods, humanReadable, createMOTDAttachment, pause } = require('../util
 const { DBDiscordUsers } = require('../dbObjects.js');
 
 module.exports = {
-	qualifier: async function (client, mappool, players) {
+	qualifier: async function (client, bancho, bracketName, mappool, players) {
 		//Return if there aren't any players
 		if (players.length === 0) {
 			return;
@@ -27,7 +27,7 @@ module.exports = {
 
 		// Catch case of less than 17 players
 		if (players.length < 17) {
-			return knockoutLobby(client, mappool, 1, players, users, true);
+			return knockoutLobby(client, bancho, bracketName, mappool, 1, players, users, true);
 		}
 
 		// Catch case of qualifiers actually being played
@@ -73,12 +73,12 @@ module.exports = {
 			}
 
 			//Divide sorted players into knockout lobbies
-			divideIntoGroups(client, mappool, 1, players, users);
+			divideIntoGroups(client, bancho, bracketName, mappool, 1, players, users);
 		}, 1000 * 60 * 10);
 	}
 };
 
-function divideIntoGroups(client, mappool, lobbyNumber, players, users) {
+function divideIntoGroups(client, bancho, bracketName, mappool, lobbyNumber, players, users) {
 	let thisLobbyPlayers = [];
 	let otherPlayers = [];
 
@@ -95,10 +95,10 @@ function divideIntoGroups(client, mappool, lobbyNumber, players, users) {
 		}
 	}
 
-	knockoutLobby(client, mappool, lobbyNumber, thisLobbyPlayers, thisLobbyUsers, false);
+	knockoutLobby(client, bancho, bracketName, mappool, lobbyNumber, thisLobbyPlayers, thisLobbyUsers, false);
 
 	if (otherPlayers.length > 0) {
-		divideIntoGroups(client, mappool, lobbyNumber + 1, otherPlayers, otherUsers);
+		divideIntoGroups(client, bancho, bracketName, mappool, lobbyNumber + 1, otherPlayers, otherUsers);
 	}
 }
 
