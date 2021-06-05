@@ -10,7 +10,7 @@ module.exports = {
 		//Start everything in that minute
 		const today = new Date();
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'Dev' && today.getUTCHours() === 20 && today.getUTCMinutes() === 45) {
+		if (process.env.SERVER === 'Live' && today.getUTCHours() === 18 && today.getUTCMinutes() === 0) {
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -128,10 +128,10 @@ module.exports = {
 					const allPlayers = await getPlayers(client);
 
 					// Trigger Mappool creation for the different brackets
-					setMapsForBracket(client, bancho, 8, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613', allPlayers[0]);
-					setMapsForBracket(client, bancho, 6.6, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813', '833313704136540171', allPlayers[1]);
-					setMapsForBracket(client, bancho, 6.2, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890', '833313763188801578', allPlayers[2]);
-					setMapsForBracket(client, bancho, 5.8, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752', '833313827172646912', allPlayers[3]);
+					setMapsForBracket(client, bancho, 'Top Bracket', 8, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613', allPlayers[0]);
+					setMapsForBracket(client, bancho, 'Middle Bracket', 6.6, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813', '833313704136540171', allPlayers[1]);
+					setMapsForBracket(client, bancho, 'Lower Bracket', 6.2, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890', '833313763188801578', allPlayers[2]);
+					setMapsForBracket(client, bancho, 'Beginner Bracket', 5.8, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752', '833313827172646912', allPlayers[3]);
 				})
 				.catch(e => {
 					console.log(e);

@@ -47,7 +47,7 @@ module.exports = {
 		} else if (args[0] === 'verify') {
 			verify(msg, args, osuApi, bancho, discordUser, guildPrefix);
 		} else {
-			connect(msg, args, osuApi, discordUser, guildPrefix);
+			connect(msg, args, osuApi, bancho, discordUser, guildPrefix);
 		}
 	},
 };
@@ -86,24 +86,34 @@ async function connect(msg, args, osuApi, bancho, discordUser, guildPrefix) {
 					discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 					discordUser.save();
 
-					bancho.connect().then(async () => {
-						const IRCUser = bancho.getUser(osuUser.name);
-						IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
-						bancho.disconnect();
-						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
-					}).catch(console.error);
+					try {
+						await bancho.connect();
+					} catch (error) {
+						if (!error.message === 'Already connected/connecting') {
+							throw (error);
+						}
+					}
+
+					const IRCUser = bancho.getUser(osuUser.name);
+					IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
+					processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 				} else {
 					const processingMessage = await msg.channel.send('Processing...');
 					const verificationCode = Math.random().toString(36).substring(8);
 					let badges = await getOsuBadgeNumberById(osuUser.id);
 					DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuName: osuUser.name, osuBadges: badges, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
 
-					bancho.connect().then(async () => {
-						const IRCUser = bancho.getUser(osuUser.name);
-						IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
-						bancho.disconnect();
-						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
-					}).catch(console.error);
+					try {
+						await bancho.connect();
+					} catch (error) {
+						if (!error.message === 'Already connected/connecting') {
+							throw (error);
+						}
+					}
+
+					const IRCUser = bancho.getUser(osuUser.name);
+					IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
+					processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 				}
 			})
 			.catch(err => {
@@ -205,12 +215,17 @@ async function verify(msg, args, osuApi, bancho, discordUser, guildPrefix) {
 							discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 							discordUser.save();
 
-							bancho.connect().then(async () => {
-								const IRCUser = bancho.getUser(osuUser.name);
-								IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
-								bancho.disconnect();
-								processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
-							}).catch(console.error);
+							try {
+								await bancho.connect();
+							} catch (error) {
+								if (!error.message === 'Already connected/connecting') {
+									throw (error);
+								}
+							}
+
+							const IRCUser = bancho.getUser(osuUser.name);
+							IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
+							processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 						})
 						.catch(err => {
 							if (err.message === 'Not found') {
