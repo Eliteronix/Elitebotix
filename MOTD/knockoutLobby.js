@@ -116,6 +116,27 @@ module.exports = {
 				}
 			});
 			lobby.on('matchFinished', async (results) => {
+				//Set array for how many players should get through maximum
+				let expectedPlayers = [];
+				expectedPlayers.push(16); //Map [0] Qualifiers -> 16
+				expectedPlayers.push(14); //Map [1] 16 -> 14
+				expectedPlayers.push(12); //Map [2] 14 -> 12
+				expectedPlayers.push(10); //Map [3] 12 -> 10
+				expectedPlayers.push(8); //Map [4] 10 -> 8 --DT
+				expectedPlayers.push(6); //Map [5] 8 -> 6
+				expectedPlayers.push(5); //Map [6] 6 -> 5
+				expectedPlayers.push(4); //Map [7] 5 -> 4
+				expectedPlayers.push(3); //Map [8] 4 -> 3 --DT
+				expectedPlayers.push(2); //Map [9] 3 -> 2
+				expectedPlayers.push(1); //Map [10] 2 -> 1
+
+				//Calculate the amount of knockouts needed
+				let knockoutNumber = expectedPlayers[mapIndex - 1] - expectedPlayers[mapIndex];
+				//Set the amount to 1 if less players are in the lobby
+				if (players.length < expectedPlayers[mapIndex - 1]) {
+					knockoutNumber = 1;
+				}
+
 				let knockedOutPlayers = 0;
 				let knockedOutPlayerNames = '';
 				let knockedOutPlayerIds = [];
@@ -156,27 +177,6 @@ module.exports = {
 				playerIds = [];
 				for (let i = 0; i < players.length; i++) {
 					playerIds.push(players[i].osuUserId);
-				}
-
-				//Set array for how many players should get through maximum
-				let expectedPlayers = [];
-				expectedPlayers.push(16); //Map [0] Qualifiers -> 16
-				expectedPlayers.push(14); //Map [1] 16 -> 14
-				expectedPlayers.push(12); //Map [2] 14 -> 12
-				expectedPlayers.push(10); //Map [3] 12 -> 10
-				expectedPlayers.push(8); //Map [4] 10 -> 8 --DT
-				expectedPlayers.push(6); //Map [5] 8 -> 6
-				expectedPlayers.push(5); //Map [6] 6 -> 5
-				expectedPlayers.push(4); //Map [7] 5 -> 4
-				expectedPlayers.push(3); //Map [8] 4 -> 3 --DT
-				expectedPlayers.push(2); //Map [9] 3 -> 2
-				expectedPlayers.push(1); //Map [10] 2 -> 1
-
-				//Calculate the amount of knockouts needed
-				let knockoutNumber = expectedPlayers[mapIndex - 1] - expectedPlayers[mapIndex];
-				//Set the amount to 1 if less players are in the lobby
-				if (players.length < expectedPlayers[mapIndex - 1]) {
-					knockoutNumber = 1;
 				}
 
 				//Remove as many players as needed if there weren't enough players inactive
