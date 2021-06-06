@@ -62,12 +62,16 @@ module.exports = {
 		mappoolInOrder.push(selectedNMMaps[2]);
 		// Fourth map (DT) 10 -> 8  -> Between difficulty of third and fifth
 		const firstDTDifficulty = (parseFloat(selectedNMMaps[3].difficulty.rating) + parseFloat(selectedNMMaps[2].difficulty.rating)) / 2;
+		let mapUsedIndex = 0;
 		let firstDTMap = possibleDTBeatmaps[0];
 		for (let i = 1; i < possibleDTBeatmaps.length; i++) {
 			if (Math.abs(firstDTMap.difficulty.rating - firstDTDifficulty) > Math.abs(possibleDTBeatmaps[i].difficulty.rating - firstDTDifficulty)) {
 				firstDTMap = possibleDTBeatmaps[i];
+				mapUsedIndex = i;
 			}
 		}
+		possibleDTBeatmaps.splice(mapUsedIndex, 1);
+
 		mappoolInOrder.push(firstDTMap);
 		// Fifth map 8 -> 6
 		mappoolInOrder.push(selectedNMMaps[3]);
