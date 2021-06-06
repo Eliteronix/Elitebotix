@@ -49,6 +49,7 @@ module.exports = {
 			const password = Math.random().toString(36).substring(8);
 
 			await Promise.all([lobby.setPassword(password),]);
+			await channel.sendMessage('!mp lock');
 			await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 			await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
 
@@ -217,6 +218,7 @@ module.exports = {
 					await channel.sendMessage('!mp close');
 					return await channel.leave();
 				} else {
+					movePlayersIntoFirstSlots(channel, lobby);
 					mapIndex++;
 					let skipped = false;
 					//Increases knockoutmap number to start/continue with harder maps and give more points
@@ -614,6 +616,20 @@ async function messageUserWithRetries(client, user, content, attachment) {
 				i = Infinity;
 				console.log(error);
 			}
+		}
+	}
+}
+
+async function movePlayersIntoFirstSlots(channel, lobby) {
+	await lobby.updateSettings();
+
+	let spotToFillNext = 0;
+	for (let i = 0; i < 16; i++) {
+		if (lobby.slots[i] && i === spotToFillNext) {
+			spotToFillNext++;
+		} else if (lobby.slots[i] && i !== spotToFillNext) {
+			channel.sendMessage(`!mp move #${lobby.slots[i].user.id} ${spotToFillNext + 1}`);
+			spotToFillNext++;
 		}
 	}
 }
