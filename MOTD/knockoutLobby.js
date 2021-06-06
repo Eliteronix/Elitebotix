@@ -628,7 +628,7 @@ async function movePlayersIntoFirstSlots(channel, lobby) {
 		if (lobby.slots[i] && i === spotToFillNext) {
 			spotToFillNext++;
 		} else if (lobby.slots[i] && i !== spotToFillNext) {
-			channel.sendMessage(`!mp move #${lobby.slots[i].user.id} ${spotToFillNext + 1}`);
+			await channel.sendMessage(`!mp move #${lobby.slots[i].user.id} ${spotToFillNext + 1}`);
 			spotToFillNext++;
 		}
 	}
