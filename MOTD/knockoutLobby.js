@@ -236,8 +236,8 @@ module.exports = {
 						doubleTime = ' DT';
 					}
 
+					await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 					if (mapIndex === 4 || mapIndex === 5 || mapIndex === 8 || mapIndex === 9) {
-						await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 						await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
 					}
 
