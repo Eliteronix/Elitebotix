@@ -33,22 +33,38 @@ module.exports = {
 		}
 
 		if (lobbyNumber === 1) {
-			try {
-				await bancho.connect();
-			} catch (error) {
-				if (!error.message === 'Already connected/connecting') {
-					throw (error);
-				}
-			}
 
 			let lobbyStatus = 'Joining phase';
 
-			const channel = await bancho.createLobby(`MOTD: (${bracketName}) vs (Lobby #${lobbyNumber})`);
+			let channel;
+
+			for (let i = 0; i < 5; i++) {
+				try {
+					try {
+						await bancho.connect();
+					} catch (error) {
+						if (!error.message === 'Already connected/connecting') {
+							throw (error);
+						}
+					}
+					channel = await bancho.createLobby(`MOTD: (${bracketName}) vs (Lobby #${lobbyNumber})`);
+					break;
+				} catch (error) {
+					if (i === 2) {
+						//Start the first knockout map in solo as a fallback
+						return knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, 1, isFirstRound);
+					} else {
+						await pause(10000);
+					}
+				}
+			}
+
+
 			const lobby = channel.lobby;
 
 			const password = Math.random().toString(36).substring(8);
 
-			await Promise.all([lobby.setPassword(password),]);
+			await lobby.setPassword(password);
 			await channel.sendMessage('!mp lock');
 			await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 			await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
