@@ -63,10 +63,25 @@ module.exports = {
 				if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
 					//Banchobot countdown finished
 					if (lobbyStatus === 'Joining phase') {
-						lobbyStatus = 'Waiting for start';
+						await lobby.updateSettings();
+						let allPlayersReady = true;
+						for (let i = 0; i < 16; i++) {
+							let player = lobby.slots[i];
+							if (player && player.state !== require('bancho.js').BanchoLobbyPlayerStates.Ready) {
+								allPlayersReady = false;
+							}
+						}
 
-						await channel.sendMessage('Everyone please ready up!');
-						await channel.sendMessage('!mp timer 120');
+						if (allPlayersReady) {
+							await channel.sendMessage('!mp start 10');
+
+							lobbyStatus === 'Map being played';
+						} else {
+							lobbyStatus = 'Waiting for start';
+
+							await channel.sendMessage('Everyone please ready up!');
+							await channel.sendMessage('!mp timer 120');
+						}
 					} else if (lobbyStatus === 'Waiting for start') {
 						await channel.sendMessage('!mp start 10');
 
