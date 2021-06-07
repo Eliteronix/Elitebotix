@@ -42,6 +42,78 @@ module.exports = {
 					pointDatasets[i].save();
 				}
 			}
+		} else if (args[0] === 'fix') {
+			const points620 = await DBMOTDPoints.findOne({
+				where: { id: 620 }
+			});
+			points620.knockoutPoints = Math.round(7 * (11 / 10 * 2));
+			points620.knockoutRank = 1;
+			points620.knockoutPlayers = 16;
+			points620.save();
+
+			const points630 = await DBMOTDPoints.findOne({
+				where: { id: 630 }
+			});
+			points630.knockoutPoints = Math.round(7 * (10 / 10 * 2));
+			points630.knockoutRank = 2;
+			points630.knockoutPlayers = 16;
+			points630.save();
+
+			const points638 = await DBMOTDPoints.findOne({
+				where: { id: 638 }
+			});
+			points638.knockoutPoints = Math.round(7 * (11 / 10 * 2));
+			points638.knockoutRank = 1;
+			points638.knockoutPlayers = 7;
+			points638.save();
+
+			const points639 = await DBMOTDPoints.findOne({
+				where: { id: 639 }
+			});
+			points639.knockoutPoints = Math.round(7 * (10 / 10 * 2));
+			points639.knockoutRank = 2;
+			points639.knockoutPlayers = 7;
+			points639.save();
+
+			const points640 = await DBMOTDPoints.findOne({
+				where: { id: 640 }
+			});
+			points640.knockoutPoints = Math.round(7 * (9 / 10 * 2));
+			points640.knockoutRank = 3;
+			points640.knockoutPlayers = 7;
+			points640.save();
+
+			const points641 = await DBMOTDPoints.findOne({
+				where: { id: 641 }
+			});
+			points641.knockoutPoints = Math.round(7 * (8 / 10 * 2));
+			points641.knockoutRank = 4;
+			points641.knockoutPlayers = 7;
+			points641.save();
+
+			const points642 = await DBMOTDPoints.findOne({
+				where: { id: 642 }
+			});
+			points642.knockoutPoints = Math.round(7 * (7 / 10 * 2));
+			points642.knockoutRank = 5;
+			points642.knockoutPlayers = 7;
+			points642.save();
+
+			const points643 = await DBMOTDPoints.findOne({
+				where: { id: 643 }
+			});
+			points643.knockoutPoints = Math.round(7 * (6 / 10 * 2));
+			points643.knockoutRank = 6;
+			points643.knockoutPlayers = 7;
+			points643.save();
+
+			const points644 = await DBMOTDPoints.findOne({
+				where: { id: 644 }
+			});
+			points644.knockoutPoints = Math.round(7 * (5 / 10 * 2));
+			points644.knockoutRank = 7;
+			points644.knockoutPlayers = 7;
+			points644.save();
 		}
 	}
 };
