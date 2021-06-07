@@ -49,6 +49,8 @@ module.exports = {
 			points620.knockoutPoints = Math.round(7 * (11 / 10 * 2));
 			points620.knockoutRank = 1;
 			points620.knockoutPlayers = 16;
+			points620.knockoutRound = 11;
+			points620.maxQualifierPoints = 18;
 			points620.save();
 
 			const points630 = await DBMOTDPoints.findOne({
@@ -57,6 +59,8 @@ module.exports = {
 			points630.knockoutPoints = Math.round(7 * (10 / 10 * 2));
 			points630.knockoutRank = 2;
 			points630.knockoutPlayers = 16;
+			points620.knockoutRound = 10;
+			points620.maxQualifierPoints = 18;
 			points630.save();
 
 			const points638 = await DBMOTDPoints.findOne({
@@ -65,6 +69,8 @@ module.exports = {
 			points638.knockoutPoints = Math.round(7 * (11 / 10 * 2));
 			points638.knockoutRank = 1;
 			points638.knockoutPlayers = 7;
+			points620.knockoutRound = 11;
+			points620.maxQualifierPoints = 7;
 			points638.save();
 
 			const points639 = await DBMOTDPoints.findOne({
@@ -73,6 +79,8 @@ module.exports = {
 			points639.knockoutPoints = Math.round(7 * (10 / 10 * 2));
 			points639.knockoutRank = 2;
 			points639.knockoutPlayers = 7;
+			points620.knockoutRound = 10;
+			points620.maxQualifierPoints = 7;
 			points639.save();
 
 			const points640 = await DBMOTDPoints.findOne({
@@ -81,6 +89,8 @@ module.exports = {
 			points640.knockoutPoints = Math.round(7 * (9 / 10 * 2));
 			points640.knockoutRank = 3;
 			points640.knockoutPlayers = 7;
+			points620.knockoutRound = 9;
+			points620.maxQualifierPoints = 7;
 			points640.save();
 
 			const points641 = await DBMOTDPoints.findOne({
@@ -89,6 +99,8 @@ module.exports = {
 			points641.knockoutPoints = Math.round(7 * (8 / 10 * 2));
 			points641.knockoutRank = 4;
 			points641.knockoutPlayers = 7;
+			points620.knockoutRound = 8;
+			points620.maxQualifierPoints = 7;
 			points641.save();
 
 			const points642 = await DBMOTDPoints.findOne({
@@ -97,6 +109,8 @@ module.exports = {
 			points642.knockoutPoints = Math.round(7 * (7 / 10 * 2));
 			points642.knockoutRank = 5;
 			points642.knockoutPlayers = 7;
+			points620.knockoutRound = 7;
+			points620.maxQualifierPoints = 7;
 			points642.save();
 
 			const points643 = await DBMOTDPoints.findOne({
@@ -105,6 +119,8 @@ module.exports = {
 			points643.knockoutPoints = Math.round(7 * (6 / 10 * 2));
 			points643.knockoutRank = 6;
 			points643.knockoutPlayers = 7;
+			points620.knockoutRound = 6;
+			points620.maxQualifierPoints = 7;
 			points643.save();
 
 			const points644 = await DBMOTDPoints.findOne({
@@ -113,6 +129,8 @@ module.exports = {
 			points644.knockoutPoints = Math.round(7 * (5 / 10 * 2));
 			points644.knockoutRank = 7;
 			points644.knockoutPlayers = 7;
+			points620.knockoutRound = 5;
+			points620.maxQualifierPoints = 7;
 			points644.save();
 		}
 	}
