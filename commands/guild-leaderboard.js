@@ -49,7 +49,7 @@ module.exports = {
 
 					let dataset = {
 						name: userDisplayName,
-						value: `${humanReadable(discordUsers[i].points)} points`,
+						value: `${humanReadable(discordUsers[i].points)} point(s)`,
 					};
 
 					leaderboardData.push(dataset);
