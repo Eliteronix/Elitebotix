@@ -178,7 +178,7 @@ module.exports = async function (oldMember, newMember) {
 						if (e.message === 'Missing Access') {
 							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
 							return owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${member.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
-						} else if (e.message !== 'Unknown Channel') {
+						} else if (e.message !== 'Unknown Channel') { //Channel might be deleted already
 							console.log(createdText);
 							return console.log(e);
 						}
