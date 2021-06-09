@@ -20,6 +20,7 @@ module.exports = {
 
 		let results = [];
 		let resultsMaxLength = 0;
+		let highestVotes = 0;
 
 		for (let i = 0; i < reactions.length; i++) {
 			let result = {
@@ -29,7 +30,11 @@ module.exports = {
 			results.push(result);
 
 			if (args[3 + i].length > resultsMaxLength) {
-				resultsMaxLength = args[3 + 1];
+				resultsMaxLength = args[3 + i].length;
+			}
+
+			if (reactions[i].count - 1 > highestVotes) {
+				highestVotes = reactions[i].count - 1;
 			}
 		}
 
@@ -68,9 +73,12 @@ module.exports = {
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 5, canvas.height - 5);
 
 		for (let i = 0; i < results.length; i++) {
+			ctx.fillStyle = 'rgba(128, 216, 255, 0.4)';
+			ctx.fillRect(95, 75 + 100 * i, (canvas.width - 190) / highestVotes * results[i].votes, 65);
+			ctx.fillStyle = 'rgba(255, 255, 255, 1)';
 			ctx.font = 'bold 25px comfortaa, sans-serif';
 			ctx.textAlign = 'left';
-			ctx.fillText(results[i].name);
+			ctx.fillText(results[i].name, 100, 100 + 100 * i);
 			fitTextOnLeftCanvas(ctx, `${results[i].votes} Vote(s)`, 25, 'comfortaa, sans-serif', 130 + 100 * i, canvas.width - 100, 100);
 		}
 
