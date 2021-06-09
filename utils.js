@@ -817,6 +817,23 @@ module.exports = {
 			accuracy = (50 * parseInt(score.counts[50]) + 100 * parseInt(score.counts[100]) + 200 * parseInt(score.counts.katu) + 300 * (parseInt(score.counts[300]) + parseInt(score.counts.geki))) / (300 * (parseInt(score.counts.miss) + parseInt(score.counts[50]) + parseInt(score.counts[100]) + parseInt(score.counts.katu) + parseInt(score.counts[300]) + parseInt(score.counts.geki)));
 		}
 		return accuracy;
+	},
+	fitTextOnLeftCanvas(ctx, text, startingSize, fontface, yPosition, width, xOffset) {
+
+		// start with a large font size
+		var fontsize = startingSize;
+
+		// lower the font size until the text fits the canvas
+		do {
+			fontsize--;
+			ctx.font = fontsize + 'px ' + fontface;
+		} while (ctx.measureText(text).width > width - xOffset);
+
+		// draw the text
+		ctx.textAlign = 'left';
+		ctx.fillText(text, xOffset, yPosition);
+
+		return fontsize;
 	}
 };
 
