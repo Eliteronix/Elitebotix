@@ -87,7 +87,11 @@ module.exports = {
 			return msg.channel.send('Votes are limited to 10 possibilities maximum.');
 		}
 
-		const canvasWidth = 200 + 15 * optionsMaxLength;
+		if (title.length > optionsMaxLength) {
+			optionsMaxLength = title.length;
+		}
+
+		let canvasWidth = 200 + 15 * optionsMaxLength;
 		let canvasHeight = 100 + options.length * 100;
 
 		//Create Canvas

@@ -38,6 +38,10 @@ module.exports = {
 			}
 		}
 
+		if (args[2].length > resultsMaxLength) {
+			resultsMaxLength = args[2].length;
+		}
+
 		quicksort(results);
 
 		const canvasWidth = 200 + 15 * resultsMaxLength;
