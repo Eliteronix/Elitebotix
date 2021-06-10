@@ -32,12 +32,26 @@ module.exports = {
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
 
-			//Get The Big Black
-			const bigBlack = await osuApi.getBeatmaps({ m: 0, b: '131891' });
+			let backupMaps = [];
+			backupMaps.push('131891'); //The Quick Brown Fox - Big Black [WHO'S AFRAID OF THE BIG BLACK]
+			backupMaps.push('736215'); //Panda Eyes - Highscore [Game Over]
+			backupMaps.push('845391'); //Tower of Heaven
+			backupMaps.push('954692'); //Kira Kira Days
+			backupMaps.push('47152'); //Masterpiece
+			backupMaps.push('104229'); //Can't defeat Airman
+			backupMaps.push('422328'); //pensamento tipico de esquerda caviar
+			backupMaps.push('131564'); //Scarlet rose
+			backupMaps.push('786867'); //Ooi
+			backupMaps.push('367763'); //Crack Traxxxx
 
 			while (possibleNMBeatmaps.length < 9) {
-				possibleNMBeatmaps.push(bigBlack[0]);
+				const mapIndex = Math.floor(Math.random() * backupMaps.length);
+				const map = await osuApi.getBeatmaps({ m: 0, b: backupMaps[mapIndex] });
+				possibleNMBeatmaps.push(map[0]);
+				backupMaps.splice(mapIndex, 1);
 			}
+
+			quicksort(possibleNMBeatmaps);
 		}
 
 		let selectedNMMaps = [];
@@ -147,3 +161,28 @@ module.exports = {
 		qualifier(client, bancho, bracketName, mappoolInOrder, players);
 	}
 };
+
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].difficulty.rating) <= parseFloat(pivot.difficulty.rating)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
+}
