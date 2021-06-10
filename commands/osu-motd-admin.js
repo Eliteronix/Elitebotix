@@ -1,4 +1,5 @@
 const { DBMOTDPoints } = require('../dbObjects.js');
+const { initializeMOTD } = require('../MOTD/initializeMOTD.js');
 
 module.exports = {
 	name: 'osu-motd-admin',
@@ -15,10 +16,11 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'debug',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, additionalObjects) {
 		if (msg.author.id !== '138273136285057025') {
 			return;
 		}
+		const bancho = additionalObjects[0];
 
 		if (args[0] === 'recalculate') {
 			const pointDatasets = await DBMOTDPoints.findAll();
@@ -132,6 +134,8 @@ module.exports = {
 			points644.knockoutRound = 5;
 			points644.maxQualifierPoints = 7;
 			points644.save();
+		} else if (args[0] === 'start') {
+			initializeMOTD(msg.client, bancho, true);
 		}
 	}
 };
