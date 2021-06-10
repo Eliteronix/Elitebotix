@@ -69,9 +69,6 @@ module.exports = {
 						seasonAgo.setUTCDate(seasonAgo.getUTCDate() - 90);
 						let weekAgo = new Date();
 						weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
-						if (registeredPlayer.osuMOTDerrorFirstOccurence) {
-							console.log('WeekAgo:', weekAgo, 'ErrorFirstOccurence', registeredPlayer.osuMOTDerrorFirstOccurence);
-						}
 						if (seasonAgo > registeredPlayer.osuMOTDlastRoundPlayed) {
 							registeredPlayer.osuMOTDRegistered = false;
 							registeredPlayer.osuMOTDlastRoundPlayed = null;
