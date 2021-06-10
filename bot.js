@@ -82,6 +82,6 @@ client.on('guildCreate', guildCreate);
 
 client.setInterval(() => executeNextProcessQueueTask(client), 300);
 
-client.setInterval(() => initializeMOTD(client, bancho), 60000);
+client.setInterval(() => initializeMOTD(client, bancho, false), 60000);
 
 client.setInterval(() => refreshOsuRank(), 600000);
