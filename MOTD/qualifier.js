@@ -281,10 +281,21 @@ async function messageUserWithRetries(client, user, content, attachment) {
 						where: { userId: user.id }
 					});
 
+					let weekAgo = new Date();
+					weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
 					if (discordUser && discordUser.osuMOTDerrorFirstOccurence === null) {
 						let now = new Date();
 						discordUser.osuMOTDerrorFirstOccurence = now;
 						discordUser.save();
+					} else if (discordUser && discordUser.osuMOTDerrorFirstOccurence && weekAgo > discordUser.osuMOTDerrorFirstOccurence) {
+						async (discordUser) => {
+							discordUser.osuMOTDRegistered = false;
+							discordUser.osuMOTDlastRoundPlayed = null;
+							discordUser.osuMOTDMuted = false;
+							discordUser.osuMOTDerrorFirstOccurence = null;
+							discordUser.osuMOTDmutedUntil = null;
+							discordUser.save();
+						};
 					}
 				} else {
 					await pause(2500);
