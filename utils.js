@@ -519,14 +519,17 @@ module.exports = {
 		return userDisplayName;
 	},
 	executeNextProcessQueueTask: async function (client) {
-		const taskInWork = await DBProcessQueue.findOne({
+		const tasksInWork = await DBProcessQueue.findAll({
 			where: { beingExecuted: true }
 		});
-		if (taskInWork) {
+		if (tasksInWork.length >= 5) {
 			return;
 		}
 		let now = new Date();
 		let nextPriorityTasklevel = await DBProcessQueue.findAll({
+			where: {
+				beingExecuted: false,
+			},
 			order: [
 				['priority', 'DESC']
 			]
@@ -539,7 +542,7 @@ module.exports = {
 		}
 		if (nextPriorityTasklevel.length > 0) {
 			let nextTask = await DBProcessQueue.findAll({
-				where: { priority: nextPriorityTasklevel[0].priority },
+				where: { beingExecuted: false, priority: nextPriorityTasklevel[0].priority },
 				order: [
 					['createdAt', 'ASC']
 				]
