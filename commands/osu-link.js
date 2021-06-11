@@ -1,6 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-const { getGuildPrefix, getOsuBadgeNumberById } = require('../utils');
+const { getGuildPrefix, getOsuBadgeNumberById, getIDFromPotentialOsuLink } = require('../utils');
 
 module.exports = {
 	name: 'osu-link',
@@ -62,7 +62,7 @@ async function connect(msg, args, osuApi, bancho, discordUser, guildPrefix) {
 			return msg.channel.send(`You provided multiple arguments (\`${args.join('`, `')}\`). If your name has spaces please replace them with an \`_\` like this: \`${args.join('_')}\`.`);
 		}
 
-		osuApi.getUser({ u: args[0] })
+		osuApi.getUser({ u: getIDFromPotentialOsuLink(args[0]) })
 			.then(async (osuUser) => {
 				//get discordUser from db
 				const existingVerifiedDiscordUser = await DBDiscordUsers.findOne({

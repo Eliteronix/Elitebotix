@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink } = require('../utils');
 const fetch = require('node-fetch');
 const { calculateStarRating } = require('osu-sr-calculator');
 
@@ -76,12 +76,12 @@ module.exports = {
 
 							if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 								if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-									getScore(msg, beatmaps[0], args[i], server, mode, true, mapRank);
+									getScore(msg, beatmaps[0], getIDFromPotentialOsuLink(args[i]), server, mode, true, mapRank);
 								} else {
-									getScore(msg, beatmaps[0], args[i], server, mode, false, mapRank);
+									getScore(msg, beatmaps[0], getIDFromPotentialOsuLink(args[i]), server, mode, false, mapRank);
 								}
 							} else {
-								getScore(msg, beatmaps[0], args[i], server, mode, false, mapRank);
+								getScore(msg, beatmaps[0], getIDFromPotentialOsuLink(args[i]), server, mode, false, mapRank);
 							}
 						}
 					}

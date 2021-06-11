@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGameMode } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink } = require('../utils');
 
 module.exports = {
 	name: 'osu-beatmap',
@@ -27,19 +27,19 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		for (let i = 0; i < args.length; i++) {
-			osuApi.getBeatmaps({ b: args[i] })
+		args.forEach(arg => {
+			osuApi.getBeatmaps({ b: getIDFromPotentialOsuLink(arg) })
 				.then(async (beatmaps) => {
 					getBeatmap(msg, beatmaps[0]);
 				})
 				.catch(err => {
 					if (err.message === 'Not found') {
-						msg.channel.send(`Could not find beatmap \`${args[i].replace(/`/g, '')}\`.`);
+						msg.channel.send(`Could not find beatmap \`${arg.replace(/`/g, '')}\`.`);
 					} else {
 						console.log(err);
 					}
 				});
-		}
+		});
 	},
 };
 

@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getGuildPrefix, createLeaderboard } = require('../utils');
+const { getGuildPrefix, createLeaderboard, getIDFromPotentialOsuLink } = require('../utils');
 const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
@@ -31,7 +31,7 @@ module.exports = {
 
 		if (isNaN(matchID)) {
 			if (args[0].startsWith('https://osu.ppy.sh/community/matches/')) {
-				matchID = args[0].replace('https://osu.ppy.sh/community/matches/', '');
+				matchID = getIDFromPotentialOsuLink(args[0]);
 			} else {
 				const guildPrefix = await getGuildPrefix(msg);
 				return msg.channel.send(`You didn't provide a valid match ID or URL.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);
