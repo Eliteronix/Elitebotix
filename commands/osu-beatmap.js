@@ -27,19 +27,22 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		for (let i = 0; i < args.length; i++) {
-			osuApi.getBeatmaps({ b: args[i] })
+		args.forEach(arg => {
+			if (arg.endsWith('/')) {
+				arg = arg.substring(0, arg.length - 1);
+			}
+			osuApi.getBeatmaps({ b: arg.replace(/.+\//g, '') })
 				.then(async (beatmaps) => {
 					getBeatmap(msg, beatmaps[0]);
 				})
 				.catch(err => {
 					if (err.message === 'Not found') {
-						msg.channel.send(`Could not find beatmap \`${args[i].replace(/`/g, '')}\`.`);
+						msg.channel.send(`Could not find beatmap \`${arg.replace(/`/g, '')}\`.`);
 					} else {
 						console.log(err);
 					}
 				});
-		}
+		});
 	},
 };
 
