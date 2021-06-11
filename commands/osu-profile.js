@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname } = require('../utils');
+const { getGuildPrefix, humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink } = require('../utils');
 const fetch = require('node-fetch');
 
 module.exports = {
@@ -54,12 +54,12 @@ module.exports = {
 
 					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getProfile(msg, args[i], server, mode, true);
+							getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode, true);
 						} else {
-							getProfile(msg, args[i], server, mode);
+							getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode);
 						}
 					} else {
-						getProfile(msg, args[i], server, mode);
+						getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode);
 					}
 				}
 			}

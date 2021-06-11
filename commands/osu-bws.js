@@ -1,6 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-const { getGuildPrefix, humanReadable, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getOsuBadgeNumberById } = require('../utils');
+const { getGuildPrefix, humanReadable, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getOsuBadgeNumberById, getIDFromPotentialOsuLink } = require('../utils');
 
 module.exports = {
 	name: 'osu-bws',
@@ -50,12 +50,12 @@ module.exports = {
 
 					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getProfile(msg, args[i], mode, true);
+							getProfile(msg, getIDFromPotentialOsuLink(args[i]), mode, true);
 						} else {
-							getProfile(msg, args[i], mode);
+							getProfile(msg, getIDFromPotentialOsuLink(args[i]), mode);
 						}
 					} else {
-						getProfile(msg, args[i], mode);
+						getProfile(msg, getIDFromPotentialOsuLink(args[i]), mode);
 					}
 				}
 			}

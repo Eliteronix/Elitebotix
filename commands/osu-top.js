@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink } = require('../utils');
 const fetch = require('node-fetch');
 
 module.exports = {
@@ -79,12 +79,12 @@ module.exports = {
 
 					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getTopPlays(msg, args[i], server, mode, true, recentScores, limit, tracking);
+							getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, true, recentScores, limit, tracking);
 						} else {
-							getTopPlays(msg, args[i], server, mode, false, recentScores, limit, tracking);
+							getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, recentScores, limit, tracking);
 						}
 					} else {
-						getTopPlays(msg, args[i], server, mode, false, recentScores, limit, tracking);
+						getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, recentScores, limit, tracking);
 					}
 				}
 			}

@@ -1,5 +1,6 @@
 const { DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
+const { getIDFromPotentialOsuLink } = require('../utils');
 
 module.exports = {
 	name: 'osu-track',
@@ -66,7 +67,7 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		osuApi.getUser({ u: args.join('_') })
+		osuApi.getUser({ u: getIDFromPotentialOsuLink(args.join('_')) })
 			.then(async (user) => {
 				//Check for duplicates
 				const duplicates = await DBProcessQueue.findAll({

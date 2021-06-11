@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGameMode } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink } = require('../utils');
 
 module.exports = {
 	name: 'osu-beatmap',
@@ -28,10 +28,7 @@ module.exports = {
 		});
 
 		args.forEach(arg => {
-			if (arg.endsWith('/')) {
-				arg = arg.substring(0, arg.length - 1);
-			}
-			osuApi.getBeatmaps({ b: arg.replace(/.+\//g, '') })
+			osuApi.getBeatmaps({ b: getIDFromPotentialOsuLink(arg) })
 				.then(async (beatmaps) => {
 					getBeatmap(msg, beatmaps[0]);
 				})

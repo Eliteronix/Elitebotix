@@ -834,6 +834,12 @@ module.exports = {
 		ctx.fillText(text, xOffset, yPosition);
 
 		return fontsize;
+	},
+	getIDFromPotentialOsuLink(link) {
+		if (link.endsWith('/')) {
+			link = link.substring(0, link.length - 1);
+		}
+		return link.replace(/.+\//g, '');
 	}
 };
 
