@@ -274,9 +274,6 @@ async function messageUserWithRetries(client, user, content, attachment) {
 		} catch (error) {
 			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
 				if (i === 2) {
-					const channel = await client.channels.fetch('833803740162949191');
-					channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
-
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: user.id }
 					});
@@ -287,15 +284,19 @@ async function messageUserWithRetries(client, user, content, attachment) {
 						let now = new Date();
 						discordUser.osuMOTDerrorFirstOccurence = now;
 						discordUser.save();
+
+						const channel = await client.channels.fetch('833803740162949191');
+						channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 					} else if (discordUser && discordUser.osuMOTDerrorFirstOccurence && weekAgo > discordUser.osuMOTDerrorFirstOccurence) {
-						async (discordUser) => {
-							discordUser.osuMOTDRegistered = false;
-							discordUser.osuMOTDlastRoundPlayed = null;
-							discordUser.osuMOTDMuted = false;
-							discordUser.osuMOTDerrorFirstOccurence = null;
-							discordUser.osuMOTDmutedUntil = null;
-							discordUser.save();
-						};
+						discordUser.osuMOTDRegistered = false;
+						discordUser.osuMOTDlastRoundPlayed = null;
+						discordUser.osuMOTDMuted = false;
+						discordUser.osuMOTDerrorFirstOccurence = null;
+						discordUser.osuMOTDmutedUntil = null;
+						discordUser.save();
+					} else {
+						const channel = await client.channels.fetch('833803740162949191');
+						channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 					}
 				} else {
 					await pause(2500);
