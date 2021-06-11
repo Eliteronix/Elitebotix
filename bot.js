@@ -80,7 +80,7 @@ client.on('voiceStateUpdate', voiceStateUpdate);
 
 client.on('guildCreate', guildCreate);
 
-client.setInterval(() => executeNextProcessQueueTask(client), 300);
+client.setInterval(() => executeNextProcessQueueTask(client), 1000);
 
 client.setInterval(() => initializeMOTD(client, bancho, false), 60000);
 

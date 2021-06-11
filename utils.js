@@ -733,13 +733,13 @@ module.exports = {
 		return await getOsuBadgeNumberByIdFunction(osuUserId);
 	},
 	async restartProcessQueueTask() {
-		const taskInWork = await DBProcessQueue.findOne({
+		const tasksInWork = await DBProcessQueue.findAll({
 			where: { beingExecuted: true }
 		});
-		if (taskInWork) {
-			taskInWork.beingExecuted = 0;
-			taskInWork.save();
-		}
+		tasksInWork.forEach(task => {
+			task.beingExecuted = 0;
+			task.save();
+		});
 	},
 	async createMOTDAttachment(stagename, beatmap, doubletime) {
 		let canvasWidth = 1000;
