@@ -13,7 +13,7 @@ module.exports = {
 	botPermissionsTranslated: 'Attach Files',
 	guildOnly: true,
 	// args: true,
-	cooldown: 60,
+	cooldown: 30,
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
@@ -94,18 +94,41 @@ module.exports = {
 					leaderboardData.push(dataset);
 				}
 
+				let totalPages = Math.floor(leaderboardData.length / 100) + 1;
+
 				let page;
 
 				if (args[0] && !isNaN(args[0])) {
 					page = parseInt(args[0]);
 				}
 
-				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${msg.guild.name}'s osu! leaderboard`, `osu-leaderboard-${msg.guild.name}.png`, page);
+				if (totalPages === 1) {
+					page = null;
+				}
+
+				let filename = `osu-leaderboard-${msg.author.id}-${msg.guild.name}.png`;
+
+				if (page) {
+					filename = `osu-leaderboard-${msg.author.id}-${msg.guild.name}-page${page}.png`;
+				}
+
+				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${msg.guild.name}'s osu! leaderboard`, filename, page);
 
 				const guildPrefix = await getGuildPrefix(msg);
 
 				//Send attachment
-				await msg.channel.send(`The leaderboard consists of all players that have their osu! account connected to the bot.\nUse \`${guildPrefix}osu-link <username>\` to connect your osu! account.\nData is being updated once a day or when \`${guildPrefix}osu-profile <username>\` is being used.`, attachment);
+				const leaderboardMessage = await msg.channel.send(`The leaderboard consists of all players that have their osu! account connected to the bot.\nUse \`${guildPrefix}osu-link <username>\` to connect your osu! account.\nData is being updated once a day or when \`${guildPrefix}osu-profile <username>\` is being used.`, attachment);
+
+				if (page) {
+					if (page > 1) {
+						await leaderboardMessage.react('◀️');
+					}
+
+					if (page < totalPages) {
+						await leaderboardMessage.react('▶️');
+					}
+				}
+
 				processingMessage.delete();
 			})
 			.catch(err => {

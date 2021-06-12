@@ -12,7 +12,7 @@ module.exports = {
 	botPermissionsTranslated: 'Attach Files',
 	guildOnly: true,
 	// args: true,
-	cooldown: 60,
+	cooldown: 30,
 	//noCooldownMessage: true,
 	tags: 'general',
 	prefixCommand: true,
@@ -55,16 +55,38 @@ module.exports = {
 					leaderboardData.push(dataset);
 				}
 
+				let totalPages = Math.floor(leaderboardData.length / 100) + 1;
+
 				let page;
 
 				if (args[0] && !isNaN(args[0])) {
 					page = parseInt(args[0]);
 				}
 
-				const attachment = await createLeaderboard(leaderboardData, 'discord-background.png', `${msg.guild.name}'s activity leaderboard`, `guild-leaderboard-${msg.guild.name}.png`, page);
+				if (totalPages === 1) {
+					page = null;
+				}
+
+				let filename = `guild-leaderboard-${msg.author.id}-${msg.guild.name}.png`;
+
+				if (page) {
+					filename = `guild-leaderboard-${msg.author.id}-${msg.guild.name}-page${page}.png`;
+				}
+
+				const attachment = await createLeaderboard(leaderboardData, 'discord-background.png', `${msg.guild.name}'s activity leaderboard`, filename, page);
 
 				//Send attachment
-				await msg.channel.send('The leaderboard shows the most active users of the server.', attachment);
+				const leaderboardMessage = await msg.channel.send('The leaderboard shows the most active users of the server.', attachment);
+
+				if (page) {
+					if (page > 1) {
+						await leaderboardMessage.react('◀️');
+					}
+
+					if (page < totalPages) {
+						await leaderboardMessage.react('▶️');
+					}
+				}
 
 				processingMessage.delete();
 			})
