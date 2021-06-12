@@ -6,6 +6,7 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user) {
+	// console.log(reaction);
 	//For the development version
 	//if the message is not in the Dev-Servers then return
 	// eslint-disable-next-line no-undef
@@ -49,8 +50,45 @@ module.exports = async function (reaction, user) {
 		}
 	}
 
-	if (user.id === '784836063058329680') {
+	//Return if the bot reacted itself or if it was not a bot message
+	//Checking ID instead seemed to be bugged
+	if (user.username === 'Elitebotix' && user.discriminator === '4152') {
 		return;
+	}
+	if (reaction.message.author.username !== 'Elitebotix' && reaction.message.author.discriminator !== '4152') {
+		return;
+	}
+
+	if (reaction.message.attachments.first() && reaction.message.attachments.first().name.match(/.+leaderboard.+page.+/g)) {
+		const commandName = reaction.message.attachments.first().name.match(/.+leaderboard/g);
+		let page = reaction.message.attachments.first().name.replace(/.+page/g, '').replace('.png', '');
+
+		if (reaction.message.attachments.first().name.replace(/.+leaderboard-/g, '').replace(/-.+/g, '') !== user.id) {
+			return;
+		}
+
+		if (reaction._emoji.name === '◀️') {
+			page--;
+		} else if (reaction._emoji.name === '▶️') {
+			page++;
+		} else {
+			return;
+		}
+
+		let message = {
+			guild: reaction.message.guild,
+			content: `e!${commandName[0]} ${page}`,
+			author: user,
+			channel: reaction.message.channel,
+		};
+
+		const command = require(`./commands/${commandName[0]}.js`);
+
+		reaction.message.author.id = user.id;
+
+		command.execute(message, [page]);
+
+		return reaction.message.delete();
 	}
 
 	const didYouMeanRegex = /<@.+>, I could not find the command `.+`.\nDid you mean `.+`?/gm;
