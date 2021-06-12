@@ -648,4 +648,8 @@ async function movePlayersIntoFirstSlots(channel, lobby) {
 			spotToFillNext++;
 		}
 	}
+
+	await pause(10000);
+
+	await channel.sendMessage(`!mp set 0 0 ${spotToFillNext}`);
 }
