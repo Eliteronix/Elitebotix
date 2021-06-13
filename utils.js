@@ -765,7 +765,7 @@ module.exports = {
 		ctx.font = 'bold 50px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
-		ctx.fillText(stagename, canvas.width / 2, 60);
+		ctx.fillText(stagename, canvas.width / 2, 65);
 
 		ctx.fillStyle = 'rgba(173, 216, 230, 0.25)';
 		ctx.fillRect(100, 100, 800, 800);
@@ -774,26 +774,40 @@ module.exports = {
 		ctx.font = 'bold 50px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
-		fitTextOnMiddleCanvas(ctx, beatmap.artist, 50, 'comfortaa, sans-serif', 200, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, beatmap.title, 50, 'comfortaa, sans-serif', 250, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, `Mapper: ${beatmap.creator}`, 50, 'comfortaa, sans-serif', 300, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, `[${beatmap.version}]`, 100, 'comfortaa, sans-serif', 400, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, beatmap.artist, 40, 'comfortaa, sans-serif', 200, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, beatmap.title, 40, 'comfortaa, sans-serif', 240, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, `Mapper: ${beatmap.creator}`, 40, 'comfortaa, sans-serif', 280, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, `[${beatmap.version}]`, 100, 'comfortaa, sans-serif', 450, canvas.width, 220);
 		let doubletimeMod = '';
 		if (doubletime) {
 			doubletimeMod = '+DoubleTime';
-			ctx.fillStyle = '#966FD6';
+			ctx.save();
 			ctx.beginPath();
-			ctx.arc(810, 625, 75, 0, 2 * Math.PI);
+			// move the rotation point to the center of the rect
+			ctx.translate(775, 700);
+			// rotate the rect
+			ctx.rotate(45 * Math.PI / 180);
+
+			// draw the rect on the transformed context
+			// Note: after transforming [0,0] is visually [x,y]
+			//       so the rect needs to be offset accordingly when drawn
+			ctx.rect(-60, -60, 120, 120);
+
+			ctx.fillStyle = 'rgb(56, 172, 236)';
 			ctx.fill();
+
+			// restore the context to its untranslated/unrotated state
+			ctx.restore();
+
 			ctx.fillStyle = '#ffffff';
 			ctx.font = 'bold 65px comfortaa, sans-serif';
-			ctx.fillText('DT', 810, 650);
+			ctx.fillText('DT', 775, 725);
 		}
-		fitTextOnMiddleCanvas(ctx, `Mods: Freemod${doubletimeMod}`, 50, 'comfortaa, sans-serif', 500, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, '(All mods allowed except: Relax, Autopilot, Auto, ScoreV2)', 25, 'comfortaa, sans-serif', 525, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, `Length: ${Math.floor(beatmap.length.total / 60)}:${(beatmap.length.total % 60).toString().padStart(2, '0')}`, 50, 'comfortaa, sans-serif', 600, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, `SR: ${Math.round(beatmap.difficulty.rating * 100) / 100} | ${beatmap.bpm} BPM`, 50, 'comfortaa, sans-serif', 700, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, `CS ${beatmap.difficulty.size} | HP ${beatmap.difficulty.drain} | OD ${beatmap.difficulty.overall} | AR ${beatmap.difficulty.approach}`, 50, 'comfortaa, sans-serif', 800, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, `Mods: Freemod${doubletimeMod}`, 50, 'comfortaa, sans-serif', 575, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, '(All mods allowed except: Relax, Autopilot, Auto, ScoreV2)', 25, 'comfortaa, sans-serif', 600, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, `Length: ${Math.floor(beatmap.length.total / 60)}:${(beatmap.length.total % 60).toString().padStart(2, '0')}`, 35, 'comfortaa, sans-serif', 700, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, `SR: ${Math.round(beatmap.difficulty.rating * 100) / 100} | ${beatmap.bpm} BPM`, 35, 'comfortaa, sans-serif', 750, canvas.width, 220);
+		fitTextOnMiddleCanvas(ctx, `CS ${beatmap.difficulty.size} | HP ${beatmap.difficulty.drain} | OD ${beatmap.difficulty.overall} | AR ${beatmap.difficulty.approach}`, 35, 'comfortaa, sans-serif', 800, canvas.width, 220);
 
 		let today = new Date().toLocaleDateString();
 
