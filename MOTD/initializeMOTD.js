@@ -110,7 +110,13 @@ module.exports = {
 						DTBeatmaps[i].difficulty.speed = starRating.DT.speed;
 						DTBeatmaps[i].length.total = Math.round(DTBeatmaps[i].length.total / 3 * 2);
 						DTBeatmaps[i].length.drain = Math.round(DTBeatmaps[i].length.drain / 3 * 2);
+						DTBeatmaps[i].difficulty.overall = Math.round(((79.5 - ((79.5 - 6 * DTBeatmaps[i].difficulty.overall) * 2 / 3)) / 6) * 100) / 100;
 						DTBeatmaps[i].bpm = DTBeatmaps[i].bpm * 1.5;
+						if (parseInt(DTBeatmaps[i].difficulty.approach) <= 5) {
+							DTBeatmaps[i].difficulty.approach = Math.round(((1800 - ((1800 - DTBeatmaps[i].difficulty.approach * 120) * 2 / 3)) / 120) * 100) / 100;
+						} else {
+							DTBeatmaps[i].difficulty.approach = Math.round((((1200 - ((1200 - (DTBeatmaps[i].difficulty.approach - 5) * 150) * 2 / 3)) / 150) + 5) * 100) / 100;
+						}
 					}
 
 					//Sort the maps by difficulty each
