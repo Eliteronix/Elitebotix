@@ -567,37 +567,57 @@ async function drawAccInfo(input, mode, mapRank) {
 	ctx.textAlign = 'center';
 	ctx.fillText('PP', canvas.width / 1000 * 870 + 55, canvas.height / 500 * 385);
 	ctx.fillText(`${pp}`, canvas.width / 1000 * 870 + 55, canvas.height / 500 * 410);
+
 	//300
-	roundedRect(ctx, canvas.width / 1000 * 600, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
-	ctx.font = '18px comfortaa, sans-serif';
-	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'center';
 	let displayTerm = '300s';
+	let xTextOffset = 0;
+	let widthOffset = 0;
 	if (mode === 1) {
 		displayTerm = 'Great';
+		xTextOffset = 15;
+		widthOffset = 30;
+	} else if (mode === 2) {
+		displayTerm = 'Fruits';
 	}
-	ctx.fillText(displayTerm, canvas.width / 1000 * 600 + 40, canvas.height / 500 * 445);
-	ctx.fillText(`${score.counts[300]}`, canvas.width / 1000 * 600 + 40, canvas.height / 500 * 470);
-	//100
-	roundedRect(ctx, canvas.width / 1000 * 700, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
+	roundedRect(ctx, canvas.width / 1000 * 600, canvas.height / 500 * 425, 80 + widthOffset, 50, 5, '00', '00', '00', 0.5);
 	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
+	ctx.fillText(displayTerm, canvas.width / 1000 * 600 + 40 + xTextOffset, canvas.height / 500 * 445);
+	ctx.fillText(`${score.counts[300]}`, canvas.width / 1000 * 600 + 40 + xTextOffset, canvas.height / 500 * 470);
+
+	//100
+	let xRectOffset = 0;
 	displayTerm = '100s';
 	if (mode === 1) {
 		displayTerm = 'Good';
+		xRectOffset = 25;
+	} else if (mode === 2) {
+		displayTerm = 'Ticks';
 	}
-	ctx.fillText(displayTerm, canvas.width / 1000 * 700 + 40, canvas.height / 500 * 445);
-	ctx.fillText(`${score.counts[100]}`, canvas.width / 1000 * 700 + 40, canvas.height / 500 * 470);
+	roundedRect(ctx, canvas.width / 1000 * 700 + xRectOffset, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
+	ctx.font = '18px comfortaa, sans-serif';
+	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = 'center';
+	ctx.fillText(displayTerm, canvas.width / 1000 * 700 + 40 + xTextOffset, canvas.height / 500 * 445);
+	ctx.fillText(`${score.counts[100]}`, canvas.width / 1000 * 700 + 40 + xTextOffset, canvas.height / 500 * 470);
+
+	//50
 	if (mode !== 1) {
-		//50
+		displayTerm = '50s';
+		let value = score.counts[50];
+		if (mode === 2) {
+			displayTerm = 'DRPMiss';
+			value = score.counts.katu;
+		}
 		roundedRect(ctx, canvas.width / 1000 * 800, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
 		ctx.font = '18px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
-		ctx.fillText('50s', canvas.width / 1000 * 800 + 40, canvas.height / 500 * 445);
-		ctx.fillText(`${score.counts[50]}`, canvas.width / 1000 * 800 + 40, canvas.height / 500 * 470);
+		ctx.fillText(displayTerm, canvas.width / 1000 * 800 + 40, canvas.height / 500 * 445);
+		ctx.fillText(value, canvas.width / 1000 * 800 + 40, canvas.height / 500 * 470);
 	}
+
 	//Miss
 	roundedRect(ctx, canvas.width / 1000 * 900, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
 	ctx.font = '18px comfortaa, sans-serif';
