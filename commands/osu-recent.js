@@ -574,7 +574,11 @@ async function drawAccInfo(input, mode) {
 	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText('300s', canvas.width / 1000 * 600 + 40, canvas.height / 500 * 445);
+	let displayTerm = '300s';
+	if (mode === 1) {
+		displayTerm = 'Great';
+	}
+	ctx.fillText(displayTerm, canvas.width / 1000 * 600 + 40, canvas.height / 500 * 445);
 	ctx.fillText(`${score.counts[300]}`, canvas.width / 1000 * 600 + 40, canvas.height / 500 * 470);
 	//100
 	roundedRect(ctx, canvas.width / 1000 * 700, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);

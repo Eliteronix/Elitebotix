@@ -572,22 +572,32 @@ async function drawAccInfo(input, mode, mapRank) {
 	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText('300s', canvas.width / 1000 * 600 + 40, canvas.height / 500 * 445);
+	let displayTerm = '300s';
+	if (mode === 1) {
+		displayTerm = 'Great';
+	}
+	ctx.fillText(displayTerm, canvas.width / 1000 * 600 + 40, canvas.height / 500 * 445);
 	ctx.fillText(`${score.counts[300]}`, canvas.width / 1000 * 600 + 40, canvas.height / 500 * 470);
 	//100
 	roundedRect(ctx, canvas.width / 1000 * 700, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
 	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText('100s', canvas.width / 1000 * 700 + 40, canvas.height / 500 * 445);
+	displayTerm = '100s';
+	if (mode === 1) {
+		displayTerm = 'Good';
+	}
+	ctx.fillText(displayTerm, canvas.width / 1000 * 700 + 40, canvas.height / 500 * 445);
 	ctx.fillText(`${score.counts[100]}`, canvas.width / 1000 * 700 + 40, canvas.height / 500 * 470);
-	//50
-	roundedRect(ctx, canvas.width / 1000 * 800, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
-	ctx.font = '18px comfortaa, sans-serif';
-	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'center';
-	ctx.fillText('50s', canvas.width / 1000 * 800 + 40, canvas.height / 500 * 445);
-	ctx.fillText(`${score.counts[50]}`, canvas.width / 1000 * 800 + 40, canvas.height / 500 * 470);
+	if (mode !== 1) {
+		//50
+		roundedRect(ctx, canvas.width / 1000 * 800, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
+		ctx.font = '18px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		ctx.fillText('50s', canvas.width / 1000 * 800 + 40, canvas.height / 500 * 445);
+		ctx.fillText(`${score.counts[50]}`, canvas.width / 1000 * 800 + 40, canvas.height / 500 * 470);
+	}
 	//Miss
 	roundedRect(ctx, canvas.width / 1000 * 900, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
 	ctx.font = '18px comfortaa, sans-serif';
