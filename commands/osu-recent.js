@@ -553,13 +553,17 @@ async function drawAccInfo(input, mode) {
 	if (score.perfect) {
 		ctx.fillStyle = '#B3FF66';
 	} else {
-		combo = `${score.maxCombo}/${beatmap.maxCombo}x`;
+		if (mode === 3 || mode === 1) {
+			combo = `${score.maxCombo}x`;
+		} else {
+			combo = `${score.maxCombo}/${beatmap.maxCombo}x`;
+		}
 	}
 	ctx.fillText(combo, canvas.width / 1000 * 735 + 55, canvas.height / 500 * 410);
 
 	let pp = 'None';
-	if (lookedUpScore && lookedUpScore.pp && lookedUpScore.score === score.score) {
-		pp = Math.round(lookedUpScore.pp);
+	if (score.pp) {
+		pp = Math.round(score.pp);
 	}
 
 	//PP
@@ -569,34 +573,116 @@ async function drawAccInfo(input, mode) {
 	ctx.textAlign = 'center';
 	ctx.fillText('PP', canvas.width / 1000 * 870 + 55, canvas.height / 500 * 385);
 	ctx.fillText(`${pp}`, canvas.width / 1000 * 870 + 55, canvas.height / 500 * 410);
+
+	//MAX
+	if (mode === 3) {
+		roundedRect(ctx, canvas.width / 1000 * 600, canvas.height / 500 * 425, 60, 50, 5, '00', '00', '00', 0.5);
+		ctx.font = '18px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		ctx.fillText('Max', canvas.width / 1000 * 600 + 30, canvas.height / 500 * 445);
+		ctx.fillText(`${score.counts.geki}`, canvas.width / 1000 * 600 + 30, canvas.height / 500 * 470);
+	}
+
 	//300
-	roundedRect(ctx, canvas.width / 1000 * 600, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
+	let displayTerm = '300s';
+	let xTextOffset = 0;
+	let widthOffset = 0;
+	let xRectOffset = 0;
+	if (mode === 1) {
+		displayTerm = 'Great';
+		xTextOffset = 15;
+		widthOffset = 30;
+	} else if (mode === 2) {
+		displayTerm = 'Fruits';
+	} else if (mode === 3) {
+		xRectOffset = 64;
+		widthOffset = -20;
+		xTextOffset = 54;
+	}
+	roundedRect(ctx, canvas.width / 1000 * 600 + xRectOffset, canvas.height / 500 * 425, 80 + widthOffset, 50, 5, '00', '00', '00', 0.5);
 	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText('300s', canvas.width / 1000 * 600 + 40, canvas.height / 500 * 445);
-	ctx.fillText(`${score.counts[300]}`, canvas.width / 1000 * 600 + 40, canvas.height / 500 * 470);
+	ctx.fillText(displayTerm, canvas.width / 1000 * 600 + 40 + xTextOffset, canvas.height / 500 * 445);
+	ctx.fillText(`${score.counts[300]}`, canvas.width / 1000 * 600 + 40 + xTextOffset, canvas.height / 500 * 470);
+
+	//200
+	if (mode === 3) {
+		roundedRect(ctx, canvas.width / 1000 * 728, canvas.height / 500 * 425, 60, 50, 5, '00', '00', '00', 0.5);
+		ctx.font = '18px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		ctx.fillText('200s', canvas.width / 1000 * 728 + 30, canvas.height / 500 * 445);
+		ctx.fillText(`${score.counts.katu}`, canvas.width / 1000 * 728 + 30, canvas.height / 500 * 470);
+	}
+
 	//100
-	roundedRect(ctx, canvas.width / 1000 * 700, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
+	xRectOffset = 0;
+	widthOffset = 0;
+	xTextOffset = 0;
+	displayTerm = '100s';
+	if (mode === 1) {
+		displayTerm = 'Good';
+		xRectOffset = 25;
+		widthOffset = 50;
+		xTextOffset = 50;
+	} else if (mode === 2) {
+		displayTerm = 'Ticks';
+	} else if (mode === 3) {
+		xRectOffset = 92;
+		widthOffset = -20;
+		xTextOffset = 82;
+	}
+	roundedRect(ctx, canvas.width / 1000 * 700 + xRectOffset, canvas.height / 500 * 425, 80 + widthOffset, 50, 5, '00', '00', '00', 0.5);
 	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText('100s', canvas.width / 1000 * 700 + 40, canvas.height / 500 * 445);
-	ctx.fillText(`${score.counts[100]}`, canvas.width / 1000 * 700 + 40, canvas.height / 500 * 470);
+	ctx.fillText(displayTerm, canvas.width / 1000 * 700 + 40 + xTextOffset, canvas.height / 500 * 445);
+	ctx.fillText(`${score.counts[100]}`, canvas.width / 1000 * 700 + 40 + xTextOffset, canvas.height / 500 * 470);
+
 	//50
-	roundedRect(ctx, canvas.width / 1000 * 800, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
-	ctx.font = '18px comfortaa, sans-serif';
-	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'center';
-	ctx.fillText('50s', canvas.width / 1000 * 800 + 40, canvas.height / 500 * 445);
-	ctx.fillText(`${score.counts[50]}`, canvas.width / 1000 * 800 + 40, canvas.height / 500 * 470);
+	if (mode !== 1) {
+		displayTerm = '50s';
+		xRectOffset = 0;
+		widthOffset = 0;
+		xTextOffset = 0;
+		let value = score.counts[50];
+		if (mode === 2) {
+			displayTerm = 'DRPMiss';
+			value = score.counts.katu;
+		} else if (mode === 3) {
+			xRectOffset = 56;
+			widthOffset = -20;
+			xTextOffset = 46;
+		}
+		roundedRect(ctx, canvas.width / 1000 * 800 + xRectOffset, canvas.height / 500 * 425, 80 + widthOffset, 50, 5, '00', '00', '00', 0.5);
+		ctx.font = '18px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		ctx.fillText(displayTerm, canvas.width / 1000 * 800 + 40 + xTextOffset, canvas.height / 500 * 445);
+		ctx.fillText(value, canvas.width / 1000 * 800 + 40 + xTextOffset, canvas.height / 500 * 470);
+	}
+
 	//Miss
-	roundedRect(ctx, canvas.width / 1000 * 900, canvas.height / 500 * 425, 80, 50, 5, '00', '00', '00', 0.5);
+	xRectOffset = 0;
+	widthOffset = 0;
+	xTextOffset = 0;
+	if (mode === 1) {
+		xRectOffset = -30;
+		widthOffset = 30;
+		xTextOffset = -15;
+	} else if (mode === 3) {
+		xRectOffset = 20;
+		widthOffset = -20;
+		xTextOffset = 10;
+	}
+	roundedRect(ctx, canvas.width / 1000 * 900 + xRectOffset, canvas.height / 500 * 425, 80 + widthOffset, 50, 5, '00', '00', '00', 0.5);
 	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText('Miss', canvas.width / 1000 * 900 + 40, canvas.height / 500 * 445);
-	ctx.fillText(`${score.counts.miss}`, canvas.width / 1000 * 900 + 40, canvas.height / 500 * 470);
+	ctx.fillText('Miss', canvas.width / 1000 * 900 + 40 + xTextOffset, canvas.height / 500 * 445);
+	ctx.fillText(`${score.counts.miss}`, canvas.width / 1000 * 900 + 40 + xTextOffset, canvas.height / 500 * 470);
 
 	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
 	return output;
