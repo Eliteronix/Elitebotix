@@ -22,7 +22,7 @@ module.exports = {
 		let resultsMaxLength = 0;
 		let highestVotes = 0;
 
-		for (let i = 0; i < reactions.length; i++) {
+		for (let i = 0; i < reactions.length && i < args.length - 3; i++) {
 			let result = {
 				name: args[3 + i],
 				votes: reactions[i].count - 1

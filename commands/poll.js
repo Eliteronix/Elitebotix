@@ -7,7 +7,7 @@ module.exports = {
 	name: 'poll',
 	aliases: ['vote'],
 	description: 'Start a vote / poll',
-	usage: '<title> <option1>; <option2[; <option3>] ... [; <option10>] <#y/#mo/#w/#d/#h/#m>',
+	usage: '<title>; <option1>; <option2[; <option3>] ... [; <option10>] <#y/#mo/#w/#d/#h/#m>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: 'ATTACH_FILES',
