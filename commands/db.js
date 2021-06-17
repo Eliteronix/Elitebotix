@@ -91,6 +91,8 @@ module.exports = {
 					goodbyeMessageText: dbList[i].goodbyeMessageText,
 					temporaryVoices: dbList[i].temporaryVoices,
 					addTemporaryText: dbList[i].addTemporaryText,
+					starBoardEnabled: dbList[i].starBoardEnabled,
+					starBoardMinimum: dbList[i].starBoardMinimum,
 					paranoid: dbList[i].paranoid,
 					createdAt: dbList[i].createdAt,
 					updatedAt: dbList[i].updatedAt,

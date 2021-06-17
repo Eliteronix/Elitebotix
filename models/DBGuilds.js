@@ -37,6 +37,9 @@ module.exports = (sequelize, DataTypes) => {
 		goodbyeMessageText: DataTypes.STRING,
 		temporaryVoices: DataTypes.BOOLEAN,
 		addTemporaryText: DataTypes.BOOLEAN,
+		starBoardEnabled: DataTypes.BOOLEAN,
+		starBoardMinimum: DataTypes.STRING,
+		starBoardChannel: DataTypes.STRING,
 		paranoid: true,
 	});
 };
