@@ -18,6 +18,9 @@ const memberJoined = require('./memberJoined');
 //Get memberLeaved
 const memberLeaved = require('./memberLeaved');
 
+//Get voiceStateUpdate
+const guildMemberUpdate = require('./guildMemberUpdate');
+
 //Get reactionAdded
 const reactionAdded = require('./reactionAdded');
 
@@ -69,6 +72,8 @@ function readyDiscord() {
 client.on('guildMemberAdd', memberJoined);
 
 client.on('guildMemberRemove', memberLeaved);
+
+client.on('guildMemberUpdate', guildMemberUpdate);
 
 client.on('messageReactionAdd', reactionAdded);
 
