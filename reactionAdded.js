@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { DBReactionRolesHeader, DBReactionRoles } = require('./dbObjects');
+const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } = require('./dbObjects');
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
@@ -55,6 +55,125 @@ module.exports = async function (reaction, user) {
 	if (user.username === 'Elitebotix' && user.discriminator === '4152') {
 		return;
 	}
+
+	if (reaction._emoji.name === '⭐') {
+		const guild = await DBGuilds.findOne({
+			where: { guildId: reaction.message.guild.id }
+		});
+
+		if (guild && guild.starBoardEnabled && parseInt(guild.starBoardMinimum) <= reaction.count) {
+			const starBoardedMessage = await DBStarBoardMessages.findOne({
+				where: { originalMessageId: reaction.message.id }
+			});
+
+			if (starBoardedMessage) {
+				let channel;
+				try {
+					channel = await reaction.client.channels.fetch(starBoardedMessage.starBoardChannelId);
+				} catch (error) {
+					if (error.message !== 'Unknown Channel') {
+						console.log(error);
+					}
+				}
+				if (channel) {
+					let message;
+					try {
+						message = await channel.messages.fetch(starBoardedMessage.starBoardMessageId);
+					} catch (error) {
+						if (error.message !== 'Unknown Message') {
+							console.log(error);
+						}
+					}
+
+					if (message) {
+						const starBoardMessageEmbed = new Discord.MessageEmbed()
+							.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
+							.setColor('#d9b51c')
+							.addFields(
+								{ name: 'Message', value: reaction.message.content },
+								{ name: 'Link', value: `[Open](https://discord.com/channels/${reaction.message.guild.id}/${reaction.message.channel.id}/${reaction.message.id})` },
+							)
+							.setTimestamp();
+
+						reaction.message.attachments.forEach(attachment => {
+							starBoardMessageEmbed
+								.addField('Attachment', attachment.name)
+								.setImage(attachment.url);
+						});
+
+						return message.edit(`${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, starBoardMessageEmbed);
+					}
+				}
+
+				//Try to resend the message
+				const starBoardMessageEmbed = new Discord.MessageEmbed()
+					.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
+					.setColor('#d9b51c')
+					.addFields(
+						{ name: 'Message', value: reaction.message.content },
+						{ name: 'Link', value: `[Open](https://discord.com/channels/${reaction.message.guild.id}/${reaction.message.channel.id}/${reaction.message.id})` },
+					)
+					.setTimestamp();
+
+				reaction.message.attachments.forEach(attachment => {
+					starBoardMessageEmbed
+						.addField('Attachment', attachment.name)
+						.setImage(attachment.url);
+				});
+
+				try {
+					channel = await reaction.client.channels.fetch(guild.starBoardChannel);
+				} catch (error) {
+					if (error.message === 'Unknown Channel') {
+						guild.starBoardEnabled = false;
+						guild.save();
+						const owner = await reaction.message.client.users.fetch(reaction.message.guild.ownerID);
+						return owner.send(`It seems like the starboard channel on the guild \`${reaction.message.guild.name}\` has been deleted.\nThe starboard has been deactivated.`);
+					}
+					console.log(error);
+				}
+
+				const starBoardMessage = await channel.send(`${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, starBoardMessageEmbed);
+				starBoardedMessage.starBoardChannelId = starBoardMessage.channel.id;
+				starBoardedMessage.starBoardMessageId = starBoardMessage.id;
+				starBoardedMessage.save();
+			} else {
+				const starBoardMessageEmbed = new Discord.MessageEmbed()
+					.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
+					.setColor('#d9b51c')
+					.addFields(
+						{ name: 'Message', value: reaction.message.content },
+						{ name: 'Link', value: `[Open](https://discord.com/channels/${reaction.message.guild.id}/${reaction.message.channel.id}/${reaction.message.id})` },
+					)
+					.setTimestamp();
+
+				reaction.message.attachments.forEach(attachment => {
+					starBoardMessageEmbed
+						.addField('Attachment', attachment.name)
+						.setImage(attachment.url);
+				});
+
+				let channel;
+				try {
+					channel = await reaction.client.channels.fetch(guild.starBoardChannel);
+				} catch (error) {
+					if (error.message === 'Unknown Channel') {
+						guild.starBoardEnabled = false;
+						guild.save();
+						const owner = await reaction.message.client.users.fetch(reaction.message.guild.ownerID);
+						return owner.send(`It seems like the starboard channel on the guild \`${reaction.message.guild.name}\` has been deleted.\nThe starboard has been deactivated.`);
+					}
+					console.log(error);
+				}
+
+				const starBoardMessage = await channel.send(`${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, starBoardMessageEmbed);
+				DBStarBoardMessages.create({ originalChannelId: reaction.message.channel.id, originalMessageId: reaction.message.id, starBoardChannelId: starBoardMessage.channel.id, starBoardMessageId: starBoardMessage.id });
+			}
+		}
+
+		return;
+	}
+
 	if (reaction.message.author.username !== 'Elitebotix' && reaction.message.author.discriminator !== '4152') {
 		return;
 	}

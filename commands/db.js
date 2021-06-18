@@ -1,4 +1,4 @@
-const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
+const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages } = require('../dbObjects');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
 
@@ -91,6 +91,8 @@ module.exports = {
 					goodbyeMessageText: dbList[i].goodbyeMessageText,
 					temporaryVoices: dbList[i].temporaryVoices,
 					addTemporaryText: dbList[i].addTemporaryText,
+					starBoardEnabled: dbList[i].starBoardEnabled,
+					starBoardMinimum: dbList[i].starBoardMinimum,
 					paranoid: dbList[i].paranoid,
 					createdAt: dbList[i].createdAt,
 					updatedAt: dbList[i].updatedAt,
@@ -274,6 +276,22 @@ module.exports = {
 					beatmapId: dbList[i].beatmapId,
 					beatmapsetId: dbList[i].beatmapsetId,
 					bpm: dbList[i].bpm,
+					paranoid: dbList[i].paranoid,
+					createdAt: dbList[i].createdAt,
+					updatedAt: dbList[i].updatedAt,
+				});
+			}
+		} else if (args[0] === 'starboardmessages') {
+			const dbList = await DBStarBoardMessages.findAll();
+			dbTableName = 'DBStarBoardMessages';
+
+			for (let i = 0; i < dbList.length; i++) {
+				data.push({
+					id: dbList[i].id,
+					originalChannelId: dbList[i].originalChannelId,
+					originalMessageId: dbList[i].originalMessageId,
+					starBoardChannelId: dbList[i].starBoardChannelId,
+					starBoardMessageId: dbList[i].starBoardMessageId,
 					paranoid: dbList[i].paranoid,
 					createdAt: dbList[i].createdAt,
 					updatedAt: dbList[i].updatedAt,
