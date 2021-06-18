@@ -18,8 +18,11 @@ const memberJoined = require('./memberJoined');
 //Get memberLeaved
 const memberLeaved = require('./memberLeaved');
 
-//Get voiceStateUpdate
+//Get guildMemberUpdate
 const guildMemberUpdate = require('./guildMemberUpdate');
+
+//Get userUpdate
+const userUpdate = require('./userUpdate');
 
 //Get reactionAdded
 const reactionAdded = require('./reactionAdded');
@@ -74,6 +77,8 @@ client.on('guildMemberAdd', memberJoined);
 client.on('guildMemberRemove', memberLeaved);
 
 client.on('guildMemberUpdate', guildMemberUpdate);
+
+// client.on('userUpdate', userUpdate);
 
 client.on('messageReactionAdd', reactionAdded);
 

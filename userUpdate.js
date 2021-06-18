@@ -2,14 +2,8 @@ const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
 
 module.exports = async function (oldMember, newMember) {
-
-	console.log('guildMemberUpdate');
-	if (oldMember.user.nickname !== newMember.user.nickname) { console.log('Nickname changed'); }
-	if (oldMember.user.username !== newMember.user.username) { console.log('Username changed'); }
-	if (oldMember.user.discriminator !== newMember.user.discriminator) { console.log('Discriminator changed'); }
-	if (oldMember.user.defaultAvatarURL !== newMember.user.defaultAvatarURL) { console.log('Avatar changed'); }
-	if (oldMember._roles != newMember._roles) { console.log('Roles changed'); }
-	console.log(oldMember.user, oldMember._roles, newMember.user, newMember._roles);
+	console.log('userUpdate');
+	console.log(oldMember, newMember);
 
 	//For the development version
 	//if the message is not in the Dev-Servers then return
@@ -34,12 +28,12 @@ module.exports = async function (oldMember, newMember) {
 		}
 	}
 
-	if (oldMember.nickname !== newMember.nickname) {
+	if (oldMember.user.username !== newMember.user.username) {
 		const guild = await DBGuilds.findOne({
 			where: { guildId: newMember.guild.id }
 		});
 
-		if (guild && guild.loggingChannel && guild.loggingNicknames) {
+		if (guild && guild.loggingChannel && guild.loggingUsernames) {
 			let channel;
 			try {
 				channel = await newMember.client.channels.fetch(guild.loggingChannel);
@@ -53,28 +47,50 @@ module.exports = async function (oldMember, newMember) {
 				console.log(error);
 			}
 
-			let oldUserDisplayName = oldMember.user.username;
-
-			if (oldMember.nickname) {
-				oldUserDisplayName = oldMember.nickname;
-			}
-
-			let newUserDisplayName = newMember.user.username;
-
-			if (newMember.nickname) {
-				newUserDisplayName = newMember.nickname;
-			}
-
 			const changeEmbed = new Discord.MessageEmbed()
 				.setColor('#0099ff')
 				.setAuthor(`${newMember.user.username}#${newMember.user.discriminator}`, newMember.user.displayAvatarURL())
 				.setDescription(`<@${newMember.user.id}> has updated their profile!`)
 				.setThumbnail(newMember.user.displayAvatarURL())
 				.addFields(
-					{ name: 'Nickname', value: `\`${oldUserDisplayName}\` -> \`${newUserDisplayName}\`` },
+					{ name: 'Username', value: `\`${oldMember.user.username}\` -> \`${newMember.user.username}\`` },
 				)
 				.setTimestamp()
-				.setFooter('Eventname: nicknames');
+				.setFooter('Eventname: usernames');
+
+			channel.send(changeEmbed);
+		}
+	}
+
+	if (oldMember.user.discriminator !== newMember.user.discriminator) {
+		const guild = await DBGuilds.findOne({
+			where: { guildId: newMember.guild.id }
+		});
+
+		if (guild && guild.loggingChannel && guild.loggingUsernames) {
+			let channel;
+			try {
+				channel = await newMember.client.channels.fetch(guild.loggingChannel);
+			} catch (error) {
+				if (error.message === 'Unknown Channel') {
+					guild.loggingChannel = null;
+					guild.save();
+					const owner = await newMember.message.client.users.fetch(newMember.guild.ownerID);
+					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				}
+				console.log(error);
+			}
+
+			const changeEmbed = new Discord.MessageEmbed()
+				.setColor('#0099ff')
+				.setAuthor(`${newMember.user.discriminator}#${newMember.user.discriminator}`, newMember.user.displayAvatarURL())
+				.setDescription(`<@${newMember.user.id}> has updated their profile!`)
+				.setThumbnail(newMember.user.displayAvatarURL())
+				.addFields(
+					{ name: 'Discriminator', value: `\`${oldMember.user.discriminator}\` -> \`${newMember.user.discriminator}\`` },
+				)
+				.setTimestamp()
+				.setFooter('Eventname: userdiscriminator');
 
 			channel.send(changeEmbed);
 		}

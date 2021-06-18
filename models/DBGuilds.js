@@ -40,6 +40,9 @@ module.exports = (sequelize, DataTypes) => {
 		starBoardEnabled: DataTypes.BOOLEAN,
 		starBoardMinimum: DataTypes.STRING,
 		starBoardChannel: DataTypes.STRING,
+		loggingChannel: DataTypes.STRING,
+		loggingNicknames: DataTypes.BOOLEAN,
+		loggingUsernames: DataTypes.BOOLEAN,
 		paranoid: true,
 	});
 };
