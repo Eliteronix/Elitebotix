@@ -89,8 +89,8 @@ module.exports = async function (reaction, user) {
 						const starBoardMessageEmbed = new Discord.MessageEmbed()
 							.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
 							.setColor('#d9b51c')
+							.setDescription(reaction.message.content)
 							.addFields(
-								{ name: 'Message', value: reaction.message.content },
 								{ name: 'Link', value: `[Open](https://discord.com/channels/${reaction.message.guild.id}/${reaction.message.channel.id}/${reaction.message.id})` },
 							)
 							.setTimestamp();
@@ -109,8 +109,8 @@ module.exports = async function (reaction, user) {
 				const starBoardMessageEmbed = new Discord.MessageEmbed()
 					.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
 					.setColor('#d9b51c')
+					.setDescription(reaction.message.content)
 					.addFields(
-						{ name: 'Message', value: reaction.message.content },
 						{ name: 'Link', value: `[Open](https://discord.com/channels/${reaction.message.guild.id}/${reaction.message.channel.id}/${reaction.message.id})` },
 					)
 					.setTimestamp();
@@ -141,8 +141,8 @@ module.exports = async function (reaction, user) {
 				const starBoardMessageEmbed = new Discord.MessageEmbed()
 					.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
 					.setColor('#d9b51c')
+					.setDescription(reaction.message.content)
 					.addFields(
-						{ name: 'Message', value: reaction.message.content },
 						{ name: 'Link', value: `[Open](https://discord.com/channels/${reaction.message.guild.id}/${reaction.message.channel.id}/${reaction.message.id})` },
 					)
 					.setTimestamp();
