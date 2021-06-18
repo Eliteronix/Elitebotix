@@ -87,15 +87,18 @@ module.exports = async function (reaction, user) {
 
 					if (message) {
 						const starBoardMessageEmbed = new Discord.MessageEmbed()
+							.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
 							.setColor('#d9b51c')
 							.addFields(
-								{ name: reaction.message.author.username, value: reaction.message.content },
+								{ name: 'Message', value: reaction.message.content },
 								{ name: 'Link', value: `[Open](https://discord.com/channels/${reaction.message.guild.id}/${reaction.message.channel.id}/${reaction.message.id})` },
 							)
 							.setTimestamp();
 
 						reaction.message.attachments.forEach(attachment => {
-							starBoardedMessage.addField(`Attachment: ${attachment.name}`, attachment.data);
+							starBoardMessageEmbed
+								.addField('Attachment', attachment.name)
+								.setImage(attachment.url);
 						});
 
 						return message.edit(`${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, starBoardMessageEmbed);
@@ -104,15 +107,18 @@ module.exports = async function (reaction, user) {
 
 				//Try to resend the message
 				const starBoardMessageEmbed = new Discord.MessageEmbed()
+					.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
 					.setColor('#d9b51c')
 					.addFields(
-						{ name: reaction.message.author.username, value: reaction.message.content },
+						{ name: 'Message', value: reaction.message.content },
 						{ name: 'Link', value: `[Open](https://discord.com/channels/${reaction.message.guild.id}/${reaction.message.channel.id}/${reaction.message.id})` },
 					)
 					.setTimestamp();
 
 				reaction.message.attachments.forEach(attachment => {
-					starBoardedMessage.addField(`Attachment: ${attachment.name}`, attachment.data);
+					starBoardMessageEmbed
+						.addField('Attachment', attachment.name)
+						.setImage(attachment.url);
 				});
 
 				try {
@@ -133,15 +139,18 @@ module.exports = async function (reaction, user) {
 				starBoardedMessage.save();
 			} else {
 				const starBoardMessageEmbed = new Discord.MessageEmbed()
+					.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
 					.setColor('#d9b51c')
 					.addFields(
-						{ name: reaction.message.author.username, value: reaction.message.content },
+						{ name: 'Message', value: reaction.message.content },
 						{ name: 'Link', value: `[Open](https://discord.com/channels/${reaction.message.guild.id}/${reaction.message.channel.id}/${reaction.message.id})` },
 					)
 					.setTimestamp();
 
 				reaction.message.attachments.forEach(attachment => {
-					starBoardedMessage.addField(`Attachment: ${attachment.name}`, attachment.data);
+					starBoardMessageEmbed
+						.addField('Attachment', attachment.name)
+						.setImage(attachment.url);
 				});
 
 				let channel;
