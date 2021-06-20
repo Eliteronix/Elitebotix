@@ -1,4 +1,4 @@
-//Import Guilds Table
+const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
 
 module.exports = async function (member) {
@@ -56,6 +56,34 @@ module.exports = async function (member) {
 					return console.log(e);
 				}
 			}
+		}
+
+		if (guild.loggingChannel && guild.loggingMemberRemove) {
+			let channel;
+			try {
+				channel = await member.client.channels.fetch(guild.loggingChannel);
+			} catch (error) {
+				if (error.message === 'Unknown Channel') {
+					guild.loggingChannel = null;
+					guild.save();
+					const owner = await member.message.client.users.fetch(member.guild.ownerID);
+					return owner.send(`It seems like the logging channel on the guild \`${member.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				}
+				console.log(error);
+			}
+
+			const changeEmbed = new Discord.MessageEmbed()
+				.setColor('#0099ff')
+				.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
+				.setDescription(`<@${member.user.id}> left the server!`)
+				.setThumbnail(member.user.displayAvatarURL())
+				.addFields(
+					{ name: 'Left the server', value: `<@${member.user.id}>` },
+				)
+				.setTimestamp()
+				.setFooter('Eventname: userleaving');
+
+			channel.send(changeEmbed);
 		}
 	}
 };

@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const { DBGuilds } = require('../dbObjects');
 const { getGuildPrefix } = require('../utils');
 
@@ -5,7 +6,7 @@ module.exports = {
 	name: 'logging',
 	aliases: ['server-logging'],
 	description: '[Toggle] Logs the enabled events in the specified channel.',
-	usage: '<channel> <mentioned channel> | <eventnames to toggle>',
+	usage: 'list | <channel> <mentioned channel> | <eventnames to toggle>',
 	permissions: 'MANAGE_GUILD',
 	permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -20,7 +21,103 @@ module.exports = {
 		let guild = await DBGuilds.findOne({
 			where: { guildId: msg.guild.id }
 		});
-		if (args[0].toLowerCase() === 'channel') {
+		if (args[0].toLowerCase() === 'list') {
+			let channel = 'Not yet set.';
+			if (guild && guild.loggingChannel) {
+				channel = `<#${guild.loggingChannel}>`;
+			}
+
+			let nicknames = '❌ Not being logged';
+			if (guild && guild.loggingNicknames) {
+				nicknames = '✅ Being logged';
+			}
+
+			let usernames = '❌ Not being logged';
+			if (guild && guild.loggingUsernames) {
+				usernames = '✅ Being logged';
+			}
+
+			let userdiscriminators = '❌ Not being logged';
+			if (guild && guild.loggingDiscriminators) {
+				userdiscriminators = '✅ Being logged';
+			}
+
+			let useravatars = '❌ Not being logged';
+			if (guild && guild.loggingAvatars) {
+				useravatars = '✅ Being logged';
+			}
+
+			let userroles = '❌ Not being logged';
+			if (guild && guild.loggingUserroles) {
+				userroles = '✅ Being logged';
+			}
+
+			let userjoining = '❌ Not being logged';
+			if (guild && guild.loggingMemberAdd) {
+				userjoining = '✅ Being logged';
+			}
+
+			let userleaving = '❌ Not being logged';
+			if (guild && guild.loggingMemberRemove) {
+				userleaving = '✅ Being logged';
+			}
+
+			let rolecreate = '❌ Not being logged';
+			if (guild && guild.loggingRoleCreate) {
+				rolecreate = '✅ Being logged';
+			}
+
+			let roleupdate = '❌ Not being logged';
+			if (guild && guild.loggingRoleUpdate) {
+				roleupdate = '✅ Being logged';
+			}
+
+			let roledelete = '❌ Not being logged';
+			if (guild && guild.loggingRoleDelete) {
+				roledelete = '✅ Being logged';
+			}
+
+			let banadd = '❌ Not being logged';
+			if (guild && guild.loggingBanAdd) {
+				banadd = '✅ Being logged';
+			}
+
+			let banremove = '❌ Not being logged';
+			if (guild && guild.loggingBanRemove) {
+				banremove = '✅ Being logged';
+			}
+
+			let guildupdate = '❌ Not being logged';
+			if (guild && guild.loggingGuildUpdate) {
+				guildupdate = '✅ Being logged';
+			}
+
+			const guildPrefix = await getGuildPrefix(msg);
+
+			const loggingEmbed = new Discord.MessageEmbed()
+				.setColor('#0099ff')
+				.setDescription('A list of all events and if they are being logged or not is being provided below')
+				.addFields(
+					{ name: 'Channel', value: channel },
+					{ name: 'nicknames', value: nicknames, inline: true },
+					{ name: 'usernames', value: usernames, inline: true },
+					{ name: 'userdiscriminators', value: userdiscriminators, inline: true },
+					{ name: 'useravatars', value: useravatars, inline: true },
+					{ name: 'userroles', value: userroles, inline: true },
+					{ name: 'userjoining', value: userjoining, inline: true },
+					{ name: 'userleaving', value: userleaving, inline: true },
+					{ name: 'rolecreate', value: rolecreate, inline: true },
+					{ name: 'roleupdate', value: roleupdate, inline: true },
+					{ name: 'roledelete', value: roledelete, inline: true },
+					{ name: 'banadd', value: banadd, inline: true },
+					{ name: 'banremove', value: banremove, inline: true },
+					{ name: 'guildupdate', value: guildupdate, inline: true },
+				)
+				.setTimestamp()
+				.setFooter(`To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\``);
+
+			msg.channel.send(loggingEmbed);
+		} else if (args[0].toLowerCase() === 'channel') {
 			if (!msg.mentions.channels.first()) {
 				return msg.channel.send('Please mention a channel where the highlighted messages should be sent into.');
 			}
@@ -70,6 +167,106 @@ module.exports = {
 						guild.loggingDiscriminators = true;
 						guild.save();
 						msg.channel.send('Discriminator changes will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'useravatars') {
+					if (guild.loggingAvatars) {
+						guild.loggingAvatars = false;
+						guild.save();
+						msg.channel.send('Avatar changes will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingAvatars = true;
+						guild.save();
+						msg.channel.send('Avatar changes will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'userroles') {
+					if (guild.loggingUserroles) {
+						guild.loggingUserroles = false;
+						guild.save();
+						msg.channel.send('User role changes will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingUserroles = true;
+						guild.save();
+						msg.channel.send('User role changes will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'userjoining') {
+					if (guild.loggingMemberAdd) {
+						guild.loggingMemberAdd = false;
+						guild.save();
+						msg.channel.send('Users joining will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingMemberAdd = true;
+						guild.save();
+						msg.channel.send('Users joining will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'userleaving') {
+					if (guild.loggingMemberRemove) {
+						guild.loggingMemberRemove = false;
+						guild.save();
+						msg.channel.send('Users leaving will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingMemberRemove = true;
+						guild.save();
+						msg.channel.send('Users leaving will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'rolecreate') {
+					if (guild.loggingRoleCreate) {
+						guild.loggingRoleCreate = false;
+						guild.save();
+						msg.channel.send('Create roles will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingRoleCreate = true;
+						guild.save();
+						msg.channel.send('Create roles will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'roleupdate') {
+					if (guild.loggingRoleUpdate) {
+						guild.loggingRoleUpdate = false;
+						guild.save();
+						msg.channel.send('Updated roles will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingRoleUpdate = true;
+						guild.save();
+						msg.channel.send('Updated roles will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'roledelete') {
+					if (guild.loggingRoleDelete) {
+						guild.loggingRoleDelete = false;
+						guild.save();
+						msg.channel.send('Deleted roles will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingRoleDelete = true;
+						guild.save();
+						msg.channel.send('Deleted roles will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'banadd') {
+					if (guild.loggingBanAdd) {
+						guild.loggingBanAdd = false;
+						guild.save();
+						msg.channel.send('Banned users will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingBanAdd = true;
+						guild.save();
+						msg.channel.send('Banned users will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'banremove') {
+					if (guild.loggingBanRemove) {
+						guild.loggingBanRemove = false;
+						guild.save();
+						msg.channel.send('Unbanned users will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingBanRemove = true;
+						guild.save();
+						msg.channel.send('Unbanned users will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'guildupdate') {
+					if (guild.loggingGuildUpdate) {
+						guild.loggingGuildUpdate = false;
+						guild.save();
+						msg.channel.send('Guild updates will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingGuildUpdate = true;
+						guild.save();
+						msg.channel.send('Guild updates will now get logged in the specified channel.');
 					}
 				} else {
 					msg.channel.send(`\`${arg.replace(/`/g, '')}\` is not a valid event to log.`);

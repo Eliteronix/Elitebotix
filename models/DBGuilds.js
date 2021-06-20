@@ -43,6 +43,17 @@ module.exports = (sequelize, DataTypes) => {
 		loggingChannel: DataTypes.STRING,
 		loggingNicknames: DataTypes.BOOLEAN,
 		loggingUsernames: DataTypes.BOOLEAN,
+		loggingDiscriminators: DataTypes.BOOLEAN,
+		loggingAvatars: DataTypes.BOOLEAN,
+		loggingUserroles: DataTypes.BOOLEAN,
+		loggingMemberAdd: DataTypes.BOOLEAN,
+		loggingMemberRemove: DataTypes.BOOLEAN,
+		loggingRoleCreate: DataTypes.BOOLEAN,
+		loggingRoleUpdate: DataTypes.BOOLEAN,
+		loggingRoleDelete: DataTypes.BOOLEAN,
+		loggingBanAdd: DataTypes.BOOLEAN,
+		loggingBanRemove: DataTypes.BOOLEAN,
+		loggingGuildUpdate: DataTypes.BOOLEAN,
 		paranoid: true,
 	});
 };

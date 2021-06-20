@@ -12,14 +12,20 @@ const client = new Discord.Client({ partials: ['MESSAGE', 'REACTION'] });
 //Get gotMessage
 const gotMessage = require('./gotMessage');
 
-//Get memberJoined
-const memberJoined = require('./memberJoined');
+//Get guildMemberAdd
+const guildMemberAdd = require('./guildMemberAdd');
 
-//Get memberLeaved
-const memberLeaved = require('./memberLeaved');
+//Get guildMemberRemove
+const guildMemberRemove = require('./guildMemberRemove');
 
 //Get guildMemberUpdate
 const guildMemberUpdate = require('./guildMemberUpdate');
+
+//Get guildBanAdd
+const guildBanAdd = require('./guildBanAdd');
+
+//Get guildBanRemove
+const guildBanRemove = require('./guildBanRemove');
 
 //Get userUpdate
 const userUpdate = require('./userUpdate');
@@ -35,6 +41,18 @@ const voiceStateUpdate = require('./voiceStateUpdate');
 
 //Get guildCreate
 const guildCreate = require('./guildCreate');
+
+//Get guildUpdate
+const guildUpdate = require('./guildUpdate');
+
+//Get roleCreate
+const roleCreate = require('./roleCreate');
+
+//Get roleUpdate
+const roleUpdate = require('./roleUpdate');
+
+//Get roleDelete
+const roleDelete = require('./roleDelete');
 
 //Get executeNextProcessQueueTask
 const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask } = require('./utils');
@@ -72,13 +90,17 @@ function readyDiscord() {
 	restartProcessQueueTask();
 }
 
-client.on('guildMemberAdd', memberJoined);
+client.on('guildMemberAdd', guildMemberAdd);
 
-client.on('guildMemberRemove', memberLeaved);
+client.on('guildMemberRemove', guildMemberRemove);
 
 client.on('guildMemberUpdate', guildMemberUpdate);
 
-// client.on('userUpdate', userUpdate);
+client.on('guildBanAdd', guildBanAdd);
+
+client.on('guildBanRemove', guildBanRemove);
+
+client.on('userUpdate', userUpdate);
 
 client.on('messageReactionAdd', reactionAdded);
 
@@ -89,6 +111,14 @@ client.on('message', msg => gotMessage(msg, bancho));
 client.on('voiceStateUpdate', voiceStateUpdate);
 
 client.on('guildCreate', guildCreate);
+
+client.on('guildUpdate', guildUpdate);
+
+client.on('roleCreate', roleCreate);
+
+client.on('roleUpdate', roleUpdate);
+
+client.on('roleDelete', roleDelete);
 
 client.setInterval(() => executeNextProcessQueueTask(client), 1000);
 

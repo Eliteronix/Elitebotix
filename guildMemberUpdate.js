@@ -3,14 +3,6 @@ const { DBGuilds } = require('./dbObjects');
 
 module.exports = async function (oldMember, newMember) {
 
-	console.log('guildMemberUpdate');
-	if (oldMember.user.nickname !== newMember.user.nickname) { console.log('Nickname changed'); }
-	if (oldMember.user.username !== newMember.user.username) { console.log('Username changed'); }
-	if (oldMember.user.discriminator !== newMember.user.discriminator) { console.log('Discriminator changed'); }
-	if (oldMember.user.defaultAvatarURL !== newMember.user.defaultAvatarURL) { console.log('Avatar changed'); }
-	if (oldMember._roles != newMember._roles) { console.log('Roles changed'); }
-	console.log(oldMember.user, oldMember._roles, newMember.user, newMember._roles);
-
 	//For the development version
 	//if the message is not in the Dev-Servers then return
 	// eslint-disable-next-line no-undef
@@ -75,6 +67,66 @@ module.exports = async function (oldMember, newMember) {
 				)
 				.setTimestamp()
 				.setFooter('Eventname: nicknames');
+
+			channel.send(changeEmbed);
+		}
+	}
+
+	let sameRoles = true;
+	for (let i = 0; i < oldMember._roles.length && sameRoles; i++) {
+		if (!newMember._roles[i] || newMember._roles[i] !== oldMember._roles[i]) {
+			sameRoles = false;
+		}
+	}
+	if (!sameRoles) {
+		const guild = await DBGuilds.findOne({
+			where: { guildId: newMember.guild.id }
+		});
+
+		if (guild && guild.loggingChannel && guild.loggingUserroles) {
+			let channel;
+			try {
+				channel = await newMember.client.channels.fetch(guild.loggingChannel);
+			} catch (error) {
+				if (error.message === 'Unknown Channel') {
+					guild.loggingChannel = null;
+					guild.save();
+					const owner = await newMember.message.client.users.fetch(newMember.guild.ownerID);
+					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				}
+				console.log(error);
+			}
+
+			let oldUserRoles = '';
+
+			oldMember._roles.forEach(role => {
+				if (oldUserRoles) {
+					oldUserRoles = `${oldUserRoles}, <@&${role}>`;
+				} else {
+					oldUserRoles = `<@&${role}>`;
+				}
+			});
+
+			let newUserRoles = '';
+
+			newMember._roles.forEach(role => {
+				if (newUserRoles) {
+					newUserRoles = `${newUserRoles}, <@&${role}>`;
+				} else {
+					newUserRoles = `<@&${role}>`;
+				}
+			});
+
+			const changeEmbed = new Discord.MessageEmbed()
+				.setColor('#0099ff')
+				.setAuthor(`${newMember.user.username}#${newMember.user.discriminator}`, oldMember.user.displayAvatarURL())
+				.setDescription(`<@${newMember.user.id}> roles have changed!`)
+				.setThumbnail(newMember.user.displayAvatarURL())
+				.addFields(
+					{ name: 'Roles', value: `Old Roles:\n${oldUserRoles}\n\nNew Roles:\n${newUserRoles}` },
+				)
+				.setTimestamp()
+				.setFooter('Eventname: userroles');
 
 			channel.send(changeEmbed);
 		}
