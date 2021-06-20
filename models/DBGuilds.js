@@ -54,6 +54,8 @@ module.exports = (sequelize, DataTypes) => {
 		loggingBanAdd: DataTypes.BOOLEAN,
 		loggingBanRemove: DataTypes.BOOLEAN,
 		loggingGuildUpdate: DataTypes.BOOLEAN,
+		loggingServerMute: DataTypes.BOOLEAN,
+		loggingServerDeaf: DataTypes.BOOLEAN,
 		paranoid: true,
 	});
 };

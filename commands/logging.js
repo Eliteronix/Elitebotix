@@ -92,6 +92,16 @@ module.exports = {
 				guildupdate = '✅ Being logged';
 			}
 
+			let servermute = '❌ Not being logged';
+			if (guild && guild.loggingServerMute) {
+				servermute = '✅ Being logged';
+			}
+
+			let serverdeaf = '❌ Not being logged';
+			if (guild && guild.loggingServerDeaf) {
+				serverdeaf = '✅ Being logged';
+			}
+
 			const guildPrefix = await getGuildPrefix(msg);
 
 			const loggingEmbed = new Discord.MessageEmbed()
@@ -112,6 +122,8 @@ module.exports = {
 					{ name: 'banadd', value: banadd, inline: true },
 					{ name: 'banremove', value: banremove, inline: true },
 					{ name: 'guildupdate', value: guildupdate, inline: true },
+					{ name: 'servermute', value: servermute, inline: true },
+					{ name: 'serverdeaf', value: serverdeaf, inline: true },
 				)
 				.setTimestamp()
 				.setFooter(`To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\``);
@@ -267,6 +279,26 @@ module.exports = {
 						guild.loggingGuildUpdate = true;
 						guild.save();
 						msg.channel.send('Guild updates will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'servermute') {
+					if (guild.loggingServerMute) {
+						guild.loggingServerMute = false;
+						guild.save();
+						msg.channel.send('Server mutes will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingServerMute = true;
+						guild.save();
+						msg.channel.send('Server mutes will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'serverdeaf') {
+					if (guild.loggingServerDeaf) {
+						guild.loggingServerDeaf = false;
+						guild.save();
+						msg.channel.send('Server deafs will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingServerDeaf = true;
+						guild.save();
+						msg.channel.send('Server deafs will now get logged in the specified channel.');
 					}
 				} else {
 					msg.channel.send(`\`${arg.replace(/`/g, '')}\` is not a valid event to log.`);

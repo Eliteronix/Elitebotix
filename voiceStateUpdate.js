@@ -1,4 +1,4 @@
-//Import Tables
+const Discord = require('discord.js');
 const { DBGuilds, DBTemporaryVoices } = require('./dbObjects');
 
 module.exports = async function (oldMember, newMember) {
@@ -23,6 +23,96 @@ module.exports = async function (oldMember, newMember) {
 	} else if (process.env.SERVER === 'Live') {
 		if (newMember.guild.id === '800641468321759242' || newMember.guild.id === '800641735658176553' || newMember.guild.id === '800641367083974667' || newMember.guild.id === '800641819086946344') {
 			return;
+		}
+	}
+
+	if (oldMember.serverMute !== newMember.serverMute) {
+		const guild = await DBGuilds.findOne({
+			where: { guildId: newMember.guild.id }
+		});
+
+		if (guild.loggingChannel && guild.loggingServerMute) {
+			let channel;
+			try {
+				channel = await newMember.client.channels.fetch(guild.loggingChannel);
+			} catch (error) {
+				if (error.message === 'Unknown Channel') {
+					guild.loggingChannel = null;
+					guild.save();
+					const owner = await newMember.client.users.fetch(newMember.guild.ownerID);
+					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				}
+				console.log(error);
+			}
+
+			let member;
+			try {
+				member = await newMember.guild.members.fetch(newMember.id);
+			} catch (error) {
+				//nothing
+			}
+
+			if (!member) {
+				return;
+			}
+
+			const changeEmbed = new Discord.MessageEmbed()
+				.setColor('#0099ff')
+				.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
+				.setDescription(`<@${member.user.id}> has updated their profile!`)
+				.setThumbnail(member.user.displayAvatarURL())
+				.addFields(
+					{ name: 'Server Mute', value: `\`${oldMember.serverMute}\` -> \`${newMember.serverMute}\`` },
+				)
+				.setTimestamp()
+				.setFooter('Eventname: servermute');
+
+			channel.send(changeEmbed);
+		}
+	}
+
+	if (oldMember.serverDeaf !== newMember.serverDeaf) {
+		const guild = await DBGuilds.findOne({
+			where: { guildId: newMember.guild.id }
+		});
+
+		if (guild.loggingChannel && guild.loggingServerDeaf) {
+			let channel;
+			try {
+				channel = await newMember.client.channels.fetch(guild.loggingChannel);
+			} catch (error) {
+				if (error.message === 'Unknown Channel') {
+					guild.loggingChannel = null;
+					guild.save();
+					const owner = await newMember.client.users.fetch(newMember.guild.ownerID);
+					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				}
+				console.log(error);
+			}
+
+			let member;
+			try {
+				member = await newMember.guild.members.fetch(newMember.id);
+			} catch (error) {
+				//nothing
+			}
+
+			if (!member) {
+				return;
+			}
+
+			const changeEmbed = new Discord.MessageEmbed()
+				.setColor('#0099ff')
+				.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
+				.setDescription(`<@${member.user.id}> has updated their profile!`)
+				.setThumbnail(member.user.displayAvatarURL())
+				.addFields(
+					{ name: 'Server Deaf', value: `\`${oldMember.serverDeaf}\` -> \`${newMember.serverDeaf}\`` },
+				)
+				.setTimestamp()
+				.setFooter('Eventname: serverdeaf');
+
+			channel.send(changeEmbed);
 		}
 	}
 
