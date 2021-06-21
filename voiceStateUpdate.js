@@ -59,7 +59,7 @@ module.exports = async function (oldMember, newMember) {
 			const changeEmbed = new Discord.MessageEmbed()
 				.setColor('#0099ff')
 				.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
-				.setDescription(`<@${member.user.id}> has updated their profile!`)
+				.setDescription(`<@${member.user.id}> has been updated!`)
 				.setThumbnail(member.user.displayAvatarURL())
 				.addFields(
 					{ name: 'Server Mute', value: `\`${oldMember.serverMute}\` -> \`${newMember.serverMute}\`` },
@@ -104,13 +104,97 @@ module.exports = async function (oldMember, newMember) {
 			const changeEmbed = new Discord.MessageEmbed()
 				.setColor('#0099ff')
 				.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
-				.setDescription(`<@${member.user.id}> has updated their profile!`)
+				.setDescription(`<@${member.user.id}> has been updated!`)
 				.setThumbnail(member.user.displayAvatarURL())
 				.addFields(
 					{ name: 'Server Deaf', value: `\`${oldMember.serverDeaf}\` -> \`${newMember.serverDeaf}\`` },
 				)
 				.setTimestamp()
 				.setFooter('Eventname: serverdeaf');
+
+			channel.send(changeEmbed);
+		}
+	}
+
+	if (oldMember.channelID !== newMember.channelID) {
+		const guild = await DBGuilds.findOne({
+			where: { guildId: newMember.guild.id }
+		});
+
+		if (newMember.channelID && guild.loggingChannel && guild.loggingJoinVoice) {
+			let channel;
+			try {
+				channel = await newMember.client.channels.fetch(guild.loggingChannel);
+			} catch (error) {
+				if (error.message === 'Unknown Channel') {
+					guild.loggingChannel = null;
+					guild.save();
+					const owner = await newMember.client.users.fetch(newMember.guild.ownerID);
+					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				}
+				console.log(error);
+			}
+
+			let member;
+			try {
+				member = await newMember.guild.members.fetch(newMember.id);
+			} catch (error) {
+				//nothing
+			}
+
+			if (!member) {
+				return;
+			}
+
+			const changeEmbed = new Discord.MessageEmbed()
+				.setColor('#0099ff')
+				.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
+				.setDescription(`<@${member.user.id}> has joined a voice channel!`)
+				.setThumbnail(member.user.displayAvatarURL())
+				.addFields(
+					{ name: 'Joined Voice Channel', value: `<#${newMember.channelID}>` },
+				)
+				.setTimestamp()
+				.setFooter('Eventname: joinvoice');
+
+			channel.send(changeEmbed);
+		}
+
+		if (oldMember.channelID && guild.loggingChannel && guild.loggingLeaveVoice) {
+			let channel;
+			try {
+				channel = await newMember.client.channels.fetch(guild.loggingChannel);
+			} catch (error) {
+				if (error.message === 'Unknown Channel') {
+					guild.loggingChannel = null;
+					guild.save();
+					const owner = await newMember.client.users.fetch(newMember.guild.ownerID);
+					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				}
+				console.log(error);
+			}
+
+			let member;
+			try {
+				member = await newMember.guild.members.fetch(newMember.id);
+			} catch (error) {
+				//nothing
+			}
+
+			if (!member) {
+				return;
+			}
+
+			const changeEmbed = new Discord.MessageEmbed()
+				.setColor('#0099ff')
+				.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
+				.setDescription(`<@${member.user.id}> has left a voice channel!`)
+				.setThumbnail(member.user.displayAvatarURL())
+				.addFields(
+					{ name: 'Left Voice Channel', value: `<#${oldMember.channelID}>` },
+				)
+				.setTimestamp()
+				.setFooter('Eventname: leavevoice');
 
 			channel.send(changeEmbed);
 		}

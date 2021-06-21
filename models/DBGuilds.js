@@ -56,6 +56,8 @@ module.exports = (sequelize, DataTypes) => {
 		loggingGuildUpdate: DataTypes.BOOLEAN,
 		loggingServerMute: DataTypes.BOOLEAN,
 		loggingServerDeaf: DataTypes.BOOLEAN,
+		loggingJoinVoice: DataTypes.BOOLEAN,
+		loggingLeaveVoice: DataTypes.BOOLEAN,
 		paranoid: true,
 	});
 };

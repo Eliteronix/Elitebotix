@@ -102,6 +102,16 @@ module.exports = {
 				serverdeaf = '✅ Being logged';
 			}
 
+			let joinvoice = '❌ Not being logged';
+			if (guild && guild.loggingJoinVoice) {
+				joinvoice = '✅ Being logged';
+			}
+
+			let leavevoice = '❌ Not being logged';
+			if (guild && guild.loggingLeaveVoice) {
+				leavevoice = '✅ Being logged';
+			}
+
 			const guildPrefix = await getGuildPrefix(msg);
 
 			const loggingEmbed = new Discord.MessageEmbed()
@@ -124,6 +134,8 @@ module.exports = {
 					{ name: 'guildupdate', value: guildupdate, inline: true },
 					{ name: 'servermute', value: servermute, inline: true },
 					{ name: 'serverdeaf', value: serverdeaf, inline: true },
+					{ name: 'joinvoice', value: joinvoice, inline: true },
+					{ name: 'leavevoice', value: leavevoice, inline: true },
 				)
 				.setTimestamp()
 				.setFooter(`To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\``);
@@ -297,6 +309,26 @@ module.exports = {
 						msg.channel.send('Server deafs will no longer get logged in the specified channel.');
 					} else {
 						guild.loggingServerDeaf = true;
+						guild.save();
+						msg.channel.send('Server deafs will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'joinvoice') {
+					if (guild.loggingJoinVoice) {
+						guild.loggingJoinVoice = false;
+						guild.save();
+						msg.channel.send('Server deafs will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingJoinVoice = true;
+						guild.save();
+						msg.channel.send('Server deafs will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'leavevoice') {
+					if (guild.loggingLeaveVoice) {
+						guild.loggingLeaveVoice = false;
+						guild.save();
+						msg.channel.send('Server deafs will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingLeaveVoice = true;
 						guild.save();
 						msg.channel.send('Server deafs will now get logged in the specified channel.');
 					}
