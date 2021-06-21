@@ -28,7 +28,7 @@
     "weather-js": "^2.0.0"
   },
   "devDependencies": {
-    "eslint": "^7.22.0"
+    "eslint": "^7.29.0"
   },
   "engines": {
     "node": "14.16.0",
