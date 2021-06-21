@@ -54,6 +54,12 @@ const roleUpdate = require('./roleUpdate');
 //Get roleDelete
 const roleDelete = require('./roleDelete');
 
+//Get channelCreate
+const channelCreate = require('./channelCreate');
+
+//Get channelDelete
+const channelDelete = require('./channelDelete');
+
 //Get executeNextProcessQueueTask
 const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask } = require('./utils');
 
@@ -119,6 +125,10 @@ client.on('roleCreate', roleCreate);
 client.on('roleUpdate', roleUpdate);
 
 client.on('roleDelete', roleDelete);
+
+client.on('channelCreate', channelCreate);
+
+client.on('channelDelete', channelDelete);
 
 client.setInterval(() => executeNextProcessQueueTask(client), 1000);
 

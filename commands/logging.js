@@ -112,6 +112,21 @@ module.exports = {
 				leavevoice = '✅ Being logged';
 			}
 
+			let channelcreate = '❌ Not being logged';
+			if (guild && guild.loggingChannelCreate) {
+				channelcreate = '✅ Being logged';
+			}
+
+			let channelupdate = '❌ Not being logged';
+			if (guild && guild.loggingChannelUpdate) {
+				channelupdate = '✅ Being logged';
+			}
+
+			let channeldelete = '❌ Not being logged';
+			if (guild && guild.loggingChannelDelete) {
+				channeldelete = '✅ Being logged';
+			}
+
 			const guildPrefix = await getGuildPrefix(msg);
 
 			const loggingEmbed = new Discord.MessageEmbed()
@@ -136,6 +151,9 @@ module.exports = {
 					{ name: 'serverdeaf', value: serverdeaf, inline: true },
 					{ name: 'joinvoice', value: joinvoice, inline: true },
 					{ name: 'leavevoice', value: leavevoice, inline: true },
+					{ name: 'channelcreate', value: channelcreate, inline: true },
+					{ name: 'channelupdate', value: channelupdate, inline: true },
+					{ name: 'channeldelete', value: channeldelete, inline: true },
 				)
 				.setTimestamp()
 				.setFooter(`To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\``);
@@ -316,21 +334,51 @@ module.exports = {
 					if (guild.loggingJoinVoice) {
 						guild.loggingJoinVoice = false;
 						guild.save();
-						msg.channel.send('Server deafs will no longer get logged in the specified channel.');
+						msg.channel.send('Joining voices will no longer get logged in the specified channel.');
 					} else {
 						guild.loggingJoinVoice = true;
 						guild.save();
-						msg.channel.send('Server deafs will now get logged in the specified channel.');
+						msg.channel.send('Joining voices will now get logged in the specified channel.');
 					}
 				} else if (arg.toLowerCase() === 'leavevoice') {
 					if (guild.loggingLeaveVoice) {
 						guild.loggingLeaveVoice = false;
 						guild.save();
-						msg.channel.send('Server deafs will no longer get logged in the specified channel.');
+						msg.channel.send('Leaving voices will no longer get logged in the specified channel.');
 					} else {
 						guild.loggingLeaveVoice = true;
 						guild.save();
-						msg.channel.send('Server deafs will now get logged in the specified channel.');
+						msg.channel.send('Leaving voices will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'channelcreate') {
+					if (guild.loggingChannelCreate) {
+						guild.loggingChannelCreate = false;
+						guild.save();
+						msg.channel.send('Created channels will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingChannelCreate = true;
+						guild.save();
+						msg.channel.send('Created channels will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'channelupdate') {
+					if (guild.loggingChannelUpdate) {
+						guild.loggingChannelUpdate = false;
+						guild.save();
+						msg.channel.send('Updated channels will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingChannelUpdate = true;
+						guild.save();
+						msg.channel.send('Updated channels will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'channeldelete') {
+					if (guild.loggingChannelDelete) {
+						guild.loggingChannelDelete = false;
+						guild.save();
+						msg.channel.send('Deleted channels will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingChannelDelete = true;
+						guild.save();
+						msg.channel.send('Deleted channels will now get logged in the specified channel.');
 					}
 				} else {
 					msg.channel.send(`\`${arg.replace(/`/g, '')}\` is not a valid event to log.`);
