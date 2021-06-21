@@ -57,8 +57,17 @@ const roleDelete = require('./roleDelete');
 //Get channelCreate
 const channelCreate = require('./channelCreate');
 
+//Get channelUpdate
+const channelUpdate = require('./channelUpdate');
+
 //Get channelDelete
 const channelDelete = require('./channelDelete');
+
+//Get inviteCreate
+const inviteCreate = require('./inviteCreate');
+
+//Get inviteDelete
+const inviteDelete = require('./inviteDelete');
 
 //Get executeNextProcessQueueTask
 const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask } = require('./utils');
@@ -128,7 +137,13 @@ client.on('roleDelete', roleDelete);
 
 client.on('channelCreate', channelCreate);
 
+client.on('channelUpdate', channelUpdate);
+
 client.on('channelDelete', channelDelete);
+
+client.on('inviteCreate', inviteCreate);
+
+client.on('inviteDelete', inviteDelete);
 
 client.setInterval(() => executeNextProcessQueueTask(client), 1000);
 

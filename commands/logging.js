@@ -127,6 +127,16 @@ module.exports = {
 				channeldelete = '✅ Being logged';
 			}
 
+			let invitecreate = '❌ Not being logged';
+			if (guild && guild.loggingInviteCreate) {
+				invitecreate = '✅ Being logged';
+			}
+
+			let invitedelete = '❌ Not being logged';
+			if (guild && guild.loggingInviteDelete) {
+				invitedelete = '✅ Being logged';
+			}
+
 			const guildPrefix = await getGuildPrefix(msg);
 
 			const loggingEmbed = new Discord.MessageEmbed()
@@ -154,6 +164,8 @@ module.exports = {
 					{ name: 'channelcreate', value: channelcreate, inline: true },
 					{ name: 'channelupdate', value: channelupdate, inline: true },
 					{ name: 'channeldelete', value: channeldelete, inline: true },
+					{ name: 'invitecreate', value: invitecreate, inline: true },
+					{ name: 'invitedelete', value: invitedelete, inline: true },
 				)
 				.setTimestamp()
 				.setFooter(`To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\``);
@@ -379,6 +391,26 @@ module.exports = {
 						guild.loggingChannelDelete = true;
 						guild.save();
 						msg.channel.send('Deleted channels will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'invitecreate') {
+					if (guild.loggingInviteCreate) {
+						guild.loggingInviteCreate = false;
+						guild.save();
+						msg.channel.send('Created invites will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingInviteCreate = true;
+						guild.save();
+						msg.channel.send('Created invites will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'invitedelete') {
+					if (guild.loggingInviteDelete) {
+						guild.loggingInviteDelete = false;
+						guild.save();
+						msg.channel.send('Deleted invites will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingInviteDelete = true;
+						guild.save();
+						msg.channel.send('Deleted invites will now get logged in the specified channel.');
 					}
 				} else {
 					msg.channel.send(`\`${arg.replace(/`/g, '')}\` is not a valid event to log.`);

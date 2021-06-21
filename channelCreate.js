@@ -54,7 +54,6 @@ module.exports = async function (channel) {
 				{ name: 'Channel Created', value: `<#${channel.id}>` },
 				{ name: 'Type', value: channel.type },
 				{ name: 'Name', value: channel.name },
-				// { name: 'Permissions', value: permissionsReadable },
 			)
 			.setTimestamp()
 			.setFooter('Eventname: channelcreate');
@@ -93,6 +92,3 @@ module.exports = async function (channel) {
 		loggingChannel.send(changeEmbed);
 	}
 };
-
-//permissionOverwrites: Collection(0)[Map] { }
-//permissionOverwrites: Collection(0) [Map] {}
