@@ -12,6 +12,12 @@ const client = new Discord.Client({ partials: ['MESSAGE', 'REACTION'] });
 //Get gotMessage
 const gotMessage = require('./gotMessage');
 
+//Get messageUpdate
+const messageUpdate = require('./messageUpdate');
+
+//Get messageDelete
+const messageDelete = require('./messageDelete');
+
 //Get guildMemberAdd
 const guildMemberAdd = require('./guildMemberAdd');
 
@@ -69,6 +75,15 @@ const inviteCreate = require('./inviteCreate');
 //Get inviteDelete
 const inviteDelete = require('./inviteDelete');
 
+//Get emojiCreate
+const emojiCreate = require('./emojiCreate');
+
+//Get emojiUpdate
+const emojiUpdate = require('./emojiUpdate');
+
+//Get emojiDelete
+const emojiDelete = require('./emojiDelete');
+
 //Get executeNextProcessQueueTask
 const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask } = require('./utils');
 
@@ -105,6 +120,12 @@ function readyDiscord() {
 	restartProcessQueueTask();
 }
 
+client.on('message', msg => gotMessage(msg, bancho));
+
+client.on('messageUpdate', messageUpdate);
+
+client.on('messageDelete', messageDelete);
+
 client.on('guildMemberAdd', guildMemberAdd);
 
 client.on('guildMemberRemove', guildMemberRemove);
@@ -120,8 +141,6 @@ client.on('userUpdate', userUpdate);
 client.on('messageReactionAdd', reactionAdded);
 
 client.on('messageReactionRemove', reactionRemoved);
-
-client.on('message', msg => gotMessage(msg, bancho));
 
 client.on('voiceStateUpdate', voiceStateUpdate);
 
@@ -144,6 +163,12 @@ client.on('channelDelete', channelDelete);
 client.on('inviteCreate', inviteCreate);
 
 client.on('inviteDelete', inviteDelete);
+
+client.on('emojiCreate', emojiCreate);
+
+client.on('emojiUpdate', emojiUpdate);
+
+client.on('emojiDelete', emojiDelete);
 
 client.setInterval(() => executeNextProcessQueueTask(client), 1000);
 

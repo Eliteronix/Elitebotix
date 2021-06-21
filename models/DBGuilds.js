@@ -63,6 +63,11 @@ module.exports = (sequelize, DataTypes) => {
 		loggingChannelDelete: DataTypes.BOOLEAN,
 		loggingInviteCreate: DataTypes.BOOLEAN,
 		loggingInviteDelete: DataTypes.BOOLEAN,
+		loggingMessageUpdate: DataTypes.BOOLEAN,
+		loggingMessageDelete: DataTypes.BOOLEAN,
+		loggingEmojiCreate: DataTypes.BOOLEAN,
+		loggingEmojiUpdate: DataTypes.BOOLEAN,
+		loggingEmojiDelete: DataTypes.BOOLEAN,
 		paranoid: true,
 	});
 };

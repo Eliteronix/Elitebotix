@@ -137,11 +137,36 @@ module.exports = {
 				invitedelete = '✅ Being logged';
 			}
 
+			let messageupdate = '❌ Not being logged';
+			if (guild && guild.loggingMessageUpdate) {
+				messageupdate = '✅ Being logged';
+			}
+
+			let messagedelete = '❌ Not being logged';
+			if (guild && guild.loggingMessageDelete) {
+				messagedelete = '✅ Being logged';
+			}
+
+			let emojicreate = '❌ Not being logged';
+			if (guild && guild.loggingEmojiCreate) {
+				emojicreate = '✅ Being logged';
+			}
+
+			let emojiupdate = '❌ Not being logged';
+			if (guild && guild.loggingEmojiUpdate) {
+				emojiupdate = '✅ Being logged';
+			}
+
+			let emojidelete = '❌ Not being logged';
+			if (guild && guild.loggingEmojiDelete) {
+				emojidelete = '✅ Being logged';
+			}
+
 			const guildPrefix = await getGuildPrefix(msg);
 
 			const loggingEmbed = new Discord.MessageEmbed()
 				.setColor('#0099ff')
-				.setDescription('A list of all events and if they are being logged or not is being provided below')
+				.setDescription('A list of all events and if they are being logged or not is being provided below (part 1)')
 				.addFields(
 					{ name: 'Channel', value: channel },
 					{ name: 'nicknames', value: nicknames, inline: true },
@@ -166,11 +191,26 @@ module.exports = {
 					{ name: 'channeldelete', value: channeldelete, inline: true },
 					{ name: 'invitecreate', value: invitecreate, inline: true },
 					{ name: 'invitedelete', value: invitedelete, inline: true },
+					{ name: 'messageupdate', value: messageupdate, inline: true },
+					{ name: 'messagedelete', value: messagedelete, inline: true },
 				)
 				.setTimestamp()
 				.setFooter(`To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\``);
 
 			msg.channel.send(loggingEmbed);
+
+			const loggingEmbed2 = new Discord.MessageEmbed()
+				.setColor('#0099ff')
+				.setDescription('A list of all events and if they are being logged or not is being provided below (part 2)')
+				.addFields(
+					{ name: 'emojicreate', value: emojicreate, inline: true },
+					{ name: 'emojiupdate', value: emojiupdate, inline: true },
+					{ name: 'emojidelete', value: emojidelete, inline: true },
+				)
+				.setTimestamp()
+				.setFooter(`To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\``);
+
+			msg.channel.send(loggingEmbed2);
 		} else if (args[0].toLowerCase() === 'channel') {
 			if (!msg.mentions.channels.first()) {
 				return msg.channel.send('Please mention a channel where the highlighted messages should be sent into.');
@@ -411,6 +451,56 @@ module.exports = {
 						guild.loggingInviteDelete = true;
 						guild.save();
 						msg.channel.send('Deleted invites will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'messageupdate') {
+					if (guild.loggingMessageUpdate) {
+						guild.loggingMessageUpdate = false;
+						guild.save();
+						msg.channel.send('Updated messages will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingMessageUpdate = true;
+						guild.save();
+						msg.channel.send('Updated messages will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'messagedelete') {
+					if (guild.loggingMessageDelete) {
+						guild.loggingMessageDelete = false;
+						guild.save();
+						msg.channel.send('Deleted messages will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingMessageDelete = true;
+						guild.save();
+						msg.channel.send('Deleted messages will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'emojicreate') {
+					if (guild.loggingEmojiCreate) {
+						guild.loggingEmojiCreate = false;
+						guild.save();
+						msg.channel.send('Created emojis will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingEmojiCreate = true;
+						guild.save();
+						msg.channel.send('Created emojis will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'emojiupdate') {
+					if (guild.loggingEmojiUpdate) {
+						guild.loggingEmojiUpdate = false;
+						guild.save();
+						msg.channel.send('Updated emojis will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingEmojiUpdate = true;
+						guild.save();
+						msg.channel.send('Updated emojis will now get logged in the specified channel.');
+					}
+				} else if (arg.toLowerCase() === 'emojidelete') {
+					if (guild.loggingEmojiDelete) {
+						guild.loggingEmojiDelete = false;
+						guild.save();
+						msg.channel.send('Deleted emojis will no longer get logged in the specified channel.');
+					} else {
+						guild.loggingEmojiDelete = true;
+						guild.save();
+						msg.channel.send('Deleted emojis will now get logged in the specified channel.');
 					}
 				} else {
 					msg.channel.send(`\`${arg.replace(/`/g, '')}\` is not a valid event to log.`);
