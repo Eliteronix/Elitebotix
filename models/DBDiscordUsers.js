@@ -75,6 +75,9 @@ module.exports = (sequelize, DataTypes) => {
 		osuMOTDmutedUntil: {
 			type: DataTypes.DATE,
 		},
+		osuNotFoundFirstOccurence: {
+			type: DataTypes.DATE,
+		},
 		paranoid: true,
 	});
 };

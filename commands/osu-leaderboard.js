@@ -1,5 +1,4 @@
 const { DBDiscordUsers } = require('../dbObjects');
-const osu = require('node-osu');
 const { getGuildPrefix, humanReadable, createLeaderboard } = require('../utils');
 
 module.exports = {
@@ -19,14 +18,6 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
-		// eslint-disable-next-line no-undef
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
-
 		let processingMessage = await msg.channel.send('Processing osu! leaderboard...');
 
 		msg.guild.members.fetch()
@@ -39,30 +30,6 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						const today = new Date();
-						const dd = String(today.getDate());
-						const mm = String(today.getMonth() + 1);
-						const yyyy = today.getFullYear();
-
-						let osuUser;
-
-						if (discordUser.updatedAt.getFullYear() < yyyy) {
-							osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
-						} else if (discordUser.updatedAt.getMonth() + 1 < mm) {
-							osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
-						} else if (discordUser.updatedAt.getDate() < dd) {
-							osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
-						} else if (discordUser.osuPP === null || discordUser.osuRank === null || discordUser.osuName === null) {
-							osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
-						}
-
-						if (osuUser) {
-							discordUser.osuName = osuUser.name;
-							discordUser.osuPP = osuUser.pp.raw;
-							discordUser.osuRank = osuUser.pp.rank;
-							await discordUser.save();
-						}
-
 						osuAccounts.push(discordUser);
 					}
 				}

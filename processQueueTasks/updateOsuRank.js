@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp } = require('../dbObjects');
+const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
 const { getOsuBadgeNumberById } = require('../utils.js');
 const osu = require('node-osu');
 
@@ -18,30 +18,110 @@ module.exports = {
 			where: { userId: discordUserId }
 		});
 
-		const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
+		try {
+			const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
 
-		discordUser.osuName = osuUser.name;
-		discordUser.osuPP = osuUser.pp.raw;
-		discordUser.osuRank = osuUser.pp.rank;
+			discordUser.osuName = osuUser.name;
+			discordUser.osuPP = osuUser.pp.raw;
+			discordUser.osuRank = osuUser.pp.rank;
 
-		const taikoUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 1 });
+			const taikoUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 1 });
 
-		discordUser.taikoPP = taikoUser.pp.raw;
-		discordUser.taikoRank = taikoUser.pp.rank;
+			discordUser.taikoPP = taikoUser.pp.raw;
+			discordUser.taikoRank = taikoUser.pp.rank;
 
-		const catchUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 2 });
+			const catchUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 2 });
 
-		discordUser.catchPP = catchUser.pp.raw;
-		discordUser.catchRank = catchUser.pp.rank;
+			discordUser.catchPP = catchUser.pp.raw;
+			discordUser.catchRank = catchUser.pp.rank;
 
-		const maniaUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 3 });
+			const maniaUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 3 });
 
-		discordUser.maniaPP = maniaUser.pp.raw;
-		discordUser.maniaRank = maniaUser.pp.rank;
+			discordUser.maniaPP = maniaUser.pp.raw;
+			discordUser.maniaRank = maniaUser.pp.rank;
 
-		discordUser.osuBadges = await getOsuBadgeNumberById(discordUser.osuUserId);
+			discordUser.osuBadges = await getOsuBadgeNumberById(discordUser.osuUserId);
 
-		await discordUser.save();
+			discordUser.osuNotFoundFirstOccurence = null;
+
+			await discordUser.save();
+		} catch (error) {
+			if (error.message === 'Not found') {
+				let now = new Date();
+				let halfWeekAgo = new Date();
+				halfWeekAgo.setUTCDate(halfWeekAgo.getUTCDate() - 3);
+				if (discordUser.osuNotFoundFirstOccurence === null) {
+					discordUser.osuNotFoundFirstOccurence = now;
+					discordUser.save();
+				} else if (discordUser.osuNotFoundFirstOccurence && halfWeekAgo > discordUser.osuNotFoundFirstOccurence) {
+					const user = await client.users.fetch(discordUser.userId).catch(async () => {
+						//Nothing
+					});
+
+					discordUser.osuUserId = null;
+					discordUser.osuVerificationCode = null;
+					discordUser.osuVerified = null;
+					discordUser.osuName = null;
+					discordUser.osuBadges = 0;
+					discordUser.osuPP = null;
+					discordUser.osuRank = null;
+					discordUser.taikoPP = null;
+					discordUser.taikoRank = null;
+					discordUser.catchPP = null;
+					discordUser.catchRank = null;
+					discordUser.maniaPP = null;
+					discordUser.maniaRank = null;
+
+					if (user) {
+						await user.send('Your osu! account could not be found anymore for multiple days.\nIf you think this is an issue try linking it again or message Eliteronix#4208');
+					}
+
+					//Remove from MOTD
+					discordUser.osuMOTDRegistered = null;
+					discordUser.osuMOTDMuted = null;
+					discordUser.osuMOTDLastRoundPlayed = null;
+					discordUser.osuMOTDerrorFirstOccurence = null;
+					discordUser.osuMOTDmutedUntil = null;
+					await discordUser.save();
+
+					if (user) {
+						await user.send('Your MOTD registration has been removed in the process.');
+					}
+
+					const elitiriSignUp = await DBElitiriCupSignUp.findOne({
+						where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Cup Summer 2021' }
+					});
+
+					if (elitiriSignUp) {
+						const task = await DBProcessQueue.findOne({
+							where: { guildId: 'None', task: 'refreshElitiriSignUp', additions: discordUser.osuUserId }
+						});
+
+						if (!task) {
+							DBProcessQueue.create({ guildId: 'None', task: 'refreshElitiriSignUp', priority: 3, additions: discordUser.osuUserId });
+						}
+
+						const allSubmissions = await DBElitiriCupSubmissions.findAll({
+							where: { osuUserId: elitiriSignUp.osuUserId, tournamentName: 'Elitiri Cup Summer 2021' }
+						});
+
+						allSubmissions.forEach(submission => {
+							submission.destroy();
+						});
+
+						await elitiriSignUp.destroy();
+
+						if (user) {
+							await user.send('Your Elitiri Cup registration has been removed in the process.');
+						}
+					}
+
+				}
+
+			} else {
+				console.log(error);
+			}
+		}
 
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Cup Summer 2021' }
