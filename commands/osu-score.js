@@ -47,7 +47,7 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		const beatmapId = args.shift();
+		const beatmapId = getIDFromPotentialOsuLink(args.shift());
 
 		osuApi.getBeatmaps({ b: beatmapId })
 			.then(async (beatmaps) => {
