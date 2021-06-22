@@ -125,7 +125,14 @@ module.exports = {
 				}
 			});
 			lobby.on('allPlayersReady', async () => {
-				if (lobbyStatus === 'Waiting for start') {
+				await lobby.updateSettings();
+				let playersInLobby = 0;
+				for (let i = 0; i < 16; i++) {
+					if (lobby.slots[i]) {
+						playersInLobby++;
+					}
+				}
+				if (lobbyStatus === 'Waiting for start' && playersInLobby === players.length) {
 					await channel.sendMessage('!mp start 10');
 
 					lobbyStatus === 'Map being played';
@@ -234,7 +241,7 @@ module.exports = {
 					await channel.sendMessage('!mp close');
 					return await channel.leave();
 				} else {
-					movePlayersIntoFirstSlots(channel, lobby);
+					movePlayersIntoFirstSlots(channel, lobby, players);
 					mapIndex++;
 					let skipped = false;
 					//Increases knockoutmap number to start/continue with harder maps and give more points
@@ -636,7 +643,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 	}
 }
 
-async function movePlayersIntoFirstSlots(channel, lobby) {
+async function movePlayersIntoFirstSlots(channel, lobby, players) {
 	await lobby.updateSettings();
 
 	let spotToFillNext = 0;
@@ -651,5 +658,5 @@ async function movePlayersIntoFirstSlots(channel, lobby) {
 
 	await pause(10000);
 
-	await channel.sendMessage(`!mp set 0 0 ${spotToFillNext}`);
+	await channel.sendMessage(`!mp set 0 0 ${players.length}`);
 }
