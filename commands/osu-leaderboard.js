@@ -71,7 +71,12 @@ module.exports = {
 
 				let leaderboardData = [];
 
+				let messageToAuthor = '';
+
 				for (let i = 0; i < osuAccounts.length; i++) {
+					if (msg.author.id === osuAccounts[i].userId) {
+						messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
+					}
 					const member = await msg.guild.members.fetch(osuAccounts[i].userId);
 
 					let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
@@ -117,7 +122,7 @@ module.exports = {
 				const guildPrefix = await getGuildPrefix(msg);
 
 				//Send attachment
-				const leaderboardMessage = await msg.channel.send(`The leaderboard consists of all players that have their osu! account connected to the bot.\nUse \`${guildPrefix}osu-link <username>\` to connect your osu! account.\nData is being updated once a day or when \`${guildPrefix}osu-profile <username>\` is being used.`, attachment);
+				const leaderboardMessage = await msg.channel.send(`The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`${guildPrefix}osu-link <username>\` to connect your osu! account.\nData is being updated once a day or when \`${guildPrefix}osu-profile <username>\` is being used.`, attachment);
 
 				if (page) {
 					if (page > 1) {

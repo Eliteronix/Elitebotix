@@ -38,7 +38,12 @@ module.exports = {
 
 				let leaderboardData = [];
 
+				let messageToAuthor = '';
+
 				for (let i = 0; i < discordUsers.length; i++) {
+					if (msg.author.id === discordUsers[i].userId) {
+						messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
+					}
 					const member = await msg.guild.members.fetch(discordUsers[i].userId);
 
 					let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
@@ -76,7 +81,7 @@ module.exports = {
 				const attachment = await createLeaderboard(leaderboardData, 'discord-background.png', `${msg.guild.name}'s activity leaderboard`, filename, page);
 
 				//Send attachment
-				const leaderboardMessage = await msg.channel.send('The leaderboard shows the most active users of the server.', attachment);
+				const leaderboardMessage = await msg.channel.send(`The leaderboard shows the most active users of the server.${messageToAuthor}`, attachment);
 
 				if (page) {
 					if (page > 1) {
