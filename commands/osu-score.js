@@ -10,7 +10,7 @@ module.exports = {
 	name: 'osu-score',
 	aliases: ['os', 'o-s'],
 	description: 'Sends an info card about the score of the specified player on the map',
-	usage: '<beatmapID> [username] [username] ... (Use "_" instead of spaces)',
+	usage: '<beatmapID> [username] [username] ... (Use "_" instead of spaces; --all for all mod combinations; --HD for HD highscore ...)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: 'ATTACH_FILES',
@@ -31,9 +31,28 @@ module.exports = {
 
 		let mapRank = 0;
 
+		let mods = 'best';
+
 		for (let i = 0; i < args.length; i++) {
 			if (args[i].startsWith('--event')) {
 				mapRank = args[i].substring(7);
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--all') {
+				mods = 'all';
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].startsWith('--NM') || args[i].startsWith('--NF') || args[i].startsWith('--HT') || args[i].startsWith('--EZ')
+				|| args[i].startsWith('--HR') || args[i].startsWith('--HD') || args[i].startsWith('--SD') || args[i].startsWith('--DT')
+				|| args[i].startsWith('--NC') || args[i].startsWith('--FL') || args[i].startsWith('--SO') || args[i].startsWith('--PF')
+				|| args[i].startsWith('--K4') || args[i].startsWith('--K5') || args[i].startsWith('--K6') || args[i].startsWith('--K7')
+				|| args[i].startsWith('--K8') || args[i].startsWith('--FI') || args[i].startsWith('--RD') || args[i].startsWith('--K9')
+				|| args[i].startsWith('--KC') || args[i].startsWith('--K1') || args[i].startsWith('--K2') || args[i].startsWith('--K3')
+				|| args[i].startsWith('--MR')) {
+				mods = args[i].substring(2);
+				if (mods === 'NM') {
+					mods = '';
+				}
 				args.splice(i, 1);
 				i--;
 			}
@@ -53,10 +72,10 @@ module.exports = {
 			.then(async (beatmaps) => {
 				if (!args[0]) {//Get profile by author if no argument
 					if (commandUser && commandUser.osuUserId) {
-						getScore(msg, beatmaps[0], commandUser.osuUserId, server, mode, false, mapRank);
+						getScore(msg, beatmaps[0], commandUser.osuUserId, server, mode, false, mapRank, mods);
 					} else {
 						const userDisplayName = await getMessageUserDisplayname(msg);
-						getScore(msg, beatmaps[0], userDisplayName, server, mode, false, mapRank);
+						getScore(msg, beatmaps[0], userDisplayName, server, mode, false, mapRank, mods);
 					}
 				} else {
 					//Get profiles by arguments
@@ -67,21 +86,21 @@ module.exports = {
 							});
 
 							if (discordUser && discordUser.osuUserId) {
-								getScore(msg, beatmaps[0], discordUser.osuUserId, server, mode, false, mapRank);
+								getScore(msg, beatmaps[0], discordUser.osuUserId, server, mode, false, mapRank, mods);
 							} else {
 								msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-								getScore(msg, beatmaps[0], args[i], server, mode, false, mapRank);
+								getScore(msg, beatmaps[0], args[i], server, mode, false, mapRank, mods);
 							}
 						} else {
 
 							if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 								if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-									getScore(msg, beatmaps[0], getIDFromPotentialOsuLink(args[i]), server, mode, true, mapRank);
+									getScore(msg, beatmaps[0], getIDFromPotentialOsuLink(args[i]), server, mode, true, mapRank, mods);
 								} else {
-									getScore(msg, beatmaps[0], getIDFromPotentialOsuLink(args[i]), server, mode, false, mapRank);
+									getScore(msg, beatmaps[0], getIDFromPotentialOsuLink(args[i]), server, mode, false, mapRank, mods);
 								}
 							} else {
-								getScore(msg, beatmaps[0], getIDFromPotentialOsuLink(args[i]), server, mode, false, mapRank);
+								getScore(msg, beatmaps[0], getIDFromPotentialOsuLink(args[i]), server, mode, false, mapRank, mods);
 							}
 						}
 					}
@@ -97,7 +116,7 @@ module.exports = {
 	},
 };
 
-async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, mapRank) {
+async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, mapRank, mods) {
 	if (server === 'bancho') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -111,60 +130,69 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 				if (!(scores[0])) {
 					return msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.id}\`.`);
 				}
-				const user = await osuApi.getUser({ u: username, m: mode });
-				updateOsuDetailsforUser(user, mode);
+				let scoreHasBeenOutput = false;
+				for (let i = 0; i < scores.length; i++) {
+					if (mods === 'best' && i === 0 || mods === 'all' || mods === getMods(scores[i].raw_mods).join('')) {
+						scoreHasBeenOutput = true;
+						const user = await osuApi.getUser({ u: username, m: mode });
+						updateOsuDetailsforUser(user, mode);
 
-				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
+						let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
-				const canvasWidth = 1000;
-				const canvasHeight = 500;
+						const canvasWidth = 1000;
+						const canvasHeight = 500;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+						Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
 
-				//Create Canvas
-				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+						//Create Canvas
+						const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-				//Get context and load the image
-				const ctx = canvas.getContext('2d');
-				const background = await Canvas.loadImage('./other/osu-background.png');
-				ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+						//Get context and load the image
+						const ctx = canvas.getContext('2d');
+						const background = await Canvas.loadImage('./other/osu-background.png');
+						ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-				let elements = [canvas, ctx, scores[0], beatmap, user];
+						let elements = [canvas, ctx, scores[i], beatmap, user];
 
-				elements = await drawTitle(elements);
+						elements = await drawTitle(elements);
 
-				elements = await drawCover(elements, mode);
+						elements = await drawCover(elements, mode);
 
-				elements = await drawFooter(elements);
+						elements = await drawFooter(elements);
 
-				elements = await drawAccInfo(elements, mode, mapRank);
+						elements = await drawAccInfo(elements, mode, mapRank);
 
-				await drawUserInfo(elements, server);
+						await drawUserInfo(elements, server);
 
-				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.id}.png`);
+						//Create as an attachment
+						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.id}.png`);
 
-				//If coming from osu-tracking
-				if (mapRank > 0) {
-					await msg.channel.send(`\`${user.name}\` achieved rank **#${mapRank}**!`, attachment);
-				} else {
-					let guildPrefix = await getGuildPrefix(msg);
+						//If coming from osu-tracking
+						if (mapRank > 0) {
+							await msg.channel.send(`\`${user.name}\` achieved rank **#${mapRank}**!`, attachment);
+						} else {
+							let guildPrefix = await getGuildPrefix(msg);
 
-					//declare hints array
-					var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`];
+							//declare hints array
+							var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-top ${user.name.replace(/ /g, '_')}\` for top plays.`, `Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`];
 
-					let sentMessage;
+							let sentMessage;
 
-					//Send attachment
-					if (noLinkedAccount) {
-						sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
-					} else {
-						sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+							//Send attachment
+							if (noLinkedAccount) {
+								sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+							} else {
+								sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+							}
+							sentMessage.react('<:COMPARE:827974793365159997>');
+						}
+
+						processingMessage.delete();
 					}
-					sentMessage.react('<:COMPARE:827974793365159997>');
 				}
-
-				processingMessage.delete();
+				if (!scoreHasBeenOutput) {
+					msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.id}\` with \`${mods}\`.`);
+				}
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {

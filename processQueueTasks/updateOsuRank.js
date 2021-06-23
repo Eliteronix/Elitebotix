@@ -82,6 +82,8 @@ module.exports = {
 					discordUser.osuMOTDLastRoundPlayed = null;
 					discordUser.osuMOTDerrorFirstOccurence = null;
 					discordUser.osuMOTDmutedUntil = null;
+
+					discordUser.osuNotFoundFirstOccurence = null;
 					await discordUser.save();
 
 					if (user) {
