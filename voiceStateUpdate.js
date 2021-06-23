@@ -31,7 +31,7 @@ module.exports = async function (oldMember, newMember) {
 			where: { guildId: newMember.guild.id }
 		});
 
-		if (guild.loggingChannel && guild.loggingServerMute) {
+		if (guild && guild.loggingChannel && guild.loggingServerMute) {
 			let channel;
 			try {
 				channel = await newMember.client.channels.fetch(guild.loggingChannel);
@@ -76,7 +76,7 @@ module.exports = async function (oldMember, newMember) {
 			where: { guildId: newMember.guild.id }
 		});
 
-		if (guild.loggingChannel && guild.loggingServerDeaf) {
+		if (guild && guild.loggingChannel && guild.loggingServerDeaf) {
 			let channel;
 			try {
 				channel = await newMember.client.channels.fetch(guild.loggingChannel);
@@ -121,7 +121,7 @@ module.exports = async function (oldMember, newMember) {
 			where: { guildId: newMember.guild.id }
 		});
 
-		if (newMember.channelID && guild.loggingChannel && guild.loggingJoinVoice) {
+		if (guild && newMember.channelID && guild.loggingChannel && guild.loggingJoinVoice) {
 			let channel;
 			try {
 				channel = await newMember.client.channels.fetch(guild.loggingChannel);
@@ -160,7 +160,7 @@ module.exports = async function (oldMember, newMember) {
 			channel.send(changeEmbed);
 		}
 
-		if (oldMember.channelID && guild.loggingChannel && guild.loggingLeaveVoice) {
+		if (guild && oldMember.channelID && guild.loggingChannel && guild.loggingLeaveVoice) {
 			let channel;
 			try {
 				channel = await newMember.client.channels.fetch(guild.loggingChannel);
