@@ -33,6 +33,10 @@ module.exports = async function (msg) {
 		}
 	}
 
+	if (msg.channel.type === 'dm') {
+		return;
+	}
+
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
 		where: { guildId: msg.guild.id, loggingMessageDelete: true },

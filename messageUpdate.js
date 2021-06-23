@@ -33,6 +33,10 @@ module.exports = async function (oldMsg, newMsg) {
 		}
 	}
 
+	if (newMsg.channel.type === 'dm') {
+		return;
+	}
+
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
 		where: { guildId: newMsg.guild.id, loggingMessageUpdate: true },
