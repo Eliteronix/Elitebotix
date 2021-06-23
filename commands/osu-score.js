@@ -31,11 +31,23 @@ module.exports = {
 
 		let mapRank = 0;
 
+		let mods = 'best';
+
 		for (let i = 0; i < args.length; i++) {
 			if (args[i].startsWith('--event')) {
 				mapRank = args[i].substring(7);
 				args.splice(i, 1);
 				i--;
+			} else if (args[i] === '--all') {
+				mods = 'all';
+			} else if (args[i].startsWith('--NM') || args[i].startsWith('--NF') || args[i].startsWith('--HT') || args[i].startsWith('--EZ')
+				|| args[i].startsWith('--HR') || args[i].startsWith('--HD') || args[i].startsWith('--SD') || args[i].startsWith('--DT')
+				|| args[i].startsWith('--NC') || args[i].startsWith('--FL') || args[i].startsWith('--SO') || args[i].startsWith('--PF')
+				|| args[i].startsWith('--K4') || args[i].startsWith('--K5') || args[i].startsWith('--K6') || args[i].startsWith('--K7')
+				|| args[i].startsWith('--K8') || args[i].startsWith('--FI') || args[i].startsWith('--RD') || args[i].startsWith('--K9')
+				|| args[i].startsWith('--KC') || args[i].startsWith('--K1') || args[i].startsWith('--K2') || args[i].startsWith('--K3')
+				|| args[i].startsWith('--MR')) {
+				mods = args[i].substring(2);
 			}
 		}
 
