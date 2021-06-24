@@ -26,7 +26,7 @@ module.exports = async function (oldMember, newMember) {
 		}
 	}
 
-	if (oldMember.serverMute !== newMember.serverMute) {
+	if (oldMember.serverMute !== null && oldMember.serverMute !== newMember.serverMute) {
 		const guild = await DBGuilds.findOne({
 			where: { guildId: newMember.guild.id }
 		});
