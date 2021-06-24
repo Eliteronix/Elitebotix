@@ -3,7 +3,7 @@ const { getGuildPrefix } = require('../utils');
 
 module.exports = {
 	name: 'osu-elitiri-cup',
-	aliases: ['elitiri-cup', 'elitiri-cup-summer', 'elitiri-cup-summer-2021', 'ecs', 'ecs2021'],
+	aliases: ['elitiri-cup', 'elitiri-cup-summer', 'elitiri-cup-summer-2021', 'ecs'],
 	description: 'Allows you to sign up for the `Elitiri Cup Summer 2021` tournament!',
 	usage: '<register> <desired upper SR limit> <desired lower SR limit> | <unregister> | <server> | <availability>',
 	//permissions: 'MANAGE_GUILD',
