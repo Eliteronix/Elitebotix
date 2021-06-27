@@ -73,7 +73,11 @@ module.exports = {
 					discordUser.maniaRank = null;
 
 					if (user) {
-						await user.send('Your osu! account could not be found anymore for multiple days.\nIf you think this is an issue try linking it again or message Eliteronix#4208');
+						try {
+							await user.send('Your osu! account could not be found anymore for multiple days.\nIf you think this is an issue try linking it again or message Eliteronix#4208');
+						} catch (error) {
+							//Nothing
+						}
 					}
 
 					//Remove from MOTD
@@ -87,7 +91,11 @@ module.exports = {
 					await discordUser.save();
 
 					if (user) {
-						await user.send('Your MOTD registration has been removed in the process.');
+						try {
+							await user.send('Your MOTD registration has been removed in the process.');
+						} catch (error) {
+							//Nothing
+						}
 					}
 
 					const elitiriSignUp = await DBElitiriCupSignUp.findOne({
@@ -114,7 +122,11 @@ module.exports = {
 						await elitiriSignUp.destroy();
 
 						if (user) {
-							await user.send('Your Elitiri Cup registration has been removed in the process.');
+							try {
+								await user.send('Your Elitiri Cup registration has been removed in the process.');
+							} catch (error) {
+								//Nothing
+							}
 						}
 					}
 
