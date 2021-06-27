@@ -45,95 +45,45 @@ module.exports = {
 				}
 			}
 		} else if (args[0] === 'fix') {
-			const points620 = await DBMOTDPoints.findOne({
-				where: { id: 620 }
+			const points1071 = await DBMOTDPoints.findOne({
+				where: { id: 1071 }
 			});
-			points620.knockoutPoints = Math.round(7 * (11 / 10 * 2));
-			points620.knockoutRank = 1;
-			points620.knockoutPlayers = 16;
-			points620.knockoutRound = 11;
-			points620.maxQualifierPoints = 18;
-			points620.save();
+			points1071.knockoutPoints = Math.round(7 * (10 / 10 * 2));
+			points1071.knockoutRank = 2;
+			points1071.knockoutPlayers = 10;
+			points1071.knockoutRound = 10;
+			points1071.maxQualifierPoints = 10;
+			points1071.save();
 
-			const points630 = await DBMOTDPoints.findOne({
-				where: { id: 630 }
+			const points1072 = await DBMOTDPoints.findOne({
+				where: { id: 1072 }
 			});
-			points630.knockoutPoints = Math.round(7 * (10 / 10 * 2));
-			points630.knockoutRank = 2;
-			points630.knockoutPlayers = 16;
-			points630.knockoutRound = 10;
-			points630.maxQualifierPoints = 18;
-			points630.save();
+			points1072.knockoutPoints = Math.round(7 * (11 / 10 * 2));
+			points1072.knockoutRank = 1;
+			points1072.knockoutPlayers = 10;
+			points1072.knockoutRound = 11;
+			points1072.maxQualifierPoints = 10;
+			points1072.save();
 
-			const points638 = await DBMOTDPoints.findOne({
-				where: { id: 638 }
+			const points1073 = await DBMOTDPoints.findOne({
+				where: { id: 1073 }
 			});
-			points638.knockoutPoints = Math.round(7 * (11 / 10 * 2));
-			points638.knockoutRank = 1;
-			points638.knockoutPlayers = 7;
-			points638.knockoutRound = 11;
-			points638.maxQualifierPoints = 7;
-			points638.save();
+			points1073.knockoutPoints = Math.round(7 * (8 / 10 * 2));
+			points1073.knockoutRank = 4;
+			points1073.knockoutPlayers = 10;
+			points1073.knockoutRound = 8;
+			points1073.maxQualifierPoints = 10;
+			points1073.save();
 
-			const points639 = await DBMOTDPoints.findOne({
-				where: { id: 639 }
+			const points1074 = await DBMOTDPoints.findOne({
+				where: { id: 1074 }
 			});
-			points639.knockoutPoints = Math.round(7 * (10 / 10 * 2));
-			points639.knockoutRank = 2;
-			points639.knockoutPlayers = 7;
-			points639.knockoutRound = 10;
-			points639.maxQualifierPoints = 7;
-			points639.save();
-
-			const points640 = await DBMOTDPoints.findOne({
-				where: { id: 640 }
-			});
-			points640.knockoutPoints = Math.round(7 * (9 / 10 * 2));
-			points640.knockoutRank = 3;
-			points640.knockoutPlayers = 7;
-			points640.knockoutRound = 9;
-			points640.maxQualifierPoints = 7;
-			points640.save();
-
-			const points641 = await DBMOTDPoints.findOne({
-				where: { id: 641 }
-			});
-			points641.knockoutPoints = Math.round(7 * (8 / 10 * 2));
-			points641.knockoutRank = 4;
-			points641.knockoutPlayers = 7;
-			points641.knockoutRound = 8;
-			points641.maxQualifierPoints = 7;
-			points641.save();
-
-			const points642 = await DBMOTDPoints.findOne({
-				where: { id: 642 }
-			});
-			points642.knockoutPoints = Math.round(7 * (7 / 10 * 2));
-			points642.knockoutRank = 5;
-			points642.knockoutPlayers = 7;
-			points642.knockoutRound = 7;
-			points642.maxQualifierPoints = 7;
-			points642.save();
-
-			const points643 = await DBMOTDPoints.findOne({
-				where: { id: 643 }
-			});
-			points643.knockoutPoints = Math.round(7 * (6 / 10 * 2));
-			points643.knockoutRank = 6;
-			points643.knockoutPlayers = 7;
-			points643.knockoutRound = 6;
-			points643.maxQualifierPoints = 7;
-			points643.save();
-
-			const points644 = await DBMOTDPoints.findOne({
-				where: { id: 644 }
-			});
-			points644.knockoutPoints = Math.round(7 * (5 / 10 * 2));
-			points644.knockoutRank = 7;
-			points644.knockoutPlayers = 7;
-			points644.knockoutRound = 5;
-			points644.maxQualifierPoints = 7;
-			points644.save();
+			points1074.knockoutPoints = Math.round(7 * (9 / 10 * 2));
+			points1074.knockoutRank = 3;
+			points1074.knockoutPlayers = 10;
+			points1074.knockoutRound = 9;
+			points1074.maxQualifierPoints = 10;
+			points1074.save();
 		} else if (args[0] === 'start') {
 			initializeMOTD(msg.client, bancho, true);
 		}
