@@ -2,6 +2,19 @@ const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp } = require('../dbObj
 
 module.exports = {
 	async execute(client, processQueueEntry) {
+		let now = new Date();
+		let endOfRegs = new Date();
+		endOfRegs.setUTCMilliseconds(999);
+		endOfRegs.setUTCSeconds(59);
+		endOfRegs.setUTCMinutes(59);
+		endOfRegs.setUTCHours(23);
+		endOfRegs.setUTCDate(27);
+		endOfRegs.setUTCMonth(5); //Zero Indexed
+		endOfRegs.setUTCFullYear(2021);
+		if (now > endOfRegs) {
+			return;
+		}
+
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { osuUserId: processQueueEntry.additions }
 		});
