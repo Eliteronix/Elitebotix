@@ -122,7 +122,7 @@ module.exports = {
 		startOfSubmission.setUTCMilliseconds(0);
 		startOfSubmission.setUTCSeconds(0);
 		startOfSubmission.setUTCMinutes(0);
-		startOfSubmission.setUTCHours(12);
+		startOfSubmission.setUTCHours(0);
 		startOfSubmission.setUTCDate(28);
 		startOfSubmission.setUTCMonth(5); //Zero Indexed
 		startOfSubmission.setUTCFullYear(2021);
@@ -261,17 +261,17 @@ module.exports = {
 				}
 
 				//Top:
-				const topLowerDiff = 5.61;
-				const topUpperDiff = 7.04;
+				const topLowerDiff = 5.5;
+				const topUpperDiff = 7;
 				//Middle:
-				const middleLowerDiff = 5.09;
-				const middleUpperDiff = 6.3;
+				const middleLowerDiff = 5.07;
+				const middleUpperDiff = 6.37;
 				//Lower:
-				const lowerLowerDiff = 4.55;
-				const lowerUpperDiff = 5.74;
-				//Middle:
-				const beginnerLowerDiff = 4.06;
-				const beginnerUpperDiff = 5.34;
+				const lowerLowerDiff = 4.49;
+				const lowerUpperDiff = 5.97;
+				//Beginner:
+				const beginnerLowerDiff = 3.64;
+				const beginnerUpperDiff = 5.54;
 
 				if (args[0].toLowerCase() === 'hr') {
 					const starRating = await calculateStarRating(beatmaps[0].id, ['HR'], false, true);
