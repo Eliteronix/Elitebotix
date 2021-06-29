@@ -290,6 +290,15 @@ module.exports = {
 					beatmaps[0].bpm = beatmaps[0].bpm * 1.5;
 				}
 
+				//Until blue moon rises is bugged; These are the ingame values hardcoded
+				if (args[0].toLowerCase() === 'nm' && beatmaps[0].id === '2081848' || args[0].toLowerCase() === 'hd' && beatmaps[0].id === '2081848' || args[0].toLowerCase() === 'fm' && beatmaps[0].id === '2081848') {
+					beatmaps[0].difficulty.rating = 3.66;
+				} else if (args[0].toLowerCase() === 'hr' && beatmaps[0].id === '2081848') {
+					beatmaps[0].difficulty.rating = 4.63;
+				} else if (args[0].toLowerCase() === 'dt' && beatmaps[0].id === '2081848') {
+					beatmaps[0].difficulty.rating = 5.05;
+				}
+
 				//Difficulty: Maps have to be between the specified diffculty
 				if (bracket === 'top' && beatmaps[0].difficulty.rating < topLowerDiff) {
 					viabilityEmbed.setColor('#FF0000')
