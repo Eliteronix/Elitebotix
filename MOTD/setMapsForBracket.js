@@ -153,7 +153,7 @@ module.exports = {
 		const mapsOfTheDayChannel = await client.channels.fetch(channelID);
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER !== 'Dev') {
-			mapsOfTheDayChannel.send(`<@&${roleId}> The new mappool is out!\nThe bot will send you a DM in a moment. Please follow the instructions given.`);
+			mapsOfTheDayChannel.send('The new mappool is out!\nThe bot will send you a DM in a moment. Please follow the instructions given.');
 			mapsOfTheDayChannel.send(mappoolEmbed);
 		}
 
