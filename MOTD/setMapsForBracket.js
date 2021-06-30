@@ -54,6 +54,13 @@ module.exports = {
 			quicksort(possibleNMBeatmaps);
 		}
 
+		//Artificially lower Beginner Bracket Maps
+		if (bracketName === 'Beginner Bracket' && possibleNMBeatmaps.length > 9) {
+			while (possibleNMBeatmaps.length > 9 && ) {
+
+			}
+		}
+
 		let selectedNMMaps = [];
 
 		//Get the 9 hardest NM maps
