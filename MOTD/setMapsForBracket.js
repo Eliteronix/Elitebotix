@@ -56,7 +56,7 @@ module.exports = {
 
 		//Artificially lower Beginner Bracket Maps
 		if (bracketName === 'Beginner Bracket' && possibleNMBeatmaps.length > 9) {
-			while (possibleNMBeatmaps.length > 9 && ) {
+			while (possibleNMBeatmaps.length > 9) {
 
 			}
 		}
