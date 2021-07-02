@@ -108,7 +108,7 @@ module.exports = {
 				content = `Leaderboard from \`${todayFormatted}\``;
 			} else if (title === 'Monthly' && tomorrow.getUTCDate() === 1) { //1st of the month is tomorrow
 				content = `Leaderboard from \`${todayFormatted}\``;
-			} else if (title === 'Quarter Yearly' && tomorrow.getUTCDate() === 1 && (tomorrow.getUTCMonth() === 1 || tomorrow.getUTCMonth() === 4 || tomorrow.getUTCMonth() === 7 || tomorrow.getUTCMonth() === 10)) {
+			} else if (title === 'Quarter Yearly' && tomorrow.getUTCDate() === 1 && (tomorrow.getUTCMonth() === 3 || tomorrow.getUTCMonth() === 6 || tomorrow.getUTCMonth() === 9 || tomorrow.getUTCMonth() === 0)) {
 				content = `Leaderboard from \`${todayFormatted}\``;
 			} else if (title === 'All Time') {
 				content = `Leaderboard from \`${todayFormatted}\``;
