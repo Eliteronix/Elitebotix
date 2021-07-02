@@ -5,7 +5,7 @@ module.exports = {
 	name: 'osu-motd-admin',
 	//aliases: ['osu-map', 'beatmap-info'],
 	description: 'Admin control for the Maps of the Day Competition',
-	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability>',
+	usage: '<recalculate/fix/start/createLeaderboard>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -85,7 +85,9 @@ module.exports = {
 			points1074.maxQualifierPoints = 10;
 			points1074.save();
 		} else if (args[0] === 'start') {
-			initializeMOTD(msg.client, bancho, true);
+			initializeMOTD(msg.client, bancho, true, false);
+		} else if (args[0] === 'createLeaderboard') {
+			initializeMOTD(msg.client, bancho, false, true);
 		}
 	}
 };

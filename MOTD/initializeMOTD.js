@@ -6,7 +6,7 @@ const { createLeaderboard } = require('./createLeaderboard');
 const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
-	initializeMOTD: async function (client, bancho, manualStart) {
+	initializeMOTD: async function (client, bancho, manualStart, manualLeaderboard) {
 		//Start everything in that minute
 		const today = new Date();
 		// eslint-disable-next-line no-undef
@@ -143,7 +143,7 @@ module.exports = {
 					console.log(e);
 				});
 			// eslint-disable-next-line no-undef
-		} else if (process.env.SERVER === 'Live' && today.getUTCHours() === 19 && today.getUTCMinutes() === 30) {
+		} else if (process.env.SERVER === 'Live' && today.getUTCHours() === 19 && today.getUTCMinutes() === 30 || manualLeaderboard) {
 			//Maybe create all leaderboards daily anyway?
 			//Get Dates
 			let todayMorning = new Date();
