@@ -165,7 +165,6 @@ module.exports = {
 
 			let monthMorning = new Date();
 			monthMorning.setHours(0);
-			monthMorning.setUTCDate(monthMorning.getUTCDate() - (monthMorning.getUTCDay() - 1));
 			monthMorning.setUTCDate(1);
 
 			//Monthly Leaderboard
@@ -173,7 +172,6 @@ module.exports = {
 
 			let quarterMorning = new Date();
 			quarterMorning.setHours(0);
-			quarterMorning.setUTCDate(quarterMorning.getUTCDate() - (quarterMorning.getUTCDay() - 1));
 			quarterMorning.setUTCDate(1);
 			quarterMorning.setUTCMonth(quarterMorning.getUTCMonth() - (quarterMorning.getUTCMonth() % 3));
 
