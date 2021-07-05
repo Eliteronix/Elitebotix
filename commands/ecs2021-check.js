@@ -223,7 +223,7 @@ module.exports = {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find beatmap \`${args[2].replace(/`/g, '')}\`.`);
+					msg.channel.send(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
 				} else {
 					console.log(err);
 				}
