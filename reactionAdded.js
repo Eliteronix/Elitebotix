@@ -6,7 +6,6 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user) {
-	// console.log(reaction);
 	//For the development version
 	//if the message is not in the Dev-Servers then return
 	// eslint-disable-next-line no-undef
@@ -52,7 +51,7 @@ module.exports = async function (reaction, user) {
 
 	//Return if the bot reacted itself or if it was not a bot message
 	//Checking ID instead seemed to be bugged
-	if (user.username === 'Elitebotix' && user.discriminator === '4152') {
+	if (user.id === '784836063058329680') {
 		return;
 	}
 
@@ -174,7 +173,7 @@ module.exports = async function (reaction, user) {
 		return;
 	}
 
-	if (reaction.message.author.username !== 'Elitebotix' && reaction.message.author.discriminator !== '4152') {
+	if (reaction.message.author.id !== '784836063058329680') {
 		return;
 	}
 
@@ -202,8 +201,6 @@ module.exports = async function (reaction, user) {
 		};
 
 		const command = require(`./commands/${commandName[0]}.js`);
-
-		reaction.message.author.id = user.id;
 
 		command.execute(message, [page]);
 

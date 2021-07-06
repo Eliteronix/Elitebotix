@@ -1,5 +1,6 @@
 const { DBServerUserActivity } = require('../dbObjects');
 const { createLeaderboard, humanReadable } = require('../utils.js');
+const { leaderboardEntriesPerPage } = require('../config.json');
 
 module.exports = {
 	name: 'server-leaderboard',
@@ -60,7 +61,7 @@ module.exports = {
 					leaderboardData.push(dataset);
 				}
 
-				let totalPages = Math.floor(leaderboardData.length / 100) + 1;
+				let totalPages = Math.floor(leaderboardData.length / leaderboardEntriesPerPage) + 1;
 
 				let page;
 
