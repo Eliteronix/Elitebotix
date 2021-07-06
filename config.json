@@ -1,3 +1,4 @@
 {
-    "prefix": "e!"
+	"prefix": "e!",
+	"leaderboardEntriesPerPage": 48
 }

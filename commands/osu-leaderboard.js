@@ -1,5 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const { getGuildPrefix, humanReadable, createLeaderboard } = require('../utils');
+const { leaderboardEntriesPerPage } = require('../config.json');
 
 module.exports = {
 	name: 'osu-leaderboard',
@@ -66,7 +67,7 @@ module.exports = {
 					leaderboardData.push(dataset);
 				}
 
-				let totalPages = Math.floor(leaderboardData.length / 100) + 1;
+				let totalPages = Math.floor(leaderboardData.length / leaderboardEntriesPerPage) + 1;
 
 				let page;
 

@@ -1,5 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue } = require('./dbObjects');
-const { prefix } = require('./config.json');
+const { prefix, leaderboardEntriesPerPage } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
@@ -586,24 +586,23 @@ module.exports = {
 		}
 	},
 	async createLeaderboard(data, backgroundFile, title, filename, page) {
-		let dataPerPage = 100;
-		if (page && (page - 1) * dataPerPage > data.length) {
+		if (page && (page - 1) * leaderboardEntriesPerPage > data.length) {
 			page = null;
 		}
-		let totalPages = Math.floor((data.length - 1) / dataPerPage) + 1;
+		let totalPages = Math.floor((data.length - 1) / leaderboardEntriesPerPage) + 1;
 
 		let dataStart = 0;
 		let dataEnd = Infinity;
 		if (page) {
-			dataStart = dataPerPage * (page - 1);
-			dataEnd = dataPerPage * page;
+			dataStart = leaderboardEntriesPerPage * (page - 1);
+			dataEnd = leaderboardEntriesPerPage * page;
 
 			for (let i = 0; i < dataStart; i++) {
 				data.splice(0, 1);
 			}
 
-			for (let i = dataPerPage; i < data.length; i++) {
-				data.splice(dataPerPage, 1);
+			for (let i = leaderboardEntriesPerPage; i < data.length; i++) {
+				data.splice(leaderboardEntriesPerPage, 1);
 				i--;
 			}
 		}
