@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { calculateStarRating } = require('osu-sr-calculator');
 const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
-const { getGuildPrefix, pause } = require('../utils.js');
+const { getGuildPrefix, pause, getIDFromPotentialOsuLink } = require('../utils.js');
 
 module.exports = {
 	name: 'ecs2021-submit',
@@ -157,7 +157,7 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		osuApi.getBeatmaps({ b: args[1] })
+		osuApi.getBeatmaps({ b: getIDFromPotentialOsuLink(args[1]) })
 			.then(async (beatmaps) => {
 				getBeatmap(msg, args);
 
