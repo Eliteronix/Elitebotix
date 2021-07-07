@@ -70,6 +70,9 @@ async function connect(msg, args, osuApi, bancho, discordUser, guildPrefix) {
 				});
 
 				if (existingVerifiedDiscordUser) {
+					if (existingVerifiedDiscordUser.userId === msg.author.id) {
+						return msg.channel.send(`You already connected and verified your connection of your discord account to the osu! account \`${args[0].replace(/`/g, '')}\``);
+					}
 					return msg.channel.send(`There is already a discord account linked and verified for \`${args[0].replace(/`/g, '')}\``);
 				}
 
