@@ -48,7 +48,7 @@ module.exports = {
 	name: 'ecs2021-admin',
 	//aliases: ['osu-map', 'beatmap-info'],
 	description: 'Admin control for the Elitiri Cup',
-	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> | <createPools> <top/middle/lower/beginner>',
+	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -209,10 +209,7 @@ module.exports = {
 							});
 					} catch (error) {
 						if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
-							if (j === 2) {
-								const channel = await msg.client.channels.fetch('833803740162949191');
-								channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
-							} else {
+							if (j !== 2) {
 								await pause(5000);
 							}
 						} else {
@@ -221,6 +218,7 @@ module.exports = {
 						}
 					}
 				}
+				console.log('Finished messaging', i, 'out of', elitiriSignUps.length);
 			}
 		} else if (args[0] === 'createPools') {
 			let allMaps;
