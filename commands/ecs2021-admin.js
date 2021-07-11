@@ -220,6 +220,101 @@ module.exports = {
 				}
 				console.log('Finished messaging', i, 'out of', elitiriSignUps.length);
 			}
+		} else if (args[0] === 'prune') {
+			args.shift();
+			let targetGroup = '';
+			if (!args[0]) {
+				return msg.channel.send('You didn\'t specify a valid target group. It should be `everyone`, `noAvailibility` or `noSubmissions` instead.');
+			} else if (args[0] === 'noSubmissions') {
+				targetGroup = 'Players with missing submissions';
+			} else if (args[0] === 'player') {
+				targetGroup = 'A specific player';
+				if (!args[1]) {
+					return msg.channel.send('No player specified');
+				}
+			} else {
+				return msg.channel.send(`${args[0]} is not a valid target group. It should be \`everyone\`, \`noAvailability\` or \`noSubmissions\` instead.`);
+			}
+
+			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
+				where: { tournamentName: 'Elitiri Cup Summer 2021' }
+			});
+
+			if (targetGroup === 'Players with missing submissions') {
+				for (let i = 0; i < elitiriSignUps.length; i++) {
+					let submissions = await DBElitiriCupSubmissions.findAll({
+						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
+					});
+
+					if (submissions.length !== 5) {
+						elitiriSignUps[i].destroy();
+						submissions.forEach(submission => {
+							submission.destroy();
+						});
+
+						const user = await msg.client.users.fetch(elitiriSignUps[i].userId);
+
+						for (let j = 0; j < 3; j++) {
+							try {
+								await user.send('**You were disqualified** from the `Elitiri Cup` due to missing map submissions.')
+									.then(() => {
+										j = Infinity;
+									})
+									.catch(async (error) => {
+										throw (error);
+									});
+							} catch (error) {
+								if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
+									if (j !== 2) {
+										await pause(5000);
+									}
+								} else {
+									j = Infinity;
+									console.log(error);
+								}
+							}
+						}
+						console.log('Player removed from Elitiri Cup');
+					}
+				}
+			} else if (targetGroup === 'A specific player') {
+				for (let i = 0; i < elitiriSignUps.length; i++) {
+					let submissions = await DBElitiriCupSubmissions.findAll({
+						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
+					});
+
+					if (elitiriSignUps[i].osuUserId === args[1]) {
+						elitiriSignUps[i].destroy();
+						submissions.forEach(submission => {
+							submission.destroy();
+						});
+
+						const user = await msg.client.users.fetch(elitiriSignUps[i].userId);
+
+						for (let j = 0; j < 3; j++) {
+							try {
+								await user.send('You were removed from the `Elitiri Cup` by staff. If you have any questions feel free to ask any member of the staff.')
+									.then(() => {
+										j = Infinity;
+									})
+									.catch(async (error) => {
+										throw (error);
+									});
+							} catch (error) {
+								if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
+									if (j !== 2) {
+										await pause(5000);
+									}
+								} else {
+									j = Infinity;
+									console.log(error);
+								}
+							}
+						}
+						console.log('Player removed from Elitiri Cup');
+					}
+				}
+			}
 		} else if (args[0] === 'createPools') {
 			let allMaps;
 			let rowOffset;
