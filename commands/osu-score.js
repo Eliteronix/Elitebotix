@@ -200,12 +200,12 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 					}
 				}
 				if (!scoreHasBeenOutput) {
-					msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.id}\` with \`${mods}\`.`);
+					msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.version}] (${beatmap.id})\` with \`${mods}\`.`);
 				}
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.id}\`.`);
+					msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.version}] (${beatmap.id})\`.`);
 				} else {
 					console.log(err);
 				}
@@ -216,7 +216,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.id}\`.`);
+					return msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.version}] (${beatmap.id})\`.`);
 				}
 
 				let score = rippleToBanchoScore(responseJson[0]);
