@@ -25,7 +25,7 @@ module.exports = {
 
 			const user = await client.users.fetch(discordUser.userId);
 
-			if (now > endOfRegs) {
+			if (!(now > endOfRegs)) {
 				elitiriSignUp.osuName = discordUser.osuName;
 				elitiriSignUp.osuBadges = discordUser.osuBadges;
 				elitiriSignUp.osuPP = discordUser.osuPP;
