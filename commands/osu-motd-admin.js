@@ -45,45 +45,245 @@ module.exports = {
 				}
 			}
 		} else if (args[0] === 'fix') {
-			const points1071 = await DBMOTDPoints.findOne({
-				where: { id: 1071 }
+			await DBMOTDPoints.create({
+				userId: '244892643316858881',
+				osuUserId: '9665206',
+				osuRank: '376',
+				totalPoints: '4',
+				qualifierPoints: '2',
+				qualifierRank: '1',
+				qualifierPlayers: '2',
+				knockoutPoints: '2',
+				knockoutRank: '2',
+				knockoutPlayers: '1',
+				knockoutRound: '10',
+				maxQualifierPoints: '1',
+				matchDate: 1626112800000
 			});
-			points1071.knockoutPoints = Math.round(7 * (10 / 10 * 2));
-			points1071.knockoutRank = 2;
-			points1071.knockoutPlayers = 10;
-			points1071.knockoutRound = 10;
-			points1071.maxQualifierPoints = 10;
-			points1071.save();
 
-			const points1072 = await DBMOTDPoints.findOne({
-				where: { id: 1072 }
+			await DBMOTDPoints.create({
+				userId: '244526413888094209',
+				osuUserId: '12296128',
+				osuRank: '2079',
+				totalPoints: '3',
+				qualifierPoints: '1',
+				qualifierRank: '2',
+				qualifierPlayers: '2',
+				knockoutPoints: '2',
+				knockoutRank: '1',
+				knockoutPlayers: '1',
+				knockoutRound: '11',
+				maxQualifierPoints: '1',
+				matchDate: 1626112800000
 			});
-			points1072.knockoutPoints = Math.round(7 * (11 / 10 * 2));
-			points1072.knockoutRank = 1;
-			points1072.knockoutPlayers = 10;
-			points1072.knockoutRound = 11;
-			points1072.maxQualifierPoints = 10;
-			points1072.save();
 
-			const points1073 = await DBMOTDPoints.findOne({
-				where: { id: 1073 }
+			await DBMOTDPoints.create({
+				userId: '149635950463549440',
+				osuUserId: '962519',
+				osuRank: '80258',
+				totalPoints: '13',
+				qualifierPoints: '4',
+				qualifierRank: '1',
+				qualifierPlayers: '4',
+				knockoutPoints: '9',
+				knockoutRank: '1',
+				knockoutPlayers: '4',
+				knockoutRound: '11',
+				maxQualifierPoints: '4',
+				matchDate: 1626112800000
 			});
-			points1073.knockoutPoints = Math.round(7 * (8 / 10 * 2));
-			points1073.knockoutRank = 4;
-			points1073.knockoutPlayers = 10;
-			points1073.knockoutRound = 8;
-			points1073.maxQualifierPoints = 10;
-			points1073.save();
 
-			const points1074 = await DBMOTDPoints.findOne({
-				where: { id: 1074 }
+			await DBMOTDPoints.create({
+				userId: '422331306643292160',
+				osuUserId: '15774143',
+				osuRank: '98016',
+				totalPoints: '11',
+				qualifierPoints: '3',
+				qualifierRank: '2',
+				qualifierPlayers: '4',
+				knockoutPoints: '8',
+				knockoutRank: '2',
+				knockoutPlayers: '4',
+				knockoutRound: '10',
+				maxQualifierPoints: '4',
+				matchDate: 1626112800000
 			});
-			points1074.knockoutPoints = Math.round(7 * (9 / 10 * 2));
-			points1074.knockoutRank = 3;
-			points1074.knockoutPlayers = 10;
-			points1074.knockoutRound = 9;
-			points1074.maxQualifierPoints = 10;
-			points1074.save();
+
+			await DBMOTDPoints.create({
+				userId: '677670575350480906',
+				osuUserId: '15631422',
+				osuRank: '87534',
+				totalPoints: '8',
+				qualifierPoints: '2',
+				qualifierRank: '3',
+				qualifierPlayers: '4',
+				knockoutPoints: '6',
+				knockoutRank: '4',
+				knockoutPlayers: '4',
+				knockoutRound: '8',
+				maxQualifierPoints: '4',
+				matchDate: 1626112800000
+			});
+
+			await DBMOTDPoints.create({
+				userId: '725524775304167484',
+				osuUserId: '4824446',
+				osuRank: '57320',
+				totalPoints: '8',
+				qualifierPoints: '1',
+				qualifierRank: '4',
+				qualifierPlayers: '4',
+				knockoutPoints: '7',
+				knockoutRank: '3',
+				knockoutPlayers: '4',
+				knockoutRound: '9',
+				maxQualifierPoints: '4',
+				matchDate: 1626112800000
+			});
+
+			await DBMOTDPoints.create({
+				userId: '499374303805046795',
+				osuUserId: '12920152',
+				osuRank: '15590',
+				totalPoints: '16',
+				qualifierPoints: '5',
+				qualifierRank: '1',
+				qualifierPlayers: '5',
+				knockoutPoints: '11',
+				knockoutRank: '1',
+				knockoutPlayers: '5',
+				knockoutRound: '11',
+				maxQualifierPoints: '5',
+				matchDate: 1626112800000
+			});
+
+			await DBMOTDPoints.create({
+				userId: '238326691896885248',
+				osuUserId: '772295',
+				osuRank: '11590',
+				totalPoints: '14',
+				qualifierPoints: '4',
+				qualifierRank: '2',
+				qualifierPlayers: '5',
+				knockoutPoints: '10',
+				knockoutRank: '2',
+				knockoutPlayers: '5',
+				knockoutRound: '10',
+				maxQualifierPoints: '5',
+				matchDate: 1626112800000
+			});
+
+			await DBMOTDPoints.create({
+				userId: '138273136285057025',
+				osuUserId: '4520333',
+				osuRank: '26777',
+				totalPoints: '10',
+				qualifierPoints: '3',
+				qualifierRank: '3',
+				qualifierPlayers: '5',
+				knockoutPoints: '7',
+				knockoutRank: '5',
+				knockoutPlayers: '5',
+				knockoutRound: '7',
+				maxQualifierPoints: '5',
+				matchDate: 1626112800000
+			});
+
+			await DBMOTDPoints.create({
+				userId: '480382946851815452',
+				osuUserId: '13222659',
+				osuRank: '45811',
+				totalPoints: '10',
+				qualifierPoints: '2',
+				qualifierRank: '4',
+				qualifierPlayers: '5',
+				knockoutPoints: '8',
+				knockoutRank: '4',
+				knockoutPlayers: '5',
+				knockoutRound: '8',
+				maxQualifierPoints: '5',
+				matchDate: 1626112800000
+			});
+
+			await DBMOTDPoints.create({
+				userId: '458196977939906562',
+				osuUserId: '3148418',
+				osuRank: '12096',
+				totalPoints: '10',
+				qualifierPoints: '1',
+				qualifierRank: '5',
+				qualifierPlayers: '5',
+				knockoutPoints: '9',
+				knockoutRank: '3',
+				knockoutPlayers: '5',
+				knockoutRound: '9',
+				maxQualifierPoints: '5',
+				matchDate: 1626112800000
+			});
+
+			await DBMOTDPoints.create({
+				userId: '213704622659862529',
+				osuUserId: '8880119',
+				osuRank: '209248',
+				totalPoints: '12',
+				qualifierPoints: '4',
+				qualifierRank: '1',
+				qualifierPlayers: '4',
+				knockoutPoints: '8',
+				knockoutRank: '2',
+				knockoutPlayers: '4',
+				knockoutRound: '10',
+				maxQualifierPoints: '4',
+				matchDate: 1626112800000
+			});
+
+			await DBMOTDPoints.create({
+				userId: '414110552919375874',
+				osuUserId: '15233100',
+				osuRank: '105476',
+				totalPoints: '12',
+				qualifierPoints: '3',
+				qualifierRank: '2',
+				qualifierPlayers: '4',
+				knockoutPoints: '9',
+				knockoutRank: '1',
+				knockoutPlayers: '4',
+				knockoutRound: '11',
+				maxQualifierPoints: '4',
+				matchDate: 1626112800000
+			});
+
+			await DBMOTDPoints.create({
+				userId: '312981329476321282',
+				osuUserId: '12442952',
+				osuRank: '100004',
+				totalPoints: '9',
+				qualifierPoints: '2',
+				qualifierRank: '3',
+				qualifierPlayers: '4',
+				knockoutPoints: '7',
+				knockoutRank: '3',
+				knockoutPlayers: '4',
+				knockoutRound: '9',
+				maxQualifierPoints: '4',
+				matchDate: 1626112800000
+			});
+
+			await DBMOTDPoints.create({
+				userId: '371638091275829258',
+				osuUserId: '19236425',
+				osuRank: '128658',
+				totalPoints: '7',
+				qualifierPoints: '1',
+				qualifierRank: '4',
+				qualifierPlayers: '4',
+				knockoutPoints: '6',
+				knockoutRank: '4',
+				knockoutPlayers: '4',
+				knockoutRound: '8',
+				maxQualifierPoints: '4',
+				matchDate: 1626112800000
+			});
 		} else if (args[0] === 'start') {
 			initializeMOTD(msg.client, bancho, true, false);
 		} else if (args[0] === 'createLeaderboard') {
