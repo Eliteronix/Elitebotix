@@ -68,6 +68,10 @@ module.exports = (sequelize, DataTypes) => {
 		loggingEmojiCreate: DataTypes.BOOLEAN,
 		loggingEmojiUpdate: DataTypes.BOOLEAN,
 		loggingEmojiDelete: DataTypes.BOOLEAN,
+		ticketsEnabled: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		paranoid: true,
 	});
 };
