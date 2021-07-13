@@ -67,6 +67,7 @@ module.exports = {
 						for (let j = 0; j < gameScores.length; j++) {
 							if (parseInt(gameScores[j].score) < 10000) {
 								gameScores.splice(j, 1);
+								j--;
 							}
 						}
 
