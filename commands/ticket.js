@@ -1,4 +1,4 @@
-const { DBGuilds } = require('../dbObjects');
+const { DBGuilds, DBTickets } = require('../dbObjects');
 const { getGuildPrefix } = require('../utils');
 
 module.exports = {
@@ -28,6 +28,21 @@ module.exports = {
 				const ticket = await DBTickets.findOne({
 					where: { guildId: msg.guild.id, channelId: msg.channel.id }
 				});
+
+				if (ticket) {
+					ticket.statusId = 100;
+					ticket.statusName = 'Closed';
+
+					//Move the channel to the correct category
+					const closedCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Closed');
+					if (closedCategory) {
+						msg.channel.setParent(closedCategory.id);
+					} else {
+
+					}
+				} else {
+					return msg.channel.send('This is not a valid ticket channel.');
+				}
 			}
 		} else {
 			const guildPrefix = await getGuildPrefix(msg);
