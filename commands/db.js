@@ -339,6 +339,7 @@ module.exports = {
 					creatorId: dbList[i].creatorId,
 					statusId: dbList[i].statusId,
 					statusName: dbList[i].statusName,
+					additionalParties: dbList[i].additionalParties,
 					paranoid: dbList[i].paranoid,
 					createdAt: dbList[i].createdAt,
 					updatedAt: dbList[i].updatedAt,

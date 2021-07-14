@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
 		creatorId: DataTypes.STRING,
 		statusId: DataTypes.INTEGER,
 		statusName: DataTypes.STRING,
+		additionalParties: DataTypes.STRING,
 		paranoid: true,
 	});
 };

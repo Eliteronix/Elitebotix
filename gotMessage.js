@@ -294,7 +294,9 @@ async function handleTicketStatus(msg) {
 		where: { channelId: msg.channel.id, creatorId: msg.author.id }
 	});
 
-	if (ticket && ticket.statusId !== 0) {
+	const guildPrefix = await getGuildPrefix(msg);
+
+	if (ticket && ticket.statusId !== 0 && ticket.statusId !== 100 && !msg.content.startsWith(`${guildPrefix}ticket`)) {
 		ticket.statusId = 75;
 		ticket.statusName = 'Awaiting Response';
 		ticket.save();
@@ -324,17 +326,52 @@ async function handleTicketStatus(msg) {
 			}
 			await awaitingResponseCategory.setPosition(position);
 		}
-		msg.channel.setParent(awaitingResponseCategory);
+		await msg.channel.setParent(awaitingResponseCategory);
 
-		await msg.channel.overwritePermissions([
+
+		let permissions = [
 			{
 				id: ticket.creatorId,
 				allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'ADD_REACTIONS', 'USE_EXTERNAL_EMOJIS', 'MENTION_EVERYONE', 'READ_MESSAGE_HISTORY'],
 			},
 			{
-				id: msg.guild.roles.everyone.id,
+				id: msg.channel.guild.roles.everyone.id,
 				deny: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'MANAGE_MESSAGES', 'SEND_TTS_MESSAGES'],
 			},
-		]);
+		];
+
+		if (ticket.additionalParties) {
+			let parties = ticket.additionalParties.split(';');
+
+			parties.forEach(async (party) => {
+				if (!isNaN(party)) {
+					permissions.push(
+						{
+							id: party,
+							allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'ADD_REACTIONS', 'USE_EXTERNAL_EMOJIS', 'MENTION_EVERYONE', 'READ_MESSAGE_HISTORY'],
+						}
+					);
+				}
+			});
+		}
+
+		await msg.channel.overwritePermissions(permissions);
+
+		let openCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Open');
+		if (openCategory && !openCategory.children.first()) {
+			openCategory.delete();
+		}
+		let respondedCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Responded');
+		if (respondedCategory && !respondedCategory.children.first()) {
+			respondedCategory.delete();
+		}
+		let inActionCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - In Action');
+		if (inActionCategory && !inActionCategory.children.first()) {
+			inActionCategory.delete();
+		}
+		let closedCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Closed');
+		if (closedCategory && !closedCategory.children.first()) {
+			closedCategory.delete();
+		}
 	}
 }
