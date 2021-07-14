@@ -6,7 +6,7 @@ module.exports = {
 	name: 'ticket',
 	//aliases: ['developer'],
 	description: 'Ticket manager',
-	usage: '<issue description> | <close/c>',
+	usage: '<issue description> | <responded/r/action/a/close/c>',
 	// permissions: 'MANAGE_GUILD',
 	// permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -25,18 +25,118 @@ module.exports = {
 		});
 
 		if (guild) {
-			if (args[0].toLowerCase() === 'close' || args[0].toLowerCase() === 'c') {
+			if (args[0].toLowerCase() === 'responded' || args[0].toLowerCase() === 'r') {
 				const ticket = await DBTickets.findOne({
 					where: { guildId: msg.guild.id, channelId: msg.channel.id }
 				});
 
 				if (ticket) {
-					console.log(msg.guild.ownerID);
+					if (ticket.creatorId === msg.author.id && msg.guild.ownerID !== msg.author.id) {
+						return;
+					}
+					ticket.statusId = 25;
+					ticket.statusName = 'Responded';
+					ticket.save();
+
+					//Move the channel to the correct category
+					let repondedCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Responded');
+					if (!repondedCategory) {
+						repondedCategory = await msg.guild.channels.create('Tickets - Responded', { type: 'category' });
+						await repondedCategory.overwritePermissions([
+							{
+								id: msg.guild.roles.everyone.id,
+								deny: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'MANAGE_MESSAGES', 'SEND_TTS_MESSAGES'],
+							},
+						]);
+						let openCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Open');
+						let position = 0;
+						if (openCategory) {
+							position++;
+						}
+						await repondedCategory.setPosition(position);
+					}
+					msg.channel.setParent(repondedCategory);
+
+					await msg.channel.overwritePermissions([
+						{
+							id: ticket.creatorId,
+							allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'ADD_REACTIONS', 'USE_EXTERNAL_EMOJIS', 'MENTION_EVERYONE', 'READ_MESSAGE_HISTORY'],
+						},
+						{
+							id: msg.guild.roles.everyone.id,
+							deny: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'MANAGE_MESSAGES', 'SEND_TTS_MESSAGES'],
+						},
+					]);
+
+					msg.delete();
+				} else {
+					return msg.channel.send('This is not a valid ticket channel.');
+				}
+				return;
+			} else if (args[0].toLowerCase() === 'action' || args[0].toLowerCase() === 'a') {
+				const ticket = await DBTickets.findOne({
+					where: { guildId: msg.guild.id, channelId: msg.channel.id }
+				});
+
+				if (ticket) {
+					if (ticket.creatorId === msg.author.id && msg.guild.ownerID !== msg.author.id) {
+						return;
+					}
+					ticket.statusId = 50;
+					ticket.statusName = 'In action';
+					ticket.save();
+
+					//Move the channel to the correct category
+					let inActionCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - In Action');
+					if (!inActionCategory) {
+						inActionCategory = await msg.guild.channels.create('Tickets - In Action', { type: 'category' });
+						await inActionCategory.overwritePermissions([
+							{
+								id: msg.guild.roles.everyone.id,
+								deny: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'MANAGE_MESSAGES', 'SEND_TTS_MESSAGES'],
+							},
+						]);
+						let openCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Open');
+						let position = 0;
+						if (openCategory) {
+							position++;
+						}
+						let respondedCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Responded');
+						if (respondedCategory) {
+							position++;
+						}
+						await inActionCategory.setPosition(position);
+					}
+					msg.channel.setParent(inActionCategory);
+
+					await msg.channel.overwritePermissions([
+						{
+							id: ticket.creatorId,
+							allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'ADD_REACTIONS', 'USE_EXTERNAL_EMOJIS', 'MENTION_EVERYONE', 'READ_MESSAGE_HISTORY'],
+						},
+						{
+							id: msg.guild.roles.everyone.id,
+							deny: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'MANAGE_MESSAGES', 'SEND_TTS_MESSAGES'],
+						},
+					]);
+
+					msg.delete();
+				} else {
+					return msg.channel.send('This is not a valid ticket channel.');
+				}
+				return;
+			} else if (args[0].toLowerCase() === 'close' || args[0].toLowerCase() === 'c') {
+				const ticket = await DBTickets.findOne({
+					where: { guildId: msg.guild.id, channelId: msg.channel.id }
+				});
+
+				if (ticket) {
 					if (ticket.creatorId === msg.author.id && msg.guild.ownerID !== msg.author.id) {
 						return;
 					}
 					ticket.statusId = 100;
 					ticket.statusName = 'Closed';
+					ticket.save();
 
 					//Move the channel to the correct category
 					let closedCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Closed');
@@ -53,9 +153,33 @@ module.exports = {
 						if (openCategory) {
 							position++;
 						}
+						let respondedCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Responded');
+						if (respondedCategory) {
+							position++;
+						}
+						let inActionCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - In Action');
+						if (inActionCategory) {
+							position++;
+						}
+						let awaitingResponseCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Awaiting Response');
+						if (awaitingResponseCategory) {
+							position++;
+						}
 						await closedCategory.setPosition(position);
 					}
 					msg.channel.setParent(closedCategory);
+
+					await msg.channel.overwritePermissions([
+						{
+							id: ticket.creatorId,
+							allow: ['VIEW_CHANNEL', 'READ_MESSAGE_HISTORY'],
+							deny: ['SEND_MESSAGES']
+						},
+						{
+							id: msg.guild.roles.everyone.id,
+							deny: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'MANAGE_MESSAGES', 'SEND_TTS_MESSAGES'],
+						},
+					]);
 
 					msg.channel.send('The Ticket has been closed.');
 					msg.delete();
@@ -122,15 +246,3 @@ module.exports = {
 		}
 	},
 };
-
-// let channelName = args.slice(0).join(' '); //Arguments to set the channel name
-// message.guild.channels.create(channelName, {
-//         type: "text", //This create a text channel, you can make a voice one too, by changing "text" to "voice"
-//         permissionOverwrites: [
-//            {
-//              id: message.guild.roles.everyone, //To make it be seen by a certain role, user an ID instead
-//              allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'], //Allow permissions
-//              deny: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'] //Deny permissions
-// 		   }
-//         ],
-//       })
