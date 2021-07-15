@@ -20,5 +20,6 @@ const DBMOTDPoints = require('./models/DBMOTDPoints')(sequelize, Sequelize.DataT
 const DBElitiriCupSignUp = require('./models/DBElitiriCupSignUp')(sequelize, Sequelize.DataTypes);
 const DBElitiriCupSubmissions = require('./models/DBElitiriCupSubmissions')(sequelize, Sequelize.DataTypes);
 const DBStarBoardMessages = require('./models/DBStarBoardMessages')(sequelize, Sequelize.DataTypes);
+const DBTickets = require('./models/DBTickets')(sequelize, Sequelize.DataTypes);
 
-module.exports = { DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBAutoRoles, DBTemporaryVoices, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages };
+module.exports = { DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBAutoRoles, DBTemporaryVoices, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets };

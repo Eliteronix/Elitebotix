@@ -1,4 +1,4 @@
-const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages } = require('../dbObjects');
+const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets } = require('../dbObjects');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
 
@@ -322,6 +322,24 @@ module.exports = {
 					originalMessageId: dbList[i].originalMessageId,
 					starBoardChannelId: dbList[i].starBoardChannelId,
 					starBoardMessageId: dbList[i].starBoardMessageId,
+					paranoid: dbList[i].paranoid,
+					createdAt: dbList[i].createdAt,
+					updatedAt: dbList[i].updatedAt,
+				});
+			}
+		} else if (args[0] === 'tickets') {
+			const dbList = await DBTickets.findAll();
+			dbTableName = 'DBTickets';
+
+			for (let i = 0; i < dbList.length; i++) {
+				data.push({
+					id: dbList[i].id,
+					guildId: dbList[i].guildId,
+					channelId: dbList[i].channelId,
+					creatorId: dbList[i].creatorId,
+					statusId: dbList[i].statusId,
+					statusName: dbList[i].statusName,
+					additionalParties: dbList[i].additionalParties,
 					paranoid: dbList[i].paranoid,
 					createdAt: dbList[i].createdAt,
 					updatedAt: dbList[i].updatedAt,
