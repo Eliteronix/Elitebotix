@@ -231,6 +231,10 @@ module.exports = {
 				return;
 			}
 
+			if (!args[1]) {
+				return msg.channel.send('Please describe the problem in further detail.');
+			}
+
 			const tickets = await DBTickets.findAll({
 				where: { guildId: msg.guild.id }
 			});
@@ -249,7 +253,7 @@ module.exports = {
 			let ticketChannel = await msg.guild.channels.create(`${msg.guild.name.substring(0, 3)}-${(tickets.length + 1).toString().padStart(6, '0')}-${msg.author.username.substring(0, 3)}`, 'text');
 			await ticketChannel.setParent(openCategory);
 
-			const ticket = DBTickets.create({
+			const ticket = await DBTickets.create({
 				guildId: msg.guild.id,
 				channelId: ticketChannel.id,
 				creatorId: msg.author.id,

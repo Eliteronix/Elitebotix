@@ -123,6 +123,7 @@ module.exports = {
 					loggingEmojiCreate: dbList[i].loggingEmojiCreate,
 					loggingEmojiUpdate: dbList[i].loggingEmojiUpdate,
 					loggingEmojiDelete: dbList[i].loggingEmojiDelete,
+					ticketsEnabled: dbList[i].ticketsEnabled,
 					paranoid: dbList[i].paranoid,
 					createdAt: dbList[i].createdAt,
 					updatedAt: dbList[i].updatedAt,
