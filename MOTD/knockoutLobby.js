@@ -75,8 +75,11 @@ module.exports = {
 			}
 
 			await channel.sendMessage('!mp timer 180');
+			let timer = new Date();
+			timer.setMinutes(timer.getMinutes() + 4);
 
 			channel.on('message', async (msg) => {
+				let now = new Date();
 				if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
 					//Banchobot countdown finished
 					if (lobbyStatus === 'Joining phase') {
@@ -104,6 +107,11 @@ module.exports = {
 
 						lobbyStatus === 'Map being played';
 					}
+				} else if (timer < now && lobbyStatus === 'Joining phase') {
+					lobbyStatus = 'Waiting for start';
+
+					await channel.sendMessage('Everyone please ready up!');
+					await channel.sendMessage('!mp timer 120');
 				}
 			});
 			lobby.on('playerJoined', async (obj) => {
