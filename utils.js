@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBOsuMultiScores } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -856,6 +856,18 @@ module.exports = {
 			link = link.substring(0, link.length - 1);
 		}
 		return link.replace(/.+\//g, '');
+	},
+	saveOsuMultiScores(match) {
+		console.log(match);
+		match.games.forEach(game => {
+			console.log(game);
+			game.scores.forEach(async (score) => {
+				console.log(score);
+				const existingScore = await DBOsuMultiScores.findOne({
+					where: { osuUserId: }
+				});
+			});
+		});
 	}
 };
 

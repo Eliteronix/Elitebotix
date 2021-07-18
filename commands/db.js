@@ -346,6 +346,34 @@ module.exports = {
 					updatedAt: dbList[i].updatedAt,
 				});
 			}
+		} else if (args[0] === 'osumultiscores') {
+			const dbList = await DBTickets.findAll();
+			dbTableName = 'DBTickets';
+
+			for (let i = 0; i < dbList.length; i++) {
+				data.push({
+					id: dbList[i].id,
+					osuUserId: dbList[i].osuUserId,
+					matchId: dbList[i].matchId,
+					matchName: dbList[i].matchName,
+					gameId: dbList[i].gameId,
+					scoringType: dbList[i].scoringType,
+					mode: dbList[i].mode,
+					beatmapId: dbList[i].beatmapId,
+					tourneyMatch: dbList[i].tourneyMatch,
+					evaluation: dbList[i].evaluation,
+					score: dbList[i].score,
+					gameRawMods: dbList[i].gameRawMods,
+					rawMods: dbList[i].rawMods,
+					matchStartDate: dbList[i].matchStartDate,
+					matchEndDate: dbList[i].matchEndDate,
+					gameStartDate: dbList[i].gameStartDate,
+					gameEndDate: dbList[i].gameEndDate,
+					paranoid: dbList[i].paranoid,
+					createdAt: dbList[i].createdAt,
+					updatedAt: dbList[i].updatedAt,
+				});
+			}
 		} else {
 			return msg.reply('no corresponding table found');
 		}
