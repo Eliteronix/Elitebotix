@@ -11,7 +11,7 @@ module.exports = {
 				//Nothing
 			});
 
-			channel.delete();
+			await channel.delete();
 
 			let openCategory = channel.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Open');
 			if (openCategory && !openCategory.children.first()) {
