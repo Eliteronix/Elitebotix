@@ -1,4 +1,4 @@
-const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets } = require('../dbObjects');
+const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
 
@@ -27,352 +27,105 @@ module.exports = {
 			dbTableName = 'DBAutoRoles';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					guildId: dbList[i].guildId,
-					roleId: dbList[i].roleId,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'discordusers') {
 			const dbList = await DBDiscordUsers.findAll();
 			dbTableName = 'DBDiscordUsers';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					userId: dbList[i].userId,
-					osuUserId: dbList[i].osuUserId,
-					osuVerificationCode: dbList[i].osuVerificationCode,
-					osuVerified: dbList[i].osuVerified,
-					osuName: dbList[i].osuName,
-					osuBadges: dbList[i].osuBadges,
-					osuPP: dbList[i].osuPP,
-					osuRank: dbList[i].osuRank,
-					taikoPP: dbList[i].taikoPP,
-					taikoRank: dbList[i].taikoRank,
-					catchPP: dbList[i].catchPP,
-					catchRank: dbList[i].catchRank,
-					maniaPP: dbList[i].maniaPP,
-					maniaRank: dbList[i].maniaRank,
-					osuMainServer: dbList[i].osuMainServer,
-					osuMainMode: dbList[i].osuMainMode,
-					osuMOTDRegistered: dbList[i].osuMOTDRegistered,
-					osuMOTDMuted: dbList[i].osuMOTDMuted,
-					osuMOTDlastRoundPlayed: dbList[i].osuMOTDlastRoundPlayed,
-					osuMOTDerrorFirstOccurence: dbList[i].osuMOTDerrorFirstOccurence,
-					osuMOTDmutedUntil: dbList[i].osuMOTDmutedUntil,
-					osuNotFoundFirstOccurence: dbList[i].osuNotFoundFirstOccurence,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'guilds') {
 			const dbList = await DBGuilds.findAll();
 			dbTableName = 'DBGuilds';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					guildId: dbList[i].guildId,
-					guildName: dbList[i].guildName,
-					customPrefixUsed: dbList[i].customPrefixUsed,
-					customPrefix: dbList[i].customPrefix,
-					dadmodeEnabled: dbList[i].dadmodeEnabled,
-					saluteEnabled: dbList[i].saluteEnabled,
-					owoEnabled: dbList[i].owoEnabled,
-					sendWelcomeMessage: dbList[i].sendWelcomeMessage,
-					welcomeMessageChannel: dbList[i].welcomeMessageChannel,
-					welcomeMessageText: dbList[i].welcomeMessageText,
-					sendGoodbyeMessage: dbList[i].sendGoodbyeMessage,
-					goodbyeMessageChannel: dbList[i].goodbyeMessageChannel,
-					goodbyeMessageText: dbList[i].goodbyeMessageText,
-					temporaryVoices: dbList[i].temporaryVoices,
-					addTemporaryText: dbList[i].addTemporaryText,
-					starBoardEnabled: dbList[i].starBoardEnabled,
-					starBoardMinimum: dbList[i].starBoardMinimum,
-					starBoardChannel: dbList[i].starBoardChannel,
-					loggingChannel: dbList[i].loggingChannel,
-					loggingNicknames: dbList[i].loggingNicknames,
-					loggingUsernames: dbList[i].loggingUsernames,
-					loggingDiscriminators: dbList[i].loggingDiscriminators,
-					loggingAvatars: dbList[i].loggingAvatars,
-					loggingUserroles: dbList[i].loggingUserroles,
-					loggingMemberAdd: dbList[i].loggingMemberAdd,
-					loggingMemberRemove: dbList[i].loggingMemberRemove,
-					loggingRoleCreate: dbList[i].loggingRoleCreate,
-					loggingRoleUpdate: dbList[i].loggingRoleUpdate,
-					loggingRoleDelete: dbList[i].loggingRoleDelete,
-					loggingBanAdd: dbList[i].loggingBanAdd,
-					loggingBanRemove: dbList[i].loggingBanRemove,
-					loggingGuildUpdate: dbList[i].loggingGuildUpdate,
-					loggingServerMute: dbList[i].loggingServerMute,
-					loggingServerDeaf: dbList[i].loggingServerDeaf,
-					loggingJoinVoice: dbList[i].loggingJoinVoice,
-					loggingLeaveVoice: dbList[i].loggingLeaveVoice,
-					loggingChannelCreate: dbList[i].loggingChannelCreate,
-					loggingChannelUpdate: dbList[i].loggingChannelUpdate,
-					loggingChannelDelete: dbList[i].loggingChannelDelete,
-					loggingInviteCreate: dbList[i].loggingInviteCreate,
-					loggingInviteDelete: dbList[i].loggingInviteDelete,
-					loggingMessageUpdate: dbList[i].loggingMessageUpdate,
-					loggingMessageDelete: dbList[i].loggingMessageDelete,
-					loggingEmojiCreate: dbList[i].loggingEmojiCreate,
-					loggingEmojiUpdate: dbList[i].loggingEmojiUpdate,
-					loggingEmojiDelete: dbList[i].loggingEmojiDelete,
-					ticketsEnabled: dbList[i].ticketsEnabled,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'reactionroles') {
 			const dbList = await DBReactionRoles.findAll();
 			dbTableName = 'DBReactionRoles';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					dbReactionRolesHeaderId: dbList[i].dbReactionRolesHeaderId,
-					roleId: dbList[i].roleId,
-					emoji: dbList[i].emoji,
-					description: dbList[i].description,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'reactionrolesheader') {
 			const dbList = await DBReactionRolesHeader.findAll();
 			dbTableName = 'DBReactionRolesHeader';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					guildId: dbList[i].guildId,
-					reactionHeaderId: dbList[i].reactionHeaderId,
-					reactionChannelHeaderId: dbList[i].reactionChannelHeaderId,
-					reactionTitle: dbList[i].reactionTitle,
-					reactionColor: dbList[i].reactionColor,
-					reactionDescription: dbList[i].reactionDescription,
-					reactionImage: dbList[i].reactionImage,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'serveruseractivity') {
 			const dbList = await DBServerUserActivity.findAll();
 			dbTableName = 'DBServerUserActivity';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					guildId: dbList[i].guildId,
-					userId: dbList[i].userId,
-					points: dbList[i].points,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'temporaryvoices') {
 			const dbList = await DBTemporaryVoices.findAll();
 			dbTableName = 'DBTemporaryVoices';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					guildId: dbList[i].guildId,
-					channelId: dbList[i].channelId,
-					textChannelId: dbList[i].textChannelId,
-					creatorId: dbList[i].creatorId,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'processqueue') {
 			const dbList = await DBProcessQueue.findAll();
 			dbTableName = 'DBProcessQueue';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					guildId: dbList[i].guildId,
-					task: dbList[i].task,
-					priority: dbList[i].priority,
-					filters: dbList[i].filters,
-					additions: dbList[i].additions,
-					date: dbList[i].date,
-					beingExecuted: dbList[i].beingExecuted,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'activityroles') {
 			const dbList = await DBActivityRoles.findAll();
 			dbTableName = 'DBActivityRoles';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					guildId: dbList[i].guildId,
-					roleId: dbList[i].roleId,
-					rankCutoff: dbList[i].rankCutoff,
-					percentageCutoff: dbList[i].percentageCutoff,
-					pointsCutoff: dbList[i].pointsCutoff,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'motdpoints') {
 			const dbList = await DBMOTDPoints.findAll();
 			dbTableName = 'DBMOTDPoints';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					userId: dbList[i].userId,
-					osuUserId: dbList[i].osuUserId,
-					osuRank: dbList[i].osuRank,
-					totalPoints: dbList[i].totalPoints,
-					qualifierPoints: dbList[i].qualifierPoints,
-					qualifierRank: dbList[i].qualifierRank,
-					qualifierPlayers: dbList[i].qualifierPlayers,
-					knockoutPoints: dbList[i].knockoutPoints,
-					knockoutRank: dbList[i].knockoutRank,
-					knockoutPlayers: dbList[i].knockoutPlayers,
-					knockoutRound: dbList[i].knockoutRound,
-					maxQualifierPoints: dbList[i].maxQualifierPoints,
-					matchDate: dbList[i].matchDate,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'elitiricupsignup') {
 			const dbList = await DBElitiriCupSignUp.findAll();
 			dbTableName = 'DBElitiriCupSignUp';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					userId: dbList[i].userId,
-					discordTag: dbList[i].discordTag,
-					osuUserId: dbList[i].osuUserId,
-					osuName: dbList[i].osuName,
-					osuBadges: dbList[i].osuBadges,
-					osuPP: dbList[i].osuPP,
-					osuRank: dbList[i].osuRank,
-					bracketName: dbList[i].bracketName,
-					saturdayEarlyAvailability: dbList[i].saturdayEarlyAvailability,
-					saturdayLateAvailability: dbList[i].saturdayLateAvailability,
-					sundayEarlyAvailability: dbList[i].sundayEarlyAvailability,
-					sundayLateAvailability: dbList[i].sundayLateAvailability,
-					lowerDifficulty: dbList[i].lowerDifficulty,
-					upperDifficulty: dbList[i].upperDifficulty,
-					tournamentName: dbList[i].tournamentName,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'elitiricupsubmissions') {
 			const dbList = await DBElitiriCupSubmissions.findAll();
 			dbTableName = 'DBElitiriCupSubmissions';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					osuUserId: dbList[i].osuUserId,
-					osuName: dbList[i].osuName,
-					bracketName: dbList[i].bracketName,
-					tournamentName: dbList[i].tournamentName,
-					modPool: dbList[i].modPool,
-					title: dbList[i].title,
-					artist: dbList[i].artist,
-					difficulty: dbList[i].difficulty,
-					starRating: dbList[i].starRating,
-					drainLength: dbList[i].drainLength,
-					circleSize: dbList[i].circleSize,
-					approachRate: dbList[i].approachRate,
-					overallDifficulty: dbList[i].overallDifficulty,
-					hpDrain: dbList[i].hpDrain,
-					mapper: dbList[i].mapper,
-					beatmapId: dbList[i].beatmapId,
-					beatmapsetId: dbList[i].beatmapsetId,
-					bpm: dbList[i].bpm,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'starboardmessages') {
 			const dbList = await DBStarBoardMessages.findAll();
 			dbTableName = 'DBStarBoardMessages';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					originalChannelId: dbList[i].originalChannelId,
-					originalMessageId: dbList[i].originalMessageId,
-					starBoardChannelId: dbList[i].starBoardChannelId,
-					starBoardMessageId: dbList[i].starBoardMessageId,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'tickets') {
 			const dbList = await DBTickets.findAll();
 			dbTableName = 'DBTickets';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					guildId: dbList[i].guildId,
-					channelId: dbList[i].channelId,
-					creatorId: dbList[i].creatorId,
-					statusId: dbList[i].statusId,
-					statusName: dbList[i].statusName,
-					additionalParties: dbList[i].additionalParties,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else if (args[0] === 'osumultiscores') {
-			const dbList = await DBTickets.findAll();
-			dbTableName = 'DBTickets';
+			const dbList = await DBOsuMultiScores.findAll();
+			dbTableName = 'DBOsuMultiScores';
 
 			for (let i = 0; i < dbList.length; i++) {
-				data.push({
-					id: dbList[i].id,
-					osuUserId: dbList[i].osuUserId,
-					matchId: dbList[i].matchId,
-					matchName: dbList[i].matchName,
-					gameId: dbList[i].gameId,
-					scoringType: dbList[i].scoringType,
-					mode: dbList[i].mode,
-					beatmapId: dbList[i].beatmapId,
-					tourneyMatch: dbList[i].tourneyMatch,
-					evaluation: dbList[i].evaluation,
-					score: dbList[i].score,
-					gameRawMods: dbList[i].gameRawMods,
-					rawMods: dbList[i].rawMods,
-					matchStartDate: dbList[i].matchStartDate,
-					matchEndDate: dbList[i].matchEndDate,
-					gameStartDate: dbList[i].gameStartDate,
-					gameEndDate: dbList[i].gameEndDate,
-					paranoid: dbList[i].paranoid,
-					createdAt: dbList[i].createdAt,
-					updatedAt: dbList[i].updatedAt,
-				});
+				data.push(dbList[i].dataValues);
 			}
 		} else {
 			return msg.reply('no corresponding table found');

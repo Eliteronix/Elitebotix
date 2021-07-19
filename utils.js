@@ -858,14 +858,64 @@ module.exports = {
 		return link.replace(/.+\//g, '');
 	},
 	saveOsuMultiScores(match) {
-		console.log(match);
+		let tourneyMatch = false;
+		if (match.name.match(/.+: (.+) vs (.+)/g) || match.name.match(/.+: (.+) vs. (.+)/g)) {
+			tourneyMatch = true;
+		}
 		match.games.forEach(game => {
-			console.log(game);
 			game.scores.forEach(async (score) => {
-				console.log(score);
+				//Calculate evaluation
+				let evaluation = 0;
+				let gameScores = game.scores;
+
+				if (gameScores.length > 0) {
+					quicksort(gameScores);
+
+					for (let i = 0; i < gameScores.length; i++) {
+						if (parseInt(gameScores[i].score) < 10000) {
+							gameScores.splice(i, 1);
+							i--;
+						}
+					}
+
+					const middleIndex = gameScores.length - Math.round(gameScores.length / 2);
+					const middleScore = gameScores[middleIndex].score;
+
+					for (let i = 0; i < gameScores.length; i++) {
+						if (score.userId === gameScores[i].userId) {
+							evaluation = 1 / parseInt(middleScore) * parseInt(gameScores[i].score);
+						}
+					}
+				}
+
+				//Add score to db
 				const existingScore = await DBOsuMultiScores.findOne({
-					where: { osuUserId: }
+					where: {
+						osuUserId: score.userId,
+						matchId: match.id,
+						gameId: game.id,
+					}
 				});
+
+				if (!existingScore && evaluation) {
+					DBOsuMultiScores.create({
+						osuUserId: score.userId,
+						matchId: match.id,
+						gameId: game.id,
+						scoringType: game.scoringType,
+						mode: game.mode,
+						beatmapId: game.beatmapId,
+						tourneyMatch: tourneyMatch,
+						evaluation: evaluation,
+						score: score.score,
+						gameRawMods: game.raw_mods,
+						rawMods: score.raw_mods,
+						matchStartDate: match.raw_start,
+						matchEndDate: match.raw_end,
+						gameStartDate: game.raw_start,
+						gameEndDate: game.raw_end,
+					});
+				}
 			});
 		});
 	}
@@ -921,4 +971,29 @@ function fitTextOnMiddleCanvas(ctx, text, startingSize, fontface, yPosition, wid
 
 	return fontsize;
 
+}
+
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].score) >= parseFloat(pivot.score)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
 }
