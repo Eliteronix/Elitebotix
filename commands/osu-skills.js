@@ -39,25 +39,51 @@ module.exports = {
 					oldestDate = score.matchStartDate;
 				}
 			});
-
-			console.log(oldestDate);
-
-			const DATA_COUNT = userScores.length;
+			const rawData = [];
 			const labels = [];
-			for (let i = 0; i < DATA_COUNT; ++i) {
-				labels.push(i.toString());
+			for (let now = new Date(); oldestDate < now; oldestDate.setUTCMonth(oldestDate.getUTCMonth() + 1)) {
+				let rawDataObject = {
+					label: `${oldestDate.getUTCMonth().toString().padStart(2, '0')}-${oldestDate.getUTCFullYear()}`,
+					totalEvaluation: 0,
+					totalCount: 0,
+					NMEvaluation: 0,
+					NMCount: 0,
+					HDEvaluation: 0,
+					HDCount: 0,
+					HREvaluation: 0,
+					HRCount: 0,
+					DTEvaluation: 0,
+					DTCount: 0,
+					FMEvaluation: 0,
+					FMCount: 0
+				};
+				labels.push(rawDataObject.label);
+				rawData.push(rawDataObject);
 			}
 
-			const datapoints = [];
 			userScores.forEach(score => {
-				datapoints.push(score.evaluation);
+				rawData.forEach(rawDataObject => {
+					if (rawDataObject.label === `${score.matchStartDate.getUTCMonth().toString().padStart(2, '0')}-${score.matchStartDate.getUTCFullYear()}`) {
+						rawDataObject.totalEvaluation += parseInt(score.evaluation);
+						rawDataObject.totalCount++;
+					}
+				});
+			});
+
+			const datapoints = [];
+			rawData.forEach(rawDataObject => {
+				let value = NaN;
+				if (rawDataObject.totalCount) {
+					value = rawDataObject.totalEvaluation / rawDataObject.totalCount;
+				}
+				datapoints.push(value);
 			});
 
 			const data = {
 				labels: labels,
 				datasets: [
 					{
-						label: 'Cubic interpolation',
+						label: 'Evaluation (All Mods)',
 						data: datapoints,
 						borderColor: 'rgb(54, 162, 235)',
 						fill: false,
@@ -74,7 +100,7 @@ module.exports = {
 					plugins: {
 						title: {
 							display: true,
-							text: 'Chart.js Line Chart - Cubic interpolation mode'
+							text: 'Elitebotix Evaluation for submitted matches'
 						},
 					},
 					interaction: {
