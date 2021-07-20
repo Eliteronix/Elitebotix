@@ -21,114 +21,59 @@ module.exports = {
 	async execute(msg, args) {
 		let data = [];
 		let dbTableName;
+		let dbList = [];
 
 		if (args[0] === 'autoroles') {
-			const dbList = await DBAutoRoles.findAll();
+			dbList = await DBAutoRoles.findAll();
 			dbTableName = 'DBAutoRoles';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'discordusers') {
-			const dbList = await DBDiscordUsers.findAll();
+			dbList = await DBDiscordUsers.findAll();
 			dbTableName = 'DBDiscordUsers';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'guilds') {
-			const dbList = await DBGuilds.findAll();
+			dbList = await DBGuilds.findAll();
 			dbTableName = 'DBGuilds';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'reactionroles') {
-			const dbList = await DBReactionRoles.findAll();
+			dbList = await DBReactionRoles.findAll();
 			dbTableName = 'DBReactionRoles';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'reactionrolesheader') {
-			const dbList = await DBReactionRolesHeader.findAll();
+			dbList = await DBReactionRolesHeader.findAll();
 			dbTableName = 'DBReactionRolesHeader';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'serveruseractivity') {
-			const dbList = await DBServerUserActivity.findAll();
+			dbList = await DBServerUserActivity.findAll();
 			dbTableName = 'DBServerUserActivity';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'temporaryvoices') {
-			const dbList = await DBTemporaryVoices.findAll();
+			dbList = await DBTemporaryVoices.findAll();
 			dbTableName = 'DBTemporaryVoices';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'processqueue') {
-			const dbList = await DBProcessQueue.findAll();
+			dbList = await DBProcessQueue.findAll();
 			dbTableName = 'DBProcessQueue';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'activityroles') {
-			const dbList = await DBActivityRoles.findAll();
+			dbList = await DBActivityRoles.findAll();
 			dbTableName = 'DBActivityRoles';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'motdpoints') {
-			const dbList = await DBMOTDPoints.findAll();
+			dbList = await DBMOTDPoints.findAll();
 			dbTableName = 'DBMOTDPoints';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'elitiricupsignup') {
-			const dbList = await DBElitiriCupSignUp.findAll();
+			dbList = await DBElitiriCupSignUp.findAll();
 			dbTableName = 'DBElitiriCupSignUp';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'elitiricupsubmissions') {
-			const dbList = await DBElitiriCupSubmissions.findAll();
+			dbList = await DBElitiriCupSubmissions.findAll();
 			dbTableName = 'DBElitiriCupSubmissions';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'starboardmessages') {
-			const dbList = await DBStarBoardMessages.findAll();
+			dbList = await DBStarBoardMessages.findAll();
 			dbTableName = 'DBStarBoardMessages';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'tickets') {
-			const dbList = await DBTickets.findAll();
+			dbList = await DBTickets.findAll();
 			dbTableName = 'DBTickets';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else if (args[0] === 'osumultiscores') {
-			const dbList = await DBOsuMultiScores.findAll();
+			dbList = await DBOsuMultiScores.findAll();
 			dbTableName = 'DBOsuMultiScores';
-
-			for (let i = 0; i < dbList.length; i++) {
-				data.push(dbList[i].dataValues);
-			}
 		} else {
 			return msg.reply('no corresponding table found');
+		}
+
+		for (let i = 0; i < dbList.length; i++) {
+			data.push(dbList[i].dataValues);
 		}
 
 		const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
