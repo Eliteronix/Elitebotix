@@ -316,7 +316,7 @@ module.exports = {
 				}
 			}
 		} else if (args[0] === 'createPools') {
-			let allMaps;
+			let allMaps = [];
 			let rowOffset;
 			if (args[1] === 'top') {
 				allMaps = await DBElitiriCupSubmissions.findAll({
@@ -341,6 +341,8 @@ module.exports = {
 			} else {
 				return msg.channel.send('Please specify for which bracket the pools should be created. (`top`, `middle`, `lower`, `beginner`)');
 			}
+
+			console.log(allMaps);
 
 			quicksort(allMaps);
 
