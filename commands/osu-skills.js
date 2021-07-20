@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
-const Canvas = require('canvas');
 const { CanvasRenderService } = require('chartjs-node-canvas');
+const { DBOsuMultiScores } = require('../dbObjects');
 
 module.exports = {
 	name: 'osu-skills',
@@ -18,40 +18,86 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args) {
-		const canvasWidth = 1000;
-		const canvasHeight = 500;
-
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
-
-		//Create Canvas
-		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
-
-		//Get context and load the image
-		const ctx = canvas.getContext('2d');
-
-		const background = await Canvas.loadImage('./other/osu-background.png');
-
-		for (let i = 0; i < canvas.height / background.height; i++) {
-			for (let j = 0; j < canvas.width / background.width; j++) {
-				ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
-			}
-		}
-
 
 		const width = 400; //px
 		const height = 400; //px
 		const canvasRenderService = new CanvasRenderService(width, height);
 
 		(async () => {
-			const configuration = {
-				type: 'bar',
-				data: {
-					labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-					datasets: [{
-						label: 'Users',
-						data: [50, 60, 70, 180]
-					}]
+			const userScores = await DBOsuMultiScores.findAll({
+				where: { osuUserId: args[0] }
+			});
+
+			if (!userScores.length) {
+				return msg.channel.send('No scores found in the database.');
+			}
+
+			let oldestDate = new Date();
+
+			userScores.forEach(score => {
+				if (oldestDate > score.matchStartDate) {
+					oldestDate = score.matchStartDate;
 				}
+			});
+
+			console.log(oldestDate);
+
+			const DATA_COUNT = userScores.length;
+			const labels = [];
+			for (let i = 0; i < DATA_COUNT; ++i) {
+				labels.push(i.toString());
+			}
+
+			const datapoints = [];
+			userScores.forEach(score => {
+				datapoints.push(score.evaluation);
+			});
+
+			const data = {
+				labels: labels,
+				datasets: [
+					{
+						label: 'Cubic interpolation',
+						data: datapoints,
+						borderColor: 'rgb(54, 162, 235)',
+						fill: false,
+						tension: 0.4
+					}
+				]
+			};
+
+			const configuration = {
+				type: 'line',
+				data: data,
+				options: {
+					responsive: true,
+					plugins: {
+						title: {
+							display: true,
+							text: 'Chart.js Line Chart - Cubic interpolation mode'
+						},
+					},
+					interaction: {
+						intersect: false,
+					},
+					scales: {
+						x: {
+							display: true,
+							title: {
+								display: true
+							}
+						},
+						y: {
+							display: true,
+							title: {
+								display: true,
+								text: 'Value'
+							},
+							suggestedMin: 0,
+							suggestedMax: 2
+						}
+					}
+				},
 			};
 
 			const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
@@ -61,7 +107,7 @@ module.exports = {
 			// const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'yes.png');
 			const attachment = new Discord.MessageAttachment(imageBuffer, 'yes.png');
 
-			await msg.channel.send('!', attachment);
+			await msg.channel.send('Automated scheduling', attachment);
 		})();
 	},
 };
