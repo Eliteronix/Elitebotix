@@ -901,6 +901,7 @@ module.exports = {
 					DBOsuMultiScores.create({
 						osuUserId: score.userId,
 						matchId: match.id,
+						matchName: match.name,
 						gameId: game.id,
 						scoringType: game.scoringType,
 						mode: game.mode,
