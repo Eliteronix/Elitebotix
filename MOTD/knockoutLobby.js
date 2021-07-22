@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause } = require('../utils.js');
+const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause, saveOsuMultiScores } = require('../utils.js');
 const { assignKnockoutPoints } = require('./givePointsToPlayers.js');
 
 module.exports = {
@@ -242,11 +242,41 @@ module.exports = {
 					assignKnockoutPoints(client, players[0], startingPlayers, players.length, mapIndex + 1);
 					await pause(30000);
 					await channel.sendMessage('!mp close');
+					// eslint-disable-next-line no-undef
+					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+					});
+
+					osuApi.getMatch({ mp: lobby.id })
+						.then(async (match) => {
+							saveOsuMultiScores(match);
+						})
+						.catch(() => {
+							//Nothing
+						});
 					return await channel.leave();
 
 				} else if (players.length === 0) {
 					lobbyStatus = 'Lobby finished';
 					await channel.sendMessage('!mp close');
+					// eslint-disable-next-line no-undef
+					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+					});
+
+					osuApi.getMatch({ mp: lobby.id })
+						.then(async (match) => {
+							saveOsuMultiScores(match);
+						})
+						.catch(() => {
+							//Nothing
+						});
 					return await channel.leave();
 				} else {
 					movePlayersIntoFirstSlots(channel, lobby, players);
