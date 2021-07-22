@@ -181,7 +181,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					}
 					rawData.forEach(rawDataObject => {
 						if (rawDataObject.label === `${(score.matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${score.matchStartDate.getUTCFullYear()}`) {
-							console.log(score.scoringType);
 							rawDataObject.totalEvaluation += parseFloat(score.evaluation);
 							rawDataObject.totalCount++;
 							if (score.rawMods === '0' && (score.gameRawMods === '0' || score.gameRawMods === '1')) {
@@ -343,13 +342,19 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 								display: true,
 								title: {
 									display: true
-								}
+								},
+								grid: {
+									color: '#8F8F8F'
+								},
 							},
 							y: {
 								display: true,
 								title: {
 									display: true,
 									text: 'Value'
+								},
+								grid: {
+									color: '#8F8F8F'
 								},
 								suggestedMin: 0,
 								suggestedMax: 1.5
