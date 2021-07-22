@@ -18,7 +18,7 @@ module.exports = {
 	// args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
-	tags: 'osu',
+	tags: 'debug',
 	prefixCommand: true,
 	async execute(msg, args) {
 		const guildPrefix = await getGuildPrefix(msg);
@@ -27,15 +27,15 @@ module.exports = {
 		const commandUser = commandConfig[0];
 
 		let scaled = false;
-		let scoringType = 'v2';
+		let scoringType = 'vx';
 		let tourneyMatch = false;
 		for (let i = 0; i < args.length; i++) {
 			if (args[i].toLowerCase().startsWith('--scaled')) {
 				scaled = true;
 				args.splice(i, 1);
 				i--;
-			} else if (args[i].toLowerCase().startsWith('--vx')) {
-				scoringType = 'vx';
+			} else if (args[i].toLowerCase().startsWith('--v2')) {
+				scoringType = 'v2';
 				args.splice(i, 1);
 				i--;
 			} else if (args[i].toLowerCase().startsWith('--v1')) {
@@ -331,7 +331,13 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 						plugins: {
 							title: {
 								display: true,
-								text: 'Elitebotix Evaluation for submitted matches'
+								text: 'Elitebotix Evaluation for submitted matches',
+								color: '#FFFFFF',
+							},
+							legend: {
+								labels: {
+									color: '#FFFFFF',
+								}
 							},
 						},
 						interaction: {
@@ -341,20 +347,29 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 							x: {
 								display: true,
 								title: {
-									display: true
+									display: true,
+									text: 'Month',
+									color: '#FFFFFF'
 								},
 								grid: {
 									color: '#8F8F8F'
+								},
+								ticks: {
+									color: '#FFFFFF',
 								},
 							},
 							y: {
 								display: true,
 								title: {
 									display: true,
-									text: 'Value'
+									text: 'Evaluation value',
+									color: '#FFFFFF'
 								},
 								grid: {
 									color: '#8F8F8F'
+								},
+								ticks: {
+									color: '#FFFFFF',
 								},
 								suggestedMin: 0,
 								suggestedMax: 1.5
@@ -379,7 +394,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					tourneyMatchText = 'Tourney matches only';
 				}
 
-				msg.channel.send(`Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}`, attachment);
+				msg.channel.send(`[Beta/WIP] Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}`, attachment);
 			})();
 		})
 		.catch(err => {

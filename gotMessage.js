@@ -392,7 +392,7 @@ async function saveSentOsuMatches(msg, args) {
 	});
 
 	args.forEach(arg => {
-		if (arg.match(/https:\/\/osu.ppy.sh\/community\/matches\/\d+/)) {
+		if (arg.match(/https:\/\/osu.ppy.sh\/community\/matches\/\d+/) || arg.match(/https:\/\/osu.ppy.sh\/mp\/\d+/)) {
 			osuApi.getMatch({ mp: getIDFromPotentialOsuLink(arg) })
 				.then(async (match) => {
 					saveOsuMultiScores(match);
