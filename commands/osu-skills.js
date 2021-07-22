@@ -291,6 +291,16 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					}
 				}
 
+				if (labels.length === 1) {
+					labels.push(labels[0]);
+					totalDatapoints.push(totalDatapoints[0]);
+					NMDatapoints.push(NMDatapoints[0]);
+					HDDatapoints.push(HDDatapoints[0]);
+					HRDatapoints.push(HRDatapoints[0]);
+					DTDatapoints.push(DTDatapoints[0]);
+					FMDatapoints.push(FMDatapoints[0]);
+				}
+
 				const data = {
 					labels: labels,
 					datasets: [
