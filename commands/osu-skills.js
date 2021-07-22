@@ -169,39 +169,51 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					rawData.push(rawDataObject);
 				}
 
-				userScores.forEach(score => {
-					if (scoringType === 'v2' && score.scoringType !== 'Score v2') {
-						return;
+				for (let i = 0; i < userScores.length; i++) {
+					if (scoringType === 'v2' && userScores[i].scoringType !== 'Score v2') {
+						continue;
 					}
-					if (scoringType === 'v1' && score.scoringType === 'Score v2') {
-						return;
+					if (scoringType === 'v1' && userScores[i].scoringType === 'Score v2') {
+						continue;
 					}
-					if (tourneyMatch && !score.tourneyMatch) {
-						return;
+					if (tourneyMatch && !userScores[i].tourneyMatch) {
+						continue;
 					}
-					rawData.forEach(rawDataObject => {
-						if (rawDataObject.label === `${(score.matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${score.matchStartDate.getUTCFullYear()}`) {
-							rawDataObject.totalEvaluation += parseFloat(score.evaluation);
-							rawDataObject.totalCount++;
-							if (score.rawMods === '0' && (score.gameRawMods === '0' || score.gameRawMods === '1')) {
-								rawDataObject.NMEvaluation += parseFloat(score.evaluation);
-								rawDataObject.NMCount++;
-							} else if (score.rawMods === '0' && (score.gameRawMods === '8' || score.gameRawMods === '9')) {
-								rawDataObject.HDEvaluation += parseFloat(score.evaluation);
-								rawDataObject.HDCount++;
-							} else if (score.rawMods === '0' && (score.gameRawMods === '16' || score.gameRawMods === '17')) {
-								rawDataObject.HREvaluation += parseFloat(score.evaluation);
-								rawDataObject.HRCount++;
-							} else if (score.rawMods === '0' && (score.gameRawMods === '64' || score.gameRawMods === '65' || score.gameRawMods === '576' || score.gameRawMods === '577')) {
-								rawDataObject.DTEvaluation += parseFloat(score.evaluation);
-								rawDataObject.DTCount++;
+
+					for (let j = 0; j < rawData.length; j++) {
+						if (rawData[j].label === `${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()}`) {
+							rawData[j].totalEvaluation += parseFloat(userScores[i].evaluation);
+							rawData[j].totalCount++;
+							const sameGameScores = await DBOsuMultiScores.findAll({
+								where: { matchId: userScores[i].matchId, gameId: userScores[i].gameId }
+							});
+
+							for (let k = 0; k < sameGameScores.length; k++) {
+								if (userScores[i].rawMods === sameGameScores[k].rawMods) {
+									sameGameScores.splice(k, 1);
+									k--;
+								}
+							}
+
+							if (sameGameScores.length === 0 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
+								rawData[j].NMEvaluation += parseFloat(userScores[i].evaluation);
+								rawData[j].NMCount++;
+							} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '8' || userScores[i].gameRawMods === '9')) {
+								rawData[j].HDEvaluation += parseFloat(userScores[i].evaluation);
+								rawData[j].HDCount++;
+							} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '16' || userScores[i].gameRawMods === '17')) {
+								rawData[j].HREvaluation += parseFloat(userScores[i].evaluation);
+								rawData[j].HRCount++;
+							} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '64' || userScores[i].gameRawMods === '65' || userScores[i].gameRawMods === '576' || userScores[i].gameRawMods === '577')) {
+								rawData[j].DTEvaluation += parseFloat(userScores[i].evaluation);
+								rawData[j].DTCount++;
 							} else {
-								rawDataObject.FMEvaluation += parseFloat(score.evaluation);
-								rawDataObject.FMCount++;
+								rawData[j].FMEvaluation += parseFloat(userScores[i].evaluation);
+								rawData[j].FMCount++;
 							}
 						}
-					});
-				});
+					}
+				}
 
 				const totalDatapoints = [];
 				const NMDatapoints = [];
