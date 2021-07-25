@@ -128,20 +128,11 @@ module.exports = {
 				where: { osuUserId: users[i] }
 			});
 
-			let matchesHad = [];
-			for (let j = 0; j < allMatches.length; j++) {
-				if (matchesHad.includes(allMatches[j].matchId)) {
-					allMatches.splice(j, 1);
-					j--;
-				} else {
-					matchesHad.push(allMatches[j].matchId);
-				}
-			}
 			let maxCount = 0;
 			for (let j = 0; j < 24; j++) {
 				let count = 0;
 				for (let k = 0; k < allMatches.length; k++) {
-					if (allMatches[k].matchStartDate.getUTCHours() === j) {
+					if (allMatches[k].gameStartDate.getUTCHours() === j) {
 						count++;
 						allMatches.splice(k, 1);
 						k--;
@@ -219,6 +210,6 @@ module.exports = {
 
 		const attachment = new Discord.MessageAttachment(imageBuffer, 'osu-schedules.png');
 
-		msg.channel.send(`Schedule for: ${usersReadable.join(', ')}`, attachment);
+		msg.channel.send(`Schedule for: ${usersReadable.join(', ')}\nThe data is based on multiplayer matches evaluated by / sent to the bot`, attachment);
 	},
 };
