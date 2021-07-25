@@ -40,6 +40,7 @@ module.exports = {
 			require('../models/DBElitiriCupSubmissions')(sequelize, Sequelize.DataTypes);
 			require('../models/DBStarBoardMessages')(sequelize, Sequelize.DataTypes);
 			require('../models/DBTickets')(sequelize, Sequelize.DataTypes);
+			require('../models/DBOsuMultiScores')(sequelize, Sequelize.DataTypes);
 
 			sequelize.sync({ alter: true })
 				.then(async () => {

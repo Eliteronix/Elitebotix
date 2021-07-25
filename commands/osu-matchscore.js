@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getGuildPrefix, createLeaderboard, getIDFromPotentialOsuLink } = require('../utils');
+const { getGuildPrefix, createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores } = require('../utils');
 const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
@@ -40,6 +40,7 @@ module.exports = {
 
 		osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
+				saveOsuMultiScores(match);
 				let processingMessage = await msg.channel.send('Processing osu! match leaderboard...');
 				let warmups = 2;
 				let warmupsReason = `Assumed ${warmups} warmups.`;
