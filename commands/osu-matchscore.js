@@ -62,7 +62,7 @@ module.exports = {
 				for (let i = 0; i < match.games.length; i++) {
 					let gameScores = match.games[i].scores;
 
-					if (gameScores.length > 0) {
+					if (gameScores.length > 1) {
 						quicksort(gameScores);
 
 						for (let j = 0; j < gameScores.length; j++) {
@@ -111,6 +111,10 @@ module.exports = {
 
 					valueType = 'average';
 					valueHint = 'Players were judged across only the maps they played making players that play less often more valuable.\nTo judge on all rounds remove `avg` at the end of the command.';
+				}
+
+				if (playerMatchResults.length === 0) {
+					return processingMessage.edit('No rounds with at least 2 players found in the match.');
 				}
 
 				quicksort(playerMatchResults);
