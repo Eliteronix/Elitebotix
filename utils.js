@@ -868,7 +868,7 @@ module.exports = {
 				let evaluation = 0;
 				let gameScores = game.scores;
 
-				if (gameScores.length > 0) {
+				if (gameScores.length > 1) {
 					quicksort(gameScores);
 
 					for (let i = 0; i < gameScores.length; i++) {
