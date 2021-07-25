@@ -17,7 +17,7 @@ module.exports = {
 	// args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
-	tags: 'debug',
+	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args) {
 		const guildPrefix = await getGuildPrefix(msg);
