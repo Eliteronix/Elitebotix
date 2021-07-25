@@ -8,7 +8,7 @@ module.exports = {
 	name: 'osu-schedule',
 	// aliases: ['os', 'o-s'],
 	description: 'Sends an info graph about the schedules of the players',
-	usage: '<username> [username] ... (Use "_" instead of spaces)',
+	usage: '[username] [username] ... (Use "_" instead of spaces)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: 'ATTACH_FILES',
