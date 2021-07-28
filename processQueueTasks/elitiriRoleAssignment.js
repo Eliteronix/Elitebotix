@@ -3,6 +3,7 @@ const { DBElitiriCupSignUp } = require('../dbObjects');
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(client, processQueueEntry) {
+		return;
 		//Fetch server
 		const guild = await client.guilds.fetch('727407178499096597');
 

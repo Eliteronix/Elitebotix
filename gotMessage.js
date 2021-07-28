@@ -1,4 +1,4 @@
-const { getGuildPrefix, updateServerUserActivity, getIDFromPotentialOsuLink, saveOsuMultiScores } = require('./utils');
+const { getGuildPrefix, updateServerUserActivity, saveOsuMultiScores } = require('./utils');
 const fs = require('fs');
 const Discord = require('discord.js');
 const osu = require('node-osu');
@@ -391,9 +391,28 @@ async function saveSentOsuMatches(msg, args) {
 		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 	});
 
+	let containsLink = false;
+	for (let i = 0; i < args.length; i++) {
+		if (args[i].includes('http')) {
+			containsLink = true;
+		}
+		if (args[i].includes('\n')) {
+			const split = args[i].split('\n');
+			for (let j = 0; j < split.length; j++) {
+				args.push(split[j]);
+			}
+			args.splice(i, 1);
+			i--;
+		}
+	}
+
+	if (!containsLink) {
+		return;
+	}
+
 	args.forEach(arg => {
-		if (arg.match(/https:\/\/osu.ppy.sh\/community\/matches\/\d+/) || arg.match(/https:\/\/osu.ppy.sh\/mp\/\d+/)) {
-			osuApi.getMatch({ mp: getIDFromPotentialOsuLink(arg) })
+		if (arg.replace(/\D/g, '')) {
+			osuApi.getMatch({ mp: arg.replace(/\D/g, '') })
 				.then(async (match) => {
 					saveOsuMultiScores(match);
 				})
