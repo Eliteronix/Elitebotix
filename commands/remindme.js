@@ -3,7 +3,7 @@ const { getGuildPrefix } = require('../utils');
 
 module.exports = {
 	name: 'remindme',
-	aliases: ['reminder'],
+	aliases: ['reminder', 'remind'],
 	description: 'Sends a reminder at the specified time',
 	usage: '<#y/#mo/#w/#d/#h/#m> <message>',
 	//permissions: 'KICK_MEMBERS',
