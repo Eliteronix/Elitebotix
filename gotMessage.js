@@ -6,7 +6,6 @@ const cooldowns = new Discord.Collection();
 const { closest } = require('fastest-levenshtein');
 const { Permissions } = require('discord.js');
 const { DBElitiriCupSignUp, DBTickets } = require('./dbObjects');
-const { args } = require('./commands/changelog');
 
 module.exports = async function (msg, bancho) {
 	//Create a collection for the commands
@@ -384,6 +383,7 @@ async function handleTicketStatus(msg) {
 }
 
 async function saveSentOsuMatches(msg, oldArgs) {
+	let args = [];
 	for (let i = 0; i < oldArgs.length; i++) {
 		args.push(oldArgs[i]);
 	}
