@@ -878,8 +878,12 @@ module.exports = {
 						}
 					}
 
-					const middleIndex = gameScores.length - Math.round(gameScores.length / 2);
-					const middleScore = gameScores[middleIndex].score;
+					let sortedScores = [];
+					for (let j = 0; j < gameScores.length; j++) {
+						sortedScores.push(gameScores[j].score);
+					}
+
+					const middleScore = getMiddleScore(sortedScores);
 
 					for (let i = 0; i < gameScores.length; i++) {
 						if (score.userId === gameScores[i].userId) {
@@ -997,4 +1001,19 @@ function quicksort(list, start = 0, end = undefined) {
 		quicksort(list, p + 1, end);
 	}
 	return list;
+}
+
+function getMiddleScore(scores) {
+	if (scores.length % 2) {
+		//Odd amount of scores
+		const middleIndex = scores.length - Math.round(scores.length / 2);
+		return scores[middleIndex];
+	}
+
+	while (scores.length > 2) {
+		scores.splice(0, 1);
+		scores.splice(scores.length - 1, 1);
+	}
+
+	return (parseInt(scores[0]) + parseInt(scores[1])) / 2;
 }
