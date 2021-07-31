@@ -14,14 +14,18 @@ module.exports = {
 	tags: 'debug',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	execute(msg, args) {
+	async execute(msg, args) {
 		if (args[0] === 'guildCommands') {
 			msg.client.api.applications(msg.client.user.id).guilds(args[1]).commands.post({
 				data: {
-					name: 'bot-server',
-					description: 'Sends a message with the bots server'
+					name: 'creator',
+					description: 'Sends an info card about the developer'
 				}
 			});
+
+			// const yes = await msg.client.api.applications(msg.client.user.id).guilds('800641468321759242').commands.get();
+			// console.log(yes);
+			// msg.client.api.applications(msg.client.user.id).guilds('800641468321759242').commands('870256682314383370').delete();
 		}
 
 		msg.channel.send('Done.');

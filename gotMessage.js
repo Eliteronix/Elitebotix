@@ -284,7 +284,7 @@ module.exports = async function (msg, bancho) {
 		setTimeout(() => timestamps.delete(msg.author.id), cooldownAmount);
 
 		try {
-			let additionalObjects = [bancho];
+			let additionalObjects = [bancho, msg.client];
 			command.execute(msg, args, additionalObjects);
 		} catch (error) {
 			console.error(error);
