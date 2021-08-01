@@ -919,6 +919,14 @@ module.exports = {
 				}
 			});
 		});
+	},
+	async populateMsgFromInteraction(client, interaction) {
+		return {
+			author: await client.users.fetch(interaction.member.user.id),
+			client: client,
+			channel: await client.channels.fetch(interaction.channel_id),
+			guild: await client.guilds.fetch(interaction.guild_id),
+		};
 	}
 };
 

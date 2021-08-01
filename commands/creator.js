@@ -18,7 +18,7 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		const eliteronixUser = await additionalObjects[1].users.fetch('138273136285057025');
+		const eliteronixUser = await additionalObjects[0].users.fetch('138273136285057025');
 
 		//Create new embed
 		const creatorInfoEmbed = new Discord.MessageEmbed()
@@ -39,7 +39,7 @@ module.exports = {
 			return msg.channel.send(creatorInfoEmbed);
 		}
 
-		await additionalObjects[1].api.interactions(interaction.id, interaction.token).callback.post({
+		await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
 			data: {
 				type: 4,
 				data: {
@@ -47,7 +47,7 @@ module.exports = {
 				}
 			}
 		});
-		const channel = await additionalObjects[1].channels.cache.find(c => c.id === interaction.channel_id);
+		const channel = await additionalObjects[0].channels.fetch(interaction.channel_id);
 		return channel.send(creatorInfoEmbed);
 	},
 };

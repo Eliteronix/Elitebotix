@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 module.exports = {
 	name: 'cuddle',
 	// aliases: ['dice', 'ouo'],
-	description: 'Lets you send a gif to cuddle a user.',
+	description: 'Lets you send a gif to cuddle a user',
 	usage: '<@user>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',

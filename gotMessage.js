@@ -285,7 +285,7 @@ module.exports = async function (msg, bancho) {
 
 		try {
 			let additionalObjects = [bancho, msg.client];
-			command.execute(msg, args, additionalObjects);
+			command.execute(msg, args, null, additionalObjects);
 		} catch (error) {
 			console.error(error);
 			const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');

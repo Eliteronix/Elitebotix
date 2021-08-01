@@ -18,7 +18,7 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, additionalObjects) {
-		const bancho = additionalObjects[0];
+		const bancho = additionalObjects[1];
 
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {

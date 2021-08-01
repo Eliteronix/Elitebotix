@@ -64,7 +64,7 @@ module.exports = async function (client, bancho, interaction) {
 	if (command.permissions) {
 		const channel = await client.channels.cache.find(c => c.id === interaction.channel_id);
 		const guild = await client.guilds.cache.find(g => g.id === interaction.guild_id);
-		const member = await guild.members.find(u => u.id === interaction.member.user.id);
+		const member = await guild.members.cache.find(u => u.id === interaction.member.user.id);
 		const authorPerms = channel.permissionsFor(member);
 		if (!authorPerms || !authorPerms.has(command.permissions)) {
 			client.api.interactions(interaction.id, interaction.token).callback.post({
@@ -137,8 +137,8 @@ module.exports = async function (client, bancho, interaction) {
 	setTimeout(() => timestamps.delete(interaction.member.user.id), cooldownAmount);
 
 	try {
-		let additionalObjects = [bancho, client];
-		command.execute(null, null, interaction, additionalObjects);
+		let additionalObjects = [client, bancho];
+		command.execute(null, [], interaction, additionalObjects);
 	} catch (error) {
 		console.error(error);
 		const eliteronixUser = await client.users.cache.find(user => user.id === '138273136285057025');
