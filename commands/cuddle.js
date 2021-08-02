@@ -25,7 +25,7 @@ module.exports = {
 				data: {
 					type: 4,
 					data: {
-						content: 'Users are getting cuddled'
+						content: 'Cuddle initiated'
 					}
 				}
 			});

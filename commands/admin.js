@@ -157,6 +157,21 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
 				data: {
+					name: 'guild-leaderboard',
+					description: 'Sends a leaderboard of the top users in the guild',
+					options: [
+						{
+							'name': 'page',
+							'description': 'The page of the leaderboard to display',
+							'type': 4,
+							'required': false
+						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
 					name: 'help',
 					description: 'List all commands or get info about a specific command',
 					options: [

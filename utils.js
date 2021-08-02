@@ -923,10 +923,12 @@ module.exports = {
 	async populateMsgFromInteraction(client, interaction) {
 		let userMentions = new Discord.Collection();
 
-		for (let i = 0; i < interaction.data.options.length; i++) {
-			if (interaction.data.options[i].type === 6) {
-				let user = await client.users.fetch(interaction.data.options[i].value);
-				userMentions.set(user.id, user);
+		if (interaction.data.options) {
+			for (let i = 0; i < interaction.data.options.length; i++) {
+				if (interaction.data.options[i].type === 6) {
+					let user = await client.users.fetch(interaction.data.options[i].value);
+					userMentions.set(user.id, user);
+				}
 			}
 		}
 

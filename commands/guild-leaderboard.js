@@ -1,5 +1,5 @@
 const { DBServerUserActivity } = require('../dbObjects');
-const { createLeaderboard, humanReadable } = require('../utils.js');
+const { createLeaderboard, humanReadable, populateMsgFromInteraction } = require('../utils.js');
 const { leaderboardEntriesPerPage } = require('../config.json');
 
 module.exports = {
@@ -18,7 +18,26 @@ module.exports = {
 	tags: 'general',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: 'Guild leaderboard will be created'
+					}
+				}
+			});
+
+			if (interaction.data.options) {
+				args = [interaction.data.options[0].value];
+			} else {
+				args = [];
+			}
+		}
+
 		let processingMessage = await msg.channel.send('Processing guild leaderboard...');
 
 		msg.guild.members.fetch()
