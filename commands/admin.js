@@ -76,6 +76,13 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
 				data: {
+					name: 'creator',
+					description: 'Sends an info card about the developer'
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
 					name: 'cuddle',
 					description: 'Lets you send a gif to cuddle a user',
 					options: [
@@ -115,9 +122,37 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
 				data: {
-					name: 'creator',
-					description: 'Sends an info card about the developer'
-				}
+					name: 'feedback',
+					description: 'Sends feedback to the dev',
+					options: [
+						{
+							'name': 'type',
+							'description': 'The type of feedback',
+							'type': 3,
+							'required': true,
+							'choices': [
+								{
+									'name': 'bug',
+									'value': 'bug'
+								},
+								{
+									'name': 'feature',
+									'value': 'feature'
+								},
+								{
+									'name': 'feedback',
+									'value': 'feedback'
+								}
+							]
+						},
+						{
+							'name': 'feedback',
+							'description': 'The feedback message',
+							'type': 3,
+							'required': true,
+						}
+					]
+				},
 			});
 
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({

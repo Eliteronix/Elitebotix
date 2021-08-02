@@ -921,11 +921,24 @@ module.exports = {
 		});
 	},
 	async populateMsgFromInteraction(client, interaction) {
+		let userMentions = new Discord.Collection();
+
+		for (let i = 0; i < interaction.data.options.length; i++) {
+			if (interaction.data.options[i].type === 6) {
+				let user = await client.users.fetch(interaction.data.options[i].value);
+				userMentions.set(user.id, user);
+			}
+		}
+
+		let mentions = {
+			users: userMentions
+		};
 		return {
 			author: await client.users.fetch(interaction.member.user.id),
 			client: client,
 			channel: await client.channels.fetch(interaction.channel_id),
 			guild: await client.guilds.fetch(interaction.guild_id),
+			mentions: mentions,
 		};
 	}
 };

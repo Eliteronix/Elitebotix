@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 module.exports = {
 	name: 'feedback',
 	//aliases: ['developer'],
-	description: 'Sends feedback to the devs',
+	description: 'Sends feedback to the dev',
 	usage: '<bug/feature/feedback> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
@@ -16,7 +16,8 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'general',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		console.log(interaction.data);
 		//check for the first argument
 		if (args[0].toLowerCase() === 'bug') { //go to bug tree
 			if (!args[1]) { //check for second argument
