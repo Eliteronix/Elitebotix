@@ -15,6 +15,10 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
+		if (msg.author.id !== '138273136285057025') {
+			return;
+		}
+
 		if (args[0] === 'guildCommands') {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
 			// 	data: {
@@ -88,31 +92,31 @@ module.exports = {
 					options: [
 						{
 							'name': 'user',
-							'description': 'The user to hug',
+							'description': 'The user to cuddle',
 							'type': 6, // 6 is type USER
 							'required': true
 						},
 						{
 							'name': 'user2',
-							'description': 'The user to hug',
+							'description': 'The user to cuddle',
 							'type': 6, // 6 is type USER
 							'required': false
 						},
 						{
 							'name': 'user3',
-							'description': 'The user to hug',
+							'description': 'The user to cuddle',
 							'type': 6, // 6 is type USER
 							'required': false
 						},
 						{
 							'name': 'user4',
-							'description': 'The user to hug',
+							'description': 'The user to cuddle',
 							'type': 6, // 6 is type USER
 							'required': false
 						},
 						{
 							'name': 'user5',
-							'description': 'The user to hug',
+							'description': 'The user to cuddle',
 							'type': 6, // 6 is type USER
 							'required': false
 						},
@@ -226,6 +230,130 @@ module.exports = {
 						},
 					]
 				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'hug',
+					description: 'Lets you send a gif to hug a user',
+					options: [
+						{
+							'name': 'user',
+							'description': 'The user to hug',
+							'type': 6, // 6 is type USER
+							'required': true
+						},
+						{
+							'name': 'user2',
+							'description': 'The user to hug',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'user3',
+							'description': 'The user to hug',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'user4',
+							'description': 'The user to hug',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'user5',
+							'description': 'The user to hug',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'kiss',
+					description: 'Lets you send a gif to kiss a user',
+					options: [
+						{
+							'name': 'user',
+							'description': 'The user to kiss',
+							'type': 6, // 6 is type USER
+							'required': true
+						},
+						{
+							'name': 'user2',
+							'description': 'The user to kiss',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'user3',
+							'description': 'The user to kiss',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'user4',
+							'description': 'The user to kiss',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'user5',
+							'description': 'The user to kiss',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'leaderboard',
+					description: 'Sends a leaderboard of the top users in the guild',
+					options: [
+						{
+							'name': 'type',
+							'description': 'Sends a leaderboard of all the players in the guild that have their account connected',
+							'type': 3,
+							'required': true,
+							'choices': [
+								{
+									'name': 'server',
+									'value': 'server'
+								},
+								{
+									'name': 'osu',
+									'value': 'osu'
+								}
+							]
+						},
+						{
+							'name': 'page',
+							'description': 'The page of the leaderboard to display',
+							'type': 4,
+							'required': false
+						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'osu-leaderboard',
+					description: 'Sends a leaderboard of all the players in the guild that have their account connected',
+					options: [
+						{
+							'name': 'page',
+							'description': 'The page of the leaderboard to display',
+							'type': 4,
+							'required': false
+						}
+					]
+				},
 			});
 
 			// const yes = await msg.client.api.applications(msg.client.user.id).guilds('800641468321759242').commands.get();

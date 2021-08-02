@@ -1,3 +1,5 @@
+const { populateMsgFromInteraction } = require('../utils');
+
 module.exports = {
 	name: 'leaderboard',
 	aliases: ['leaderboard', 'ranking'],
@@ -13,7 +15,26 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'general',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			if (interaction.data.options[1]) {
+				args = [interaction.data.options[0].value, interaction.data.options[1].value];
+			} else {
+				args = [interaction.data.options[0].value];
+			}
+
+			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: 'Leaderboard will be created'
+					}
+				}
+			});
+		}
+
 		let command;
 		if (args[0] === 'osu') {
 			command = require('./osu-leaderboard.js');
@@ -26,7 +47,7 @@ module.exports = {
 		args.shift();
 
 		try {
-			command.execute(msg, args, true);
+			command.execute(msg, args, null, additionalObjects);
 		} catch (error) {
 			console.error(error);
 			const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
