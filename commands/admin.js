@@ -20,63 +20,6 @@ module.exports = {
 		}
 
 		if (args[0] === 'guildCommands') {
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
-			// 	data: {
-			// 		name: 'activityrole',
-			// 		description: 'Assigns roles depending on how active your users are',
-			// 		options: [
-			// 			{
-			// 				'name': 'list',
-			// 				'description': 'Get a list of all commands',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'add',
-			// 				'description': 'Get a list of commands for a category',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'role',
-			// 						'description': 'The role to add',
-			// 						'type': 8, // 8 is type ROLE
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'requirement1',
-			// 						'description': 'topx/topx%/xpoints -> replace x with a number',
-			// 						'type': 3,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'requirement2',
-			// 						'description': 'topx/topx%/xpoints -> replace x with a number',
-			// 						'type': 3,
-			// 						'required': false
-			// 					},
-			// 					{
-			// 						'name': 'requirement3',
-			// 						'description': 'topx/topx%/xpoints -> replace x with a number',
-			// 						'type': 3,
-			// 						'required': false
-			// 					},
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'remove',
-			// 				'description': 'Get help for a command',
-			// 				'type': 1,
-			// 				'options': [
-			// 					{
-			// 						'name': 'role',
-			// 						'description': 'The role to add',
-			// 						'type': 8, // 8 is type ROLE
-			// 						'required': true
-			// 					}
-			// 				]
-			// 			},
-			// 		]
-			// 	}
-			// });
 
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
 				data: {
