@@ -14,7 +14,18 @@ module.exports = {
 	tags: 'general',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	execute(msg, args) {
+	execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: 'Here is a [link](https://discord.com/oauth2/authorize?client_id=784836063058329680&scope=applications.commands&permissions=285256792) to add the bot to your server'
+					}
+				}
+			});
+		}
+
 		//Link with permissions | Administrator, Manage Roles, Manage Channels, Read Messages, Send Messages, Manage Messages, Attach Files, View Channel, Move Members, Add Reactions
 		msg.channel.send('Here is a link to add the bot to your server: https://discord.com/oauth2/authorize?client_id=784836063058329680&scope=applications.commands&permissions=285256792');
 	},

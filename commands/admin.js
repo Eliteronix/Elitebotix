@@ -343,6 +343,130 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
 				data: {
+					name: 'link',
+					description: 'Sends a link to add the bot to a server'
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'osu-beatmap',
+					description: 'Sends an info card about the specified beatmap',
+					options: [
+						{
+							'name': 'id',
+							'description': 'The id or link of the beatmap to display',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'id2',
+							'description': 'The id or link of the beatmap to display',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'id3',
+							'description': 'The id or link of the beatmap to display',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'id4',
+							'description': 'The id or link of the beatmap to display',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'id5',
+							'description': 'The id or link of the beatmap to display',
+							'type': 3,
+							'required': false
+						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'osu-bws',
+					description: 'Sends info about the BWS rank of the specified player',
+					options: [
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player to calculate',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player to calculate',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player to calculate',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player to calculate',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player to calculate',
+							'type': 3,
+							'required': false
+						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'osu-compare',
+					description: 'Sends an info card about the score of the specified player on the last map sent into the channel',
+					options: [
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player to compare',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player to compare',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player to compare',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player to compare',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player to compare',
+							'type': 3,
+							'required': false
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
 					name: 'osu-leaderboard',
 					description: 'Sends a leaderboard of all the players in the guild that have their account connected',
 					options: [
@@ -354,6 +478,51 @@ module.exports = {
 						}
 					]
 				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'osu-link',
+					description: 'Allows you to link your Discord Account to your osu! Account',
+					options: [
+						{
+							'name': 'connect',
+							'description': 'Connect your discord account to your osu! account',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'username',
+									'description': 'Your osu! username or alternatively id',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'current',
+							'description': 'Get information on your current connection to an osu! account',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'disconnect',
+							'description': 'Disconnect your discord account from your osu! account',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'verify',
+							'description': 'Resend the verification code ingame or confirm your verification',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'code',
+									'description': 'The verification code sent to you in osu! DMs',
+									'type': 3,
+									'required': false
+								}
+							]
+						},
+					]
+				}
 			});
 
 			// const yes = await msg.client.api.applications(msg.client.user.id).guilds('800641468321759242').commands.get();
