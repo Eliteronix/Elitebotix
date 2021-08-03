@@ -468,6 +468,271 @@ module.exports = {
 				}
 			});
 
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'osu-matchscore',
+					description: 'Sends an evaluation of how valuable all the players in the match were',
+					options: [
+						{
+							'name': 'match',
+							'description': 'Match ID or link',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'warmups',
+							'description': 'The amount of warmups played',
+							'type': 4,
+						},
+						{
+							'name': 'average',
+							'description': 'True means unplayed maps will be ignored',
+							'type': 5,
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'osu-profile',
+					description: 'Sends an info card about the specified player',
+					options: [
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'o-p',
+					description: 'Sends an info card about the specified player',
+					options: [
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'osu-recent',
+					description: 'Sends an info card about the specified player',
+					options: [
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'ors',
+					description: 'Sends an info card about the specified player',
+					options: [
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'osu-schedule',
+					description: 'Sends an info graph about the schedules of the players',
+					options: [
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'osu-score',
+					description: 'Sends an info graph about the schedules of the players',
+					options: [
+						{
+							'name': 'beatmap',
+							'description': 'The beatmap id or link',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						}
+					]
+				},
+			});
+
 			// const yes = await msg.client.api.applications(msg.client.user.id).guilds('800641468321759242').commands.get();
 			// console.log(yes);
 			// msg.client.api.applications(msg.client.user.id).guilds('800641468321759242').commands('871448630224113724').delete();

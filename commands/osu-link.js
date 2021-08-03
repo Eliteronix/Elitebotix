@@ -159,14 +159,6 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 					} else {
 						new Discord.WebhookClient(additionalObjects[0].user.id, interaction.token).send(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
-						// await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.patch({
-						// 	data: {
-						// 		type: 4,
-						// 		data: {
-						// 			content: `A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`
-						// 		}
-						// 	}
-						// });
 					}
 				} else {
 					let processingMessage = null;
@@ -199,14 +191,7 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 					if (msg.id) {
 						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 					} else {
-						await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.patch({
-							data: {
-								type: 4,
-								data: {
-									content: `A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`
-								}
-							}
-						});
+						new Discord.WebhookClient(additionalObjects[0].user.id, interaction.token).send(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 					}
 				}
 			})
@@ -411,14 +396,7 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 							if (msg.id) {
 								processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 							} else {
-								additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.patch({
-									data: {
-										type: 4,
-										data: {
-											content: `A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`
-										}
-									}
-								});
+								new Discord.WebhookClient(additionalObjects[0].user.id, interaction.token).send(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 							}
 						})
 						.catch(err => {
