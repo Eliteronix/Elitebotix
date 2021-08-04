@@ -1,5 +1,6 @@
 //Require discord.js module
 const Discord = require('discord.js');
+const { populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'server-info',
@@ -17,11 +18,22 @@ module.exports = {
 	tags: 'general',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: 'Server info card will be sent'
+					}
+				}
+			});
+		}
+
 		const guildInfoEmbed = new Discord.MessageEmbed()
 			.setColor('#ffcc00')
 			.setTitle(`${msg.guild.name}`)
-			.setThumbnail(`${msg.guild.iconURL()}`)
 			.addFields(
 				{ name: 'Server Owner', value: `${msg.client.users.cache.find(user => user.id === `${msg.guild.ownerID}`)}` },
 				{ name: 'Region', value: `${msg.guild.region}` },
@@ -29,6 +41,10 @@ module.exports = {
 				{ name: 'AFK Timeout', value: `${msg.guild.afkTimeout / 60} minutes` }
 			)
 			.setTimestamp();
+
+		if (msg.guild.iconURL()) {
+			guildInfoEmbed.setThumbnail(`${msg.guild.iconURL()}`);
+		}
 
 		msg.channel.send(guildInfoEmbed);
 	},

@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Canvas = require('canvas');
 const weather = require('weather-js');
 const util = require('util');
-const { pause } = require('../utils');
+const { pause, populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'weather',
@@ -20,7 +20,26 @@ module.exports = {
 	tags: 'misc',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: 'Location is being evaluated'
+					}
+				}
+			});
+
+			args = [];
+
+			for (let i = 0; i < interaction.data.options.length; i++) {
+				args.push(interaction.data.options[i].value);
+			}
+		}
+
 		let degreeType = 'C';
 		if (args[0].toLowerCase() === 'f' || args[0].toLowerCase() === 'fahrenheit') {
 			degreeType = 'F';

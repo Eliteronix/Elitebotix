@@ -1,5 +1,5 @@
 const { DBProcessQueue } = require('../dbObjects');
-const { getGuildPrefix } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'remindme',
@@ -17,13 +17,26 @@ module.exports = {
 	tags: 'general',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
 		let years = 0;
 		let months = 0;
 		let weeks = 0;
 		let days = 0;
 		let hours = 0;
 		let minutes = 0;
+
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			years = interaction.data.options[0].value;
+			months = interaction.data.options[1].value;
+			weeks = interaction.data.options[2].value;
+			days = interaction.data.options[3].value;
+			hours = interaction.data.options[4].value;
+			minutes = interaction.data.options[5].value;
+
+			args = [interaction.data.options[6].value];
+		}
 
 		for (let i = 0; i < args.length; i++) {
 			let splice = true;
@@ -69,6 +82,17 @@ module.exports = {
 
 		DBProcessQueue.create({ guildId: 'None', task: 'remind', priority: 10, additions: `${msg.author.id};${args.join(' ')}`, date: date });
 
-		msg.channel.send('Reminder has been set. Be sure to have DMs enabled for the bot.');
+		if (msg.id) {
+			return msg.channel.send('Reminder has been set. Be sure to have DMs enabled for the bot.');
+		}
+
+		return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+			data: {
+				type: 4,
+				data: {
+					content: 'Reminder has been set. Be sure to have DMs enabled for the bot.'
+				}
+			}
+		});
 	},
 };

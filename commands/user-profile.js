@@ -1,5 +1,6 @@
 //Import Tables
 const { DBDiscordUsers } = require('../dbObjects');
+const { populateMsgFromInteraction } = require('../utils');
 
 //Require discord.js module
 const Discord = require('discord.js');
@@ -23,7 +24,20 @@ module.exports = {
 	tags: 'general',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: 'User profiles will be displayed'
+					}
+				}
+			});
+		}
+
 		if (!msg.mentions.users.first()) {
 			sendUserEmbed(msg, msg.author);
 		} else {
@@ -62,7 +76,7 @@ async function sendUserEmbed(msg, user) {
 
 		const memberRoles = '<@&' + member.roles.cache.filter(role => role.name !== '@everyone').map(role => role.id).join('>, <@&') + '>';
 
-		if(memberRoles !== '<@&>'){
+		if (memberRoles !== '<@&>') {
 			userInfoEmbed.addFields(
 				{ name: 'Roles', value: `${memberRoles}` }
 			);

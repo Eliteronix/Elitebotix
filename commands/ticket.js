@@ -1,5 +1,5 @@
 const { DBGuilds, DBTickets, DBProcessQueue } = require('../dbObjects');
-const { getGuildPrefix } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const Discord = require('discord.js');
 
 module.exports = {
@@ -18,7 +18,13 @@ module.exports = {
 	tags: 'general',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			args = interaction.data.options[0].value.split(' ');
+		}
+
 		//get guild from db
 		const guild = await DBGuilds.findOne({
 			where: { guildId: msg.guild.id, ticketsEnabled: true },
@@ -232,7 +238,17 @@ module.exports = {
 			}
 
 			if (!args[1]) {
-				return msg.channel.send('Please describe the problem in further detail.');
+				if (msg.id) {
+					return msg.channel.send('Please describe the problem in further detail.');
+				}
+				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							content: 'Please describe the problem in further detail.'
+						}
+					}
+				});
 			}
 
 			const tickets = await DBTickets.findAll({
@@ -276,10 +292,30 @@ module.exports = {
 
 			ticketChannel.send('Staff will take over shortly.\nPlease make sure to describe your issue as well as possible in the meantime.');
 
-			msg.delete();
+			if (msg.id) {
+				return msg.delete();
+			}
+			return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: 'Ticket has been created.'
+					}
+				}
+			});
 		} else {
 			const guildPrefix = await getGuildPrefix(msg);
-			return msg.channel.send(`Tickets aren't enabled on this server.\nStaff can enable tickets by using \`${guildPrefix}toggletickets\`.`);
+			if (msg.id) {
+				return msg.channel.send(`Tickets aren't enabled on this server.\nStaff can enable tickets by using \`${guildPrefix}toggletickets\`.`);
+			}
+			return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: `Tickets aren't enabled on this server.\nStaff can enable tickets by using \`${guildPrefix}toggletickets\`.`
+					}
+				}
+			});
 		}
 	},
 };

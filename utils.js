@@ -510,9 +510,10 @@ module.exports = {
 	getMessageUserDisplayname: async function (msg) {
 		let userDisplayName = msg.author.username;
 		if (msg.channel.type !== 'dm') {
-			const guildDisplayName = msg.guild.member(msg.author).displayName;
+			const member = await msg.guild.members.fetch(msg.author.id);
+			const guildDisplayName = member.displayName;
 			if (guildDisplayName) {
-				userDisplayName = msg.guild.member(msg.author).displayName;
+				userDisplayName = guildDisplayName;
 			}
 		}
 
@@ -927,6 +928,9 @@ module.exports = {
 			for (let i = 0; i < interaction.data.options.length; i++) {
 				if (interaction.data.options[i].type === 6) {
 					let user = await client.users.fetch(interaction.data.options[i].value);
+					userMentions.set(user.id, user);
+				} else if (interaction.data.options[i].value.startsWith('<@') && interaction.data.options[i].value.endsWith('>')) {
+					let user = await client.users.fetch(interaction.data.options[i].value.replace(/\D/g, ''));
 					userMentions.set(user.id, user);
 				}
 			}

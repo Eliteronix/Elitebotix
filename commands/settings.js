@@ -1,11 +1,11 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBAutoRoles } = require('../dbObjects');
-const { getGuildPrefix } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'settings',
 	aliases: ['bot-settings', 'server-settings'],
-	description: 'Sends an info card about the settings of the bot for the server.',
+	description: 'Sends an info card about the settings of the bot for the server',
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
@@ -18,7 +18,20 @@ module.exports = {
 	tags: 'general',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: 'Server settings info card will be sent'
+					}
+				}
+			});
+		}
+
 		//Get bot member
 		const member = msg.guild.members.fetch('784836063058329680');
 

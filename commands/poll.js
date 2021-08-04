@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { fitTextOnLeftCanvas, getGuildPrefix } = require('../utils');
+const { fitTextOnLeftCanvas, getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const { DBProcessQueue } = require('../dbObjects');
 
 module.exports = {
@@ -19,13 +19,38 @@ module.exports = {
 	tags: 'general',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
 		let years = 0;
 		let months = 0;
 		let weeks = 0;
 		let days = 0;
 		let hours = 0;
 		let minutes = 0;
+
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: 'The poll is being created'
+					}
+				}
+			});
+
+			months = interaction.data.options[0].value;
+			weeks = interaction.data.options[1].value;
+			days = interaction.data.options[2].value;
+			hours = interaction.data.options[3].value;
+			minutes = interaction.data.options[4].value;
+
+			args = [];
+
+			for (let i = 5; i < interaction.data.options.length; i++) {
+				args.push(`${interaction.data.options[i].value};`);
+			}
+		}
 
 		for (let i = 0; i < args.length; i++) {
 			let splice = true;
@@ -65,6 +90,13 @@ module.exports = {
 
 		let allArgs = args.join(' ');
 		let options = allArgs.split(';');
+
+		if (interaction) {
+			options = [];
+			for (let i = 5; i < interaction.data.options.length; i++) {
+				options.push(interaction.data.options[i].value);
+			}
+		}
 
 		let title = options.shift();
 
