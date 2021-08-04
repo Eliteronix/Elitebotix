@@ -945,6 +945,111 @@ module.exports = {
 				}
 			});
 
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'poll',
+					description: 'Start a vote / poll',
+					options: [
+						{
+							'name': 'months',
+							'description': 'The months until the end of the poll',
+							'type': 4,
+							'required': true
+						},
+						{
+							'name': 'weeks',
+							'description': 'The weeks until the end of the poll',
+							'type': 4,
+							'required': true
+						},
+						{
+							'name': 'days',
+							'description': 'The days until the end of the poll',
+							'type': 4,
+							'required': true
+						},
+						{
+							'name': 'hours',
+							'description': 'The hours until the end of the poll',
+							'type': 4,
+							'required': true
+						},
+						{
+							'name': 'minutes',
+							'description': 'The minutes until the end of the poll',
+							'type': 4,
+							'required': true
+						},
+						{
+							'name': 'topic',
+							'description': 'The poll topic',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'option1',
+							'description': 'The first option of the poll',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'option2',
+							'description': 'The second option of the poll',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'option3',
+							'description': 'The third option of the poll',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'option4',
+							'description': 'The fourth option of the poll',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'option5',
+							'description': 'The fifth option of the poll',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'option6',
+							'description': 'The sixth option of the poll',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'option7',
+							'description': 'The seventh option of the poll',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'option8',
+							'description': 'The eigth option of the poll',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'option9',
+							'description': 'The ninth option of the poll',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'option10',
+							'description': 'The tenth option of the poll',
+							'type': 3,
+							'required': false
+						},
+					]
+				}
+			});
+
 			// const yes = await msg.client.api.applications(msg.client.user.id).guilds('800641468321759242').commands.get();
 			// console.log(yes);
 			// msg.client.api.applications(msg.client.user.id).guilds('800641468321759242').commands('871448630224113724').delete();
