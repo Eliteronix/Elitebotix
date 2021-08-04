@@ -943,11 +943,22 @@ module.exports = {
 		let mentions = {
 			users: userMentions
 		};
+
+		let user = null;
+		let guild = null;
+
+		if (interaction.guild_id) {
+			user = interaction.member.user;
+			guild = await client.guilds.fetch(interaction.guild_id);
+		} else {
+			user = interaction.user;
+		}
+
 		return {
-			author: await client.users.fetch(interaction.member.user.id),
+			author: await client.users.fetch(user.id),
 			client: client,
 			channel: await client.channels.fetch(interaction.channel_id),
-			guild: await client.guilds.fetch(interaction.guild_id),
+			guild: guild,
 			mentions: mentions,
 		};
 	}

@@ -18,7 +18,6 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			console.log(interaction.data.options);
 			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
 
 			args = [interaction.data.options[0].value];

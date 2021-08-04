@@ -60,11 +60,19 @@ module.exports = async function (client, bancho, interaction) {
 		});
 	}
 
+	let user = null;
+
+	if (interaction.guild_id) {
+		user = interaction.member.user;
+	} else {
+		user = interaction.user;
+	}
+
 	//Check permissions of the user
 	if (command.permissions) {
 		const channel = await client.channels.cache.find(c => c.id === interaction.channel_id);
 		const guild = await client.guilds.cache.find(g => g.id === interaction.guild_id);
-		const member = await guild.members.cache.find(u => u.id === interaction.member.user.id);
+		const member = await guild.members.cache.find(u => u.id === user.id);
 		const authorPerms = channel.permissionsFor(member);
 		if (!authorPerms || !authorPerms.has(command.permissions)) {
 			client.api.interactions(interaction.id, interaction.token).callback.post({
@@ -110,8 +118,8 @@ module.exports = async function (client, bancho, interaction) {
 	const cooldownAmount = (command.cooldown || 5) * 1000;
 
 	//get expiration times for the cooldowns for the authorID
-	if (timestamps.has(interaction.member.user.id)) {
-		const expirationTime = timestamps.get(interaction.member.user.id) + cooldownAmount;
+	if (timestamps.has(user.id)) {
+		const expirationTime = timestamps.get(user.id) + cooldownAmount;
 
 		//If cooldown didn't expire yet send cooldown message
 		if (command.noCooldownMessage) {
@@ -130,11 +138,11 @@ module.exports = async function (client, bancho, interaction) {
 	}
 
 	//Set timestamp for the used command
-	if (interaction.member.user.id !== '138273136285057025') {
-		timestamps.set(interaction.member.user.id, now);
+	if (user.id !== '138273136285057025') {
+		timestamps.set(user.id, now);
 	}
 	//Automatically delete the timestamp after the cooldown
-	setTimeout(() => timestamps.delete(interaction.member.user.id), cooldownAmount);
+	setTimeout(() => timestamps.delete(user.id), cooldownAmount);
 
 	try {
 		let additionalObjects = [client, bancho];
@@ -150,6 +158,6 @@ module.exports = async function (client, bancho, interaction) {
 				}
 			}
 		});
-		eliteronixUser.send(`There was an error trying to execute a command.\n\nMessage by ${interaction.member.user.username}#${interaction.member.user.discriminator}: \`${interaction.data.name}\`\n\n${error}`);
+		eliteronixUser.send(`There was an error trying to execute a command.\n\nMessage by ${user.username}#${user.discriminator}: \`${interaction.data.name}\`\n\n${error}`);
 	}
 };
