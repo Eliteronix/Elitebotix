@@ -5,7 +5,7 @@ const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } 
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
-module.exports = async function (reaction, user) {
+module.exports = async function (reaction, user, additionalObjects) {
 	//For the development version
 	//if the message is not in the Dev-Servers then return
 	// eslint-disable-next-line no-undef
@@ -252,7 +252,7 @@ module.exports = async function (reaction, user) {
 			reaction.message.author = user;
 
 			try {
-				command.execute(reaction.message, args, true);
+				command.execute(reaction.message, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');

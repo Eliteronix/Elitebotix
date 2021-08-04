@@ -284,8 +284,8 @@ module.exports = async function (msg, bancho) {
 		setTimeout(() => timestamps.delete(msg.author.id), cooldownAmount);
 
 		try {
-			let additionalObjects = [bancho];
-			command.execute(msg, args, additionalObjects);
+			let additionalObjects = [bancho, msg.client];
+			command.execute(msg, args, null, additionalObjects);
 		} catch (error) {
 			console.error(error);
 			const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');

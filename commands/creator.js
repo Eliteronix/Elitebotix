@@ -12,13 +12,13 @@ module.exports = {
 	//botPermissionsTranslated: 'Manage Roles',
 	//guildOnly: true,
 	//args: true,
-	cooldown: 5,
+	cooldown: 15,
 	//noCooldownMessage: true,
 	tags: 'general',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
-		const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
+	async execute(msg, args, interaction, additionalObjects) {
+		const eliteronixUser = await additionalObjects[0].users.fetch('138273136285057025');
 
 		//Create new embed
 		const creatorInfoEmbed = new Discord.MessageEmbed()
@@ -35,6 +35,19 @@ module.exports = {
 			)
 			.setTimestamp();
 
-		msg.channel.send(creatorInfoEmbed);
+		if (msg) {
+			return msg.channel.send(creatorInfoEmbed);
+		}
+
+		await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+			data: {
+				type: 4,
+				data: {
+					content: 'Creator Embed is being sent'
+				}
+			}
+		});
+		const channel = await additionalObjects[0].channels.fetch(interaction.channel_id);
+		return channel.send(creatorInfoEmbed);
 	},
 };

@@ -84,6 +84,9 @@ const emojiUpdate = require('./emojiUpdate');
 //Get emojiDelete
 const emojiDelete = require('./emojiDelete');
 
+//Get interactionCreate
+const interactionCreate = require('./interactionCreate');
+
 //Get executeNextProcessQueueTask
 const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask } = require('./utils');
 
@@ -138,7 +141,9 @@ client.on('guildBanRemove', guildBanRemove);
 
 client.on('userUpdate', userUpdate);
 
-client.on('messageReactionAdd', reactionAdded);
+client.on('messageReactionAdd', (reaction, user) => {
+	reactionAdded(reaction, user, [client, bancho]);
+});
 
 client.on('messageReactionRemove', reactionRemoved);
 
@@ -175,3 +180,7 @@ client.setInterval(() => executeNextProcessQueueTask(client), 1000);
 client.setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
 
 client.setInterval(() => refreshOsuRank(), 600000);
+
+client.ws.on('INTERACTION_CREATE', interaction => {
+	interactionCreate(client, bancho, interaction);
+});

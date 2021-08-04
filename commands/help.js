@@ -1,5 +1,5 @@
 const { DBElitiriCupSignUp } = require('../dbObjects');
-const { getGuildPrefix } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'help',
@@ -16,7 +16,14 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'general',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			if (interaction.data.options[0].name !== 'list') {
+				args.push(interaction.data.options[0].options[0].value);
+			}
+
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+		}
 		//define variables
 		const categories = ['general', 'server-admin', 'misc', 'osu'];
 
@@ -50,12 +57,43 @@ module.exports = {
 
 			//Send all the commands (Split the message into multiple pieces if necessary)
 			return msg.author.send(data, { split: true })
-				.then(() => {
-					if (msg.channel.type === 'dm') return;
-					msg.reply('I\'ve sent you a DM with all my commands!');
+				.then(async () => {
+					if (msg.id) {
+						if (msg.channel.type === 'dm') return;
+						msg.reply('I\'ve sent you a DM with all my commands!');
+					} else if (interaction) {
+						if (!interaction.guild_id) {
+							return await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+								data: {
+									type: 4,
+									data: {
+										content: 'Help info will be sent'
+									}
+								}
+							});
+						}
+						await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+							data: {
+								type: 4,
+								data: {
+									content: 'I\'ve sent you a DM with all my commands!'
+								}
+							}
+						});
+					}
 				})
 				.catch(() => {
-					msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
+					if (msg.id) {
+						return msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
+					}
+					return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+						data: {
+							type: 4,
+							data: {
+								content: 'It seems like I can\'t DM you! Do you have DMs disabled?'
+							}
+						}
+					});
 				});
 		} else if (categories.includes(args[0])) {
 			data.push(`Here's a list of all my \`${args[0]}\` commands:`);
@@ -67,12 +105,43 @@ module.exports = {
 
 			//Send all the commands (Split the message into multiple pieces if necessary)
 			return msg.author.send(data, { split: true })
-				.then(() => {
-					if (msg.channel.type === 'dm') return;
-					msg.reply('I\'ve sent you a DM with all my commands!');
+				.then(async () => {
+					if (msg.id) {
+						if (msg.channel.type === 'dm') return;
+						msg.reply('I\'ve sent you a DM with all my commands!');
+					} else if (interaction) {
+						if (!interaction.guild_id) {
+							return await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+								data: {
+									type: 4,
+									data: {
+										content: 'Help info will be sent'
+									}
+								}
+							});
+						}
+						await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+							data: {
+								type: 4,
+								data: {
+									content: 'I\'ve sent you a DM with all my commands!'
+								}
+							}
+						});
+					}
 				})
 				.catch(() => {
-					msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
+					if (msg.id) {
+						return msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
+					}
+					return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+						data: {
+							type: 4,
+							data: {
+								content: 'It seems like I can\'t DM you! Do you have DMs disabled?'
+							}
+						}
+					});
 				});
 		}
 
@@ -93,6 +162,14 @@ module.exports = {
 		data.push(`**Cooldown:** ${command.cooldown || 3} second(s)`);
 
 		//Send the information
+		await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+			data: {
+				type: 4,
+				data: {
+					content: `${args[0]} info will be sent`
+				}
+			}
+		});
 		msg.channel.send(data, { split: true });
 	},
 };

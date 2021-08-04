@@ -1,10 +1,10 @@
-const { getGuildPrefix } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const fetch = require('node-fetch');
 
 module.exports = {
 	name: 'feedback',
 	//aliases: ['developer'],
-	description: 'Sends feedback to the devs',
+	description: 'Sends feedback to the dev',
 	usage: '<bug/feature/feedback> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
@@ -16,7 +16,16 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'general',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			console.log(interaction.data.options);
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			args = [interaction.data.options[0].value];
+			interaction.data.options[1].value.split(/ +/).forEach(arg => {
+				args.push(arg);
+			});
+		}
 		//check for the first argument
 		if (args[0].toLowerCase() === 'bug') { //go to bug tree
 			if (!args[1]) { //check for second argument
@@ -29,7 +38,18 @@ module.exports = {
 				//send the bug into the correct Channel
 				createJiraIssue('10006', `[BUG] ${bug} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
-				msg.channel.send('Your bug report was sent to the developer.');
+				if (msg.id) {
+					return msg.channel.send('Your bug report was sent to the developer.');
+				}
+
+				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							content: 'Your bug report was sent to the developer.'
+						}
+					}
+				});
 			}
 		} else if (args[0].toLowerCase() === 'feature') { //go to feature tree
 			if (!args[1]) { //check for second argument
@@ -42,7 +62,18 @@ module.exports = {
 				//send the feature into the correct Channel
 				createJiraIssue('10007', `[FEATURE] ${feature} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
-				msg.channel.send('Your feature-request was sent to the developer.');
+				if (msg.id) {
+					return msg.channel.send('Your feature-request was sent to the developer.');
+				}
+
+				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							content: 'Your feature-request was sent to the developer.'
+						}
+					}
+				});
 			}
 		} else if (args[0].toLowerCase() === 'feedback') { //go to general tree
 			if (!args[1]) { //check for second argument
@@ -55,7 +86,18 @@ module.exports = {
 				//send the feedback into the correct Channel
 				createJiraIssue('10005', `[FEEDBACK] ${feedback} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
-				msg.channel.send('Your feedback has been sent to the developer.');
+				if (msg.id) {
+					return msg.channel.send('Your feedback has been sent to the developer.');
+				}
+
+				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							content: 'Your feedback has been sent to the developer.'
+						}
+					}
+				});
 			}
 		} else {
 			let guildPrefix = await getGuildPrefix(msg);

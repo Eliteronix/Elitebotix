@@ -1,5 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, humanReadable, createLeaderboard } = require('../utils');
+const { getGuildPrefix, humanReadable, createLeaderboard, populateMsgFromInteraction } = require('../utils');
 const { leaderboardEntriesPerPage } = require('../config.json');
 
 module.exports = {
@@ -18,7 +18,26 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: 'osu! leaderboard will be created'
+					}
+				}
+			});
+
+			if (interaction.data.options) {
+				args = [interaction.data.options[0].value];
+			} else {
+				args = [];
+			}
+		}
+
 		let processingMessage = await msg.channel.send('Processing osu! leaderboard...');
 
 		msg.guild.members.fetch()

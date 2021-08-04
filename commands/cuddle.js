@@ -1,9 +1,10 @@
 const fetch = require('node-fetch');
+const { populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'cuddle',
 	// aliases: ['dice', 'ouo'],
-	description: 'Lets you send a gif to cuddle a user.',
+	description: 'Lets you send a gif to cuddle a user',
 	usage: '<@user>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
@@ -16,7 +17,20 @@ module.exports = {
 	tags: 'misc',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: 'Cuddle initiated'
+					}
+				}
+			});
+		}
+
 		if (msg.mentions.users.first()) {
 			msg.mentions.users.forEach(async (user) => {
 				// eslint-disable-next-line no-undef

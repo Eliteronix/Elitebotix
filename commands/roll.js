@@ -1,3 +1,5 @@
+const { populateMsgFromInteraction } = require('../utils');
+
 module.exports = {
 	name: 'roll',
 	// aliases: ['dice', 'ouo'],
@@ -14,7 +16,15 @@ module.exports = {
 	tags: 'misc',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			if (interaction.data.options) {
+				args = [interaction.data.options[0].value];
+			}
+		}
+
 		let max = 100;
 		if (args[0] && !isNaN(args[0]) && args[0] > 1) {
 			max = parseInt(args[0]);
@@ -22,6 +32,16 @@ module.exports = {
 
 		const result = Math.floor(Math.random() * max) + 1;
 
-		msg.channel.send(`<@${msg.author.id}> rolled ${result}!`);
+		if (msg.id) {
+			return msg.channel.send(`<@${msg.author.id}> rolled ${result}!`);
+		}
+		return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+			data: {
+				type: 4,
+				data: {
+					content: `<@${msg.author.id}> rolled ${result}!`
+				}
+			}
+		});
 	},
 };

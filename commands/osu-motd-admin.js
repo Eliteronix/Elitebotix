@@ -20,7 +20,7 @@ module.exports = {
 		if (msg.author.id !== '138273136285057025') {
 			return;
 		}
-		const bancho = additionalObjects[0];
+		const bancho = additionalObjects[1];
 
 		if (args[0] === 'recalculate') {
 			const pointDatasets = await DBMOTDPoints.findAll();

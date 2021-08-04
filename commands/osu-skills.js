@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const fetch = require('node-fetch');
 const { CanvasRenderService } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, saveOsuMultiScores } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, saveOsuMultiScores, populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'osu-skills',
@@ -18,9 +18,41 @@ module.exports = {
 	// args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
-	tags: 'debug',
+	tags: 'osu',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: 'Players are being processed'
+					}
+				}
+			});
+
+			args = [];
+
+			if (interaction.data.options) {
+				for (let i = 0; i < interaction.data.options.length; i++) {
+					args.push(interaction.data.options[i].value);
+				}
+			}
+
+			if (args[2]) {
+				args[2] = '--tourney';
+			} else {
+				args.splice(2, 1);
+			}
+
+			if (args[0]) {
+				args[0] = '--scaled';
+			} else {
+				args.splice(0, 1);
+			}
+		}
 		const guildPrefix = await getGuildPrefix(msg);
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
@@ -44,6 +76,10 @@ module.exports = {
 				i--;
 			} else if (args[i].toLowerCase().startsWith('--tourney')) {
 				tourneyMatch = true;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase().startsWith('--vx')) {
+				scoringType = 'vx';
 				args.splice(i, 1);
 				i--;
 			}

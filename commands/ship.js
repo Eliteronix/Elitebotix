@@ -1,4 +1,4 @@
-const { getMessageUserDisplayname } = require('../utils.js');
+const { getMessageUserDisplayname, populateMsgFromInteraction } = require('../utils.js');
 
 module.exports = {
 	name: 'ship',
@@ -16,7 +16,16 @@ module.exports = {
 	tags: 'misc',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			args = [];
+
+			for (let i = 0; i < interaction.data.options.length; i++) {
+				args.push(interaction.data.options[i].value);
+			}
+		}
 		let firstName = await getName(msg, args[0]);
 		let secondName = await getName(msg, args[1]);
 
@@ -36,11 +45,22 @@ module.exports = {
 		}
 
 		const shipname = `${firstName.substring(0, firstName.length / 2)}${secondName.substring(secondName.length / 2, secondName.length)}`;
-		
+
 		data.push(`Shipping name: \`${shipname.replace(/`/g, '')}\``);
 		data.push(`Compatibility: ${compatibility}%`);
 
-		msg.channel.send(data);
+		if (msg.id) {
+			return msg.channel.send(data);
+		}
+
+		additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+			data: {
+				type: 4,
+				data: {
+					content: data.join('\n')
+				}
+			}
+		});
 	},
 };
 

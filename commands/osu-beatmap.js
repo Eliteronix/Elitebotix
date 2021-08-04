@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGameMode, getIDFromPotentialOsuLink } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'osu-beatmap',
@@ -18,7 +18,26 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+				data: {
+					type: 4,
+					data: {
+						content: 'Beatmaps are being processed'
+					}
+				}
+			});
+
+			args = [];
+
+			for (let i = 0; i < interaction.data.options.length; i++) {
+				args.push(interaction.data.options[i].value);
+			}
+		}
+
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)

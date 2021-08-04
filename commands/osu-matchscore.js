@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getGuildPrefix, createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores } = require('../utils');
+const { getGuildPrefix, createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, populateMsgFromInteraction } = require('../utils');
 const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
@@ -18,7 +18,16 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			args = [];
+
+			for (let i = 0; i < interaction.data.options.length; i++) {
+				args.push(interaction.data.options[i].value);
+			}
+		}
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -34,13 +43,32 @@ module.exports = {
 				matchID = getIDFromPotentialOsuLink(args[0]);
 			} else {
 				const guildPrefix = await getGuildPrefix(msg);
-				return msg.channel.send(`You didn't provide a valid match ID or URL.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);
+				if (msg.id) {
+					return msg.channel.send(`You didn't provide a valid match ID or URL.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);
+				} else {
+					return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+						data: {
+							type: 4,
+							data: {
+								content: `You didn't provide a valid match ID or URL.\nUsage: \`/${this.name} ${this.usage}\``
+							}
+						}
+					});
+				}
 			}
 		}
 
 		osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
 				saveOsuMultiScores(match);
+				await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							content: 'Matchscores are getting calculated'
+						}
+					}
+				});
 				let processingMessage = await msg.channel.send('Processing osu! match leaderboard...');
 				let warmups = 2;
 				let warmupsReason = `Assumed ${warmups} warmups.`;
@@ -170,7 +198,18 @@ module.exports = {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
+					if (msg.id) {
+						return msg.channel.send(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
+					} else {
+						return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+							data: {
+								type: 4,
+								data: {
+									content: `Could not find match \`${args[0].replace(/`/g, '')}\`.`
+								}
+							}
+						});
+					}
 				} else {
 					console.log(err);
 				}
