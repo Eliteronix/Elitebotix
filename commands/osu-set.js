@@ -1,4 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
+const { populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'osu-set',
@@ -15,72 +16,137 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+
+			args = [interaction.data.options[0].name, interaction.data.options[0].options[0].value];
+		}
 
 		//get discordUser from db
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { userId: msg.author.id },
 		});
 
-		if(args[0].toLowerCase() === 'server'){
-			if(args[1] && args[1].toLowerCase() === 'bancho'){
-				if(discordUser){
+		if (args[0].toLowerCase() === 'server') {
+			if (args[1] && args[1].toLowerCase() === 'bancho') {
+				if (discordUser) {
 					discordUser.osuMainServer = 'bancho';
 					discordUser.save();
 				} else {
 					DBDiscordUsers.create({ userId: msg.author.id, osuMainServer: 'bancho' });
 				}
-				
-				msg.channel.send('Bancho has been set as your main server.');
-			} else if(args[1] && args[1].toLowerCase() === 'ripple'){
-				if(discordUser){
+
+				if (msg.id) {
+					return msg.channel.send('Bancho has been set as your main server.');
+				}
+				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							content: 'Bancho has been set as your main server.'
+						}
+					}
+				});
+			} else if (args[1] && args[1].toLowerCase() === 'ripple') {
+				if (discordUser) {
 					discordUser.osuMainServer = 'ripple';
 					discordUser.save();
 				} else {
 					DBDiscordUsers.create({ userId: msg.author.id, osuMainServer: 'ripple' });
 				}
-				
-				msg.channel.send('Ripple has been set as your main server.');
+
+				if (msg.id) {
+					return msg.channel.send('Ripple has been set as your main server.');
+				}
+				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							content: 'Ripple has been set as your main server.'
+						}
+					}
+				});
 			} else {
 				msg.channel.send('Please specify which server you want to set as your main server: `bancho`, `ripple`');
 			}
-		} else if(args[0].toLowerCase() === 'mode'){
-			if(args[1] && args[1].toLowerCase() === 'standard'){
-				if(discordUser){
+		} else if (args[0].toLowerCase() === 'mode') {
+			if (args[1] && args[1].toLowerCase() === 'standard') {
+				if (discordUser) {
 					discordUser.osuMainMode = 0;
 					discordUser.save();
 				} else {
 					DBDiscordUsers.create({ userId: msg.author.id, osuMainMode: 0 });
 				}
-				
-				msg.channel.send('Standard has been set as your main mode.');
-			} else if(args[1] && args[1].toLowerCase() === 'taiko'){
-				if(discordUser){
+
+				if (msg.id) {
+					return msg.channel.send('Standard has been set as your main mode.');
+				}
+				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							content: 'Standard has been set as your main mode.'
+						}
+					}
+				});
+			} else if (args[1] && args[1].toLowerCase() === 'taiko') {
+				if (discordUser) {
 					discordUser.osuMainMode = 1;
 					discordUser.save();
 				} else {
 					DBDiscordUsers.create({ userId: msg.author.id, osuMainMode: 1 });
 				}
-				
-				msg.channel.send('Taiko has been set as your main mode.');
-			} else if(args[1] && args[1].toLowerCase() === 'catch'){
-				if(discordUser){
+
+				if (msg.id) {
+					return msg.channel.send('Taiko has been set as your main mode.');
+				}
+				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							content: 'Taiko has been set as your main mode.'
+						}
+					}
+				});
+			} else if (args[1] && args[1].toLowerCase() === 'catch') {
+				if (discordUser) {
 					discordUser.osuMainMode = 2;
 					discordUser.save();
 				} else {
 					DBDiscordUsers.create({ userId: msg.author.id, osuMainMode: 2 });
 				}
-				
-				msg.channel.send('Catch has been set as your main mode.');
-			} else if(args[1] && args[1].toLowerCase() === 'mania'){
-				if(discordUser){
+
+				if (msg.id) {
+					return msg.channel.send('Catch has been set as your main mode.');
+				}
+				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							content: 'Catch has been set as your main mode.'
+						}
+					}
+				});
+			} else if (args[1] && args[1].toLowerCase() === 'mania') {
+				if (discordUser) {
 					discordUser.osuMainMode = 3;
 					discordUser.save();
 				} else {
 					DBDiscordUsers.create({ userId: msg.author.id, osuMainMode: 3 });
 				}
-				
-				msg.channel.send('Mania has been set as your main mode.');
+
+				if (msg.id) {
+					return msg.channel.send('Mania has been set as your main mode.');
+				}
+				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							content: 'Mania has been set as your main mode.'
+						}
+					}
+				});
 			} else {
 				msg.channel.send('Please specify which mode you want to set as your main mode: `standard`, `taiko`, `catch`, `mania`');
 			}

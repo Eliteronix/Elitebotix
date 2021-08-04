@@ -141,7 +141,9 @@ client.on('guildBanRemove', guildBanRemove);
 
 client.on('userUpdate', userUpdate);
 
-client.on('messageReactionAdd', reactionAdded);
+client.on('messageReactionAdd', (reaction, user) => {
+	reactionAdded(reaction, user, [client, bancho]);
+});
 
 client.on('messageReactionRemove', reactionRemoved);
 

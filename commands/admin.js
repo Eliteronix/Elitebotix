@@ -733,6 +733,218 @@ module.exports = {
 				},
 			});
 
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'osu-set',
+					description: 'Allows you to set your main mode and server',
+					options: [
+						{
+							'name': 'mode',
+							'description': 'Change the main mode when handling the bot',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'mode',
+									'description': 'The osu! mode you want as your main',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'standard',
+											'value': 'standard'
+										},
+										{
+											'name': 'taiko',
+											'value': 'taiko'
+										},
+										{
+											'name': 'catch',
+											'value': 'catch'
+										},
+										{
+											'name': 'mania',
+											'value': 'mania'
+										}
+									]
+								}
+							]
+						},
+						{
+							'name': 'server',
+							'description': 'Change the main server when handling the bot',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'server',
+									'description': 'The osu! server you want as your main',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'bancho',
+											'value': 'bancho'
+										},
+										{
+											'name': 'ripple',
+											'value': 'ripple'
+										}
+									]
+								}
+							]
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'osu-skills',
+					description: 'Sends an info card about the skills of the specified player',
+					options: [
+						{
+							'name': 'scaled',
+							'description': 'Should the graph be scaled by the total evaluation?',
+							'type': 5,
+							'required': true
+						},
+						{
+							'name': 'scores',
+							'description': 'Which types of scores should the graph evaluate?',
+							'type': 3,
+							'required': true,
+							'choices': [
+								{
+									'name': 'All Scores',
+									'value': '--vx'
+								},
+								{
+									'name': 'Only Score v1',
+									'value': '--v1'
+								},
+								{
+									'name': 'Only Score v2',
+									'value': '--v2'
+								}
+							]
+						},
+						{
+							'name': 'tourney',
+							'description': 'Should it only count scores from tournaments?',
+							'type': 5,
+							'required': true
+						},
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'osu-top',
+					description: 'Sends an info card about the topplays of the specified player',
+					options: [
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+				data: {
+					name: 'pat',
+					description: 'Lets you send a gif to pat a user',
+					options: [
+						{
+							'name': 'user',
+							'description': 'The user to pat',
+							'type': 6, // 6 is type USER
+							'required': true
+						},
+						{
+							'name': 'user2',
+							'description': 'The user to pat',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'user3',
+							'description': 'The user to pat',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'user4',
+							'description': 'The user to pat',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'user5',
+							'description': 'The user to pat',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+					]
+				}
+			});
+
 			// const yes = await msg.client.api.applications(msg.client.user.id).guilds('800641468321759242').commands.get();
 			// console.log(yes);
 			// msg.client.api.applications(msg.client.user.id).guilds('800641468321759242').commands('871448630224113724').delete();

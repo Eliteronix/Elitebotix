@@ -57,7 +57,7 @@ module.exports = {
 				const command = require('./osu-score.js');
 
 				try {
-					command.execute(msg, newArgs, true);
+					command.execute(msg, newArgs, null, additionalObjects);
 				} catch (error) {
 					console.error(error);
 					const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
