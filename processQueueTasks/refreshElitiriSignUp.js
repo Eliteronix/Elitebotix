@@ -16,17 +16,9 @@ module.exports = {
 			where: { osuUserId: processQueueEntry.additions }
 		});
 
-		if (discordUser.osuUserId === '13605288') {
-			console.log('13605288 refreshElitiriSignUp');
-		}
-
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { osuUserId: processQueueEntry.additions, tournamentName: 'Elitiri Cup Summer 2021' }
 		});
-
-		if (discordUser.osuUserId === '13605288') {
-			console.log(elitiriSignUp);
-		}
 
 		if (discordUser && elitiriSignUp) {
 
