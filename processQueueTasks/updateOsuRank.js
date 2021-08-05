@@ -18,9 +18,7 @@ module.exports = {
 			where: { userId: discordUserId }
 		});
 
-		if (discordUser.osuUserId === '13605288') {
-			console.log('13605288 updateOsuRank');
-		}
+		console.log('updateOsuRank', discordUser.osuUserId, discordUser.osuName);
 
 		try {
 			const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
