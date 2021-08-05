@@ -32,7 +32,7 @@ module.exports = {
 
 		// Catch case of qualifiers actually being played
 		//Send messages to inform players
-		await sendQualifierMessages(client, mappool[0], users);
+		await sendQualifierMessages(client, bancho, mappool[0], users, players);
 
 		//wait 10 minutes
 		setTimeout(async function () {
@@ -52,6 +52,8 @@ module.exports = {
 			for (let i = 0; i < results.length; i++) {
 				if (results[i].score < 0) {
 					messageUserWithRetries(client, users[i], 'You failed to submit a score for todays qualifier map and have been removed from todays competition.\nCome back tomorrow for another round.');
+					const IRCUser = bancho.getUser(players[i].osuName);
+					IRCUser.sendMessage('[Elitebotix]: You failed to submit a score for todays qualifier map and have been removed from todays MOTD competition. Come back tomorrow for another round.');
 					results.splice(i, 1);
 					players.splice(i, 1);
 					users.splice(i, 1);
@@ -70,6 +72,8 @@ module.exports = {
 			//Message people what scores they got
 			for (let i = 0; i < users.length; i++) {
 				await messageUserWithRetries(client, users[i], `You placed \`${i + 1}.\` out of \`${users.length}\` players with a score of \`${humanReadable(results[i].score)}\``);
+				const IRCUser = bancho.getUser(players[i].osuName);
+				IRCUser.sendMessage(`[Elitebotix]: You placed \`${i + 1}.\` out of \`${users.length}\` players with a score of \`${humanReadable(results[i].score)}\``);
 			}
 
 			//Divide sorted players into knockout lobbies
@@ -102,7 +106,7 @@ function divideIntoGroups(client, bancho, bracketName, mappool, lobbyNumber, pla
 	}
 }
 
-async function sendQualifierMessages(client, map, users) {
+async function sendQualifierMessages(client, bancho, map, users, players) {
 	let data = [];
 	data.push(`There are ${users.length} players registered today for your bracket!`);
 	data.push('Try to get your **best score** possible in the next **10 minutes** on the following map to qualify for a knockout lobby **(fails are excluded)**.');
@@ -111,6 +115,8 @@ async function sendQualifierMessages(client, map, users) {
 	const attachment = await createMOTDAttachment('Qualifier', map, false);
 	for (let i = 0; i < users.length; i++) {
 		await messageUserWithRetries(client, users[i], data, attachment);
+		const IRCUser = bancho.getUser(players[i].osuName);
+		IRCUser.sendMessage(`[Elitebotix]: A new round of MOTD just started! Today's qualifier map is this one: osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
 	}
 }
 
