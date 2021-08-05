@@ -18,6 +18,10 @@ module.exports = {
 			where: { userId: discordUserId }
 		});
 
+		if (discordUser.osuUserId === '13605288') {
+			console.log('13605288 updateOsuRank');
+		}
+
 		try {
 			const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
 
@@ -140,6 +144,10 @@ module.exports = {
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Cup Summer 2021' }
 		});
+
+		if (discordUser.osuUserId === '13605288') {
+			console.log(elitiriSignUp);
+		}
 
 		if (elitiriSignUp) {
 			const task = await DBProcessQueue.findOne({
