@@ -52,8 +52,19 @@ module.exports = {
 			for (let i = 0; i < results.length; i++) {
 				if (results[i].score < 0) {
 					messageUserWithRetries(client, users[i], 'You failed to submit a score for todays qualifier map and have been removed from todays competition.\nCome back tomorrow for another round.');
-					const IRCUser = bancho.getUser(players[i].osuName);
-					IRCUser.sendMessage('[Elitebotix]: You failed to submit a score for todays qualifier map and have been removed from todays MOTD competition. Come back tomorrow for another round.');
+					try {
+						try {
+							await bancho.connect();
+						} catch (error) {
+							if (!error.message === 'Already connected/connecting') {
+								throw (error);
+							}
+						}
+						const IRCUser = bancho.getUser(players[i].osuName);
+						IRCUser.sendMessage('[Elitebotix]: You failed to submit a score for todays qualifier map and have been removed from todays MOTD competition. Come back tomorrow for another round.');
+					} catch (error) {
+						console.log('MOTD/qualifier.js', error);
+					}
 					results.splice(i, 1);
 					players.splice(i, 1);
 					users.splice(i, 1);
@@ -72,8 +83,19 @@ module.exports = {
 			//Message people what scores they got
 			for (let i = 0; i < users.length; i++) {
 				await messageUserWithRetries(client, users[i], `You placed \`${i + 1}.\` out of \`${users.length}\` players with a score of \`${humanReadable(results[i].score)}\``);
-				const IRCUser = bancho.getUser(players[i].osuName);
-				IRCUser.sendMessage(`[Elitebotix]: You placed \`${i + 1}.\` out of \`${users.length}\` players with a score of \`${humanReadable(results[i].score)}\``);
+				try {
+					try {
+						await bancho.connect();
+					} catch (error) {
+						if (!error.message === 'Already connected/connecting') {
+							throw (error);
+						}
+					}
+					const IRCUser = bancho.getUser(players[i].osuName);
+					IRCUser.sendMessage(`[Elitebotix]: You placed \`${i + 1}.\` out of \`${users.length}\` players with a score of \`${humanReadable(results[i].score)}\``);
+				} catch (error) {
+					console.log('MOTD/qualifier.js', error);
+				}
 			}
 
 			//Divide sorted players into knockout lobbies
@@ -115,8 +137,19 @@ async function sendQualifierMessages(client, bancho, map, users, players) {
 	const attachment = await createMOTDAttachment('Qualifier', map, false);
 	for (let i = 0; i < users.length; i++) {
 		await messageUserWithRetries(client, users[i], data, attachment);
-		const IRCUser = bancho.getUser(players[i].osuName);
-		IRCUser.sendMessage(`[Elitebotix]: A new round of MOTD just started! Today's qualifier map is this one: osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
+		try {
+			try {
+				await bancho.connect();
+			} catch (error) {
+				if (!error.message === 'Already connected/connecting') {
+					throw (error);
+				}
+			}
+			const IRCUser = bancho.getUser(players[i].osuName);
+			IRCUser.sendMessage(`[Elitebotix]: A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
+		} catch (error) {
+			console.log('MOTD/qualifier.js', error);
+		}
 	}
 }
 

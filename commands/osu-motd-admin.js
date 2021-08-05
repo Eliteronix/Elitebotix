@@ -16,7 +16,7 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'debug',
 	prefixCommand: true,
-	async execute(msg, args, additionalObjects) {
+	async execute(msg, args, interaction, additionalObjects) {
 		if (msg.author.id !== '138273136285057025') {
 			return;
 		}
