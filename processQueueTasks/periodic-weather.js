@@ -36,7 +36,7 @@ module.exports = {
 					newArgs.push(locationArguments[i]);
 				}
 
-				command.execute(messagesArray[messagesArray.length - 1], newArgs, true);
+				command.execute(messagesArray[messagesArray.length - 1], newArgs, null, [client, null]);
 
 				messagesArray[messagesArray.length - 1].delete();
 
