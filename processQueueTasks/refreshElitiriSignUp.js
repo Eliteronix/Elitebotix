@@ -21,6 +21,7 @@ module.exports = {
 		});
 
 		if (discordUser && elitiriSignUp) {
+
 			let bracketName = '';
 
 			const user = await client.users.fetch(discordUser.userId);
