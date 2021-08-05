@@ -933,7 +933,7 @@ module.exports = {
 				if (interaction.data.options[i].type === 6) {
 					let user = await client.users.fetch(interaction.data.options[i].value);
 					userMentions.set(user.id, user);
-				} else if (typeof interaction.data.options[i].value === 'string' && interaction.data.options[i].value.startsWith('<@') && interaction.data.options[i].value.endsWith('>')) {
+				} else if (interaction.data.options[i].value && typeof interaction.data.options[i].value === 'string' && interaction.data.options[i].value.startsWith('<@') && interaction.data.options[i].value.endsWith('>')) {
 					let user = await client.users.fetch(interaction.data.options[i].value.replace(/\D/g, ''));
 					userMentions.set(user.id, user);
 				}
