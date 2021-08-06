@@ -109,33 +109,9 @@ async function sendQualifierMessages(client, bancho, map, users, players) {
 	data.push('\nTodays qualifier map:');
 	data.push(`Website: <https://osu.ppy.sh/b/${map.id}> | osu! direct: <osu://b/${map.id}>`);
 	const attachment = await createMOTDAttachment('Qualifier', map, false);
-	try {
-		await bancho.connect();
-	} catch (error) {
-		if (!error.message === 'Already connected/connecting') {
-			throw (error);
-		}
-	}
+	messageIngame(bancho, map, players);
 	for (let i = 0; i < users.length; i++) {
 		await messageUserWithRetries(client, users[i], data, attachment);
-		try {
-			const IRCUser = bancho.getUser(players[i].osuName);
-			IRCUser.sendMessage(`[Elitebotix]: A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
-		} catch (error) {
-			try {
-				await bancho.connect();
-			} catch (error) {
-				if (!error.message === 'Already connected/connecting') {
-					throw (error);
-				}
-			}
-			try {
-				const IRCUser = bancho.getUser(players[i].osuName);
-				IRCUser.sendMessage(`[Elitebotix]: A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
-			} catch (error) {
-				console.log('MOTD/qualifier.js', error);
-			}
-		}
 	}
 }
 
@@ -329,6 +305,36 @@ async function messageUserWithRetries(client, user, content, attachment) {
 			} else {
 				i = Infinity;
 				console.log(error);
+			}
+		}
+	}
+}
+
+async function messageIngame(bancho, map, players) {
+	try {
+		await bancho.connect();
+	} catch (error) {
+		if (!error.message === 'Already connected/connecting') {
+			throw (error);
+		}
+	}
+	for (let i = 0; i < players.length; i++) {
+		try {
+			const IRCUser = await bancho.getUser(players[i].osuName);
+			await IRCUser.sendMessage(`[Elitebotix]: A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
+		} catch (error) {
+			try {
+				await bancho.connect();
+			} catch (error) {
+				if (!error.message === 'Already connected/connecting') {
+					throw (error);
+				}
+			}
+			try {
+				const IRCUser = await bancho.getUser(players[i].osuName);
+				await IRCUser.sendMessage(`[Elitebotix]: A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
+			} catch (error) {
+				console.log('MOTD/qualifier.js', error);
 			}
 		}
 	}
