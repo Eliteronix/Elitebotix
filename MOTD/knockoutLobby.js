@@ -497,7 +497,7 @@ async function getKnockoutScores(map, players, doubleTime) {
 				}
 				scores[0].raw_mods = mods;
 				if (mods.includes('NF')) {
-					scores[0].score = parseInt(scores[0].score) * 2;
+					scores[0].score = parseInt(parseInt(scores[0].score) * 1.75);
 				}
 				if (doubleTime && !mods.includes('DT') && !mods.includes('NC')) {
 					scores[0].score = '-1';
