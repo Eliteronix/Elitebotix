@@ -298,7 +298,20 @@ async function drawTitle(input, osuApi) {
 	}
 
 	if (mods.includes('DT') || mods.includes('HT') || mods.includes('HR') || mods.includes('EZ')) {
-		const modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: score.raw_mods });
+		let modMap = beatmap;
+		if (mods.includes('DT') && mods.includes('HR')) {
+			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 80 });
+		} else if (mods.includes('DT') && mods.includes('EZ')) {
+			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 66 });
+		} else if (mods.includes('DT')) {
+			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 64 });
+		} else if (mods.includes('HT') && mods.includes('HR')) {
+			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 272 });
+		} else if (mods.includes('HT') && mods.includes('EZ')) {
+			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 258 });
+		} else if (mods.includes('HT')) {
+			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 256 });
+		}
 		ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100} (${Math.round(modMap[0].difficulty.rating * 100) / 100} with ${mods.join('')})   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
 	} else {
 		ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100}   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
