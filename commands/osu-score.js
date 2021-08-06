@@ -4,7 +4,6 @@ const osu = require('node-osu');
 const Canvas = require('canvas');
 const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction } = require('../utils');
 const fetch = require('node-fetch');
-const { calculateStarRating } = require('osu-sr-calculator');
 
 module.exports = {
 	name: 'osu-score',
@@ -137,15 +136,15 @@ module.exports = {
 };
 
 async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, mapRank, mods) {
-	if (server === 'bancho') {
-		// eslint-disable-next-line no-undef
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
+	// eslint-disable-next-line no-undef
+	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+	});
 
+	if (server === 'bancho') {
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { osuUserId: username }
 		});
@@ -183,7 +182,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						let elements = [canvas, ctx, scores[i], beatmap, user];
 
-						elements = await drawTitle(elements);
+						elements = await drawTitle(elements, osuApi);
 
 						elements = await drawCover(elements, mode);
 
@@ -265,7 +264,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						let elements = [canvas, ctx, score, beatmap, user];
 
-						elements = await drawTitle(elements);
+						elements = await drawTitle(elements, osuApi);
 
 						elements = await drawCover(elements, mode);
 
@@ -312,7 +311,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 	}
 }
 
-async function drawTitle(input) {
+async function drawTitle(input, osuApi) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let score = input[2];
@@ -342,8 +341,8 @@ async function drawTitle(input) {
 	}
 
 	if (mods.includes('DT') || mods.includes('HT') || mods.includes('HR') || mods.includes('EZ')) {
-		const starRating = await calculateStarRating(beatmap.id, mods);
-		ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100} (${Math.round(starRating[mods.join('')] * 100) / 100} with ${mods.join('')})   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
+		const modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: score.raw_mods });
+		ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100} (${Math.round(modMap[0].difficulty.rating * 100) / 100} with ${mods.join('')})   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
 	} else {
 		ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100}   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
 	}

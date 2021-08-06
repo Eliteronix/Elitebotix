@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const { calculateStarRating } = require('osu-sr-calculator');
 const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
 const { getGuildPrefix, pause, getIDFromPotentialOsuLink } = require('../utils.js');
 
@@ -274,17 +273,17 @@ module.exports = {
 				const beginnerUpperDiff = 5.54;
 
 				if (args[0].toLowerCase() === 'hr') {
-					const starRating = await calculateStarRating(beatmaps[0].id, ['HR'], false, true);
+					const hrMap = await osuApi.getBeatmaps({ b: getIDFromPotentialOsuLink(args[1]), mods: 16 });
 
-					beatmaps[0].difficulty.rating = starRating.HR.total;
-					beatmaps[0].difficulty.aim = starRating.HR.aim;
-					beatmaps[0].difficulty.speed = starRating.HR.speed;
+					beatmaps[0].difficulty.rating = hrMap[0].difficulty.rating;
+					beatmaps[0].difficulty.aim = hrMap[0].difficulty.aim;
+					beatmaps[0].difficulty.speed = hrMap[0].difficulty.speed;
 				} else if (args[0].toLowerCase() === 'dt') {
-					const starRating = await calculateStarRating(beatmaps[0].id, ['DT'], false, true);
+					const dtMap = await osuApi.getBeatmaps({ b: getIDFromPotentialOsuLink(args[1]), mods: 64 });
 
-					beatmaps[0].difficulty.rating = starRating.DT.total;
-					beatmaps[0].difficulty.aim = starRating.DT.aim;
-					beatmaps[0].difficulty.speed = starRating.DT.speed;
+					beatmaps[0].difficulty.rating = dtMap[0].difficulty.rating;
+					beatmaps[0].difficulty.aim = dtMap[0].difficulty.aim;
+					beatmaps[0].difficulty.speed = dtMap[0].difficulty.speed;
 					beatmaps[0].length.total = Math.round(beatmaps[0].length.total / 3 * 2);
 					beatmaps[0].length.drain = Math.round(beatmaps[0].length.drain / 3 * 2);
 					beatmaps[0].bpm = beatmaps[0].bpm * 1.5;

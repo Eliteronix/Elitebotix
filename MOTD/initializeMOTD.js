@@ -1,5 +1,4 @@
 const osu = require('node-osu');
-const { calculateStarRating } = require('osu-sr-calculator');
 const { assignPlayerRoles } = require('./assignPlayerRoles');
 const { setMapsForBracket } = require('./setMapsForBracket');
 const { createLeaderboard } = require('./createLeaderboard');
@@ -103,11 +102,11 @@ module.exports = {
 
 					//Calculate Difficulties and other stuff for DT
 					for (let i = 0; i < DTBeatmaps.length; i++) {
-						const starRating = await calculateStarRating(DTBeatmaps[i].id, ['DT'], false, true);
+						const dtMap = await osuApi.getBeatmaps({ b: DTBeatmaps[i].id, mods: 64 });
 
-						DTBeatmaps[i].difficulty.rating = starRating.DT.total;
-						DTBeatmaps[i].difficulty.aim = starRating.DT.aim;
-						DTBeatmaps[i].difficulty.speed = starRating.DT.speed;
+						DTBeatmaps[i].difficulty.rating = dtMap[0].difficulty.rating;
+						DTBeatmaps[i].difficulty.aim = dtMap[0].difficulty.aim;
+						DTBeatmaps[i].difficulty.speed = dtMap[0].difficulty.speed;
 						DTBeatmaps[i].length.total = Math.round(DTBeatmaps[i].length.total / 3 * 2);
 						DTBeatmaps[i].length.drain = Math.round(DTBeatmaps[i].length.drain / 3 * 2);
 						DTBeatmaps[i].difficulty.overall = Math.round(((79.5 - ((79.5 - 6 * DTBeatmaps[i].difficulty.overall) * 2 / 3)) / 6) * 100) / 100;
