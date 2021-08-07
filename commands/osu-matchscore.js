@@ -61,14 +61,16 @@ module.exports = {
 		osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
 				saveOsuMultiScores(match);
-				await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
+				if (interaction) {
+					await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
 						data: {
-							content: 'Matchscores are getting calculated'
+							type: 4,
+							data: {
+								content: 'Matchscores are getting calculated'
+							}
 						}
-					}
-				});
+					});
+				}
 				let processingMessage = await msg.channel.send('Processing osu! match leaderboard...');
 				let warmups = 2;
 				let warmupsReason = `Assumed ${warmups} warmups.`;
