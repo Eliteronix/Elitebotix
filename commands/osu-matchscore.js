@@ -24,8 +24,14 @@ module.exports = {
 
 			args = [];
 
-			for (let i = 0; i < interaction.data.options.length; i++) {
-				args.push(interaction.data.options[i].value);
+			args.push(interaction.data.options[0].value);
+
+			if (interaction.data.options[1]) {
+				args.push(interaction.data.options[1].value.toString());
+			}
+
+			if (interaction.data.options[2] && interaction.data.options[2].value) {
+				args.push('avg');
 			}
 		}
 		// eslint-disable-next-line no-undef
@@ -256,5 +262,5 @@ function getMiddleScore(scores) {
 		scores.splice(scores.length - 1, 1);
 	}
 
-	return (parseInt(scores[0]) + parseInt(scores[1])) / 2;
+	return (parseFloat(scores[0]) + parseFloat(scores[1])) / 2;
 }
