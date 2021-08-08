@@ -867,7 +867,11 @@ module.exports = {
 			game.scores.forEach(async (score) => {
 				//Calculate evaluation
 				let evaluation = 0;
-				let gameScores = game.scores;
+
+				let gameScores = [];
+				for (let i = 0; i < game.scores.length; i++) {
+					gameScores.push(game.scores[i]);
+				}
 
 				if (gameScores.length > 1) {
 					quicksort(gameScores);

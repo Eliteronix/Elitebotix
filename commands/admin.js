@@ -1,3 +1,7 @@
+const { DBOsuMultiScores } = require('../dbObjects');
+const { saveOsuMultiScores, pause } = require('../utils');
+const osu = require('node-osu');
+
 module.exports = {
 	name: 'admin',
 	//aliases: ['developer'],
@@ -2538,6 +2542,48 @@ module.exports = {
 			for (let i = 0; i < commands.length; i++) {
 				await msg.client.api.applications(msg.client.user.id).commands(commands[i].id).delete();
 			}
+		} else if (args[0] === 'recalculateMultiScores') {
+			//recalculate existing scores in the db
+			const allScores = await DBOsuMultiScores.findAll();
+
+			for (let i = 0; i < allScores.length; i++) {
+				let matchId = allScores[i].matchId;
+				for (let j = 0; j < allScores.length; j++) {
+					if (allScores[j].matchId === matchId) {
+						allScores.splice(j, 1);
+						j--;
+					}
+				}
+
+				// eslint-disable-next-line no-undef
+				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+				});
+
+				await pause(250);
+
+				await osuApi.getMatch({ mp: matchId })
+					.then(async (match) => {
+						const allMatchScores = await DBOsuMultiScores.findAll({
+							where: { matchId: match.id }
+						});
+
+						for (let j = 0; j < allMatchScores.length; j++) {
+							await allMatchScores[j].destroy();
+						}
+
+						saveOsuMultiScores(match);
+
+						console.log('MatchId done:', matchId);
+					})
+					.catch(error => {
+						console.log('MatchId went into an error (Not found):', matchId, error);
+					});
+			}
+			console.log('Done');
 		}
 
 		msg.channel.send('Done.');
