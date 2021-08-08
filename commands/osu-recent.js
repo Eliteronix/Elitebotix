@@ -298,7 +298,7 @@ async function drawTitle(input, osuApi) {
 	}
 
 	if (mods.includes('DT') || mods.includes('HT') || mods.includes('HR') || mods.includes('EZ')) {
-		let modMap = beatmap;
+		let modMap = [beatmap];
 		if (mods.includes('DT') && mods.includes('HR')) {
 			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 80 });
 		} else if (mods.includes('DT') && mods.includes('EZ')) {
@@ -311,6 +311,10 @@ async function drawTitle(input, osuApi) {
 			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 258 });
 		} else if (mods.includes('HT')) {
 			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 256 });
+		} else if (mods.includes('EZ')) {
+			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 2 });
+		} else if (mods.includes('HR')) {
+			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 16 });
 		}
 		ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100} (${Math.round(modMap[0].difficulty.rating * 100) / 100} with ${mods.join('')})   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
 	} else {
