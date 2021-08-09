@@ -177,9 +177,14 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 				let oldestDate = new Date();
 
+				oldestDate.setUTCDate(1);
+				oldestDate.setUTCHours(0);
+				oldestDate.setUTCMinutes(0);
+
 				userScores.forEach(score => {
 					if (oldestDate > score.matchStartDate) {
-						oldestDate = score.matchStartDate;
+						oldestDate.setUTCFullYear(score.matchStartDate.getUTCFullYear());
+						oldestDate.setUTCMonth(score.matchStartDate.getUTCMonth());
 					}
 				});
 
@@ -209,7 +214,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					if (scoringType === 'v2' && userScores[i].scoringType !== 'Score v2') {
 						continue;
 					}
-					if (scoringType === 'v1' && userScores[i].scoringType === 'Score v2') {
+					if (scoringType === 'v1' && userScores[i].scoringType === 'Score v1') {
 						continue;
 					}
 					if (tourneyMatch && !userScores[i].tourneyMatch) {
