@@ -205,18 +205,23 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					rawData.push(rawDataObject);
 				}
 
+				console.log('userScores.length', userScores.length);
 				for (let i = 0; i < userScores.length; i++) {
 					if (scoringType === 'v2' && userScores[i].scoringType !== 'Score v2') {
+						console.log('v2');
 						continue;
 					}
-					if (scoringType === 'v1' && userScores[i].scoringType === 'Score v2') {
+					if (scoringType === 'v1' && userScores[i].scoringType === 'Score v1') {
+						console.log('v1');
 						continue;
 					}
 					if (tourneyMatch && !userScores[i].tourneyMatch) {
+						console.log('No tourneyMatch');
 						continue;
 					}
 
 					for (let j = 0; j < rawData.length; j++) {
+						console.log(userScores[i].matchName, userScores[i].matchStartDate, rawData[j].label, `${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()}`);
 						if (rawData[j].label === `${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()}`) {
 							rawData[j].totalEvaluation += parseFloat(userScores[i].evaluation);
 							rawData[j].totalCount++;
@@ -258,6 +263,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				const DTDatapoints = [];
 				const FMDatapoints = [];
 				rawData.forEach(rawDataObject => {
+					console.log('rawDataObject.totalCount', rawDataObject.totalCount);
 					let totalValue = NaN;
 					if (rawDataObject.totalCount) {
 						totalValue = rawDataObject.totalEvaluation / rawDataObject.totalCount;
