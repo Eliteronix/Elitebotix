@@ -3,7 +3,6 @@ const { DBElitiriCupSignUp } = require('../dbObjects');
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(client, processQueueEntry) {
-		return;
 		//Fetch server
 		const guild = await client.guilds.fetch('727407178499096597');
 
@@ -44,7 +43,7 @@ module.exports = {
 					if (registeredPlayer) {
 						//Assign Elitiri role if not there yet
 						try {
-							if (!members[i].roles.cache.has(ElitiriRole.id)) {
+							if (!members[i].roles.cache.has(ElitiriRole.id) && !registeredPlayer.rankAchieved) {
 								//Assign role if not there yet
 								await members[i].roles.add(ElitiriRole);
 							}
@@ -62,6 +61,10 @@ module.exports = {
 							correctRole = '803217971782352907';
 						} else if (registeredPlayer.bracketName === 'Beginner Bracket') {
 							correctRole = '803218142453170226';
+						}
+
+						if (registeredPlayer.rankAchieved) {
+							correctRole = '';
 						}
 
 						//Assign or remove needed bracket roles
