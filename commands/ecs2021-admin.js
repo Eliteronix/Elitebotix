@@ -327,6 +327,8 @@ module.exports = {
 			}
 
 			elitiriSignUp.save();
+
+			msg.channel.send(`Placement of \`${elitiriSignUp.osuName}\` set to \`${elitiriSignUp.rankAchieved}\``);
 		} else if (args[0] === 'createPools') {
 			let allMaps = [];
 			let rowOffset;
