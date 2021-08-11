@@ -315,6 +315,18 @@ module.exports = {
 					}
 				}
 			}
+		} else if (args[0] === 'placement') {
+			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
+				where: { osuUserId: args[1], tournamentName: 'Elitiri Cup Summer 2021' }
+			});
+
+			if (args[2]) {
+				elitiriSignUp.rankAchieved = args[2];
+			} else {
+				elitiriSignUp.rankAchieved = '';
+			}
+
+			elitiriSignUp.save();
 		} else if (args[0] === 'createPools') {
 			let allMaps = [];
 			let rowOffset;

@@ -52,6 +52,9 @@ module.exports = (sequelize, DataTypes) => {
 		tournamentName: {
 			type: DataTypes.STRING,
 		},
+		rankAchieved: {
+			type: DataTypes.STRING,
+		},
 		paranoid: true,
 	});
 };
