@@ -143,43 +143,47 @@ module.exports = {
 
 		if (elitiriSignUp) {
 			const guild = await client.guilds.fetch('727407178499096597');
-			const member = await guild.members.fetch(discordUserId);
+			try {
+				const member = await guild.members.fetch(discordUserId);
 
-			const ecs2021ParticipantRoleId = '875031092921532416';
-			const ecs2021ParticipantRole = await guild.roles.fetch(ecs2021ParticipantRoleId);
+				const ecs2021ParticipantRoleId = '875031092921532416';
+				const ecs2021ParticipantRole = await guild.roles.fetch(ecs2021ParticipantRoleId);
 
-			if (elitiriSignUp.rankAchieved !== 'Forfeit') {
-				try {
-					if (!member.roles.cache.has(ecs2021ParticipantRole)) {
-						//Assign role if not there yet
-						await member.roles.add(ecs2021ParticipantRole);
+				if (elitiriSignUp.rankAchieved !== 'Forfeit') {
+					try {
+						if (!member.roles.cache.has(ecs2021ParticipantRole)) {
+							//Assign role if not there yet
+							await member.roles.add(ecs2021ParticipantRole);
+						}
+					} catch (e) {
+						console.log(e);
 					}
-				} catch (e) {
-					console.log(e);
-				}
-			} else {
-				try {
-					if (member.roles.cache.has(ecs2021ParticipantRole)) {
-						//Remove role if not removed yet
-						await member.roles.remove(ecs2021ParticipantRole);
+				} else {
+					try {
+						if (member.roles.cache.has(ecs2021ParticipantRole)) {
+							//Remove role if not removed yet
+							await member.roles.remove(ecs2021ParticipantRole);
+						}
+					} catch (e) {
+						console.log(e);
 					}
-				} catch (e) {
-					console.log(e);
 				}
-			}
 
-			if (elitiriSignUp.rankAchieved === 'Winner') {
-				const ecs2021WinnerRoleId = '875031510288306267';
-				const ecs2021WinnerRole = await guild.roles.fetch(ecs2021WinnerRoleId);
+				if (elitiriSignUp.rankAchieved === 'Winner') {
+					const ecs2021WinnerRoleId = '875031510288306267';
+					const ecs2021WinnerRole = await guild.roles.fetch(ecs2021WinnerRoleId);
 
-				try {
-					if (!member.roles.cache.has(ecs2021WinnerRole)) {
-						//Assign role if not there yet
-						await member.roles.add(ecs2021WinnerRole);
+					try {
+						if (!member.roles.cache.has(ecs2021WinnerRole)) {
+							//Assign role if not there yet
+							await member.roles.add(ecs2021WinnerRole);
+						}
+					} catch (e) {
+						console.log(e);
 					}
-				} catch (e) {
-					console.log(e);
 				}
+			} catch (error) {
+				//nothing
 			}
 
 			const task = await DBProcessQueue.findOne({
