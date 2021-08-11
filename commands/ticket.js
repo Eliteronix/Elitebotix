@@ -229,7 +229,7 @@ module.exports = {
 					msg.delete();
 
 					let date = new Date();
-					date.setHours(date.getHours() + 24);
+					date.setUTCMinutes(date.getUTCMinutes() + 3);
 					DBProcessQueue.create({ guildId: msg.guild.id, task: 'closeTicket', priority: 5, additions: msg.channel.id, date: date });
 				} else {
 					return msg.channel.send('This is not a valid ticket channel.');
