@@ -40,7 +40,11 @@ module.exports = {
 			discordUser.maniaPP = maniaUser.pp.raw;
 			discordUser.maniaRank = maniaUser.pp.rank;
 
-			discordUser.osuBadges = await getOsuBadgeNumberById(discordUser.osuUserId);
+			let badges = await getOsuBadgeNumberById(discordUser.osuUserId);
+
+			if (parseInt(badges) > -1) {
+				discordUser.osuBadges = badges;
+			}
 
 			discordUser.osuNotFoundFirstOccurence = null;
 
