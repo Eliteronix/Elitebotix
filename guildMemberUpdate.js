@@ -97,23 +97,27 @@ module.exports = async function (oldMember, newMember) {
 				console.log(error);
 			}
 
-			let oldUserRoles = '';
+			let removedRoles = '';
 
 			oldMember._roles.forEach(role => {
-				if (oldUserRoles) {
-					oldUserRoles = `${oldUserRoles}, <@&${role}>`;
-				} else {
-					oldUserRoles = `<@&${role}>`;
+				if (!newMember._roles.includes(role)) {
+					if (removedRoles) {
+						removedRoles = `${removedRoles}, <@&${role}>`;
+					} else {
+						removedRoles = `<@&${role}>`;
+					}
 				}
 			});
 
-			let newUserRoles = '';
+			let addedRoles = '';
 
 			newMember._roles.forEach(role => {
-				if (newUserRoles) {
-					newUserRoles = `${newUserRoles}, <@&${role}>`;
-				} else {
-					newUserRoles = `<@&${role}>`;
+				if (!oldMember._roles.includes(role)) {
+					if (addedRoles) {
+						addedRoles = `${addedRoles}, <@&${role}>`;
+					} else {
+						addedRoles = `<@&${role}>`;
+					}
 				}
 			});
 
@@ -122,11 +126,20 @@ module.exports = async function (oldMember, newMember) {
 				.setAuthor(`${newMember.user.username}#${newMember.user.discriminator}`, oldMember.user.displayAvatarURL())
 				.setDescription(`<@${newMember.user.id}> roles have changed!`)
 				.setThumbnail(newMember.user.displayAvatarURL())
-				.addFields(
-					{ name: 'Roles', value: `Old Roles:\n${oldUserRoles}\n\nNew Roles:\n${newUserRoles}` },
-				)
 				.setTimestamp()
 				.setFooter('Eventname: userroles');
+
+			if (removedRoles) {
+				changeEmbed.addFields(
+					{ name: 'Removed Roles', value: removedRoles },
+				);
+			}
+
+			if (addedRoles) {
+				changeEmbed.addFields(
+					{ name: 'Added Roles', value: addedRoles },
+				);
+			}
 
 			channel.send(changeEmbed);
 		}
