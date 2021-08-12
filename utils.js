@@ -974,30 +974,33 @@ async function getOsuBadgeNumberByIdFunction(osuUserId) {
 			let htmlCode = await res.text();
 			const badgesRegex = /,"badges".+,"beatmap_playcounts_count":/gm;
 			const matches = badgesRegex.exec(htmlCode);
-			const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"beatmap_playcounts_count":', '');
-			const rawBadgesArray = cleanedMatch.split('},{');
-			const badgeNameArray = [];
-			for (let i = 0; i < rawBadgesArray.length; i++) {
-				if (rawBadgesArray[i] !== '') {
-					const badgeArray = rawBadgesArray[i].split('","');
-					const badgeName = badgeArray[1].replace('description":"', '');
-					if (!badgeName.startsWith('Beatmap Spotlights: ')
-						&& !badgeName.includes(' contribution to the ')
-						&& !badgeName.includes(' contributor')
-						&& !badgeName.includes('Mapper\'s Favourite ')
-						&& !badgeName.includes('Community Favourite ')
-						&& !badgeName.includes('Mapping')
-						&& !badgeName.includes('Aspire')
-						&& !badgeName.includes('Beatmapping')
-						&& !badgeName.includes('osu!idol')
-						&& badgeName !== 'The official voice behind osu!'
-						&& !badgeName.includes('Newspaper ')
-						&& !badgeName.includes('Pending Cup ')) {
-						badgeNameArray.push(badgeName);
+			if (matches && matches[0]) {
+				const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"beatmap_playcounts_count":', '');
+				const rawBadgesArray = cleanedMatch.split('},{');
+				const badgeNameArray = [];
+				for (let i = 0; i < rawBadgesArray.length; i++) {
+					if (rawBadgesArray[i] !== '') {
+						const badgeArray = rawBadgesArray[i].split('","');
+						const badgeName = badgeArray[1].replace('description":"', '');
+						if (!badgeName.startsWith('Beatmap Spotlights: ')
+							&& !badgeName.includes(' contribution to the ')
+							&& !badgeName.includes(' contributor')
+							&& !badgeName.includes('Mapper\'s Favourite ')
+							&& !badgeName.includes('Community Favourite ')
+							&& !badgeName.includes('Mapping')
+							&& !badgeName.includes('Aspire')
+							&& !badgeName.includes('Beatmapping')
+							&& !badgeName.includes('osu!idol')
+							&& badgeName !== 'The official voice behind osu!'
+							&& !badgeName.includes('Newspaper ')
+							&& !badgeName.includes('Pending Cup ')) {
+							badgeNameArray.push(badgeName);
+						}
 					}
 				}
+				return badgeNameArray.length;
 			}
-			return badgeNameArray.length;
+			return -1;
 		});
 }
 
