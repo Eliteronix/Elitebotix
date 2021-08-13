@@ -20,7 +20,7 @@ module.exports = {
 				data: {
 					type: 4,
 					data: {
-						content: 'Here is a [link](https://discord.com/oauth2/authorize?client_id=784836063058329680&scope=applications.commands&permissions=285256792) to add the bot to your server'
+						content: 'Here is a [link](https://discord.com/oauth2/authorize?client_id=784836063058329680&scope=bot&permissions=285256792) to add the bot to your server'
 					}
 				}
 			});
