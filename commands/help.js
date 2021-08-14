@@ -162,14 +162,16 @@ module.exports = {
 		data.push(`**Cooldown:** ${command.cooldown || 3} second(s)`);
 
 		//Send the information
-		await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-			data: {
-				type: 4,
+		if (interaction) {
+			return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
 				data: {
-					content: `${args[0]} info will be sent`
+					type: 4,
+					data: {
+						content: `${args[0]} info will be sent`
+					}
 				}
-			}
-		});
-		msg.channel.send(data, { split: true });
+			});
+		}
+		return msg.channel.send(data, { split: true });
 	},
 };
