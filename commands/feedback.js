@@ -33,7 +33,7 @@ module.exports = {
 				//get rid of the first argument
 				args.shift();
 				//join the bug in a variable
-				const bug = args.join(' ');
+				const bug = args.join(' ').replace(/"/g, '');
 				//send the bug into the correct Channel
 				createJiraIssue('10006', `[BUG] ${bug} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
@@ -57,7 +57,7 @@ module.exports = {
 				//get rid of the first argument
 				args.shift();
 				//join the feature in a variable
-				const feature = args.join(' ');
+				const feature = args.join(' ').replace(/"/g, '');
 				//send the feature into the correct Channel
 				createJiraIssue('10007', `[FEATURE] ${feature} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
@@ -81,7 +81,7 @@ module.exports = {
 				//get rid of the first argument
 				args.shift();
 				//join the feedback in a variable
-				const feedback = args.join(' ');
+				const feedback = args.join(' ').replace(/"/g, '');
 				//send the feedback into the correct Channel
 				createJiraIssue('10005', `[FEEDBACK] ${feedback} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
