@@ -19,9 +19,9 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args) {
 		//Check the first argument
-		if (args[0] === 'embed') {
+		if (args[0].toLowerCase() === 'embed') {
 			//Check the second argument
-			if (args[1] === 'add') {
+			if (args[1].toLowerCase() === 'add') {
 				//Check if a name was set for the embed
 				if (args[2]) {
 					//Remove the first two items
@@ -59,7 +59,7 @@ module.exports = {
 				}
 
 				//Check the second argument
-			} else if (args[1] === 'remove') {
+			} else if (args[1].toLowerCase() === 'remove') {
 				if (!(isNaN(args[2]))) {
 					//Get the embed which should get deleted
 					const reactionRolesHeader = await DBReactionRolesHeader.findOne({
@@ -98,9 +98,9 @@ module.exports = {
 					msg.channel.send('Please specify what ID the embed has you want to remove. (Can be found in the footer of the embed.)');
 					sendHelp(msg);
 				}
-			} else if (args[1] === 'change') {
+			} else if (args[1].toLowerCase() === 'change') {
 				if (!(isNaN(args[2]))) {
-					if (args[3] === 'title') {
+					if (args[3].toLowerCase() === 'title') {
 						//Get embed from the db
 						const reactionRolesHeader = await DBReactionRolesHeader.findOne({
 							where: { guildId: msg.guild.id, id: args[2] },
@@ -121,7 +121,7 @@ module.exports = {
 						} else {
 							msg.channel.send('Couldn\'t find an embed with this EmbedID');
 						}
-					} else if (args[3] === 'description') {
+					} else if (args[3].toLowerCase() === 'description') {
 						//Get embed from the db
 						const reactionRolesHeader = await DBReactionRolesHeader.findOne({
 							where: { guildId: msg.guild.id, id: args[2] },
@@ -142,7 +142,7 @@ module.exports = {
 						} else {
 							msg.channel.send('Couldn\'t find an embed with this EmbedID');
 						}
-					} else if (args[3] === 'color') {
+					} else if (args[3].toLowerCase() === 'color') {
 						if (args[4].startsWith('#') && args[4].length === 7) {
 
 							const embedColor = args[4];
@@ -170,7 +170,7 @@ module.exports = {
 						} else {
 							msg.channel.send('Please send a color in a format like \'#0099ff\'');
 						}
-					} else if (args[3] === 'image') {
+					} else if (args[3].toLowerCase() === 'image') {
 
 						const embedImage = args[4];
 
@@ -208,9 +208,9 @@ module.exports = {
 				sendHelp(msg);
 			}
 			//Check the first argument
-		} else if (args[0] === 'role') {
+		} else if (args[0].toLowerCase() === 'role') {
 			//Check the second argument
-			if (args[1] === 'add') {
+			if (args[1].toLowerCase() === 'add') {
 				//Check the third argument if it is an possible embedID
 				if (!(isNaN(args[2]))) {
 					//Check if there is a role mentioned in the message
@@ -267,7 +267,7 @@ module.exports = {
 					sendHelp(msg);
 				}
 				//Check the second argument
-			} else if (args[1] === 'remove') {
+			} else if (args[1].toLowerCase() === 'remove') {
 				//Check the third argument if it is an possible embedID
 				if (!(isNaN(args[2]))) {
 					//Check for a fourth argument
@@ -299,7 +299,7 @@ module.exports = {
 					sendHelp(msg);
 				}
 				//Check the second argument
-			} else if (args[1] === 'change') {
+			} else if (args[1].toLowerCase() === 'change') {
 				//Check the third argument if it is an possible embedID
 				if (!(isNaN(args[2]))) {
 					//Get headerId
@@ -321,11 +321,11 @@ module.exports = {
 
 						//Check if there is an reactionRole with this emoji
 						if (reactionRolesEmoji) {
-							if (args[4] === 'emoji') {
+							if (args[4].toLowerCase() === 'emoji') {
 								reactionRolesEmoji.emoji = args[5];
 								reactionRolesEmoji.save()
 									.then(editEmbed(msg, reactionRolesHeader));
-							} else if (args[4] === 'description') {
+							} else if (args[4].toLowerCase() === 'description') {
 								args.shift();
 								args.shift();
 								args.shift();
@@ -353,7 +353,7 @@ module.exports = {
 				msg.channel.send('Please specify if you want to add or remove the embed.');
 				sendHelp(msg);
 			}
-		} else if (args[0] === 'help') {
+		} else if (args[0].toLowerCase() === 'help') {
 			sendHelp(msg);
 		} else {
 			//Incorrect first argument
@@ -424,7 +424,7 @@ async function sendHelp(msg) {
 
 	let helpString = `Correct usage for creating a new embed:\n\`\`\`${guildPrefix}reactionrole embed add <name of the embed>\`\`\``;
 	helpString += `Correct usage for removing an existing embed:\n\`\`\`${guildPrefix}reactionrole embed remove <embedID which can be found in the footer>\`\`\``;
-	helpString += `Correct usage for changing an existing embed's appearance:\n\`\`\`${guildPrefix}reactionrole embed change <embedID> <title/description/color/Image> <new title/description/color/Image URL>\`\`\``;
+	helpString += `Correct usage for changing an existing embed's appearance:\n\`\`\`${guildPrefix}reactionrole embed change <embedID> <title/description/color/image> <new title/description/color/image URL>\`\`\``;
 	helpString += `Correct usage for adding a role to an embed:\n\`\`\`${guildPrefix}reactionrole role add <embedID> <emoji for the role> <@role> <description>\`\`\``;
 	helpString += `Correct usage for removing a role from an embed:\n\`\`\`${guildPrefix}reactionrole role remove <embedID> <emoji of the role>\`\`\``;
 	helpString += `Correct usage for changing a role in an embed:\n\`\`\`${guildPrefix}reactionrole role change <embedID> <emoji of the role> <emoji/description> <new emoji/description>\`\`\``;
