@@ -13,23 +13,25 @@ module.exports = {
 
 			await channel.delete();
 
-			let openCategory = channel.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Open');
+			const guild = await client.guilds.fetch(channel.guild.id);
+
+			let openCategory = guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Open');
 			if (openCategory && !openCategory.children.first()) {
 				openCategory.delete();
 			}
-			let respondedCategory = channel.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Responded');
+			let respondedCategory = guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Responded');
 			if (respondedCategory && !respondedCategory.children.first()) {
 				respondedCategory.delete();
 			}
-			let inActionCategory = channel.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - In Action');
+			let inActionCategory = guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - In Action');
 			if (inActionCategory && !inActionCategory.children.first()) {
 				inActionCategory.delete();
 			}
-			let awaitingResponseCategory = channel.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Awaiting Response');
+			let awaitingResponseCategory = guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Awaiting Response');
 			if (awaitingResponseCategory && !awaitingResponseCategory.children.first()) {
 				awaitingResponseCategory.delete();
 			}
-			let closedCategory = channel.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Closed');
+			let closedCategory = guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Closed');
 			if (closedCategory && !closedCategory.children.first()) {
 				closedCategory.delete();
 			}
