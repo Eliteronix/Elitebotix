@@ -2584,6 +2584,18 @@ module.exports = {
 					});
 			}
 			console.log('Done');
+		} else if (args[0] === 'fixMultiTourneyScores') {
+			const allScores = await DBOsuMultiScores.findAll({
+				where: { tourneyMatch: false }
+			});
+
+			allScores.forEach(score => {
+				if (score.matchName.toLowerCase().match(/.+: (.+) vs (.+)/g) || score.matchName.toLowerCase().match(/.+: (.+) vs. (.+)/g)) {
+					score.tourneyMatch = true;
+					score.save();
+					console.log(score.matchName);
+				}
+			});
 		}
 
 		msg.channel.send('Done.');
