@@ -860,7 +860,7 @@ module.exports = {
 	},
 	saveOsuMultiScores(match) {
 		let tourneyMatch = false;
-		if (match.name.match(/.+: (.+) vs (.+)/g) || match.name.match(/.+: (.+) vs. (.+)/g)) {
+		if (match.name.toLowerCase().match(/.+: (.+) vs (.+)/g) || match.name.toLowerCase().match(/.+: (.+) vs. (.+)/g)) {
 			tourneyMatch = true;
 		}
 		match.games.forEach(game => {
