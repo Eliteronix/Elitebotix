@@ -108,14 +108,19 @@ module.exports = {
 							}
 						}
 
-						let sortedScores = [];
 						for (let j = 0; j < gameScores.length; j++) {
-							sortedScores.push(gameScores[j].score);
-						}
+							let sortedScores = [];
+							for (let k = 0; k < gameScores.length; k++) {
+								//Remove the own score to make it odd for the middle score
+								if (!(gameScores.length % 2 === 0 && gameScores[j].userId === gameScores[k].userId)) {
+									sortedScores.push(gameScores[k].score);
+								}
+							}
 
-						const middleScore = getMiddleScore(sortedScores);
+							console.log(gameScores[j].userId, gameScores[j].score, sortedScores);
 
-						for (let j = 0; j < gameScores.length; j++) {
+							const middleScore = getMiddleScore(sortedScores);
+
 							let existingScore = null;
 
 							for (let k = 0; k < playerMatchResults.length; k++) {
