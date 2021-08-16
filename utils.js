@@ -885,7 +885,10 @@ module.exports = {
 
 					let sortedScores = [];
 					for (let j = 0; j < gameScores.length; j++) {
-						sortedScores.push(gameScores[j].score);
+						//Remove the own score to make it odd for the middle score
+						if (!(gameScores.length % 2 === 0 && score.userId === gameScores[j].userId)) {
+							sortedScores.push(gameScores[j].score);
+						}
 					}
 
 					const middleScore = getMiddleScore(sortedScores);
