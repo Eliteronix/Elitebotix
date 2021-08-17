@@ -36,18 +36,10 @@ module.exports = {
 			.setTimestamp();
 
 		if (msg) {
-			return msg.channel.send(creatorInfoEmbed);
+			return msg.channel.send({ embeds: [creatorInfoEmbed] });
 		}
 
-		await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-			data: {
-				type: 4,
-				data: {
-					content: 'Creator Embed is being sent'
-				}
-			}
-		});
-		const channel = await additionalObjects[0].channels.fetch(interaction.channel_id);
-		return channel.send(creatorInfoEmbed);
+		await interaction.reply('Creator Embed is being sent');
+		return interaction.channel.send({ embeds: [creatorInfoEmbed] });
 	},
 };

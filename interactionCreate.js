@@ -3,25 +3,26 @@ const fs = require('fs');
 const cooldowns = new Discord.Collection();
 
 module.exports = async function (client, bancho, interaction) {
+	if (!interaction.isCommand()) return;
 	//For the development version
 	//if the message is not in the Dev-Servers then return
 	// eslint-disable-next-line no-undef
 	if (process.env.SERVER === 'Dev') {
-		if (interaction.guild_id != '800641468321759242' && interaction.guild_id != '800641735658176553') {
+		if (interaction.guildId != '800641468321759242' && interaction.guildId != '800641735658176553') {
 			return;
 		}
 		//For the QA version
 		//if the message is in the QA-Servers then return
 		// eslint-disable-next-line no-undef
 	} else if (process.env.SERVER === 'QA') {
-		if (interaction.guild_id != '800641367083974667' && interaction.guild_id != '800641819086946344') {
+		if (interaction.guildId != '800641367083974667' && interaction.guildId != '800641819086946344') {
 			return;
 		}
 		//For the Live version
 		//if the message is in the Dev/QA-Servers then return
 		// eslint-disable-next-line no-undef
 	} else if (process.env.SERVER === 'Live') {
-		if (interaction.guild_id === '800641468321759242' || interaction.guild_id === '800641735658176553' || interaction.guild_id === '800641367083974667' || interaction.guild_id === '800641819086946344') {
+		if (interaction.guildId === '800641468321759242' || interaction.guildId === '800641735658176553' || interaction.guildId === '800641367083974667' || interaction.guildId === '800641819086946344') {
 			return;
 		}
 	}
@@ -41,66 +42,29 @@ module.exports = async function (client, bancho, interaction) {
 		client.commands.set(command.name, command);
 	}
 
-	//Delete the first item from the args array and use it for the command variable
-	let commandName = interaction.data.name;
-
 	//Set the command and check for possible uses of aliases
-	let command = client.commands.get(commandName)
-		|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+	let command = client.commands.get(interaction.commandName)
+		|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(interaction.commandName));
 
 	//Check if the command can't be used outside of DMs
-	if (command.guildOnly && !interaction.guild_id) {
-		client.api.interactions(interaction.id, interaction.token).callback.post({
-			data: {
-				type: 4,
-				data: {
-					content: 'I can\'t execute that command inside DMs!'
-				}
-			}
-		});
-	}
-
-	let user = null;
-
-	if (interaction.guild_id) {
-		user = interaction.member.user;
-	} else {
-		user = interaction.user;
+	if (command.guildOnly && !interaction.guildId) {
+		return interaction.reply({ content: 'I can\'t execute that command inside DMs!', ephemeral: true });
 	}
 
 	//Check permissions of the user
 	if (command.permissions) {
-		const channel = await client.channels.cache.find(c => c.id === interaction.channel_id);
-		const guild = await client.guilds.cache.find(g => g.id === interaction.guild_id);
-		const member = await guild.members.cache.find(u => u.id === user.id);
-		const authorPerms = channel.permissionsFor(member);
+		const authorPerms = interaction.channel.permissionsFor(interaction.member);
 		if (!authorPerms || !authorPerms.has(command.permissions)) {
-			client.api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: `You need the ${command.permissionsTranslated} permission to do this!`
-					}
-				}
-			});
+			return interaction.reply({ content: `You need the ${command.permissionsTranslated} permission to do this!`, ephemeral: true });
 		}
 	}
 
 	//Check permissions of the bot
 	if (interaction.guild_id) {
 		if (command.botPermissions) {
-			const channel = await client.channels.cache.find(c => c.id === interaction.channel_id);
-			const guild = await client.guilds.cache.find(g => g.id === interaction.guild_id);
-			const botPermissions = channel.permissionsFor(await guild.members.fetch('784836063058329680'));
+			const botPermissions = interaction.channel.permissionsFor(await interaction.guild.members.fetch('784836063058329680'));
 			if (!botPermissions.has(command.botPermissions)) {
-				client.api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							content: `I need the ${command.botPermissionsTranslated} permission to do this!`
-						}
-					}
-				});
+				return interaction.reply({ content: `I need the ${command.botPermissionsTranslated} permission to do this!`, ephemeral: true });
 			}
 		}
 	}
@@ -118,31 +82,24 @@ module.exports = async function (client, bancho, interaction) {
 	const cooldownAmount = (command.cooldown || 5) * 1000;
 
 	//get expiration times for the cooldowns for the authorID
-	if (timestamps.has(user.id)) {
-		const expirationTime = timestamps.get(user.id) + cooldownAmount;
+	if (timestamps.has(interaction.user.id)) {
+		const expirationTime = timestamps.get(interaction.user.id) + cooldownAmount;
 
 		//If cooldown didn't expire yet send cooldown message
 		if (command.noCooldownMessage) {
 			return;
 		} else if (now < expirationTime) {
 			const timeLeft = (expirationTime - now) / 1000;
-			return client.api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: `Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`
-					}
-				}
-			});
+			return interaction.reply({ content: `Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`, ephemeral: true });
 		}
 	}
 
 	//Set timestamp for the used command
-	if (user.id !== '138273136285057025') {
-		timestamps.set(user.id, now);
+	if (interaction.user.id !== '138273136285057025') {
+		timestamps.set(interaction.user.id, now);
 	}
 	//Automatically delete the timestamp after the cooldown
-	setTimeout(() => timestamps.delete(user.id), cooldownAmount);
+	setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
 
 	try {
 		let additionalObjects = [client, bancho];
@@ -150,14 +107,7 @@ module.exports = async function (client, bancho, interaction) {
 	} catch (error) {
 		console.error(error);
 		const eliteronixUser = await client.users.cache.find(user => user.id === '138273136285057025');
-		client.api.interactions(interaction.id, interaction.token).callback.post({
-			data: {
-				type: 4,
-				data: {
-					content: 'There was an error trying to execute that command. The developer has been alerted.'
-				}
-			}
-		});
-		eliteronixUser.send(`There was an error trying to execute a command.\n\nMessage by ${user.username}#${user.discriminator}: \`${interaction.data.name}\`\n\n${error}`);
+		interaction.reply('There was an error trying to execute that command. The developer has been alerted.');
+		eliteronixUser.send(`There was an error trying to execute a command.\n\nMessage by ${interaction.user.username}#${interaction.user.discriminator}: \`${interaction.commandName}\`\n\n${error}`);
 	}
 };

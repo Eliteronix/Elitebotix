@@ -138,7 +138,7 @@ function readyDiscord() {
 	restartProcessQueueTask();
 }
 
-client.on('message', msg => gotMessage(msg, bancho));
+client.on('messageCreate', msg => gotMessage(msg, bancho));
 
 client.on('messageUpdate', messageUpdate);
 
@@ -196,6 +196,6 @@ setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
 
 setInterval(() => refreshOsuRank(), 600000);
 
-client.ws.on('INTERACTION_CREATE', interaction => {
+client.on('interactionCreate', interaction => {
 	interactionCreate(client, bancho, interaction);
 });

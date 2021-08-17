@@ -40,7 +40,8 @@ module.exports = {
 		await guild.members.fetch()
 			.then(async (guildMembers) => {
 
-				const members = guildMembers.filter(member => member.user.bot !== true).array();
+				const members = [];
+				guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
 				let discordUsers = [];
 				for (let i = 0; i < members.length; i++) {
 					const serverUserActivity = await DBServerUserActivity.findOne({

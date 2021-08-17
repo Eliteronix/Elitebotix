@@ -17,18 +17,12 @@ module.exports = {
 	tags: 'misc',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			console.log(interaction.options._hoistedOptions);
+			msg = await populateMsgFromInteraction(interaction);
 
-			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: 'Cuddle initiated'
-					}
-				}
-			});
+			await interaction.reply('Cuddle initiated');
 		}
 
 		if (msg.mentions.users.first()) {

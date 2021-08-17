@@ -486,8 +486,8 @@ module.exports = {
 			if (serverUserActivity && serverUserActivity.updatedAt < now) {
 				msg.channel.messages.fetch({ limit: 100 })
 					.then(async (messages) => {
-						const messagesArray = messages.filter(m => m.author.id === msg.author.id && m.content === msg.content).array();
-						if (!messagesArray[1]) {
+						const lastMessage = messages.filter(m => m.author.id === msg.author.id && m.content === msg.content).last();
+						if (msg.id === lastMessage.id) {
 							serverUserActivity.points = serverUserActivity.points + 1;
 							serverUserActivity.save();
 							const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 } });
@@ -932,18 +932,15 @@ module.exports = {
 			});
 		});
 	},
-	async populateMsgFromInteraction(client, interaction) {
+	async populateMsgFromInteraction(interaction) {
 		let userMentions = new Discord.Collection();
 
-		if (interaction.data.options) {
-			for (let i = 0; i < interaction.data.options.length; i++) {
-				if (interaction.data.options[i].type === 6) {
-					let user = await client.users.fetch(interaction.data.options[i].value);
-					userMentions.set(user.id, user);
-				} else if (interaction.data.options[i].value && typeof interaction.data.options[i].value === 'string' && interaction.data.options[i].value.startsWith('<@') && interaction.data.options[i].value.endsWith('>')) {
-					let user = await client.users.fetch(interaction.data.options[i].value.replace(/\D/g, ''));
-					userMentions.set(user.id, user);
-				}
+		for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+			if (interaction.options._hoistedOptions[i].type === 'USER') {
+				userMentions.set(interaction.options._hoistedOptions[i].user.id, interaction.options._hoistedOptions[i].user);
+			} else if (interaction.options._hoistedOptions[i].value && interaction.options._hoistedOptions[i].type === 'STRING' && interaction.options._hoistedOptions[i].value.startsWith('<@') && interaction.options._hoistedOptions[i].value.endsWith('>')) {
+				let user = await interaction.client.users.fetch(interaction.data.options[i].value.replace(/\D/g, ''));
+				userMentions.set(user.id, user);
 			}
 		}
 
@@ -951,21 +948,11 @@ module.exports = {
 			users: userMentions
 		};
 
-		let user = null;
-		let guild = null;
-
-		if (interaction.guild_id) {
-			user = interaction.member.user;
-			guild = await client.guilds.fetch(interaction.guild_id);
-		} else {
-			user = interaction.user;
-		}
-
 		return {
-			author: await client.users.fetch(user.id),
-			client: client,
-			channel: await client.channels.fetch(interaction.channel_id),
-			guild: guild,
+			author: interaction.user,
+			client: interaction.client,
+			channel: interaction.channel,
+			guild: interaction.guild,
 			mentions: mentions,
 		};
 	}

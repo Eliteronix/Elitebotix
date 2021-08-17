@@ -16,12 +16,12 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'general',
 	prefixCommand: true,
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			args = [interaction.data.options[0].value];
-			interaction.data.options[1].value.split(/ +/).forEach(arg => {
+			args = [interaction.options._hoistedOptions[0].value];
+			interaction.options._hoistedOptions[1].value.split(/ +/).forEach(arg => {
 				args.push(arg);
 			});
 		}
@@ -40,15 +40,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.channel.send('Your bug report was sent to the developer.');
 				}
-
-				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							content: 'Your bug report was sent to the developer.'
-						}
-					}
-				});
+				return interaction.reply('Your bug report was sent to the developer.');
 			}
 		} else if (args[0].toLowerCase() === 'feature') { //go to feature tree
 			if (!args[1]) { //check for second argument
@@ -64,15 +56,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.channel.send('Your feature-request was sent to the developer.');
 				}
-
-				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							content: 'Your feature-request was sent to the developer.'
-						}
-					}
-				});
+				return interaction.reply('Your feature-request was sent to the developer.');
 			}
 		} else if (args[0].toLowerCase() === 'feedback') { //go to general tree
 			if (!args[1]) { //check for second argument
@@ -88,15 +72,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.channel.send('Your feedback has been sent to the developer.');
 				}
-
-				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							content: 'Your feedback has been sent to the developer.'
-						}
-					}
-				});
+				return interaction.reply('Your feedback has been sent to the developer.');
 			}
 		} else {
 			let guildPrefix = await getGuildPrefix(msg);
