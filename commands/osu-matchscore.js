@@ -117,8 +117,6 @@ module.exports = {
 								}
 							}
 
-							console.log(gameScores[j].userId, gameScores[j].score, sortedScores);
-
 							const middleScore = getMiddleScore(sortedScores);
 
 							let existingScore = null;
