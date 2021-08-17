@@ -190,11 +190,11 @@ client.on('emojiUpdate', emojiUpdate);
 
 client.on('emojiDelete', emojiDelete);
 
-client.setInterval(() => executeNextProcessQueueTask(client), 1000);
+setInterval(() => executeNextProcessQueueTask(client), 1000);
 
-client.setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
+setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
 
-client.setInterval(() => refreshOsuRank(), 600000);
+setInterval(() => refreshOsuRank(), 600000);
 
 client.ws.on('INTERACTION_CREATE', interaction => {
 	interactionCreate(client, bancho, interaction);
