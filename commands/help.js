@@ -16,13 +16,13 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'general',
 	prefixCommand: true,
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		if (interaction) {
-			if (interaction.data.options[0].name !== 'list') {
+			if (interaction.options._subcommand !== 'list') {
 				args.push(interaction.data.options[0].options[0].value);
 			}
 
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 		}
 		//define variables
 		const categories = ['general', 'server-admin', 'misc', 'osu'];
@@ -62,38 +62,17 @@ module.exports = {
 						if (msg.channel.type === 'dm') return;
 						msg.reply('I\'ve sent you a DM with all my commands!');
 					} else if (interaction) {
-						if (!interaction.guild_id) {
-							return await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-								data: {
-									type: 4,
-									data: {
-										content: 'Help info will be sent'
-									}
-								}
-							});
+						if (!interaction.channel.type === 'dm') {
+							return interaction.reply({ content: 'Help info will be sent', ephemeral: true });
 						}
-						await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-							data: {
-								type: 4,
-								data: {
-									content: 'I\'ve sent you a DM with all my commands!'
-								}
-							}
-						});
+						await interaction.reply({ content: 'I\'ve sent you a DM with all my commands!', ephemeral: true });
 					}
 				})
 				.catch(() => {
 					if (msg.id) {
 						return msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
 					}
-					return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-						data: {
-							type: 4,
-							data: {
-								content: 'It seems like I can\'t DM you! Do you have DMs disabled?'
-							}
-						}
-					});
+					return interaction.reply({ content: 'It seems like I can\'t DM you! Do you have DMs disabled?', ephemeral: true });
 				});
 		} else if (categories.includes(args[0])) {
 			data.push(`Here's a list of all my \`${args[0]}\` commands:`);
@@ -110,38 +89,17 @@ module.exports = {
 						if (msg.channel.type === 'dm') return;
 						msg.reply('I\'ve sent you a DM with all my commands!');
 					} else if (interaction) {
-						if (!interaction.guild_id) {
-							return await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-								data: {
-									type: 4,
-									data: {
-										content: 'Help info will be sent'
-									}
-								}
-							});
+						if (!interaction.channel.type === 'dm') {
+							return interaction.reply({ content: 'Help info will be sent', ephemeral: true });
 						}
-						await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-							data: {
-								type: 4,
-								data: {
-									content: 'I\'ve sent you a DM with all my commands!'
-								}
-							}
-						});
+						await interaction.reply({ content: 'I\'ve sent you a DM with all my commands!', ephemeral: true });
 					}
 				})
 				.catch(() => {
 					if (msg.id) {
 						return msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
 					}
-					return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-						data: {
-							type: 4,
-							data: {
-								content: 'It seems like I can\'t DM you! Do you have DMs disabled?'
-							}
-						}
-					});
+					return interaction.reply({ content: 'It seems like I can\'t DM you! Do you have DMs disabled?', ephemeral: true });
 				});
 		}
 
@@ -163,14 +121,7 @@ module.exports = {
 
 		//Send the information
 		if (interaction) {
-			return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: `${args[0]} info will be sent`
-					}
-				}
-			});
+			return interaction.reply(`${args[0]} info will be sent`);
 		}
 		return msg.channel.send(data, { split: true });
 	},

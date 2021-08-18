@@ -935,12 +935,14 @@ module.exports = {
 	async populateMsgFromInteraction(interaction) {
 		let userMentions = new Discord.Collection();
 
-		for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-			if (interaction.options._hoistedOptions[i].type === 'USER') {
-				userMentions.set(interaction.options._hoistedOptions[i].user.id, interaction.options._hoistedOptions[i].user);
-			} else if (interaction.options._hoistedOptions[i].value && interaction.options._hoistedOptions[i].type === 'STRING' && interaction.options._hoistedOptions[i].value.startsWith('<@') && interaction.options._hoistedOptions[i].value.endsWith('>')) {
-				let user = await interaction.client.users.fetch(interaction.data.options[i].value.replace(/\D/g, ''));
-				userMentions.set(user.id, user);
+		if (interaction.options._hoistedOptions) {
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				if (interaction.options._hoistedOptions[i].type === 'USER') {
+					userMentions.set(interaction.options._hoistedOptions[i].user.id, interaction.options._hoistedOptions[i].user);
+				} else if (interaction.options._hoistedOptions[i].value && interaction.options._hoistedOptions[i].type === 'STRING' && interaction.options._hoistedOptions[i].value.startsWith('<@') && interaction.options._hoistedOptions[i].value.endsWith('>')) {
+					let user = await interaction.client.users.fetch(interaction.data.options[i].value.replace(/\D/g, ''));
+					userMentions.set(user.id, user);
+				}
 			}
 		}
 

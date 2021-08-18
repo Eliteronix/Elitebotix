@@ -20,19 +20,12 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: 'Guild leaderboard will be created'
-					}
-				}
-			});
+			await interaction.reply('Guild leaderboard will be created');
 
-			if (interaction.data.options) {
-				args = [interaction.data.options[0].value];
+			if (interaction.options._hoistedOptions[0]) {
+				args = [interaction.options._hoistedOptions[0].value];
 			} else {
 				args = [];
 			}
@@ -42,7 +35,8 @@ module.exports = {
 
 		msg.guild.members.fetch()
 			.then(async (guildMembers) => {
-				const members = guildMembers.filter(member => member.user.bot !== true).array();
+				const members = [];
+				guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
 				let discordUsers = [];
 				for (let i = 0; i < members.length; i++) {
 					const serverUserActivity = await DBServerUserActivity.findOne({
@@ -101,7 +95,7 @@ module.exports = {
 				const attachment = await createLeaderboard(leaderboardData, 'discord-background.png', `${msg.guild.name}'s activity leaderboard`, filename, page);
 
 				//Send attachment
-				const leaderboardMessage = await msg.channel.send(`The leaderboard shows the most active users of the server.${messageToAuthor}`, attachment);
+				const leaderboardMessage = await msg.channel.send({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
 
 				if (page) {
 					if (page > 1) {
