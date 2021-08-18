@@ -17,22 +17,15 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			if (interaction.data.options[1]) {
-				args = [interaction.data.options[0].value, interaction.data.options[1].value];
+			if (interaction.options._hoistedOptions[1]) {
+				args = [interaction.options._hoistedOptions[0].value, interaction.options._hoistedOptions[1].value];
 			} else {
-				args = [interaction.data.options[0].value];
+				args = [interaction.options._hoistedOptions[0].value];
 			}
 
-			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: 'Leaderboard will be created'
-					}
-				}
-			});
+			await interaction.reply('Leaderboard will be created');
 		}
 
 		let command;

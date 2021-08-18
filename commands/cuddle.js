@@ -19,7 +19,6 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		if (interaction) {
-			console.log(interaction.options._hoistedOptions);
 			msg = await populateMsgFromInteraction(interaction);
 
 			await interaction.reply('Cuddle initiated');

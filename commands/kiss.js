@@ -19,16 +19,9 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: 'Kiss initiated'
-					}
-				}
-			});
+			await interaction.reply('Kiss initiated');
 		}
 
 		if (msg.mentions.users.first()) {

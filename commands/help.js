@@ -19,7 +19,7 @@ module.exports = {
 	async execute(msg, args, interaction) {
 		if (interaction) {
 			if (interaction.options._subcommand !== 'list') {
-				args.push(interaction.data.options[0].options[0].value);
+				args.push(interaction.options._hoistedOptions[0].value);
 			}
 
 			msg = await populateMsgFromInteraction(interaction);
@@ -56,7 +56,7 @@ module.exports = {
 			data.push('\nTo stay informed about changes go to <https://discord.com/invite/Asz5Gfe> and follow <#804658828883787784>');
 
 			//Send all the commands (Split the message into multiple pieces if necessary)
-			return msg.author.send(data, { split: true })
+			return msg.author.send(data.join('\n'), { split: true })
 				.then(async () => {
 					if (msg.id) {
 						if (msg.channel.type === 'dm') return;
@@ -83,7 +83,7 @@ module.exports = {
 			data.push('\nTo stay informed about changes go to <https://discord.com/invite/Asz5Gfe> and follow <#804658828883787784>');
 
 			//Send all the commands (Split the message into multiple pieces if necessary)
-			return msg.author.send(data, { split: true })
+			return msg.author.send(data.join('\n'), { split: true })
 				.then(async () => {
 					if (msg.id) {
 						if (msg.channel.type === 'dm') return;
@@ -121,8 +121,8 @@ module.exports = {
 
 		//Send the information
 		if (interaction) {
-			return interaction.reply(`${args[0]} info will be sent`);
+			return interaction.reply({ content: data.join('\n'), ephemeral: true });
 		}
-		return msg.channel.send(data, { split: true });
+		return msg.channel.send(data.join('\n'), { split: true });
 	},
 };
