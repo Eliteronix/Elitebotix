@@ -8,60 +8,60 @@ const { Permissions } = require('discord.js');
 const { DBElitiriCupSignUp, DBTickets } = require('./dbObjects');
 
 module.exports = async function (msg, bancho) {
-	//Create a collection for the commands
-	msg.client.commands = new Discord.Collection();
-
-	//get all command files
-	const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-
-	//Add the commands from the command files to the client.commands collection
-	for (const file of commandFiles) {
-		const command = require(`./commands/${file}`);
-
-		// set a new item in the Collection
-		// with the key as the command name and the value as the exported module
-		msg.client.commands.set(command.name, command);
-	}
-
-	//For the development version
-	//if the message is not in the Dev-Servers then return
-	// eslint-disable-next-line no-undef
-	if (process.env.SERVER === 'Dev') {
-		if (msg.channel.type === 'dm') {
-			return;
-		}
-		if (msg.channel.type !== 'dm' && msg.guild.id != '800641468321759242' && msg.guild.id != '800641735658176553') {
-			return;
-		}
-		//For the QA version
-		//if the message is in the QA-Servers then return
-		// eslint-disable-next-line no-undef
-	} else if (process.env.SERVER === 'QA') {
-		if (msg.channel.type === 'dm') {
-			return;
-		}
-		if (msg.channel.type !== 'dm' && msg.guild.id != '800641367083974667' && msg.guild.id != '800641819086946344') {
-			return;
-		}
-		//For the Live version
-		//if the message is in the Dev/QA-Servers then return
-		// eslint-disable-next-line no-undef
-	} else if (process.env.SERVER === 'Live') {
-		if (msg.channel.type !== 'dm') {
-			if (msg.guild.id === '800641468321759242' || msg.guild.id === '800641735658176553' || msg.guild.id === '800641367083974667' || msg.guild.id === '800641819086946344') {
-				return;
-			}
-		}
-	}
-
-	//Update user activity
-	updateServerUserActivity(msg);
-
-	//Handle Ticket
-	handleTicketStatus(msg);
-
 	//check if the message wasn't sent by the bot itself or another bot
 	if (!(msg.author.bot)) {
+		//Create a collection for the commands
+		msg.client.commands = new Discord.Collection();
+
+		//get all command files
+		const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+
+		//Add the commands from the command files to the client.commands collection
+		for (const file of commandFiles) {
+			const command = require(`./commands/${file}`);
+
+			// set a new item in the Collection
+			// with the key as the command name and the value as the exported module
+			msg.client.commands.set(command.name, command);
+		}
+
+		//For the development version
+		//if the message is not in the Dev-Servers then return
+		// eslint-disable-next-line no-undef
+		if (process.env.SERVER === 'Dev') {
+			if (msg.channel.type === 'dm') {
+				return;
+			}
+			if (msg.channel.type !== 'dm' && msg.guild.id != '800641468321759242' && msg.guild.id != '800641735658176553') {
+				return;
+			}
+			//For the QA version
+			//if the message is in the QA-Servers then return
+			// eslint-disable-next-line no-undef
+		} else if (process.env.SERVER === 'QA') {
+			if (msg.channel.type === 'dm') {
+				return;
+			}
+			if (msg.channel.type !== 'dm' && msg.guild.id != '800641367083974667' && msg.guild.id != '800641819086946344') {
+				return;
+			}
+			//For the Live version
+			//if the message is in the Dev/QA-Servers then return
+			// eslint-disable-next-line no-undef
+		} else if (process.env.SERVER === 'Live') {
+			if (msg.channel.type !== 'dm') {
+				if (msg.guild.id === '800641468321759242' || msg.guild.id === '800641735658176553' || msg.guild.id === '800641367083974667' || msg.guild.id === '800641819086946344') {
+					return;
+				}
+			}
+		}
+
+		//Update user activity
+		updateServerUserActivity(msg);
+
+		//Handle Ticket
+		handleTicketStatus(msg);
+
 		if (msg.author.id === '138273136285057025' && msg.content === 'e!dbinit') {
 			console.log('Syncing database...');
 			const Sequelize = require('sequelize');

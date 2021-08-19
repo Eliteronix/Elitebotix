@@ -20,24 +20,17 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: 'Players are being processed'
-					}
-				}
-			});
+			await interaction.reply('Players are being processed');
 
 			args = [];
 
-			if (interaction.data.options) {
-				for (let i = 0; i < interaction.data.options.length; i++) {
-					args.push(interaction.data.options[i].value);
+			if (interaction.options._hoistedOptions) {
+				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+					args.push(interaction.options._hoistedOptions[i].value);
 				}
 			}
 		}
@@ -158,7 +151,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentS
 
 				//If created by osu-tracking
 				if (tracking) {
-					await msg.channel.send(`\`${user.name}\` got ${limit} new top play(s)!`, attachment);
+					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: [attachment] });
 				} else {
 					//Define prefix command
 					let guildPrefix = await getGuildPrefix(msg);
@@ -168,9 +161,9 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentS
 
 					//Send attachment
 					if (noLinkedAccount) {
-						await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+						await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 					} else {
-						await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+						await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, files: [attachment] });
 					}
 				}
 
@@ -225,7 +218,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, recentS
 				var hints = [`Try \`${guildPrefix}osu-profile ${user.name.replace(/ /g, '_')}\` for a profile card.`, `Try \`${guildPrefix}osu-recent ${user.name.replace(/ /g, '_')}\` for recent plays.`, `Try \`${guildPrefix}osu-score <beatmapID> ${user.name.replace(/ /g, '_')}\` for the best score on a map.`];
 
 				//Send attachment
-				await msg.channel.send(`\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+				await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, files: [attachment] });
 				processingMessage.delete();
 			})
 			.catch(err => {

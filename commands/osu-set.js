@@ -16,11 +16,11 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			args = [interaction.data.options[0].name, interaction.data.options[0].options[0].value];
+			args = [interaction.options._subcommand, interaction.options._hoistedOptions[0].value];
 		}
 
 		//get discordUser from db
@@ -40,14 +40,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.channel.send('Bancho has been set as your main server.');
 				}
-				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							content: 'Bancho has been set as your main server.'
-						}
-					}
-				});
+				return interaction.reply({ content: 'Bancho has been set as your main server.', ephemeral: true });
 			} else if (args[1] && args[1].toLowerCase() === 'ripple') {
 				if (discordUser) {
 					discordUser.osuMainServer = 'ripple';
@@ -59,14 +52,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.channel.send('Ripple has been set as your main server.');
 				}
-				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							content: 'Ripple has been set as your main server.'
-						}
-					}
-				});
+				return interaction.reply({ content: 'Ripple has been set as your main server.', ephemeral: true });
 			} else {
 				msg.channel.send('Please specify which server you want to set as your main server: `bancho`, `ripple`');
 			}
@@ -82,14 +68,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.channel.send('Standard has been set as your main mode.');
 				}
-				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							content: 'Standard has been set as your main mode.'
-						}
-					}
-				});
+				return interaction.reply({ content: 'Standard has been set as your main mode.', ephemeral: true });
 			} else if (args[1] && args[1].toLowerCase() === 'taiko') {
 				if (discordUser) {
 					discordUser.osuMainMode = 1;
@@ -101,14 +80,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.channel.send('Taiko has been set as your main mode.');
 				}
-				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							content: 'Taiko has been set as your main mode.'
-						}
-					}
-				});
+				return interaction.reply({ content: 'Taiko has been set as your main mode.', ephemeral: true });
 			} else if (args[1] && args[1].toLowerCase() === 'catch') {
 				if (discordUser) {
 					discordUser.osuMainMode = 2;
@@ -120,14 +92,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.channel.send('Catch has been set as your main mode.');
 				}
-				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							content: 'Catch has been set as your main mode.'
-						}
-					}
-				});
+				return interaction.reply({ content: 'Catch has been set as your main mode.', ephemeral: true });
 			} else if (args[1] && args[1].toLowerCase() === 'mania') {
 				if (discordUser) {
 					discordUser.osuMainMode = 3;
@@ -139,14 +104,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.channel.send('Mania has been set as your main mode.');
 				}
-				return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							content: 'Mania has been set as your main mode.'
-						}
-					}
-				});
+				return interaction.reply({ content: 'Mania has been set as your main mode.', ephemeral: true });
 			} else {
 				msg.channel.send('Please specify which mode you want to set as your main mode: `standard`, `taiko`, `catch`, `mania`');
 			}

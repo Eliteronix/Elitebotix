@@ -18,10 +18,10 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			if (interaction.data.options) {
-				args = [interaction.data.options[0].value];
+			if (interaction.options._hoistedOptions[0]) {
+				args = [interaction.options._hoistedOptions[0].value];
 			}
 		}
 
@@ -35,13 +35,6 @@ module.exports = {
 		if (msg.id) {
 			return msg.channel.send(`<@${msg.author.id}> rolled ${result}!`);
 		}
-		return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-			data: {
-				type: 4,
-				data: {
-					content: `<@${msg.author.id}> rolled ${result}!`
-				}
-			}
-		});
+		return interaction.reply(`<@${msg.author.id}> rolled ${result}!`);
 	},
 };

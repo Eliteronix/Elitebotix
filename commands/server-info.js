@@ -20,23 +20,15 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
-			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: 'Server info card will be sent'
-					}
-				}
-			});
+			msg = await populateMsgFromInteraction(interaction);
+			await interaction.reply('Server info card will be sent');
 		}
 
 		const guildInfoEmbed = new Discord.MessageEmbed()
 			.setColor('#ffcc00')
 			.setTitle(`${msg.guild.name}`)
 			.addFields(
-				{ name: 'Server Owner', value: `${msg.client.users.cache.find(user => user.id === `${msg.guild.ownerID}`)}` },
-				{ name: 'Region', value: `${msg.guild.region}` },
+				{ name: 'Server Owner', value: `${msg.client.users.cache.find(user => user.id === `${msg.guild.ownerId}`)}` },
 				{ name: 'Member count', value: `${msg.guild.memberCount}` },
 				{ name: 'AFK Timeout', value: `${msg.guild.afkTimeout / 60} minutes` }
 			)
@@ -46,6 +38,6 @@ module.exports = {
 			guildInfoEmbed.setThumbnail(`${msg.guild.iconURL()}`);
 		}
 
-		msg.channel.send(guildInfoEmbed);
+		msg.channel.send({ embeds: [guildInfoEmbed] });
 	},
 };

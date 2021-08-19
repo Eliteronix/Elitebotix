@@ -20,24 +20,17 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: 'Players are being processed'
-					}
-				}
-			});
+			await interaction.reply('Players are being processed');
 
 			args = [];
 
-			if (interaction.data.options) {
-				for (let i = 0; i < interaction.data.options.length; i++) {
-					args.push(interaction.data.options[i].value);
+			if (interaction.options._hoistedOptions) {
+				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+					args.push(interaction.options._hoistedOptions[i].value);
 				}
 			}
 
@@ -457,7 +450,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					tourneyMatchText = 'Tourney matches only';
 				}
 
-				msg.channel.send(`[Beta/WIP] Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}`, attachment);
+				msg.channel.send({ content: `[Beta/WIP] Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}`, files: [attachment] });
 			})();
 		})
 		.catch(err => {

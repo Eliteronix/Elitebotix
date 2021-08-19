@@ -16,7 +16,8 @@ module.exports = {
 
 		msg.delete();
 
-		let reactions = msg.reactions.cache.array();
+		let reactions = [];
+		msg.reactions.cache.each(reaction => reactions.push(reaction));
 
 		let results = [];
 		let resultsMaxLength = 0;
@@ -89,7 +90,7 @@ module.exports = {
 		//Create as an attachment
 		const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'vote.png');
 
-		await msg.channel.send(`Results for: \`${args[2]}\``, attachment);
+		await msg.channel.send({ content: `Results for: \`${args[2]}\``, files: [attachment] });
 	},
 };
 

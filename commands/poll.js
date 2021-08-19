@@ -28,27 +28,20 @@ module.exports = {
 		let minutes = 0;
 
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: 'The poll is being created'
-					}
-				}
-			});
+			await interaction.reply('The poll is being created');
 
-			months = interaction.data.options[0].value;
-			weeks = interaction.data.options[1].value;
-			days = interaction.data.options[2].value;
-			hours = interaction.data.options[3].value;
-			minutes = interaction.data.options[4].value;
+			months = interaction.options._hoistedOptions[0].value;
+			weeks = interaction.options._hoistedOptions[1].value;
+			days = interaction.options._hoistedOptions[2].value;
+			hours = interaction.options._hoistedOptions[3].value;
+			minutes = interaction.options._hoistedOptions[4].value;
 
 			args = [];
 
-			for (let i = 5; i < interaction.data.options.length; i++) {
-				args.push(`${interaction.data.options[i].value};`);
+			for (let i = 5; i < interaction.options._hoistedOptions.length; i++) {
+				args.push(`${interaction.options._hoistedOptions[i].value};`);
 			}
 		}
 
@@ -93,8 +86,8 @@ module.exports = {
 
 		if (interaction) {
 			options = [];
-			for (let i = 5; i < interaction.data.options.length; i++) {
-				options.push(interaction.data.options[i].value);
+			for (let i = 5; i < interaction.options._hoistedOptions.length; i++) {
+				options.push(interaction.options._hoistedOptions[i].value);
 			}
 		}
 
@@ -165,7 +158,7 @@ module.exports = {
 		//Create as an attachment
 		const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'vote.png');
 
-		const pollMessage = await msg.channel.send('Vote for the options by using the reactions below the image!', attachment);
+		const pollMessage = await msg.channel.send({ content: 'Vote for the options by using the reactions below the image!', files: [attachment] });
 
 		for (let i = 0; i < options.length; i++) {
 			if (i === 0) {

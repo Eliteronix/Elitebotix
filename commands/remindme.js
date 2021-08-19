@@ -26,16 +26,16 @@ module.exports = {
 		let minutes = 0;
 
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			years = interaction.data.options[0].value;
-			months = interaction.data.options[1].value;
-			weeks = interaction.data.options[2].value;
-			days = interaction.data.options[3].value;
-			hours = interaction.data.options[4].value;
-			minutes = interaction.data.options[5].value;
+			years = interaction.options._hoistedOptions[0].value;
+			months = interaction.options._hoistedOptions[1].value;
+			weeks = interaction.options._hoistedOptions[2].value;
+			days = interaction.options._hoistedOptions[3].value;
+			hours = interaction.options._hoistedOptions[4].value;
+			minutes = interaction.options._hoistedOptions[5].value;
 
-			args = [interaction.data.options[6].value];
+			args = [interaction.options._hoistedOptions[6].value];
 		}
 
 		for (let i = 0; i < args.length; i++) {
@@ -86,13 +86,6 @@ module.exports = {
 			return msg.channel.send('Reminder has been set. Be sure to have DMs enabled for the bot.');
 		}
 
-		return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-			data: {
-				type: 4,
-				data: {
-					content: 'Reminder has been set. Be sure to have DMs enabled for the bot.'
-				}
-			}
-		});
+		return interaction.reply({ content: 'Reminder has been set. Be sure to have DMs enabled for the bot.', ephemeral: true });
 	},
 };

@@ -20,17 +20,17 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
 			args = [];
 
-			args.push(interaction.data.options[0].value);
+			args.push(interaction.options._hoistedOptions[0].value);
 
-			if (interaction.data.options[1]) {
-				args.push(interaction.data.options[1].value.toString());
+			if (interaction.options._hoistedOptions[1]) {
+				args.push(interaction.options._hoistedOptions[1].value.toString());
 			}
 
-			if (interaction.data.options[2] && interaction.data.options[2].value) {
+			if (interaction.options._hoistedOptions[2] && interaction.options._hoistedOptions[2].value) {
 				args.push('avg');
 			}
 		}
@@ -45,21 +45,14 @@ module.exports = {
 		let matchID = args[0];
 
 		if (isNaN(matchID)) {
-			if (args[0].startsWith('https://osu.ppy.sh/community/matches/')) {
+			if (args[0].startsWith('https://osu.ppy.sh/community/matches/') || args[0].startsWith('https://osu.ppy.sh/mp/')) {
 				matchID = getIDFromPotentialOsuLink(args[0]);
 			} else {
 				const guildPrefix = await getGuildPrefix(msg);
 				if (msg.id) {
 					return msg.channel.send(`You didn't provide a valid match ID or URL.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);
 				} else {
-					return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-						data: {
-							type: 4,
-							data: {
-								content: `You didn't provide a valid match ID or URL.\nUsage: \`/${this.name} ${this.usage}\``
-							}
-						}
-					});
+					return interaction.reply(`You didn't provide a valid match ID or URL.\nUsage: \`/${this.name} ${this.usage}\``);
 				}
 			}
 		}
@@ -68,14 +61,7 @@ module.exports = {
 			.then(async (match) => {
 				saveOsuMultiScores(match);
 				if (interaction) {
-					await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-						data: {
-							type: 4,
-							data: {
-								content: 'Matchscores are getting calculated'
-							}
-						}
-					});
+					await interaction.reply('Matchscores are getting calculated');
 				}
 				let processingMessage = await msg.channel.send('Processing osu! match leaderboard...');
 				let warmups = 2;
@@ -204,7 +190,7 @@ module.exports = {
 				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${match.name}`, `osu-match-${match.name}.png`);
 
 				//Send attachment
-				await msg.channel.send(`The leaderboard shows the evaluation of the players that participated in the match.\n${warmupsReason}\n${valueHint}\n<https://osu.ppy.sh/community/matches/${match.id}>`, attachment);
+				await msg.channel.send({ content: `The leaderboard shows the evaluation of the players that participated in the match.\n${warmupsReason}\n${valueHint}\n<https://osu.ppy.sh/community/matches/${match.id}>`, files: [attachment] });
 				processingMessage.delete();
 			})
 			.catch(err => {
@@ -212,14 +198,7 @@ module.exports = {
 					if (msg.id) {
 						return msg.channel.send(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
 					} else {
-						return additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-							data: {
-								type: 4,
-								data: {
-									content: `Could not find match \`${args[0].replace(/`/g, '')}\`.`
-								}
-							}
-						});
+						return interaction.reply(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
 					}
 				} else {
 					console.log(err);
