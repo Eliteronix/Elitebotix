@@ -197,7 +197,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						//If coming from osu-tracking
 						if (mapRank > 0) {
-							await msg.channel.send(`\`${user.name}\` achieved rank **#${mapRank}**!`, attachment);
+							await msg.channel.send({ content: `\`${user.name}\` achieved rank **#${mapRank}**!`, files: [attachment] });
 						} else {
 							let guildPrefix = await getGuildPrefix(msg);
 
@@ -208,9 +208,9 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 							//Send attachment
 							if (noLinkedAccount) {
-								sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+								sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 							} else {
-								sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+								sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, files: [attachment] });
 							}
 							sentMessage.react('<:COMPARE:827974793365159997>');
 						}
@@ -286,9 +286,9 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						//Send attachment
 						if (noLinkedAccount) {
-							sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, attachment);
+							sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>\n${hints[Math.floor(Math.random() * hints.length)]}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 						} else {
-							sentMessage = await msg.channel.send(`\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, attachment);
+							sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>\n${hints[Math.floor(Math.random() * hints.length)]}`, files: [attachment] });
 						}
 						processingMessage.delete();
 						sentMessage.react('<:COMPARE:827974793365159997>');

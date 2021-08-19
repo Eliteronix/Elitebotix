@@ -20,19 +20,12 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: 'osu! leaderboard will be created'
-					}
-				}
-			});
+			await interaction.reply('osu! leaderboard will be created');
 
-			if (interaction.data.options) {
-				args = [interaction.data.options[0].value];
+			if (interaction.options._hoistedOptions[0]) {
+				args = [interaction.options._hoistedOptions[0].value];
 			} else {
 				args = [];
 			}
@@ -42,7 +35,8 @@ module.exports = {
 
 		msg.guild.members.fetch()
 			.then(async (guildMembers) => {
-				const members = guildMembers.array();
+				const members = [];
+				guildMembers.each(member => members.push(member));
 				let osuAccounts = [];
 				for (let i = 0; i < members.length; i++) {
 					const discordUser = await DBDiscordUsers.findOne({
@@ -109,7 +103,7 @@ module.exports = {
 				const guildPrefix = await getGuildPrefix(msg);
 
 				//Send attachment
-				const leaderboardMessage = await msg.channel.send(`The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`${guildPrefix}osu-link <username>\` to connect your osu! account.\nData is being updated once a day or when \`${guildPrefix}osu-profile <username>\` is being used.`, attachment);
+				const leaderboardMessage = await msg.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`${guildPrefix}osu-link <username>\` to connect your osu! account.\nData is being updated once a day or when \`${guildPrefix}osu-profile <username>\` is being used.`, files: [attachment] });
 
 				if (page) {
 					if (page > 1) {

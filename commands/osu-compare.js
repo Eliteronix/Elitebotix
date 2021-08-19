@@ -17,36 +17,30 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: 'Score will be compared'
-					}
-				}
-			});
+			await interaction.reply('Score will be compared');
 
 			args = [];
 
-			if (interaction.data.options) {
-				for (let i = 0; i < interaction.data.options.length; i++) {
-					args.push(interaction.data.options[i].value);
+			if (interaction.options._hoistedOptions) {
+				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+					args.push(interaction.options._hoistedOptions[i].value);
 				}
 			}
 		}
 		msg.channel.messages.fetch({ limit: 100 })
 			.then(async (messages) => {
 				const allRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+\nTry `.+/gm;
-				const messagesArray = messages.filter(m => m.author.id === '784836063058329680' && m.content.match(allRegex)).array();
+				const firstMessage = messages.filter(m => m.author.id === '784836063058329680' && m.content.match(allRegex)).first();
 
 				const beginningRegex = /.+\nSpectate: .+\nBeatmap: <https:\/\/osu.ppy.sh\/b\//gm;
 				const endingRegex = />\nosu! direct:.+\nTry.+/gm;
-				if (!messagesArray[0]) {
+				if (!firstMessage) {
 					return msg.channel.send('Could not find any scores sent by Elitebotix in this channel in the last 100 messages.');
 				}
-				const beatmapId = messagesArray[0].content.replace(beginningRegex, '').replace(endingRegex, '');
+
+				const beatmapId = firstMessage.content.replace(beginningRegex, '').replace(endingRegex, '');
 
 				let newArgs = [beatmapId];
 
