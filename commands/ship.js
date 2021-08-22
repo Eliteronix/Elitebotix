@@ -22,8 +22,8 @@ module.exports = {
 
 			args = [];
 
-			for (let i = 0; i < interaction.data.options.length; i++) {
-				args.push(interaction.data.options[i].value);
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				args.push(interaction.options._hoistedOptions[i].value);
 			}
 		}
 		let firstName = await getName(msg, args[0]);
@@ -50,17 +50,10 @@ module.exports = {
 		data.push(`Compatibility: ${compatibility}%`);
 
 		if (msg.id) {
-			return msg.channel.send(data);
+			return msg.channel.send(data.join('\n'));
 		}
 
-		additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-			data: {
-				type: 4,
-				data: {
-					content: data.join('\n')
-				}
-			}
-		});
+		interaction.reply(data.join('\n'));
 	},
 };
 
@@ -68,7 +61,8 @@ async function getName(msg, argument) {
 	let name = argument;
 
 	if (argument) {
-		let mentions = msg.mentions.users.array();
+		let mentions = [];
+		msg.mentions.users.each(mention => mentions.push(mention));
 		for (let i = 0; i < mentions.length; i++) {
 			if (`<@${mentions[i].id}>` === argument || `<@!${mentions[i].id}>` === argument) {
 				name = mentions[i].username;

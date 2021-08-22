@@ -26,22 +26,16 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: 'User profiles will be displayed'
-					}
-				}
-			});
+			await interaction.reply('User profiles will be displayed');
 		}
 
 		if (!msg.mentions.users.first()) {
 			sendUserEmbed(msg, msg.author);
 		} else {
-			const users = msg.mentions.users.array();
+			const users = [];
+			msg.mentions.users.each(user => users.push(user));
 			for (let i = 0; i < users.length; i++) {
 				sendUserEmbed(msg, users[i]);
 			}
@@ -109,5 +103,5 @@ async function sendUserEmbed(msg, user) {
 		}
 
 	}
-	msg.channel.send(userInfoEmbed);
+	msg.channel.send({ embeds: [userInfoEmbed] });
 }

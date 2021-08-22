@@ -308,25 +308,25 @@ async function handleTicketStatus(msg) {
 		ticket.save();
 
 		//Move the channel to the correct category
-		let awaitingResponseCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Awaiting Response');
+		let awaitingResponseCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Awaiting Response');
 		if (!awaitingResponseCategory) {
 			awaitingResponseCategory = await msg.guild.channels.create('Tickets - Awaiting Response', { type: 'category' });
-			await awaitingResponseCategory.overwritePermissions([
+			await awaitingResponseCategory.permissionOverwrites.set([
 				{
 					id: msg.guild.roles.everyone.id,
 					deny: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'MANAGE_MESSAGES', 'SEND_TTS_MESSAGES'],
 				},
 			]);
-			let openCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Open');
+			let openCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Open');
 			let position = 0;
 			if (openCategory) {
 				position++;
 			}
-			let respondedCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Responded');
+			let respondedCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Responded');
 			if (respondedCategory) {
 				position++;
 			}
-			let inActionCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - In Action');
+			let inActionCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - In Action');
 			if (inActionCategory) {
 				position++;
 			}
@@ -361,21 +361,21 @@ async function handleTicketStatus(msg) {
 			});
 		}
 
-		await msg.channel.overwritePermissions(permissions);
+		await msg.channel.permissionOverwrites.set(permissions);
 
-		let openCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Open');
+		let openCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Open');
 		if (openCategory && !openCategory.children.first()) {
 			openCategory.delete();
 		}
-		let respondedCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Responded');
+		let respondedCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Responded');
 		if (respondedCategory && !respondedCategory.children.first()) {
 			respondedCategory.delete();
 		}
-		let inActionCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - In Action');
+		let inActionCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - In Action');
 		if (inActionCategory && !inActionCategory.children.first()) {
 			inActionCategory.delete();
 		}
-		let closedCategory = msg.guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Closed');
+		let closedCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Closed');
 		if (closedCategory && !closedCategory.children.first()) {
 			closedCategory.delete();
 		}

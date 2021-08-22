@@ -20,16 +20,9 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: 'Server settings info card will be sent'
-					}
-				}
-			});
+			await interaction.reply('Server settings info card will be sent');
 		}
 
 		//Get bot member
@@ -133,6 +126,6 @@ module.exports = {
 			)
 			.setTimestamp();
 
-		msg.channel.send(guildBotInfoEmbed);
+		msg.channel.send({ embeds: [guildBotInfoEmbed] });
 	},
 };
