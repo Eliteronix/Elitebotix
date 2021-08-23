@@ -71,7 +71,7 @@ module.exports = async function (oldMsg, newMsg) {
 		if (oldMsg.content !== newMsg.content) {
 			changeEmbed.addField('Content', `\`${oldMsg.content}\` -> \`${newMsg.content}\``);
 
-			channel.send(changeEmbed);
+			channel.send({ embeds: [changeEmbed] });
 		}
 	}
 };

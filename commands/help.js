@@ -123,6 +123,6 @@ module.exports = {
 		if (interaction) {
 			return interaction.reply({ content: data.join('\n'), ephemeral: true });
 		}
-		return msg.channel.send(data.join('\n'), { split: true });
+		return msg.reply(data.join('\n'), { split: true });
 	},
 };

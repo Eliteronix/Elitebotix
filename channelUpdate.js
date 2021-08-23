@@ -158,6 +158,6 @@ module.exports = async function (oldChannel, newChannel) {
 			changeEmbed.addField('Deny', permissionsDenyReadable);
 		});
 
-		loggingChannel.send(changeEmbed);
+		loggingChannel.send({ embeds: [changeEmbed] });
 	}
 };

@@ -2598,6 +2598,6 @@ module.exports = {
 			});
 		}
 
-		msg.channel.send('Done.');
+		msg.reply('Done.');
 	},
 };

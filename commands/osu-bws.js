@@ -41,10 +41,10 @@ module.exports = {
 		if (!args[0]) {//Get profile by author if no argument
 
 			if (commandUser && commandUser.osuUserId) {
-				getProfile(msg, commandUser.osuUserId, mode);
+				getProfile(msg, interaction, commandUser.osuUserId, mode);
 			} else {
 				const userDisplayName = await getMessageUserDisplayname(msg);
-				getProfile(msg, userDisplayName, mode);
+				getProfile(msg, interaction, userDisplayName, mode);
 			}
 		} else {
 			//Get profiles by arguments
@@ -55,21 +55,24 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getProfile(msg, discordUser.osuUserId, mode);
+						getProfile(msg, interaction, discordUser.osuUserId, mode);
 					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-						getProfile(msg, args[i], mode);
+						if (msg.id) {
+							return msg.reply(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						}
+
+						return interaction.followUp(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
 					}
 				} else {
 
 					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getProfile(msg, getIDFromPotentialOsuLink(args[i]), mode, true);
+							getProfile(msg, interaction, getIDFromPotentialOsuLink(args[i]), mode, true);
 						} else {
-							getProfile(msg, getIDFromPotentialOsuLink(args[i]), mode);
+							getProfile(msg, interaction, getIDFromPotentialOsuLink(args[i]), mode);
 						}
 					} else {
-						getProfile(msg, getIDFromPotentialOsuLink(args[i]), mode);
+						getProfile(msg, interaction, getIDFromPotentialOsuLink(args[i]), mode);
 					}
 				}
 			}
@@ -77,7 +80,7 @@ module.exports = {
 	},
 };
 
-async function getProfile(msg, username, mode, noLinkedAccount) {
+async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 	// eslint-disable-next-line no-undef
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -116,11 +119,17 @@ async function getProfile(msg, username, mode, noLinkedAccount) {
 			if (noLinkedAccount) {
 				data.push(`Feel free to use \`${guildPrefix}osu-link ${user.name}\` to connect your account.`);
 			}
-			msg.channel.send(data.join('\n'), { split: true });
+			if (msg.id) {
+				return msg.reply(data.join('\n'), { split: true });
+			}
+			return interaction.followUp(data.join('\n'), { split: true });
 		})
 		.catch(err => {
 			if (err.message === 'Not found') {
-				msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+				if (msg.id) {
+					return msg.reply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+				}
+				return interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 			} else {
 				console.log(err);
 			}

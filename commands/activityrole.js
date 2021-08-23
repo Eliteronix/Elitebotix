@@ -34,7 +34,7 @@ module.exports = {
 				if (activityRole) {
 					msg.channel.send(`${activityRoleName.name} is already an activityrole.`);
 				} else {
-					if(!args[2]){
+					if (!args[2]) {
 						msg.channel.send('Please declare conditions: topx/topx%/xpoints');
 					}
 					let rankCutoff;
@@ -52,16 +52,16 @@ module.exports = {
 							if (isNaN(points)) {
 								return msg.channel.send(`\`${points.replace(/`/g, '')}\` is not a valid amount of points. (\`${args[i].replace(/`/g, '')}\`)`);
 							}
-							if(points < 1){
+							if (points < 1) {
 								return msg.channel.send(`\`${points.replace(/`/g, '')}\` is below the minimum of 1 point. (\`${args[i].replace(/`/g, '')}\`)`);
 							}
 							pointsCutoff = parseInt(points);
-						} else if(args[i].startsWith('top')) {
-							const rank = args[i].substring(3,args[i].length);
-							if(isNaN(rank)){
+						} else if (args[i].startsWith('top')) {
+							const rank = args[i].substring(3, args[i].length);
+							if (isNaN(rank)) {
 								return msg.channel.send(`\`${rank.replace(/`/g, '')}\` is not a valid rank. (\`${args[i].replace(/`/g, '')}\`)`);
 							}
-							if(rank < 1){
+							if (rank < 1) {
 								return msg.channel.send(`\`${rank.replace(/`/g, '')}\` is below the minimum of 1 point. (\`${args[i].replace(/`/g, '')}\`)`);
 							}
 							rankCutoff = parseInt(rank);
@@ -92,9 +92,9 @@ module.exports = {
 				const rowCount = await DBActivityRoles.destroy({ where: { guildId: msg.guild.id, roleId: activityRoleId } });
 				//Send feedback message accordingly
 				if (rowCount > 0) {
-					msg.guild.members.forEach(member => {
-						if (member.roles.find(r => r.id == activityRoleName.id)){
-							member.removeRole(activityRoleName.id);
+					msg.guild.members.cache.forEach(member => {
+						if (member.roles.cache.find(r => r.id == activityRoleName.id)) {
+							member.roles.remove(activityRoleName.id);
 						}
 					});
 					msg.channel.send(`${activityRoleName.name} has been removed from activityroles.`);
@@ -109,7 +109,7 @@ module.exports = {
 		} else if (args[0] === 'list') { // has to be adapted still
 			//get all activityRoles for the guild
 			const activityRolesList = await DBActivityRoles.findAll({ where: { guildId: msg.guild.id } });
-			
+
 			let activityRolesString = '';
 
 			//iterate for every activityrole in the array
@@ -119,20 +119,20 @@ module.exports = {
 
 				let conditions = '';
 
-				if(activityRolesList[i].rankCutoff){
+				if (activityRolesList[i].rankCutoff) {
 					conditions = `Rank top ${activityRolesList[i].rankCutoff}`;
 				}
 
-				if(activityRolesList[i].percentageCutoff){
-					if(conditions !== ''){
+				if (activityRolesList[i].percentageCutoff) {
+					if (conditions !== '') {
 						conditions = `${conditions} & `;
 					}
 
 					conditions = `${conditions}Rank top ${activityRolesList[i].percentageCutoff}%`;
 				}
 
-				if(activityRolesList[i].pointsCutoff){
-					if(conditions !== ''){
+				if (activityRolesList[i].pointsCutoff) {
+					if (conditions !== '') {
 						conditions = `${conditions} & `;
 					}
 
@@ -148,7 +148,7 @@ module.exports = {
 				}
 			}
 
-			if(activityRolesString === ''){
+			if (activityRolesString === '') {
 				activityRolesString = 'No activityroles found.';
 			}
 			//Output activityrole list

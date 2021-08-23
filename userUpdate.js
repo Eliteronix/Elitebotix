@@ -55,7 +55,7 @@ module.exports = async function (oldUser, newUser) {
 					.setTimestamp()
 					.setFooter('Eventname: usernames');
 
-				channel.send(changeEmbed);
+				channel.send({ embeds: [changeEmbed] });
 			}
 		});
 	}
@@ -113,7 +113,7 @@ module.exports = async function (oldUser, newUser) {
 					.setTimestamp()
 					.setFooter('Eventname: userdiscriminators');
 
-				channel.send(changeEmbed);
+				channel.send({ embeds: [changeEmbed] });
 			}
 		});
 	}
@@ -171,7 +171,7 @@ module.exports = async function (oldUser, newUser) {
 					.setTimestamp()
 					.setFooter('Eventname: useravatars');
 
-				channel.send(changeEmbed);
+				channel.send({ embeds: [changeEmbed] });
 			}
 		});
 	}

@@ -32,11 +32,11 @@ module.exports = {
 
 				//If autorole already exists
 				if (autoRole) {
-					msg.channel.send(`${autoRoleName.name} is already an autorole.`);
+					msg.reply(`${autoRoleName.name} is already an autorole.`);
 				} else {
 					//If autorole doesn't exist in db then create it
 					DBAutoRoles.create({ guildId: msg.guild.id, roleId: autoRoleId });
-					msg.channel.send(`${autoRoleName.name} has been added as an autorole.`);
+					msg.reply(`${autoRoleName.name} has been added as an autorole.`);
 
 					//Get all members of the guild
 					const guildMembers = await msg.guild.members.fetch();
@@ -62,9 +62,9 @@ module.exports = {
 				const rowCount = await DBAutoRoles.destroy({ where: { guildId: msg.guild.id, roleId: autoRoleId } });
 				//Send feedback message accordingly
 				if (rowCount > 0) {
-					msg.channel.send(`${autoRoleName.name} has been removed from autoroles.`);
+					msg.reply(`${autoRoleName.name} has been removed from autoroles.`);
 				} else {
-					msg.channel.send(`${autoRoleName.name} was no autorole.`);
+					msg.reply(`${autoRoleName.name} was no autorole.`);
 				}
 			} else {
 				//if no roles were mentioned
@@ -80,7 +80,7 @@ module.exports = {
 				let autoRole = msg.guild.roles.cache.get(autoRolesList[i].roleId);
 
 				//Check if deleted role
-				if(autoRole){
+				if (autoRole) {
 					//Set array index to the role name for the output
 					autoRolesList[i] = autoRole.name;
 				} else {
@@ -91,12 +91,12 @@ module.exports = {
 			//Set the output string
 			const autoRolesString = autoRolesList.join(', ') || 'No autoroles found.';
 			//Output autorole list
-			msg.channel.send(`List of autoroles: ${autoRolesString}`);
+			msg.reply(`List of autoroles: ${autoRolesString}`);
 		} else {
 			let guildPrefix = await getGuildPrefix(msg);
 
 			//If no proper first argument is given
-			msg.channel.send(`Please add if you want to add, remove or list the autorole(s). Proper usage: \`${guildPrefix}${this.name} ${this.usage}\``);
+			msg.reply(`Please add if you want to add, remove or list the autorole(s). Proper usage: \`${guildPrefix}${this.name} ${this.usage}\``);
 		}
 	},
 };

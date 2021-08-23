@@ -56,6 +56,6 @@ module.exports = async function (invite) {
 			.setTimestamp()
 			.setFooter('Eventname: invitedelete');
 
-		channel.send(changeEmbed);
+		channel.send({ embeds: [changeEmbed] });
 	}
 };

@@ -127,7 +127,7 @@ module.exports = {
 			let targetGroup = '';
 			let targetBracket = '';
 			if (!args[0]) {
-				return msg.channel.send('You didn\'t specify a valid target group. It should be `everyone`, `noAvailibility` or `noSubmissions` instead.');
+				return msg.reply('You didn\'t specify a valid target group. It should be `everyone`, `noAvailibility` or `noSubmissions` instead.');
 			} else if (args[0] === 'everyone') {
 				targetGroup = 'Every Player';
 			} else if (args[0] === 'noAvailability') {
@@ -135,11 +135,11 @@ module.exports = {
 			} else if (args[0] === 'noSubmissions') {
 				targetGroup = 'Players with missing submissions';
 			} else {
-				return msg.channel.send(`${args[0]} is not a valid target group. It should be \`everyone\`, \`noAvailability\` or \`noSubmissions\` instead.`);
+				return msg.reply(`${args[0]} is not a valid target group. It should be \`everyone\`, \`noAvailability\` or \`noSubmissions\` instead.`);
 			}
 
 			if (!args[1]) {
-				return msg.channel.send('You didn\'t specify a valid target bracket. It should be `all`, `top`, `middle`, `lower` or `beginner` instead.');
+				return msg.reply('You didn\'t specify a valid target bracket. It should be `all`, `top`, `middle`, `lower` or `beginner` instead.');
 			} else if (args[1] === 'top') {
 				targetBracket = 'Top Bracket';
 			} else if (args[1] === 'middle') {
@@ -151,7 +151,7 @@ module.exports = {
 			} else if (args[1] === 'all') {
 				targetBracket = 'Every Bracket';
 			} else {
-				return msg.channel.send(`${args[1]} is not a valid target bracket. It should be \`all\`, \`top\`, \`middle\`, \`lower\` or \`beginner\` instead.`);
+				return msg.reply(`${args[1]} is not a valid target bracket. It should be \`all\`, \`top\`, \`middle\`, \`lower\` or \`beginner\` instead.`);
 			}
 
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
@@ -191,7 +191,7 @@ module.exports = {
 			args.shift();
 
 			if (!args[0]) {
-				return msg.channel.send('You didn\'t provide a message to send.');
+				return msg.reply('You didn\'t provide a message to send.');
 			}
 
 			for (let i = 0; i < elitiriSignUps.length; i++) {
@@ -224,16 +224,16 @@ module.exports = {
 			args.shift();
 			let targetGroup = '';
 			if (!args[0]) {
-				return msg.channel.send('You didn\'t specify a valid target group. It should be `everyone`, `noAvailibility` or `noSubmissions` instead.');
+				return msg.reply('You didn\'t specify a valid target group. It should be `everyone`, `noAvailibility` or `noSubmissions` instead.');
 			} else if (args[0] === 'noSubmissions') {
 				targetGroup = 'Players with missing submissions';
 			} else if (args[0] === 'player') {
 				targetGroup = 'A specific player';
 				if (!args[1]) {
-					return msg.channel.send('No player specified');
+					return msg.reply('No player specified');
 				}
 			} else {
-				return msg.channel.send(`${args[0]} is not a valid target group. It should be \`everyone\`, \`noAvailability\` or \`noSubmissions\` instead.`);
+				return msg.reply(`${args[0]} is not a valid target group. It should be \`everyone\`, \`noAvailability\` or \`noSubmissions\` instead.`);
 			}
 
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
@@ -328,7 +328,7 @@ module.exports = {
 
 			elitiriSignUp.save();
 
-			msg.channel.send(`Placement of \`${elitiriSignUp.osuName}\` set to \`${elitiriSignUp.rankAchieved}\``);
+			msg.reply(`Placement of \`${elitiriSignUp.osuName}\` set to \`${elitiriSignUp.rankAchieved}\``);
 		} else if (args[0] === 'createPools') {
 			let allMaps = [];
 			let rowOffset;
@@ -353,7 +353,7 @@ module.exports = {
 				});
 				rowOffset = 3;
 			} else {
-				return msg.channel.send('Please specify for which bracket the pools should be created. (`top`, `middle`, `lower`, `beginner`)');
+				return msg.reply('Please specify for which bracket the pools should be created. (`top`, `middle`, `lower`, `beginner`)');
 			}
 
 			console.log(allMaps);

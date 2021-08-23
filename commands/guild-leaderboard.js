@@ -22,7 +22,7 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Guild leaderboard will be created');
+			await interaction.reply('Processing guild leaderboard...');
 
 			if (interaction.options._hoistedOptions[0]) {
 				args = [interaction.options._hoistedOptions[0].value];
@@ -31,7 +31,10 @@ module.exports = {
 			}
 		}
 
-		let processingMessage = await msg.channel.send('Processing guild leaderboard...');
+		let processingMessage;
+		if (msg.id) {
+			processingMessage = await msg.reply('Processing guild leaderboard...');
+		}
 
 		msg.guild.members.fetch()
 			.then(async (guildMembers) => {
@@ -95,7 +98,12 @@ module.exports = {
 				const attachment = await createLeaderboard(leaderboardData, 'discord-background.png', `${msg.guild.name}'s activity leaderboard`, filename, page);
 
 				//Send attachment
-				const leaderboardMessage = await msg.channel.send({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
+				let leaderboardMessage;
+				if (msg.id) {
+					leaderboardMessage = await msg.reply({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
+				} else {
+					interaction.followUp({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
+				}
 
 				if (page) {
 					if (page > 1) {

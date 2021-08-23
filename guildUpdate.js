@@ -137,6 +137,6 @@ module.exports = async function (oldGuild, newGuild) {
 			changeEmbed.addField('Embed Channel', `<#${oldGuild.embedChannelID}> -> <#${newGuild.embedChannelID}>`);
 		}
 
-		channel.send(changeEmbed);
+		channel.send({ embeds: [changeEmbed] });
 	}
 };

@@ -83,7 +83,7 @@ module.exports = async function (member) {
 				.setTimestamp()
 				.setFooter('Eventname: userleaving');
 
-			channel.send(changeEmbed);
+			channel.send({ embeds: [changeEmbed] });
 		}
 	}
 };

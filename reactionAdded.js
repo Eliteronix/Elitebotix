@@ -50,7 +50,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 	}
 
 	//Return if the bot reacted itself or if it was not a bot message
-	//Checking ID instead seemed to be bugged
 	if (user.id === '784836063058329680') {
 		return;
 	}
@@ -207,25 +206,21 @@ module.exports = async function (reaction, user, additionalObjects) {
 		return reaction.message.delete();
 	}
 
-	const didYouMeanRegex = /<@.+>, I could not find the command `.+`.\nDid you mean `.+`?/gm;
-	if (reaction.message.content && reaction.message.content.substring(3).startsWith(user.id) && reaction.message.content.match(didYouMeanRegex)
-		|| reaction.message.content && reaction.message.content.substring(2).startsWith(user.id) && reaction.message.content.match(didYouMeanRegex)) {
+	const didYouMeanRegex = /I could not find the command `.+`.\nDid you mean `.+`?/gm;
+	if (reaction.message.content && reaction.message.mentions.repliedUser.id && reaction.message.mentions.repliedUser.id === user.id && reaction.message.content.match(didYouMeanRegex)
+		|| reaction.message.content && reaction.message.mentions.repliedUser.id && reaction.message.mentions.repliedUser.id === user.id && reaction.message.content.match(didYouMeanRegex)) {
 		if (reaction._emoji.name === '✅') {
 			//Grab old message and change content instead
-			reaction.message.channel.messages.fetch({ limit: 100 }).then(async (messages) => {
-				const wrongContent = reaction.message.content.replace(/<@.+>, I could not find the command `/gm, '').replace(/`.\nDid you mean `.+`?/gm, '');
-				const messagesArray = messages.filter(m => m.author.id === user.id && m.content.startsWith(wrongContent)).array();
+			reaction.message.channel.messages.fetch(reaction.message.reference.messageId).then(async (message) => {
 
-				if (messagesArray.length > 0) {
-					let newMessage = messagesArray[messagesArray.length - 1];
-
-					const didYouMeanBeginningRegex = /<@.+>, I could not find the command `.+`.\nDid you mean `/gm;
-					newMessage.content = reaction.message.content.substring(0, reaction.message.content.length - 2).replace(didYouMeanBeginningRegex, '');
+				if (message) {
+					const didYouMeanBeginningRegex = /I could not find the command `.+`.\nDid you mean `/gm;
+					message.content = reaction.message.content.substring(0, reaction.message.content.length - 2).replace(didYouMeanBeginningRegex, '');
 
 					//Get gotMessage
 					const gotMessage = require('./gotMessage');
 
-					gotMessage(newMessage);
+					gotMessage(message);
 
 					return reaction.message.delete();
 				} else {

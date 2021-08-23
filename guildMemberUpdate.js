@@ -68,7 +68,7 @@ module.exports = async function (oldMember, newMember) {
 				.setTimestamp()
 				.setFooter('Eventname: nicknames');
 
-			channel.send(changeEmbed);
+			channel.send({ embeds: [changeEmbed] });
 		}
 	}
 
@@ -141,7 +141,7 @@ module.exports = async function (oldMember, newMember) {
 				);
 			}
 
-			channel.send(changeEmbed);
+			channel.send({ embeds: [changeEmbed] });
 		}
 	}
 };

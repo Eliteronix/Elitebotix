@@ -36,10 +36,9 @@ module.exports = {
 			.setTimestamp();
 
 		if (msg) {
-			return msg.channel.send({ embeds: [creatorInfoEmbed] });
+			return msg.reply({ embeds: [creatorInfoEmbed] });
 		}
 
-		await interaction.reply('Creator Embed is being sent');
-		return interaction.channel.send({ embeds: [creatorInfoEmbed] });
+		return interaction.reply({ embeds: [creatorInfoEmbed] });
 	},
 };

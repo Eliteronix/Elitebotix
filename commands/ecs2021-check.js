@@ -24,13 +24,13 @@ module.exports = {
 		});
 
 		if (!elitiriSignUp && !args[2]) {
-			return msg.channel.send('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
+			return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
 		} else if (!elitiriSignUp && args[2].toLowerCase() !== 'top' && args[2].toLowerCase() !== 'middle' && args[2].toLowerCase() !== 'lower' && args[2].toLowerCase() !== 'beginner') {
-			return msg.channel.send('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
+			return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
 		}
 
 		if (args[0].toLowerCase() !== 'nm' && args[0].toLowerCase() !== 'hd' && args[0].toLowerCase() !== 'hr' && args[0].toLowerCase() !== 'dt' && args[0].toLowerCase() !== 'fm') {
-			return msg.channel.send('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
+			return msg.reply('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
 		}
 
 		let bracket = '';
@@ -219,11 +219,11 @@ module.exports = {
 						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}`);
 				}
 
-				msg.channel.send(viabilityEmbed);
+				msg.reply({ embeds: [viabilityEmbed] });
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
+					msg.reply(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
 				} else {
 					console.log(err);
 				}

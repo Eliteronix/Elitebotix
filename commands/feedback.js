@@ -28,7 +28,7 @@ module.exports = {
 		//check for the first argument
 		if (args[0].toLowerCase() === 'bug') { //go to bug tree
 			if (!args[1]) { //check for second argument
-				msg.channel.send('Please add an explaination to your bug after the command.');
+				msg.reply('Please add an explaination to your bug after the command.');
 			} else {
 				//get rid of the first argument
 				args.shift();
@@ -38,13 +38,13 @@ module.exports = {
 				createJiraIssue('10006', `[BUG] ${bug} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
 				if (msg.id) {
-					return msg.channel.send('Your bug report was sent to the developer.');
+					return msg.reply('Your bug report was sent to the developer.');
 				}
 				return interaction.reply('Your bug report was sent to the developer.');
 			}
 		} else if (args[0].toLowerCase() === 'feature') { //go to feature tree
 			if (!args[1]) { //check for second argument
-				msg.channel.send('Please add an explaination to your feature-request after the command.');
+				msg.reply('Please add an explaination to your feature-request after the command.');
 			} else {
 				//get rid of the first argument
 				args.shift();
@@ -54,13 +54,13 @@ module.exports = {
 				createJiraIssue('10007', `[FEATURE] ${feature} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
 				if (msg.id) {
-					return msg.channel.send('Your feature-request was sent to the developer.');
+					return msg.reply('Your feature-request was sent to the developer.');
 				}
 				return interaction.reply('Your feature-request was sent to the developer.');
 			}
 		} else if (args[0].toLowerCase() === 'feedback') { //go to general tree
 			if (!args[1]) { //check for second argument
-				msg.channel.send('Please add some text to your feedback after the command.');
+				msg.reply('Please add some text to your feedback after the command.');
 			} else {
 				//get rid of the first argument
 				args.shift();
@@ -70,14 +70,14 @@ module.exports = {
 				createJiraIssue('10005', `[FEEDBACK] ${feedback} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
 				if (msg.id) {
-					return msg.channel.send('Your feedback has been sent to the developer.');
+					return msg.reply('Your feedback has been sent to the developer.');
 				}
 				return interaction.reply('Your feedback has been sent to the developer.');
 			}
 		} else {
 			let guildPrefix = await getGuildPrefix(msg);
 
-			msg.channel.send(`Please add what kind of feedback you want to give. Proper usage: \`${guildPrefix}${this.name} ${this.usage}\``);
+			msg.reply(`Please add what kind of feedback you want to give. Proper usage: \`${guildPrefix}${this.name} ${this.usage}\``);
 		}
 	},
 };

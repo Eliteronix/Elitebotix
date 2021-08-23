@@ -67,7 +67,7 @@ module.exports = async function (oldMember, newMember) {
 				.setTimestamp()
 				.setFooter('Eventname: servermute');
 
-			channel.send(changeEmbed);
+			channel.send({ embeds: [changeEmbed] });
 		}
 	}
 
@@ -112,7 +112,7 @@ module.exports = async function (oldMember, newMember) {
 				.setTimestamp()
 				.setFooter('Eventname: serverdeaf');
 
-			channel.send(changeEmbed);
+			channel.send({ embeds: [changeEmbed] });
 		}
 	}
 
@@ -157,7 +157,7 @@ module.exports = async function (oldMember, newMember) {
 				.setTimestamp()
 				.setFooter('Eventname: joinvoice');
 
-			channel.send(changeEmbed);
+			channel.send({ embeds: [changeEmbed] });
 		}
 
 		if (guild && oldMember.channelID && guild.loggingChannel && guild.loggingLeaveVoice) {
@@ -196,7 +196,7 @@ module.exports = async function (oldMember, newMember) {
 				.setTimestamp()
 				.setFooter('Eventname: leavevoice');
 
-			channel.send(changeEmbed);
+			channel.send({ embeds: [changeEmbed] });
 		}
 	}
 

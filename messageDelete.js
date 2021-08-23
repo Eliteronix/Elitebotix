@@ -80,6 +80,6 @@ module.exports = async function (msg) {
 			});
 		}
 
-		channel.send(changeEmbed);
+		channel.send({ embeds: [changeEmbed] });
 	}
 };

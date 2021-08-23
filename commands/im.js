@@ -28,7 +28,7 @@ module.exports = {
 				if (guild.dadmodeEnabled) {
 					//Send dad answer
 					const userMessage = args.join(' ');
-					msg.channel.send(`Hi \`${userMessage.replace(/`/g, '')}\`, I'm dad!`);
+					msg.reply(`Hi \`${userMessage.replace(/`/g, '')}\`, I'm dad!`);
 				}
 			} else {
 				//Create guild dataset in db if not there yet

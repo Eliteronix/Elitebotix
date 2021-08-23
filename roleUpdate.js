@@ -89,6 +89,6 @@ module.exports = async function (oldRole, newRole) {
 			changeEmbed.addField('Permissions', `\`${oldPermissionsReadable}\` -> \`${newPermissionsReadable}\``);
 		}
 
-		channel.send(changeEmbed);
+		channel.send({ embeds: [changeEmbed] });
 	}
 };

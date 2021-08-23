@@ -54,6 +54,6 @@ module.exports = async function (oldEmoji, newEmoji) {
 			.setTimestamp()
 			.setFooter('Eventname: emojiupdate');
 
-		channel.send(changeEmbed);
+		channel.send({ embeds: [changeEmbed] });
 	}
 };

@@ -24,7 +24,7 @@ module.exports = {
 		});
 
 		if (!elitiriSignUp) {
-			return msg.channel.send('It seems like you are not registered for any bracket of the Elitiri Cup.');
+			return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.');
 		}
 
 		if (args[0].toLowerCase() === 'list') {
@@ -103,7 +103,7 @@ module.exports = {
 				submissionsEmbed.setFooter(`This embed will automatically get deleted in 30 seconds to avoid leaking maps.\nYou can use 'e!${this.name} list' in my DMs to send the embed without a timer.`);
 			}
 
-			let sentMessage = await msg.channel.send(submissionsEmbed);
+			let sentMessage = await msg.reply({ embeds: [submissionsEmbed] });
 
 			if (msg.channel.type !== 'dm') {
 				await pause(30000);
@@ -126,7 +126,7 @@ module.exports = {
 		startOfSubmission.setUTCMonth(5); //Zero Indexed
 		startOfSubmission.setUTCFullYear(2021);
 		if (now < startOfSubmission) {
-			return msg.channel.send('The submission period hasn\'t started yet and maps can\'t be submitted yet.');
+			return msg.reply('The submission period hasn\'t started yet and maps can\'t be submitted yet.');
 		}
 
 		let endOfSubmission = new Date();
@@ -138,11 +138,11 @@ module.exports = {
 		endOfSubmission.setUTCMonth(6); //Zero Indexed
 		endOfSubmission.setUTCFullYear(2021);
 		if (now > endOfSubmission) {
-			return msg.channel.send('The submission period has ended and maps can\'t be changed anymore.');
+			return msg.reply('The submission period has ended and maps can\'t be changed anymore.');
 		}
 
 		if (args[0].toLowerCase() !== 'nm' && args[0].toLowerCase() !== 'hd' && args[0].toLowerCase() !== 'hr' && args[0].toLowerCase() !== 'dt' && args[0].toLowerCase() !== 'fm') {
-			return msg.channel.send('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
+			return msg.reply('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
 		}
 
 		let bracketNameParts = elitiriSignUp.bracketName.split(' ');
@@ -179,7 +179,7 @@ module.exports = {
 						.setDescription(`To look at your submitted maps use \`${guildPrefix}${this.name} list\`\nIf you think the map is within the restrictions please contact Eliteronix#4208`)
 						.addField('Map has been submitted already', 'Each map can just be submitted once for each player');
 
-					return msg.channel.send(viabilityEmbed);
+					return msg.reply({ embeds: [viabilityEmbed] });
 				}
 
 				//The map has to have audio
@@ -390,11 +390,11 @@ module.exports = {
 					}
 				}
 
-				msg.channel.send(viabilityEmbed);
+				msg.reply({ embeds: [viabilityEmbed] });
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
+					msg.reply(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
 				} else {
 					console.log(err);
 				}

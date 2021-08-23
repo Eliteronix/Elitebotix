@@ -19,6 +19,6 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	execute(msg, args) {
 		// eslint-disable-next-line no-undef
-		msg.channel.send(`The server is running on the ${process.env.SERVER} environment on ${process.env.PROVIDER}.`);
+		msg.reply(`The server is running on the ${process.env.SERVER} environment on ${process.env.PROVIDER}.`);
 	},
 };

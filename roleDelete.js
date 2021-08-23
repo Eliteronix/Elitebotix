@@ -65,6 +65,6 @@ module.exports = async function (role) {
 			.setTimestamp()
 			.setFooter('Eventname: roledelete');
 
-		channel.send(changeEmbed);
+		channel.send({ embeds: [changeEmbed] });
 	}
 };

@@ -128,7 +128,8 @@ module.exports = async function (msg, bancho) {
 		//if there is no command used then break
 		if (!command && prefixCommand === true) {
 			let commandNames = [];
-			const commandArray = msg.client.commands.array();
+			const commandArray = [];
+			msg.client.commands.each(clientCommand => commandArray.push(clientCommand));
 
 			//define variables
 			const categories = ['general', 'server-admin', 'osu', 'misc'];
@@ -200,7 +201,7 @@ module.exports = async function (msg, bancho) {
 					await closestMatchMessage.react('✅');
 					await closestMatchMessage.react('❌');
 				} catch (e) {
-					msg.channel.send('I don\'t have permissions to add reactions. Please notify an admin so that you just need to click an emote to fix your typos.');
+					msg.reply('I don\'t have permissions to add reactions. Please notify an admin so that you just need to click an emote to fix your typos.');
 				}
 			}
 
@@ -248,7 +249,7 @@ module.exports = async function (msg, bancho) {
 			}
 
 			//Send message
-			return msg.channel.send(reply);
+			return msg.reply(reply);
 		}
 
 		//Check if the cooldown collection has the command already; if not write it in

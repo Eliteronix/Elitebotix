@@ -79,7 +79,7 @@ module.exports = async function (member) {
 				.setTimestamp()
 				.setFooter('Eventname: userjoining');
 
-			channel.send(changeEmbed);
+			channel.send({ embeds: [changeEmbed] });
 		}
 	}
 

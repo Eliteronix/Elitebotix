@@ -56,6 +56,6 @@ module.exports = async function (discordGuild, user) {
 			.setTimestamp()
 			.setFooter('Eventname: banremove');
 
-		channel.send(changeEmbed);
+		channel.send({ embeds: [changeEmbed] });
 	}
 };

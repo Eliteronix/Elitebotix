@@ -46,7 +46,10 @@ module.exports = {
 				})
 				.catch(err => {
 					if (err.message === 'Not found') {
-						msg.channel.send(`Could not find beatmap \`${arg.replace(/`/g, '')}\`.`);
+						if (msg.id) {
+							return msg.reply(`Could not find beatmap \`${arg.replace(/`/g, '')}\`.`);
+						}
+						return interaction.followUp(`Could not find beatmap \`${arg.replace(/`/g, '')}\`.`);
 					} else {
 						console.log(err);
 					}

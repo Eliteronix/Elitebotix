@@ -37,7 +37,10 @@ module.exports = {
 				const beginningRegex = /.+\nSpectate: .+\nBeatmap: <https:\/\/osu.ppy.sh\/b\//gm;
 				const endingRegex = />\nosu! direct:.+\nTry.+/gm;
 				if (!firstMessage) {
-					return msg.channel.send('Could not find any scores sent by Elitebotix in this channel in the last 100 messages.');
+					if (msg.id) {
+						return msg.reply('Could not find any scores sent by Elitebotix in this channel in the last 100 messages.');
+					}
+					return interaction.followUp('Could not find any scores sent by Elitebotix in this channel in the last 100 messages.');
 				}
 
 				const beatmapId = firstMessage.content.replace(beginningRegex, '').replace(endingRegex, '');

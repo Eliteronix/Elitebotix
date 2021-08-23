@@ -20,6 +20,6 @@ module.exports = {
 		}
 
 		//Link with permissions | Administrator, Manage Roles, Manage Channels, Read Messages, Send Messages, Manage Messages, Attach Files, View Channel, Move Members, Add Reactions
-		msg.channel.send('Here is a link to add the bot to your server: https://discord.com/oauth2/authorize?client_id=784836063058329680&scope=bot&permissions=285256792');
+		msg.reply('Here is a link to add the bot to your server: https://discord.com/oauth2/authorize?client_id=784836063058329680&scope=bot&permissions=285256792');
 	},
 };
