@@ -38,6 +38,9 @@ module.exports = {
 			guildInfoEmbed.setThumbnail(`${msg.guild.iconURL()}`);
 		}
 
-		msg.channel.send({ embeds: [guildInfoEmbed] });
+		if (msg.id) {
+			return msg.reply({ embeds: [guildInfoEmbed] });
+		}
+		return interaction.reply({ embeds: [guildInfoEmbed] });
 	},
 };

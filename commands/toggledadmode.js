@@ -25,7 +25,7 @@ module.exports = {
 		//Check if guild exists in db
 		if (guild) {
 			//reverse dadmode and save dataset
-			if(guild.dadmodeEnabled === true){
+			if (guild.dadmodeEnabled === true) {
 				guild.dadmodeEnabled = false;
 			} else {
 				guild.dadmodeEnabled = true;
@@ -34,14 +34,14 @@ module.exports = {
 
 			//output change
 			if (guild.dadmodeEnabled) {
-				msg.channel.send('Dadmode has been enabled');
+				msg.reply('Dadmode has been enabled');
 			} else {
-				msg.channel.send('Dadmode has been disabled');
+				msg.reply('Dadmode has been disabled');
 			}
 		} else {
 			//Create guild in db if it wasn't there yet and disable it by default
 			DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, dadmodeEnabled: true });
-			msg.channel.send('Dadmode has been activated');
+			msg.reply('Dadmode has been activated');
 		}
 	},
 };

@@ -50,11 +50,11 @@ module.exports = {
 						.setTitle(embedName)
 						.setFooter(`Reactionrole - EmbedID: ${embedId}`);
 					//Send embed
-					const embedMessage = await msg.channel.send(reactionRoleEmbed);
+					const embedMessage = await msg.reply({ embeds: [reactionRoleEmbed] });
 					//Create the record for the embed in the db
 					DBReactionRolesHeader.create({ guildId: embedMessage.guild.id, reactionHeaderId: embedMessage.id, reactionChannelHeaderId: msg.channel.id, reactionTitle: embedName, reactionColor: '#0099ff' });
 				} else {
-					msg.channel.send('Please specify what name you want to give the embed you want to create.');
+					msg.reply('Please specify what name you want to give the embed you want to create.');
 					sendHelp(msg);
 				}
 
@@ -77,7 +77,7 @@ module.exports = {
 						try {
 							embedChannel = msg.guild.channels.cache.get(embedChannelId);
 						} catch (e) {
-							msg.channel.send('Couldn\'t find an embed with this EmbedID');
+							msg.reply('Couldn\'t find an embed with this EmbedID');
 							DBReactionRolesHeader.destroy({
 								where: { guildId: msg.guild.id, id: args[2] },
 							});
@@ -92,10 +92,10 @@ module.exports = {
 							where: { guildId: msg.guild.id, id: args[2] },
 						});
 					} else {
-						msg.channel.send('Couldn\'t find an embed with this EmbedID');
+						msg.reply('Couldn\'t find an embed with this EmbedID');
 					}
 				} else {
-					msg.channel.send('Please specify what ID the embed has you want to remove. (Can be found in the footer of the embed.)');
+					msg.reply('Please specify what ID the embed has you want to remove. (Can be found in the footer of the embed.)');
 					sendHelp(msg);
 				}
 			} else if (args[1].toLowerCase() === 'change') {
@@ -117,9 +117,9 @@ module.exports = {
 								editEmbed(msg, reactionRolesHeader)
 							);
 
-							msg.channel.send('The title for the specified embed has been changed.');
+							msg.reply('The title for the specified embed has been changed.');
 						} else {
-							msg.channel.send('Couldn\'t find an embed with this EmbedID');
+							msg.reply('Couldn\'t find an embed with this EmbedID');
 						}
 					} else if (args[3].toLowerCase() === 'description') {
 						//Get embed from the db
@@ -138,9 +138,9 @@ module.exports = {
 								editEmbed(msg, reactionRolesHeader)
 							);
 
-							msg.channel.send('The description for the specified embed has been changed.');
+							msg.reply('The description for the specified embed has been changed.');
 						} else {
-							msg.channel.send('Couldn\'t find an embed with this EmbedID');
+							msg.reply('Couldn\'t find an embed with this EmbedID');
 						}
 					} else if (args[3].toLowerCase() === 'color') {
 						if (args[4].startsWith('#') && args[4].length === 7) {
@@ -163,12 +163,12 @@ module.exports = {
 									editEmbed(msg, reactionRolesHeader)
 								);
 
-								msg.channel.send('The color for the specified embed has been changed.');
+								msg.reply('The color for the specified embed has been changed.');
 							} else {
-								msg.channel.send('Couldn\'t find an embed with this EmbedID');
+								msg.reply('Couldn\'t find an embed with this EmbedID');
 							}
 						} else {
-							msg.channel.send('Please send a color in a format like \'#0099ff\'');
+							msg.reply('Please send a color in a format like \'#0099ff\'');
 						}
 					} else if (args[3].toLowerCase() === 'image') {
 
@@ -190,21 +190,21 @@ module.exports = {
 								editEmbed(msg, reactionRolesHeader)
 							);
 
-							msg.channel.send('The image for the specified embed has been changed.');
+							msg.reply('The image for the specified embed has been changed.');
 						} else {
-							msg.channel.send('Couldn\'t find an embed with this EmbedID');
+							msg.reply('Couldn\'t find an embed with this EmbedID');
 						}
 					} else {
-						msg.channel.send('Please specify what you want to change: <title/description/color/image>');
+						msg.reply('Please specify what you want to change: <title/description/color/image>');
 						sendHelp(msg);
 					}
 				} else {
-					msg.channel.send('Please specify what ID the embed has you want to change. (Can be found in the footer of the embed.)');
+					msg.reply('Please specify what ID the embed has you want to change. (Can be found in the footer of the embed.)');
 					sendHelp(msg);
 				}
 			} else {
 				//incorrect second argument
-				msg.channel.send('Please specify if you want to add, remove or change the embed.');
+				msg.reply('Please specify if you want to add, remove or change the embed.');
 				sendHelp(msg);
 			}
 			//Check the first argument
@@ -235,9 +235,9 @@ module.exports = {
 								});
 
 								if (reactionRolesEmoji) {
-									return msg.channel.send('There is already a reactionrole with this emoji in the specified embed.');
+									return msg.reply('There is already a reactionrole with this emoji in the specified embed.');
 								} else if (reactionRolesRole) {
-									return msg.channel.send('There is already a reactionrole with this role in the specified embed.');
+									return msg.reply('There is already a reactionrole with this role in the specified embed.');
 								} else {
 									const emoji = args[3];
 									args.shift();
@@ -246,24 +246,24 @@ module.exports = {
 									args.shift();
 									args.shift();
 									DBReactionRoles.create({ dbReactionRolesHeaderId: headerId, roleId: roleMentioned, emoji: emoji, description: args.join(' ') });
-									msg.channel.send('The role has been added as an reactionrole.'); //Specify which role (print the name)
+									msg.reply('The role has been added as an reactionrole.'); //Specify which role (print the name)
 
 									//Edit embed
 									editEmbed(msg, reactionRolesHeader);
 								}
 							} else {
-								msg.channel.send('Couldn\'t find an embed with this EmbedID');
+								msg.reply('Couldn\'t find an embed with this EmbedID');
 							}
 						} else {
-							msg.channel.send('You didn\'t provide a description for the role!');
+							msg.reply('You didn\'t provide a description for the role!');
 							sendHelp(msg);
 						}
 					} else {
-						msg.channel.send('You didn\'t specify the role you want to add to the embed!');
+						msg.reply('You didn\'t specify the role you want to add to the embed!');
 						sendHelp(msg);
 					}
 				} else {
-					msg.channel.send('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
+					msg.reply('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
 					sendHelp(msg);
 				}
 				//Check the second argument
@@ -290,12 +290,12 @@ module.exports = {
 								//Edit embed
 								editEmbed(msg, reactionRolesHeader);
 							} else {
-								msg.channel.send('There were no reactionrole found in the embed with this emoji.');
+								msg.reply('There were no reactionrole found in the embed with this emoji.');
 							}
 						}
 					}
 				} else {
-					msg.channel.send('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
+					msg.reply('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
 					sendHelp(msg);
 				}
 				//Check the second argument
@@ -335,29 +335,29 @@ module.exports = {
 								reactionRolesEmoji.save()
 									.then(editEmbed(msg, reactionRolesHeader));
 							} else {
-								msg.channel.send('Please specify if you want to change the emoji or the description.');
+								msg.reply('Please specify if you want to change the emoji or the description.');
 								sendHelp(msg);
 							}
 						} else {
-							msg.channel.send('Couldn\'t find a reactionrole with this emoji in the specified embed.');
+							msg.reply('Couldn\'t find a reactionrole with this emoji in the specified embed.');
 						}
 					} else {
-						msg.channel.send('Couldn\'t find an embed with this EmbedID');
+						msg.reply('Couldn\'t find an embed with this EmbedID');
 					}
 				} else {
-					msg.channel.send('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
+					msg.reply('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
 					sendHelp(msg);
 				}
 			} else {
 				//incorrect second argument
-				msg.channel.send('Please specify if you want to add or remove the embed.');
+				msg.reply('Please specify if you want to add or remove the embed.');
 				sendHelp(msg);
 			}
 		} else if (args[0].toLowerCase() === 'help') {
 			sendHelp(msg);
 		} else {
 			//Incorrect first argument
-			msg.channel.send('Please provide what kind of object you want to add / remove.');
+			msg.reply('Please provide what kind of object you want to add / remove.');
 			sendHelp(msg);
 		}
 	},
@@ -398,7 +398,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 	try {
 		embedChannel = msg.guild.channels.cache.get(embedChannelId);
 	} catch (e) {
-		msg.channel.send('Couldn\'t find an embed with this EmbedID');
+		msg.reply('Couldn\'t find an embed with this EmbedID');
 		DBReactionRolesHeader.destroy({
 			where: { guildId: msg.guild.id, id: reactionRolesHeader.id },
 		});
@@ -428,5 +428,5 @@ async function sendHelp(msg) {
 	helpString += `Correct usage for adding a role to an embed:\n\`\`\`${guildPrefix}reactionrole role add <embedID> <emoji for the role> <@role> <description>\`\`\``;
 	helpString += `Correct usage for removing a role from an embed:\n\`\`\`${guildPrefix}reactionrole role remove <embedID> <emoji of the role>\`\`\``;
 	helpString += `Correct usage for changing a role in an embed:\n\`\`\`${guildPrefix}reactionrole role change <embedID> <emoji of the role> <emoji/description> <new emoji/description>\`\`\``;
-	msg.channel.send(helpString);
+	msg.reply(helpString);
 }

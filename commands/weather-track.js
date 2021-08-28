@@ -36,7 +36,7 @@ module.exports = {
 				}
 			}
 
-			return msg.channel.send(trackingListString || 'No weather tracking tasks found in this channel.');
+			return msg.reply(trackingListString || 'No weather tracking tasks found in this channel.');
 		} else if (args[0].toLowerCase() === 'remove') {
 			args.shift();
 			const trackingList = await DBProcessQueue.findAll({
@@ -50,18 +50,18 @@ module.exports = {
 			} else if (args[0].toLowerCase() === 'f') {
 				degreeType = 'F';
 			} else {
-				return msg.channel.send('Please specify if it is a tracker in `C` or in `F` as the second argument.');
+				return msg.reply('Please specify if it is a tracker in `C` or in `F` as the second argument.');
 			}
 			args.shift();
 
 			for (let i = 0; i < trackingList.length; i++) {
 				if (trackingList[i].additions.startsWith(msg.channel.id) && trackingList[i].additions.includes(`;${degreeType};`) && trackingList[i].additions.endsWith(`;${args.join(' ')}`)) {
 					trackingList[i].destroy();
-					return msg.channel.send('The specified tracker has been removed.');
+					return msg.reply('The specified tracker has been removed.');
 				}
 			}
 
-			return msg.channel.send('Couldn\'t find a weather tracker to remove.');
+			return msg.reply('Couldn\'t find a weather tracker to remove.');
 		} else if (args[0].toLowerCase() === 'hourly') {
 			timePeriod = 'hourly';
 			args.shift();
@@ -69,7 +69,7 @@ module.exports = {
 			timePeriod = 'daily';
 			args.shift();
 		} else {
-			return msg.channel.send('The first argument should declare if it is `hourly` or `daily`.');
+			return msg.reply('The first argument should declare if it is `hourly` or `daily`.');
 		}
 
 		let degreeType = 'C';
@@ -82,7 +82,7 @@ module.exports = {
 			if (err) console.log(err);
 
 			if (!result[0]) {
-				return msg.channel.send(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
+				return msg.reply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
 			}
 
 			let date = new Date();
@@ -102,7 +102,7 @@ module.exports = {
 			});
 
 			if (duplicate) {
-				return msg.channel.send(`The weather for ${args.join(' ')} is already being provided ${timePeriod} in this channel.`);
+				return msg.reply(`The weather for ${args.join(' ')} is already being provided ${timePeriod} in this channel.`);
 			}
 
 			if (timePeriod === 'hourly') {
@@ -114,7 +114,7 @@ module.exports = {
 					dailyDuplicate.additions = `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`;
 					dailyDuplicate.save();
 
-					return msg.channel.send(`The weather for ${args.join(' ')} will now be provided hourly instead of daily.`);
+					return msg.reply(`The weather for ${args.join(' ')} will now be provided hourly instead of daily.`);
 				}
 			} else {
 				const hourlyDuplicate = await DBProcessQueue.findOne({
@@ -125,13 +125,13 @@ module.exports = {
 					hourlyDuplicate.additions = `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`;
 					hourlyDuplicate.save();
 
-					return msg.channel.send(`The weather for ${args.join(' ')} will now be provided daily instead of hourly.`);
+					return msg.reply(`The weather for ${args.join(' ')} will now be provided daily instead of hourly.`);
 				}
 			}
 
 			DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`, date: date });
 
-			msg.channel.send(`The weather for ${args.join(' ')} will be provided ${timePeriod} in this channel.`);
+			msg.reply(`The weather for ${args.join(' ')} will be provided ${timePeriod} in this channel.`);
 		});
 	},
 };

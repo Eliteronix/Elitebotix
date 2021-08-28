@@ -70,7 +70,7 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 				args[i] = args[i].replace(/`/g, '');
 			}
 			if (msg.id) {
-				return msg.channel.send(`You provided multiple arguments (\`${args.join('`, `')}\`). If your name has spaces please replace them with an \`_\` like this: \`${args.join('_')}\`.`);
+				return msg.reply(`You provided multiple arguments (\`${args.join('`, `')}\`). If your name has spaces please replace them with an \`_\` like this: \`${args.join('_')}\`.`);
 			}
 
 			return interaction.reply(`You provided multiple arguments (\`${args.join('`, `')}\`). If your name has spaces please replace them with an \`_\` like this: \`${args.join('_')}\`.`);
@@ -86,13 +86,13 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 				if (existingVerifiedDiscordUser) {
 					if (existingVerifiedDiscordUser.userId === msg.author.id) {
 						if (msg.id) {
-							return msg.channel.send(`You already connected and verified your connection of your discord account to the osu! account \`${args[0].replace(/`/g, '')}\``);
+							return msg.reply(`You already connected and verified your connection of your discord account to the osu! account \`${args[0].replace(/`/g, '')}\``);
 						}
 
 						return interaction.reply(`You already connected and verified your connection of your discord account to the osu! account \`${args[0].replace(/`/g, '')}\``);
 					}
 					if (msg.id) {
-						return msg.channel.send(`There is already a discord account linked and verified for \`${args[0].replace(/`/g, '')}\``);
+						return msg.reply(`There is already a discord account linked and verified for \`${args[0].replace(/`/g, '')}\``);
 					}
 
 					return interaction.reply(`There is already a discord account linked and verified for \`${args[0].replace(/`/g, '')}\``);
@@ -101,7 +101,7 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 				if (discordUser) {
 					let processingMessage = null;
 					if (msg.id) {
-						processingMessage = await msg.channel.send('Processing...');
+						processingMessage = await msg.reply('Processing...');
 					} else {
 						await interaction.reply('Processing...');
 					}
@@ -134,7 +134,7 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 				} else {
 					let processingMessage = null;
 					if (msg.id) {
-						processingMessage = await msg.channel.send('Processing...');
+						processingMessage = await msg.reply('Processing...');
 					} else {
 						await interaction.reply('Processing...');
 					}
@@ -162,7 +162,7 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 			.catch(err => {
 				if (err.message === 'Not found') {
 					if (msg.id) {
-						return msg.channel.send(`Could not find an osu! account \`${args[0].replace(/`/g, '')}\`.`);
+						return msg.reply(`Could not find an osu! account \`${args[0].replace(/`/g, '')}\`.`);
 					} else {
 						return interaction.reply(`Could not find an osu! account \`${args[0].replace(/`/g, '')}\`.`);
 					}
@@ -172,7 +172,7 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 			});
 	} else {
 		if (msg.id) {
-			return msg.channel.send(`Please specify to which osu! account you want to connect.\nUsage: \`${guildPrefix}osu-link connect <osu! username ("_" for " ")>\``);
+			return msg.reply(`Please specify to which osu! account you want to connect.\nUsage: \`${guildPrefix}osu-link connect <osu! username ("_" for " ")>\``);
 		} else {
 			return interaction.reply('Please specify to which osu! account you want to connect.\nUsage: `/osu-link connect <osu! username ("_" for " ")>`');
 		}
@@ -196,7 +196,7 @@ async function current(msg, osuApi, interaction, additionalObjects, discordUser,
 				discordUser.save();
 
 				if (msg.id) {
-					return msg.channel.send(`Currently linked osu! account: \`${osuUser.name}\`.\nVerified: \`${verified}\``);
+					return msg.reply(`Currently linked osu! account: \`${osuUser.name}\`.\nVerified: \`${verified}\``);
 				} else {
 					return interaction.reply(`Currently linked osu! account: \`${osuUser.name}\`.\nVerified: \`${verified}\``);
 				}
@@ -204,7 +204,7 @@ async function current(msg, osuApi, interaction, additionalObjects, discordUser,
 			.catch(err => {
 				if (err.message === 'Not found') {
 					if (msg.id) {
-						return msg.channel.send(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
+						return msg.reply(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
 					} else {
 						return interaction.reply(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
 					}
@@ -235,7 +235,7 @@ async function disconnect(msg, interaction, additionalObjects, discordUser, guil
 		discordUser.save();
 
 		if (msg.id) {
-			return msg.channel.send(`There is no longer an osu! account linked to your discord account.\nUse \`${guildPrefix}osu-link <connect> <osu! username ("_" for " ")>\` to link an osu! account to your discord account.`);
+			return msg.reply(`There is no longer an osu! account linked to your discord account.\nUse \`${guildPrefix}osu-link <connect> <osu! username ("_" for " ")>\` to link an osu! account to your discord account.`);
 		} else {
 			return interaction.reply('There is no longer an osu! account linked to your discord account.\nUse `/osu-link connect <osu! username ("_" for " ")>` to link an osu! account to your discord account.');
 		}
@@ -256,7 +256,7 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 						discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 						discordUser.save();
 						if (msg.id) {
-							return msg.channel.send(`Your osu! account \`${osuUser.name}\` is already verified\nIf you need to connect a different account use \`${guildPrefix}osu-link <disconnect>\` first.`);
+							return msg.reply(`Your osu! account \`${osuUser.name}\` is already verified\nIf you need to connect a different account use \`${guildPrefix}osu-link <disconnect>\` first.`);
 						} else {
 							return interaction.reply(`Your osu! account \`${osuUser.name}\` is already verified\nIf you need to connect a different account use \`/osu-link disconnect\` first.`);
 						}
@@ -264,7 +264,7 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 					.catch(err => {
 						if (err.message === 'Not found') {
 							if (msg.id) {
-								return msg.channel.send(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
+								return msg.reply(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
 							} else {
 								return interaction.reply(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
 							}
@@ -278,7 +278,7 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 						.then(async (osuUser) => {
 							let processingMessage = null;
 							if (msg.id) {
-								processingMessage = await msg.channel.send('Processing...');
+								processingMessage = await msg.reply('Processing...');
 							} else {
 								await interaction.reply('Processing...');
 							}
@@ -310,7 +310,7 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 						.catch(err => {
 							if (err.message === 'Not found') {
 								if (msg.id) {
-									return msg.channel.send(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
+									return msg.reply(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
 								} else {
 									return interaction.reply(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
 								}
@@ -337,7 +337,7 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 						discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 						discordUser.save();
 						if (msg.id) {
-							return msg.channel.send(`Your connection to the osu! account \`${osuUser.name}\` is now verified.`);
+							return msg.reply(`Your connection to the osu! account \`${osuUser.name}\` is now verified.`);
 						} else {
 							return interaction.reply(`Your connection to the osu! account \`${osuUser.name}\` is now verified.`);
 						}
@@ -345,7 +345,7 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 					.catch(err => {
 						if (err.message === 'Not found') {
 							if (msg.id) {
-								return msg.channel.send(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
+								return msg.reply(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
 							} else {
 								return interaction.reply(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
 							}
@@ -362,7 +362,7 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 						discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 						discordUser.save();
 						if (msg.id) {
-							return msg.channel.send(`The sent code \`${args[1].replace(/`/g, '')}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse \`${guildPrefix}osu-link verify\` to resend the code.`);
+							return msg.reply(`The sent code \`${args[1].replace(/`/g, '')}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse \`${guildPrefix}osu-link verify\` to resend the code.`);
 						} else {
 							return interaction.reply(`The sent code \`${args[1].replace(/`/g, '')}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse \`/osu-link verify\` to resend the code.`);
 						}
@@ -370,7 +370,7 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 					.catch(err => {
 						if (err.message === 'Not found') {
 							if (msg.id) {
-								return msg.channel.send(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
+								return msg.reply(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
 							} else {
 								return interaction.reply(`Could not find an osu! account for id \`${discordUser.osuUserId}\`.`);
 							}
@@ -387,7 +387,7 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 
 function linkAccountMessage(msg, interaction, additionalObjects, guildPrefix) {
 	if (msg.id) {
-		return msg.channel.send(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <username ("_" for " ")>\``);
+		return msg.reply(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <username ("_" for " ")>\``);
 	} else {
 		return interaction.reply('There is currently no osu! account linked to your discord account.\nPlease use `/osu-link connect <username ("_" for " ")>`');
 	}

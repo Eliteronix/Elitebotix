@@ -25,7 +25,7 @@ module.exports = {
 		//Check if guild exists in db
 		if (guild) {
 			//reverse owo and save dataset
-			if(guild.owoEnabled === true){
+			if (guild.owoEnabled === true) {
 				guild.owoEnabled = false;
 			} else {
 				guild.owoEnabled = true;
@@ -34,14 +34,14 @@ module.exports = {
 
 			//output change
 			if (guild.owoEnabled) {
-				msg.channel.send('owo has been enabled');
+				msg.reply('owo has been enabled');
 			} else {
-				msg.channel.send('owo has been disabled');
+				msg.reply('owo has been disabled');
 			}
 		} else {
 			//Create guild in db if it wasn't there yet and disable it by default
 			DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, owoEnabled: true });
-			msg.channel.send('owo has been activated');
+			msg.reply('owo has been activated');
 		}
 	},
 };

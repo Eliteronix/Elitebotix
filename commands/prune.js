@@ -28,7 +28,7 @@ module.exports = {
 		//Delete messages which are less than 2 weeks old
 		msg.channel.bulkDelete(amount, true).catch(err => {
 			console.error(err);
-			msg.channel.send('there was an error trying to prune messages in this channel!');
+			msg.reply('there was an error trying to prune messages in this channel!');
 		});
 	},
 };

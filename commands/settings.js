@@ -126,6 +126,9 @@ module.exports = {
 			)
 			.setTimestamp();
 
-		msg.channel.send({ embeds: [guildBotInfoEmbed] });
+		if (msg.id) {
+			return msg.reply({ embeds: [guildBotInfoEmbed] });
+		}
+		return interaction.reply({ embeds: [guildBotInfoEmbed] });
 	},
 };

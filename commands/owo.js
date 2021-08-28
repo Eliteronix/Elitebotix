@@ -29,9 +29,9 @@ module.exports = {
 				if (guild.owoEnabled) {
 					//declare weebEmojis array
 					var weebEmojis = ['owo', 'uwu', 'UwU', 'OwO', 'OuO'];
-		
+
 					//send the message
-					msg.channel.send(weebEmojis[Math.floor(Math.random() * weebEmojis.length)]);
+					msg.reply(weebEmojis[Math.floor(Math.random() * weebEmojis.length)]);
 				}
 			} else {
 				//Create guild dataset in db if not there yet

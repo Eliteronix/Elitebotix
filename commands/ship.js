@@ -50,7 +50,7 @@ module.exports = {
 		data.push(`Compatibility: ${compatibility}%`);
 
 		if (msg.id) {
-			return msg.channel.send(data.join('\n'));
+			return msg.reply(data.join('\n'));
 		}
 
 		interaction.reply(data.join('\n'));

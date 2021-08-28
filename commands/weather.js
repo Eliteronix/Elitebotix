@@ -22,21 +22,14 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(additionalObjects[0], interaction);
+			msg = await populateMsgFromInteraction(interaction);
 
-			await additionalObjects[0].api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						content: 'Location is being evaluated'
-					}
-				}
-			});
+			await interaction.reply('Location is being evaluated');
 
 			args = [];
 
-			for (let i = 0; i < interaction.data.options.length; i++) {
-				args.push(interaction.data.options[i].value);
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				args.push(interaction.options._hoistedOptions[i].value);
 			}
 		}
 
@@ -56,7 +49,10 @@ module.exports = {
 					.then(async (result) => {
 						if (!result[0]) {
 							triesBeforeError = Infinity;
-							return msg.channel.send(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
+							if (msg.id) {
+								return msg.reply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
+							}
+							return interaction.reply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
 						}
 
 						const weather = result[0];
@@ -134,7 +130,11 @@ module.exports = {
 						//Create as an attachment
 						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'elitebotix-changelog.png');
 
-						msg.channel.send(`Weather for ${args.join(' ')}`, attachment);
+						if (msg.id) {
+							msg.reply({ content: `Weather for ${args.join(' ')}`, files: [attachment] });
+						} else {
+							interaction.followUp({ content: `Weather for ${args.join(' ')}`, files: [attachment] });
+						}
 
 						return triesBeforeError = Infinity;
 					})

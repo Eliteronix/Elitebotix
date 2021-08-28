@@ -32,19 +32,19 @@ module.exports = {
 		}
 
 		if (!msg.mentions.users.first()) {
-			sendUserEmbed(msg, msg.author);
+			sendUserEmbed(msg, interaction, msg.author);
 		} else {
 			const users = [];
 			msg.mentions.users.each(user => users.push(user));
 			for (let i = 0; i < users.length; i++) {
-				sendUserEmbed(msg, users[i]);
+				sendUserEmbed(msg, interaction, users[i]);
 			}
 		}
 
 	},
 };
 
-async function sendUserEmbed(msg, user) {
+async function sendUserEmbed(msg, interaction, user) {
 	//Send embed
 	const userInfoEmbed = new Discord.MessageEmbed()
 		.setColor('#7289DA')
@@ -103,5 +103,8 @@ async function sendUserEmbed(msg, user) {
 		}
 
 	}
-	msg.channel.send({ embeds: [userInfoEmbed] });
+	if (msg.id) {
+		return msg.reply({ embeds: [userInfoEmbed] });
+	}
+	return interaction.followUp({ embeds: [userInfoEmbed] });
 }

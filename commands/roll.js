@@ -33,7 +33,7 @@ module.exports = {
 		const result = Math.floor(Math.random() * max) + 1;
 
 		if (msg.id) {
-			return msg.channel.send(`<@${msg.author.id}> rolled ${result}!`);
+			return msg.reply(`<@${msg.author.id}> rolled ${result}!`);
 		}
 		return interaction.reply(`<@${msg.author.id}> rolled ${result}!`);
 	},

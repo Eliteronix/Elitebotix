@@ -30,7 +30,11 @@ module.exports = {
 				let response = await fetch(url);
 				let json = await response.json();
 				const index = Math.floor(Math.random() * json.results.length);
-				msg.channel.send(`<@${msg.author.id}> has slapped <@${user.id}>\n${json.results[index].url}`);
+				if (msg.id) {
+					return msg.reply(`<@${msg.author.id}> has slapped <@${user.id}>\n${json.results[index].url}`);
+				}
+
+				return interaction.followUp(`<@${msg.author.id}> has slapped <@${user.id}>\n${json.results[index].url}`);
 			});
 		} else {
 			msg.reply('please mention a user.');

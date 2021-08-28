@@ -64,7 +64,7 @@ module.exports = {
 
 		if (args.length === 0) {
 			const guildPrefix = await getGuildPrefix(msg);
-			return msg.channel.send(`You didn't provide a message.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
+			return msg.reply(`You didn't provide a message.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
 		}
 
 		let now = new Date();
@@ -77,13 +77,13 @@ module.exports = {
 
 		if (now.getTime() === date.getTime()) {
 			const guildPrefix = await getGuildPrefix(msg);
-			return msg.channel.send(`You didn't specify when I should remind you.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
+			return msg.reply(`You didn't specify when I should remind you.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
 		}
 
 		DBProcessQueue.create({ guildId: 'None', task: 'remind', priority: 10, additions: `${msg.author.id};${args.join(' ')}`, date: date });
 
 		if (msg.id) {
-			return msg.channel.send('Reminder has been set. Be sure to have DMs enabled for the bot.');
+			return msg.reply('Reminder has been set. Be sure to have DMs enabled for the bot.');
 		}
 
 		return interaction.reply({ content: 'Reminder has been set. Be sure to have DMs enabled for the bot.', ephemeral: true });

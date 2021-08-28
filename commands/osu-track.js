@@ -36,11 +36,11 @@ module.exports = {
 				}
 			}
 
-			return msg.channel.send(trackingListString || 'No osu! tracking tasks found in this channel.', { split: true });
+			return msg.reply(trackingListString || 'No osu! tracking tasks found in this channel.', { split: true });
 		} else if (args[0].toLowerCase() === 'remove') {
 			args.shift();
 			if (args[1]) {
-				return msg.channel.send('Please specify which user shouldn\'t be tracked anymore.');
+				return msg.reply('Please specify which user shouldn\'t be tracked anymore.');
 			}
 
 			const trackingList = await DBProcessQueue.findAll({
@@ -50,11 +50,11 @@ module.exports = {
 			for (let i = 0; i < trackingList.length; i++) {
 				if (trackingList[i].additions.startsWith(msg.channel.id) && trackingList[i].additions.toLowerCase().replace(/ /g, '_').includes(`;${args.join('_').toLowerCase()}`)) {
 					trackingList[i].destroy();
-					return msg.channel.send('The specified tracker has been removed.');
+					return msg.reply('The specified tracker has been removed.');
 				}
 			}
 
-			return msg.channel.send('Couldn\'t find an osu! tracker to remove.');
+			return msg.reply('Couldn\'t find an osu! tracker to remove.');
 		} else if (args[0].toLowerCase() === 'add') {
 			args.shift();
 		}
@@ -88,14 +88,14 @@ module.exports = {
 
 					DBProcessQueue.create({ guildId: 'None', task: 'osu-track', priority: 8, additions: `${msg.channel.id};${user.id};${user.name}`, date: date });
 
-					msg.channel.send(`The user ${user.name} will be tracked in this channel.`);
+					msg.reply(`The user ${user.name} will be tracked in this channel.`);
 				} else {
-					msg.channel.send(`The user ${user.name} is already being tracked in this channel.`);
+					msg.reply(`The user ${user.name} is already being tracked in this channel.`);
 				}
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${args.join('_').replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
+					msg.reply(`Could not find user \`${args.join('_').replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
 				} else {
 					console.log(err);
 				}

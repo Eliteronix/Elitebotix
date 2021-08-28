@@ -30,7 +30,7 @@ module.exports = {
 			endOfRegs.setUTCMonth(5); //Zero Indexed
 			endOfRegs.setUTCFullYear(2021);
 			if (now > endOfRegs) {
-				return msg.channel.send('The registration period has ended.');
+				return msg.reply('The registration period has ended.');
 			}
 
 			const guildPrefix = await getGuildPrefix(msg);
@@ -115,7 +115,7 @@ module.exports = {
 			endOfRegs.setUTCMonth(5); //Zero Indexed
 			endOfRegs.setUTCFullYear(2021);
 			if (now > endOfRegs) {
-				return msg.channel.send('The registration period has ended and signups can\'t be changed anymore.');
+				return msg.reply('The registration period has ended and signups can\'t be changed anymore.');
 			}
 
 			const guildPrefix = await getGuildPrefix(msg);
@@ -168,7 +168,7 @@ module.exports = {
 				sendMessage(msg, `You are not yet registered for the \`Elitiri Cup Summer 2021\` tournament.\nYou can register by using \`${guildPrefix}${this.name} register\`!`);
 			}
 		} else {
-			msg.channel.send('Please specify what you want to do: `server`, `register`, `unregister`, `availability`');
+			msg.reply('Please specify what you want to do: `server`, `register`, `unregister`, `availability`');
 		}
 	},
 };

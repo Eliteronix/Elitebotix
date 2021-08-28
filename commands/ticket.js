@@ -95,7 +95,7 @@ module.exports = {
 						return;
 					}
 					if (ticket.statusId === 100) {
-						return msg.channel.send('The ticket is already closed. Please create a new ticket instead.');
+						return msg.reply('The ticket is already closed. Please create a new ticket instead.');
 					}
 					ticket.statusId = 25;
 					ticket.statusName = 'Responded';
@@ -125,7 +125,7 @@ module.exports = {
 					msg.delete();
 					removeEmptyCategories(msg);
 				} else {
-					return msg.channel.send('This is not a valid ticket channel.');
+					return msg.reply('This is not a valid ticket channel.');
 				}
 				return;
 			} else if (args[0].toLowerCase() === 'action' || args[0].toLowerCase() === 'a') {
@@ -138,7 +138,7 @@ module.exports = {
 						return;
 					}
 					if (ticket.statusId === 100) {
-						return msg.channel.send('The ticket is already closed. Please create a new ticket instead.');
+						return msg.reply('The ticket is already closed. Please create a new ticket instead.');
 					}
 					ticket.statusId = 50;
 					ticket.statusName = 'In action';
@@ -172,7 +172,7 @@ module.exports = {
 					msg.delete();
 					removeEmptyCategories(msg);
 				} else {
-					return msg.channel.send('This is not a valid ticket channel.');
+					return msg.reply('This is not a valid ticket channel.');
 				}
 				return;
 			} else if (args[0].toLowerCase() === 'close' || args[0].toLowerCase() === 'c') {
@@ -185,7 +185,7 @@ module.exports = {
 						return;
 					}
 					if (ticket.statusId === 100) {
-						return msg.channel.send('The ticket is already closed.');
+						return msg.reply('The ticket is already closed.');
 					}
 					ticket.statusId = 100;
 					ticket.statusName = 'Closed';
@@ -224,7 +224,7 @@ module.exports = {
 
 					await setPermissions(msg.channel, ticket);
 
-					msg.channel.send('The Ticket has been closed.');
+					msg.reply('The Ticket has been closed.');
 					removeEmptyCategories(msg);
 					msg.delete();
 
@@ -232,14 +232,14 @@ module.exports = {
 					date.setUTCMinutes(date.getUTCMinutes() + 3);
 					DBProcessQueue.create({ guildId: msg.guild.id, task: 'closeTicket', priority: 5, additions: msg.channel.id, date: date });
 				} else {
-					return msg.channel.send('This is not a valid ticket channel.');
+					return msg.reply('This is not a valid ticket channel.');
 				}
 				return;
 			}
 
 			if (!args[1]) {
 				if (msg.id) {
-					return msg.channel.send('Please describe the problem in further detail.');
+					return msg.reply('Please describe the problem in further detail.');
 				}
 				return interaction.reply('Please describe the problem in further detail.');
 			}
@@ -292,7 +292,7 @@ module.exports = {
 		} else {
 			const guildPrefix = await getGuildPrefix(msg);
 			if (msg.id) {
-				return msg.channel.send(`Tickets aren't enabled on this server.\nStaff can enable tickets by using \`${guildPrefix}toggletickets\`.`);
+				return msg.reply(`Tickets aren't enabled on this server.\nStaff can enable tickets by using \`${guildPrefix}toggletickets\`.`);
 			}
 			return interaction.reply(`Tickets aren't enabled on this server.\nStaff can enable tickets by using \`${guildPrefix}toggletickets\`.`);
 		}

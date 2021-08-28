@@ -50,7 +50,7 @@ module.exports = {
 			} else {
 				const guildPrefix = await getGuildPrefix(msg);
 				if (msg.id) {
-					return msg.channel.send(`You didn't provide a valid match ID or URL.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);
+					return msg.reply(`You didn't provide a valid match ID or URL.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);
 				} else {
 					return interaction.reply(`You didn't provide a valid match ID or URL.\nUsage: \`/${this.name} ${this.usage}\``);
 				}
@@ -196,7 +196,7 @@ module.exports = {
 			.catch(err => {
 				if (err.message === 'Not found') {
 					if (msg.id) {
-						return msg.channel.send(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
+						return msg.reply(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
 					} else {
 						return interaction.reply(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
 					}

@@ -27,12 +27,12 @@ module.exports = {
 			guild.customPrefix = args[0];
 			guild.save();
 
-			msg.channel.send(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+			msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
 		} else {
 			//Create new record for the guild in the db
 			DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, customPrefixUsed: true, customPrefix: args[0] });
 
-			msg.channel.send(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+			msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
 		}
 	},
 };

@@ -34,14 +34,14 @@ module.exports = {
 
 			//output change
 			if (guild.ticketsEnabled) {
-				msg.channel.send('Tickets have been enabled');
+				msg.reply('Tickets have been enabled');
 			} else {
-				msg.channel.send('Tickets have been disabled');
+				msg.reply('Tickets have been disabled');
 			}
 		} else {
 			//Create guild in db if it wasn't there yet and disable it by default
 			DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, ticketsEnabled: true });
-			msg.channel.send('Tickets have been enabled');
+			msg.reply('Tickets have been enabled');
 		}
 	},
 };

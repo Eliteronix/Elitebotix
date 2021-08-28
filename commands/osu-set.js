@@ -38,7 +38,7 @@ module.exports = {
 				}
 
 				if (msg.id) {
-					return msg.channel.send('Bancho has been set as your main server.');
+					return msg.reply('Bancho has been set as your main server.');
 				}
 				return interaction.reply({ content: 'Bancho has been set as your main server.', ephemeral: true });
 			} else if (args[1] && args[1].toLowerCase() === 'ripple') {
@@ -50,11 +50,14 @@ module.exports = {
 				}
 
 				if (msg.id) {
-					return msg.channel.send('Ripple has been set as your main server.');
+					return msg.reply('Ripple has been set as your main server.');
 				}
 				return interaction.reply({ content: 'Ripple has been set as your main server.', ephemeral: true });
 			} else {
-				msg.channel.send('Please specify which server you want to set as your main server: `bancho`, `ripple`');
+				if (msg.id) {
+					return msg.reply('Please specify which server you want to set as your main server: `bancho`, `ripple`');
+				}
+				return interaction.reply({ content: 'Please specify which server you want to set as your main server: `bancho`, `ripple`', ephemeral: true });
 			}
 		} else if (args[0].toLowerCase() === 'mode') {
 			if (args[1] && args[1].toLowerCase() === 'standard') {
@@ -66,7 +69,7 @@ module.exports = {
 				}
 
 				if (msg.id) {
-					return msg.channel.send('Standard has been set as your main mode.');
+					return msg.reply('Standard has been set as your main mode.');
 				}
 				return interaction.reply({ content: 'Standard has been set as your main mode.', ephemeral: true });
 			} else if (args[1] && args[1].toLowerCase() === 'taiko') {
@@ -78,7 +81,7 @@ module.exports = {
 				}
 
 				if (msg.id) {
-					return msg.channel.send('Taiko has been set as your main mode.');
+					return msg.reply('Taiko has been set as your main mode.');
 				}
 				return interaction.reply({ content: 'Taiko has been set as your main mode.', ephemeral: true });
 			} else if (args[1] && args[1].toLowerCase() === 'catch') {
@@ -90,7 +93,7 @@ module.exports = {
 				}
 
 				if (msg.id) {
-					return msg.channel.send('Catch has been set as your main mode.');
+					return msg.reply('Catch has been set as your main mode.');
 				}
 				return interaction.reply({ content: 'Catch has been set as your main mode.', ephemeral: true });
 			} else if (args[1] && args[1].toLowerCase() === 'mania') {
@@ -102,14 +105,20 @@ module.exports = {
 				}
 
 				if (msg.id) {
-					return msg.channel.send('Mania has been set as your main mode.');
+					return msg.reply('Mania has been set as your main mode.');
 				}
 				return interaction.reply({ content: 'Mania has been set as your main mode.', ephemeral: true });
 			} else {
-				msg.channel.send('Please specify which mode you want to set as your main mode: `standard`, `taiko`, `catch`, `mania`');
+				if (msg.id) {
+					return msg.reply('Please specify which mode you want to set as your main mode: `standard`, `taiko`, `catch`, `mania`');
+				}
+				return interaction.reply({ content: 'Please specify which mode you want to set as your main mode: `standard`, `taiko`, `catch`, `mania`', ephemeral: true });
 			}
 		} else {
-			msg.channel.send('Please specify what you want to change: `mode`, `server`');
+			if (msg.id) {
+				return msg.reply('Please specify what you want to change: `mode`, `server`');
+			}
+			return interaction.reply({ content: 'Please specify what you want to change: `mode`, `server`', ephemeral: true });
 		}
 	},
 };

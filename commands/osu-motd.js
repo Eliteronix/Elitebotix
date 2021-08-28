@@ -181,7 +181,7 @@ module.exports = {
 				sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `e!osu-motd register`!');
 			}
 		} else {
-			msg.channel.send('Please specify what you want to do: `server`, `register`, `unregister`, `mute`, `unmute`');
+			msg.reply('Please specify what you want to do: `server`, `register`, `unregister`, `mute`, `unmute`');
 		}
 	},
 };
