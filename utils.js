@@ -487,7 +487,7 @@ module.exports = {
 				msg.channel.messages.fetch({ limit: 100 })
 					.then(async (messages) => {
 						const lastMessage = messages.filter(m => m.author.id === msg.author.id && m.content === msg.content).last();
-						if (msg.id === lastMessage.id) {
+						if (lastMessage && msg.id === lastMessage.id) {
 							serverUserActivity.points = serverUserActivity.points + 1;
 							serverUserActivity.save();
 							const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 } });

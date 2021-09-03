@@ -11,7 +11,8 @@ module.exports = {
 			.then(async (guildMembers) => {
 
 				//Filter members and push into array
-				const members = guildMembers.filter(member => member.user.bot !== true).array();
+				const members = [];
+				guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
 
 				//Set all 4 bracket role ids as a reference
 				const bracketRoles = [
