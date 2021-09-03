@@ -129,6 +129,6 @@ module.exports = {
 		if (msg.id) {
 			return msg.reply({ embeds: [guildBotInfoEmbed] });
 		}
-		return interaction.reply({ embeds: [guildBotInfoEmbed] });
+		return interaction.followUp({ embeds: [guildBotInfoEmbed] });
 	},
 };

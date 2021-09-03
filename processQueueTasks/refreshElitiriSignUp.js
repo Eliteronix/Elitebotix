@@ -94,8 +94,13 @@ module.exports = {
 			if (!task) {
 				let date = new Date();
 				date.setUTCMinutes(date.getUTCMinutes() + 1);
+				processQueueEntry.destroy();
 				DBProcessQueue.create({ guildId: 'None', task: 'elitiriCupSignUps', priority: 3, additions: elitiriSignUp.bracketName, date: date });
+			} else {
+				processQueueEntry.destroy();
 			}
+		} else {
+			processQueueEntry.destroy();
 		}
 	},
 };

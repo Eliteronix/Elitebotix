@@ -6,8 +6,9 @@ module.exports = {
 			//Nothing
 		});
 
-		if(user){
+		if (user) {
 			user.send(`Reminder: ${args[1]}`);
 		}
+		processQueueEntry.destroy();
 	},
 };

@@ -1,4 +1,4 @@
-const { DBOsuMultiScores } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { saveOsuMultiScores, pause } = require('../utils');
 const osu = require('node-osu');
 
@@ -2596,6 +2596,8 @@ module.exports = {
 					console.log(score.matchName);
 				}
 			});
+		} else if (args[0] === 'saveMultiMatches') {
+			DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${args[1]}`, priority: 0 });
 		}
 
 		msg.reply('Done.');

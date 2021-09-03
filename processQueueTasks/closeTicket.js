@@ -36,5 +36,7 @@ module.exports = {
 				closedCategory.delete();
 			}
 		}
+
+		processQueueEntry.destroy();
 	},
 };

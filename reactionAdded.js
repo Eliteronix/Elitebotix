@@ -207,8 +207,8 @@ module.exports = async function (reaction, user, additionalObjects) {
 	}
 
 	const didYouMeanRegex = /I could not find the command `.+`.\nDid you mean `.+`?/gm;
-	if (reaction.message.content && reaction.message.mentions.repliedUser.id && reaction.message.mentions.repliedUser.id === user.id && reaction.message.content.match(didYouMeanRegex)
-		|| reaction.message.content && reaction.message.mentions.repliedUser.id && reaction.message.mentions.repliedUser.id === user.id && reaction.message.content.match(didYouMeanRegex)) {
+	if (reaction.message.content && reaction.message.mentions.repliedUser && reaction.message.mentions.repliedUser.id && reaction.message.mentions.repliedUser.id === user.id && reaction.message.content.match(didYouMeanRegex)
+		|| reaction.message.content && reaction.message.mentions.repliedUser && reaction.message.mentions.repliedUser.id && reaction.message.mentions.repliedUser.id === user.id && reaction.message.content.match(didYouMeanRegex)) {
 		if (reaction._emoji.name === '✅') {
 			//Grab old message and change content instead
 			reaction.message.channel.messages.fetch(reaction.message.reference.messageId).then(async (message) => {

@@ -7,6 +7,7 @@ module.exports = {
 		});
 
 		if (!activityRoles) {
+			processQueueEntry.destroy();
 			return;
 		}
 
@@ -16,8 +17,10 @@ module.exports = {
 			guild = await client.guilds.fetch(processQueueEntry.guildId);
 		} catch (e) {
 			if (e.message === 'Missing Access') {
+				processQueueEntry.destroy();
 				return;
 			} else {
+				processQueueEntry.destroy();
 				return console.log(e);
 			}
 		}
@@ -96,11 +99,13 @@ module.exports = {
 								if (e.message === 'Missing Access') {
 									if (!missingPermissionsMessage) {
 										const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
-										owner.send(`I could not assign an activity to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
+										owner.send(`I could not assign an activityrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
 										missingPermissionsMessage = true;
 									}
+									processQueueEntry.destroy();
 									return;
 								} else {
+									processQueueEntry.destroy();
 									return console.log(e);
 								}
 							}
@@ -117,8 +122,10 @@ module.exports = {
 										owner.send(`I could not remove an activityrole from an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
 										missingPermissionsMessage = true;
 									}
+									processQueueEntry.destroy();
 									return;
 								} else {
+									processQueueEntry.destroy();
 									return console.log(e);
 								}
 							}
@@ -126,6 +133,8 @@ module.exports = {
 					}
 				}
 			});
+
+		processQueueEntry.destroy();
 	},
 };
 

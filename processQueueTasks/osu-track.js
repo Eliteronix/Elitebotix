@@ -77,6 +77,7 @@ module.exports = {
 
 						date.setUTCMinutes(date.getUTCMinutes() + 15);
 
+						processQueueEntry.destroy();
 						return await DBProcessQueue.create({ guildId: processQueueEntry.guildId, task: processQueueEntry.task, priority: processQueueEntry.priority, additions: `${channel.id};${user.id};${user.name}`, date: date });
 					}
 
@@ -87,16 +88,21 @@ module.exports = {
 
 					date.setUTCMinutes(date.getUTCMinutes() + 5);
 
+					processQueueEntry.destroy();
 					return await DBProcessQueue.create({ guildId: processQueueEntry.guildId, task: processQueueEntry.task, priority: processQueueEntry.priority, additions: `${channel.id};${user.id};${user.name}`, date: date });
 				})
 				.catch(async (err) => {
 					console.log(err);
 					if (err.message === 'Not found') {
 						await channel.send(`Could not find user \`${args[1]}\` anymore and I will therefore stop tracking them. Maybe they changed their name?`);
+						processQueueEntry.destroy();
 					} else {
 						console.log(err);
+						processQueueEntry.destroy();
 					}
 				});
+		} else {
+			processQueueEntry.destroy();
 		}
 	},
 };

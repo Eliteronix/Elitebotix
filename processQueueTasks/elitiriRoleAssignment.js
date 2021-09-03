@@ -104,5 +104,7 @@ module.exports = {
 					}
 				}
 			});
+
+		processQueueEntry.destroy();
 	}
 };

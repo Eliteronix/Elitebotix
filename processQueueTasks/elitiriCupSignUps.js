@@ -13,6 +13,8 @@ module.exports = {
 		} else if (processQueueEntry.additions === 'Beginner Bracket') {
 			await updateSheet('1AIyEGG2_X2gwy01XQl2pINc2yYU8XicrdfyOEvZYY-Q', processQueueEntry.additions);
 		}
+
+		processQueueEntry.destroy();
 	},
 };
 

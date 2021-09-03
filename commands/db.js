@@ -85,6 +85,6 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		const attachment = new Discord.MessageAttachment(buffer, `${dbTableName}-${process.env.SERVER}-${process.env.PROVIDER}.csv`);
 		// eslint-disable-next-line no-undef
-		eliteronixUser.send(`${dbTableName} - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`, attachment);
+		eliteronixUser.send({ content: `${dbTableName} - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`, files: [attachment] });
 	},
 };

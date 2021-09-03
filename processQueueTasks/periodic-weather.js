@@ -52,8 +52,11 @@ module.exports = {
 					date.setUTCDate(date.getUTCDate() + 1);
 				}
 
+				processQueueEntry.destroy();
 				await DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${args[0]};${args[1]};${args[2]};${args[3]}`, date: date });
 			});
+		} else {
+			processQueueEntry.destroy();
 		}
 	},
 };

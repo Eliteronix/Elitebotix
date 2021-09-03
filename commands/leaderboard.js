@@ -24,8 +24,6 @@ module.exports = {
 			} else {
 				args = [interaction.options._hoistedOptions[0].value];
 			}
-
-			await interaction.reply('Leaderboard will be created');
 		}
 
 		let command;
@@ -40,7 +38,7 @@ module.exports = {
 		args.shift();
 
 		try {
-			command.execute(msg, args, null, additionalObjects);
+			command.execute(msg, args, interaction, additionalObjects);
 		} catch (error) {
 			console.error(error);
 			const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');

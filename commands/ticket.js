@@ -104,7 +104,7 @@ module.exports = {
 					//Move the channel to the correct category
 					let repondedCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Responded');
 					if (!repondedCategory) {
-						repondedCategory = await msg.guild.channels.create('Tickets - Responded', { type: 'category' });
+						repondedCategory = await msg.guild.channels.create('Tickets - Responded', { type: 'GUILD_CATEGORY' });
 						await repondedCategory.permissionOverwrites.set([
 							{
 								id: msg.guild.roles.everyone.id,
@@ -147,7 +147,7 @@ module.exports = {
 					//Move the channel to the correct category
 					let inActionCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - In Action');
 					if (!inActionCategory) {
-						inActionCategory = await msg.guild.channels.create('Tickets - In Action', { type: 'category' });
+						inActionCategory = await msg.guild.channels.create('Tickets - In Action', { type: 'GUILD_CATEGORY' });
 						await inActionCategory.permissionOverwrites.set([
 							{
 								id: msg.guild.roles.everyone.id,
@@ -194,7 +194,7 @@ module.exports = {
 					//Move the channel to the correct category
 					let closedCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Closed');
 					if (!closedCategory) {
-						closedCategory = await msg.guild.channels.create('Tickets - Closed', { type: 'category' });
+						closedCategory = await msg.guild.channels.create('Tickets - Closed', { type: 'GUILD_CATEGORY' });
 						await closedCategory.permissionOverwrites.set([
 							{
 								id: msg.guild.roles.everyone.id,
@@ -224,7 +224,7 @@ module.exports = {
 
 					await setPermissions(msg.channel, ticket);
 
-					msg.reply('The Ticket has been closed.');
+					msg.channel.send('The Ticket has been closed.');
 					removeEmptyCategories(msg);
 					msg.delete();
 
@@ -292,9 +292,9 @@ module.exports = {
 		} else {
 			const guildPrefix = await getGuildPrefix(msg);
 			if (msg.id) {
-				return msg.reply(`Tickets aren't enabled on this server.\nStaff can enable tickets by using \`${guildPrefix}toggletickets\`.`);
+				return msg.reply(`Tickets aren't enabled on this server.\nAdmins can enable tickets by using \`${guildPrefix}toggletickets\`.`);
 			}
-			return interaction.reply(`Tickets aren't enabled on this server.\nStaff can enable tickets by using \`${guildPrefix}toggletickets\`.`);
+			return interaction.reply(`Tickets aren't enabled on this server.\nAdmins can enable tickets by using \`${guildPrefix}toggletickets\`.`);
 		}
 	},
 };

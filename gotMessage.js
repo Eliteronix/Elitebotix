@@ -311,7 +311,7 @@ async function handleTicketStatus(msg) {
 		//Move the channel to the correct category
 		let awaitingResponseCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Awaiting Response');
 		if (!awaitingResponseCategory) {
-			awaitingResponseCategory = await msg.guild.channels.create('Tickets - Awaiting Response', { type: 'category' });
+			awaitingResponseCategory = await msg.guild.channels.create('Tickets - Awaiting Response', { type: 'GUILD_CATEGORY' });
 			await awaitingResponseCategory.permissionOverwrites.set([
 				{
 					id: msg.guild.roles.everyone.id,

@@ -41,6 +41,6 @@ module.exports = {
 		if (msg.id) {
 			return msg.reply({ embeds: [guildInfoEmbed] });
 		}
-		return interaction.reply({ embeds: [guildInfoEmbed] });
+		return interaction.followUp({ embeds: [guildInfoEmbed] });
 	},
 };

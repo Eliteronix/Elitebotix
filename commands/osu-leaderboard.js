@@ -123,10 +123,14 @@ module.exports = {
 					}
 				}
 
-				processingMessage.delete();
+				if (processingMessage) {
+					processingMessage.delete();
+				}
 			})
 			.catch(err => {
-				processingMessage.edit('Error');
+				if (processingMessage) {
+					processingMessage.edit('Error');
+				}
 				console.log(err);
 			});
 	},

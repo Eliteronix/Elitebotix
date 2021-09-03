@@ -198,5 +198,6 @@ module.exports = {
 				DBProcessQueue.create({ guildId: 'None', task: 'refreshElitiriSignUp', priority: 3, additions: discordUser.osuUserId });
 			}
 		}
+		processQueueEntry.destroy();
 	},
 };

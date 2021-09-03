@@ -91,6 +91,7 @@ module.exports = {
 		const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'vote.png');
 
 		await msg.channel.send({ content: `Results for: \`${args[2]}\``, files: [attachment] });
+		processQueueEntry.destroy();
 	},
 };
 

@@ -561,8 +561,6 @@ module.exports = {
 				await nextTask[0].save();
 
 				await task.execute(client, nextTask[0]);
-
-				nextTask[0].destroy();
 			} catch (e) {
 				console.log('Error executing process queue task', e);
 				console.log('Process Queue entry:', nextTask[0]);
