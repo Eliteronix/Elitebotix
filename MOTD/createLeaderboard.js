@@ -6,7 +6,8 @@ module.exports = {
 		const channel = await client.channels.fetch(channelId);
 		channel.messages.fetch({ limit: 100 })
 			.then(async (messages) => {
-				const messagesArray = messages.filter(m => m.content === 'Daily Update').array();
+				const messagesArray = [];
+				messages.filter(m => m.content === 'Daily Update').each(message => messagesArray.push(message));
 
 				for (let i = 0; i < messagesArray.length; i++) {
 					messagesArray[i].delete();
