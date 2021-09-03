@@ -2,8 +2,8 @@ const { DBDiscordUsers, DBMOTDPoints } = require('../dbObjects');
 const { createLeaderboard, humanReadable } = require('../utils.js');
 
 module.exports = {
-	createLeaderboard: async function (client, since, topAmount, title, channelID) {
-		const channel = await client.channels.fetch(channelID);
+	createLeaderboard: async function (client, since, topAmount, title, channelId) {
+		const channel = await client.channels.fetch(channelId);
 		channel.messages.fetch({ limit: 100 })
 			.then(async (messages) => {
 				const messagesArray = messages.filter(m => m.content === 'Daily Update').array();

@@ -39,7 +39,7 @@ module.exports = async function (oldMember, newMember) {
 				if (error.message === 'Unknown Channel') {
 					guild.loggingChannel = null;
 					guild.save();
-					const owner = await newMember.client.users.fetch(newMember.guild.ownerID);
+					const owner = await newMember.client.users.fetch(newMember.guild.ownerId);
 					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.log(error);
@@ -84,7 +84,7 @@ module.exports = async function (oldMember, newMember) {
 				if (error.message === 'Unknown Channel') {
 					guild.loggingChannel = null;
 					guild.save();
-					const owner = await newMember.client.users.fetch(newMember.guild.ownerID);
+					const owner = await newMember.client.users.fetch(newMember.guild.ownerId);
 					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.log(error);
@@ -116,12 +116,12 @@ module.exports = async function (oldMember, newMember) {
 		}
 	}
 
-	if (oldMember.channelID !== newMember.channelID) {
+	if (oldMember.channelId !== newMember.channelId) {
 		const guild = await DBGuilds.findOne({
 			where: { guildId: newMember.guild.id }
 		});
 
-		if (guild && newMember.channelID && guild.loggingChannel && guild.loggingJoinVoice) {
+		if (guild && newMember.channelId && guild.loggingChannel && guild.loggingJoinVoice) {
 			let channel;
 			try {
 				channel = await newMember.client.channels.fetch(guild.loggingChannel);
@@ -129,7 +129,7 @@ module.exports = async function (oldMember, newMember) {
 				if (error.message === 'Unknown Channel') {
 					guild.loggingChannel = null;
 					guild.save();
-					const owner = await newMember.client.users.fetch(newMember.guild.ownerID);
+					const owner = await newMember.client.users.fetch(newMember.guild.ownerId);
 					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.log(error);
@@ -152,7 +152,7 @@ module.exports = async function (oldMember, newMember) {
 				.setDescription(`<@${member.user.id}> has joined a voice channel!`)
 				.setThumbnail(member.user.displayAvatarURL())
 				.addFields(
-					{ name: 'Joined Voice Channel', value: `<#${newMember.channelID}>` },
+					{ name: 'Joined Voice Channel', value: `<#${newMember.channelId}>` },
 				)
 				.setTimestamp()
 				.setFooter('Eventname: joinvoice');
@@ -160,7 +160,7 @@ module.exports = async function (oldMember, newMember) {
 			channel.send({ embeds: [changeEmbed] });
 		}
 
-		if (guild && oldMember.channelID && guild.loggingChannel && guild.loggingLeaveVoice) {
+		if (guild && oldMember.channelId && guild.loggingChannel && guild.loggingLeaveVoice) {
 			let channel;
 			try {
 				channel = await newMember.client.channels.fetch(guild.loggingChannel);
@@ -168,7 +168,7 @@ module.exports = async function (oldMember, newMember) {
 				if (error.message === 'Unknown Channel') {
 					guild.loggingChannel = null;
 					guild.save();
-					const owner = await newMember.client.users.fetch(newMember.guild.ownerID);
+					const owner = await newMember.client.users.fetch(newMember.guild.ownerId);
 					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.log(error);
@@ -191,7 +191,7 @@ module.exports = async function (oldMember, newMember) {
 				.setDescription(`<@${member.user.id}> has left a voice channel!`)
 				.setThumbnail(member.user.displayAvatarURL())
 				.addFields(
-					{ name: 'Left Voice Channel', value: `<#${oldMember.channelID}>` },
+					{ name: 'Left Voice Channel', value: `<#${oldMember.channelId}>` },
 				)
 				.setTimestamp()
 				.setFooter('Eventname: leavevoice');
@@ -200,8 +200,8 @@ module.exports = async function (oldMember, newMember) {
 		}
 	}
 
-	const newUserChannelId = newMember.channelID;
-	const oldUserChannelId = oldMember.channelID;
+	const newUserChannelId = newMember.channelId;
+	const oldUserChannelId = oldMember.channelId;
 
 	const newUserChannel = oldMember.client.channels.cache.get(newUserChannelId);
 	const oldUserChannel = oldMember.client.channels.cache.get(oldUserChannelId);
@@ -228,7 +228,7 @@ module.exports = async function (oldMember, newMember) {
 					createdChannel = await newUserChannel.clone();
 				} catch (e) {
 					if (e.message === 'Missing Access') {
-						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
 						return owner.send(`I could not create a new temporary voicechannel because I am missing the \`Manage Channels\` permission on \`${member.guild.name}\`.`);
 					} else {
 						return console.log(e);
@@ -238,14 +238,14 @@ module.exports = async function (oldMember, newMember) {
 				let createdText;
 
 				if (dbGuild.addTemporaryText) {
-					const createdCategoryId = createdChannel.parentID;
+					const createdCategoryId = createdChannel.parentId;
 
 					try {
 						//Move further down to avoid waiting time
 						createdText = await newMember.guild.channels.create('temporaryText', 'text');
 					} catch (e) {
 						if (e.message === 'Missing Access') {
-							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
 							return owner.send(`I could not create a new temporary voicechannel because I am missing the \`Manage Channels\` permission on \`${member.guild.name}\`.`);
 						} else {
 							return console.log(e);
@@ -259,7 +259,7 @@ module.exports = async function (oldMember, newMember) {
 					DBTemporaryVoices.create({ guildId: createdChannel.guild.id, channelId: createdChannel.id, creatorId: newMember.id });
 				}
 
-				//Get Member ID
+				//Get Member Id
 				const newMemberId = newMember.id;
 				//Get member
 				const member = await newMember.guild.members.fetch(newMemberId);
@@ -293,7 +293,7 @@ module.exports = async function (oldMember, newMember) {
 					await member.voice.setChannel(createdChannel);
 				} catch (e) {
 					if (e.message === 'Missing Access') {
-						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
 						return owner.send(`I could not move a user to their temporary voicechannel because I am missing the \`Move Members\` permission on \`${member.guild.name}\`.`);
 					} else if (e.message === 'Target user is not connected to voice.') {
 						if (createdText) {
@@ -301,7 +301,7 @@ module.exports = async function (oldMember, newMember) {
 								await createdText.delete();
 							} catch (e) {
 								if (e.message === 'Missing Access') {
-									const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerID);
+									const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerId);
 									return owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${newMember.guild.name}\`.`);
 								} else {
 									return console.log(e);
@@ -312,7 +312,7 @@ module.exports = async function (oldMember, newMember) {
 							return await createdChannel.delete();
 						} catch (e) {
 							if (e.message === 'Missing Access') {
-								const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerID);
+								const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerId);
 								return owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${newMember.guild.name}\`.`);
 							} else {
 								return console.log(e);
@@ -325,10 +325,10 @@ module.exports = async function (oldMember, newMember) {
 				//Set all permissions for the creator
 				const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
 				try {
-					await createdChannel.updateOverwrite(newUser, { MANAGE_CHANNELS: true, MANAGE_ROLES: true, MUTE_MEMBERS: true, DEAFEN_MEMBERS: true, MOVE_MEMBERS: true, CONNECT: true, SPEAK: true, VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, STREAM: true, USE_VAD: true });
+					await createdChannel.permissionOverwrites.edit(newUser, { MANAGE_CHANNELS: true, MANAGE_ROLES: true, MUTE_MEMBERS: true, DEAFEN_MEMBERS: true, MOVE_MEMBERS: true, CONNECT: true, SPEAK: true, VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, STREAM: true, USE_VAD: true });
 				} catch (e) {
 					if (e.message === 'Missing Access') {
-						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
 						return owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${member.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
 					} else {
 						return console.log(e);
@@ -338,7 +338,7 @@ module.exports = async function (oldMember, newMember) {
 					//Set all permissions for the creator and deny @everyone to view the text channel
 					let everyone = newMember.guild.roles.everyone;
 					try {
-						await createdText.overwritePermissions([
+						await createdText.permissionOverwrites.set([
 							{
 								id: newMember.id,
 								allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'SEND_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'ADD_REACTIONS', 'USE_EXTERNAL_EMOJIS', 'MENTION_EVERYONE', 'MANAGE_MESSAGES', 'READ_MESSAGE_HISTORY', 'SEND_TTS_MESSAGES'],
@@ -350,10 +350,9 @@ module.exports = async function (oldMember, newMember) {
 						]);
 					} catch (e) {
 						if (e.message === 'Missing Access') {
-							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
 							return owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${member.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
 						} else if (e.message !== 'Unknown Channel') { //Channel might be deleted already
-							console.log(createdText);
 							return console.log(e);
 						}
 					}
@@ -369,10 +368,10 @@ module.exports = async function (oldMember, newMember) {
 		}
 		const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
 		try {
-			await textChannel.updateOverwrite(newUser, { VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, SEND_MESSAGES: true, EMBED_LINKS: true, ATTACH_FILES: true, ADD_REACTIONS: true, USE_EXTERNAL_EMOJIS: true, READ_MESSAGE_HISTORY: true });
+			await textChannel.permissionOverwrites.edit(newUser, { VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, SEND_MESSAGES: true, EMBED_LINKS: true, ATTACH_FILES: true, ADD_REACTIONS: true, USE_EXTERNAL_EMOJIS: true, READ_MESSAGE_HISTORY: true });
 		} catch (e) {
 			if (e.message === 'Missing Access') {
-				const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerID);
+				const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerId);
 				return owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${newMember.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
 			} else {
 				return console.log(e);
@@ -400,7 +399,7 @@ module.exports = async function (oldMember, newMember) {
 			let usersLeft = false;
 
 			voiceStates.forEach(voiceState => {
-				if (voiceState.channelID === dbTemporaryVoices.channelId) {
+				if (voiceState.channelId === dbTemporaryVoices.channelId) {
 					usersLeft = true;
 				}
 			});
@@ -411,7 +410,7 @@ module.exports = async function (oldMember, newMember) {
 						await textChannel.delete();
 					} catch (e) {
 						if (e.message === 'Missing Access') {
-							const owner = await oldMember.client.users.cache.find(user => user.id === oldMember.guild.ownerID);
+							const owner = await oldMember.client.users.cache.find(user => user.id === oldMember.guild.ownerId);
 							return owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${oldMember.guild.name}\`.`);
 						} else {
 							return console.log(e);
@@ -423,7 +422,7 @@ module.exports = async function (oldMember, newMember) {
 				} catch (e) {
 					if (e.message === 'Missing Access') {
 						await dbTemporaryVoices.destroy();
-						const owner = await oldMember.client.users.cache.find(user => user.id === oldMember.guild.ownerID);
+						const owner = await oldMember.client.users.cache.find(user => user.id === oldMember.guild.ownerId);
 						return owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${oldMember.guild.name}\`.`);
 					} else {
 						await dbTemporaryVoices.destroy();
@@ -434,10 +433,10 @@ module.exports = async function (oldMember, newMember) {
 			} else if (oldMember.id !== dbTemporaryVoices.creatorId) {
 				const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
 				try {
-					await textChannel.updateOverwrite(newUser, { VIEW_CHANNEL: false });
+					await textChannel.permissionOverwrites.edit(newUser, { VIEW_CHANNEL: false });
 				} catch (e) {
 					if (e.message === 'Missing Access') {
-						const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerID);
+						const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerId);
 						return owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${newMember.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
 					} else {
 						return console.log(e);

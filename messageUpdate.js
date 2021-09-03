@@ -50,7 +50,7 @@ module.exports = async function (oldMsg, newMsg) {
 			if (error.message === 'Unknown Channel') {
 				guild.loggingChannel = null;
 				guild.save();
-				const owner = await newMsg.client.users.fetch(newMsg.guild.ownerID);
+				const owner = await newMsg.client.users.fetch(newMsg.guild.ownerId);
 				return owner.send(`It seems like the logging channel on the guild \`${newMsg.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
 			console.log(error);

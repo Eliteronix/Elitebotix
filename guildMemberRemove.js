@@ -50,7 +50,7 @@ module.exports = async function (member) {
 				guildGoodbyeMessageChannel.send(guildGoodbyeMessageText);
 			} catch (e) {
 				if (e.message === 'Missing Access') {
-					const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerID);
+					const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
 					return owner.send(`I could not send a welcome message for a new user into the channel \`${guildGoodbyeMessageChannel.name}\` on \`${member.guild.name}\` due to missing permissions.`);
 				} else {
 					return console.log(e);
@@ -66,7 +66,7 @@ module.exports = async function (member) {
 				if (error.message === 'Unknown Channel') {
 					guild.loggingChannel = null;
 					guild.save();
-					const owner = await member.message.client.users.fetch(member.guild.ownerID);
+					const owner = await member.message.client.users.fetch(member.guild.ownerId);
 					return owner.send(`It seems like the logging channel on the guild \`${member.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.log(error);

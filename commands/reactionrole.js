@@ -29,7 +29,7 @@ module.exports = {
 					args.shift();
 					//Join the name string
 					const embedName = args.join(' ');
-					//Get the last created record for the next embedID
+					//Get the last created record for the next embedId
 					const reactionRolesHeader = await DBReactionRolesHeader.findOne({
 						order: [
 							['id', 'DESC'],
@@ -48,7 +48,7 @@ module.exports = {
 					const reactionRoleEmbed = new Discord.MessageEmbed()
 						.setColor('#0099ff')
 						.setTitle(embedName)
-						.setFooter(`Reactionrole - EmbedID: ${embedId}`);
+						.setFooter(`Reactionrole - EmbedId: ${embedId}`);
 					//Send embed
 					const embedMessage = await msg.reply({ embeds: [reactionRoleEmbed] });
 					//Create the record for the embed in the db
@@ -68,16 +68,16 @@ module.exports = {
 
 					//Check if it was found in the db
 					if (reactionRolesHeader) {
-						//Get the ID of the message
+						//Get the Id of the message
 						const embedMessageId = reactionRolesHeader.reactionHeaderId;
-						//get the ID of the channel
+						//get the Id of the channel
 						const embedChannelId = reactionRolesHeader.reactionChannelHeaderId;
 						//Get the channel object
 						let embedChannel;
 						try {
 							embedChannel = msg.guild.channels.cache.get(embedChannelId);
 						} catch (e) {
-							msg.reply('Couldn\'t find an embed with this EmbedID');
+							msg.reply('Couldn\'t find an embed with this EmbedId');
 							DBReactionRolesHeader.destroy({
 								where: { guildId: msg.guild.id, id: args[2] },
 							});
@@ -92,10 +92,10 @@ module.exports = {
 							where: { guildId: msg.guild.id, id: args[2] },
 						});
 					} else {
-						msg.reply('Couldn\'t find an embed with this EmbedID');
+						msg.reply('Couldn\'t find an embed with this EmbedId');
 					}
 				} else {
-					msg.reply('Please specify what ID the embed has you want to remove. (Can be found in the footer of the embed.)');
+					msg.reply('Please specify what Id the embed has you want to remove. (Can be found in the footer of the embed.)');
 					sendHelp(msg);
 				}
 			} else if (args[1].toLowerCase() === 'change') {
@@ -119,7 +119,7 @@ module.exports = {
 
 							msg.reply('The title for the specified embed has been changed.');
 						} else {
-							msg.reply('Couldn\'t find an embed with this EmbedID');
+							msg.reply('Couldn\'t find an embed with this EmbedId');
 						}
 					} else if (args[3].toLowerCase() === 'description') {
 						//Get embed from the db
@@ -140,7 +140,7 @@ module.exports = {
 
 							msg.reply('The description for the specified embed has been changed.');
 						} else {
-							msg.reply('Couldn\'t find an embed with this EmbedID');
+							msg.reply('Couldn\'t find an embed with this EmbedId');
 						}
 					} else if (args[3].toLowerCase() === 'color') {
 						if (args[4].startsWith('#') && args[4].length === 7) {
@@ -165,7 +165,7 @@ module.exports = {
 
 								msg.reply('The color for the specified embed has been changed.');
 							} else {
-								msg.reply('Couldn\'t find an embed with this EmbedID');
+								msg.reply('Couldn\'t find an embed with this EmbedId');
 							}
 						} else {
 							msg.reply('Please send a color in a format like \'#0099ff\'');
@@ -192,14 +192,14 @@ module.exports = {
 
 							msg.reply('The image for the specified embed has been changed.');
 						} else {
-							msg.reply('Couldn\'t find an embed with this EmbedID');
+							msg.reply('Couldn\'t find an embed with this EmbedId');
 						}
 					} else {
 						msg.reply('Please specify what you want to change: <title/description/color/image>');
 						sendHelp(msg);
 					}
 				} else {
-					msg.reply('Please specify what ID the embed has you want to change. (Can be found in the footer of the embed.)');
+					msg.reply('Please specify what Id the embed has you want to change. (Can be found in the footer of the embed.)');
 					sendHelp(msg);
 				}
 			} else {
@@ -211,7 +211,7 @@ module.exports = {
 		} else if (args[0].toLowerCase() === 'role') {
 			//Check the second argument
 			if (args[1].toLowerCase() === 'add') {
-				//Check the third argument if it is an possible embedID
+				//Check the third argument if it is an possible embedId
 				if (!(isNaN(args[2]))) {
 					//Check if there is a role mentioned in the message
 					if (msg.mentions.roles.first() && args[4].startsWith('<@&')) {
@@ -252,7 +252,7 @@ module.exports = {
 									editEmbed(msg, reactionRolesHeader);
 								}
 							} else {
-								msg.reply('Couldn\'t find an embed with this EmbedID');
+								msg.reply('Couldn\'t find an embed with this EmbedId');
 							}
 						} else {
 							msg.reply('You didn\'t provide a description for the role!');
@@ -263,12 +263,12 @@ module.exports = {
 						sendHelp(msg);
 					}
 				} else {
-					msg.reply('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
+					msg.reply('Please specify what Id the embed has you want to add a role to. (Can be found in the footer of the embed.)');
 					sendHelp(msg);
 				}
 				//Check the second argument
 			} else if (args[1].toLowerCase() === 'remove') {
-				//Check the third argument if it is an possible embedID
+				//Check the third argument if it is an possible embedId
 				if (!(isNaN(args[2]))) {
 					//Check for a fourth argument
 					if (args[3]) {
@@ -295,12 +295,12 @@ module.exports = {
 						}
 					}
 				} else {
-					msg.reply('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
+					msg.reply('Please specify what Id the embed has you want to add a role to. (Can be found in the footer of the embed.)');
 					sendHelp(msg);
 				}
 				//Check the second argument
 			} else if (args[1].toLowerCase() === 'change') {
-				//Check the third argument if it is an possible embedID
+				//Check the third argument if it is an possible embedId
 				if (!(isNaN(args[2]))) {
 					//Get headerId
 					const headerId = args[2];
@@ -342,10 +342,10 @@ module.exports = {
 							msg.reply('Couldn\'t find a reactionrole with this emoji in the specified embed.');
 						}
 					} else {
-						msg.reply('Couldn\'t find an embed with this EmbedID');
+						msg.reply('Couldn\'t find an embed with this EmbedId');
 					}
 				} else {
-					msg.reply('Please specify what ID the embed has you want to add a role to. (Can be found in the footer of the embed.)');
+					msg.reply('Please specify what Id the embed has you want to add a role to. (Can be found in the footer of the embed.)');
 					sendHelp(msg);
 				}
 			} else {
@@ -369,7 +369,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		.setColor(reactionRolesHeader.reactionColor)
 		.setTitle(reactionRolesHeader.reactionTitle)
 		.setThumbnail(reactionRolesHeader.reactionImage)
-		.setFooter(`Reactionrole - EmbedID: ${reactionRolesHeader.id}`);
+		.setFooter(`Reactionrole - EmbedId: ${reactionRolesHeader.id}`);
 
 	//Set description if available
 	if (reactionRolesHeader.reactionDescription) {
@@ -389,16 +389,16 @@ async function editEmbed(msg, reactionRolesHeader) {
 		reactionRoleEmbed.addField(reactionRole.emoji + ': ' + reactionRoleName.name, reactionRole.description);
 	});
 
-	//Get the ID of the message
+	//Get the Id of the message
 	const embedMessageId = reactionRolesHeader.reactionHeaderId;
-	//get the ID of the channel
+	//get the Id of the channel
 	const embedChannelId = reactionRolesHeader.reactionChannelHeaderId;
 	//Get the channel object
 	let embedChannel;
 	try {
 		embedChannel = msg.guild.channels.cache.get(embedChannelId);
 	} catch (e) {
-		msg.reply('Couldn\'t find an embed with this EmbedID');
+		msg.reply('Couldn\'t find an embed with this EmbedId');
 		DBReactionRolesHeader.destroy({
 			where: { guildId: msg.guild.id, id: reactionRolesHeader.id },
 		});
@@ -423,10 +423,10 @@ async function sendHelp(msg) {
 	let guildPrefix = await getGuildPrefix(msg);
 
 	let helpString = `Correct usage for creating a new embed:\n\`\`\`${guildPrefix}reactionrole embed add <name of the embed>\`\`\``;
-	helpString += `Correct usage for removing an existing embed:\n\`\`\`${guildPrefix}reactionrole embed remove <embedID which can be found in the footer>\`\`\``;
-	helpString += `Correct usage for changing an existing embed's appearance:\n\`\`\`${guildPrefix}reactionrole embed change <embedID> <title/description/color/image> <new title/description/color/image URL>\`\`\``;
-	helpString += `Correct usage for adding a role to an embed:\n\`\`\`${guildPrefix}reactionrole role add <embedID> <emoji for the role> <@role> <description>\`\`\``;
-	helpString += `Correct usage for removing a role from an embed:\n\`\`\`${guildPrefix}reactionrole role remove <embedID> <emoji of the role>\`\`\``;
-	helpString += `Correct usage for changing a role in an embed:\n\`\`\`${guildPrefix}reactionrole role change <embedID> <emoji of the role> <emoji/description> <new emoji/description>\`\`\``;
+	helpString += `Correct usage for removing an existing embed:\n\`\`\`${guildPrefix}reactionrole embed remove <embedId which can be found in the footer>\`\`\``;
+	helpString += `Correct usage for changing an existing embed's appearance:\n\`\`\`${guildPrefix}reactionrole embed change <embedId> <title/description/color/image> <new title/description/color/image URL>\`\`\``;
+	helpString += `Correct usage for adding a role to an embed:\n\`\`\`${guildPrefix}reactionrole role add <embedId> <emoji for the role> <@role> <description>\`\`\``;
+	helpString += `Correct usage for removing a role from an embed:\n\`\`\`${guildPrefix}reactionrole role remove <embedId> <emoji of the role>\`\`\``;
+	helpString += `Correct usage for changing a role in an embed:\n\`\`\`${guildPrefix}reactionrole role change <embedId> <emoji of the role> <emoji/description> <new emoji/description>\`\`\``;
 	msg.reply(helpString);
 }

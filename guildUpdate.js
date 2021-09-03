@@ -40,7 +40,7 @@ module.exports = async function (oldGuild, newGuild) {
 			if (error.message === 'Unknown Channel') {
 				guild.loggingChannel = null;
 				guild.save();
-				const owner = await newGuild.client.users.fetch(newGuild.ownerID);
+				const owner = await newGuild.client.users.fetch(newGuild.ownerId);
 				return owner.send(`It seems like the logging channel on the guild \`${newGuild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
 			console.log(error);
@@ -73,12 +73,12 @@ module.exports = async function (oldGuild, newGuild) {
 			changeEmbed.addField('AFK Timeout', `\`${oldGuild.afkTimeout}\` -> \`${newGuild.afkTimeout}\``);
 		}
 
-		if (oldGuild.afkChannelID !== newGuild.afkChannelID) {
-			changeEmbed.addField('AFK Channel', `<#${oldGuild.afkChannelID}> -> <#${newGuild.afkChannelID}>`);
+		if (oldGuild.afkChannelId !== newGuild.afkChannelId) {
+			changeEmbed.addField('AFK Channel', `<#${oldGuild.afkChannelId}> -> <#${newGuild.afkChannelId}>`);
 		}
 
-		if (oldGuild.systemChannelID !== newGuild.systemChannelID) {
-			changeEmbed.addField('System Channel', `<#${oldGuild.systemChannelID}> -> <#${newGuild.systemChannelID}>`);
+		if (oldGuild.systemChannelId !== newGuild.systemChannelId) {
+			changeEmbed.addField('System Channel', `<#${oldGuild.systemChannelId}> -> <#${newGuild.systemChannelId}>`);
 		}
 
 		if (oldGuild.premiumTier !== newGuild.premiumTier) {
@@ -117,24 +117,24 @@ module.exports = async function (oldGuild, newGuild) {
 			changeEmbed.addField('Banner', 'The serverbanner has been updated');
 		}
 
-		if (oldGuild.rulesChannelID !== newGuild.rulesChannelID) {
-			changeEmbed.addField('Rules Channel', `<#${oldGuild.rulesChannelID}> -> <#${newGuild.rulesChannelID}>`);
+		if (oldGuild.rulesChannelId !== newGuild.rulesChannelId) {
+			changeEmbed.addField('Rules Channel', `<#${oldGuild.rulesChannelId}> -> <#${newGuild.rulesChannelId}>`);
 		}
 
-		if (oldGuild.publicUpdatesChannelID !== newGuild.publicUpdatesChannelID) {
-			changeEmbed.addField('Public Updates Channel', `<#${oldGuild.publicUpdatesChannelID}> -> <#${newGuild.publicUpdatesChannelID}>`);
+		if (oldGuild.publicUpdatesChannelId !== newGuild.publicUpdatesChannelId) {
+			changeEmbed.addField('Public Updates Channel', `<#${oldGuild.publicUpdatesChannelId}> -> <#${newGuild.publicUpdatesChannelId}>`);
 		}
 
-		if (oldGuild.ownerID !== newGuild.ownerID) {
-			changeEmbed.addField('Owner', `<@${oldGuild.ownerID}> -> <@${newGuild.ownerID}>`);
+		if (oldGuild.ownerId !== newGuild.ownerId) {
+			changeEmbed.addField('Owner', `<@${oldGuild.ownerId}> -> <@${newGuild.ownerId}>`);
 		}
 
-		if (oldGuild.widgetChannelID !== newGuild.widgetChannelID) {
-			changeEmbed.addField('Widget Channel', `<#${oldGuild.widgetChannelID}> -> <#${newGuild.widgetChannelID}>`);
+		if (oldGuild.widgetChannelId !== newGuild.widgetChannelId) {
+			changeEmbed.addField('Widget Channel', `<#${oldGuild.widgetChannelId}> -> <#${newGuild.widgetChannelId}>`);
 		}
 
-		if (oldGuild.embedChannelID !== newGuild.embedChannelID) {
-			changeEmbed.addField('Embed Channel', `<#${oldGuild.embedChannelID}> -> <#${newGuild.embedChannelID}>`);
+		if (oldGuild.embedChannelId !== newGuild.embedChannelId) {
+			changeEmbed.addField('Embed Channel', `<#${oldGuild.embedChannelId}> -> <#${newGuild.embedChannelId}>`);
 		}
 
 		channel.send({ embeds: [changeEmbed] });

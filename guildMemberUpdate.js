@@ -39,7 +39,7 @@ module.exports = async function (oldMember, newMember) {
 				if (error.message === 'Unknown Channel') {
 					guild.loggingChannel = null;
 					guild.save();
-					const owner = await newMember.message.client.users.fetch(newMember.guild.ownerID);
+					const owner = await newMember.message.client.users.fetch(newMember.guild.ownerId);
 					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.log(error);
@@ -91,7 +91,7 @@ module.exports = async function (oldMember, newMember) {
 				if (error.message === 'Unknown Channel') {
 					guild.loggingChannel = null;
 					guild.save();
-					const owner = await newMember.message.client.users.fetch(newMember.guild.ownerID);
+					const owner = await newMember.message.client.users.fetch(newMember.guild.ownerId);
 					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.log(error);

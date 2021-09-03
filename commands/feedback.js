@@ -82,7 +82,7 @@ module.exports = {
 	},
 };
 
-async function createJiraIssue(issuetypeID, text) {
+async function createJiraIssue(issuetypeId, text) {
 	const bodyData = `{
 		"fields": {
 		   "project":
@@ -92,7 +92,7 @@ async function createJiraIssue(issuetypeID, text) {
 		   "summary": "${text}",
 		   "description": "${text}",
 		   "issuetype": {
-			  "id": "${issuetypeID}"
+			  "id": "${issuetypeId}"
 		   }
 	   }
 	}`;

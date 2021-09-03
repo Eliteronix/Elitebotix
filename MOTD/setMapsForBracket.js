@@ -4,7 +4,7 @@ const { humanReadable } = require('../utils.js');
 const { qualifier } = require('./qualifier.js');
 
 module.exports = {
-	setMapsForBracket: async function (client, bancho, bracketName, SRLimit, NMBeatmaps, DTBeatmaps, upperRank, lowerRank, channelID, roleId, players) {
+	setMapsForBracket: async function (client, bancho, bracketName, SRLimit, NMBeatmaps, DTBeatmaps, upperRank, lowerRank, channelId, roleId, players) {
 
 		let possibleNMBeatmaps = [];
 		let possibleDTBeatmaps = [];
@@ -157,7 +157,7 @@ module.exports = {
 		}
 
 		//Send official message into the correct channel
-		const mapsOfTheDayChannel = await client.channels.fetch(channelID);
+		const mapsOfTheDayChannel = await client.channels.fetch(channelId);
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER !== 'Dev') {
 			mapsOfTheDayChannel.send('The new mappool is out!\nThe bot will send you a DM in a moment. Please follow the instructions given.');

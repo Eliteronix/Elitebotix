@@ -81,7 +81,7 @@ module.exports = async function (client, bancho, interaction) {
 	//set necessary cooldown amount; if non stated in command default to 5; calculate ms afterwards
 	const cooldownAmount = (command.cooldown || 5) * 1000;
 
-	//get expiration times for the cooldowns for the authorID
+	//get expiration times for the cooldowns for the authorId
 	if (timestamps.has(interaction.user.id)) {
 		const expirationTime = timestamps.get(interaction.user.id) + cooldownAmount;
 

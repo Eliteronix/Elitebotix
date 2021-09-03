@@ -38,7 +38,7 @@ module.exports = async function (emoji) {
 			if (error.message === 'Unknown Channel') {
 				guild.loggingChannel = null;
 				guild.save();
-				const owner = await emoji.client.users.fetch(emoji.guild.ownerID);
+				const owner = await emoji.client.users.fetch(emoji.guild.ownerId);
 				return owner.send(`It seems like the logging channel on the guild \`${emoji.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
 			console.log(error);

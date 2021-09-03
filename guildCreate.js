@@ -24,7 +24,7 @@ module.exports = async function (guild) {
 	}
 
 	try {
-		const systemChannel = await guild.channels.cache.get(guild.systemChannelID);
+		const systemChannel = await guild.channels.cache.get(guild.systemChannelId);
 		if (systemChannel) {
 			systemChannel.send('Thanks for adding me to the server!\nUse `e!help` to get a list of commands!\nTo provide feedback please use `e!feedback`\nTo stay informed about changes go to <https://discord.com/invite/Asz5Gfe> and follow <#804658828883787784>');
 		} else {

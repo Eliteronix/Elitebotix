@@ -37,7 +37,7 @@ module.exports = async function (oldUser, newUser) {
 						guild.loggingChannel = null;
 						guild.save();
 						if (discordGuild) {
-							const owner = await newUser.client.users.fetch(discordGuild.ownerID);
+							const owner = await newUser.client.users.fetch(discordGuild.ownerId);
 							return owner.send(`It seems like the logging channel on the guild \`${discordGuild.name}\` has been deleted.\nThe logging has been deactivated.`);
 						}
 					}
@@ -95,7 +95,7 @@ module.exports = async function (oldUser, newUser) {
 						guild.loggingChannel = null;
 						guild.save();
 						if (discordGuild) {
-							const owner = await newUser.client.users.fetch(discordGuild.ownerID);
+							const owner = await newUser.client.users.fetch(discordGuild.ownerId);
 							return owner.send(`It seems like the logging channel on the guild \`${discordGuild.name}\` has been deleted.\nThe logging has been deactivated.`);
 						}
 					}
@@ -153,7 +153,7 @@ module.exports = async function (oldUser, newUser) {
 						guild.loggingChannel = null;
 						guild.save();
 						if (discordGuild) {
-							const owner = await newUser.client.users.fetch(discordGuild.ownerID);
+							const owner = await newUser.client.users.fetch(discordGuild.ownerId);
 							return owner.send(`It seems like the logging channel on the guild \`${discordGuild.name}\` has been deleted.\nThe logging has been deactivated.`);
 						}
 					}

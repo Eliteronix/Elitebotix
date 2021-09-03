@@ -37,7 +37,7 @@ module.exports = {
 				});
 
 				if (ticket) {
-					if (ticket.creatorId === msg.author.id && msg.guild.ownerID !== msg.author.id) {
+					if (ticket.creatorId === msg.author.id && msg.guild.ownerId !== msg.author.id) {
 						return;
 					}
 
@@ -58,7 +58,7 @@ module.exports = {
 				});
 
 				if (ticket) {
-					if (ticket.creatorId === msg.author.id && msg.guild.ownerID !== msg.author.id) {
+					if (ticket.creatorId === msg.author.id && msg.guild.ownerId !== msg.author.id) {
 						return;
 					}
 
@@ -91,7 +91,7 @@ module.exports = {
 				});
 
 				if (ticket) {
-					if (ticket.creatorId === msg.author.id && msg.guild.ownerID !== msg.author.id) {
+					if (ticket.creatorId === msg.author.id && msg.guild.ownerId !== msg.author.id) {
 						return;
 					}
 					if (ticket.statusId === 100) {
@@ -134,7 +134,7 @@ module.exports = {
 				});
 
 				if (ticket) {
-					if (ticket.creatorId === msg.author.id && msg.guild.ownerID !== msg.author.id) {
+					if (ticket.creatorId === msg.author.id && msg.guild.ownerId !== msg.author.id) {
 						return;
 					}
 					if (ticket.statusId === 100) {
@@ -181,7 +181,7 @@ module.exports = {
 				});
 
 				if (ticket) {
-					if (ticket.creatorId === msg.author.id && msg.guild.ownerID !== msg.author.id) {
+					if (ticket.creatorId === msg.author.id && msg.guild.ownerId !== msg.author.id) {
 						return;
 					}
 					if (ticket.statusId === 100) {
