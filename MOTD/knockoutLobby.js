@@ -649,7 +649,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 	for (let i = 0; i < 3; i++) {
 		try {
 			if (attachment) {
-				await user.send(content, attachment)
+				await user.send({ content: content, files: [attachment] })
 					.then(() => {
 						i = Infinity;
 					})

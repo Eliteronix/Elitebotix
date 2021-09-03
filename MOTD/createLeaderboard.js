@@ -115,7 +115,7 @@ module.exports = {
 			}
 
 			//Send attachment
-			await channel.send(content, attachment);
+			await channel.send({ content: content, files: [attachment] });
 		}
 	}
 };
