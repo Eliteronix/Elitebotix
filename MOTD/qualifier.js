@@ -111,7 +111,7 @@ async function sendQualifierMessages(client, bancho, map, users, players) {
 	const attachment = await createMOTDAttachment('Qualifier', map, false);
 	messageIngame(bancho, map, players);
 	for (let i = 0; i < users.length; i++) {
-		await messageUserWithRetries(client, users[i], data, attachment);
+		await messageUserWithRetries(client, users[i], data.join('\n'), attachment);
 	}
 }
 

@@ -331,7 +331,7 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 	data.push('Your lobby consists of the following players:');
 	data.push(playerList);
 	for (let i = 0; i < users.length; i++) {
-		await messageUserWithRetries(client, users[i], data);
+		await messageUserWithRetries(client, users[i], data.join('\n'));
 	}
 }
 
@@ -473,7 +473,7 @@ async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, dou
 	data.push(`Website: <https://osu.ppy.sh/b/${map.id}> | osu! direct: <osu://b/${map.id}>`);
 	const attachment = await createMOTDAttachment(`${mapIndex}. Knockout Map`, map, doubleTime);
 	for (let i = 0; i < users.length; i++) {
-		await messageUserWithRetries(client, users[i], data, attachment);
+		await messageUserWithRetries(client, users[i], data.join('\n'), attachment);
 	}
 }
 
