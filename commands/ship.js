@@ -38,12 +38,6 @@ module.exports = {
 		let data = [];
 		data.push(`\`${firstName.replace(/`/g, '')}\` + \`${secondName.replace(/`/g, '')}\``);
 
-		if (Math.random() > 0.5) {
-			let helperString = firstName;
-			firstName = secondName;
-			secondName = helperString;
-		}
-
 		const shipname = `${firstName.substring(0, firstName.length / 2)}${secondName.substring(secondName.length / 2, secondName.length)}`;
 
 		data.push(`Shipping name: \`${shipname.replace(/`/g, '')}\``);
