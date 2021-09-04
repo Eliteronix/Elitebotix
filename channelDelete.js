@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { DBGuilds } = require('./dbObjects');
+const { DBGuilds, DBTemporaryVoices } = require('./dbObjects');
 
 module.exports = async function (channel) {
 	if (channel.type === 'dm') {
@@ -25,6 +25,26 @@ module.exports = async function (channel) {
 	} else if (process.env.SERVER === 'Live') {
 		if (channel.guild.id === '800641468321759242' || channel.guild.id === '800641735658176553' || channel.guild.id === '800641367083974667' || channel.guild.id === '800641819086946344') {
 			return;
+		}
+	}
+
+	const temporaryVoice = await DBTemporaryVoices.findOne({
+		where: { guildId: channel.guild.id, channelId: channel.id }
+	});
+
+	const temporaryText = await DBTemporaryVoices.findOne({
+		where: { guildId: channel.guild.id, textChannelId: channel.id }
+	});
+
+	if (temporaryVoice || temporaryText) {
+		if (temporaryVoice) {
+			const textChannel = await channel.guild.channels.fetch(temporaryVoice.textChannelId);
+			await temporaryVoice.destroy();
+			await textChannel.delete();
+		} else if (temporaryText) {
+			const voiceChannel = await channel.guild.channels.fetch(temporaryText.channelId);
+			await temporaryText.destroy();
+			await voiceChannel.delete();
 		}
 	}
 
