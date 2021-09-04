@@ -26,7 +26,8 @@ module.exports = {
 
 		osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
-				if (match.raw_end || matchID === '43027669') {
+				const stuckMatches = ['43027669'];
+				if (match.raw_end || stuckMatches.includes(matchID)) {
 					if (match.name.toLowerCase().match(/.+: (.+) vs (.+)/g) || match.name.toLowerCase().match(/.+: (.+) vs. (.+)/g)) {
 						saveOsuMultiScores(match);
 						console.log(`${matchID} ${match.name} done`);
