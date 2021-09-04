@@ -616,7 +616,7 @@ async function sendMapLeaderboard(client, results, players, users) {
 		}
 	}
 	for (let i = 0; i < users.length; i++) {
-		await messageUserWithRetries(client, users[i], data);
+		await messageUserWithRetries(client, users[i], data.join('\n'));
 	}
 }
 

@@ -18,7 +18,9 @@ module.exports = {
 
 		let matchID = args[0];
 
-		if (args[0] === '-1') {
+		// eslint-disable-next-line no-undef
+		if (args[0] === '-1' || process.env.SERVER !== 'Live') {
+			console.log(`Manually deleted task for saving Multi Matches for ${matchID}`);
 			return processQueueEntry.destroy();
 		}
 
