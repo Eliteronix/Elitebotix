@@ -31,11 +31,11 @@ module.exports = {
 		}
 		msg.channel.messages.fetch({ limit: 100 })
 			.then(async (messages) => {
-				const allRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+\nTry `.+/gm;
+				const allRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+/gm;
 				const firstMessage = messages.filter(m => m.author.id === '784836063058329680' && m.content.match(allRegex)).first();
 
 				const beginningRegex = /.+\nSpectate: .+\nBeatmap: <https:\/\/osu.ppy.sh\/b\//gm;
-				const endingRegex = />\nosu! direct:.+\nTry.+/gm;
+				const endingRegex = />\nosu! direct:.+/gm;
 				if (!firstMessage) {
 					if (msg.id) {
 						return msg.reply('Could not find any scores sent by Elitebotix in this channel in the last 100 messages.');
