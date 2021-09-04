@@ -198,7 +198,7 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
 					} else {
-						return interaction.reply(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
+						return interaction.followUp(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
 					}
 				} else {
 					console.log(err);
