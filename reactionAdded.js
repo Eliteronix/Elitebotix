@@ -233,10 +233,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 	}
 
 	if (reaction._emoji.id === '827974793365159997') {
-		const scoreRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+\nTry `.+/gm;
+		const scoreRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+/gm;
 		if (reaction.message.content.match(scoreRegex)) {
 			const beginningRegex = /.+\nSpectate: .+\nBeatmap: <https:\/\/osu.ppy.sh\/b\//gm;
-			const endingRegex = />\nosu! direct:.+\nTry.+/gm;
+			const endingRegex = />\nosu! direct:.+/gm;
 			const beatmapId = reaction.message.content.replace(beginningRegex, '').replace(endingRegex, '');
 
 			let args = [beatmapId];
