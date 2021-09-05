@@ -26,8 +26,9 @@ module.exports = {
 
 		osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
-				const stuckMatches = ['43027669'];
-				if (match.raw_end || stuckMatches.includes(matchID)) {
+				let oneDayAgo = new Date();
+				oneDayAgo.setUTCDate(oneDayAgo.getUTCDate() - 1);
+				if (match.raw_end || Date.parse(match.raw_start) < oneDayAgo) {
 					if (match.name.toLowerCase().match(/.+: (.+) vs (.+)/g) || match.name.toLowerCase().match(/.+: (.+) vs. (.+)/g)) {
 						saveOsuMultiScores(match);
 						console.log(`${matchID} ${match.name} done`);
