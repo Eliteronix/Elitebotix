@@ -16,5 +16,8 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
 		console.log(msg);
+		for (let i = 42994000; i < 42995000; i++) {
+			msg.reply(`https://osu.ppy.sh/community/matches/${i}`);
+		}
 	},
 };

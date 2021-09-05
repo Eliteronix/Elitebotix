@@ -2,7 +2,6 @@ const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp } = require('../dbObj
 
 module.exports = {
 	async execute(client, processQueueEntry) {
-		console.log('refreshElitiriSignUp');
 		let now = new Date();
 		let endOfRegs = new Date();
 		endOfRegs.setUTCMilliseconds(999);

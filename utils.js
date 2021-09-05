@@ -555,12 +555,14 @@ module.exports = {
 				}
 			}
 			try {
-				const task = require(`./processQueueTasks/${nextTask[0].task}.js`);
+				if (nextTask[0]) {
+					const task = require(`./processQueueTasks/${nextTask[0].task}.js`);
 
-				nextTask[0].beingExecuted = true;
-				await nextTask[0].save();
+					nextTask[0].beingExecuted = true;
+					await nextTask[0].save();
 
-				await task.execute(client, nextTask[0]);
+					await task.execute(client, nextTask[0]);
+				}
 			} catch (e) {
 				console.log('Error executing process queue task', e);
 				console.log('Process Queue entry:', nextTask[0]);
