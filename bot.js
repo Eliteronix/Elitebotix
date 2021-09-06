@@ -190,7 +190,7 @@ client.on('emojiUpdate', emojiUpdate);
 
 client.on('emojiDelete', emojiDelete);
 
-setInterval(() => executeNextProcessQueueTask(client), 1000);
+setInterval(() => executeNextProcessQueueTask(client), 800);
 
 setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
 
