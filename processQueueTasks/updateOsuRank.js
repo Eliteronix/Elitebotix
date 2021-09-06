@@ -52,12 +52,12 @@ module.exports = {
 		} catch (error) {
 			if (error.message === 'Not found') {
 				let now = new Date();
-				let halfWeekAgo = new Date();
-				halfWeekAgo.setUTCDate(halfWeekAgo.getUTCDate() - 3);
+				let weekAgo = new Date();
+				weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
 				if (discordUser.osuNotFoundFirstOccurence === null) {
 					discordUser.osuNotFoundFirstOccurence = now;
 					discordUser.save();
-				} else if (discordUser.osuNotFoundFirstOccurence && halfWeekAgo > discordUser.osuNotFoundFirstOccurence) {
+				} else if (discordUser.osuNotFoundFirstOccurence && weekAgo > discordUser.osuNotFoundFirstOccurence) {
 					const user = await client.users.fetch(discordUser.userId).catch(async () => {
 						//Nothing
 					});

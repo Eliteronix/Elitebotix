@@ -326,7 +326,7 @@ async function messageIngame(bancho, map, players) {
 			try {
 				await bancho.connect();
 			} catch (error) {
-				if (!error.message === 'Already connected/connecting') {
+				if (!error.message === 'Already connected/connecting' || error.message === 'Currently disconnected!') {
 					throw (error);
 				}
 			}
@@ -334,7 +334,9 @@ async function messageIngame(bancho, map, players) {
 				const IRCUser = await bancho.getUser(players[i].osuName);
 				await IRCUser.sendMessage(`[Elitebotix]: A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
 			} catch (error) {
-				console.log('MOTD/qualifier.js', error);
+				if (error.message !== 'Currently disconnected!') {
+					console.log('MOTD/qualifier.js', error);
+				}
 			}
 		}
 	}
