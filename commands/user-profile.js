@@ -55,7 +55,7 @@ async function sendUserEmbed(msg, interaction, user) {
 		)
 		.setTimestamp();
 
-	if (msg.channel.type !== 'dm') {
+	if (msg.channel.type !== 'DM') {
 		const member = await msg.guild.members.fetch(user.id);
 
 		let userDisplayName = user.username;

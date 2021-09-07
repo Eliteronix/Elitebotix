@@ -25,7 +25,7 @@ module.exports = async function (msg, bancho) {
 			msg.client.commands.set(command.name, command);
 		}
 
-		if (isWrongSystem(msg.guildId, msg.channel.type === 'dm')) {
+		if (isWrongSystem(msg.guildId, msg.channel.type === 'DM')) {
 			return;
 		}
 
@@ -123,7 +123,7 @@ module.exports = async function (msg, bancho) {
 
 			let authorPerms;
 
-			if (msg.channel.type !== 'dm') {
+			if (msg.channel.type !== 'DM') {
 				authorPerms = msg.channel.permissionsFor(msg.member);
 			} else {
 				const flags = [
@@ -169,7 +169,7 @@ module.exports = async function (msg, bancho) {
 				}
 			}
 
-			if (msg.channel.type !== 'dm' && closestMatchMessage) {
+			if (msg.channel.type !== 'DM' && closestMatchMessage) {
 				try {
 					await closestMatchMessage.react('✅');
 					await closestMatchMessage.react('❌');
@@ -189,7 +189,7 @@ module.exports = async function (msg, bancho) {
 		if (command.prefixCommand !== prefixCommand) return;
 
 		//Check if the command can't be used outside of DMs
-		if (command.guildOnly && msg.channel.type === 'dm') {
+		if (command.guildOnly && msg.channel.type === 'DM') {
 			return msg.reply('I can\'t execute that command inside DMs!');
 		}
 
@@ -202,7 +202,7 @@ module.exports = async function (msg, bancho) {
 		}
 
 		//Check permissions of the bot
-		if (msg.channel.type !== 'dm') {
+		if (msg.channel.type !== 'DM') {
 			if (command.botPermissions) {
 				const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch('784836063058329680'));
 				if (!botPermissions.has(command.botPermissions)) {

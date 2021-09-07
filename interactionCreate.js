@@ -5,7 +5,7 @@ const cooldowns = new Discord.Collection();
 
 module.exports = async function (client, bancho, interaction) {
 	if (!interaction.isCommand()) return;
-	if (isWrongSystem(interaction.guildId, interaction.channel.type === 'dm')) {
+	if (isWrongSystem(interaction.guildId, interaction.channel.type === 'DM')) {
 		return;
 	}
 

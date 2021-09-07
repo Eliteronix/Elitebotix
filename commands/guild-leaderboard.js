@@ -43,7 +43,7 @@ module.exports = {
 				let discordUsers = [];
 				for (let i = 0; i < members.length; i++) {
 					const serverUserActivity = await DBServerUserActivity.findOne({
-						where: { userId: members[i].id, guildId: msg.guild.id },
+						where: { userId: members[i].id, guildId: msg.guildId },
 					});
 
 					if (serverUserActivity) {

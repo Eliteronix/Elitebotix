@@ -25,14 +25,14 @@ module.exports = {
 
 		if (args[0] === 'guildCommands') {
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'creator',
 					description: 'Sends an info card about the developer'
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'cuddle',
 					description: 'Lets you send a gif to cuddle a user',
@@ -71,7 +71,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'feedback',
 					description: 'Sends feedback to the dev',
@@ -106,7 +106,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'guild-leaderboard',
 					description: 'Sends a leaderboard of the top users in the guild',
@@ -121,7 +121,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'help',
 					description: 'List all commands or get info about a specific command',
@@ -179,7 +179,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'hug',
 					description: 'Lets you send a gif to hug a user',
@@ -218,7 +218,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'kiss',
 					description: 'Lets you send a gif to kiss a user',
@@ -257,7 +257,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'leaderboard',
 					description: 'Sends a leaderboard of the top users in the guild',
@@ -288,14 +288,14 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'link',
 					description: 'Sends a link to add the bot to a server'
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-beatmap',
 					description: 'Sends an info card about the specified beatmap',
@@ -334,7 +334,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-bws',
 					description: 'Sends info about the BWS rank of the specified player',
@@ -373,7 +373,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-compare',
 					description: 'Sends an info card about the score of the specified player on the last map sent into the channel',
@@ -412,7 +412,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-leaderboard',
 					description: 'Sends a leaderboard of all the players in the guild that have their account connected',
@@ -427,7 +427,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-link',
 					description: 'Allows you to link your Discord Account to your osu! Account',
@@ -472,7 +472,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-matchscore',
 					description: 'Sends an evaluation of how valuable all the players in the match were',
@@ -497,7 +497,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-profile',
 					description: 'Sends an info card about the specified player',
@@ -536,7 +536,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'o-p',
 					description: 'Sends an info card about the specified player',
@@ -575,7 +575,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-recent',
 					description: 'Sends an info card about the specified player',
@@ -614,7 +614,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'ors',
 					description: 'Sends an info card about the specified player',
@@ -653,7 +653,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-schedule',
 					description: 'Sends an info graph about the schedules of the players',
@@ -692,7 +692,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-score',
 					description: 'Sends an info graph about the schedules of the players',
@@ -737,7 +737,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-set',
 					description: 'Allows you to set your main mode and server',
@@ -800,7 +800,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-skills',
 					description: 'Sends an info card about the skills of the specified player',
@@ -871,7 +871,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-top',
 					description: 'Sends an info card about the topplays of the specified player',
@@ -910,7 +910,7 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'pat',
 					description: 'Lets you send a gif to pat a user',
@@ -949,7 +949,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'poll',
 					description: 'Start a vote / poll',
@@ -1054,7 +1054,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'remindme',
 					description: 'Sends a reminder at the specified time',
@@ -1105,7 +1105,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'roll',
 					description: 'Rolls a number between 1 and 100 or 1 and the number specified',
@@ -1120,21 +1120,21 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'server-info',
 					description: 'Sends an info card about the server'
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'settings',
 					description: 'Sends an info card about the settings of the bot for the server'
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'ship',
 					description: 'Lets you check how compatible two users are.',
@@ -1155,7 +1155,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'slap',
 					description: 'Lets you send a gif to slap a user',
@@ -1194,7 +1194,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'ticket',
 					description: 'Create a ticket',
@@ -1209,7 +1209,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'user-profile',
 					description: 'Sends an info card about the specified user',
@@ -1248,7 +1248,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'weather',
 					description: 'Sends info about the weather of the given location',
@@ -1279,9 +1279,9 @@ module.exports = {
 				}
 			});
 		} else if (args[0] === 'removeGuildCommands') {
-			const commands = await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands.get();
+			const commands = await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.get();
 			for (let i = 0; i < commands.length; i++) {
-				await msg.client.api.applications(msg.client.user.id).guilds(msg.guild.id).commands(commands[i].id).delete();
+				await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands(commands[i].id).delete();
 			}
 		} else if (args[0] === 'globalCommands') {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
@@ -2598,6 +2598,10 @@ module.exports = {
 			});
 		} else if (args[0] === 'saveMultiMatches') {
 			DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${args[1]}`, priority: 0 });
+		} else if (args[0] === 'sendMultis') {
+			for (let i = 42981425; i < 42982000; i++) {
+				msg.reply(`https://osu.ppy.sh/community/matches/${i}`);
+			}
 		}
 
 		msg.reply('Done.');

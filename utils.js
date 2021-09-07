@@ -10,13 +10,13 @@ module.exports = {
 		let guildPrefix;
 
 		//Check if the channel type is not a dm
-		if (msg.channel.type === 'dm') {
+		if (msg.channel.type === 'DM') {
 			//Set prefix to standard prefix
 			guildPrefix = prefix;
 		} else {
 			//Get guild from the db
 			const guild = await DBGuilds.findOne({
-				where: { guildId: msg.guild.id },
+				where: { guildId: msg.guildId },
 			});
 
 			//Check if a guild record was found
@@ -476,11 +476,11 @@ module.exports = {
 		return outputArray;
 	},
 	updateServerUserActivity: async function (msg) {
-		if (msg.channel.type !== 'dm') {
+		if (msg.channel.type !== 'DM') {
 			const now = new Date();
 			now.setSeconds(now.getSeconds() - 15);
 			const serverUserActivity = await DBServerUserActivity.findOne({
-				where: { guildId: msg.guild.id, userId: msg.author.id },
+				where: { guildId: msg.guildId, userId: msg.author.id },
 			});
 
 			if (serverUserActivity && serverUserActivity.updatedAt < now) {
@@ -490,26 +490,26 @@ module.exports = {
 						if (lastMessage && msg.id === lastMessage.id) {
 							serverUserActivity.points = serverUserActivity.points + 1;
 							serverUserActivity.save();
-							const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 } });
+							const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
 							if (!existingTask) {
-								DBProcessQueue.create({ guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 });
+								DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 });
 							}
 						}
 					});
 			}
 
 			if (!serverUserActivity) {
-				DBServerUserActivity.create({ guildId: msg.guild.id, userId: msg.author.id });
-				const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 } });
+				DBServerUserActivity.create({ guildId: msg.guildId, userId: msg.author.id });
+				const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
 				if (!existingTask) {
-					DBProcessQueue.create({ guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 });
+					DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 });
 				}
 			}
 		}
 	},
 	getMessageUserDisplayname: async function (msg) {
 		let userDisplayName = msg.author.username;
-		if (msg.channel.type !== 'dm') {
+		if (msg.channel.type !== 'DM') {
 			const member = await msg.guild.members.fetch(msg.author.id);
 			const guildDisplayName = member.displayName;
 			if (guildDisplayName) {

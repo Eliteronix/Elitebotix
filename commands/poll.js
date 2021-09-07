@@ -184,6 +184,6 @@ module.exports = {
 			}
 		}
 
-		DBProcessQueue.create({ guildId: msg.guild.id, task: 'closePoll', priority: 5, additions: `${pollMessage.channel.id};${pollMessage.id};${title};${options.join(';')}`, date: date });
+		DBProcessQueue.create({ guildId: msg.guildId, task: 'closePoll', priority: 5, additions: `${pollMessage.channel.id};${pollMessage.id};${title};${options.join(';')}`, date: date });
 	},
 };

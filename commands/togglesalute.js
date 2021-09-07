@@ -19,7 +19,7 @@ module.exports = {
 	async execute(msg, args) {
 		//get guild from db
 		const guild = await DBGuilds.findOne({
-			where: { guildId: msg.guild.id },
+			where: { guildId: msg.guildId },
 		});
 
 		//Check if guild exists in db
@@ -40,7 +40,7 @@ module.exports = {
 			}
 		} else {
 			//Create guild in db if it wasn't there yet and disable it by default
-			DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, saluteEnabled: true });
+			DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, saluteEnabled: true });
 			msg.reply('Salute has been activated');
 		}
 	},

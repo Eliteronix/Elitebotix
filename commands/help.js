@@ -59,10 +59,10 @@ module.exports = {
 			return msg.author.send(data.join('\n'), { split: true })
 				.then(async () => {
 					if (msg.id) {
-						if (msg.channel.type === 'dm') return;
+						if (msg.channel.type === 'DM') return;
 						msg.reply('I\'ve sent you a DM with all my commands!');
 					} else if (interaction) {
-						if (!interaction.channel.type === 'dm') {
+						if (!interaction.channel.type === 'DM') {
 							return interaction.reply({ content: 'Help info will be sent', ephemeral: true });
 						}
 						await interaction.reply({ content: 'I\'ve sent you a DM with all my commands!', ephemeral: true });
@@ -86,10 +86,10 @@ module.exports = {
 			return msg.author.send(data.join('\n'), { split: true })
 				.then(async () => {
 					if (msg.id) {
-						if (msg.channel.type === 'dm') return;
+						if (msg.channel.type === 'DM') return;
 						msg.reply('I\'ve sent you a DM with all my commands!');
 					} else if (interaction) {
-						if (!interaction.channel.type === 'dm') {
+						if (!interaction.channel.type === 'DM') {
 							return interaction.reply({ content: 'Help info will be sent', ephemeral: true });
 						}
 						await interaction.reply({ content: 'I\'ve sent you a DM with all my commands!', ephemeral: true });

@@ -63,7 +63,7 @@ module.exports = {
 				if (!(isNaN(args[2]))) {
 					//Get the embed which should get deleted
 					const reactionRolesHeader = await DBReactionRolesHeader.findOne({
-						where: { guildId: msg.guild.id, id: args[2] },
+						where: { guildId: msg.guildId, id: args[2] },
 					});
 
 					//Check if it was found in the db
@@ -79,7 +79,7 @@ module.exports = {
 						} catch (e) {
 							msg.reply('Couldn\'t find an embed with this EmbedId');
 							DBReactionRolesHeader.destroy({
-								where: { guildId: msg.guild.id, id: args[2] },
+								where: { guildId: msg.guildId, id: args[2] },
 							});
 							return console.log(e);
 						}
@@ -89,7 +89,7 @@ module.exports = {
 						embedMessage.delete();
 						//Delete the record from the db
 						DBReactionRolesHeader.destroy({
-							where: { guildId: msg.guild.id, id: args[2] },
+							where: { guildId: msg.guildId, id: args[2] },
 						});
 					} else {
 						msg.reply('Couldn\'t find an embed with this EmbedId');
@@ -103,7 +103,7 @@ module.exports = {
 					if (args[3].toLowerCase() === 'title') {
 						//Get embed from the db
 						const reactionRolesHeader = await DBReactionRolesHeader.findOne({
-							where: { guildId: msg.guild.id, id: args[2] },
+							where: { guildId: msg.guildId, id: args[2] },
 						});
 
 						//Check if it was found in the db
@@ -124,7 +124,7 @@ module.exports = {
 					} else if (args[3].toLowerCase() === 'description') {
 						//Get embed from the db
 						const reactionRolesHeader = await DBReactionRolesHeader.findOne({
-							where: { guildId: msg.guild.id, id: args[2] },
+							where: { guildId: msg.guildId, id: args[2] },
 						});
 
 						//Check if it was found in the db
@@ -149,7 +149,7 @@ module.exports = {
 
 							//Get embed from the db
 							const reactionRolesHeader = await DBReactionRolesHeader.findOne({
-								where: { guildId: msg.guild.id, id: args[2] },
+								where: { guildId: msg.guildId, id: args[2] },
 							});
 
 							//Check if it was found in the db
@@ -176,7 +176,7 @@ module.exports = {
 
 						//Get embed from the db
 						const reactionRolesHeader = await DBReactionRolesHeader.findOne({
-							where: { guildId: msg.guild.id, id: args[2] },
+							where: { guildId: msg.guildId, id: args[2] },
 						});
 
 						//Check if it was found in the db
@@ -222,7 +222,7 @@ module.exports = {
 
 							//Get embed from the db
 							const reactionRolesHeader = await DBReactionRolesHeader.findOne({
-								where: { guildId: msg.guild.id, id: headerId },
+								where: { guildId: msg.guildId, id: headerId },
 							});
 
 							if (reactionRolesHeader) {
@@ -278,7 +278,7 @@ module.exports = {
 
 						//Get embed from the db
 						const reactionRolesHeader = await DBReactionRolesHeader.findOne({
-							where: { guildId: msg.guild.id, id: headerId },
+							where: { guildId: msg.guildId, id: headerId },
 						});
 
 						if (reactionRolesHeader) {
@@ -307,7 +307,7 @@ module.exports = {
 
 					//Get embed from the db
 					const reactionRolesHeader = await DBReactionRolesHeader.findOne({
-						where: { guildId: msg.guild.id, id: headerId },
+						where: { guildId: msg.guildId, id: headerId },
 					});
 
 					//Check if there was an embed found in the same guild
@@ -400,7 +400,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 	} catch (e) {
 		msg.reply('Couldn\'t find an embed with this EmbedId');
 		DBReactionRolesHeader.destroy({
-			where: { guildId: msg.guild.id, id: reactionRolesHeader.id },
+			where: { guildId: msg.guildId, id: reactionRolesHeader.id },
 		});
 		return console.log(e);
 	}

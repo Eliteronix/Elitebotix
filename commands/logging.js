@@ -19,7 +19,7 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args) {
 		let guild = await DBGuilds.findOne({
-			where: { guildId: msg.guild.id }
+			where: { guildId: msg.guildId }
 		});
 		if (args[0].toLowerCase() === 'list') {
 			let channel = 'Not yet set.';
@@ -220,7 +220,7 @@ module.exports = {
 				guild.save();
 				return msg.reply(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
 			} else {
-				DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, loggingChannel: msg.mentions.channels.first().id });
+				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, loggingChannel: msg.mentions.channels.first().id });
 				return msg.reply(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
 			}
 		} else {
@@ -229,7 +229,7 @@ module.exports = {
 				msg.reply(`Be sure to use \`${guildPrefix}${this.name} channel <mentioned channel>\` to set a channel where this information should be logged into.`);
 			}
 			if (!guild) {
-				guild = await DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name });
+				guild = await DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name });
 			}
 			args.forEach(arg => {
 				if (arg.toLowerCase() === 'nicknames') {

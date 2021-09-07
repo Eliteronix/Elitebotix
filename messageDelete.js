@@ -3,17 +3,17 @@ const { DBGuilds } = require('./dbObjects');
 const { isWrongSystem } = require('./utils');
 
 module.exports = async function (msg) {
-	if (isWrongSystem(msg.guildId, msg.channel.type === 'dm')) {
+	if (isWrongSystem(msg.guildId, msg.channel.type === 'DM')) {
 		return;
 	}
 
-	if (msg.channel.type === 'dm') {
+	if (msg.channel.type === 'DM') {
 		return;
 	}
 
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
-		where: { guildId: msg.guild.id, loggingMessageDelete: true },
+		where: { guildId: msg.guildId, loggingMessageDelete: true },
 	});
 
 	if (guild && guild.loggingChannel && msg.author) {

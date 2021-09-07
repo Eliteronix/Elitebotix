@@ -7,7 +7,7 @@ const { isWrongSystem } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user) {
-	if (isWrongSystem(reaction.message.guild.id, reaction.message.channel.type === 'dm')) {
+	if (isWrongSystem(reaction.message.guild.id, reaction.message.channel.type === 'DM')) {
 		return;
 	}
 
@@ -23,7 +23,7 @@ module.exports = async function (reaction, user) {
 		}
 	}
 
-	if (reaction.message.channel.type === 'dm') {
+	if (reaction.message.channel.type === 'DM') {
 		return;
 	}
 
@@ -139,7 +139,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 	} catch (e) {
 		msg.channel.send('Couldn\'t find an embed with this EmbedId');
 		DBReactionRolesHeader.destroy({
-			where: { guildId: msg.guild.id, id: reactionRolesHeader.id },
+			where: { guildId: msg.guildId, id: reactionRolesHeader.id },
 		});
 		return console.log(e);
 	}

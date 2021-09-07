@@ -3,11 +3,11 @@ const { DBGuilds } = require('./dbObjects');
 const { isWrongSystem } = require('./utils');
 
 module.exports = async function (oldChannel, newChannel) {
-	if (newChannel.type === 'dm') {
+	if (newChannel.type === 'DM') {
 		return;
 	}
 
-	if (isWrongSystem(newChannel.guild.id, newChannel.type === 'dm')) {
+	if (isWrongSystem(newChannel.guild.id, newChannel.type === 'DM')) {
 		return;
 	}
 
