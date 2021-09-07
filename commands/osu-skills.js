@@ -174,7 +174,11 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				oldestDate.setUTCHours(0);
 				oldestDate.setUTCMinutes(0);
 
+				let matchesPlayed = [];
 				userScores.forEach(score => {
+					if (!matchesPlayed.includes(score.matchId)) {
+						matchesPlayed.push(score.matchId);
+					}
 					if (oldestDate > score.matchStartDate) {
 						oldestDate.setUTCFullYear(score.matchStartDate.getUTCFullYear());
 						oldestDate.setUTCMonth(score.matchStartDate.getUTCMonth());
