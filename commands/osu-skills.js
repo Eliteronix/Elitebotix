@@ -175,8 +175,9 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				oldestDate.setUTCMinutes(0);
 
 				let matchesPlayed = [];
+				quicksort(userScores);
 				userScores.forEach(score => {
-					if (!matchesPlayed.includes(score.matchId)) {
+					if (!matchesPlayed.includes(`${score.matchName} - https://osu.ppy.sh/community/matches/${score.matchId}`)) {
 						matchesPlayed.push(`${score.matchName} - https://osu.ppy.sh/community/matches/${score.matchId}`);
 					}
 					if (oldestDate > score.matchStartDate) {
@@ -466,4 +467,29 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				console.log(err);
 			}
 		});
+}
+
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].matchId) >= parseFloat(pivot.matchId)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
 }

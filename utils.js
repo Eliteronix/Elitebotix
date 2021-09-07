@@ -956,6 +956,7 @@ module.exports = {
 			channel: interaction.channel,
 			guild: interaction.guild,
 			mentions: mentions,
+			guildId: interaction.guild.id
 		};
 	},
 	isWrongSystem(guildId, isDM) {
