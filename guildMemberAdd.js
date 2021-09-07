@@ -1,29 +1,10 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBAutoRoles } = require('./dbObjects');
+const { isWrongSystem } = require('./utils');
 
 module.exports = async function (member) {
-
-	//For the development version
-	//if the message is not in the Dev-Servers then return
-	// eslint-disable-next-line no-undef
-	if (process.env.SERVER === 'Dev') {
-		if (member.guild.id != '800641468321759242' && member.guild.id != '800641735658176553') {
-			return;
-		}
-		//For the QA version
-		//if the message is in the QA-Servers then return
-		// eslint-disable-next-line no-undef
-	} else if (process.env.SERVER === 'QA') {
-		if (member.guild.id != '800641367083974667' && member.guild.id != '800641819086946344') {
-			return;
-		}
-		//For the Live version
-		//if the message is in the Dev/QA-Servers then return
-		// eslint-disable-next-line no-undef
-	} else if (process.env.SERVER === 'Live') {
-		if (member.guild.id === '800641468321759242' || member.guild.id === '800641735658176553' || member.guild.id === '800641367083974667' || member.guild.id === '800641819086946344') {
-			return;
-		}
+	if (isWrongSystem(member.guild.id, false)) {
+		return;
 	}
 
 	//Get the guild dataset from the db
