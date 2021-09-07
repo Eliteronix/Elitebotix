@@ -177,7 +177,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				let matchesPlayed = [];
 				userScores.forEach(score => {
 					if (!matchesPlayed.includes(score.matchId)) {
-						matchesPlayed.push(score.matchId);
+						matchesPlayed.push(`${score.matchName} - https://osu.ppy.sh/community/matches/${score.matchId}`);
 					}
 					if (oldestDate > score.matchStartDate) {
 						oldestDate.setUTCFullYear(score.matchStartDate.getUTCFullYear());
@@ -454,7 +454,9 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					tourneyMatchText = 'Tourney matches only';
 				}
 
-				msg.channel.send({ content: `[Beta/WIP] Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}`, files: [attachment] });
+				// eslint-disable-next-line no-undef
+				matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${user.id}.txt`);
+				msg.channel.send({ content: `[Beta/WIP] Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}`, files: [attachment, matchesPlayed] });
 			})();
 		})
 		.catch(err => {

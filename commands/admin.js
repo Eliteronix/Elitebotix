@@ -2599,7 +2599,7 @@ module.exports = {
 		} else if (args[0] === 'saveMultiMatches') {
 			DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${args[1]}`, priority: 0 });
 		} else if (args[0] === 'sendMultis') {
-			for (let i = 42977000; i < 42978000; i++) {
+			for (let i = parseInt(args[1]); i < parseInt(args[2]); i++) {
 				msg.reply(`https://osu.ppy.sh/community/matches/${i}`);
 			}
 		}
