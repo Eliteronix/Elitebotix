@@ -950,13 +950,19 @@ module.exports = {
 			users: userMentions
 		};
 
+		let guildId = null;
+
+		if (interaction.guild) {
+			guildId = interaction.guild.id;
+		}
+
 		return {
 			author: interaction.user,
 			client: interaction.client,
 			channel: interaction.channel,
 			guild: interaction.guild,
 			mentions: mentions,
-			guildId: interaction.guild.id
+			guildId: guildId
 		};
 	},
 	isWrongSystem(guildId, isDM) {

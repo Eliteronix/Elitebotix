@@ -177,9 +177,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				let matchesPlayed = [];
 				quicksort(userScores);
 				userScores.forEach(score => {
-					if (!matchesPlayed.includes(`${score.matchName} - https://osu.ppy.sh/community/matches/${score.matchId}`)) {
-						matchesPlayed.push(`${score.matchName} - https://osu.ppy.sh/community/matches/${score.matchId}`);
-					}
 					if (oldestDate > score.matchStartDate) {
 						oldestDate.setUTCFullYear(score.matchStartDate.getUTCFullYear());
 						oldestDate.setUTCMonth(score.matchStartDate.getUTCMonth());
@@ -212,11 +209,15 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					if (scoringType === 'v2' && userScores[i].scoringType !== 'Score v2') {
 						continue;
 					}
-					if (scoringType === 'v1' && userScores[i].scoringType === 'Score v1') {
+					if (scoringType === 'v1' && userScores[i].scoringType !== 'Score') {
 						continue;
 					}
 					if (tourneyMatch && !userScores[i].tourneyMatch) {
 						continue;
+					}
+
+					if (!matchesPlayed.includes(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`)) {
+						matchesPlayed.push(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`);
 					}
 
 					for (let j = 0; j < rawData.length; j++) {
