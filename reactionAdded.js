@@ -168,6 +168,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 		let message = {
 			guild: reaction.message.guild,
+			guildId: reaction.message.guild.id,
 			content: `e!${commandName[0]} ${page}`,
 			author: user,
 			channel: reaction.message.channel,
