@@ -572,9 +572,6 @@ module.exports = {
 				if (nextTask[0]) {
 					const task = require(`./processQueueTasks/${nextTask[0].task}.js`);
 
-					if (nextTask[0].task !== 'saveMultiMatches') {
-						console.log(nextTask[0].task);
-					}
 					nextTask[0].beingExecuted = true;
 					await nextTask[0].save();
 
