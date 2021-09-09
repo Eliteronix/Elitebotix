@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBOsuMultiScores } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBOsuMultiScores, DBActivityRoles } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -490,9 +490,16 @@ module.exports = {
 						if (lastMessage && msg.id === lastMessage.id) {
 							serverUserActivity.points = serverUserActivity.points + 1;
 							serverUserActivity.save();
-							const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
-							if (!existingTask) {
-								DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 });
+							const activityRoles = await DBActivityRoles.findAll({
+								where: { guildId: msg.guildId }
+							});
+							if (activityRoles.length) {
+								const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
+								if (!existingTask) {
+									let date = new Date();
+									date.setUTCMinutes(date.getUTCMinutes() + 5);
+									DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
+								}
 							}
 						}
 					});
@@ -500,9 +507,16 @@ module.exports = {
 
 			if (!serverUserActivity) {
 				DBServerUserActivity.create({ guildId: msg.guildId, userId: msg.author.id });
-				const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
-				if (!existingTask) {
-					DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 });
+				const activityRoles = await DBActivityRoles.findAll({
+					where: { guildId: msg.guildId }
+				});
+				if (activityRoles.length) {
+					const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
+					if (!existingTask) {
+						let date = new Date();
+						date.setUTCMinutes(date.getUTCMinutes() + 5);
+						DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
+					}
 				}
 			}
 		}
@@ -558,6 +572,9 @@ module.exports = {
 				if (nextTask[0]) {
 					const task = require(`./processQueueTasks/${nextTask[0].task}.js`);
 
+					if (nextTask[0].task !== 'saveMultiMatches') {
+						console.log(nextTask[0].task);
+					}
 					nextTask[0].beingExecuted = true;
 					await nextTask[0].save();
 
@@ -571,9 +588,8 @@ module.exports = {
 		}
 	},
 	refreshOsuRank: async function () {
-		const today = new Date();
 		let date = new Date();
-		date.setHours(today.getHours() - 8);
+		date.setUTCHours(date.getUTCHours() - 12);
 
 		const discordUsers = await DBDiscordUsers.findAll();
 
