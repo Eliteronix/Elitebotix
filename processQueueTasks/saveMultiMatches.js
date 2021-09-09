@@ -32,9 +32,10 @@ module.exports = {
 					if (match.name.toLowerCase().match(/.+: (.+) vs (.+)/g) || match.name.toLowerCase().match(/.+: (.+) vs. (.+)/g)) {
 						saveOsuMultiScores(match);
 						let now = new Date();
+						let minutesBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60) % 60;
 						let hoursBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60) % 24;
 						let daysBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60 / 24);
-						console.log(`${matchID}; ${daysBehindToday}d ${hoursBehindToday}h ${match.name} done`);
+						console.log(`${matchID}; ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m ${match.name} done`);
 					} else {
 						// console.log(`${matchID} ${match.name} is not a tourney match`);
 					}
