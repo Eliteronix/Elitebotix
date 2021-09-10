@@ -405,6 +405,8 @@ module.exports = async function (oldMember, newMember) {
 						await dbTemporaryVoices.destroy();
 						const owner = await oldMember.client.users.cache.find(user => user.id === oldMember.guild.ownerId);
 						return owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${oldMember.guild.name}\`.`);
+					} else if (e.message === 'Unknown Channel') {
+						await dbTemporaryVoices.destroy();
 					} else {
 						await dbTemporaryVoices.destroy();
 						return console.log(e);
