@@ -1,30 +1,12 @@
 const Discord = require('discord.js');
 const fs = require('fs');
+const { isWrongSystem } = require('./utils');
 const cooldowns = new Discord.Collection();
 
 module.exports = async function (client, bancho, interaction) {
 	if (!interaction.isCommand()) return;
-	//For the development version
-	//if the message is not in the Dev-Servers then return
-	// eslint-disable-next-line no-undef
-	if (process.env.SERVER === 'Dev') {
-		if (interaction.guildId != '800641468321759242' && interaction.guildId != '800641735658176553') {
-			return;
-		}
-		//For the QA version
-		//if the message is in the QA-Servers then return
-		// eslint-disable-next-line no-undef
-	} else if (process.env.SERVER === 'QA') {
-		if (interaction.guildId != '800641367083974667' && interaction.guildId != '800641819086946344') {
-			return;
-		}
-		//For the Live version
-		//if the message is in the Dev/QA-Servers then return
-		// eslint-disable-next-line no-undef
-	} else if (process.env.SERVER === 'Live') {
-		if (interaction.guildId === '800641468321759242' || interaction.guildId === '800641735658176553' || interaction.guildId === '800641367083974667' || interaction.guildId === '800641819086946344') {
-			return;
-		}
+	if (isWrongSystem(interaction.guildId, interaction.channel.type === 'DM')) {
+		return;
 	}
 
 	//Create a collection for the commands

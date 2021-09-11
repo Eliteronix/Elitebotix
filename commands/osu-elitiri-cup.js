@@ -176,7 +176,7 @@ module.exports = {
 function sendMessage(msg, content) {
 	msg.author.send(content)
 		.then(() => {
-			if (msg.channel.type === 'dm') return;
+			if (msg.channel.type === 'DM') return;
 			msg.reply('I\'ve sent you a DM with some info!');
 		})
 		.catch(() => {

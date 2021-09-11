@@ -19,7 +19,7 @@ module.exports = {
 	async execute(msg, args) {
 		const guildPrefix = await getGuildPrefix(msg);
 		const guild = await DBGuilds.findOne({
-			where: { guildId: msg.guild.id }
+			where: { guildId: msg.guildId }
 		});
 		if (args[0].toLowerCase() === 'enable') {
 			if (guild) {
@@ -37,7 +37,7 @@ module.exports = {
 					return msg.reply(`The starboard has been enabled on this server for channel <#${guild.starBoardChannel}> with a minimum requirement of ${guild.starBoardMinimum} stars.`);
 				}
 			} else {
-				DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, starBoardEnabled: true, starBoardMinimum: 3, starBoardChannel: msg.channel.id });
+				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, starBoardEnabled: true, starBoardMinimum: 3, starBoardChannel: msg.channel.id });
 				return msg.reply(`The starboard has been enabled on this server for channel <#${msg.channel.id}> with a minimum requirement of 3 stars.`);
 			}
 		} else if (args[0].toLowerCase() === 'disable') {
@@ -65,7 +65,7 @@ module.exports = {
 				guild.save();
 				return msg.reply(`The starboard has been enabled on this server for channel <#${msg.mentions.channels.first().id}> with a minimum requirement of ${guild.starBoardMinimum} stars.`);
 			} else {
-				DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, starBoardEnabled: true, starBoardMinimum: 3, starBoardChannel: msg.mentions.channels.first().id });
+				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, starBoardEnabled: true, starBoardMinimum: 3, starBoardChannel: msg.mentions.channels.first().id });
 				return msg.reply(`The starboard has been enabled on this server for channel <#${msg.mentions.channels.first().id}> with a minimum requirement of 3 stars.`);
 			}
 		} else if (args[0].toLowerCase() === 'minimum') {
@@ -81,7 +81,7 @@ module.exports = {
 				guild.save();
 				return msg.reply(`The starboard has been enabled on this server for channel <#${guild.starBoardChannel}> with a minimum requirement of ${parseInt(args[1])} stars.`);
 			} else {
-				DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, starBoardEnabled: true, starBoardMinimum: parseInt(args[1]), starBoardChannel: msg.channel.id });
+				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, starBoardEnabled: true, starBoardMinimum: parseInt(args[1]), starBoardChannel: msg.channel.id });
 				return msg.reply(`The starboard has been enabled on this server for channel <#${msg.channel.id}> with a minimum requirement of ${parseInt(args[1])} stars.`);
 			}
 		} else {

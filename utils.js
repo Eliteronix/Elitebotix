@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBOsuMultiScores } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBOsuMultiScores, DBActivityRoles } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -10,13 +10,13 @@ module.exports = {
 		let guildPrefix;
 
 		//Check if the channel type is not a dm
-		if (msg.channel.type === 'dm') {
+		if (msg.channel.type === 'DM') {
 			//Set prefix to standard prefix
 			guildPrefix = prefix;
 		} else {
 			//Get guild from the db
 			const guild = await DBGuilds.findOne({
-				where: { guildId: msg.guild.id },
+				where: { guildId: msg.guildId },
 			});
 
 			//Check if a guild record was found
@@ -476,11 +476,11 @@ module.exports = {
 		return outputArray;
 	},
 	updateServerUserActivity: async function (msg) {
-		if (msg.channel.type !== 'dm') {
+		if (msg.channel.type !== 'DM') {
 			const now = new Date();
 			now.setSeconds(now.getSeconds() - 15);
 			const serverUserActivity = await DBServerUserActivity.findOne({
-				where: { guildId: msg.guild.id, userId: msg.author.id },
+				where: { guildId: msg.guildId, userId: msg.author.id },
 			});
 
 			if (serverUserActivity && serverUserActivity.updatedAt < now) {
@@ -490,26 +490,40 @@ module.exports = {
 						if (lastMessage && msg.id === lastMessage.id) {
 							serverUserActivity.points = serverUserActivity.points + 1;
 							serverUserActivity.save();
-							const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 } });
-							if (!existingTask) {
-								DBProcessQueue.create({ guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 });
+							const activityRoles = await DBActivityRoles.findAll({
+								where: { guildId: msg.guildId }
+							});
+							if (activityRoles.length) {
+								const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
+								if (!existingTask) {
+									let date = new Date();
+									date.setUTCMinutes(date.getUTCMinutes() + 5);
+									DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
+								}
 							}
 						}
 					});
 			}
 
 			if (!serverUserActivity) {
-				DBServerUserActivity.create({ guildId: msg.guild.id, userId: msg.author.id });
-				const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 } });
-				if (!existingTask) {
-					DBProcessQueue.create({ guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 });
+				DBServerUserActivity.create({ guildId: msg.guildId, userId: msg.author.id });
+				const activityRoles = await DBActivityRoles.findAll({
+					where: { guildId: msg.guildId }
+				});
+				if (activityRoles.length) {
+					const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
+					if (!existingTask) {
+						let date = new Date();
+						date.setUTCMinutes(date.getUTCMinutes() + 5);
+						DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
+					}
 				}
 			}
 		}
 	},
 	getMessageUserDisplayname: async function (msg) {
 		let userDisplayName = msg.author.username;
-		if (msg.channel.type !== 'dm') {
+		if (msg.channel.type !== 'DM') {
 			const member = await msg.guild.members.fetch(msg.author.id);
 			const guildDisplayName = member.displayName;
 			if (guildDisplayName) {
@@ -571,9 +585,8 @@ module.exports = {
 		}
 	},
 	refreshOsuRank: async function () {
-		const today = new Date();
 		let date = new Date();
-		date.setHours(today.getHours() - 8);
+		date.setUTCHours(date.getUTCHours() - 12);
 
 		const discordUsers = await DBDiscordUsers.findAll();
 
@@ -950,13 +963,54 @@ module.exports = {
 			users: userMentions
 		};
 
+		let guildId = null;
+
+		if (interaction.guild) {
+			guildId = interaction.guild.id;
+		}
+
 		return {
 			author: interaction.user,
 			client: interaction.client,
 			channel: interaction.channel,
 			guild: interaction.guild,
 			mentions: mentions,
+			guildId: guildId
 		};
+	},
+	isWrongSystem(guildId, isDM) {
+		//For the development version
+		//if the message is not in the Dev-Servers then return
+		// eslint-disable-next-line no-undef
+		if (process.env.SERVER === 'Dev') {
+			if (isDM) {
+				return true;
+			}
+			if (!isDM && guildId != '800641468321759242' && guildId != '800641735658176553') {
+				return true;
+			}
+			//For the QA version
+			//if the message is in the QA-Servers then return
+			// eslint-disable-next-line no-undef
+		} else if (process.env.SERVER === 'QA') {
+			if (isDM) {
+				return true;
+			}
+			if (!isDM && guildId != '800641367083974667' && guildId != '800641819086946344') {
+				return true;
+			}
+			//For the Live version
+			//if the message is in the Dev/QA-Servers then return
+			// eslint-disable-next-line no-undef
+		} else if (process.env.SERVER === 'Live') {
+			if (!isDM) {
+				if (guildId === '800641468321759242' || guildId === '800641735658176553' || guildId === '800641367083974667' || guildId === '800641819086946344') {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 };
 

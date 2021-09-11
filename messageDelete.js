@@ -1,45 +1,19 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
+const { isWrongSystem } = require('./utils');
 
 module.exports = async function (msg) {
-	//For the development version
-	//if the message is not in the Dev-Servers then return
-	// eslint-disable-next-line no-undef
-	if (process.env.SERVER === 'Dev') {
-		if (msg.channel.type === 'dm') {
-			return;
-		}
-		if (msg.channel.type !== 'dm' && msg.guild.id != '800641468321759242' && msg.guild.id != '800641735658176553') {
-			return;
-		}
-		//For the QA version
-		//if the message is in the QA-Servers then return
-		// eslint-disable-next-line no-undef
-	} else if (process.env.SERVER === 'QA') {
-		if (msg.channel.type === 'dm') {
-			return;
-		}
-		if (msg.channel.type !== 'dm' && msg.guild.id != '800641367083974667' && msg.guild.id != '800641819086946344') {
-			return;
-		}
-		//For the Live version
-		//if the message is in the Dev/QA-Servers then return
-		// eslint-disable-next-line no-undef
-	} else if (process.env.SERVER === 'Live') {
-		if (msg.channel.type !== 'dm') {
-			if (msg.guild.id === '800641468321759242' || msg.guild.id === '800641735658176553' || msg.guild.id === '800641367083974667' || msg.guild.id === '800641819086946344') {
-				return;
-			}
-		}
+	if (isWrongSystem(msg.guildId, msg.channel.type === 'DM')) {
+		return;
 	}
 
-	if (msg.channel.type === 'dm') {
+	if (msg.channel.type === 'DM') {
 		return;
 	}
 
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
-		where: { guildId: msg.guild.id, loggingMessageDelete: true },
+		where: { guildId: msg.guildId, loggingMessageDelete: true },
 	});
 
 	if (guild && guild.loggingChannel && msg.author) {

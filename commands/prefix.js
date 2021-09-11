@@ -18,7 +18,7 @@ module.exports = {
 	async execute(msg, args) {
 		//Get guild from db
 		const guild = await DBGuilds.findOne({
-			where: { guildId: msg.guild.id },
+			where: { guildId: msg.guildId },
 		});
 
 		if (guild) {
@@ -30,7 +30,7 @@ module.exports = {
 			msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
 		} else {
 			//Create new record for the guild in the db
-			DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, customPrefixUsed: true, customPrefix: args[0] });
+			DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, customPrefixUsed: true, customPrefix: args[0] });
 
 			msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
 		}

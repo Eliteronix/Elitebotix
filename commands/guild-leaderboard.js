@@ -43,7 +43,7 @@ module.exports = {
 				let discordUsers = [];
 				for (let i = 0; i < members.length; i++) {
 					const serverUserActivity = await DBServerUserActivity.findOne({
-						where: { userId: members[i].id, guildId: msg.guild.id },
+						where: { userId: members[i].id, guildId: msg.guildId },
 					});
 
 					if (serverUserActivity) {
@@ -101,8 +101,10 @@ module.exports = {
 				let leaderboardMessage;
 				if (msg.id) {
 					leaderboardMessage = await msg.reply({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
+				} else if (interaction) {
+					leaderboardMessage = await interaction.followUp({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
 				} else {
-					interaction.followUp({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
+					leaderboardMessage = await msg.channel.send({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
 				}
 
 				if (page) {

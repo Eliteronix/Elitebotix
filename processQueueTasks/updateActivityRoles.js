@@ -6,7 +6,7 @@ module.exports = {
 			where: { guildId: processQueueEntry.guildId }
 		});
 
-		if (!activityRoles) {
+		if (!activityRoles.length) {
 			processQueueEntry.destroy();
 			return;
 		}

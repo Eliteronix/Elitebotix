@@ -20,7 +20,7 @@ module.exports = {
 		if (!(args[0])) {
 			//get guild from db
 			const guild = await DBGuilds.findOne({
-				where: { guildId: msg.guild.id },
+				where: { guildId: msg.guildId },
 			});
 
 			//check if guild is in db
@@ -35,7 +35,7 @@ module.exports = {
 				}
 			} else {
 				//Create guild dataset in db if not there yet
-				DBGuilds.create({ guildId: msg.guild.id, guildName: msg.guild.name, owoEnabled: false });
+				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, owoEnabled: false });
 			}
 		}
 	},

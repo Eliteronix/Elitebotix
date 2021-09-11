@@ -27,13 +27,13 @@ module.exports = {
 
 		//get guild from db
 		const guild = await DBGuilds.findOne({
-			where: { guildId: msg.guild.id, ticketsEnabled: true },
+			where: { guildId: msg.guildId, ticketsEnabled: true },
 		});
 
 		if (guild) {
 			if (args[0].toLowerCase() === 'add') {
 				const ticket = await DBTickets.findOne({
-					where: { guildId: msg.guild.id, channelId: msg.channel.id }
+					where: { guildId: msg.guildId, channelId: msg.channel.id }
 				});
 
 				if (ticket) {
@@ -54,7 +54,7 @@ module.exports = {
 				}
 			} else if (args[0].toLowerCase() === 'remove') {
 				const ticket = await DBTickets.findOne({
-					where: { guildId: msg.guild.id, channelId: msg.channel.id }
+					where: { guildId: msg.guildId, channelId: msg.channel.id }
 				});
 
 				if (ticket) {
@@ -87,7 +87,7 @@ module.exports = {
 				}
 			} else if (args[0].toLowerCase() === 'responded' || args[0].toLowerCase() === 'r') {
 				const ticket = await DBTickets.findOne({
-					where: { guildId: msg.guild.id, channelId: msg.channel.id }
+					where: { guildId: msg.guildId, channelId: msg.channel.id }
 				});
 
 				if (ticket) {
@@ -130,7 +130,7 @@ module.exports = {
 				return;
 			} else if (args[0].toLowerCase() === 'action' || args[0].toLowerCase() === 'a') {
 				const ticket = await DBTickets.findOne({
-					where: { guildId: msg.guild.id, channelId: msg.channel.id }
+					where: { guildId: msg.guildId, channelId: msg.channel.id }
 				});
 
 				if (ticket) {
@@ -177,7 +177,7 @@ module.exports = {
 				return;
 			} else if (args[0].toLowerCase() === 'close' || args[0].toLowerCase() === 'c') {
 				const ticket = await DBTickets.findOne({
-					where: { guildId: msg.guild.id, channelId: msg.channel.id }
+					where: { guildId: msg.guildId, channelId: msg.channel.id }
 				});
 
 				if (ticket) {
@@ -230,7 +230,7 @@ module.exports = {
 
 					let date = new Date();
 					date.setUTCMinutes(date.getUTCMinutes() + 3);
-					DBProcessQueue.create({ guildId: msg.guild.id, task: 'closeTicket', priority: 5, additions: msg.channel.id, date: date });
+					DBProcessQueue.create({ guildId: msg.guildId, task: 'closeTicket', priority: 5, additions: msg.channel.id, date: date });
 				} else {
 					return msg.reply('This is not a valid ticket channel.');
 				}
@@ -245,7 +245,7 @@ module.exports = {
 			}
 
 			const tickets = await DBTickets.findAll({
-				where: { guildId: msg.guild.id }
+				where: { guildId: msg.guildId }
 			});
 
 			let openCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Open');
@@ -263,7 +263,7 @@ module.exports = {
 			await ticketChannel.setParent(openCategory);
 
 			const ticket = await DBTickets.create({
-				guildId: msg.guild.id,
+				guildId: msg.guildId,
 				channelId: ticketChannel.id,
 				creatorId: msg.author.id,
 				statusId: 0,

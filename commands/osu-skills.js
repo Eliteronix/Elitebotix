@@ -147,6 +147,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				oldestDate.setUTCHours(0);
 				oldestDate.setUTCMinutes(0);
 
+				let matchesPlayed = [];
+				quicksort(userScores);
 				userScores.forEach(score => {
 					if (oldestDate > score.matchStartDate) {
 						oldestDate.setUTCFullYear(score.matchStartDate.getUTCFullYear());
@@ -180,11 +182,15 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					if (scoringType === 'v2' && userScores[i].scoringType !== 'Score v2') {
 						continue;
 					}
-					if (scoringType === 'v1' && userScores[i].scoringType === 'Score v1') {
+					if (scoringType === 'v1' && userScores[i].scoringType !== 'Score') {
 						continue;
 					}
 					if (tourneyMatch && !userScores[i].tourneyMatch) {
 						continue;
+					}
+
+					if (!matchesPlayed.includes(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`)) {
+						matchesPlayed.push(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`);
 					}
 
 					for (let j = 0; j < rawData.length; j++) {
@@ -423,7 +429,9 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					tourneyMatchText = 'Tourney matches only';
 				}
 
-				msg.channel.send({ content: `[Beta/WIP] Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}`, files: [attachment] });
+				// eslint-disable-next-line no-undef
+				matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${user.id}.txt`);
+				msg.channel.send({ content: `[Beta/WIP] Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}`, files: [attachment, matchesPlayed] });
 			})();
 		})
 		.catch(err => {
@@ -433,4 +441,29 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				console.log(err);
 			}
 		});
+}
+
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].matchId) >= parseFloat(pivot.matchId)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
 }

@@ -31,7 +31,7 @@ module.exports = {
 		const user = msg.client.users.cache.find(user => user.id === '784836063058329680');
 
 		const guild = await DBGuilds.findOne({
-			where: { guildId: msg.guild.id },
+			where: { guildId: msg.guildId },
 		});
 
 		let membername;
@@ -83,7 +83,7 @@ module.exports = {
 		}
 
 		//get all autoRoles for the guild
-		const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: msg.guild.id } });
+		const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: msg.guildId } });
 		//iterate for every autorole in the array
 		for (let i = 0; i < autoRolesList.length; i++) {
 			//get role object by role Id

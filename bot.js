@@ -21,7 +21,7 @@ const client = new Discord.Client({
 		Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
 		Discord.Intents.FLAGS.DIRECT_MESSAGES
 	],
-	partials: ['MESSAGE', 'REACTION']
+	partials: ['MESSAGE', 'REACTION', 'CHANNEL']
 });
 
 //Get gotMessage

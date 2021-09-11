@@ -27,7 +27,7 @@ module.exports = {
 				let activityRoleName = msg.guild.roles.cache.get(args[1].replace('<@&', '').replace('>', ''));
 				//try to find that activityrole in the db
 				const activityRole = await DBActivityRoles.findOne({
-					where: { guildId: msg.guild.id, roleId: activityRoleId },
+					where: { guildId: msg.guildId, roleId: activityRoleId },
 				});
 
 				//If activityrole already exists
@@ -69,10 +69,10 @@ module.exports = {
 					}
 
 					//If activityrole doesn't exist in db then create it
-					DBActivityRoles.create({ guildId: msg.guild.id, roleId: activityRoleId, percentageCutoff: percentageCutoff, pointsCutoff: pointsCutoff, rankCutoff: rankCutoff });
-					const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 } });
+					DBActivityRoles.create({ guildId: msg.guildId, roleId: activityRoleId, percentageCutoff: percentageCutoff, pointsCutoff: pointsCutoff, rankCutoff: rankCutoff });
+					const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
 					if (!existingTask) {
-						DBProcessQueue.create({ guildId: msg.guild.id, task: 'updateActivityRoles', priority: 5 });
+						DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 });
 					}
 					msg.channel.send(`${activityRoleName.name} has been added as an activityrole. The roles will get updated periodically and will not happen right after a user reached a new milestone.`);
 				}
@@ -89,7 +89,7 @@ module.exports = {
 				//get role object with id
 				let activityRoleName = msg.guild.roles.cache.get(args[1].replace('<@&', '').replace('>', ''));
 				//Delete roles with roleId and guildId
-				const rowCount = await DBActivityRoles.destroy({ where: { guildId: msg.guild.id, roleId: activityRoleId } });
+				const rowCount = await DBActivityRoles.destroy({ where: { guildId: msg.guildId, roleId: activityRoleId } });
 				//Send feedback message accordingly
 				if (rowCount > 0) {
 					msg.guild.members.cache.forEach(member => {
@@ -108,7 +108,7 @@ module.exports = {
 			//Check first argument
 		} else if (args[0] === 'list') { // has to be adapted still
 			//get all activityRoles for the guild
-			const activityRolesList = await DBActivityRoles.findAll({ where: { guildId: msg.guild.id } });
+			const activityRolesList = await DBActivityRoles.findAll({ where: { guildId: msg.guildId } });
 
 			let activityRolesString = '';
 
@@ -143,7 +143,7 @@ module.exports = {
 				if (activityRole) {
 					activityRolesString = `${activityRolesString}\n${activityRole.name} -> ${conditions}`;
 				} else {
-					DBActivityRoles.destroy({ where: { guildId: msg.guild.id, roleId: activityRolesList[i].roleId } });
+					DBActivityRoles.destroy({ where: { guildId: msg.guildId, roleId: activityRolesList[i].roleId } });
 					activityRolesList.shift();
 				}
 			}
