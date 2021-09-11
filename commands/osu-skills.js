@@ -1,9 +1,8 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const fetch = require('node-fetch');
 const { CanvasRenderService } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, saveOsuMultiScores, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'osu-skills',
@@ -128,32 +127,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 	osuApi.getUser({ u: username })
 		.then(async (user) => {
 			let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
-			await fetch(`https://osu.ppy.sh/users/${user.id}/osu`)
-				.then(async (res) => {
-					let htmlCode = await res.text();
-					const matchRegex = /https:\\\/\\\/osu.ppy.sh\\\/community\\\/matches\\\/\d+/gm;
-					const matches = htmlCode.match(matchRegex);
-
-					if (!matches) {
-						return;
-					}
-
-					for (let i = 0; i < matches.length; i++) {
-						const exisitingScore = await DBOsuMultiScores.findOne({
-							where: { matchId: getIDFromPotentialOsuLink(matches[i]) }
-						});
-
-						if (!exisitingScore) {
-							osuApi.getMatch({ mp: getIDFromPotentialOsuLink(matches[i]) })
-								.then(async (match) => {
-									saveOsuMultiScores(match);
-								})
-								.catch(() => {
-									//Nothing
-								});
-						}
-					}
-				});
 
 			const width = 1500; //px
 			const height = 750; //px
