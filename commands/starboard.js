@@ -1,12 +1,13 @@
 const { DBGuilds } = require('../dbObjects');
 const { getGuildPrefix } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'starboard',
 	aliases: ['star-board'],
 	description: 'Sends the messages receiving a star into the specified channel.',
 	usage: '<enable/disable> | <channel> <mentioned channel> | <minimum> <#amount>',
-	permissions: 'MANAGE_GUILD',
+	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',

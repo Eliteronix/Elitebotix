@@ -1,6 +1,7 @@
 const { DBGuilds, DBTickets, DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const Discord = require('discord.js');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'ticket',
@@ -9,7 +10,7 @@ module.exports = {
 	usage: '<issue description> | <responded/r/action/a/close/c> | <add/remove> <@user/@role>',
 	// permissions: 'MANAGE_GUILD',
 	// permissionsTranslated: 'Manage Server',
-	botPermissions: ['MANAGE_CHANNELS', 'MANAGE_ROLES'],
+	botPermissions: [Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MANAGE_ROLES],
 	botPermissionsTranslated: 'Manage Channels and Manage Roles',
 	guildOnly: true,
 	args: true,

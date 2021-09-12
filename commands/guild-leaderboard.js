@@ -1,6 +1,7 @@
 const { DBServerUserActivity } = require('../dbObjects');
 const { createLeaderboard, humanReadable, populateMsgFromInteraction } = require('../utils.js');
 const { leaderboardEntriesPerPage } = require('../config.json');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'server-leaderboard',
@@ -9,7 +10,7 @@ module.exports = {
 	usage: '<page>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: 'ATTACH_FILES',
+	botPermissions: Permissions.FLAGS.ATTACH_FILES,
 	botPermissionsTranslated: 'Attach Files',
 	guildOnly: true,
 	// args: true,

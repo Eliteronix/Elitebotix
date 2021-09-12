@@ -1,15 +1,16 @@
 const Discord = require('discord.js');
 const { DBReactionRolesHeader, DBReactionRoles } = require('../dbObjects');
 const { getGuildPrefix } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'reactionrole',
 	aliases: ['reactionroles', 'rr'],
 	description: 'Create and manage reaction roles',
 	usage: 'help <- For a detailed help in using the command',
-	permissions: 'MANAGE_ROLES',
+	permissions: Permissions.FLAGS.MANAGE_ROLES,
 	permissionsTranslated: 'Manage Roles',
-	botPermissions: ['MANAGE_ROLES', 'MANAGE_MESSAGES'],
+	botPermissions: [Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.MANAGE_MESSAGES],
 	botPermissionsTranslated: 'Manage Roles and Manage Messages',
 	guildOnly: true,
 	args: true,

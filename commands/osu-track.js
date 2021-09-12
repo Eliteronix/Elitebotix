@@ -1,13 +1,14 @@
 const { DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
 const { getIDFromPotentialOsuLink } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'osu-track',
 	// aliases: ['developer', 'donate', 'support'],
 	description: 'Sends info about the scores achieved by the user',
 	usage: '<add/list/remove> <username>',
-	permissions: 'MANAGE_GUILD',
+	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',

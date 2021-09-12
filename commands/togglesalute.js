@@ -1,11 +1,12 @@
 const { DBGuilds } = require('../dbObjects');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'togglesalute',
 	//aliases: ['developer'],
 	description: 'Toggles the salute setting for the server (sends an o7 after a \'F\')',
 	//usage: '<bug/feature/request> <description>',
-	permissions: 'MANAGE_GUILD',
+	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',

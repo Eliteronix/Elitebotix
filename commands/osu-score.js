@@ -4,6 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('canvas');
 const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction } = require('../utils');
 const fetch = require('node-fetch');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'osu-score',
@@ -12,7 +13,7 @@ module.exports = {
 	usage: '<beatmapID> [username] [username] ... (Use "_" instead of spaces; --all for all mod combinations; --HD for HD highscore ...)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: 'ATTACH_FILES',
+	botPermissions: Permissions.FLAGS.ATTACH_FILES,
 	botPermissionsTranslated: 'Attach Files',
 	//guildOnly: true,
 	args: true,

@@ -1,11 +1,12 @@
 const { DBGuilds } = require('../dbObjects');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'toggledadmode',
 	//aliases: ['developer'],
 	description: 'Toggles the Dadmode setting for the server',
 	//usage: '<bug/feature/request> <description>',
-	permissions: 'MANAGE_GUILD',
+	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',

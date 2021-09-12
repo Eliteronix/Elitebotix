@@ -1,11 +1,13 @@
+const { Permissions } = require('discord.js');
+
 module.exports = {
 	name: 'prune',
 	aliases: ['delete', 'delete-messages'],
 	description: 'Deletes the specified amount of messages; Messages have to be less than 2 weeks old',
 	usage: '<amount> (has to be between 1 and 99)',
-	permissions: 'MANAGE_MESSAGES',
+	permissions: Permissions.FLAGS.MANAGE_MESSAGES,
 	permissionsTranslated: 'Manage Messages',
-	botPermissions: 'MANAGE_MESSAGES',
+	botPermissions: Permissions.FLAGS.MANAGE_MESSAGES,
 	botPermissionsTranslated: 'Manage Messages',
 	guildOnly: true,
 	args: true,

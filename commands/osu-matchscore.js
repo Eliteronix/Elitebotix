@@ -1,6 +1,7 @@
 const osu = require('node-osu');
 const { getGuildPrefix, createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, populateMsgFromInteraction } = require('../utils');
 const { DBDiscordUsers } = require('../dbObjects');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'osu-matchscore',
@@ -9,7 +10,7 @@ module.exports = {
 	usage: '<match ID or URL> [# of warmups] [avg]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: 'ATTACH_FILES',
+	botPermissions: Permissions.FLAGS.ATTACH_FILES,
 	botPermissionsTranslated: 'Attach Files',
 	//guildOnly: true,
 	args: true,

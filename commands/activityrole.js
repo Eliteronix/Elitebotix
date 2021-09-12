@@ -1,14 +1,15 @@
 const { DBActivityRoles, DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'activityrole',
 	aliases: ['activityroles'],
 	description: 'Assigns roles depending on how active your users are; Recommended for use in a private channel to not mention every user with that role',
 	usage: '<add/remove/list> <@role> <topx/topx%/xpoints> [topx/topx%/xpoints] [topx/topx%/xpoints]',
-	permissions: 'MANAGE_ROLES',
+	permissions: Permissions.FLAGS.MANAGE_ROLES,
 	permissionsTranslated: 'Manage Roles',
-	botPermissions: 'MANAGE_ROLES',
+	botPermissions: Permissions.FLAGS.MANAGE_ROLES,
 	botPermissionsTranslated: 'Manage Roles',
 	guildOnly: true,
 	args: true,

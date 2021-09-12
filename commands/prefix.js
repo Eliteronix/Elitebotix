@@ -1,11 +1,12 @@
 const { DBGuilds } = require('../dbObjects');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'prefix',
 	aliases: ['custom-prefix', 'setprefix'],
 	description: 'Sets the bot prefix to the new specified prefix',
 	usage: '<new prefix like \'!\' or \'.\'>',
-	permissions: 'MANAGE_GUILD',
+	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',

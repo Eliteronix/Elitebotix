@@ -1,13 +1,14 @@
 const { DBGuilds } = require('../dbObjects');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'toggletickets',
 	//aliases: ['developer'],
 	description: 'Toggles the tickets setting for the server',
 	//usage: '<bug/feature/request> <description>',
-	permissions: 'MANAGE_GUILD',
+	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
-	botPermissions: ['MANAGE_CHANNELS', 'MANAGE_ROLES'],
+	botPermissions: [Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MANAGE_ROLES],
 	botPermissionsTranslated: 'Manage Channels and Manage Roles',
 	guildOnly: true,
 	// args: true,

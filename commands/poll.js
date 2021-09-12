@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const Canvas = require('canvas');
 const { fitTextOnLeftCanvas, getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const { DBProcessQueue } = require('../dbObjects');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'poll',
@@ -10,7 +11,7 @@ module.exports = {
 	usage: '<title>; <option1>; <option2[; <option3>] ... [; <option10>] <#y/#mo/#w/#d/#h/#m>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: 'ATTACH_FILES',
+	botPermissions: Permissions.FLAGS.ATTACH_FILES,
 	botPermissionsTranslated: 'Attach Files',
 	guildOnly: true,
 	args: true,

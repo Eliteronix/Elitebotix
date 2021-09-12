@@ -1,14 +1,15 @@
 const { DBAutoRoles } = require('../dbObjects');
 const { getGuildPrefix } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'autorole',
 	aliases: ['autoroles', 'ar'],
 	description: 'Assigns roles on joining the server; Recommended for use in a private channel to not mention every user with that role',
 	usage: '<add/remove/list> <@role>',
-	permissions: 'MANAGE_ROLES',
+	permissions: Permissions.FLAGS.MANAGE_ROLES,
 	permissionsTranslated: 'Manage Roles',
-	botPermissions: 'MANAGE_ROLES',
+	botPermissions: Permissions.FLAGS.MANAGE_ROLES,
 	botPermissionsTranslated: 'Manage Roles',
 	guildOnly: true,
 	args: true,

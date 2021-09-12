@@ -1,11 +1,12 @@
 const { DBGuilds } = require('../dbObjects');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'toggleowo',
 	//aliases: ['developer'],
 	description: 'Toggles the owo setting for the server (sends an owo after another owo/uwu)',
 	//usage: '<bug/feature/request> <description>',
-	permissions: 'MANAGE_GUILD',
+	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',

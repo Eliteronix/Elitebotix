@@ -3,6 +3,7 @@ const osu = require('node-osu');
 const { CanvasRenderService } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
 const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'osu-schedule',
@@ -11,7 +12,7 @@ module.exports = {
 	usage: '[username] [username] ... (Use "_" instead of spaces)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: 'ATTACH_FILES',
+	botPermissions: Permissions.FLAGS.ATTACH_FILES,
 	botPermissionsTranslated: 'Attach Files',
 	//guildOnly: true,
 	// args: true,

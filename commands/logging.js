@@ -1,13 +1,14 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('../dbObjects');
 const { getGuildPrefix } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'logging',
 	aliases: ['server-logging'],
 	description: '[Toggle] Logs the enabled events in the specified channel.',
 	usage: 'list | <channel> <mentioned channel> | <eventnames to toggle>',
-	permissions: 'MANAGE_GUILD',
+	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',

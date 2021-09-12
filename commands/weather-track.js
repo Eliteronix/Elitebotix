@@ -1,12 +1,13 @@
 const { DBProcessQueue } = require('../dbObjects');
 const weather = require('weather-js');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'weather-track',
 	// aliases: ['developer', 'donate', 'support'],
 	description: 'Sends info about the weather of the given location each time period',
 	usage: '[hourly/daily] [F/Fahrenheit] <location/zipcode> | <List> | <remove> <C/F> <location>',
-	permissions: 'MANAGE_GUILD',
+	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',

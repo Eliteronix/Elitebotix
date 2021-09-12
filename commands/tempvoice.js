@@ -1,14 +1,15 @@
 const { DBGuilds } = require('../dbObjects');
 const { getGuildPrefix } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'tempvoice',
 	aliases: ['tempvoices', 'temporaryvoices', 'modularchannels', 'customvoice', 'tempchannel', 'tempchannels', 'customvoices', 'customchannel', 'customchannels'],
 	description: 'Toggles the temporary channel setting for the server',
 	usage: '<enable/disable/text> <for \'text\' option: enable/disable>',
-	permissions: 'MANAGE_GUILD',
+	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
-	botPermissions: ['MANAGE_CHANNELS', 'MOVE_MEMBERS', 'MANAGE_ROLES'],
+	botPermissions: [Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MOVE_MEMBERS, Permissions.FLAGS.MANAGE_ROLES],
 	botPermissionsTranslated: 'Manage Channels, Manage Roles and Move Members',
 	guildOnly: true,
 	args: true,

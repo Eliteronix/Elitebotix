@@ -1,11 +1,12 @@
 const { DBGuilds } = require('../dbObjects');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'welcome-message',
 	//aliases: ['developer'],
 	description: 'Sends the specified message into the channel the user used the command in as soon as a new member arrives.',
 	usage: '<current/disable/message to send> (use "@member" to mention the new member)',
-	permissions: 'MANAGE_GUILD',
+	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',

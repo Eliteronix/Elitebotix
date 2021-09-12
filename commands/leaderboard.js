@@ -1,4 +1,5 @@
 const { populateMsgFromInteraction } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'leaderboard',
@@ -7,7 +8,7 @@ module.exports = {
 	usage: '<server/osu> <page>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: 'ATTACH_FILES',
+	botPermissions: Permissions.FLAGS.ATTACH_FILES,
 	botPermissionsTranslated: 'Attach Files',
 	guildOnly: true,
 	args: true,

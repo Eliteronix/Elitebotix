@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
 const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'osu-beatmap',
@@ -10,7 +11,7 @@ module.exports = {
 	usage: '<id> [id] [id] ...',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: 'ATTACH_FILES',
+	botPermissions: Permissions.FLAGS.ATTACH_FILES,
 	botPermissionsTranslated: 'Attach Files',
 	//guildOnly: true,
 	args: true,
