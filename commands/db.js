@@ -68,6 +68,9 @@ module.exports = {
 		} else if (args[0] === 'osumultiscores') {
 			dbList = await DBOsuMultiScores.findAll();
 			dbTableName = 'DBOsuMultiScores';
+		} else if (args[0] === 'osubeatmaps') {
+			dbList = await DBOsuMultiScores.findAll();
+			dbTableName = 'DBOsuMultiScores';
 		} else {
 			return msg.reply('no corresponding table found');
 		}

@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBOsuMultiScores, DBActivityRoles } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBOsuMultiScores, DBActivityRoles, DBOsuBeatmaps } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -1011,7 +1011,39 @@ module.exports = {
 		}
 
 		return false;
-	}
+	},
+	async saveOsuBeatmap(beatmap) {
+		let dbBeatmap = await DBOsuBeatmaps.findOne({
+			where: { beatmapId: beatmap.id }
+		});
+
+		dbBeatmap = await DBOsuBeatmaps.create({
+			title: beatmap.title,
+			artist: beatmap.artist,
+			difficulty: beatmap.version,
+			starRating: beatmap.difficulty.rating,
+			aimRating: beatmap.difficulty.aim,
+			speedRating: beatmap.difficulty.speed,
+			drainLength: beatmap.length.drain,
+			totalLength: beatmap.length.total,
+			circleSize: beatmap.difficulty.size,
+			approachRate: beatmap.difficulty.approach,
+			overallDifficulty: beatmap.difficulty.overall,
+			hpDrain: beatmap.difficulty.drain,
+			mapper: beatmap.creator,
+			beatmapId: beatmap.id,
+			beatmapsetId: beatmap.beatmapSetId,
+			bpm: beatmap.bpm,
+			mode: beatmap.mode,
+			approvalStatus: beatmap.approvalStatus,
+			maxCombo: beatmap.maxCombo,
+			circles: beatmap.objects.normal,
+			sliders: beatmap.objects.slider,
+			spinners: beatmap.objects.spinner,
+		});
+
+		return dbBeatmap;
+	},
 };
 
 async function getOsuBadgeNumberByIdFunction(osuUserId) {
