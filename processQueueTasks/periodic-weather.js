@@ -13,7 +13,8 @@ module.exports = {
 			let command = require('../commands/weather.js');
 
 			await channel.messages.fetch({ limit: 100 }).then(async (messages) => {
-				const messagesArray = messages.filter(m => m.content === `Weather for ${args[3]}`).array();
+				const messagesArray = [];
+				messages.filter(m => m.content === `Weather for ${args[3]}`).each(message => messagesArray.push(message));
 
 				if (messagesArray.length === 0) {
 					const placeHolderMessage = await channel.send('Placeholder message for weather tracking.');
