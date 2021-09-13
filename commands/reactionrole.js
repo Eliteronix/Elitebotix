@@ -51,7 +51,7 @@ module.exports = {
 						.setTitle(embedName)
 						.setFooter(`Reactionrole - EmbedId: ${embedId}`);
 					//Send embed
-					const embedMessage = await msg.reply({ embeds: [reactionRoleEmbed] });
+					const embedMessage = await msg.channel.send({ embeds: [reactionRoleEmbed] });
 					//Create the record for the embed in the db
 					DBReactionRolesHeader.create({ guildId: embedMessage.guild.id, reactionHeaderId: embedMessage.id, reactionChannelHeaderId: msg.channel.id, reactionTitle: embedName, reactionColor: '#0099ff' });
 				} else {
@@ -408,7 +408,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 	//Get the message object
 	const embedMessage = await embedChannel.messages.fetch(embedMessageId);
 	//Edit the message
-	embedMessage.edit(reactionRoleEmbed);
+	embedMessage.edit({ embeds: [reactionRoleEmbed] });
 
 	//Remove all reactions from the embed
 	embedMessage.reactions.removeAll().catch(error => console.error('Failed to clear reactions: ', error));
