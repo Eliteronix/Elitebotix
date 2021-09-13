@@ -349,7 +349,9 @@ module.exports = async function (oldMember, newMember) {
 		}
 		const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
 		try {
-			await textChannel.permissionOverwrites.edit(newUser, { VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, SEND_MESSAGES: true, EMBED_LINKS: true, ATTACH_FILES: true, ADD_REACTIONS: true, USE_EXTERNAL_EMOJIS: true, READ_MESSAGE_HISTORY: true });
+			if (textChannel) {
+				await textChannel.permissionOverwrites.edit(newUser, { VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, SEND_MESSAGES: true, EMBED_LINKS: true, ATTACH_FILES: true, ADD_REACTIONS: true, USE_EXTERNAL_EMOJIS: true, READ_MESSAGE_HISTORY: true });
+			}
 		} catch (e) {
 			if (e.message === 'Missing Access') {
 				const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerId);
@@ -358,7 +360,9 @@ module.exports = async function (oldMember, newMember) {
 				return console.log(e);
 			}
 		}
-		textChannel.send(`<@${newMember.id}>, you now have access to this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel. You will also lose access to this channel if you leave the voice channel.`);
+		if (textChannel) {
+			textChannel.send(`<@${newMember.id}>, you now have access to this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel. You will also lose access to this channel if you leave the voice channel.`);
+		}
 	}
 
 	if (oldUserChannel && newUserChannel !== oldUserChannel) {
@@ -388,7 +392,9 @@ module.exports = async function (oldMember, newMember) {
 			if (!(usersLeft)) {
 				if (dbTemporaryVoices.textChannelId) {
 					try {
-						await textChannel.delete();
+						if (textChannel) {
+							await textChannel.delete();
+						}
 					} catch (e) {
 						if (e.message === 'Missing Access') {
 							const owner = await oldMember.client.users.cache.find(user => user.id === oldMember.guild.ownerId);
@@ -416,7 +422,9 @@ module.exports = async function (oldMember, newMember) {
 			} else if (oldMember.id !== dbTemporaryVoices.creatorId) {
 				const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
 				try {
-					await textChannel.permissionOverwrites.edit(newUser, { VIEW_CHANNEL: false });
+					if (textChannel) {
+						await textChannel.permissionOverwrites.edit(newUser, { VIEW_CHANNEL: false });
+					}
 				} catch (e) {
 					if (e.message === 'Missing Access') {
 						const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerId);
