@@ -687,6 +687,72 @@ module.exports = {
 							'description': 'The username, id or link of the player',
 							'type': 3,
 							'required': false
+						},
+						{
+							'name': 'username6',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username7',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username8',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username9',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username10',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username11',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username12',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username13',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username14',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username15',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username16',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
 						}
 					]
 				},
@@ -695,7 +761,7 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-score',
-					description: 'Sends an info graph about the schedules of the players',
+					description: 'Sends an info card about the score of the specified player on the map',
 					options: [
 						{
 							'name': 'beatmap',
@@ -1946,6 +2012,72 @@ module.exports = {
 							'description': 'The username, id or link of the player',
 							'type': 3,
 							'required': false
+						},
+						{
+							'name': 'username6',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username7',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username8',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username9',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username10',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username11',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username12',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username13',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username14',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username15',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username16',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
 						}
 					]
 				},
@@ -1954,7 +2086,7 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'osu-score',
-					description: 'Sends an info graph about the schedules of the players',
+					description: 'Sends an info card about the score of the specified player on the map',
 					options: [
 						{
 							'name': 'beatmap',
