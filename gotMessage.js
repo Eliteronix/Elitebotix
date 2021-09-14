@@ -127,15 +127,16 @@ module.exports = async function (msg, bancho) {
 				authorPerms = msg.channel.permissionsFor(msg.member);
 			} else {
 				const flags = [
-					'SEND_MESSAGES',
-					'ATTACH_FILES',
+					Permissions.FLAGS.SEND_MESSAGES,
+					Permissions.FLAGS.ATTACH_FILES,
 				];
 
 				authorPerms = new Permissions(flags);
 			}
 
 			for (let i = 0; i < commandArray.length; i++) {
-				if (commandArray[i].prefixCommand === true && categories.includes(commandArray[i].tags) && authorPerms.has(commandArray[i].permissions)) {
+				if (commandArray[i].prefixCommand === true && categories.includes(commandArray[i].tags) && commandArray[i].permissions && authorPerms.has(commandArray[i].permissions) ||
+					commandArray[i].prefixCommand === true && categories.includes(commandArray[i].tags)) {
 					commandNames.push(commandArray[i].name);
 					if (commandArray[i].aliases) {
 						for (let j = 0; j < commandArray[i].aliases.length; j++) {
