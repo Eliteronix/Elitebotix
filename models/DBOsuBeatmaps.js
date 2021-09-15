@@ -17,6 +17,9 @@ module.exports = (sequelize, DataTypes) => {
 		starRating: {
 			type: DataTypes.STRING,
 		},
+		moddedStarRating: {
+			type: DataTypes.STRING,
+		},
 		aimRating: {
 			type: DataTypes.STRING,
 		},
@@ -69,6 +72,9 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.INTEGER,
 		},
 		spinners: {
+			type: DataTypes.INTEGER,
+		},
+		mods: {
 			type: DataTypes.INTEGER,
 		},
 		paranoid: true,
