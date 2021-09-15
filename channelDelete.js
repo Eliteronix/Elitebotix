@@ -23,11 +23,15 @@ module.exports = async function (channel) {
 		if (temporaryVoice) {
 			const textChannel = await channel.guild.channels.fetch(temporaryVoice.textChannelId);
 			await temporaryVoice.destroy();
-			await textChannel.delete();
+			if (textChannel) {
+				await textChannel.delete();
+			}
 		} else if (temporaryText) {
 			const voiceChannel = await channel.guild.channels.fetch(temporaryText.channelId);
 			await temporaryText.destroy();
-			await voiceChannel.delete();
+			if (voiceChannel) {
+				await voiceChannel.delete();
+			}
 		}
 	}
 
