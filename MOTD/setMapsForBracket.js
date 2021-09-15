@@ -1,6 +1,6 @@
 const osu = require('node-osu');
 const Discord = require('discord.js');
-const { humanReadable } = require('../utils.js');
+const { humanReadable, pause } = require('../utils.js');
 const { qualifier } = require('./qualifier.js');
 
 module.exports = {
@@ -43,12 +43,23 @@ module.exports = {
 			backupMaps.push('131564'); //Scarlet rose
 			backupMaps.push('786867'); //Ooi
 			backupMaps.push('367763'); //Crack Traxxxx
+			backupMaps.push('1513180'); //Dum Surfer
+			backupMaps.push('994495'); //Haitai
+			backupMaps.push('714001'); //No title
+			backupMaps.push('397535'); //My love
 
 			while (possibleNMBeatmaps.length < 9) {
 				const mapIndex = Math.floor(Math.random() * backupMaps.length);
 				const map = await osuApi.getBeatmaps({ m: 0, b: backupMaps[mapIndex] });
-				possibleNMBeatmaps.push(map[0]);
-				backupMaps.splice(mapIndex, 1);
+				if (map[0]) {
+					possibleNMBeatmaps.push(map[0]);
+				}
+				const dtmap = await osuApi.getBeatmaps({ m: 0, b: backupMaps[mapIndex], mods: 64 });
+				if (dtmap[0]) {
+					possibleDTBeatmaps.push(dtmap[0]);
+					backupMaps.splice(mapIndex, 1);
+				}
+				await pause(5000);
 			}
 
 			quicksort(possibleNMBeatmaps);
