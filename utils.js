@@ -1024,7 +1024,10 @@ module.exports = {
 			where: { beatmapId: beatmapId, mods: modBits }
 		});
 
-		if (!dbBeatmap || dbBeatmap && dbBeatmap.updatedAt < lastRework || dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt < lastMonth) {
+		if (!dbBeatmap
+			|| dbBeatmap && dbBeatmap.updatedAt < lastRework
+			|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt < lastMonth
+			|| dbBeatmap && !dbBeatmap.starRating) {
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
