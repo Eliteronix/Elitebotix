@@ -1,4 +1,4 @@
-const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores } = require('../dbObjects');
+const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
 
@@ -68,6 +68,9 @@ module.exports = {
 		} else if (args[0] === 'osumultiscores') {
 			dbList = await DBOsuMultiScores.findAll();
 			dbTableName = 'DBOsuMultiScores';
+		} else if (args[0] === 'osubeatmaps') {
+			dbList = await DBOsuBeatmaps.findAll();
+			dbTableName = 'DBOsuBeatmaps';
 		} else {
 			return msg.reply('no corresponding table found');
 		}

@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { CanvasRenderService } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -157,10 +157,11 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					}
 				});
 
-				const rawData = [];
+				const rawModsData = [];
 				const labels = [];
+				//Get the base data which is gonna be added up later
 				for (let now = new Date(); oldestDate < now; oldestDate.setUTCMonth(oldestDate.getUTCMonth() + 1)) {
-					let rawDataObject = {
+					let rawModsDataObject = {
 						label: `${(oldestDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${oldestDate.getUTCFullYear()}`,
 						totalEvaluation: 0,
 						totalCount: 0,
@@ -175,11 +176,12 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 						FMEvaluation: 0,
 						FMCount: 0
 					};
-					labels.push(rawDataObject.label);
-					rawData.push(rawDataObject);
+					labels.push(rawModsDataObject.label);
+					rawModsData.push(rawModsDataObject);
 				}
 
 				for (let i = 0; i < userScores.length; i++) {
+					//Filter out rounds which don't fit the restrictions
 					if (scoringType === 'v2' && userScores[i].scoringType !== 'Score v2') {
 						continue;
 					}
@@ -190,14 +192,15 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 						continue;
 					}
 
+					//Push matches for the history txt
 					if (!matchesPlayed.includes(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`)) {
 						matchesPlayed.push(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`);
 					}
 
-					for (let j = 0; j < rawData.length; j++) {
-						if (rawData[j].label === `${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()}`) {
-							rawData[j].totalEvaluation += parseFloat(userScores[i].evaluation);
-							rawData[j].totalCount++;
+					for (let j = 0; j < rawModsData.length; j++) {
+						if (rawModsData[j].label === `${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()}`) {
+							rawModsData[j].totalEvaluation += parseFloat(userScores[i].evaluation);
+							rawModsData[j].totalCount++;
 							const sameGameScores = await DBOsuMultiScores.findAll({
 								where: { matchId: userScores[i].matchId, gameId: userScores[i].gameId }
 							});
@@ -209,22 +212,26 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 								}
 							}
 
+							//Add values to Mods
 							if (sameGameScores.length === 0 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
-								rawData[j].NMEvaluation += parseFloat(userScores[i].evaluation);
-								rawData[j].NMCount++;
+								rawModsData[j].NMEvaluation += parseFloat(userScores[i].evaluation);
+								rawModsData[j].NMCount++;
 							} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '8' || userScores[i].gameRawMods === '9')) {
-								rawData[j].HDEvaluation += parseFloat(userScores[i].evaluation);
-								rawData[j].HDCount++;
+								rawModsData[j].HDEvaluation += parseFloat(userScores[i].evaluation);
+								rawModsData[j].HDCount++;
 							} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '16' || userScores[i].gameRawMods === '17')) {
-								rawData[j].HREvaluation += parseFloat(userScores[i].evaluation);
-								rawData[j].HRCount++;
+								rawModsData[j].HREvaluation += parseFloat(userScores[i].evaluation);
+								rawModsData[j].HRCount++;
 							} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '64' || userScores[i].gameRawMods === '65' || userScores[i].gameRawMods === '576' || userScores[i].gameRawMods === '577')) {
-								rawData[j].DTEvaluation += parseFloat(userScores[i].evaluation);
-								rawData[j].DTCount++;
+								rawModsData[j].DTEvaluation += parseFloat(userScores[i].evaluation);
+								rawModsData[j].DTCount++;
 							} else {
-								rawData[j].FMEvaluation += parseFloat(userScores[i].evaluation);
-								rawData[j].FMCount++;
+								rawModsData[j].FMEvaluation += parseFloat(userScores[i].evaluation);
+								rawModsData[j].FMCount++;
 							}
+
+							//Save the maps locally
+							getOsuBeatmap(userScores[i].beatmapId, userScores[i].gameRawMods);
 						}
 					}
 				}
@@ -235,15 +242,15 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				const HRDatapoints = [];
 				const DTDatapoints = [];
 				const FMDatapoints = [];
-				rawData.forEach(rawDataObject => {
+				rawModsData.forEach(rawModsDataObject => {
 					let totalValue = NaN;
-					if (rawDataObject.totalCount) {
-						totalValue = rawDataObject.totalEvaluation / rawDataObject.totalCount;
+					if (rawModsDataObject.totalCount) {
+						totalValue = rawModsDataObject.totalEvaluation / rawModsDataObject.totalCount;
 					}
 
 					let NMValue = NaN;
-					if (rawDataObject.NMCount) {
-						NMValue = rawDataObject.NMEvaluation / rawDataObject.NMCount;
+					if (rawModsDataObject.NMCount) {
+						NMValue = rawModsDataObject.NMEvaluation / rawModsDataObject.NMCount;
 						if (scaled) {
 							NMValue = NMValue / totalValue;
 						}
@@ -251,8 +258,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					NMDatapoints.push(NMValue);
 
 					let HDValue = NaN;
-					if (rawDataObject.HDCount) {
-						HDValue = rawDataObject.HDEvaluation / rawDataObject.HDCount;
+					if (rawModsDataObject.HDCount) {
+						HDValue = rawModsDataObject.HDEvaluation / rawModsDataObject.HDCount;
 						if (scaled) {
 							HDValue = HDValue / totalValue;
 						}
@@ -260,8 +267,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					HDDatapoints.push(HDValue);
 
 					let HRValue = NaN;
-					if (rawDataObject.HRCount) {
-						HRValue = rawDataObject.HREvaluation / rawDataObject.HRCount;
+					if (rawModsDataObject.HRCount) {
+						HRValue = rawModsDataObject.HREvaluation / rawModsDataObject.HRCount;
 						if (scaled) {
 							HRValue = HRValue / totalValue;
 						}
@@ -269,8 +276,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					HRDatapoints.push(HRValue);
 
 					let DTValue = NaN;
-					if (rawDataObject.DTCount) {
-						DTValue = rawDataObject.DTEvaluation / rawDataObject.DTCount;
+					if (rawModsDataObject.DTCount) {
+						DTValue = rawModsDataObject.DTEvaluation / rawModsDataObject.DTCount;
 						if (scaled) {
 							DTValue = DTValue / totalValue;
 						}
@@ -278,8 +285,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					DTDatapoints.push(DTValue);
 
 					let FMValue = NaN;
-					if (rawDataObject.FMCount) {
-						FMValue = rawDataObject.FMEvaluation / rawDataObject.FMCount;
+					if (rawModsDataObject.FMCount) {
+						FMValue = rawModsDataObject.FMEvaluation / rawModsDataObject.FMCount;
 						if (scaled) {
 							FMValue = FMValue / totalValue;
 						}

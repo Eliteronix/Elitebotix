@@ -61,6 +61,7 @@ module.exports = async function (msg, bancho) {
 			require('./models/DBStarBoardMessages')(sequelize, Sequelize.DataTypes);
 			require('./models/DBTickets')(sequelize, Sequelize.DataTypes);
 			require('./models/DBOsuMultiScores')(sequelize, Sequelize.DataTypes);
+			require('./models/DBOsuBeatmaps')(sequelize, Sequelize.DataTypes);
 
 			await sequelize.sync({ alter: true })
 				.then(async () => {
