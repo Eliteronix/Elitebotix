@@ -1024,9 +1024,7 @@ module.exports = {
 			where: { beatmapId: beatmapId, mods: modBits }
 		});
 
-		console.log(beatmapId, modBits, 'Beatmap is needed');
 		if (!dbBeatmap || dbBeatmap && dbBeatmap.updatedAt < lastRework || dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt < lastMonth) {
-			console.log(beatmapId, modBits, 'Beatmap API fetched');
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
