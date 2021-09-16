@@ -105,7 +105,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 					console.log(error);
 				}
 
-				const starBoardMessage = await channel.send(`${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, starBoardMessageEmbed);
+				const starBoardMessage = await channel.send({ content: `${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, embeds: [starBoardMessageEmbed] });
 				starBoardedMessage.starBoardChannelId = starBoardMessage.channel.id;
 				starBoardedMessage.starBoardMessageId = starBoardMessage.id;
 				starBoardedMessage.save();
@@ -138,7 +138,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 					console.log(error);
 				}
 
-				const starBoardMessage = await channel.send(`${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, starBoardMessageEmbed);
+				const starBoardMessage = await channel.send({ content: `${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, embeds: [starBoardMessageEmbed] });
 				DBStarBoardMessages.create({ originalChannelId: reaction.message.channel.id, originalMessageId: reaction.message.id, starBoardChannelId: starBoardMessage.channel.id, starBoardMessageId: starBoardMessage.id });
 			}
 		}
