@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -328,8 +328,8 @@ async function drawTopPlays(input, server, mode, msg, recentScores, showLimit) {
 		ctx.textAlign = 'right';
 		ctx.fillText(humanReadable(Math.floor(scores[i].pp)) + 'pp', (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
 
-		const beatmap = await osuApi.getBeatmaps({ b: scores[i].beatmapId });
-		let beatmapTitle = `${beatmap[0].title} by ${beatmap[0].artist}`;
+		const dbBeatmap = await getOsuBeatmap(scores[i].beatmapId, 0);
+		let beatmapTitle = `${dbBeatmap.title} by ${dbBeatmap.artist}`;
 		const maxSize = canvas.width / 250 * 19;
 		if (beatmapTitle.length > maxSize) {
 			beatmapTitle = beatmapTitle.substring(0, maxSize - 3) + '...';
@@ -345,7 +345,7 @@ async function drawTopPlays(input, server, mode, msg, recentScores, showLimit) {
 		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.fillStyle = '#FFCC22';
 		ctx.textAlign = 'left';
-		ctx.fillText(beatmap[0].version, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+		ctx.fillText(dbBeatmap.difficulty, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 
 		let today = new Date();
 
@@ -377,7 +377,7 @@ async function drawTopPlays(input, server, mode, msg, recentScores, showLimit) {
 		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.fillStyle = '#A08C95';
 		ctx.textAlign = 'left';
-		ctx.fillText(achievedTime, (canvas.width / 35) * 3 + parseInt(beatmap[0].version.length) * 6 + canvas.width / 50, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+		ctx.fillText(achievedTime, (canvas.width / 35) * 3 + parseInt(dbBeatmap.difficulty.length) * 6 + canvas.width / 50, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 
 		let accuracy = getAccuracy(scores[i], mode) * 100;
 
@@ -386,7 +386,7 @@ async function drawTopPlays(input, server, mode, msg, recentScores, showLimit) {
 		if (mode === 3) {
 			combo = `(${scores[i].maxCombo}x)`;
 		} else {
-			combo = `(${scores[i].maxCombo}/${beatmap[0].maxCombo})`;
+			combo = `(${scores[i].maxCombo}/${dbBeatmap.maxCombo})`;
 		}
 
 		ctx.font = 'bold 10px comfortaa, sans-serif';

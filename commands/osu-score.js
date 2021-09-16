@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -71,61 +71,47 @@ module.exports = {
 			}
 		}
 
-		// eslint-disable-next-line no-undef
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
-
 		const beatmapId = getIDFromPotentialOsuLink(args.shift());
 
-		osuApi.getBeatmaps({ b: beatmapId })
-			.then(async (beatmaps) => {
-				if (!args[0]) {//Get profile by author if no argument
-					if (commandUser && commandUser.osuUserId) {
-						getScore(msg, beatmaps[0], commandUser.osuUserId, server, mode, false, mapRank, mods);
+		const dbBeatmap = await getOsuBeatmap(beatmapId, 0);
+		if (!dbBeatmap) {
+			msg.channel.send(`Couldn't find beatmap \`${beatmapId.replace(/`/g, '')}\``);
+		}
+		if (!args[0]) {//Get profile by author if no argument
+			if (commandUser && commandUser.osuUserId) {
+				getScore(msg, dbBeatmap, commandUser.osuUserId, server, mode, false, mapRank, mods);
+			} else {
+				const userDisplayName = await getMessageUserDisplayname(msg);
+				getScore(msg, dbBeatmap, userDisplayName, server, mode, false, mapRank, mods);
+			}
+		} else {
+			//Get profiles by arguments
+			for (let i = 0; i < args.length; i++) {
+				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
+					const discordUser = await DBDiscordUsers.findOne({
+						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
+					});
+
+					if (discordUser && discordUser.osuUserId) {
+						getScore(msg, dbBeatmap, discordUser.osuUserId, server, mode, false, mapRank, mods);
 					} else {
-						const userDisplayName = await getMessageUserDisplayname(msg);
-						getScore(msg, beatmaps[0], userDisplayName, server, mode, false, mapRank, mods);
+						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						getScore(msg, dbBeatmap, args[i], server, mode, false, mapRank, mods);
 					}
 				} else {
-					//Get profiles by arguments
-					for (let i = 0; i < args.length; i++) {
-						if (args[i].startsWith('<@') && args[i].endsWith('>')) {
-							const discordUser = await DBDiscordUsers.findOne({
-								where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
-							});
 
-							if (discordUser && discordUser.osuUserId) {
-								getScore(msg, beatmaps[0], discordUser.osuUserId, server, mode, false, mapRank, mods);
-							} else {
-								msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-								getScore(msg, beatmaps[0], args[i], server, mode, false, mapRank, mods);
-							}
+					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
+						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
+							getScore(msg, dbBeatmap, getIDFromPotentialOsuLink(args[i]), server, mode, true, mapRank, mods);
 						} else {
-
-							if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
-								if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-									getScore(msg, beatmaps[0], getIDFromPotentialOsuLink(args[i]), server, mode, true, mapRank, mods);
-								} else {
-									getScore(msg, beatmaps[0], getIDFromPotentialOsuLink(args[i]), server, mode, false, mapRank, mods);
-								}
-							} else {
-								getScore(msg, beatmaps[0], getIDFromPotentialOsuLink(args[i]), server, mode, false, mapRank, mods);
-							}
+							getScore(msg, dbBeatmap, getIDFromPotentialOsuLink(args[i]), server, mode, false, mapRank, mods);
 						}
+					} else {
+						getScore(msg, dbBeatmap, getIDFromPotentialOsuLink(args[i]), server, mode, false, mapRank, mods);
 					}
 				}
-			})
-			.catch(err => {
-				if (err.message === 'Not found') {
-					msg.channel.send(`Couldn't find beatmap \`${beatmapId.replace(/`/g, '')}\``);
-				} else {
-					console.log(err);
-				}
-			});
+			}
+		}
 	},
 };
 
@@ -147,10 +133,10 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 			username = discordUser.osuName;
 		}
 
-		osuApi.getScores({ b: beatmap.id, u: username, m: mode })
+		osuApi.getScores({ b: beatmap.beatmapId, u: username, m: mode })
 			.then(async (scores) => {
 				if (!(scores[0])) {
-					return msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.version}] (${beatmap.id})\`.`);
+					return msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\`.`);
 				}
 				let scoreHasBeenOutput = false;
 				for (let i = 0; i < scores.length; i++) {
@@ -176,7 +162,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						let elements = [canvas, ctx, scores[i], beatmap, user];
 
-						elements = await drawTitle(elements, osuApi);
+						elements = await drawTitle(elements);
 
 						elements = await drawCover(elements, mode);
 
@@ -187,7 +173,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						await drawUserInfo(elements, server);
 
 						//Create as an attachment
-						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.id}.png`);
+						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.beatmapId}.png`);
 
 						//If coming from osu-tracking
 						if (mapRank > 0) {
@@ -199,9 +185,9 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 							//Send attachment
 							if (noLinkedAccount) {
-								sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+								sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 							} else {
-								sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>`, files: [attachment] });
+								sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 							}
 							sentMessage.react('<:COMPARE:827974793365159997>');
 						}
@@ -210,23 +196,23 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 					}
 				}
 				if (!scoreHasBeenOutput) {
-					msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.version}] (${beatmap.id})\` with \`${mods}\`.`);
+					msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\` with \`${mods}\`.`);
 				}
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.version}] (${beatmap.id})\`.`);
+					msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\`.`);
 				} else {
 					console.log(err);
 				}
 			});
 	} else if (server === 'ripple') {
 		let processingMessage = await msg.channel.send(`[\`${username.replace(/`/g, '')}\`] Processing...`);
-		fetch(`https://www.ripple.moe/api/get_scores?b=${beatmap.id}&u=${username}&m=${mode}`)
+		fetch(`https://www.ripple.moe/api/get_scores?b=${beatmap.beatmapId}&u=${username}&m=${mode}`)
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.version}] (${beatmap.id})\`.`);
+					return msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\`.`);
 				}
 
 				let score = rippleToBanchoScore(responseJson[0]);
@@ -255,7 +241,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						let elements = [canvas, ctx, score, beatmap, user];
 
-						elements = await drawTitle(elements, osuApi);
+						elements = await drawTitle(elements);
 
 						elements = await drawCover(elements, mode);
 
@@ -266,10 +252,10 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						await drawUserInfo(elements, server);
 
 						//Create as an attachment
-						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.id}.png`);
+						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.beatmapId}.png`);
 
 						//Send attachment
-						let sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.id}>\nosu! direct: <osu://b/${beatmap.id}>`, files: [attachment] });
+						let sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 
 						processingMessage.delete();
 						sentMessage.react('<:COMPARE:827974793365159997>');
@@ -292,7 +278,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 	}
 }
 
-async function drawTitle(input, osuApi) {
+async function drawTitle(input) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let score = input[2];
@@ -322,27 +308,27 @@ async function drawTitle(input, osuApi) {
 	}
 
 	if (mods.includes('DT') || mods.includes('HT') || mods.includes('HR') || mods.includes('EZ')) {
-		let modMap = [beatmap];
+		let modMap = beatmap;
 		if (mods.includes('DT') && mods.includes('HR')) {
-			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 80 });
+			modMap = await getOsuBeatmap(beatmap.beatmapId, 80);
 		} else if (mods.includes('DT') && mods.includes('EZ')) {
-			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 66 });
+			modMap = await getOsuBeatmap(beatmap.beatmapId, 66);
 		} else if (mods.includes('DT')) {
-			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 64 });
+			modMap = await getOsuBeatmap(beatmap.beatmapId, 64);
 		} else if (mods.includes('HT') && mods.includes('HR')) {
-			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 272 });
+			modMap = await getOsuBeatmap(beatmap.beatmapId, 272);
 		} else if (mods.includes('HT') && mods.includes('EZ')) {
-			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 258 });
+			modMap = await getOsuBeatmap(beatmap.beatmapId, 258);
 		} else if (mods.includes('HT')) {
-			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 256 });
+			modMap = await getOsuBeatmap(beatmap.beatmapId, 256);
 		} else if (mods.includes('EZ')) {
-			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 2 });
+			modMap = await getOsuBeatmap(beatmap.beatmapId, 2);
 		} else if (mods.includes('HR')) {
-			modMap = await osuApi.getBeatmaps({ b: beatmap.id, mods: 16 });
+			modMap = await getOsuBeatmap(beatmap.beatmapId, 16);
 		}
-		ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100} (${Math.round(modMap[0].difficulty.rating * 100) / 100} with ${mods.join('')})   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
+		ctx.fillText(`★ ${Math.round(beatmap.starRating * 100) / 100} (${Math.round(modMap.starRating * 100) / 100} with ${mods.join('')})   ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
 	} else {
-		ctx.fillText(`★ ${Math.round(beatmap.difficulty.rating * 100) / 100}   ${beatmap.version} mapped by ${beatmap.creator}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
+		ctx.fillText(`★ ${Math.round(beatmap.starRating * 100) / 100}   ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
 	}
 
 	const output = [canvas, ctx, score, beatmap, user];
@@ -361,7 +347,7 @@ async function drawCover(input, mode) {
 	ctx.globalAlpha = 0.6;
 	//Draw a shape onto the main canvas in the top left
 	try {
-		background = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapSetId}/covers/cover.jpg`);
+		background = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapsetId}/covers/cover.jpg`);
 		ctx.drawImage(background, 0, canvas.height / 6.25, canvas.width, background.height / background.width * canvas.width);
 	} catch (error) {
 		background = await Canvas.loadImage('https://osu.ppy.sh/assets/images/default-bg.7594e945.png');

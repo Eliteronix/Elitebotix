@@ -3,6 +3,7 @@ const { prefix, leaderboardEntriesPerPage } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
+const osu = require('node-osu');
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -1012,35 +1013,91 @@ module.exports = {
 
 		return false;
 	},
-	async saveOsuBeatmap(beatmap) {
+	async getOsuBeatmap(beatmapId, modBits) {
+		let lastRework = new Date();
+		lastRework.setUTCFullYear(2021);
+		lastRework.setUTCMonth(7);
+		lastRework.setUTCDate(20);
+		let lastMonth = new Date();
+		lastMonth.setUTCMonth(lastMonth.getUTCMonth() - 1);
 		let dbBeatmap = await DBOsuBeatmaps.findOne({
-			where: { beatmapId: beatmap.id }
+			where: { beatmapId: beatmapId, mods: modBits }
 		});
 
-		dbBeatmap = await DBOsuBeatmaps.create({
-			title: beatmap.title,
-			artist: beatmap.artist,
-			difficulty: beatmap.version,
-			starRating: beatmap.difficulty.rating,
-			aimRating: beatmap.difficulty.aim,
-			speedRating: beatmap.difficulty.speed,
-			drainLength: beatmap.length.drain,
-			totalLength: beatmap.length.total,
-			circleSize: beatmap.difficulty.size,
-			approachRate: beatmap.difficulty.approach,
-			overallDifficulty: beatmap.difficulty.overall,
-			hpDrain: beatmap.difficulty.drain,
-			mapper: beatmap.creator,
-			beatmapId: beatmap.id,
-			beatmapsetId: beatmap.beatmapSetId,
-			bpm: beatmap.bpm,
-			mode: beatmap.mode,
-			approvalStatus: beatmap.approvalStatus,
-			maxCombo: beatmap.maxCombo,
-			circles: beatmap.objects.normal,
-			sliders: beatmap.objects.slider,
-			spinners: beatmap.objects.spinner,
-		});
+		console.log(beatmapId, modBits, 'Beatmap is needed');
+		if (!dbBeatmap || dbBeatmap && dbBeatmap.updatedAt < lastRework || dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt < lastMonth) {
+			console.log(beatmapId, modBits, 'Beatmap API fetched');
+			// eslint-disable-next-line no-undef
+			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+			});
+
+			await osuApi.getBeatmaps({ b: beatmapId, mods: modBits })
+				.then(async (beatmaps) => {
+					//Map has to be updated
+					if (dbBeatmap) {
+						dbBeatmap.title = beatmaps[0].title;
+						dbBeatmap.artist = beatmaps[0].artist;
+						dbBeatmap.difficulty = beatmaps[0].version;
+						dbBeatmap.starRating = beatmaps[0].difficulty.rating;
+						dbBeatmap.aimRating = beatmaps[0].difficulty.aim;
+						dbBeatmap.speedRating = beatmaps[0].difficulty.speed;
+						dbBeatmap.drainLength = beatmaps[0].length.drain;
+						dbBeatmap.totalLength = beatmaps[0].length.total;
+						dbBeatmap.circleSize = beatmaps[0].difficulty.size;
+						dbBeatmap.approachRate = beatmaps[0].difficulty.approach;
+						dbBeatmap.overallDifficulty = beatmaps[0].difficulty.overall;
+						dbBeatmap.hpDrain = beatmaps[0].difficulty.drain;
+						dbBeatmap.mapper = beatmaps[0].creator;
+						dbBeatmap.beatmapsetId = beatmaps[0].beatmapSetId;
+						dbBeatmap.bpm = beatmaps[0].bpm;
+						dbBeatmap.mode = beatmaps[0].mode;
+						dbBeatmap.approvalStatus = beatmaps[0].approvalStatus;
+						dbBeatmap.maxCombo = beatmaps[0].maxCombo;
+						dbBeatmap.circles = beatmaps[0].objects.normal;
+						dbBeatmap.sliders = beatmaps[0].objects.slider;
+						dbBeatmap.spinners = beatmaps[0].objects.spinner;
+						dbBeatmap.mods = modBits;
+						dbBeatmap.userRating = beatmaps[0].rating;
+						await dbBeatmap.save();
+					} else { // Map has to be added new
+						dbBeatmap = await DBOsuBeatmaps.create({
+							title: beatmaps[0].title,
+							artist: beatmaps[0].artist,
+							difficulty: beatmaps[0].version,
+							starRating: beatmaps[0].difficulty.rating,
+							aimRating: beatmaps[0].difficulty.aim,
+							speedRating: beatmaps[0].difficulty.speed,
+							drainLength: beatmaps[0].length.drain,
+							totalLength: beatmaps[0].length.total,
+							circleSize: beatmaps[0].difficulty.size,
+							approachRate: beatmaps[0].difficulty.approach,
+							overallDifficulty: beatmaps[0].difficulty.overall,
+							hpDrain: beatmaps[0].difficulty.drain,
+							mapper: beatmaps[0].creator,
+							beatmapId: beatmaps[0].id,
+							beatmapsetId: beatmaps[0].beatmapSetId,
+							bpm: beatmaps[0].bpm,
+							mode: beatmaps[0].mode,
+							approvalStatus: beatmaps[0].approvalStatus,
+							maxCombo: beatmaps[0].maxCombo,
+							circles: beatmaps[0].objects.normal,
+							sliders: beatmaps[0].objects.slider,
+							spinners: beatmaps[0].objects.spinner,
+							mods: modBits,
+							userRating: beatmaps[0].rating,
+						});
+					}
+				})
+				.catch(err => {
+					if (err.message !== 'Not found') {
+						console.log(err);
+					}
+				});
+		}
 
 		return dbBeatmap;
 	},

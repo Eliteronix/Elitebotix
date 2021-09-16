@@ -1,8 +1,8 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { CanvasRenderService } = require('chartjs-node-canvas');
-const { DBOsuMultiScores, DBDiscordUsers, DBOsuBeatmaps } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, saveOsuBeatmap } = require('../utils');
+const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -230,22 +230,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 								rawModsData[j].FMCount++;
 							}
 
-							//Grab the map from db if available
-							let dbBeatmap = await DBOsuBeatmaps.findOne({
-								where: { beatmapId: userScores[i].beatmapId }
-							});
-
-							if (!dbBeatmap) {
-								await osuApi.getBeatmaps({ b: userScores[i].beatmapId })
-									.then(async (beatmaps) => {
-										saveOsuBeatmap(beatmaps[0]);
-									})
-									.catch(err => {
-										if (err.message !== 'Not found') {
-											console.log('commands/osu-skills.js', err);
-										}
-									});
-							}
+							//Save the maps locally
+							getOsuBeatmap(userScores[i].beatmapId, userScores[i].gameRawMods);
 						}
 					}
 				}
