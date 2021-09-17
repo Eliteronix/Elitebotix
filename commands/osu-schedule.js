@@ -142,7 +142,6 @@ module.exports = {
 				where: { osuUserId: users[i] }
 			});
 
-			let maxCount = 0;
 			for (let j = 0; j < 24; j++) {
 				let count = 0;
 				for (let k = 0; k < allMatches.length; k++) {
@@ -153,18 +152,29 @@ module.exports = {
 					}
 				}
 				data.push(count);
-				if (count > maxCount) {
-					maxCount = count;
+			}
+
+			let filteredData = [];
+			let maxAmount = 0;
+			for (let j = 0; j < data.length; j++) {
+				if (data[j]) {
+					let filteredPoint = (data[(j - 1 + 24) % 24] + data[j] + data[(j + 1) % 24]) / 3;
+					filteredData.push(filteredPoint);
+					if (filteredPoint / 3 > maxAmount) {
+						maxAmount = filteredPoint;
+					}
+				} else {
+					filteredData.push(0);
 				}
 			}
 
-			for (let j = 0; j < data.length; j++) {
-				data[j] = data[j] / maxCount;
+			for (let j = 0; j < filteredData.length; j++) {
+				filteredData[j] = filteredData[j] / maxAmount;
 			}
 
 			datasets.push({
 				label: usersReadable[i],
-				data: data,
+				data: filteredData,
 				backgroundColor: colors[i],
 				fill: true,
 			});
