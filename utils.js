@@ -1093,10 +1093,8 @@ module.exports = {
 						});
 					}
 				})
-				.catch(err => {
-					if (err.message !== 'Not found') {
-						console.log(err);
-					}
+				.catch({
+					//Nothing
 				});
 		}
 
