@@ -119,7 +119,9 @@ async function updateSheet(spreadsheetID, bracketName, processQueueEntry) {
 			}
 		}
 	} catch (error) {
-		if (error.message === 'Google API error - [503] The service is currently unavailable.') {
+		if (error.message === 'Google API error - [503] The service is currently unavailable.'
+			|| error.message === 'Request failed with status code 502'
+			|| error.message === 'Google API error - [500] Internal error encountered.') {
 			console.log(error.message, 'New task is being created');
 			await processQueueEntry.destroy();
 			const task = await DBProcessQueue.findOne({
