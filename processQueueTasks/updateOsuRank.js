@@ -3,7 +3,7 @@ const { getOsuBadgeNumberById } = require('../utils.js');
 const osu = require('node-osu');
 
 module.exports = {
-	async execute(client, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)

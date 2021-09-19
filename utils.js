@@ -534,7 +534,7 @@ module.exports = {
 
 		return userDisplayName;
 	},
-	executeNextProcessQueueTask: async function (client) {
+	executeNextProcessQueueTask: async function (client, bancho) {
 		const tasksInWork = await DBProcessQueue.findAll({
 			where: { beingExecuted: true }
 		});
@@ -576,7 +576,7 @@ module.exports = {
 					nextTask[0].beingExecuted = true;
 					await nextTask[0].save();
 
-					await task.execute(client, nextTask[0]);
+					await task.execute(client, bancho, nextTask[0]);
 				}
 			} catch (e) {
 				console.log('Error executing process queue task', e);
@@ -1018,15 +1018,15 @@ module.exports = {
 		lastRework.setUTCFullYear(2021);
 		lastRework.setUTCMonth(7);
 		lastRework.setUTCDate(20);
-		let lastMonth = new Date();
-		lastMonth.setUTCMonth(lastMonth.getUTCMonth() - 1);
+		let lastWeek = new Date();
+		lastWeek.setUTCMonth(lastWeek.getUTCDate() - 7);
 		let dbBeatmap = await DBOsuBeatmaps.findOne({
 			where: { beatmapId: beatmapId, mods: modBits }
 		});
 
 		if (!dbBeatmap
 			|| dbBeatmap && dbBeatmap.updatedAt < lastRework
-			|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt < lastMonth
+			|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt < lastWeek
 			|| dbBeatmap && !dbBeatmap.starRating) {
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {

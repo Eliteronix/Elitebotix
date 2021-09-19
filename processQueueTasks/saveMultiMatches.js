@@ -5,7 +5,7 @@ const { saveOsuMultiScores } = require('../utils');
 //Archiving started around 40000000
 
 module.exports = {
-	async execute(client, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		let args = processQueueEntry.additions.split(';');
 
 		// eslint-disable-next-line no-undef
