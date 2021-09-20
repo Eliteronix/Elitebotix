@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBTemporaryVoices } = require('./dbObjects');
-const { isWrongSystem } = require('./utils');
+const { isWrongSystem, pause } = require('./utils');
 
 module.exports = async function (channel) {
 	if (channel.type === 'DM') {
@@ -9,30 +9,6 @@ module.exports = async function (channel) {
 
 	if (isWrongSystem(channel.guild.id, channel.type === 'DM')) {
 		return;
-	}
-
-	const temporaryVoice = await DBTemporaryVoices.findOne({
-		where: { guildId: channel.guild.id, channelId: channel.id }
-	});
-
-	const temporaryText = await DBTemporaryVoices.findOne({
-		where: { guildId: channel.guild.id, textChannelId: channel.id }
-	});
-
-	if (temporaryVoice || temporaryText) {
-		if (temporaryVoice) {
-			const textChannel = await channel.guild.channels.fetch(temporaryVoice.textChannelId);
-			await temporaryVoice.destroy();
-			if (textChannel) {
-				await textChannel.delete();
-			}
-		} else if (temporaryText) {
-			const voiceChannel = await channel.guild.channels.fetch(temporaryText.channelId);
-			await temporaryText.destroy();
-			if (voiceChannel) {
-				await voiceChannel.delete();
-			}
-		}
 	}
 
 	//Get the guild dataset from the db
@@ -97,5 +73,30 @@ module.exports = async function (channel) {
 		});
 
 		loggingChannel.send({ embeds: [changeEmbed] });
+	}
+
+	await pause(5000);
+	const temporaryVoice = await DBTemporaryVoices.findOne({
+		where: { guildId: channel.guild.id, channelId: channel.id }
+	});
+
+	const temporaryText = await DBTemporaryVoices.findOne({
+		where: { guildId: channel.guild.id, textChannelId: channel.id }
+	});
+
+	if (temporaryVoice || temporaryText) {
+		if (temporaryVoice) {
+			const textChannel = await channel.guild.channels.fetch(temporaryVoice.textChannelId);
+			await temporaryVoice.destroy();
+			if (textChannel) {
+				await textChannel.delete();
+			}
+		} else if (temporaryText) {
+			const voiceChannel = await channel.guild.channels.fetch(temporaryText.channelId);
+			await temporaryText.destroy();
+			if (voiceChannel) {
+				await voiceChannel.delete();
+			}
+		}
 	}
 };
