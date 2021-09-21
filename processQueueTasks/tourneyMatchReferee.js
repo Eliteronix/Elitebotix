@@ -132,14 +132,15 @@ module.exports = {
 					lobbyStatus === 'Map being played';
 				}
 			} else if (forfeitTimer < now && lobbyStatus === 'Joining phase') {
-				let noPlayers = false;
+				let noPlayers = true;
 				for (let i = 0; i < 16; i++) {
-					if (lobby.slots[i]) {
-						noPlayers = true;
+					if (lobby.slots[i] !== null) {
+						noPlayers = false;
 					}
 				}
 
 				if (noPlayers) {
+					lobbyStatus = 'Aborted';
 					await channel.sendMessage('!mp close');
 
 					let dbPlayerNames = [];
