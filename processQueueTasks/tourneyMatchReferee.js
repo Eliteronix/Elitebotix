@@ -6,6 +6,7 @@ module.exports = {
 		let args = processQueueEntry.additions.split(';');
 
 		let channel;
+		let discordChannel = await client.channels.fetch(args[1]);
 
 		for (let i = 0; i < 5; i++) {
 			try {
@@ -30,7 +31,6 @@ module.exports = {
 					}
 					let user = await client.users.fetch(args[0]);
 					user.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[2]}`);
-					let discordChannel = await client.channels.fetch(args[1]);
 					return discordChannel.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[2]}`);
 				} else {
 					await pause(10000);
@@ -41,6 +41,7 @@ module.exports = {
 		let players = args[3].split(',');
 		let dbPlayers = [];
 		let playerIds = [];
+		let discordIds = [];
 		let users = [];
 		for (let i = 0; i < players.length; i++) {
 			const dbDiscordUser = await DBDiscordUsers.findOne({
@@ -48,6 +49,7 @@ module.exports = {
 			});
 			dbPlayers.push(dbDiscordUser);
 			playerIds.push(dbDiscordUser.osuUserId);
+			discordIds.push(dbDiscordUser.userId);
 			const user = await client.users.fetch(dbDiscordUser.userId);
 			users.push(user);
 		}
@@ -75,6 +77,7 @@ module.exports = {
 			await channel.sendMessage(`!mp invite #${dbPlayers[i].osuUserId}`);
 			await messageUserWithRetries(client, users[i], args[1], `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 		}
+		discordChannel.send(`<@${discordIds.join('>, <@')}> your match has been created. You have been invited ingame by \`Eliteronix\` and also got a DM as a backup.`);
 
 		//Add timers to 10 minutes after the match and also during the scheduled time send another message
 		let matchStartingTime = new Date();
@@ -85,6 +88,7 @@ module.exports = {
 		matchStartingTime.setUTCMinutes(processQueueEntry.date.getUTCMinutes());
 		matchStartingTime.setUTCSeconds(processQueueEntry.date.getUTCSeconds());
 		matchStartingTime.setUTCMinutes(processQueueEntry.date.getUTCMinutes() + 10);
+		let secondRoundOfInvitesSent = false;
 
 		let forfeitTimer = new Date();
 		forfeitTimer.setUTCFullYear(processQueueEntry.date.getUTCFullYear());
@@ -94,6 +98,9 @@ module.exports = {
 		forfeitTimer.setUTCMinutes(processQueueEntry.date.getUTCMinutes());
 		forfeitTimer.setUTCSeconds(processQueueEntry.date.getUTCSeconds());
 		forfeitTimer.setUTCMinutes(processQueueEntry.date.getUTCMinutes() + 20);
+		let currentTime = new Date();
+		let secondsUntilForfeit = Math.round((forfeitTimer - currentTime) / 1000) + 30;
+		await channel.sendMessage(`!mp timer ${secondsUntilForfeit}`);
 		//Add discord messages and also ingame invites for the timers
 		channel.on('message', async (msg) => {
 			let now = new Date();
@@ -125,10 +132,44 @@ module.exports = {
 					lobbyStatus === 'Map being played';
 				}
 			} else if (forfeitTimer < now && lobbyStatus === 'Joining phase') {
+				let noPlayers = false;
+				for (let i = 0; i < 16; i++) {
+					if (lobby.slots[i]) {
+						noPlayers = true;
+					}
+				}
+
+				if (noPlayers) {
+					await channel.sendMessage('!mp close');
+
+					let dbPlayerNames = [];
+					for (let j = 0; j < players.length; j++) {
+						const dbDiscordUser = await DBDiscordUsers.findOne({
+							where: { id: players[j] }
+						});
+						dbPlayerNames.push(dbDiscordUser.osuName);
+					}
+
+					let user = await client.users.fetch(args[0]);
+					user.send(`The scheduled Qualifier has been aborted because no one showed up. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${args[2]}`);
+					return await channel.leave();
+				}
+
 				lobbyStatus = 'Waiting for start';
 
+				await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+				await channel.sendMessage(`!mp mods ${dbMaps[mapIndex].mods}`);
 				await channel.sendMessage('Everyone please ready up!');
 				await channel.sendMessage('!mp timer 120');
+			} else if (matchStartingTime < now && !secondRoundOfInvitesSent && lobbyStatus === 'Joining phase') {
+				secondRoundOfInvitesSent = true;
+				for (let i = 0; i < users.length; i++) {
+					if (!lobby.playersById[dbPlayers[i].osuUserId.toString()]) {
+						await channel.sendMessage(`!mp invite #${dbPlayers[i].osuUserId}`);
+						await messageUserWithRetries(client, users[i], args[1], `Your match is about to start. Please join as soon as possible. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+						discordChannel.send(`<@${dbPlayers[i].userId}> The lobby is about to start. I've sent you another invite.`);
+					}
+				}
 			}
 		});
 
@@ -168,7 +209,8 @@ module.exports = {
 			}
 		});
 
-		lobby.on('matchFinished', async () => {
+		// eslint-disable-next-line no-unused-vars
+		lobby.on('matchFinished', async (results) => {
 			if (mapIndex !== dbMaps.length) {
 				mapIndex++;
 				lobbyStatus = 'Waiting for start';
@@ -198,6 +240,17 @@ module.exports = {
 					.catch(() => {
 						//Nothing
 					});
+
+				let dbPlayerNames = [];
+				for (let j = 0; j < players.length; j++) {
+					const dbDiscordUser = await DBDiscordUsers.findOne({
+						where: { id: players[j] }
+					});
+					dbPlayerNames.push(dbDiscordUser.osuName);
+				}
+
+				let user = await client.users.fetch(args[0]);
+				user.send(`The scheduled Qualifier match has finished. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${args[2]}`);
 				return await channel.leave();
 
 			}
