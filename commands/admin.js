@@ -718,10 +718,30 @@ module.exports = {
 									'required': true
 								},
 								{
-									'name': 'forcedfreemod',
-									'description': 'Wether mods have to be picked or not for FreeMod',
+									'name': 'usenofail',
+									'description': 'Should nofail be applied to all maps?',
 									'type': 5,
-									'required': true
+									'required': true,
+								},
+								{
+									'name': 'score',
+									'description': 'Which types of scores should the graph evaluate?',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Score v1',
+											'value': '0'
+										},
+										{
+											'name': 'Score v2',
+											'value': '3'
+										},
+										{
+											'name': 'Accuracy',
+											'value': '1'
+										}
+									]
 								},
 							]
 						},

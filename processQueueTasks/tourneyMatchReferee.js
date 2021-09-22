@@ -1,5 +1,6 @@
 const { DBDiscordUsers, DBOsuBeatmaps } = require('../dbObjects');
 const { pause, saveOsuMultiScores } = require('../utils');
+const osu = require('node-osu');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -60,7 +61,7 @@ module.exports = {
 
 		await lobby.setPassword(password);
 		await channel.sendMessage('!mp map 975342 0');
-		await channel.sendMessage(`!mp set 0 3 ${dbPlayers.length}`);
+		await channel.sendMessage(`!mp set 0 ${args[7]} ${dbPlayers.length}`);
 		let lobbyStatus = 'Joining phase';
 		let mapIndex = 0;
 		let maps = args[2].split(',');
@@ -101,6 +102,10 @@ module.exports = {
 		let currentTime = new Date();
 		let secondsUntilForfeit = Math.round((forfeitTimer - currentTime) / 1000) + 30;
 		await channel.sendMessage(`!mp timer ${secondsUntilForfeit}`);
+		let noFail = 0;
+		if (args[4] === 'true') {
+			noFail = 1;
+		}
 		//Add discord messages and also ingame invites for the timers
 		channel.on('message', async (msg) => {
 			let now = new Date();
@@ -159,9 +164,10 @@ module.exports = {
 				lobbyStatus = 'Waiting for start';
 
 				await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
-				await channel.sendMessage(`!mp mods ${dbMaps[mapIndex].mods}`);
+				await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail}`);
 				await channel.sendMessage('Everyone please ready up!');
 				await channel.sendMessage('!mp timer 120');
+				mapIndex++;
 			} else if (matchStartingTime < now && !secondRoundOfInvitesSent && lobbyStatus === 'Joining phase') {
 				secondRoundOfInvitesSent = true;
 				for (let i = 0; i < users.length; i++) {
@@ -188,9 +194,10 @@ module.exports = {
 					lobbyStatus = 'Waiting for start';
 
 					await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
-					await channel.sendMessage(`!mp mods ${dbMaps[mapIndex].mods}`);
+					await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail}`);
 					await channel.sendMessage('Everyone please ready up!');
 					await channel.sendMessage('!mp timer 120');
+					mapIndex++;
 				}
 			}
 		});
@@ -213,13 +220,13 @@ module.exports = {
 		// eslint-disable-next-line no-unused-vars
 		lobby.on('matchFinished', async (results) => {
 			if (mapIndex < dbMaps.length) {
-				mapIndex++;
 				lobbyStatus = 'Waiting for start';
 
 				await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
-				await channel.sendMessage(`!mp mods ${dbMaps[mapIndex].mods}`);
+				await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail}`);
 				await channel.sendMessage('Everyone please ready up!');
 				await channel.sendMessage('!mp timer 120');
+				mapIndex++;
 			} else {
 				lobbyStatus = 'Lobby finished';
 
@@ -252,6 +259,7 @@ module.exports = {
 
 				let user = await client.users.fetch(args[0]);
 				user.send(`The scheduled Qualifier match has finished. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${args[6]}`);
+
 				return await channel.leave();
 
 			}

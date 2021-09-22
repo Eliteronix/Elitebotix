@@ -29,10 +29,11 @@ module.exports = {
 			date.setUTCSeconds(0);
 			let dbMaps = [];
 			let dbPlayers = [];
-			let forcedFreemod = false;
+			let useNoFail = false;
 			let channel = null;
 			let matchname = '';
 			let mappoolReadable = '';
+			let scoreMode = 0;
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 				if (interaction.options._hoistedOptions[i].name === 'date') {
 					date.setUTCDate(interaction.options._hoistedOptions[i].value);
@@ -62,8 +63,6 @@ module.exports = {
 							modBits = 16;
 						} else if (maps[j].toLowerCase().startsWith('dt')) {
 							modBits = 64;
-						} else if (maps[j].toLowerCase().startsWith('fm')) {
-							modBits = 0;
 						} else {
 							return interaction.followUp(`${maps[j].substring(0, 2)} is not a valid mod.`);
 						}
@@ -113,8 +112,8 @@ module.exports = {
 							return;
 						}
 					}
-				} else if (interaction.options._hoistedOptions[i].name === 'forcedfreemod' && interaction.options._hoistedOptions[i].value) {
-					forcedFreemod = true;
+				} else if (interaction.options._hoistedOptions[i].name === 'usenofail' && interaction.options._hoistedOptions[i].value) {
+					useNoFail = true;
 				} else if (interaction.options._hoistedOptions[i].name === 'channel') {
 					channel = await interaction.guild.channels.fetch(interaction.options._hoistedOptions[i].value);
 					if (channel.type !== 'GUILD_TEXT') {
@@ -122,6 +121,8 @@ module.exports = {
 					}
 				} else if (interaction.options._hoistedOptions[i].name === 'matchname') {
 					matchname = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'score') {
+					scoreMode = interaction.options._hoistedOptions[i].value;
 				}
 			}
 
@@ -134,7 +135,7 @@ module.exports = {
 
 			date.setUTCMinutes(date.getUTCMinutes() - 15);
 
-			DBProcessQueue.create({ guildId: interaction.guildId, task: 'tourneyMatchNotification', priority: 10, additions: `${interaction.user.id};${channel.id};${dbMaps.join(',')};${dbPlayers.join(',')};${forcedFreemod};${matchname};${mappoolReadable}`, date: date });
+			DBProcessQueue.create({ guildId: interaction.guildId, task: 'tourneyMatchNotification', priority: 10, additions: `${interaction.user.id};${channel.id};${dbMaps.join(',')};${dbPlayers.join(',')};${useNoFail};${matchname};${mappoolReadable};${scoreMode}`, date: date });
 			return interaction.followUp('The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use `/osu-referee scheduled`');
 		}
 	},
