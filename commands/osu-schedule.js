@@ -160,7 +160,7 @@ module.exports = {
 				if (data[j]) {
 					let filteredPoint = (data[(j - 1 + 24) % 24] + data[j] + data[(j + 1) % 24]) / 3;
 					filteredData.push(filteredPoint);
-					if (filteredPoint / 3 > maxAmount) {
+					if (filteredPoint > maxAmount) {
 						maxAmount = filteredPoint;
 					}
 				} else {
