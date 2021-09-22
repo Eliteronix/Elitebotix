@@ -30,8 +30,8 @@ module.exports = {
 						dbPlayers.push(dbDiscordUser.osuName);
 					}
 					let user = await client.users.fetch(args[0]);
-					user.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[2]}`);
-					return discordChannel.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[2]}`);
+					user.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[6]}`);
+					return discordChannel.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[6]}`);
 				} else {
 					await pause(10000);
 				}
@@ -152,7 +152,7 @@ module.exports = {
 					}
 
 					let user = await client.users.fetch(args[0]);
-					user.send(`The scheduled Qualifier has been aborted because no one showed up. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${args[2]}`);
+					user.send(`The scheduled Qualifier has been aborted because no one showed up. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${args[6]}`);
 					return await channel.leave();
 				}
 
@@ -251,7 +251,7 @@ module.exports = {
 				}
 
 				let user = await client.users.fetch(args[0]);
-				user.send(`The scheduled Qualifier match has finished. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${args[2]}`);
+				user.send(`The scheduled Qualifier match has finished. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${args[6]}`);
 				return await channel.leave();
 
 			}

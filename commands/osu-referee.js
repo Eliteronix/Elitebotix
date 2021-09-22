@@ -32,6 +32,7 @@ module.exports = {
 			let forcedFreemod = false;
 			let channel = null;
 			let matchname = '';
+			let mappoolReadable = '';
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 				if (interaction.options._hoistedOptions[i].name === 'date') {
 					date.setUTCDate(interaction.options._hoistedOptions[i].value);
@@ -45,6 +46,7 @@ module.exports = {
 					date.setUTCMinutes(interaction.options._hoistedOptions[i].value);
 				} else if (interaction.options._hoistedOptions[i].name === 'mappool') {
 					let maps = interaction.options._hoistedOptions[i].value.split(',');
+					mappoolReadable = interaction.options._hoistedOptions[i].value;
 
 					for (let j = 0; j < maps.length; j++) {
 						if (!maps[j].match(/[a-zA-Z][a-zA-Z]\d+/gm)) {
@@ -132,7 +134,7 @@ module.exports = {
 
 			date.setUTCMinutes(date.getUTCMinutes() - 15);
 
-			DBProcessQueue.create({ guildId: interaction.guildId, task: 'tourneyMatchNotification', priority: 10, additions: `${interaction.user.id};${channel.id};${dbMaps.join(',')};${dbPlayers.join(',')};${forcedFreemod};${matchname}`, date: date });
+			DBProcessQueue.create({ guildId: interaction.guildId, task: 'tourneyMatchNotification', priority: 10, additions: `${interaction.user.id};${channel.id};${dbMaps.join(',')};${dbPlayers.join(',')};${forcedFreemod};${matchname};${mappoolReadable}`, date: date });
 			return interaction.followUp('The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use `/osu-referee scheduled`');
 		}
 	},
