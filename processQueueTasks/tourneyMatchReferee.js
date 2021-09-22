@@ -212,7 +212,7 @@ module.exports = {
 
 		// eslint-disable-next-line no-unused-vars
 		lobby.on('matchFinished', async (results) => {
-			if (mapIndex !== dbMaps.length) {
+			if (mapIndex < dbMaps.length) {
 				mapIndex++;
 				lobbyStatus = 'Waiting for start';
 

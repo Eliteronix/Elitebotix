@@ -61,7 +61,7 @@ module.exports = {
 						} else if (maps[j].toLowerCase().startsWith('hr')) {
 							modBits = 16;
 						} else if (maps[j].toLowerCase().startsWith('dt')) {
-							modBits = 16;
+							modBits = 64;
 						} else if (maps[j].toLowerCase().startsWith('fm')) {
 							modBits = 0;
 						} else {
