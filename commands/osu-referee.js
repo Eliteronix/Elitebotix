@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
+const { DBDiscordUsers, DBProcessQueue, DBOsuBeatmaps } = require('../dbObjects');
 const osu = require('node-osu');
 const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser } = require('../utils');
 const { Permissions } = require('discord.js');
@@ -152,6 +152,23 @@ module.exports = {
 			const tourneyMatchNotifications = await DBProcessQueue.findAll({
 				where: { task: 'tourneyMatchNotification' }
 			});
+
+			for (let i = 0; i < tourneyMatchNotifications.length; i++) {
+				const plannedStartDate = tourneyMatchNotifications[i].date;
+				plannedStartDate.setUTCMinutes(plannedStartDate.getUTCMinutes() + 15);
+
+				const additions = tourneyMatchNotifications[i].additions.split(';');
+
+				const maps = additions.split(',');
+				let plannedMatchLength = 600 + 60 + 180; //Set to forfeit time by default + 1 end minute + 3 extra minutes backup
+
+				for (let i = 0; i < maps.length; i++) {
+					const dbOsuBeatmap = await DBOsuBeatmaps.findOne({
+						where: { id: maps[i] }
+					});
+					plannedMatchLength += parseInt(dbOsuBeatmap.totalLength) + 120;
+				}
+			}
 
 			date.setUTCMinutes(date.getUTCMinutes() - 15);
 
