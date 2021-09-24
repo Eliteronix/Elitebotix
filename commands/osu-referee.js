@@ -34,6 +34,7 @@ module.exports = {
 			let matchname = '';
 			let mappoolReadable = '';
 			let scoreMode = 0;
+			let matchLength = 600 + 60 + 180; //Set to forfeit time by default + 1 end minute + 3 extra minutes backup
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 				if (interaction.options._hoistedOptions[i].name === 'date') {
 					date.setUTCDate(interaction.options._hoistedOptions[i].value);
@@ -71,6 +72,7 @@ module.exports = {
 
 						if (dbBeatmap) {
 							dbMaps.push(dbBeatmap.id);
+							matchLength += 120 + parseInt(dbMaps.totalLength);
 						} else {
 							return interaction.followUp(`The beatmap \`${maps[j].substring(2)}\` could not be found.`);
 						}
@@ -132,6 +134,24 @@ module.exports = {
 			} else if (now.setUTCDate(now.getUTCDate() + 14) < date) {
 				return interaction.followUp('You are trying to schedule a match more than 2 weeks in the future which is not allowed.');
 			}
+
+			//Calculate if there are going to be other matches running during that time
+			let matchesPlanned = 0;
+			let endDate = new Date();
+			endDate.setUTCFullYear(date.getUTCFullYear());
+			endDate.setUTCMonth(date.getUTCMonth());
+			endDate.setUTCDate(date.getUTCDate());
+			endDate.setUTCHours(date.setUTCHours());
+			endDate.setUTCMinutes(date.setUTCMinutes());
+			endDate.setUTCSeconds(0);
+			endDate.setUTCSeconds(matchLength);
+			if (date.getUTCHours() <= 18 && endDate.getUTCHours >= 18) {
+				matchesPlanned += 2;
+			}
+
+			const tourneyMatchNotifications = await DBProcessQueue.findAll({
+				where: { task: 'tourneyMatchNotification' }
+			});
 
 			date.setUTCMinutes(date.getUTCMinutes() - 15);
 
