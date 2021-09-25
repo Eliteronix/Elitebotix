@@ -35,7 +35,7 @@ module.exports = {
 						let minutesBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60) % 60;
 						let hoursBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60) % 24;
 						let daysBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60 / 24);
-						const channel = client.channels.fetch('891314445559676928');
+						const channel = await client.channels.fetch('891314445559676928');
 						channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m ${match.name} done`);
 					} else {
 						// console.log(`${matchID} ${match.name} is not a tourney match`);
