@@ -141,11 +141,11 @@ module.exports = {
 			endDate.setUTCFullYear(date.getUTCFullYear());
 			endDate.setUTCMonth(date.getUTCMonth());
 			endDate.setUTCDate(date.getUTCDate());
-			endDate.setUTCHours(date.setUTCHours());
-			endDate.setUTCMinutes(date.setUTCMinutes());
+			endDate.setUTCHours(date.getUTCHours());
+			endDate.setUTCMinutes(date.getUTCMinutes());
 			endDate.setUTCSeconds(0);
 			endDate.setUTCSeconds(matchLength);
-			if (date.getUTCHours() <= 18 && endDate.getUTCHours >= 18) {
+			if (date.getUTCHours() <= 18 && endDate.getUTCHours() >= 18) {
 				matchesPlanned += 2;
 			}
 
@@ -155,12 +155,11 @@ module.exports = {
 
 			for (let i = 0; i < tourneyMatchNotifications.length; i++) {
 				const plannedStartDate = tourneyMatchNotifications[i].date;
-				plannedStartDate.setUTCMinutes(plannedStartDate.getUTCMinutes() + 15);
 
 				const additions = tourneyMatchNotifications[i].additions.split(';');
 
-				const maps = additions.split(',');
-				let plannedMatchLength = 600 + 60 + 180; //Set to forfeit time by default + 1 end minute + 3 extra minutes backup
+				const maps = additions[2].split(',');
+				let plannedMatchLength = 1200 + 60 + 180 + 600; //Set to forfeit time by default + 1 end minute + 3 extra minutes backup + 10 minutes to make sure its in limits
 
 				for (let i = 0; i < maps.length; i++) {
 					const dbOsuBeatmap = await DBOsuBeatmaps.findOne({
@@ -168,6 +167,61 @@ module.exports = {
 					});
 					plannedMatchLength += parseInt(dbOsuBeatmap.totalLength) + 120;
 				}
+
+				let plannedEndDate = new Date();
+				plannedEndDate.setUTCFullYear(plannedStartDate.getUTCFullYear());
+				plannedEndDate.setUTCMonth(plannedStartDate.getUTCMonth());
+				plannedEndDate.setUTCDate(plannedStartDate.getUTCDate());
+				plannedEndDate.setUTCHours(plannedStartDate.getUTCHours());
+				plannedEndDate.setUTCMinutes(plannedStartDate.getUTCMinutes());
+				plannedEndDate.setUTCSeconds(0);
+				plannedEndDate.setUTCSeconds(plannedMatchLength);
+
+				if (date >= plannedStartDate && date <= plannedEndDate
+					|| endDate >= plannedStartDate && endDate <= plannedEndDate
+					|| date <= plannedStartDate && endDate >= plannedEndDate) {
+					matchesPlanned++;
+				}
+			}
+
+			const tourneyMatchReferees = await DBProcessQueue.findAll({
+				where: { task: 'tourneyMatchReferee' }
+			});
+
+			for (let i = 0; i < tourneyMatchReferees.length; i++) {
+				const plannedStartDate = tourneyMatchReferees[i].date;
+				plannedStartDate.setUTCMinutes(plannedStartDate.getUTCMinutes() - 5);
+
+				const additions = tourneyMatchReferees[i].additions.split(';');
+
+				const maps = additions[2].split(',');
+				let plannedMatchLength = 1200 + 60 + 180 + 600; //Set to forfeit time by default + 1 end minute + 3 extra minutes backup + 10 minutes to make sure its in limits
+
+				for (let i = 0; i < maps.length; i++) {
+					const dbOsuBeatmap = await DBOsuBeatmaps.findOne({
+						where: { id: maps[i] }
+					});
+					plannedMatchLength += parseInt(dbOsuBeatmap.totalLength) + 120;
+				}
+
+				let plannedEndDate = new Date();
+				plannedEndDate.setUTCFullYear(plannedStartDate.getUTCFullYear());
+				plannedEndDate.setUTCMonth(plannedStartDate.getUTCMonth());
+				plannedEndDate.setUTCDate(plannedStartDate.getUTCDate());
+				plannedEndDate.setUTCHours(plannedStartDate.getUTCHours());
+				plannedEndDate.setUTCMinutes(plannedStartDate.getUTCMinutes());
+				plannedEndDate.setUTCSeconds(0);
+				plannedEndDate.setUTCSeconds(plannedMatchLength);
+
+				if (date >= plannedStartDate && date <= plannedEndDate
+					|| endDate >= plannedStartDate && endDate <= plannedEndDate
+					|| date <= plannedStartDate && endDate >= plannedEndDate) {
+					matchesPlanned++;
+				}
+			}
+
+			if (matchesPlanned > 3) {
+				return interaction.followUp('The bot cannot host another match at the specified time because there will already be 4 matches running. (Maximum limit is 4)');
 			}
 
 			date.setUTCMinutes(date.getUTCMinutes() - 15);
