@@ -884,6 +884,12 @@ module.exports = {
 			// 				'required': true
 			// 			},
 			// 			{
+			// 				'name': 'mods',
+			// 				'description': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
+			// 				'type': 3,
+			// 				'required': false,
+			// 			},
+			// 			{
 			// 				'name': 'username',
 			// 				'description': 'The username, id or link of the player',
 			// 				'type': 3,
@@ -2333,6 +2339,12 @@ module.exports = {
 							'description': 'The beatmap id or link',
 							'type': 3,
 							'required': true
+						},
+						{
+							'name': 'mods',
+							'description': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
+							'type': 3,
+							'required': false,
 						},
 						{
 							'name': 'username',

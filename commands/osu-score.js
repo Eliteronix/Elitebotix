@@ -22,6 +22,7 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		let mods = 'best';
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -31,7 +32,11 @@ module.exports = {
 
 			if (interaction.options._hoistedOptions) {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					args.push(interaction.options._hoistedOptions[i].value);
+					if (interaction.options._hoistedOptions[i].name === 'mods') {
+						args.push(`--${interaction.options._hoistedOptions[i].value}`);
+					} else {
+						args.push(interaction.options._hoistedOptions[i].value);
+					}
 				}
 			}
 		}
@@ -43,8 +48,6 @@ module.exports = {
 		const mode = commandConfig[2];
 
 		let mapRank = 0;
-
-		let mods = 'best';
 
 		for (let i = 0; i < args.length; i++) {
 			if (args[i].startsWith('--event')) {
