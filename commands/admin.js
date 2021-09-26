@@ -656,11 +656,11 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-referee',
-					description: 'Lets you schedule a match which is being reffed by the bot',
+					description: 'Lets you schedule matches which are being reffed by the bot',
 					options: [
 						{
 							'name': 'soloqualifiers',
-							'description': 'Connect your discord account to your osu! account',
+							'description': 'Lets you schedule a match which is being reffed by the bot',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
@@ -742,6 +742,24 @@ module.exports = {
 											'value': '1'
 										}
 									]
+								},
+							]
+						},
+						{
+							'name': 'scheduled',
+							'description': 'Show what matches you have scheduled',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'remove',
+							'description': 'Remove matches that you have scheduled over the bot',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'internalid',
+									'description': 'The internal ID which can be found when using /osu-referee scheduled',
+									'type': 4,
+									'required': true
 								},
 							]
 						},
