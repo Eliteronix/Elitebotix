@@ -653,119 +653,119 @@ module.exports = {
 			// 	},
 			// });
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'osu-referee',
-					description: 'Lets you schedule matches which are being reffed by the bot',
-					options: [
-						{
-							'name': 'soloqualifiers',
-							'description': 'Lets you schedule a match which is being reffed by the bot',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'date',
-									'description': 'The date of the month in UTC (i.e. 29)',
-									'type': 4,
-									'required': true
-								},
-								{
-									'name': 'month',
-									'description': 'The month in UTC (i.e. 11)',
-									'type': 4,
-									'required': true
-								},
-								{
-									'name': 'year',
-									'description': 'The year in UTC (i.e. 2021)',
-									'type': 4,
-									'required': true
-								},
-								{
-									'name': 'hour',
-									'description': 'The hour in UTC (i.e. 18)',
-									'type': 4,
-									'required': true
-								},
-								{
-									'name': 'minute',
-									'description': 'The minute in UTC (i.e. 0)',
-									'type': 4,
-									'required': true
-								},
-								{
-									'name': 'channel',
-									'description': 'The channel in which the players should be notified.',
-									'type': 7,
-									'required': true
-								},
-								{
-									'name': 'matchname',
-									'description': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
-									'type': 3,
-									'required': true
-								},
-								{
-									'name': 'mappool',
-									'description': 'The mappool in the following format: NM234826,HD123141,HR123172',
-									'type': 3,
-									'required': true
-								},
-								{
-									'name': 'players',
-									'description': 'The username, id or link of the players seperated by a \',\'',
-									'type': 3,
-									'required': true
-								},
-								{
-									'name': 'usenofail',
-									'description': 'Should nofail be applied to all maps?',
-									'type': 5,
-									'required': true,
-								},
-								{
-									'name': 'score',
-									'description': 'Which types of scores should the graph evaluate?',
-									'type': 3,
-									'required': true,
-									'choices': [
-										{
-											'name': 'Score v1',
-											'value': '0'
-										},
-										{
-											'name': 'Score v2',
-											'value': '3'
-										},
-										{
-											'name': 'Accuracy',
-											'value': '1'
-										}
-									]
-								},
-							]
-						},
-						{
-							'name': 'scheduled',
-							'description': 'Show what matches you have scheduled',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'remove',
-							'description': 'Remove matches that you have scheduled over the bot',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'internalid',
-									'description': 'The internal ID which can be found when using /osu-referee scheduled',
-									'type': 4,
-									'required': true
-								},
-							]
-						},
-					]
-				},
-			});
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'osu-referee',
+			// 		description: 'Lets you schedule matches which are being reffed by the bot',
+			// 		options: [
+			// 			{
+			// 				'name': 'soloqualifiers',
+			// 				'description': 'Lets you schedule a match which is being reffed by the bot',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'date',
+			// 						'description': 'The date of the month in UTC (i.e. 29)',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'month',
+			// 						'description': 'The month in UTC (i.e. 11)',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'year',
+			// 						'description': 'The year in UTC (i.e. 2021)',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'hour',
+			// 						'description': 'The hour in UTC (i.e. 18)',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'minute',
+			// 						'description': 'The minute in UTC (i.e. 0)',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'channel',
+			// 						'description': 'The channel in which the players should be notified.',
+			// 						'type': 7,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'matchname',
+			// 						'description': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'mappool',
+			// 						'description': 'The mappool in the following format: NM234826,HD123141,HR123172',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'players',
+			// 						'description': 'The username, id or link of the players seperated by a \',\'',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'usenofail',
+			// 						'description': 'Should nofail be applied to all maps?',
+			// 						'type': 5,
+			// 						'required': true,
+			// 					},
+			// 					{
+			// 						'name': 'score',
+			// 						'description': 'Which types of scores should the graph evaluate?',
+			// 						'type': 3,
+			// 						'required': true,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Score v1',
+			// 								'value': '0'
+			// 							},
+			// 							{
+			// 								'name': 'Score v2',
+			// 								'value': '3'
+			// 							},
+			// 							{
+			// 								'name': 'Accuracy',
+			// 								'value': '1'
+			// 							}
+			// 						]
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'scheduled',
+			// 				'description': 'Show what matches you have scheduled',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'remove',
+			// 				'description': 'Remove matches that you have scheduled over the bot',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'internalid',
+			// 						'description': 'The internal ID which can be found when using /osu-referee scheduled',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 		]
+			// 	},
+			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -2088,6 +2088,120 @@ module.exports = {
 							'type': 3,
 							'required': false
 						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-referee',
+					description: 'Lets you schedule matches which are being reffed by the bot',
+					options: [
+						{
+							'name': 'soloqualifiers',
+							'description': 'Lets you schedule a match which is being reffed by the bot',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'date',
+									'description': 'The date of the month in UTC (i.e. 29)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'month',
+									'description': 'The month in UTC (i.e. 11)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'year',
+									'description': 'The year in UTC (i.e. 2021)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'hour',
+									'description': 'The hour in UTC (i.e. 18)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'minute',
+									'description': 'The minute in UTC (i.e. 0)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'channel',
+									'description': 'The channel in which the players should be notified.',
+									'type': 7,
+									'required': true
+								},
+								{
+									'name': 'matchname',
+									'description': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'mappool',
+									'description': 'The mappool in the following format: NM234826,HD123141,HR123172',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'players',
+									'description': 'The username, id or link of the players seperated by a \',\'',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'usenofail',
+									'description': 'Should nofail be applied to all maps?',
+									'type': 5,
+									'required': true,
+								},
+								{
+									'name': 'score',
+									'description': 'Which types of scores should the graph evaluate?',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Score v1',
+											'value': '0'
+										},
+										{
+											'name': 'Score v2',
+											'value': '3'
+										},
+										{
+											'name': 'Accuracy',
+											'value': '1'
+										}
+									]
+								},
+							]
+						},
+						{
+							'name': 'scheduled',
+							'description': 'Show what matches you have scheduled',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'remove',
+							'description': 'Remove matches that you have scheduled over the bot',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'internalid',
+									'description': 'The internal ID which can be found when using /osu-referee scheduled',
+									'type': 4,
+									'required': true
+								},
+							]
+						},
 					]
 				},
 			});
