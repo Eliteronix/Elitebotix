@@ -3,7 +3,7 @@ const { DBElitiriCupSignUp, DBProcessQueue } = require('../dbObjects');
 
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
-	async execute(client, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		if (processQueueEntry.additions === 'Top Bracket') {
 			await updateSheet('1FeGwyeI-GLLej4HxfOJ0R4A9ZAnJ7ofdMPgKrgnpBG8', processQueueEntry.additions);
 		} else if (processQueueEntry.additions === 'Middle Bracket') {

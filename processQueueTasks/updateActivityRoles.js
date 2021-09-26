@@ -1,7 +1,7 @@
 const { DBServerUserActivity, DBActivityRoles } = require('../dbObjects');
 
 module.exports = {
-	async execute(client, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		const activityRoles = await DBActivityRoles.findAll({
 			where: { guildId: processQueueEntry.guildId }
 		});

@@ -118,16 +118,15 @@ module.exports = {
 		let datasets = [];
 
 		let colors = [];
+		let startRed = 135;
+		let startGreen = 206;
+		let startBlue = 250;
+
+		let endRed = 0;
+		let endGreen = 0;
+		let endBlue = 128;
 
 		for (let i = 0; i < users.length; i++) {
-			let startRed = 135;
-			let startGreen = 206;
-			let startBlue = 250;
-
-			let endRed = 0;
-			let endGreen = 0;
-			let endBlue = 128;
-
 			let currentRed = ((startRed - endRed) / users.length * (i + 1) + endRed);
 			let currentGreen = ((startGreen - endGreen) / users.length * (i + 1) + endGreen);
 			let currentBlue = ((startBlue - endBlue) / users.length * (i + 1) + endBlue);

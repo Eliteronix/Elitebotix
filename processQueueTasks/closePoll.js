@@ -3,7 +3,7 @@ const Canvas = require('canvas');
 const { fitTextOnLeftCanvas } = require('../utils');
 
 module.exports = {
-	async execute(client, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		let args = processQueueEntry.additions.split(';');
 
 		const channel = await client.channels.fetch(args[0]).catch(async () => {
