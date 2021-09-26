@@ -1057,6 +1057,18 @@ module.exports = {
 			// 		description: 'Sends an info card about the topplays of the specified player',
 			// 		options: [
 			// 			{
+			// 				'name': 'new',
+			// 				'description': 'Should the newest topplays be shown?',
+			// 				'type': 5,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'amount',
+			// 				'description': 'The amount of topplays to be displayed',
+			// 				'type': 4,
+			// 				'required': false
+			// 			},
+			// 			{
 			// 				'name': 'username',
 			// 				'description': 'The username, id or link of the player',
 			// 				'type': 3,
@@ -1085,7 +1097,7 @@ module.exports = {
 			// 				'description': 'The username, id or link of the player',
 			// 				'type': 3,
 			// 				'required': false
-			// 			}
+			// 			},
 			// 		]
 			// 	},
 			// });
@@ -2496,6 +2508,18 @@ module.exports = {
 					description: 'Sends an info card about the topplays of the specified player',
 					options: [
 						{
+							'name': 'new',
+							'description': 'Should the newest topplays be shown?',
+							'type': 5,
+							'required': false
+						},
+						{
+							'name': 'amount',
+							'description': 'The amount of topplays to be displayed',
+							'type': 4,
+							'required': false
+						},
+						{
 							'name': 'username',
 							'description': 'The username, id or link of the player',
 							'type': 3,
@@ -2524,7 +2548,7 @@ module.exports = {
 							'description': 'The username, id or link of the player',
 							'type': 3,
 							'required': false
-						}
+						},
 					]
 				},
 			});

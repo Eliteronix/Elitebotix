@@ -31,7 +31,15 @@ module.exports = {
 
 			if (interaction.options._hoistedOptions) {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					args.push(interaction.options._hoistedOptions[i].value);
+					if (interaction.options._hoistedOptions[i].name === 'new') {
+						if (interaction.options._hoistedOptions[i].value) {
+							args.push('--new');
+						}
+					} else if (interaction.options._hoistedOptions[i].name === 'amount') {
+						args.push(`--${interaction.options._hoistedOptions[i].value}`);
+					} else {
+						args.push(interaction.options._hoistedOptions[i].value);
+					}
 				}
 			}
 		}

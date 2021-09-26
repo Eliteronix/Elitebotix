@@ -27,7 +27,7 @@ module.exports = {
 				args = [interaction.options._subcommand];
 			}
 
-			interaction.deferReply();
+			await interaction.deferReply();
 		}
 
 		const bancho = additionalObjects[1];
