@@ -25,7 +25,9 @@ module.exports = {
 
 			await interaction.reply('Processing guild leaderboard...');
 
-			if (interaction.options._hoistedOptions[0]) {
+			if (interaction.options._hoistedOptions[1]) {
+				args = [interaction.options._hoistedOptions[1].value];
+			} else if (interaction.options._hoistedOptions[0]) {
 				args = [interaction.options._hoistedOptions[0].value];
 			} else {
 				args = [];
