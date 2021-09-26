@@ -5,7 +5,7 @@ const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'osu-referee',
-	aliases: ['osu-match'],
+	aliases: ['osu-host'],
 	description: 'Lets you schedule a match which is being reffed by the bot',
 	// usage: '[username] [username] ... (Use "_" instead of spaces; Use --b for bancho / --r for ripple; Use --o/--t/--c/--m for modes)',
 	permissions: Permissions.FLAGS.MANAGE_GUILD,
