@@ -33,7 +33,11 @@ module.exports = {
 
 		args.forEach(async (arg) => {
 			const dbBeatmap = await getOsuBeatmap(getIDFromPotentialOsuLink(arg), 0);
-			getBeatmap(msg, dbBeatmap);
+			if (dbBeatmap) {
+				getBeatmap(msg, dbBeatmap);
+			} else {
+				await msg.channel.send({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
+			}
 		});
 	},
 };
