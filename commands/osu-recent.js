@@ -90,6 +90,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
+
 		osuApi.getUserRecent({ u: username, m: mode })
 			.then(async (scores) => {
 				if (!(scores[0])) {
@@ -99,6 +100,23 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 				const dbBeatmap = await getOsuBeatmap(scores[0].beatmapId, 0);
 				const user = await osuApi.getUser({ u: username, m: mode });
 				updateOsuDetailsforUser(user, mode);
+
+				let mapRank = 0;
+				//Get the map leaderboard and fill the maprank if found
+				await osuApi.getScores({ b: dbBeatmap.beatmapId, m: mode, limit: 100 })
+					.then(async (mapScores) => {
+						for (let j = 0; j < mapScores.length && !mapRank; j++) {
+							if (scores[0].raw_mods === mapScores[j].raw_mods && scores[0].user.id === mapScores[j].user.id && scores[0].score === mapScores[j].score) {
+								console.log(scores[0].raw_mods, mapScores[j].raw_mods);
+								mapRank = j + 1;
+							}
+						}
+					})
+					// eslint-disable-next-line no-unused-vars
+					.catch(err => {
+						//Nothing
+					});
+
 
 				const beatmapMode = getBeatmapModeId(dbBeatmap);
 
@@ -136,7 +154,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 
 				elements = await drawFooter(elements);
 
-				elements = await drawAccInfo(elements, mode);
+				elements = await drawAccInfo(elements, mode, mapRank);
 
 				await drawUserInfo(elements, server);
 
@@ -513,13 +531,23 @@ async function drawFooter(input) {
 	return output;
 }
 
-async function drawAccInfo(input, mode) {
+async function drawAccInfo(input, mode, mapRank) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let score = input[2];
 	let beatmap = input[3];
 	let user = input[4];
 	let lookedUpScore = input[5];
+
+	if (mapRank > 0) {
+		//Draw completion
+		roundedRect(ctx, canvas.width / 1000 * 450, canvas.height / 500 * 395, 116, 50, 5, '00', '00', '00', 0.5);
+		ctx.font = '18px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		ctx.fillText('Global Rank', canvas.width / 1000 * 453 + 55, canvas.height / 500 * 415);
+		ctx.fillText(`#${mapRank}`, canvas.width / 1000 * 453 + 55, canvas.height / 500 * 440);
+	}
 
 	if (score.rank === 'F') {
 		//Calculate Completion
