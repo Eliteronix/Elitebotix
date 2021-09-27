@@ -155,7 +155,6 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 								.then(async (mapScores) => {
 									for (let j = 0; j < mapScores.length && !mapRank; j++) {
 										if (scores[i].raw_mods === mapScores[j].raw_mods && scores[i].user.id === mapScores[j].user.id && scores[i].score === mapScores[j].score) {
-											console.log(scores[i].raw_mods, mapScores[j].raw_mods);
 											mapRank = j + 1;
 										}
 									}
