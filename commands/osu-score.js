@@ -80,6 +80,7 @@ module.exports = {
 		if (!dbBeatmap) {
 			msg.channel.send(`Couldn't find beatmap \`${beatmapId.replace(/`/g, '')}\``);
 		}
+
 		if (!args[0]) {//Get profile by author if no argument
 			if (commandUser && commandUser.osuUserId) {
 				getScore(msg, dbBeatmap, commandUser.osuUserId, server, mode, false, mapRank, mods);
@@ -148,6 +149,23 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						const user = await osuApi.getUser({ u: username, m: mode });
 						updateOsuDetailsforUser(user, mode);
 
+						//Get the map leaderboard and fill the maprank if found
+						if (!mapRank) {
+							await osuApi.getScores({ b: beatmap.beatmapId, m: mode, limit: 100 })
+								.then(async (mapScores) => {
+									for (let j = 0; j < mapScores.length && !mapRank; j++) {
+										if (scores[i].raw_mods === mapScores[j].raw_mods && scores[i].user.id === mapScores[j].user.id && scores[i].score === mapScores[j].score) {
+											console.log(scores[i].raw_mods, mapScores[j].raw_mods);
+											mapRank = j + 1;
+										}
+									}
+								})
+								// eslint-disable-next-line no-unused-vars
+								.catch(err => {
+									//Nothing
+								});
+						}
+
 						let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 						const canvasWidth = 1000;
@@ -178,24 +196,21 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						//Create as an attachment
 						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.beatmapId}.png`);
 
-						//If coming from osu-tracking
-						if (mapRank > 0) {
-							await msg.channel.send({ content: `\`${user.name}\` achieved rank **#${mapRank}**!`, files: [attachment] });
+						let guildPrefix = await getGuildPrefix(msg);
+
+						let sentMessage;
+
+						//Send attachment
+						if (noLinkedAccount) {
+							sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 						} else {
-							let guildPrefix = await getGuildPrefix(msg);
-
-							let sentMessage;
-
-							//Send attachment
-							if (noLinkedAccount) {
-								sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
-							} else {
-								sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
-							}
-							sentMessage.react('<:COMPARE:827974793365159997>');
+							sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 						}
+						sentMessage.react('<:COMPARE:827974793365159997>');
 
 						processingMessage.delete();
+						//Reset maprank in case of multiple scores displayed
+						mapRank = 0;
 					}
 				}
 				if (!scoreHasBeenOutput) {
