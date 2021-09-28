@@ -625,15 +625,18 @@ async function drawAccInfo(input, mode, mapRank) {
 
 	ctx.font = '18px comfortaa, sans-serif';
 	if (score.rank !== 'F' && !score.perfect) {
-		console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=${accuracy}&x=0&c=${beatmap.maxCombo}&mods=${score.raw_mods}`);
-		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=${accuracy}&x=0&c=${beatmap.maxCombo}&mods=${score.raw_mods}`);
-		let htmlCode = await response.text();
-		console.log(htmlCode);
-		const ppRegex = /"pp":.+, "length"/gm;
-		const matches = ppRegex.exec(htmlCode);
-		let fcpp = matches[0].replace('"pp": [', '').replace('], "length"', '');
-		pp = `${pp} (${Math.round(fcpp)} If FC)`;
-		ctx.font = '16px comfortaa, sans-serif';
+		try {
+			let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=${accuracy}&x=0&c=${beatmap.maxCombo}&m=${score.raw_mods}`);
+			let htmlCode = await response.text();
+			const ppRegex = /"pp":.+, "length"/gm;
+			const matches = ppRegex.exec(htmlCode);
+			let fcpp = matches[0].replace('"pp": [', '').replace('], "length"', '');
+			pp = `${pp} (${Math.round(fcpp)} If FC)`;
+			ctx.font = '16px comfortaa, sans-serif';
+		} catch (err) {
+			console.log('error fetching osu-score pp', err);
+			console.log(`https://osu.gatari.pw/api/v1/pp?b=${score.beatmapId}&a=${accuracy}&x=${score.counts.miss}&c=${score.maxCombo}&m=${score.raw_mods}`);
+		}
 	}
 
 	//PP

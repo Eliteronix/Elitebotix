@@ -1103,11 +1103,16 @@ module.exports = {
 	},
 	async populatePP(score, accuracy) {
 		if (!score.pp) {
-			let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${score.beatmapId}&a=${accuracy}&x=${score.counts.miss}&c=${score.maxCombo}&mods=${score.raw_mods}`);
-			let htmlCode = await response.text();
-			const ppRegex = /"pp":.+, "length"/gm;
-			const matches = ppRegex.exec(htmlCode);
-			score.pp = matches[0].replace('"pp": [', '').replace('], "length"', '');
+			try {
+				let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${score.beatmapId}&a=${accuracy}&x=${score.counts.miss}&c=${score.maxCombo}&m=${score.raw_mods}`);
+				let htmlCode = await response.text();
+				const ppRegex = /"pp":.+, "length"/gm;
+				const matches = ppRegex.exec(htmlCode);
+				score.pp = matches[0].replace('"pp": [', '').replace('], "length"', '');
+			} catch (err) {
+				console.log('error fetching osu pp', err);
+				console.log(`https://osu.gatari.pw/api/v1/pp?b=${score.beatmapId}&a=${accuracy}&x=${score.counts.miss}&c=${score.maxCombo}&m=${score.raw_mods}`);
+			}
 		}
 
 		return score;
