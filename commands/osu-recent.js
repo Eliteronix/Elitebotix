@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -594,13 +594,28 @@ async function drawAccInfo(input, mode, mapRank) {
 	ctx.fillText(combo, canvas.width / 1000 * 735 + 55, canvas.height / 500 * 410);
 
 	let pp = 'None';
+
+	score = await populatePP(score, accuracy);
 	if (score.pp) {
 		pp = Math.round(score.pp);
 	}
 
+	ctx.font = '18px comfortaa, sans-serif';
+	if (score.rank === 'F') {
+		pp = `${pp} (If Pass)`;
+		ctx.font = '16px comfortaa, sans-serif';
+	} else if (!score.perfect) {
+		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${score.beatmapId}&a=${accuracy}&x=0&c=${beatmap.maxCombo}&mods=${score.raw_mods}`);
+		let htmlCode = await response.text();
+		const ppRegex = /"pp":.+, "length"/gm;
+		const matches = ppRegex.exec(htmlCode);
+		let fcpp = matches[0].replace('"pp": [', '').replace('], "length"', '');
+		pp = `${pp} (${Math.round(fcpp)} If FC)`;
+		ctx.font = '16px comfortaa, sans-serif';
+	}
+
 	//PP
 	roundedRect(ctx, canvas.width / 1000 * 870, canvas.height / 500 * 365, 110, 50, 5, '00', '00', '00', 0.5);
-	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('PP', canvas.width / 1000 * 870 + 55, canvas.height / 500 * 385);
