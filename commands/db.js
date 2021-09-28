@@ -77,17 +77,20 @@ module.exports = {
 
 		for (let i = 0; i < dbList.length; i++) {
 			data.push(dbList[i].dataValues);
-		}
 
-		const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
-		let csv = new ObjectsToCsv(data);
-		csv = await csv.toString();
-		// eslint-disable-next-line no-undef
-		const buffer = Buffer.from(csv);
-		//Create as an attachment
-		// eslint-disable-next-line no-undef
-		const attachment = new Discord.MessageAttachment(buffer, `${dbTableName}-${process.env.SERVER}-${process.env.PROVIDER}.csv`);
-		// eslint-disable-next-line no-undef
-		eliteronixUser.send({ content: `${dbTableName} - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`, files: [attachment] });
+			if (i % 10000 === 0 && i > 0 || dbList.length - 1 === i) {
+				const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
+				let csv = new ObjectsToCsv(data);
+				csv = await csv.toString();
+				// eslint-disable-next-line no-undef
+				const buffer = Buffer.from(csv);
+				//Create as an attachment
+				// eslint-disable-next-line no-undef
+				const attachment = new Discord.MessageAttachment(buffer, `${dbTableName}-${process.env.SERVER}-${process.env.PROVIDER}.csv`);
+				// eslint-disable-next-line no-undef
+				await eliteronixUser.send({ content: `${dbTableName} - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`, files: [attachment] });
+				data = [];
+			}
+		}
 	},
 };
