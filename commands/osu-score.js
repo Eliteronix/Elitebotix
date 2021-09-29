@@ -618,7 +618,7 @@ async function drawAccInfo(input, mode, mapRank) {
 
 	let pp = 'None';
 
-	score = await populatePP(score, accuracy);
+	score = await populatePP(score, beatmap, accuracy);
 	if (score.pp) {
 		pp = Math.round(score.pp);
 	}
