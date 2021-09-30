@@ -133,10 +133,11 @@ module.exports = {
 					const allPlayers = await getPlayers(client);
 
 					// Trigger Mappool creation for the different brackets
-					setMapsForBracket(client, bancho, 'Top Bracket', 8, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613', allPlayers[0]);
-					setMapsForBracket(client, bancho, 'Middle Bracket', 6.6, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813', '833313704136540171', allPlayers[1]);
-					setMapsForBracket(client, bancho, 'Lower Bracket', 6.2, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890', '833313763188801578', allPlayers[2]);
-					setMapsForBracket(client, bancho, 'Beginner Bracket', 5.8, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752', '833313827172646912', allPlayers[3]);
+					// setMapsForBracket(client, bancho, 'Top Bracket', 8, NMBeatmaps, DTBeatmaps, 1, 9999, '833076996258005002', '833313544400535613', allPlayers[0]);
+					// setMapsForBracket(client, bancho, 'Middle Bracket', 6.6, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813', '833313704136540171', allPlayers[1]);
+					// setMapsForBracket(client, bancho, 'Lower Bracket', 6.2, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890', '833313763188801578', allPlayers[2]);
+					// setMapsForBracket(client, bancho, 'Beginner Bracket', 5.8, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752', '833313827172646912', allPlayers[3]);
+					setMapsForBracket(client, bancho, 'MOTD', 6, NMBeatmaps, DTBeatmaps, 1, 9999999, '893215604503351386', '833313361483530261', allPlayers[0]);
 				})
 				.catch(e => {
 					console.log(e);
@@ -235,25 +236,26 @@ async function getPlayers(client) {
 				// eslint-disable-next-line no-undef
 				if (process.env.SERVER === 'Dev') {
 					for (let j = 0; j < 1; j++) {
-						// topBracketPlayers.push(registeredUsers[i]);
+						topBracketPlayers.push(registeredUsers[i]);
 						// middleBracketPlayers.push(registeredUsers[i]);
-						lowerBracketPlayers.push(registeredUsers[i]);
+						// lowerBracketPlayers.push(registeredUsers[i]);
 						// beginnerBracketPlayers.push(registeredUsers[i]);
 					}
 					// eslint-disable-next-line no-undef
 				} else if (process.env.SERVER === 'QA') {
 					lowerBracketPlayers.push(registeredUsers[i]);
 				} else {
-					let BWSRank = Math.round(Math.pow(registeredUsers[i].osuRank, Math.pow(0.9937, Math.pow(registeredUsers[i].osuBadges, 2))));
-					if (BWSRank < 10000) {
-						topBracketPlayers.push(registeredUsers[i]);
-					} else if (BWSRank < 50000) {
-						middleBracketPlayers.push(registeredUsers[i]);
-					} else if (BWSRank < 100000) {
-						lowerBracketPlayers.push(registeredUsers[i]);
-					} else if (BWSRank < 10000000) {
-						beginnerBracketPlayers.push(registeredUsers[i]);
-					}
+					// let BWSRank = Math.round(Math.pow(registeredUsers[i].osuRank, Math.pow(0.9937, Math.pow(registeredUsers[i].osuBadges, 2))));
+					// if (BWSRank < 10000) {
+					// 	topBracketPlayers.push(registeredUsers[i]);
+					// } else if (BWSRank < 50000) {
+					// 	middleBracketPlayers.push(registeredUsers[i]);
+					// } else if (BWSRank < 100000) {
+					// 	lowerBracketPlayers.push(registeredUsers[i]);
+					// } else if (BWSRank < 10000000) {
+					// 	beginnerBracketPlayers.push(registeredUsers[i]);
+					// }
+					topBracketPlayers.push(registeredUsers[i]);
 				}
 			} else {
 				registeredUsers[i].osuMOTDRegistered = 0;
