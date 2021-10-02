@@ -1,7 +1,8 @@
-const osu = require('node-osu');
 const Discord = require('discord.js');
-const { humanReadable, pause } = require('../utils.js');
+const { humanReadable } = require('../utils.js');
 const { qualifier } = require('./qualifier.js');
+const { DBOsuBeatmaps, DBOsuMultiScores } = require('../dbObjects.js');
+const { Op } = require('sequelize');
 
 module.exports = {
 	setMapsForBracket: async function (client, bancho, bracketName, SRLimit, NMBeatmaps, DTBeatmaps, upperRank, lowerRank, channelId, roleId, players) {
@@ -24,45 +25,150 @@ module.exports = {
 		}
 
 		if (possibleNMBeatmaps.length < 9) {
-			// eslint-disable-next-line no-undef
-			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+			const beatmaps = await DBOsuBeatmaps.findAll({
+				where: {
+					[Op.or]: [
+						{ mods: 0 },
+						{ mods: 1 }
+					]
+				}
 			});
 
-			let backupMaps = [];
-			backupMaps.push('131891'); //The Quick Brown Fox - Big Black [WHO'S AFRAID OF THE BIG BLACK]
-			backupMaps.push('736215'); //Panda Eyes - Highscore [Game Over]
-			backupMaps.push('845391'); //Tower of Heaven
-			backupMaps.push('954692'); //Kira Kira Days
-			backupMaps.push('47152'); //Masterpiece
-			backupMaps.push('104229'); //Can't defeat Airman
-			backupMaps.push('422328'); //pensamento tipico de esquerda caviar
-			backupMaps.push('131564'); //Scarlet rose
-			backupMaps.push('786867'); //Ooi
-			backupMaps.push('367763'); //Crack Traxxxx
-			backupMaps.push('1513180'); //Dum Surfer
-			backupMaps.push('994495'); //Haitai
-			backupMaps.push('714001'); //No title
-			backupMaps.push('397535'); //My love
-
 			while (possibleNMBeatmaps.length < 9) {
-				const mapIndex = Math.floor(Math.random() * backupMaps.length);
-				const map = await osuApi.getBeatmaps({ m: 0, b: backupMaps[mapIndex] });
-				if (map[0]) {
-					possibleNMBeatmaps.push(map[0]);
+
+				let beatmap = null;
+
+				while (!beatmap) {
+					const index = Math.floor(Math.random() * beatmaps.length);
+					const dbBeatmap = beatmaps[index];
+
+					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
+						&& parseFloat(dbBeatmap.starRating) >= 5 && parseFloat(dbBeatmap.starRating) <= 6) {
+						const multiScores = await DBOsuMultiScores.findAll({
+							where: {
+								tourneyMatch: true,
+							}
+						});
+
+						let onlyMOTD = true;
+						for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
+							if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
+								onlyMOTD = false;
+							}
+						}
+
+						beatmap = {
+							id: dbBeatmap.beatmapId,
+							beatmapSetId: dbBeatmap.beatmapsetId,
+							title: dbBeatmap.title,
+							creator: dbBeatmap.mapper,
+							version: dbBeatmap.difficulty,
+							artist: dbBeatmap.artist,
+							rating: dbBeatmap.userRating,
+							bpm: dbBeatmap.bpm,
+							mode: dbBeatmap.mode,
+							approvalStatus: dbBeatmap.approvalStatus,
+							maxCombo: dbBeatmap.maxCombo,
+							objects: {
+								normal: dbBeatmap.circles,
+								slider: dbBeatmap.sliders,
+								spinner: dbBeatmap.spinners
+							},
+							difficulty: {
+								rating: dbBeatmap.starRating,
+								aim: dbBeatmap.aimRating,
+								speed: dbBeatmap.speedRating,
+								size: dbBeatmap.circleSize,
+								overall: dbBeatmap.overallDifficulty,
+								approach: dbBeatmap.approachRate,
+								drain: dbBeatmap.hpDrain
+							},
+							length: {
+								total: dbBeatmap.totalLength,
+								drain: dbBeatmap.drainLength
+							}
+						};
+					}
+
+					beatmaps.splice(index, 1);
 				}
-				const dtmap = await osuApi.getBeatmaps({ m: 0, b: backupMaps[mapIndex], mods: 64 });
-				if (dtmap[0]) {
-					possibleDTBeatmaps.push(dtmap[0]);
-					backupMaps.splice(mapIndex, 1);
-				}
-				await pause(5000);
+
+				possibleNMBeatmaps.push(beatmap);
 			}
 
 			quicksort(possibleNMBeatmaps);
+		}
+
+		if (possibleDTBeatmaps.length < 2) {
+			const beatmaps = await DBOsuBeatmaps.findAll({
+				where: {
+					mods: 64
+				}
+			});
+
+			while (possibleDTBeatmaps.length < 2) {
+
+				let beatmap = null;
+
+				while (!beatmap) {
+					const index = Math.floor(Math.random() * beatmaps.length);
+					const dbBeatmap = beatmaps[index];
+
+					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
+						&& parseFloat(dbBeatmap.starRating) >= 5 && parseFloat(dbBeatmap.starRating) <= 6) {
+						const multiScores = await DBOsuMultiScores.findAll({
+							where: {
+								tourneyMatch: true,
+							}
+						});
+
+						let onlyMOTD = true;
+						for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
+							if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
+								onlyMOTD = false;
+							}
+						}
+
+						beatmap = {
+							id: dbBeatmap.beatmapId,
+							beatmapSetId: dbBeatmap.beatmapsetId,
+							title: dbBeatmap.title,
+							creator: dbBeatmap.mapper,
+							version: dbBeatmap.difficulty,
+							artist: dbBeatmap.artist,
+							rating: dbBeatmap.userRating,
+							bpm: dbBeatmap.bpm,
+							mode: dbBeatmap.mode,
+							approvalStatus: dbBeatmap.approvalStatus,
+							maxCombo: dbBeatmap.maxCombo,
+							objects: {
+								normal: dbBeatmap.circles,
+								slider: dbBeatmap.sliders,
+								spinner: dbBeatmap.spinners
+							},
+							difficulty: {
+								rating: dbBeatmap.starRating,
+								aim: dbBeatmap.aimRating,
+								speed: dbBeatmap.speedRating,
+								size: dbBeatmap.circleSize,
+								overall: dbBeatmap.overallDifficulty,
+								approach: dbBeatmap.approachRate,
+								drain: dbBeatmap.hpDrain
+							},
+							length: {
+								total: dbBeatmap.totalLength,
+								drain: dbBeatmap.drainLength
+							}
+						};
+					}
+
+					beatmaps.splice(index, 1);
+				}
+
+				possibleDTBeatmaps.push(beatmap);
+			}
+
+			quicksort(possibleDTBeatmaps);
 		}
 
 		//Artificially lower Beginner Bracket Maps
