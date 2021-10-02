@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { CanvasRenderService } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -129,6 +129,60 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 		.then(async (user) => {
 			let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
+			const topScores = await osuApi.getUserBest({ u: user.name, m: 0, limit: 100 });
+
+			console.log(topScores);
+
+			let mods = [];
+			let mappers = [];
+			for (let i = 0; i < topScores.length; i++) {
+				//Add and count mods
+				let modAdded = false;
+				for (let j = 0; j < mods.length && !modAdded; j++) {
+					if (mods[j].bits === topScores[i].raw_mods) {
+						mods[j].amount++;
+						modAdded = true;
+					}
+				}
+
+				if (!modAdded) {
+					const modObject = {
+						bits: topScores[i].raw_mods,
+						modsReadable: getMods(topScores[i].raw_mods).join(''),
+						amount: 1
+					};
+
+					if (!modObject.modsReadable) {
+						modObject.modsReadable = 'NM';
+					}
+
+					mods.push(modObject);
+				}
+
+				//Add and count mappers
+				let mapperAdded = false;
+				const dbBeatmap = await getOsuBeatmap(topScores[i].beatmapId, topScores[i].raw_mods);
+				for (let j = 0; j < mappers.length && !mapperAdded; j++) {
+					if (mappers[j].mapper === dbBeatmap.mapper) {
+						mappers[j].amount++;
+						mapperAdded = true;
+					}
+				}
+
+				if (!mapperAdded) {
+					mappers.push({
+						mapper: dbBeatmap.mapper,
+						amount: 1
+					});
+				}
+			}
+
+			quicksortAmount(mods);
+			quicksortAmount(mappers);
+
+			console.log(mods);
+			console.log(mappers);
+
 			const width = 1500; //px
 			const height = 750; //px
 			const canvasRenderService = new CanvasRenderService(width, height);
@@ -139,7 +193,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				});
 
 				if (!userScores.length) {
-					return processingMessage.edit(`No scores found in the database for ${user.name}.`);
+					return processingMessage.edit(`No multi-scores found in the database for ${user.name}.`);
 				}
 
 				let oldestDate = new Date();
@@ -472,6 +526,31 @@ function quicksort(list, start = 0, end = undefined) {
 		const p = partition(list, start, end);
 		quicksort(list, start, p - 1);
 		quicksort(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionAmount(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].amount) >= parseFloat(pivot.amount)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksortAmount(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionAmount(list, start, end);
+		quicksortAmount(list, start, p - 1);
+		quicksortAmount(list, p + 1, end);
 	}
 	return list;
 }
