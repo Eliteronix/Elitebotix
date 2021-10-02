@@ -625,8 +625,18 @@ async function drawAccInfo(input, mode, mapRank) {
 
 	ctx.font = '18px comfortaa, sans-serif';
 	if (!score.perfect) {
+		let fcScore = {
+			counts: {
+				'300': parseInt(score.counts[300]) + parseInt(score.counts.miss),
+				'100': parseInt(score.counts[100]),
+				'50': parseInt(score.counts[50]),
+				miss: 0
+			}
+		};
+
+		let fcScoreAccuracy = getAccuracy(fcScore, 0) * 100;
 		try {
-			let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=${accuracy}&x=0&c=${beatmap.maxCombo}&m=${score.raw_mods}`);
+			let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=${fcScoreAccuracy}&x=0&c=${beatmap.maxCombo}&m=${score.raw_mods}`);
 			let htmlCode = await response.text();
 			const ppRegex = /"pp":.+, "length"/gm;
 			const matches = ppRegex.exec(htmlCode);
@@ -637,7 +647,7 @@ async function drawAccInfo(input, mode, mapRank) {
 			}
 		} catch (err) {
 			console.log('error fetching osu-score pp', err);
-			console.log(`https://osu.gatari.pw/api/v1/pp?b=${score.beatmapId}&a=${accuracy}&x=${score.counts.miss}&c=${score.maxCombo}&m=${score.raw_mods}`);
+			console.log(`https://osu.gatari.pw/api/v1/pp?b=${score.beatmapId}&a=${fcScoreAccuracy}&x=${score.counts.miss}&c=${score.maxCombo}&m=${score.raw_mods}`);
 		}
 	}
 
