@@ -123,6 +123,8 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 
 				elements = await drawPlays(elements, server);
 
+				elements = await drawBadges(elements, server);
+
 				elements = await drawFooter(elements, server);
 
 				await drawAvatar(elements);
@@ -181,6 +183,8 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				elements = await drawLevel(elements, server);
 
 				elements = await drawPlays(elements, server);
+
+				elements = await drawBadges(elements, server);
 
 				elements = await drawFooter(elements, server);
 
@@ -384,6 +388,44 @@ async function drawPlays(input, server) {
 		ctx.fillText('Plays:', canvas.width / 16 * 13, canvas.height / 2 + 6 + 20 + yOffset);
 		ctx.fillText(humanReadable(user.counts.plays), canvas.width / 16 * 13, canvas.height / 2 + 6 + 40 + yOffset);
 	}
+	const output = [canvas, ctx, user];
+	return output;
+}
+
+async function drawBadges(input, server) {
+	let canvas = input[0];
+	let ctx = input[1];
+	let user = input[2];
+
+	if (server === 'bancho') {
+		const badgeURLs = [];
+		await fetch(`https://osu.ppy.sh/users/${user.id}/osu`)
+			.then(async (res) => {
+				let htmlCode = await res.text();
+				const badgesRegex = /,"badges".+,"beatmap_playcounts_count":/gm;
+				const matches = badgesRegex.exec(htmlCode);
+				if (matches && matches[0]) {
+					const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"beatmap_playcounts_count":', '');
+					const rawBadgesArray = cleanedMatch.split('},{');
+					for (let i = 0; i < rawBadgesArray.length; i++) {
+						if (rawBadgesArray[i] !== '') {
+							const badgeArray = rawBadgesArray[i].split('","');
+							badgeURLs.push(badgeArray[2].substring(12));
+						}
+					}
+				}
+			});
+
+		let xOffset = -2;
+		if (badgeURLs.length < 8) {
+			xOffset = xOffset + (8 - badgeURLs.length) * 44;
+		}
+		for (let i = 0; i < badgeURLs.length && i < 8; i++) {
+			const badge = await Canvas.loadImage(badgeURLs[i].replace(/\\/gm, ''));
+			ctx.drawImage(badge, xOffset + (i * 88), 290);
+		}
+	}
+
 	const output = [canvas, ctx, user];
 	return output;
 }
