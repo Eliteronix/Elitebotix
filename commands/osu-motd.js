@@ -33,6 +33,10 @@ module.exports = {
 				}
 				if (discordUser.osuVerified) {
 					discordUser.osuMOTDRegistered = true;
+					discordUser.osuMOTDlastRoundPlayed = null;
+					discordUser.osuMOTDMuted = false;
+					discordUser.osuMOTDerrorFirstOccurence = null;
+					discordUser.osuMOTDmutedUntil = null;
 					discordUser.save();
 					sendMessage(msg, `You successfully registered for the \`Maps of the Day\` competition.\nBe sure to join the server and read <#834833321438740490> if you didn't already. (\`${guildPrefix}osu-motd server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`);
 				} else {
