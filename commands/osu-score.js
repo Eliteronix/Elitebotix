@@ -624,7 +624,7 @@ async function drawAccInfo(input, mode, mapRank) {
 	}
 
 	ctx.font = '18px comfortaa, sans-serif';
-	if (score.rank !== 'F' && !score.perfect) {
+	if (!score.perfect) {
 		try {
 			let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=${accuracy}&x=0&c=${beatmap.maxCombo}&m=${score.raw_mods}`);
 			let htmlCode = await response.text();
