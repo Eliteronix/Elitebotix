@@ -146,7 +146,7 @@ module.exports = {
 				endDate.setUTCSeconds(0);
 				endDate.setUTCSeconds(matchLength);
 				if (date.getUTCHours() <= 18 && endDate.getUTCHours() >= 18) {
-					matchesPlanned += 2;
+					matchesPlanned += 3;
 				}
 
 				const tourneyMatchNotifications = await DBProcessQueue.findAll({
