@@ -137,7 +137,7 @@ module.exports = {
 					// setMapsForBracket(client, bancho, 'Middle Bracket', 6.6, NMBeatmaps, DTBeatmaps, 10000, 49999, '833077384725921813', '833313704136540171', allPlayers[1]);
 					// setMapsForBracket(client, bancho, 'Lower Bracket', 6.2, NMBeatmaps, DTBeatmaps, 50000, 99999, '833077410328739890', '833313763188801578', allPlayers[2]);
 					// setMapsForBracket(client, bancho, 'Beginner Bracket', 5.8, NMBeatmaps, DTBeatmaps, 100000, 9999999, '833077435687370752', '833313827172646912', allPlayers[3]);
-					setMapsForBracket(client, bancho, 'MOTD', 6, NMBeatmaps, DTBeatmaps, 1, 9999999, '893215604503351386', '833313361483530261', allPlayers[0]);
+					setMapsForBracket(client, bancho, 'MOTD', 6.4, NMBeatmaps, DTBeatmaps, 1, 9999999, '893215604503351386', '833313361483530261', allPlayers[0]);
 				})
 				.catch(e => {
 					console.log(e);
