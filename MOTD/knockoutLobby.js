@@ -32,7 +32,7 @@ module.exports = {
 			doubleTime = ' DT';
 		}
 
-		if (lobbyNumber === 1) {
+		if (lobbyNumber < 5) {
 
 			let lobbyStatus = 'Joining phase';
 
