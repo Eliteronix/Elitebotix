@@ -100,7 +100,7 @@ module.exports = {
 							lobbyStatus = 'Waiting for start';
 
 							await channel.sendMessage('Everyone please ready up!');
-							await channel.sendMessage('!mp timer 120');
+							await channel.sendMessage('!mp timer 60');
 						}
 					} else if (lobbyStatus === 'Waiting for start') {
 						await channel.sendMessage('!mp start 10');
@@ -111,7 +111,7 @@ module.exports = {
 					lobbyStatus = 'Waiting for start';
 
 					await channel.sendMessage('Everyone please ready up!');
-					await channel.sendMessage('!mp timer 120');
+					await channel.sendMessage('!mp timer 60');
 				}
 			});
 			lobby.on('playerJoined', async (obj) => {
@@ -128,7 +128,7 @@ module.exports = {
 						lobbyStatus = 'Waiting for start';
 
 						await channel.sendMessage('Everyone please ready up!');
-						await channel.sendMessage('!mp timer 120');
+						await channel.sendMessage('!mp timer 60');
 					}
 				}
 			});
@@ -229,7 +229,7 @@ module.exports = {
 				}
 
 				await channel.sendMessage(`Knocked out players this round: ${knockedOutPlayerNames}`);
-				await pause(30000);
+				await pause(15000);
 
 				for (let i = 0; i < knockedOutPlayerIds.length; i++) {
 					await channel.sendMessage(`!mp kick #${knockedOutPlayerIds[i]}`);
@@ -240,7 +240,7 @@ module.exports = {
 
 					await channel.sendMessage(`Congratulations ${players[0].osuName}! You won todays knockout lobby. Come back tomorrow for another round!`);
 					assignKnockoutPoints(client, players[0], startingPlayers, players.length, mapIndex + 1);
-					await pause(30000);
+					await pause(15000);
 					await channel.sendMessage('!mp close');
 					// eslint-disable-next-line no-undef
 					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -303,7 +303,7 @@ module.exports = {
 					}
 
 					lobbyStatus = 'Waiting for start';
-					await channel.sendMessage('!mp timer 120');
+					await channel.sendMessage('!mp timer 60');
 
 					isFirstRound = false;
 				}
