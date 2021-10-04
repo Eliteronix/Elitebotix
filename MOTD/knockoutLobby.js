@@ -69,6 +69,13 @@ module.exports = {
 			await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 			await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
 
+			try {
+				const announceChannel = await client.channels.fetch('893215604503351386');
+				announceChannel.send(`Lobby #${lobbyNumber}: <https://osu.ppy.sh/mp/${lobby.id}>`);
+			} catch (error) {
+				console.log('MOTD/knockoutLobby.js', error);
+			}
+
 			for (let i = 0; i < users.length; i++) {
 				await channel.sendMessage(`!mp invite #${players[i].osuUserId}`);
 				await messageUserWithRetries(client, users[i], `Your Knockoutlobby has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
