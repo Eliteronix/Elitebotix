@@ -69,11 +69,14 @@ module.exports = {
 			await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 			await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
 
-			try {
-				const announceChannel = await client.channels.fetch('893215604503351386');
-				announceChannel.send(`Lobby #${lobbyNumber}: <https://osu.ppy.sh/mp/${lobby.id}>`);
-			} catch (error) {
-				console.log('MOTD/knockoutLobby.js', error);
+			// eslint-disable-next-line no-undef
+			if (process.env.SERVER !== 'Dev') {
+				try {
+					const announceChannel = await client.channels.fetch('893215604503351386');
+					announceChannel.send(`Lobby #${lobbyNumber}: <https://osu.ppy.sh/mp/${lobby.id}>`);
+				} catch (error) {
+					console.log('MOTD/knockoutLobby.js', error);
+				}
 			}
 
 			for (let i = 0; i < users.length; i++) {
@@ -107,6 +110,9 @@ module.exports = {
 							lobbyStatus = 'Waiting for start';
 
 							await channel.sendMessage('Everyone please ready up!');
+							//Calculate the amount of knockouts needed
+							let knockoutNumber = calculateKnockoutNumber(players, mapIndex);
+							await channel.sendMessage(`${knockoutNumber} player(s) will be knocked out.`);
 							await channel.sendMessage('!mp timer 60');
 						}
 					} else if (lobbyStatus === 'Waiting for start') {
@@ -118,6 +124,9 @@ module.exports = {
 					lobbyStatus = 'Waiting for start';
 
 					await channel.sendMessage('Everyone please ready up!');
+					//Calculate the amount of knockouts needed
+					let knockoutNumber = calculateKnockoutNumber(players, mapIndex);
+					await channel.sendMessage(`${knockoutNumber} player(s) will be knocked out.`);
 					await channel.sendMessage('!mp timer 60');
 				}
 			});
@@ -135,6 +144,9 @@ module.exports = {
 						lobbyStatus = 'Waiting for start';
 
 						await channel.sendMessage('Everyone please ready up!');
+						//Calculate the amount of knockouts needed
+						let knockoutNumber = calculateKnockoutNumber(players, mapIndex);
+						await channel.sendMessage(`${knockoutNumber} player(s) will be knocked out.`);
 						await channel.sendMessage('!mp timer 60');
 					}
 				}
@@ -154,26 +166,8 @@ module.exports = {
 				}
 			});
 			lobby.on('matchFinished', async (results) => {
-				//Set array for how many players should get through maximum
-				let expectedPlayers = [];
-				expectedPlayers.push(16); //Map [0] Qualifiers -> 16
-				expectedPlayers.push(14); //Map [1] 16 -> 14
-				expectedPlayers.push(12); //Map [2] 14 -> 12
-				expectedPlayers.push(10); //Map [3] 12 -> 10
-				expectedPlayers.push(8); //Map [4] 10 -> 8 --DT
-				expectedPlayers.push(6); //Map [5] 8 -> 6
-				expectedPlayers.push(5); //Map [6] 6 -> 5
-				expectedPlayers.push(4); //Map [7] 5 -> 4
-				expectedPlayers.push(3); //Map [8] 4 -> 3 --DT
-				expectedPlayers.push(2); //Map [9] 3 -> 2
-				expectedPlayers.push(1); //Map [10] 2 -> 1
-
 				//Calculate the amount of knockouts needed
-				let knockoutNumber = expectedPlayers[mapIndex - 1] - expectedPlayers[mapIndex];
-				//Set the amount to 1 if less players are in the lobby
-				if (players.length < expectedPlayers[mapIndex - 1]) {
-					knockoutNumber = 1;
-				}
+				let knockoutNumber = calculateKnockoutNumber(players, mapIndex);
 
 				let knockedOutPlayers = 0;
 				let knockedOutPlayerNames = '';
@@ -310,6 +304,9 @@ module.exports = {
 					}
 
 					lobbyStatus = 'Waiting for start';
+					//Calculate the amount of knockouts needed
+					let knockoutNumber = calculateKnockoutNumber(players, mapIndex);
+					await channel.sendMessage(`${knockoutNumber} player(s) will be knocked out.`);
 					await channel.sendMessage('!mp timer 60');
 
 					isFirstRound = false;
@@ -704,4 +701,29 @@ async function movePlayersIntoFirstSlots(channel, lobby, players) {
 	await pause(10000);
 
 	await channel.sendMessage(`!mp set 0 0 ${players.length}`);
+}
+
+function calculateKnockoutNumber(players, mapIndex) {
+	//Set array for how many players should get through maximum
+	let expectedPlayers = [];
+	expectedPlayers.push(16); //Map [0] Qualifiers -> 16
+	expectedPlayers.push(14); //Map [1] 16 -> 14
+	expectedPlayers.push(12); //Map [2] 14 -> 12
+	expectedPlayers.push(10); //Map [3] 12 -> 10
+	expectedPlayers.push(8); //Map [4] 10 -> 8 --DT
+	expectedPlayers.push(6); //Map [5] 8 -> 6
+	expectedPlayers.push(5); //Map [6] 6 -> 5
+	expectedPlayers.push(4); //Map [7] 5 -> 4
+	expectedPlayers.push(3); //Map [8] 4 -> 3 --DT
+	expectedPlayers.push(2); //Map [9] 3 -> 2
+	expectedPlayers.push(1); //Map [10] 2 -> 1
+
+	//Calculate the amount of knockouts needed
+	let knockoutNumber = expectedPlayers[mapIndex - 1] - expectedPlayers[mapIndex];
+	//Set the amount to 1 if less players are in the lobby
+	if (players.length < expectedPlayers[mapIndex - 1]) {
+		knockoutNumber = 1;
+	}
+
+	return knockoutNumber;
 }
