@@ -34,11 +34,11 @@ module.exports = {
 						if (interaction.options._hoistedOptions[i].value) {
 							args.push('--scaled');
 						}
-					} else if (interaction.options._hoistedOptions[i].name === 'tourney' && interaction.options._hoistedOptions[i].value) {
+					} else if (interaction.options._hoistedOptions[i].name === 'tourney') {
 						if (interaction.options._hoistedOptions[i].value) {
 							args.push('--tourney');
 						}
-					} else if (interaction.options._hoistedOptions[i].name === 'runningaverage' && interaction.options._hoistedOptions[i].value) {
+					} else if (interaction.options._hoistedOptions[i].name === 'runningaverage') {
 						if (interaction.options._hoistedOptions[i].value) {
 							args.push('--runningavg');
 						}
