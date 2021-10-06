@@ -30,12 +30,18 @@ module.exports = {
 
 			if (interaction.options._hoistedOptions) {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					if (interaction.options._hoistedOptions[i].name === 'scaled' && interaction.options._hoistedOptions[i].value) {
-						args.push('--scaled');
+					if (interaction.options._hoistedOptions[i].name === 'scaled') {
+						if (interaction.options._hoistedOptions[i].value) {
+							args.push('--scaled');
+						}
 					} else if (interaction.options._hoistedOptions[i].name === 'tourney' && interaction.options._hoistedOptions[i].value) {
-						args.push('--tourney');
+						if (interaction.options._hoistedOptions[i].value) {
+							args.push('--tourney');
+						}
 					} else if (interaction.options._hoistedOptions[i].name === 'runningaverage' && interaction.options._hoistedOptions[i].value) {
-						args.push('--runningavg');
+						if (interaction.options._hoistedOptions[i].value) {
+							args.push('--runningavg');
+						}
 					} else {
 						args.push(interaction.options._hoistedOptions[i].value);
 					}
@@ -476,9 +482,14 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					tourneyMatchText = 'Tourney matches only';
 				}
 
+				let runningAverageText = '';
+				if (runningAverage) {
+					runningAverageText = ' (Running Average of at least 75 maps)';
+				}
+
 				// eslint-disable-next-line no-undef
 				matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${user.id}.txt`);
-				msg.channel.send({ content: `[Beta/WIP] Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}`, files: [attachment, matchesPlayed] });
+				msg.channel.send({ content: `[Beta/WIP] Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}${runningAverageText}`, files: [attachment, matchesPlayed] });
 			})();
 		})
 		.catch(err => {
