@@ -250,26 +250,38 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 							for (let k = 0; k < uncompletedMonths.length; k++) {
 								if (rawModsData[j].label !== uncompletedMonths[k].label) {
-									//add to total evaluation
-									uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
-									uncompletedMonths[k].totalCount++;
 
 									//Add values to Mods
 									if (uncompletedMonths[k].NMCount < 15 && sameGameScores.length === 0 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
 										uncompletedMonths[k].NMEvaluation += parseFloat(userScores[i].evaluation);
 										uncompletedMonths[k].NMCount++;
+										//add to total evaluation
+										uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
+										uncompletedMonths[k].totalCount++;
 									} else if (uncompletedMonths[k].HDCount < 15 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '8' || userScores[i].gameRawMods === '9')) {
 										uncompletedMonths[k].HDEvaluation += parseFloat(userScores[i].evaluation);
 										uncompletedMonths[k].HDCount++;
+										//add to total evaluation
+										uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
+										uncompletedMonths[k].totalCount++;
 									} else if (uncompletedMonths[k].HRCount < 15 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '16' || userScores[i].gameRawMods === '17')) {
 										uncompletedMonths[k].HREvaluation += parseFloat(userScores[i].evaluation);
 										uncompletedMonths[k].HRCount++;
+										//add to total evaluation
+										uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
+										uncompletedMonths[k].totalCount++;
 									} else if (uncompletedMonths[k].DTCount < 15 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '64' || userScores[i].gameRawMods === '65' || userScores[i].gameRawMods === '576' || userScores[i].gameRawMods === '577')) {
 										uncompletedMonths[k].DTEvaluation += parseFloat(userScores[i].evaluation);
 										uncompletedMonths[k].DTCount++;
+										//add to total evaluation
+										uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
+										uncompletedMonths[k].totalCount++;
 									} else if (uncompletedMonths[k].FMCount < 15) {
 										uncompletedMonths[k].FMEvaluation += parseFloat(userScores[i].evaluation);
 										uncompletedMonths[k].FMCount++;
+										//add to total evaluation
+										uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
+										uncompletedMonths[k].totalCount++;
 									}
 
 									if (uncompletedMonths[k].totalCount >= runningAverageAmount
