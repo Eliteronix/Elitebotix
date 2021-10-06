@@ -1024,6 +1024,12 @@ module.exports = {
 			// 				'required': true
 			// 			},
 			// 			{
+			// 				'name': 'runningaverage',
+			// 				'description': 'Should a running average be shown instead?',
+			// 				'type': 5,
+			// 				'required': true
+			// 			},
+			// 			{
 			// 				'name': 'username',
 			// 				'description': 'The username, id or link of the player',
 			// 				'type': 3,
@@ -2477,6 +2483,12 @@ module.exports = {
 						{
 							'name': 'tourney',
 							'description': 'Should it only count scores from tournaments?',
+							'type': 5,
+							'required': true
+						},
+						{
+							'name': 'runningaverage',
+							'description': 'Should a running average be shown instead?',
 							'type': 5,
 							'required': true
 						},

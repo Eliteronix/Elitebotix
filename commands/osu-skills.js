@@ -30,20 +30,16 @@ module.exports = {
 
 			if (interaction.options._hoistedOptions) {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					args.push(interaction.options._hoistedOptions[i].value);
+					if (interaction.options._hoistedOptions[i].name === 'scaled' && interaction.options._hoistedOptions[i].value) {
+						args.push('--scaled');
+					} else if (interaction.options._hoistedOptions[i].name === 'tourney' && interaction.options._hoistedOptions[i].value) {
+						args.push('--tourney');
+					} else if (interaction.options._hoistedOptions[i].name === 'runningaverage' && interaction.options._hoistedOptions[i].value) {
+						args.push('--runningavg');
+					} else {
+						args.push(interaction.options._hoistedOptions[i].value);
+					}
 				}
-			}
-
-			if (args[2]) {
-				args[2] = '--tourney';
-			} else {
-				args.splice(2, 1);
-			}
-
-			if (args[0]) {
-				args[0] = '--scaled';
-			} else {
-				args.splice(0, 1);
 			}
 		}
 		const guildPrefix = await getGuildPrefix(msg);
@@ -54,6 +50,7 @@ module.exports = {
 		let scaled = false;
 		let scoringType = 'vx';
 		let tourneyMatch = false;
+		let runningAverage = false;
 		for (let i = 0; i < args.length; i++) {
 			if (args[i].toLowerCase().startsWith('--scaled')) {
 				scaled = true;
@@ -75,15 +72,19 @@ module.exports = {
 				scoringType = 'vx';
 				args.splice(i, 1);
 				i--;
+			} else if (args[i].toLowerCase().startsWith('--runningavg')) {
+				runningAverage = true;
+				args.splice(i, 1);
+				i--;
 			}
 		}
 
 		if (!args[0]) {//Get profile by author if no argument
 			if (commandUser && commandUser.osuUserId) {
-				getOsuSkills(msg, args, commandUser.osuUserId, scaled, scoringType, tourneyMatch);
+				getOsuSkills(msg, args, commandUser.osuUserId, scaled, scoringType, tourneyMatch, runningAverage);
 			} else {
 				const userDisplayName = await getMessageUserDisplayname(msg);
-				getOsuSkills(msg, args, userDisplayName, scaled, scoringType, tourneyMatch);
+				getOsuSkills(msg, args, userDisplayName, scaled, scoringType, tourneyMatch, runningAverage);
 			}
 		} else {
 			//Get profiles by arguments
@@ -94,21 +95,21 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getOsuSkills(msg, args, discordUser.osuUserId, scaled, scoringType, tourneyMatch);
+						getOsuSkills(msg, args, discordUser.osuUserId, scaled, scoringType, tourneyMatch, runningAverage);
 					} else {
 						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-						getOsuSkills(msg, args, args[i], scaled, scoringType, tourneyMatch);
+						getOsuSkills(msg, args, args[i], scaled, scoringType, tourneyMatch, runningAverage);
 					}
 				} else {
 
 					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getOsuSkills(msg, args, getIDFromPotentialOsuLink(args[i]), scaled, scoringType, tourneyMatch);
+							getOsuSkills(msg, args, getIDFromPotentialOsuLink(args[i]), scaled, scoringType, tourneyMatch, runningAverage);
 						} else {
-							getOsuSkills(msg, args, getIDFromPotentialOsuLink(args[i]), scaled, scoringType, tourneyMatch);
+							getOsuSkills(msg, args, getIDFromPotentialOsuLink(args[i]), scaled, scoringType, tourneyMatch, runningAverage);
 						}
 					} else {
-						getOsuSkills(msg, args, getIDFromPotentialOsuLink(args[i]), scaled, scoringType, tourneyMatch);
+						getOsuSkills(msg, args, getIDFromPotentialOsuLink(args[i]), scaled, scoringType, tourneyMatch, runningAverage);
 					}
 				}
 			}
@@ -116,7 +117,7 @@ module.exports = {
 	},
 };
 
-async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMatch) {
+async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMatch, runningAverage) {
 	// eslint-disable-next-line no-undef
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -180,6 +181,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					rawModsData.push(rawModsDataObject);
 				}
 
+				let uncompletedMonths = [];
+				let runningAverageAmount = 75;
 				for (let i = 0; i < userScores.length; i++) {
 					//Filter out rounds which don't fit the restrictions
 					if (scoringType === 'v2' && userScores[i].scoringType !== 'Score v2') {
@@ -201,6 +204,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 						if (rawModsData[j].label === `${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()}`) {
 							rawModsData[j].totalEvaluation += parseFloat(userScores[i].evaluation);
 							rawModsData[j].totalCount++;
+
 							const sameGameScores = await DBOsuMultiScores.findAll({
 								where: { matchId: userScores[i].matchId, gameId: userScores[i].gameId }
 							});
@@ -232,6 +236,41 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 							//Save the maps locally
 							getOsuBeatmap(userScores[i].beatmapId, userScores[i].gameRawMods);
+
+							//add to uncompleted months for running avg
+							if (runningAverage && rawModsData[j].totalCount < runningAverageAmount && !uncompletedMonths.includes(rawModsData[j])) {
+								uncompletedMonths.push(rawModsData[j]);
+							}
+
+							for (let k = 0; k < uncompletedMonths.length; k++) {
+								if (rawModsData[j].label !== uncompletedMonths[k].label) {
+									//add to total evaluation
+									uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
+									uncompletedMonths[k].totalCount++;
+
+									//Add values to Mods
+									if (sameGameScores.length === 0 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
+										uncompletedMonths[k].NMEvaluation += parseFloat(userScores[i].evaluation);
+										uncompletedMonths[k].NMCount++;
+									} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '8' || userScores[i].gameRawMods === '9')) {
+										uncompletedMonths[k].HDEvaluation += parseFloat(userScores[i].evaluation);
+										uncompletedMonths[k].HDCount++;
+									} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '16' || userScores[i].gameRawMods === '17')) {
+										uncompletedMonths[k].HREvaluation += parseFloat(userScores[i].evaluation);
+										uncompletedMonths[k].HRCount++;
+									} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '64' || userScores[i].gameRawMods === '65' || userScores[i].gameRawMods === '576' || userScores[i].gameRawMods === '577')) {
+										uncompletedMonths[k].DTEvaluation += parseFloat(userScores[i].evaluation);
+										uncompletedMonths[k].DTCount++;
+									} else {
+										uncompletedMonths[k].FMEvaluation += parseFloat(userScores[i].evaluation);
+										uncompletedMonths[k].FMCount++;
+									}
+
+									if (uncompletedMonths[k].totalCount >= runningAverageAmount) {
+										uncompletedMonths.splice(k, 1);
+									}
+								}
+							}
 						}
 					}
 				}
