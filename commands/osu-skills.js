@@ -255,24 +255,29 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 									uncompletedMonths[k].totalCount++;
 
 									//Add values to Mods
-									if (sameGameScores.length === 0 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
+									if (uncompletedMonths[k].NMCount < 15 && sameGameScores.length === 0 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
 										uncompletedMonths[k].NMEvaluation += parseFloat(userScores[i].evaluation);
 										uncompletedMonths[k].NMCount++;
-									} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '8' || userScores[i].gameRawMods === '9')) {
+									} else if (uncompletedMonths[k].HDCount < 15 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '8' || userScores[i].gameRawMods === '9')) {
 										uncompletedMonths[k].HDEvaluation += parseFloat(userScores[i].evaluation);
 										uncompletedMonths[k].HDCount++;
-									} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '16' || userScores[i].gameRawMods === '17')) {
+									} else if (uncompletedMonths[k].HRCount < 15 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '16' || userScores[i].gameRawMods === '17')) {
 										uncompletedMonths[k].HREvaluation += parseFloat(userScores[i].evaluation);
 										uncompletedMonths[k].HRCount++;
-									} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '64' || userScores[i].gameRawMods === '65' || userScores[i].gameRawMods === '576' || userScores[i].gameRawMods === '577')) {
+									} else if (uncompletedMonths[k].DTCount < 15 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '64' || userScores[i].gameRawMods === '65' || userScores[i].gameRawMods === '576' || userScores[i].gameRawMods === '577')) {
 										uncompletedMonths[k].DTEvaluation += parseFloat(userScores[i].evaluation);
 										uncompletedMonths[k].DTCount++;
-									} else {
+									} else if (uncompletedMonths[k].FMCount < 15) {
 										uncompletedMonths[k].FMEvaluation += parseFloat(userScores[i].evaluation);
 										uncompletedMonths[k].FMCount++;
 									}
 
-									if (uncompletedMonths[k].totalCount >= runningAverageAmount) {
+									if (uncompletedMonths[k].totalCount >= runningAverageAmount
+										&& uncompletedMonths[k].NMCount >= 15
+										&& uncompletedMonths[k].HDCount >= 15
+										&& uncompletedMonths[k].HRCount >= 15
+										&& uncompletedMonths[k].DTCount >= 15
+										&& uncompletedMonths[k].FMCount >= 15) {
 										uncompletedMonths.splice(k, 1);
 									}
 								}
@@ -484,7 +489,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 				let runningAverageText = '';
 				if (runningAverage) {
-					runningAverageText = ' (Running Average of at least 75 maps)';
+					runningAverageText = ' (Running Average of at least 15 maps per mod per month)';
 				}
 
 				// eslint-disable-next-line no-undef
