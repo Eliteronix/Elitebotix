@@ -12,14 +12,14 @@ module.exports = {
 
 		//Filter NM maps by difficulty limit
 		for (let i = 0; i < NMBeatmaps.length; i++) {
-			if (Math.round(NMBeatmaps[i].difficulty.rating * 100) / 100 < SRLimit) {
+			if (Math.round(NMBeatmaps[i].difficulty.rating * 100) / 100 < SRLimit && Math.round(NMBeatmaps[i].difficulty.rating * 100) / 100 > 3.5) {
 				possibleNMBeatmaps.push(NMBeatmaps[i]);
 			}
 		}
 
 		//Filter DT maps by difficulty limit
 		for (let i = 0; i < DTBeatmaps.length; i++) {
-			if (Math.round(DTBeatmaps[i].difficulty.rating * 100) / 100 < SRLimit) {
+			if (Math.round(DTBeatmaps[i].difficulty.rating * 100) / 100 < SRLimit && Math.round(DTBeatmaps[i].difficulty.rating * 100) / 100 > 3.5) {
 				possibleDTBeatmaps.push(DTBeatmaps[i]);
 			}
 		}
@@ -43,7 +43,7 @@ module.exports = {
 					const dbBeatmap = beatmaps[index];
 
 					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
-						&& parseFloat(dbBeatmap.starRating) >= 5 && parseFloat(dbBeatmap.starRating) <= 6) {
+						&& parseFloat(dbBeatmap.starRating) >= 4 && parseFloat(dbBeatmap.starRating) <= 6) {
 						const multiScores = await DBOsuMultiScores.findAll({
 							where: {
 								tourneyMatch: true,
@@ -115,7 +115,7 @@ module.exports = {
 					const dbBeatmap = beatmaps[index];
 
 					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
-						&& parseFloat(dbBeatmap.starRating) >= 5 && parseFloat(dbBeatmap.starRating) <= 6) {
+						&& parseFloat(dbBeatmap.starRating) >= 4 && parseFloat(dbBeatmap.starRating) <= 6) {
 						const multiScores = await DBOsuMultiScores.findAll({
 							where: {
 								tourneyMatch: true,
