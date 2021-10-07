@@ -29,11 +29,11 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Live' && matchID === '50000000') {
-			matchID = '60000000';
+			matchID = '80000000';
 		}
 
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'QA' && matchID === '60000000') {
+		if (process.env.SERVER === 'QA' && matchID === '80000000') {
 			// eslint-disable-next-line no-undef
 			console.log(`Manually deleted task for saving Multi Matches for ${matchID} ${process.env.SERVER}`);
 			return processQueueEntry.destroy();
