@@ -24,6 +24,32 @@ module.exports = {
 			}
 		}
 
+		//Remove maps if more than enough to make it scale better
+		while (possibleNMBeatmaps.length > 9) {
+			if (Math.round(possibleNMBeatmaps[0].difficulty.rating * 100) / 100 < 4) {
+				possibleNMBeatmaps.splice(0, 1);
+			} else {
+				//Set initial object
+				let smallestGap = {
+					index: 1,
+					gap: possibleNMBeatmaps[2].difficulty.rating - possibleNMBeatmaps[0].difficulty.rating,
+				};
+
+				//start at 2 because the first gap is already in initial object
+				//Skip 0 and the end to avoid out of bounds exception
+				for (let i = 2; i < possibleNMBeatmaps.length - 1; i++) {
+					if (smallestGap.gap > possibleNMBeatmaps[i + 1].difficulty.rating - possibleNMBeatmaps[i - 1].difficulty.rating) {
+						smallestGap.gap = possibleNMBeatmaps[i + 1].difficulty.rating - possibleNMBeatmaps[i - 1].difficulty.rating;
+						smallestGap.index = i;
+					}
+				}
+
+				//Remove the map that causes the smallest gap
+				possibleNMBeatmaps.splice(smallestGap.index, 1);
+			}
+		}
+
+		//Fill up maps if not enough
 		if (possibleNMBeatmaps.length < 9) {
 			const beatmaps = await DBOsuBeatmaps.findAll({
 				where: {
