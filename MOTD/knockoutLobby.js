@@ -88,6 +88,8 @@ module.exports = {
 			let timer = new Date();
 			timer.setMinutes(timer.getMinutes() + 4);
 
+			let waitedForMapdownload = false;
+
 			channel.on('message', async (msg) => {
 				let now = new Date();
 				if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
@@ -116,9 +118,27 @@ module.exports = {
 							await channel.sendMessage('!mp timer 60');
 						}
 					} else if (lobbyStatus === 'Waiting for start') {
-						await channel.sendMessage('!mp start 10');
+						await lobby.updateSettings();
 
-						lobbyStatus === 'Map being played';
+						let playerHasNoMap = false;
+						for (let i = 0; i < 16; i++) {
+							let player = lobby.slots[i];
+							if (player && player.state === require('bancho.js').BanchoLobbyPlayerStates.NoMap) {
+								playerHasNoMap = true;
+							}
+						}
+
+						if (waitedForMapdownload || !playerHasNoMap) {
+							//just start; we waited another minute already
+							waitedForMapdownload = false;
+							await channel.sendMessage('!mp start 10');
+							lobbyStatus === 'Map being played';
+						} else {
+							waitedForMapdownload = true;
+							await channel.sendMessage('A player is missing the map. Waiting only 1 minute longer.');
+							await channel.sendMessage('!mp timer 60');
+						}
+
 					}
 				} else if (timer < now && lobbyStatus === 'Joining phase') {
 					lobbyStatus = 'Waiting for start';
@@ -130,6 +150,7 @@ module.exports = {
 					await channel.sendMessage('!mp timer 60');
 				}
 			});
+
 			lobby.on('playerJoined', async (obj) => {
 				if (!playerIds.includes(obj.player.user.id.toString())) {
 					channel.sendMessage(`!mp kick #${obj.player.user.id}`);
