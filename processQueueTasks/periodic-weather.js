@@ -1,5 +1,5 @@
 const { DBProcessQueue } = require('../dbObjects');
-const { getGuildPrefix } = require('../utils');
+const { getGuildPrefix, pause } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -38,6 +38,8 @@ module.exports = {
 				}
 
 				command.execute(messagesArray[messagesArray.length - 1], newArgs, null, [client, null]);
+
+				await pause(60000);
 
 				messagesArray[messagesArray.length - 1].delete();
 
