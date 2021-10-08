@@ -49,6 +49,7 @@ module.exports = {
 								let msg = {
 									guild: channel.guild,
 									channel: channel,
+									guildId: channel.guild.id,
 									author: {
 										id: 0
 									}
@@ -139,6 +140,7 @@ async function lookForTopPlays(processQueueEntry, args, channel, user, mode) {
 		let msg = {
 			guild: channel.guild,
 			channel: channel,
+			guildId: channel.guild.id,
 			author: {
 				id: 0
 			}
