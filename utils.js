@@ -269,6 +269,82 @@ module.exports = {
 
 		return mods.reverse();
 	},
+	getModBits: function (input) {
+		let modBits = 0;
+
+		if (input === 'NM') {
+			return modBits;
+		}
+
+		for (let i = 0; i < input.length; i += 2) {
+			console.log(input.substring(i, i + 2));
+			if (input.substring(i, i + 2) === 'MI') {
+				modBits += 1073741824;
+			} else if (input.substring(i, i + 2) === 'V2') {
+				modBits += 536870912;
+			} else if (input.substring(i, i + 2) === '2K') {
+				modBits += 268435456;
+			} else if (input.substring(i, i + 2) === '3K') {
+				modBits += 134217728;
+			} else if (input.substring(i, i + 2) === '1K') {
+				modBits += 67108864;
+			} else if (input.substring(i, i + 2) === 'KC') {
+				modBits += 33554432;
+			} else if (input.substring(i, i + 2) === '9K') {
+				modBits += 16777216;
+			} else if (input.substring(i, i + 2) === 'TG') {
+				modBits += 8388608;
+			} else if (input.substring(i, i + 2) === 'CI') {
+				modBits += 4194304;
+			} else if (input.substring(i, i + 2) === 'RD') {
+				modBits += 2097152;
+			} else if (input.substring(i, i + 2) === 'FI') {
+				modBits += 1048576;
+			} else if (input.substring(i, i + 2) === '8K') {
+				modBits += 524288;
+			} else if (input.substring(i, i + 2) === '7K') {
+				modBits += 262144;
+			} else if (input.substring(i, i + 2) === '6K') {
+				modBits += 131072;
+			} else if (input.substring(i, i + 2) === '5K') {
+				modBits += 65536;
+			} else if (input.substring(i, i + 2) === '4K') {
+				modBits += 32768;
+			} else if (input.substring(i, i + 2) === 'PF') {
+				modBits += 16384;
+				modBits += 32;
+			} else if (input.substring(i, i + 2) === 'AP') {
+				modBits += 8192;
+			} else if (input.substring(i, i + 2) === 'SO') {
+				modBits += 4096;
+			} else if (input.substring(i, i + 2) === 'FL') {
+				modBits += 1024;
+			} else if (input.substring(i, i + 2) === 'NC') {
+				modBits += 512;
+				modBits += 64;
+			} else if (input.substring(i, i + 2) === 'HT') {
+				modBits += 256;
+			} else if (input.substring(i, i + 2) === 'RX') {
+				modBits += 128;
+			} else if (input.substring(i, i + 2) === 'DT') {
+				modBits += 64;
+			} else if (input.substring(i, i + 2) === 'SD') {
+				modBits += 32;
+			} else if (input.substring(i, i + 2) === 'HR') {
+				modBits += 16;
+			} else if (input.substring(i, i + 2) === 'HD') {
+				modBits += 8;
+			} else if (input.substring(i, i + 2) === 'TD') {
+				modBits += 4;
+			} else if (input.substring(i, i + 2) === 'EZ') {
+				modBits += 2;
+			} else if (input.substring(i, i + 2) === 'NF') {
+				modBits += 1;
+			}
+		}
+
+		return modBits;
+	},
 	getLinkModeName: function (ID) {
 		let gameMode = 'osu';
 		if (ID === 1) {

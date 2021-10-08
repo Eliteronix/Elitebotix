@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits } = require('../utils');
 const { Permissions } = require('discord.js');
 const fetch = require('node-fetch');
 
@@ -28,12 +28,34 @@ module.exports = {
 			args = [];
 
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-				args.push(interaction.options._hoistedOptions[i].value);
+				if (interaction.options._hoistedOptions[i].name === 'mods') {
+					args.push(`--${interaction.options._hoistedOptions[i].value}`);
+				} else {
+					args.push(interaction.options._hoistedOptions[i].value);
+				}
 			}
 		}
 
+		let mods = 0;
+
+		for (let i = 0; i < args.length; i++) {
+			if (args[i].startsWith('--NM') || args[i].startsWith('--NF') || args[i].startsWith('--HT') || args[i].startsWith('--EZ')
+				|| args[i].startsWith('--HR') || args[i].startsWith('--HD') || args[i].startsWith('--SD') || args[i].startsWith('--DT')
+				|| args[i].startsWith('--NC') || args[i].startsWith('--FL') || args[i].startsWith('--SO') || args[i].startsWith('--PF')
+				|| args[i].startsWith('--K4') || args[i].startsWith('--K5') || args[i].startsWith('--K6') || args[i].startsWith('--K7')
+				|| args[i].startsWith('--K8') || args[i].startsWith('--FI') || args[i].startsWith('--RD') || args[i].startsWith('--K9')
+				|| args[i].startsWith('--KC') || args[i].startsWith('--K1') || args[i].startsWith('--K2') || args[i].startsWith('--K3')
+				|| args[i].startsWith('--MR')) {
+				mods = args[i].substring(2);
+				args.splice(i, 1);
+				i--;
+			}
+		}
+
+		let modBits = getModBits(mods);
+
 		args.forEach(async (arg) => {
-			const dbBeatmap = await getOsuBeatmap(getIDFromPotentialOsuLink(arg), 0);
+			const dbBeatmap = await getOsuBeatmap(getIDFromPotentialOsuLink(arg), modBits);
 			if (dbBeatmap) {
 				getBeatmap(msg, dbBeatmap);
 			} else {
@@ -189,15 +211,17 @@ async function drawStats(input) {
 
 	let ppOne = 'None';
 
+	visualmods seem to destroy the API a bit
+	let noModMap = await getOsuBeatmap(beatmap.beatmapId, 0);
 	try {
-		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=95&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=95&x=0&c=${noModMap.maxCombo}&m=${beatmap.mods}`);
 		let htmlCode = await response.text();
 		const ppRegex = /"pp":.+, "length"/gm;
 		const matches = ppRegex.exec(htmlCode);
 		ppOne = `${Math.round(matches[0].replace('"pp": [', '').replace('], "length"', ''))} pp`;
 	} catch (err) {
-		console.log('error fetching osu-score pp', err);
-		console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=95&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+		console.log('error fetching osu-beatmap pp', err);
+		console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=95&x=0&c=${noModMap.maxCombo}&m=${beatmap.mods}`);
 	}
 
 	ctx.font = 'bold 15px comfortaa, sans-serif';
@@ -226,14 +250,14 @@ async function drawStats(input) {
 	let ppTwo = 'None';
 
 	try {
-		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=99&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=99&x=0&c=${noModMap.maxCombo}&m=${beatmap.mods}`);
 		let htmlCode = await response.text();
 		const ppRegex = /"pp":.+, "length"/gm;
 		const matches = ppRegex.exec(htmlCode);
 		ppTwo = `${Math.round(matches[0].replace('"pp": [', '').replace('], "length"', ''))} pp`;
 	} catch (err) {
-		console.log('error fetching osu-score pp', err);
-		console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=99&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+		console.log('error fetching osu-beatmap pp', err);
+		console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=99&x=0&c=${noModMap.maxCombo}&m=${beatmap.mods}`);
 	}
 
 	ctx.font = 'bold 15px comfortaa, sans-serif';
@@ -269,14 +293,14 @@ async function drawStats(input) {
 	let ppThree = 'None';
 
 	try {
-		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=100&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=100&x=0&c=${noModMap.maxCombo}&m=${beatmap.mods}`);
 		let htmlCode = await response.text();
 		const ppRegex = /"pp":.+, "length"/gm;
 		const matches = ppRegex.exec(htmlCode);
 		ppThree = `${Math.round(matches[0].replace('"pp": [', '').replace('], "length"', ''))} pp`;
 	} catch (err) {
-		console.log('error fetching osu-score pp', err);
-		console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=100&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+		console.log('error fetching osu-beatmap pp', err);
+		console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=100&x=0&c=${noModMap.maxCombo}&m=${beatmap.mods}`);
 	}
 
 	ctx.font = 'bold 15px comfortaa, sans-serif';
