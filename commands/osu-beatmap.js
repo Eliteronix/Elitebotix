@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const Canvas = require('canvas');
 const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
 const { Permissions } = require('discord.js');
+const fetch = require('node-fetch');
 
 module.exports = {
 	name: 'osu-beatmap',
@@ -126,7 +127,7 @@ async function drawMode(input) {
 	return output;
 }
 
-function drawStats(input) {
+async function drawStats(input) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let beatmap = input[2];
@@ -167,9 +168,9 @@ function drawStats(input) {
 	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(beatmap.approvalStatus, canvas.width / 1000 * 330, canvas.height / 500 * 200);
 	ctx.font = 'bold 15px comfortaa, sans-serif';
-	ctx.fillText('Difficulty Rating', canvas.width / 1000 * 330, canvas.height / 500 * 250);
+	ctx.fillText('Difficulty Rating', canvas.width / 1000 * 330, canvas.height / 500 * 230);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100} ★`, canvas.width / 1000 * 330, canvas.height / 500 * 280);
+	ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100} ★`, canvas.width / 1000 * 330, canvas.height / 500 * 260);
 
 	let beatmapMapper = beatmap.mapper;
 	const maxSizeMapper = parseInt(canvas.width / 1000 * 12);
@@ -178,13 +179,31 @@ function drawStats(input) {
 	}
 
 	ctx.font = 'bold 15px comfortaa, sans-serif';
-	ctx.fillText('Mapper', canvas.width / 1000 * 330, canvas.height / 500 * 330);
+	ctx.fillText('Mapper', canvas.width / 1000 * 330, canvas.height / 500 * 290);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(beatmapMapper, canvas.width / 1000 * 330, canvas.height / 500 * 360);
+	ctx.fillText(beatmapMapper, canvas.width / 1000 * 330, canvas.height / 500 * 320);
 	ctx.font = 'bold 15px comfortaa, sans-serif';
-	ctx.fillText('User Rating', canvas.width / 1000 * 330, canvas.height / 500 * 420);
+	ctx.fillText('User Rating', canvas.width / 1000 * 330, canvas.height / 500 * 350);
 	ctx.font = 'bold 20px comfortaa, sans-serif';
-	ctx.fillText(userRatingDisplay, canvas.width / 1000 * 330, canvas.height / 500 * 440);
+	ctx.fillText(userRatingDisplay, canvas.width / 1000 * 330, canvas.height / 500 * 375);
+
+	let ppOne = 'None';
+
+	try {
+		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=95&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+		let htmlCode = await response.text();
+		const ppRegex = /"pp":.+, "length"/gm;
+		const matches = ppRegex.exec(htmlCode);
+		ppOne = `${Math.round(matches[0].replace('"pp": [', '').replace('], "length"', ''))} pp`;
+	} catch (err) {
+		console.log('error fetching osu-score pp', err);
+		console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=95&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+	}
+
+	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.fillText('95% Accuracy', canvas.width / 1000 * 330, canvas.height / 500 * 410);
+	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.fillText(ppOne, canvas.width / 1000 * 330, canvas.height / 500 * 440);
 
 	//Second column
 	ctx.font = 'bold 15px comfortaa, sans-serif';
@@ -192,17 +211,35 @@ function drawStats(input) {
 	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(`CS ${beatmap.circleSize}`, canvas.width / 1000 * 580, canvas.height / 500 * 200);
 	ctx.font = 'bold 15px comfortaa, sans-serif';
-	ctx.fillText('Approach Rate', canvas.width / 1000 * 580, canvas.height / 500 * 250);
+	ctx.fillText('Approach Rate', canvas.width / 1000 * 580, canvas.height / 500 * 230);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`AR ${beatmap.approachRate}`, canvas.width / 1000 * 580, canvas.height / 500 * 280);
+	ctx.fillText(`AR ${beatmap.approachRate}`, canvas.width / 1000 * 580, canvas.height / 500 * 260);
 	ctx.font = 'bold 15px comfortaa, sans-serif';
-	ctx.fillText('Overall Difficulty', canvas.width / 1000 * 580, canvas.height / 500 * 330);
+	ctx.fillText('Overall Difficulty', canvas.width / 1000 * 580, canvas.height / 500 * 290);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`OD ${beatmap.overallDifficulty}`, canvas.width / 1000 * 580, canvas.height / 500 * 360);
+	ctx.fillText(`OD ${beatmap.overallDifficulty}`, canvas.width / 1000 * 580, canvas.height / 500 * 320);
 	ctx.font = 'bold 15px comfortaa, sans-serif';
-	ctx.fillText('HP Drain', canvas.width / 1000 * 580, canvas.height / 500 * 410);
+	ctx.fillText('HP Drain', canvas.width / 1000 * 580, canvas.height / 500 * 350);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`HP ${beatmap.hpDrain}`, canvas.width / 1000 * 580, canvas.height / 500 * 440);
+	ctx.fillText(`HP ${beatmap.hpDrain}`, canvas.width / 1000 * 580, canvas.height / 500 * 380);
+
+	let ppTwo = 'None';
+
+	try {
+		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=99&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+		let htmlCode = await response.text();
+		const ppRegex = /"pp":.+, "length"/gm;
+		const matches = ppRegex.exec(htmlCode);
+		ppTwo = `${Math.round(matches[0].replace('"pp": [', '').replace('], "length"', ''))} pp`;
+	} catch (err) {
+		console.log('error fetching osu-score pp', err);
+		console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=99&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+	}
+
+	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.fillText('99% Accuracy', canvas.width / 1000 * 580, canvas.height / 500 * 410);
+	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.fillText(ppTwo, canvas.width / 1000 * 580, canvas.height / 500 * 440);
 
 	//Third column
 	if (beatmap.mode === 'Mania') {
@@ -217,17 +254,35 @@ function drawStats(input) {
 		ctx.fillText(`${beatmap.maxCombo}x`, canvas.width / 1000 * 750, canvas.height / 500 * 200);
 	}
 	ctx.font = 'bold 15px comfortaa, sans-serif';
-	ctx.fillText('Beats per Minute', canvas.width / 1000 * 750, canvas.height / 500 * 250);
+	ctx.fillText('Beats per Minute', canvas.width / 1000 * 750, canvas.height / 500 * 230);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${beatmap.bpm} BPM`, canvas.width / 1000 * 750, canvas.height / 500 * 280);
+	ctx.fillText(`${beatmap.bpm} BPM`, canvas.width / 1000 * 750, canvas.height / 500 * 260);
 	ctx.font = 'bold 15px comfortaa, sans-serif';
-	ctx.fillText('Length', canvas.width / 1000 * 750, canvas.height / 500 * 330);
+	ctx.fillText('Length', canvas.width / 1000 * 750, canvas.height / 500 * 290);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${totalLength} Total`, canvas.width / 1000 * 750, canvas.height / 500 * 360);
+	ctx.fillText(`${totalLength} Total`, canvas.width / 1000 * 750, canvas.height / 500 * 320);
 	ctx.font = 'bold 15px comfortaa, sans-serif';
-	ctx.fillText('Length (Drain)', canvas.width / 1000 * 750, canvas.height / 500 * 410);
+	ctx.fillText('Length (Drain)', canvas.width / 1000 * 750, canvas.height / 500 * 350);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${drainLength} Drain`, canvas.width / 1000 * 750, canvas.height / 500 * 440);
+	ctx.fillText(`${drainLength} Drain`, canvas.width / 1000 * 750, canvas.height / 500 * 380);
+
+	let ppThree = 'None';
+
+	try {
+		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=100&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+		let htmlCode = await response.text();
+		const ppRegex = /"pp":.+, "length"/gm;
+		const matches = ppRegex.exec(htmlCode);
+		ppThree = `${Math.round(matches[0].replace('"pp": [', '').replace('], "length"', ''))} pp`;
+	} catch (err) {
+		console.log('error fetching osu-score pp', err);
+		console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=100&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+	}
+
+	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.fillText('100% Accuracy', canvas.width / 1000 * 750, canvas.height / 500 * 410);
+	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.fillText(ppThree, canvas.width / 1000 * 750, canvas.height / 500 * 440);
 
 	const output = [canvas, ctx, beatmap];
 	return output;
