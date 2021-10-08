@@ -64,8 +64,6 @@ module.exports = {
 							channel = await client.channels.fetch('892873577479692358');
 						}
 						channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m ${match.name} done`);
-					} else {
-						// console.log(`${matchID} ${match.name} is not a tourney match`);
 					}
 					const existingTask = await DBProcessQueue.findOne({ where: { task: 'saveMultiMatches', additions: `${parseInt(matchID) + 1}` } });
 					if (!existingTask) {
@@ -94,7 +92,7 @@ module.exports = {
 						return console.log(`A task for ${parseInt(matchID) + 1} already exists.`);
 					}
 				} else {
-					console.log('processQueueTasks/saveMultiMatches.js', matchID, err);
+					// console.log('processQueueTasks/saveMultiMatches.js', matchID, err);
 					let date = new Date();
 					date.setUTCMinutes(date.getUTCMinutes() + 1);
 					processQueueEntry.destroy();
