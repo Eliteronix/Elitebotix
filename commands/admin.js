@@ -307,6 +307,12 @@ module.exports = {
 			// 				'required': true
 			// 			},
 			// 			{
+			// 				'name': 'mods',
+			// 				'description': 'The mod combination that should be displayed (i.e. NM, HDHR, ...)',
+			// 				'type': 3,
+			// 				'required': false,
+			// 			},
+			// 			{
 			// 				'name': 'id2',
 			// 				'description': 'The id or link of the beatmap to display',
 			// 				'type': 3,
@@ -1768,6 +1774,12 @@ module.exports = {
 							'description': 'The id or link of the beatmap to display',
 							'type': 3,
 							'required': true
+						},
+						{
+							'name': 'mods',
+							'description': 'The mod combination that should be displayed (i.e. NM, HDHR, ...)',
+							'type': 3,
+							'required': false,
 						},
 						{
 							'name': 'id2',
