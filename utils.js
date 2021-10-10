@@ -1205,6 +1205,7 @@ function getMiddleScore(scores) {
 }
 
 async function getOsuBeatmapFunction(beatmapId, modBits) {
+	console.log('getOsuBeatmapFunction');
 	let lastRework = new Date();
 	lastRework.setUTCFullYear(2021);
 	lastRework.setUTCMonth(7);
@@ -1230,7 +1231,11 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 
 		await osuApi.getBeatmaps({ b: beatmapId, mods: modBits })
 			.then(async (beatmaps) => {
-				let noModBeatmap = await getOsuBeatmapFunction(beatmaps[0].id, 0);
+				let noModBeatmap = beatmaps[0];
+
+				if (modBits) {
+					noModBeatmap = await getOsuBeatmapFunction(beatmaps[0].id, 0);
+				}
 
 				//Map has to be updated
 				if (dbBeatmap) {
