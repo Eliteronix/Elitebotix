@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { CanvasRenderService } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -29,8 +29,24 @@ module.exports = {
 			args = [];
 
 			if (interaction.options._hoistedOptions) {
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					args.push(interaction.options._hoistedOptions[i].value);
+				if (interaction.options._hoistedOptions) {
+					for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+						if (interaction.options._hoistedOptions[i].name === 'scaled') {
+							if (interaction.options._hoistedOptions[i].value) {
+								args.push('--scaled');
+							}
+						} else if (interaction.options._hoistedOptions[i].name === 'tourney') {
+							if (interaction.options._hoistedOptions[i].value) {
+								args.push('--tourney');
+							}
+						} else if (interaction.options._hoistedOptions[i].name === 'runningaverage') {
+							if (interaction.options._hoistedOptions[i].value) {
+								args.push('--runningavg');
+							}
+						} else {
+							args.push(interaction.options._hoistedOptions[i].value);
+						}
+					}
 				}
 			}
 
@@ -135,6 +151,12 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 			let mods = [];
 			let mappers = [];
+			let pp = [];
+			let stars = [];
+			let aim = [];
+			let speed = [];
+			let acc = [];
+			let bpm = [];
 			for (let i = 0; i < topScores.length; i++) {
 				//Add and count mods
 				let modAdded = false;
@@ -175,13 +197,38 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 						amount: 1
 					});
 				}
+
+				//Add pp counts
+				pp.push(topScores[i].pp);
+
+				//Add difficulty ratings
+				stars.push(dbBeatmap.starRating);
+				aim.push(dbBeatmap.aimRating);
+				speed.push(dbBeatmap.speedRating);
+
+				//Add accuracy
+				acc.push(getAccuracy(topScores[i], 0));
+
+				//Add bpm
+				bpm.push(dbBeatmap.bpm);
 			}
 
 			quicksortAmount(mods);
 			quicksortAmount(mappers);
+			quicksortValue(stars);
+			quicksortValue(aim);
+			quicksortValue(speed);
+			quicksortValue(acc);
+			quicksortValue(bpm);
 
 			console.log(mods);
 			console.log(mappers);
+			console.log(pp);
+			console.log(stars);
+			console.log(aim);
+			console.log(speed);
+			console.log(acc);
+			console.log(bpm);
 
 			const width = 1500; //px
 			const height = 750; //px
@@ -551,6 +598,31 @@ function quicksortAmount(list, start = 0, end = undefined) {
 		const p = partitionAmount(list, start, end);
 		quicksortAmount(list, start, p - 1);
 		quicksortAmount(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionValue(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j]) >= parseFloat(pivot)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksortValue(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionValue(list, start, end);
+		quicksortValue(list, start, p - 1);
+		quicksortValue(list, p + 1, end);
 	}
 	return list;
 }
