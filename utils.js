@@ -1205,7 +1205,6 @@ function getMiddleScore(scores) {
 }
 
 async function getOsuBeatmapFunction(beatmapId, modBits) {
-	console.log('getOsuBeatmapFunction');
 	let lastRework = new Date();
 	lastRework.setUTCFullYear(2021);
 	lastRework.setUTCMonth(7);
@@ -1295,7 +1294,6 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 			// eslint-disable-next-line no-unused-vars
 			.catch(error => {
 				//Nothing
-				console.log(error);
 			});
 	}
 
