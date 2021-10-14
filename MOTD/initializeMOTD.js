@@ -161,14 +161,14 @@ module.exports = {
 			}
 
 			//Weekly Leaderboard
-			createLeaderboard(client, mondayMorning, 4, 'Weekly', '835187571625164800');
+			createLeaderboard(client, mondayMorning, 3, 'Weekly', '835187571625164800');
 
 			let monthMorning = new Date();
 			monthMorning.setHours(0);
 			monthMorning.setUTCDate(1);
 
 			//Monthly Leaderboard
-			createLeaderboard(client, monthMorning, 20, 'Monthly', '835187660183699487');
+			createLeaderboard(client, monthMorning, 15, 'Monthly', '835187660183699487');
 
 			let quarterMorning = new Date();
 			quarterMorning.setHours(0);
@@ -176,7 +176,7 @@ module.exports = {
 			quarterMorning.setUTCMonth(quarterMorning.getUTCMonth() - (quarterMorning.getUTCMonth() % 3));
 
 			//Quarter Yearly Leaderboard
-			createLeaderboard(client, quarterMorning, 60, 'Quarter Yearly', '835187745210499073');
+			createLeaderboard(client, quarterMorning, 45, 'Quarter Yearly', '835187745210499073');
 
 			let beginningOfTime = new Date();
 			beginningOfTime.setHours(0);
