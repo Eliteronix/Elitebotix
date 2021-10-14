@@ -27,12 +27,13 @@ module.exports = {
 				});
 
 				for (let k = 0; k < playerResults.length; k++) {
-					let BWSRank = Math.round(Math.pow(playerResults[k].osuRank, Math.pow(0.9937, Math.pow(bracketPlayers[j].osuBadges, 2))));
-					if (playerResults[k].matchDate < since || //Time
-						i === 0 && BWSRank > 9999 //Top Bracket
-						|| i === 1 && (BWSRank < 10000 || BWSRank > 49999) // Middle Bracket
-						|| i === 2 && (BWSRank < 50000 || BWSRank > 99999) // Lower Bracket
-						|| i === 3 && BWSRank < 100000) { //Beginner Bracket
+					//let BWSRank = Math.round(Math.pow(playerResults[k].osuRank, Math.pow(0.9937, Math.pow(bracketPlayers[j].osuBadges, 2))));
+					//||i === 0 && BWSRank > 9999 //Top Bracket
+					//|| i === 1 && (BWSRank < 10000 || BWSRank > 49999) // Middle Bracket
+					//|| i === 2 && (BWSRank < 50000 || BWSRank > 99999) // Lower Bracket
+					//|| i === 3 && BWSRank < 100000 //Beginner Bracket
+					if (playerResults[k].matchDate < since //Time
+					) {
 						playerResults.splice(k, 1);
 						k--;
 					}
