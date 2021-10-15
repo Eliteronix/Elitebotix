@@ -128,10 +128,10 @@ function readyDiscord() {
 	if (process.env.SERVER === 'Live') {
 		client.user.setPresence({
 			status: 'online',  //You can show online, idle....
-			activity: {
+			activities: [{
 				name: 'with e!help',  //The message shown
 				type: 'PLAYING' //PLAYING: WATCHING: LISTENING: STREAMING:
-			}
+			}]
 		});
 	}
 
