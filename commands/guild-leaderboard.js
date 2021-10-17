@@ -88,6 +88,10 @@ module.exports = {
 					page = parseInt(args[0]);
 				}
 
+				if (!page && leaderboardData.length > 300) {
+					page = 1;
+				}
+
 				if (totalPages === 1) {
 					page = null;
 				}
