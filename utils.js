@@ -997,20 +997,19 @@ function getMiddleScore(scores) {
 }
 
 async function getOsuBeatmapFunction(beatmapId, modBits) {
-	console.log(beatmapId, modBits);
 	let lastRework = new Date();
 	lastRework.setUTCFullYear(2021);
 	lastRework.setUTCMonth(7);
 	lastRework.setUTCDate(20);
-	let lastMonth = new Date();
-	lastMonth.setUTCMonth(lastMonth.getUTCMonth() - 1);
+	let lastWeek = new Date();
+	lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
 	let dbBeatmap = await DBOsuBeatmaps.findOne({
 		where: { beatmapId: beatmapId, mods: modBits }
 	});
 
 	if (!dbBeatmap
 		|| dbBeatmap && dbBeatmap.updatedAt < lastRework
-		|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt.getTime() < lastMonth.getTime()
+		|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt.getTime() < lastWeek.getTime()
 		|| dbBeatmap && !dbBeatmap.starRating
 		|| dbBeatmap && !dbBeatmap.maxCombo
 		|| dbBeatmap && dbBeatmap.starRating == 0) {
@@ -1094,8 +1093,20 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 				}
 			})
 			// eslint-disable-next-line no-unused-vars
-			.catch(error => {
+			.catch(async (error) => {
 				//Nothing
+				//Map is already saved; Delay next check until 7 days
+				if (dbBeatmap) {
+					await dbBeatmap.save();
+				} else { // Map has to be added new
+					dbBeatmap = await DBOsuBeatmaps.create({
+						beatmapId: beatmapId,
+						approvalStatus: 'Not found',
+						mods: modBits,
+						starRating: -1,
+						maxCombo: -1,
+					});
+				}
 			});
 	}
 
@@ -1151,10 +1162,10 @@ function getModBitsFunction(input, noVisualMods) {
 			modBits += 4096;
 		} else if (input.substring(i, i + 2) === 'FL' && !noVisualMods) {
 			modBits += 1024;
-		} else if (input.substring(i, i + 2) === 'NC' && !noVisualMods) {
-			modBits += 64;
 		} else if (input.substring(i, i + 2) === 'NC') {
-			modBits += 512;
+			if (!noVisualMods) {
+				modBits += 512;
+			}
 			modBits += 64;
 		} else if (input.substring(i, i + 2) === 'HT') {
 			modBits += 256;
