@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits } = require('../utils');
 const { Permissions } = require('discord.js');
 const fetch = require('node-fetch');
 
@@ -190,11 +190,10 @@ async function drawStats(input) {
 	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(beatmap.approvalStatus, canvas.width / 1000 * 330, canvas.height / 500 * 200);
 
-	let noVisualModBeatmap = await getOsuBeatmap(beatmap.beatmapId, getModBits(getMods(beatmap.mods).join(''), true));
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Difficulty Rating', canvas.width / 1000 * 330, canvas.height / 500 * 230);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${Math.round(noVisualModBeatmap.starRating * 100) / 100} ★`, canvas.width / 1000 * 330, canvas.height / 500 * 260);
+	ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100} ★`, canvas.width / 1000 * 330, canvas.height / 500 * 260);
 
 	let beatmapMapper = beatmap.mapper;
 	const maxSizeMapper = parseInt(canvas.width / 1000 * 12);
