@@ -1010,17 +1010,17 @@ module.exports = {
 			// 				'required': true,
 			// 				'choices': [
 			// 					{
-			// 						'name': 'All Scores',
-			// 						'value': '--vx'
+			// 						'name': 'Only Score v2',
+			// 						'value': '--v2'
 			// 					},
 			// 					{
 			// 						'name': 'Only Score v1',
 			// 						'value': '--v1'
 			// 					},
 			// 					{
-			// 						'name': 'Only Score v2',
-			// 						'value': '--v2'
-			// 					}
+			// 						'name': 'All Scores',
+			// 						'value': '--vx'
+			// 					},
 			// 				]
 			// 			},
 			// 			{
@@ -2479,17 +2479,17 @@ module.exports = {
 							'required': true,
 							'choices': [
 								{
-									'name': 'All Scores',
-									'value': '--vx'
+									'name': 'Only Score v2',
+									'value': '--v2'
 								},
 								{
 									'name': 'Only Score v1',
 									'value': '--v1'
 								},
 								{
-									'name': 'Only Score v2',
-									'value': '--v2'
-								}
+									'name': 'All Scores',
+									'value': '--vx'
+								},
 							]
 						},
 						{
