@@ -211,15 +211,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			quicksortValue(acc);
 			quicksortValue(bpm);
 
-			console.log(mods);
-			console.log(mappers);
-			console.log(pp);
-			console.log(stars);
-			console.log(aim);
-			console.log(speed);
-			console.log(acc);
-			console.log(bpm);
-
 			const canvasWidth = 700;
 			const canvasHeight = 500;
 
@@ -238,6 +229,17 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
 				}
 			}
+
+			let today = new Date().toLocaleDateString();
+
+			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.fillStyle = '#ffffff';
+
+			ctx.textAlign = 'left';
+			ctx.fillText(`UserID: ${user.id}`, canvas.width / 140, canvas.height - canvas.height / 70);
+
+			ctx.textAlign = 'right';
+			ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
 
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
@@ -268,7 +270,40 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			ctx.fillText(`${Math.round(stars[stars.length - 1] * 100) / 100} (Lowest) - ${Math.round(averageStars * 100) / 100} (avg) - ${Math.round(stars[0] * 100) / 100} (Highest)`, 200, 150);
 
 			ctx.font = 'bold 15px comfortaa, sans-serif';
-			ctx.fillText('BPM', 200, 300);
+			ctx.fillText('Aim', 200, 175);
+			ctx.font = 'bold 18px comfortaa, sans-serif';
+
+			let averageAim = 0;
+			for (let i = 0; i < aim.length; i++) {
+				averageAim += parseFloat(aim[i]);
+			}
+			averageAim = averageAim / aim.length;
+			ctx.fillText(`${Math.round(aim[aim.length - 1] * 100) / 100} (Lowest) - ${Math.round(averageAim * 100) / 100} (avg) - ${Math.round(aim[0] * 100) / 100} (Highest)`, 200, 195);
+
+			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.fillText('Speed', 200, 220);
+			ctx.font = 'bold 18px comfortaa, sans-serif';
+
+			let averageSpeed = 0;
+			for (let i = 0; i < speed.length; i++) {
+				averageSpeed += parseFloat(speed[i]);
+			}
+			averageSpeed = averageSpeed / speed.length;
+			ctx.fillText(`${Math.round(speed[speed.length - 1] * 100) / 100} (Lowest) - ${Math.round(averageSpeed * 100) / 100} (avg) - ${Math.round(speed[0] * 100) / 100} (Highest)`, 200, 240);
+
+			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.fillText('Accuracy', 200, 265);
+			ctx.font = 'bold 18px comfortaa, sans-serif';
+
+			let averageAcc = 0;
+			for (let i = 0; i < acc.length; i++) {
+				averageAcc += parseFloat(acc[i]);
+			}
+			averageAcc = averageAcc / acc.length;
+			ctx.fillText(`${Math.round(acc[acc.length - 1] * 10000) / 100}% (Lowest) - ${Math.round(averageAcc * 10000) / 100}% (avg) - ${Math.round(acc[0] * 10000) / 100}% (Highest)`, 200, 285);
+
+			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.fillText('BPM', 200, 310);
 			ctx.font = 'bold 18px comfortaa, sans-serif';
 
 			let averageBPM = 0;
@@ -276,21 +311,37 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				averageBPM += parseFloat(bpm[i]);
 			}
 			averageBPM = averageBPM / bpm.length;
-			ctx.fillText(`${Math.round(bpm[bpm.length - 1] * 100) / 100} (Lowest) - ${Math.round(averageBPM * 100) / 100} (avg) - ${Math.round(bpm[0] * 100) / 100} (Highest)`, 200, 320);
+			ctx.fillText(`${Math.round(bpm[bpm.length - 1] * 100) / 100} (Lowest) - ${Math.round(averageBPM * 100) / 100} (avg) - ${Math.round(bpm[0] * 100) / 100} (Highest)`, 200, 330);
+
+			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.fillText('Favourite Mods', 30, 370);
+			ctx.font = 'bold 18px comfortaa, sans-serif';
+			for (let i = 0; i < mods.length && i < 5; i++) {
+				ctx.fillText(`${mods[i].modsReadable}`, 30, 390 + i * 20);
+				ctx.fillText(`Used ${mods[i].amount} times`, 130, 390 + i * 20);
+			}
+
+			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.fillText('Most Farmed Mappers', 380, 370);
+			ctx.font = 'bold 18px comfortaa, sans-serif';
+			for (let i = 0; i < mappers.length && i < 5; i++) {
+				ctx.fillText(`${mappers[i].mapper}`, 380, 390 + i * 20);
+				ctx.fillText(`Used ${mappers[i].amount} times`, 530, 390 + i * 20);
+			}
 
 			//Get a circle for inserting the player avatar
 			ctx.beginPath();
-			ctx.arc(60, 60, 50, 0, Math.PI * 2, true);
+			ctx.arc(90, 90, 80, 0, Math.PI * 2, true);
 			ctx.closePath();
 			ctx.clip();
 
 			//Draw a shape onto the main canvas
 			try {
 				const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${user.id}`);
-				ctx.drawImage(avatar, 10, 10, 100, 100);
+				ctx.drawImage(avatar, 10, 10, 160, 160);
 			} catch (error) {
 				const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-				ctx.drawImage(avatar, 10, 10, 100, 100);
+				ctx.drawImage(avatar, 10, 10, 160, 160);
 			}
 
 			//Create as an attachment

@@ -131,218 +131,10 @@ module.exports = {
 		return URL;
 	},
 	getMods: function (input) {
-
-		let mods = [];
-		let modsBits = input;
-		let PFpossible = false;
-		let hasNC = false;
-		if (modsBits >= 1073741824) {
-			mods.push('MI');
-			modsBits = modsBits - 1073741824;
-		}
-		if (modsBits >= 536870912) {
-			mods.push('V2');
-			modsBits = modsBits - 536870912;
-		}
-		if (modsBits >= 268435456) {
-			mods.push('2K');
-			modsBits = modsBits - 268435456;
-		}
-		if (modsBits >= 134217728) {
-			mods.push('3K');
-			modsBits = modsBits - 134217728;
-		}
-		if (modsBits >= 67108864) {
-			mods.push('1K');
-			modsBits = modsBits - 67108864;
-		}
-		if (modsBits >= 33554432) {
-			mods.push('KC');
-			modsBits = modsBits - 33554432;
-		}
-		if (modsBits >= 16777216) {
-			mods.push('9K');
-			modsBits = modsBits - 16777216;
-		}
-		if (modsBits >= 8388608) {
-			mods.push('TG');
-			modsBits = modsBits - 8388608;
-		}
-		if (modsBits >= 4194304) {
-			mods.push('CI');
-			modsBits = modsBits - 4194304;
-		}
-		if (modsBits >= 2097152) {
-			mods.push('RD');
-			modsBits = modsBits - 2097152;
-		}
-		if (modsBits >= 1048576) {
-			mods.push('FI');
-			modsBits = modsBits - 1048576;
-		}
-		if (modsBits >= 524288) {
-			mods.push('8K');
-			modsBits = modsBits - 524288;
-		}
-		if (modsBits >= 262144) {
-			mods.push('7K');
-			modsBits = modsBits - 262144;
-		}
-		if (modsBits >= 131072) {
-			mods.push('6K');
-			modsBits = modsBits - 131072;
-		}
-		if (modsBits >= 65536) {
-			mods.push('5K');
-			modsBits = modsBits - 65536;
-		}
-		if (modsBits >= 32768) {
-			mods.push('4K');
-			modsBits = modsBits - 32768;
-		}
-		if (modsBits >= 16384) {
-			PFpossible = true;
-			modsBits = modsBits - 16384;
-		}
-		if (modsBits >= 8192) {
-			mods.push('AP');
-			modsBits = modsBits - 8192;
-		}
-		if (modsBits >= 4096) {
-			mods.push('SO');
-			modsBits = modsBits - 4096;
-		}
-		if (modsBits >= 2048) {
-			modsBits = modsBits - 2048;
-		}
-		if (modsBits >= 1024) {
-			mods.push('FL');
-			modsBits = modsBits - 1024;
-		}
-		if (modsBits >= 512) {
-			hasNC = true;
-			mods.push('NC');
-			modsBits = modsBits - 512;
-		}
-		if (modsBits >= 256) {
-			mods.push('HT');
-			modsBits = modsBits - 256;
-		}
-		if (modsBits >= 128) {
-			mods.push('RX');
-			modsBits = modsBits - 128;
-		}
-		if (modsBits >= 64) {
-			if (!hasNC) {
-				mods.push('DT');
-			}
-			modsBits = modsBits - 64;
-		}
-		if (modsBits >= 32) {
-			if (PFpossible) {
-				mods.push('PF');
-			} else {
-				mods.push('SD');
-			}
-			modsBits = modsBits - 32;
-		}
-		if (modsBits >= 16) {
-			mods.push('HR');
-			modsBits = modsBits - 16;
-		}
-		if (modsBits >= 8) {
-			mods.push('HD');
-			modsBits = modsBits - 8;
-		}
-		if (modsBits >= 4) {
-			mods.push('TD');
-			modsBits = modsBits - 4;
-		}
-		if (modsBits >= 2) {
-			mods.push('EZ');
-			modsBits = modsBits - 2;
-		}
-		if (modsBits >= 1) {
-			mods.push('NF');
-			modsBits = modsBits - 1;
-		}
-
-		return mods.reverse();
+		return getModsFunction(input);
 	},
 	getModBits: function (input, noVisualMods) {
-		let modBits = 0;
-
-		if (input === 'NM') {
-			return modBits;
-		}
-
-		for (let i = 0; i < input.length; i += 2) {
-			if (input.substring(i, i + 2) === 'MI' && !noVisualMods) {
-				modBits += 1073741824;
-			} else if (input.substring(i, i + 2) === 'V2') {
-				modBits += 536870912;
-			} else if (input.substring(i, i + 2) === '2K') {
-				modBits += 268435456;
-			} else if (input.substring(i, i + 2) === '3K') {
-				modBits += 134217728;
-			} else if (input.substring(i, i + 2) === '1K') {
-				modBits += 67108864;
-			} else if (input.substring(i, i + 2) === 'KC') {
-				modBits += 33554432;
-			} else if (input.substring(i, i + 2) === '9K') {
-				modBits += 16777216;
-			} else if (input.substring(i, i + 2) === 'TG') {
-				modBits += 8388608;
-			} else if (input.substring(i, i + 2) === 'CI') {
-				modBits += 4194304;
-			} else if (input.substring(i, i + 2) === 'RD') {
-				modBits += 2097152;
-			} else if (input.substring(i, i + 2) === 'FI' && !noVisualMods) {
-				modBits += 1048576;
-			} else if (input.substring(i, i + 2) === '8K') {
-				modBits += 524288;
-			} else if (input.substring(i, i + 2) === '7K') {
-				modBits += 262144;
-			} else if (input.substring(i, i + 2) === '6K') {
-				modBits += 131072;
-			} else if (input.substring(i, i + 2) === '5K') {
-				modBits += 65536;
-			} else if (input.substring(i, i + 2) === '4K') {
-				modBits += 32768;
-			} else if (input.substring(i, i + 2) === 'PF') {
-				modBits += 16384;
-				modBits += 32;
-			} else if (input.substring(i, i + 2) === 'AP') {
-				modBits += 8192;
-			} else if (input.substring(i, i + 2) === 'SO') {
-				modBits += 4096;
-			} else if (input.substring(i, i + 2) === 'FL' && !noVisualMods) {
-				modBits += 1024;
-			} else if (input.substring(i, i + 2) === 'NC') {
-				modBits += 512;
-				modBits += 64;
-			} else if (input.substring(i, i + 2) === 'HT') {
-				modBits += 256;
-			} else if (input.substring(i, i + 2) === 'RX') {
-				modBits += 128;
-			} else if (input.substring(i, i + 2) === 'DT') {
-				modBits += 64;
-			} else if (input.substring(i, i + 2) === 'SD') {
-				modBits += 32;
-			} else if (input.substring(i, i + 2) === 'HR') {
-				modBits += 16;
-			} else if (input.substring(i, i + 2) === 'HD' && !noVisualMods) {
-				modBits += 8;
-			} else if (input.substring(i, i + 2) === 'TD') {
-				modBits += 4;
-			} else if (input.substring(i, i + 2) === 'EZ') {
-				modBits += 2;
-			} else if (input.substring(i, i + 2) === 'NF') {
-				modBits += 1;
-			}
-		}
-
-		return modBits;
+		return getModBitsFunction(input, noVisualMods);
 	},
 	getLinkModeName: function (ID) {
 		let gameMode = 'osu';
@@ -1205,21 +997,23 @@ function getMiddleScore(scores) {
 }
 
 async function getOsuBeatmapFunction(beatmapId, modBits) {
+	console.log(beatmapId, modBits);
 	let lastRework = new Date();
 	lastRework.setUTCFullYear(2021);
 	lastRework.setUTCMonth(7);
 	lastRework.setUTCDate(20);
-	let lastWeek = new Date();
-	lastWeek.setUTCMonth(lastWeek.getUTCDate() - 7);
+	let lastMonth = new Date();
+	lastMonth.setUTCMonth(lastMonth.getUTCMonth() - 1);
 	let dbBeatmap = await DBOsuBeatmaps.findOne({
 		where: { beatmapId: beatmapId, mods: modBits }
 	});
 
 	if (!dbBeatmap
 		|| dbBeatmap && dbBeatmap.updatedAt < lastRework
-		|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt < lastWeek
+		|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt.getTime() < lastMonth.getTime()
 		|| dbBeatmap && !dbBeatmap.starRating
-		|| dbBeatmap && !dbBeatmap.maxCombo) {
+		|| dbBeatmap && !dbBeatmap.maxCombo
+		|| dbBeatmap && dbBeatmap.starRating == 0) {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -1233,7 +1027,15 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 				let noModBeatmap = beatmaps[0];
 
 				if (modBits) {
-					noModBeatmap = await getOsuBeatmapFunction(beatmaps[0].id, 0);
+					noModBeatmap = await getOsuBeatmapFunction(beatmapId, 0);
+				}
+
+				let noVisualModBeatmap = beatmaps[0];
+				if (getModsFunction(modBits).includes('MI') || getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL') || getModsFunction(modBits).includes('FI') || getModsFunction(modBits).includes('NF') || getModsFunction(modBits).includes('NC')) {
+					let realNoVisualModBeatmap = await getOsuBeatmapFunction(beatmapId, getModBitsFunction(getModsFunction(modBits).join(''), true));
+					noVisualModBeatmap.difficulty.rating = realNoVisualModBeatmap.starRating;
+					noVisualModBeatmap.difficulty.aim = realNoVisualModBeatmap.aimRating;
+					noVisualModBeatmap.difficulty.speed = realNoVisualModBeatmap.speedRating;
 				}
 
 				//Map has to be updated
@@ -1241,9 +1043,9 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 					dbBeatmap.title = beatmaps[0].title;
 					dbBeatmap.artist = beatmaps[0].artist;
 					dbBeatmap.difficulty = beatmaps[0].version;
-					dbBeatmap.starRating = beatmaps[0].difficulty.rating;
-					dbBeatmap.aimRating = beatmaps[0].difficulty.aim;
-					dbBeatmap.speedRating = beatmaps[0].difficulty.speed;
+					dbBeatmap.starRating = noVisualModBeatmap.difficulty.rating;
+					dbBeatmap.aimRating = noVisualModBeatmap.difficulty.aim;
+					dbBeatmap.speedRating = noVisualModBeatmap.difficulty.speed;
 					dbBeatmap.drainLength = beatmaps[0].length.drain;
 					dbBeatmap.totalLength = beatmaps[0].length.total;
 					dbBeatmap.circleSize = beatmaps[0].difficulty.size;
@@ -1267,9 +1069,9 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 						title: beatmaps[0].title,
 						artist: beatmaps[0].artist,
 						difficulty: beatmaps[0].version,
-						starRating: beatmaps[0].difficulty.rating,
-						aimRating: beatmaps[0].difficulty.aim,
-						speedRating: beatmaps[0].difficulty.speed,
+						starRating: noVisualModBeatmap.difficulty.rating,
+						aimRating: noVisualModBeatmap.difficulty.aim,
+						speedRating: noVisualModBeatmap.difficulty.speed,
 						drainLength: beatmaps[0].length.drain,
 						totalLength: beatmaps[0].length.total,
 						circleSize: beatmaps[0].difficulty.size,
@@ -1298,4 +1100,221 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 	}
 
 	return dbBeatmap;
+}
+
+function getModBitsFunction(input, noVisualMods) {
+	let modBits = 0;
+
+	if (input === 'NM') {
+		return modBits;
+	}
+
+	for (let i = 0; i < input.length; i += 2) {
+		if (input.substring(i, i + 2) === 'MI' && !noVisualMods) {
+			modBits += 1073741824;
+		} else if (input.substring(i, i + 2) === 'V2') {
+			modBits += 536870912;
+		} else if (input.substring(i, i + 2) === '2K') {
+			modBits += 268435456;
+		} else if (input.substring(i, i + 2) === '3K') {
+			modBits += 134217728;
+		} else if (input.substring(i, i + 2) === '1K') {
+			modBits += 67108864;
+		} else if (input.substring(i, i + 2) === 'KC') {
+			modBits += 33554432;
+		} else if (input.substring(i, i + 2) === '9K') {
+			modBits += 16777216;
+		} else if (input.substring(i, i + 2) === 'TG') {
+			modBits += 8388608;
+		} else if (input.substring(i, i + 2) === 'CI') {
+			modBits += 4194304;
+		} else if (input.substring(i, i + 2) === 'RD') {
+			modBits += 2097152;
+		} else if (input.substring(i, i + 2) === 'FI' && !noVisualMods) {
+			modBits += 1048576;
+		} else if (input.substring(i, i + 2) === '8K') {
+			modBits += 524288;
+		} else if (input.substring(i, i + 2) === '7K') {
+			modBits += 262144;
+		} else if (input.substring(i, i + 2) === '6K') {
+			modBits += 131072;
+		} else if (input.substring(i, i + 2) === '5K') {
+			modBits += 65536;
+		} else if (input.substring(i, i + 2) === '4K') {
+			modBits += 32768;
+		} else if (input.substring(i, i + 2) === 'PF') {
+			modBits += 16384;
+			modBits += 32;
+		} else if (input.substring(i, i + 2) === 'AP') {
+			modBits += 8192;
+		} else if (input.substring(i, i + 2) === 'SO') {
+			modBits += 4096;
+		} else if (input.substring(i, i + 2) === 'FL' && !noVisualMods) {
+			modBits += 1024;
+		} else if (input.substring(i, i + 2) === 'NC' && !noVisualMods) {
+			modBits += 64;
+		} else if (input.substring(i, i + 2) === 'NC') {
+			modBits += 512;
+			modBits += 64;
+		} else if (input.substring(i, i + 2) === 'HT') {
+			modBits += 256;
+		} else if (input.substring(i, i + 2) === 'RX') {
+			modBits += 128;
+		} else if (input.substring(i, i + 2) === 'DT') {
+			modBits += 64;
+		} else if (input.substring(i, i + 2) === 'SD') {
+			modBits += 32;
+		} else if (input.substring(i, i + 2) === 'HR') {
+			modBits += 16;
+		} else if (input.substring(i, i + 2) === 'HD' && !noVisualMods) {
+			modBits += 8;
+		} else if (input.substring(i, i + 2) === 'TD') {
+			modBits += 4;
+		} else if (input.substring(i, i + 2) === 'EZ') {
+			modBits += 2;
+		} else if (input.substring(i, i + 2) === 'NF' && !noVisualMods) {
+			modBits += 1;
+		}
+	}
+
+	return modBits;
+}
+
+function getModsFunction(input) {
+	let mods = [];
+	let modsBits = input;
+	let PFpossible = false;
+	let hasNC = false;
+	if (modsBits >= 1073741824) {
+		mods.push('MI');
+		modsBits = modsBits - 1073741824;
+	}
+	if (modsBits >= 536870912) {
+		mods.push('V2');
+		modsBits = modsBits - 536870912;
+	}
+	if (modsBits >= 268435456) {
+		mods.push('2K');
+		modsBits = modsBits - 268435456;
+	}
+	if (modsBits >= 134217728) {
+		mods.push('3K');
+		modsBits = modsBits - 134217728;
+	}
+	if (modsBits >= 67108864) {
+		mods.push('1K');
+		modsBits = modsBits - 67108864;
+	}
+	if (modsBits >= 33554432) {
+		mods.push('KC');
+		modsBits = modsBits - 33554432;
+	}
+	if (modsBits >= 16777216) {
+		mods.push('9K');
+		modsBits = modsBits - 16777216;
+	}
+	if (modsBits >= 8388608) {
+		mods.push('TG');
+		modsBits = modsBits - 8388608;
+	}
+	if (modsBits >= 4194304) {
+		mods.push('CI');
+		modsBits = modsBits - 4194304;
+	}
+	if (modsBits >= 2097152) {
+		mods.push('RD');
+		modsBits = modsBits - 2097152;
+	}
+	if (modsBits >= 1048576) {
+		mods.push('FI');
+		modsBits = modsBits - 1048576;
+	}
+	if (modsBits >= 524288) {
+		mods.push('8K');
+		modsBits = modsBits - 524288;
+	}
+	if (modsBits >= 262144) {
+		mods.push('7K');
+		modsBits = modsBits - 262144;
+	}
+	if (modsBits >= 131072) {
+		mods.push('6K');
+		modsBits = modsBits - 131072;
+	}
+	if (modsBits >= 65536) {
+		mods.push('5K');
+		modsBits = modsBits - 65536;
+	}
+	if (modsBits >= 32768) {
+		mods.push('4K');
+		modsBits = modsBits - 32768;
+	}
+	if (modsBits >= 16384) {
+		PFpossible = true;
+		modsBits = modsBits - 16384;
+	}
+	if (modsBits >= 8192) {
+		mods.push('AP');
+		modsBits = modsBits - 8192;
+	}
+	if (modsBits >= 4096) {
+		mods.push('SO');
+		modsBits = modsBits - 4096;
+	}
+	if (modsBits >= 2048) {
+		modsBits = modsBits - 2048;
+	}
+	if (modsBits >= 1024) {
+		mods.push('FL');
+		modsBits = modsBits - 1024;
+	}
+	if (modsBits >= 512) {
+		hasNC = true;
+		mods.push('NC');
+		modsBits = modsBits - 512;
+	}
+	if (modsBits >= 256) {
+		mods.push('HT');
+		modsBits = modsBits - 256;
+	}
+	if (modsBits >= 128) {
+		mods.push('RX');
+		modsBits = modsBits - 128;
+	}
+	if (modsBits >= 64) {
+		if (!hasNC) {
+			mods.push('DT');
+		}
+		modsBits = modsBits - 64;
+	}
+	if (modsBits >= 32) {
+		if (PFpossible) {
+			mods.push('PF');
+		} else {
+			mods.push('SD');
+		}
+		modsBits = modsBits - 32;
+	}
+	if (modsBits >= 16) {
+		mods.push('HR');
+		modsBits = modsBits - 16;
+	}
+	if (modsBits >= 8) {
+		mods.push('HD');
+		modsBits = modsBits - 8;
+	}
+	if (modsBits >= 4) {
+		mods.push('TD');
+		modsBits = modsBits - 4;
+	}
+	if (modsBits >= 2) {
+		mods.push('EZ');
+		modsBits = modsBits - 2;
+	}
+	if (modsBits >= 1) {
+		mods.push('NF');
+		modsBits = modsBits - 1;
+	}
+
+	return mods.reverse();
 }
