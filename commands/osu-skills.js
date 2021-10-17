@@ -4,6 +4,7 @@ const { CanvasRenderService } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
 const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy } = require('../utils');
 const { Permissions } = require('discord.js');
+const Canvas = require('canvas');
 
 module.exports = {
 	name: 'osu-skills',
@@ -147,8 +148,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 			const topScores = await osuApi.getUserBest({ u: user.name, m: 0, limit: 100 });
 
-			console.log(topScores);
-
 			let mods = [];
 			let mappers = [];
 			let pp = [];
@@ -230,6 +229,86 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			console.log(acc);
 			console.log(bpm);
 
+			const canvasWidth = 700;
+			const canvasHeight = 500;
+
+			//Create Canvas
+			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+			//Get context and load the image
+			const ctx = canvas.getContext('2d');
+
+			const background = await Canvas.loadImage('./other/osu-background.png');
+
+			for (let i = 0; i < canvas.height / background.height; i++) {
+				for (let j = 0; j < canvas.width / background.width; j++) {
+					ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+				}
+			}
+
+			ctx.fillStyle = '#ffffff';
+			ctx.textAlign = 'center';
+			ctx.font = 'bold 30px comfortaa, sans-serif';
+			ctx.fillText(`Top Play Stats for ${user.name}`, 400, 40);
+
+			ctx.textAlign = 'left';
+			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.fillText('PP', 200, 80);
+			ctx.font = 'bold 18px comfortaa, sans-serif';
+
+			let averagepp = 0;
+			for (let i = 0; i < pp.length; i++) {
+				averagepp += parseFloat(pp[i]);
+			}
+			averagepp = averagepp / pp.length;
+			ctx.fillText(`${Math.round(pp[pp.length - 1] * 100) / 100} (Lowest) - ${Math.round(averagepp * 100) / 100} (avg) - ${Math.round(pp[0] * 100) / 100} (Highest)`, 200, 100);
+
+			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.fillText('Stars', 200, 130);
+			ctx.font = 'bold 18px comfortaa, sans-serif';
+
+			let averageStars = 0;
+			for (let i = 0; i < stars.length; i++) {
+				averageStars += parseFloat(stars[i]);
+			}
+			averageStars = averageStars / stars.length;
+			ctx.fillText(`${Math.round(stars[stars.length - 1] * 100) / 100} (Lowest) - ${Math.round(averageStars * 100) / 100} (avg) - ${Math.round(stars[0] * 100) / 100} (Highest)`, 200, 150);
+
+			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.fillText('BPM', 200, 300);
+			ctx.font = 'bold 18px comfortaa, sans-serif';
+
+			let averageBPM = 0;
+			for (let i = 0; i < bpm.length; i++) {
+				averageBPM += parseFloat(bpm[i]);
+			}
+			averageBPM = averageBPM / bpm.length;
+			ctx.fillText(`${Math.round(bpm[bpm.length - 1] * 100) / 100} (Lowest) - ${Math.round(averageBPM * 100) / 100} (avg) - ${Math.round(bpm[0] * 100) / 100} (Highest)`, 200, 320);
+
+			//Get a circle for inserting the player avatar
+			ctx.beginPath();
+			ctx.arc(60, 60, 50, 0, Math.PI * 2, true);
+			ctx.closePath();
+			ctx.clip();
+
+			//Draw a shape onto the main canvas
+			try {
+				const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${user.id}`);
+				ctx.drawImage(avatar, 10, 10, 100, 100);
+			} catch (error) {
+				const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
+				ctx.drawImage(avatar, 10, 10, 100, 100);
+			}
+
+			//Create as an attachment
+			const topPlayStats = new Discord.MessageAttachment(canvas.toBuffer(), `osu-topPlayStats-${user.id}.png`);
+
+			const files = [topPlayStats];
+
+			let content = 'Top play stats';
+
 			const width = 1500; //px
 			const height = 750; //px
 			const canvasRenderService = new CanvasRenderService(width, height);
@@ -240,307 +319,317 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				});
 
 				if (!userScores.length) {
-					return processingMessage.edit(`No multi-scores found in the database for ${user.name}.`);
-				}
+					await processingMessage.delete();
 
-				let oldestDate = new Date();
+					content = `${content}; No multi/tourney-scores found in the database for ${user.name} - skipping modpool evaluation`;
 
-				oldestDate.setUTCDate(1);
-				oldestDate.setUTCHours(0);
-				oldestDate.setUTCMinutes(0);
+				} else {
 
-				let matchesPlayed = [];
-				quicksort(userScores);
-				userScores.forEach(score => {
-					if (oldestDate > score.matchStartDate) {
-						oldestDate.setUTCFullYear(score.matchStartDate.getUTCFullYear());
-						oldestDate.setUTCMonth(score.matchStartDate.getUTCMonth());
+
+					let oldestDate = new Date();
+
+					oldestDate.setUTCDate(1);
+					oldestDate.setUTCHours(0);
+					oldestDate.setUTCMinutes(0);
+
+					let matchesPlayed = [];
+					quicksort(userScores);
+					userScores.forEach(score => {
+						if (oldestDate > score.matchStartDate) {
+							oldestDate.setUTCFullYear(score.matchStartDate.getUTCFullYear());
+							oldestDate.setUTCMonth(score.matchStartDate.getUTCMonth());
+						}
+					});
+
+					const rawModsData = [];
+					const labels = [];
+					//Get the base data which is gonna be added up later
+					for (let now = new Date(); oldestDate < now; oldestDate.setUTCMonth(oldestDate.getUTCMonth() + 1)) {
+						let rawModsDataObject = {
+							label: `${(oldestDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${oldestDate.getUTCFullYear()}`,
+							totalEvaluation: 0,
+							totalCount: 0,
+							NMEvaluation: 0,
+							NMCount: 0,
+							HDEvaluation: 0,
+							HDCount: 0,
+							HREvaluation: 0,
+							HRCount: 0,
+							DTEvaluation: 0,
+							DTCount: 0,
+							FMEvaluation: 0,
+							FMCount: 0
+						};
+						labels.push(rawModsDataObject.label);
+						rawModsData.push(rawModsDataObject);
 					}
-				});
 
-				const rawModsData = [];
-				const labels = [];
-				//Get the base data which is gonna be added up later
-				for (let now = new Date(); oldestDate < now; oldestDate.setUTCMonth(oldestDate.getUTCMonth() + 1)) {
-					let rawModsDataObject = {
-						label: `${(oldestDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${oldestDate.getUTCFullYear()}`,
-						totalEvaluation: 0,
-						totalCount: 0,
-						NMEvaluation: 0,
-						NMCount: 0,
-						HDEvaluation: 0,
-						HDCount: 0,
-						HREvaluation: 0,
-						HRCount: 0,
-						DTEvaluation: 0,
-						DTCount: 0,
-						FMEvaluation: 0,
-						FMCount: 0
+					for (let i = 0; i < userScores.length; i++) {
+						//Filter out rounds which don't fit the restrictions
+						if (scoringType === 'v2' && userScores[i].scoringType !== 'Score v2') {
+							continue;
+						}
+						if (scoringType === 'v1' && userScores[i].scoringType !== 'Score') {
+							continue;
+						}
+						if (tourneyMatch && !userScores[i].tourneyMatch) {
+							continue;
+						}
+
+						//Push matches for the history txt
+						if (!matchesPlayed.includes(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`)) {
+							matchesPlayed.push(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`);
+						}
+
+						for (let j = 0; j < rawModsData.length; j++) {
+							if (rawModsData[j].label === `${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()}`) {
+								rawModsData[j].totalEvaluation += parseFloat(userScores[i].evaluation);
+								rawModsData[j].totalCount++;
+								const sameGameScores = await DBOsuMultiScores.findAll({
+									where: { matchId: userScores[i].matchId, gameId: userScores[i].gameId }
+								});
+
+								for (let k = 0; k < sameGameScores.length; k++) {
+									if (userScores[i].rawMods === sameGameScores[k].rawMods) {
+										sameGameScores.splice(k, 1);
+										k--;
+									}
+								}
+
+								//Add values to Mods
+								if (sameGameScores.length === 0 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
+									rawModsData[j].NMEvaluation += parseFloat(userScores[i].evaluation);
+									rawModsData[j].NMCount++;
+								} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '8' || userScores[i].gameRawMods === '9')) {
+									rawModsData[j].HDEvaluation += parseFloat(userScores[i].evaluation);
+									rawModsData[j].HDCount++;
+								} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '16' || userScores[i].gameRawMods === '17')) {
+									rawModsData[j].HREvaluation += parseFloat(userScores[i].evaluation);
+									rawModsData[j].HRCount++;
+								} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '64' || userScores[i].gameRawMods === '65' || userScores[i].gameRawMods === '576' || userScores[i].gameRawMods === '577')) {
+									rawModsData[j].DTEvaluation += parseFloat(userScores[i].evaluation);
+									rawModsData[j].DTCount++;
+								} else {
+									rawModsData[j].FMEvaluation += parseFloat(userScores[i].evaluation);
+									rawModsData[j].FMCount++;
+								}
+
+								//Save the maps locally
+								getOsuBeatmap(userScores[i].beatmapId, userScores[i].gameRawMods);
+							}
+						}
+					}
+
+					const totalDatapoints = [];
+					const NMDatapoints = [];
+					const HDDatapoints = [];
+					const HRDatapoints = [];
+					const DTDatapoints = [];
+					const FMDatapoints = [];
+					rawModsData.forEach(rawModsDataObject => {
+						let totalValue = NaN;
+						if (rawModsDataObject.totalCount) {
+							totalValue = rawModsDataObject.totalEvaluation / rawModsDataObject.totalCount;
+						}
+
+						let NMValue = NaN;
+						if (rawModsDataObject.NMCount) {
+							NMValue = rawModsDataObject.NMEvaluation / rawModsDataObject.NMCount;
+							if (scaled) {
+								NMValue = NMValue / totalValue;
+							}
+						}
+						NMDatapoints.push(NMValue);
+
+						let HDValue = NaN;
+						if (rawModsDataObject.HDCount) {
+							HDValue = rawModsDataObject.HDEvaluation / rawModsDataObject.HDCount;
+							if (scaled) {
+								HDValue = HDValue / totalValue;
+							}
+						}
+						HDDatapoints.push(HDValue);
+
+						let HRValue = NaN;
+						if (rawModsDataObject.HRCount) {
+							HRValue = rawModsDataObject.HREvaluation / rawModsDataObject.HRCount;
+							if (scaled) {
+								HRValue = HRValue / totalValue;
+							}
+						}
+						HRDatapoints.push(HRValue);
+
+						let DTValue = NaN;
+						if (rawModsDataObject.DTCount) {
+							DTValue = rawModsDataObject.DTEvaluation / rawModsDataObject.DTCount;
+							if (scaled) {
+								DTValue = DTValue / totalValue;
+							}
+						}
+						DTDatapoints.push(DTValue);
+
+						let FMValue = NaN;
+						if (rawModsDataObject.FMCount) {
+							FMValue = rawModsDataObject.FMEvaluation / rawModsDataObject.FMCount;
+							if (scaled) {
+								FMValue = FMValue / totalValue;
+							}
+						}
+						FMDatapoints.push(FMValue);
+
+						if (scaled) {
+							totalValue = totalValue / totalValue;
+						}
+						totalDatapoints.push(totalValue);
+					});
+
+					for (let i = 0; i < totalDatapoints.length; i++) {
+						if (isNaN(totalDatapoints[i])) {
+							labels.splice(i, 1);
+							totalDatapoints.splice(i, 1);
+							NMDatapoints.splice(i, 1);
+							HDDatapoints.splice(i, 1);
+							HRDatapoints.splice(i, 1);
+							DTDatapoints.splice(i, 1);
+							FMDatapoints.splice(i, 1);
+							i--;
+						}
+					}
+
+					if (labels.length === 1) {
+						labels.push(labels[0]);
+						totalDatapoints.push(totalDatapoints[0]);
+						NMDatapoints.push(NMDatapoints[0]);
+						HDDatapoints.push(HDDatapoints[0]);
+						HRDatapoints.push(HRDatapoints[0]);
+						DTDatapoints.push(DTDatapoints[0]);
+						FMDatapoints.push(FMDatapoints[0]);
+					}
+
+					const data = {
+						labels: labels,
+						datasets: [
+							{
+								label: 'Evaluation (All Mods)',
+								data: totalDatapoints,
+								borderColor: 'rgb(201, 203, 207)',
+								fill: false,
+								tension: 0.4
+							}, {
+								label: 'Evaluation (NM only)',
+								data: NMDatapoints,
+								borderColor: 'rgb(54, 162, 235)',
+								fill: false,
+								tension: 0.4
+							}, {
+								label: 'Evaluation (HD only)',
+								data: HDDatapoints,
+								borderColor: 'rgb(255, 205, 86)',
+								fill: false,
+								tension: 0.4
+							}, {
+								label: 'Evaluation (HR only)',
+								data: HRDatapoints,
+								borderColor: 'rgb(255, 99, 132)',
+								fill: false,
+								tension: 0.4
+							}, {
+								label: 'Evaluation (DT only)',
+								data: DTDatapoints,
+								borderColor: 'rgb(153, 102, 255)',
+								fill: false,
+								tension: 0.4
+							}, {
+								label: 'Evaluation (FM only)',
+								data: FMDatapoints,
+								borderColor: 'rgb(75, 192, 192)',
+								fill: false,
+								tension: 0.4
+							}
+						]
 					};
-					labels.push(rawModsDataObject.label);
-					rawModsData.push(rawModsDataObject);
-				}
 
-				for (let i = 0; i < userScores.length; i++) {
-					//Filter out rounds which don't fit the restrictions
-					if (scoringType === 'v2' && userScores[i].scoringType !== 'Score v2') {
-						continue;
-					}
-					if (scoringType === 'v1' && userScores[i].scoringType !== 'Score') {
-						continue;
-					}
-					if (tourneyMatch && !userScores[i].tourneyMatch) {
-						continue;
-					}
-
-					//Push matches for the history txt
-					if (!matchesPlayed.includes(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`)) {
-						matchesPlayed.push(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`);
-					}
-
-					for (let j = 0; j < rawModsData.length; j++) {
-						if (rawModsData[j].label === `${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()}`) {
-							rawModsData[j].totalEvaluation += parseFloat(userScores[i].evaluation);
-							rawModsData[j].totalCount++;
-							const sameGameScores = await DBOsuMultiScores.findAll({
-								where: { matchId: userScores[i].matchId, gameId: userScores[i].gameId }
-							});
-
-							for (let k = 0; k < sameGameScores.length; k++) {
-								if (userScores[i].rawMods === sameGameScores[k].rawMods) {
-									sameGameScores.splice(k, 1);
-									k--;
+					const configuration = {
+						type: 'line',
+						data: data,
+						options: {
+							spanGaps: true,
+							responsive: true,
+							plugins: {
+								title: {
+									display: true,
+									text: 'Elitebotix Evaluation for submitted matches',
+									color: '#FFFFFF',
+								},
+								legend: {
+									labels: {
+										color: '#FFFFFF',
+									}
+								},
+							},
+							interaction: {
+								intersect: false,
+							},
+							scales: {
+								x: {
+									display: true,
+									title: {
+										display: true,
+										text: 'Month',
+										color: '#FFFFFF'
+									},
+									grid: {
+										color: '#8F8F8F'
+									},
+									ticks: {
+										color: '#FFFFFF',
+									},
+								},
+								y: {
+									display: true,
+									title: {
+										display: true,
+										text: 'Evaluation value',
+										color: '#FFFFFF'
+									},
+									grid: {
+										color: '#8F8F8F'
+									},
+									ticks: {
+										color: '#FFFFFF',
+									},
+									suggestedMin: 0,
+									suggestedMax: 1.5
 								}
 							}
+						},
+					};
 
-							//Add values to Mods
-							if (sameGameScores.length === 0 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
-								rawModsData[j].NMEvaluation += parseFloat(userScores[i].evaluation);
-								rawModsData[j].NMCount++;
-							} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '8' || userScores[i].gameRawMods === '9')) {
-								rawModsData[j].HDEvaluation += parseFloat(userScores[i].evaluation);
-								rawModsData[j].HDCount++;
-							} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '16' || userScores[i].gameRawMods === '17')) {
-								rawModsData[j].HREvaluation += parseFloat(userScores[i].evaluation);
-								rawModsData[j].HRCount++;
-							} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '64' || userScores[i].gameRawMods === '65' || userScores[i].gameRawMods === '576' || userScores[i].gameRawMods === '577')) {
-								rawModsData[j].DTEvaluation += parseFloat(userScores[i].evaluation);
-								rawModsData[j].DTCount++;
-							} else {
-								rawModsData[j].FMEvaluation += parseFloat(userScores[i].evaluation);
-								rawModsData[j].FMCount++;
-							}
+					const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
 
-							//Save the maps locally
-							getOsuBeatmap(userScores[i].beatmapId, userScores[i].gameRawMods);
-						}
-					}
-				}
+					const attachment = new Discord.MessageAttachment(imageBuffer, `osu-skills-${user.id}.png`);
+					files.push(attachment);
 
-				const totalDatapoints = [];
-				const NMDatapoints = [];
-				const HDDatapoints = [];
-				const HRDatapoints = [];
-				const DTDatapoints = [];
-				const FMDatapoints = [];
-				rawModsData.forEach(rawModsDataObject => {
-					let totalValue = NaN;
-					if (rawModsDataObject.totalCount) {
-						totalValue = rawModsDataObject.totalEvaluation / rawModsDataObject.totalCount;
-					}
+					await processingMessage.delete();
 
-					let NMValue = NaN;
-					if (rawModsDataObject.NMCount) {
-						NMValue = rawModsDataObject.NMEvaluation / rawModsDataObject.NMCount;
-						if (scaled) {
-							NMValue = NMValue / totalValue;
-						}
-					}
-					NMDatapoints.push(NMValue);
-
-					let HDValue = NaN;
-					if (rawModsDataObject.HDCount) {
-						HDValue = rawModsDataObject.HDEvaluation / rawModsDataObject.HDCount;
-						if (scaled) {
-							HDValue = HDValue / totalValue;
-						}
-					}
-					HDDatapoints.push(HDValue);
-
-					let HRValue = NaN;
-					if (rawModsDataObject.HRCount) {
-						HRValue = rawModsDataObject.HREvaluation / rawModsDataObject.HRCount;
-						if (scaled) {
-							HRValue = HRValue / totalValue;
-						}
-					}
-					HRDatapoints.push(HRValue);
-
-					let DTValue = NaN;
-					if (rawModsDataObject.DTCount) {
-						DTValue = rawModsDataObject.DTEvaluation / rawModsDataObject.DTCount;
-						if (scaled) {
-							DTValue = DTValue / totalValue;
-						}
-					}
-					DTDatapoints.push(DTValue);
-
-					let FMValue = NaN;
-					if (rawModsDataObject.FMCount) {
-						FMValue = rawModsDataObject.FMEvaluation / rawModsDataObject.FMCount;
-						if (scaled) {
-							FMValue = FMValue / totalValue;
-						}
-					}
-					FMDatapoints.push(FMValue);
-
+					let scaledText = '';
 					if (scaled) {
-						totalValue = totalValue / totalValue;
+						scaledText = ' (Scaled by total evaluation)';
 					}
-					totalDatapoints.push(totalValue);
-				});
 
-				for (let i = 0; i < totalDatapoints.length; i++) {
-					if (isNaN(totalDatapoints[i])) {
-						labels.splice(i, 1);
-						totalDatapoints.splice(i, 1);
-						NMDatapoints.splice(i, 1);
-						HDDatapoints.splice(i, 1);
-						HRDatapoints.splice(i, 1);
-						DTDatapoints.splice(i, 1);
-						FMDatapoints.splice(i, 1);
-						i--;
+					let tourneyMatchText = 'Casual & Tourney matches';
+					if (tourneyMatch) {
+						tourneyMatchText = 'Tourney matches only';
 					}
+
+					// eslint-disable-next-line no-undef
+					matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${user.id}.txt`);
+					files.push(matchesPlayed);
+
+					content = `${content} and [Beta/WIP] Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}`;
 				}
 
-				if (labels.length === 1) {
-					labels.push(labels[0]);
-					totalDatapoints.push(totalDatapoints[0]);
-					NMDatapoints.push(NMDatapoints[0]);
-					HDDatapoints.push(HDDatapoints[0]);
-					HRDatapoints.push(HRDatapoints[0]);
-					DTDatapoints.push(DTDatapoints[0]);
-					FMDatapoints.push(FMDatapoints[0]);
-				}
-
-				const data = {
-					labels: labels,
-					datasets: [
-						{
-							label: 'Evaluation (All Mods)',
-							data: totalDatapoints,
-							borderColor: 'rgb(201, 203, 207)',
-							fill: false,
-							tension: 0.4
-						}, {
-							label: 'Evaluation (NM only)',
-							data: NMDatapoints,
-							borderColor: 'rgb(54, 162, 235)',
-							fill: false,
-							tension: 0.4
-						}, {
-							label: 'Evaluation (HD only)',
-							data: HDDatapoints,
-							borderColor: 'rgb(255, 205, 86)',
-							fill: false,
-							tension: 0.4
-						}, {
-							label: 'Evaluation (HR only)',
-							data: HRDatapoints,
-							borderColor: 'rgb(255, 99, 132)',
-							fill: false,
-							tension: 0.4
-						}, {
-							label: 'Evaluation (DT only)',
-							data: DTDatapoints,
-							borderColor: 'rgb(153, 102, 255)',
-							fill: false,
-							tension: 0.4
-						}, {
-							label: 'Evaluation (FM only)',
-							data: FMDatapoints,
-							borderColor: 'rgb(75, 192, 192)',
-							fill: false,
-							tension: 0.4
-						}
-					]
-				};
-
-				const configuration = {
-					type: 'line',
-					data: data,
-					options: {
-						spanGaps: true,
-						responsive: true,
-						plugins: {
-							title: {
-								display: true,
-								text: 'Elitebotix Evaluation for submitted matches',
-								color: '#FFFFFF',
-							},
-							legend: {
-								labels: {
-									color: '#FFFFFF',
-								}
-							},
-						},
-						interaction: {
-							intersect: false,
-						},
-						scales: {
-							x: {
-								display: true,
-								title: {
-									display: true,
-									text: 'Month',
-									color: '#FFFFFF'
-								},
-								grid: {
-									color: '#8F8F8F'
-								},
-								ticks: {
-									color: '#FFFFFF',
-								},
-							},
-							y: {
-								display: true,
-								title: {
-									display: true,
-									text: 'Evaluation value',
-									color: '#FFFFFF'
-								},
-								grid: {
-									color: '#8F8F8F'
-								},
-								ticks: {
-									color: '#FFFFFF',
-								},
-								suggestedMin: 0,
-								suggestedMax: 1.5
-							}
-						}
-					},
-				};
-
-				const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
-
-				const attachment = new Discord.MessageAttachment(imageBuffer, `osu-skills-${user.id}.png`);
-
-				await processingMessage.delete();
-
-				let scaledText = '';
-				if (scaled) {
-					scaledText = ' (Scaled by total evaluation)';
-				}
-
-				let tourneyMatchText = 'Casual & Tourney matches';
-				if (tourneyMatch) {
-					tourneyMatchText = 'Tourney matches only';
-				}
-
-				// eslint-disable-next-line no-undef
-				matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${user.id}.txt`);
-				msg.channel.send({ content: `[Beta/WIP] Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}`, files: [attachment, matchesPlayed] });
+				msg.channel.send({ content: content, files: files });
 			})();
 		})
 		.catch(err => {
