@@ -1023,18 +1023,13 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 
 		await osuApi.getBeatmaps({ b: beatmapId, mods: modBits })
 			.then(async (beatmaps) => {
-				let noModBeatmap = beatmaps[0];
-
-				if (modBits) {
-					noModBeatmap = await getOsuBeatmapFunction(beatmapId, 0);
-				}
-
 				let noVisualModBeatmap = beatmaps[0];
 				if (getModsFunction(modBits).includes('MI') || getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL') || getModsFunction(modBits).includes('FI') || getModsFunction(modBits).includes('NF') || getModsFunction(modBits).includes('NC')) {
 					let realNoVisualModBeatmap = await getOsuBeatmapFunction(beatmapId, getModBitsFunction(getModsFunction(modBits).join(''), true));
 					noVisualModBeatmap.difficulty.rating = realNoVisualModBeatmap.starRating;
 					noVisualModBeatmap.difficulty.aim = realNoVisualModBeatmap.aimRating;
 					noVisualModBeatmap.difficulty.speed = realNoVisualModBeatmap.speedRating;
+					noVisualModBeatmap.maxCombo = realNoVisualModBeatmap.maxCombo;
 				}
 
 				//Map has to be updated
@@ -1056,7 +1051,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 					dbBeatmap.bpm = beatmaps[0].bpm;
 					dbBeatmap.mode = beatmaps[0].mode;
 					dbBeatmap.approvalStatus = beatmaps[0].approvalStatus;
-					dbBeatmap.maxCombo = noModBeatmap.maxCombo;
+					dbBeatmap.maxCombo = noVisualModBeatmap.maxCombo;
 					dbBeatmap.circles = beatmaps[0].objects.normal;
 					dbBeatmap.sliders = beatmaps[0].objects.slider;
 					dbBeatmap.spinners = beatmaps[0].objects.spinner;
@@ -1083,7 +1078,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 						bpm: beatmaps[0].bpm,
 						mode: beatmaps[0].mode,
 						approvalStatus: beatmaps[0].approvalStatus,
-						maxCombo: noModBeatmap.maxCombo,
+						maxCombo: noVisualModBeatmap.maxCombo,
 						circles: beatmaps[0].objects.normal,
 						sliders: beatmaps[0].objects.slider,
 						spinners: beatmaps[0].objects.spinner,
