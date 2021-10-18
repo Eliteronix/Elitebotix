@@ -729,7 +729,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${user.id}.txt`);
 					files.push(matchesPlayed);
 
-					content = `${content} and [Beta/WIP] Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}${runningAverageText}`;
+					content = `${content} and Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}${runningAverageText}`;
 				}
 
 				msg.channel.send({ content: content, files: files });
