@@ -181,7 +181,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					}
 				}
 
-				if (!mapperAdded) {
+				if (!mapperAdded && dbBeatmap && dbBeatmap.mapper) {
 					mappers.push({
 						mapper: dbBeatmap.mapper,
 						amount: 1
@@ -192,9 +192,11 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				pp.push(topScores[i].pp);
 
 				//Add difficulty ratings
-				stars.push(dbBeatmap.starRating);
-				aim.push(dbBeatmap.aimRating);
-				speed.push(dbBeatmap.speedRating);
+				if (dbBeatmap && dbBeatmap.starRating && dbBeatmap.starRating != -1) {
+					stars.push(dbBeatmap.starRating);
+					aim.push(dbBeatmap.aimRating);
+					speed.push(dbBeatmap.speedRating);
+				}
 
 				//Add accuracy
 				acc.push(getAccuracy(topScores[i], 0));
