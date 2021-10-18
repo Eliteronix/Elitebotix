@@ -1087,13 +1087,12 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 					});
 				}
 			})
-			// eslint-disable-next-line no-unused-vars
 			.catch(async (error) => {
 				//Nothing
 				//Map is already saved; Delay next check until 7 days
 				if (dbBeatmap) {
 					await dbBeatmap.save();
-				} else { // Map has to be added new
+				} else if (error.message === 'Not found') { // Map has to be added new
 					dbBeatmap = await DBOsuBeatmaps.create({
 						beatmapId: beatmapId,
 						approvalStatus: 'Not found',
