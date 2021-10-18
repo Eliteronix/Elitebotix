@@ -175,7 +175,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				let mapperAdded = false;
 				const dbBeatmap = await getOsuBeatmap(topScores[i].beatmapId, topScores[i].raw_mods);
 				for (let j = 0; j < mappers.length && !mapperAdded; j++) {
-					if (mappers[j].mapper === dbBeatmap.mapper) {
+					if (mappers[j] && mappers[j].mapper === dbBeatmap.mapper) {
 						mappers[j].amount++;
 						mapperAdded = true;
 					}
