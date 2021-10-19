@@ -1010,9 +1010,9 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 	if (!dbBeatmap
 		|| dbBeatmap && dbBeatmap.updatedAt < lastRework
 		|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt.getTime() < lastWeek.getTime()
-		|| dbBeatmap && !dbBeatmap.starRating
-		|| dbBeatmap && !dbBeatmap.maxCombo
-		|| dbBeatmap && dbBeatmap.starRating == 0) {
+		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && !dbBeatmap.starRating
+		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && !dbBeatmap.maxCombo
+		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && dbBeatmap.starRating == 0) {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -1097,8 +1097,8 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 						beatmapId: beatmapId,
 						approvalStatus: 'Not found',
 						mods: modBits,
-						starRating: -1,
-						maxCombo: -1,
+						starRating: 0,
+						maxCombo: 0,
 					});
 				}
 			});
@@ -1152,7 +1152,7 @@ function getModBitsFunction(input, noVisualMods) {
 			modBits += 32;
 		} else if (input.substring(i, i + 2) === 'AP') {
 			modBits += 8192;
-		} else if (input.substring(i, i + 2) === 'SO') {
+		} else if (input.substring(i, i + 2) === 'SO' && !noVisualMods) {
 			modBits += 4096;
 		} else if (input.substring(i, i + 2) === 'FL' && !noVisualMods) {
 			modBits += 1024;
