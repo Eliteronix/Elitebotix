@@ -175,7 +175,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				let mapperAdded = false;
 				const dbBeatmap = await getOsuBeatmap(topScores[i].beatmapId, topScores[i].raw_mods);
 				for (let j = 0; j < mappers.length && !mapperAdded; j++) {
-					if (mappers[j] && mappers[j].mapper === dbBeatmap.mapper) {
+					if (mappers[j] && dbBeatmap && mappers[j].mapper === dbBeatmap.mapper) {
 						mappers[j].amount++;
 						mapperAdded = true;
 					}
@@ -192,7 +192,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				pp.push(topScores[i].pp);
 
 				//Add difficulty ratings
-				if (dbBeatmap && dbBeatmap.starRating && dbBeatmap.starRating != -1) {
+				if (dbBeatmap && dbBeatmap.starRating && parseFloat(dbBeatmap.starRating) > 0) {
 					stars.push(dbBeatmap.starRating);
 					aim.push(dbBeatmap.aimRating);
 					speed.push(dbBeatmap.speedRating);
@@ -320,7 +320,11 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			ctx.font = 'bold 18px comfortaa, sans-serif';
 			for (let i = 0; i < mods.length && i < 5; i++) {
 				ctx.fillText(`${mods[i].modsReadable}`, 30, 390 + i * 20);
-				ctx.fillText(`Used ${mods[i].amount} times`, 130, 390 + i * 20);
+				if (mods[i].amount > 1) {
+					ctx.fillText(`Used ${mods[i].amount} times`, 130, 390 + i * 20);
+				} else {
+					ctx.fillText('Used once', 130, 390 + i * 20);
+				}
 			}
 
 			ctx.font = 'bold 15px comfortaa, sans-serif';
@@ -328,7 +332,11 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			ctx.font = 'bold 18px comfortaa, sans-serif';
 			for (let i = 0; i < mappers.length && i < 5; i++) {
 				ctx.fillText(`${mappers[i].mapper}`, 380, 390 + i * 20);
-				ctx.fillText(`Used ${mappers[i].amount} times`, 530, 390 + i * 20);
+				if (mappers[i].amount > 1) {
+					ctx.fillText(`Used ${mappers[i].amount} times`, 530, 390 + i * 20);
+				} else {
+					ctx.fillText('Used once', 530, 390 + i * 20);
+				}
 			}
 
 			//Get a circle for inserting the player avatar
