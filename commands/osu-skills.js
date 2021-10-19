@@ -202,7 +202,9 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				acc.push(getAccuracy(topScores[i], 0));
 
 				//Add bpm
-				bpm.push(dbBeatmap.bpm);
+				if (dbBeatmap && dbBeatmap.bpm) {
+					bpm.push(dbBeatmap.bpm);
+				}
 			}
 
 			quicksortAmount(mods);
