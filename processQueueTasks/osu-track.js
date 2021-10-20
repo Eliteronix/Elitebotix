@@ -11,7 +11,6 @@ module.exports = {
 			//Nothing
 		});
 		args.shift();
-		console.log('osu-track', processQueueEntry);
 
 		if (channel) {
 			// eslint-disable-next-line no-undef
