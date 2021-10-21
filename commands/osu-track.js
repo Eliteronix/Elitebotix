@@ -87,7 +87,9 @@ module.exports = {
 
 					date.setUTCMinutes(date.getUTCMinutes() + 15);
 
-					DBProcessQueue.create({ guildId: 'None', task: 'osu-track', priority: 8, additions: `${msg.channel.id};${user.id};${user.name}`, date: date });
+					let now = new Date();
+
+					DBProcessQueue.create({ guildId: 'None', task: 'osu-track', priority: 8, additions: `${msg.channel.id};${user.id};${user.name};${now.getTime()}`, date: date });
 
 					msg.reply(`The user ${user.name} will be tracked in this channel.`);
 				} else {

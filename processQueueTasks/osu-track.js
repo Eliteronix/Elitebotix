@@ -1,4 +1,3 @@
-const { DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
 
 //Events have to say the global rank on the map
@@ -44,7 +43,7 @@ module.exports = {
 							if (modeName.length === 0) {
 								modeName = 'osu!';
 							}
-							if (parseInt(mapRank) <= 50 && processQueueEntry.createdAt.getTime() <= Date.parse(user.events[i].raw_date)) {
+							if (parseInt(mapRank) <= 50 && args[2] <= Date.parse(user.events[i].raw_date)) {
 								recentActivity = true;
 								let msg = {
 									guild: channel.guild,
@@ -75,30 +74,29 @@ module.exports = {
 
 					if (recentActivity) {
 						let date = new Date();
-
+						processQueueEntry.additions = `${channel.id};${args[0]};${args[1]};${date.getTime()}`;
 						date.setUTCMinutes(date.getUTCMinutes() + 15);
 
-						processQueueEntry.destroy();
-						return await DBProcessQueue.create({ guildId: processQueueEntry.guildId, task: processQueueEntry.task, priority: processQueueEntry.priority, additions: `${channel.id};${user.id};${user.name}`, date: date });
+						processQueueEntry.date = date;
+						processQueueEntry.beingExecuted = false;
+						return await processQueueEntry.save();
 					}
 
 					//Retry later because there was no activity
 					let date = new Date();
-
-					date.setTime(date.getTime() + (date.getTime() - processQueueEntry.createdAt.getTime()));
+					processQueueEntry.additions = `${channel.id};${args[0]};${args[1]};${date.getTime()}`;
+					date.setTime(date.getTime() + (date.getTime() - args[2]));
 
 					date.setUTCMinutes(date.getUTCMinutes() + 5);
 
-					processQueueEntry.destroy();
-					return await DBProcessQueue.create({ guildId: processQueueEntry.guildId, task: processQueueEntry.task, priority: processQueueEntry.priority, additions: `${channel.id};${user.id};${user.name}`, date: date });
+					processQueueEntry.date = date;
+					processQueueEntry.beingExecuted = false;
+					return await processQueueEntry.save();
 				})
 				.catch(async (err) => {
 					console.log(err);
 					if (err.message === 'Not found') {
 						await channel.send(`Could not find user \`${args[1]}\` anymore and I will therefore stop tracking them. Maybe they changed their name?`);
-						processQueueEntry.destroy();
-					} else {
-						console.log(err);
 						processQueueEntry.destroy();
 					}
 				});
@@ -124,7 +122,7 @@ async function lookForTopPlays(processQueueEntry, args, channel, user, mode) {
 			let recentPlaysAmount = 0;
 			for (let i = 0; i < scores.length; i++) {
 				//This only works if the local timezone is UTC
-				if (processQueueEntry.createdAt.getTime() <= Date.parse(scores[i].raw_date)) {
+				if (args[2] <= Date.parse(scores[i].raw_date)) {
 					recentPlaysAmount++;
 				}
 			}
