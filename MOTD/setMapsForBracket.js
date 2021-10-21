@@ -2,7 +2,6 @@ const Discord = require('discord.js');
 const { humanReadable } = require('../utils.js');
 const { qualifier } = require('./qualifier.js');
 const { DBOsuBeatmaps, DBOsuMultiScores } = require('../dbObjects.js');
-const { Op } = require('sequelize');
 
 module.exports = {
 	setMapsForBracket: async function (client, bancho, bracketName, SRLimit, NMBeatmaps, DTBeatmaps, upperRank, lowerRank, channelId, roleId, players) {
@@ -51,14 +50,14 @@ module.exports = {
 
 		//Fill up maps if not enough
 		if (possibleNMBeatmaps.length < 9) {
-			const beatmaps = await DBOsuBeatmaps.findAll({
-				where: {
-					[Op.or]: [
-						{ mods: 0 },
-						{ mods: 1 }
-					]
+			const beatmaps = await DBOsuBeatmaps.findAll();
+
+			for (let i = 0; i < beatmaps.length; i++) {
+				if (beatmaps[i].mods !== 0 && beatmaps[i].mods !== 1) {
+					beatmaps.splice(i, 1);
+					i--;
 				}
-			});
+			}
 
 			while (possibleNMBeatmaps.length < 9) {
 
