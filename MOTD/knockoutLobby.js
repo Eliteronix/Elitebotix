@@ -23,7 +23,7 @@ module.exports = {
 
 		let mapIndex = 1;
 		//Increases knockoutmap number to start/continue with harder maps and give more points
-		while (12 - players.length > mapIndex) {
+		while (12 - players.length > mapIndex && lobbyNumber === 1) {
 			mapIndex++;
 		}
 
@@ -303,6 +303,7 @@ module.exports = {
 				} else {
 					movePlayersIntoFirstSlots(channel, lobby, players);
 					mapIndex++;
+
 					let skipped = false;
 					//Increases knockoutmap number to start/continue with harder maps and give more points
 					while (12 - players.length > mapIndex) {
