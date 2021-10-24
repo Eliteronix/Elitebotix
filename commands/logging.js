@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('../dbObjects');
-const { getGuildPrefix } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -18,7 +18,19 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'server-admin',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			if (interaction.options._subcommand !== 'toggleevent') {
+				args = [interaction.options._subcommand];
+			}
+
+			if (interaction.options._subcommand !== 'list') {
+				args.push(interaction.options._hoistedOptions[0].value);
+			}
+		}
+
 		let guild = await DBGuilds.findOne({
 			where: { guildId: msg.guildId }
 		});
@@ -198,7 +210,11 @@ module.exports = {
 				.setTimestamp()
 				.setFooter(`To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\``);
 
-			msg.reply({ embeds: [loggingEmbed] });
+			if (msg.id) {
+				msg.reply({ embeds: [loggingEmbed] });
+			} else {
+				interaction.reply({ embeds: [loggingEmbed] });
+			}
 
 			const loggingEmbed2 = new Discord.MessageEmbed()
 				.setColor('#0099ff')
@@ -211,23 +227,39 @@ module.exports = {
 				.setTimestamp()
 				.setFooter(`To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\``);
 
-			msg.reply({ embeds: [loggingEmbed2] });
+			if (msg.id) {
+				msg.reply({ embeds: [loggingEmbed2] });
+			} else {
+				interaction.reply({ embeds: [loggingEmbed2] });
+			}
 		} else if (args[0].toLowerCase() === 'channel') {
 			if (!msg.mentions.channels.first()) {
-				return msg.reply('Please mention a channel where the highlighted messages should be sent into.');
+				if (msg.id) {
+					return msg.reply('Please mention a channel where the highlighted messages should be sent into.');
+				}
+				return interaction.reply('Please mention a channel where the highlighted messages should be sent into.');
 			}
 			if (guild) {
 				guild.loggingChannel = msg.mentions.channels.first().id;
 				guild.save();
-				return msg.reply(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
+				if (msg.id) {
+					return msg.reply(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
+				}
+				return interaction.reply(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
 			} else {
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, loggingChannel: msg.mentions.channels.first().id });
-				return msg.reply(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
+				if (msg.id) {
+					return msg.reply(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
+				}
+				return interaction.reply(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
 			}
 		} else {
 			if (!guild || !guild.loggingChannel) {
 				const guildPrefix = await getGuildPrefix(msg);
-				msg.reply(`Be sure to use \`${guildPrefix}${this.name} channel <mentioned channel>\` to set a channel where this information should be logged into.`);
+				if (msg.id) {
+					msg.reply(`Be sure to use \`${guildPrefix}${this.name} channel <mentioned channel>\` to set a channel where this information should be logged into.`);
+				}
+				interaction.reply(`Be sure to use \`${guildPrefix}${this.name} channel <mentioned channel>\` to set a channel where this information should be logged into.`);
 			}
 			if (!guild) {
 				guild = await DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name });

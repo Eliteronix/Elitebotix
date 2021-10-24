@@ -819,6 +819,7 @@ module.exports = {
 	async populateMsgFromInteraction(interaction) {
 		let userMentions = new Discord.Collection();
 		let roleMentions = new Discord.Collection();
+		let channelMentions = new Discord.Collection();
 
 		if (interaction.options._hoistedOptions) {
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
@@ -829,13 +830,16 @@ module.exports = {
 					userMentions.set(user.id, user);
 				} else if (interaction.options._hoistedOptions[i].type === 'ROLE') {
 					roleMentions.set(interaction.options._hoistedOptions[i].role.id, interaction.options._hoistedOptions[i].role);
+				} else if (interaction.options._hoistedOptions[i].type === 'CHANNEL') {
+					roleMentions.set(interaction.options._hoistedOptions[i].channel.id, interaction.options._hoistedOptions[i].channel);
 				}
 			}
 		}
 
 		let mentions = {
 			users: userMentions,
-			roles: roleMentions
+			roles: roleMentions,
+			channels: channelMentions
 		};
 
 		let guildId = null;
