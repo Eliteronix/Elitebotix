@@ -304,15 +304,17 @@ module.exports = {
 					movePlayersIntoFirstSlots(channel, lobby, players);
 					mapIndex++;
 
-					let skipped = false;
-					//Increases knockoutmap number to start/continue with harder maps and give more points
-					while (12 - players.length > mapIndex) {
-						mapIndex++;
-						skipped = true;
-					}
+					if (lobbyNumber === 1) {
+						let skipped = false;
+						//Increases knockoutmap number to start/continue with harder maps and give more points
+						while (12 - players.length > mapIndex) {
+							mapIndex++;
+							skipped = true;
+						}
 
-					if (skipped) {
-						await channel.sendMessage('One or more maps have been skipped due to a lower amount of players.');
+						if (skipped) {
+							await channel.sendMessage('One or more maps have been skipped due to a lower amount of players.');
+						}
 					}
 
 					doubleTime = '';
@@ -362,16 +364,18 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 }
 
 async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, mapIndex, isFirstRound) {
-	let skipped = false;
-	//Increases knockoutmap number to start/continue with harder maps and give more points
-	while (12 - players.length > mapIndex) {
-		mapIndex++;
-		skipped = true;
-	}
+	if (lobbyNumber === 1) {
+		let skipped = false;
+		//Increases knockoutmap number to start/continue with harder maps and give more points
+		while (12 - players.length > mapIndex) {
+			mapIndex++;
+			skipped = true;
+		}
 
-	if (skipped) {
-		for (let i = 0; i < users.length; i++) {
-			await messageUserWithRetries(client, users[i], 'One or more knockout maps have been skipped due to a lower amount of players left in the lobby.');
+		if (skipped) {
+			for (let i = 0; i < users.length; i++) {
+				await messageUserWithRetries(client, users[i], 'One or more knockout maps have been skipped due to a lower amount of players left in the lobby.');
+			}
 		}
 	}
 
