@@ -239,6 +239,14 @@ module.exports = {
 							'name': 'list',
 							'description': 'Show which users are being tracked in the channel',
 							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'eventname',
+									'description': 'The eventname found in the list embeds',
+									'type': 3, // 3 is type STRING
+									'required': true
+								}
+							]
 						},
 					]
 				},
