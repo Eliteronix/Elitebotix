@@ -269,71 +269,127 @@ module.exports = {
 					if (guild.loggingNicknames) {
 						guild.loggingNicknames = false;
 						guild.save();
-						msg.reply('Nickname changes will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Nickname changes will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Nickname changes will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingNicknames = true;
 						guild.save();
-						msg.reply('Nickname changes will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Nickname changes will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Nickname changes will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'usernames') {
 					if (guild.loggingUsernames) {
 						guild.loggingUsernames = false;
 						guild.save();
-						msg.reply('Username changes will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Username changes will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Username changes will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingUsernames = true;
 						guild.save();
-						msg.reply('Username changes will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Username changes will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Username changes will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'userdiscriminators') {
 					if (guild.loggingDiscriminators) {
 						guild.loggingDiscriminators = false;
 						guild.save();
-						msg.reply('Discriminator changes will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Discriminator changes will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Discriminator changes will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingDiscriminators = true;
 						guild.save();
-						msg.reply('Discriminator changes will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Discriminator changes will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Discriminator changes will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'useravatars') {
 					if (guild.loggingAvatars) {
 						guild.loggingAvatars = false;
 						guild.save();
-						msg.reply('Avatar changes will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Avatar changes will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Avatar changes will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingAvatars = true;
 						guild.save();
-						msg.reply('Avatar changes will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Avatar changes will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Avatar changes will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'userroles') {
 					if (guild.loggingUserroles) {
 						guild.loggingUserroles = false;
 						guild.save();
-						msg.reply('User role changes will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('User role changes will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('User role changes will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingUserroles = true;
 						guild.save();
-						msg.reply('User role changes will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('User role changes will now get logged in the specified channel.');
+						} else {
+							interaction.reply('User role changes will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'userjoining') {
 					if (guild.loggingMemberAdd) {
 						guild.loggingMemberAdd = false;
 						guild.save();
-						msg.reply('Users joining will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Users joining will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Users joining will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingMemberAdd = true;
 						guild.save();
-						msg.reply('Users joining will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Users joining will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Users joining will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'userleaving') {
 					if (guild.loggingMemberRemove) {
 						guild.loggingMemberRemove = false;
 						guild.save();
-						msg.reply('Users leaving will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Users leaving will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Users leaving will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingMemberRemove = true;
 						guild.save();
-						msg.reply('Users leaving will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Users leaving will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Users leaving will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'rolecreate') {
 					if (guild.loggingRoleCreate) {
