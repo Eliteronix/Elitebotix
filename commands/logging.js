@@ -230,10 +230,11 @@ module.exports = {
 			if (msg.id) {
 				msg.reply({ embeds: [loggingEmbed2] });
 			} else {
-				interaction.reply({ embeds: [loggingEmbed2] });
+				interaction.followUp({ embeds: [loggingEmbed2] });
 			}
 		} else if (args[0].toLowerCase() === 'channel') {
 			if (!msg.mentions.channels.first()) {
+				console.log(msg.mentions);
 				if (msg.id) {
 					return msg.reply('Please mention a channel where the highlighted messages should be sent into.');
 				}
@@ -395,204 +396,368 @@ module.exports = {
 					if (guild.loggingRoleCreate) {
 						guild.loggingRoleCreate = false;
 						guild.save();
-						msg.reply('Create roles will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Create roles will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Create roles will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingRoleCreate = true;
 						guild.save();
-						msg.reply('Create roles will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Create roles will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Create roles will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'roleupdate') {
 					if (guild.loggingRoleUpdate) {
 						guild.loggingRoleUpdate = false;
 						guild.save();
-						msg.reply('Updated roles will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Updated roles will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Updated roles will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingRoleUpdate = true;
 						guild.save();
-						msg.reply('Updated roles will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Updated roles will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Updated roles will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'roledelete') {
 					if (guild.loggingRoleDelete) {
 						guild.loggingRoleDelete = false;
 						guild.save();
-						msg.reply('Deleted roles will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Deleted roles will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Deleted roles will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingRoleDelete = true;
 						guild.save();
-						msg.reply('Deleted roles will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Deleted roles will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Deleted roles will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'banadd') {
 					if (guild.loggingBanAdd) {
 						guild.loggingBanAdd = false;
 						guild.save();
-						msg.reply('Banned users will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Banned users will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Banned users will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingBanAdd = true;
 						guild.save();
-						msg.reply('Banned users will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Banned users will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Banned users will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'banremove') {
 					if (guild.loggingBanRemove) {
 						guild.loggingBanRemove = false;
 						guild.save();
-						msg.reply('Unbanned users will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Unbanned users will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Unbanned users will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingBanRemove = true;
 						guild.save();
-						msg.reply('Unbanned users will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Unbanned users will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Unbanned users will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'guildupdate') {
 					if (guild.loggingGuildUpdate) {
 						guild.loggingGuildUpdate = false;
 						guild.save();
-						msg.reply('Guild updates will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Guild updates will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Guild updates will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingGuildUpdate = true;
 						guild.save();
-						msg.reply('Guild updates will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Guild updates will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Guild updates will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'servermute') {
 					if (guild.loggingServerMute) {
 						guild.loggingServerMute = false;
 						guild.save();
-						msg.reply('Server mutes will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Server mutes will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Server mutes will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingServerMute = true;
 						guild.save();
-						msg.reply('Server mutes will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Server mutes will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Server mutes will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'serverdeaf') {
 					if (guild.loggingServerDeaf) {
 						guild.loggingServerDeaf = false;
 						guild.save();
-						msg.reply('Server deafs will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Server deafs will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Server deafs will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingServerDeaf = true;
 						guild.save();
-						msg.reply('Server deafs will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Server deafs will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Server deafs will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'joinvoice') {
 					if (guild.loggingJoinVoice) {
 						guild.loggingJoinVoice = false;
 						guild.save();
-						msg.reply('Joining voices will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Joining voices will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Joining voices will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingJoinVoice = true;
 						guild.save();
-						msg.reply('Joining voices will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Joining voices will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Joining voices will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'leavevoice') {
 					if (guild.loggingLeaveVoice) {
 						guild.loggingLeaveVoice = false;
 						guild.save();
-						msg.reply('Leaving voices will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Leaving voices will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Leaving voices will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingLeaveVoice = true;
 						guild.save();
-						msg.reply('Leaving voices will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Leaving voices will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Leaving voices will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'channelcreate') {
 					if (guild.loggingChannelCreate) {
 						guild.loggingChannelCreate = false;
 						guild.save();
-						msg.reply('Created channels will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Created channels will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Created channels will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingChannelCreate = true;
 						guild.save();
-						msg.reply('Created channels will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Created channels will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Created channels will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'channelupdate') {
 					if (guild.loggingChannelUpdate) {
 						guild.loggingChannelUpdate = false;
 						guild.save();
-						msg.reply('Updated channels will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Updated channels will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Updated channels will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingChannelUpdate = true;
 						guild.save();
-						msg.reply('Updated channels will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Updated channels will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Updated channels will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'channeldelete') {
 					if (guild.loggingChannelDelete) {
 						guild.loggingChannelDelete = false;
 						guild.save();
-						msg.reply('Deleted channels will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Deleted channels will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Deleted channels will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingChannelDelete = true;
 						guild.save();
-						msg.reply('Deleted channels will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Deleted channels will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Deleted channels will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'invitecreate') {
 					if (guild.loggingInviteCreate) {
 						guild.loggingInviteCreate = false;
 						guild.save();
-						msg.reply('Created invites will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Created invites will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Created invites will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingInviteCreate = true;
 						guild.save();
-						msg.reply('Created invites will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Created invites will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Created invites will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'invitedelete') {
 					if (guild.loggingInviteDelete) {
 						guild.loggingInviteDelete = false;
 						guild.save();
-						msg.reply('Deleted invites will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Deleted invites will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Deleted invites will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingInviteDelete = true;
 						guild.save();
-						msg.reply('Deleted invites will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Deleted invites will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Deleted invites will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'messageupdate') {
 					if (guild.loggingMessageUpdate) {
 						guild.loggingMessageUpdate = false;
 						guild.save();
-						msg.reply('Updated messages will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Updated messages will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Updated messages will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingMessageUpdate = true;
 						guild.save();
-						msg.reply('Updated messages will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Updated messages will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Updated messages will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'messagedelete') {
 					if (guild.loggingMessageDelete) {
 						guild.loggingMessageDelete = false;
 						guild.save();
-						msg.reply('Deleted messages will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Deleted messages will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Deleted messages will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingMessageDelete = true;
 						guild.save();
-						msg.reply('Deleted messages will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Deleted messages will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Deleted messages will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'emojicreate') {
 					if (guild.loggingEmojiCreate) {
 						guild.loggingEmojiCreate = false;
 						guild.save();
-						msg.reply('Created emojis will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Created emojis will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Created emojis will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingEmojiCreate = true;
 						guild.save();
-						msg.reply('Created emojis will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Created emojis will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Created emojis will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'emojiupdate') {
 					if (guild.loggingEmojiUpdate) {
 						guild.loggingEmojiUpdate = false;
 						guild.save();
-						msg.reply('Updated emojis will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Updated emojis will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Updated emojis will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingEmojiUpdate = true;
 						guild.save();
-						msg.reply('Updated emojis will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Updated emojis will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Updated emojis will now get logged in the specified channel.');
+						}
 					}
 				} else if (arg.toLowerCase() === 'emojidelete') {
 					if (guild.loggingEmojiDelete) {
 						guild.loggingEmojiDelete = false;
 						guild.save();
-						msg.reply('Deleted emojis will no longer get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Deleted emojis will no longer get logged in the specified channel.');
+						} else {
+							interaction.reply('Deleted emojis will no longer get logged in the specified channel.');
+						}
 					} else {
 						guild.loggingEmojiDelete = true;
 						guild.save();
-						msg.reply('Deleted emojis will now get logged in the specified channel.');
+						if (msg.id) {
+							msg.reply('Deleted emojis will now get logged in the specified channel.');
+						} else {
+							interaction.reply('Deleted emojis will now get logged in the specified channel.');
+						}
 					}
 				} else {
-					msg.reply(`\`${arg.replace(/`/g, '')}\` is not a valid event to log.`);
+					if (msg.id) {
+						msg.reply(`\`${arg.replace(/`/g, '')}\` is not a valid event to log.`);
+					} else {
+						interaction.reply(`\`${arg.replace(/`/g, '')}\` is not a valid event to log.`);
+					}
 				}
 			});
 		}

@@ -29,9 +29,11 @@ module.exports = {
 			}
 		}
 
-		let serverAdminCommands = ['activityrole', 'autorole', 'goodbye-message', 'logging'];
+		let serverAdminCommands = ['activityrole', 'autorole', 'goodbye-message', 'logging', 'osu-track', 'prefix', 'prune'];
 
 		if (show) {
+			await interaction.deferReply();
+
 			await additionalObjects[0].api.applications(additionalObjects[0].user.id).guilds(interaction.guildId).commands.post({
 				data: {
 					name: 'activityrole',
@@ -202,7 +204,77 @@ module.exports = {
 				},
 			});
 
-			interaction.reply(`Server-admin commands will be shown:\n\`${serverAdminCommands.join('`, `')}\``);
+			await additionalObjects[0].api.applications(additionalObjects[0].user.id).guilds(interaction.guildId).commands.post({
+				data: {
+					name: 'osu-track',
+					description: 'Tracks new scores set by the specified users',
+					options: [
+						{
+							'name': 'add',
+							'description': 'Lets you add a new user to track',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'username',
+									'description': 'The user to track',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'remove',
+							'description': 'Stop tracking a user',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'username',
+									'description': 'The user to stop tracking',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'list',
+							'description': 'Show which users are being tracked in the channel',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+					]
+				},
+			});
+
+			await additionalObjects[0].api.applications(additionalObjects[0].user.id).guilds(interaction.guildId).commands.post({
+				data: {
+					name: 'prefix',
+					description: 'Change the bot\'s prefix on the server for chat commands',
+					options: [
+						{
+							'name': 'prefix',
+							'description': 'The new bot prefix',
+							'type': 3,
+							'required': true
+						},
+					]
+				},
+			});
+
+			await additionalObjects[0].api.applications(additionalObjects[0].user.id).guilds(interaction.guildId).commands.post({
+				data: {
+					name: 'prune',
+					description: 'Delete recent messages',
+					options: [
+						{
+							'name': 'amount',
+							'description': 'The amount of messages to delete',
+							'type': 4,
+							'required': true
+						},
+					]
+				},
+			});
+
+			interaction.editReply(`Server-admin commands will be shown:\n\`${serverAdminCommands.join('`, `')}\``);
 		} else {
 			const commands = await additionalObjects[0].api.applications(additionalObjects[0].user.id).guilds(interaction.guildId).commands.get();
 			for (let i = 0; i < commands.length; i++) {

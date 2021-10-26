@@ -831,7 +831,7 @@ module.exports = {
 				} else if (interaction.options._hoistedOptions[i].type === 'ROLE') {
 					roleMentions.set(interaction.options._hoistedOptions[i].role.id, interaction.options._hoistedOptions[i].role);
 				} else if (interaction.options._hoistedOptions[i].type === 'CHANNEL') {
-					roleMentions.set(interaction.options._hoistedOptions[i].channel.id, interaction.options._hoistedOptions[i].channel);
+					channelMentions.set(interaction.options._hoistedOptions[i].channel.id, interaction.options._hoistedOptions[i].channel);
 				}
 			}
 		}
