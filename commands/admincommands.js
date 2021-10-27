@@ -29,7 +29,7 @@ module.exports = {
 			}
 		}
 
-		let serverAdminCommands = ['activityrole', 'autorole', 'goodbye-message', 'logging', 'osu-track', 'prefix', 'prune'];
+		let serverAdminCommands = ['activityrole', 'autorole', 'goodbye-message', 'logging', 'osu-track', 'prefix', 'prune', 'reactionrole'];
 
 		if (show) {
 			await interaction.deferReply();
@@ -274,8 +274,179 @@ module.exports = {
 				},
 			});
 
+			await additionalObjects[0].api.applications(additionalObjects[0].user.id).guilds(interaction.guildId).commands.post({
+				data: {
+					name: 'reactionrole',
+					description: 'Set up roles that users can assign themselves',
+					options: [
+						{
+							'name': 'embedadd',
+							'description': 'Create a new embed for reactionroles',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'name',
+									'description': 'The name of the embed',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'embedremove',
+							'description': 'Remove an existing embed',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'embedid',
+									'description': 'The ID of the embed',
+									'type': 4,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'embedchange',
+							'description': 'Change an existing embed',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'embedid',
+									'description': 'The ID of the embed',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'property',
+									'description': 'The property to change',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Title',
+											'value': 'title'
+										},
+										{
+											'name': 'Description',
+											'value': 'description'
+										},
+										{
+											'name': 'Color',
+											'value': 'color'
+										},
+										{
+											'name': 'Image',
+											'value': 'image'
+										}
+									]
+								},
+								{
+									'name': 'value',
+									'description': 'The new title/description/color/image URL',
+									'type': 3,
+									'required': true,
+								}
+							]
+						},
+						{
+							'name': 'roleadd',
+							'description': 'Add a role to an embed',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'embedid',
+									'description': 'The ID of the embed',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'emoji',
+									'description': 'The emoji to represent the role',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'role',
+									'description': 'The emoji to represent the role',
+									'type': 8, // 8 is type ROLE
+									'required': true
+								},
+								{
+									'name': 'description',
+									'description': 'The description for the reactionrole',
+									'type': 3,
+									'required': true
+								},
+							]
+						},
+						{
+							'name': 'roleremove',
+							'description': 'Remove an existing reactionrole',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'embedid',
+									'description': 'The ID of the embed',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'emoji',
+									'description': 'The emoji that represents the role',
+									'type': 3,
+									'required': true
+								},
+							]
+						},
+						{
+							'name': 'rolechange',
+							'description': 'Change an existing reactionrole',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'embedid',
+									'description': 'The ID of the embed',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'emoji',
+									'description': 'The emoji that represents the role',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'property',
+									'description': 'The property to change',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Emoji',
+											'value': 'emoji'
+										},
+										{
+											'name': 'Description',
+											'value': 'description'
+										}
+									]
+								},
+								{
+									'name': 'value',
+									'description': 'The new emoji/description',
+									'type': 3,
+									'required': true,
+								}
+							]
+						},
+					]
+				},
+			});
+
 			interaction.editReply(`Server-admin commands will be shown:\n\`${serverAdminCommands.join('`, `')}\``);
 		} else {
+			await interaction.deferReply();
+
 			const commands = await additionalObjects[0].api.applications(additionalObjects[0].user.id).guilds(interaction.guildId).commands.get();
 			for (let i = 0; i < commands.length; i++) {
 				if (serverAdminCommands.includes(commands[i].name)) {
@@ -283,7 +454,7 @@ module.exports = {
 				}
 			}
 
-			interaction.reply('Server-admin commands will no longer be shown.');
+			interaction.editReply('Server-admin commands will no longer be shown.');
 		}
 	},
 };
