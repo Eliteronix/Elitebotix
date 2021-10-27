@@ -70,8 +70,8 @@ module.exports = {
 						processQueueEntry.destroy();
 						return DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${parseInt(matchID) + 1}`, priority: 0 });
 					} else {
-						processQueueEntry.destroy();
-						return console.log(`A task for ${parseInt(matchID) + 1} already exists.`);
+						return processQueueEntry.destroy();
+						// return console.log(`A task for ${parseInt(matchID) + 1} already exists.`);
 					}
 				}
 				// console.log(`${matchID} has not ended yet`);
@@ -88,8 +88,8 @@ module.exports = {
 						processQueueEntry.destroy();
 						return DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${parseInt(matchID) + 1}`, priority: 0 });
 					} else {
-						processQueueEntry.destroy();
-						return console.log(`A task for ${parseInt(matchID) + 1} already exists.`);
+						return processQueueEntry.destroy();
+						// return console.log(`A task for ${parseInt(matchID) + 1} already exists.`);
 					}
 				} else {
 					// console.log('processQueueTasks/saveMultiMatches.js', matchID, err);
