@@ -29,7 +29,7 @@ module.exports = {
 			}
 		}
 
-		let serverAdminCommands = ['activityrole', 'autorole', 'goodbye-message', 'logging', 'osu-track', 'prefix', 'prune', 'reactionrole'];
+		let serverAdminCommands = ['activityrole', 'autorole', 'goodbye-message', 'logging', 'osu-track', 'prefix', 'prune', 'reactionrole', 'starboard', 'tempvoice'];
 
 		if (show) {
 			await interaction.deferReply();
@@ -182,7 +182,7 @@ module.exports = {
 								{
 									'name': 'channel',
 									'description': 'The channel that is supposed to log the information',
-									'type': 7, // 3 is type CHANNEL
+									'type': 7, // 7 is type CHANNEL
 									'required': true
 								}
 							]
@@ -438,6 +438,80 @@ module.exports = {
 									'required': true,
 								}
 							]
+						},
+					]
+				},
+			});
+
+			await additionalObjects[0].api.applications(additionalObjects[0].user.id).guilds(interaction.guildId).commands.post({
+				data: {
+					name: 'starboard',
+					description: 'Highlight favourite messages with a star emoji!',
+					options: [
+						{
+							'name': 'enable',
+							'description': 'Enable the starboard for the server',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'disable',
+							'description': 'Disable the starboard for the server',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'channel',
+							'description': 'Set the starboard channel where starred messages get sent to',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'channel',
+									'description': 'The channel to send messages to',
+									'type': 7, // 7 is type CHANNEL
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'minimum',
+							'description': 'Set the minimum amount of stars needed to highlight',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'amount',
+									'description': 'The minimum amount of stars needed',
+									'type': 4,
+									'required': true
+								}
+							]
+						},
+					]
+				},
+			});
+
+			await additionalObjects[0].api.applications(additionalObjects[0].user.id).guilds(interaction.guildId).commands.post({
+				data: {
+					name: 'tempvoice',
+					description: 'Create temporary voice- and textchannels',
+					options: [
+						{
+							'name': 'enablevoice',
+							'description': 'Enable temporary voices for the server',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'disablevoice',
+							'description': 'Disable temporary voices for the server',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'enabletext',
+							'description': 'Enable temporary textchannels along voices for the server',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'disabletext',
+							'description': 'Disable temporary textchannels along voices for the server',
+							'type': 1, // 1 is type SUB_COMMAND
 						},
 					]
 				},

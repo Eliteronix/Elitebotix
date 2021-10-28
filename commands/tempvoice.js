@@ -1,5 +1,5 @@
 const { DBGuilds } = require('../dbObjects');
-const { getGuildPrefix } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -17,7 +17,22 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'server-admin',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			await interaction.deferReply({ ephemeral: true });
+
+			if (interaction.options._subcommand === 'enablevoice') {
+				args = ['enable'];
+			} else if (interaction.options._subcommand === 'disablevoice') {
+				args = ['disable'];
+			} else if (interaction.options._subcommand === 'enabletext') {
+				args = ['text', 'enable'];
+			} else {
+				args = ['text', 'disable'];
+			}
+		}
 		//get guild from db
 		const guild = await DBGuilds.findOne({
 			where: { guildId: msg.guildId },
@@ -33,14 +48,23 @@ module.exports = {
 				let guildPrefix = await getGuildPrefix(msg);
 
 				if (guild.addTemporaryText) {
-					msg.reply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
+					if (msg.id) {
+						return msg.reply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
+					}
+					return interaction.editReply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
 				} else {
-					msg.reply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will NOT be created alongside for all the members in the voices.\n To enable this type \`${guildPrefix}tempvoice text enable\``);
+					if (msg.id) {
+						return msg.reply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will NOT be created alongside for all the members in the voices.\n To enable this type \`${guildPrefix}tempvoice text enable\``);
+					}
+					return interaction.editReply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will NOT be created alongside for all the members in the voices.\n To enable this type \`${guildPrefix}tempvoice text enable\``);
 				}
 			} else if (args[0] === 'disable') {
 				guild.temporaryVoices = false;
 				guild.save();
-				msg.reply('Temporary channels have been disabled.');
+				if (msg.id) {
+					return msg.reply('Temporary channels have been disabled.');
+				}
+				return interaction.editReply('Temporary channels have been disabled.');
 			} else if (args[0] === 'text') {
 				if (args[1] === 'enable') {
 					//Check permissions of the bot
@@ -51,13 +75,22 @@ module.exports = {
 
 					guild.addTemporaryText = true;
 					guild.save();
-					msg.reply('Text channels will now be created alongside temporary voice channels.');
+					if (msg.id) {
+						return msg.reply('Text channels will now be created alongside temporary voice channels.');
+					}
+					return interaction.editReply('Text channels will now be created alongside temporary voice channels.');
 				} else if (args[1] === 'disable') {
 					guild.addTemporaryText = false;
 					guild.save();
-					msg.reply('Text channels will NOT be created alongside temporary voice channels.');
+					if (msg.id) {
+						return msg.reply('Text channels will NOT be created alongside temporary voice channels.');
+					}
+					return interaction.editReply('Text channels will NOT be created alongside temporary voice channels.');
 				} else {
-					msg.reply('Please specify if you want to enable or disable the textchannel creation.');
+					if (msg.id) {
+						return msg.reply('Please specify if you want to enable or disable the textchannel creation.');
+					}
+					return interaction.editReply('Please specify if you want to enable or disable the textchannel creation.');
 				}
 			}
 		} else {
@@ -68,30 +101,48 @@ module.exports = {
 
 				let guildPrefix = await getGuildPrefix(msg);
 
-				msg.reply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
+				if (msg.id) {
+					return msg.reply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
+				}
+				return interaction.editReply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
 			} else if (args[0] === 'disable') {
 				//Create guild in db if it wasn't there yet
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, temporaryVoices: false, addTemporaryText: true });
-				msg.reply('Temporary channels have been disabled.');
+				if (msg.id) {
+					return msg.reply('Temporary channels have been disabled.');
+				}
+				return interaction.editReply('Temporary channels have been disabled.');
 			} else if (args[0] === 'text') {
 				if (args[1] === 'enable') {
 					//Check permissions of the bot
 					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch('784836063058329680'));
 					if (!botPermissions.has('ADMINISTRATOR')) {
-						return msg.reply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');
+						if (msg.id) {
+							return msg.reply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');
+						}
+						return interaction.editReply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');
 					}
 
 					//Create guild in db if it wasn't there yet
 					DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, temporaryVoices: false, addTemporaryText: true });
-					msg.reply('Text channels will now be created alongside temporary voice channels.');
+					if (msg.id) {
+						return msg.reply('Text channels will now be created alongside temporary voice channels.');
+					}
+					return interaction.editReply('Text channels will now be created alongside temporary voice channels.');
 				} else if (args[1] === 'disable') {
 					//Create guild in db if it wasn't there yet
 					DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, temporaryVoices: false, addTemporaryText: false });
-					msg.reply('Text channels will NOT be created alongside temporary voice channels.');
+					if (msg.id) {
+						return msg.reply('Text channels will NOT be created alongside temporary voice channels.');
+					}
+					return interaction.editReply('Text channels will NOT be created alongside temporary voice channels.');
 				} else {
 					//Create guild in db if it wasn't there yet
 					DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, temporaryVoices: false, addTemporaryText: false });
-					msg.reply('Please specify if you want to enable or disable the textchannel creation.');
+					if (msg.id) {
+						return msg.reply('Please specify if you want to enable or disable the textchannel creation.');
+					}
+					return interaction.editReply('Please specify if you want to enable or disable the textchannel creation.');
 				}
 			}
 		}
