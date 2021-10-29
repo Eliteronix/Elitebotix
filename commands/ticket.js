@@ -7,7 +7,7 @@ module.exports = {
 	name: 'ticket',
 	//aliases: ['developer'],
 	description: 'Ticket manager',
-	usage: '<issue description> | <responded/r/action/a/close/c> | <add/remove> <@user/@role>',
+	usage: '<issue description> | <responded/r/action/a/close/c> | <add/remove> <@role>',
 	// permissions: 'MANAGE_GUILD',
 	// permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MANAGE_ROLES],
@@ -23,7 +23,17 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			args = interaction.options._hoistedOptions[0].value.split(' ');
+			await interaction.deferReply({ ephemeral: true });
+
+			if (interaction.options._subcommand === 'create') {
+				args = interaction.options._hoistedOptions[0].value.split(' ');
+			} else if (interaction.options._subcommand === 'state') {
+				args = interaction.options._hoistedOptions[0].value;
+			} else if (interaction.options._subcommand === 'addrole') {
+				args = ['add', interaction.options._hoistedOptions[0].value];
+			} else if (interaction.options._subcommand === 'removerole') {
+				args = ['remove', interaction.options._hoistedOptions[0].value];
+			}
 		}
 
 		//get guild from db
@@ -39,6 +49,9 @@ module.exports = {
 
 				if (ticket) {
 					if (ticket.creatorId === msg.author.id && msg.guild.ownerId !== msg.author.id) {
+						if (interaction) {
+							interaction.editReply('You don\'t have permissions to add roles to the ticket.');
+						}
 						return;
 					}
 
@@ -51,7 +64,13 @@ module.exports = {
 					});
 					ticket.save();
 
+					if (interaction) {
+						interaction.editReply('The role has been added to the ticket.');
+					}
 					return await setPermissions(msg.channel, ticket);
+				}
+				if (interaction) {
+					return interaction.editReply('This is not a valid ticket channel.');
 				}
 			} else if (args[0].toLowerCase() === 'remove') {
 				const ticket = await DBTickets.findOne({
@@ -60,6 +79,9 @@ module.exports = {
 
 				if (ticket) {
 					if (ticket.creatorId === msg.author.id && msg.guild.ownerId !== msg.author.id) {
+						if (interaction) {
+							interaction.editReply('You don\'t have permissions to remove roles from the ticket.');
+						}
 						return;
 					}
 
@@ -84,7 +106,13 @@ module.exports = {
 					});
 					ticket.save();
 
+					if (interaction) {
+						interaction.editReply('The role has been removed from the ticket.');
+					}
 					return await setPermissions(msg.channel, ticket);
+				}
+				if (interaction) {
+					return interaction.editReply('This is not a valid ticket channel.');
 				}
 			} else if (args[0].toLowerCase() === 'responded' || args[0].toLowerCase() === 'r') {
 				const ticket = await DBTickets.findOne({
@@ -93,10 +121,16 @@ module.exports = {
 
 				if (ticket) {
 					if (ticket.creatorId === msg.author.id && msg.guild.ownerId !== msg.author.id) {
+						if (interaction) {
+							interaction.editReply('You don\'t have permissions to change the ticket state.');
+						}
 						return;
 					}
 					if (ticket.statusId === 100) {
-						return msg.reply('The ticket is already closed. Please create a new ticket instead.');
+						if (msg.id) {
+							return msg.reply('The ticket is already closed. Please create a new ticket instead.');
+						}
+						return interaction.editReply('The ticket is already closed. Please create a new ticket instead.');
 					}
 					ticket.statusId = 25;
 					ticket.statusName = 'Responded';
@@ -123,10 +157,16 @@ module.exports = {
 
 					await setPermissions(msg.channel, ticket);
 
+					if (interaction) {
+						interaction.editReply('The ticket state has been updated.');
+					}
 					msg.delete();
 					removeEmptyCategories(msg);
 				} else {
-					return msg.reply('This is not a valid ticket channel.');
+					if (msg.id) {
+						return msg.reply('This is not a valid ticket channel.');
+					}
+					return interaction.editReply('This is not a valid ticket channel.');
 				}
 				return;
 			} else if (args[0].toLowerCase() === 'action' || args[0].toLowerCase() === 'a') {
@@ -136,10 +176,16 @@ module.exports = {
 
 				if (ticket) {
 					if (ticket.creatorId === msg.author.id && msg.guild.ownerId !== msg.author.id) {
+						if (interaction) {
+							interaction.editReply('You don\'t have permissions to change the ticket state.');
+						}
 						return;
 					}
 					if (ticket.statusId === 100) {
-						return msg.reply('The ticket is already closed. Please create a new ticket instead.');
+						if (msg.id) {
+							return msg.reply('The ticket is already closed. Please create a new ticket instead.');
+						}
+						return interaction.editReply('The ticket is already closed. Please create a new ticket instead.');
 					}
 					ticket.statusId = 50;
 					ticket.statusName = 'In action';
@@ -170,10 +216,16 @@ module.exports = {
 
 					await setPermissions(msg.channel, ticket);
 
+					if (interaction) {
+						interaction.editReply('The ticket state has been updated.');
+					}
 					msg.delete();
 					removeEmptyCategories(msg);
 				} else {
-					return msg.reply('This is not a valid ticket channel.');
+					if (msg.id) {
+						return msg.reply('This is not a valid ticket channel.');
+					}
+					return interaction.editReply('This is not a valid ticket channel.');
 				}
 				return;
 			} else if (args[0].toLowerCase() === 'close' || args[0].toLowerCase() === 'c') {
@@ -183,10 +235,16 @@ module.exports = {
 
 				if (ticket) {
 					if (ticket.creatorId === msg.author.id && msg.guild.ownerId !== msg.author.id) {
+						if (interaction) {
+							interaction.editReply('You don\'t have permissions to change the ticket state.');
+						}
 						return;
 					}
 					if (ticket.statusId === 100) {
-						return msg.reply('The ticket is already closed.');
+						if (msg.id) {
+							return msg.reply('The ticket is already closed.');
+						}
+						return interaction.editReply('The ticket is already closed.');
 					}
 					ticket.statusId = 100;
 					ticket.statusName = 'Closed';
@@ -226,6 +284,9 @@ module.exports = {
 					await setPermissions(msg.channel, ticket);
 
 					msg.channel.send('The Ticket has been closed.');
+					if (interaction) {
+						interaction.editReply('The ticket state has been updated.');
+					}
 					removeEmptyCategories(msg);
 					msg.delete();
 
@@ -233,9 +294,11 @@ module.exports = {
 					date.setUTCMinutes(date.getUTCMinutes() + 3);
 					DBProcessQueue.create({ guildId: msg.guildId, task: 'closeTicket', priority: 5, additions: msg.channel.id, date: date });
 				} else {
-					return msg.reply('This is not a valid ticket channel.');
+					if (msg.id) {
+						return msg.reply('This is not a valid ticket channel.');
+					}
+					return interaction.editReply('This is not a valid ticket channel.');
 				}
-				return;
 			}
 
 			if (!args[1]) {
@@ -289,7 +352,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.delete();
 			}
-			return interaction.reply('Ticket has been created.');
+			return interaction.reply('The Ticket has been created.');
 		} else {
 			const guildPrefix = await getGuildPrefix(msg);
 			if (msg.id) {
