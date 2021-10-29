@@ -159,8 +159,9 @@ module.exports = {
 
 					if (interaction) {
 						interaction.editReply('The ticket state has been updated.');
+					} else {
+						msg.delete();
 					}
-					msg.delete();
 					removeEmptyCategories(msg);
 				} else {
 					if (msg.id) {
@@ -218,8 +219,9 @@ module.exports = {
 
 					if (interaction) {
 						interaction.editReply('The ticket state has been updated.');
+					} else {
+						msg.delete();
 					}
-					msg.delete();
 					removeEmptyCategories(msg);
 				} else {
 					if (msg.id) {
@@ -286,9 +288,10 @@ module.exports = {
 					msg.channel.send('The Ticket has been closed.');
 					if (interaction) {
 						interaction.editReply('The ticket state has been updated.');
+					} else {
+						msg.delete();
 					}
 					removeEmptyCategories(msg);
-					msg.delete();
 
 					let date = new Date();
 					date.setUTCMinutes(date.getUTCMinutes() + 3);
@@ -305,7 +308,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Please describe the problem in further detail.');
 				}
-				return interaction.reply('Please describe the problem in further detail.');
+				return interaction.editReply('Please describe the problem in further detail.');
 			}
 
 			const tickets = await DBTickets.findAll({
@@ -352,13 +355,13 @@ module.exports = {
 			if (msg.id) {
 				return msg.delete();
 			}
-			return interaction.reply('The Ticket has been created.');
+			return interaction.editReply('The Ticket has been created.');
 		} else {
 			const guildPrefix = await getGuildPrefix(msg);
 			if (msg.id) {
 				return msg.reply(`Tickets aren't enabled on this server.\nAdmins can enable tickets by using \`${guildPrefix}toggletickets\`.`);
 			}
-			return interaction.reply(`Tickets aren't enabled on this server.\nAdmins can enable tickets by using \`${guildPrefix}toggletickets\`.`);
+			return interaction.editReply(`Tickets aren't enabled on this server.\nAdmins can enable tickets by using \`${guildPrefix}toggletickets\`.`);
 		}
 	},
 };

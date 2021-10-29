@@ -29,7 +29,7 @@ module.exports = {
 			}
 		}
 
-		let serverAdminCommands = ['activityrole', 'autorole', 'goodbye-message', 'logging', 'osu-track', 'prefix', 'prune', 'reactionrole', 'starboard', 'tempvoice'];
+		let serverAdminCommands = ['activityrole', 'autorole', 'goodbye-message', 'logging', 'osu-track', 'prefix', 'prune', 'reactionrole', 'starboard', 'tempvoice', 'weather-track'];
 
 		if (show) {
 			await interaction.deferReply();
@@ -512,6 +512,94 @@ module.exports = {
 							'name': 'disabletext',
 							'description': 'Disable temporary textchannels along voices for the server',
 							'type': 1, // 1 is type SUB_COMMAND
+						},
+					]
+				},
+			});
+
+			await additionalObjects[0].api.applications(additionalObjects[0].user.id).guilds(interaction.guildId).commands.post({
+				data: {
+					name: 'weather-track',
+					description: 'Get hourly/daily weather updates for a specified location',
+					options: [
+						{
+							'name': 'list',
+							'description': 'List the currently tracked locations',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'add',
+							'description': 'Track a new location',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'location',
+									'description': 'The location or zipcode to track',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'frequency',
+									'description': 'The tracking frequency',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Daily',
+											'value': 'daily'
+										},
+										{
+											'name': 'Hourly',
+											'value': 'hourly'
+										},
+									]
+								},
+								{
+									'name': 'unit',
+									'description': 'The tracking unit',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Celcius',
+											'value': 'c'
+										},
+										{
+											'name': 'Fahrenheit',
+											'value': 'f'
+										}
+									]
+								}
+							]
+						},
+						{
+							'name': 'remove',
+							'description': 'Stop tracking a location',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'unit',
+									'description': 'The tracking unit',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Celcius',
+											'value': 'c'
+										},
+										{
+											'name': 'Fahrenheit',
+											'value': 'f'
+										}
+									]
+								},
+								{
+									'name': 'location',
+									'description': 'The location or zipcode to track',
+									'type': 3,
+									'required': true
+								},
+							]
 						},
 					]
 				},
