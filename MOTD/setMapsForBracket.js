@@ -1,7 +1,8 @@
 const Discord = require('discord.js');
-const { humanReadable } = require('../utils.js');
+const { humanReadable, getOsuBeatmap } = require('../utils.js');
 const { qualifier } = require('./qualifier.js');
 const { DBOsuBeatmaps, DBOsuMultiScores } = require('../dbObjects.js');
+const osu = require('node-osu');
 
 module.exports = {
 	setMapsForBracket: async function (client, bancho, bracketName, SRLimit, NMBeatmaps, DTBeatmaps, upperRank, lowerRank, channelId, roleId, players) {
@@ -48,30 +49,52 @@ module.exports = {
 			}
 		}
 
-		//Fill up maps if not enough
-		if (possibleNMBeatmaps.length < 9) {
-			const beatmaps = await DBOsuBeatmaps.findAll();
+		let amountOfMapsInDB = -1;
 
-			for (let i = 0; i < beatmaps.length; i++) {
-				if (beatmaps[i].mods !== 0 && beatmaps[i].mods !== 1) {
-					beatmaps.splice(i, 1);
-					i--;
+		if (possibleNMBeatmaps.length < 9 || possibleDTBeatmaps.length < 2) {
+			// eslint-disable-next-line no-undef
+			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+			});
+			while (amountOfMapsInDB === -1) {
+				const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
+
+				const dbBeatmap = await getOsuBeatmap(mostRecentBeatmap[0].id, 0);
+
+				if (dbBeatmap) {
+					amountOfMapsInDB = dbBeatmap.id;
 				}
 			}
+		}
 
+		//Fill up maps if not enough
+		if (possibleNMBeatmaps.length < 9) {
+			let backupBeatmapIds = [];
 			while (possibleNMBeatmaps.length < 9) {
 
 				let beatmap = null;
 
 				while (!beatmap) {
-					const index = Math.floor(Math.random() * beatmaps.length);
-					const dbBeatmap = beatmaps[index];
+					const index = Math.floor(Math.random() * amountOfMapsInDB);
+
+					const dbBeatmap = await DBOsuBeatmaps.findOne({
+						where: { id: index }
+					});
+
+
 
 					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
-						&& parseFloat(dbBeatmap.starRating) >= 4 && parseFloat(dbBeatmap.starRating) <= 6) {
+						&& parseFloat(dbBeatmap.starRating) >= 4 && parseFloat(dbBeatmap.starRating) <= 6
+						&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
+						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
+						backupBeatmapIds.push(dbBeatmap.id);
 						const multiScores = await DBOsuMultiScores.findAll({
 							where: {
 								tourneyMatch: true,
+								beatmapId: dbBeatmap.beatmapId
 							}
 						});
 
@@ -114,8 +137,6 @@ module.exports = {
 							}
 						};
 					}
-
-					beatmaps.splice(index, 1);
 				}
 
 				possibleNMBeatmaps.push(beatmap);
@@ -125,25 +146,29 @@ module.exports = {
 		}
 
 		if (possibleDTBeatmaps.length < 2) {
-			const beatmaps = await DBOsuBeatmaps.findAll({
-				where: {
-					mods: 64
-				}
-			});
+
+			let backupBeatmapIds = [];
 
 			while (possibleDTBeatmaps.length < 2) {
 
 				let beatmap = null;
 
 				while (!beatmap) {
-					const index = Math.floor(Math.random() * beatmaps.length);
-					const dbBeatmap = beatmaps[index];
+					const index = Math.floor(Math.random() * amountOfMapsInDB);
+
+					const dbBeatmap = await DBOsuBeatmaps.findOne({
+						where: { id: index }
+					});
 
 					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
-						&& parseFloat(dbBeatmap.starRating) >= 4 && parseFloat(dbBeatmap.starRating) <= 6) {
+						&& parseFloat(dbBeatmap.starRating) >= 4 && parseFloat(dbBeatmap.starRating) <= 6
+						&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
+						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
+						backupBeatmapIds.push(dbBeatmap.id);
 						const multiScores = await DBOsuMultiScores.findAll({
 							where: {
 								tourneyMatch: true,
+								beatmapId: dbBeatmap.beatmapId
 							}
 						});
 
@@ -186,8 +211,6 @@ module.exports = {
 							}
 						};
 					}
-
-					beatmaps.splice(index, 1);
 				}
 
 				possibleDTBeatmaps.push(beatmap);
