@@ -578,7 +578,10 @@ module.exports = {
 					}
 				}
 			}
-			if (i + dataStart === 0) {
+
+			if (data[i].color && data[i].color !== '#000000') {
+				ctx.fillStyle = data[i].color;
+			} else if (i + dataStart === 0) {
 				ctx.fillStyle = '#E2B007';
 			} else if (i + dataStart === 1) {
 				ctx.fillStyle = '#C4CACE';
