@@ -50,6 +50,7 @@ module.exports = {
 					});
 
 					if (serverUserActivity) {
+						serverUserActivity.displayColor = members[i].displayHexColor;
 						discordUsers.push(serverUserActivity);
 					}
 				}
@@ -75,6 +76,7 @@ module.exports = {
 					let dataset = {
 						name: userDisplayName,
 						value: `${humanReadable(discordUsers[i].points)} point(s)`,
+						color: discordUsers[i].displayColor
 					};
 
 					leaderboardData.push(dataset);
