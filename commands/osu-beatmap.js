@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage } = require('../utils');
 const { Permissions } = require('discord.js');
 const fetch = require('node-fetch');
 
@@ -144,6 +144,18 @@ async function drawMode(input) {
 	const gameMode = getGameMode(beatmap);
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
 	ctx.drawImage(modePic, (canvas.height / 3 - canvas.height / 3 / 4 * 3) / 2, canvas.height / 3 * 2 + (canvas.height / 3 - canvas.height / 3 / 4 * 3) / 4, canvas.height / 3 / 4 * 3, canvas.height / 3 / 4 * 3);
+
+	let mods = getMods(beatmap.mods);
+
+	if (!mods[0]) {
+		mods = ['NM'];
+	}
+
+	for (let i = 0; i < mods.length; i++) {
+		mods[i] = getModImage(mods[i]);
+		const modImage = await Canvas.loadImage(mods[i]);
+		ctx.drawImage(modImage, 150, 385 + i * 40 - ((mods.length - 1) * 40) / 2, 45, 32);
+	}
 
 	const output = [canvas, ctx, beatmap];
 	return output;
