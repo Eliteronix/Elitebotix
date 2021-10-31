@@ -27,6 +27,21 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'admincommands',
+			// 		description: 'Adapt if server-admin commands should be shown or not',
+			// 		options: [
+			// 			{
+			// 				'name': 'show',
+			// 				'description': 'Should the commands for server-admins be shown?',
+			// 				'type': 5,
+			// 				'required': true
+			// 			}
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'creator',
 			// 		description: 'Sends an info card about the developer'
 			// 	}
@@ -1407,14 +1422,74 @@ module.exports = {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'ticket',
-			// 		description: 'Create a ticket',
+			// 		description: 'Create and manage tickets',
 			// 		options: [
 			// 			{
-			// 				'name': 'issue',
-			// 				'description': 'The issue description for your ticket',
-			// 				'type': 3,
-			// 				'required': true,
-			// 			}
+			// 				'name': 'create',
+			// 				'description': 'Create a ticket',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'issue',
+			// 						'description': 'The issue description for your ticket',
+			// 						'type': 3,
+			// 						'required': true,
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'state',
+			// 				'description': 'Manage a ticket\'s workflow state',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'state',
+			// 						'description': 'The ticket\'s workflow state',
+			// 						'type': 3,
+			// 						'required': true,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Responded',
+			// 								'value': 'responded'
+			// 							},
+			// 							{
+			// 								'name': 'In action',
+			// 								'value': 'action'
+			// 							},
+			// 							{
+			// 								'name': 'Close',
+			// 								'value': 'close'
+			// 							}
+			// 						]
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'addrole',
+			// 				'description': 'Add a role to a ticket',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'role',
+			// 						'description': 'The role to add to the ticket',
+			// 						'type': 8,
+			// 						'required': true,
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'removerole',
+			// 				'description': 'Remove a role from a ticket',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'role',
+			// 						'description': 'The role to remove from the ticket',
+			// 						'type': 8,
+			// 						'required': true,
+			// 					}
+			// 				]
+			// 			},
 			// 		]
 			// 	}
 			// });
@@ -1494,6 +1569,21 @@ module.exports = {
 				await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands(commands[i].id).delete();
 			}
 		} else if (args[0] === 'globalCommands') {
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'admincommands',
+					description: 'Adapt if server-admin commands should be shown or not',
+					options: [
+						{
+							'name': 'show',
+							'description': 'Should the commands for server-admins be shown?',
+							'type': 5,
+							'required': true
+						}
+					]
+				},
+			});
+
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'creator',
@@ -2876,14 +2966,74 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'ticket',
-					description: 'Create a ticket',
+					description: 'Create and manage tickets',
 					options: [
 						{
-							'name': 'issue',
-							'description': 'The issue description for your ticket',
-							'type': 3,
-							'required': true,
-						}
+							'name': 'create',
+							'description': 'Create a ticket',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'issue',
+									'description': 'The issue description for your ticket',
+									'type': 3,
+									'required': true,
+								}
+							]
+						},
+						{
+							'name': 'state',
+							'description': 'Manage a ticket\'s workflow state',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'state',
+									'description': 'The ticket\'s workflow state',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Responded',
+											'value': 'responded'
+										},
+										{
+											'name': 'In action',
+											'value': 'action'
+										},
+										{
+											'name': 'Close',
+											'value': 'close'
+										}
+									]
+								}
+							]
+						},
+						{
+							'name': 'addrole',
+							'description': 'Add a role to a ticket',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'role',
+									'description': 'The role to add to the ticket',
+									'type': 8,
+									'required': true,
+								}
+							]
+						},
+						{
+							'name': 'removerole',
+							'description': 'Remove a role from a ticket',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'role',
+									'description': 'The role to remove from the ticket',
+									'type': 8,
+									'required': true,
+								}
+							]
+						},
 					]
 				}
 			});

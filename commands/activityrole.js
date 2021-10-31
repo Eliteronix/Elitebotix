@@ -1,5 +1,5 @@
 const { DBActivityRoles, DBProcessQueue } = require('../dbObjects');
-const { getGuildPrefix } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -17,7 +17,25 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'server-admin',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			args = [interaction.options._subcommand];
+
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				if (interaction.options._hoistedOptions[i].name === 'role') {
+					args.push(`<@&${interaction.options._hoistedOptions[i].value}>`);
+				} else if (interaction.options._hoistedOptions[i].name === 'rank') {
+					args.push(`top${interaction.options._hoistedOptions[i].value}`);
+				} else if (interaction.options._hoistedOptions[i].name === 'percentage') {
+					args.push(`top${interaction.options._hoistedOptions[i].value}%`);
+				} else if (interaction.options._hoistedOptions[i].name === 'points') {
+					args.push(`${interaction.options._hoistedOptions[i].value}points`);
+				}
+			}
+		}
+
 		//Check the first argument
 		if (args[0] === 'add') {
 			//Check if any roles were memtioned
@@ -36,7 +54,10 @@ module.exports = {
 					msg.channel.send(`${activityRoleName.name} is already an activityrole.`);
 				} else {
 					if (!args[2]) {
-						msg.channel.send('Please declare conditions: topx/topx%/xpoints');
+						if (msg.id) {
+							return msg.reply('Please declare conditions: topx/topx%/xpoints');
+						}
+						return interaction.reply('Please declare conditions: topx/topx%/xpoints');
 					}
 					let rankCutoff;
 					let percentageCutoff;
@@ -75,7 +96,10 @@ module.exports = {
 					if (!existingTask) {
 						DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 });
 					}
-					msg.channel.send(`${activityRoleName.name} has been added as an activityrole. The roles will get updated periodically and will not happen right after a user reached a new milestone.`);
+					if (msg.id) {
+						return msg.reply(`${activityRoleName.name} has been added as an activityrole. The roles will get updated periodically and will not happen right after a user reached a new milestone.`);
+					}
+					return interaction.reply(`${activityRoleName.name} has been added as an activityrole. The roles will get updated periodically and will not happen right after a user reached a new milestone.`);
 				}
 			} else {
 				//If no roles were mentioned
@@ -98,9 +122,15 @@ module.exports = {
 							member.roles.remove(activityRoleName.id);
 						}
 					});
-					msg.channel.send(`${activityRoleName.name} has been removed from activityroles.`);
+					if (msg.id) {
+						return msg.reply(`${activityRoleName.name} has been removed from activityroles.`);
+					}
+					return interaction.reply(`${activityRoleName.name} has been removed from activityroles.`);
 				} else {
-					msg.channel.send(`${activityRoleName.name} was no activityrole.`);
+					if (msg.id) {
+						return msg.reply(`${activityRoleName.name} was no activityrole.`);
+					}
+					return interaction.reply(`${activityRoleName.name} was no activityrole.`);
 				}
 			} else {
 				//if no roles were mentioned
@@ -153,7 +183,10 @@ module.exports = {
 				activityRolesString = 'No activityroles found.';
 			}
 			//Output activityrole list
-			msg.channel.send(`List of activityroles: ${activityRolesString}`);
+			if (msg.id) {
+				return msg.reply(`List of activityroles: ${activityRolesString}`);
+			}
+			return interaction.reply(`List of activityroles: ${activityRolesString}`);
 		} else {
 			let guildPrefix = await getGuildPrefix(msg);
 

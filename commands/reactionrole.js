@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const { DBReactionRolesHeader, DBReactionRoles } = require('../dbObjects');
-const { getGuildPrefix } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -18,7 +18,22 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'server-admin',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			await interaction.deferReply({ ephemeral: true });
+
+			if (interaction.options._subcommand.startsWith('embed')) {
+				args = ['embed', interaction.options._subcommand.substring(5)];
+			} else {
+				args = ['role', interaction.options._subcommand.substring(4)];
+			}
+
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				args.push(interaction.options._hoistedOptions[i].value);
+			}
+		}
 		//Check the first argument
 		if (args[0].toLowerCase() === 'embed') {
 			//Check the second argument
@@ -50,6 +65,10 @@ module.exports = {
 						.setColor('#0099ff')
 						.setTitle(embedName)
 						.setFooter(`Reactionrole - EmbedId: ${embedId}`);
+
+					if (!msg.id) {
+						interaction.editReply({ content: 'Embed will be created', ephemeral: true });
+					}
 					//Send embed
 					const embedMessage = await msg.channel.send({ embeds: [reactionRoleEmbed] });
 					//Create the record for the embed in the db
@@ -78,7 +97,11 @@ module.exports = {
 						try {
 							embedChannel = msg.guild.channels.cache.get(embedChannelId);
 						} catch (e) {
-							msg.reply('Couldn\'t find an embed with this EmbedId');
+							if (msg.id) {
+								msg.reply('Couldn\'t find an embed with this EmbedId');
+							} else {
+								interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
+							}
 							DBReactionRolesHeader.destroy({
 								where: { guildId: msg.guildId, id: args[2] },
 							});
@@ -86,6 +109,9 @@ module.exports = {
 						}
 						//Get the message object
 						const embedMessage = await embedChannel.messages.fetch(embedMessageId);
+						if (!msg.id) {
+							interaction.editReply({ content: 'Embed will be deleted', ephemeral: true });
+						}
 						//Delete the embed
 						embedMessage.delete();
 						//Delete the record from the db
@@ -93,7 +119,11 @@ module.exports = {
 							where: { guildId: msg.guildId, id: args[2] },
 						});
 					} else {
-						msg.reply('Couldn\'t find an embed with this EmbedId');
+						if (msg.id) {
+							msg.reply('Couldn\'t find an embed with this EmbedId');
+						} else {
+							interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
+						}
 					}
 				} else {
 					msg.reply('Please specify what Id the embed has you want to remove. (Can be found in the footer of the embed.)');
@@ -118,9 +148,15 @@ module.exports = {
 								editEmbed(msg, reactionRolesHeader)
 							);
 
-							msg.reply('The title for the specified embed has been changed.');
+							if (msg.id) {
+								return msg.reply('The title for the specified embed has been changed.');
+							}
+							return interaction.editReply({ content: 'The title for the specified embed has been changed.', ephemeral: true });
 						} else {
-							msg.reply('Couldn\'t find an embed with this EmbedId');
+							if (msg.id) {
+								return msg.reply('Couldn\'t find an embed with this EmbedId');
+							}
+							return interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
 						}
 					} else if (args[3].toLowerCase() === 'description') {
 						//Get embed from the db
@@ -139,9 +175,15 @@ module.exports = {
 								editEmbed(msg, reactionRolesHeader)
 							);
 
-							msg.reply('The description for the specified embed has been changed.');
+							if (msg.id) {
+								return msg.reply('The description for the specified embed has been changed.');
+							}
+							return interaction.editReply({ content: 'The description for the specified embed has been changed.', ephemeral: true });
 						} else {
-							msg.reply('Couldn\'t find an embed with this EmbedId');
+							if (msg.id) {
+								return msg.reply('Couldn\'t find an embed with this EmbedId');
+							}
+							return interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
 						}
 					} else if (args[3].toLowerCase() === 'color') {
 						if (args[4].startsWith('#') && args[4].length === 7) {
@@ -164,12 +206,21 @@ module.exports = {
 									editEmbed(msg, reactionRolesHeader)
 								);
 
-								msg.reply('The color for the specified embed has been changed.');
+								if (msg.id) {
+									return msg.reply('The color for the specified embed has been changed.');
+								}
+								return interaction.editReply({ content: 'The color for the specified embed has been changed.', ephemeral: true });
 							} else {
-								msg.reply('Couldn\'t find an embed with this EmbedId');
+								if (msg.id) {
+									return msg.reply('Couldn\'t find an embed with this EmbedId');
+								}
+								return interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
 							}
 						} else {
-							msg.reply('Please send a color in a format like \'#0099ff\'');
+							if (msg.id) {
+								return msg.reply('Please send a color in a format like \'#0099ff\'');
+							}
+							return interaction.editReply({ content: 'Please send a color in a format like \'#0099ff\'', ephemeral: true });
 						}
 					} else if (args[3].toLowerCase() === 'image') {
 
@@ -191,9 +242,15 @@ module.exports = {
 								editEmbed(msg, reactionRolesHeader)
 							);
 
-							msg.reply('The image for the specified embed has been changed.');
+							if (msg.id) {
+								return msg.reply('The image for the specified embed has been changed.');
+							}
+							return interaction.editReply({ content: 'The image for the specified embed has been changed.', ephemeral: true });
 						} else {
-							msg.reply('Couldn\'t find an embed with this EmbedId');
+							if (msg.id) {
+								return msg.reply('Couldn\'t find an embed with this EmbedId');
+							}
+							return interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
 						}
 					} else {
 						msg.reply('Please specify what you want to change: <title/description/color/image>');
@@ -215,7 +272,7 @@ module.exports = {
 				//Check the third argument if it is an possible embedId
 				if (!(isNaN(args[2]))) {
 					//Check if there is a role mentioned in the message
-					if (msg.mentions.roles.first() && args[4].startsWith('<@&')) {
+					if (interaction || msg.mentions.roles.first() && args[4].startsWith('<@&')) {
 						if (args[5]) {
 
 							const headerId = args[2];
@@ -236,9 +293,15 @@ module.exports = {
 								});
 
 								if (reactionRolesEmoji) {
-									return msg.reply('There is already a reactionrole with this emoji in the specified embed.');
+									if (msg.id) {
+										return msg.reply('There is already a reactionrole with this emoji in the specified embed.');
+									}
+									return interaction.editReply({ content: 'There is already a reactionrole with this emoji in the specified embed.', ephemeral: true });
 								} else if (reactionRolesRole) {
-									return msg.reply('There is already a reactionrole with this role in the specified embed.');
+									if (msg.id) {
+										return msg.reply('There is already a reactionrole with this role in the specified embed.');
+									}
+									return interaction.editReply({ content: 'There is already a reactionrole with this role in the specified embed.', ephemeral: true });
 								} else {
 									const emoji = args[3];
 									args.shift();
@@ -247,13 +310,20 @@ module.exports = {
 									args.shift();
 									args.shift();
 									DBReactionRoles.create({ dbReactionRolesHeaderId: headerId, roleId: roleMentioned, emoji: emoji, description: args.join(' ') });
-									msg.reply('The role has been added as an reactionrole.'); //Specify which role (print the name)
+									if (msg.id) {
+										msg.reply('The role has been added as an reactionrole.');
+									} else {
+										interaction.editReply({ content: 'The role has been added as an reactionrole.', ephemeral: true });
+									}
 
 									//Edit embed
 									editEmbed(msg, reactionRolesHeader);
 								}
 							} else {
-								msg.reply('Couldn\'t find an embed with this EmbedId');
+								if (msg.id) {
+									return msg.reply('Couldn\'t find an embed with this EmbedId');
+								}
+								return interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
 							}
 						} else {
 							msg.reply('You didn\'t provide a description for the role!');
@@ -290,8 +360,15 @@ module.exports = {
 							if (rowCount > 0) {
 								//Edit embed
 								editEmbed(msg, reactionRolesHeader);
+
+								if (interaction) {
+									interaction.editReply({ content: 'The role has been removed', ephemeral: true });
+								}
 							} else {
-								msg.reply('There were no reactionrole found in the embed with this emoji.');
+								if (msg.id) {
+									return msg.reply('There were no reactionrole found in the embed with this emoji.');
+								}
+								return interaction.editReply({ content: 'There were no reactionrole found in the embed with this emoji.', ephemeral: true });
 							}
 						}
 					}
@@ -326,6 +403,9 @@ module.exports = {
 								reactionRolesEmoji.emoji = args[5];
 								reactionRolesEmoji.save()
 									.then(editEmbed(msg, reactionRolesHeader));
+								if (interaction) {
+									interaction.editReply({ content: 'The emoji has been changed', ephemeral: true });
+								}
 							} else if (args[4].toLowerCase() === 'description') {
 								args.shift();
 								args.shift();
@@ -335,15 +415,24 @@ module.exports = {
 								reactionRolesEmoji.description = args.join(' ');
 								reactionRolesEmoji.save()
 									.then(editEmbed(msg, reactionRolesHeader));
+								if (interaction) {
+									interaction.editReply({ content: 'The description has been changed', ephemeral: true });
+								}
 							} else {
 								msg.reply('Please specify if you want to change the emoji or the description.');
 								sendHelp(msg);
 							}
 						} else {
-							msg.reply('Couldn\'t find a reactionrole with this emoji in the specified embed.');
+							if (msg.id) {
+								return msg.reply('Couldn\'t find a reactionrole with this emoji in the specified embed.');
+							}
+							return interaction.editReply({ content: 'Couldn\'t find a reactionrole with this emoji in the specified embed.', ephemeral: true });
 						}
 					} else {
-						msg.reply('Couldn\'t find an embed with this EmbedId');
+						if (msg.id) {
+							return msg.reply('Couldn\'t find an embed with this EmbedId');
+						}
+						return interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
 					}
 				} else {
 					msg.reply('Please specify what Id the embed has you want to add a role to. (Can be found in the footer of the embed.)');

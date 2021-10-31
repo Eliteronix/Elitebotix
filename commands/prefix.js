@@ -1,5 +1,6 @@
 const { DBGuilds } = require('../dbObjects');
 const { Permissions } = require('discord.js');
+const { populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'prefix',
@@ -16,7 +17,13 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'server-admin',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			args = [interaction.options._hoistedOptions[0].value];
+
+		}
 		//Get guild from db
 		const guild = await DBGuilds.findOne({
 			where: { guildId: msg.guildId },
@@ -28,12 +35,18 @@ module.exports = {
 			guild.customPrefix = args[0];
 			guild.save();
 
-			msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+			if (msg.id) {
+				return msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+			}
+			return interaction.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
 		} else {
 			//Create new record for the guild in the db
 			DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, customPrefixUsed: true, customPrefix: args[0] });
 
-			msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+			if (msg.id) {
+				return msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+			}
+			return interaction.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
 		}
 	},
 };

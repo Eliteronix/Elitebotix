@@ -818,6 +818,8 @@ module.exports = {
 	},
 	async populateMsgFromInteraction(interaction) {
 		let userMentions = new Discord.Collection();
+		let roleMentions = new Discord.Collection();
+		let channelMentions = new Discord.Collection();
 
 		if (interaction.options._hoistedOptions) {
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
@@ -826,12 +828,18 @@ module.exports = {
 				} else if (interaction.options._hoistedOptions[i].value && interaction.options._hoistedOptions[i].type === 'STRING' && interaction.options._hoistedOptions[i].value.startsWith('<@') && interaction.options._hoistedOptions[i].value.endsWith('>')) {
 					let user = await interaction.client.users.fetch(interaction.options._hoistedOptions[i].value.replace(/\D/g, ''));
 					userMentions.set(user.id, user);
+				} else if (interaction.options._hoistedOptions[i].type === 'ROLE') {
+					roleMentions.set(interaction.options._hoistedOptions[i].role.id, interaction.options._hoistedOptions[i].role);
+				} else if (interaction.options._hoistedOptions[i].type === 'CHANNEL') {
+					channelMentions.set(interaction.options._hoistedOptions[i].channel.id, interaction.options._hoistedOptions[i].channel);
 				}
 			}
 		}
 
 		let mentions = {
-			users: userMentions
+			users: userMentions,
+			roles: roleMentions,
+			channels: channelMentions
 		};
 
 		let guildId = null;
