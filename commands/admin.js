@@ -25,20 +25,20 @@ module.exports = {
 
 		if (args[0] === 'guildCommands') {
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'admincommands',
-					description: 'Adapt if server-admin commands should be shown or not',
-					options: [
-						{
-							'name': 'show',
-							'description': 'Should the commands for server-admins be shown?',
-							'type': 5,
-							'required': true
-						}
-					]
-				},
-			});
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'admincommands',
+			// 		description: 'Adapt if server-admin commands should be shown or not',
+			// 		options: [
+			// 			{
+			// 				'name': 'show',
+			// 				'description': 'Should the commands for server-admins be shown?',
+			// 				'type': 5,
+			// 				'required': true
+			// 			}
+			// 		]
+			// 	},
+			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -1569,6 +1569,21 @@ module.exports = {
 				await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands(commands[i].id).delete();
 			}
 		} else if (args[0] === 'globalCommands') {
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'admincommands',
+					description: 'Adapt if server-admin commands should be shown or not',
+					options: [
+						{
+							'name': 'show',
+							'description': 'Should the commands for server-admins be shown?',
+							'type': 5,
+							'required': true
+						}
+					]
+				},
+			});
+
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'creator',
