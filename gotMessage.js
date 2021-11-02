@@ -205,13 +205,13 @@ module.exports = async function (msg, bancho) {
 
 		//Check permissions of the bot
 		if (msg.channel.type !== 'DM') {
-				if (command.botPermissions) {
-					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch(msg.client.user.id));
-					if (!botPermissions.has(command.botPermissions)) {
-						return msg.reply(`I need the ${command.botPermissionsTranslated} permission to do this!`);
-					}
+			if (command.botPermissions) {
+				const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch(msg.client.user.id));
+				if (!botPermissions.has(command.botPermissions)) {
+					return msg.reply(`I need the ${command.botPermissionsTranslated} permission to do this!`);
 				}
 			}
+		}
 
 		//Check if arguments are provided if needed
 		if (command.args && !args.length) {
