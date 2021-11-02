@@ -28,14 +28,23 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			years = interaction.options._hoistedOptions[0].value;
-			months = interaction.options._hoistedOptions[1].value;
-			weeks = interaction.options._hoistedOptions[2].value;
-			days = interaction.options._hoistedOptions[3].value;
-			hours = interaction.options._hoistedOptions[4].value;
-			minutes = interaction.options._hoistedOptions[5].value;
-
-			args = [interaction.options._hoistedOptions[6].value];
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				if (interaction.options._hoistedOptions[i].name === 'years') {
+					years = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'months') {
+					months = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'weeks') {
+					weeks = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'days') {
+					days = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'hours') {
+					hours = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'minutes') {
+					minutes = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'message') {
+					args = [interaction.options._hoistedOptions[i].value];
+				}
+			}
 		}
 
 		for (let i = 0; i < args.length; i++) {
@@ -77,7 +86,10 @@ module.exports = {
 
 		if (now.getTime() === date.getTime()) {
 			const guildPrefix = await getGuildPrefix(msg);
-			return msg.reply(`You didn't specify when I should remind you.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
+			if (msg.id) {
+				return msg.reply(`You didn't specify when I should remind you.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
+			}
+			return interaction.reply({ content: 'You didn\'t specify when I should remind you.', ephemeral: true });
 		}
 
 		DBProcessQueue.create({ guildId: 'None', task: 'remind', priority: 10, additions: `${msg.author.id};${args.join(' ')}`, date: date });
