@@ -205,10 +205,12 @@ module.exports = async function (msg, bancho) {
 
 		//Check permissions of the bot
 		if (msg.channel.type !== 'DM') {
-			if (command.botPermissions) {
-				const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch('784836063058329680'));
-				if (!botPermissions.has(command.botPermissions)) {
-					return msg.reply(`I need the ${command.botPermissionsTranslated} permission to do this!`);
+			if (msg.guild.id !== '800641468321759242'){
+				if (command.botPermissions) {
+					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch('784836063058329680'));
+					if (!botPermissions.has(command.botPermissions)) {
+						return msg.reply(`I need the ${command.botPermissionsTranslated} permission to do this!`);
+					}
 				}
 			}
 		}
@@ -253,7 +255,7 @@ module.exports = async function (msg, bancho) {
 		}
 
 		//Set timestamp for the used command
-		if (msg.author.id !== '138273136285057025') {
+		if (msg.author.id !== '138273136285057025' && msg.author.id !== '212511522407055360') {
 			timestamps.set(msg.author.id, now);
 		}
 		//Automatically delete the timestamp after the cooldown
