@@ -69,23 +69,49 @@ async function sendUserEmbed(msg, interaction, user) {
 		);
 
 		//Get the member roles and push the IDs into an array
-		const memberRoleIds = [];
-		member.roles.cache.filter(role => role.name !== '@everyone').each(role => memberRoleIds.push(role.id));
+		const memberRoles = [];
+		member.roles.cache.filter(role => role.name !== '@everyone').each(role => memberRoles.push(`<@&${role.id}>`));
 
 		//18 characters role ID + <@& + > -> 22 characters per role
 		//Divide into as many fields as needed
 		const roleFieldValues = [];
+		let roleFieldValue = '';
 
-		for (let i = 0; i < memberRoleIds.length; i++) {
-			//Something that puts together the field value string per each 46 roles
+		//Fill up roleFieldValue with each role and push it to the array when character limit is reached
+		for (let i = 0; i < memberRoles.length; i++) {
+			//Character limit will be reached; push to array and reset the helper variable
+			if (roleFieldValue.length + 2 + memberRoles[i].length > 1024) {
+				roleFieldValues.push(roleFieldValue);
+				roleFieldValue = '';
+			}
+
+			//Differentiate between empty string and already filled string with some roles
+			if (roleFieldValue) {
+				roleFieldValue = `${roleFieldValue}, ${memberRoles[i]}`;
+			} else {
+				roleFieldValue = memberRoles[i];
+			}
 		}
 
+		//Add the rest of the roles that didn't fill up to 1024 anymore
+		if (roleFieldValue) {
+			roleFieldValues.push(roleFieldValue);
+		}
+
+
 		//add as many fields as needed to the embed
-		// if (memberRoles !== '<@&>') {
-		// 	userInfoEmbed.addFields(
-		// 		{ name: 'Roles', value: `${memberRoles}` }
-		// 	);
-		// }
+		if (roleFieldValues[0]) {
+			for (let i = 0; i < roleFieldValues.length; i++) {
+				let header = '\u200B';
+				if (i === 0) {
+					header = 'Roles';
+				}
+
+				userInfoEmbed.addFields(
+					{ name: header, value: roleFieldValues[i] }
+				);
+			}
+		}
 	}
 
 	//get discordUser from db
