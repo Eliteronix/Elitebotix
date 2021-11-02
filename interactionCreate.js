@@ -3,7 +3,7 @@ const fs = require('fs');
 const { isWrongSystem } = require('./utils');
 const cooldowns = new Discord.Collection();
 
-module.exports = async function (client, bancho, interaction) {
+module.exports = async function (msg, client, bancho, interaction) {
 	if (!interaction.isCommand()) return;
 	if (isWrongSystem(interaction.guildId, interaction.channel.type === 'DM')) {
 		return;
@@ -44,7 +44,7 @@ module.exports = async function (client, bancho, interaction) {
 	//Check permissions of the bot
 	if (interaction.guild_id) {
 		if (command.botPermissions) {
-			const botPermissions = interaction.channel.permissionsFor(await interaction.guild.members.fetch('784836063058329680'));
+			const botPermissions = interaction.channel.permissionsFor(await interaction.guild.members.fetch(msg.client.user.id));
 			if (!botPermissions.has(command.botPermissions)) {
 				return interaction.reply({ content: `I need the ${command.botPermissionsTranslated} permission to do this!`, ephemeral: true });
 			}
