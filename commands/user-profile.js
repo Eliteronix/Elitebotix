@@ -68,13 +68,24 @@ async function sendUserEmbed(msg, interaction, user) {
 			{ name: 'Nickname', value: `${userDisplayName}` }
 		);
 
-		const memberRoles = '<@&' + member.roles.cache.filter(role => role.name !== '@everyone').map(role => role.id).join('>, <@&') + '>';
+		//Get the member roles and push the IDs into an array
+		const memberRoleIds = [];
+		member.roles.cache.filter(role => role.name !== '@everyone').each(role => memberRoleIds.push(role.id));
 
-		if (memberRoles !== '<@&>') {
-			userInfoEmbed.addFields(
-				{ name: 'Roles', value: `${memberRoles}` }
-			);
+		//18 characters role ID + <@& + > -> 22 characters per role
+		//Divide into as many fields as needed
+		const roleFieldValues = [];
+
+		for (let i = 0; i < memberRoleIds.length; i++) {
+			//Something that puts together the field value string per each 46 roles
 		}
+
+		//add as many fields as needed to the embed
+		// if (memberRoles !== '<@&>') {
+		// 	userInfoEmbed.addFields(
+		// 		{ name: 'Roles', value: `${memberRoles}` }
+		// 	);
+		// }
 	}
 
 	//get discordUser from db
