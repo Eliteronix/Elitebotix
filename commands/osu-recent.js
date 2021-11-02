@@ -118,6 +118,8 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 
 
 				const beatmapMode = getBeatmapModeId(dbBeatmap);
+				const beatmapStatus = dbBeatmap.approvalStatus;
+				console.log(beatmapStatus)
 
 				let lookedUpScore;
 
@@ -142,9 +144,9 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 				const background = await Canvas.loadImage('./other/osu-background.png');
 				ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-				let elements = [canvas, ctx, scores[0], dbBeatmap, user];
+				let elements = [canvas, ctx, scores[0], dbBeatmap, user, beatmapStatus];
 				if (lookedUpScore) {
-					elements = [canvas, ctx, scores[0], dbBeatmap, user, lookedUpScore[0]];
+					elements = [canvas, ctx, scores[0], dbBeatmap, user, lookedUpScore[0], beatmapStatus];
 				}
 
 				elements = await drawTitle(elements);
@@ -260,6 +262,7 @@ async function drawTitle(input) {
 	let beatmap = input[3];
 	let user = input[4];
 	let lookedUpScore = input[5];
+	let beatmapStatus = input[6];
 
 	const gameMode = getGameMode(beatmap);
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
@@ -302,12 +305,14 @@ async function drawTitle(input) {
 		} else if (mods.includes('HR')) {
 			modMap = await getOsuBeatmap(beatmap.beatmapId, 16);
 		}
+		ctx.textAlign = 'left';
+		ctx.fillText(`${beatmapStatus}`, canvas.width, canvas.height )
 		ctx.fillText(`★ ${Math.round(beatmap.starRating * 100) / 100} (${Math.round(modMap.starRating * 100) / 100} with ${mods.join('')})   ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
 	} else {
 		ctx.fillText(`★ ${Math.round(beatmap.starRating * 100) / 100}   ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
 	}
 
-	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
+	const output = [canvas, ctx, score, beatmap, user, lookedUpScore, beatmapStatus];
 	return output;
 }
 
