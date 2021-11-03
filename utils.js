@@ -1018,12 +1018,17 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 		where: { beatmapId: beatmapId, mods: modBits }
 	});
 
+	//Date of reworked DT and HT values
+	if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('HT')) {
+		lastRework.setUTCFullYear(2021);
+		lastRework.setUTCMonth(10);
+		lastRework.setUTCDate(4);
+	}
+
 	if (!dbBeatmap
-		|| dbBeatmap && dbBeatmap.updatedAt < lastRework
-		|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt.getTime() < lastWeek.getTime()
-		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && !dbBeatmap.starRating
-		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && !dbBeatmap.maxCombo
-		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && dbBeatmap.starRating == 0) {
+		|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
+		|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt.getTime() < lastWeek.getTime() //Update if old non-ranked map
+		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0)) { //Always update ranked maps if values are missing
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -1043,6 +1048,15 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 					noVisualModBeatmap.maxCombo = realNoVisualModBeatmap.maxCombo;
 				}
 
+				//Recalculate bpm for HT and DT
+				let bpm = beatmaps[0].bpm;
+
+				if (getModsFunction(modBits).includes('DT')) {
+					bpm = parseFloat(beatmaps[0].bpm) * 1.5;
+				} else if (getModsFunction(modBits).includes('HT')) {
+					bpm = parseFloat(beatmaps[0].bpm) * 0.75;
+				}
+
 				//Map has to be updated
 				if (dbBeatmap) {
 					dbBeatmap.title = beatmaps[0].title;
@@ -1059,7 +1073,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 					dbBeatmap.hpDrain = beatmaps[0].difficulty.drain;
 					dbBeatmap.mapper = beatmaps[0].creator;
 					dbBeatmap.beatmapsetId = beatmaps[0].beatmapSetId;
-					dbBeatmap.bpm = beatmaps[0].bpm;
+					dbBeatmap.bpm = bpm;
 					dbBeatmap.mode = beatmaps[0].mode;
 					dbBeatmap.approvalStatus = beatmaps[0].approvalStatus;
 					dbBeatmap.maxCombo = noVisualModBeatmap.maxCombo;
@@ -1086,7 +1100,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 						mapper: beatmaps[0].creator,
 						beatmapId: beatmaps[0].id,
 						beatmapsetId: beatmaps[0].beatmapSetId,
-						bpm: beatmaps[0].bpm,
+						bpm: bpm,
 						mode: beatmaps[0].mode,
 						approvalStatus: beatmaps[0].approvalStatus,
 						maxCombo: noVisualModBeatmap.maxCombo,
