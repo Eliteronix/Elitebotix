@@ -193,7 +193,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						await drawUserInfo(elements, server);
 
 						//Create as an attachment
-						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.beatmapId}.png`);
+						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-score-${user.id}-${beatmap.beatmapId}-${scores[0].raw_mods}.png`);
 
 						let guildPrefix = await getGuildPrefix(msg);
 
@@ -206,6 +206,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 							sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 						}
 						sentMessage.react('<:COMPARE:827974793365159997>');
+						sentMessage.react('🗺️');
 
 						processingMessage.delete();
 						//Reset maprank in case of multiple scores displayed
@@ -269,13 +270,14 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						await drawUserInfo(elements, server);
 
 						//Create as an attachment
-						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.beatmapId}.png`);
+						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-score-${user.id}-${beatmap.beatmapId}-${score.raw_mods}.png`);
 
 						//Send attachment
 						let sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 
 						processingMessage.delete();
 						sentMessage.react('<:COMPARE:827974793365159997>');
+						sentMessage.react('🗺️');
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {
