@@ -209,7 +209,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 	//For the compare emoji
 	if (reaction._emoji.id === '827974793365159997') {
-		console.log(reaction.message.content);
 		const scoreRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+/gm;
 		const beatmapRegex = /Website: <https:\/\/osu.ppy.sh\/b\/.+>\nosu! direct: <osu:\/\/b\/.+>/gm;
 		if (reaction.message.content.match(scoreRegex)) {
