@@ -6,6 +6,7 @@ const cooldowns = new Discord.Collection();
 const { closest } = require('fastest-levenshtein');
 const { Permissions } = require('discord.js');
 const { DBElitiriCupSignUp, DBTickets } = require('./dbObjects');
+const { Chads } = require("./config.json")
 
 module.exports = async function (msg, bancho) {
 	//check if the message wasn't sent by the bot itself or another bot
@@ -35,7 +36,7 @@ module.exports = async function (msg, bancho) {
 		//Handle Ticket
 		handleTicketStatus(msg);
 
-		if (msg.author.id === '138273136285057025' && msg.content === 'e!dbinit') {
+		if (Chads.includes(msg.author.id) && msg.content === 'e!dbinit') {
 			console.log('Syncing database...');
 			const Sequelize = require('sequelize');
 
@@ -109,7 +110,7 @@ module.exports = async function (msg, bancho) {
 			const categories = ['general', 'server-admin', 'osu', 'misc'];
 
 			//Developer
-			if (msg.author.id === '138273136285057025') {
+			if (Chads.includes(msg.author.id)) {
 				categories.push('debug');
 			}
 
@@ -253,7 +254,7 @@ module.exports = async function (msg, bancho) {
 		}
 
 		//Set timestamp for the used command
-		if (msg.author.id !== '138273136285057025' && msg.author.id !== '212511522407055360') {
+		if (!Chads.includes(msg.author.id)) {
 			timestamps.set(msg.author.id, now);
 		}
 		//Automatically delete the timestamp after the cooldown
