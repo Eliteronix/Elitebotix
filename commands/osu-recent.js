@@ -118,8 +118,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 
 
 				const beatmapMode = getBeatmapModeId(dbBeatmap);
-				const beatmapStatus = dbBeatmap.approvalStatus;
-				console.log(beatmapStatus)
+				const beatmapStatus = await dbBeatmap.approvalStatus;
 
 				let lookedUpScore;
 
@@ -268,13 +267,25 @@ async function drawTitle(input) {
 
 	const gameMode = getGameMode(beatmap);
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
+	let beatmapStatusIcon;
+	if (beatmapStatus === "Ranked"){
+		beatmapStatusIcon = await Canvas.loadImage(`./other/ApprovalStatus-UpwardsChevron.png`)
+	} else if (beatmapStatus === "Loved"){
+		beatmapStatusIcon = await Canvas.loadImage(`./other/ApprovalStatus-Heart.png`)
+	}else if (beatmapStatus === "Qualified" || beatmapStatus === "Approved" ){
+		beatmapStatusIcon = await Canvas.loadImage(`./other/ApprovalStatus-Heart.png`)
+	}else {
+		beatmapStatusIcon = await Canvas.loadImage(`./other/ApprovalStatus-QuestionMark.png`)
+	}
+
+	ctx.drawImage(beatmapStatusIcon, 10, 8, canvas.height / 500 * 35, canvas.height / 500 * 35);
 	ctx.drawImage(modePic, canvas.width / 1000 * 10, canvas.height / 500 * 40, canvas.height / 500 * 35, canvas.height / 500 * 35);
 
 	// Write the title of the beatmap
 	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'left';
-	ctx.fillText(`${beatmap.title} by ${beatmap.artist}`, canvas.width / 100, canvas.height / 500 * 35);
+	ctx.fillText(`${beatmap.title} by ${beatmap.artist}`, canvas.width / 1000 * 60, canvas.height / 500 * 35);
 	ctx.font = '25px comfortaa, sans-serif';
 
 	const mods = getMods(score.raw_mods);
@@ -307,14 +318,12 @@ async function drawTitle(input) {
 		} else if (mods.includes('HR')) {
 			modMap = await getOsuBeatmap(beatmap.beatmapId, 16);
 		}
-		ctx.textAlign = 'left';
-		ctx.fillText(`${beatmapStatus}`, canvas.width, canvas.height )
 		ctx.fillText(`★ ${Math.round(beatmap.starRating * 100) / 100} (${Math.round(modMap.starRating * 100) / 100} with ${mods.join('')})   ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
 	} else {
 		ctx.fillText(`★ ${Math.round(beatmap.starRating * 100) / 100}   ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
 	}
 
-	const output = [canvas, ctx, score, beatmap, user, lookedUpScore, beatmapStatus];
+	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
 	return output;
 }
 
