@@ -1022,7 +1022,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 	if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('HT')) {
 		lastRework.setUTCFullYear(2021);
 		lastRework.setUTCMonth(10);
-		lastRework.setUTCDate(4);
+		lastRework.setUTCDate(7);
 	}
 
 	if (!dbBeatmap
