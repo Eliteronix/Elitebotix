@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP, getBeatmapApprovalStatus } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP, getBeatmapApprovalStatusImage } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -265,9 +265,9 @@ async function drawTitle(input) {
 
 	const gameMode = getGameMode(beatmap);
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
-	const beatmapStatusIcon = await Canvas.loadImage(getBeatmapApprovalStatus(beatmap));
+	const beatmapStatusIcon = await Canvas.loadImage(getBeatmapApprovalStatusImage(beatmap));
 
-	ctx.drawImage(beatmapStatusIcon, 10, 8, canvas.height / 500 * 35, canvas.height / 500 * 35);
+	ctx.drawImage(beatmapStatusIcon, 10, 5, canvas.height / 500 * 35, canvas.height / 500 * 35);
 	ctx.drawImage(modePic, canvas.width / 1000 * 10, canvas.height / 500 * 40, canvas.height / 500 * 35, canvas.height / 500 * 35);
 
 	// Write the title of the beatmap

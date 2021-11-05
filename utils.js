@@ -130,7 +130,7 @@ module.exports = {
 
 		return URL;
 	},
-	getBeatmapApprovalStatus: function (beatmap) {
+	getBeatmapApprovalStatusImage: function (beatmap) {
 
 		let beatmapStatusIcon;
 		if (beatmap.approvalStatus === 'Ranked') {
