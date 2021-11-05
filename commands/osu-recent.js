@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP, getBeatmapApprovalStatus } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -118,7 +118,6 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 
 
 				const beatmapMode = getBeatmapModeId(dbBeatmap);
-				const beatmapStatus = await dbBeatmap.approvalStatus;
 
 				let lookedUpScore;
 
@@ -143,9 +142,9 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 				const background = await Canvas.loadImage('./other/osu-background.png');
 				ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-				let elements = [canvas, ctx, scores[0], dbBeatmap, user, beatmapStatus];
+				let elements = [canvas, ctx, scores[0], dbBeatmap, user];
 				if (lookedUpScore) {
-					elements = [canvas, ctx, scores[0], dbBeatmap, user, lookedUpScore[0], beatmapStatus];
+					elements = [canvas, ctx, scores[0], dbBeatmap, user, lookedUpScore[0]];
 				}
 
 				elements = await drawTitle(elements);
@@ -263,20 +262,10 @@ async function drawTitle(input) {
 	let beatmap = input[3];
 	let user = input[4];
 	let lookedUpScore = input[5];
-	let beatmapStatus = input[6];
 
 	const gameMode = getGameMode(beatmap);
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
-	let beatmapStatusIcon;
-	if (beatmapStatus === "Ranked"){
-		beatmapStatusIcon = await Canvas.loadImage(`./other/ApprovalStatus-UpwardsChevron.png`)
-	} else if (beatmapStatus === "Loved"){
-		beatmapStatusIcon = await Canvas.loadImage(`./other/ApprovalStatus-Heart.png`)
-	}else if (beatmapStatus === "Qualified" || beatmapStatus === "Approved" ){
-		beatmapStatusIcon = await Canvas.loadImage(`./other/ApprovalStatus-Heart.png`)
-	}else {
-		beatmapStatusIcon = await Canvas.loadImage(`./other/ApprovalStatus-QuestionMark.png`)
-	}
+	const beatmapStatusIcon = await Canvas.loadImage(getBeatmapApprovalStatus(beatmap))
 
 	ctx.drawImage(beatmapStatusIcon, 10, 8, canvas.height / 500 * 35, canvas.height / 500 * 35);
 	ctx.drawImage(modePic, canvas.width / 1000 * 10, canvas.height / 500 * 40, canvas.height / 500 * 35, canvas.height / 500 * 35);
