@@ -1,5 +1,6 @@
 const { DBElitiriCupSignUp } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
+const { Chads } = require("../config.json")
 
 module.exports = {
 	name: 'help',
@@ -28,7 +29,7 @@ module.exports = {
 		const categories = ['general', 'server-admin', 'misc', 'osu'];
 
 		//Developer
-		if (msg.author.id === '138273136285057025') {
+		if (!Chads.includes(msg.author.id)) {
 			categories.push('debug');
 		}
 
