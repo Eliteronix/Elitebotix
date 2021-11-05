@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const { isWrongSystem } = require('./utils');
 const cooldowns = new Discord.Collection();
+const { Permissions } = require('discord.js');
 
 module.exports = async function (client, bancho, interaction) {
 	if (!interaction.isCommand()) return;
@@ -43,8 +44,15 @@ module.exports = async function (client, bancho, interaction) {
 
 	//Check permissions of the bot
 	if (interaction.guildId) {
+		const botPermissions = interaction.channel.permissionsFor(await interaction.guild.members.fetch(client.user.id));
+		if (!botPermissions || !botPermissions.has(Permissions.FLAGS.VIEW_CHANNEL)) {
+			//The bot can't possibly answer the message
+			return interaction.reply({ content: 'I can\'t view this channel.', ephemeral: true });
+		}
+		//Probably needs a special interaction permission property
+
+		//Check the command permissions
 		if (command.botPermissions) {
-			const botPermissions = interaction.channel.permissionsFor(await interaction.guild.members.fetch(client.user.id));
 			if (!botPermissions.has(command.botPermissions)) {
 				return interaction.reply({ content: `I need the ${command.botPermissionsTranslated} permission to do this!`, ephemeral: true });
 			}

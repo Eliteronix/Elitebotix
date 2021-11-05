@@ -205,8 +205,14 @@ module.exports = async function (msg, bancho) {
 
 		//Check permissions of the bot
 		if (msg.channel.type !== 'DM') {
+			const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch(msg.client.user.id));
+			if (!botPermissions || !botPermissions.has(Permissions.FLAGS.SEND_MESSAGES) || !botPermissions.has(Permissions.FLAGS.READ_MESSAGE_HISTORY)) {
+				//The bot can't possibly answer the message
+				return;
+			}
+
+			//Check the command permissions
 			if (command.botPermissions) {
-				const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch(msg.client.user.id));
 				if (!botPermissions.has(command.botPermissions)) {
 					return msg.reply(`I need the ${command.botPermissionsTranslated} permission to do this!`);
 				}
