@@ -2,7 +2,7 @@ const { DBGuilds } = require('../dbObjects');
 
 module.exports = {
 	name: 'owo',
-	aliases: ['uwu', 'ouo'],
+	aliases: ['uwu', 'ouo', 'umu'],
 	description: 'Sends a weebEmoji if someone else sends owo',
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'MANAGE_GUILD',
@@ -28,7 +28,7 @@ module.exports = {
 				//check if owo is enabled
 				if (guild.owoEnabled) {
 					//declare weebEmojis array
-					var weebEmojis = ['owo', 'uwu', 'UwU', 'OwO', 'OuO'];
+					var weebEmojis = ['owo', 'uwu','umu', 'UwU', 'OwO', 'OuO', 'UmU'];
 
 					//send the message
 					msg.reply(weebEmojis[Math.floor(Math.random() * weebEmojis.length)]);
