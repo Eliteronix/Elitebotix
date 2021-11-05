@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { Chads } = require("../config.json")
+const { developers } = require('../config.json');
 
 module.exports = {
 	name: 'changelog',
@@ -19,7 +19,7 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
-		if (!Chads.includes(msg.author.id)) {
+		if (!developers.includes(msg.author.id)) {
 			const argString = args.join(' ');
 			let argArray = argString.split('<|>');
 			const canvasHeight = parseInt(argArray.shift());

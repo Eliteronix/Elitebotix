@@ -1,7 +1,7 @@
 const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { saveOsuMultiScores, pause } = require('../utils');
 const osu = require('node-osu');
-const { Chads } = require("../config.json")
+const { developers } = require('../config.json');
 
 module.exports = {
 	name: 'admin',
@@ -20,7 +20,7 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
-		if (!Chads.includes(msg.author.id)) {
+		if (!developers.includes(msg.author.id)) {
 			return;
 		}
 
