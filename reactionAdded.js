@@ -3,7 +3,7 @@ const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } 
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { isWrongSystem } = require('./utils');
+const { isWrongSystem, getMods } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user, additionalObjects) {
@@ -253,6 +253,44 @@ module.exports = async function (reaction, user, additionalObjects) {
 				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 			}
 
+		}
+	}
+
+	//Check if reacted for map information
+	if (reaction._emoji.name === '🗺️') {
+		const scoreRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+/gm;
+		//Check if it is actually a scorepost
+		if (reaction.message.content.match(scoreRegex)) {
+			//Regex the beatmapId out of there
+			const beginningRegex = /.+\nSpectate: .+\nBeatmap: <https:\/\/osu.ppy.sh\/b\//gm;
+			const endingRegex = />\nosu! direct:.+/gm;
+			const beatmapId = reaction.message.content.replace(beginningRegex, '').replace(endingRegex, '');
+
+			//get the mods used
+			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+
+			let mods = getMods(modBits);
+
+			if (!mods[0]) {
+				mods = ['NM'];
+			}
+
+			//Setup artificial arguments
+			let args = [beatmapId, `--${mods.join('')}`];
+
+			const command = require('./commands/osu-beatmap.js');
+
+			//Set author of the message to the reacting user to not break the commands
+			reaction.message.author = user;
+
+			try {
+				command.execute(reaction.message, args, null, additionalObjects);
+			} catch (error) {
+				console.error(error);
+				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+			}
 		}
 	}
 
