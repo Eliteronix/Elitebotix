@@ -26,9 +26,9 @@ module.exports = {
 		}
 
 		//Get bot member
-		const member = msg.guild.members.fetch('784836063058329680');
+		const member = msg.guild.members.fetch(msg.client.user.id);
 
-		const user = msg.client.users.cache.find(user => user.id === '784836063058329680');
+		const user = msg.client.users.cache.find(user => user.id === msg.client.user.id);
 
 		const guild = await DBGuilds.findOne({
 			where: { guildId: msg.guildId },
