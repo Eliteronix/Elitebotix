@@ -1,6 +1,6 @@
 const { DBMOTDPoints } = require('../dbObjects.js');
 const { initializeMOTD } = require('../MOTD/initializeMOTD.js');
-const { Chads } = require("../config.json")
+const { developers } = require('../config.json');
 
 module.exports = {
 	name: 'osu-motd-admin',
@@ -18,7 +18,7 @@ module.exports = {
 	tags: 'debug',
 	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
-		if (!Chads.includes(msg.author.id)) {
+		if (!developers.includes(msg.author.id)) {
 			return;
 		}
 		const bancho = additionalObjects[1];
