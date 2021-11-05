@@ -133,17 +133,17 @@ module.exports = {
 	getBeatmapApprovalStatus: function (beatmap) {
 
 		let beatmapStatusIcon;
-		if (beatmap.approvalStatus === "Ranked") {
-			beatmapStatusIcon = `./other/ApprovalStatus-UpwardsChevron.png`
-		} else if (beatmap.approvalStatus === "Loved") {
-			beatmapStatusIcon = `./other/ApprovalStatus-Heart.png`
-		} else if (beatmap.approvalStatus === "Qualified" || beatmap.approvalStatus === "Approved") {
-			beatmapStatusIcon = `./other/ApprovalStatus-Heart.png`
+		if (beatmap.approvalStatus === 'Ranked') {
+			beatmapStatusIcon = './other/ApprovalStatus-UpwardsChevron.png';
+		} else if (beatmap.approvalStatus === 'Loved') {
+			beatmapStatusIcon = './other/ApprovalStatus-Heart.png';
+		} else if (beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Approved') {
+			beatmapStatusIcon = './other/ApprovalStatus-Heart.png';
 		} else {
-			beatmapStatusIcon = `./other/ApprovalStatus-QuestionMark.png`
+			beatmapStatusIcon = './other/ApprovalStatus-QuestionMark.png';
 		}
 
-		return beatmapStatusIcon
+		return beatmapStatusIcon;
 	},
 
 	getMods: function (input) {
