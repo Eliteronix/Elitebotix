@@ -858,37 +858,34 @@ module.exports = {
 		};
 	},
 	isWrongSystem(guildId, isDM) {
+		//Always respond to DMs
+		if (isDM) {
+			return false;
+		}
 		//For the development version
 		//if the message is not in the Dev-Servers then return
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
-			if (isDM) {
-				return true;
-			}
-			if (!isDM && guildId != '800641468321759242' && guildId != '800641735658176553') {
+			if (guildId != '800641468321759242' && guildId != '800641735658176553') {
 				return true;
 			}
 			//For the QA version
 			//if the message is in the QA-Servers then return
 			// eslint-disable-next-line no-undef
 		} else if (process.env.SERVER === 'QA') {
-			if (isDM) {
-				return true;
-			}
-			if (!isDM && guildId != '800641367083974667' && guildId != '800641819086946344') {
+			if (guildId != '800641367083974667' && guildId != '800641819086946344') {
 				return true;
 			}
 			//For the Live version
 			//if the message is in the Dev/QA-Servers then return
 			// eslint-disable-next-line no-undef
 		} else if (process.env.SERVER === 'Live') {
-			if (!isDM) {
-				if (guildId === '800641468321759242' || guildId === '800641735658176553' || guildId === '800641367083974667' || guildId === '800641819086946344') {
-					return true;
-				}
+			if (guildId === '800641468321759242' || guildId === '800641735658176553' || guildId === '800641367083974667' || guildId === '800641819086946344') {
+				return true;
 			}
 		}
 
+		//Otherwise its on the correct server
 		return false;
 	},
 	async getOsuBeatmap(beatmapId, modBits) {
