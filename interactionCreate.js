@@ -42,9 +42,9 @@ module.exports = async function (client, bancho, interaction) {
 	}
 
 	//Check permissions of the bot
-	if (interaction.guild_id) {
+	if (interaction.guildId) {
 		if (command.botPermissions) {
-			const botPermissions = interaction.channel.permissionsFor(await interaction.guild.members.fetch('784836063058329680'));
+			const botPermissions = interaction.channel.permissionsFor(await interaction.guild.members.fetch(client.user.id));
 			if (!botPermissions.has(command.botPermissions)) {
 				return interaction.reply({ content: `I need the ${command.botPermissionsTranslated} permission to do this!`, ephemeral: true });
 			}

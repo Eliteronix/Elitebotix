@@ -159,7 +159,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 				await drawUserInfo(elements, server);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${dbBeatmap.beatmapId}.png`);
+				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${dbBeatmap.beatmapId}-${scores[0].raw_mods}.png`);
 
 				let guildPrefix = await getGuildPrefix(msg);
 
@@ -173,6 +173,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 				}
 				processingMessage.delete();
 				sentMessage.react('<:COMPARE:827974793365159997>');
+				sentMessage.react('🗺️');
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
@@ -228,12 +229,13 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 						await drawUserInfo(elements, server);
 
 						//Create as an attachment
-						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${dbBeatmap.beatmapId}.png`);
+						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${dbBeatmap.beatmapId}-${score.raw_mods}.png`);
 
 						//Send attachment
 						const sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nosu! direct: <osu://b/${dbBeatmap.beatmapId}>`, files: [attachment] });
 						processingMessage.delete();
 						sentMessage.react('<:COMPARE:827974793365159997>');
+						sentMessage.react('🗺️');
 
 					})
 					.catch(err => {
