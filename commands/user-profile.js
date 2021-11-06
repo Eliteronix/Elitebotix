@@ -112,6 +112,14 @@ async function sendUserEmbed(msg, interaction, user) {
 				);
 			}
 		}
+		userInfoEmbed.addFields(
+			{ name: 'Created at: ', value: `${msg.author.createdAt.toLocaleString('en-US',{
+				day: 'numeric',
+				year: 'numeric', 
+				month: 'long', 
+			})}` 
+			}
+		);
 	}
 
 	//get discordUser from db
