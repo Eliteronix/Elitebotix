@@ -1,5 +1,6 @@
 const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const fetch = require('node-fetch');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'feedback',
@@ -8,8 +9,8 @@ module.exports = {
 	usage: '<bug/feature/feedback> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissionsTranslated: 'Send Messages',
 	//guildOnly: true,
 	args: true,
 	cooldown: 15,

@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const { populateMsgFromInteraction } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'slap',
@@ -8,8 +9,8 @@ module.exports = {
 	usage: '<@user>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
+	botPermissionsTranslated: 'Send Messages and Embed Links',
 	// guildOnly: true,
 	args: true,
 	cooldown: 5,

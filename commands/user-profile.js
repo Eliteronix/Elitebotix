@@ -1,6 +1,7 @@
 //Import Tables
 const { DBDiscordUsers } = require('../dbObjects');
 const { populateMsgFromInteraction } = require('../utils');
+const { Permissions } = require('discord.js');
 
 //Require discord.js module
 const Discord = require('discord.js');
@@ -15,8 +16,8 @@ module.exports = {
 	usage: '[@user]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissionsTranslated: 'Send Messages',
 	//guildOnly: true,
 	//args: true,
 	cooldown: 5,
