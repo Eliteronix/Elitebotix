@@ -113,10 +113,12 @@ async function sendUserEmbed(msg, interaction, user) {
 			}
 		}
 		userInfoEmbed.addFields(
-			{ name: 'Created at: ', value: `${msg.author.createdAt.toLocaleString('en-US',{
+			{ name: 'Created at: ', value: `${msg.author.createdAt.toLocaleString('en-US',{ // en-UK if 24hour format
 				day: 'numeric',
 				year: 'numeric', 
 				month: 'long', 
+				hour: 'numeric',
+				minute: 'numeric',
 			})}` 
 			}
 		);
