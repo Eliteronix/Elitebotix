@@ -19,7 +19,7 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
-		if (!developers.includes(msg.author.id)) {
+		if (developers.includes(msg.author.id)) {
 			const argString = args.join(' ');
 			let argArray = argString.split('<|>');
 			const canvasHeight = parseInt(argArray.shift());
