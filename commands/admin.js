@@ -1032,13 +1032,13 @@ module.exports = {
 			// 				'name': 'scaled',
 			// 				'description': 'Should the graph be scaled by the total evaluation?',
 			// 				'type': 5,
-			// 				'required': true
+			// 				'required': false
 			// 			},
 			// 			{
 			// 				'name': 'scores',
 			// 				'description': 'Which types of scores should the graph evaluate?',
 			// 				'type': 3,
-			// 				'required': true,
+			// 				'required': false,
 			// 				'choices': [
 			// 					{
 			// 						'name': 'Only Score v2',
@@ -1058,13 +1058,13 @@ module.exports = {
 			// 				'name': 'tourney',
 			// 				'description': 'Should it only count scores from tournaments?',
 			// 				'type': 5,
-			// 				'required': true
+			// 				'required': false
 			// 			},
 			// 			{
 			// 				'name': 'runningaverage',
 			// 				'description': 'Should a running average be shown instead?',
 			// 				'type': 5,
-			// 				'required': true
+			// 				'required': false
 			// 			},
 			// 			{
 			// 				'name': 'username',
@@ -2585,13 +2585,13 @@ module.exports = {
 							'name': 'scaled',
 							'description': 'Should the graph be scaled by the total evaluation?',
 							'type': 5,
-							'required': true
+							'required': false
 						},
 						{
 							'name': 'scores',
 							'description': 'Which types of scores should the graph evaluate?',
 							'type': 3,
-							'required': true,
+							'required': false,
 							'choices': [
 								{
 									'name': 'Only Score v2',
@@ -2611,13 +2611,13 @@ module.exports = {
 							'name': 'tourney',
 							'description': 'Should it only count scores from tournaments?',
 							'type': 5,
-							'required': true
+							'required': false
 						},
 						{
 							'name': 'runningaverage',
 							'description': 'Should a running average be shown instead?',
 							'type': 5,
-							'required': true
+							'required': false
 						},
 						{
 							'name': 'username',
