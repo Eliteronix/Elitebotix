@@ -1,8 +1,9 @@
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
+const { populateMsgFromInteraction } = require('../utils');
 module.exports = {
 	name: 'time',
-	// aliases: ['developer', 'donate', 'support'],
+	aliases: ['localtime', 'donate', 'support'],
 	description: 'Sends current time of the given location',
 	usage: '<location>',
 	//permissions: 'KICK_MEMBERS',
@@ -15,47 +16,61 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'misc',
 	prefixCommand: true,
-	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args, interaction, additionalObjects) {
-		// eslint-disable-next-line no-undef
+	async execute(msg, args, interaction) {
+		//Multiple requests Tomorrow
+		//Code optimization as well
 		//make a call to find a lat and long of the location
+		// eslint-disable-next-line no-undef
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+			await interaction.reply('Locations are being processed');
+		}
+
 		let url = `http://api.geonames.org/searchJSON?q=${args}&maxRows=1&username=roddy`;
 		let response = await fetch(url);
 		let json = await response.json();
 
-		//set a latitude and longtitude for the given location
-		let lat = json.geonames[0].lat;
-		let lng = json.geonames[0].lng;
+		//checking if the location exists agreeGe
+		if (json.totalResultsCount === 0) {
+			msg.reply(`Couldn't find ${args[0].split(',')} location. Maybe you've mistyped?`);
+		}else {
 
-		//make a call again to find time itself
-		let url2 = `http://api.geonames.org/timezoneJSON?lat=${lat}&lng=${lng}&username=roddy`;
-		let response2 = await fetch(url2);
-		let json2 = await response2.json();
-		let comparedToUTC;
-		if (json2.gmtOffset>=0){
-			comparedToUTC = '+' + json2.gmtOffset;
-		} else {
-			comparedToUTC = json2.gmtOffset;
-		}
-		let time = new Date(json2.time);
+			let lat = json.geonames[0].lat;
+			let lng = json.geonames[0].lng;
 
-		const timeEmbed = new Discord.MessageEmbed()
-			.setColor('#7289DA')
-			.addFields(
-				{ name: `Current date and time for ${json2.timezoneId.replace('_',' ')} timezone is`, value: `${time.toLocaleString('en-US', {
-					weekday: 'long', // long, short, narrow
-					day: 'numeric', // numeric, 2-digit
-					year: 'numeric', // numeric, 2-digit
-					month: 'long', // numeric, 2-digit, long, short, narrow
-					hour: 'numeric', // numeric, 2-digit
-					minute: 'numeric', // numeric, 2-digit  
-				})
-				}\nUTC${comparedToUTC}`}
-			)   
-			.setTimestamp();
-
-		if (msg.id) {
-			return msg.reply({ embeds: [timeEmbed] });
-		}
-	}
+			//make a call again to find time itself
+			let url2 = `http://api.geonames.org/timezoneJSON?lat=${lat}&lng=${lng}&username=roddy`;
+			let response2 = await fetch(url2);
+			let json2 = await response2.json();
+			let comparedToUTC;
+			if (json2.gmtOffset>=0){
+				comparedToUTC = '+' + json2.gmtOffset;
+			} else {
+				comparedToUTC = json2.gmtOffset;
+			}
+			//have to do this because .toLocaleString doesnt work with json2.time (because json2.time is a string and not a date format)
+			let time = new Date(json2.time);
+			console.log(args);
+			const timeEmbed = new Discord.MessageEmbed()
+				.setColor('#7289DA')
+				.addFields(
+					// eslint-disable-next-line indent
+														//return locations without e!time		||replace '_' in timezoneId with an empty string			
+					{ name: `Current date and time for "${msg.content.replace('e!time','')}" (${json2.timezoneId.replace('_',' ')} timezone) is`, value: `${time.toLocaleString('en-UK', {
+						// some settings for the formatting. Note: seconds CAN NOT be displayed due to limits of api
+						weekday: 'long', 
+						day: 'numeric', 
+						year: 'numeric', 
+						month: 'long',
+						hour: 'numeric',
+						minute: 'numeric', 
+					})
+					}\nUTC${comparedToUTC}`}
+				)   
+				.setTimestamp();
+			//send embed
+			if (msg.id) {
+				return msg.reply({ embeds: [timeEmbed] });
+			}
+		}}
 };
