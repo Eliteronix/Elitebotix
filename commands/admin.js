@@ -3126,6 +3126,20 @@ module.exports = {
 					]
 				}
 			});
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data:{
+					name: 'time',
+					description: 'Sends current time of the given location',
+					options: [						
+						{
+							'name': 'location',
+							'description': 'location, the time of which you need to find out',
+							'type': 3, // 6 is type USER
+							'required': true
+						},
+					]
+				}
+			});
 		} else if (args[0] === 'removeGlobalCommands') {
 			const commands = await msg.client.api.applications(msg.client.user.id).commands.get();
 			for (let i = 0; i < commands.length; i++) {
