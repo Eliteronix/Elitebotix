@@ -49,7 +49,6 @@ module.exports = async function (client, bancho, interaction) {
 			//The bot can't possibly answer the message
 			return interaction.reply({ content: 'I can\'t view this channel.', ephemeral: true });
 		}
-		//Probably needs a special interaction permission property
 
 		//Check the command permissions
 		if (command.botPermissions) {
