@@ -16,7 +16,7 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
-		if (!developers.includes(msg.author.id)) {
+		if (developers.includes(msg.author.id)) {
 			console.log('Syncing database...');
 			const Sequelize = require('sequelize');
 
