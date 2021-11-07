@@ -29,7 +29,7 @@ module.exports = {
 		const categories = ['general', 'server-admin', 'misc', 'osu'];
 
 		//Developer
-		if (!developers.includes(msg.author.id)) {
+		if (developers.includes(msg.author.id)) {
 			categories.push('debug');
 		}
 
