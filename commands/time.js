@@ -21,11 +21,13 @@ module.exports = {
 		//Code optimization as well
 		//make a call to find a lat and long of the location
 		// eslint-disable-next-line no-undef
+		const timeEmbed = new Discord.MessageEmbed();
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 			await interaction.reply('Locations are being processed');
 		}
 
+		//getting Latitude and longtitude 
 		let url = `http://api.geonames.org/searchJSON?q=${args}&maxRows=1&username=roddy`;
 		let response = await fetch(url);
 		let json = await response.json();
@@ -50,9 +52,7 @@ module.exports = {
 			}
 			//have to do this because .toLocaleString doesnt work with json2.time (because json2.time is a string and not a date format)
 			let time = new Date(json2.time);
-			console.log(args);
-			const timeEmbed = new Discord.MessageEmbed()
-				.setColor('#7289DA')
+			timeEmbed.setColor('#7289DA')
 				.addFields(
 					// eslint-disable-next-line indent
 														//return locations without e!time		||replace '_' in timezoneId with an empty string			
@@ -69,8 +69,10 @@ module.exports = {
 				)   
 				.setTimestamp();
 			//send embed
-			if (msg.id) {
-				return msg.reply({ embeds: [timeEmbed] });
-			}
-		}}
+		}
+		if (msg.id) {
+			return msg.reply({ embeds: [timeEmbed] });
+
+		}	return interaction.reply({ content: timeEmbed, ephemeral: false });
+	}
 };

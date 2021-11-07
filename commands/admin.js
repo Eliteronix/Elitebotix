@@ -1573,6 +1573,22 @@ module.exports = {
 			// 		]
 			// 	}
 			// });
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data:{
+					name: 'time',
+					description: 'Sends current time of the given location',
+					options: [						
+						{
+							'name': 'location',
+							'description': 'location, the time of which you need to find out',
+							'type': 3,
+							'required': true
+						},
+					]
+				}
+			});
+
 		} else if (args[0] === 'removeGuildCommands') {
 			const commands = await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.get();
 			for (let i = 0; i < commands.length; i++) {
@@ -3134,7 +3150,7 @@ module.exports = {
 						{
 							'name': 'location',
 							'description': 'location, the time of which you need to find out',
-							'type': 3, // 6 is type USER
+							'type': 3,
 							'required': true
 						},
 					]
