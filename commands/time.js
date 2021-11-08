@@ -39,9 +39,9 @@ module.exports = {
 		if (json.totalResultsCount === 0) {
 			//pinge check
 			if (msg.id) {
-				return msg.reply(`Couldn't find \`${args.join(' ').replace(/`/g, '')}\` location. Maybe you've mistyped?`);	
+				return msg.reply(`Couldn't find \`${args.join(' ').replace(/`/g, '')}\` location. Maybe you've mistyped?`);
 			} return interaction.followUp(`Couldn't find \`${args.join(' ').replace(/`/g, '')}\` location. Maybe you've mistyped?`);
-		}else {
+		} else {
 
 			let lat = json.geonames[0].lat;
 			let lng = json.geonames[0].lng;
@@ -51,7 +51,7 @@ module.exports = {
 			let response2 = await fetch(url2);
 			let json2 = await response2.json();
 			let comparedToUTC;
-			if (json2.gmtOffset>=0){
+			if (json2.gmtOffset >= 0) {
 				comparedToUTC = '+' + json2.gmtOffset;
 			} else {
 				comparedToUTC = json2.gmtOffset;
@@ -62,23 +62,25 @@ module.exports = {
 			timeEmbed.setColor('#7289DA')
 				.addFields(
 					// eslint-disable-next-line indent
-														//return locations without e!time		||replace '_' in timezoneId with an empty string			
-					{ name: `Current date and time for  (${json2.timezoneId.replace('_',' ')} timezone) is`, value: `${time.toLocaleString('en-UK', {
-						// some settings for the formatting. Note: seconds CAN NOT be displayed due to limits of api
-						weekday: 'long', 
-						day: 'numeric', 
-						year: 'numeric', 
-						month: 'long',
-						hour: 'numeric',
-						minute: 'numeric', 
-					})
-					}\nUTC${comparedToUTC}`}
-				)   
+					//return locations without e!time		||replace '_' in timezoneId with an empty string			
+					{
+						name: `Current date and time for  (${json2.timezoneId.replace('_', ' ')} timezone) is`, value: `${time.toLocaleString('en-UK', {
+							// some settings for the formatting. Note: seconds CAN NOT be displayed due to limits of api
+							weekday: 'long',
+							day: 'numeric',
+							year: 'numeric',
+							month: 'long',
+							hour: 'numeric',
+							minute: 'numeric',
+						})}\nUTC${comparedToUTC}`
+					}
+				)
 				.setTimestamp();
+
 			//send embed
 			if (msg.id) {
 				return msg.reply({ embeds: [timeEmbed] });
-			}	return interaction.followUp({ embeds: [timeEmbed], ephemeral: false });
+			} return interaction.followUp({ embeds: [timeEmbed], ephemeral: false });
 		}
 	}
 };
