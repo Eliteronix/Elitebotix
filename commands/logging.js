@@ -10,8 +10,8 @@ module.exports = {
 	usage: 'list | <channel> <mentioned channel> | <eventnames to toggle>',
 	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
-	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
-	botPermissionsTranslated: 'Send Messages',
+	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
+	botPermissionsTranslated: 'Send Messages and Embed Links',
 	//guildOnly: true,
 	args: true,
 	cooldown: 5,
@@ -19,6 +19,7 @@ module.exports = {
 	tags: 'server-admin',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		console.log('logging');
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
