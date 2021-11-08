@@ -37,6 +37,10 @@ module.exports = {
 						}
 					} else if (interaction.options._hoistedOptions[i].name === 'amount') {
 						args.push(`--${interaction.options._hoistedOptions[i].value}`);
+					} else if (interaction.options._hoistedOptions[i].name === 'gamemode') {
+						args.push(`--${interaction.options._hoistedOptions[i].value}`);
+					} else if (interaction.options._hoistedOptions[i].name === 'server') {
+						args.push(`--${interaction.options._hoistedOptions[i].value}`);
 					} else {
 						args.push(interaction.options._hoistedOptions[i].value);
 					}

@@ -1118,6 +1118,45 @@ module.exports = {
 			// 				'required': false
 			// 			},
 			// 			{
+			// 				'name': 'gamemode',
+			// 				'description': 'Gamemode',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Standard',
+			// 						'value': 's',
+			// 					},
+			// 					{
+			// 						'name': 'Mania',
+			// 						'value': 'm',
+			// 					},
+			// 					{
+			// 						'name': 'Catch The Beat',
+			// 						'value': 'c',
+			// 					},
+			// 					{
+			// 						'name': 'Taiko',
+			// 						'value': 't',
+			// 					},
+			// 				]
+			// 			}, {
+			// 				'name': 'server',
+			// 				'description': 'The server from which the results will be displayed',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Bancho',
+			// 						'value': 'b',
+			// 					},
+			// 					{
+			// 						'name': 'Ripple',
+			// 						'value': 'r',
+			// 					},
+			// 				]
+			// 			},
+			// 			{
 			// 				'name': 'username',
 			// 				'description': 'The username, id or link of the player',
 			// 				'type': 3,
@@ -2685,6 +2724,46 @@ module.exports = {
 							'description': 'The amount of topplays to be displayed',
 							'type': 4,
 							'required': false
+						},
+						{
+							'name': 'gamemode',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'Standard',
+									'value': 's',
+								},
+								{
+									'name': 'Mania',
+									'value': 'm',
+								},
+								{
+									'name': 'Catch the beat',
+									'value': 'c',
+								},
+								{
+									'name': 'Taiko',
+									'value': 't',
+								},
+							]
+						},
+						{
+							'name': 'server',
+							'description': 'The server from which the results will be displayed',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'Bancho',
+									'value': 'b',
+								},
+								{
+									'name': 'Ripple',
+									'value': 'r',
+								},
+							]
 						},
 						{
 							'name': 'username',
