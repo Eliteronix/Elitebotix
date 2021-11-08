@@ -1,5 +1,6 @@
 //Require discord.js module
 const Discord = require('discord.js');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'creator',
@@ -8,8 +9,8 @@ module.exports = {
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: [Permissions.FLAGS.SEND_MESSAGES],
+	botPermissionsTranslated: 'Send Messages',
 	//guildOnly: true,
 	//args: true,
 	cooldown: 15,

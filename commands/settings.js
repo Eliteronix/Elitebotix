@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBAutoRoles } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'settings',
@@ -9,8 +10,8 @@ module.exports = {
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissionsTranslated: 'Send Messages',
 	guildOnly: true,
 	//args: true,
 	cooldown: 5,

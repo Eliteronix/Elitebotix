@@ -1,3 +1,5 @@
+const { Permissions } = require('discord.js');
+
 module.exports = {
 	name: 'link',
 	aliases: ['invite'],
@@ -5,8 +7,8 @@ module.exports = {
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissionsTranslated: 'Send Messages',
 	//guildOnly: true,
 	//args: true,
 	cooldown: 5,

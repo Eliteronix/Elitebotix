@@ -1,4 +1,5 @@
 const { getMessageUserDisplayname, populateMsgFromInteraction } = require('../utils.js');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'ship',
@@ -7,8 +8,8 @@ module.exports = {
 	usage: '<@user/name> [@user/name]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissionsTranslated: 'Send Messages',
 	// guildOnly: true,
 	args: true,
 	cooldown: 5,
