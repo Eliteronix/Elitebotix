@@ -22,8 +22,11 @@ module.exports = {
 		//make a call to find a lat and long of the location
 		// eslint-disable-next-line no-undef
 		const timeEmbed = new Discord.MessageEmbed();
+
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
+			args = [];
+			args.push(interaction.options._hoistedOptions[0].value);
 			await interaction.reply('Locations are being processed');
 		}
 
@@ -34,7 +37,10 @@ module.exports = {
 
 		//checking if the location exists agreeGe
 		if (json.totalResultsCount === 0) {
-			msg.reply(`Couldn't find ${args[0].split(',')} location. Maybe you've mistyped?`);
+			//pinge check
+			if (msg.id) {
+				return msg.reply(`Couldn't find \`${args.join(' ').replace(/`/g, '')}\` location. Maybe you've mistyped?`);	
+			} return interaction.followUp(`Couldn't find \`${args.join(' ').replace(/`/g, '')}\` location. Maybe you've mistyped?`);
 		}else {
 
 			let lat = json.geonames[0].lat;
@@ -52,11 +58,12 @@ module.exports = {
 			}
 			//have to do this because .toLocaleString doesnt work with json2.time (because json2.time is a string and not a date format)
 			let time = new Date(json2.time);
+
 			timeEmbed.setColor('#7289DA')
 				.addFields(
 					// eslint-disable-next-line indent
 														//return locations without e!time		||replace '_' in timezoneId with an empty string			
-					{ name: `Current date and time for "${msg.content.replace('e!time','')}" (${json2.timezoneId.replace('_',' ')} timezone) is`, value: `${time.toLocaleString('en-UK', {
+					{ name: `Current date and time for  (${json2.timezoneId.replace('_',' ')} timezone) is`, value: `${time.toLocaleString('en-UK', {
 						// some settings for the formatting. Note: seconds CAN NOT be displayed due to limits of api
 						weekday: 'long', 
 						day: 'numeric', 
@@ -69,10 +76,9 @@ module.exports = {
 				)   
 				.setTimestamp();
 			//send embed
+			if (msg.id) {
+				return msg.reply({ embeds: [timeEmbed] });
+			}	return interaction.followUp({ embeds: [timeEmbed], ephemeral: false });
 		}
-		if (msg.id) {
-			return msg.reply({ embeds: [timeEmbed] });
-
-		}	return interaction.reply({ content: timeEmbed, ephemeral: false });
 	}
 };
