@@ -1,6 +1,8 @@
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
 const { populateMsgFromInteraction } = require('../utils');
+const { Permissions } = require('discord.js');
+
 module.exports = {
 	name: 'time',
 	aliases: ['localtime'],
