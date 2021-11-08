@@ -2671,6 +2671,19 @@ module.exports = {
 							'required': false
 						},
 						{
+							'name': 'gamemode',
+							'description': 'gamemode',
+							'type': 4,
+							'required': false
+
+						},
+						{
+							'name': 'server',
+							'description': 'gamemode',
+							'type': 4,
+							'required': false
+						},
+						{
 							'name': 'username',
 							'description': 'The username, id or link of the player',
 							'type': 3,
