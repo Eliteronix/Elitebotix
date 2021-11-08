@@ -1,5 +1,5 @@
-const { DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
+const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiScores } = require('../dbObjects');
+const { getGuildPrefix, populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
 
 module.exports = {
 	name: 'osu-motd',
@@ -331,6 +331,169 @@ module.exports = {
 				if (unreachableUsers.length > 0) {
 					return interaction.editReply(`The following users are not reachable: ${unreachableUsers.join(', ')}\nThe custom MOTD has been aborted.`);
 				}
+
+				//Get the amount of Maps in the DB
+				let amountOfMapsInDB = -1;
+
+				while (amountOfMapsInDB === -1) {
+					const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
+
+					const dbBeatmap = await getOsuBeatmap(mostRecentBeatmap[0].id, 0);
+
+					if (dbBeatmap) {
+						amountOfMapsInDB = dbBeatmap.id;
+					}
+				}
+
+				//Fill a Nomod map array with random tourney maps from the db
+				let nomodMaps = [];
+				let backupBeatmapIds = [];
+				while (nomodMaps.length < 9) {
+
+					let beatmap = null;
+
+					while (!beatmap) {
+						const index = Math.floor(Math.random() * amountOfMapsInDB);
+
+						const dbBeatmap = await DBOsuBeatmaps.findOne({
+							where: { id: index }
+						});
+
+
+
+						if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
+							&& parseFloat(dbBeatmap.starRating) >= 4 && parseFloat(dbBeatmap.starRating) <= 6
+							&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
+							&& !backupBeatmapIds.includes(dbBeatmap.id)) {
+							backupBeatmapIds.push(dbBeatmap.id);
+							const multiScores = await DBOsuMultiScores.findAll({
+								where: {
+									tourneyMatch: true,
+									beatmapId: dbBeatmap.beatmapId
+								}
+							});
+
+							let onlyMOTD = true;
+							for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
+								if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
+									onlyMOTD = false;
+								}
+							}
+
+							beatmap = {
+								id: dbBeatmap.beatmapId,
+								beatmapSetId: dbBeatmap.beatmapsetId,
+								title: dbBeatmap.title,
+								creator: dbBeatmap.mapper,
+								version: dbBeatmap.difficulty,
+								artist: dbBeatmap.artist,
+								rating: dbBeatmap.userRating,
+								bpm: dbBeatmap.bpm,
+								mode: dbBeatmap.mode,
+								approvalStatus: dbBeatmap.approvalStatus,
+								maxCombo: dbBeatmap.maxCombo,
+								objects: {
+									normal: dbBeatmap.circles,
+									slider: dbBeatmap.sliders,
+									spinner: dbBeatmap.spinners
+								},
+								difficulty: {
+									rating: dbBeatmap.starRating,
+									aim: dbBeatmap.aimRating,
+									speed: dbBeatmap.speedRating,
+									size: dbBeatmap.circleSize,
+									overall: dbBeatmap.overallDifficulty,
+									approach: dbBeatmap.approachRate,
+									drain: dbBeatmap.hpDrain
+								},
+								length: {
+									total: dbBeatmap.totalLength,
+									drain: dbBeatmap.drainLength
+								}
+							};
+						}
+					}
+
+					nomodMaps.push(beatmap);
+				}
+
+				quicksort(nomodMaps);
+
+				//Fill a DoubleTime map array with 50 random tourney maps from the db
+				let doubleTimeMaps = [];
+
+				backupBeatmapIds = [];
+
+				while (doubleTimeMaps.length < 50) {
+
+					let beatmap = null;
+
+					while (!beatmap) {
+						const index = Math.floor(Math.random() * amountOfMapsInDB);
+
+						const dbBeatmap = await DBOsuBeatmaps.findOne({
+							where: { id: index }
+						});
+
+						if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
+							&& parseFloat(dbBeatmap.starRating) >= 4 && parseFloat(dbBeatmap.starRating) <= 6
+							&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
+							&& !backupBeatmapIds.includes(dbBeatmap.id)) {
+							backupBeatmapIds.push(dbBeatmap.id);
+							const multiScores = await DBOsuMultiScores.findAll({
+								where: {
+									tourneyMatch: true,
+									beatmapId: dbBeatmap.beatmapId
+								}
+							});
+
+							let onlyMOTD = true;
+							for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
+								if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
+									onlyMOTD = false;
+								}
+							}
+
+							beatmap = {
+								id: dbBeatmap.beatmapId,
+								beatmapSetId: dbBeatmap.beatmapsetId,
+								title: dbBeatmap.title,
+								creator: dbBeatmap.mapper,
+								version: dbBeatmap.difficulty,
+								artist: dbBeatmap.artist,
+								rating: dbBeatmap.userRating,
+								bpm: dbBeatmap.bpm,
+								mode: dbBeatmap.mode,
+								approvalStatus: dbBeatmap.approvalStatus,
+								maxCombo: dbBeatmap.maxCombo,
+								objects: {
+									normal: dbBeatmap.circles,
+									slider: dbBeatmap.sliders,
+									spinner: dbBeatmap.spinners
+								},
+								difficulty: {
+									rating: dbBeatmap.starRating,
+									aim: dbBeatmap.aimRating,
+									speed: dbBeatmap.speedRating,
+									size: dbBeatmap.circleSize,
+									overall: dbBeatmap.overallDifficulty,
+									approach: dbBeatmap.approachRate,
+									drain: dbBeatmap.hpDrain
+								},
+								length: {
+									total: dbBeatmap.totalLength,
+									drain: dbBeatmap.drainLength
+								}
+							};
+						}
+					}
+
+					doubleTimeMaps.push(beatmap);
+				}
+
+				quicksort(doubleTimeMaps);
+
+
 			}
 		} else {
 			msg.reply('Please specify what you want to do: `server`, `register`, `unregister`, `mute`, `unmute`, `custom`');
@@ -347,4 +510,29 @@ function sendMessage(msg, content) {
 		.catch(() => {
 			msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
 		});
+}
+
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].difficulty.rating) <= parseFloat(pivot.difficulty.rating)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
 }
