@@ -1138,9 +1138,9 @@ module.exports = {
 			// 					{
 			// 						'name': 'Taiko',
 			// 						'value': 't',
-			// 					},	
+			// 					},
 			// 				]
-			// 			},					{
+			// 			}, {
 			// 				'name': 'server',
 			// 				'description': 'The server from which the results will be displayed',
 			// 				'type': 3,
