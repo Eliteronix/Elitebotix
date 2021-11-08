@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP, getBeatmapApprovalStatusImage } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -10,7 +10,7 @@ module.exports = {
 	name: 'osu-recent',
 	aliases: ['ors', 'o-rs'],
 	description: 'Sends an info card about the last score of the specified player',
-	usage: '[username] [username] ... (Use "_" instead of spaces; Use --b for bancho / --r for ripple; Use --o/--t/--c/--m for modes)',
+	usage: '[username] [username] ... (Use "_" instead of spaces; Use --b for bancho / --r for ripple; Use --s/--t/--c/--m for modes)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
@@ -94,7 +94,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 		osuApi.getUserRecent({ u: username, m: mode })
 			.then(async (scores) => {
 				if (!(scores[0])) {
-					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; --r for ripple; Use --o/--t/--c/--m for modes)`);
+					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; --r for ripple; Use --s/--t/--c/--m for modes)`);
 				}
 
 				const dbBeatmap = await getOsuBeatmap(scores[0].beatmapId, 0);
@@ -158,7 +158,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 				await drawUserInfo(elements, server);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${dbBeatmap.beatmapId}.png`);
+				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${dbBeatmap.beatmapId}-${scores[0].raw_mods}.png`);
 
 				let guildPrefix = await getGuildPrefix(msg);
 
@@ -172,10 +172,11 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 				}
 				processingMessage.delete();
 				sentMessage.react('<:COMPARE:827974793365159997>');
+				sentMessage.react('🗺️');
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --r for ripple; Use --o/--t/--c/--m for modes)`);
+					msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --r for ripple; Use --s/--t/--c/--m for modes)`);
 				} else {
 					console.log(err);
 				}
@@ -186,7 +187,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --o/--t/--c/--m for modes)`);
+					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --s/--t/--c/--m for modes)`);
 				}
 
 				let score = rippleToBanchoScore(responseJson[0]);
@@ -227,17 +228,18 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 						await drawUserInfo(elements, server);
 
 						//Create as an attachment
-						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${dbBeatmap.beatmapId}.png`);
+						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${dbBeatmap.beatmapId}-${score.raw_mods}.png`);
 
 						//Send attachment
 						const sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nosu! direct: <osu://b/${dbBeatmap.beatmapId}>`, files: [attachment] });
 						processingMessage.delete();
 						sentMessage.react('<:COMPARE:827974793365159997>');
+						sentMessage.react('🗺️');
 
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {
-							msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --o/--t/--c/--m for modes)`);
+							msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --s/--t/--c/--m for modes)`);
 						} else {
 							console.log(err);
 						}
@@ -245,7 +247,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --o/--t/--c/--m for modes)`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --s/--t/--c/--m for modes)`);
 				} else {
 					console.log(err);
 				}
@@ -263,13 +265,16 @@ async function drawTitle(input) {
 
 	const gameMode = getGameMode(beatmap);
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
+	const beatmapStatusIcon = await Canvas.loadImage(getBeatmapApprovalStatusImage(beatmap));
+
+	ctx.drawImage(beatmapStatusIcon, 10, 5, canvas.height / 500 * 35, canvas.height / 500 * 35);
 	ctx.drawImage(modePic, canvas.width / 1000 * 10, canvas.height / 500 * 40, canvas.height / 500 * 35, canvas.height / 500 * 35);
 
 	// Write the title of the beatmap
 	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'left';
-	ctx.fillText(`${beatmap.title} by ${beatmap.artist}`, canvas.width / 100, canvas.height / 500 * 35);
+	ctx.fillText(`${beatmap.title} by ${beatmap.artist}`, canvas.width / 1000 * 60, canvas.height / 500 * 35);
 	ctx.font = '25px comfortaa, sans-serif';
 
 	const mods = getMods(score.raw_mods);

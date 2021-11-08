@@ -97,8 +97,9 @@ async function getBeatmap(msg, beatmap) {
 	const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-beatmap-${beatmap.beatmapId}.png`);
 
 	//Send attachment
-	await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
+	const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 	processingMessage.delete();
+	sentMessage.react('<:COMPARE:827974793365159997>');
 }
 
 async function drawTitle(input) {

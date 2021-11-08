@@ -7,7 +7,7 @@ module.exports = {
 	name: 'osu-referee',
 	aliases: ['osu-host'],
 	description: 'Lets you schedule a match which is being reffed by the bot',
-	// usage: '[username] [username] ... (Use "_" instead of spaces; Use --b for bancho / --r for ripple; Use --o/--t/--c/--m for modes)',
+	// usage: '[username] [username] ... (Use "_" instead of spaces; Use --b for bancho / --r for ripple; Use --s/--t/--c/--m for modes)',
 	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,

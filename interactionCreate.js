@@ -3,6 +3,7 @@ const fs = require('fs');
 const { isWrongSystem } = require('./utils');
 const cooldowns = new Discord.Collection();
 const { Permissions } = require('discord.js');
+const { developers } = require('./config.json');
 
 module.exports = async function (client, bancho, interaction) {
 	if (!interaction.isCommand()) return;
@@ -84,7 +85,7 @@ module.exports = async function (client, bancho, interaction) {
 	}
 
 	//Set timestamp for the used command
-	if (interaction.user.id !== '138273136285057025') {
+	if (!developers.includes(interaction.user.id)) {
 		timestamps.set(interaction.user.id, now);
 	}
 	//Automatically delete the timestamp after the cooldown

@@ -1,6 +1,7 @@
 const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { saveOsuMultiScores, pause } = require('../utils');
 const osu = require('node-osu');
+const { developers } = require('../config.json');
 
 module.exports = {
 	name: 'admin',
@@ -19,11 +20,26 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
-		if (msg.author.id !== '138273136285057025') {
+		if (!developers.includes(msg.author.id)) {
 			return;
 		}
 
 		if (args[0] === 'guildCommands') {
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: '8ball',
+			// 		description: 'Answers with a random 8-Ball message',
+			// 		options: [
+			// 			{
+			// 				'name': 'question',
+			// 				'description': 'The question that should be answered',
+			// 				'type': 3,
+			// 				'required': true
+			// 			}
+			// 		]
+			// 	}
+			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -1016,13 +1032,13 @@ module.exports = {
 			// 				'name': 'scaled',
 			// 				'description': 'Should the graph be scaled by the total evaluation?',
 			// 				'type': 5,
-			// 				'required': true
+			// 				'required': false
 			// 			},
 			// 			{
 			// 				'name': 'scores',
 			// 				'description': 'Which types of scores should the graph evaluate?',
 			// 				'type': 3,
-			// 				'required': true,
+			// 				'required': false,
 			// 				'choices': [
 			// 					{
 			// 						'name': 'Only Score v2',
@@ -1042,13 +1058,13 @@ module.exports = {
 			// 				'name': 'tourney',
 			// 				'description': 'Should it only count scores from tournaments?',
 			// 				'type': 5,
-			// 				'required': true
+			// 				'required': false
 			// 			},
 			// 			{
 			// 				'name': 'runningaverage',
 			// 				'description': 'Should a running average be shown instead?',
 			// 				'type': 5,
-			// 				'required': true
+			// 				'required': false
 			// 			},
 			// 			{
 			// 				'name': 'username',
@@ -1557,12 +1573,43 @@ module.exports = {
 			// 		]
 			// 	}
 			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'time',
+			// 		description: 'Sends current time of the given location',
+			// 		options: [
+			// 			{
+			// 				'name': 'location',
+			// 				'description': 'The location of which you want to find out the time',
+			// 				'type': 3,
+			// 				'required': true
+			// 			},
+			// 		]
+			// 	}
+			// });
+
 		} else if (args[0] === 'removeGuildCommands') {
 			const commands = await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.get();
 			for (let i = 0; i < commands.length; i++) {
 				await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands(commands[i].id).delete();
 			}
 		} else if (args[0] === 'globalCommands') {
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: '8ball',
+					description: 'Answers with a random 8-Ball message',
+					options: [
+						{
+							'name': 'question',
+							'description': 'The question that should be answered',
+							'type': 3,
+							'required': true
+						}
+					]
+				}
+			});
+
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'admincommands',
@@ -2554,13 +2601,13 @@ module.exports = {
 							'name': 'scaled',
 							'description': 'Should the graph be scaled by the total evaluation?',
 							'type': 5,
-							'required': true
+							'required': false
 						},
 						{
 							'name': 'scores',
 							'description': 'Which types of scores should the graph evaluate?',
 							'type': 3,
-							'required': true,
+							'required': false,
 							'choices': [
 								{
 									'name': 'Only Score v2',
@@ -2580,13 +2627,13 @@ module.exports = {
 							'name': 'tourney',
 							'description': 'Should it only count scores from tournaments?',
 							'type': 5,
-							'required': true
+							'required': false
 						},
 						{
 							'name': 'runningaverage',
 							'description': 'Should a running average be shown instead?',
 							'type': 5,
-							'required': true
+							'required': false
 						},
 						{
 							'name': 'username',
@@ -3092,6 +3139,21 @@ module.exports = {
 							'type': 3,
 							'required': true
 						}
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'time',
+					description: 'Sends current time of the given location',
+					options: [
+						{
+							'name': 'location',
+							'description': 'The location of which you want to find out the time',
+							'type': 3,
+							'required': true
+						},
 					]
 				}
 			});

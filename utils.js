@@ -130,6 +130,22 @@ module.exports = {
 
 		return URL;
 	},
+	getBeatmapApprovalStatusImage: function (beatmap) {
+
+		let beatmapStatusIcon;
+		if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved') {
+			beatmapStatusIcon = './other/ApprovalStatus-UpwardsChevron.png';
+		} else if (beatmap.approvalStatus === 'Loved') {
+			beatmapStatusIcon = './other/ApprovalStatus-Heart.png';
+		} else if (beatmap.approvalStatus === 'Qualified') {
+			beatmapStatusIcon = './other/ApprovalStatus-Check.png';
+		} else {
+			beatmapStatusIcon = './other/ApprovalStatus-QuestionMark.png';
+		}
+
+		return beatmapStatusIcon;
+	},
+
 	getMods: function (input) {
 		return getModsFunction(input);
 	},
@@ -858,37 +874,34 @@ module.exports = {
 		};
 	},
 	isWrongSystem(guildId, isDM) {
+		//Always respond to DMs
+		if (isDM) {
+			return false;
+		}
 		//For the development version
 		//if the message is not in the Dev-Servers then return
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
-			if (isDM) {
-				return true;
-			}
-			if (!isDM && guildId != '800641468321759242' && guildId != '800641735658176553') {
+			if (guildId != '800641468321759242' && guildId != '800641735658176553') {
 				return true;
 			}
 			//For the QA version
 			//if the message is in the QA-Servers then return
 			// eslint-disable-next-line no-undef
 		} else if (process.env.SERVER === 'QA') {
-			if (isDM) {
-				return true;
-			}
-			if (!isDM && guildId != '800641367083974667' && guildId != '800641819086946344') {
+			if (guildId != '800641367083974667' && guildId != '800641819086946344') {
 				return true;
 			}
 			//For the Live version
 			//if the message is in the Dev/QA-Servers then return
 			// eslint-disable-next-line no-undef
 		} else if (process.env.SERVER === 'Live') {
-			if (!isDM) {
-				if (guildId === '800641468321759242' || guildId === '800641735658176553' || guildId === '800641367083974667' || guildId === '800641819086946344') {
-					return true;
-				}
+			if (guildId === '800641468321759242' || guildId === '800641735658176553' || guildId === '800641367083974667' || guildId === '800641819086946344') {
+				return true;
 			}
 		}
 
+		//Otherwise its on the correct server
 		return false;
 	},
 	async getOsuBeatmap(beatmapId, modBits) {
@@ -1018,12 +1031,17 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 		where: { beatmapId: beatmapId, mods: modBits }
 	});
 
+	//Date of reworked DT and HT values
+	if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('HT')) {
+		lastRework.setUTCFullYear(2021);
+		lastRework.setUTCMonth(10);
+		lastRework.setUTCDate(7);
+	}
+
 	if (!dbBeatmap
-		|| dbBeatmap && dbBeatmap.updatedAt < lastRework
-		|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt.getTime() < lastWeek.getTime()
-		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && !dbBeatmap.starRating
-		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && !dbBeatmap.maxCombo
-		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && dbBeatmap.starRating == 0) {
+		|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
+		|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt.getTime() < lastWeek.getTime() //Update if old non-ranked map
+		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0)) { //Always update ranked maps if values are missing
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -1043,6 +1061,15 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 					noVisualModBeatmap.maxCombo = realNoVisualModBeatmap.maxCombo;
 				}
 
+				//Recalculate bpm for HT and DT
+				let bpm = beatmaps[0].bpm;
+
+				if (getModsFunction(modBits).includes('DT')) {
+					bpm = parseFloat(beatmaps[0].bpm) * 1.5;
+				} else if (getModsFunction(modBits).includes('HT')) {
+					bpm = parseFloat(beatmaps[0].bpm) * 0.75;
+				}
+
 				//Map has to be updated
 				if (dbBeatmap) {
 					dbBeatmap.title = beatmaps[0].title;
@@ -1059,7 +1086,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 					dbBeatmap.hpDrain = beatmaps[0].difficulty.drain;
 					dbBeatmap.mapper = beatmaps[0].creator;
 					dbBeatmap.beatmapsetId = beatmaps[0].beatmapSetId;
-					dbBeatmap.bpm = beatmaps[0].bpm;
+					dbBeatmap.bpm = bpm;
 					dbBeatmap.mode = beatmaps[0].mode;
 					dbBeatmap.approvalStatus = beatmaps[0].approvalStatus;
 					dbBeatmap.maxCombo = noVisualModBeatmap.maxCombo;
@@ -1086,7 +1113,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 						mapper: beatmaps[0].creator,
 						beatmapId: beatmaps[0].id,
 						beatmapsetId: beatmaps[0].beatmapSetId,
-						bpm: beatmaps[0].bpm,
+						bpm: bpm,
 						mode: beatmaps[0].mode,
 						approvalStatus: beatmaps[0].approvalStatus,
 						maxCombo: noVisualModBeatmap.maxCombo,

@@ -295,7 +295,7 @@ module.exports = {
 
 					let date = new Date();
 					date.setUTCMinutes(date.getUTCMinutes() + 3);
-					DBProcessQueue.create({ guildId: msg.guildId, task: 'closeTicket', priority: 5, additions: msg.channel.id, date: date });
+					return DBProcessQueue.create({ guildId: msg.guildId, task: 'closeTicket', priority: 5, additions: msg.channel.id, date: date });
 				} else {
 					if (msg.id) {
 						return msg.reply('This is not a valid ticket channel.');
