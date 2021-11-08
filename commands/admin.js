@@ -1147,11 +1147,11 @@ module.exports = {
 			// 				'required': false,
 			// 				'choices': [
 			// 					{
-			// 						'name': 'bancho',
+			// 						'name': 'Bancho',
 			// 						'value': 'b',
 			// 					},
 			// 					{
-			// 						'name': 'ripple',
+			// 						'name': 'Ripple',
 			// 						'value': 'r',
 			// 					},
 			// 				]
@@ -2730,7 +2730,7 @@ module.exports = {
 								{
 									'name': 'Taiko',
 									'value': 't',
-								},	
+								},
 							]
 						},
 						{
