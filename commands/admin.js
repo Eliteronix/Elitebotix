@@ -2735,21 +2735,17 @@ module.exports = {
 						},
 						{
 							'name': 'server',
-							'description': 'The username, id or link of the player',
+							'description': 'The server from which the results will be displayed',
 							'type': 3,
 							'required': false,
 							'choices': [
 								{
-									'name': 'b',
-									'description': 'bancho',
-									'type': 3,
-									'required': true,
+									'name': 'Bancho',
+									'value': 'b',
 								},
 								{
-									'name': 'r',
-									'description': 'ripple',
-									'type': 3,
-									'required': true,
+									'name': 'Ripple',
+									'value': 'r',
 								},
 							]
 						},
