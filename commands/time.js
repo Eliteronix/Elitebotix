@@ -3,13 +3,13 @@ const Discord = require('discord.js');
 const { populateMsgFromInteraction } = require('../utils');
 module.exports = {
 	name: 'time',
-	aliases: ['localtime', 'donate', 'support'],
+	aliases: ['localtime'],
 	description: 'Sends current time of the given location',
 	usage: '<location>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: [Permissions.FLAGS.EMBED_LINKS, Permissions.FLAGS.SEND_MESSAGES],
+	botPermissionsTranslated: 'Manage Roles',
 	//guildOnly: true,
 	args: true,
 	cooldown: 5,
@@ -17,16 +17,13 @@ module.exports = {
 	tags: 'misc',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
-		//Multiple requests Tomorrow
-		//Code optimization as well
 		//make a call to find a lat and long of the location
 		// eslint-disable-next-line no-undef
 		const timeEmbed = new Discord.MessageEmbed();
 
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
-			args = [];
-			args.push(interaction.options._hoistedOptions[0].value);
+			args = [interaction.options._hoistedOptions[0].value];
 			await interaction.reply('Locations are being processed');
 		}
 
@@ -40,7 +37,8 @@ module.exports = {
 			//pinge check
 			if (msg.id) {
 				return msg.reply(`Couldn't find \`${args.join(' ').replace(/`/g, '')}\` location. Maybe you've mistyped?`);
-			} return interaction.followUp(`Couldn't find \`${args.join(' ').replace(/`/g, '')}\` location. Maybe you've mistyped?`);
+			}
+			return interaction.followUp(`Couldn't find \`${args.join(' ').replace(/`/g, '')}\` location. Maybe you've mistyped?`);
 		} else {
 
 			let lat = json.geonames[0].lat;
@@ -51,11 +49,14 @@ module.exports = {
 			let response2 = await fetch(url2);
 			let json2 = await response2.json();
 			let comparedToUTC;
+
+			//Always starting with - by default
 			if (json2.gmtOffset >= 0) {
 				comparedToUTC = '+' + json2.gmtOffset;
 			} else {
 				comparedToUTC = json2.gmtOffset;
 			}
+
 			//have to do this because .toLocaleString doesnt work with json2.time (because json2.time is a string and not a date format)
 			let time = new Date(json2.time);
 
@@ -64,7 +65,7 @@ module.exports = {
 					// eslint-disable-next-line indent
 					//return locations without e!time		||replace '_' in timezoneId with an empty string			
 					{
-						name: `Current date and time for  (${json2.timezoneId.replace('_', ' ')} timezone) is`, value: `${time.toLocaleString('en-UK', {
+						name: `Current date and time for ${json2.timezoneId.replace('_', ' ')} timezone`, value: `${time.toLocaleString('en-UK', {
 							// some settings for the formatting. Note: seconds CAN NOT be displayed due to limits of api
 							weekday: 'long',
 							day: 'numeric',
@@ -80,7 +81,8 @@ module.exports = {
 			//send embed
 			if (msg.id) {
 				return msg.reply({ embeds: [timeEmbed] });
-			} return interaction.followUp({ embeds: [timeEmbed], ephemeral: false });
+			}
+			return interaction.followUp({ embeds: [timeEmbed], ephemeral: false });
 		}
 	}
 };
