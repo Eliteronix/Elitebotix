@@ -2716,19 +2716,19 @@ module.exports = {
 							'required': false,
 							'choices': [
 								{
-									'name': 'standard',
+									'name': 'Standard',
 									'value': 's',
 								},
 								{
-									'name': 'mania',
+									'name': 'Mania',
 									'value': 'm',
 								},
 								{
-									'name': 'catch the beat',
+									'name': 'Catch the beat',
 									'value': 'c',
 								},
 								{
-									'name': 'taiko',
+									'name': 'Taiko',
 									'value': 't',
 								},	
 							]
