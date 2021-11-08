@@ -1100,56 +1100,95 @@ module.exports = {
 			// 	},
 			// });
 
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'osu-top',
-			// 		description: 'Sends an info card about the topplays of the specified player',
-			// 		options: [
-			// 			{
-			// 				'name': 'new',
-			// 				'description': 'Should the newest topplays be shown?',
-			// 				'type': 5,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'amount',
-			// 				'description': 'The amount of topplays to be displayed',
-			// 				'type': 4,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username2',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username3',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username4',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username5',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 		]
-			// 	},
-			// });
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'osu-top',
+					description: 'Sends an info card about the topplays of the specified player',
+					options: [
+						{
+							'name': 'new',
+							'description': 'Should the newest topplays be shown?',
+							'type': 5,
+							'required': false
+						},
+						{
+							'name': 'amount',
+							'description': 'The amount of topplays to be displayed',
+							'type': 4,
+							'required': false
+						},
+						{
+							'name': 'gamemode',
+							'description': 'Gamemode',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'standard',
+									'value': 's',
+								},
+								{
+									'name': 'mania',
+									'value': 'm',
+								},
+								{
+									'name': 'catch the beat',
+									'value': 'c',
+								},
+								{
+									'name': 'taiko',
+									'value': 't',
+								},	
+							]
+						},					{
+							'name': 'server',
+							'description': 'The server from which the results will be displayed',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'bancho',
+									'value': 'b',
+								},
+								{
+									'name': 'ripple',
+									'value': 'r',
+								},
+							]
+						},
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+					]
+				},
+			});
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -2672,16 +2711,47 @@ module.exports = {
 						},
 						{
 							'name': 'gamemode',
-							'description': 'gamemode',
-							'type': 4,
-							'required': false
-
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'standard',
+									'value': 's',
+								},
+								{
+									'name': 'mania',
+									'value': 'm',
+								},
+								{
+									'name': 'catch the beat',
+									'value': 'c',
+								},
+								{
+									'name': 'taiko',
+									'value': 't',
+								},	
+							]
 						},
 						{
 							'name': 'server',
-							'description': 'gamemode',
-							'type': 4,
-							'required': false
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'b',
+									'description': 'bancho',
+									'type': 3,
+									'required': true,
+								},
+								{
+									'name': 'r',
+									'description': 'ripple',
+									'type': 3,
+									'required': true,
+								},
+							]
 						},
 						{
 							'name': 'username',
