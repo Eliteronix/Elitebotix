@@ -764,6 +764,18 @@ module.exports = {
 			tourneyMatch = true;
 		}
 		match.games.forEach(game => {
+			//Define if the game is freemod or not
+			let freeMod = false;
+			if (game.scores[0]) {
+				let rawMods = game.scores[0].raw_mods;
+				for (let i = 0; i < game.scores.length; i++) {
+					if (rawMods !== game.scores[i].raw_mods) {
+						freeMod = true;
+						break;
+					}
+				}
+			}
+
 			game.scores.forEach(async (score) => {
 				//Calculate evaluation
 				let evaluation = 0;
@@ -827,6 +839,7 @@ module.exports = {
 						matchEndDate: match.raw_end,
 						gameStartDate: game.raw_start,
 						gameEndDate: game.raw_end,
+						freeMod: freeMod,
 					});
 				}
 			});

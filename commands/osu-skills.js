@@ -5,7 +5,6 @@ const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
 const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
-const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-skills',
@@ -156,7 +155,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 		.then(async (user) => {
 			let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
-			let startDate = new Date();
 			const topScores = await osuApi.getUserBest({ u: user.name, m: 0, limit: 100 });
 
 			let mods = [];
@@ -235,10 +233,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			quicksortValue(acc);
 			quicksortValue(bpm);
 
-			let endDate = new Date();
-			console.log(`[osu-skills] Top 100 data took ${endDate - startDate}ms to process.`);
-
-			startDate = new Date();
 			const canvasWidth = 700;
 			const canvasHeight = 500;
 
@@ -386,20 +380,15 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			const files = [topPlayStats];
 
 			let content = 'Top play stats';
-			endDate = new Date();
-			console.log(`[osu-skills] Top 100 picture took ${endDate - startDate}ms to process.`);
 
 			const width = 1500; //px
 			const height = 750; //px
 			const canvasRenderService = new ChartJSNodeCanvas({ width, height });
 
 			(async () => {
-				startDate = new Date();
 				const userScores = await DBOsuMultiScores.findAll({
 					where: { osuUserId: user.id }
 				});
-				endDate = new Date();
-				console.log(`[osu-skills] Get userScores took ${endDate - startDate}ms to process.`);
 
 				if (!userScores.length) {
 					await processingMessage.delete();
@@ -407,8 +396,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					content = `${content}; No multi/tourney-scores found in the database for ${user.name} - skipping modpool evaluation`;
 
 				} else {
-
-					startDate = new Date();
 					let oldestDate = new Date();
 					oldestDate.setUTCDate(1);
 					oldestDate.setUTCHours(0);
@@ -445,14 +432,10 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 						labels.push(rawModsDataObject.label);
 						rawModsData.push(rawModsDataObject);
 					}
-					endDate = new Date();
-					console.log(`[osu-skills] Labels took ${endDate - startDate}ms to process.`);
 
-					startDate = new Date();
 					let uncompletedMonths = [];
 					let runningAverageAmount = 75;
 					for (let i = 0; i < userScores.length; i++) {
-						let startDate2 = new Date();
 						//Filter out rounds which don't fit the restrictions
 						if (scoringType === 'v2' && userScores[i].scoringType !== 'Score v2') {
 							continue;
@@ -474,22 +457,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 								rawModsData[j].totalEvaluation += parseFloat(userScores[i].evaluation);
 								rawModsData[j].totalCount++;
 
-								let startDate4 = new Date();
-								//get sameGameScores with different mods
-								//gameId is already unique, so we can use it as a key
-								const sameGameScores = await DBOsuMultiScores.count({
-									where: {
-										gameId: userScores[i].gameId,
-										rawMods: {
-											[Op.ne]: userScores[i].rawMods,
-										}
-									}
-								});
-								let endDate4 = new Date();
-								console.log(`----[osu-skills] Get sameGameScores took ${endDate4 - startDate4}ms to process. (${sameGameScores.length})`);
-
 								//Add values to Mods
-								if (sameGameScores === 0 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
+								if (!userScores[i].freeMod && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
 									rawModsData[j].NMEvaluation += parseFloat(userScores[i].evaluation);
 									rawModsData[j].NMCount++;
 								} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '8' || userScores[i].gameRawMods === '9')) {
@@ -515,7 +484,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 									if (rawModsData[j].label !== uncompletedMonths[k].label) {
 
 										//Add values to Mods
-										if (uncompletedMonths[k].NMCount < 15 && sameGameScores === 0 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
+										if (uncompletedMonths[k].NMCount < 15 && !userScores[i].freeMod && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
 											uncompletedMonths[k].NMEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].NMCount++;
 											//add to total evaluation
@@ -559,13 +528,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 								}
 							}
 						}
-						let endDate2 = new Date();
-						console.log(`--[osu-skills] 1 userScore took ${endDate2 - startDate2}ms to process.`);
 					}
-					endDate = new Date();
-					console.log(`[osu-skills] Assemble rawModsData took ${endDate - startDate}ms to process.`);
 
-					startDate = new Date();
 					const totalDatapoints = [];
 					const NMDatapoints = [];
 					const HDDatapoints = [];
@@ -628,10 +592,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 						}
 						totalDatapoints.push(totalValue);
 					});
-					endDate = new Date();
-					console.log(`[osu-skills] Push datapoints took ${endDate - startDate}ms to process.`);
 
-					startDate = new Date();
 					for (let i = 0; i < totalDatapoints.length; i++) {
 						if (isNaN(totalDatapoints[i])) {
 							labels.splice(i, 1);
@@ -644,8 +605,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 							i--;
 						}
 					}
-					endDate = new Date();
-					console.log(`[osu-skills] Remove x axis datapoint if empty took ${endDate - startDate}ms to process.`);
 
 					if (labels.length === 1) {
 						labels.push(labels[0]);
@@ -657,7 +616,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 						FMDatapoints.push(FMDatapoints[0]);
 					}
 
-					startDate = new Date();
 					const data = {
 						labels: labels,
 						datasets: [
@@ -760,8 +718,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
 
 					const attachment = new Discord.MessageAttachment(imageBuffer, `osu-skills-${user.id}.png`);
-					endDate = new Date();
-					console.log(`[osu-skills] Create the chart attachment took ${endDate - startDate}ms to process.`);
 
 					files.push(attachment);
 

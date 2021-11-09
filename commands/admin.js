@@ -3301,6 +3301,44 @@ module.exports = {
 			for (let i = parseInt(args[1]); i < parseInt(args[2]); i++) {
 				msg.reply(`https://osu.ppy.sh/community/matches/${i}`);
 			}
+		} else if (args[0] === 'fillFreemod') {
+			//Iterate over all multi scores finding one by one from the database to not run out of memory
+			for (let i = 0; i < 1000000; i++) {
+				const score = await DBOsuMultiScores.findOne({
+					where: {
+						id: i
+					}
+				});
+
+				//If score found set freemod
+				if (score) {
+					const sameGameScores = await DBOsuMultiScores.findAll({
+						where: {
+							matchId: score.matchId,
+							gameId: score.gameId,
+						}
+					});
+
+					//find out if they are freemod scores
+					let freeMod = false;
+					if (sameGameScores.length > 0) {
+						let rawMods = score.rawMods;
+						for (let i = 0; i < sameGameScores.length; i++) {
+							if (rawMods !== sameGameScores[i].rawMods) {
+								freeMod = true;
+								break;
+							}
+						}
+					}
+
+					//Set freemod value
+					score.freeMod = freeMod;
+					score.save();
+					console.log(score.id, score.freeMod);
+				}
+			}
+		} else {
+			msg.reply('Invalid command');
 		}
 
 		msg.reply('Done.');

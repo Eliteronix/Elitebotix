@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
 		matchEndDate: DataTypes.DATE,
 		gameStartDate: DataTypes.DATE,
 		gameEndDate: DataTypes.DATE,
+		freeMod: DataTypes.BOOLEAN,
 		paranoid: true,
 	});
 };
