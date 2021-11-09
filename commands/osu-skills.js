@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { CanvasRenderService } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 
@@ -760,9 +760,12 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				await msg.channel.send({ content: content, files: files });
 
 				//Save the maps locally
-				userScores.forEach(userScore => {
-					getOsuBeatmap(userScore.beatmapId, userScore.gameRawMods);
-				});
+				for (let i = 0; i < userScores.length; i++) {
+					let dbBeatmap = await getOsuBeatmap(userScores[i].beatmapId, userScores[i].gameRawMods);
+					if (dbBeatmap && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.approvalStatus !== 'Ranked') {
+						await pause(500);
+					}
+				}
 			})();
 		})
 		.catch(err => {
