@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const { CanvasRenderService } = require('chartjs-node-canvas');
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
 const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
@@ -108,7 +108,7 @@ module.exports = {
 
 		const width = 1500; //px
 		const height = 750; //px
-		const canvasRenderService = new CanvasRenderService(width, height);
+		const canvasRenderService = new ChartJSNodeCanvas({ width, height });
 
 		const labels = [];
 		for (let i = 0; i < 24; i++) {

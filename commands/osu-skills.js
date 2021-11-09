@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const { CanvasRenderService } = require('chartjs-node-canvas');
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
 const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause } = require('../utils');
 const { Permissions } = require('discord.js');
@@ -383,7 +383,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 			const width = 1500; //px
 			const height = 750; //px
-			const canvasRenderService = new CanvasRenderService(width, height);
+			const canvasRenderService = new ChartJSNodeCanvas({ width, height });
 
 			(async () => {
 				const userScores = await DBOsuMultiScores.findAll({
