@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP, getBeatmapApprovalStatusImage } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -13,8 +13,8 @@ module.exports = {
 	usage: '<beatmapID> [username] [username] ... (Use "_" instead of spaces; --all for all mod combinations; --HD for HD highscore ...)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: Permissions.FLAGS.ATTACH_FILES,
-	botPermissionsTranslated: 'Attach Files',
+	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissionsTranslated: 'Send Messages and Attach Files',
 	//guildOnly: true,
 	args: true,
 	cooldown: 5,
@@ -193,7 +193,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						await drawUserInfo(elements, server);
 
 						//Create as an attachment
-						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.beatmapId}.png`);
+						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-score-${user.id}-${beatmap.beatmapId}-${scores[0].raw_mods}.png`);
 
 						let guildPrefix = await getGuildPrefix(msg);
 
@@ -206,6 +206,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 							sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 						}
 						sentMessage.react('<:COMPARE:827974793365159997>');
+						sentMessage.react('🗺️');
 
 						processingMessage.delete();
 						//Reset maprank in case of multiple scores displayed
@@ -269,13 +270,14 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						await drawUserInfo(elements, server);
 
 						//Create as an attachment
-						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${beatmap.beatmapId}.png`);
+						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-score-${user.id}-${beatmap.beatmapId}-${score.raw_mods}.png`);
 
 						//Send attachment
 						let sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 
 						processingMessage.delete();
 						sentMessage.react('<:COMPARE:827974793365159997>');
+						sentMessage.react('🗺️');
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {
@@ -304,13 +306,16 @@ async function drawTitle(input) {
 
 	const gameMode = getGameMode(beatmap);
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
+	const beatmapStatusIcon = await Canvas.loadImage(getBeatmapApprovalStatusImage(beatmap));
+
+	ctx.drawImage(beatmapStatusIcon, 10, 5, canvas.height / 500 * 35, canvas.height / 500 * 35);
 	ctx.drawImage(modePic, canvas.width / 1000 * 10, canvas.height / 500 * 40, canvas.height / 500 * 35, canvas.height / 500 * 35);
 
 	// Write the title of the beatmap
 	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'left';
-	ctx.fillText(`${beatmap.title} by ${beatmap.artist}`, canvas.width / 100, canvas.height / 500 * 35);
+	ctx.fillText(`${beatmap.title} by ${beatmap.artist}`, canvas.width / 1000 * 60, canvas.height / 500 * 35);
 	ctx.font = '25px comfortaa, sans-serif';
 
 	const mods = getMods(score.raw_mods);

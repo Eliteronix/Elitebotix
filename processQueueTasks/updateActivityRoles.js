@@ -33,9 +33,6 @@ module.exports = {
 				activityRoleObjects.push(role);
 			} else {
 				activityRoles.splice(i, 1);
-				DBActivityRoles.destroy({
-					where: { id: activityRoles[i].id }
-				});
 				i--;
 			}
 		}

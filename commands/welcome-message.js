@@ -1,5 +1,6 @@
 const { DBGuilds } = require('../dbObjects');
 const { Permissions } = require('discord.js');
+const { populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'welcome-message',
@@ -8,15 +9,24 @@ module.exports = {
 	usage: '<current/disable/message to send> (use "@member" to mention the new member)',
 	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissionsTranslated: 'Send Messages',
 	//guildOnly: true,
 	args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
 	tags: 'server-admin',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			if (interaction.options._subcommand === 'set') {
+				args.push(interaction.options._hoistedOptions[0].value);
+			} else {
+				args = [interaction.options._subcommand];
+			}
+		}
 		//Check first argument of the command
 		if (args[0] === 'current') {
 			//get guild from db
@@ -32,16 +42,25 @@ module.exports = {
 					const guildWelcomeMessageChannelId = guild.welcomeMessageChannel;
 					//get the channel object by the id
 					const guildWelcomeMessageChannel = msg.guild.channels.cache.find(channel => channel.id === guildWelcomeMessageChannelId);
-					msg.reply(`The current welcome message is set to channel \`${guildWelcomeMessageChannel.name}\`: \`${guild.welcomeMessageText.replace(/`/g, '')}\``);
+					if (msg.id) {
+						return msg.reply(`The current welcome message is set to channel \`${guildWelcomeMessageChannel.name}\`: \`${guild.welcomeMessageText.replace(/`/g, '')}\``);
+					}
+					return interaction.reply(`The current welcome message is set to channel \`${guildWelcomeMessageChannel.name}\`: \`${guild.welcomeMessageText.replace(/`/g, '')}\``);
 				} else {
 					//if no welcome message is set
-					msg.reply('There is currently no welcome message set.');
+					if (msg.id) {
+						return msg.reply('There is currently no welcome message set.');
+					}
+					return interaction.reply('There is currently no welcome message set.');
 				}
 			} else {
 				//Create guild in the db in case the guild is not in the db yet
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendWelcomeMessage: false });
 				//Send that no welcome message is set
-				msg.reply('There is currently no welcome message set.');
+				if (msg.id) {
+					return msg.reply('There is currently no welcome message set.');
+				}
+				return interaction.reply('There is currently no welcome message set.');
 			}
 			//Check first argument of the command
 		} else if (args[0] === 'disable') {
@@ -58,16 +77,25 @@ module.exports = {
 					guild.sendWelcomeMessage = false;
 					//Save the dataset
 					guild.save();
-					msg.reply('Welcome messages have been disabled for this server.');
+					if (msg.id) {
+						return msg.reply('Welcome messages have been disabled for this server.');
+					}
+					return interaction.reply('Welcome messages have been disabled for this server.');
 				} else {
 					//if welcome messages are already disabled
-					msg.reply('Welcome messages are already disabled for this server.');
+					if (msg.id) {
+						return msg.reply('Welcome messages are already disabled for this server.');
+					}
+					return interaction.reply('Welcome messages are already disabled for this server.');
 				}
 			} else {
 				//Create guild in the db in case the guild is not in the db yet
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendWelcomeMessage: false });
 				//Send that no welcome message is set
-				msg.reply('Welcome messages are already disabled for this server.');
+				if (msg.id) {
+					return msg.reply('Welcome messages are already disabled for this server.');
+				}
+				return interaction.reply('Welcome messages are already disabled for this server.');
 			}
 			//If not specified keyword for the command
 		} else {
@@ -89,7 +117,10 @@ module.exports = {
 				//if guild was not found, create it in db
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendWelcomeMessage: true, welcomeMessageChannel: msg.channel.id, welcomeMessageText: welcomeMessage });
 			}
-			msg.reply(`The new message \`${welcomeMessage.replace(/`/g, '')}\` has been set for welcoming new members in the channel \`${msg.channel.name}\`.`);
+			if (msg.id) {
+				return msg.reply(`The new message \`${welcomeMessage.replace(/`/g, '')}\` has been set for welcoming new members in the channel \`${msg.channel.name}\`.`);
+			}
+			return interaction.reply(`The new message \`${welcomeMessage.replace(/`/g, '')}\` has been set for welcoming new members in the channel \`${msg.channel.name}\`.`);
 		}
 	},
 };

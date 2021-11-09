@@ -1,6 +1,7 @@
 //Require discord.js module
 const Discord = require('discord.js');
 const { populateMsgFromInteraction } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'server-info',
@@ -9,8 +10,8 @@ module.exports = {
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'MANAGE_MESSAGES',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
+	botPermissionsTranslated: 'Send Messages and Embed Links',
 	guildOnly: true,
 	//args: true,
 	cooldown: 5,

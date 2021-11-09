@@ -1,6 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const { getGuildPrefix, getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'osu-link',
@@ -9,8 +10,8 @@ module.exports = {
 	usage: '<connect/current/disconnect/verify> [username ("_" for " ")]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'ATTACH_FILES',
-	//botPermissionsTranslated: 'Attach Files',
+	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissionsTranslated: 'Send Messages',
 	//guildOnly: true,
 	args: true,
 	cooldown: 15,

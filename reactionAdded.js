@@ -3,7 +3,7 @@ const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } 
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { isWrongSystem } = require('./utils');
+const { isWrongSystem, getMods } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user, additionalObjects) {
@@ -24,7 +24,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	}
 
 	//Return if the bot reacted itself or if it was not a bot message
-	if (user.id === '784836063058329680') {
+	if (user.id === reaction.client.user.id) {
 		return;
 	}
 
@@ -146,7 +146,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 		return;
 	}
 
-	if (reaction.message.author.id !== '784836063058329680') {
+	if (reaction.message.author.id !== reaction.client.user.id) {
 		return;
 	}
 
@@ -207,8 +207,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 		}
 	}
 
+	//For the compare emoji
 	if (reaction._emoji.id === '827974793365159997') {
 		const scoreRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+/gm;
+		const beatmapRegex = /Website: <https:\/\/osu.ppy.sh\/b\/.+>\nosu! direct: <osu:\/\/b\/.+>/gm;
 		if (reaction.message.content.match(scoreRegex)) {
 			const beginningRegex = /.+\nSpectate: .+\nBeatmap: <https:\/\/osu.ppy.sh\/b\//gm;
 			const endingRegex = />\nosu! direct:.+/gm;
@@ -217,6 +219,66 @@ module.exports = async function (reaction, user, additionalObjects) {
 			let args = [beatmapId];
 
 			const command = require('./commands/osu-score.js');
+
+			//Set author of the message to the reacting user to not break the commands
+			reaction.message.author = user;
+
+			//Execute the command
+			try {
+				command.execute(reaction.message, args, null, additionalObjects);
+			} catch (error) {
+				console.error(error);
+				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+			}
+		} else if (reaction.message.content.match(beatmapRegex)) {
+			const beginningRegex = /Website: https:\/\/osu.ppy.sh\/b\/.+\nosu! direct: osu:\/\/b\//gm;
+			const beatmapId = reaction.message.content.replace(beginningRegex, '').replace('>', '');
+
+			let args = [beatmapId];
+
+			const command = require('./commands/osu-score.js');
+
+			//Set author of the message to the reacting user to not break the commands
+			reaction.message.author = user;
+
+			//Execute the command
+			try {
+				command.execute(reaction.message, args, null, additionalObjects);
+			} catch (error) {
+				console.error(error);
+				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+			}
+
+		}
+	}
+
+	//Check if reacted for map information
+	if (reaction._emoji.name === '🗺️') {
+		const scoreRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+/gm;
+		//Check if it is actually a scorepost
+		if (reaction.message.content.match(scoreRegex)) {
+			//Regex the beatmapId out of there
+			const beginningRegex = /.+\nSpectate: .+\nBeatmap: <https:\/\/osu.ppy.sh\/b\//gm;
+			const endingRegex = />\nosu! direct:.+/gm;
+			const beatmapId = reaction.message.content.replace(beginningRegex, '').replace(endingRegex, '');
+
+			//get the mods used
+			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+
+			let mods = getMods(modBits);
+
+			if (!mods[0]) {
+				mods = ['NM'];
+			}
+
+			//Setup artificial arguments
+			let args = [beatmapId, `--${mods.join('')}`];
+
+			const command = require('./commands/osu-beatmap.js');
 
 			//Set author of the message to the reacting user to not break the commands
 			reaction.message.author = user;

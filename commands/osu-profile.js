@@ -10,11 +10,11 @@ module.exports = {
 	name: 'osu-profile',
 	aliases: ['osu-player', 'osu-user', 'o-u', 'o-p'],
 	description: 'Sends an info card about the specified player',
-	usage: '[username] [username] ... (Use "_" instead of spaces; Use --b for bancho / --r for ripple; Use --o/--t/--c/--m for modes)',
+	usage: '[username] [username] ... (Use "_" instead of spaces; Use --b for bancho / --r for ripple; Use --s/--t/--c/--m for modes)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: Permissions.FLAGS.ATTACH_FILES,
-	botPermissionsTranslated: 'Attach Files',
+	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissionsTranslated: 'Send Messages and Attach Files',
 	//guildOnly: true,
 	//args: true,
 	cooldown: 5,
@@ -144,7 +144,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --r for ripple; Use --o/--t/--c/--m for modes)`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --r for ripple; Use --s/--t/--c/--m for modes)`);
 				} else {
 					console.log(err);
 				}
@@ -154,7 +154,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --o/--t/--c/--m for modes)`);
+					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --s/--t/--c/--m for modes)`);
 				}
 
 				let user = rippleToBanchoUser(responseJson[0]);
@@ -199,7 +199,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --o/--t/--c/--m for modes)`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --s/--t/--c/--m for modes)`);
 				} else {
 					console.log(err);
 				}

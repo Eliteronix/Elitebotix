@@ -10,8 +10,8 @@ module.exports = {
 	usage: '<page>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: Permissions.FLAGS.ATTACH_FILES,
-	botPermissionsTranslated: 'Attach Files',
+	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissionsTranslated: 'Send Messages and Attach Files',
 	guildOnly: true,
 	// args: true,
 	cooldown: 30,
@@ -50,6 +50,7 @@ module.exports = {
 					});
 
 					if (serverUserActivity) {
+						serverUserActivity.displayColor = members[i].displayHexColor;
 						discordUsers.push(serverUserActivity);
 					}
 				}
@@ -75,6 +76,7 @@ module.exports = {
 					let dataset = {
 						name: userDisplayName,
 						value: `${humanReadable(discordUsers[i].points)} point(s)`,
+						color: discordUsers[i].displayColor
 					};
 
 					leaderboardData.push(dataset);

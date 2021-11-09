@@ -1,5 +1,5 @@
 const { DBAutoRoles } = require('../dbObjects');
-const { getGuildPrefix } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -9,15 +9,27 @@ module.exports = {
 	usage: '<add/remove/list> <@role>',
 	permissions: Permissions.FLAGS.MANAGE_ROLES,
 	permissionsTranslated: 'Manage Roles',
-	botPermissions: Permissions.FLAGS.MANAGE_ROLES,
-	botPermissionsTranslated: 'Manage Roles',
+	botPermissions: [Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.SEND_MESSAGES],
+	botPermissionsTranslated: 'Send Messages and Manage Roles',
 	guildOnly: true,
 	args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
 	tags: 'server-admin',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			args = [interaction.options._subcommand];
+
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				if (interaction.options._hoistedOptions[i].name === 'role') {
+					args.push(`<@&${interaction.options._hoistedOptions[i].value}>`);
+				}
+			}
+		}
+
 		//Check the first argument
 		if (args[0] === 'add') {
 			//Check if any roles were memtioned
@@ -33,11 +45,18 @@ module.exports = {
 
 				//If autorole already exists
 				if (autoRole) {
-					msg.reply(`${autoRoleName.name} is already an autorole.`);
+					if (msg.id) {
+						return msg.reply(`${autoRoleName.name} is already an autorole.`);
+					}
+					return interaction.reply(`${autoRoleName.name} is already an autorole.`);
 				} else {
 					//If autorole doesn't exist in db then create it
 					DBAutoRoles.create({ guildId: msg.guildId, roleId: autoRoleId });
-					msg.reply(`${autoRoleName.name} has been added as an autorole.`);
+					if (msg.id) {
+						msg.reply(`${autoRoleName.name} has been added as an autorole.`);
+					} else {
+						interaction.reply(`${autoRoleName.name} has been added as an autorole.`);
+					}
 
 					//Get all members of the guild
 					const guildMembers = await msg.guild.members.fetch();
@@ -63,9 +82,15 @@ module.exports = {
 				const rowCount = await DBAutoRoles.destroy({ where: { guildId: msg.guildId, roleId: autoRoleId } });
 				//Send feedback message accordingly
 				if (rowCount > 0) {
-					msg.reply(`${autoRoleName.name} has been removed from autoroles.`);
+					if (msg.id) {
+						return msg.reply(`${autoRoleName.name} has been removed from autoroles.`);
+					}
+					return interaction.reply(`${autoRoleName.name} has been removed from autoroles.`);
 				} else {
-					msg.reply(`${autoRoleName.name} was no autorole.`);
+					if (msg.id) {
+						msg.reply(`${autoRoleName.name} was no autorole.`);
+					}
+					return interaction.reply(`${autoRoleName.name} was no autorole.`);
 				}
 			} else {
 				//if no roles were mentioned
@@ -92,7 +117,10 @@ module.exports = {
 			//Set the output string
 			const autoRolesString = autoRolesList.join(', ') || 'No autoroles found.';
 			//Output autorole list
-			msg.reply(`List of autoroles: ${autoRolesString}`);
+			if (msg.id) {
+				return msg.reply(`List of autoroles: ${autoRolesString}`);
+			}
+			return interaction.reply(`List of autoroles: ${autoRolesString}`);
 		} else {
 			let guildPrefix = await getGuildPrefix(msg);
 

@@ -1,6 +1,7 @@
 const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { saveOsuMultiScores, pause } = require('../utils');
 const osu = require('node-osu');
+const { developers } = require('../config.json');
 
 module.exports = {
 	name: 'admin',
@@ -19,11 +20,41 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
-		if (msg.author.id !== '138273136285057025') {
+		if (!developers.includes(msg.author.id)) {
 			return;
 		}
 
 		if (args[0] === 'guildCommands') {
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: '8ball',
+			// 		description: 'Answers with a random 8-Ball message',
+			// 		options: [
+			// 			{
+			// 				'name': 'question',
+			// 				'description': 'The question that should be answered',
+			// 				'type': 3,
+			// 				'required': true
+			// 			}
+			// 		]
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'admincommands',
+			// 		description: 'Adapt if server-admin commands should be shown or not',
+			// 		options: [
+			// 			{
+			// 				'name': 'show',
+			// 				'description': 'Should the commands for server-admins be shown?',
+			// 				'type': 5,
+			// 				'required': true
+			// 			}
+			// 		]
+			// 	},
+			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -1001,13 +1032,13 @@ module.exports = {
 			// 				'name': 'scaled',
 			// 				'description': 'Should the graph be scaled by the total evaluation?',
 			// 				'type': 5,
-			// 				'required': true
+			// 				'required': false
 			// 			},
 			// 			{
 			// 				'name': 'scores',
 			// 				'description': 'Which types of scores should the graph evaluate?',
 			// 				'type': 3,
-			// 				'required': true,
+			// 				'required': false,
 			// 				'choices': [
 			// 					{
 			// 						'name': 'Only Score v2',
@@ -1027,13 +1058,13 @@ module.exports = {
 			// 				'name': 'tourney',
 			// 				'description': 'Should it only count scores from tournaments?',
 			// 				'type': 5,
-			// 				'required': true
+			// 				'required': false
 			// 			},
 			// 			{
 			// 				'name': 'runningaverage',
 			// 				'description': 'Should a running average be shown instead?',
 			// 				'type': 5,
-			// 				'required': true
+			// 				'required': false
 			// 			},
 			// 			{
 			// 				'name': 'username',
@@ -1085,6 +1116,45 @@ module.exports = {
 			// 				'description': 'The amount of topplays to be displayed',
 			// 				'type': 4,
 			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'gamemode',
+			// 				'description': 'Gamemode',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Standard',
+			// 						'value': 's',
+			// 					},
+			// 					{
+			// 						'name': 'Mania',
+			// 						'value': 'm',
+			// 					},
+			// 					{
+			// 						'name': 'Catch The Beat',
+			// 						'value': 'c',
+			// 					},
+			// 					{
+			// 						'name': 'Taiko',
+			// 						'value': 't',
+			// 					},
+			// 				]
+			// 			}, {
+			// 				'name': 'server',
+			// 				'description': 'The server from which the results will be displayed',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Bancho',
+			// 						'value': 'b',
+			// 					},
+			// 					{
+			// 						'name': 'Ripple',
+			// 						'value': 'r',
+			// 					},
+			// 				]
 			// 			},
 			// 			{
 			// 				'name': 'username',
@@ -1270,47 +1340,41 @@ module.exports = {
 			// 		description: 'Sends a reminder at the specified time',
 			// 		options: [
 			// 			{
+			// 				'name': 'message',
+			// 				'description': 'The message of the reminder',
+			// 				'type': 3,
+			// 				'required': true
+			// 			},
+			// 			{
 			// 				'name': 'years',
 			// 				'description': 'The years until the reminder',
 			// 				'type': 4,
-			// 				'required': true
 			// 			},
 			// 			{
 			// 				'name': 'months',
 			// 				'description': 'The months until the reminder',
 			// 				'type': 4,
-			// 				'required': true
 			// 			},
 			// 			{
 			// 				'name': 'weeks',
 			// 				'description': 'The weeks until the reminder',
 			// 				'type': 4,
-			// 				'required': true
 			// 			},
 			// 			{
 			// 				'name': 'days',
 			// 				'description': 'The days until the reminder',
 			// 				'type': 4,
-			// 				'required': true
 			// 			},
 			// 			{
 			// 				'name': 'hours',
 			// 				'description': 'The hours until the reminder',
 			// 				'type': 4,
-			// 				'required': true
 			// 			},
 			// 			{
 			// 				'name': 'minutes',
 			// 				'description': 'The minutes until the reminder',
 			// 				'type': 4,
-			// 				'required': true
 			// 			},
-			// 			{
-			// 				'name': 'message',
-			// 				'description': 'The message of the reminder',
-			// 				'type': 3,
-			// 				'required': true
-			// 			}
 			// 		]
 			// 	}
 			// });
@@ -1407,14 +1471,74 @@ module.exports = {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'ticket',
-			// 		description: 'Create a ticket',
+			// 		description: 'Create and manage tickets',
 			// 		options: [
 			// 			{
-			// 				'name': 'issue',
-			// 				'description': 'The issue description for your ticket',
-			// 				'type': 3,
-			// 				'required': true,
-			// 			}
+			// 				'name': 'create',
+			// 				'description': 'Create a ticket',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'issue',
+			// 						'description': 'The issue description for your ticket',
+			// 						'type': 3,
+			// 						'required': true,
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'state',
+			// 				'description': 'Manage a ticket\'s workflow state',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'state',
+			// 						'description': 'The ticket\'s workflow state',
+			// 						'type': 3,
+			// 						'required': true,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Responded',
+			// 								'value': 'responded'
+			// 							},
+			// 							{
+			// 								'name': 'In action',
+			// 								'value': 'action'
+			// 							},
+			// 							{
+			// 								'name': 'Close',
+			// 								'value': 'close'
+			// 							}
+			// 						]
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'addrole',
+			// 				'description': 'Add a role to a ticket',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'role',
+			// 						'description': 'The role to add to the ticket',
+			// 						'type': 8,
+			// 						'required': true,
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'removerole',
+			// 				'description': 'Remove a role from a ticket',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'role',
+			// 						'description': 'The role to remove from the ticket',
+			// 						'type': 8,
+			// 						'required': true,
+			// 					}
+			// 				]
+			// 			},
 			// 		]
 			// 	}
 			// });
@@ -1488,12 +1612,58 @@ module.exports = {
 			// 		]
 			// 	}
 			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'time',
+			// 		description: 'Sends current time of the given location',
+			// 		options: [
+			// 			{
+			// 				'name': 'location',
+			// 				'description': 'The location of which you want to find out the time',
+			// 				'type': 3,
+			// 				'required': true
+			// 			},
+			// 		]
+			// 	}
+			// });
+
 		} else if (args[0] === 'removeGuildCommands') {
 			const commands = await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.get();
 			for (let i = 0; i < commands.length; i++) {
 				await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands(commands[i].id).delete();
 			}
 		} else if (args[0] === 'globalCommands') {
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: '8ball',
+					description: 'Answers with a random 8-Ball message',
+					options: [
+						{
+							'name': 'question',
+							'description': 'The question that should be answered',
+							'type': 3,
+							'required': true
+						}
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'admincommands',
+					description: 'Adapt if server-admin commands should be shown or not',
+					options: [
+						{
+							'name': 'show',
+							'description': 'Should the commands for server-admins be shown?',
+							'type': 5,
+							'required': true
+						}
+					]
+				},
+			});
+
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'creator',
@@ -2470,13 +2640,13 @@ module.exports = {
 							'name': 'scaled',
 							'description': 'Should the graph be scaled by the total evaluation?',
 							'type': 5,
-							'required': true
+							'required': false
 						},
 						{
 							'name': 'scores',
 							'description': 'Which types of scores should the graph evaluate?',
 							'type': 3,
-							'required': true,
+							'required': false,
 							'choices': [
 								{
 									'name': 'Only Score v2',
@@ -2496,13 +2666,13 @@ module.exports = {
 							'name': 'tourney',
 							'description': 'Should it only count scores from tournaments?',
 							'type': 5,
-							'required': true
+							'required': false
 						},
 						{
 							'name': 'runningaverage',
 							'description': 'Should a running average be shown instead?',
 							'type': 5,
-							'required': true
+							'required': false
 						},
 						{
 							'name': 'username',
@@ -2554,6 +2724,46 @@ module.exports = {
 							'description': 'The amount of topplays to be displayed',
 							'type': 4,
 							'required': false
+						},
+						{
+							'name': 'gamemode',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'Standard',
+									'value': 's',
+								},
+								{
+									'name': 'Mania',
+									'value': 'm',
+								},
+								{
+									'name': 'Catch the beat',
+									'value': 'c',
+								},
+								{
+									'name': 'Taiko',
+									'value': 't',
+								},
+							]
+						},
+						{
+							'name': 'server',
+							'description': 'The server from which the results will be displayed',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'Bancho',
+									'value': 'b',
+								},
+								{
+									'name': 'Ripple',
+									'value': 'r',
+								},
+							]
 						},
 						{
 							'name': 'username',
@@ -2739,47 +2949,41 @@ module.exports = {
 					description: 'Sends a reminder at the specified time',
 					options: [
 						{
+							'name': 'message',
+							'description': 'The message of the reminder',
+							'type': 3,
+							'required': true
+						},
+						{
 							'name': 'years',
 							'description': 'The years until the reminder',
 							'type': 4,
-							'required': true
 						},
 						{
 							'name': 'months',
 							'description': 'The months until the reminder',
 							'type': 4,
-							'required': true
 						},
 						{
 							'name': 'weeks',
 							'description': 'The weeks until the reminder',
 							'type': 4,
-							'required': true
 						},
 						{
 							'name': 'days',
 							'description': 'The days until the reminder',
 							'type': 4,
-							'required': true
 						},
 						{
 							'name': 'hours',
 							'description': 'The hours until the reminder',
 							'type': 4,
-							'required': true
 						},
 						{
 							'name': 'minutes',
 							'description': 'The minutes until the reminder',
 							'type': 4,
-							'required': true
 						},
-						{
-							'name': 'message',
-							'description': 'The message of the reminder',
-							'type': 3,
-							'required': true
-						}
 					]
 				}
 			});
@@ -2876,14 +3080,74 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'ticket',
-					description: 'Create a ticket',
+					description: 'Create and manage tickets',
 					options: [
 						{
-							'name': 'issue',
-							'description': 'The issue description for your ticket',
-							'type': 3,
-							'required': true,
-						}
+							'name': 'create',
+							'description': 'Create a ticket',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'issue',
+									'description': 'The issue description for your ticket',
+									'type': 3,
+									'required': true,
+								}
+							]
+						},
+						{
+							'name': 'state',
+							'description': 'Manage a ticket\'s workflow state',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'state',
+									'description': 'The ticket\'s workflow state',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Responded',
+											'value': 'responded'
+										},
+										{
+											'name': 'In action',
+											'value': 'action'
+										},
+										{
+											'name': 'Close',
+											'value': 'close'
+										}
+									]
+								}
+							]
+						},
+						{
+							'name': 'addrole',
+							'description': 'Add a role to a ticket',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'role',
+									'description': 'The role to add to the ticket',
+									'type': 8,
+									'required': true,
+								}
+							]
+						},
+						{
+							'name': 'removerole',
+							'description': 'Remove a role from a ticket',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'role',
+									'description': 'The role to remove from the ticket',
+									'type': 8,
+									'required': true,
+								}
+							]
+						},
 					]
 				}
 			});
@@ -2954,6 +3218,21 @@ module.exports = {
 							'type': 3,
 							'required': true
 						}
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'time',
+					description: 'Sends current time of the given location',
+					options: [
+						{
+							'name': 'location',
+							'description': 'The location of which you want to find out the time',
+							'type': 3,
+							'required': true
+						},
 					]
 				}
 			});

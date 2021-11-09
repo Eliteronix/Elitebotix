@@ -6,6 +6,7 @@ const cooldowns = new Discord.Collection();
 const { closest } = require('fastest-levenshtein');
 const { Permissions } = require('discord.js');
 const { DBElitiriCupSignUp, DBTickets } = require('./dbObjects');
+const { developers } = require('./config.json');
 
 module.exports = async function (msg, bancho) {
 	//check if the message wasn't sent by the bot itself or another bot
@@ -35,7 +36,7 @@ module.exports = async function (msg, bancho) {
 		//Handle Ticket
 		handleTicketStatus(msg);
 
-		if (msg.author.id === '138273136285057025' && msg.content === 'e!dbinit') {
+		if (developers.includes(msg.author.id) && msg.content === 'e!dbinit') {
 			console.log('Syncing database...');
 			const Sequelize = require('sequelize');
 
@@ -109,7 +110,7 @@ module.exports = async function (msg, bancho) {
 			const categories = ['general', 'server-admin', 'osu', 'misc'];
 
 			//Developer
-			if (msg.author.id === '138273136285057025') {
+			if (developers.includes(msg.author.id)) {
 				categories.push('debug');
 			}
 
@@ -205,8 +206,14 @@ module.exports = async function (msg, bancho) {
 
 		//Check permissions of the bot
 		if (msg.channel.type !== 'DM') {
+			const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch(msg.client.user.id));
+			if (!botPermissions || !botPermissions.has(Permissions.FLAGS.SEND_MESSAGES) || !botPermissions.has(Permissions.FLAGS.READ_MESSAGE_HISTORY)) {
+				//The bot can't possibly answer the message
+				return;
+			}
+
+			//Check the command permissions
 			if (command.botPermissions) {
-				const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch('784836063058329680'));
 				if (!botPermissions.has(command.botPermissions)) {
 					return msg.reply(`I need the ${command.botPermissionsTranslated} permission to do this!`);
 				}
@@ -253,7 +260,7 @@ module.exports = async function (msg, bancho) {
 		}
 
 		//Set timestamp for the used command
-		if (msg.author.id !== '138273136285057025') {
+		if (!developers.includes(msg.author.id)) {
 			timestamps.set(msg.author.id, now);
 		}
 		//Automatically delete the timestamp after the cooldown

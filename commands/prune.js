@@ -1,4 +1,5 @@
 const { Permissions } = require('discord.js');
+const { populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'prune',
@@ -15,7 +16,14 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'server-admin',
 	prefixCommand: true,
-	execute(msg, args) {
+	async execute(msg, args, interaction) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			args = [interaction.options._hoistedOptions[0].value];
+
+			interaction.reply({ content: 'Deleted messages', ephemeral: true });
+		}
 		//Set amount by argument + 1
 		const amount = parseInt(args[0]) + 1;
 
@@ -30,7 +38,10 @@ module.exports = {
 		//Delete messages which are less than 2 weeks old
 		msg.channel.bulkDelete(amount, true).catch(err => {
 			console.error(err);
-			msg.reply('there was an error trying to prune messages in this channel!');
+			if (msg.id) {
+				return msg.reply('there was an error trying to prune messages in this channel!');
+			}
+			return interaction.reply({ content: 'There was an error trying to prune messages in this channel', ephemeral: true });
 		});
 	},
 };

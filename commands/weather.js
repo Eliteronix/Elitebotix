@@ -3,6 +3,7 @@ const Canvas = require('canvas');
 const weather = require('weather-js');
 const util = require('util');
 const { pause, populateMsgFromInteraction } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'weather',
@@ -11,8 +12,8 @@ module.exports = {
 	usage: '[F/Fahrenheit] <location/zipcode>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissionsTranslated: 'Send Messages and Attach Files',
 	//guildOnly: true,
 	args: true,
 	cooldown: 5,

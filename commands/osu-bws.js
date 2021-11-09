@@ -1,16 +1,17 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
+const { Permissions } = require('discord.js');
 const { getGuildPrefix, humanReadable, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'osu-bws',
 	// aliases: ['osu-player', 'osu-user', 'o-u', 'o-p'],
 	description: 'Sends info about the BWS rank of the specified player',
-	usage: '[username] [username] ... (Use "_" instead of spaces; Use --o/--t/--c/--m for modes)',
+	usage: '[username] [username] ... (Use "_" instead of spaces; Use --s/--t/--c/--m for modes)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	// botPermissions: 'ATTACH_FILES',
-	// botPermissionsTranslated: 'Attach Files',
+	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissionsTranslated: 'Send Messages',
 	//guildOnly: true,
 	//args: true,
 	cooldown: 5,

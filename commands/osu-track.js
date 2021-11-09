@@ -1,6 +1,6 @@
 const { DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { getIDFromPotentialOsuLink } = require('../utils');
+const { getIDFromPotentialOsuLink, populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -10,8 +10,8 @@ module.exports = {
 	usage: '<add/list/remove> <username>',
 	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissionsTranslated: 'Send Messages and Attach Files',
 	guildOnly: true,
 	args: true,
 	cooldown: 5,
@@ -19,7 +19,16 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			if (interaction.options._subcommand === 'list') {
+				args = [interaction.options._subcommand];
+			} else {
+				args = [interaction.options._subcommand, interaction.options._hoistedOptions[0].value];
+			}
+		}
 		if (args[0].toLowerCase() === 'list') {
 			const trackingList = await DBProcessQueue.findAll({
 				where: { task: 'osu-track' }
@@ -37,11 +46,17 @@ module.exports = {
 				}
 			}
 
-			return msg.reply(trackingListString || 'No osu! tracking tasks found in this channel.', { split: true });
+			if (msg.id) {
+				return msg.reply(trackingListString || 'No osu! tracking tasks found in this channel.', { split: true });
+			}
+			return interaction.reply(trackingListString || 'No osu! tracking tasks found in this channel.', { split: true });
 		} else if (args[0].toLowerCase() === 'remove') {
 			args.shift();
 			if (args[1]) {
-				return msg.reply('Please specify which user shouldn\'t be tracked anymore.');
+				if (msg.id) {
+					return msg.reply('Please specify which user shouldn\'t be tracked anymore.');
+				}
+				return interaction.reply('Please specify which user shouldn\'t be tracked anymore.');
 			}
 
 			const trackingList = await DBProcessQueue.findAll({
@@ -51,11 +66,17 @@ module.exports = {
 			for (let i = 0; i < trackingList.length; i++) {
 				if (trackingList[i].additions.startsWith(msg.channel.id) && trackingList[i].additions.toLowerCase().replace(/ /g, '_').includes(`;${args.join('_').toLowerCase()}`)) {
 					trackingList[i].destroy();
-					return msg.reply('The specified tracker has been removed.');
+					if (msg.id) {
+						return msg.reply('The specified tracker has been removed.');
+					}
+					return interaction.reply('The specified tracker has been removed.');
 				}
 			}
 
-			return msg.reply('Couldn\'t find an osu! tracker to remove.');
+			if (msg.id) {
+				return msg.reply('Couldn\'t find an osu! tracker to remove.');
+			}
+			return interaction.reply('Couldn\'t find an osu! tracker to remove.');
 		} else if (args[0].toLowerCase() === 'add') {
 			args.shift();
 		}
@@ -87,16 +108,27 @@ module.exports = {
 
 					date.setUTCMinutes(date.getUTCMinutes() + 15);
 
-					DBProcessQueue.create({ guildId: 'None', task: 'osu-track', priority: 8, additions: `${msg.channel.id};${user.id};${user.name}`, date: date });
+					let now = new Date();
 
-					msg.reply(`The user ${user.name} will be tracked in this channel.`);
+					DBProcessQueue.create({ guildId: 'None', task: 'osu-track', priority: 8, additions: `${msg.channel.id};${user.id};${user.name};${now.getTime()}`, date: date });
+
+					if (msg.id) {
+						return msg.reply(`The user ${user.name} will be tracked in this channel.`);
+					}
+					interaction.reply(`The user ${user.name} will be tracked in this channel.`);
 				} else {
-					msg.reply(`The user ${user.name} is already being tracked in this channel.`);
+					if (msg.id) {
+						return msg.reply(`The user ${user.name} is already being tracked in this channel.`);
+					}
+					return interaction.reply(`The user ${user.name} is already being tracked in this channel.`);
 				}
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.reply(`Could not find user \`${args.join('_').replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
+					if (msg.id) {
+						return msg.reply(`Could not find user \`${args.join('_').replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
+					}
+					interaction.reply(`Could not find user \`${args.join('_').replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
 				} else {
 					console.log(err);
 				}

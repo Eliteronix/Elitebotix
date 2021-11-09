@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBAutoRoles } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'settings',
@@ -9,8 +10,8 @@ module.exports = {
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
+	botPermissionsTranslated: 'Send Messages and Embed Links',
 	guildOnly: true,
 	//args: true,
 	cooldown: 5,
@@ -26,9 +27,9 @@ module.exports = {
 		}
 
 		//Get bot member
-		const member = msg.guild.members.fetch('784836063058329680');
+		const member = await msg.guild.members.fetch(msg.client.user.id);
 
-		const user = msg.client.users.cache.find(user => user.id === '784836063058329680');
+		const user = await msg.client.users.fetch(msg.client.user.id);
 
 		const guild = await DBGuilds.findOne({
 			where: { guildId: msg.guildId },

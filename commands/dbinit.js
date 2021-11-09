@@ -1,3 +1,4 @@
+const { developers } = require('../config.json');
 module.exports = {
 	name: 'dbinit',
 	// aliases: ['leaderboard', 'ranking'],
@@ -15,7 +16,7 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
-		if (msg.author.id === '138273136285057025') {
+		if (developers.includes(msg.author.id)) {
 			console.log('Syncing database...');
 			const Sequelize = require('sequelize');
 

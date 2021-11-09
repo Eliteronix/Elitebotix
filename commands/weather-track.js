@@ -1,6 +1,7 @@
 const { DBProcessQueue } = require('../dbObjects');
 const weather = require('weather-js');
 const { Permissions } = require('discord.js');
+const { populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'weather-track',
@@ -9,8 +10,8 @@ module.exports = {
 	usage: '[hourly/daily] [F/Fahrenheit] <location/zipcode> | <List> | <remove> <C/F> <location>',
 	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissionsTranslated: 'Send Messages and Attach Files',
 	guildOnly: true,
 	args: true,
 	cooldown: 5,
@@ -18,7 +19,46 @@ module.exports = {
 	tags: 'misc',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			await interaction.deferReply({ ephemeral: true });
+
+			if (interaction.options._subcommand === 'list') {
+				args = ['list'];
+			} else if (interaction.options._subcommand === 'add') {
+				let location = null;
+				let frequency = null;
+				let unit = null;
+
+				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+					if (interaction.options._hoistedOptions[i].name === 'location') {
+						location = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'frequency') {
+						frequency = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'unit') {
+						unit = interaction.options._hoistedOptions[i].value;
+					}
+				}
+
+				args = [frequency, unit, location];
+
+			} else if (interaction.options._subcommand === 'remove') {
+				let location = null;
+				let unit = null;
+
+				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+					if (interaction.options._hoistedOptions[i].name === 'location') {
+						location = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'unit') {
+						unit = interaction.options._hoistedOptions[i].value;
+					}
+				}
+
+				args = ['remove', unit, location];
+			}
+		}
 		let timePeriod = '';
 		if (args[0].toLowerCase() === 'list') {
 			const trackingList = await DBProcessQueue.findAll({
@@ -37,7 +77,10 @@ module.exports = {
 				}
 			}
 
-			return msg.reply(trackingListString || 'No weather tracking tasks found in this channel.');
+			if (msg.id) {
+				return msg.reply(trackingListString || 'No weather tracking tasks found in this channel.');
+			}
+			return interaction.editReply(trackingListString || 'No weather tracking tasks found in this channel.');
 		} else if (args[0].toLowerCase() === 'remove') {
 			args.shift();
 			const trackingList = await DBProcessQueue.findAll({
@@ -58,11 +101,16 @@ module.exports = {
 			for (let i = 0; i < trackingList.length; i++) {
 				if (trackingList[i].additions.startsWith(msg.channel.id) && trackingList[i].additions.includes(`;${degreeType};`) && trackingList[i].additions.endsWith(`;${args.join(' ')}`)) {
 					trackingList[i].destroy();
-					return msg.reply('The specified tracker has been removed.');
+					if (msg.id) {
+						return msg.reply('The specified tracker has been removed.');
+					}
+					return interaction.editReply('The specified tracker has been removed.');
 				}
 			}
-
-			return msg.reply('Couldn\'t find a weather tracker to remove.');
+			if (msg.id) {
+				return msg.reply('Couldn\'t find a weather tracker to remove.');
+			}
+			return interaction.editReply('Couldn\'t find a weather tracker to remove.');
 		} else if (args[0].toLowerCase() === 'hourly') {
 			timePeriod = 'hourly';
 			args.shift();
@@ -77,13 +125,18 @@ module.exports = {
 		if (args[0].toLowerCase() === 'f' || args[0].toLowerCase() === 'fahrenheit') {
 			degreeType = 'F';
 			args.shift();
+		} else if (args[0].toLowerCase() === 'c' || args[0].toLowerCase() === 'celcius') {
+			args.shift();
 		}
 
 		weather.find({ search: args.join(' '), degreeType: degreeType }, async function (err, result) {
 			if (err) console.log(err);
 
 			if (!result[0]) {
-				return msg.reply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
+				if (msg.id) {
+					return msg.reply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
+				}
+				return interaction.editReply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
 			}
 
 			let date = new Date();
@@ -103,7 +156,10 @@ module.exports = {
 			});
 
 			if (duplicate) {
-				return msg.reply(`The weather for ${args.join(' ')} is already being provided ${timePeriod} in this channel.`);
+				if (msg.id) {
+					return msg.reply(`The weather for ${args.join(' ')} is already being provided ${timePeriod} in this channel.`);
+				}
+				return interaction.editReply(`The weather for ${args.join(' ')} is already being provided ${timePeriod} in this channel.`);
 			}
 
 			if (timePeriod === 'hourly') {
@@ -115,7 +171,10 @@ module.exports = {
 					dailyDuplicate.additions = `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`;
 					dailyDuplicate.save();
 
-					return msg.reply(`The weather for ${args.join(' ')} will now be provided hourly instead of daily.`);
+					if (msg.id) {
+						return msg.reply(`The weather for ${args.join(' ')} will now be provided hourly instead of daily.`);
+					}
+					return interaction.editReply(`The weather for ${args.join(' ')} will now be provided hourly instead of daily.`);
 				}
 			} else {
 				const hourlyDuplicate = await DBProcessQueue.findOne({
@@ -126,13 +185,19 @@ module.exports = {
 					hourlyDuplicate.additions = `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`;
 					hourlyDuplicate.save();
 
-					return msg.reply(`The weather for ${args.join(' ')} will now be provided daily instead of hourly.`);
+					if (msg.id) {
+						return msg.reply(`The weather for ${args.join(' ')} will now be provided daily instead of hourly.`);
+					}
+					return interaction.editReply(`The weather for ${args.join(' ')} will now be provided daily instead of hourly.`);
 				}
 			}
 
 			DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`, date: date });
 
-			msg.reply(`The weather for ${args.join(' ')} will be provided ${timePeriod} in this channel.`);
+			if (msg.id) {
+				return msg.reply(`The weather for ${args.join(' ')} will be provided ${timePeriod} in this channel.`);
+			}
+			return interaction.editReply(`The weather for ${args.join(' ')} will be provided ${timePeriod} in this channel.`);
 		});
 	},
 };

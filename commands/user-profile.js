@@ -1,6 +1,7 @@
 //Import Tables
 const { DBDiscordUsers } = require('../dbObjects');
 const { populateMsgFromInteraction } = require('../utils');
+const { Permissions } = require('discord.js');
 
 //Require discord.js module
 const Discord = require('discord.js');
@@ -15,8 +16,8 @@ module.exports = {
 	usage: '[@user]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
+	botPermissionsTranslated: 'Send Messages and Embed Links',
 	//guildOnly: true,
 	//args: true,
 	cooldown: 5,
@@ -68,13 +69,61 @@ async function sendUserEmbed(msg, interaction, user) {
 			{ name: 'Nickname', value: `${userDisplayName}` }
 		);
 
-		const memberRoles = '<@&' + member.roles.cache.filter(role => role.name !== '@everyone').map(role => role.id).join('>, <@&') + '>';
+		//Get the member roles and push the IDs into an array
+		const memberRoles = [];
+		member.roles.cache.filter(role => role.name !== '@everyone').each(role => memberRoles.push(`<@&${role.id}>`));
 
-		if (memberRoles !== '<@&>') {
-			userInfoEmbed.addFields(
-				{ name: 'Roles', value: `${memberRoles}` }
-			);
+		//18 characters role ID + <@& + > -> 22 characters per role
+		//Divide into as many fields as needed
+		const roleFieldValues = [];
+		let roleFieldValue = '';
+
+		//Fill up roleFieldValue with each role and push it to the array when character limit is reached
+		for (let i = 0; i < memberRoles.length; i++) {
+			//Character limit will be reached; push to array and reset the helper variable
+			if (roleFieldValue.length + 2 + memberRoles[i].length > 1024) {
+				roleFieldValues.push(roleFieldValue);
+				roleFieldValue = '';
+			}
+
+			//Differentiate between empty string and already filled string with some roles
+			if (roleFieldValue) {
+				roleFieldValue = `${roleFieldValue}, ${memberRoles[i]}`;
+			} else {
+				roleFieldValue = memberRoles[i];
+			}
 		}
+
+		//Add the rest of the roles that didn't fill up to 1024 anymore
+		if (roleFieldValue) {
+			roleFieldValues.push(roleFieldValue);
+		}
+
+
+		//add as many fields as needed to the embed
+		if (roleFieldValues[0]) {
+			for (let i = 0; i < roleFieldValues.length; i++) {
+				let header = '\u200B';
+				if (i === 0) {
+					header = 'Roles';
+				}
+
+				userInfoEmbed.addFields(
+					{ name: header, value: roleFieldValues[i] }
+				);
+			}
+		}
+		userInfoEmbed.addFields(
+			{
+				name: 'Created at: ', value: `${user.createdAt.toLocaleString('en-UK', { // en-UK if 24hour format
+					day: 'numeric',
+					year: 'numeric',
+					month: 'long',
+					hour: 'numeric',
+					minute: 'numeric',
+				})}`
+			}
+		);
 	}
 
 	//get discordUser from db

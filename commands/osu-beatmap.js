@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage } = require('../utils');
 const { Permissions } = require('discord.js');
 const fetch = require('node-fetch');
 
@@ -11,8 +11,8 @@ module.exports = {
 	usage: '<id> [id] [id] ...',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: Permissions.FLAGS.ATTACH_FILES,
-	botPermissionsTranslated: 'Attach Files',
+	botPermissions: [Permissions.FLAGS.ATTACH_FILES, Permissions.FLAGS.SEND_MESSAGES],
+	botPermissionsTranslated: 'Send Messages and Attach Files',
 	//guildOnly: true,
 	args: true,
 	cooldown: 5,
@@ -97,8 +97,9 @@ async function getBeatmap(msg, beatmap) {
 	const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-beatmap-${beatmap.beatmapId}.png`);
 
 	//Send attachment
-	await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
+	const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 	processingMessage.delete();
+	sentMessage.react('<:COMPARE:827974793365159997>');
 }
 
 async function drawTitle(input) {
@@ -144,6 +145,18 @@ async function drawMode(input) {
 	const gameMode = getGameMode(beatmap);
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
 	ctx.drawImage(modePic, (canvas.height / 3 - canvas.height / 3 / 4 * 3) / 2, canvas.height / 3 * 2 + (canvas.height / 3 - canvas.height / 3 / 4 * 3) / 4, canvas.height / 3 / 4 * 3, canvas.height / 3 / 4 * 3);
+
+	let mods = getMods(beatmap.mods);
+
+	if (!mods[0]) {
+		mods = ['NM'];
+	}
+
+	for (let i = 0; i < mods.length; i++) {
+		mods[i] = getModImage(mods[i]);
+		const modImage = await Canvas.loadImage(mods[i]);
+		ctx.drawImage(modImage, 150, 385 + i * 40 - ((mods.length - 1) * 40) / 2, 45, 32);
+	}
 
 	const output = [canvas, ctx, beatmap];
 	return output;

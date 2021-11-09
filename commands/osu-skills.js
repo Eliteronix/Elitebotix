@@ -10,11 +10,11 @@ module.exports = {
 	name: 'osu-skills',
 	// aliases: ['os', 'o-s'],
 	description: 'Sends an info card about the skills of the specified player',
-	usage: '[username] [username] ... (Use "_" instead of spaces; Use --scaled to scale by totalEvaluation (better for mods); Use --vx/--v1 to change scoring type filter; Use --tourney to filter by tourney matches only)',
+	usage: '[username] [username] ... (Use "_" instead of spaces; Use --noscale to not scale by totalEvaluation (better for mods); Use --vx/--v1/--v2 to change scoring type filter; Use --all to not filter by tourney matches only; Use --norunningavg to not take the running average)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: Permissions.FLAGS.ATTACH_FILES,
-	botPermissionsTranslated: 'Attach Files',
+	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissionsTranslated: 'Send Messages and Attach Files',
 	//guildOnly: true,
 	// args: true,
 	cooldown: 5,
@@ -34,14 +34,20 @@ module.exports = {
 					if (interaction.options._hoistedOptions[i].name === 'scaled') {
 						if (interaction.options._hoistedOptions[i].value) {
 							args.push('--scaled');
+						} else {
+							args.push('--noscale');
 						}
 					} else if (interaction.options._hoistedOptions[i].name === 'tourney') {
 						if (interaction.options._hoistedOptions[i].value) {
 							args.push('--tourney');
+						} else {
+							args.push('--all');
 						}
 					} else if (interaction.options._hoistedOptions[i].name === 'runningaverage') {
 						if (interaction.options._hoistedOptions[i].value) {
 							args.push('--runningavg');
+						} else {
+							args.push('--norunningavg');
 						}
 					} else {
 						args.push(interaction.options._hoistedOptions[i].value);
@@ -54,13 +60,17 @@ module.exports = {
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
 
-		let scaled = false;
-		let scoringType = 'vx';
-		let tourneyMatch = false;
-		let runningAverage = false;
+		let scaled = true;
+		let scoringType = 'v2';
+		let tourneyMatch = true;
+		let runningAverage = true;
 		for (let i = 0; i < args.length; i++) {
 			if (args[i].toLowerCase().startsWith('--scaled')) {
 				scaled = true;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase().startsWith('--noscale')) {
+				scaled = false;
 				args.splice(i, 1);
 				i--;
 			} else if (args[i].toLowerCase().startsWith('--v2')) {
@@ -75,12 +85,20 @@ module.exports = {
 				tourneyMatch = true;
 				args.splice(i, 1);
 				i--;
+			} else if (args[i].toLowerCase().startsWith('--all')) {
+				tourneyMatch = false;
+				args.splice(i, 1);
+				i--;
 			} else if (args[i].toLowerCase().startsWith('--vx')) {
 				scoringType = 'vx';
 				args.splice(i, 1);
 				i--;
 			} else if (args[i].toLowerCase().startsWith('--runningavg')) {
 				runningAverage = true;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase().startsWith('--norunningavg')) {
+				runningAverage = false;
 				args.splice(i, 1);
 				i--;
 			}
@@ -469,9 +487,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 										rawModsData[j].FMCount++;
 									}
 
-									//Save the maps locally
-									getOsuBeatmap(userScores[i].beatmapId, userScores[i].gameRawMods);
-
 									//add to uncompleted months for running avg
 									if (runningAverage && rawModsData[j].totalCount < runningAverageAmount && !uncompletedMonths.includes(rawModsData[j])) {
 										uncompletedMonths.push(rawModsData[j]);
@@ -742,7 +757,12 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					content = `${content} and Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}${runningAverageText}`;
 				}
 
-				msg.channel.send({ content: content, files: files });
+				await msg.channel.send({ content: content, files: files });
+
+				//Save the maps locally
+				userScores.forEach(userScore => {
+					getOsuBeatmap(userScore.beatmapId, userScore.gameRawMods);
+				});
 			})();
 		})
 		.catch(err => {

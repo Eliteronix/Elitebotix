@@ -1,13 +1,14 @@
 const { DBGuilds } = require('../dbObjects');
 const { Permissions } = require('discord.js');
+const { populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'goodbye-message',
 	aliases: ['farewell-message'],
 	description: 'Sends the specified message into the channel the user used the command in as soon as a member leaves.',
 	usage: '<current/disable/message to send> (use "@member" to mention the member)',
-	permissions: Permissions.FLAGS.MANAGE_GUILD,
-	permissionsTranslated: 'Manage Server',
+	permissions: [Permissions.FLAGS.MANAGE_GUILD, Permissions.FLAGS.SEND_MESSAGES],
+	permissionsTranslated: 'Send Messages and Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	//guildOnly: true,
@@ -16,7 +17,17 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'server-admin',
 	prefixCommand: true,
-	async execute(msg, args) {
+	async execute(msg, args, interaction) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			if (interaction.options._subcommand === 'set') {
+				args.push(interaction.options._hoistedOptions[0].value);
+			} else {
+				args = [interaction.options._subcommand];
+			}
+		}
+
 		//Check first argument of the command
 		if (args[0] === 'current') {
 			//get guild from db
@@ -32,16 +43,25 @@ module.exports = {
 					const guildGoodbyeMessageChannelId = guild.goodbyeMessageChannel;
 					//get the channel object by the id
 					const guildGoodbyeMessageChannel = msg.guild.channels.cache.find(channel => channel.id === guildGoodbyeMessageChannelId);
-					msg.reply(`The current goodbye message is set to channel \`${guildGoodbyeMessageChannel.name}\`: \`${guild.goodbyeMessageText.replace(/`/g, '')}\``);
+					if (msg.id) {
+						return msg.reply(`The current goodbye message is set to channel \`${guildGoodbyeMessageChannel.name}\`: \`${guild.goodbyeMessageText.replace(/`/g, '')}\``);
+					}
+					return interaction.reply(`The current goodbye message is set to channel \`${guildGoodbyeMessageChannel.name}\`: \`${guild.goodbyeMessageText.replace(/`/g, '')}\``);
 				} else {
 					//if no goodbye message is set
-					msg.reply('There is currently no goodbye message set.');
+					if (msg.id) {
+						return msg.reply('There is currently no goodbye message set.');
+					}
+					return interaction.reply('There is currently no goodbye message set.');
 				}
 			} else {
 				//Create guild in the db in case the guild is not in the db yet
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendGoodbyeMessage: false });
 				//Send that no goodbye message is set
-				msg.reply('There is currently no goodbye message set.');
+				if (msg.id) {
+					return msg.reply('There is currently no goodbye message set.');
+				}
+				return interaction.reply('There is currently no goodbye message set.');
 			}
 			//Check first argument of the command
 		} else if (args[0] === 'disable') {
@@ -58,16 +78,25 @@ module.exports = {
 					guild.sendGoodbyeMessage = false;
 					//Save the dataset
 					guild.save();
-					msg.reply('Goodbye messages have been disabled for this server.');
+					if (msg.id) {
+						return msg.reply('Goodbye messages have been disabled for this server.');
+					}
+					return interaction.reply('Goodbye messages have been disabled for this server.');
 				} else {
 					//if goodbye messages are already disabled
-					msg.reply('Goodbye messages are already disabled for this server.');
+					if (msg.id) {
+						return msg.reply('Goodbye messages are already disabled for this server.');
+					}
+					return interaction.reply('Goodbye messages are already disabled for this server.');
 				}
 			} else {
 				//Create guild in the db in case the guild is not in the db yet
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendGoodbyeMessage: false });
 				//Send that no goodbye message is set
-				msg.reply('Goodbye messages are already disabled for this server.');
+				if (msg.id) {
+					return msg.reply('Goodbye messages are already disabled for this server.');
+				}
+				return interaction.reply('Goodbye messages are already disabled for this server.');
 			}
 			//If not specified keyword for the command
 		} else {
@@ -89,7 +118,10 @@ module.exports = {
 				//if guild was not found, create it in db
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendGoodbyeMessage: true, goodbyeMessageChannel: msg.channel.id, goodbyeMessageText: goodbyeMessage });
 			}
-			msg.reply(`The new message \`${goodbyeMessage.replace(/`/g, '')}\` has been set for leaving members in the channel \`${msg.channel.name}\`.`);
+			if (msg.id) {
+				return msg.reply(`The new message \`${goodbyeMessage.replace(/`/g, '')}\` has been set for leaving members in the channel \`${msg.channel.name}\`.`);
+			}
+			return interaction.reply(`The new message \`${goodbyeMessage.replace(/`/g, '')}\` has been set for leaving members in the channel \`${msg.channel.name}\`.`);
 		}
 	},
 };
