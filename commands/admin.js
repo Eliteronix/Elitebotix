@@ -617,13 +617,13 @@ module.exports = {
 									'name': 'username',
 									'description': 'The username, id or link of the player',
 									'type': 3,
-									'required': false
+									'required': true
 								},
 								{
 									'name': 'username2',
 									'description': 'The username, id or link of the player',
 									'type': 3,
-									'required': false
+									'required': true
 								},
 								{
 									'name': 'username3',

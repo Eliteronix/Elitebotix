@@ -1,5 +1,7 @@
 const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiScores } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
+const Discord = require('discord.js');
+const osu = require('node-osu');
 
 module.exports = {
 	name: 'osu-motd',
@@ -23,12 +25,14 @@ module.exports = {
 		let days = 0;
 		let hours = 0;
 		let minutes = 0;
+		let lowerStarLimit = 0;
+		let higherStarLimit = 10;
 
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
 			if (interaction.options._subcommand === 'custom-fixed-players') {
-				args = ['custom'];
+				args = ['custom-fixed-players'];
 			} else {
 				args = [interaction.options._subcommand];
 			}
@@ -46,8 +50,12 @@ module.exports = {
 					hours = interaction.options._hoistedOptions[i].value;
 				} else if (interaction.options._hoistedOptions[i].name === 'minutes') {
 					minutes = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'message') {
-					args = [interaction.options._hoistedOptions[i].value];
+				} else if (interaction.options._hoistedOptions[i].name === 'lowerstars') {
+					lowerStarLimit = parseFloat(interaction.options._hoistedOptions[i].value);
+				} else if (interaction.options._hoistedOptions[i].name === 'higherstars') {
+					higherStarLimit = parseFloat(interaction.options._hoistedOptions[i].value);
+				} else {
+					args.push(interaction.options._hoistedOptions[i].value);
 				}
 			}
 		}
@@ -252,134 +260,130 @@ module.exports = {
 				}
 				return interaction.reply({ content: 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!', ephemeral: true });
 			}
-		} else if (args[0].toLowerCase() === 'custom') {
+		} else if (args[0].toLowerCase() === 'custom-fixed-players') {
 			//Return if its not triggered by a slash command
 			if (msg.id) {
-				return msg.reply('Please use `/osu-motd custom` to set up the custom MOTD');
+				return msg.reply('Please use `/osu-motd custom-fixed-players` to set up the custom MOTD');
 			}
 			args.shift();
-			//Decide between provided player list or not
-			if (args[0]) { //Player list provided
-				if (!args[1]) {
-					//Send a message that not enough players were provided (min 2)
-					return interaction.reply('You need to provide at least 2 players to start a custom MOTD!');
+
+			//Defer the interaction
+			await interaction.deferReply();
+
+			// eslint-disable-next-line no-undef
+			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+			});
+
+			//Get all players from the osu! api and store them in the players array
+			let players = [];
+			let playersNotFound = [];
+			for (let i = 0; i < args.length; i++) {
+				let player = await osuApi.getUser({ u: args[i] });
+				if (player) {
+					players.push(player);
+				} else {
+					playersNotFound.push(args[i]);
 				}
+			}
 
-				//Defer the interaction
-				await interaction.deferReply();
+			//Return if at least one player wasn't found
+			if (playersNotFound.length > 0) {
+				return interaction.editReply(`The following players were not found: ${playersNotFound.join(', ')}\nThe custom MOTD has been aborted.`);
+			}
 
-				// eslint-disable-next-line no-undef
-				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+			//Get the related discordUser from the db for each player
+			let discordUsers = [];
+			let playersNotConnected = [];
+
+			for (let i = 0; i < players.length; i++) {
+				let discordUser = await DBDiscordUsers.findOne({
+					where: { osuUserId: players[i].id },
 				});
 
-				//Get all players from the osu! api and store them in the players array
-				let players = [];
-				let playersNotFound = [];
-				for (let i = 0; i < args.length; i++) {
-					let player = await osuApi.getUser({ u: args[i] });
-					if (player) {
-						players.push(player);
-					} else {
-						playersNotFound.push(args[i]);
-					}
+				if (discordUser) {
+					discordUsers.push(discordUser);
+				} else {
+					playersNotConnected.push(players[i].name);
 				}
+			}
 
-				//Return if at least one player wasn't found
-				if (playersNotFound.length > 0) {
-					return interaction.editReply(`The following players were not found: ${playersNotFound.join(', ')}\nThe custom MOTD has been aborted.`);
+			//Return if at least one player isn't connected to the bot
+			if (playersNotConnected.length > 0) {
+				return interaction.editReply(`The following players are not connected to the bot: ${playersNotConnected.join(', ')}\nThe custom MOTD has been aborted.`);
+			}
+
+			//Get the related user on discord for each discorduser
+			let users = [];
+			let unreachableUsers = [];
+
+			for (let i = 0; i < discordUsers.length; i++) {
+				let user = await interaction.guild.members.fetch(discordUsers[i].userId);
+				if (user) {
+					users.push(user);
+				} else {
+					unreachableUsers.push(discordUsers[i].userId);
 				}
+			}
 
-				//Get the related discordUser from the db for each player
-				let discordUsers = [];
-				let playersNotConnected = [];
+			//Return if at least one user isn't reachable
+			if (unreachableUsers.length > 0) {
+				return interaction.editReply(`The following users are not reachable: ${unreachableUsers.join(', ')}\nThe custom MOTD has been aborted.`);
+			}
 
-				for (let i = 0; i < players.length; i++) {
-					let discordUser = await DBDiscordUsers.findOne({
-						where: { userId: players[i].id },
+			//Get the amount of Maps in the DB
+			let amountOfMapsInDB = -1;
+
+			while (amountOfMapsInDB === -1) {
+				const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
+
+				const dbBeatmap = await getOsuBeatmap(mostRecentBeatmap[0].id, 0);
+
+				if (dbBeatmap) {
+					amountOfMapsInDB = dbBeatmap.id;
+				}
+			}
+
+			//Fill a Nomod map array with random tourney maps from the db
+			//More maps than needed to get a better distribution
+			let nomodMaps = [];
+			let backupBeatmapIds = [];
+			while (nomodMaps.length < 20) {
+
+				let beatmap = null;
+
+				while (!beatmap) {
+					const index = Math.floor(Math.random() * amountOfMapsInDB);
+
+					const dbBeatmap = await DBOsuBeatmaps.findOne({
+						where: { id: index }
 					});
 
-					if (discordUser) {
-						discordUsers.push(discordUser);
-					} else {
-						playersNotConnected.push(players[i].username);
-					}
-				}
 
-				//Return if at least one player isn't connected to the bot
-				if (playersNotConnected.length > 0) {
-					return interaction.editReply(`The following players are not connected to the bot: ${playersNotConnected.join(', ')}\nThe custom MOTD has been aborted.`);
-				}
 
-				//Get the related user on discord for each discorduser
-				let users = [];
-				let unreachableUsers = [];
-
-				for (let i = 0; i < discordUsers.length; i++) {
-					let user = await interaction.guild.members.fetch(discordUsers[i].userId);
-					if (user) {
-						users.push(user);
-					} else {
-						unreachableUsers.push(discordUsers[i].userId);
-					}
-				}
-
-				//Return if at least one user isn't reachable
-				if (unreachableUsers.length > 0) {
-					return interaction.editReply(`The following users are not reachable: ${unreachableUsers.join(', ')}\nThe custom MOTD has been aborted.`);
-				}
-
-				//Get the amount of Maps in the DB
-				let amountOfMapsInDB = -1;
-
-				while (amountOfMapsInDB === -1) {
-					const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
-
-					const dbBeatmap = await getOsuBeatmap(mostRecentBeatmap[0].id, 0);
-
-					if (dbBeatmap) {
-						amountOfMapsInDB = dbBeatmap.id;
-					}
-				}
-
-				//Fill a Nomod map array with random tourney maps from the db
-				let nomodMaps = [];
-				let backupBeatmapIds = [];
-				while (nomodMaps.length < 9) {
-
-					let beatmap = null;
-
-					while (!beatmap) {
-						const index = Math.floor(Math.random() * amountOfMapsInDB);
-
-						const dbBeatmap = await DBOsuBeatmaps.findOne({
-							where: { id: index }
+					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
+						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit && parseFloat(dbBeatmap.starRating) <= higherStarLimit
+						&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
+						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
+						backupBeatmapIds.push(dbBeatmap.id);
+						const multiScores = await DBOsuMultiScores.findAll({
+							where: {
+								tourneyMatch: true,
+								beatmapId: dbBeatmap.beatmapId
+							}
 						});
 
-
-
-						if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
-							&& parseFloat(dbBeatmap.starRating) >= 4 && parseFloat(dbBeatmap.starRating) <= 6
-							&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
-							&& !backupBeatmapIds.includes(dbBeatmap.id)) {
-							backupBeatmapIds.push(dbBeatmap.id);
-							const multiScores = await DBOsuMultiScores.findAll({
-								where: {
-									tourneyMatch: true,
-									beatmapId: dbBeatmap.beatmapId
-								}
-							});
-
-							let onlyMOTD = true;
-							for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
-								if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
-									onlyMOTD = false;
-								}
+						let onlyMOTD = true;
+						for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
+							if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
+								onlyMOTD = false;
 							}
+						}
 
+						if (!onlyMOTD) {
 							beatmap = {
 								id: dbBeatmap.beatmapId,
 								beatmapSetId: dbBeatmap.beatmapsetId,
@@ -413,90 +417,198 @@ module.exports = {
 							};
 						}
 					}
-
-					nomodMaps.push(beatmap);
 				}
 
-				quicksort(nomodMaps);
-
-				//Fill a DoubleTime map array with 50 random tourney maps from the db
-				let doubleTimeMaps = [];
-
-				backupBeatmapIds = [];
-
-				while (doubleTimeMaps.length < 50) {
-
-					let beatmap = null;
-
-					while (!beatmap) {
-						const index = Math.floor(Math.random() * amountOfMapsInDB);
-
-						const dbBeatmap = await DBOsuBeatmaps.findOne({
-							where: { id: index }
-						});
-
-						if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
-							&& parseFloat(dbBeatmap.starRating) >= 4 && parseFloat(dbBeatmap.starRating) <= 6
-							&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
-							&& !backupBeatmapIds.includes(dbBeatmap.id)) {
-							backupBeatmapIds.push(dbBeatmap.id);
-							const multiScores = await DBOsuMultiScores.findAll({
-								where: {
-									tourneyMatch: true,
-									beatmapId: dbBeatmap.beatmapId
-								}
-							});
-
-							let onlyMOTD = true;
-							for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
-								if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
-									onlyMOTD = false;
-								}
-							}
-
-							beatmap = {
-								id: dbBeatmap.beatmapId,
-								beatmapSetId: dbBeatmap.beatmapsetId,
-								title: dbBeatmap.title,
-								creator: dbBeatmap.mapper,
-								version: dbBeatmap.difficulty,
-								artist: dbBeatmap.artist,
-								rating: dbBeatmap.userRating,
-								bpm: dbBeatmap.bpm,
-								mode: dbBeatmap.mode,
-								approvalStatus: dbBeatmap.approvalStatus,
-								maxCombo: dbBeatmap.maxCombo,
-								objects: {
-									normal: dbBeatmap.circles,
-									slider: dbBeatmap.sliders,
-									spinner: dbBeatmap.spinners
-								},
-								difficulty: {
-									rating: dbBeatmap.starRating,
-									aim: dbBeatmap.aimRating,
-									speed: dbBeatmap.speedRating,
-									size: dbBeatmap.circleSize,
-									overall: dbBeatmap.overallDifficulty,
-									approach: dbBeatmap.approachRate,
-									drain: dbBeatmap.hpDrain
-								},
-								length: {
-									total: dbBeatmap.totalLength,
-									drain: dbBeatmap.drainLength
-								}
-							};
-						}
-					}
-
-					doubleTimeMaps.push(beatmap);
-				}
-
-				quicksort(doubleTimeMaps);
-
-
+				nomodMaps.push(beatmap);
 			}
+
+			quicksort(nomodMaps);
+
+			//Remove maps if more than enough to make it scale better
+			while (nomodMaps.length > 9) {
+				if (Math.round(nomodMaps[0].difficulty.rating * 100) / 100 < 4) {
+					nomodMaps.splice(0, 1);
+				} else {
+					//Set initial object
+					let smallestGap = {
+						index: 1,
+						gap: nomodMaps[2].difficulty.rating - nomodMaps[0].difficulty.rating,
+					};
+
+					//start at 2 because the first gap is already in initial object
+					//Skip 0 and the end to avoid out of bounds exception
+					for (let i = 2; i < nomodMaps.length - 1; i++) {
+						if (smallestGap.gap > nomodMaps[i + 1].difficulty.rating - nomodMaps[i - 1].difficulty.rating) {
+							smallestGap.gap = nomodMaps[i + 1].difficulty.rating - nomodMaps[i - 1].difficulty.rating;
+							smallestGap.index = i;
+						}
+					}
+
+					//Remove the map that causes the smallest gap
+					nomodMaps.splice(smallestGap.index, 1);
+				}
+			}
+
+			//Fill a DoubleTime map array with 50 random tourney maps from the db
+			let doubleTimeMaps = [];
+
+			backupBeatmapIds = [];
+
+			while (doubleTimeMaps.length < 50) {
+
+				let beatmap = null;
+
+				while (!beatmap) {
+					const index = Math.floor(Math.random() * amountOfMapsInDB);
+
+					const dbBeatmap = await DBOsuBeatmaps.findOne({
+						where: { id: index }
+					});
+
+					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
+						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit && parseFloat(dbBeatmap.starRating) <= higherStarLimit
+						&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
+						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
+						backupBeatmapIds.push(dbBeatmap.id);
+						const multiScores = await DBOsuMultiScores.findAll({
+							where: {
+								tourneyMatch: true,
+								beatmapId: dbBeatmap.beatmapId
+							}
+						});
+
+						let onlyMOTD = true;
+						for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
+							if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
+								onlyMOTD = false;
+							}
+						}
+
+						if (!onlyMOTD) {
+							beatmap = {
+								id: dbBeatmap.beatmapId,
+								beatmapSetId: dbBeatmap.beatmapsetId,
+								title: dbBeatmap.title,
+								creator: dbBeatmap.mapper,
+								version: dbBeatmap.difficulty,
+								artist: dbBeatmap.artist,
+								rating: dbBeatmap.userRating,
+								bpm: dbBeatmap.bpm,
+								mode: dbBeatmap.mode,
+								approvalStatus: dbBeatmap.approvalStatus,
+								maxCombo: dbBeatmap.maxCombo,
+								objects: {
+									normal: dbBeatmap.circles,
+									slider: dbBeatmap.sliders,
+									spinner: dbBeatmap.spinners
+								},
+								difficulty: {
+									rating: dbBeatmap.starRating,
+									aim: dbBeatmap.aimRating,
+									speed: dbBeatmap.speedRating,
+									size: dbBeatmap.circleSize,
+									overall: dbBeatmap.overallDifficulty,
+									approach: dbBeatmap.approachRate,
+									drain: dbBeatmap.hpDrain
+								},
+								length: {
+									total: dbBeatmap.totalLength,
+									drain: dbBeatmap.drainLength
+								}
+							};
+						}
+					}
+				}
+
+				doubleTimeMaps.push(beatmap);
+			}
+
+			quicksort(doubleTimeMaps);
+
+			//Push the chosen maps in correct order
+			const mappoolInOrder = [];
+
+			// Max 16 players join the lobby
+
+			// First map 16 -> 14
+			mappoolInOrder.push(nomodMaps[0]);
+			// Second map 14 -> 12
+			mappoolInOrder.push(nomodMaps[1]);
+			// Third map 12 -> 10
+			mappoolInOrder.push(nomodMaps[2]);
+			// Fourth map (DT) 10 -> 8  -> Between difficulty of third and fifth
+			const firstDTDifficulty = (parseFloat(nomodMaps[3].difficulty.rating) + parseFloat(nomodMaps[2].difficulty.rating)) / 2;
+			let mapUsedIndex = 0;
+			let firstDTMap = doubleTimeMaps[0];
+			for (let i = 1; i < doubleTimeMaps.length; i++) {
+				if (Math.abs(firstDTMap.difficulty.rating - firstDTDifficulty) > Math.abs(doubleTimeMaps[i].difficulty.rating - firstDTDifficulty)) {
+					firstDTMap = doubleTimeMaps[i];
+					mapUsedIndex = i;
+				}
+			}
+			doubleTimeMaps.splice(mapUsedIndex, 1);
+
+			mappoolInOrder.push(firstDTMap);
+			// Fifth map 8 -> 6
+			mappoolInOrder.push(nomodMaps[3]);
+			// Sixth map 6 -> 5
+			mappoolInOrder.push(nomodMaps[4]);
+			// Seventh map 5 -> 4
+			mappoolInOrder.push(nomodMaps[5]);
+			// Eigth map (DT) 4 -> 3  -> Between difficulty of seventh and eigth
+			const secondDTDifficulty = (parseFloat(nomodMaps[5].difficulty.rating) + parseFloat(nomodMaps[6].difficulty.rating)) / 2;
+			let secondDTMap = doubleTimeMaps[0];
+			for (let i = 1; i < doubleTimeMaps.length; i++) {
+				if (Math.abs(secondDTMap.difficulty.rating - secondDTDifficulty) > Math.abs(doubleTimeMaps[i].difficulty.rating - secondDTDifficulty)) {
+					secondDTMap = doubleTimeMaps[i];
+				}
+			}
+			mappoolInOrder.push(secondDTMap);
+			// Ninth map 3 -> 2
+			mappoolInOrder.push(nomodMaps[6]);
+			// 10th map 2 -> 1
+			mappoolInOrder.push(nomodMaps[7]);
+
+			let mappoolLength = 0;
+			let gameLength = 0;
+
+			//Calculate match times
+			for (let i = 0; i < mappoolInOrder.length; i++) {
+				if (!(i === 0 && players.length < 17)) {
+					mappoolLength = mappoolLength + parseInt(mappoolInOrder[i].length.total);
+					if (i === 0) {
+						gameLength = gameLength + 600;
+					} else {
+						gameLength = gameLength + 120 + parseInt(mappoolInOrder[i].length.total);
+					}
+				}
+			}
+
+			//Prepare official mappool message
+			const mappoolEmbed = new Discord.MessageEmbed()
+				.setColor('#C45686')
+				.setTitle('Custom MOTD settings')
+				.setFooter(`Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`);
+
+			for (let i = 0; i < players.length; i++) {
+				mappoolEmbed.addField(`Player #${i + 1}`, `${players[i].name} | #${players[i].pp.rank}`, true);
+			}
+
+			for (let i = 0; i < mappoolInOrder.length; i++) {
+				let mapPrefix = '';
+				if (i === 3 || i === 7) {
+					mapPrefix = `Knockout #${i + 1} (DT):`;
+				} else {
+					mapPrefix = `Knockout #${i + 1}:`;
+				}
+				const embedName = `${mapPrefix} ${mappoolInOrder[i].artist} - ${mappoolInOrder[i].title} | [${mappoolInOrder[i].version}]`;
+				const embedValue = `${Math.round(mappoolInOrder[i].difficulty.rating * 100) / 100}* | ${Math.floor(mappoolInOrder[i].length.total / 60)}:${(mappoolInOrder[i].length.total % 60).toString().padStart(2, '0')} | [Website](<https://osu.ppy.sh/b/${mappoolInOrder[i].id}>) | osu! direct: <osu://b/${mappoolInOrder[i].id}>`;
+				mappoolEmbed.addField(embedName, embedValue);
+			}
+
+			interaction.editReply({ embeds: [mappoolEmbed] });
 		} else {
-			msg.reply('Please specify what you want to do: `server`, `register`, `unregister`, `mute`, `unmute`, `custom`');
+			msg.reply('Please specify what you want to do: `server`, `register`, `unregister`, `mute`, `unmute`, `custom-fixed-players`');
 		}
 	},
 };

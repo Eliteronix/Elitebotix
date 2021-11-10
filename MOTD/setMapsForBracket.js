@@ -105,37 +105,39 @@ module.exports = {
 							}
 						}
 
-						beatmap = {
-							id: dbBeatmap.beatmapId,
-							beatmapSetId: dbBeatmap.beatmapsetId,
-							title: dbBeatmap.title,
-							creator: dbBeatmap.mapper,
-							version: dbBeatmap.difficulty,
-							artist: dbBeatmap.artist,
-							rating: dbBeatmap.userRating,
-							bpm: dbBeatmap.bpm,
-							mode: dbBeatmap.mode,
-							approvalStatus: dbBeatmap.approvalStatus,
-							maxCombo: dbBeatmap.maxCombo,
-							objects: {
-								normal: dbBeatmap.circles,
-								slider: dbBeatmap.sliders,
-								spinner: dbBeatmap.spinners
-							},
-							difficulty: {
-								rating: dbBeatmap.starRating,
-								aim: dbBeatmap.aimRating,
-								speed: dbBeatmap.speedRating,
-								size: dbBeatmap.circleSize,
-								overall: dbBeatmap.overallDifficulty,
-								approach: dbBeatmap.approachRate,
-								drain: dbBeatmap.hpDrain
-							},
-							length: {
-								total: dbBeatmap.totalLength,
-								drain: dbBeatmap.drainLength
-							}
-						};
+						if (!onlyMOTD) {
+							beatmap = {
+								id: dbBeatmap.beatmapId,
+								beatmapSetId: dbBeatmap.beatmapsetId,
+								title: dbBeatmap.title,
+								creator: dbBeatmap.mapper,
+								version: dbBeatmap.difficulty,
+								artist: dbBeatmap.artist,
+								rating: dbBeatmap.userRating,
+								bpm: dbBeatmap.bpm,
+								mode: dbBeatmap.mode,
+								approvalStatus: dbBeatmap.approvalStatus,
+								maxCombo: dbBeatmap.maxCombo,
+								objects: {
+									normal: dbBeatmap.circles,
+									slider: dbBeatmap.sliders,
+									spinner: dbBeatmap.spinners
+								},
+								difficulty: {
+									rating: dbBeatmap.starRating,
+									aim: dbBeatmap.aimRating,
+									speed: dbBeatmap.speedRating,
+									size: dbBeatmap.circleSize,
+									overall: dbBeatmap.overallDifficulty,
+									approach: dbBeatmap.approachRate,
+									drain: dbBeatmap.hpDrain
+								},
+								length: {
+									total: dbBeatmap.totalLength,
+									drain: dbBeatmap.drainLength
+								}
+							};
+						}
 					}
 				}
 
@@ -179,37 +181,39 @@ module.exports = {
 							}
 						}
 
-						beatmap = {
-							id: dbBeatmap.beatmapId,
-							beatmapSetId: dbBeatmap.beatmapsetId,
-							title: dbBeatmap.title,
-							creator: dbBeatmap.mapper,
-							version: dbBeatmap.difficulty,
-							artist: dbBeatmap.artist,
-							rating: dbBeatmap.userRating,
-							bpm: dbBeatmap.bpm,
-							mode: dbBeatmap.mode,
-							approvalStatus: dbBeatmap.approvalStatus,
-							maxCombo: dbBeatmap.maxCombo,
-							objects: {
-								normal: dbBeatmap.circles,
-								slider: dbBeatmap.sliders,
-								spinner: dbBeatmap.spinners
-							},
-							difficulty: {
-								rating: dbBeatmap.starRating,
-								aim: dbBeatmap.aimRating,
-								speed: dbBeatmap.speedRating,
-								size: dbBeatmap.circleSize,
-								overall: dbBeatmap.overallDifficulty,
-								approach: dbBeatmap.approachRate,
-								drain: dbBeatmap.hpDrain
-							},
-							length: {
-								total: dbBeatmap.totalLength,
-								drain: dbBeatmap.drainLength
-							}
-						};
+						if (!onlyMOTD) {
+							beatmap = {
+								id: dbBeatmap.beatmapId,
+								beatmapSetId: dbBeatmap.beatmapsetId,
+								title: dbBeatmap.title,
+								creator: dbBeatmap.mapper,
+								version: dbBeatmap.difficulty,
+								artist: dbBeatmap.artist,
+								rating: dbBeatmap.userRating,
+								bpm: dbBeatmap.bpm,
+								mode: dbBeatmap.mode,
+								approvalStatus: dbBeatmap.approvalStatus,
+								maxCombo: dbBeatmap.maxCombo,
+								objects: {
+									normal: dbBeatmap.circles,
+									slider: dbBeatmap.sliders,
+									spinner: dbBeatmap.spinners
+								},
+								difficulty: {
+									rating: dbBeatmap.starRating,
+									aim: dbBeatmap.aimRating,
+									speed: dbBeatmap.speedRating,
+									size: dbBeatmap.circleSize,
+									overall: dbBeatmap.overallDifficulty,
+									approach: dbBeatmap.approachRate,
+									drain: dbBeatmap.hpDrain
+								},
+								length: {
+									total: dbBeatmap.totalLength,
+									drain: dbBeatmap.drainLength
+								}
+							};
+						}
 					}
 				}
 
@@ -265,8 +269,8 @@ module.exports = {
 		mappoolInOrder.push(selectedNMMaps[5]);
 		// Seventh map 5 -> 4
 		mappoolInOrder.push(selectedNMMaps[6]);
-		// Eigth map (DT) 4 -> 3  -> Between difficulty of sixth and seventh
-		const secondDTDifficulty = (parseFloat(selectedNMMaps[5].difficulty.rating) + parseFloat(selectedNMMaps[6].difficulty.rating)) / 2;
+		// Eigth map (DT) 4 -> 3  -> Between difficulty of seventh and eigth
+		const secondDTDifficulty = (parseFloat(selectedNMMaps[6].difficulty.rating) + parseFloat(selectedNMMaps[7].difficulty.rating)) / 2;
 		let secondDTMap = possibleDTBeatmaps[0];
 		for (let i = 1; i < possibleDTBeatmaps.length; i++) {
 			if (Math.abs(secondDTMap.difficulty.rating - secondDTDifficulty) > Math.abs(possibleDTBeatmaps[i].difficulty.rating - secondDTDifficulty)) {
