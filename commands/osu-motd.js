@@ -58,6 +58,10 @@ module.exports = {
 					args.push(interaction.options._hoistedOptions[i].value);
 				}
 			}
+
+			if (lowerStarLimit && higherStarLimit && lowerStarLimit > higherStarLimit) {
+				[lowerStarLimit, higherStarLimit] = [higherStarLimit, lowerStarLimit];
+			}
 		}
 
 
@@ -295,6 +299,21 @@ module.exports = {
 				return interaction.editReply(`The following players were not found: ${playersNotFound.join(', ')}\nThe custom MOTD has been aborted.`);
 			}
 
+			//Check if there are any duplicate players
+			let duplicatePlayers = [];
+			for (let i = 0; i < players.length; i++) {
+				for (let j = i + 1; j < players.length; j++) {
+					if (players[i].id === players[j].id) {
+						duplicatePlayers.push(players[i].name);
+					}
+				}
+			}
+
+			//Return if there are any duplicate players
+			if (duplicatePlayers.length > 0) {
+				return interaction.editReply(`The following players have been mentioned multiple times: ${duplicatePlayers.join(', ')}\nThe custom MOTD has been aborted.`);
+			}
+
 			//Get the related discordUser from the db for each player
 			let discordUsers = [];
 			let playersNotConnected = [];
@@ -351,11 +370,12 @@ module.exports = {
 			//More maps than needed to get a better distribution
 			let nomodMaps = [];
 			let backupBeatmapIds = [];
+			let i = 0;
 			while (nomodMaps.length < 20) {
 
 				let beatmap = null;
-
 				while (!beatmap) {
+					i++;
 					const index = Math.floor(Math.random() * amountOfMapsInDB);
 
 					const dbBeatmap = await DBOsuBeatmaps.findOne({
@@ -365,7 +385,7 @@ module.exports = {
 
 
 					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
-						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit && parseFloat(dbBeatmap.starRating) <= higherStarLimit
+						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
 						&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
 						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
 						backupBeatmapIds.push(dbBeatmap.id);
@@ -454,11 +474,13 @@ module.exports = {
 
 			backupBeatmapIds = [];
 
+			i = 0;
 			while (doubleTimeMaps.length < 50) {
 
 				let beatmap = null;
-
 				while (!beatmap) {
+					i++;
+
 					const index = Math.floor(Math.random() * amountOfMapsInDB);
 
 					const dbBeatmap = await DBOsuBeatmaps.findOne({
@@ -466,7 +488,7 @@ module.exports = {
 					});
 
 					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
-						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit && parseFloat(dbBeatmap.starRating) <= higherStarLimit
+						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
 						&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
 						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
 						backupBeatmapIds.push(dbBeatmap.id);
