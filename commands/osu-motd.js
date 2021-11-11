@@ -18,7 +18,7 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
-	async execute(msg, args, interaction) {
+	async execute(msg, args, interaction, additionalObjects) {
 		let years = 0;
 		let months = 0;
 		let weeks = 0;
@@ -371,7 +371,7 @@ module.exports = {
 			let nomodMaps = [];
 			let backupBeatmapIds = [];
 			let i = 0;
-			while (nomodMaps.length < 20) {
+			while (nomodMaps.length < 30) {
 
 				let beatmap = null;
 				while (!beatmap) {
@@ -381,8 +381,6 @@ module.exports = {
 					const dbBeatmap = await DBOsuBeatmaps.findOne({
 						where: { id: index }
 					});
-
-
 
 					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
 						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
@@ -551,7 +549,8 @@ module.exports = {
 			const mappoolInOrder = [];
 
 			// Max 16 players join the lobby
-
+			//Push first map twice to simulate the qualifier map existing
+			mappoolInOrder.push(nomodMaps[0]);
 			// First map 16 -> 14
 			mappoolInOrder.push(nomodMaps[0]);
 			// Second map 14 -> 12
@@ -616,12 +615,12 @@ module.exports = {
 				mappoolEmbed.addField(`Player #${i + 1}`, `${players[i].name} | #${players[i].pp.rank}`, true);
 			}
 
-			for (let i = 0; i < mappoolInOrder.length; i++) {
+			for (let i = 1; i < mappoolInOrder.length; i++) {
 				let mapPrefix = '';
 				if (i === 3 || i === 7) {
-					mapPrefix = `Knockout #${i + 1} (DT):`;
+					mapPrefix = `Knockout #${i} (DT):`;
 				} else {
-					mapPrefix = `Knockout #${i + 1}:`;
+					mapPrefix = `Knockout #${i}:`;
 				}
 				const embedName = `${mapPrefix} ${mappoolInOrder[i].artist} - ${mappoolInOrder[i].title} | [${mappoolInOrder[i].version}]`;
 				const embedValue = `${Math.round(mappoolInOrder[i].difficulty.rating * 100) / 100}* | ${Math.floor(mappoolInOrder[i].length.total / 60)}:${(mappoolInOrder[i].length.total % 60).toString().padStart(2, '0')} | [Website](<https://osu.ppy.sh/b/${mappoolInOrder[i].id}>) | osu! direct: <osu://b/${mappoolInOrder[i].id}>`;
@@ -629,6 +628,10 @@ module.exports = {
 			}
 
 			interaction.editReply({ embeds: [mappoolEmbed] });
+
+			//Start the knockout lobby
+			const { knockoutLobby } = require('../MOTD/knockoutLobby.js');
+			knockoutLobby(additionalObjects[0], additionalObjects[1], 'Knockout', mappoolInOrder, 'custom', discordUsers, users, true);
 		} else {
 			msg.reply('Please specify what you want to do: `server`, `register`, `unregister`, `mute`, `unmute`, `custom-fixed-players`');
 		}
