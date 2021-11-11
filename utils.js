@@ -1036,20 +1036,20 @@ function getMiddleScore(scores) {
 async function getOsuBeatmapFunction(beatmapId, modBits) {
 	let lastRework = new Date();
 	lastRework.setUTCFullYear(2021);
-	lastRework.setUTCMonth(7);
-	lastRework.setUTCDate(20);
+	lastRework.setUTCMonth(10);
+	lastRework.setUTCDate(11);
 	let lastWeek = new Date();
 	lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
 	let dbBeatmap = await DBOsuBeatmaps.findOne({
 		where: { beatmapId: beatmapId, mods: modBits }
 	});
 
-	//Date of reworked DT and HT values
-	if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('HT')) {
-		lastRework.setUTCFullYear(2021);
-		lastRework.setUTCMonth(10);
-		lastRework.setUTCDate(7);
-	}
+	// //Date of reworked DT and HT values
+	// if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('HT')) {
+	// 	lastRework.setUTCFullYear(2021);
+	// 	lastRework.setUTCMonth(10);
+	// 	lastRework.setUTCDate(7);
+	// }
 
 	if (!dbBeatmap
 		|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
