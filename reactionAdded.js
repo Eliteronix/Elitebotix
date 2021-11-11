@@ -33,7 +33,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 			where: { guildId: reaction.message.guild.id }
 		});
 
-		if (guild && guild.starBoardEnabled && parseInt(guild.starBoardMinimum) <= reaction.count) {
+		if (guild && guild.starBoardEnabled && parseInt(guild.starBoardMinimum) <= reaction.count && guild.starBoardChannel !== reaction.message.channel.id) {
 			const starBoardedMessage = await DBStarBoardMessages.findOne({
 				where: { originalMessageId: reaction.message.id }
 			});
