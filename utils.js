@@ -1038,6 +1038,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 	lastRework.setUTCFullYear(2021);
 	lastRework.setUTCMonth(10);
 	lastRework.setUTCDate(11);
+	lastRework.setUTCHours(0);
 	let lastWeek = new Date();
 	lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
 	let dbBeatmap = await DBOsuBeatmaps.findOne({
