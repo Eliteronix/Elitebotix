@@ -31,11 +31,7 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			if (interaction.options._subcommand === 'custom-fixed-players') {
-				args = ['custom-fixed-players'];
-			} else {
-				args = [interaction.options._subcommand];
-			}
+			args = [interaction.options._subcommand];
 
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 				if (interaction.options._hoistedOptions[i].name === 'years') {
@@ -635,8 +631,14 @@ module.exports = {
 		} else if (args[0].toLowerCase() === 'custom-react-to-play') {
 			//Return if its not triggered by a slash command
 			if (msg.id) {
-				return msg.reply('Please use `/osu-motd custom-react-to-play` to set up the custom MOTD');
+				return msg.reply('Please use `/osu-motd custom-react-to-play` to set up the custom MOTD.');
 			}
+
+			//Return if triggered in DMs
+			if (msg.channel.type === 'dm') {
+				return msg.reply('Please use `/osu-motd custom-react-to-play` in a server to set up the custom MOTD.');
+			}
+
 			args.shift();
 
 			//Defer the interaction
