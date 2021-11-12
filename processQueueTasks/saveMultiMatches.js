@@ -65,8 +65,8 @@ module.exports = {
 						}
 						channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m ${match.name} done`);
 					}
-					const existingTask = await DBProcessQueue.findOne({ where: { task: 'saveMultiMatches', additions: `${parseInt(matchID) + 1}` } });
-					if (!existingTask) {
+					const existingTask = await DBProcessQueue.findOne({ where: { task: 'saveMultiMatches' } });
+					if (!existingTask || existingTask && existingTask.additions === `${matchID}`) {
 						processQueueEntry.destroy();
 						return DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${parseInt(matchID) + 1}`, priority: 0 });
 					} else {
@@ -83,8 +83,8 @@ module.exports = {
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
 					// console.log(`${matchID} could not be found`);
-					const existingTask = await DBProcessQueue.findOne({ where: { task: 'saveMultiMatches', additions: `${parseInt(matchID) + 1}` } });
-					if (!existingTask) {
+					const existingTask = await DBProcessQueue.findOne({ where: { task: 'saveMultiMatches' } });
+					if (!existingTask || existingTask && existingTask.additions === `${matchID}`) {
 						processQueueEntry.destroy();
 						return DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${parseInt(matchID) + 1}`, priority: 0 });
 					} else {
