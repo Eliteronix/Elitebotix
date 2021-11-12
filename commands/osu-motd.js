@@ -378,7 +378,7 @@ module.exports = {
 						where: { id: index }
 					});
 
-					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
+					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
 						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
 						&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
 						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
@@ -481,7 +481,7 @@ module.exports = {
 						where: { id: index }
 					});
 
-					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
+					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
 						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
 						&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
 						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
@@ -681,7 +681,7 @@ module.exports = {
 						where: { id: index }
 					});
 
-					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
+					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
 						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
 						&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
 						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
@@ -784,7 +784,7 @@ module.exports = {
 						where: { id: index }
 					});
 
-					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
+					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
 						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
 						&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
 						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
@@ -934,7 +934,7 @@ module.exports = {
 				return reaction.emoji.name === '✅' && !discordUserIds.includes(user.id) && user.id !== additionalObjects[0].user.id && discordUsers.length < 16;
 			};
 
-			const collector = embedMessage.createReactionCollector({ filter, time: 120000 });
+			const collector = embedMessage.createReactionCollector({ filter, time: 120000, max: 16 });
 
 			collector.on('collect', async (reaction, user) => {
 				const dbDiscordUser = await DBDiscordUsers.findOne({

@@ -86,7 +86,7 @@ module.exports = {
 
 
 
-					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
+					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
 						&& parseFloat(dbBeatmap.starRating) >= 4 && parseFloat(dbBeatmap.starRating) <= 6
 						&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
 						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
@@ -162,7 +162,7 @@ module.exports = {
 						where: { id: index }
 					});
 
-					if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
+					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
 						&& parseFloat(dbBeatmap.starRating) >= 4 && parseFloat(dbBeatmap.starRating) <= 6
 						&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
 						&& !backupBeatmapIds.includes(dbBeatmap.id)) {

@@ -1143,7 +1143,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 	if (!dbBeatmap
 		|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
 		|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.updatedAt.getTime() < lastWeek.getTime() //Update if old non-ranked map
-		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0)) { //Always update ranked maps if values are missing
+		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0 || !dbBeatmap.mode)) { //Always update ranked maps if values are missing
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
