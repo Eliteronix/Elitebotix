@@ -534,205 +534,205 @@ module.exports = {
 			// 	}
 			// });
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'osu-motd',
-					description: 'Manage your Maps of the Day registration and create custom rounds',
-					options: [
-						{
-							'name': 'register',
-							'description': 'Register for the daily Maps of the Day competition',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'unregister',
-							'description': 'Register from the daily Maps of the Day competition',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'server',
-							'description': 'Get a link to the server of the daily Maps of the Day competition',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'mute',
-							'description': 'Mute the MOTD messages for the specified amount',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'years',
-									'description': 'The years until the reminder',
-									'type': 4,
-								},
-								{
-									'name': 'months',
-									'description': 'The months until the reminder',
-									'type': 4,
-								},
-								{
-									'name': 'weeks',
-									'description': 'The weeks until the reminder',
-									'type': 4,
-								},
-								{
-									'name': 'days',
-									'description': 'The days until the reminder',
-									'type': 4,
-								},
-								{
-									'name': 'hours',
-									'description': 'The hours until the reminder',
-									'type': 4,
-								},
-								{
-									'name': 'minutes',
-									'description': 'The minutes until the reminder',
-									'type': 4,
-								},
-							]
-						},
-						{
-							'name': 'unmute',
-							'description': 'Unmute the MOTD messages',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'custom-fixed-players',
-							'description': 'Create a custom MOTD sort of competition with a fixed player list',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'lowerstars',
-									'description': 'The lower star rating limit for the custom lobby',
-									'type': 10, // 10 is type Number
-									'required': true
-								},
-								{
-									'name': 'higherstars',
-									'description': 'The higher star rating limit for the custom lobby',
-									'type': 10, // 10 is type Number
-									'required': true
-								},
-								{
-									'name': 'username',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': true
-								},
-								{
-									'name': 'username2',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': true
-								},
-								{
-									'name': 'username3',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username4',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username5',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username6',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username7',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username8',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username9',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username10',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username11',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username12',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username13',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username14',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username15',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username16',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								}
-							]
-						},
-						{
-							'name': 'custom-react-to-play',
-							'description': 'Create a custom MOTD sort of competition with a fixed player list',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'lowerstars',
-									'description': 'The lower star rating limit for the custom lobby',
-									'type': 10, // 10 is type Number
-									'required': true
-								},
-								{
-									'name': 'higherstars',
-									'description': 'The higher star rating limit for the custom lobby',
-									'type': 10, // 10 is type Number
-									'required': true
-								},
-							]
-						},
-					]
-				}
-			});
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'osu-motd',
+			// 		description: 'Manage your Maps of the Day registration and create custom rounds',
+			// 		options: [
+			// 			{
+			// 				'name': 'register',
+			// 				'description': 'Register for the daily Maps of the Day competition',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'unregister',
+			// 				'description': 'Register from the daily Maps of the Day competition',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'server',
+			// 				'description': 'Get a link to the server of the daily Maps of the Day competition',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'mute',
+			// 				'description': 'Mute the MOTD messages for the specified amount',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'years',
+			// 						'description': 'The years until the reminder',
+			// 						'type': 4,
+			// 					},
+			// 					{
+			// 						'name': 'months',
+			// 						'description': 'The months until the reminder',
+			// 						'type': 4,
+			// 					},
+			// 					{
+			// 						'name': 'weeks',
+			// 						'description': 'The weeks until the reminder',
+			// 						'type': 4,
+			// 					},
+			// 					{
+			// 						'name': 'days',
+			// 						'description': 'The days until the reminder',
+			// 						'type': 4,
+			// 					},
+			// 					{
+			// 						'name': 'hours',
+			// 						'description': 'The hours until the reminder',
+			// 						'type': 4,
+			// 					},
+			// 					{
+			// 						'name': 'minutes',
+			// 						'description': 'The minutes until the reminder',
+			// 						'type': 4,
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'unmute',
+			// 				'description': 'Unmute the MOTD messages',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'custom-fixed-players',
+			// 				'description': 'Create a custom MOTD sort of competition with a fixed player list',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'lowerstars',
+			// 						'description': 'The lower star rating limit for the custom lobby',
+			// 						'type': 10, // 10 is type Number
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'higherstars',
+			// 						'description': 'The higher star rating limit for the custom lobby',
+			// 						'type': 10, // 10 is type Number
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'username2',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'username3',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username4',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username5',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username6',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username7',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username8',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username9',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username10',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username11',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username12',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username13',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username14',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username15',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username16',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'custom-react-to-play',
+			// 				'description': 'Create a custom MOTD sort of competition with a fixed player list',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'lowerstars',
+			// 						'description': 'The lower star rating limit for the custom lobby',
+			// 						'type': 10, // 10 is type Number
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'higherstars',
+			// 						'description': 'The higher star rating limit for the custom lobby',
+			// 						'type': 10, // 10 is type Number
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 		]
+			// 	}
+			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -2282,6 +2282,206 @@ module.exports = {
 							'name': 'average',
 							'description': 'True means unplayed maps will be ignored',
 							'type': 5,
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-motd',
+					description: 'Manage your Maps of the Day registration and create custom rounds',
+					options: [
+						{
+							'name': 'register',
+							'description': 'Register for the daily Maps of the Day competition',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'unregister',
+							'description': 'Register from the daily Maps of the Day competition',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'server',
+							'description': 'Get a link to the server of the daily Maps of the Day competition',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'mute',
+							'description': 'Mute the MOTD messages for the specified amount',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'years',
+									'description': 'The years until the reminder',
+									'type': 4,
+								},
+								{
+									'name': 'months',
+									'description': 'The months until the reminder',
+									'type': 4,
+								},
+								{
+									'name': 'weeks',
+									'description': 'The weeks until the reminder',
+									'type': 4,
+								},
+								{
+									'name': 'days',
+									'description': 'The days until the reminder',
+									'type': 4,
+								},
+								{
+									'name': 'hours',
+									'description': 'The hours until the reminder',
+									'type': 4,
+								},
+								{
+									'name': 'minutes',
+									'description': 'The minutes until the reminder',
+									'type': 4,
+								},
+							]
+						},
+						{
+							'name': 'unmute',
+							'description': 'Unmute the MOTD messages',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'custom-fixed-players',
+							'description': 'Create a custom MOTD sort of competition with a fixed player list',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'lowerstars',
+									'description': 'The lower star rating limit for the custom lobby',
+									'type': 10, // 10 is type Number
+									'required': true
+								},
+								{
+									'name': 'higherstars',
+									'description': 'The higher star rating limit for the custom lobby',
+									'type': 10, // 10 is type Number
+									'required': true
+								},
+								{
+									'name': 'username',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'username2',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'username3',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username4',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username5',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username6',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username7',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username8',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username9',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username10',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username11',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username12',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username13',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username14',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username15',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username16',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								}
+							]
+						},
+						{
+							'name': 'custom-react-to-play',
+							'description': 'Create a custom MOTD sort of competition with a fixed player list',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'lowerstars',
+									'description': 'The lower star rating limit for the custom lobby',
+									'type': 10, // 10 is type Number
+									'required': true
+								},
+								{
+									'name': 'higherstars',
+									'description': 'The higher star rating limit for the custom lobby',
+									'type': 10, // 10 is type Number
+									'required': true
+								},
+							]
 						},
 					]
 				}
