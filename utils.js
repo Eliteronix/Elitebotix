@@ -421,7 +421,7 @@ module.exports = {
 		const tasksInWork = await DBProcessQueue.findAll({
 			where: { beingExecuted: true }
 		});
-		if (tasksInWork.length >= 5) {
+		if (tasksInWork.length > 5) {
 			return;
 		}
 		let now = new Date();
@@ -923,6 +923,108 @@ module.exports = {
 
 		return score;
 	},
+	async getMatchesPlanned(startDate, endDate) {
+		let matchesPlanned = 0;
+		if (startDate.getUTCHours() <= 18 && endDate.getUTCHours() >= 18) {
+			matchesPlanned += 2;
+		}
+
+		const tourneyMatchNotifications = await DBProcessQueue.findAll({
+			where: { task: 'tourneyMatchNotification' }
+		});
+
+		for (let i = 0; i < tourneyMatchNotifications.length; i++) {
+			const plannedStartDate = tourneyMatchNotifications[i].date;
+
+			const additions = tourneyMatchNotifications[i].additions.split(';');
+
+			const maps = additions[2].split(',');
+			let plannedMatchLength = 1200 + 60 + 180 + 600; //Set to forfeit time by default + 1 end minute + 3 extra minutes backup + 10 minutes to make sure its in limits
+
+			for (let i = 0; i < maps.length; i++) {
+				const dbOsuBeatmap = await DBOsuBeatmaps.findOne({
+					where: { id: maps[i] }
+				});
+				plannedMatchLength += parseInt(dbOsuBeatmap.totalLength) + 120;
+			}
+
+			let plannedEndDate = new Date();
+			plannedEndDate.setUTCFullYear(plannedStartDate.getUTCFullYear());
+			plannedEndDate.setUTCMonth(plannedStartDate.getUTCMonth());
+			plannedEndDate.setUTCDate(plannedStartDate.getUTCDate());
+			plannedEndDate.setUTCHours(plannedStartDate.getUTCHours());
+			plannedEndDate.setUTCMinutes(plannedStartDate.getUTCMinutes());
+			plannedEndDate.setUTCSeconds(0);
+			plannedEndDate.setUTCSeconds(plannedMatchLength);
+
+			if (startDate >= plannedStartDate && startDate <= plannedEndDate
+				|| endDate >= plannedStartDate && endDate <= plannedEndDate
+				|| startDate <= plannedStartDate && endDate >= plannedEndDate) {
+				matchesPlanned++;
+			}
+		}
+
+		const tourneyMatchReferees = await DBProcessQueue.findAll({
+			where: { task: 'tourneyMatchReferee' }
+		});
+
+		for (let i = 0; i < tourneyMatchReferees.length; i++) {
+			const plannedStartDate = tourneyMatchReferees[i].date;
+			plannedStartDate.setUTCMinutes(plannedStartDate.getUTCMinutes() - 5);
+
+			const additions = tourneyMatchReferees[i].additions.split(';');
+
+			const maps = additions[2].split(',');
+			let plannedMatchLength = 1200 + 60 + 180 + 600; //Set to forfeit time by default + 1 end minute + 3 extra minutes backup + 10 minutes to make sure its in limits
+
+			for (let i = 0; i < maps.length; i++) {
+				const dbOsuBeatmap = await DBOsuBeatmaps.findOne({
+					where: { id: maps[i] }
+				});
+				plannedMatchLength += parseInt(dbOsuBeatmap.totalLength) + 120;
+			}
+
+			let plannedEndDate = new Date();
+			plannedEndDate.setUTCFullYear(plannedStartDate.getUTCFullYear());
+			plannedEndDate.setUTCMonth(plannedStartDate.getUTCMonth());
+			plannedEndDate.setUTCDate(plannedStartDate.getUTCDate());
+			plannedEndDate.setUTCHours(plannedStartDate.getUTCHours());
+			plannedEndDate.setUTCMinutes(plannedStartDate.getUTCMinutes());
+			plannedEndDate.setUTCSeconds(0);
+			plannedEndDate.setUTCSeconds(plannedMatchLength);
+
+			if (startDate >= plannedStartDate && startDate <= plannedEndDate
+				|| endDate >= plannedStartDate && endDate <= plannedEndDate
+				|| startDate <= plannedStartDate && endDate >= plannedEndDate) {
+				matchesPlanned++;
+			}
+		}
+
+		const customMOTDs = await DBProcessQueue.findAll({
+			where: { task: 'customMOTD' }
+		});
+
+		for (let i = 0; i < customMOTDs.length; i++) {
+			const plannedStartDate = customMOTDs[i].date;
+
+			let plannedEndDate = new Date();
+			plannedEndDate.setUTCFullYear(plannedStartDate.getUTCFullYear());
+			plannedEndDate.setUTCMonth(plannedStartDate.getUTCMonth());
+			plannedEndDate.setUTCDate(plannedStartDate.getUTCDate());
+			plannedEndDate.setUTCHours(plannedStartDate.getUTCHours());
+			plannedEndDate.setUTCMinutes(plannedStartDate.getUTCMinutes());
+			plannedEndDate.setUTCSeconds(0);
+			plannedEndDate.setUTCSeconds(customMOTDs[i].additions);
+
+			if (startDate >= plannedStartDate && startDate <= plannedEndDate
+				|| endDate >= plannedStartDate && endDate <= plannedEndDate
+				|| startDate <= plannedStartDate && endDate >= plannedEndDate) {
+				matchesPlanned++;
+			}
+		}
+
+		return matchesPlanned;
+	}
 };
 
 async function getOsuBadgeNumberByIdFunction(osuUserId) {

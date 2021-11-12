@@ -711,6 +711,25 @@ module.exports = {
 								}
 							]
 						},
+						{
+							'name': 'custom-react-to-play',
+							'description': 'Create a custom MOTD sort of competition with a fixed player list',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'lowerstars',
+									'description': 'The lower star rating limit for the custom lobby',
+									'type': 10, // 10 is type Number
+									'required': true
+								},
+								{
+									'name': 'higherstars',
+									'description': 'The higher star rating limit for the custom lobby',
+									'type': 10, // 10 is type Number
+									'required': true
+								},
+							]
+						},
 					]
 				}
 			});

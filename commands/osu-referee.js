@@ -1,6 +1,6 @@
-const { DBDiscordUsers, DBProcessQueue, DBOsuBeatmaps } = require('../dbObjects');
+const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser } = require('../utils');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, getMatchesPlanned } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -136,7 +136,6 @@ module.exports = {
 				}
 
 				//Calculate if there are going to be other matches running during that time
-				let matchesPlanned = 0;
 				let endDate = new Date();
 				endDate.setUTCFullYear(date.getUTCFullYear());
 				endDate.setUTCMonth(date.getUTCMonth());
@@ -145,80 +144,8 @@ module.exports = {
 				endDate.setUTCMinutes(date.getUTCMinutes());
 				endDate.setUTCSeconds(0);
 				endDate.setUTCSeconds(matchLength);
-				if (date.getUTCHours() <= 18 && endDate.getUTCHours() >= 18) {
-					matchesPlanned += 3;
-				}
 
-				const tourneyMatchNotifications = await DBProcessQueue.findAll({
-					where: { task: 'tourneyMatchNotification' }
-				});
-
-				for (let i = 0; i < tourneyMatchNotifications.length; i++) {
-					const plannedStartDate = tourneyMatchNotifications[i].date;
-
-					const additions = tourneyMatchNotifications[i].additions.split(';');
-
-					const maps = additions[2].split(',');
-					let plannedMatchLength = 1200 + 60 + 180 + 600; //Set to forfeit time by default + 1 end minute + 3 extra minutes backup + 10 minutes to make sure its in limits
-
-					for (let i = 0; i < maps.length; i++) {
-						const dbOsuBeatmap = await DBOsuBeatmaps.findOne({
-							where: { id: maps[i] }
-						});
-						plannedMatchLength += parseInt(dbOsuBeatmap.totalLength) + 120;
-					}
-
-					let plannedEndDate = new Date();
-					plannedEndDate.setUTCFullYear(plannedStartDate.getUTCFullYear());
-					plannedEndDate.setUTCMonth(plannedStartDate.getUTCMonth());
-					plannedEndDate.setUTCDate(plannedStartDate.getUTCDate());
-					plannedEndDate.setUTCHours(plannedStartDate.getUTCHours());
-					plannedEndDate.setUTCMinutes(plannedStartDate.getUTCMinutes());
-					plannedEndDate.setUTCSeconds(0);
-					plannedEndDate.setUTCSeconds(plannedMatchLength);
-
-					if (date >= plannedStartDate && date <= plannedEndDate
-						|| endDate >= plannedStartDate && endDate <= plannedEndDate
-						|| date <= plannedStartDate && endDate >= plannedEndDate) {
-						matchesPlanned++;
-					}
-				}
-
-				const tourneyMatchReferees = await DBProcessQueue.findAll({
-					where: { task: 'tourneyMatchReferee' }
-				});
-
-				for (let i = 0; i < tourneyMatchReferees.length; i++) {
-					const plannedStartDate = tourneyMatchReferees[i].date;
-					plannedStartDate.setUTCMinutes(plannedStartDate.getUTCMinutes() - 5);
-
-					const additions = tourneyMatchReferees[i].additions.split(';');
-
-					const maps = additions[2].split(',');
-					let plannedMatchLength = 1200 + 60 + 180 + 600; //Set to forfeit time by default + 1 end minute + 3 extra minutes backup + 10 minutes to make sure its in limits
-
-					for (let i = 0; i < maps.length; i++) {
-						const dbOsuBeatmap = await DBOsuBeatmaps.findOne({
-							where: { id: maps[i] }
-						});
-						plannedMatchLength += parseInt(dbOsuBeatmap.totalLength) + 120;
-					}
-
-					let plannedEndDate = new Date();
-					plannedEndDate.setUTCFullYear(plannedStartDate.getUTCFullYear());
-					plannedEndDate.setUTCMonth(plannedStartDate.getUTCMonth());
-					plannedEndDate.setUTCDate(plannedStartDate.getUTCDate());
-					plannedEndDate.setUTCHours(plannedStartDate.getUTCHours());
-					plannedEndDate.setUTCMinutes(plannedStartDate.getUTCMinutes());
-					plannedEndDate.setUTCSeconds(0);
-					plannedEndDate.setUTCSeconds(plannedMatchLength);
-
-					if (date >= plannedStartDate && date <= plannedEndDate
-						|| endDate >= plannedStartDate && endDate <= plannedEndDate
-						|| date <= plannedStartDate && endDate >= plannedEndDate) {
-						matchesPlanned++;
-					}
-				}
+				let matchesPlanned = await getMatchesPlanned(date, endDate);
 
 				if (matchesPlanned > 3) {
 					return interaction.followUp('The bot cannot host another match at the specified time because there will already be 4 matches running. (Maximum limit is 4)');
