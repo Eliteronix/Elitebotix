@@ -55,6 +55,27 @@ module.exports = {
 				}
 			}
 
+			//Set lower star limit to 0 if it lower than 0
+			if (lowerStarLimit < 0) {
+				lowerStarLimit = 0;
+			}
+
+			//Set lower star limit to 10 if it higher than 10
+			if (higherStarLimit > 10) {
+				higherStarLimit = 10;
+			}
+
+			//Set higher star limit to 0 if it lower than 0
+			if (higherStarLimit < 0) {
+				higherStarLimit = 0;
+			}
+
+			//Set higher star limit to 10 if it higher than 10
+			if (higherStarLimit > 10) {
+				higherStarLimit = 10;
+			}
+
+			//Swap lower and higher star limits if they're the wrong way around
 			if ((interaction.options._subcommand === 'custom-fixed-players' || interaction.options._subcommand === 'custom-react-to-play') && lowerStarLimit > higherStarLimit) {
 				[lowerStarLimit, higherStarLimit] = [higherStarLimit, lowerStarLimit];
 			}
@@ -381,8 +402,8 @@ module.exports = {
 					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
 						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
 						&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
-						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
-						backupBeatmapIds.push(dbBeatmap.id);
+						&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
+						backupBeatmapIds.push(dbBeatmap.beatmapId);
 						const multiScores = await DBOsuMultiScores.findAll({
 							where: {
 								tourneyMatch: true,
@@ -484,8 +505,8 @@ module.exports = {
 					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
 						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
 						&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
-						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
-						backupBeatmapIds.push(dbBeatmap.id);
+						&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
+						backupBeatmapIds.push(dbBeatmap.beatmapId);
 						const multiScores = await DBOsuMultiScores.findAll({
 							where: {
 								tourneyMatch: true,
@@ -684,8 +705,8 @@ module.exports = {
 					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
 						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
 						&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
-						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
-						backupBeatmapIds.push(dbBeatmap.id);
+						&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
+						backupBeatmapIds.push(dbBeatmap.beatmapId);
 						const multiScores = await DBOsuMultiScores.findAll({
 							where: {
 								tourneyMatch: true,
@@ -787,8 +808,8 @@ module.exports = {
 					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
 						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
 						&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
-						&& !backupBeatmapIds.includes(dbBeatmap.id)) {
-						backupBeatmapIds.push(dbBeatmap.id);
+						&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
+						backupBeatmapIds.push(dbBeatmap.beatmapId);
 						const multiScores = await DBOsuMultiScores.findAll({
 							where: {
 								tourneyMatch: true,
@@ -936,7 +957,7 @@ module.exports = {
 				const dbDiscordUser = await DBDiscordUsers.findOne({
 					where: { userId: user.id }
 				});
-				if (dbDiscordUser && dbDiscordUser.osuUserId) {
+				if (dbDiscordUser && dbDiscordUser.osuUserId && dbDiscordUser.osuVerified) {
 					discordUsers.push(dbDiscordUser);
 					users.push(user);
 					discordUserIds.push(user.id);
@@ -967,17 +988,41 @@ module.exports = {
 					interaction.editReply({ embeds: [mappoolEmbed] });
 				} else {
 					reaction.users.remove(user.id);
-					let hintMessage = await embedMessage.channel.send(`It seems like you don't have your account connected and verified to the bot <@${user.id}>.\nPlease do so by using \`/osu-link connect\`and try again.`);
+					let hintMessage = await embedMessage.channel.send(`It seems like you don't have your account connected and verified to the bot <@${user.id}>.\nPlease do so by using \`/osu-link connect\` and try again.`);
 					await pause(10000);
 					hintMessage.delete();
 				}
 			});
 
 			collector.on('end', () => {
+				embedMessage.reactions.removeAll();
 				if (discordUsers.length < 2) {
-					embedMessage.reactions.removeAll();
 					return interaction.editReply({ content: 'Less than 2 players signed up. The custom MOTD has been aborted.', embeds: [] });
 				}
+
+				//Edit embed
+				const mappoolEmbed = new Discord.MessageEmbed()
+					.setColor('#C45686')
+					.setTitle('Custom MOTD settings [In Progress]')
+					.setFooter(`Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`);
+
+				for (let i = 0; i < discordUsers.length; i++) {
+					mappoolEmbed.addField(`Player #${i + 1}`, `${discordUsers[i].osuName} | #${discordUsers[i].osuRank}`, true);
+				}
+
+				for (let i = 1; i < mappoolInOrder.length; i++) {
+					let mapPrefix = '';
+					if (i === 4 || i === 8) {
+						mapPrefix = `Knockout #${i} (DT):`;
+					} else {
+						mapPrefix = `Knockout #${i}:`;
+					}
+					const embedName = `${mapPrefix} ${mappoolInOrder[i].artist} - ${mappoolInOrder[i].title} | [${mappoolInOrder[i].version}]`;
+					const embedValue = `${Math.round(mappoolInOrder[i].difficulty.rating * 100) / 100}* | ${Math.floor(mappoolInOrder[i].length.total / 60)}:${(mappoolInOrder[i].length.total % 60).toString().padStart(2, '0')} | [Website](<https://osu.ppy.sh/b/${mappoolInOrder[i].id}>) | osu! direct: <osu://b/${mappoolInOrder[i].id}>`;
+					mappoolEmbed.addField(embedName, embedValue);
+				}
+
+				interaction.editReply({ embeds: [mappoolEmbed] });
 
 				//Start the knockout lobby
 				const { knockoutLobby } = require('../MOTD/knockoutLobby.js');
