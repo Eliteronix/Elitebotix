@@ -39,9 +39,9 @@ module.exports = {
 				createJiraIssue('10006', `[BUG] ${bug} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
 				if (msg.id) {
-					return msg.reply('Your bug report was sent to the developer.');
+					return msg.reply('Your bug report was sent to the developers.');
 				}
-				return interaction.reply('Your bug report was sent to the developer.');
+				return interaction.reply('Your bug report was sent to the developers.');
 			}
 		} else if (args[0].toLowerCase() === 'feature') { //go to feature tree
 			if (!args[1]) { //check for second argument
@@ -55,9 +55,9 @@ module.exports = {
 				createJiraIssue('10007', `[FEATURE] ${feature} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
 				if (msg.id) {
-					return msg.reply('Your feature-request was sent to the developer.');
+					return msg.reply('Your feature-request was sent to the developers.');
 				}
-				return interaction.reply('Your feature-request was sent to the developer.');
+				return interaction.reply('Your feature-request was sent to the developers.');
 			}
 		} else if (args[0].toLowerCase() === 'feedback') { //go to general tree
 			if (!args[1]) { //check for second argument
@@ -71,9 +71,9 @@ module.exports = {
 				createJiraIssue('10005', `[FEEDBACK] ${feedback} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
 				if (msg.id) {
-					return msg.reply('Your feedback has been sent to the developer.');
+					return msg.reply('Your feedback has been sent to the developers.');
 				}
-				return interaction.reply('Your feedback has been sent to the developer.');
+				return interaction.reply('Your feedback has been sent to the developers.');
 			}
 		} else {
 			let guildPrefix = await getGuildPrefix(msg);
