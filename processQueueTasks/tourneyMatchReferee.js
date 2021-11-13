@@ -30,6 +30,7 @@ module.exports = {
 						});
 						dbPlayers.push(dbDiscordUser.osuName);
 					}
+					processQueueEntry.destroy();
 					let user = await client.users.fetch(args[0]);
 					user.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[6]}`);
 					return discordChannel.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[6]}`);
@@ -147,6 +148,7 @@ module.exports = {
 				if (noPlayers) {
 					lobbyStatus = 'Aborted';
 					await channel.sendMessage('!mp close');
+					processQueueEntry.destroy();
 
 					let dbPlayerNames = [];
 					for (let j = 0; j < players.length; j++) {
@@ -233,6 +235,7 @@ module.exports = {
 				await channel.sendMessage('Thank you everyone for playing! The lobby will automatically close in one minute.');
 				await pause(60000);
 				await channel.sendMessage('!mp close');
+				processQueueEntry.destroy();
 				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -264,8 +267,6 @@ module.exports = {
 
 			}
 		});
-
-		processQueueEntry.destroy();
 	},
 };
 

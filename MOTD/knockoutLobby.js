@@ -1,5 +1,6 @@
 const osu = require('node-osu');
-const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause, saveOsuMultiScores } = require('../utils.js');
+const { DBProcessQueue } = require('../dbObjects.js');
+const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause, saveOsuMultiScores, getMatchesPlanned } = require('../utils.js');
 const { assignKnockoutPoints } = require('./givePointsToPlayers.js');
 
 module.exports = {
@@ -10,7 +11,9 @@ module.exports = {
 
 		//Case of just one player
 		if (players.length === 1) {
-			assignKnockoutPoints(client, players[0], players, 1, 11);
+			if (lobbyNumber !== 'custom') {
+				assignKnockoutPoints(client, players[0], players, 1, 11);
+			}
 			return await messageUserWithRetries(client, users[0], 'You will win your lobby by default.\nCome back tomorrow for another competition!');
 		}
 
@@ -23,7 +26,7 @@ module.exports = {
 
 		let mapIndex = 1;
 		//Increases knockoutmap number to start/continue with harder maps and give more points
-		while (12 - players.length > mapIndex && lobbyNumber === 1) {
+		while (12 - players.length > mapIndex && (lobbyNumber === 1 || lobbyNumber === 'custom')) {
 			mapIndex++;
 		}
 
@@ -32,7 +35,39 @@ module.exports = {
 			doubleTime = ' DT';
 		}
 
-		if (lobbyNumber < 5) {
+		//Calculate start and end date for custom MOTDs
+		let plannedStartDate = new Date();
+		let startIndex = 1;
+		//set startIndex to something else if below 11 players (below all maps played)
+		if (players.length < 11) {
+			startIndex = 12 - players.length;
+		}
+
+		let gameLength = 180;
+
+		//Calculate match time
+		for (let i = startIndex; i < mappool.length; i++) {
+			gameLength = gameLength + 120 + parseInt(mappool[i].length.total);
+		}
+
+		let plannedEndDate = new Date();
+		plannedEndDate.setUTCFullYear(plannedStartDate.getUTCFullYear());
+		plannedEndDate.setUTCMonth(plannedStartDate.getUTCMonth());
+		plannedEndDate.setUTCDate(plannedStartDate.getUTCDate());
+		plannedEndDate.setUTCHours(plannedStartDate.getUTCHours());
+		plannedEndDate.setUTCMinutes(plannedStartDate.getUTCMinutes());
+		plannedEndDate.setUTCSeconds(0);
+		plannedEndDate.setUTCSeconds(gameLength);
+
+		let matchesPlanned = await getMatchesPlanned(plannedStartDate, plannedEndDate);
+
+		if (matchesPlanned < 4 && lobbyNumber === 'custom') {
+			//Create processqueue task to block potential osu-referee schedules
+			DBProcessQueue.create({ guildId: 'None', task: 'customMOTD', priority: 10, additions: gameLength, date: plannedStartDate });
+		}
+
+		//Host multi only if lobbyNumber is below 5 or custom lobby with less than 4 matches planned
+		if (lobbyNumber < 5 || lobbyNumber === 'custom' && matchesPlanned < 4) {
 
 			let lobbyStatus = 'Joining phase';
 
@@ -70,7 +105,7 @@ module.exports = {
 			await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
 
 			// eslint-disable-next-line no-undef
-			if (process.env.SERVER !== 'Dev') {
+			if (process.env.SERVER !== 'Dev' && lobbyNumber !== 'custom') {
 				try {
 					const announceChannel = await client.channels.fetch('893215604503351386');
 					announceChannel.send(`Lobby #${lobbyNumber}: <https://osu.ppy.sh/mp/${lobby.id}>`);
@@ -211,7 +246,7 @@ module.exports = {
 							knockedOutPlayerNames = `${knockedOutPlayerNames}, ${players[i].osuName}`;
 						}
 
-						if (!isFirstRound) {
+						if (!isFirstRound && lobbyNumber !== 'custom') {
 							assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
 						}
 						players.splice(i, 1);
@@ -235,7 +270,9 @@ module.exports = {
 				//Remove as many players as needed if there weren't enough players inactive
 				if (knockedOutPlayers < knockoutNumber) {
 					for (let i = 0; i < players.length && knockedOutPlayers < knockoutNumber; i++) {
-						assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
+						if (lobbyNumber !== 'custom') {
+							assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
+						}
 						if (knockedOutPlayerNames === '') {
 							knockedOutPlayerNames = `\`${players[i].osuName}\``;
 						} else {
@@ -260,8 +297,12 @@ module.exports = {
 				if (players.length === 1) {
 					lobbyStatus = 'Lobby finished';
 
-					await channel.sendMessage(`Congratulations ${players[0].osuName}! You won todays knockout lobby. Come back tomorrow for another round!`);
-					assignKnockoutPoints(client, players[0], startingPlayers, players.length, mapIndex + 1);
+					if (lobbyNumber === 'custom') {
+						await channel.sendMessage(`Congratulations ${players[0].osuName}! You won the knockout lobby. Feel free to sign up for another round!`);
+					} else {
+						await channel.sendMessage(`Congratulations ${players[0].osuName}! You won todays knockout lobby. Come back tomorrow for another round!`);
+						assignKnockoutPoints(client, players[0], startingPlayers, players.length, mapIndex + 1);
+					}
 					await pause(15000);
 					await channel.sendMessage('!mp close');
 					// eslint-disable-next-line no-undef
@@ -304,7 +345,7 @@ module.exports = {
 					movePlayersIntoFirstSlots(channel, lobby, players);
 					mapIndex++;
 
-					if (lobbyNumber === 1) {
+					if (lobbyNumber === 1 || lobbyNumber === 'custom') {
 						let skipped = false;
 						//Increases knockoutmap number to start/continue with harder maps and give more points
 						while (12 - players.length > mapIndex) {
@@ -364,7 +405,7 @@ async function sendLobbyMessages(client, lobbyNumber, players, users) {
 }
 
 async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, mapIndex, isFirstRound) {
-	if (lobbyNumber === 1) {
+	if (lobbyNumber === 1 || lobbyNumber === 'custom') {
 		let skipped = false;
 		//Increases knockoutmap number to start/continue with harder maps and give more points
 		while (12 - players.length > mapIndex) {
@@ -438,9 +479,15 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 						}
 					}
 				} else {
-					assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
+					if (lobbyNumber !== 'custom') {
+						assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
+					}
 				}
-				await messageUserWithRetries(client, users[i], `You failed to submit a valid score for the last knockout map and have been removed from todays competition.\nReason for the knockout: ${results[i].pp}\nCome back tomorrow for another round.`);
+				if (lobbyNumber === 'custom') {
+					await messageUserWithRetries(client, users[i], `You failed to submit a valid score for the last knockout map and have been removed from the competition.\nReason for the knockout: ${results[i].pp}\nFeel free to sign up for a new round.`);
+				} else {
+					await messageUserWithRetries(client, users[i], `You failed to submit a valid score for the last knockout map and have been removed from todays competition.\nReason for the knockout: ${results[i].pp}\nCome back tomorrow for another round.`);
+				}
 				if (knockedOutPlayerNames === '') {
 					knockedOutPlayerNames = `\`${players[i].osuName}\``;
 				} else {
@@ -459,7 +506,9 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 		//Remove as many players as needed if there weren't enough players inactive
 		if (knockedOutPlayers < knockoutNumber) {
 			for (let i = 0; i < players.length && knockedOutPlayers < knockoutNumber; i++) {
-				assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
+				if (lobbyNumber !== 'custom') {
+					assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
+				}
 				await messageUserWithRetries(client, users[i], 'You were knocked out by score. Thank you for playing and come back tomorrow for another round!');
 				if (knockedOutPlayerNames === '') {
 					knockedOutPlayerNames = `\`${players[i].osuName}\``;
@@ -486,8 +535,12 @@ async function knockoutMap(client, mappool, lobbyNumber, startingPlayers, player
 
 		//Message the winner if only one person is left
 		if (players.length === 1) {
-			assignKnockoutPoints(client, players[0], startingPlayers, players.length, mapIndex + 1);
-			return await messageUserWithRetries(client, users[0], 'All other players have been knocked out of todays competition which means **you have won!**\nCongratulations, thank you for playing and come back tomorrow for another round.');
+			if (lobbyNumber !== 'custom') {
+				assignKnockoutPoints(client, players[0], startingPlayers, players.length, mapIndex + 1);
+				return await messageUserWithRetries(client, users[0], 'All other players have been knocked out of todays competition which means **you have won!**\nCongratulations, thank you for playing and come back tomorrow for another round.');
+			} else {
+				return await messageUserWithRetries(client, users[0], 'All other players have been knocked out of the competition which means **you have won!**\nCongratulations, thank you for playing and feel free to sign up for another round.');
+			}
 		}
 
 		//Start the next round
