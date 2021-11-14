@@ -742,10 +742,11 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${user.id}.txt`);
 					files.push(matchesPlayed);
 
-					content = `${content} and Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}${runningAverageText}`;
+					content = `${content} and Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}${runningAverageText}\n${user.name}: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>`;
 				}
 
-				await msg.channel.send({ content: content, files: files });
+				let sentMessage = await msg.channel.send({ content: content, files: files });
+				await sentMessage.react('👤');
 
 				//Save the maps locally
 				for (let i = 0; i < userScores.length; i++) {
