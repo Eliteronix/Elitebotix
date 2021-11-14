@@ -9,7 +9,7 @@ module.exports = {
 		//Start everything in that minute
 		const today = new Date();
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'Live' && today.getUTCHours() === 18 && today.getUTCMinutes() === 0 || manualStart) {
+		if (process.env.SERVER === 'Live' && today.getUTCHours() === 19 && today.getUTCMinutes() === 0 || manualStart) {
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -143,7 +143,7 @@ module.exports = {
 					console.log(e);
 				});
 			// eslint-disable-next-line no-undef
-		} else if (process.env.SERVER === 'Live' && today.getUTCHours() === 19 && today.getUTCMinutes() === 30 || manualLeaderboard) {
+		} else if (process.env.SERVER === 'Live' && today.getUTCHours() === 20 && today.getUTCMinutes() === 30 || manualLeaderboard) {
 			//Maybe create all leaderboards daily anyway?
 			//Get Dates
 			let todayMorning = new Date();
@@ -188,7 +188,7 @@ module.exports = {
 			//All Time Leaderboard
 			createLeaderboard(client, beginningOfTime, 1000000, 'All Time', '835187880229339187');
 			// eslint-disable-next-line no-undef
-		} else if (process.env.SERVER === 'Live' && today.getUTCMinutes() % 10 === 0 && today.getUTCHours !== 18) {
+		} else if (process.env.SERVER === 'Live' && today.getUTCMinutes() % 10 === 0) {
 			//Assign roles to all players currently registered and remove unneeded roles
 			await assignPlayerRoles(client);
 		}
