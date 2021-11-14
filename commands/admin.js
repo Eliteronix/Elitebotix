@@ -962,7 +962,7 @@ module.exports = {
 			// 					},
 			// 					{
 			// 						'name': 'score',
-			// 						'description': 'Which types of scores should the graph evaluate?',
+			// 						'description': 'What is the winning condition of the match?',
 			// 						'type': 3,
 			// 						'required': true,
 			// 						'choices': [
@@ -2770,7 +2770,7 @@ module.exports = {
 								},
 								{
 									'name': 'score',
-									'description': 'Which types of scores should the graph evaluate?',
+									'description': 'What is the winning condition of the match?',
 									'type': 3,
 									'required': true,
 									'choices': [
