@@ -294,9 +294,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 		}
 	}
 
-	//Check if reacted for map information
+	//Check if reacted for skills information
 	if (reaction._emoji.name === '📈') {
-		//Check if it is actually a scorepost
+		//Check if it is a profile
 		if (reaction.message.attachments.first().name.startsWith('osu-profile')) {
 			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
