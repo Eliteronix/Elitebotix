@@ -135,12 +135,14 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				let guildPrefix = await getGuildPrefix(msg);
 
 				//Send attachment
+				let sentMessage = null;
 				if (noLinkedAccount) {
-					await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 				} else {
-					await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
 				}
 				processingMessage.delete();
+				await sentMessage.react('📈');
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
@@ -194,8 +196,9 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-profile-${getGameModeName(mode)}-${user.id}.png`);
 
 				//Send attachment
-				await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
+				let sentMessage = await msg.channel.send({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
 				processingMessage.delete();
+				await sentMessage.react('📈');
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
