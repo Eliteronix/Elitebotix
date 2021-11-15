@@ -393,7 +393,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				if (!userScores.length) {
 					await processingMessage.delete();
 
-					content = `${content}; No multi/tourney-scores found in the database for ${user.name} - skipping modpool evaluation`;
+					content = `${content}; No multi/tourney-scores found in the database for ${user.name} - skipping modpool evaluation\n${user.name}: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>`;
 
 				} else {
 					let oldestDate = new Date();
