@@ -747,6 +747,9 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 				let sentMessage = await msg.channel.send({ content: content, files: files });
 				await sentMessage.react('👤');
+				if (userScores.length) {
+					await sentMessage.react('📊');
+				}
 
 				//Save the maps locally
 				for (let i = 0; i < userScores.length; i++) {

@@ -366,6 +366,32 @@ module.exports = async function (reaction, user, additionalObjects) {
 		}
 	}
 
+	//Check if reacted for schedule information
+	if (reaction._emoji.name === '📊') {
+		//Check if it is a profile
+		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats')) {
+			//get the osuUserId used
+			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+
+			//Setup artificial arguments
+			let args = [osuUserId];
+
+			const command = require('./commands/osu-schedule.js');
+
+			//Set author of the message to the reacting user to not break the commands
+			reaction.message.author = user;
+
+			try {
+				command.execute(reaction.message, args, null, additionalObjects);
+			} catch (error) {
+				console.error(error);
+				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+			}
+		}
+	}
+
 	if (reaction.message.channel.type === 'DM') {
 		return;
 	}
