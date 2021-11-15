@@ -1,10 +1,11 @@
 //Require discord.js module
-const Discord = require('discord.js');
+const { MessageAttachment, MessageEmbed } = require('discord.js');
 const { Permissions } = require('discord.js');
+const Canvas = require('canvas');
 
 module.exports = {
 	name: 'creator',
-	aliases: ['developer', 'donate', 'support'],
+	aliases: ['developer', 'donate', 'support', 'creators', 'developers', 'devs'],
 	description: 'Sends an info card about the developer',
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'KICK_MEMBERS',
@@ -20,26 +21,49 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		const eliteronixUser = await additionalObjects[0].users.fetch('138273136285057025');
+		const roddyUser = await additionalObjects[0].users.fetch('212511522407055360');
+
+		const canvas = Canvas.createCanvas(261, 128);
+		const ctx = canvas.getContext('2d');
+
+		
+		const eliteAvatar = await Canvas.loadImage(eliteronixUser.displayAvatarURL({ format: 'jpg' }));
+		ctx.drawImage(eliteAvatar, 0, 0, 128, canvas.height);
+		const roddyAvatar = await Canvas.loadImage(roddyUser.displayAvatarURL({ format: 'jpg' }));
+		ctx.drawImage(roddyAvatar, 133, 0, 128, canvas.height);
+
+		const file = new MessageAttachment(canvas.toBuffer(), 'profileImages.jpg');
+
 
 		//Create new embed
-		const creatorInfoEmbed = new Discord.MessageEmbed()
+		const creatorInfoEmbed = new MessageEmbed()
 			.setColor('#0492C2')
-			.setTitle('Developer info card')
-			.setDescription('I\'m currently working on this bot on my own.\nFeel free to support me using the links below.')
-			.setThumbnail(`${eliteronixUser.avatarURL()}`)
+			.setTitle('Developers info card')
+			.setDescription('Developers team cons.\nFeel free to support us by using the links below.')
+			.setThumbnail('attachment://profileImages.jpg')
 			.addFields(
-				{ name: 'Discord', value: '[Eliteronix#4208](https://discord.com/invite/Asz5Gfe)' },
-				{ name: 'Github', value: '[Eliteronix](https://github.com/Eliteronix)' },
-				{ name: 'Twitter', value: '[@Eliteronix](https://twitter.com/Eliteronix)' },
-				{ name: 'Paypal', value: '[paypal.me/Eliteronix](https://paypal.me/Eliteronix)' },
-				{ name: 'Twitch', value: '[Eliteronix](https://twitch.tv/Eliteronix)' }
-			)
+				{ name: 'Discord', value: '[Eliteronix#4208](https://discord.com/invite/Asz5Gfe)', inline:true},
+				{ name: 'Discord', value: '[Roddy#0160](https://discord.com/invite/Asz5Gfe)', inline:true  },
+				{ name: '\u200B', value:'\u200B', inline:true })
+			.addFields(
+				{ name: 'Github', value: '[Eliteronix](https://github.com/Eliteronix)', inline:true },
+				{ name: 'Github', value: '[Roddy](https://github.com/Roddyyyy)', inline:true },
+				{ name: '\u200B', value:'\u200B', inline:true })
+			.addFields(
+				{ name: 'Twitter', value: '[@Eliteronix](https://twitter.com/Eliteronix)', inline:true },
+				{ name: 'Twitter', value: '[@RoddyOsu](https://twitter.com/RoddyOsu)', inline:true },
+				{ name: '\u200B', value:'\u200B', inline:true })
+			.addFields(
+				{ name: 'Twitch', value: '[Eliteronix](https://twitch.tv/Eliteronix)', inline:true },
+				{ name: 'Twitch', value: '[Roddy](https://twitch.tv/Roddy_dota)', inline:true  },
+				{ name: '\u200B', value:'\u200B', inline:true })
+			.addField('Paypal', '[paypal.me/Eliteronix](https://paypal.me/Eliteronix)')
 			.setTimestamp();
 
-		if (msg) {
-			return msg.reply({ embeds: [creatorInfoEmbed] });
-		}
 
-		return interaction.reply({ embeds: [creatorInfoEmbed] });
+		if (msg){
+			return msg.reply({ embeds: [creatorInfoEmbed], files: [file] });
+		}
+		return interaction.reply({ embeds: [creatorInfoEmbed], files: [file] });
 	},
 };
