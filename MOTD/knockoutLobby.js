@@ -101,14 +101,10 @@ module.exports = {
 
 			await lobby.setPassword(password);
 			await channel.sendMessage('!mp lock');
-			console.log(lobby);
-			console.log('Pausing');
 			await pause(60000);
-			console.log(lobby);
-			while (lobby._beatmapId !== mappool[mapIndex].id) {
+			while (lobby._beatmapId != mappool[mapIndex].id) {
 				await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 				await pause(5000);
-				console.log(lobby);
 			}
 			await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
 
@@ -371,7 +367,7 @@ module.exports = {
 						doubleTime = ' DT';
 					}
 
-					while (lobby._beatmapId !== mappool[mapIndex].id) {
+					while (lobby._beatmapId != mappool[mapIndex].id) {
 						await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 						await pause(5000);
 					}

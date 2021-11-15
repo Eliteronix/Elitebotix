@@ -165,7 +165,7 @@ module.exports = {
 
 				lobbyStatus = 'Waiting for start';
 
-				while (lobby._beatmapId !== dbMaps[mapIndex].beatmapId) {
+				while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
 					await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
 					await pause(5000);
 				}
@@ -198,7 +198,7 @@ module.exports = {
 				if (allPlayersJoined) {
 					lobbyStatus = 'Waiting for start';
 
-					while (lobby._beatmapId !== dbMaps[mapIndex].beatmapId) {
+					while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
 						await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
 						await pause(5000);
 					}
@@ -230,7 +230,7 @@ module.exports = {
 			if (mapIndex < dbMaps.length) {
 				lobbyStatus = 'Waiting for start';
 
-				while (lobby._beatmapId !== dbMaps[mapIndex].beatmapId) {
+				while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
 					await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
 					await pause(5000);
 				}
