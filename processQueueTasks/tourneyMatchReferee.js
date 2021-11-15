@@ -165,7 +165,10 @@ module.exports = {
 
 				lobbyStatus = 'Waiting for start';
 
-				await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+				while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
+					await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+					await pause(5000);
+				}
 				await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail}`);
 				await channel.sendMessage('Everyone please ready up!');
 				await channel.sendMessage('!mp timer 120');
@@ -195,7 +198,10 @@ module.exports = {
 				if (allPlayersJoined) {
 					lobbyStatus = 'Waiting for start';
 
-					await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+					while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
+						await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+						await pause(5000);
+					}
 					await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail}`);
 					await channel.sendMessage('Everyone please ready up!');
 					await channel.sendMessage('!mp timer 120');
@@ -224,7 +230,10 @@ module.exports = {
 			if (mapIndex < dbMaps.length) {
 				lobbyStatus = 'Waiting for start';
 
-				await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+				while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
+					await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+					await pause(5000);
+				}
 				await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail}`);
 				await channel.sendMessage('Everyone please ready up!');
 				await channel.sendMessage('!mp timer 120');
