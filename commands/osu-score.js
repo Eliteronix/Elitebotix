@@ -201,12 +201,13 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						//Send attachment
 						if (noLinkedAccount) {
-							sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+							sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 						} else {
-							sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
+							sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 						}
-						sentMessage.react('<:COMPARE:827974793365159997>');
-						sentMessage.react('🗺️');
+						await sentMessage.react('<:COMPARE:827974793365159997>');
+						await sentMessage.react('🗺️');
+						await sentMessage.react('👤');
 
 						processingMessage.delete();
 						//Reset maprank in case of multiple scores displayed
@@ -273,11 +274,12 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-score-${user.id}-${beatmap.beatmapId}-${score.raw_mods}.png`);
 
 						//Send attachment
-						let sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
+						let sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 
 						processingMessage.delete();
-						sentMessage.react('<:COMPARE:827974793365159997>');
-						sentMessage.react('🗺️');
+						await sentMessage.react('<:COMPARE:827974793365159997>');
+						await sentMessage.react('🗺️');
+						await sentMessage.react('👤');
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {
