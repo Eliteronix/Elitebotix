@@ -26,7 +26,7 @@ module.exports = {
 		const canvas = Canvas.createCanvas(261, 128);
 		const ctx = canvas.getContext('2d');
 
-		
+
 		const eliteAvatar = await Canvas.loadImage(eliteronixUser.displayAvatarURL({ format: 'jpg' }));
 		ctx.drawImage(eliteAvatar, 0, 0, 128, canvas.height);
 		const roddyAvatar = await Canvas.loadImage(roddyUser.displayAvatarURL({ format: 'jpg' }));
@@ -39,29 +39,29 @@ module.exports = {
 		const creatorInfoEmbed = new MessageEmbed()
 			.setColor('#0492C2')
 			.setTitle('Developers info card')
-			.setDescription('Developers team cons.\nFeel free to support us by using the links below.')
+			.setDescription('We are working on this bot during our free time -\nfeel free to support us by using the links below.')
 			.setThumbnail('attachment://profileImages.jpg')
 			.addFields(
-				{ name: 'Discord', value: '[Eliteronix#4208](https://discord.com/invite/Asz5Gfe)', inline:true},
-				{ name: 'Discord', value: '[Roddy#0160](https://discord.com/invite/Asz5Gfe)', inline:true  },
-				{ name: '\u200B', value:'\u200B', inline:true })
+				{ name: 'Discord', value: '[Eliteronix#4208](https://discord.com/invite/Asz5Gfe)', inline: true },
+				{ name: 'Discord', value: '[Roddy#0160](https://discord.com/invite/Asz5Gfe)', inline: true },
+				{ name: '\u200B', value: '\u200B', inline: true })
 			.addFields(
-				{ name: 'Github', value: '[Eliteronix](https://github.com/Eliteronix)', inline:true },
-				{ name: 'Github', value: '[Roddy](https://github.com/Roddyyyy)', inline:true },
-				{ name: '\u200B', value:'\u200B', inline:true })
+				{ name: 'Github', value: '[Eliteronix](https://github.com/Eliteronix)', inline: true },
+				{ name: 'Github', value: '[Roddy](https://github.com/Roddyyyy)', inline: true },
+				{ name: '\u200B', value: '\u200B', inline: true })
 			.addFields(
-				{ name: 'Twitter', value: '[@Eliteronix](https://twitter.com/Eliteronix)', inline:true },
-				{ name: 'Twitter', value: '[@RoddyOsu](https://twitter.com/RoddyOsu)', inline:true },
-				{ name: '\u200B', value:'\u200B', inline:true })
+				{ name: 'Twitter', value: '[@Eliteronix](https://twitter.com/Eliteronix)', inline: true },
+				{ name: 'Twitter', value: '[@RoddyOsu](https://twitter.com/RoddyOsu)', inline: true },
+				{ name: '\u200B', value: '\u200B', inline: true })
 			.addFields(
-				{ name: 'Twitch', value: '[Eliteronix](https://twitch.tv/Eliteronix)', inline:true },
-				{ name: 'Twitch', value: '[Roddy](https://twitch.tv/Roddy_dota)', inline:true  },
-				{ name: '\u200B', value:'\u200B', inline:true })
+				{ name: 'Twitch', value: '[Eliteronix](https://twitch.tv/Eliteronix)', inline: true },
+				{ name: 'Twitch', value: '[Roddy](https://twitch.tv/Roddy_dota)', inline: true },
+				{ name: '\u200B', value: '\u200B', inline: true })
 			.addField('Paypal', '[paypal.me/Eliteronix](https://paypal.me/Eliteronix)')
 			.setTimestamp();
 
 
-		if (msg){
+		if (msg) {
 			return msg.reply({ embeds: [creatorInfoEmbed], files: [file] });
 		}
 		return interaction.reply({ embeds: [creatorInfoEmbed], files: [file] });
