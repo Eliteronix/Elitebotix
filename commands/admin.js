@@ -713,7 +713,7 @@ module.exports = {
 			// 			},
 			// 			{
 			// 				'name': 'custom-react-to-play',
-			// 				'description': 'Create a custom MOTD sort of competition with a fixed player list',
+			// 				'description': 'Create a custom MOTD sort of competition where players can react to join',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
@@ -2521,7 +2521,7 @@ module.exports = {
 						},
 						{
 							'name': 'custom-react-to-play',
-							'description': 'Create a custom MOTD sort of competition with a fixed player list',
+							'description': 'Create a custom MOTD sort of competition where players can react to join',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
