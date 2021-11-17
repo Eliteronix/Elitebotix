@@ -157,14 +157,19 @@ module.exports = {
 				return interaction.followUp('The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use `/osu-referee scheduled`');
 			} else if (interaction.options._subcommand === 'scheduled') {
 				let scheduledMatches = [];
+				//Get all scheduled matches that still need to notify
 				const tourneyMatchNotifications = await DBProcessQueue.findAll({
 					where: { task: 'tourneyMatchNotification' }
 				});
 
 				for (let i = 0; i < tourneyMatchNotifications.length; i++) {
+					//Get the match data from the additions field
 					let additions = tourneyMatchNotifications[i].additions.split(';');
+					//Check if the executing user is the 0 index of the additions
 					if (additions[0] === interaction.user.id) {
+						//Get the player IDs from the additions on index 3
 						let players = additions[3].split(',');
+						//Translate the player IDs to osu! usernames
 						let dbPlayerNames = [];
 						for (let j = 0; j < players.length; j++) {
 							const dbDiscordUser = await DBDiscordUsers.findOne({
@@ -173,7 +178,9 @@ module.exports = {
 							dbPlayerNames.push(dbDiscordUser.osuName);
 						}
 
+						//Get the match date from the date the task is scheduled to
 						const matchDate = tourneyMatchNotifications[i].date;
+						//Increase the matchDate by 15 minutes to get the date the match actually starts (Because notifications happen 15 minutes earlier)
 						matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 15);
 
 						scheduledMatches.push(`\`\`\`Scheduled:\nInternal ID: ${tourneyMatchNotifications[i].id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${additions[6]}\`\`\``);
