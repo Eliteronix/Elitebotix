@@ -1828,6 +1828,13 @@ module.exports = {
 			// 	}
 			// });
 
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'reminders',
+					description: 'Sends your set reminders',
+				}
+			});
+
 		} else if (args[0] === 'removeGuildCommands') {
 			const commands = await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.get();
 			for (let i = 0; i < commands.length; i++) {
@@ -3636,6 +3643,14 @@ module.exports = {
 					]
 				}
 			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'reminders',
+					description: 'Sends your set reminders',
+				}
+			});
+
 		} else if (args[0] === 'removeGlobalCommands') {
 			const commands = await msg.client.api.applications(msg.client.user.id).commands.get();
 			for (let i = 0; i < commands.length; i++) {
