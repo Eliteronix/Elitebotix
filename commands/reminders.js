@@ -20,28 +20,28 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, interaction) {
 		if (interaction) {
-			await populateMsgFromInteraction(interaction);
+			msg = await populateMsgFromInteraction(interaction);
 		}
-        
+
 		const reminders = await DBProcessQueue.findAll({
 			where: { task: 'remind' }
 		});
-        
+
 		let setReminders = [];
 		let reminderTime = [];
 		let date = new Date();
 		let message = '';
-        
+
 		if (reminders.length == 0) {
-			if (msg){
+			if (msg) {
 				return msg.reply('No reminders set for you');
-			}  else
+			} else
 				return interaction.reply({ content: 'No reminders set for you', ephemeral: true });
 		} else {
 			for (let i = 0; i < reminders.length; i++) {
 				let args = reminders[i].additions.split(';');
 				date = reminders[i].date;
-                
+
 				setReminders.push(args[1]);
 				reminderTime.push(date.toLocaleTimeString('en-UK', {
 					day: 'numeric', // numeric, 2-digit
@@ -52,11 +52,11 @@ module.exports = {
 					second: 'numeric', // numeric, 2-digit
 				}));
 			}
-            
+
 			for (let i = 0; i < setReminders.length; i++) {
-				message+= `"${setReminders[i]}"  -  will be send on ${reminderTime[i]}\n`;
+				message += `"${setReminders[i]}"  -  will be send on ${reminderTime[i]}\n`;
 			}
-            
+
 			if (msg) {
 				if (msg.channel.type !== 'DM') {
 					msg.reply(' Check your DMs');
