@@ -142,6 +142,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
 				}
 				processingMessage.delete();
+				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
 			})
 			.catch(err => {
@@ -198,6 +199,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				//Send attachment
 				let sentMessage = await msg.channel.send({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
 				processingMessage.delete();
+				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
 			})
 			.catch(err => {
