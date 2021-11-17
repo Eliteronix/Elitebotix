@@ -11,7 +11,7 @@ module.exports = {
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.EMBED_LINKS, Permissions.FLAGS.SEND_MESSAGES],
-	botPermissionsTranslated: 'Manage Roles',
+	botPermissionsTranslated: 'Send messages and link embeds',
 	//guildOnly: true,
 	args: true,
 	cooldown: 5,
