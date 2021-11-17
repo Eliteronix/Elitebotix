@@ -389,6 +389,15 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				const userScores = await DBOsuMultiScores.findAll({
 					where: { osuUserId: user.id }
 				});
+				//Remove userScores which don't fit the criteria
+				for (let i = 0; i < userScores.length; i++) {
+					if (scoringType === 'v2' && userScores[i].scoringType !== 'Score v2'
+						|| scoringType === 'v1' && userScores[i].scoringType !== 'Score'
+						|| tourneyMatch && !userScores[i].tourneyMatch) {
+						userScores.splice(i, 1);
+						i--;
+					}
+				}
 
 				if (!userScores.length) {
 					await processingMessage.delete();
@@ -436,17 +445,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					let uncompletedMonths = [];
 					let runningAverageAmount = 75;
 					for (let i = 0; i < userScores.length; i++) {
-						//Filter out rounds which don't fit the restrictions
-						if (scoringType === 'v2' && userScores[i].scoringType !== 'Score v2') {
-							continue;
-						}
-						if (scoringType === 'v1' && userScores[i].scoringType !== 'Score') {
-							continue;
-						}
-						if (tourneyMatch && !userScores[i].tourneyMatch) {
-							continue;
-						}
-
 						//Push matches for the history txt
 						if (!matchesPlayed.includes(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`)) {
 							matchesPlayed.push(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`);
