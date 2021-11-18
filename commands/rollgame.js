@@ -44,7 +44,7 @@ module.exports = {
 
 		// `m` is a message object that will be passed through the filter function
 		const mFilter = m => ['join', 'start'].includes(m.content.toLowerCase()) && m.author.id !== msg.client.user.id;
-		const mCollector = msg.channel.createMessageCollector({ mFilter, time: 30000 });
+		const mCollector = msg.channel.createMessageCollector({ mFilter, time: 3600000 });
 
 		mCollector.on('collect', async (m) => {
 			if (!players.includes(m.author.id) && m.content.toLowerCase() === 'join') {
@@ -57,7 +57,7 @@ module.exports = {
 			}
 		});
 
-		const rCollector = sentMessage.createReactionCollector({ time: 30000 });
+		const rCollector = sentMessage.createReactionCollector({ time: 3600000 });
 
 		rCollector.on('collect', async (reaction, user) => {
 			if (!players.includes(user.id) && user.id !== msg.client.user.id && reaction.emoji.name === '🎲') {
@@ -82,7 +82,7 @@ module.exports = {
 
 			// `m` is a message object that will be passed through the filter function
 			const meFilter = m => ['roll'].includes(m.content.toLowerCase()) && m.author.id !== msg.client.user.id;
-			const meCollector = msg.channel.createMessageCollector({ meFilter, time: 30000 });
+			const meCollector = msg.channel.createMessageCollector({ meFilter, time: 3600000 });
 
 			meCollector.on('collect', async (m) => {
 				//Do the roll for the user
@@ -102,7 +102,7 @@ module.exports = {
 				}
 			});
 
-			const reCollector = sentMessage.createReactionCollector({ time: 30000 });
+			const reCollector = sentMessage.createReactionCollector({ time: 3600000 });
 
 			reCollector.on('collect', async (reaction, user) => {
 				//Do the roll for the user
@@ -217,7 +217,7 @@ async function rollRound(sentMessage, players, rounds) {
 
 	// `m` is a message object that will be passed through the filter function
 	const mFilter = m => m.content.toLowerCase() === `roll ${toRoll}`;
-	const mCollector = sentMessage.channel.createMessageCollector({ mFilter, time: 30000 });
+	const mCollector = sentMessage.channel.createMessageCollector({ mFilter, time: 3600000 });
 
 	mCollector.on('collect', async (m) => {
 		if (m.author.id === players[rounds.length % players.length][0] && m.content.toLowerCase() === `roll ${toRoll}`) {
@@ -228,7 +228,7 @@ async function rollRound(sentMessage, players, rounds) {
 		}
 	});
 
-	const rCollector = sentMessage.createReactionCollector({ time: 30000 });
+	const rCollector = sentMessage.createReactionCollector({ time: 3600000 });
 	await sentMessage.react('🎲');
 
 	rCollector.on('collect', async (reaction, user) => {
