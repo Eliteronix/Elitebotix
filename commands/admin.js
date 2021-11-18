@@ -1536,6 +1536,13 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'reminders',
+			// 		description: 'Sends your set reminders',
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'remindme',
 			// 		description: 'Sends a reminder at the specified time',
 			// 		options: [
@@ -3340,6 +3347,13 @@ module.exports = {
 							'required': false
 						},
 					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'reminders',
+					description: 'Sends your set reminders',
 				}
 			});
 
