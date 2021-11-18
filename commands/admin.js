@@ -1603,6 +1603,13 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'rollgame',
+			// 		description: 'Start a round of rollgame'
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'server-info',
 			// 		description: 'Sends an info card about the server'
 			// 	}
@@ -3414,6 +3421,13 @@ module.exports = {
 							'required': false
 						}
 					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'rollgame',
+					description: 'Start a round of rollgame'
 				}
 			});
 
