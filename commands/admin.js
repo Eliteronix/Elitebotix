@@ -1536,6 +1536,13 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'reminders',
+			// 		description: 'Sends your set reminders',
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'remindme',
 			// 		description: 'Sends a reminder at the specified time',
 			// 		options: [
@@ -1827,13 +1834,6 @@ module.exports = {
 			// 		]
 			// 	}
 			// });
-
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'reminders',
-					description: 'Sends your set reminders',
-				}
-			});
 
 		} else if (args[0] === 'removeGuildCommands') {
 			const commands = await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.get();
@@ -3352,6 +3352,13 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
+					name: 'reminders',
+					description: 'Sends your set reminders',
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
 					name: 'remindme',
 					description: 'Sends a reminder at the specified time',
 					options: [
@@ -3641,13 +3648,6 @@ module.exports = {
 							'required': true
 						},
 					]
-				}
-			});
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'reminders',
-					description: 'Sends your set reminders',
 				}
 			});
 
