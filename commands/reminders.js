@@ -54,7 +54,7 @@ module.exports = {
 		}
 
 		if (msg && msg.channel.type !== 'DM') {
-			msg.reply(' Check your DMs');
+			msg.reply('You have received a DM with your pending reminders.');
 			return msg.author.send(message);
 		}
 		return interaction.reply({ content: message, ephemeral: true });
