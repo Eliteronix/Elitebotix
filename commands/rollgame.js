@@ -150,7 +150,7 @@ async function updateEmbed(embedMessage, players, rounds, instructions) {
 	const rollgameEmbed = new MessageEmbed()
 		.setColor('#187bcd')
 		.setTitle('Rollgame')
-		.setDescription('First to roll 1 wins')
+		.setDescription('Players take turns rolling the previously rolled number - starting at 1000000.\nFirst to roll 1 wins')
 		.setTimestamp();
 
 	//Add playerNames
