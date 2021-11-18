@@ -22,17 +22,17 @@ module.exports = {
 			where: { task: 'remind' }
 		});
 
+		if (reminders.length === 0) {
+			if (msg) {
+				return msg.reply('There are no reminders set for you');
+			}
+			return interaction.reply({ content: 'There are no reminders set for you', ephemeral: true });
+		}
+
 		let setReminders = [];
 		let reminderTime = [];
 		let date = new Date();
 		let message = '';
-
-		if (reminders.length == 0) {
-			if (msg) {
-				return msg.reply('No reminders set for you');
-			}
-			return interaction.reply({ content: 'No reminders set for you', ephemeral: true });
-		}
 
 		for (let i = 0; i < reminders.length; i++) {
 			let args = reminders[i].additions.split(';');
@@ -50,12 +50,19 @@ module.exports = {
 		}
 
 		for (let i = 0; i < setReminders.length; i++) {
-			message += `"${setReminders[i]}"  -  will be send on ${reminderTime[i]}\n`;
+			message += `\`${setReminders[i]}\`  -  will be sent on ${reminderTime[i]}\n`;
 		}
 
-		if (msg && msg.channel.type !== 'DM') {
-			msg.reply(' Check your DMs');
-			return msg.author.send(message);
+		if (msg) {
+			//Try DM'ing the user
+			return msg.author.send(message, { split: true })
+				.then(async () => {
+					if (msg.channel.type === 'DM') return;
+					msg.reply('You have received a DM with your pending reminders.');
+				})
+				.catch(() => {
+					return msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
+				});
 		}
 		return interaction.reply({ content: message, ephemeral: true });
 
