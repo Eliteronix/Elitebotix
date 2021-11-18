@@ -3650,7 +3650,6 @@ module.exports = {
 					]
 				}
 			});
-
 		} else if (args[0] === 'removeGlobalCommands') {
 			const commands = await msg.client.api.applications(msg.client.user.id).commands.get();
 			for (let i = 0; i < commands.length; i++) {
