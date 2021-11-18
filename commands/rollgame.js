@@ -153,22 +153,33 @@ async function updateEmbed(embedMessage, players, rounds, instructions) {
 		.setDescription('Players take turns rolling the previously rolled number - starting at 1000000.\nFirst to roll 1 wins')
 		.setTimestamp();
 
+	//Keep track of amount of fields
+	let fieldAmount = 0;
+
 	//Add playerNames
 	for (let i = 0; i < players.length; i++) {
 		if (typeof players[i] === 'string') {
 			rollgameEmbed.addField(`Player ${i + 1}`, `<@${players[i]}>`, true);
+			fieldAmount++;
 		} else {
 			rollgameEmbed.addField(`Player ${i + 1}`, `<@${players[i][0]}> (${players[i][1]})`, true);
+			fieldAmount++;
 		}
 	}
 
 	//Add rounds
-
 	if (rounds.length) {
 		rollgameEmbed.addField('Start', '1000000');
+		fieldAmount++;
 	}
 
-	for (let i = 0; i < rounds.length; i++) {
+	//Calculate how many rounds can be shown
+	let startValue = (fieldAmount + 1 + rounds.length) - 25;
+	if (startValue < 0) {
+		startValue = 0;
+	}
+
+	for (let i = startValue; i < rounds.length; i++) {
 		rollgameEmbed.addField(`Round ${i + 1}`, `<@${players[i % players.length][0]}> - ${rounds[i]}`);
 	}
 
@@ -177,8 +188,8 @@ async function updateEmbed(embedMessage, players, rounds, instructions) {
 	} else {
 		rollgameEmbed.addField('Instructions', instructions);
 	}
-
-	return await embedMessage.edit({ embeds: [rollgameEmbed] });
+	await embedMessage.delete();
+	return await embedMessage.channel.send({ embeds: [rollgameEmbed] });
 }
 
 function partition(list, start, end) {
