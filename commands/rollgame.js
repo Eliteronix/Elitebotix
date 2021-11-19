@@ -12,7 +12,7 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	// guildOnly: true,
 	//args: true,
-	cooldown: 5,
+	cooldown: 30,
 	// noCooldownMessage: true,
 	tags: 'misc',
 	prefixCommand: true,
@@ -188,8 +188,8 @@ async function updateEmbed(embedMessage, players, rounds, instructions) {
 	} else {
 		rollgameEmbed.addField('Instructions', instructions);
 	}
-	await embedMessage.delete();
-	return await embedMessage.channel.send({ embeds: [rollgameEmbed] });
+	return await embedMessage.channel.send({ embeds: [rollgameEmbed] }).
+		then(embedMessage.delete());
 }
 
 function partition(list, start, end) {
