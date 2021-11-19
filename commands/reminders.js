@@ -1,5 +1,7 @@
 const { Permissions } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
+const { populateMsgFromInteraction } = require('../utils');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'reminders',
@@ -18,8 +20,18 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+		}
+
+		//Get all the reminders by the user
 		const reminders = await DBProcessQueue.findAll({
-			where: { task: 'remind' }
+			where: {
+				task: 'remind',
+				additions: {
+					[Op.like]: `${msg.author.id}%`,
+				}
+			}
 		});
 
 		if (reminders.length === 0) {
