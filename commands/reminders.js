@@ -6,7 +6,7 @@ const { Op } = require('sequelize');
 module.exports = {
 	name: 'reminders',
 	aliases: ['remind-list', 'reminders-list'],
-	description: 'Sends current time of the given location',
+	description: 'Sends your set reminders',
 	//usage: '<location>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
@@ -14,7 +14,7 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	//guildOnly: true,
 	//args: false,
-	cooldown: 5,
+	cooldown: 15,
 	//noCooldownMessage: true,
 	tags: 'general',
 	prefixCommand: true,
