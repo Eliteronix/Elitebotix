@@ -1,5 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBOsuMultiScores, DBActivityRoles, DBOsuBeatmaps } = require('./dbObjects');
-const { prefix, leaderboardEntriesPerPage } = require('./config.json');
+const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
@@ -15,6 +15,7 @@ module.exports = {
 			//Set prefix to standard prefix
 			guildPrefix = prefix;
 		} else {
+			logDatabaseQueriesFunction(3, 'utils.js getGuildPrefix');
 			//Get guild from the db
 			const guild = await DBGuilds.findOne({
 				where: { guildId: msg.guildId },
@@ -282,6 +283,7 @@ module.exports = {
 		return outputUser;
 	},
 	updateOsuDetailsforUser: async function (user, mode) {
+		logDatabaseQueriesFunction(4, 'utils.js updateOsuDetailsforUser');
 		//get discordUser from db to update pp and rank
 		DBDiscordUsers.findOne({
 			where: { osuUserId: user.id },
@@ -315,6 +317,7 @@ module.exports = {
 		let server = 'bancho';
 		let mode = 0;
 
+		logDatabaseQueriesFunction(4, 'utils.js getOsuUserServerMode');
 		//Check user settings
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { userId: msg.author.id },
@@ -363,6 +366,7 @@ module.exports = {
 		if (msg.channel.type !== 'DM') {
 			const now = new Date();
 			now.setSeconds(now.getSeconds() - 15);
+			logDatabaseQueriesFunction(3, 'utils.js DBServerUserActivity');
 			const serverUserActivity = await DBServerUserActivity.findOne({
 				where: { guildId: msg.guildId, userId: msg.author.id },
 			});
@@ -374,10 +378,12 @@ module.exports = {
 						if (lastMessage && msg.id === lastMessage.id) {
 							serverUserActivity.points = serverUserActivity.points + 1;
 							serverUserActivity.save();
+							logDatabaseQueriesFunction(3, 'utils.js old updateServerUserActivity activityRoles');
 							const activityRoles = await DBActivityRoles.findAll({
 								where: { guildId: msg.guildId }
 							});
 							if (activityRoles.length) {
+								logDatabaseQueriesFunction(3, 'utils.js old updateServerUserActivity DBProcessQueue');
 								const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
 								if (!existingTask) {
 									let date = new Date();
@@ -391,10 +397,12 @@ module.exports = {
 
 			if (!serverUserActivity) {
 				DBServerUserActivity.create({ guildId: msg.guildId, userId: msg.author.id });
+				logDatabaseQueriesFunction(3, 'utils.js new updateServerUserActivity DBProcessQueue');
 				const activityRoles = await DBActivityRoles.findAll({
 					where: { guildId: msg.guildId }
 				});
 				if (activityRoles.length) {
+					logDatabaseQueriesFunction(3, 'utils.js new updateServerUserActivity DBProcessQueue');
 					const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
 					if (!existingTask) {
 						let date = new Date();
@@ -418,6 +426,7 @@ module.exports = {
 		return userDisplayName;
 	},
 	executeNextProcessQueueTask: async function (client, bancho) {
+		logDatabaseQueriesFunction(1, 'utils.js DBProcessQueue tasksInWork');
 		const tasksInWork = await DBProcessQueue.findAll({
 			where: { beingExecuted: true }
 		});
@@ -425,6 +434,7 @@ module.exports = {
 			return;
 		}
 		let now = new Date();
+		logDatabaseQueriesFunction(1, 'utils.js DBProcessQueue nextPriorityTasklevel');
 		let nextPriorityTasklevel = await DBProcessQueue.findAll({
 			where: {
 				beingExecuted: false,
@@ -440,6 +450,7 @@ module.exports = {
 			}
 		}
 		if (nextPriorityTasklevel.length > 0) {
+			logDatabaseQueriesFunction(1, 'utils.js DBProcessQueue nextTask');
 			let nextTask = await DBProcessQueue.findAll({
 				where: { beingExecuted: false, priority: nextPriorityTasklevel[0].priority },
 				order: [
@@ -472,10 +483,12 @@ module.exports = {
 		let date = new Date();
 		date.setUTCHours(date.getUTCHours() - 12);
 
+		logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBDiscordUsers');
 		const discordUsers = await DBDiscordUsers.findAll();
 
 		for (let i = 0; i < discordUsers.length; i++) {
 			if (discordUsers[i].osuUserId && discordUsers[i].updatedAt < date) {
+				logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBProcessQueue');
 				const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUsers[i].userId } });
 				if (!existingTask) {
 					DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUsers[i].userId });
@@ -633,6 +646,7 @@ module.exports = {
 		return await getOsuBadgeNumberByIdFunction(osuUserId);
 	},
 	async restartProcessQueueTask() {
+		logDatabaseQueriesFunction(5, 'utils.js restartProcessQueueTask');
 		const tasksInWork = await DBProcessQueue.findAll({
 			where: { beingExecuted: true }
 		});
@@ -813,6 +827,7 @@ module.exports = {
 				}
 
 				//Add score to db
+				logDatabaseQueriesFunction(2, 'utils.js saveOsuMultiScores');
 				const existingScore = await DBOsuMultiScores.findOne({
 					where: {
 						osuUserId: score.userId,
@@ -942,6 +957,7 @@ module.exports = {
 			matchesPlanned += 2;
 		}
 
+		logDatabaseQueriesFunction(4, 'utils.js getMatchesPlanned DBProcessQueue tourneyMatchNotification');
 		const tourneyMatchNotifications = await DBProcessQueue.findAll({
 			where: { task: 'tourneyMatchNotification' }
 		});
@@ -955,6 +971,7 @@ module.exports = {
 			let plannedMatchLength = 1200 + 60 + 180 + 600; //Set to forfeit time by default + 1 end minute + 3 extra minutes backup + 10 minutes to make sure its in limits
 
 			for (let i = 0; i < maps.length; i++) {
+				logDatabaseQueriesFunction(4, 'utils.js getMatchesPlanned DBProcessQueue tourneyMatchNotification DBOsuBeatmaps');
 				const dbOsuBeatmap = await DBOsuBeatmaps.findOne({
 					where: { id: maps[i] }
 				});
@@ -977,6 +994,7 @@ module.exports = {
 			}
 		}
 
+		logDatabaseQueriesFunction(4, 'utils.js getMatchesPlanned DBProcessQueue tourneyMatchReferee');
 		const tourneyMatchReferees = await DBProcessQueue.findAll({
 			where: { task: 'tourneyMatchReferee' }
 		});
@@ -991,6 +1009,7 @@ module.exports = {
 			let plannedMatchLength = 1200 + 60 + 180 + 600; //Set to forfeit time by default + 1 end minute + 3 extra minutes backup + 10 minutes to make sure its in limits
 
 			for (let i = 0; i < maps.length; i++) {
+				logDatabaseQueriesFunction(4, 'utils.js getMatchesPlanned DBProcessQueue tourneyMatchReferee DBOsuBeatmaps');
 				const dbOsuBeatmap = await DBOsuBeatmaps.findOne({
 					where: { id: maps[i] }
 				});
@@ -1013,6 +1032,7 @@ module.exports = {
 			}
 		}
 
+		logDatabaseQueriesFunction(4, 'utils.js getMatchesPlanned DBProcessQueue customMOTD');
 		const customMOTDs = await DBProcessQueue.findAll({
 			where: { task: 'customMOTD' }
 		});
@@ -1037,6 +1057,9 @@ module.exports = {
 		}
 
 		return matchesPlanned;
+	},
+	logDatabaseQueries(level, output) {
+		logDatabaseQueriesFunction(level, output);
 	}
 };
 
@@ -1143,6 +1166,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 	lastRework.setUTCHours(17);
 	let lastWeek = new Date();
 	lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
+	logDatabaseQueriesFunction(4, 'utils.js getOsuBeatmapFunction');
 	let dbBeatmap = await DBOsuBeatmaps.findOne({
 		where: { beatmapId: beatmapId, mods: modBits }
 	});
@@ -1476,4 +1500,15 @@ function getModsFunction(input) {
 	}
 
 	return mods.reverse();
+}
+
+function logDatabaseQueriesFunction(level, output) {
+	//Level 5: Log rarely used queries
+	//Level 4: Log queries used in commands
+	//Level 3: Log queries used in (all) messages
+	//Level 2: Log constant periodic queries
+	//Level 1: Log all queries
+	if (traceDatabaseQueries <= level) {
+		console.log('traceDatabaseQueries: ', output);
+	}
 }
