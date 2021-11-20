@@ -6,7 +6,7 @@ const { Op } = require('sequelize');
 module.exports = {
 	name: 'reminders',
 	aliases: ['remind-list', 'reminders-list'],
-	description: 'Sends current time of the given location',
+	description: 'Sends your set reminders',
 	//usage: '<location>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
@@ -14,7 +14,7 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	//guildOnly: true,
 	//args: false,
-	cooldown: 5,
+	cooldown: 15,
 	//noCooldownMessage: true,
 	tags: 'general',
 	prefixCommand: true,
@@ -35,7 +35,7 @@ module.exports = {
 		});
 
 		if (reminders.length === 0) {
-			if (msg) {
+			if (msg.id) {
 				return msg.reply('There are no reminders set for you');
 			}
 			return interaction.reply({ content: 'There are no reminders set for you', ephemeral: true });
@@ -62,10 +62,10 @@ module.exports = {
 		}
 
 		for (let i = 0; i < setReminders.length; i++) {
-			message += `\`${setReminders[i]}\`  -  will be sent on ${reminderTime[i]}\n`;
+			message += `[${i+1}] \`${setReminders[i]}\`  -  will be sent on ${reminderTime[i]}\n`;
 		}
 
-		if (msg) {
+		if (msg.id) {
 			//Try DM'ing the user
 			return msg.author.send(message, { split: true })
 				.then(async () => {
