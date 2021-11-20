@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBTemporaryVoices } = require('./dbObjects');
-const { isWrongSystem } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (oldMember, newMember) {
 	if (isWrongSystem(newMember.guild.id, false)) {
@@ -8,6 +8,7 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (oldMember.serverMute !== null && oldMember.serverMute !== newMember.serverMute) {
+		logDatabaseQueries(4, 'voiceStateUpdate.js DBGuilds 1');
 		const guild = await DBGuilds.findOne({
 			where: { guildId: newMember.guild.id }
 		});
@@ -53,6 +54,7 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (oldMember.serverDeaf !== newMember.serverDeaf) {
+		logDatabaseQueries(4, 'voiceStateUpdate.js DBGuilds 2');
 		const guild = await DBGuilds.findOne({
 			where: { guildId: newMember.guild.id }
 		});
@@ -98,6 +100,7 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (oldMember.channelId !== newMember.channelId) {
+		logDatabaseQueries(4, 'voiceStateUpdate.js DBGuilds 3');
 		const guild = await DBGuilds.findOne({
 			where: { guildId: newMember.guild.id }
 		});
@@ -190,6 +193,7 @@ module.exports = async function (oldMember, newMember) {
 	let dbTemporaryVoicesNew;
 
 	if (newUserChannel) {
+		logDatabaseQueries(4, 'voiceStateUpdate.js DBTemporaryVoices 1');
 		dbTemporaryVoicesNew = await DBTemporaryVoices.findOne({
 			where: { guildId: newUserChannel.guild.id, channelId: newUserChannel.id }
 		});
@@ -197,6 +201,7 @@ module.exports = async function (oldMember, newMember) {
 
 	if (newUserChannel && newUserChannel.name.startsWith('➕') && !(dbTemporaryVoicesNew) && newUserChannel !== oldUserChannel) {
 
+		logDatabaseQueries(4, 'voiceStateUpdate.js DBTemporaryVoices 4');
 		const dbGuild = await DBGuilds.findOne({
 			where: { guildId: newMember.guild.id }
 		});
@@ -367,6 +372,7 @@ module.exports = async function (oldMember, newMember) {
 
 	if (oldUserChannel && newUserChannel !== oldUserChannel) {
 
+		logDatabaseQueries(4, 'voiceStateUpdate.js DBTemporaryVoices 2');
 		const dbTemporaryVoices = await DBTemporaryVoices.findOne({
 			where: { guildId: oldUserChannel.guild.id, channelId: oldUserChannel.id }
 		});
