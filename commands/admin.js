@@ -3439,7 +3439,7 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'reminders-delete',
-					description: 'Delete your reminders',
+					description: 'Delete a selected reminder',
 					options: [
 						{
 							'name': 'id',
