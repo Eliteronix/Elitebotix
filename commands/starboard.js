@@ -6,7 +6,7 @@ module.exports = {
 	name: 'starboard',
 	aliases: ['star-board'],
 	description: 'Sends the messages receiving a star into the specified channel.',
-	usage: '<enable/disable> | <channel> <mentioned channel> | <minimum> <#amount>',
+	usage: '\n<enable/disable> - turn on/off starboard\n<channel> [mentioned channel] - change starboard\'s channel\n<minimum> [#amount] - change minimum star amount',
 	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
