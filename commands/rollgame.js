@@ -188,8 +188,8 @@ async function updateEmbed(embedMessage, players, rounds, instructions) {
 	} else {
 		rollgameEmbed.addField('Instructions', instructions);
 	}
-	return await embedMessage.channel.send({ embeds: [rollgameEmbed] }).
-		then(embedMessage.delete());
+	setTimeout(() => embedMessage.delete(), 80);
+	return await embedMessage.channel.send({ embeds: [rollgameEmbed] });
 }
 
 function partition(list, start, end) {
