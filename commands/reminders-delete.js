@@ -6,7 +6,7 @@ const { Op } = require('sequelize');
 module.exports = {
 	name: 'reminders-delete',
 	//aliases: ['remind-list', 'reminders-list'],
-	description: 'Delete your reminders',
+	description: 'Delete a selected reminder',
 	usage: '<ID>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
@@ -57,7 +57,8 @@ module.exports = {
 		} catch (error) {
 			if (msg.id) {
 				return msg.reply('There are no reminders with the given ID');
-			} else return interaction.reply({ content: 'There are no reminders with the given ID', ephemeral: true });
+			}
+			return interaction.reply({ content: 'There are no reminders with the given ID', ephemeral: true });
 		}
         
 	}

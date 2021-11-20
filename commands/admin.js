@@ -1544,12 +1544,12 @@ module.exports = {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'reminders-delete',
-			// 		description: 'Delete your reminders',
+			// 		description: 'Delete a selected reminder',
 			// 		options: [
 			// 			{
 			// 				'name': 'id',
 			// 				'description': 'Id of the reminder (can be found by using e!reminders command)',
-			// 				'type': 3,
+			// 				'type': 4,
 			// 				'required': true
 			// 			}
 			// 		],
@@ -1564,7 +1564,7 @@ module.exports = {
 			// 			{
 			// 				'name': 'id',
 			// 				'description': 'Id of the reminder (can be found by using e!reminders command)',
-			// 				'type': 3,
+			// 				'type': 4,
 			// 				'required': true
 			// 			},
 			// 			{
@@ -3436,15 +3436,15 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'reminders-delete',
-					description: 'Delete your reminders',
+					description: 'Delete a selected reminder',
 					options: [
 						{
 							'name': 'id',
 							'description': 'Id of the reminder (can be found by using e!reminders command)',
-							'type': 3,
+							'type': 4,
 							'required': true
 						}
 					],
@@ -3459,7 +3459,7 @@ module.exports = {
 						{
 							'name': 'id',
 							'description': 'Id of the reminder (can be found by using e!reminders command)',
-							'type': 3,
+							'type': 4,
 							'required': true
 						},
 						{
