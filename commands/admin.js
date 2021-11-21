@@ -854,7 +854,7 @@ module.exports = {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'ors',
-			// 		description: 'Sends an info card about the specified player',
+			// 		description: 'Sends an info card about the last score of the specified player',
 			// 		options: [
 			// 			{
 			// 				'name': 'username',
@@ -2677,7 +2677,7 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'ors',
-					description: 'Sends an info card about the specified player',
+					description: 'Sends an info card about the last score of the specified player',
 					options: [
 						{
 							'name': 'username',

@@ -35,7 +35,7 @@ module.exports = {
 		});
 
 		if (reminders.length === 0) {
-			if (msg) {
+			if (msg.id) {
 				return msg.reply('There are no reminders set for you');
 			}
 			return interaction.reply({ content: 'There are no reminders set for you', ephemeral: true });
@@ -65,7 +65,7 @@ module.exports = {
 			message += `\`${setReminders[i]}\`  -  will be sent on ${reminderTime[i]}\n`;
 		}
 
-		if (msg) {
+		if (msg.id) {
 			//Try DM'ing the user
 			return msg.author.send(message, { split: true })
 				.then(async () => {
