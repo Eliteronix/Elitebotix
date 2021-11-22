@@ -158,18 +158,20 @@ module.exports = async function (msg, bancho) {
 				args[i] = args[i].replace(/`/g, '');
 			}
 
-			if (args[0]) {
+			if (args[0] && msg.channel.type !== 'DM') {
 				try {
 					closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch} ${args.join(' ')}\`?`);
 				} catch (e) {
 					//Nothing as its an optional feature
 				}
-			} else {
+			} else if (!args[0] && msg.channel.type !== 'DM') {
 				try {
 					closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch}\`?`);
 				} catch (e) {
 					//Nothing as its an optional feature
 				}
+			} else {
+				msg.reply('I could not find the command. Please, check your syntax and try again');
 			}
 
 			if (msg.channel.type !== 'DM' && closestMatchMessage) {
