@@ -1,4 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	assignPlayerRoles: async function (client) {
@@ -35,6 +36,7 @@ module.exports = {
 				//Iterate through all members
 				for (let i = 0; i < members.length; i++) {
 					//Find out if they are registered or not
+					logDatabaseQueries(2, 'MOTD/assignPlayerRoles.js DBDiscordUsers');
 					const registeredPlayer = await DBDiscordUsers.findOne({
 						where: { userId: members[i].user.id, osuMOTDRegistered: true }
 					});
