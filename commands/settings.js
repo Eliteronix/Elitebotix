@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBAutoRoles } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -31,6 +31,7 @@ module.exports = {
 
 		const user = await msg.client.users.fetch(msg.client.user.id);
 
+		logDatabaseQueries(4, 'commands/settings.js DBGuilds');
 		const guild = await DBGuilds.findOne({
 			where: { guildId: msg.guildId },
 		});
@@ -83,6 +84,7 @@ module.exports = {
 			goodbyeMessage = 'Disabled';
 		}
 
+		logDatabaseQueries(4, 'commands/settings.js DBAutoRoles');
 		//get all autoRoles for the guild
 		const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: msg.guildId } });
 		//iterate for every autorole in the array

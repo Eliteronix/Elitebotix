@@ -10,6 +10,7 @@
 // the winner receives 100% of 16 points
 
 const { DBMOTDPoints, DBDiscordUsers } = require('../dbObjects');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	assignQualifierPoints: async function (allPlayers) {
@@ -24,6 +25,7 @@ module.exports = {
 		today.setUTCSeconds(0);
 		today.setUTCMilliseconds(0);
 
+		logDatabaseQueries(2, 'MOTD/givePointsToPlayers.js DBMOTDPoints 1');
 		const qualifierDataset = await DBMOTDPoints.findOne({
 			where: { userId: player.userId, osuUserId: player.osuUserId, matchDate: today }
 		});
@@ -31,6 +33,7 @@ module.exports = {
 		if (qualifierDataset) {
 			let maximumPointsFromQualis = 0;
 			for (let i = 0; i < allPlayers.length; i++) {
+				logDatabaseQueries(2, 'MOTD/givePointsToPlayers.js DBMOTDPoints 2');
 				const qualifierDataset = await DBMOTDPoints.findOne({
 					where: { userId: allPlayers[i].userId, osuUserId: allPlayers[i].osuUserId, matchDate: today }
 				});
@@ -84,6 +87,7 @@ module.exports = {
 			}
 		}
 
+		logDatabaseQueries(2, 'MOTD/givePointsToPlayers.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { userId: player.userId }
 		});

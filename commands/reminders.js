@@ -1,6 +1,6 @@
 const { Permissions } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
-const { populateMsgFromInteraction } = require('../utils');
+const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -24,6 +24,7 @@ module.exports = {
 			msg = await populateMsgFromInteraction(interaction);
 		}
 
+		logDatabaseQueries(4, 'commands/reminders.js DBProcessQueue');
 		//Get all the reminders by the user
 		const reminders = await DBProcessQueue.findAll({
 			where: {
@@ -35,7 +36,7 @@ module.exports = {
 		});
 
 		if (reminders.length === 0) {
-			if (msg) {
+			if (msg.id) {
 				return msg.reply('There are no reminders set for you');
 			}
 			return interaction.reply({ content: 'There are no reminders set for you', ephemeral: true });
@@ -65,7 +66,7 @@ module.exports = {
 			message += `\`${setReminders[i]}\`  -  will be sent on ${reminderTime[i]}\n`;
 		}
 
-		if (msg) {
+		if (msg.id) {
 			//Try DM'ing the user
 			return msg.author.send(message, { split: true })
 				.then(async () => {

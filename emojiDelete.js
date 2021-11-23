@@ -1,12 +1,13 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (emoji) {
 	if (isWrongSystem(emoji.guild.id, false)) {
 		return;
 	}
 
+	logDatabaseQueries(2, 'emojiDelete.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
 		where: { guildId: emoji.guild.id, loggingEmojiDelete: true },

@@ -1,8 +1,10 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
+const { logDatabaseQueries } = require('./utils');
 
 module.exports = async function (oldUser, newUser) {
 	if (oldUser.username !== newUser.username) {
+		logDatabaseQueries(2, 'userUpdate.js DBGuilds Username');
 		const guilds = await DBGuilds.findAll({
 			where: { loggingUsernames: true }
 		});
@@ -61,6 +63,7 @@ module.exports = async function (oldUser, newUser) {
 	}
 
 	if (oldUser.discriminator !== newUser.discriminator) {
+		logDatabaseQueries(2, 'userUpdate.js DBGuilds Discriminator');
 		const guilds = await DBGuilds.findAll({
 			where: { loggingDiscriminators: true }
 		});
@@ -119,6 +122,7 @@ module.exports = async function (oldUser, newUser) {
 	}
 
 	if (oldUser.displayAvatarURL() !== newUser.displayAvatarURL()) {
+		logDatabaseQueries(2, 'userUpdate.js DBGuilds Avatar');
 		const guilds = await DBGuilds.findAll({
 			where: { loggingAvatars: true }
 		});

@@ -1,4 +1,4 @@
-const { getGuildPrefix, updateServerUserActivity, saveOsuMultiScores, isWrongSystem } = require('./utils');
+const { getGuildPrefix, updateServerUserActivity, saveOsuMultiScores, isWrongSystem, logDatabaseQueries } = require('./utils');
 const fs = require('fs');
 const Discord = require('discord.js');
 const osu = require('node-osu');
@@ -114,6 +114,7 @@ module.exports = async function (msg, bancho) {
 				categories.push('debug');
 			}
 
+			logDatabaseQueries(3, 'gotMessage.js DBElitiriCupSignUp');
 			//ecs2021 player
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: { tournamentName: 'Elitiri Cup Summer 2021', userId: msg.author.id }
@@ -279,6 +280,7 @@ module.exports = async function (msg, bancho) {
 };
 
 async function handleTicketStatus(msg) {
+	logDatabaseQueries(3, 'gotMessage.js DBTickets');
 	const ticket = await DBTickets.findOne({
 		where: { channelId: msg.channel.id, creatorId: msg.author.id }
 	});

@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBOsuBeatmaps } = require('../dbObjects');
-const { pause, saveOsuMultiScores } = require('../utils');
+const { pause, saveOsuMultiScores, logDatabaseQueries } = require('../utils');
 const osu = require('node-osu');
 
 module.exports = {
@@ -25,6 +25,7 @@ module.exports = {
 					let players = args[3].split(',');
 					let dbPlayers = [];
 					for (let j = 0; j < players.length; j++) {
+						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
 						const dbDiscordUser = await DBDiscordUsers.findOne({
 							where: { id: players[j] }
 						});
@@ -46,6 +47,7 @@ module.exports = {
 		let discordIds = [];
 		let users = [];
 		for (let i = 0; i < players.length; i++) {
+			logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 2');
 			const dbDiscordUser = await DBDiscordUsers.findOne({
 				where: { id: players[i] }
 			});
@@ -68,6 +70,7 @@ module.exports = {
 		let maps = args[2].split(',');
 		let dbMaps = [];
 		for (let i = 0; i < maps.length; i++) {
+			logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBOsuBeatmaps');
 			const dbOsuBeatmap = await DBOsuBeatmaps.findOne({
 				where: { id: maps[i] }
 			});
@@ -152,6 +155,7 @@ module.exports = {
 
 					let dbPlayerNames = [];
 					for (let j = 0; j < players.length; j++) {
+						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 3');
 						const dbDiscordUser = await DBDiscordUsers.findOne({
 							where: { id: players[j] }
 						});
@@ -263,6 +267,7 @@ module.exports = {
 
 				let dbPlayerNames = [];
 				for (let j = 0; j < players.length; j++) {
+					logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 4');
 					const dbDiscordUser = await DBDiscordUsers.findOne({
 						where: { id: players[j] }
 					});

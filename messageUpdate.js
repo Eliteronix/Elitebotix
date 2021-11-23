@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (oldMsg, newMsg) {
 	if (isWrongSystem(newMsg.guildId, newMsg.channel.type === 'DM')) {
@@ -11,6 +11,7 @@ module.exports = async function (oldMsg, newMsg) {
 		return;
 	}
 
+	logDatabaseQueries(2, 'messageUpdate.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
 		where: { guildId: newMsg.guildId, loggingMessageUpdate: true },

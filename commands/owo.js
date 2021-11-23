@@ -1,4 +1,5 @@
 const { DBGuilds } = require('../dbObjects');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'owo',
@@ -18,6 +19,7 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
 		if (!(args[0])) {
+			logDatabaseQueries(4, 'commands/owo.js DBGuilds');
 			//get guild from db
 			const guild = await DBGuilds.findOne({
 				where: { guildId: msg.guildId },
@@ -28,7 +30,7 @@ module.exports = {
 				//check if owo is enabled
 				if (guild.owoEnabled) {
 					//declare weebEmojis array
-					var weebEmojis = ['owo', 'uwu','umu', 'UwU', 'OwO', 'OuO', 'UmU'];
+					var weebEmojis = ['owo', 'uwu', 'umu', 'UwU', 'OwO', 'OuO', 'UmU'];
 
 					//send the message
 					msg.reply(weebEmojis[Math.floor(Math.random() * weebEmojis.length)]);

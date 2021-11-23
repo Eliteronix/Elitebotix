@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { humanReadable, getOsuBeatmap } = require('../utils.js');
+const { humanReadable, getOsuBeatmap, logDatabaseQueries } = require('../utils.js');
 const { qualifier } = require('./qualifier.js');
 const { DBOsuBeatmaps, DBOsuMultiScores } = require('../dbObjects.js');
 const osu = require('node-osu');
@@ -80,6 +80,7 @@ module.exports = {
 				while (!beatmap) {
 					const index = Math.floor(Math.random() * amountOfMapsInDB);
 
+					logDatabaseQueries(2, 'MOTD/setMapsForBracket.js DBOsuBeatmaps 1');
 					const dbBeatmap = await DBOsuBeatmaps.findOne({
 						where: { id: index }
 					});
@@ -91,6 +92,7 @@ module.exports = {
 						&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
 						&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 						backupBeatmapIds.push(dbBeatmap.beatmapId);
+						logDatabaseQueries(2, 'MOTD/setMapsForBracket.js DBOsuMultiScores 1');
 						const multiScores = await DBOsuMultiScores.findAll({
 							where: {
 								tourneyMatch: true,
@@ -158,6 +160,7 @@ module.exports = {
 				while (!beatmap) {
 					const index = Math.floor(Math.random() * amountOfMapsInDB);
 
+					logDatabaseQueries(2, 'MOTD/setMapsForBracket.js DBOsuBeatmaps 2');
 					const dbBeatmap = await DBOsuBeatmaps.findOne({
 						where: { id: index }
 					});
@@ -167,6 +170,7 @@ module.exports = {
 						&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
 						&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 						backupBeatmapIds.push(dbBeatmap.beatmapId);
+						logDatabaseQueries(2, 'MOTD/setMapsForBracket.js DBOsuMultiScores 2');
 						const multiScores = await DBOsuMultiScores.findAll({
 							where: {
 								tourneyMatch: true,

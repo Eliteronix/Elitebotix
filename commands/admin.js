@@ -854,7 +854,7 @@ module.exports = {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'ors',
-			// 		description: 'Sends an info card about the specified player',
+			// 		description: 'Sends an info card about the last score of the specified player',
 			// 		options: [
 			// 			{
 			// 				'name': 'username',
@@ -944,7 +944,7 @@ module.exports = {
 			// 					},
 			// 					{
 			// 						'name': 'mappool',
-			// 						'description': 'The mappool in the following format: NM234826,HD123141,HR123172',
+			// 						'description': 'The mappool in the following format: NM234826,HD123141,HR123172. Available mods: NM, HD, HR, DT',
 			// 						'type': 3,
 			// 						'required': true
 			// 					},
@@ -2677,7 +2677,7 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'ors',
-					description: 'Sends an info card about the specified player',
+					description: 'Sends an info card about the last score of the specified player',
 					options: [
 						{
 							'name': 'username',
@@ -2767,7 +2767,7 @@ module.exports = {
 								},
 								{
 									'name': 'mappool',
-									'description': 'The mappool in the following format: NM234826,HD123141,HR123172',
+									'description': 'The mappool in the following format: NM234826,HD123141,HR123172. Available mods: NM, HD, HR, DT',
 									'type': 3,
 									'required': true
 								},

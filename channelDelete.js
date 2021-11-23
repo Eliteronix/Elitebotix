@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBTemporaryVoices } = require('./dbObjects');
-const { isWrongSystem, pause } = require('./utils');
+const { isWrongSystem, pause, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (channel) {
 	if (channel.type === 'DM') {
@@ -11,6 +11,7 @@ module.exports = async function (channel) {
 		return;
 	}
 
+	logDatabaseQueries(2, 'channelDelete.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
 		where: { guildId: channel.guild.id, loggingChannelDelete: true },
@@ -76,10 +77,12 @@ module.exports = async function (channel) {
 	}
 
 	await pause(5000);
+	logDatabaseQueries(2, 'channelDelete.js DBTemporaryVoices 1');
 	const temporaryVoice = await DBTemporaryVoices.findOne({
 		where: { guildId: channel.guild.id, channelId: channel.id }
 	});
 
+	logDatabaseQueries(2, 'channelDelete.js DBTemporaryVoices 2');
 	const temporaryText = await DBTemporaryVoices.findOne({
 		where: { guildId: channel.guild.id, textChannelId: channel.id }
 	});

@@ -1,4 +1,5 @@
 const { DBElitiriCupSignUp } = require('../dbObjects');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
@@ -35,6 +36,7 @@ module.exports = {
 
 				//Iterate through all members
 				for (let i = 0; i < members.length; i++) {
+					logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupSignUp');
 					//Find out if they are registered or not
 					const registeredPlayer = await DBElitiriCupSignUp.findOne({
 						where: { userId: members[i].user.id }

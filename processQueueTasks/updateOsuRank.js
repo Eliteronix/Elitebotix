@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { getOsuBadgeNumberById } = require('../utils.js');
+const { getOsuBadgeNumberById, logDatabaseQueries } = require('../utils.js');
 const osu = require('node-osu');
 
 module.exports = {
@@ -14,6 +14,7 @@ module.exports = {
 
 		const discordUserId = processQueueEntry.additions;
 
+		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { userId: discordUserId }
 		});
@@ -102,11 +103,13 @@ module.exports = {
 						}
 					}
 
+					logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBElitiriCupSignUp 1');
 					const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 						where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Cup Summer 2021' }
 					});
 
 					if (elitiriSignUp) {
+						logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBProcessQueue 1');
 						const task = await DBProcessQueue.findOne({
 							where: { guildId: 'None', task: 'refreshElitiriSignUp', additions: discordUser.osuUserId }
 						});
@@ -115,6 +118,7 @@ module.exports = {
 							DBProcessQueue.create({ guildId: 'None', task: 'refreshElitiriSignUp', priority: 3, additions: discordUser.osuUserId });
 						}
 
+						logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBElitiriCupSubmissions');
 						const allSubmissions = await DBElitiriCupSubmissions.findAll({
 							where: { osuUserId: elitiriSignUp.osuUserId, tournamentName: 'Elitiri Cup Summer 2021' }
 						});
@@ -141,6 +145,7 @@ module.exports = {
 			}
 		}
 
+		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBElitiriCupSignUp 2');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Cup Summer 2021' }
 		});
@@ -241,6 +246,7 @@ module.exports = {
 				}
 
 				if (elitiriSignUp.bracketName !== bracketName) {
+					logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBProcessQueue 2');
 					const task = await DBProcessQueue.findOne({
 						where: { guildId: 'None', task: 'elitiriCupSignUps', additions: elitiriSignUp.bracketName }
 					});
@@ -265,6 +271,7 @@ module.exports = {
 
 			await elitiriSignUp.save();
 
+			logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBProcessQueue 3');
 			const task = await DBProcessQueue.findOne({
 				where: { guildId: 'None', task: 'elitiriCupSignUps', additions: elitiriSignUp.bracketName }
 			});

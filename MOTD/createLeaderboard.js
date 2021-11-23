@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBMOTDPoints } = require('../dbObjects');
-const { createLeaderboard, humanReadable } = require('../utils.js');
+const { createLeaderboard, humanReadable, logDatabaseQueries } = require('../utils.js');
 
 module.exports = {
 	createLeaderboard: async function (client, since, topAmount, title, channelId) {
@@ -22,6 +22,7 @@ module.exports = {
 			let bracketPlayerResults = [];
 
 			for (let j = 0; j < bracketPlayers.length; j++) {
+				logDatabaseQueries(2, 'MOTD/createLeaderboard.js DBMOTDPoints');
 				let playerResults = await DBMOTDPoints.findAll({
 					where: { userId: bracketPlayers[j].userId, osuUserId: bracketPlayers[j].osuUserId }
 				});
@@ -148,6 +149,7 @@ function quicksort(list, start = 0, end = undefined) {
 }
 
 async function getPlayers(client) {
+	logDatabaseQueries(2, 'MOTD/createLeaderboard.js DBDiscordUsers');
 	const registeredUsers = await DBDiscordUsers.findAll({
 		where: { osuMOTDRegistered: 1 }
 	});
