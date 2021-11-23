@@ -1,5 +1,6 @@
 const { DBGuilds } = require('../dbObjects');
 const { Permissions } = require('discord.js');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'toggleowo',
@@ -18,6 +19,7 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
+		logDatabaseQueries(4, 'commands/toggleowo.js DBGuilds');
 		//get guild from db
 		const guild = await DBGuilds.findOne({
 			where: { guildId: msg.guildId },

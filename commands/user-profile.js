@@ -1,6 +1,6 @@
 //Import Tables
 const { DBDiscordUsers } = require('../dbObjects');
-const { populateMsgFromInteraction } = require('../utils');
+const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 
 //Require discord.js module
@@ -126,6 +126,7 @@ async function sendUserEmbed(msg, interaction, user) {
 		);
 	}
 
+	logDatabaseQueries(4, 'commands/user-profile.js DBDiscordUsers');
 	//get discordUser from db
 	const discordUser = await DBDiscordUsers.findOne({
 		where: { userId: user.id },

@@ -1,6 +1,6 @@
 const { DBGuilds } = require('../dbObjects');
 const { Permissions } = require('discord.js');
-const { populateMsgFromInteraction } = require('../utils');
+const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'welcome-message',
@@ -29,6 +29,7 @@ module.exports = {
 		}
 		//Check first argument of the command
 		if (args[0] === 'current') {
+			logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds current');
 			//get guild from db
 			const guild = await DBGuilds.findOne({
 				where: { guildId: msg.guildId },
@@ -64,6 +65,7 @@ module.exports = {
 			}
 			//Check first argument of the command
 		} else if (args[0] === 'disable') {
+			logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds disable');
 			//get guild from db
 			const guild = await DBGuilds.findOne({
 				where: { guildId: msg.guildId },
@@ -101,6 +103,7 @@ module.exports = {
 		} else {
 			//Define welcome message from the rest of the arguments
 			let welcomeMessage = args.join(' ');
+			logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds else');
 			//get guild from db
 			const guild = await DBGuilds.findOne({
 				where: { guildId: msg.guildId },

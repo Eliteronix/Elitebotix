@@ -1,5 +1,5 @@
 const { DBGuilds, DBTickets, DBProcessQueue } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const Discord = require('discord.js');
 const { Permissions } = require('discord.js');
 
@@ -36,6 +36,7 @@ module.exports = {
 			}
 		}
 
+		logDatabaseQueries(4, 'commands/ticket.js DBGuilds');
 		//get guild from db
 		const guild = await DBGuilds.findOne({
 			where: { guildId: msg.guildId, ticketsEnabled: true },
@@ -43,6 +44,7 @@ module.exports = {
 
 		if (guild) {
 			if (args[0].toLowerCase() === 'add') {
+				logDatabaseQueries(4, 'commands/ticket.js DBTickets add');
 				const ticket = await DBTickets.findOne({
 					where: { guildId: msg.guildId, channelId: msg.channel.id }
 				});
@@ -73,6 +75,7 @@ module.exports = {
 					return interaction.editReply('This is not a valid ticket channel.');
 				}
 			} else if (args[0].toLowerCase() === 'remove') {
+				logDatabaseQueries(4, 'commands/ticket.js DBTickets remove');
 				const ticket = await DBTickets.findOne({
 					where: { guildId: msg.guildId, channelId: msg.channel.id }
 				});
@@ -115,6 +118,7 @@ module.exports = {
 					return interaction.editReply('This is not a valid ticket channel.');
 				}
 			} else if (args[0].toLowerCase() === 'responded' || args[0].toLowerCase() === 'r') {
+				logDatabaseQueries(4, 'commands/ticket.js DBTickets responded');
 				const ticket = await DBTickets.findOne({
 					where: { guildId: msg.guildId, channelId: msg.channel.id }
 				});
@@ -171,6 +175,7 @@ module.exports = {
 				}
 				return;
 			} else if (args[0].toLowerCase() === 'action' || args[0].toLowerCase() === 'a') {
+				logDatabaseQueries(4, 'commands/ticket.js DBTickets action');
 				const ticket = await DBTickets.findOne({
 					where: { guildId: msg.guildId, channelId: msg.channel.id }
 				});
@@ -231,6 +236,7 @@ module.exports = {
 				}
 				return;
 			} else if (args[0].toLowerCase() === 'close' || args[0].toLowerCase() === 'c') {
+				logDatabaseQueries(4, 'commands/ticket.js DBTickets close');
 				const ticket = await DBTickets.findOne({
 					where: { guildId: msg.guildId, channelId: msg.channel.id }
 				});
@@ -311,6 +317,7 @@ module.exports = {
 				return interaction.editReply('Please describe the problem in further detail.');
 			}
 
+			logDatabaseQueries(4, 'commands/ticket.js DBTickets all');
 			const tickets = await DBTickets.findAll({
 				where: { guildId: msg.guildId }
 			});

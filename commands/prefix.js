@@ -1,6 +1,6 @@
 const { DBGuilds } = require('../dbObjects');
 const { Permissions } = require('discord.js');
-const { populateMsgFromInteraction } = require('../utils');
+const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'prefix',
@@ -24,6 +24,7 @@ module.exports = {
 			args = [interaction.options._hoistedOptions[0].value];
 
 		}
+		logDatabaseQueries(4, 'commands/prefix.js DBGuilds');
 		//Get guild from db
 		const guild = await DBGuilds.findOne({
 			where: { guildId: msg.guildId },

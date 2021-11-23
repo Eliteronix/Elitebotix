@@ -1,5 +1,5 @@
 const { DBGuilds } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -30,6 +30,7 @@ module.exports = {
 			}
 		}
 		const guildPrefix = await getGuildPrefix(msg);
+		logDatabaseQueries(4, 'commands/starboard.js DBGuilds');
 		const guild = await DBGuilds.findOne({
 			where: { guildId: msg.guildId }
 		});
