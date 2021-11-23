@@ -1,12 +1,13 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBAutoRoles } = require('./dbObjects');
-const { isWrongSystem } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (member) {
 	if (isWrongSystem(member.guild.id, false)) {
 		return;
 	}
 
+	logDatabaseQueries(2, 'guildMemberAdd.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
 		where: { guildId: member.guild.id },
@@ -64,6 +65,7 @@ module.exports = async function (member) {
 		}
 	}
 
+	logDatabaseQueries(2, 'guildMemberAdd.js DBAutoRoles');
 	//get all autoroles for the guild
 	const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: member.guild.id } });
 	//iterate for every autorole gathered

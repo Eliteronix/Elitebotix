@@ -3,7 +3,7 @@ const { DBReactionRolesHeader, DBReactionRoles } = require('./dbObjects');
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { isWrongSystem } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user) {
@@ -27,6 +27,7 @@ module.exports = async function (reaction, user) {
 		return;
 	}
 
+	logDatabaseQueries(2, 'reactionRemoved.js DBReactionRolesHeader');
 	//Get the header message from the db
 	const dbReactionRolesHeader = await DBReactionRolesHeader.findOne({
 		where: {
@@ -36,6 +37,7 @@ module.exports = async function (reaction, user) {
 	});
 
 	if (dbReactionRolesHeader) {
+		logDatabaseQueries(2, 'reactionRemoved.js DBReactionRoles 1');
 		//Get the reactionRole from the db by all the string (works for general emojis)
 		const dbReactionRole = await DBReactionRoles.findOne({
 			where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, emoji: reaction._emoji.name }
@@ -68,6 +70,7 @@ module.exports = async function (reaction, user) {
 			//Put the emoji name into the correct format for comparing it in case it's an guild emoji
 			let emoji = '<:' + reaction._emoji.name + ':';
 
+			logDatabaseQueries(2, 'reactionRemoved.js DBReactionRoles 2');
 			//Get the reactionRole from the db by all the string (works for general emojis)
 			const dbReactionRoleBackup = await DBReactionRoles.findOne({
 				where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, emoji: { [Op.like]: emoji + '%' } }
@@ -115,6 +118,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		reactionRoleEmbed.setDescription(reactionRolesHeader.reactionDescription);
 	}
 
+	logDatabaseQueries(2, 'reactionRemoved.js DBReactionRoles 3');
 	//Get roles from db
 	const reactionRoles = await DBReactionRoles.findAll({
 		where: { dbReactionRolesHeaderId: reactionRolesHeader.id }
