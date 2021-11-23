@@ -79,7 +79,6 @@ module.exports = {
 		}
 
 		if (years || months || weeks || days || hours || minutes) {
-			// eslint-disable-next-line indent
 			//Get reminders property 'date' from user's given Id
 			userReminderDate.setUTCFullYear(userReminderDate.getUTCFullYear() + years);
 			userReminderDate.setUTCMonth(userReminderDate.getUTCMonth() + months);
