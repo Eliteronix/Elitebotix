@@ -1,5 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
-const { populateMsgFromInteraction } = require('../utils');
+const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -25,6 +25,7 @@ module.exports = {
 		}
 
 		//get discordUser from db
+		logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { userId: msg.author.id },
 		});

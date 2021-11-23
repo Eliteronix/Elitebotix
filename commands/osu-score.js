@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP, getBeatmapApprovalStatusImage } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP, getBeatmapApprovalStatusImage, logDatabaseQueries } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -92,6 +92,7 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < args.length; i++) {
 				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
+					logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
 					});
@@ -129,6 +130,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 	});
 
 	if (server === 'bancho') {
+		logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers 2');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { osuUserId: username }
 		});

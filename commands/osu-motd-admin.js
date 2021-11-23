@@ -1,6 +1,7 @@
 const { DBMOTDPoints } = require('../dbObjects.js');
 const { initializeMOTD } = require('../MOTD/initializeMOTD.js');
 const { developers } = require('../config.json');
+const { logDatabaseQueries } = require('../utils.js');
 
 module.exports = {
 	name: 'osu-motd-admin',
@@ -24,6 +25,7 @@ module.exports = {
 		const bancho = additionalObjects[1];
 
 		if (args[0] === 'recalculate') {
+			logDatabaseQueries(4, 'commands/osu-motd-admin.js DBMOTDPoints');
 			const pointDatasets = await DBMOTDPoints.findAll();
 
 			for (let i = 0; i < pointDatasets.length; i++) {

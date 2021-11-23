@@ -1,6 +1,7 @@
 const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'db',
@@ -24,51 +25,67 @@ module.exports = {
 		let dbList = [];
 
 		if (args[0] === 'autoroles') {
+			logDatabaseQueries(4, 'commands/db.js DBAutoRoles');
 			dbList = await DBAutoRoles.findAll();
 			dbTableName = 'DBAutoRoles';
 		} else if (args[0] === 'discordusers') {
+			logDatabaseQueries(4, 'commands/db.js DBDiscordUsers');
 			dbList = await DBDiscordUsers.findAll();
 			dbTableName = 'DBDiscordUsers';
 		} else if (args[0] === 'guilds') {
+			logDatabaseQueries(4, 'commands/db.js DBGuilds');
 			dbList = await DBGuilds.findAll();
 			dbTableName = 'DBGuilds';
 		} else if (args[0] === 'reactionroles') {
+			logDatabaseQueries(4, 'commands/db.js DBReactionRoles');
 			dbList = await DBReactionRoles.findAll();
 			dbTableName = 'DBReactionRoles';
 		} else if (args[0] === 'reactionrolesheader') {
+			logDatabaseQueries(4, 'commands/db.js DBReactionRolesHeader');
 			dbList = await DBReactionRolesHeader.findAll();
 			dbTableName = 'DBReactionRolesHeader';
 		} else if (args[0] === 'serveruseractivity') {
+			logDatabaseQueries(4, 'commands/db.js DBServerUserActivity');
 			dbList = await DBServerUserActivity.findAll();
 			dbTableName = 'DBServerUserActivity';
 		} else if (args[0] === 'temporaryvoices') {
+			logDatabaseQueries(4, 'commands/db.js DBTemporaryVoices');
 			dbList = await DBTemporaryVoices.findAll();
 			dbTableName = 'DBTemporaryVoices';
 		} else if (args[0] === 'processqueue') {
+			logDatabaseQueries(4, 'commands/db.js DBProcessQueue');
 			dbList = await DBProcessQueue.findAll();
 			dbTableName = 'DBProcessQueue';
 		} else if (args[0] === 'activityroles') {
+			logDatabaseQueries(4, 'commands/db.js DBActivityRoles');
 			dbList = await DBActivityRoles.findAll();
 			dbTableName = 'DBActivityRoles';
 		} else if (args[0] === 'motdpoints') {
+			logDatabaseQueries(4, 'commands/db.js DBMOTDPoints');
 			dbList = await DBMOTDPoints.findAll();
 			dbTableName = 'DBMOTDPoints';
 		} else if (args[0] === 'elitiricupsignup') {
+			logDatabaseQueries(4, 'commands/db.js DBElitiriCupSignUp');
 			dbList = await DBElitiriCupSignUp.findAll();
 			dbTableName = 'DBElitiriCupSignUp';
 		} else if (args[0] === 'elitiricupsubmissions') {
+			logDatabaseQueries(4, 'commands/db.js DBElitiriCupSubmissions');
 			dbList = await DBElitiriCupSubmissions.findAll();
 			dbTableName = 'DBElitiriCupSubmissions';
 		} else if (args[0] === 'starboardmessages') {
+			logDatabaseQueries(4, 'commands/db.js DBStarBoardMessages');
 			dbList = await DBStarBoardMessages.findAll();
 			dbTableName = 'DBStarBoardMessages';
 		} else if (args[0] === 'tickets') {
+			logDatabaseQueries(4, 'commands/db.js DBTickets');
 			dbList = await DBTickets.findAll();
 			dbTableName = 'DBTickets';
 		} else if (args[0] === 'osumultiscores') {
+			logDatabaseQueries(4, 'commands/db.js DBOsuMultiScores');
 			dbList = await DBOsuMultiScores.findAll();
 			dbTableName = 'DBOsuMultiScores';
 		} else if (args[0] === 'osubeatmaps') {
+			logDatabaseQueries(4, 'commands/db.js DBOsuBeatmaps');
 			dbList = await DBOsuBeatmaps.findAll();
 			dbTableName = 'DBOsuBeatmaps';
 		} else {

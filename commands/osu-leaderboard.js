@@ -1,5 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, humanReadable, createLeaderboard, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, humanReadable, createLeaderboard, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { leaderboardEntriesPerPage } = require('../config.json');
 const { Permissions } = require('discord.js');
 
@@ -45,6 +45,7 @@ module.exports = {
 				guildMembers.each(member => members.push(member));
 				let osuAccounts = [];
 				for (let i = 0; i < members.length; i++) {
+					logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: members[i].id },
 					});

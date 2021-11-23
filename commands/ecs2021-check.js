@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBElitiriCupSignUp } = require('../dbObjects.js');
-const { getIDFromPotentialOsuLink } = require('../utils.js');
+const { getIDFromPotentialOsuLink, logDatabaseQueries } = require('../utils.js');
 
 module.exports = {
 	name: 'ecs2021-check',
@@ -19,6 +19,7 @@ module.exports = {
 	tags: 'ecs2021',
 	prefixCommand: true,
 	async execute(msg, args) {
+		logDatabaseQueries(4, 'commands/ecs2021-check.js DBElitiriCupSignUp');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { tournamentName: 'Elitiri Cup Summer 2021', userId: msg.author.id }
 		});

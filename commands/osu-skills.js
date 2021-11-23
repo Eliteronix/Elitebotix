@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 
@@ -115,6 +115,7 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < args.length; i++) {
 				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
+					logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers');
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
 					});
@@ -386,6 +387,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			const canvasRenderService = new ChartJSNodeCanvas({ width, height });
 
 			(async () => {
+				logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiScores');
 				const userScores = await DBOsuMultiScores.findAll({
 					where: { osuUserId: user.id }
 				});

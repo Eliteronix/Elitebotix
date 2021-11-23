@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getGuildPrefix, createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { DBDiscordUsers } = require('../dbObjects');
 const { Permissions } = require('discord.js');
 
@@ -166,6 +166,7 @@ module.exports = {
 					let playerName = `ID: ${playerMatchResults[i].userId}`;
 
 					if (playerMatchResults.length < 33) {
+						logDatabaseQueries(4, 'commands/osu-matchscore.js DBDiscordUsers');
 						let discordUser = await DBDiscordUsers.findOne({
 							where: { osuUserId: playerMatchResults[i].userId }
 						});

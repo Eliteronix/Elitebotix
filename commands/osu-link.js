@@ -1,6 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-const { getGuildPrefix, getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -42,6 +42,7 @@ module.exports = {
 		});
 
 		//get discordUser from db
+		logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers 1');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { userId: msg.author.id },
 		});
@@ -82,6 +83,7 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 		osuApi.getUser({ u: getIDFromPotentialOsuLink(args[0]) })
 			.then(async (osuUser) => {
 				//get discordUser from db
+				logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers 2');
 				const existingVerifiedDiscordUser = await DBDiscordUsers.findOne({
 					where: { osuUserId: osuUser.id, osuVerified: true },
 				});

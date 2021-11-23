@@ -1,5 +1,5 @@
 const { DBElitiriCupSignUp } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { developers } = require('../config.json');
 
 module.exports = {
@@ -34,6 +34,7 @@ module.exports = {
 		}
 
 		//ecs2021 player
+		logDatabaseQueries(4, 'commands/help.js DBElitiriCupSignUp');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { tournamentName: 'Elitiri Cup Summer 2021', userId: msg.author.id }
 		});

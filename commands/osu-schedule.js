@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -52,6 +52,7 @@ module.exports = {
 		//Get profiles by arguments
 		for (let i = 0; i < args.length; i++) {
 			if (args[i].startsWith('<@') && args[i].endsWith('>')) {
+				logDatabaseQueries(4, 'commands/osu-schedule.js DBDiscordUsers');
 				const discordUser = await DBDiscordUsers.findOne({
 					where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
 				});
@@ -137,6 +138,7 @@ module.exports = {
 		for (let i = 0; i < users.length; i++) {
 			let data = [];
 
+			logDatabaseQueries(4, 'commands/osu-schedule.js DBOsuMultiScores');
 			const allMatches = await DBOsuMultiScores.findAll({
 				where: { osuUserId: users[i] }
 			});

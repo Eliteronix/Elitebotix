@@ -1,5 +1,5 @@
 const { DBActivityRoles, DBProcessQueue } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -45,6 +45,7 @@ module.exports = {
 				//get role object with id
 				let activityRoleName = msg.guild.roles.cache.get(args[1].replace('<@&', '').replace('>', ''));
 				//try to find that activityrole in the db
+				logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles 1');
 				const activityRole = await DBActivityRoles.findOne({
 					where: { guildId: msg.guildId, roleId: activityRoleId },
 				});
@@ -92,6 +93,7 @@ module.exports = {
 
 					//If activityrole doesn't exist in db then create it
 					DBActivityRoles.create({ guildId: msg.guildId, roleId: activityRoleId, percentageCutoff: percentageCutoff, pointsCutoff: pointsCutoff, rankCutoff: rankCutoff });
+					logDatabaseQueries(4, 'commands/activityrole.js DBProcessQueue');
 					const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
 					if (!existingTask) {
 						DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 });
@@ -139,6 +141,7 @@ module.exports = {
 			//Check first argument
 		} else if (args[0] === 'list') { // has to be adapted still
 			//get all activityRoles for the guild
+			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles 2');
 			const activityRolesList = await DBActivityRoles.findAll({ where: { guildId: msg.guildId } });
 
 			let activityRolesString = '';
