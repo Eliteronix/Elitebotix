@@ -1,7 +1,7 @@
 const osu = require('node-osu');
 const { knockoutLobby } = require('./knockoutLobby.js');
 const { assignQualifierPoints } = require('./givePointsToPlayers.js');
-const { getMods, humanReadable, createMOTDAttachment, pause } = require('../utils.js');
+const { getMods, humanReadable, createMOTDAttachment, pause, logDatabaseQueries } = require('../utils.js');
 const { DBDiscordUsers } = require('../dbObjects.js');
 
 module.exports = {
@@ -242,6 +242,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 					.then(async () => {
 						i = Infinity;
 
+						logDatabaseQueries(2, 'MOTD/qualifier.js DBDiscordUsers 1');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: { userId: user.id }
 						});
@@ -259,6 +260,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 					.then(async () => {
 						i = Infinity;
 
+						logDatabaseQueries(2, 'MOTD/qualifier.js DBDiscordUsers 2');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: { userId: user.id }
 						});
@@ -275,6 +277,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 		} catch (error) {
 			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
 				if (i === 2) {
+					logDatabaseQueries(2, 'MOTD/qualifier.js DBDiscordUsers 3');
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: user.id }
 					});

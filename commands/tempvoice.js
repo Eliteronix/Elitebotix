@@ -1,5 +1,5 @@
 const { DBGuilds } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -33,6 +33,7 @@ module.exports = {
 				args = ['text', 'disable'];
 			}
 		}
+		logDatabaseQueries(4, 'commands/tempvoice.js DBGuilds');
 		//get guild from db
 		const guild = await DBGuilds.findOne({
 			where: { guildId: msg.guildId },

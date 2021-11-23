@@ -1,5 +1,5 @@
 const { DBServerUserActivity } = require('../dbObjects');
-const { createLeaderboard, humanReadable, populateMsgFromInteraction } = require('../utils.js');
+const { createLeaderboard, humanReadable, populateMsgFromInteraction, logDatabaseQueries } = require('../utils.js');
 const { leaderboardEntriesPerPage } = require('../config.json');
 const { Permissions } = require('discord.js');
 
@@ -45,6 +45,7 @@ module.exports = {
 				guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
 				let discordUsers = [];
 				for (let i = 0; i < members.length; i++) {
+					logDatabaseQueries(4, 'commands/guild-leaderboard.js DBServerUserActivity');
 					const serverUserActivity = await DBServerUserActivity.findOne({
 						where: { userId: members[i].id, guildId: msg.guildId },
 					});

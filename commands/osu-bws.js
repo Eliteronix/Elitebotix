@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const { Permissions } = require('discord.js');
-const { getGuildPrefix, humanReadable, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, humanReadable, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'osu-bws',
@@ -51,6 +51,7 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < args.length; i++) {
 				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
+					logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
 					});
@@ -98,6 +99,7 @@ async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 
 			let badgeAmount = await getOsuBadgeNumberById(user.id);
 
+			logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers 2');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: { osuUserId: user.id }
 			});

@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBElitiriCupSignUp, DBProcessQueue } = require('../dbObjects');
-const { getGuildPrefix } = require('../utils');
+const { getGuildPrefix, logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'osu-elitiri-cup',
@@ -35,6 +35,7 @@ module.exports = {
 
 			const guildPrefix = await getGuildPrefix(msg);
 			//get elitiriSignUp from db
+			logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBElitiriCupSignUp 1');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: { userId: msg.author.id, tournamentName: 'Elitiri Cup Summer 2021' },
 			});
@@ -44,6 +45,7 @@ module.exports = {
 			}
 
 			//get discordUser from db
+			logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBDiscordUsers');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: { userId: msg.author.id },
 			});
@@ -120,6 +122,7 @@ module.exports = {
 
 			const guildPrefix = await getGuildPrefix(msg);
 			//get elitiriSignUp from db
+			logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBElitiriCupSignUp 2');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: { userId: msg.author.id },
 			});
@@ -134,6 +137,7 @@ module.exports = {
 		} else if (args[0].toLowerCase() === 'availability') {
 			const guildPrefix = await getGuildPrefix(msg);
 			//get elitiriSignUp from db
+			logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBElitiriCupSignUp 3');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: { userId: msg.author.id },
 			});
@@ -185,6 +189,7 @@ function sendMessage(msg, content) {
 }
 
 async function createProcessQueueTask(bracketName) {
+	logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBProcessQueue');
 	const task = await DBProcessQueue.findOne({
 		where: { task: 'elitiriCupSignUps', beingExecuted: false, additions: bracketName }
 	});

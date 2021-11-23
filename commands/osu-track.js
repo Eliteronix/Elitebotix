@@ -1,6 +1,6 @@
 const { DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { getIDFromPotentialOsuLink, populateMsgFromInteraction } = require('../utils');
+const { getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -30,6 +30,7 @@ module.exports = {
 			}
 		}
 		if (args[0].toLowerCase() === 'list') {
+			logDatabaseQueries(4, 'commands/osu-track.js DBProcessQueue list');
 			const trackingList = await DBProcessQueue.findAll({
 				where: { task: 'osu-track' }
 			});
@@ -59,6 +60,7 @@ module.exports = {
 				return interaction.reply('Please specify which user shouldn\'t be tracked anymore.');
 			}
 
+			logDatabaseQueries(4, 'commands/osu-track.js DBProcessQueue remove');
 			const trackingList = await DBProcessQueue.findAll({
 				where: { task: 'osu-track' }
 			});
@@ -92,6 +94,7 @@ module.exports = {
 		osuApi.getUser({ u: getIDFromPotentialOsuLink(args.join('_')) })
 			.then(async (user) => {
 				//Check for duplicates
+				logDatabaseQueries(4, 'commands/osu-track.js DBProcessQueue duplicate');
 				const duplicates = await DBProcessQueue.findAll({
 					where: { task: 'osu-track' }
 				});

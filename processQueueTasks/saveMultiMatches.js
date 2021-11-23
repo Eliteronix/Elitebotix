@@ -1,6 +1,6 @@
 const osu = require('node-osu');
 const { DBProcessQueue } = require('../dbObjects');
-const { saveOsuMultiScores } = require('../utils');
+const { saveOsuMultiScores, logDatabaseQueries } = require('../utils');
 
 //Archiving started around 40000000
 
@@ -65,6 +65,7 @@ module.exports = {
 						}
 						channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m ${match.name} done`);
 					}
+					logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBProcessQueue 1');
 					const existingTasks = await DBProcessQueue.findAll({ where: { task: 'saveMultiMatches' } });
 					if (existingTasks.length === 1) {
 						processQueueEntry.destroy();
@@ -83,6 +84,7 @@ module.exports = {
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
 					// console.log(`${matchID} could not be found`);
+					logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBProcessQueue 2');
 					const existingTasks = await DBProcessQueue.findAll({ where: { task: 'saveMultiMatches' } });
 					if (existingTasks.length === 1) {
 						processQueueEntry.destroy();

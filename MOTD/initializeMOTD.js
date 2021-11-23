@@ -3,6 +3,7 @@ const { assignPlayerRoles } = require('./assignPlayerRoles');
 const { setMapsForBracket } = require('./setMapsForBracket');
 const { createLeaderboard } = require('./createLeaderboard');
 const { DBDiscordUsers } = require('../dbObjects');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	initializeMOTD: async function (client, bancho, manualStart, manualLeaderboard) {
@@ -221,6 +222,7 @@ function quicksort(list, start = 0, end = undefined) {
 }
 
 async function getPlayers(client) {
+	logDatabaseQueries(2, 'MOTD/initializeMOTD.js DBDiscordUsers');
 	const registeredUsers = await DBDiscordUsers.findAll({
 		where: { osuMOTDRegistered: 1 }
 	});

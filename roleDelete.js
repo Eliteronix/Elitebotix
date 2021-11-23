@@ -1,12 +1,13 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (role) {
 	if (isWrongSystem(role.guild.id, false)) {
 		return;
 	}
 
+	logDatabaseQueries(2, 'roleDelete.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
 		where: { guildId: role.guild.id, loggingRoleDelete: true },

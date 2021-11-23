@@ -1,4 +1,5 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -9,6 +10,7 @@ module.exports = {
 			let players = args[3].split(',');
 			let dbPlayers = [];
 			for (let i = 0; i < players.length; i++) {
+				logDatabaseQueries(2, 'processQueueTasks/tourneyMatchNotification.js DBDiscordUsers 1');
 				const dbDiscordUser = await DBDiscordUsers.findOne({
 					where: { id: players[i] }
 				});
@@ -45,6 +47,7 @@ module.exports = {
 			let players = args[3].split(',');
 			let dbPlayers = [];
 			for (let i = 0; i < players.length; i++) {
+				logDatabaseQueries(2, 'processQueueTasks/tourneyMatchNotification.js DBDiscordUsers 2');
 				const dbDiscordUser = await DBDiscordUsers.findOne({
 					where: { id: players[i] }
 				});

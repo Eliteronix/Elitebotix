@@ -1,5 +1,5 @@
 const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
-const { pause } = require('../utils.js');
+const { pause, logDatabaseQueries } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 
 let potentialNMQualifierMaps = [];
@@ -65,18 +65,22 @@ module.exports = {
 		}
 
 		if (args[0] === 'sr') {
+			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 1');
 			const topElitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Top Bracket' }
 			});
 
+			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 2');
 			const middleElitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Middle Bracket' }
 			});
 
+			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 3');
 			const lowerElitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Lower Bracket' }
 			});
 
+			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 4');
 			const beginnerElitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Beginner Bracket' }
 			});
@@ -154,6 +158,7 @@ module.exports = {
 				return msg.reply(`${args[1]} is not a valid target bracket. It should be \`all\`, \`top\`, \`middle\`, \`lower\` or \`beginner\` instead.`);
 			}
 
+			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 5');
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: 'Elitiri Cup Summer 2021' }
 			});
@@ -176,6 +181,7 @@ module.exports = {
 				}
 			} else if (targetGroup === 'Players with missing submissions') {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
+					logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 1');
 					let submissions = await DBElitiriCupSubmissions.findAll({
 						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
 					});
@@ -236,12 +242,14 @@ module.exports = {
 				return msg.reply(`${args[0]} is not a valid target group. It should be \`everyone\`, \`noAvailability\` or \`noSubmissions\` instead.`);
 			}
 
+			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 6');
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: 'Elitiri Cup Summer 2021' }
 			});
 
 			if (targetGroup === 'Players with missing submissions') {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
+					logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 2');
 					let submissions = await DBElitiriCupSubmissions.findAll({
 						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
 					});
@@ -279,6 +287,7 @@ module.exports = {
 				}
 			} else if (targetGroup === 'A specific player') {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
+					logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 3');
 					let submissions = await DBElitiriCupSubmissions.findAll({
 						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
 					});
@@ -316,6 +325,7 @@ module.exports = {
 				}
 			}
 		} else if (args[0] === 'placement') {
+			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 7');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: { osuUserId: args[1], tournamentName: 'Elitiri Cup Summer 2021' }
 			});
@@ -333,21 +343,25 @@ module.exports = {
 			let allMaps = [];
 			let rowOffset;
 			if (args[1] === 'top') {
+				logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 4');
 				allMaps = await DBElitiriCupSubmissions.findAll({
 					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Top Bracket' }
 				});
 				rowOffset = 78;
 			} else if (args[1] === 'middle') {
+				logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 5');
 				allMaps = await DBElitiriCupSubmissions.findAll({
 					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Middle Bracket' }
 				});
 				rowOffset = 53;
 			} else if (args[1] === 'lower') {
+				logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 6');
 				allMaps = await DBElitiriCupSubmissions.findAll({
 					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Lower Bracket' }
 				});
 				rowOffset = 28;
 			} else if (args[1] === 'beginner') {
+				logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 7');
 				allMaps = await DBElitiriCupSubmissions.findAll({
 					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Beginner Bracket' }
 				});

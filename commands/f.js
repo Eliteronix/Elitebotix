@@ -1,4 +1,5 @@
 const { DBGuilds } = require('../dbObjects');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'f',
@@ -19,6 +20,7 @@ module.exports = {
 	async execute(msg, args) {
 		if (!(args[0])) {
 			//get guild from db
+			logDatabaseQueries(4, 'commands/f.js DBGuilds');
 			const guild = await DBGuilds.findOne({
 				where: { guildId: msg.guildId },
 			});

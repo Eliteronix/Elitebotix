@@ -1,5 +1,5 @@
 const { DBAutoRoles } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -39,6 +39,7 @@ module.exports = {
 				//get role object with id
 				let autoRoleName = msg.guild.roles.cache.get(args[1].replace('<@&', '').replace('>', ''));
 				//try to find that autorole in the db
+				logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles 1');
 				const autoRole = await DBAutoRoles.findOne({
 					where: { guildId: msg.guildId, roleId: autoRoleId },
 				});
@@ -99,6 +100,7 @@ module.exports = {
 			//Check first argument
 		} else if (args[0] === 'list') {
 			//get all autoRoles for the guild
+			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles 2');
 			const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: msg.guildId } });
 			//iterate for every autorole in the array
 			for (let i = 0; i < autoRolesList.length; i++) {

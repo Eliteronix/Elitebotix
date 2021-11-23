@@ -4,5 +4,6 @@
 	"developers": [
 		"138273136285057025",
 		"212511522407055360"
-	]
+	],
+	"traceDatabaseQueries": 4
 }

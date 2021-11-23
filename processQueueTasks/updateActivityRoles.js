@@ -1,7 +1,9 @@
 const { DBServerUserActivity, DBActivityRoles } = require('../dbObjects');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
+		logDatabaseQueries(2, 'processQueueTasks/updateActivityRoles.js DBActivityRoles');
 		const activityRoles = await DBActivityRoles.findAll({
 			where: { guildId: processQueueEntry.guildId }
 		});
@@ -44,6 +46,7 @@ module.exports = {
 				guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
 				let discordUsers = [];
 				for (let i = 0; i < members.length; i++) {
+					logDatabaseQueries(2, 'processQueueTasks/updateActivityRoles.js DBServerUserActivity');
 					const serverUserActivity = await DBServerUserActivity.findOne({
 						where: { userId: members[i].id, guildId: guild.id },
 					});

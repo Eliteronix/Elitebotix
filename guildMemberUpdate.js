@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (oldMember, newMember) {
 	if (isWrongSystem(newMember.guild.id, false)) {
@@ -8,6 +8,7 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (oldMember.nickname !== newMember.nickname) {
+		logDatabaseQueries(2, 'guildMemberUpdate.js DBGuilds Nickname');
 		const guild = await DBGuilds.findOne({
 			where: { guildId: newMember.guild.id }
 		});
@@ -60,6 +61,7 @@ module.exports = async function (oldMember, newMember) {
 		}
 	}
 	if (!sameRoles) {
+		logDatabaseQueries(2, 'guildMemberUpdate.js DBGuilds Roles');
 		const guild = await DBGuilds.findOne({
 			where: { guildId: newMember.guild.id }
 		});

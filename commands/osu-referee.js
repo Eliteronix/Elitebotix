@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, getMatchesPlanned } = require('../utils');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, getMatchesPlanned, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -92,6 +92,7 @@ module.exports = {
 								.then(async (user) => {
 									updateOsuDetailsforUser(user, 0);
 
+									logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 1');
 									const dbDiscordUser = await DBDiscordUsers.findOne({
 										where: { osuUserId: user.id }
 									});
@@ -158,6 +159,7 @@ module.exports = {
 			} else if (interaction.options._subcommand === 'scheduled') {
 				let scheduledMatches = [];
 				//Get all scheduled matches that still need to notify
+				logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 1');
 				const tourneyMatchNotifications = await DBProcessQueue.findAll({
 					where: { task: 'tourneyMatchNotification' }
 				});
@@ -172,6 +174,7 @@ module.exports = {
 						//Translate the player IDs to osu! usernames
 						let dbPlayerNames = [];
 						for (let j = 0; j < players.length; j++) {
+							logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 2');
 							const dbDiscordUser = await DBDiscordUsers.findOne({
 								where: { id: players[j] }
 							});
@@ -187,6 +190,7 @@ module.exports = {
 					}
 				}
 
+				logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 2');
 				const tourneyMatchReferees = await DBProcessQueue.findAll({
 					where: { task: 'tourneyMatchReferee' }
 				});
@@ -197,6 +201,7 @@ module.exports = {
 						let players = additions[3].split(',');
 						let dbPlayerNames = [];
 						for (let j = 0; j < players.length; j++) {
+							logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 3');
 							const dbDiscordUser = await DBDiscordUsers.findOne({
 								where: { id: players[j] }
 							});
@@ -219,6 +224,7 @@ module.exports = {
 				return interaction.followUp(`Your scheduled matches:\n${scheduledMatches}`);
 			} else if (interaction.options._subcommand === 'remove') {
 				const internalId = interaction.options._hoistedOptions[0].value;
+				logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 3');
 				const processQueueTask = await DBProcessQueue.findOne({
 					where: { id: internalId }
 				});
@@ -229,6 +235,7 @@ module.exports = {
 						let players = additions[3].split(',');
 						let dbPlayerNames = [];
 						for (let j = 0; j < players.length; j++) {
+							logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 4');
 							const dbDiscordUser = await DBDiscordUsers.findOne({
 								where: { id: players[j] }
 							});

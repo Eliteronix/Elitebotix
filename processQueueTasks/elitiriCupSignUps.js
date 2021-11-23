@@ -1,5 +1,6 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { DBElitiriCupSignUp, DBProcessQueue } = require('../dbObjects');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
@@ -40,6 +41,7 @@ async function updateSheet(spreadsheetID, bracketName) {
 
 		const sheet = doc.sheetsByTitle['Player List'];
 
+		logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBElitiriCupSignUp');
 		let bracketPlayers = await DBElitiriCupSignUp.findAll({
 			where: {
 				tournamentName: 'Elitiri Cup Summer 2021',
@@ -122,6 +124,7 @@ async function updateSheet(spreadsheetID, bracketName) {
 		if (error.message === 'Google API error - [503] The service is currently unavailable.'
 			|| error.message === 'Request failed with status code 502'
 			|| error.message === 'Google API error - [500] Internal error encountered.') {
+			logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 1');
 			const task = await DBProcessQueue.findOne({
 				where: { guildId: 'None', task: 'elitiriCupSignUps', additions: bracketName }
 			});
@@ -136,6 +139,7 @@ async function updateSheet(spreadsheetID, bracketName) {
 		}
 	}
 
+	logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 2');
 	const task = await DBProcessQueue.findOne({
 		where: { task: 'elitiriRoleAssignment' }
 	});
