@@ -25,7 +25,7 @@ module.exports = {
 		} else if (msg.id) {
 			return msg.reply('Please edit your reminders by using the / command `/reminders-edit`');
 		}
-		
+
 		//getting reminders
 		const reminders = await DBProcessQueue.findAll({
 			where: {
@@ -69,7 +69,7 @@ module.exports = {
 				minutes = interaction.options._hoistedOptions[i].value;
 			}
 		}
-		
+
 		let reminderDate;
 		let userReminderDate = new Date();
 		try {
@@ -96,7 +96,7 @@ module.exports = {
 			try {
 				reminderId = reminders[Number(userReminderId) - 1].id;
 			} catch (error) {
-				return interaction.reply({content: 'There are no reminders with the given ID', ephemeral: true});
+				return interaction.reply({ content: 'There are no reminders with the given ID', ephemeral: true });
 			}
 			//If no reminder with the given Id
 			//destroy previous reminder
@@ -108,7 +108,7 @@ module.exports = {
 			});
 			//Set a new reminder
 			DBProcessQueue.create({ id: reminderId, guildId: 'None', task: 'remind', priority: 10, additions: `${msg.author.id};${userReminderMessage}`, date: userReminderDate });
-			
+
 			return interaction.reply({
 				content: `Your reminder has been successfully edited.\nNew message: \`${userReminderMessage}\`\nNew date: \`${userReminderDate.toLocaleTimeString('en-UK', {
 					day: 'numeric', // numeric, 2-digit
@@ -117,7 +117,8 @@ module.exports = {
 					hour: 'numeric', // numeric, 2-digit
 					minute: 'numeric', // numeric, 2-digit
 					second: 'numeric', // numeric, 2-digit
-				})}\``, ephemeral: true });
+				})}\``, ephemeral: true
+			});
 		}
 	}
 };

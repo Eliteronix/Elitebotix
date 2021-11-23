@@ -26,7 +26,7 @@ module.exports = {
 			userReminderId = interaction.options._hoistedOptions[0].value;
 		} else {
 			userReminderId = args[0];
-		} 
+		}
 
 		//getting reminders
 		const reminders = await DBProcessQueue.findAll({
@@ -37,13 +37,14 @@ module.exports = {
 				}
 			}
 		});
-        
+
 		if (reminders.length === 0) {
 			if (msg.id) {
-				return  msg.reply('There are no reminders set for you');
-			} else return interaction.reply({ content: 'There are no reminders set for you', ephemeral: true });
+				return msg.reply('There are no reminders set for you');
+			}
+			return interaction.reply({ content: 'There are no reminders set for you', ephemeral: true });
 		}
-        
+
 		try {
 			DBProcessQueue.destroy({
 				where: {
@@ -53,13 +54,14 @@ module.exports = {
 			});
 			if (msg.id) {
 				return msg.reply('Reminder has been successfully deleted');
-			} else return interaction.reply({ content: 'Reminder has been successfully deleted', ephemeral: true });
+			}
+			return interaction.reply({ content: 'Reminder has been successfully deleted', ephemeral: true });
 		} catch (error) {
 			if (msg.id) {
 				return msg.reply('There are no reminders with the given ID');
 			}
 			return interaction.reply({ content: 'There are no reminders with the given ID', ephemeral: true });
 		}
-        
+
 	}
 };
