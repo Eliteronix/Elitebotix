@@ -1,6 +1,6 @@
 const { Permissions } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
-const { populateMsgFromInteraction } = require('../utils');
+const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -27,6 +27,7 @@ module.exports = {
 		}
 
 		//getting reminders
+		logDatabaseQueries(4, 'commands/reminders-edit.js DBProcessQueue');
 		const reminders = await DBProcessQueue.findAll({
 			where: {
 				task: 'remind',
