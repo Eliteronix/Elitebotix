@@ -56,8 +56,8 @@ module.exports = {
 
 		args.forEach(async (arg) => {
 			const dbBeatmap = await getOsuBeatmap(getIDFromPotentialOsuLink(arg), modBits);
-			if (dbBeatmap) {
-				getBeatmap(msg, dbBeatmap, arg);
+			if (dbBeatmap.title) {
+				getBeatmap(msg, dbBeatmap);
 			} else {
 				await msg.channel.send({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
 			}
@@ -65,7 +65,7 @@ module.exports = {
 	},
 };
 
-async function getBeatmap(msg, beatmap, arg) {
+async function getBeatmap(msg, beatmap) {
 	let processingMessage = await msg.channel.send(`[${beatmap.beatmapId}] Processing...`);
 
 	const canvasWidth = 1000;
@@ -83,27 +83,22 @@ async function getBeatmap(msg, beatmap, arg) {
 
 	let elements = [canvas, ctx, beatmap];
 	
-	try {
-		elements = await drawTitle(elements);
+	elements = await drawTitle(elements);
 
-		elements = await drawMode(elements);
+	elements = await drawMode(elements);
 
-		elements = await drawStats(elements);
+	elements = await drawStats(elements);
 
-		elements = await drawFooter(elements);
-		await drawBackground(elements);
+	elements = await drawFooter(elements);
+	await drawBackground(elements);
 
-		//Create as an attachment
-		const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-beatmap-${beatmap.beatmapId}.png`);
+	//Create as an attachment
+	const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-beatmap-${beatmap.beatmapId}.png`);
 
-		//Send attachment
-		const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
-		processingMessage.delete();
-		sentMessage.react('<:COMPARE:827974793365159997>');
-	} catch (error) {
-		processingMessage.delete();
-		msg.channel.send({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
-	}
+	//Send attachment
+	const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
+	processingMessage.delete();
+	sentMessage.react('<:COMPARE:827974793365159997>');
 }
 
 async function drawTitle(input) {
