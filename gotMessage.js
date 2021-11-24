@@ -173,7 +173,7 @@ module.exports = async function (msg, bancho) {
 				}
 			}
 
-			if (msg.channel.type !== 'DM' && closestMatchMessage) {
+			if (closestMatchMessage) {
 				try {
 					await closestMatchMessage.react('✅');
 					await closestMatchMessage.react('❌');
