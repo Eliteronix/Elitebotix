@@ -56,7 +56,7 @@ module.exports = {
 
 		args.forEach(async (arg) => {
 			const dbBeatmap = await getOsuBeatmap(getIDFromPotentialOsuLink(arg), modBits);
-			if (dbBeatmap.title) {
+			if (dbBeatmap) {
 				getBeatmap(msg, dbBeatmap);
 			} else {
 				await msg.channel.send({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
@@ -82,7 +82,7 @@ async function getBeatmap(msg, beatmap) {
 	ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
 	let elements = [canvas, ctx, beatmap];
-	
+
 	elements = await drawTitle(elements);
 
 	elements = await drawMode(elements);
