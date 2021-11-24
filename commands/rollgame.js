@@ -49,10 +49,22 @@ module.exports = {
 		mCollector.on('collect', async (m) => {
 			if (!players.includes(m.author.id) && m.content.toLowerCase() === 'join') {
 				players.push(m.author.id);
-				m.delete();
+				try {
+					await m.delete();
+				} catch (e) {
+					if (e.message !== 'Unknown Message') {
+						console.log(e);
+					}
+				}
 				sentMessage = await updateEmbed(sentMessage, players, [], 'React with 🎲 or type `join` to join the lobby.\nReact with 🎲 or type `start` if you created the lobby.');
 			} else if (players[0] === m.author.id && m.content.toLowerCase() === 'start') {
-				m.delete();
+				try {
+					await m.delete();
+				} catch (e) {
+					if (e.message !== 'Unknown Message') {
+						console.log(e);
+					}
+				}
 				mCollector.stop();
 			}
 		});
@@ -87,7 +99,13 @@ module.exports = {
 			meCollector.on('collect', async (m) => {
 				//Do the roll for the user
 				if (players.includes(m.author.id) && m.content.toLowerCase() === 'roll') {
-					m.delete();
+					try {
+						await m.delete();
+					} catch (e) {
+						if (e.message !== 'Unknown Message') {
+							console.log(e);
+						}
+					}
 					const roll = rollMax(100);
 					for (let i = 0; i < players.length; i++) {
 						if (players[i] === m.author.id) {
@@ -232,7 +250,13 @@ async function rollRound(sentMessage, players, rounds) {
 
 	mCollector.on('collect', async (m) => {
 		if (m.author.id === players[rounds.length % players.length][0] && m.content.toLowerCase() === `roll ${toRoll}`) {
-			m.delete();
+			try {
+				await m.delete();
+			} catch (e) {
+				if (e.message !== 'Unknown Message') {
+					console.log(e);
+				}
+			}
 			const roll = rollMax(toRoll);
 			rounds.push(roll);
 			mCollector.stop();
