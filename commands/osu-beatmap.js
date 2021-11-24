@@ -90,6 +90,7 @@ async function getBeatmap(msg, beatmap) {
 	elements = await drawStats(elements);
 
 	elements = await drawFooter(elements);
+
 	await drawBackground(elements);
 
 	//Create as an attachment
