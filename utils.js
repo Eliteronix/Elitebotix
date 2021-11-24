@@ -1282,6 +1282,10 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 			});
 	}
 
+	if (dbBeatmap && dbBeatmap.approvalStatus === 'Not found') {
+		return null;
+	}
+
 	return dbBeatmap;
 }
 
