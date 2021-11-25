@@ -299,7 +299,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for skills information
 	if (reaction._emoji.name === '📈') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-profile')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-top')) {
 			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 
@@ -345,7 +345,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
 				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 			}
-		} else if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats')) {
+		} else if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-top')) {
 			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 
