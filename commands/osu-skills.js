@@ -393,7 +393,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				});
 				//Remove userScores which don't fit the criteria
 				for (let i = 0; i < userScores.length; i++) {
-					if (scoringType === 'v2' && userScores[i].scoringType !== 'Score v2'
+					if (userScores[i].mode !== 'Standard'
+						|| scoringType === 'v2' && userScores[i].scoringType !== 'Score v2'
 						|| scoringType === 'v1' && userScores[i].scoringType !== 'Score'
 						|| tourneyMatch && !userScores[i].tourneyMatch) {
 						userScores.splice(i, 1);
