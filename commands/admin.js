@@ -1392,6 +1392,21 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'osu-tournament',
+			// 		description: 'Sends a .txt file with all the data for the tournament matches with this acronym',
+			// 		options: [
+			// 			{
+			// 				'name': 'acronym',
+			// 				'description': 'The acronym of the tournament',
+			// 				'type': 3,
+			// 				'required': true
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'pat',
 			// 		description: 'Lets you send a gif to pat a user',
 			// 		options: [
@@ -3281,6 +3296,21 @@ module.exports = {
 							'description': 'The username, id or link of the player',
 							'type': 3,
 							'required': false
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-tournament',
+					description: 'Sends a .txt file with all the data for the tournament matches with this acronym',
+					options: [
+						{
+							'name': 'acronym',
+							'description': 'The acronym of the tournament',
+							'type': 3,
+							'required': true
 						},
 					]
 				},
