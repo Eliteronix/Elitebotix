@@ -102,10 +102,16 @@ module.exports = {
 		//Add all multiscores from both players to an array
 		let scores = [];
 		scores.push(await DBOsuMultiScores.findAll({
-			where: { osuUserId: users[0] }
+			where: {
+				osuUserId: users[0],
+				tourneyMatch: true
+			}
 		}));
 		scores.push(await DBOsuMultiScores.findAll({
-			where: { osuUserId: users[1] }
+			where: {
+				osuUserId: users[1],
+				tourneyMatch: true
+			}
 		}));
 
 		//Create arrays of standings for each player/Mod/Score
@@ -161,6 +167,31 @@ module.exports = {
 		}
 
 		console.log(directNoModsWins, directHiddenWins, directHardRockWins, directDoubleTimeWins, directFreeModWins);
+
+		//Get an array of all played maps by both players
+		let mapsPlayedByFirst = [];
+		for (let i = 0; i < scores[0].length; i++) {
+			let mods = parseInt(scores[0][i].gameRawMods) + parseInt(scores[0][i].rawMods);
+			if (scores[0][i].freeMod) {
+				mods = 'FM';
+			}
+			if (!mapsPlayedByFirst.includes(`${mods}-${scores[0][i].beatmapId}`)) {
+				mapsPlayedByFirst.push(`${mods}-${scores[0][i].beatmapId}`);
+			}
+		}
+
+		let mapsPlayedByBoth = [];
+		for (let i = 0; i < scores[1].length; i++) {
+			let mods = parseInt(scores[1][i].gameRawMods) + parseInt(scores[1][i].rawMods);
+			if (scores[1][i].freeMod) {
+				mods = 'FM';
+			}
+			if (!mapsPlayedByBoth.includes(`${mods}-${scores[1][i].beatmapId}`) && mapsPlayedByFirst.includes(`${mods}-${scores[1][i].beatmapId}`)) {
+				mapsPlayedByBoth.push(`${mods}-${scores[1][i].beatmapId}`);
+			}
+		}
+
+		console.log(mapsPlayedByBoth, mapsPlayedByBoth.length);
 
 		// eslint-disable-next-line no-undef
 		matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${users[0]}-vs-${users[1]}.txt`);
