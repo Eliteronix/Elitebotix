@@ -113,6 +113,8 @@ module.exports = {
 				tourneyMatch: true
 			}
 		}));
+		quicksort(scores[0]);
+		quicksort(scores[1]);
 
 		//Create arrays of standings for each player/Mod/Score
 		//[ScoreV1[User1Wins, User2Wins], ScoreV2[User1Wins, User2Wins]]
@@ -171,27 +173,98 @@ module.exports = {
 		//Get an array of all played maps by both players
 		let mapsPlayedByFirst = [];
 		for (let i = 0; i < scores[0].length; i++) {
+			let scoring = 'V1';
+			if (scores[0][i].scoringType === 'Score v2') {
+				scoring = 'V2';
+			}
 			let mods = parseInt(scores[0][i].gameRawMods) + parseInt(scores[0][i].rawMods);
 			if (scores[0][i].freeMod) {
 				mods = 'FM';
 			}
-			if (!mapsPlayedByFirst.includes(`${mods}-${scores[0][i].beatmapId}`)) {
-				mapsPlayedByFirst.push(`${mods}-${scores[0][i].beatmapId}`);
+			if (!mapsPlayedByFirst.includes(`${scoring}-${mods}-${scores[0][i].beatmapId}`)) {
+				mapsPlayedByFirst.push(`${scoring}-${mods}-${scores[0][i].beatmapId}`);
 			}
 		}
 
 		let mapsPlayedByBoth = [];
 		for (let i = 0; i < scores[1].length; i++) {
+			let scoring = 'V1';
+			if (scores[0][i].scoringType === 'Score v2') {
+				scoring = 'V2';
+			}
 			let mods = parseInt(scores[1][i].gameRawMods) + parseInt(scores[1][i].rawMods);
 			if (scores[1][i].freeMod) {
 				mods = 'FM';
 			}
-			if (!mapsPlayedByBoth.includes(`${mods}-${scores[1][i].beatmapId}`) && mapsPlayedByFirst.includes(`${mods}-${scores[1][i].beatmapId}`)) {
-				mapsPlayedByBoth.push(`${mods}-${scores[1][i].beatmapId}`);
+			if (!mapsPlayedByBoth.includes(`${scoring}-${mods}-${scores[1][i].beatmapId}`) && mapsPlayedByFirst.includes(`${scoring}-${mods}-${scores[1][i].beatmapId}`)) {
+				mapsPlayedByBoth.push(`${scoring}-${mods}-${scores[1][i].beatmapId}`);
 			}
 		}
 
-		console.log(mapsPlayedByBoth, mapsPlayedByBoth.length);
+		for (let i = 0; i < mapsPlayedByBoth.length; i++) {
+			//Keep one score for mod evaluation later
+			let score = null;
+
+			//Loop throught all the scores of User 1 and get the most recent score on the map
+			let scoreUser1 = 0;
+			for (let j = 0; j < scores[0].length; j++) {
+				let scoring = 'V1';
+				if (scores[0][i].scoringType === 'Score v2') {
+					scoring = 'V2';
+				}
+				let mods = parseInt(scores[0][j].gameRawMods) + parseInt(scores[0][j].rawMods);
+				if (scores[0][j].freeMod) {
+					mods = 'FM';
+				}
+				if (`${scoring}-${mods}-${scores[0][j].beatmapId}` === mapsPlayedByBoth[i]) {
+					scoreUser1 = parseInt(scores[0][j].score);
+					score = scores[0][j];
+				}
+			}
+
+			//Loop throught all the scores of User 2 and get the most recent score on the map
+			let scoreUser2 = 0;
+			for (let j = 0; j < scores[1].length; j++) {
+				let scoring = 'V1';
+				if (scores[0][i].scoringType === 'Score v2') {
+					scoring = 'V2';
+				}
+				let mods = parseInt(scores[1][j].gameRawMods) + parseInt(scores[1][j].rawMods);
+				if (scores[1][j].freeMod) {
+					mods = 'FM';
+				}
+				if (`${scoring}-${mods}-${scores[1][j].beatmapId}` === mapsPlayedByBoth[i]) {
+					scoreUser2 = parseInt(scores[1][j].score);
+				}
+			}
+
+			//Evaluate if it was played with Score v2 or not (0 = v1, 1 = v2)
+			let scoreVersion = 0;
+			if (score.scoringType === 'Score v2') {
+				scoreVersion = 1;
+			}
+
+			//Evaluate which score is better (0 = user1; 1 = user2)
+			let winner = 0;
+			if (scoreUser1 < scoreUser2) {
+				winner = 1;
+			}
+
+			//Evaluate with which mods the game was played
+			if (!score.freeMod && score.rawMods === '0' && (score.gameRawMods === '0' || score.gameRawMods === '1')) {
+				indirectNoModsWins[scoreVersion][winner]++;
+			} else if (score.rawMods === '0' && (score.gameRawMods === '8' || score.gameRawMods === '9')) {
+				indirectHiddenWins[scoreVersion][winner]++;
+			} else if (score.rawMods === '0' && (score.gameRawMods === '16' || score.gameRawMods === '17')) {
+				indirectHardRockWins[scoreVersion][winner]++;
+			} else if (score.rawMods === '0' && (score.gameRawMods === '64' || score.gameRawMods === '65' || score.gameRawMods === '576' || score.gameRawMods === '577')) {
+				indirectDoubleTimeWins[scoreVersion][winner]++;
+			} else {
+				indirectFreeModWins[scoreVersion][winner]++;
+			}
+		}
+
+		console.log(indirectNoModsWins, indirectHiddenWins, indirectHardRockWins, indirectDoubleTimeWins, indirectFreeModWins);
 
 		// eslint-disable-next-line no-undef
 		matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${users[0]}-vs-${users[1]}.txt`);
@@ -202,3 +275,28 @@ module.exports = {
 		return interaction.followUp({ content: `Matchup analysis for \`${usersReadable[0]}\` vs \`${usersReadable[1]}\``, files: [matchesPlayed] });
 	},
 };
+
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].matchId) >= parseFloat(pivot.matchId)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
+}
