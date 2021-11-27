@@ -410,16 +410,22 @@ module.exports = {
 			ctx.drawImage(avatar, 830, 10, 160, 160);
 		}
 
+		let files = [];
 		//Create as an attachment
 		const matchUpStats = new Discord.MessageAttachment(canvas.toBuffer(), `osu-matchup-${users[0]}-${users[0]}.png`);
 
-		// eslint-disable-next-line no-undef
-		matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${users[0]}-vs-${users[1]}.txt`);
+		files.push(matchUpStats);
+
+		if (matchesPlayed.length) {
+			// eslint-disable-next-line no-undef
+			matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${users[0]}-vs-${users[1]}.txt`);
+			files.push(matchesPlayed);
+		}
 
 		if (msg.id) {
-			return msg.reply({ content: `Matchup analysis for \`${usersReadable[0]}\` vs \`${usersReadable[1]}\``, files: [matchUpStats, matchesPlayed] });
+			return msg.reply({ content: `Matchup analysis for \`${usersReadable[0]}\` vs \`${usersReadable[1]}\``, files: files });
 		}
-		return interaction.followUp({ content: `Matchup analysis for \`${usersReadable[0]}\` vs \`${usersReadable[1]}\``, files: [matchUpStats, matchesPlayed] });
+		return interaction.followUp({ content: `Matchup analysis for \`${usersReadable[0]}\` vs \`${usersReadable[1]}\``, files: files });
 	},
 };
 

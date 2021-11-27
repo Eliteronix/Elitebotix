@@ -536,6 +536,26 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'osu-matchup',
+			// 		description: 'Sends an info card about the matchups between the specified players',
+			// 		options: [
+			// 			{
+			// 				'name': 'username',
+			// 				'description': 'The name of a player to compare with',
+			// 				'type': 3,
+			// 				'required': true
+			// 			},
+			// 			{
+			// 				'name': 'username2',
+			// 				'description': 'The name of a player to compare with',
+			// 				'type': 3,
+			// 			},
+			// 		]
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'osu-motd',
 			// 		description: 'Manage your Maps of the Day registration and create custom rounds',
 			// 		options: [
@@ -2439,6 +2459,26 @@ module.exports = {
 							'name': 'average',
 							'description': 'True means unplayed maps will be ignored',
 							'type': 5,
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-matchup',
+					description: 'Sends an info card about the matchups between the specified players',
+					options: [
+						{
+							'name': 'username',
+							'description': 'The name of a player to compare with',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'username2',
+							'description': 'The name of a player to compare with',
+							'type': 3,
 						},
 					]
 				}
