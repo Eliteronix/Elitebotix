@@ -69,7 +69,7 @@ module.exports = {
 			} else if (args[0] === 'text') {
 				if (args[1] === 'enable') {
 					//Check permissions of the bot
-					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch('784836063058329680'));
+					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch(msg.client.user.id));
 					if (!botPermissions.has('ADMINISTRATOR')) {
 						return msg.reply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');
 					}
@@ -116,7 +116,7 @@ module.exports = {
 			} else if (args[0] === 'text') {
 				if (args[1] === 'enable') {
 					//Check permissions of the bot
-					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch('784836063058329680'));
+					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch(msg.client.user.id));
 					if (!botPermissions.has('ADMINISTRATOR')) {
 						if (msg.id) {
 							return msg.reply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');
