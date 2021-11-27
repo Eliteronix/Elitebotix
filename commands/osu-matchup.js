@@ -98,8 +98,6 @@ module.exports = {
 			return msg.channel.send('Not enough users left for the matchup.');
 		}
 
-		console.log(usersReadable, users);
-
 		//Add all multiscores from both players to an array
 		let scores = [];
 		logDatabaseQueries(4, 'commands/osu-matchup.js DBOsuMultiScores User1');
