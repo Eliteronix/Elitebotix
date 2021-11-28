@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 
@@ -352,7 +352,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			ctx.fillText('Most Farmed Mappers', 380, 370);
 			ctx.font = 'bold 18px comfortaa, sans-serif';
 			for (let i = 0; i < mappers.length && i < 5; i++) {
-				ctx.fillText(`${mappers[i].mapper}`, 380, 390 + i * 20);
+				fitTextOnLeftCanvas(ctx, `${mappers[i].mapper}`, 18, 'comfortaa, sans-serif', 390 + i * 20, 520, 380);
+				ctx.font = 'bold 18px comfortaa, sans-serif';
 				if (mappers[i].amount > 1) {
 					ctx.fillText(`Used ${mappers[i].amount} times`, 530, 390 + i * 20);
 				} else {
