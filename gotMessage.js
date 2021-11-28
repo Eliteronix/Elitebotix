@@ -201,7 +201,7 @@ module.exports = async function (msg, bancho) {
 		if (command.permissions) {
 			const authorPerms = msg.channel.permissionsFor(msg.member);
 			if (!authorPerms || !authorPerms.has(command.permissions)) {
-				return msg.reply(`you need the ${command.permissionsTranslated} permission to do this!`);
+				return msg.reply(`You need the ${command.permissionsTranslated} permission to do this!`);
 			}
 		}
 
