@@ -152,11 +152,19 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 	});
 
+	console.log(username);
 	osuApi.getUser({ u: username })
 		.then(async (user) => {
-			let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
+			const topScores = await osuApi.getUserBest({ u: user.name, m: 0, limit: 100 })
+				.catch(err => {
+					if (err.message === 'Not found') {
+						throw new Error('No standard plays');
+					} else {
+						console.log(err);
+					}
+				});
 
-			const topScores = await osuApi.getUserBest({ u: user.name, m: 0, limit: 100 });
+			let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 			let mods = [];
 			let mappers = [];
@@ -766,6 +774,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 		.catch(err => {
 			if (err.message === 'Not found') {
 				msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
+			} else if (err.message === 'No standard plays') {
+				msg.channel.send(`Could not find any standard plays for user \`${username.replace(/`/g, '')}\`.`);
 			} else {
 				console.log(err);
 			}
