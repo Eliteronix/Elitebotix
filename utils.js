@@ -555,7 +555,7 @@ module.exports = {
 
 		// Write the title of the leaderboard
 		ctx.fillStyle = '#ffffff';
-		fitTextOnMiddleCanvas(ctx, title, 35, 'comfortaa, sans-serif', 50, canvas.width, 50);
+		fitTextOnMiddleCanvasFunction(ctx, title, 35, 'comfortaa, sans-serif', 50, canvas.width, 50);
 
 		// Write the data
 		ctx.textAlign = 'center';
@@ -688,10 +688,10 @@ module.exports = {
 		ctx.font = 'bold 50px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
-		fitTextOnMiddleCanvas(ctx, beatmap.artist, 40, 'comfortaa, sans-serif', 200, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, beatmap.title, 40, 'comfortaa, sans-serif', 240, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, `Mapper: ${beatmap.creator}`, 40, 'comfortaa, sans-serif', 280, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, `[${beatmap.version}]`, 100, 'comfortaa, sans-serif', 450, canvas.width, 220);
+		fitTextOnMiddleCanvasFunction(ctx, beatmap.artist, 40, 'comfortaa, sans-serif', 200, canvas.width, 220);
+		fitTextOnMiddleCanvasFunction(ctx, beatmap.title, 40, 'comfortaa, sans-serif', 240, canvas.width, 220);
+		fitTextOnMiddleCanvasFunction(ctx, `Mapper: ${beatmap.creator}`, 40, 'comfortaa, sans-serif', 280, canvas.width, 220);
+		fitTextOnMiddleCanvasFunction(ctx, `[${beatmap.version}]`, 100, 'comfortaa, sans-serif', 450, canvas.width, 220);
 		let doubletimeMod = '';
 		if (doubletime) {
 			doubletimeMod = '+DoubleTime';
@@ -717,11 +717,11 @@ module.exports = {
 			ctx.font = 'bold 65px comfortaa, sans-serif';
 			ctx.fillText('DT', 775, 725);
 		}
-		fitTextOnMiddleCanvas(ctx, `Mods: Freemod${doubletimeMod}`, 50, 'comfortaa, sans-serif', 575, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, '(All mods allowed except: Relax, Autopilot, Auto, ScoreV2)', 25, 'comfortaa, sans-serif', 600, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, `Length: ${Math.floor(beatmap.length.total / 60)}:${(beatmap.length.total % 60).toString().padStart(2, '0')}`, 35, 'comfortaa, sans-serif', 700, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, `SR: ${Math.round(beatmap.difficulty.rating * 100) / 100} | ${beatmap.bpm} BPM`, 35, 'comfortaa, sans-serif', 750, canvas.width, 220);
-		fitTextOnMiddleCanvas(ctx, `CS ${beatmap.difficulty.size} | HP ${beatmap.difficulty.drain} | OD ${beatmap.difficulty.overall} | AR ${beatmap.difficulty.approach}`, 35, 'comfortaa, sans-serif', 800, canvas.width, 220);
+		fitTextOnMiddleCanvasFunction(ctx, `Mods: Freemod${doubletimeMod}`, 50, 'comfortaa, sans-serif', 575, canvas.width, 220);
+		fitTextOnMiddleCanvasFunction(ctx, '(All mods allowed except: Relax, Autopilot, Auto, ScoreV2)', 25, 'comfortaa, sans-serif', 600, canvas.width, 220);
+		fitTextOnMiddleCanvasFunction(ctx, `Length: ${Math.floor(beatmap.length.total / 60)}:${(beatmap.length.total % 60).toString().padStart(2, '0')}`, 35, 'comfortaa, sans-serif', 700, canvas.width, 220);
+		fitTextOnMiddleCanvasFunction(ctx, `SR: ${Math.round(beatmap.difficulty.rating * 100) / 100} | ${beatmap.bpm} BPM`, 35, 'comfortaa, sans-serif', 750, canvas.width, 220);
+		fitTextOnMiddleCanvasFunction(ctx, `CS ${beatmap.difficulty.size} | HP ${beatmap.difficulty.drain} | OD ${beatmap.difficulty.overall} | AR ${beatmap.difficulty.approach}`, 35, 'comfortaa, sans-serif', 800, canvas.width, 220);
 
 		let today = new Date().toLocaleDateString();
 
@@ -1060,6 +1060,9 @@ module.exports = {
 	},
 	logDatabaseQueries(level, output) {
 		logDatabaseQueriesFunction(level, output);
+	},
+	fitTextOnMiddleCanvas(ctx, text, startingSize, fontface, yPosition, width, widthReduction) {
+		return fitTextOnMiddleCanvasFunction(ctx, text, startingSize, fontface, yPosition, width, widthReduction);
 	}
 };
 
@@ -1099,7 +1102,7 @@ async function getOsuBadgeNumberByIdFunction(osuUserId) {
 		});
 }
 
-function fitTextOnMiddleCanvas(ctx, text, startingSize, fontface, yPosition, width, widthReduction) {
+function fitTextOnMiddleCanvasFunction(ctx, text, startingSize, fontface, yPosition, width, widthReduction) {
 
 	// start with a large font size
 	var fontsize = startingSize;
