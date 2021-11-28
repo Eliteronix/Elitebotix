@@ -223,11 +223,12 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-score.js');
 
 			//Set author of the message to the reacting user to not break the commands
+			let tempAuthor = reaction.message.author;
 			reaction.message.author = user;
 
-			//Execute the command
 			try {
 				command.execute(reaction.message, args, null, additionalObjects);
+				reaction.message.author = tempAuthor;
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -243,11 +244,12 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-score.js');
 
 			//Set author of the message to the reacting user to not break the commands
+			let tempAuthor = reaction.message.author;
 			reaction.message.author = user;
 
-			//Execute the command
 			try {
 				command.execute(reaction.message, args, null, additionalObjects);
+				reaction.message.author = tempAuthor;
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -283,10 +285,12 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-beatmap.js');
 
 			//Set author of the message to the reacting user to not break the commands
+			let tempAuthor = reaction.message.author;
 			reaction.message.author = user;
 
 			try {
 				command.execute(reaction.message, args, null, additionalObjects);
+				reaction.message.author = tempAuthor;
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -309,10 +313,12 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-skills.js');
 
 			//Set author of the message to the reacting user to not break the commands
+			let tempAuthor = reaction.message.author;
 			reaction.message.author = user;
 
 			try {
 				command.execute(reaction.message, args, null, additionalObjects);
+				reaction.message.author = tempAuthor;
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -335,10 +341,12 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-profile.js');
 
 			//Set author of the message to the reacting user to not break the commands
+			let tempAuthor = reaction.message.author;
 			reaction.message.author = user;
 
 			try {
 				command.execute(reaction.message, args, null, additionalObjects);
+				reaction.message.author = tempAuthor;
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -355,10 +363,12 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-profile.js');
 
 			//Set author of the message to the reacting user to not break the commands
+			let tempAuthor = reaction.message.author;
 			reaction.message.author = user;
 
 			try {
 				command.execute(reaction.message, args, null, additionalObjects);
+				reaction.message.author = tempAuthor;
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -381,10 +391,12 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-schedule.js');
 
 			//Set author of the message to the reacting user to not break the commands
+			let tempAuthor = reaction.message.author;
 			reaction.message.author = user;
 
 			try {
 				command.execute(reaction.message, args, null, additionalObjects);
+				reaction.message.author = tempAuthor;
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -407,10 +419,12 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-top.js');
 
 			//Set author of the message to the reacting user to not break the commands
+			let tempAuthor = reaction.message.author;
 			reaction.message.author = user;
 
 			try {
 				command.execute(reaction.message, args, null, additionalObjects);
+				reaction.message.author = tempAuthor;
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
