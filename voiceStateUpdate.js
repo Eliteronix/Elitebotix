@@ -311,7 +311,7 @@ module.exports = async function (oldMember, newMember) {
 				//Set all permissions for the creator
 				const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
 				try {
-					await createdChannel.permissionOverwrites.edit(newUser, { MANAGE_CHANNELS: true, MANAGE_ROLES: true, MOVE_MEMBERS: true, CONNECT: true, SPEAK: true, VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, STREAM: true, USE_VAD: true });
+					await createdChannel.permissionOverwrites.edit(newUser, { MANAGE_CHANNELS: true, MOVE_MEMBERS: true, CONNECT: true, SPEAK: true, VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, STREAM: true, USE_VAD: true });
 				} catch (e) {
 					if (e.message === 'Missing Access') {
 						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
