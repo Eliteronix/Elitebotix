@@ -298,7 +298,6 @@ module.exports = {
 		ctx.textAlign = 'center';
 		ctx.font = 'bold 40px comfortaa, sans-serif';
 		fitTextOnMiddleCanvas(ctx, `${usersReadable[0]} vs. ${usersReadable[1]}`, 40, 'comfortaa, sans-serif', 90, 1000, 400);
-		// ctx.fillText(`${usersReadable[0]} vs. ${usersReadable[1]}`, 500, 90);
 
 		ctx.font = 'bold 30px comfortaa, sans-serif';
 		ctx.fillText('Direct Matchups', 250, 210);
