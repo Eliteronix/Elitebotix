@@ -415,7 +415,10 @@ module.exports = {
 
 		files.push(matchUpStats);
 
+		let content = `Matchup analysis for \`${usersReadable[0]}\` vs \`${usersReadable[1]}\``;
+
 		if (mapsPlayedByBoth.length) {
+			content += `\nWinrate chart for \`${usersReadable[0]}\` against \`${usersReadable[1]}\` attached.`;
 			//Loop through all maps played by both players and fill an array of rounds won with timestamp
 			let rounds = [];
 			for (let i = 0; i < mapsPlayedByBoth.length; i++) {
@@ -723,9 +726,9 @@ module.exports = {
 		}
 
 		if (msg.id) {
-			return msg.reply({ content: `Matchup analysis for \`${usersReadable[0]}\` vs \`${usersReadable[1]}\``, files: files });
+			return msg.reply({ content: content, files: files });
 		}
-		return interaction.followUp({ content: `Matchup analysis for \`${usersReadable[0]}\` vs \`${usersReadable[1]}\``, files: files });
+		return interaction.followUp({ content: content, files: files });
 	},
 };
 
