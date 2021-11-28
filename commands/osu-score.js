@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP, getBeatmapApprovalStatusImage, logDatabaseQueries } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP, getBeatmapApprovalStatusImage, logDatabaseQueries, getBeatmapModeId } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -45,7 +45,7 @@ module.exports = {
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
 		const server = commandConfig[1];
-		const mode = commandConfig[2];
+		let mode = commandConfig[2];
 
 		let mapRank = 0;
 
@@ -79,6 +79,8 @@ module.exports = {
 		const dbBeatmap = await getOsuBeatmap(beatmapId, 0);
 		if (!dbBeatmap) {
 			msg.channel.send(`Couldn't find beatmap \`${beatmapId.replace(/`/g, '')}\``);
+		} else if (dbBeatmap.mode !== 'Standard') {
+			mode = getBeatmapModeId(dbBeatmap);
 		}
 
 		if (!args[0]) {//Get profile by author if no argument
