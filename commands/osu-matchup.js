@@ -596,8 +596,6 @@ module.exports = {
 				totalWinrates.push(totalWinrate);
 			}
 
-			console.log(rounds, labels, NMWinrates, HDWinrates, HRWinrates, DTWinrates, FMWinrates, totalWinrates);
-
 			if (labels.length === 1) {
 				labels.push(labels[0]);
 				totalWinrates.push(totalWinrates[0]);
