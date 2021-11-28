@@ -693,7 +693,7 @@ module.exports = {
 							display: true,
 							title: {
 								display: true,
-								text: 'Winrate in %',
+								text: `Winrate for ${users[0]} in %`,
 								color: '#FFFFFF'
 							},
 							grid: {
