@@ -56,7 +56,7 @@ module.exports = {
 						console.log(e);
 					}
 				}
-				sentMessage = await updateEmbed(sentMessage, players, [], 'React with 🎲 or type `join` to join the lobby.\nReact with 🎲 or type `start` if you created the lobby.');
+				sentMessage = await updateEmbed(sentMessage, players, [], 'React with 🎲 or type `join` to join the lobby.\nReact with 🎲 or type `start` if you created the lobby.'.true);
 			} else if (players[0] === m.author.id && m.content.toLowerCase() === 'start') {
 				try {
 					await m.delete();
@@ -74,7 +74,7 @@ module.exports = {
 		rCollector.on('collect', async (reaction, user) => {
 			if (!players.includes(user.id) && user.id !== msg.client.user.id && reaction.emoji.name === '🎲') {
 				players.push(user.id);
-				sentMessage = await updateEmbed(sentMessage, players, [], 'React with 🎲 or type `join` to join the lobby.\nReact with 🎲 or type `start` if you created the lobby.');
+				sentMessage = await updateEmbed(sentMessage, players, [], 'React with 🎲 or type `join` to join the lobby.\nReact with 🎲 or type `start` if you created the lobby.', true);
 			} else if (players[0] === user.id && reaction.emoji.name === '🎲') {
 				mCollector.stop();
 			}
@@ -90,7 +90,6 @@ module.exports = {
 				playersRolled = 1;
 			}
 			sentMessage = await updateEmbed(sentMessage, players, [], 'React with 🎲 or type `roll` to determine the seeding.');
-			await sentMessage.react('🎲');
 
 			// `m` is a message object that will be passed through the filter function
 			const meFilter = m => ['roll'].includes(m.content.toLowerCase()) && m.author.id !== msg.client.user.id;
@@ -111,7 +110,7 @@ module.exports = {
 						if (players[i] === m.author.id) {
 							players[i] = [players[i], roll];
 							playersRolled++;
-							sentMessage = await updateEmbed(sentMessage, players, [], 'React with 🎲 or type `roll` to determine the seeding.');
+							sentMessage = await updateEmbed(sentMessage, players, [], 'React with 🎲 or type `roll` to determine the seeding.', true);
 							if (playersRolled === players.length) {
 								meCollector.stop();
 							}
@@ -130,7 +129,7 @@ module.exports = {
 						if (players[i] === user.id) {
 							players[i] = [players[i], roll];
 							playersRolled++;
-							sentMessage = await updateEmbed(sentMessage, players, [], 'React with 🎲 or type `roll` to determine the seeding.');
+							sentMessage = await updateEmbed(sentMessage, players, [], 'React with 🎲 or type `roll` to determine the seeding.', true);
 							if (playersRolled === players.length) {
 								meCollector.stop();
 							}
@@ -164,7 +163,7 @@ function rollMax(max) {
 	return Math.floor(Math.random() * max) + 1;
 }
 
-async function updateEmbed(embedMessage, players, rounds, instructions) {
+async function updateEmbed(embedMessage, players, rounds, instructions, edit) {
 	const rollgameEmbed = new MessageEmbed()
 		.setColor('#187bcd')
 		.setTitle('Rollgame')
@@ -206,8 +205,17 @@ async function updateEmbed(embedMessage, players, rounds, instructions) {
 	} else {
 		rollgameEmbed.addField('Instructions', instructions);
 	}
-	setTimeout(() => embedMessage.delete(), 80);
-	return await embedMessage.channel.send({ embeds: [rollgameEmbed] });
+
+	if (edit) {
+		return await embedMessage.edit({ embeds: [rollgameEmbed] });
+	} else {
+		setTimeout(() => embedMessage.delete(), 80);
+		let newEmbedMessage = await embedMessage.channel.send({ embeds: [rollgameEmbed] });
+		if (!(rounds.length && rounds[rounds.length - 1] === 1)) {
+			await newEmbedMessage.react('🎲');
+		}
+		return newEmbedMessage;
+	}
 }
 
 function partition(list, start, end) {
@@ -264,7 +272,6 @@ async function rollRound(sentMessage, players, rounds) {
 	});
 
 	const rCollector = sentMessage.createReactionCollector({ time: 3600000 });
-	await sentMessage.react('🎲');
 
 	rCollector.on('collect', async (reaction, user) => {
 		if (user.id === players[rounds.length % players.length][0]) {
