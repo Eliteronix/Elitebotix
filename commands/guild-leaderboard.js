@@ -105,7 +105,13 @@ module.exports = {
 					filename = `guild-leaderboard-${msg.author.id}-${msg.guild.name}-page${page}.png`;
 				}
 
-				const attachment = await createLeaderboard(leaderboardData, 'discord-background.png', `${msg.guild.name}'s activity leaderboard`, filename, page);
+				//Remove trailing s if guild name stops with s or x
+				let title = `${msg.guild.name}'s activity leaderboard`;
+				if (msg.guild.name.endsWith('s') || msg.guild.name.endsWith('x')) {
+					title = `${msg.guild.name}' activity leaderboard`;
+				}
+
+				const attachment = await createLeaderboard(leaderboardData, 'discord-background.png', title, filename, page);
 
 				//Send attachment
 				let leaderboardMessage;
