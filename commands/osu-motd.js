@@ -193,9 +193,9 @@ module.exports = {
 						}
 					}
 					if (msg.id) {
-						return sendMessage(msg, 'The `Maps of the Day` competition has already been muted for you - the time has been update if a period was specified.\nTo receive messages and pings again use `e!osu-motd unmute`.');
+						return sendMessage(msg, 'The `Maps of the Day` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use `e!osu-motd unmute`.');
 					}
-					return interaction.reply({ content: 'The `Maps of the Day` competition has already been muted for you - the time has been update if a period was specified.\nTo receive messages and pings again use `/osu-motd unmute`.', ephemeral: true });
+					return interaction.reply({ content: 'The `Maps of the Day` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use `/osu-motd unmute`.', ephemeral: true });
 				} else {
 					if (args[1]) {
 						let years = 0;
