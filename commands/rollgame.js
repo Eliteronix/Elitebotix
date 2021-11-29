@@ -120,6 +120,7 @@ module.exports = {
 			});
 
 			const reCollector = sentMessage.createReactionCollector({ time: 3600000 });
+			await sentMessage.react('🎲');
 
 			reCollector.on('collect', async (reaction, user) => {
 				//Do the roll for the user
@@ -210,11 +211,7 @@ async function updateEmbed(embedMessage, players, rounds, instructions, edit) {
 		return await embedMessage.edit({ embeds: [rollgameEmbed] });
 	} else {
 		setTimeout(() => embedMessage.delete(), 80);
-		let newEmbedMessage = await embedMessage.channel.send({ embeds: [rollgameEmbed] });
-		if (!(rounds.length && rounds[rounds.length - 1] === 1)) {
-			await newEmbedMessage.react('🎲');
-		}
-		return newEmbedMessage;
+		return await embedMessage.channel.send({ embeds: [rollgameEmbed] });
 	}
 }
 
@@ -272,6 +269,7 @@ async function rollRound(sentMessage, players, rounds) {
 	});
 
 	const rCollector = sentMessage.createReactionCollector({ time: 3600000 });
+	await sentMessage.react('🎲');
 
 	rCollector.on('collect', async (reaction, user) => {
 		if (user.id === players[rounds.length % players.length][0]) {
