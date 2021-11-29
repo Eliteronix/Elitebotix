@@ -105,14 +105,16 @@ module.exports = {
 		scores.push(await DBOsuMultiScores.findAll({
 			where: {
 				osuUserId: users[0],
-				tourneyMatch: true
+				tourneyMatch: true,
+				mode: 'Standard'
 			}
 		}));
 		logDatabaseQueries(4, 'commands/osu-matchup.js DBOsuMultiScores User2');
 		scores.push(await DBOsuMultiScores.findAll({
 			where: {
 				osuUserId: users[1],
-				tourneyMatch: true
+				tourneyMatch: true,
+				mode: 'Standard'
 			}
 		}));
 		quicksort(scores[0]);
