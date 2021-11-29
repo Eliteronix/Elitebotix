@@ -222,11 +222,17 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-score.js');
 
-			//Set author of the message to the reacting user to not break the commands
-			reaction.message.author = user;
+			//Set author of a temporary message copy to the reacting user to not break the commands
+			let tempMessage = {
+				guild: reaction.message.guild,
+				guildId: reaction.message.guild.id,
+				content: `e!osu-score ${beatmapId}`,
+				author: user,
+				channel: reaction.message.channel,
+			};
 
 			try {
-				command.execute(reaction.message, args, null, additionalObjects);
+				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -241,11 +247,17 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-score.js');
 
-			//Set author of the message to the reacting user to not break the commands
-			reaction.message.author = user;
+			//Set author of a temporary message copy to the reacting user to not break the commands
+			let tempMessage = {
+				guild: reaction.message.guild,
+				guildId: reaction.message.guild.id,
+				content: `e!osu-score ${beatmapId}`,
+				author: user,
+				channel: reaction.message.channel,
+			};
 
 			try {
-				command.execute(reaction.message, args, null, additionalObjects);
+				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -280,13 +292,17 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-beatmap.js');
 
-			//Set author of the message to the reacting user to not break the commands
-			let tempAuthor = reaction.message.author;
-			reaction.message.author = user;
+			//Set author of a temporary message copy to the reacting user to not break the commands
+			let tempMessage = {
+				guild: reaction.message.guild,
+				guildId: reaction.message.guild.id,
+				content: `e!osu-beatmap ${beatmapId} --${mods.join('')}`,
+				author: user,
+				channel: reaction.message.channel,
+			};
 
 			try {
-				command.execute(reaction.message, args, null, additionalObjects);
-				reaction.message.author = tempAuthor;
+				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -308,13 +324,17 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-skills.js');
 
-			//Set author of the message to the reacting user to not break the commands
-			let tempAuthor = reaction.message.author;
-			reaction.message.author = user;
+			//Set author of a temporary message copy to the reacting user to not break the commands
+			let tempMessage = {
+				guild: reaction.message.guild,
+				guildId: reaction.message.guild.id,
+				content: `e!osu-skills ${osuUserId}`,
+				author: user,
+				channel: reaction.message.channel,
+			};
 
 			try {
-				command.execute(reaction.message, args, null, additionalObjects);
-				reaction.message.author = tempAuthor;
+				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -336,13 +356,17 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-profile.js');
 
-			//Set author of the message to the reacting user to not break the commands
-			let tempAuthor = reaction.message.author;
-			reaction.message.author = user;
+			//Set author of a temporary message copy to the reacting user to not break the commands
+			let tempMessage = {
+				guild: reaction.message.guild,
+				guildId: reaction.message.guild.id,
+				content: `e!osu-profile ${osuUserId}`,
+				author: user,
+				channel: reaction.message.channel,
+			};
 
 			try {
-				command.execute(reaction.message, args, null, additionalObjects);
-				reaction.message.author = tempAuthor;
+				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -358,13 +382,17 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-profile.js');
 
-			//Set author of the message to the reacting user to not break the commands
-			let tempAuthor = reaction.message.author;
-			reaction.message.author = user;
+			//Set author of a temporary message copy to the reacting user to not break the commands
+			let tempMessage = {
+				guild: reaction.message.guild,
+				guildId: reaction.message.guild.id,
+				content: `e!osu-profile ${osuUserId}`,
+				author: user,
+				channel: reaction.message.channel,
+			};
 
 			try {
-				command.execute(reaction.message, args, null, additionalObjects);
-				reaction.message.author = tempAuthor;
+				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -386,13 +414,17 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-schedule.js');
 
-			//Set author of the message to the reacting user to not break the commands
-			let tempAuthor = reaction.message.author;
-			reaction.message.author = user;
+			//Set author of a temporary message copy to the reacting user to not break the commands
+			let tempMessage = {
+				guild: reaction.message.guild,
+				guildId: reaction.message.guild.id,
+				content: `e!osu-schedule ${osuUserId}`,
+				author: user,
+				channel: reaction.message.channel,
+			};
 
 			try {
-				command.execute(reaction.message, args, null, additionalObjects);
-				reaction.message.author = tempAuthor;
+				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -414,13 +446,17 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-top.js');
 
-			//Set author of the message to the reacting user to not break the commands
-			let tempAuthor = reaction.message.author;
-			reaction.message.author = user;
+			//Set author of a temporary message copy to the reacting user to not break the commands
+			let tempMessage = {
+				guild: reaction.message.guild,
+				guildId: reaction.message.guild.id,
+				content: `e!osu-top ${osuUserId}`,
+				author: user,
+				channel: reaction.message.channel,
+			};
 
 			try {
-				command.execute(reaction.message, args, null, additionalObjects);
-				reaction.message.author = tempAuthor;
+				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
