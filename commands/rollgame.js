@@ -56,7 +56,7 @@ module.exports = {
 						console.log(e);
 					}
 				}
-				sentMessage = await updateEmbed(sentMessage, players, [], 'React with 🎲 or type `join` to join the lobby.\nReact with 🎲 or type `start` if you created the lobby.'.true);
+				sentMessage = await updateEmbed(sentMessage, players, [], 'React with 🎲 or type `join` to join the lobby.\nReact with 🎲 or type `start` if you created the lobby.', true);
 			} else if (players[0] === m.author.id && m.content.toLowerCase() === 'start') {
 				try {
 					await m.delete();
