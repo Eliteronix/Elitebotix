@@ -256,14 +256,19 @@ module.exports = {
 			//Evaluate with which mods the game was played
 			if (!score.freeMod && score.rawMods === '0' && (score.gameRawMods === '0' || score.gameRawMods === '1')) {
 				indirectNoModWins[scoreVersion][winner]++;
+				console.log(1, i, mapsPlayedByBoth[i], 'NM', score.score);
 			} else if (score.rawMods === '0' && (score.gameRawMods === '8' || score.gameRawMods === '9')) {
 				indirectHiddenWins[scoreVersion][winner]++;
+				console.log(1, i, mapsPlayedByBoth[i], 'HD', score.score);
 			} else if (score.rawMods === '0' && (score.gameRawMods === '16' || score.gameRawMods === '17')) {
 				indirectHardRockWins[scoreVersion][winner]++;
+				console.log(1, i, mapsPlayedByBoth[i], 'HR', score.score);
 			} else if (score.rawMods === '0' && (score.gameRawMods === '64' || score.gameRawMods === '65' || score.gameRawMods === '576' || score.gameRawMods === '577')) {
 				indirectDoubleTimeWins[scoreVersion][winner]++;
+				console.log(1, i, mapsPlayedByBoth[i], 'DT', score.score);
 			} else {
 				indirectFreeModWins[scoreVersion][winner]++;
+				console.log(1, i, mapsPlayedByBoth[i], 'FM', score.score);
 			}
 		}
 
@@ -423,6 +428,7 @@ module.exports = {
 			content += `\nWinrate chart for \`${usersReadable[0]}\` against \`${usersReadable[1]}\` attached.`;
 			//Loop through all maps played by both players and fill an array of rounds won with timestamp
 			let rounds = [];
+			console.log(mapsPlayedByBoth);
 			for (let i = 0; i < mapsPlayedByBoth.length; i++) {
 				let scoreUser1 = null;
 				let scoreUser2 = null;
@@ -463,14 +469,19 @@ module.exports = {
 				let modPool = null;
 				if (!scoreUser1.freeMod && scoreUser1.rawMods === '0' && (scoreUser1.gameRawMods === '0' || scoreUser1.gameRawMods === '1')) {
 					modPool = 'NM';
+					console.log(2, i, mapsPlayedByBoth[i], 'NM', scoreUser1.score);
 				} else if (scoreUser1.rawMods === '0' && (scoreUser1.gameRawMods === '8' || scoreUser1.gameRawMods === '9')) {
 					modPool = 'HD';
+					console.log(2, i, mapsPlayedByBoth[i], 'HD', scoreUser1.score);
 				} else if (scoreUser1.rawMods === '0' && (scoreUser1.gameRawMods === '16' || scoreUser1.gameRawMods === '17')) {
 					modPool = 'HR';
+					console.log(2, i, mapsPlayedByBoth[i], 'HR', scoreUser1.score);
 				} else if (scoreUser1.rawMods === '0' && (scoreUser1.gameRawMods === '64' || scoreUser1.gameRawMods === '65' || scoreUser1.gameRawMods === '576' || scoreUser1.gameRawMods === '577')) {
 					modPool = 'DT';
+					console.log(2, i, mapsPlayedByBoth[i], 'DT', scoreUser1.score);
 				} else {
 					modPool = 'FM';
+					console.log(2, i, mapsPlayedByBoth[i], 'FM', scoreUser1.score);
 				}
 
 				//Set winner (0 = user1; 1 = user2)
@@ -496,6 +507,8 @@ module.exports = {
 					dateReadable: dateReadable,
 				});
 			}
+
+			console.log(rounds);
 
 			quicksort(rounds);
 
