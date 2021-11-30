@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
@@ -739,19 +739,4 @@ function getColor(array) {
 	}
 
 	return color;
-}
-
-function getScoreModpool(score) {
-	//Evaluate with which mods the game was played
-	if (!score.freeMod && score.rawMods === '0' && (score.gameRawMods === '0' || score.gameRawMods === '1')) {
-		return 'NM';
-	} else if (!score.freeMod && score.rawMods === '0' && (score.gameRawMods === '8' || score.gameRawMods === '9')) {
-		return 'HD';
-	} else if (!score.freeMod && score.rawMods === '0' && (score.gameRawMods === '16' || score.gameRawMods === '17')) {
-		return 'HR';
-	} else if (!score.freeMod && score.rawMods === '0' && (score.gameRawMods === '64' || score.gameRawMods === '65' || score.gameRawMods === '576' || score.gameRawMods === '577')) {
-		return 'DT';
-	} else {
-		return 'FM';
-	}
 }
