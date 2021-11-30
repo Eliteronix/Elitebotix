@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 
@@ -467,16 +467,16 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 								rawModsData[j].totalCount++;
 
 								//Add values to Mods
-								if (!userScores[i].freeMod && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
+								if (getScoreModpool(userScores[i]) === 'NM') {
 									rawModsData[j].NMEvaluation += parseFloat(userScores[i].evaluation);
 									rawModsData[j].NMCount++;
-								} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '8' || userScores[i].gameRawMods === '9')) {
+								} else if (getScoreModpool(userScores[i]) === 'HD') {
 									rawModsData[j].HDEvaluation += parseFloat(userScores[i].evaluation);
 									rawModsData[j].HDCount++;
-								} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '16' || userScores[i].gameRawMods === '17')) {
+								} else if (getScoreModpool(userScores[i]) === 'HR') {
 									rawModsData[j].HREvaluation += parseFloat(userScores[i].evaluation);
 									rawModsData[j].HRCount++;
-								} else if (userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '64' || userScores[i].gameRawMods === '65' || userScores[i].gameRawMods === '576' || userScores[i].gameRawMods === '577')) {
+								} else if (getScoreModpool(userScores[i]) === 'DT') {
 									rawModsData[j].DTEvaluation += parseFloat(userScores[i].evaluation);
 									rawModsData[j].DTCount++;
 								} else {
@@ -493,25 +493,25 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 									if (rawModsData[j].label !== uncompletedMonths[k].label) {
 
 										//Add values to Mods
-										if (uncompletedMonths[k].NMCount < 15 && !userScores[i].freeMod && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '0' || userScores[i].gameRawMods === '1')) {
+										if (uncompletedMonths[k].NMCount < 15 && getScoreModpool(userScores[i]) === 'NM') {
 											uncompletedMonths[k].NMEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].NMCount++;
 											//add to total evaluation
 											uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].totalCount++;
-										} else if (uncompletedMonths[k].HDCount < 15 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '8' || userScores[i].gameRawMods === '9')) {
+										} else if (uncompletedMonths[k].HDCount < 15 && getScoreModpool(userScores[i]) === 'HD') {
 											uncompletedMonths[k].HDEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].HDCount++;
 											//add to total evaluation
 											uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].totalCount++;
-										} else if (uncompletedMonths[k].HRCount < 15 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '16' || userScores[i].gameRawMods === '17')) {
+										} else if (uncompletedMonths[k].HRCount < 15 && getScoreModpool(userScores[i]) === 'HR') {
 											uncompletedMonths[k].HREvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].HRCount++;
 											//add to total evaluation
 											uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].totalCount++;
-										} else if (uncompletedMonths[k].DTCount < 15 && userScores[i].rawMods === '0' && (userScores[i].gameRawMods === '64' || userScores[i].gameRawMods === '65' || userScores[i].gameRawMods === '576' || userScores[i].gameRawMods === '577')) {
+										} else if (uncompletedMonths[k].DTCount < 15 && getScoreModpool(userScores[i]) === 'DT') {
 											uncompletedMonths[k].DTEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].DTCount++;
 											//add to total evaluation
