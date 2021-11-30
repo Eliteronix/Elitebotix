@@ -99,6 +99,8 @@ module.exports = {
 			return msg.channel.send('Not enough users left for the matchup.');
 		}
 
+		let processingMessage = await msg.channel.send(`[${usersReadable[0]} vs ${usersReadable[1]}] Processing...`);
+
 		//Add all multiscores from both players to an array
 		let scores = [];
 		logDatabaseQueries(4, 'commands/osu-matchup.js DBOsuMultiScores User1');
@@ -690,6 +692,88 @@ module.exports = {
 			const matchupWinrateChart = new Discord.MessageAttachment(imageBuffer, `osu-matchup-${users[0]}-vs-${users[1]}.png`);
 
 			files.push(matchupWinrateChart);
+
+			//[won by user1 array[NM[], HD[], HR[], DT[], FM[]], won by user2 array[NM[], HD[], HR[], DT[], FM[]]]]
+			//divided by player who won -> divided by modpool
+			let mapsPlayedByBothReadable = [[[], [], [], [], []], [[], [], [], [], []]];
+
+			for (let i = 0; i < mapsPlayedByBoth.length; i++) {
+				let scoreUser1 = null;
+				let scoreUser2 = null;
+
+				//Loop through all scores of player 1
+				for (let j = 0; j < scores[0].length; j++) {
+					//If the score is for the map played by both players
+					let scoring = 'V1';
+					if (scores[0][j].scoringType === 'Score v2') {
+						scoring = 'V2';
+					}
+					let mods = getScoreModpool(scores[0][j]);
+					if (`${scoring}-${mods}-${scores[0][j].beatmapId}` === mapsPlayedByBoth[i]) {
+						scoreUser1 = scores[0][j];
+					}
+				}
+
+				//Loop through all scores of player 2
+				for (let j = 0; j < scores[1].length; j++) {
+					//If the score is for the map played by both players
+					let scoring = 'V1';
+					if (scores[1][j].scoringType === 'Score v2') {
+						scoring = 'V2';
+					}
+					let mods = getScoreModpool(scores[1][j]);
+					if (`${scoring}-${mods}-${scores[1][j].beatmapId}` === mapsPlayedByBoth[i]) {
+						scoreUser2 = scores[1][j];
+					}
+				}
+
+				let dateReadable = `${(scoreUser1.matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${scoreUser1.matchStartDate.getUTCFullYear()}`;
+				if (parseInt(scoreUser1.matchId) < parseInt(scoreUser2.matchId)) {
+					dateReadable = `${(scoreUser2.matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${scoreUser2.matchStartDate.getUTCFullYear()}`;
+				}
+
+				//Evaluate which score is better (0 = user1; 1 = user2)
+				let winner = 0;
+				if (parseInt(scoreUser1.score) < parseInt(scoreUser2.score)) {
+					winner = 1;
+				}
+
+				let modPoolNumber = 0;
+				if (getScoreModpool(scoreUser1) === 'NM') {
+					modPoolNumber = 0;
+				} else if (getScoreModpool(scoreUser1) === 'HD') {
+					modPoolNumber = 1;
+				} else if (getScoreModpool(scoreUser1) === 'HR') {
+					modPoolNumber = 2;
+				} else if (getScoreModpool(scoreUser1) === 'DT') {
+					modPoolNumber = 3;
+				} else if (getScoreModpool(scoreUser1) === 'FM') {
+					modPoolNumber = 4;
+				}
+
+				mapsPlayedByBothReadable[winner][modPoolNumber].push(`${dateReadable} - ${getScoreModpool(scoreUser1)} https://osu.ppy.sh/b/${scoreUser1.beatmapId} - Won by: ${usersReadable[winner]} - ${scoreUser1.score} vs ${scoreUser2.score}`);
+			}
+
+			//Convert modpool arrays into strings
+			for (let i = 0; i < mapsPlayedByBothReadable.length; i++) {
+				for (let j = 0; j < mapsPlayedByBothReadable[i].length; j++) {
+					mapsPlayedByBothReadable[i][j] = mapsPlayedByBothReadable[i][j].join('\n');
+				}
+			}
+
+			//Convert player arrays into strings
+			for (let i = 0; i < mapsPlayedByBothReadable.length; i++) {
+				mapsPlayedByBothReadable[i] = mapsPlayedByBothReadable[i].join('\n\n');
+			}
+
+			//Add the player names in front of both strings
+			for (let i = 0; i < mapsPlayedByBothReadable.length; i++) {
+				mapsPlayedByBothReadable[i] = `----------${usersReadable[i]}----------\n${mapsPlayedByBothReadable[i]}`;
+			}
+
+			// eslint-disable-next-line no-undef
+			mapsPlayedByBothReadable = new Discord.MessageAttachment(Buffer.from(mapsPlayedByBothReadable.join('\n\n\n\n'), 'utf-8'), `indirect-matchups-${users[0]}-vs-${users[1]}.txt`);
+			files.push(mapsPlayedByBothReadable);
 		}
 
 		if (matchesPlayed.length) {
@@ -697,6 +781,8 @@ module.exports = {
 			matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${users[0]}-vs-${users[1]}.txt`);
 			files.push(matchesPlayed);
 		}
+
+		await processingMessage.delete();
 
 		if (msg.id) {
 			return msg.reply({ content: content, files: files });
