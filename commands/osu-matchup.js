@@ -179,10 +179,7 @@ module.exports = {
 			if (scores[0][i].scoringType === 'Score v2') {
 				scoring = 'V2';
 			}
-			let mods = parseInt(scores[0][i].gameRawMods) + parseInt(scores[0][i].rawMods);
-			if (scores[0][i].freeMod) {
-				mods = 'FM';
-			}
+			let mods = getScoreModpool(scores[0][i]);
 			if (!mapsPlayedByFirst.includes(`${scoring}-${mods}-${scores[0][i].beatmapId}`)) {
 				mapsPlayedByFirst.push(`${scoring}-${mods}-${scores[0][i].beatmapId}`);
 			}
@@ -194,10 +191,7 @@ module.exports = {
 			if (scores[1][i].scoringType === 'Score v2') {
 				scoring = 'V2';
 			}
-			let mods = parseInt(scores[1][i].gameRawMods) + parseInt(scores[1][i].rawMods);
-			if (scores[1][i].freeMod) {
-				mods = 'FM';
-			}
+			let mods = getScoreModpool(scores[1][i]);
 			if (!mapsPlayedByBoth.includes(`${scoring}-${mods}-${scores[1][i].beatmapId}`) && mapsPlayedByFirst.includes(`${scoring}-${mods}-${scores[1][i].beatmapId}`)) {
 				mapsPlayedByBoth.push(`${scoring}-${mods}-${scores[1][i].beatmapId}`);
 			}
@@ -214,10 +208,7 @@ module.exports = {
 				if (scores[0][j].scoringType === 'Score v2') {
 					scoring = 'V2';
 				}
-				let mods = parseInt(scores[0][j].gameRawMods) + parseInt(scores[0][j].rawMods);
-				if (scores[0][j].freeMod) {
-					mods = 'FM';
-				}
+				let mods = getScoreModpool(scores[0][j]);
 				if (`${scoring}-${mods}-${scores[0][j].beatmapId}` === mapsPlayedByBoth[i]) {
 					scoreUser1 = parseInt(scores[0][j].score);
 					score = scores[0][j];
@@ -231,10 +222,7 @@ module.exports = {
 				if (scores[1][j].scoringType === 'Score v2') {
 					scoring = 'V2';
 				}
-				let mods = parseInt(scores[1][j].gameRawMods) + parseInt(scores[1][j].rawMods);
-				if (scores[1][j].freeMod) {
-					mods = 'FM';
-				}
+				let mods = getScoreModpool(scores[1][j]);
 				if (`${scoring}-${mods}-${scores[1][j].beatmapId}` === mapsPlayedByBoth[i]) {
 					scoreUser2 = parseInt(scores[1][j].score);
 					score = scores[1][j];
@@ -254,21 +242,16 @@ module.exports = {
 			}
 
 			//Evaluate with which mods the game was played
-			if (!score.freeMod && score.rawMods === '0' && (score.gameRawMods === '0' || score.gameRawMods === '1')) {
+			if (getScoreModpool(score) === 'NM') {
 				indirectNoModWins[scoreVersion][winner]++;
-				console.log(1, i, mapsPlayedByBoth[i], 'NM', score.score);
-			} else if (score.rawMods === '0' && (score.gameRawMods === '8' || score.gameRawMods === '9')) {
+			} else if (getScoreModpool(score) === 'HD') {
 				indirectHiddenWins[scoreVersion][winner]++;
-				console.log(1, i, mapsPlayedByBoth[i], 'HD', score.score);
-			} else if (score.rawMods === '0' && (score.gameRawMods === '16' || score.gameRawMods === '17')) {
+			} else if (getScoreModpool(score) === 'HR') {
 				indirectHardRockWins[scoreVersion][winner]++;
-				console.log(1, i, mapsPlayedByBoth[i], 'HR', score.score);
-			} else if (score.rawMods === '0' && (score.gameRawMods === '64' || score.gameRawMods === '65' || score.gameRawMods === '576' || score.gameRawMods === '577')) {
+			} else if (getScoreModpool(score) === 'DT') {
 				indirectDoubleTimeWins[scoreVersion][winner]++;
-				console.log(1, i, mapsPlayedByBoth[i], 'DT', score.score);
 			} else {
 				indirectFreeModWins[scoreVersion][winner]++;
-				console.log(1, i, mapsPlayedByBoth[i], 'FM', score.score);
 			}
 		}
 
@@ -428,7 +411,6 @@ module.exports = {
 			content += `\nWinrate chart for \`${usersReadable[0]}\` against \`${usersReadable[1]}\` attached.`;
 			//Loop through all maps played by both players and fill an array of rounds won with timestamp
 			let rounds = [];
-			console.log(mapsPlayedByBoth);
 			for (let i = 0; i < mapsPlayedByBoth.length; i++) {
 				let scoreUser1 = null;
 				let scoreUser2 = null;
@@ -440,10 +422,7 @@ module.exports = {
 					if (scores[0][j].scoringType === 'Score v2') {
 						scoring = 'V2';
 					}
-					let mods = parseInt(scores[0][j].gameRawMods) + parseInt(scores[0][j].rawMods);
-					if (scores[0][j].freeMod) {
-						mods = 'FM';
-					}
+					let mods = getScoreModpool(scores[0][j]);
 					if (`${scoring}-${mods}-${scores[0][j].beatmapId}` === mapsPlayedByBoth[i]) {
 						scoreUser1 = scores[0][j];
 					}
@@ -456,33 +435,14 @@ module.exports = {
 					if (scores[1][j].scoringType === 'Score v2') {
 						scoring = 'V2';
 					}
-					let mods = parseInt(scores[1][j].gameRawMods) + parseInt(scores[1][j].rawMods);
-					if (scores[1][j].freeMod) {
-						mods = 'FM';
-					}
+					let mods = getScoreModpool(scores[1][j]);
 					if (`${scoring}-${mods}-${scores[1][j].beatmapId}` === mapsPlayedByBoth[i]) {
 						scoreUser2 = scores[1][j];
 					}
 				}
 
 				//Evaluate with which modPool the game was played
-				let modPool = null;
-				if (!scoreUser1.freeMod && scoreUser1.rawMods === '0' && (scoreUser1.gameRawMods === '0' || scoreUser1.gameRawMods === '1')) {
-					modPool = 'NM';
-					console.log(2, i, mapsPlayedByBoth[i], 'NM', scoreUser1.score);
-				} else if (scoreUser1.rawMods === '0' && (scoreUser1.gameRawMods === '8' || scoreUser1.gameRawMods === '9')) {
-					modPool = 'HD';
-					console.log(2, i, mapsPlayedByBoth[i], 'HD', scoreUser1.score);
-				} else if (scoreUser1.rawMods === '0' && (scoreUser1.gameRawMods === '16' || scoreUser1.gameRawMods === '17')) {
-					modPool = 'HR';
-					console.log(2, i, mapsPlayedByBoth[i], 'HR', scoreUser1.score);
-				} else if (scoreUser1.rawMods === '0' && (scoreUser1.gameRawMods === '64' || scoreUser1.gameRawMods === '65' || scoreUser1.gameRawMods === '576' || scoreUser1.gameRawMods === '577')) {
-					modPool = 'DT';
-					console.log(2, i, mapsPlayedByBoth[i], 'DT', scoreUser1.score);
-				} else {
-					modPool = 'FM';
-					console.log(2, i, mapsPlayedByBoth[i], 'FM', scoreUser1.score);
-				}
+				let modPool = getScoreModpool(scoreUser1);
 
 				//Set winner (0 = user1; 1 = user2)
 				let winner = 0;
@@ -507,8 +467,6 @@ module.exports = {
 					dateReadable: dateReadable,
 				});
 			}
-
-			console.log(rounds);
 
 			quicksort(rounds);
 
@@ -781,4 +739,19 @@ function getColor(array) {
 	}
 
 	return color;
+}
+
+function getScoreModpool(score) {
+	//Evaluate with which mods the game was played
+	if (!score.freeMod && score.rawMods === '0' && (score.gameRawMods === '0' || score.gameRawMods === '1')) {
+		return 'NM';
+	} else if (!score.freeMod && score.rawMods === '0' && (score.gameRawMods === '8' || score.gameRawMods === '9')) {
+		return 'HD';
+	} else if (!score.freeMod && score.rawMods === '0' && (score.gameRawMods === '16' || score.gameRawMods === '17')) {
+		return 'HR';
+	} else if (!score.freeMod && score.rawMods === '0' && (score.gameRawMods === '64' || score.gameRawMods === '65' || score.gameRawMods === '576' || score.gameRawMods === '577')) {
+		return 'DT';
+	} else {
+		return 'FM';
+	}
 }
