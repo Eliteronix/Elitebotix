@@ -8,7 +8,7 @@ const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
 module.exports = {
 	name: 'osu-matchup',
-	// aliases: ['os', 'o-s'],
+	aliases: ['matchup'],
 	description: 'Sends an info card about the matchups between the specified players',
 	usage: '<username> [username]',
 	//permissions: 'MANAGE_GUILD',
