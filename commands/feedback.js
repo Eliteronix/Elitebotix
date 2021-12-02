@@ -35,6 +35,14 @@ module.exports = {
 				args.shift();
 				//join the bug in a variable
 				const bug = args.join(' ').replace(/"/g, '');
+
+				//Return if the bug is too long
+				if (bug.length > 200) {
+					if (msg.id) {
+						return msg.reply('Your bug report is too long. Please shorten it.');
+					}
+					return interaction.reply('Your bug report is too long. Please shorten it.');
+				}
 				//send the bug into the correct Channel
 				createJiraIssue('10006', `[BUG] ${bug} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
@@ -51,6 +59,14 @@ module.exports = {
 				args.shift();
 				//join the feature in a variable
 				const feature = args.join(' ').replace(/"/g, '');
+
+				//Return if the bug is too long
+				if (feature.length > 200) {
+					if (msg.id) {
+						return msg.reply('Your feature request is too long. Please shorten it.');
+					}
+					return interaction.reply('Your feature request is too long. Please shorten it.');
+				}
 				//send the feature into the correct Channel
 				createJiraIssue('10007', `[FEATURE] ${feature} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
@@ -67,6 +83,14 @@ module.exports = {
 				args.shift();
 				//join the feedback in a variable
 				const feedback = args.join(' ').replace(/"/g, '');
+
+				//Return if the bug is too long
+				if (feedback.length > 200) {
+					if (msg.id) {
+						return msg.reply('Your feedback is too long. Please shorten it.');
+					}
+					return interaction.reply('Your feedback is too long. Please shorten it.');
+				}
 				//send the feedback into the correct Channel
 				createJiraIssue('10005', `[FEEDBACK] ${feedback} - ${msg.author.username}#${msg.author.discriminator}`);
 				//send a message to the user
