@@ -16,9 +16,6 @@ module.exports = {
 			guildPrefix = prefix;
 		} else {
 			logDatabaseQueriesFunction(3, 'utils.js getGuildPrefix');
-			if (msg.guildId === undefined) {
-				console.log('utils.js getGuildPrefix | msg.guildId is undefined: ', msg);
-			}
 			//Get guild from the db
 			const guild = await DBGuilds.findOne({
 				where: { guildId: msg.guildId },
@@ -382,9 +379,6 @@ module.exports = {
 							serverUserActivity.points = serverUserActivity.points + 1;
 							serverUserActivity.save();
 							logDatabaseQueriesFunction(3, 'utils.js old updateServerUserActivity activityRoles');
-							if (msg.guildId === undefined) {
-								console.log('utils.js old updateServerUserActivity activityRoles | msg.guildId is undefined: ', msg);
-							}
 							const activityRoles = await DBActivityRoles.findAll({
 								where: { guildId: msg.guildId }
 							});
