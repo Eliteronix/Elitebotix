@@ -32,16 +32,16 @@ module.exports = {
 		const userScores = await DBOsuMultiScores.findAll({
 			where: {
 				matchName: {
-					[Op.like]: `${args[0]}%`,
+					[Op.like]: `${args.join(' ')}%`,
 				}
 			}
 		});
 
 		if (!userScores.length) {
 			if (msg.id) {
-				return msg.reply(`No tournament matches found with the acronym ${args[0].replace(/`/g, '')}.`);
+				return msg.reply(`No tournament matches found with the acronym ${args.join(' ').replace(/`/g, '')}.`);
 			}
-			return interaction.followUp(`No tournament matches found with the acronym ${args[0].replace(/`/g, '')}.`);
+			return interaction.followUp(`No tournament matches found with the acronym ${args.join(' ').replace(/`/g, '')}.`);
 		} else {
 			quicksort(userScores);
 			let matchesPlayed = [];
@@ -53,12 +53,12 @@ module.exports = {
 			}
 
 			// eslint-disable-next-line no-undef
-			matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${args[0]}.txt`);
+			matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${args.join(' ')}.txt`);
 
 			if (msg.id) {
-				msg.reply({ content: `All matches found for the acronym \`${args[0].replace(/`/g, '')}\` are attached.`, files: [matchesPlayed] });
+				msg.reply({ content: `All matches found for the acronym \`${args.join(' ').replace(/`/g, '')}\` are attached.`, files: [matchesPlayed] });
 			} else {
-				interaction.followUp({ content: `All matches found for the acronym \`${args[0].replace(/`/g, '')}\` are attached.`, files: [matchesPlayed] });
+				interaction.followUp({ content: `All matches found for the acronym \`${args.join(' ').replace(/`/g, '')}\` are attached.`, files: [matchesPlayed] });
 			}
 
 			//Save the maps locally
