@@ -757,13 +757,22 @@ module.exports = {
 			//Convert modpool arrays into strings
 			for (let i = 0; i < mapsPlayedByBothReadable.length; i++) {
 				for (let j = 0; j < mapsPlayedByBothReadable[i].length; j++) {
-					mapsPlayedByBothReadable[i][j] = mapsPlayedByBothReadable[i][j].join('\n');
+					if (mapsPlayedByBothReadable[i][j].length) {
+						mapsPlayedByBothReadable[i][j] = mapsPlayedByBothReadable[i][j].join('\n');
+					} else {
+						mapsPlayedByBothReadable[i].splice(j, 1);
+						j--;
+					}
 				}
 			}
 
 			//Convert player arrays into strings
 			for (let i = 0; i < mapsPlayedByBothReadable.length; i++) {
-				mapsPlayedByBothReadable[i] = mapsPlayedByBothReadable[i].join('\n\n');
+				if (mapsPlayedByBothReadable[i].length) {
+					mapsPlayedByBothReadable[i] = mapsPlayedByBothReadable[i].join('\n\n');
+				} else {
+					mapsPlayedByBothReadable[i].push('No maps won');
+				}
 			}
 
 			//Add the player names in front of both strings
