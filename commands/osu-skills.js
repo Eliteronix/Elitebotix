@@ -347,7 +347,9 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			ctx.fillText('Favourite Mods', 30, 370);
 			ctx.font = 'bold 18px comfortaa, sans-serif';
 			for (let i = 0; i < mods.length && i < 5; i++) {
-				ctx.fillText(`${mods[i].modsReadable}`, 30, 390 + i * 20);
+				// ctx.fillText(`${mods[i].modsReadable}`, 30, 390 + i * 20);
+				fitTextOnLeftCanvas(ctx, `${mods[i].modsReadable}`, 18, 'comfortaa, sans-serif', 390 + i * 20, 120, 30);
+				ctx.font = 'bold 18px comfortaa, sans-serif';
 				if (mods[i].amount > 1) {
 					ctx.fillText(`Used ${mods[i].amount} times`, 130, 390 + i * 20);
 				} else {
