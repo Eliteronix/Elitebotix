@@ -223,9 +223,15 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-score.js');
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
+			let guildId = null;
+
+			if (reaction.message.guild) {
+				guildId = reaction.message.guild.id;
+			}
+
 			let tempMessage = {
 				guild: reaction.message.guild,
-				guildId: reaction.message.guild.id,
+				guildId: guildId,
 				content: `e!osu-score ${beatmapId}`,
 				author: user,
 				channel: reaction.message.channel,
@@ -248,9 +254,15 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-score.js');
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
+			let guildId = null;
+
+			if (reaction.message.guild) {
+				guildId = reaction.message.guild.id;
+			}
+
 			let tempMessage = {
 				guild: reaction.message.guild,
-				guildId: reaction.message.guild.id,
+				guildId: guildId,
 				content: `e!osu-score ${beatmapId}`,
 				author: user,
 				channel: reaction.message.channel,
@@ -293,9 +305,15 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-beatmap.js');
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
+			let guildId = null;
+
+			if (reaction.message.guild) {
+				guildId = reaction.message.guild.id;
+			}
+
 			let tempMessage = {
 				guild: reaction.message.guild,
-				guildId: reaction.message.guild.id,
+				guildId: guildId,
 				content: `e!osu-beatmap ${beatmapId} --${mods.join('')}`,
 				author: user,
 				channel: reaction.message.channel,
@@ -325,9 +343,15 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-skills.js');
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
+			let guildId = null;
+
+			if (reaction.message.guild) {
+				guildId = reaction.message.guild.id;
+			}
+
 			let tempMessage = {
 				guild: reaction.message.guild,
-				guildId: reaction.message.guild.id,
+				guildId: guildId,
 				content: `e!osu-skills ${osuUserId}`,
 				author: user,
 				channel: reaction.message.channel,
@@ -357,9 +381,15 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-profile.js');
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
+			let guildId = null;
+
+			if (reaction.message.guild) {
+				guildId = reaction.message.guild.id;
+			}
+
 			let tempMessage = {
 				guild: reaction.message.guild,
-				guildId: reaction.message.guild.id,
+				guildId: guildId,
 				content: `e!osu-profile ${osuUserId}`,
 				author: user,
 				channel: reaction.message.channel,
@@ -383,9 +413,15 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-profile.js');
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
+			let guildId = null;
+
+			if (reaction.message.guild) {
+				guildId = reaction.message.guild.id;
+			}
+
 			let tempMessage = {
 				guild: reaction.message.guild,
-				guildId: reaction.message.guild.id,
+				guildId: guildId,
 				content: `e!osu-profile ${osuUserId}`,
 				author: user,
 				channel: reaction.message.channel,
@@ -415,9 +451,15 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-schedule.js');
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
+			let guildId = null;
+
+			if (reaction.message.guild) {
+				guildId = reaction.message.guild.id;
+			}
+
 			let tempMessage = {
 				guild: reaction.message.guild,
-				guildId: reaction.message.guild.id,
+				guildId: guildId,
 				content: `e!osu-schedule ${osuUserId}`,
 				author: user,
 				channel: reaction.message.channel,
@@ -447,9 +489,15 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require('./commands/osu-top.js');
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
+			let guildId = null;
+
+			if (reaction.message.guild) {
+				guildId = reaction.message.guild.id;
+			}
+
 			let tempMessage = {
 				guild: reaction.message.guild,
-				guildId: reaction.message.guild.id,
+				guildId: guildId,
 				content: `e!osu-top ${osuUserId}`,
 				author: user,
 				channel: reaction.message.channel,
