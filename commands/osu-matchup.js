@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
@@ -751,7 +751,7 @@ module.exports = {
 					modPoolNumber = 4;
 				}
 
-				mapsPlayedByBothReadable[winner][modPoolNumber].push(`${dateReadable} - ${getScoreModpool(scoreUser1)} https://osu.ppy.sh/b/${scoreUser1.beatmapId} - Won by: ${usersReadable[winner]} - ${scoreUser1.score} vs ${scoreUser2.score}`);
+				mapsPlayedByBothReadable[winner][modPoolNumber].push(`${dateReadable} - ${getScoreModpool(scoreUser1)} https://osu.ppy.sh/b/${scoreUser1.beatmapId} - Won by: ${usersReadable[winner]} - ${humanReadable(scoreUser1.score)} vs ${humanReadable(scoreUser2.score)}`);
 			}
 
 			//Convert modpool arrays into strings
