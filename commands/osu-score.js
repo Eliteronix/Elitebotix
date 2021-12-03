@@ -78,7 +78,7 @@ module.exports = {
 
 		const dbBeatmap = await getOsuBeatmap(beatmapId, 0);
 		if (!dbBeatmap) {
-			msg.channel.send(`Couldn't find beatmap \`${beatmapId.replace(/`/g, '')}\``);
+			return msg.channel.send(`Couldn't find beatmap \`${beatmapId.replace(/`/g, '')}\``);
 		} else if (dbBeatmap.mode !== 'Standard') {
 			mode = getBeatmapModeId(dbBeatmap);
 		}
