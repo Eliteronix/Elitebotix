@@ -27,6 +27,7 @@ module.exports = {
 		let minutes = 0;
 		let lowerStarLimit = 0;
 		let higherStarLimit = 10;
+		let scoreversion = 0;
 
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
@@ -50,6 +51,8 @@ module.exports = {
 					lowerStarLimit = parseFloat(interaction.options._hoistedOptions[i].value);
 				} else if (interaction.options._hoistedOptions[i].name === 'higherstars') {
 					higherStarLimit = parseFloat(interaction.options._hoistedOptions[i].value);
+				} else if (interaction.options._hoistedOptions[i].name === 'scoreversion') {
+					scoreversion = parseFloat(interaction.options._hoistedOptions[i].value);
 				} else {
 					args.push(interaction.options._hoistedOptions[i].value);
 				}
@@ -657,7 +660,7 @@ module.exports = {
 
 			//Start the knockout lobby
 			const { knockoutLobby } = require('../MOTD/knockoutLobby.js');
-			knockoutLobby(additionalObjects[0], additionalObjects[1], 'Knockout', mappoolInOrder, 'custom', discordUsers, users, true);
+			knockoutLobby(additionalObjects[0], additionalObjects[1], 'Knockout', mappoolInOrder, 'custom', discordUsers, users, true, scoreversion);
 		} else if (args[0].toLowerCase() === 'custom-react-to-play') {
 			//Return if its not triggered by a slash command
 			if (msg.id) {
@@ -1040,7 +1043,7 @@ module.exports = {
 
 				//Start the knockout lobby
 				const { knockoutLobby } = require('../MOTD/knockoutLobby.js');
-				knockoutLobby(additionalObjects[0], additionalObjects[1], 'Knockout', mappoolInOrder, 'custom', discordUsers, users, true);
+				knockoutLobby(additionalObjects[0], additionalObjects[1], 'Knockout', mappoolInOrder, 'custom', discordUsers, users, true, scoreversion);
 			});
 		} else {
 			msg.reply('Please specify what you want to do: `server`, `register`, `unregister`, `mute`, `unmute`, `custom-fixed-players`, `custom-react-to-play`');
