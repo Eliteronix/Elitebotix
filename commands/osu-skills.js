@@ -406,7 +406,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					if (userScores[i].mode !== 'Standard'
 						|| scoringType === 'v2' && userScores[i].scoringType !== 'Score v2'
 						|| scoringType === 'v1' && userScores[i].scoringType !== 'Score'
-						|| tourneyMatch && !userScores[i].tourneyMatch) {
+						|| tourneyMatch && !userScores[i].tourneyMatch
+						|| userScores[i].evaluation === null) {
 						userScores.splice(i, 1);
 						i--;
 					}

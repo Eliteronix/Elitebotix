@@ -792,7 +792,7 @@ module.exports = {
 
 			game.scores.forEach(async (score) => {
 				//Calculate evaluation
-				let evaluation = 0;
+				let evaluation = null;
 
 				let gameScores = [];
 				for (let i = 0; i < game.scores.length; i++) {
@@ -820,7 +820,7 @@ module.exports = {
 					const middleScore = getMiddleScore(sortedScores);
 
 					for (let i = 0; i < gameScores.length; i++) {
-						if (score.userId === gameScores[i].userId) {
+						if (score.userId === gameScores[i].userId && gameScores.length > 1) {
 							evaluation = 1 / parseInt(middleScore) * parseInt(gameScores[i].score);
 						}
 					}
@@ -836,7 +836,7 @@ module.exports = {
 					}
 				});
 
-				if (!existingScore && evaluation) {
+				if (!existingScore) {
 					DBOsuMultiScores.create({
 						osuUserId: score.userId,
 						matchId: match.id,
