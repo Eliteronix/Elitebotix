@@ -27,7 +27,7 @@ module.exports = {
 
 		// Catch case of less than 17 players
 		if (players.length < 17) {
-			return knockoutLobby(client, bancho, bracketName, mappool, 1, players, users, true);
+			return knockoutLobby(client, bancho, bracketName, mappool, 1, players, users, true, 0);
 		}
 
 		// Catch case of qualifiers actually being played
@@ -95,7 +95,7 @@ function divideIntoGroups(client, bancho, bracketName, mappool, lobbyNumber, pla
 		}
 	}
 
-	knockoutLobby(client, bancho, bracketName, mappool, lobbyNumber, thisLobbyPlayers, thisLobbyUsers, false);
+	knockoutLobby(client, bancho, bracketName, mappool, lobbyNumber, thisLobbyPlayers, thisLobbyUsers, false, 0);
 
 	if (otherPlayers.length > 0) {
 		divideIntoGroups(client, bancho, bracketName, mappool, lobbyNumber + 1, otherPlayers, otherUsers);

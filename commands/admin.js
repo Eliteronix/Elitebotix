@@ -634,6 +634,22 @@ module.exports = {
 			// 						'required': true
 			// 					},
 			// 					{
+			// 						'name': 'scoreversion',
+			// 						'description': 'The score version for the custom lobby',
+			// 						'type': 3,
+			// 						'required': true,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Score v1',
+			// 								'value': '0'
+			// 							},
+			// 							{
+			// 								'name': 'Score v2',
+			// 								'value': '3'
+			// 							}
+			// 						]
+			// 					},
+			// 					{
 			// 						'name': 'username',
 			// 						'description': 'The username, id or link of the player',
 			// 						'type': 3,
@@ -747,6 +763,22 @@ module.exports = {
 			// 						'description': 'The higher star rating limit for the custom lobby',
 			// 						'type': 10, // 10 is type Number
 			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'scoreversion',
+			// 						'description': 'The score version for the custom lobby',
+			// 						'type': 3,
+			// 						'required': true,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Score v1',
+			// 								'value': '0'
+			// 							},
+			// 							{
+			// 								'name': 'Score v2',
+			// 								'value': '3'
+			// 							}
+			// 						]
 			// 					},
 			// 				]
 			// 			},
@@ -2564,6 +2596,22 @@ module.exports = {
 									'required': true
 								},
 								{
+									'name': 'scoreversion',
+									'description': 'The score version for the custom lobby',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Score v1',
+											'value': '0'
+										},
+										{
+											'name': 'Score v2',
+											'value': '3'
+										}
+									]
+								},
+								{
 									'name': 'username',
 									'description': 'The username, id or link of the player',
 									'type': 3,
@@ -2677,6 +2725,22 @@ module.exports = {
 									'description': 'The higher star rating limit for the custom lobby',
 									'type': 10, // 10 is type Number
 									'required': true
+								},
+								{
+									'name': 'scoreversion',
+									'description': 'The score version for the custom lobby',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Score v1',
+											'value': '0'
+										},
+										{
+											'name': 'Score v2',
+											'value': '3'
+										}
+									]
 								},
 							]
 						},

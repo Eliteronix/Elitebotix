@@ -4,7 +4,7 @@ const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause, saveOs
 const { assignKnockoutPoints } = require('./givePointsToPlayers.js');
 
 module.exports = {
-	knockoutLobby: async function (client, bancho, bracketName, mappool, lobbyNumber, players, users, isFirstRound) {
+	knockoutLobby: async function (client, bancho, bracketName, mappool, lobbyNumber, players, users, isFirstRound, scoreversion) {
 		//Map [0] has been played already
 		//Send message about which lobby the player is in and who he / she is against
 		await sendLobbyMessages(client, lobbyNumber, players, users);
@@ -101,6 +101,7 @@ module.exports = {
 
 			await lobby.setPassword(password);
 			await channel.sendMessage('!mp lock');
+			await channel.sendMessage(`!mp set 0 ${scoreversion} ${players.length}`);
 			await pause(60000);
 			while (lobby._beatmapId != mappool[mapIndex].id) {
 				await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
@@ -346,7 +347,7 @@ module.exports = {
 						});
 					return await channel.leave();
 				} else {
-					movePlayersIntoFirstSlots(channel, lobby, players);
+					movePlayersIntoFirstSlots(channel, lobby, players, scoreversion);
 					mapIndex++;
 
 					if (lobbyNumber === 1 || lobbyNumber === 'custom') {
@@ -771,7 +772,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 	}
 }
 
-async function movePlayersIntoFirstSlots(channel, lobby, players) {
+async function movePlayersIntoFirstSlots(channel, lobby, players, scoreversion) {
 	await lobby.updateSettings();
 
 	let spotToFillNext = 0;
@@ -786,7 +787,7 @@ async function movePlayersIntoFirstSlots(channel, lobby, players) {
 
 	await pause(10000);
 
-	await channel.sendMessage(`!mp set 0 0 ${players.length}`);
+	await channel.sendMessage(`!mp set 0 ${scoreversion} ${players.length}`);
 }
 
 function calculateKnockoutNumber(players, mapIndex) {
