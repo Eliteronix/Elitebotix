@@ -49,7 +49,7 @@ module.exports = {
 				let sixHoursAgo = new Date();
 				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
 				if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
-					if (match.name.toLowerCase().match(/.+: (.+) vs (.+)/g) || match.name.toLowerCase().match(/.+: (.+) vs. (.+)/g)) {
+					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 						saveOsuMultiScores(match);
 						let now = new Date();
 						let minutesBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60) % 60;
