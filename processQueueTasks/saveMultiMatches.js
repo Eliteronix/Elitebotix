@@ -1,6 +1,5 @@
 const osu = require('node-osu');
-const { DBProcessQueue } = require('../dbObjects');
-const { saveOsuMultiScores, logDatabaseQueries } = require('../utils');
+const { saveOsuMultiScores } = require('../utils');
 
 //Archiving started around 40000000
 
@@ -29,11 +28,11 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Live' && matchID === '50000000') {
-			matchID = '80000000';
+			matchID = '90000000';
 		}
 
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'QA' && matchID === '80000000') {
+		if (process.env.SERVER === 'QA' && matchID === '90000000') {
 			// eslint-disable-next-line no-undef
 			console.log(`Manually deleted task for saving Multi Matches for ${matchID} ${process.env.SERVER}`);
 			return processQueueEntry.destroy();
@@ -47,9 +46,9 @@ module.exports = {
 
 		osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
-				let oneDayAgo = new Date();
-				oneDayAgo.setUTCDate(oneDayAgo.getUTCDate() - 1);
-				if (match.raw_end || Date.parse(match.raw_start) < oneDayAgo) {
+				let sixHoursAgo = new Date();
+				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
+				if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
 					if (match.name.toLowerCase().match(/.+: (.+) vs (.+)/g) || match.name.toLowerCase().match(/.+: (.+) vs. (.+)/g)) {
 						saveOsuMultiScores(match);
 						let now = new Date();
@@ -65,40 +64,36 @@ module.exports = {
 						}
 						channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m ${match.name} done`);
 					}
-					logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBProcessQueue 1');
-					const existingTasks = await DBProcessQueue.findAll({ where: { task: 'saveMultiMatches' } });
-					if (existingTasks.length === 1) {
-						processQueueEntry.destroy();
-						return DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${parseInt(matchID) + 1}`, priority: 0 });
-					} else {
-						return processQueueEntry.destroy();
-						// return console.log(`A task for ${parseInt(matchID) + 1} already exists.`);
-					}
+					//Go next if match found and ended / too long going already
+					processQueueEntry.additions = `${parseInt(matchID) + 1}`;
+					let date = new Date();
+					processQueueEntry.date = date;
+					processQueueEntry.beingExecuted = false;
+					return processQueueEntry.save();
 				}
-				// console.log(`${matchID} has not ended yet`);
+
+				//Go same if match found and not ended / too long going already
 				let date = new Date();
 				date.setUTCMinutes(date.getUTCMinutes() + 1);
-				processQueueEntry.destroy();
-				return DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${matchID}`, priority: 0, date: date });
+				processQueueEntry.date = date;
+				processQueueEntry.beingExecuted = false;
+				return processQueueEntry.save();
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
-					// console.log(`${matchID} could not be found`);
-					logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBProcessQueue 2');
-					const existingTasks = await DBProcessQueue.findAll({ where: { task: 'saveMultiMatches' } });
-					if (existingTasks.length === 1) {
-						processQueueEntry.destroy();
-						return DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${parseInt(matchID) + 1}`, priority: 0 });
-					} else {
-						return processQueueEntry.destroy();
-						// return console.log(`A task for ${parseInt(matchID) + 1} already exists.`);
-					}
+					//Go next if match not found
+					processQueueEntry.additions = `${parseInt(matchID) + 1}`;
+					let date = new Date();
+					processQueueEntry.date = date;
+					processQueueEntry.beingExecuted = false;
+					return processQueueEntry.save();
 				} else {
-					// console.log('processQueueTasks/saveMultiMatches.js', matchID, err);
+					//Go same if error
 					let date = new Date();
 					date.setUTCMinutes(date.getUTCMinutes() + 1);
-					processQueueEntry.destroy();
-					return DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${matchID}`, priority: 0, date: date });
+					processQueueEntry.date = date;
+					processQueueEntry.beingExecuted = false;
+					return processQueueEntry.save();
 				}
 			});
 	},
