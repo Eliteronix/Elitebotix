@@ -798,13 +798,16 @@ module.exports = {
 
 		await processingMessage.delete();
 
+		let sentMessage;
 		if (msg.id) {
-			const sentMessage = await msg.reply({ content: content, files: files });
-			sentMessage.react('🔵');
-			sentMessage.react('🔴');
-			return;
+			sentMessage = await msg.reply({ content: content, files: files });
+		} else {
+			sentMessage = await interaction.followUp({ content: content, files: files });
 		}
-		//return interaction.followUp({ content: content, files: files });
+
+		sentMessage.react('🔵');
+		sentMessage.react('🔴');
+		return;
 	},
 };
 
