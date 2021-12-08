@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP, getBeatmapApprovalStatusImage, logDatabaseQueries, getBeatmapModeId } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP, getBeatmapApprovalStatusImage, logDatabaseQueries, getBeatmapModeId, getGameModeName } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -186,7 +186,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						let elements = [canvas, ctx, scores[i], beatmap, user];
 
-						elements = await drawTitle(elements);
+						elements = await drawTitle(elements, mode);
 
 						elements = await drawCover(elements, mode);
 
@@ -264,7 +264,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						let elements = [canvas, ctx, score, beatmap, user];
 
-						elements = await drawTitle(elements);
+						elements = await drawTitle(elements, mode);
 
 						elements = await drawCover(elements, mode);
 
@@ -303,7 +303,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 	}
 }
 
-async function drawTitle(input) {
+async function drawTitle(input, mode) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let score = input[2];
@@ -316,6 +316,11 @@ async function drawTitle(input) {
 
 	ctx.drawImage(beatmapStatusIcon, 10, 5, canvas.height / 500 * 35, canvas.height / 500 * 35);
 	ctx.drawImage(modePic, canvas.width / 1000 * 10, canvas.height / 500 * 40, canvas.height / 500 * 35, canvas.height / 500 * 35);
+
+	if (gameMode === 'osu' && mode !== 0) {
+		const modePic = await Canvas.loadImage(`./other/mode-${getGameModeName(mode)}.png`);
+		ctx.drawImage(modePic, canvas.width / 1000 * 20, canvas.height / 500 * 40, canvas.height / 500 * 35, canvas.height / 500 * 35);
+	}
 
 	// Write the title of the beatmap
 	ctx.font = '30px comfortaa, sans-serif';
