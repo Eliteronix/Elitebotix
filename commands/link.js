@@ -2,7 +2,7 @@ const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'link',
-	aliases: ['invite'],
+	aliases: ['invite', 'invitelink'],
 	description: 'Sends a link to add the bot to a server',
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'MANAGE_GUILD',
