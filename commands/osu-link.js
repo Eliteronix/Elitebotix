@@ -67,6 +67,14 @@ module.exports = {
 };
 
 async function connect(msg, args, interaction, additionalObjects, osuApi, bancho, discordUser, guildPrefix) {
+	if (discordUser.osuVerified) {
+		if (msg.id) {
+			return msg.reply(`You already connected and verified your connection of your discord account to the osu! account \`${discordUser.osuName}\`.\nIf you want to disconnect it please use \`${guildPrefix}osu-link disconnect\`.`);
+		}
+
+		return interaction.editReply(`You already connected and verified your connection of your discord account to the osu! account \`${discordUser.osuName}\`.\nIf you want to disconnect it please use \`${guildPrefix}osu-link disconnect\`.`);
+	}
+
 	if (args[0]) {
 		if (args[1]) {
 			args.shift();
@@ -87,14 +95,6 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 				const existingVerifiedDiscordUser = await DBDiscordUsers.findOne({
 					where: { osuUserId: osuUser.id, osuVerified: true },
 				});
-
-				if (discordUser.osuVerified == true) {
-					if (msg.id) {
-						return msg.reply(`You already connected and verified your connection of your discord account to the osu! account \`${args[0].replace(/`/g, '')}\``);
-					}
-
-					return interaction.editReply(`You already connected and verified your connection of your discord account to the osu! account \`${args[0].replace(/`/g, '')}\``);
-				}
 
 				if (existingVerifiedDiscordUser) {
 					if (existingVerifiedDiscordUser.userId === msg.author.id) {
