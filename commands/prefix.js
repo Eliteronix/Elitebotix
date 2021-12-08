@@ -12,7 +12,7 @@ module.exports = {
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
 	guildOnly: true,
-	args: false,
+	// args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
 	tags: 'server-admin',
@@ -31,8 +31,8 @@ module.exports = {
 		});
 
 		if (guild) {
-			if (args[0]){
-			//Set new prefix for the guild
+			if (args[0]) {
+				//Set new prefix for the guild
 				guild.customPrefixUsed = true;
 				guild.customPrefix = args[0];
 				guild.save();
