@@ -403,7 +403,7 @@ module.exports = {
 
 		let files = [];
 		//Create as an attachment
-		const matchUpStats = new Discord.MessageAttachment(canvas.toBuffer(), `osu-matchup-${users[0]}-${users[0]}.png`);
+		const matchUpStats = new Discord.MessageAttachment(canvas.toBuffer(), `osu-matchup-${users[0]}-${users[1]}.png`);
 
 		files.push(matchUpStats);
 
@@ -798,10 +798,16 @@ module.exports = {
 
 		await processingMessage.delete();
 
+		let sentMessage;
 		if (msg.id) {
-			return msg.reply({ content: content, files: files });
+			sentMessage = await msg.reply({ content: content, files: files });
+		} else {
+			sentMessage = await interaction.followUp({ content: content, files: files });
 		}
-		return interaction.followUp({ content: content, files: files });
+
+		sentMessage.react('🔵');
+		sentMessage.react('🔴');
+		return;
 	},
 };
 
