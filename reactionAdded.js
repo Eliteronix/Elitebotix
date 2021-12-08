@@ -515,7 +515,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	}
 
 	if (reaction._emoji.name === '🔵' || reaction._emoji.name === '🔴') {
-		//Check if it is a profile
+		//Check if it is a matchup
 		if (reaction.message.attachments.first().name.startsWith('osu-matchup')) {
 			//get the osuUserId used
 			let osuUserId;
