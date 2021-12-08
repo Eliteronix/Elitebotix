@@ -797,11 +797,11 @@ module.exports = {
 		}
 
 		await processingMessage.delete();
-		
+
 		if (msg.id) {
 			const sentMessage = await msg.reply({ content: content, files: files });
-			sentMessage .react('🔵');
-			sentMessage .react('🔴');
+			sentMessage.react('🔵');
+			sentMessage.react('🔴');
 			return;
 		}
 		//return interaction.followUp({ content: content, files: files });

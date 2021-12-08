@@ -517,11 +517,11 @@ module.exports = async function (reaction, user, additionalObjects) {
 	if (reaction._emoji.name === '🔵' || reaction._emoji.name === '🔴') {
 		//Check if it is a profile
 		if (reaction.message.attachments.first().name.startsWith('osu-matchup')) {
-		//get the osuUserId used
+			//get the osuUserId used
 			let osuUserId;
-			if (reaction._emoji.name === '🔴'){
+			if (reaction._emoji.name === '🔴') {
 				osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
-			} else{
+			} else {
 				osuUserId = reaction.message.attachments.first().name.replace('osu-matchup-', '').replace(/-.+/, '');
 			}
 			//Setup artificial arguments
@@ -557,7 +557,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	if (reaction._emoji.name === '🔴') {
 		//Check if it is a profile
 		if (reaction.message.attachments.first().name.startsWith('matchUpStats')) {
-		//get the osuUserId used
+			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 
 			//Setup artificial arguments
