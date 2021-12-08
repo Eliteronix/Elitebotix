@@ -12,7 +12,7 @@ module.exports = {
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
 	guildOnly: true,
-	args: true,
+	// args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
 	tags: 'server-admin',
@@ -31,23 +31,42 @@ module.exports = {
 		});
 
 		if (guild) {
-			//Set new prefix for the guild
-			guild.customPrefixUsed = true;
-			guild.customPrefix = args[0];
-			guild.save();
+			if (args[0]) {
+				//Set new prefix for the guild
+				guild.customPrefixUsed = true;
+				guild.customPrefix = args[0];
+				guild.save();
 
-			if (msg.id) {
-				return msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+				if (msg.id) {
+					return msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+				}
+				return interaction.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+			} else {
+				guild.customPrefixUsed = false;
+				guild.customPrefix = 'e!';
+				guild.save();
+
+				if (msg.id) {
+					return msg.reply('Prefix has been reset to default. (`e!`)');
+				}
+				return interaction.reply('Prefix has been reset to default. (`e!`)');
 			}
-			return interaction.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
 		} else {
-			//Create new record for the guild in the db
-			DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, customPrefixUsed: true, customPrefix: args[0] });
-
-			if (msg.id) {
-				return msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+			if (args[0]) {
+				//Create new record for the guild in the db
+				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, customPrefixUsed: true, customPrefix: args[0] });
+				if (msg.id) {
+					return msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+				}
+				return interaction.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+			} else {
+				//Create new record for the guild in the db
+				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, customPrefixUsed: false, customPrefix: 'e!' });
+				if (msg.id) {
+					return msg.reply('Prefix has been reset to default. (`e!`)');
+				}
+				return interaction.reply('Prefix has been reset to default. (`e!`)');
 			}
-			return interaction.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
 		}
 	},
 };
