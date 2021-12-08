@@ -42,22 +42,31 @@ module.exports = {
 				}
 				return interaction.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
 			} else {
-				guild.customPrefixUsed = true;
+				guild.customPrefixUsed = false;
 				guild.customPrefix = 'e!';
 				guild.save();
 
 				if (msg.id) {
-					return msg.reply('Prefix has been reset to default');
+					return msg.reply('Prefix has been reset to default. (`e!`)');
 				}
-				return interaction.reply('Prefix has been reset to default');
+				return interaction.reply('Prefix has been reset to default. (`e!`)');
 			}
 		} else {
-			//Create new record for the guild in the db
-			DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, customPrefixUsed: true, customPrefix: args[0] });
+			if (args[0]) {
+				//Create new record for the guild in the db
+				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, customPrefixUsed: true, customPrefix: args[0] });
+				if (msg.id) {
+					return msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+				}
+				return interaction.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
+			} else {
+				//Create new record for the guild in the db
+				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, customPrefixUsed: false, customPrefix: 'e!' });
+				if (msg.id) {
+					return msg.reply('Prefix has been reset to default. (`e!`)');
+				}
+				return interaction.reply('Prefix has been reset to default. (`e!`)');
+			}
 		}
-		if (msg.id) {
-			return msg.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
-		}
-		return interaction.reply(`New prefix has been set:\`\`\`${args[0]}\`\`\``);
 	},
 };
