@@ -84,7 +84,15 @@ module.exports = {
 		date.setUTCHours(date.getUTCHours() + hours);
 		date.setUTCMinutes(date.getUTCMinutes() + minutes);
 
-		if (now.getTime() === date.getTime() || years < 0 || months < 0 || weeks < 0 || days < 0 || hours < 0 || minutes < 0) {
+		if (years < 0 || months < 0 || weeks < 0 || days < 0 || hours < 0 || minutes < 0) {
+			const guildPrefix = await getGuildPrefix(msg);
+			if (msg.id) {
+				return msg.reply(`You aren't allowed to use negative values for the time.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
+			}
+			return interaction.reply({ content: `You aren't allowed to use negative values for the time.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``, ephemeral: true });
+		}
+
+		if (now.getTime() === date.getTime()) {
 			const guildPrefix = await getGuildPrefix(msg);
 			if (msg.id) {
 				return msg.reply(`You didn't specify when I should remind you.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
