@@ -32,7 +32,12 @@ module.exports = {
 		}
 
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'QA' && matchID === '90000000') {
+		if (process.env.SERVER === 'QA' && matchID === '56267496') {
+			matchID = '90000000';
+		}
+
+		// eslint-disable-next-line no-undef
+		if (process.env.SERVER === 'QA' && matchID === '56267496') {
 			// eslint-disable-next-line no-undef
 			console.log(`Manually deleted task for saving Multi Matches for ${matchID} ${process.env.SERVER}`);
 			return processQueueEntry.destroy();
@@ -65,7 +70,12 @@ module.exports = {
 						channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m ${match.name} done`);
 					}
 					//Go next if match found and ended / too long going already
-					processQueueEntry.additions = `${parseInt(matchID) + 1}`;
+					// eslint-disable-next-line no-undef
+					if (process.env.SERVER === 'Live') {
+						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
+					} else {
+						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
+					}
 					let date = new Date();
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
@@ -82,7 +92,12 @@ module.exports = {
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
 					//Go next if match not found
-					processQueueEntry.additions = `${parseInt(matchID) + 1}`;
+					// eslint-disable-next-line no-undef
+					if (process.env.SERVER === 'Live') {
+						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
+					} else {
+						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
+					}
 					let date = new Date();
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
