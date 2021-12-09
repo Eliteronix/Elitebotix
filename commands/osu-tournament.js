@@ -39,9 +39,9 @@ module.exports = {
 
 		if (!userScores.length) {
 			if (msg.id) {
-				return msg.reply(`No tournament matches found with the acronym ${args.join(' ').replace(/`/g, '')}.`);
+				return msg.reply(`No tournament matches found with the acronym \`${args.join(' ').replace(/`/g, '')}\`.`);
 			}
-			return interaction.followUp(`No tournament matches found with the acronym ${args.join(' ').replace(/`/g, '')}.`);
+			return interaction.followUp(`No tournament matches found with the acronym \`${args.join(' ').replace(/`/g, '')}\`.`);
 		} else {
 			quicksort(userScores);
 			let matchesPlayed = [];
