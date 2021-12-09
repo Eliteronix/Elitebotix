@@ -756,7 +756,7 @@ module.exports = {
 					scoringType = 'V2';
 				}
 
-				mapsPlayedByBothReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(scoreUser1)} https://osu.ppy.sh/b/${scoreUser1.beatmapId} - Won by: ${usersReadable[winner]} - ${humanReadable(scoreUser1.score)} vs ${humanReadable(scoreUser2.score)}`);
+				mapsPlayedByBothReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(scoreUser1)} https://osu.ppy.sh/b/${scoreUser1.beatmapId} - Won by: ${usersReadable[winner]} (by ${humanReadable(Math.abs(parseInt(scoreUser1.score) - parseInt(scoreUser2.score)))}) - ${humanReadable(scoreUser1.score)} vs ${humanReadable(scoreUser2.score)}`);
 			}
 
 			//Convert modpool arrays into strings
