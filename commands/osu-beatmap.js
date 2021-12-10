@@ -100,6 +100,16 @@ async function getBeatmap(msg, beatmap) {
 	const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 	processingMessage.delete();
 	sentMessage.react('<:COMPARE:827974793365159997>');
+	if (beatmap.mode === 'Standard') {
+		sentMessage.react('<:EZ:918920760586805259>');
+		sentMessage.react('<:HT:918921193426411544>');
+		sentMessage.react('<:HD:918922015182827531>');
+		sentMessage.react('<:DT:918920670023397396>');
+		sentMessage.react('<:HR:918938816377671740>');
+		sentMessage.react('<:FL:918920836755382343>');
+		sentMessage.react('<:HDHR:918935327215861760>');
+		sentMessage.react('<:HDDT:918935350125142036>');
+	}
 }
 
 async function drawTitle(input) {
