@@ -39,9 +39,9 @@ module.exports = {
 				//Return if the bug is too long
 				if (bug.length > 200) {
 					if (msg.id) {
-						return msg.reply('Your bug report is too long. Please shorten it.');
+						return msg.reply(`Your bug report is too long. Please shorten it. (Max: 200 characters, currently: ${bug.length})`);
 					}
-					return interaction.reply('Your bug report is too long. Please shorten it.');
+					return interaction.reply(`Your bug report is too long. Please shorten it. (Max: 200 characters, currently: ${bug.length})`);
 				}
 				//send the bug into the correct Channel
 				createJiraIssue('10006', `[BUG] ${bug} - ${msg.author.username}#${msg.author.discriminator}`);
@@ -63,9 +63,9 @@ module.exports = {
 				//Return if the bug is too long
 				if (feature.length > 200) {
 					if (msg.id) {
-						return msg.reply('Your feature request is too long. Please shorten it.');
+						return msg.reply(`Your feature request is too long. Please shorten it. (Max: 200 characters, currently: ${feature.length})`);
 					}
-					return interaction.reply('Your feature request is too long. Please shorten it.');
+					return interaction.reply(`Your feature request is too long. Please shorten it. (Max: 200 characters, currently: ${feature.length})`);
 				}
 				//send the feature into the correct Channel
 				createJiraIssue('10007', `[FEATURE] ${feature} - ${msg.author.username}#${msg.author.discriminator}`);
@@ -87,9 +87,9 @@ module.exports = {
 				//Return if the bug is too long
 				if (feedback.length > 200) {
 					if (msg.id) {
-						return msg.reply('Your feedback is too long. Please shorten it.');
+						return msg.reply(`Your feedback is too long. Please shorten it. (Max: 200 characters, currently: ${feedback.length})`);
 					}
-					return interaction.reply('Your feedback is too long. Please shorten it.');
+					return interaction.reply(`Your feedback is too long. Please shorten it. (Max: 200 characters, currently: ${feedback.length})`);
 				}
 				//send the feedback into the correct Channel
 				createJiraIssue('10005', `[FEEDBACK] ${feedback} - ${msg.author.username}#${msg.author.discriminator}`);
