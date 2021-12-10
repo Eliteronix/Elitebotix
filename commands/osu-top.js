@@ -342,7 +342,7 @@ async function drawTopPlays(input, server, mode, msg, recentScores, showLimit) {
 		ctx.font = 'bold 18px comfortaa, sans-serif';
 		ctx.fillStyle = '#FF66AB';
 		ctx.textAlign = 'right';
-		ctx.fillText(humanReadable(Math.floor(scores[i].pp)) + 'pp', (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
+		ctx.fillText(humanReadable(Math.round(scores[i].pp)) + 'pp', (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
 
 		const dbBeatmap = await getOsuBeatmap(scores[i].beatmapId, 0);
 		let beatmapTitle = `${dbBeatmap.title} by ${dbBeatmap.artist}`;
