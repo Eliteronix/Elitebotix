@@ -67,7 +67,7 @@ module.exports = {
 };
 
 async function connect(msg, args, interaction, additionalObjects, osuApi, bancho, discordUser, guildPrefix) {
-	if (discordUser.osuVerified) {
+	if (discordUser && discordUser.osuVerified) {
 		if (msg.id) {
 			return msg.reply(`You already connected and verified your connection of your discord account to the osu! account \`${discordUser.osuName}\`.\nIf you want to disconnect it please use \`${guildPrefix}osu-link disconnect\`.`);
 		}
