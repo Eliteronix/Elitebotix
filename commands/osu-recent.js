@@ -564,7 +564,11 @@ async function drawAccInfo(input, mode, mapRank) {
 	if (score.rank === 'F') {
 		//Calculate Completion
 		const beatmapObjects = parseInt(beatmap.circles) + parseInt(beatmap.sliders) + parseInt(beatmap.spinners);
-		const scoreHits = parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss);
+		let scoreHits = parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss);
+		//Mania needs to add geki and katu
+		if (mode === 3) {
+			scoreHits = scoreHits + parseInt(score.counts.geki) + parseInt(score.counts.katu);
+		}
 		const completion = 100 / beatmapObjects * scoreHits;
 
 		//Draw completion
