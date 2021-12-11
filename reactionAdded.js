@@ -554,6 +554,58 @@ module.exports = async function (reaction, user, additionalObjects) {
 		}
 	}
 
+	//For the compare emoji
+	if (reaction._emoji.id === '918920760586805259') {
+		if (reaction.message.attachments.first().name.startsWith('osu-beatmap')) {
+			const beatmapId = reaction.message.content.replace('osu-beatmap-', '').replace(/-.+/gm, '');
+
+			//get the mods used
+			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+
+			let mods = getMods(modBits);
+
+			console.log(reaction._emoji);
+
+			if (!mods.includes('EZ')) {
+				mods.push('EZ');
+			} else {
+				mods.splice(mods.indexOf('EZ'), 1);
+			}
+
+			if (!mods[0]) {
+				mods = ['NM'];
+			}
+
+			let args = [beatmapId, `--${mods.join('')}`];
+
+			const command = require('./commands/osu-beatmap.js');
+
+			//Set author of a temporary message copy to the reacting user to not break the commands
+			let guildId = null;
+
+			if (reaction.message.guild) {
+				guildId = reaction.message.guild.id;
+			}
+
+			let tempMessage = {
+				guild: reaction.message.guild,
+				guildId: guildId,
+				content: `e!osu-score ${beatmapId} --${mods.join('')}`,
+				author: user,
+				channel: reaction.message.channel,
+			};
+
+			try {
+				command.execute(tempMessage, args, null, additionalObjects);
+			} catch (error) {
+				console.error(error);
+				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+			}
+		}
+	}
+
 	if (reaction.message.channel.type === 'DM') {
 		return;
 	}

@@ -94,7 +94,7 @@ async function getBeatmap(msg, beatmap) {
 	await drawBackground(elements);
 
 	//Create as an attachment
-	const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-beatmap-${beatmap.beatmapId}.png`);
+	const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-beatmap-${beatmap.beatmapId}-${beatmap.mods}.png`);
 
 	//Send attachment
 	const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
