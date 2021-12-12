@@ -1,6 +1,7 @@
 const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
 const { pause, logDatabaseQueries } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
+const { currentElitiriCup } = require('../config.json');
 
 let potentialNMQualifierMaps = [];
 let potentialHDQualifierMaps = [];
@@ -45,10 +46,10 @@ let potentialDTGrandfinalMaps = [];
 let potentialFMGrandfinalMaps = [];
 
 module.exports = {
-	name: 'ecs2021-admin',
+	name: 'elitiri-admin',
 	//aliases: ['osu-map', 'beatmap-info'],
 	description: 'Admin control for the Elitiri Cup',
-	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <osuPlayerID>',
+	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <osuPlayerID> | slashCommands',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -65,22 +66,22 @@ module.exports = {
 		}
 
 		if (args[0] === 'sr') {
-			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 1');
+			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 1');
 			const topElitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Top Bracket' }
 			});
 
-			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 2');
+			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 2');
 			const middleElitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Middle Bracket' }
 			});
 
-			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 3');
+			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 3');
 			const lowerElitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Lower Bracket' }
 			});
 
-			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 4');
+			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 4');
 			const beginnerElitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Beginner Bracket' }
 			});
@@ -158,7 +159,7 @@ module.exports = {
 				return msg.reply(`${args[1]} is not a valid target bracket. It should be \`all\`, \`top\`, \`middle\`, \`lower\` or \`beginner\` instead.`);
 			}
 
-			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 5');
+			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 5');
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: 'Elitiri Cup Summer 2021' }
 			});
@@ -181,7 +182,7 @@ module.exports = {
 				}
 			} else if (targetGroup === 'Players with missing submissions') {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
-					logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 1');
+					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 1');
 					let submissions = await DBElitiriCupSubmissions.findAll({
 						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
 					});
@@ -242,14 +243,14 @@ module.exports = {
 				return msg.reply(`${args[0]} is not a valid target group. It should be \`everyone\`, \`noAvailability\` or \`noSubmissions\` instead.`);
 			}
 
-			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 6');
+			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 6');
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: 'Elitiri Cup Summer 2021' }
 			});
 
 			if (targetGroup === 'Players with missing submissions') {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
-					logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 2');
+					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 2');
 					let submissions = await DBElitiriCupSubmissions.findAll({
 						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
 					});
@@ -287,7 +288,7 @@ module.exports = {
 				}
 			} else if (targetGroup === 'A specific player') {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
-					logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 3');
+					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 3');
 					let submissions = await DBElitiriCupSubmissions.findAll({
 						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
 					});
@@ -325,7 +326,7 @@ module.exports = {
 				}
 			}
 		} else if (args[0] === 'placement') {
-			logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSignUp 7');
+			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 7');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: { osuUserId: args[1], tournamentName: 'Elitiri Cup Summer 2021' }
 			});
@@ -339,29 +340,232 @@ module.exports = {
 			elitiriSignUp.save();
 
 			msg.reply(`Placement of \`${elitiriSignUp.osuName}\` set to \`${elitiriSignUp.rankAchieved}\``);
+		} else if (args[0] === 'slashCommands') {
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'elitiri-check',
+					description: `Sends an info card about the viability of the beatmap for the ${currentElitiriCup}`,
+					options: [
+						{
+							'name': 'modpool',
+							'description': 'The pool the map should be checked for',
+							'type': 3,
+							'required': true,
+							'choices': [
+								{
+									'name': 'NoMod',
+									'value': 'NM'
+								},
+								{
+									'name': 'Hidden',
+									'value': 'HD'
+								},
+								{
+									'name': 'HardRock',
+									'value': 'HR'
+								},
+								{
+									'name': 'DoubleTime',
+									'value': 'DT'
+								},
+								{
+									'name': 'FreeMod',
+									'value': 'FM'
+								},
+							]
+						},
+						{
+							'name': 'id',
+							'description': 'The ID of the map (link also works)',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'bracket',
+							'description': 'The bracket the map should be checked for',
+							'type': 3,
+							'choices': [
+								{
+									'name': 'Top Bracket',
+									'value': 'top'
+								},
+								{
+									'name': 'Middle Bracket',
+									'value': 'middle'
+								},
+								{
+									'name': 'Lower Bracket',
+									'value': 'lower'
+								},
+								{
+									'name': 'Beginner Bracket',
+									'value': 'beginner'
+								}
+							]
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'elitiri-submit',
+					description: `Allows you to submit beatmaps for the ${currentElitiriCup}`,
+					options: [
+						{
+							'name': 'modpool',
+							'description': 'The pool the map should be submitted for',
+							'type': 3,
+							'required': true,
+							'choices': [
+								{
+									'name': 'NoMod',
+									'value': 'NM'
+								},
+								{
+									'name': 'Hidden',
+									'value': 'HD'
+								},
+								{
+									'name': 'HardRock',
+									'value': 'HR'
+								},
+								{
+									'name': 'DoubleTime',
+									'value': 'DT'
+								},
+								{
+									'name': 'FreeMod',
+									'value': 'FM'
+								},
+							]
+						},
+						{
+							'name': 'id',
+							'description': 'The ID of the map (link also works)',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'bracket',
+							'description': 'The bracket the map should be checked for',
+							'type': 3,
+							'choices': [
+								{
+									'name': 'Top Bracket',
+									'value': 'top'
+								},
+								{
+									'name': 'Middle Bracket',
+									'value': 'middle'
+								},
+								{
+									'name': 'Lower Bracket',
+									'value': 'lower'
+								},
+								{
+									'name': 'Beginner Bracket',
+									'value': 'beginner'
+								}
+							]
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'elitiri-cup',
+					description: `Allows you to sign up for the ${currentElitiriCup}`,
+					options: [
+						{
+							'name': 'register',
+							'description': `Register for the ${currentElitiriCup}`,
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'upperlimit',
+									'description': 'The star rating of the desired upper limit of your bracket',
+									'type': 10, // 10 is type Number
+									'required': true,
+								},
+								{
+									'name': 'lowerlimit',
+									'description': 'The star rating of the desired lower limit of your bracket',
+									'type': 10, // 10 is type Number
+									'required': true,
+								}
+							]
+						},
+						{
+							'name': 'unregister',
+							'description': `Unregister from the ${currentElitiriCup}`,
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'server',
+							'description': 'Get a link to the server of the tournament',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'avilability',
+							'description': 'Set your availability for the tournament',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'earlysaturday',
+									'description': 'The earliest you can play saturday',
+									'type': 10, // 10 is type Number
+									'required': true,
+								},
+								{
+									'name': 'latesaturday',
+									'description': 'The latest you can play saturday',
+									'type': 10, // 10 is type Number
+									'required': true,
+								},
+								{
+									'name': 'earlysunday',
+									'description': 'The earliest you can play sunday',
+									'type': 10, // 10 is type Number
+									'required': true,
+								},
+								{
+									'name': 'latesunday',
+									'description': 'The latest you can play sunday',
+									'type': 10, // 10 is type Number
+									'required': true,
+								}
+							]
+						},
+					]
+				}
+			});
+
+			msg.reply(`${currentElitiriCup}'s slash commands have been updated`);
 		} else if (args[0] === 'createPools') {
 			let allMaps = [];
 			let rowOffset;
 			if (args[1] === 'top') {
-				logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 4');
+				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 4');
 				allMaps = await DBElitiriCupSubmissions.findAll({
 					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Top Bracket' }
 				});
 				rowOffset = 78;
 			} else if (args[1] === 'middle') {
-				logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 5');
+				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 5');
 				allMaps = await DBElitiriCupSubmissions.findAll({
 					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Middle Bracket' }
 				});
 				rowOffset = 53;
 			} else if (args[1] === 'lower') {
-				logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 6');
+				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 6');
 				allMaps = await DBElitiriCupSubmissions.findAll({
 					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Lower Bracket' }
 				});
 				rowOffset = 28;
 			} else if (args[1] === 'beginner') {
-				logDatabaseQueries(4, 'commands/ecs2021-admin.js DBElitiriCupSubmissions 7');
+				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 7');
 				allMaps = await DBElitiriCupSubmissions.findAll({
 					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Beginner Bracket' }
 				});

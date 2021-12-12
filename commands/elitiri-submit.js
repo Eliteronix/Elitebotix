@@ -2,11 +2,12 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
 const { getGuildPrefix, pause, getIDFromPotentialOsuLink, logDatabaseQueries } = require('../utils.js');
+const { currentElitiriCup } = require('../config.json');
 
 module.exports = {
-	name: 'ecs2021-submit',
+	name: 'elitiri-submit',
 	//aliases: ['osu-map', 'beatmap-info'],
-	description: 'Allows you to submit beatmaps for the Elitiri Cup Summer 2021',
+	description: `Allows you to submit beatmaps for the ${currentElitiriCup}`,
 	usage: '<NM/HD/HR/DT/FM> <id> | <list>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
@@ -16,12 +17,12 @@ module.exports = {
 	args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
-	tags: 'ecs2021',
+	tags: 'elitiri',
 	prefixCommand: true,
 	async execute(msg, args) {
-		logDatabaseQueries(4, 'commands/ecs2021-submit.js DBElitiriCupSignUp');
+		logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSignUp');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-			where: { tournamentName: 'Elitiri Cup Summer 2021', userId: msg.author.id }
+			where: { tournamentName: currentElitiriCup, userId: msg.author.id }
 		});
 
 		if (!elitiriSignUp) {
@@ -29,9 +30,9 @@ module.exports = {
 		}
 
 		if (args[0].toLowerCase() === 'list') {
-			logDatabaseQueries(4, 'commands/ecs2021-submit.js DBElitiriCupSubmissions 1');
+			logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSubmissions 1');
 			const submissions = await DBElitiriCupSubmissions.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUp.osuUserId }
+				where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUp.osuUserId }
 			});
 
 			const guildPrefix = await getGuildPrefix(msg);
@@ -162,9 +163,9 @@ module.exports = {
 			.then(async (beatmaps) => {
 				getBeatmap(msg, args);
 
-				logDatabaseQueries(4, 'commands/ecs2021-submit.js DBElitiriCupSubmissions 2');
+				logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSubmissions 2');
 				const existingMap = await DBElitiriCupSubmissions.findOne({
-					where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUp.osuUserId, beatmapId: beatmaps[0].id }
+					where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUp.osuUserId, beatmapId: beatmaps[0].id }
 				});
 
 				const guildPrefix = await getGuildPrefix(msg);
@@ -345,16 +346,16 @@ module.exports = {
 				}
 
 				if (viabilityEmbed.title.startsWith('You have submitted the beatmap for the tournament')) {
-					logDatabaseQueries(4, 'commands/ecs2021-submit.js DBElitiriCupSubmissions 3');
+					logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSubmissions 3');
 					const submittedModMap = await DBElitiriCupSubmissions.findOne({
-						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUp.osuUserId, modPool: args[0].toUpperCase() }
+						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUp.osuUserId, modPool: args[0].toUpperCase() }
 					});
 
 					if (submittedModMap) {
 						submittedModMap.osuUserId = elitiriSignUp.osuUserId;
 						submittedModMap.osuName = elitiriSignUp.osuName;
 						submittedModMap.bracketName = elitiriSignUp.bracketName;
-						submittedModMap.tournamentName = 'Elitiri Cup Summer 2021';
+						submittedModMap.tournamentName = currentElitiriCup;
 						submittedModMap.modPool = args[0].toUpperCase();
 						submittedModMap.title = beatmaps[0].title;
 						submittedModMap.artist = beatmaps[0].artist;
@@ -375,7 +376,7 @@ module.exports = {
 							osuUserId: elitiriSignUp.osuUserId,
 							osuName: elitiriSignUp.osuName,
 							bracketName: elitiriSignUp.bracketName,
-							tournamentName: 'Elitiri Cup Summer 2021',
+							tournamentName: currentElitiriCup,
 							modPool: args[0].toUpperCase(),
 							title: beatmaps[0].title,
 							artist: beatmaps[0].artist,

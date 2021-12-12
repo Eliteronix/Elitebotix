@@ -1,10 +1,11 @@
 const { DBDiscordUsers, DBElitiriCupSignUp, DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix, logDatabaseQueries } = require('../utils');
+const { currentElitiriCup } = require('../config.json');
 
 module.exports = {
-	name: 'osu-elitiri-cup',
-	aliases: ['elitiri-cup', 'elitiri-cup-summer', 'elitiri-cup-summer-2021', 'ecs'],
-	description: 'Allows you to sign up for the `Elitiri Cup Summer 2021` tournament!',
+	name: 'elitiri-cup',
+	aliases: ['ec'],
+	description: `Allows you to sign up for the \`${currentElitiriCup}\` tournament!`,
 	usage: '<register> <desired upper SR limit> <desired lower SR limit> | <unregister> | <server> | <availability>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
@@ -14,7 +15,7 @@ module.exports = {
 	args: true,
 	cooldown: 10,
 	//noCooldownMessage: true,
-	tags: 'ecs2021',
+	tags: 'elitiri',
 	prefixCommand: true,
 	async execute(msg, args) {
 		if (args[0].toLowerCase() === 'server') {

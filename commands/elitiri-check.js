@@ -2,11 +2,12 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBElitiriCupSignUp } = require('../dbObjects.js');
 const { getIDFromPotentialOsuLink, logDatabaseQueries } = require('../utils.js');
+const { currentElitiriCup } = require('../config.json');
 
 module.exports = {
-	name: 'ecs2021-check',
+	name: 'elitiri-check',
 	//aliases: ['osu-map', 'beatmap-info'],
-	description: 'Sends an info card about the viability of the beatmap for the Elitiri Cup Summer 2021',
+	description: `Sends an info card about the viability of the beatmap for the ${currentElitiriCup}`,
 	usage: '<NM/HD/HR/DT/FM> <id> [Bracket]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
@@ -16,12 +17,12 @@ module.exports = {
 	args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
-	tags: 'ecs2021',
+	tags: 'elitiri',
 	prefixCommand: true,
 	async execute(msg, args) {
-		logDatabaseQueries(4, 'commands/ecs2021-check.js DBElitiriCupSignUp');
+		logDatabaseQueries(4, 'commands/elitiri-check.js DBElitiriCupSignUp');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-			where: { tournamentName: 'Elitiri Cup Summer 2021', userId: msg.author.id }
+			where: { tournamentName: currentElitiriCup, userId: msg.author.id }
 		});
 
 		if (!elitiriSignUp && !args[2]) {
