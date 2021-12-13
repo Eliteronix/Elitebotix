@@ -27,8 +27,8 @@ module.exports = {
 		let matchID = args[0];
 
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'Live' && matchID === '50000000') {
-			matchID = '90000000';
+		if (process.env.SERVER === 'Live' && matchID === '90305374') {
+			matchID = '90305375';
 		}
 
 		// eslint-disable-next-line no-undef
