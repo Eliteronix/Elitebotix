@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBElitiriCupSignUp, DBProcessQueue } = require('../dbObjects');
-const { getGuildPrefix, logDatabaseQueries } = require('../utils');
+const { getGuildPrefix, logDatabaseQueries, populateMsgFromInteraction } = require('../utils');
 const { currentElitiriCup } = require('../config.json');
 
 module.exports = {
@@ -17,7 +17,45 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'elitiri',
 	prefixCommand: true,
-	async execute(msg, args) {
+	// eslint-disable-next-line no-unused-vars
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			args = [interaction.options._subcommand];
+
+			if (interaction.options._subcommand === 'register') {
+				let upperlimit;
+				let lowerlimit;
+				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+					if (interaction.options._hoistedOptions[i].name === 'upperlimit') {
+						upperlimit = interaction.options._hoistedOptions[i].value;
+					} else {
+						lowerlimit = interaction.options._hoistedOptions[i].value;
+					}
+				}
+				args.push(upperlimit);
+				args.push(lowerlimit);
+			} else if (interaction.options._subcommand === 'availability') {
+				let earlysaturday;
+				let latesaturday;
+				let earlysunday;
+				let latesunday;
+				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+					if (interaction.options._hoistedOptions[i].name === 'earlysaturday') {
+						earlysaturday = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'latesaturday') {
+						latesaturday = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'earlysunday') {
+						earlysunday = interaction.options._hoistedOptions[i].value;
+					} else {
+						latesunday = interaction.options._hoistedOptions[i].value;
+					}
+				}
+				args.push(`${earlysaturday}-${latesaturday}`);
+				args.push(`${earlysunday}-${latesunday}`);
+			}
+		}
 		if (args[0].toLowerCase() === 'server') {
 			sendMessage(msg, 'The discord server for the competition can be found here: <https://discord.com/invite/Asz5Gfe>\nAfter joining be sure to head to <#727987472772104272> and assign yourself the Elitiri Cup role!\nEverything else will be done automatically when you registered!');
 		} else if (args[0].toLowerCase() === 'register') {

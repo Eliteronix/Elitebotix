@@ -508,7 +508,7 @@ module.exports = {
 							'type': 1, // 1 is type SUB_COMMAND
 						},
 						{
-							'name': 'avilability',
+							'name': 'availability',
 							'description': 'Set your availability for the tournament',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
