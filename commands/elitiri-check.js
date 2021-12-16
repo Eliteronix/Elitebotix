@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBElitiriCupSignUp } = require('../dbObjects.js');
-const { getIDFromPotentialOsuLink, logDatabaseQueries } = require('../utils.js');
+const { getIDFromPotentialOsuLink, logDatabaseQueries, populateMsgFromInteraction } = require('../utils.js');
 const { currentElitiriCup } = require('../config.json');
 
 module.exports = {
@@ -19,20 +19,53 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'elitiri',
 	prefixCommand: true,
-	async execute(msg, args) {
+	// eslint-disable-next-line no-unused-vars
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			await interaction.deferReply({ ephemeral: true });
+
+			let modpool = null;
+			let id = null;
+			let bracket = null;
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				if (interaction.options._hoistedOptions[i].name === 'modpool') {
+					modpool = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'id') {
+					id = interaction.options._hoistedOptions[i].value;
+				} else {
+					bracket = interaction.options._hoistedOptions[i].value;
+				}
+			}
+			args.push(modpool);
+			args.push(id);
+			if (bracket) {
+				args.push(bracket);
+			}
+		}
 		logDatabaseQueries(4, 'commands/elitiri-check.js DBElitiriCupSignUp');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { tournamentName: currentElitiriCup, userId: msg.author.id }
 		});
 
 		if (!elitiriSignUp && !args[2]) {
-			return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
+			if (msg.id) {
+				return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
+			}
+			return interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.', ephemeral: true });
 		} else if (!elitiriSignUp && args[2].toLowerCase() !== 'top' && args[2].toLowerCase() !== 'middle' && args[2].toLowerCase() !== 'lower' && args[2].toLowerCase() !== 'beginner') {
-			return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
+			if (msg.id) {
+				return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
+			}
+			return interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.', ephemeral: true });
 		}
 
 		if (args[0].toLowerCase() !== 'nm' && args[0].toLowerCase() !== 'hd' && args[0].toLowerCase() !== 'hr' && args[0].toLowerCase() !== 'dt' && args[0].toLowerCase() !== 'fm') {
-			return msg.reply('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
+			if (msg.id) {
+				return msg.reply('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
+			}
+			return interaction.editReply({ content: 'Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)', ephemeral: true });
 		}
 
 		let bracket = '';
@@ -55,7 +88,7 @@ module.exports = {
 
 		osuApi.getBeatmaps({ b: getIDFromPotentialOsuLink(args[1]) })
 			.then(async (beatmaps) => {
-				getBeatmap(msg, args);
+				getBeatmap(msg, args, interaction);
 
 				const viabilityEmbed = new Discord.MessageEmbed()
 					.setColor('#00FF00')
@@ -221,11 +254,17 @@ module.exports = {
 						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}`);
 				}
 
-				msg.reply({ embeds: [viabilityEmbed] });
+				if (msg.id) {
+					return msg.reply({ embeds: [viabilityEmbed] });
+				}
+				return interaction.editReply({ embeds: [viabilityEmbed], ephemeral: true });
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.reply(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
+					if (msg.id) {
+						return msg.reply(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
+					}
+					return interaction.editReply({ content: `Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`, ephemeral: true });
 				} else {
 					console.log(err);
 				}
@@ -234,11 +273,11 @@ module.exports = {
 	}
 };
 
-async function getBeatmap(msg, args) {
+async function getBeatmap(msg, args, interaction) {
 	let command = require('./osu-beatmap.js');
 	let newArgs = [args[1]];
 	try {
-		command.execute(msg, newArgs, true);
+		command.execute(msg, newArgs, interaction);
 	} catch (error) {
 		console.error(error);
 		const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');

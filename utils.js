@@ -865,6 +865,8 @@ module.exports = {
 		let roleMentions = new Discord.Collection();
 		let channelMentions = new Discord.Collection();
 
+		console.log(interaction.options);
+
 		if (interaction.options._hoistedOptions) {
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 				if (interaction.options._hoistedOptions[i].type === 'USER') {

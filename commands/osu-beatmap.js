@@ -23,17 +23,30 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Beatmaps are being processed');
+			if (interaction.commandName === 'osu-beatmap') {
+				await interaction.reply('Beatmaps are being processed');
+			}
 
 			args = [];
 
-			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-				if (interaction.options._hoistedOptions[i].name === 'mods') {
-					args.push(`--${interaction.options._hoistedOptions[i].value}`);
-				} else {
-					args.push(interaction.options._hoistedOptions[i].value);
+			if (interaction.commandName !== 'osu-beatmap') {
+				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+					if (interaction.options._hoistedOptions[i].name === 'modpool') {
+						args.push(`--${interaction.options._hoistedOptions[i].value}`);
+					} else if (interaction.options._hoistedOptions[i].name === 'id') {
+						args.push(interaction.options._hoistedOptions[i].value);
+					}
+				}
+			} else {
+				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+					if (interaction.options._hoistedOptions[i].name === 'mods') {
+						args.push(`--${interaction.options._hoistedOptions[i].value}`);
+					} else {
+						args.push(interaction.options._hoistedOptions[i].value);
+					}
 				}
 			}
+
 		}
 
 		let mods = 0;
@@ -57,7 +70,7 @@ module.exports = {
 		args.forEach(async (arg) => {
 			const dbBeatmap = await getOsuBeatmap(getIDFromPotentialOsuLink(arg), modBits);
 			if (dbBeatmap) {
-				getBeatmap(msg, dbBeatmap);
+				getBeatmap(msg, interaction, dbBeatmap);
 			} else {
 				await msg.channel.send({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
 			}
@@ -65,8 +78,12 @@ module.exports = {
 	},
 };
 
-async function getBeatmap(msg, beatmap) {
-	let processingMessage = await msg.channel.send(`[${beatmap.beatmapId}] Processing...`);
+async function getBeatmap(msg, interaction, beatmap) {
+	let processingMessage = null;
+
+	if (!interaction) {
+		processingMessage = await msg.channel.send(`[${beatmap.beatmapId}] Processing...`);
+	}
 
 	const canvasWidth = 1000;
 	const canvasHeight = 500;
@@ -96,10 +113,18 @@ async function getBeatmap(msg, beatmap) {
 	//Create as an attachment
 	const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-beatmap-${beatmap.beatmapId}.png`);
 
+	if (!interaction) {
+		processingMessage.delete();
+	}
+
 	//Send attachment
-	const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
-	processingMessage.delete();
-	sentMessage.react('<:COMPARE:827974793365159997>');
+	if (interaction && interaction.commandName !== 'osu-beatmap') {
+		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment], ephemeral: true });
+	} else {
+		const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
+		return sentMessage.react('<:COMPARE:827974793365159997>');
+	}
+
 }
 
 async function drawTitle(input) {

@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
-const { getGuildPrefix, pause, getIDFromPotentialOsuLink, logDatabaseQueries } = require('../utils.js');
+const { getGuildPrefix, pause, getIDFromPotentialOsuLink, logDatabaseQueries, populateMsgFromInteraction } = require('../utils.js');
 const { currentElitiriCup } = require('../config.json');
 
 module.exports = {
@@ -19,7 +19,28 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'elitiri',
 	prefixCommand: true,
-	async execute(msg, args) {
+	// eslint-disable-next-line no-unused-vars
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+
+			await interaction.deferReply({ ephemeral: true });
+
+			let modpool = null;
+			let id = null;
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				if (interaction.options._hoistedOptions[i].name === 'modpool') {
+					modpool = interaction.options._hoistedOptions[i].value;
+				} else {
+					id = interaction.options._hoistedOptions[i].value;
+				}
+			}
+			args.push(modpool);
+			args.push(id);
+			if (bracket) {
+				args.push(bracket);
+			}
+		}
 		logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSignUp');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { tournamentName: currentElitiriCup, userId: msg.author.id }
