@@ -26,6 +26,8 @@ module.exports = {
 
 			await interaction.deferReply({ ephemeral: true });
 
+			args = [interaction.options._subcommand];
+
 			let modpool = null;
 			let id = null;
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
@@ -37,9 +39,6 @@ module.exports = {
 			}
 			args.push(modpool);
 			args.push(id);
-			if (bracket) {
-				args.push(bracket);
-			}
 		}
 		logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSignUp');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
@@ -47,7 +46,10 @@ module.exports = {
 		});
 
 		if (!elitiriSignUp) {
-			return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.');
+			if (msg.id) {
+				return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.');
+			}
+			return interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.', ephemeral: true });
 		}
 
 		if (args[0].toLowerCase() === 'list') {
@@ -127,17 +129,20 @@ module.exports = {
 				submissionsEmbed.setFooter(`This embed will automatically get deleted in 30 seconds to avoid leaking maps.\nYou can use 'e!${this.name} list' in my DMs to send the embed without a timer.`);
 			}
 
-			let sentMessage = await msg.reply({ embeds: [submissionsEmbed] });
+			if (msg.id) {
+				let sentMessage = await msg.reply({ embeds: [submissionsEmbed] });
 
-			if (msg.channel.type !== 'DM') {
-				await pause(30000);
-				const editEmbed = new Discord.MessageEmbed()
-					.setTitle('The embed was automatically deleted to avoid leaking maps.')
-					.setDescription(`You can use \`e!${this.name} list\` in my DMs to send the embed without a timer.`);
-				sentMessage.edit({ embed: editEmbed });
+				if (msg.channel.type !== 'DM') {
+					await pause(30000);
+					const editEmbed = new Discord.MessageEmbed()
+						.setTitle('The embed was automatically deleted to avoid leaking maps.')
+						.setDescription(`You can use \`e!${this.name} list\` in my DMs to send the embed without a timer.`);
+					sentMessage.edit({ embed: editEmbed });
+				}
+
+				return;
 			}
-
-			return;
+			return interaction.editReply({ embeds: [submissionsEmbed], ephemeral: true });
 		}
 
 		let now = new Date();
@@ -150,7 +155,10 @@ module.exports = {
 		startOfSubmission.setUTCMonth(5); //Zero Indexed
 		startOfSubmission.setUTCFullYear(2021);
 		if (now < startOfSubmission) {
-			return msg.reply('The submission period hasn\'t started yet and maps can\'t be submitted yet.');
+			if (msg.id) {
+				return msg.reply('The submission period hasn\'t started yet and maps can\'t be submitted yet.');
+			}
+			return interaction.editReply({ content: 'The submission period hasn\'t started yet and maps can\'t be submitted yet.', ephemeral: true });
 		}
 
 		let endOfSubmission = new Date();
@@ -162,11 +170,17 @@ module.exports = {
 		endOfSubmission.setUTCMonth(6); //Zero Indexed
 		endOfSubmission.setUTCFullYear(2021);
 		if (now > endOfSubmission) {
-			return msg.reply('The submission period has ended and maps can\'t be changed anymore.');
+			if (msg.id) {
+				return msg.reply('The submission period has ended and maps can\'t be changed anymore.');
+			}
+			return interaction.editReply({ content: 'The submission period has ended and maps can\'t be changed anymore.', ephemeral: true });
 		}
 
 		if (args[0].toLowerCase() !== 'nm' && args[0].toLowerCase() !== 'hd' && args[0].toLowerCase() !== 'hr' && args[0].toLowerCase() !== 'dt' && args[0].toLowerCase() !== 'fm') {
-			return msg.reply('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
+			if (msg.id) {
+				return msg.reply('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
+			}
+			return interaction.editReply({ content: 'Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)', ephemeral: true });
 		}
 
 		let bracketNameParts = elitiriSignUp.bracketName.split(' ');
@@ -182,7 +196,7 @@ module.exports = {
 
 		osuApi.getBeatmaps({ b: getIDFromPotentialOsuLink(args[1]) })
 			.then(async (beatmaps) => {
-				getBeatmap(msg, args);
+				getBeatmap(msg, args, interaction);
 
 				logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSubmissions 2');
 				const existingMap = await DBElitiriCupSubmissions.findOne({
@@ -204,7 +218,10 @@ module.exports = {
 						.setDescription(`To look at your submitted maps use \`${guildPrefix}${this.name} list\`\nIf you think the map is within the restrictions please contact Eliteronix#4208`)
 						.addField('Map has been submitted already', 'Each map can just be submitted once for each player');
 
-					return msg.reply({ embeds: [viabilityEmbed] });
+					if (msg.id) {
+						return msg.reply({ embeds: [viabilityEmbed] });
+					}
+					return interaction.editReply({ embeds: [viabilityEmbed], ephemeral: true });
 				}
 
 				//The map has to have audio
@@ -416,11 +433,17 @@ module.exports = {
 					}
 				}
 
-				msg.reply({ embeds: [viabilityEmbed] });
+				if (msg.id) {
+					return msg.reply({ embeds: [viabilityEmbed] });
+				}
+				return interaction.editReply({ embeds: [viabilityEmbed], ephemeral: true });
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.reply(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
+					if (msg.id) {
+						return msg.reply(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
+					}
+					return interaction.editReply({ content: `Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`, ephemeral: true });
 				} else {
 					console.log(err);
 				}
@@ -429,11 +452,11 @@ module.exports = {
 	}
 };
 
-async function getBeatmap(msg, args) {
+async function getBeatmap(msg, args, interaction) {
 	let command = require('./osu-beatmap.js');
 	let newArgs = [args[1]];
 	try {
-		command.execute(msg, newArgs, true);
+		command.execute(msg, newArgs, interaction);
 	} catch (error) {
 		console.error(error);
 		const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');

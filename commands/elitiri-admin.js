@@ -413,61 +413,73 @@ module.exports = {
 					description: `Allows you to submit beatmaps for the ${currentElitiriCup}`,
 					options: [
 						{
-							'name': 'modpool',
-							'description': 'The pool the map should be submitted for',
-							'type': 3,
-							'required': true,
-							'choices': [
+							'name': 'submit',
+							'description': 'Submit maps for the tournament',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
 								{
-									'name': 'NoMod',
-									'value': 'NM'
+									'name': 'modpool',
+									'description': 'The pool the map should be submitted for',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'NoMod',
+											'value': 'NM'
+										},
+										{
+											'name': 'Hidden',
+											'value': 'HD'
+										},
+										{
+											'name': 'HardRock',
+											'value': 'HR'
+										},
+										{
+											'name': 'DoubleTime',
+											'value': 'DT'
+										},
+										{
+											'name': 'FreeMod',
+											'value': 'FM'
+										},
+									]
 								},
 								{
-									'name': 'Hidden',
-									'value': 'HD'
+									'name': 'id',
+									'description': 'The ID of the map (link also works)',
+									'type': 3,
+									'required': true
 								},
 								{
-									'name': 'HardRock',
-									'value': 'HR'
-								},
-								{
-									'name': 'DoubleTime',
-									'value': 'DT'
-								},
-								{
-									'name': 'FreeMod',
-									'value': 'FM'
+									'name': 'bracket',
+									'description': 'The bracket the map should be checked for',
+									'type': 3,
+									'choices': [
+										{
+											'name': 'Top Bracket',
+											'value': 'top'
+										},
+										{
+											'name': 'Middle Bracket',
+											'value': 'middle'
+										},
+										{
+											'name': 'Lower Bracket',
+											'value': 'lower'
+										},
+										{
+											'name': 'Beginner Bracket',
+											'value': 'beginner'
+										}
+									]
 								},
 							]
 						},
 						{
-							'name': 'id',
-							'description': 'The ID of the map (link also works)',
-							'type': 3,
-							'required': true
-						},
-						{
-							'name': 'bracket',
-							'description': 'The bracket the map should be checked for',
-							'type': 3,
-							'choices': [
-								{
-									'name': 'Top Bracket',
-									'value': 'top'
-								},
-								{
-									'name': 'Middle Bracket',
-									'value': 'middle'
-								},
-								{
-									'name': 'Lower Bracket',
-									'value': 'lower'
-								},
-								{
-									'name': 'Beginner Bracket',
-									'value': 'beginner'
-								}
-							]
+							'name': 'list',
+							'description': 'Get a list of your currently submitted maps',
+							'type': 1, // 1 is type SUB_COMMAND
 						},
 					]
 				}
