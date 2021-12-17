@@ -1,6 +1,7 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { DBElitiriCupSignUp, DBProcessQueue } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
+const { currentElitiriCup } = require('../config.json');
 
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
@@ -44,7 +45,7 @@ async function updateSheet(spreadsheetID, bracketName) {
 		logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBElitiriCupSignUp');
 		let bracketPlayers = await DBElitiriCupSignUp.findAll({
 			where: {
-				tournamentName: 'Elitiri Cup Summer 2021',
+				tournamentName: currentElitiriCup,
 				bracketName: bracketName
 			}
 		});

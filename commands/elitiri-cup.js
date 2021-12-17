@@ -79,7 +79,7 @@ module.exports = {
 			//get elitiriSignUp from db
 			logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBElitiriCupSignUp 1');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-				where: { userId: msg.author.id, tournamentName: 'Elitiri Cup Summer 2021' },
+				where: { userId: msg.author.id, tournamentName: currentElitiriCup },
 			});
 
 			if (elitiriSignUp) {
@@ -138,7 +138,7 @@ module.exports = {
 						saturdayLateAvailability: null,
 						sundayEarlyAvailability: null,
 						sundayLateAvailability: null,
-						tournamentName: 'Elitiri Cup Summer 2021'
+						tournamentName: currentElitiriCup
 					});
 					sendMessage(msg, interaction, `You successfully registered for the \`Elitiri Cup Summer 2021\` tournament.\nBe sure to join the server and read <#727987472772104272> if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!\n\nAlso please **be sure to set your availabilities** by using \`${guildPrefix}${this.name} availability\``);
 					createProcessQueueTask(bracketName);

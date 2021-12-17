@@ -1,6 +1,7 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
 const { getOsuBadgeNumberById, logDatabaseQueries } = require('../utils.js');
 const osu = require('node-osu');
+const { currentElitiriCup } = require('../config.json');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -105,7 +106,7 @@ module.exports = {
 
 					logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBElitiriCupSignUp 1');
 					const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-						where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Cup Summer 2021' }
+						where: { osuUserId: discordUser.osuUserId, tournamentName: currentElitiriCup }
 					});
 
 					if (elitiriSignUp) {
@@ -120,7 +121,7 @@ module.exports = {
 
 						logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBElitiriCupSubmissions');
 						const allSubmissions = await DBElitiriCupSubmissions.findAll({
-							where: { osuUserId: elitiriSignUp.osuUserId, tournamentName: 'Elitiri Cup Summer 2021' }
+							where: { osuUserId: elitiriSignUp.osuUserId, tournamentName: currentElitiriCup }
 						});
 
 						allSubmissions.forEach(submission => {
@@ -146,11 +147,11 @@ module.exports = {
 		}
 
 		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBElitiriCupSignUp 2');
-		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
+		const ecs2021SignUp = await DBElitiriCupSignUp.findOne({
 			where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Cup Summer 2021' }
 		});
 
-		if (elitiriSignUp) {
+		if (ecs2021SignUp) {
 			const guild = await client.guilds.fetch('727407178499096597');
 			try {
 				const member = await guild.members.fetch(discordUserId);
@@ -158,7 +159,7 @@ module.exports = {
 				const ecs2021ParticipantRoleId = '875031092921532416';
 				const ecs2021ParticipantRole = await guild.roles.fetch(ecs2021ParticipantRoleId);
 
-				if (elitiriSignUp.rankAchieved !== 'Forfeit') {
+				if (ecs2021SignUp.rankAchieved !== 'Forfeit') {
 					try {
 						if (!member.roles.cache.has(ecs2021ParticipantRole)) {
 							//Assign role if not there yet
@@ -178,7 +179,7 @@ module.exports = {
 					}
 				}
 
-				if (elitiriSignUp.rankAchieved === 'Winner') {
+				if (ecs2021SignUp.rankAchieved === 'Winner') {
 					const ecs2021WinnerRoleId = '875031510288306267';
 					const ecs2021WinnerRole = await guild.roles.fetch(ecs2021WinnerRoleId);
 
@@ -194,7 +195,63 @@ module.exports = {
 			} catch (error) {
 				//nothing
 			}
+		}
 
+		const ecw2022SignUp = await DBElitiriCupSignUp.findOne({
+			where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Cup Winter 2022' }
+		});
+
+		if (ecw2022SignUp) {
+			const guild = await client.guilds.fetch('727407178499096597');
+			try {
+				const member = await guild.members.fetch(discordUserId);
+
+				const ecw2022ParticipantRoleId = '875031092921532416';
+				const ecw2022ParticipantRole = await guild.roles.fetch(ecw2022ParticipantRoleId);
+
+				if (ecw2022SignUp.rankAchieved !== 'Forfeit') {
+					try {
+						if (!member.roles.cache.has(ecw2022ParticipantRole)) {
+							//Assign role if not there yet
+							await member.roles.add(ecw2022ParticipantRole);
+						}
+					} catch (e) {
+						console.log(e);
+					}
+				} else {
+					try {
+						if (member.roles.cache.has(ecw2022ParticipantRole)) {
+							//Remove role if not removed yet
+							await member.roles.remove(ecw2022ParticipantRole);
+						}
+					} catch (e) {
+						console.log(e);
+					}
+				}
+
+				if (ecw2022SignUp.rankAchieved === 'Winner') {
+					const ecw2022WinnerRoleId = '875031510288306267';
+					const ecw2022WinnerRole = await guild.roles.fetch(ecw2022WinnerRoleId);
+
+					try {
+						if (!member.roles.cache.has(ecw2022WinnerRole)) {
+							//Assign role if not there yet
+							await member.roles.add(ecw2022WinnerRole);
+						}
+					} catch (e) {
+						console.log(e);
+					}
+				}
+			} catch (error) {
+				//nothing
+			}
+		}
+
+		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
+			where: { osuUserId: discordUser.osuUserId, tournamentName: currentElitiriCup }
+		});
+
+		if (elitiriSignUp) {
 			let now = new Date();
 			let endOfRegs = new Date();
 			endOfRegs.setUTCMilliseconds(999);

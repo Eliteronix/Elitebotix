@@ -6,7 +6,7 @@ const cooldowns = new Discord.Collection();
 const { closest } = require('fastest-levenshtein');
 const { Permissions } = require('discord.js');
 const { DBElitiriCupSignUp, DBTickets } = require('./dbObjects');
-const { developers } = require('./config.json');
+const { developers, currentElitiriCup } = require('./config.json');
 
 module.exports = async function (msg, bancho) {
 	//check if the message wasn't sent by the bot itself or another bot
@@ -115,13 +115,13 @@ module.exports = async function (msg, bancho) {
 			}
 
 			logDatabaseQueries(3, 'gotMessage.js DBElitiriCupSignUp');
-			//ecs2021 player
+			//elitiri player
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-				where: { tournamentName: 'Elitiri Cup Summer 2021', userId: msg.author.id }
+				where: { tournamentName: currentElitiriCup, userId: msg.author.id }
 			});
 
 			if (elitiriSignUp) {
-				categories.push('ecs2021');
+				categories.push('elitiri');
 			}
 
 			let authorPerms;

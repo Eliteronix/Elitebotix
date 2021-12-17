@@ -1,7 +1,7 @@
 const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
 const { pause, logDatabaseQueries } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { currentElitiriCup } = require('../config.json');
+const { currentElitiriCup, currentElitiriCupHostSheetId } = require('../config.json');
 
 let potentialNMQualifierMaps = [];
 let potentialHDQualifierMaps = [];
@@ -68,22 +68,22 @@ module.exports = {
 		if (args[0] === 'sr') {
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 1');
 			const topElitiriSignUps = await DBElitiriCupSignUp.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Top Bracket' }
+				where: { tournamentName: currentElitiriCup, bracketName: 'Top Bracket' }
 			});
 
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 2');
 			const middleElitiriSignUps = await DBElitiriCupSignUp.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Middle Bracket' }
+				where: { tournamentName: currentElitiriCup, bracketName: 'Middle Bracket' }
 			});
 
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 3');
 			const lowerElitiriSignUps = await DBElitiriCupSignUp.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Lower Bracket' }
+				where: { tournamentName: currentElitiriCup, bracketName: 'Lower Bracket' }
 			});
 
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 4');
 			const beginnerElitiriSignUps = await DBElitiriCupSignUp.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Beginner Bracket' }
+				where: { tournamentName: currentElitiriCup, bracketName: 'Beginner Bracket' }
 			});
 
 			let topLowerDiff = 0;
@@ -161,7 +161,7 @@ module.exports = {
 
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 5');
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021' }
+				where: { tournamentName: currentElitiriCup }
 			});
 
 			if (targetBracket !== 'Every Bracket') {
@@ -184,7 +184,7 @@ module.exports = {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
 					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 1');
 					let submissions = await DBElitiriCupSubmissions.findAll({
-						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
+						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
 					});
 
 					if (submissions.length === 5) {
@@ -245,14 +245,14 @@ module.exports = {
 
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 6');
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021' }
+				where: { tournamentName: currentElitiriCup }
 			});
 
 			if (targetGroup === 'Players with missing submissions') {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
 					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 2');
 					let submissions = await DBElitiriCupSubmissions.findAll({
-						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
+						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
 					});
 
 					if (submissions.length !== 5) {
@@ -290,7 +290,7 @@ module.exports = {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
 					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 3');
 					let submissions = await DBElitiriCupSubmissions.findAll({
-						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
+						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
 					});
 
 					if (elitiriSignUps[i].osuUserId === args[1]) {
@@ -328,7 +328,7 @@ module.exports = {
 		} else if (args[0] === 'placement') {
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 7');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-				where: { osuUserId: args[1], tournamentName: 'Elitiri Cup Summer 2021' }
+				where: { osuUserId: args[1], tournamentName: currentElitiriCup }
 			});
 
 			if (args[2]) {
@@ -561,25 +561,25 @@ module.exports = {
 			if (args[1] === 'top') {
 				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 4');
 				allMaps = await DBElitiriCupSubmissions.findAll({
-					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Top Bracket' }
+					where: { tournamentName: currentElitiriCup, bracketName: 'Top Bracket' }
 				});
 				rowOffset = 78;
 			} else if (args[1] === 'middle') {
 				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 5');
 				allMaps = await DBElitiriCupSubmissions.findAll({
-					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Middle Bracket' }
+					where: { tournamentName: currentElitiriCup, bracketName: 'Middle Bracket' }
 				});
 				rowOffset = 53;
 			} else if (args[1] === 'lower') {
 				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 6');
 				allMaps = await DBElitiriCupSubmissions.findAll({
-					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Lower Bracket' }
+					where: { tournamentName: currentElitiriCup, bracketName: 'Lower Bracket' }
 				});
 				rowOffset = 28;
 			} else if (args[1] === 'beginner') {
 				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 7');
 				allMaps = await DBElitiriCupSubmissions.findAll({
-					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Beginner Bracket' }
+					where: { tournamentName: currentElitiriCup, bracketName: 'Beginner Bracket' }
 				});
 				rowOffset = 3;
 			} else {
@@ -857,7 +857,8 @@ module.exports = {
 			}
 
 			// Initialize the sheet - doc ID is the long id in the sheets URL
-			const doc = new GoogleSpreadsheet('1o_4d_b-yRuVkbQNdArlVUwlXFo1oUz7qQTYLjJDxHBI');
+			//Host sheet 
+			const doc = new GoogleSpreadsheet(currentElitiriCupHostSheetId);
 
 			// Initialize Auth - see more available options at https://theoephraim.github.io/node-google-spreadsheet/#/getting-started/authentication
 			await doc.useServiceAccountAuth({
@@ -869,7 +870,7 @@ module.exports = {
 
 			await doc.loadInfo(); // loads document properties and worksheet
 
-			let sheet = doc.sheetsByTitle['Mappool Top Secret'];
+			let sheet = doc.sheetsByTitle['Mappool [All]'];
 
 			await sheet.loadCells('M4:P703');
 
@@ -899,6 +900,7 @@ module.exports = {
 };
 
 function insertPoolIntoSpreadsheet(sheet, pool, rowOffset) {
+	zgukzfkuz
 	for (let i = 0; i < pool.length; i++) {
 		const link = `https://osu.ppy.sh/beatmapsets/${pool[i].beatmapsetId}#osu/${pool[i].beatmapId}`;
 		const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
