@@ -2,6 +2,7 @@ const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { saveOsuMultiScores, pause } = require('../utils');
 const osu = require('node-osu');
 const { developers } = require('../config.json');
+const fetch = require('node-fetch');
 
 module.exports = {
 	name: 'admin',
@@ -4102,6 +4103,14 @@ module.exports = {
 					score.save();
 					console.log(score.id, score.freeMod);
 				}
+			}
+		} else if (args[0] === 'fetchMulti') {
+			let response = await fetch('https://osu.ppy.sh/community/matches/90613627');
+			let htmlCode = await response.text();
+			let isolatedContent = htmlCode.replace(/[\s\S]+<script id="json-events" type="application\/json">/gm, '').replace(/<\/script>[\s\S]+/gm, '');
+			let json = JSON.parse(isolatedContent);
+			if (Date.parse(json.events[json.events.length - 1].timestamp) - Date.parse(json.match.start_time) > 86400000) {
+				console.log('Longer than 24 hours');
 			}
 		} else {
 			msg.reply('Invalid command');
