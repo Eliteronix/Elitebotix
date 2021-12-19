@@ -27,8 +27,8 @@ module.exports = {
 		let matchID = args[0];
 
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'Live' && matchID === '50000000') {
-			matchID = '90000000';
+		if (process.env.SERVER === 'Live' && matchID === '90305374') {
+			matchID = '90305375';
 		}
 
 		// eslint-disable-next-line no-undef
@@ -103,12 +103,42 @@ module.exports = {
 					processQueueEntry.beingExecuted = false;
 					return processQueueEntry.save();
 				} else {
-					//Go same if error
-					let date = new Date();
-					date.setUTCMinutes(date.getUTCMinutes() + 1);
-					processQueueEntry.date = date;
-					processQueueEntry.beingExecuted = false;
-					return processQueueEntry.save();
+					try {
+						// Check using node fetch
+						const fetch = require('node-fetch');
+						let response = await fetch(`https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
+						let htmlCode = await response.text();
+						let isolatedContent = htmlCode.replace(/[\s\S]+<script id="json-events" type="application\/json">/gm, '').replace(/<\/script>[\s\S]+/gm, '');
+						let json = JSON.parse(isolatedContent);
+						if (Date.parse(json.events[json.events.length - 1].timestamp) - Date.parse(json.match.start_time) > 86400000) {
+							//Go next if over 24 hours long game
+							// eslint-disable-next-line no-undef
+							if (process.env.SERVER === 'Live') {
+								processQueueEntry.additions = `${parseInt(matchID) + 1}`;
+							} else {
+								processQueueEntry.additions = `${parseInt(matchID) - 1}`;
+							}
+							let date = new Date();
+							processQueueEntry.date = date;
+							processQueueEntry.beingExecuted = false;
+							return processQueueEntry.save();
+						} else {
+							//Go same if under 24 hours long game
+							let date = new Date();
+							date.setUTCMinutes(date.getUTCMinutes() + 1);
+							processQueueEntry.date = date;
+							processQueueEntry.beingExecuted = false;
+							return processQueueEntry.save();
+						}
+					} catch (error) {
+						console.log(error, `going same saveMultiMatches.js https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
+						//Go same if error
+						let date = new Date();
+						date.setUTCMinutes(date.getUTCMinutes() + 1);
+						processQueueEntry.date = date;
+						processQueueEntry.beingExecuted = false;
+						return processQueueEntry.save();
+					}
 				}
 			});
 	},
