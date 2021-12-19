@@ -206,7 +206,7 @@ module.exports = {
 			try {
 				const member = await guild.members.fetch(discordUserId);
 
-				const ecw2022ParticipantRoleId = '875031092921532416';
+				const ecw2022ParticipantRoleId = '922203822313586748';
 				const ecw2022ParticipantRole = await guild.roles.fetch(ecw2022ParticipantRoleId);
 
 				if (ecw2022SignUp.rankAchieved !== 'Forfeit') {
@@ -230,7 +230,7 @@ module.exports = {
 				}
 
 				if (ecw2022SignUp.rankAchieved === 'Winner') {
-					const ecw2022WinnerRoleId = '875031510288306267';
+					const ecw2022WinnerRoleId = '922202798110691329';
 					const ecw2022WinnerRole = await guild.roles.fetch(ecw2022WinnerRoleId);
 
 					try {
@@ -295,7 +295,7 @@ module.exports = {
 					await elitiriSignUp.destroy();
 					const user = await client.users.fetch(discordUser.userId);
 					try {
-						user.send(`Your BWS Rank has dropped below 1000 (${BWSRank}) and you have therefore been removed from the signups for the \`Elitiri Cup Summer 2021\`.\nYou can re-register if you drop above 1000 again.`);
+						user.send(`Your BWS Rank has dropped below 1000 (${BWSRank}) and you have therefore been removed from the signups for the \`${currentElitiriCup}\`.\nYou can re-register if you drop above 1000 again.`);
 					} catch {
 						//Nothing
 					}
@@ -315,7 +315,7 @@ module.exports = {
 					}
 
 					try {
-						user.send(`Your bracket for the \`Elitiri Cup Summer 2021\` has been automatically changed to ${bracketName}. (Used to be ${elitiriSignUp.bracketName})`);
+						user.send(`Your bracket for the \`${currentElitiriCup}\` has been automatically changed to ${bracketName}. (Used to be ${elitiriSignUp.bracketName})`);
 					} catch {
 						//Nothing
 					}
