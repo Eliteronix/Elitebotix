@@ -628,17 +628,17 @@ module.exports = {
 			//Putting NM maps into potential pools
 			for (let i = 0; i < allNMMaps.length; i++) {
 				let allPercentage = 100 / allNMMaps.length * i;
-				if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Qual.NM)) {
-					potentialNMQualifierMaps.push(allNMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Qual.NM + MappoolSizes.Ro32.NM)) {
+				if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Ro32.NM)) {
 					potentialNMRoundOf32Maps.push(allNMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Qual.NM + MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM)) {
 					potentialNMRoundOf16Maps.push(allNMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Qual.NM + MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM)) {
 					potentialNMQuarterfinalMaps.push(allNMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Qual.NM + MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM + MappoolSizes.SF.NM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM + MappoolSizes.Qual.NM)) {
+					potentialNMQualifierMaps.push(allNMMaps[i]);
+				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM + MappoolSizes.Qual.NM + MappoolSizes.SF.NM)) {
 					potentialNMSemifinalMaps.push(allNMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Qual.NM + MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM + MappoolSizes.SF.NM + MappoolSizes.F.NM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM + MappoolSizes.Qual.NM + MappoolSizes.SF.NM + MappoolSizes.F.NM)) {
 					potentialNMFinalMaps.push(allNMMaps[i]);
 				} else {
 					potentialNMGrandfinalMaps.push(allNMMaps[i]);
@@ -648,17 +648,17 @@ module.exports = {
 			//Putting HD maps into potential pools
 			for (let i = 0; i < allHDMaps.length; i++) {
 				let allPercentage = 100 / allHDMaps.length * i;
-				if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Qual.HD)) {
-					potentialHDQualifierMaps.push(allHDMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Qual.HD + MappoolSizes.Ro32.HD)) {
+				if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Ro32.HD)) {
 					potentialHDRoundOf32Maps.push(allHDMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Qual.HD + MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD)) {
 					potentialHDRoundOf16Maps.push(allHDMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Qual.HD + MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD)) {
 					potentialHDQuarterfinalMaps.push(allHDMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Qual.HD + MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD + MappoolSizes.SF.HD)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD + MappoolSizes.Qual.HD)) {
+					potentialHDQualifierMaps.push(allHDMaps[i]);
+				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD + MappoolSizes.Qual.HD + MappoolSizes.SF.HD)) {
 					potentialHDSemifinalMaps.push(allHDMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Qual.HD + MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD + MappoolSizes.SF.HD + MappoolSizes.F.HD)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD + MappoolSizes.Qual.HD + MappoolSizes.SF.HD + MappoolSizes.F.HD)) {
 					potentialHDFinalMaps.push(allHDMaps[i]);
 				} else {
 					potentialHDGrandfinalMaps.push(allHDMaps[i]);
@@ -668,17 +668,17 @@ module.exports = {
 			//Putting HR maps into potential pools
 			for (let i = 0; i < allHRMaps.length; i++) {
 				let allPercentage = 100 / allHRMaps.length * i;
-				if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Qual.HR)) {
-					potentialHRQualifierMaps.push(allHRMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Qual.HR + MappoolSizes.Ro32.HR)) {
+				if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Ro32.HR)) {
 					potentialHRRoundOf32Maps.push(allHRMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Qual.HR + MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR)) {
 					potentialHRRoundOf16Maps.push(allHRMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Qual.HR + MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR)) {
 					potentialHRQuarterfinalMaps.push(allHRMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Qual.HR + MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR + MappoolSizes.SF.HR)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR + MappoolSizes.Qual.HR)) {
+					potentialHRQualifierMaps.push(allHRMaps[i]);
+				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR + MappoolSizes.Qual.HR + MappoolSizes.SF.HR)) {
 					potentialHRSemifinalMaps.push(allHRMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Qual.HR + MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR + MappoolSizes.SF.HR + MappoolSizes.F.HR)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR + MappoolSizes.Qual.HR + MappoolSizes.SF.HR + MappoolSizes.F.HR)) {
 					potentialHRFinalMaps.push(allHRMaps[i]);
 				} else {
 					potentialHRGrandfinalMaps.push(allHRMaps[i]);
@@ -688,17 +688,17 @@ module.exports = {
 			//Putting DT maps into potential pools
 			for (let i = 0; i < allDTMaps.length; i++) {
 				let allPercentage = 100 / allDTMaps.length * i;
-				if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Qual.DT)) {
-					potentialDTQualifierMaps.push(allDTMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Qual.DT + MappoolSizes.Ro32.DT)) {
+				if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Ro32.DT)) {
 					potentialDTRoundOf32Maps.push(allDTMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Qual.DT + MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT)) {
 					potentialDTRoundOf16Maps.push(allDTMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Qual.DT + MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT)) {
 					potentialDTQuarterfinalMaps.push(allDTMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Qual.DT + MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT + MappoolSizes.SF.DT)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT + MappoolSizes.Qual.DT)) {
+					potentialDTQualifierMaps.push(allDTMaps[i]);
+				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT + MappoolSizes.Qual.DT + MappoolSizes.SF.DT)) {
 					potentialDTSemifinalMaps.push(allDTMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Qual.DT + MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT + MappoolSizes.SF.DT + MappoolSizes.F.DT)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT + MappoolSizes.Qual.DT + MappoolSizes.SF.DT + MappoolSizes.F.DT)) {
 					potentialDTFinalMaps.push(allDTMaps[i]);
 				} else {
 					potentialDTGrandfinalMaps.push(allDTMaps[i]);
@@ -708,17 +708,17 @@ module.exports = {
 			//Putting FM maps into potential pools
 			for (let i = 0; i < allFMMaps.length; i++) {
 				let allPercentage = 100 / allFMMaps.length * i;
-				if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Qual.FM)) {
-					potentialFMQualifierMaps.push(allFMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Qual.FM + MappoolSizes.Ro32.FM)) {
+				if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Ro32.FM)) {
 					potentialFMRoundOf32Maps.push(allFMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Qual.FM + MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM)) {
 					potentialFMRoundOf16Maps.push(allFMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Qual.FM + MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM)) {
 					potentialFMQuarterfinalMaps.push(allFMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Qual.FM + MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM + MappoolSizes.SF.FM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM + MappoolSizes.Qual.FM)) {
+					potentialFMQualifierMaps.push(allFMMaps[i]);
+				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM + MappoolSizes.Qual.FM + MappoolSizes.SF.FM)) {
 					potentialFMSemifinalMaps.push(allFMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Qual.FM + MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM + MappoolSizes.SF.FM + MappoolSizes.F.FM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM + MappoolSizes.Qual.FM + MappoolSizes.SF.FM + MappoolSizes.F.FM)) {
 					potentialFMFinalMaps.push(allFMMaps[i]);
 				} else {
 					potentialFMGrandfinalMaps.push(allFMMaps[i]);
@@ -900,7 +900,6 @@ module.exports = {
 };
 
 function insertPoolIntoSpreadsheet(sheet, pool, rowOffset) {
-	zgukzfkuz
 	for (let i = 0; i < pool.length; i++) {
 		const link = `https://osu.ppy.sh/beatmapsets/${pool[i].beatmapsetId}#osu/${pool[i].beatmapId}`;
 		const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
