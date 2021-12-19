@@ -586,8 +586,6 @@ module.exports = {
 				return msg.reply('Please specify for which bracket the pools should be created. (`top`, `middle`, `lower`, `beginner`)');
 			}
 
-			console.log(allMaps);
-
 			quicksort(allMaps);
 
 			let allNMMaps = [];
@@ -872,7 +870,7 @@ module.exports = {
 
 			let sheet = doc.sheetsByTitle['Mappool [All]'];
 
-			await sheet.loadCells('M4:P703');
+			await sheet.loadCells('F4:P703');
 
 			sheet = insertPoolIntoSpreadsheet(sheet, qualifierPool, rowOffset);
 
@@ -901,12 +899,38 @@ module.exports = {
 
 function insertPoolIntoSpreadsheet(sheet, pool, rowOffset) {
 	for (let i = 0; i < pool.length; i++) {
-		const link = `https://osu.ppy.sh/beatmapsets/${pool[i].beatmapsetId}#osu/${pool[i].beatmapId}`;
-		const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
-		linkCell.value = link;
+		const titleCell = sheet.getCell(rowOffset + i, 5); //getCell(row, column) zero-indexed
+		titleCell.value = pool[i].title;
 
-		// const starRatingCell = sheet.getCell(rowOffset + i, 13); //getCell(row, column) zero-indexed
-		// starRatingCell.value = Math.round(pool[i].starRating * 100) / 100;
+		const artistCell = sheet.getCell(rowOffset + i, 6); //getCell(row, column) zero-indexed
+		artistCell.value = pool[i].artist;
+
+		const difficultyCell = sheet.getCell(rowOffset + i, 7); //getCell(row, column) zero-indexed
+		difficultyCell.value = pool[i].difficulty;
+
+		const drainLengthSeconds = (pool[i].drainLength % 60) + '';
+		const drainLengthMinutes = (pool[i].drainLength - pool[i].drainLength % 60) / 60;
+		const drainLength = drainLengthMinutes + ':' + drainLengthSeconds.padStart(2, '0');
+		const lengthCell = sheet.getCell(rowOffset + i, 8); //getCell(row, column) zero-indexed
+		lengthCell.value = drainLength;
+
+		const csArOdHpCell = sheet.getCell(rowOffset + i, 9); //getCell(row, column) zero-indexed
+		csArOdHpCell.value = `${pool[i].circleSize} | ${pool[i].approachRate} | ${pool[i].overallDifficulty} | ${pool[i].hpDrain}`;
+
+		const mapperCell = sheet.getCell(rowOffset + i, 10); //getCell(row, column) zero-indexed
+		mapperCell.value = pool[i].mapper;
+
+		const idCell = sheet.getCell(rowOffset + i, 11); //getCell(row, column) zero-indexed
+		idCell.value = pool[i].beatmapId;
+
+		const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
+		linkCell.value = `https://osu.ppy.sh/beatmapsets/${pool[i].beatmapsetId}#osu/${pool[i].beatmapId}`;
+
+		const starRatingCell = sheet.getCell(rowOffset + i, 13); //getCell(row, column) zero-indexed
+		starRatingCell.value = Math.round(pool[i].starRating * 100) / 100;
+
+		const bpmCell = sheet.getCell(rowOffset + i, 14); //getCell(row, column) zero-indexed
+		bpmCell.value = pool[i].bpm;
 
 		const pickerCell = sheet.getCell(rowOffset + i, 15); //getCell(row, column) zero-indexed
 		pickerCell.value = pool[i].osuName;
