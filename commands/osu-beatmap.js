@@ -122,9 +122,11 @@ async function getBeatmap(msg, interaction, beatmap) {
 		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment], ephemeral: true });
 	} else {
 		const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
-		return sentMessage.react('<:COMPARE:827974793365159997>');
+    if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
+      sentMessage.react('<:COMPARE:827974793365159997>');
+    }
+		return;
 	}
-
 }
 
 async function drawTitle(input) {

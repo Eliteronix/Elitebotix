@@ -172,7 +172,9 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nosu! direct: <osu://b/${dbBeatmap.beatmapId}>`, files: [attachment] });
 				}
 				processingMessage.delete();
-				await sentMessage.react('<:COMPARE:827974793365159997>');
+				if (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved' || dbBeatmap.approvalStatus === 'Qualified' || dbBeatmap.approvalStatus === 'Loved') {
+					sentMessage.react('<:COMPARE:827974793365159997>');
+				}
 				await sentMessage.react('🗺️');
 				await sentMessage.react('👤');
 			})
@@ -235,7 +237,9 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 						//Send attachment
 						const sentMessage = await msg.channel.send({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nosu! direct: <osu://b/${dbBeatmap.beatmapId}>`, files: [attachment] });
 						processingMessage.delete();
-						await sentMessage.react('<:COMPARE:827974793365159997>');
+						if (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved' || dbBeatmap.approvalStatus === 'Qualified' || dbBeatmap.approvalStatus === 'Loved') {
+							sentMessage.react('<:COMPARE:827974793365159997>');
+						}
 						await sentMessage.react('🗺️');
 						await sentMessage.react('👤');
 
