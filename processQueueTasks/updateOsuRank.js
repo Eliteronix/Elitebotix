@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
 const { getOsuBadgeNumberById, logDatabaseQueries } = require('../utils.js');
 const osu = require('node-osu');
-const { currentElitiriCup } = require('../config.json');
+const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.json');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -260,9 +260,9 @@ module.exports = {
 			endOfRegs.setUTCSeconds(59);
 			endOfRegs.setUTCMinutes(59);
 			endOfRegs.setUTCHours(23);
-			endOfRegs.setUTCDate(27);
-			endOfRegs.setUTCMonth(5); //Zero Indexed
-			endOfRegs.setUTCFullYear(2021);
+			endOfRegs.setUTCDate(currentElitiriCupEndOfRegs.day);
+			endOfRegs.setUTCMonth(currentElitiriCupEndOfRegs.zeroIndexMonth); //Zero Indexed
+			endOfRegs.setUTCFullYear(currentElitiriCupEndOfRegs.year);
 
 			let bracketName = '';
 
