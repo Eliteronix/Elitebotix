@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
 const { getGuildPrefix, pause, getIDFromPotentialOsuLink, logDatabaseQueries, populateMsgFromInteraction } = require('../utils.js');
-const { currentElitiriCup } = require('../config.json');
+const { currentElitiriCup, currentElitiriCupStartOfSubmissions, currentElitiriCupEndOfSubmissions } = require('../config.json');
 
 module.exports = {
 	name: 'elitiri-submit',
@@ -151,9 +151,9 @@ module.exports = {
 		startOfSubmission.setUTCSeconds(0);
 		startOfSubmission.setUTCMinutes(0);
 		startOfSubmission.setUTCHours(0);
-		startOfSubmission.setUTCDate(28);
-		startOfSubmission.setUTCMonth(5); //Zero Indexed
-		startOfSubmission.setUTCFullYear(2021);
+		startOfSubmission.setUTCDate(currentElitiriCupStartOfSubmissions.day);
+		startOfSubmission.setUTCMonth(currentElitiriCupStartOfSubmissions.zeroIndexMonth); //Zero Indexed
+		startOfSubmission.setUTCFullYear(currentElitiriCupStartOfSubmissions.year);
 		if (now < startOfSubmission) {
 			if (msg.id) {
 				return msg.reply('The submission period hasn\'t started yet and maps can\'t be submitted yet.');
@@ -166,9 +166,9 @@ module.exports = {
 		endOfSubmission.setUTCSeconds(59);
 		endOfSubmission.setUTCMinutes(59);
 		endOfSubmission.setUTCHours(23);
-		endOfSubmission.setUTCDate(18);
-		endOfSubmission.setUTCMonth(6); //Zero Indexed
-		endOfSubmission.setUTCFullYear(2021);
+		endOfSubmission.setUTCDate(currentElitiriCupEndOfSubmissions.day);
+		endOfSubmission.setUTCMonth(currentElitiriCupEndOfSubmissions.zeroIndexMonth); //Zero Indexed
+		endOfSubmission.setUTCFullYear(currentElitiriCupEndOfSubmissions.year);
 		if (now > endOfSubmission) {
 			if (msg.id) {
 				return msg.reply('The submission period has ended and maps can\'t be changed anymore.');

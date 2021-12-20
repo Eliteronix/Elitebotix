@@ -151,7 +151,8 @@ module.exports = {
 			where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Cup Summer 2021' }
 		});
 
-		if (ecs2021SignUp) {
+		// eslint-disable-next-line no-undef
+		if (ecs2021SignUp && process.env.SERVER === 'Live') {
 			const guild = await client.guilds.fetch('727407178499096597');
 			try {
 				const member = await guild.members.fetch(discordUserId);
@@ -201,7 +202,8 @@ module.exports = {
 			where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Cup Winter 2022' }
 		});
 
-		if (ecw2022SignUp) {
+		// eslint-disable-next-line no-undef
+		if (ecw2022SignUp && process.env.SERVER === 'Live') {
 			const guild = await client.guilds.fetch('727407178499096597');
 			try {
 				const member = await guild.members.fetch(discordUserId);
@@ -266,7 +268,8 @@ module.exports = {
 
 			const user = await client.users.fetch(discordUser.userId);
 
-			if (elitiriSignUp.osuName !== discordUser.osuName && !elitiriSignUp.rankAchieved) {
+			// eslint-disable-next-line no-undef
+			if (elitiriSignUp.osuName !== discordUser.osuName && !elitiriSignUp.rankAchieved && process.env.SERVER === 'Live') {
 				const guild = await client.guilds.fetch('727407178499096597');
 				const channel = await guild.channels.fetch('830534251757174824');
 				channel.send(`<@851356668415311963> The player \`${elitiriSignUp.osuName}\` from \`${elitiriSignUp.bracketName}\` changed their osu! name to \`${discordUser.osuName}\`.`);

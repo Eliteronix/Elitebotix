@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBElitiriCupSignUp, DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix, logDatabaseQueries, populateMsgFromInteraction } = require('../utils');
-const { currentElitiriCup } = require('../config.json');
+const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.json');
 
 module.exports = {
 	name: 'elitiri-cup',
@@ -65,9 +65,9 @@ module.exports = {
 			endOfRegs.setUTCSeconds(59);
 			endOfRegs.setUTCMinutes(59);
 			endOfRegs.setUTCHours(23);
-			endOfRegs.setUTCDate(27);
-			endOfRegs.setUTCMonth(5); //Zero Indexed
-			endOfRegs.setUTCFullYear(2021);
+			endOfRegs.setUTCDate(currentElitiriCupEndOfRegs.day);
+			endOfRegs.setUTCMonth(currentElitiriCupEndOfRegs.zeroIndexMonth); //Zero Indexed
+			endOfRegs.setUTCFullYear(currentElitiriCupEndOfRegs.year);
 			if (now > endOfRegs) {
 				if (msg.id) {
 					return msg.reply('The registration period has ended.');
@@ -155,9 +155,9 @@ module.exports = {
 			endOfRegs.setUTCSeconds(59);
 			endOfRegs.setUTCMinutes(59);
 			endOfRegs.setUTCHours(23);
-			endOfRegs.setUTCDate(27);
-			endOfRegs.setUTCMonth(5); //Zero Indexed
-			endOfRegs.setUTCFullYear(2021);
+			endOfRegs.setUTCDate(currentElitiriCupEndOfRegs.day);
+			endOfRegs.setUTCMonth(currentElitiriCupEndOfRegs.zeroIndexMonth); //Zero Indexed
+			endOfRegs.setUTCFullYear(currentElitiriCupEndOfRegs.year);
 			if (now > endOfRegs) {
 				return msg.reply('The registration period has ended and signups can\'t be changed anymore.');
 			}

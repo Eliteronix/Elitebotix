@@ -4,6 +4,11 @@ const { logDatabaseQueries } = require('../utils');
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(client, bancho, processQueueEntry) {
+		// eslint-disable-next-line no-undef
+		if (process.env.SERVER !== 'Live') {
+			return processQueueEntry.destroy();
+		}
+
 		//Fetch server
 		const guild = await client.guilds.fetch('727407178499096597');
 
