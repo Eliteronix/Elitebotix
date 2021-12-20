@@ -33,7 +33,7 @@ module.exports = {
 			categories.push('debug');
 		}
 
-		//ecs2021 player
+		//elitiri player
 		logDatabaseQueries(4, 'commands/help.js DBElitiriCupSignUp');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { tournamentName: currentElitiriCup, userId: msg.author.id }

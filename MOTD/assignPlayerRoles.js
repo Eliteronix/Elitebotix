@@ -3,6 +3,11 @@ const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	assignPlayerRoles: async function (client) {
+		// eslint-disable-next-line no-undef
+		if (process.env.SERVER !== 'Live') {
+			return;
+		}
+
 		//Fetch server
 		const guild = await client.guilds.fetch('727407178499096597');
 

@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBElitiriCupSignUp, DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix, logDatabaseQueries, populateMsgFromInteraction } = require('../utils');
-const { currentElitiriCup } = require('../config.json');
+const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.json');
 
 module.exports = {
 	name: 'elitiri-cup',
@@ -65,9 +65,9 @@ module.exports = {
 			endOfRegs.setUTCSeconds(59);
 			endOfRegs.setUTCMinutes(59);
 			endOfRegs.setUTCHours(23);
-			endOfRegs.setUTCDate(27);
-			endOfRegs.setUTCMonth(5); //Zero Indexed
-			endOfRegs.setUTCFullYear(2021);
+			endOfRegs.setUTCDate(currentElitiriCupEndOfRegs.day);
+			endOfRegs.setUTCMonth(currentElitiriCupEndOfRegs.zeroIndexMonth); //Zero Indexed
+			endOfRegs.setUTCFullYear(currentElitiriCupEndOfRegs.year);
 			if (now > endOfRegs) {
 				if (msg.id) {
 					return msg.reply('The registration period has ended.');
@@ -75,15 +75,18 @@ module.exports = {
 				return interaction.reply({ content: 'The registration period has ended.', ephemeral: true });
 			}
 
-			const guildPrefix = await getGuildPrefix(msg);
+			let guildPrefix = await getGuildPrefix(msg);
+			if (!msg.id) {
+				guildPrefix = '/';
+			}
 			//get elitiriSignUp from db
 			logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBElitiriCupSignUp 1');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-				where: { userId: msg.author.id, tournamentName: 'Elitiri Cup Summer 2021' },
+				where: { userId: msg.author.id, tournamentName: currentElitiriCup },
 			});
 
 			if (elitiriSignUp) {
-				return sendMessage(msg, interaction, `You are already registered for the \`Elitiri Cup Summer 2021\` tournament.\nBe sure to join the server if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!\n\nAlso please **be sure to set your availabilities** by using \`${guildPrefix}${this.name} availability\``);
+				return sendMessage(msg, interaction, `You are already registered for the \`${currentElitiriCup}\` tournament.\nBe sure to join the server if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!\n\nAlso please **be sure to set your availabilities** by using \`${guildPrefix}${this.name} availability\``);
 			}
 
 			//get discordUser from db
@@ -138,9 +141,9 @@ module.exports = {
 						saturdayLateAvailability: null,
 						sundayEarlyAvailability: null,
 						sundayLateAvailability: null,
-						tournamentName: 'Elitiri Cup Summer 2021'
+						tournamentName: currentElitiriCup
 					});
-					sendMessage(msg, interaction, `You successfully registered for the \`Elitiri Cup Summer 2021\` tournament.\nBe sure to join the server and read <#727987472772104272> if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!\n\nAlso please **be sure to set your availabilities** by using \`${guildPrefix}${this.name} availability\``);
+					sendMessage(msg, interaction, `You successfully registered for the \`${currentElitiriCup}\` tournament.\nBe sure to join the server and read <#727987472772104272> if you didn't already. (\`${guildPrefix}${this.name} server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the tournament!\n\nAlso please **be sure to set your availabilities** by using \`${guildPrefix}${this.name} availability\``);
 					createProcessQueueTask(bracketName);
 				} else {
 					sendMessage(msg, interaction, `It seems like you don't have your connected osu! account verified.\nPlease use \`${guildPrefix}osu-link verify\` to send a verification code to your osu! dms, follow the instructions and try again afterwards.`);
@@ -155,9 +158,9 @@ module.exports = {
 			endOfRegs.setUTCSeconds(59);
 			endOfRegs.setUTCMinutes(59);
 			endOfRegs.setUTCHours(23);
-			endOfRegs.setUTCDate(27);
-			endOfRegs.setUTCMonth(5); //Zero Indexed
-			endOfRegs.setUTCFullYear(2021);
+			endOfRegs.setUTCDate(currentElitiriCupEndOfRegs.day);
+			endOfRegs.setUTCMonth(currentElitiriCupEndOfRegs.zeroIndexMonth); //Zero Indexed
+			endOfRegs.setUTCFullYear(currentElitiriCupEndOfRegs.year);
 			if (now > endOfRegs) {
 				return msg.reply('The registration period has ended and signups can\'t be changed anymore.');
 			}
@@ -171,10 +174,10 @@ module.exports = {
 
 			if (elitiriSignUp) {
 				elitiriSignUp.destroy();
-				sendMessage(msg, interaction, `You have been unregistered from the \`Elitiri Cup Summer 2021\` tournament.\nStill thank you for showing interest!\nYou can register again by using \`${guildPrefix}${this.name} register\`!`);
+				sendMessage(msg, interaction, `You have been unregistered from the \`${currentElitiriCup}\` tournament.\nStill thank you for showing interest!\nYou can register again by using \`${guildPrefix}${this.name} register\`!`);
 				createProcessQueueTask(elitiriSignUp.bracketName);
 			} else {
-				sendMessage(msg, interaction, `You aren't signed up for the \`Elitiri Cup Summer 2021\` tournament at the moment.\nYou can register by using \`${guildPrefix}${this.name} register\`!`);
+				sendMessage(msg, interaction, `You aren't signed up for the \`${currentElitiriCup}\` tournament at the moment.\nYou can register by using \`${guildPrefix}${this.name} register\`!`);
 			}
 		} else if (args[0].toLowerCase() === 'availability') {
 			const guildPrefix = await getGuildPrefix(msg);
@@ -189,7 +192,7 @@ module.exports = {
 					if (elitiriSignUp.saturdayEarlyAvailability === null) {
 						return sendMessage(msg, interaction, `You currently don't have any availabilities set.\nUsage: \`${guildPrefix}${this.name} availability xx-xx xx-xx\`\nExample: \`${guildPrefix}${this.name} availability 14-21 16-20\``);
 					}
-					return sendMessage(msg, interaction, `Your current \`Elitiri Cup Summer 2021\` availabilities are:\nSaturday: ${elitiriSignUp.saturdayEarlyAvailability} - ${elitiriSignUp.saturdayLateAvailability} UTC\nSunday: ${elitiriSignUp.sundayEarlyAvailability} - ${elitiriSignUp.sundayLateAvailability} UTC\nUsage: \`${guildPrefix}${this.name} availability xx-xx xx-xx\`\nExample: \`${guildPrefix}${this.name} availability 14-21 16-20\``);
+					return sendMessage(msg, interaction, `Your current \`${currentElitiriCup}\` availabilities are:\nSaturday: ${elitiriSignUp.saturdayEarlyAvailability} - ${elitiriSignUp.saturdayLateAvailability} UTC\nSunday: ${elitiriSignUp.sundayEarlyAvailability} - ${elitiriSignUp.sundayLateAvailability} UTC\nUsage: \`${guildPrefix}${this.name} availability xx-xx xx-xx\`\nExample: \`${guildPrefix}${this.name} availability 14-21 16-20\``);
 				}
 				if (!args[2]) {
 					return sendMessage(msg, interaction, `You used the wrong format for submitting your availability in UTC.\nUsage: \`${guildPrefix}${this.name} availability xx-xx xx-xx\`\nExample: \`${guildPrefix}${this.name} availability 14-21 16-20\``);
@@ -208,10 +211,10 @@ module.exports = {
 				elitiriSignUp.sundayEarlyAvailability = parseInt(sundayAvailability[0]);
 				elitiriSignUp.sundayLateAvailability = parseInt(sundayAvailability[1]);
 				await elitiriSignUp.save();
-				sendMessage(msg, interaction, `Your \`Elitiri Cup Summer 2021\` availabilities have been updated.\nYour new availabilities are:\nSaturday: ${elitiriSignUp.saturdayEarlyAvailability} - ${elitiriSignUp.saturdayLateAvailability} UTC\nSunday: ${elitiriSignUp.sundayEarlyAvailability} - ${elitiriSignUp.sundayLateAvailability} UTC`);
+				sendMessage(msg, interaction, `Your \`${currentElitiriCup}\` availabilities have been updated.\nYour new availabilities are:\nSaturday: ${elitiriSignUp.saturdayEarlyAvailability} - ${elitiriSignUp.saturdayLateAvailability} UTC\nSunday: ${elitiriSignUp.sundayEarlyAvailability} - ${elitiriSignUp.sundayLateAvailability} UTC`);
 				createProcessQueueTask(elitiriSignUp.bracketName);
 			} else {
-				sendMessage(msg, interaction, `You are not yet registered for the \`Elitiri Cup Summer 2021\` tournament.\nYou can register by using \`${guildPrefix}${this.name} register\`!`);
+				sendMessage(msg, interaction, `You are not yet registered for the \`${currentElitiriCup}\` tournament.\nYou can register by using \`${guildPrefix}${this.name} register\`!`);
 			}
 		} else {
 			msg.reply('Please specify what you want to do: `server`, `register`, `unregister`, `availability`');

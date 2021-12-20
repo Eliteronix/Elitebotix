@@ -1,7 +1,7 @@
 const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
 const { pause, logDatabaseQueries } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { currentElitiriCup } = require('../config.json');
+const { currentElitiriCup, currentElitiriCupHostSheetId } = require('../config.json');
 
 let potentialNMQualifierMaps = [];
 let potentialHDQualifierMaps = [];
@@ -68,22 +68,22 @@ module.exports = {
 		if (args[0] === 'sr') {
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 1');
 			const topElitiriSignUps = await DBElitiriCupSignUp.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Top Bracket' }
+				where: { tournamentName: currentElitiriCup, bracketName: 'Top Bracket' }
 			});
 
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 2');
 			const middleElitiriSignUps = await DBElitiriCupSignUp.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Middle Bracket' }
+				where: { tournamentName: currentElitiriCup, bracketName: 'Middle Bracket' }
 			});
 
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 3');
 			const lowerElitiriSignUps = await DBElitiriCupSignUp.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Lower Bracket' }
+				where: { tournamentName: currentElitiriCup, bracketName: 'Lower Bracket' }
 			});
 
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 4');
 			const beginnerElitiriSignUps = await DBElitiriCupSignUp.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Beginner Bracket' }
+				where: { tournamentName: currentElitiriCup, bracketName: 'Beginner Bracket' }
 			});
 
 			let topLowerDiff = 0;
@@ -161,7 +161,7 @@ module.exports = {
 
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 5');
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021' }
+				where: { tournamentName: currentElitiriCup }
 			});
 
 			if (targetBracket !== 'Every Bracket') {
@@ -184,7 +184,7 @@ module.exports = {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
 					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 1');
 					let submissions = await DBElitiriCupSubmissions.findAll({
-						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
+						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
 					});
 
 					if (submissions.length === 5) {
@@ -245,14 +245,14 @@ module.exports = {
 
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 6');
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021' }
+				where: { tournamentName: currentElitiriCup }
 			});
 
 			if (targetGroup === 'Players with missing submissions') {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
 					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 2');
 					let submissions = await DBElitiriCupSubmissions.findAll({
-						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
+						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
 					});
 
 					if (submissions.length !== 5) {
@@ -290,7 +290,7 @@ module.exports = {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
 					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 3');
 					let submissions = await DBElitiriCupSubmissions.findAll({
-						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUps[i].osuUserId }
+						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
 					});
 
 					if (elitiriSignUps[i].osuUserId === args[1]) {
@@ -328,7 +328,7 @@ module.exports = {
 		} else if (args[0] === 'placement') {
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 7');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-				where: { osuUserId: args[1], tournamentName: 'Elitiri Cup Summer 2021' }
+				where: { osuUserId: args[1], tournamentName: currentElitiriCup }
 			});
 
 			if (args[2]) {
@@ -561,32 +561,30 @@ module.exports = {
 			if (args[1] === 'top') {
 				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 4');
 				allMaps = await DBElitiriCupSubmissions.findAll({
-					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Top Bracket' }
+					where: { tournamentName: currentElitiriCup, bracketName: 'Top Bracket' }
 				});
 				rowOffset = 78;
 			} else if (args[1] === 'middle') {
 				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 5');
 				allMaps = await DBElitiriCupSubmissions.findAll({
-					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Middle Bracket' }
+					where: { tournamentName: currentElitiriCup, bracketName: 'Middle Bracket' }
 				});
 				rowOffset = 53;
 			} else if (args[1] === 'lower') {
 				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 6');
 				allMaps = await DBElitiriCupSubmissions.findAll({
-					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Lower Bracket' }
+					where: { tournamentName: currentElitiriCup, bracketName: 'Lower Bracket' }
 				});
 				rowOffset = 28;
 			} else if (args[1] === 'beginner') {
 				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 7');
 				allMaps = await DBElitiriCupSubmissions.findAll({
-					where: { tournamentName: 'Elitiri Cup Summer 2021', bracketName: 'Beginner Bracket' }
+					where: { tournamentName: currentElitiriCup, bracketName: 'Beginner Bracket' }
 				});
 				rowOffset = 3;
 			} else {
 				return msg.reply('Please specify for which bracket the pools should be created. (`top`, `middle`, `lower`, `beginner`)');
 			}
-
-			console.log(allMaps);
 
 			quicksort(allMaps);
 
@@ -628,17 +626,17 @@ module.exports = {
 			//Putting NM maps into potential pools
 			for (let i = 0; i < allNMMaps.length; i++) {
 				let allPercentage = 100 / allNMMaps.length * i;
-				if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Qual.NM)) {
-					potentialNMQualifierMaps.push(allNMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Qual.NM + MappoolSizes.Ro32.NM)) {
+				if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Ro32.NM)) {
 					potentialNMRoundOf32Maps.push(allNMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Qual.NM + MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM)) {
 					potentialNMRoundOf16Maps.push(allNMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Qual.NM + MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM)) {
 					potentialNMQuarterfinalMaps.push(allNMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Qual.NM + MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM + MappoolSizes.SF.NM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM + MappoolSizes.Qual.NM)) {
+					potentialNMQualifierMaps.push(allNMMaps[i]);
+				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM + MappoolSizes.Qual.NM + MappoolSizes.SF.NM)) {
 					potentialNMSemifinalMaps.push(allNMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Qual.NM + MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM + MappoolSizes.SF.NM + MappoolSizes.F.NM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalNM * (MappoolSizes.Ro32.NM + MappoolSizes.Ro16.NM + MappoolSizes.QF.NM + MappoolSizes.Qual.NM + MappoolSizes.SF.NM + MappoolSizes.F.NM)) {
 					potentialNMFinalMaps.push(allNMMaps[i]);
 				} else {
 					potentialNMGrandfinalMaps.push(allNMMaps[i]);
@@ -648,17 +646,17 @@ module.exports = {
 			//Putting HD maps into potential pools
 			for (let i = 0; i < allHDMaps.length; i++) {
 				let allPercentage = 100 / allHDMaps.length * i;
-				if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Qual.HD)) {
-					potentialHDQualifierMaps.push(allHDMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Qual.HD + MappoolSizes.Ro32.HD)) {
+				if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Ro32.HD)) {
 					potentialHDRoundOf32Maps.push(allHDMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Qual.HD + MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD)) {
 					potentialHDRoundOf16Maps.push(allHDMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Qual.HD + MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD)) {
 					potentialHDQuarterfinalMaps.push(allHDMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Qual.HD + MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD + MappoolSizes.SF.HD)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD + MappoolSizes.Qual.HD)) {
+					potentialHDQualifierMaps.push(allHDMaps[i]);
+				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD + MappoolSizes.Qual.HD + MappoolSizes.SF.HD)) {
 					potentialHDSemifinalMaps.push(allHDMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Qual.HD + MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD + MappoolSizes.SF.HD + MappoolSizes.F.HD)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHD * (MappoolSizes.Ro32.HD + MappoolSizes.Ro16.HD + MappoolSizes.QF.HD + MappoolSizes.Qual.HD + MappoolSizes.SF.HD + MappoolSizes.F.HD)) {
 					potentialHDFinalMaps.push(allHDMaps[i]);
 				} else {
 					potentialHDGrandfinalMaps.push(allHDMaps[i]);
@@ -668,17 +666,17 @@ module.exports = {
 			//Putting HR maps into potential pools
 			for (let i = 0; i < allHRMaps.length; i++) {
 				let allPercentage = 100 / allHRMaps.length * i;
-				if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Qual.HR)) {
-					potentialHRQualifierMaps.push(allHRMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Qual.HR + MappoolSizes.Ro32.HR)) {
+				if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Ro32.HR)) {
 					potentialHRRoundOf32Maps.push(allHRMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Qual.HR + MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR)) {
 					potentialHRRoundOf16Maps.push(allHRMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Qual.HR + MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR)) {
 					potentialHRQuarterfinalMaps.push(allHRMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Qual.HR + MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR + MappoolSizes.SF.HR)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR + MappoolSizes.Qual.HR)) {
+					potentialHRQualifierMaps.push(allHRMaps[i]);
+				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR + MappoolSizes.Qual.HR + MappoolSizes.SF.HR)) {
 					potentialHRSemifinalMaps.push(allHRMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Qual.HR + MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR + MappoolSizes.SF.HR + MappoolSizes.F.HR)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalHR * (MappoolSizes.Ro32.HR + MappoolSizes.Ro16.HR + MappoolSizes.QF.HR + MappoolSizes.Qual.HR + MappoolSizes.SF.HR + MappoolSizes.F.HR)) {
 					potentialHRFinalMaps.push(allHRMaps[i]);
 				} else {
 					potentialHRGrandfinalMaps.push(allHRMaps[i]);
@@ -688,17 +686,17 @@ module.exports = {
 			//Putting DT maps into potential pools
 			for (let i = 0; i < allDTMaps.length; i++) {
 				let allPercentage = 100 / allDTMaps.length * i;
-				if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Qual.DT)) {
-					potentialDTQualifierMaps.push(allDTMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Qual.DT + MappoolSizes.Ro32.DT)) {
+				if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Ro32.DT)) {
 					potentialDTRoundOf32Maps.push(allDTMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Qual.DT + MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT)) {
 					potentialDTRoundOf16Maps.push(allDTMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Qual.DT + MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT)) {
 					potentialDTQuarterfinalMaps.push(allDTMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Qual.DT + MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT + MappoolSizes.SF.DT)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT + MappoolSizes.Qual.DT)) {
+					potentialDTQualifierMaps.push(allDTMaps[i]);
+				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT + MappoolSizes.Qual.DT + MappoolSizes.SF.DT)) {
 					potentialDTSemifinalMaps.push(allDTMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Qual.DT + MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT + MappoolSizes.SF.DT + MappoolSizes.F.DT)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalDT * (MappoolSizes.Ro32.DT + MappoolSizes.Ro16.DT + MappoolSizes.QF.DT + MappoolSizes.Qual.DT + MappoolSizes.SF.DT + MappoolSizes.F.DT)) {
 					potentialDTFinalMaps.push(allDTMaps[i]);
 				} else {
 					potentialDTGrandfinalMaps.push(allDTMaps[i]);
@@ -708,17 +706,17 @@ module.exports = {
 			//Putting FM maps into potential pools
 			for (let i = 0; i < allFMMaps.length; i++) {
 				let allPercentage = 100 / allFMMaps.length * i;
-				if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Qual.FM)) {
-					potentialFMQualifierMaps.push(allFMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Qual.FM + MappoolSizes.Ro32.FM)) {
+				if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Ro32.FM)) {
 					potentialFMRoundOf32Maps.push(allFMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Qual.FM + MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM)) {
 					potentialFMRoundOf16Maps.push(allFMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Qual.FM + MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM)) {
 					potentialFMQuarterfinalMaps.push(allFMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Qual.FM + MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM + MappoolSizes.SF.FM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM + MappoolSizes.Qual.FM)) {
+					potentialFMQualifierMaps.push(allFMMaps[i]);
+				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM + MappoolSizes.Qual.FM + MappoolSizes.SF.FM)) {
 					potentialFMSemifinalMaps.push(allFMMaps[i]);
-				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Qual.FM + MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM + MappoolSizes.SF.FM + MappoolSizes.F.FM)) {
+				} else if (allPercentage < 100 / MappoolSizes.totalFM * (MappoolSizes.Ro32.FM + MappoolSizes.Ro16.FM + MappoolSizes.QF.FM + MappoolSizes.Qual.FM + MappoolSizes.SF.FM + MappoolSizes.F.FM)) {
 					potentialFMFinalMaps.push(allFMMaps[i]);
 				} else {
 					potentialFMGrandfinalMaps.push(allFMMaps[i]);
@@ -857,7 +855,8 @@ module.exports = {
 			}
 
 			// Initialize the sheet - doc ID is the long id in the sheets URL
-			const doc = new GoogleSpreadsheet('1o_4d_b-yRuVkbQNdArlVUwlXFo1oUz7qQTYLjJDxHBI');
+			//Host sheet 
+			const doc = new GoogleSpreadsheet(currentElitiriCupHostSheetId);
 
 			// Initialize Auth - see more available options at https://theoephraim.github.io/node-google-spreadsheet/#/getting-started/authentication
 			await doc.useServiceAccountAuth({
@@ -869,9 +868,9 @@ module.exports = {
 
 			await doc.loadInfo(); // loads document properties and worksheet
 
-			let sheet = doc.sheetsByTitle['Mappool Top Secret'];
+			let sheet = doc.sheetsByTitle['Mappool [All]'];
 
-			await sheet.loadCells('M4:P703');
+			await sheet.loadCells('F4:P703');
 
 			sheet = insertPoolIntoSpreadsheet(sheet, qualifierPool, rowOffset);
 
@@ -900,12 +899,38 @@ module.exports = {
 
 function insertPoolIntoSpreadsheet(sheet, pool, rowOffset) {
 	for (let i = 0; i < pool.length; i++) {
-		const link = `https://osu.ppy.sh/beatmapsets/${pool[i].beatmapsetId}#osu/${pool[i].beatmapId}`;
-		const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
-		linkCell.value = link;
+		const titleCell = sheet.getCell(rowOffset + i, 5); //getCell(row, column) zero-indexed
+		titleCell.value = pool[i].title;
 
-		// const starRatingCell = sheet.getCell(rowOffset + i, 13); //getCell(row, column) zero-indexed
-		// starRatingCell.value = Math.round(pool[i].starRating * 100) / 100;
+		const artistCell = sheet.getCell(rowOffset + i, 6); //getCell(row, column) zero-indexed
+		artistCell.value = pool[i].artist;
+
+		const difficultyCell = sheet.getCell(rowOffset + i, 7); //getCell(row, column) zero-indexed
+		difficultyCell.value = pool[i].difficulty;
+
+		const drainLengthSeconds = (pool[i].drainLength % 60) + '';
+		const drainLengthMinutes = (pool[i].drainLength - pool[i].drainLength % 60) / 60;
+		const drainLength = drainLengthMinutes + ':' + drainLengthSeconds.padStart(2, '0');
+		const lengthCell = sheet.getCell(rowOffset + i, 8); //getCell(row, column) zero-indexed
+		lengthCell.value = drainLength;
+
+		const csArOdHpCell = sheet.getCell(rowOffset + i, 9); //getCell(row, column) zero-indexed
+		csArOdHpCell.value = `${pool[i].circleSize} | ${pool[i].approachRate} | ${pool[i].overallDifficulty} | ${pool[i].hpDrain}`;
+
+		const mapperCell = sheet.getCell(rowOffset + i, 10); //getCell(row, column) zero-indexed
+		mapperCell.value = pool[i].mapper;
+
+		const idCell = sheet.getCell(rowOffset + i, 11); //getCell(row, column) zero-indexed
+		idCell.value = pool[i].beatmapId;
+
+		const linkCell = sheet.getCell(rowOffset + i, 12); //getCell(row, column) zero-indexed
+		linkCell.value = `https://osu.ppy.sh/beatmapsets/${pool[i].beatmapsetId}#osu/${pool[i].beatmapId}`;
+
+		const starRatingCell = sheet.getCell(rowOffset + i, 13); //getCell(row, column) zero-indexed
+		starRatingCell.value = Math.round(pool[i].starRating * 100) / 100;
+
+		const bpmCell = sheet.getCell(rowOffset + i, 14); //getCell(row, column) zero-indexed
+		bpmCell.value = pool[i].bpm;
 
 		const pickerCell = sheet.getCell(rowOffset + i, 15); //getCell(row, column) zero-indexed
 		pickerCell.value = pool[i].osuName;

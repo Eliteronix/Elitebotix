@@ -6,5 +6,25 @@
 		"212511522407055360"
 	],
 	"traceDatabaseQueries": 6,
-	"currentElitiriCup": "Elitiri Winter Cup 2022"
+	"currentElitiriCup": "Elitiri Winter Cup 2022",
+	"currentElitiriCupHostSheetId": "1TlQQK4vSXxkAwxNQNfhSG0W1y85CRYNWZggwIuCgwDo",
+	"currentElitiriCupTopSheetId": "1R75yDt6RQ1qcjWDvUoVq55THIXB42ZObQ0nAYXvSYf8",
+	"currentElitiriCupMiddleSheetId": "1Kasapzdjv6e38FGzN1YvHsYXYcaUbtqMbxeVtpd7mnk",
+	"currentElitiriCupLowerSheetId": "1dtUAjWVF4JoR8OMWkj5Nn5mi0FsqjQkTV9FbLjgKcto",
+	"currentElitiriCupBeginnerSheetId": "1U_U1AklzxgxCq5zMA9lJsIPJ-UBltQDMKxWG3oCJwAU",
+	"currentElitiriCupEndOfRegs": {
+		"year": 2022,
+		"zeroIndexMonth": 0,
+		"day": 16
+	},
+	"currentElitiriCupStartOfSubmissions": {
+		"year": 2022,
+		"zeroIndexMonth": 0,
+		"day": 17
+	},
+	"currentElitiriCupEndOfSubmissions": {
+		"year": 2022,
+		"zeroIndexMonth": 1,
+		"day": 6
+	}
 }
