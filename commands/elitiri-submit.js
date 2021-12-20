@@ -58,7 +58,10 @@ module.exports = {
 				where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUp.osuUserId }
 			});
 
-			const guildPrefix = await getGuildPrefix(msg);
+			let guildPrefix = await getGuildPrefix(msg);
+			if (!msg.id) {
+				guildPrefix = '/';
+			}
 
 			const submissionsEmbed = new Discord.MessageEmbed()
 				.setColor('#00FF00')
@@ -126,7 +129,7 @@ module.exports = {
 			}
 
 			if (msg.channel.type !== 'DM') {
-				submissionsEmbed.setFooter(`This embed will automatically get deleted in 30 seconds to avoid leaking maps.\nYou can use 'e!${this.name} list' in my DMs to send the embed without a timer.`);
+				submissionsEmbed.setFooter(`This embed will automatically get deleted in 30 seconds to avoid leaking maps.\nYou can use '${guildPrefix}${this.name} list' in my DMs to send the embed without a timer.`);
 			}
 
 			if (msg.id) {
@@ -136,7 +139,7 @@ module.exports = {
 					await pause(30000);
 					const editEmbed = new Discord.MessageEmbed()
 						.setTitle('The embed was automatically deleted to avoid leaking maps.')
-						.setDescription(`You can use \`e!${this.name} list\` in my DMs to send the embed without a timer.`);
+						.setDescription(`You can use \`${guildPrefix}${this.name} list\` in my DMs to send the embed without a timer.`);
 					sentMessage.edit({ embed: editEmbed });
 				}
 

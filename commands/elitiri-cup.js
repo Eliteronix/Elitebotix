@@ -75,7 +75,10 @@ module.exports = {
 				return interaction.reply({ content: 'The registration period has ended.', ephemeral: true });
 			}
 
-			const guildPrefix = await getGuildPrefix(msg);
+			let guildPrefix = await getGuildPrefix(msg);
+			if (!msg.id) {
+				guildPrefix = '/';
+			}
 			//get elitiriSignUp from db
 			logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBElitiriCupSignUp 1');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
