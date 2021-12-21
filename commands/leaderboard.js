@@ -20,10 +20,27 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			if (interaction.options._hoistedOptions[1]) {
-				args = [interaction.options._hoistedOptions[0].value, interaction.options._hoistedOptions[1].value];
-			} else {
-				args = [interaction.options._hoistedOptions[0].value];
+			args = [];
+
+			let type = null;
+			let page = null;
+			let mode = null;
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				if (interaction.options._hoistedOptions[i].name === 'type') {
+					type = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'page') {
+					page = interaction.options._hoistedOptions[i].value;
+				} else {
+					mode = interaction.options._hoistedOptions[i].value;
+				}
+			}
+
+			args.push(type);
+			if (page) {
+				args.push(page);
+			}
+			if (type === 'osu' && mode !== null) {
+				args.push(mode);
 			}
 		}
 
