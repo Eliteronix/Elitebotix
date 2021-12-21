@@ -496,17 +496,17 @@ module.exports = {
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
+									'name': 'lowerlimit',
+									'description': 'The star rating of the desired lower limit of your bracket',
+									'type': 10, // 10 is type Number
+									'required': true,
+								},
+								{
 									'name': 'upperlimit',
 									'description': 'The star rating of the desired upper limit of your bracket',
 									'type': 10, // 10 is type Number
 									'required': true,
 								},
-								{
-									'name': 'lowerlimit',
-									'description': 'The star rating of the desired lower limit of your bracket',
-									'type': 10, // 10 is type Number
-									'required': true,
-								}
 							]
 						},
 						{

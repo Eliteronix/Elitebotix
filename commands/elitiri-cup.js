@@ -6,7 +6,7 @@ module.exports = {
 	name: 'elitiri-cup',
 	aliases: ['ec'],
 	description: `Allows you to sign up for the \`${currentElitiriCup}\` tournament!`,
-	usage: '<register> <desired upper SR limit> <desired lower SR limit> | <unregister> | <server> | <availability>',
+	usage: '<register> <desired lower SR limit> <desired upper SR limit> | <unregister> | <server> | <availability>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -34,8 +34,8 @@ module.exports = {
 						lowerlimit = interaction.options._hoistedOptions[i].value;
 					}
 				}
-				args.push(upperlimit);
 				args.push(lowerlimit);
+				args.push(upperlimit);
 			} else if (interaction.options._subcommand === 'availability') {
 				let earlysaturday;
 				let latesaturday;
