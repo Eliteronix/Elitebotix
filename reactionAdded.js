@@ -3,7 +3,7 @@ const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } 
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { isWrongSystem, getMods, logDatabaseQueries } = require('./utils');
+const { isWrongSystem, getMods, logDatabaseQueries, getOsuBeatmap } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user, additionalObjects) {
@@ -554,15 +554,18 @@ module.exports = async function (reaction, user, additionalObjects) {
 		}
 	}
 
-	//For the compare emoji | EZ | HT | HD | DT | HR | FL
+	//For the compare emoji | EZ | HT | HD | DT | HR | FL | FI
 	if (reaction._emoji.id === '918920760586805259'
 		|| reaction._emoji.id === '918921193426411544'
 		|| reaction._emoji.id === '918922015182827531'
 		|| reaction._emoji.id === '918920670023397396'
 		|| reaction._emoji.id === '918938816377671740'
-		|| reaction._emoji.id === '918920836755382343') {
+		|| reaction._emoji.id === '918920836755382343'
+		|| reaction._emoji.id === '918922047994880010') {
 		if (reaction.message.attachments.first().name.startsWith('osu-beatmap')) {
-			const beatmapId = reaction.message.content.replace('osu-beatmap-', '').replace(/-.+/gm, '');
+			const beatmapId = reaction.message.attachments.first().name.replace('osu-beatmap-', '').replace(/-.+/gm, '');
+
+			const dbBeatmap = await getOsuBeatmap(beatmapId, 0);
 
 			//get the mods used
 			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
@@ -577,6 +580,18 @@ module.exports = async function (reaction, user, additionalObjects) {
 				mods.splice(mods.indexOf('DT'), 1);
 			} else if (reaction._emoji.name === 'DT' && mods.includes('HT')) {
 				mods.splice(mods.indexOf('HT'), 1);
+			} else if (reaction._emoji.name === 'HD' && dbBeatmap.mode === 'Mania' && mods.includes('FL')) {
+				mods.splice(mods.indexOf('FL'), 1);
+			} else if (reaction._emoji.name === 'HD' && dbBeatmap.mode === 'Mania' && mods.includes('FI')) {
+				mods.splice(mods.indexOf('FI'), 1);
+			} else if (reaction._emoji.name === 'FL' && dbBeatmap.mode === 'Mania' && mods.includes('FI')) {
+				mods.splice(mods.indexOf('FI'), 1);
+			} else if (reaction._emoji.name === 'FL' && dbBeatmap.mode === 'Mania' && mods.includes('HD')) {
+				mods.splice(mods.indexOf('HD'), 1);
+			} else if (reaction._emoji.name === 'FI' && dbBeatmap.mode === 'Mania' && mods.includes('HD')) {
+				mods.splice(mods.indexOf('HD'), 1);
+			} else if (reaction._emoji.name === 'FI' && dbBeatmap.mode === 'Mania' && mods.includes('FL')) {
+				mods.splice(mods.indexOf('FL'), 1);
 			}
 
 			if (!mods.includes(reaction._emoji.name)) {
