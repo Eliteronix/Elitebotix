@@ -315,6 +315,30 @@ module.exports = {
 			// 				'description': 'The page of the leaderboard to display',
 			// 				'type': 4,
 			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'mode',
+			// 				'description': 'The osu! mode you want as your main',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'standard',
+			// 						'value': '--s'
+			// 					},
+			// 					{
+			// 						'name': 'taiko',
+			// 						'value': '--t'
+			// 					},
+			// 					{
+			// 						'name': 'catch',
+			// 						'value': '--c'
+			// 					},
+			// 					{
+			// 						'name': 'mania',
+			// 						'value': '--m'
+			// 					}
+			// 				]
 			// 			}
 			// 		]
 			// 	},
@@ -489,6 +513,30 @@ module.exports = {
 			// 				'description': 'The page of the leaderboard to display',
 			// 				'type': 4,
 			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'mode',
+			// 				'description': 'The osu! mode you want as your main',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'standard',
+			// 						'value': '--s'
+			// 					},
+			// 					{
+			// 						'name': 'taiko',
+			// 						'value': '--t'
+			// 					},
+			// 					{
+			// 						'name': 'catch',
+			// 						'value': '--c'
+			// 					},
+			// 					{
+			// 						'name': 'mania',
+			// 						'value': '--m'
+			// 					}
+			// 				]
 			// 			}
 			// 		]
 			// 	},
@@ -2318,6 +2366,30 @@ module.exports = {
 							'description': 'The page of the leaderboard to display',
 							'type': 4,
 							'required': false
+						},
+						{
+							'name': 'mode',
+							'description': 'The osu! mode you want as your main',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'standard',
+									'value': '--s'
+								},
+								{
+									'name': 'taiko',
+									'value': '--t'
+								},
+								{
+									'name': 'catch',
+									'value': '--c'
+								},
+								{
+									'name': 'mania',
+									'value': '--m'
+								}
+							]
 						}
 					]
 				},
@@ -2492,6 +2564,30 @@ module.exports = {
 							'description': 'The page of the leaderboard to display',
 							'type': 4,
 							'required': false
+						},
+						{
+							'name': 'mode',
+							'description': 'The osu! mode you want as your main',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'standard',
+									'value': '--s'
+								},
+								{
+									'name': 'taiko',
+									'value': '--t'
+								},
+								{
+									'name': 'catch',
+									'value': '--c'
+								},
+								{
+									'name': 'mania',
+									'value': '--m'
+								}
+							]
 						}
 					]
 				},

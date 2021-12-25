@@ -1,5 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, humanReadable, createLeaderboard, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { getGuildPrefix, humanReadable, createLeaderboard, populateMsgFromInteraction, logDatabaseQueries, getOsuUserServerMode, getGameModeName } = require('../utils');
 const { leaderboardEntriesPerPage } = require('../config.json');
 const { Permissions } = require('discord.js');
 
@@ -25,12 +25,10 @@ module.exports = {
 
 			await interaction.reply('osu! leaderboard will be created');
 
-			if (interaction.options._hoistedOptions[1]) {
-				args = [interaction.options._hoistedOptions[1].value];
-			} else if (interaction.options._hoistedOptions[0]) {
-				args = [interaction.options._hoistedOptions[0].value];
-			} else {
-				args = [];
+			args = [];
+
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				args.push(interaction.options._hoistedOptions[i].value);
 			}
 		}
 
@@ -38,6 +36,9 @@ module.exports = {
 		if (msg.id) {
 			processingMessage = await msg.reply('Processing osu! leaderboard...');
 		}
+
+		const commandConfig = await getOsuUserServerMode(msg, args);
+		const mode = commandConfig[2];
 
 		msg.guild.members.fetch()
 			.then(async (guildMembers) => {
@@ -51,7 +52,43 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						osuAccounts.push(discordUser);
+						if (mode === 0) {
+							osuAccounts.push({
+								userId: discordUser.userId,
+								osuUserId: discordUser.osuUserId,
+								osuName: discordUser.osuName,
+								osuVerified: discordUser.osuVerified,
+								rank: discordUser.osuRank,
+								pp: discordUser.osuPP,
+							});
+						} else if (mode === 1) {
+							osuAccounts.push({
+								userId: discordUser.userId,
+								osuUserId: discordUser.osuUserId,
+								osuName: discordUser.osuName,
+								osuVerified: discordUser.osuVerified,
+								rank: discordUser.taikoRank,
+								pp: discordUser.taikoPP,
+							});
+						} else if (mode === 2) {
+							osuAccounts.push({
+								userId: discordUser.userId,
+								osuUserId: discordUser.osuUserId,
+								osuName: discordUser.osuName,
+								osuVerified: discordUser.osuVerified,
+								rank: discordUser.catchRank,
+								pp: discordUser.catchPP,
+							});
+						} else if (mode === 3) {
+							osuAccounts.push({
+								userId: discordUser.userId,
+								osuUserId: discordUser.osuUserId,
+								osuName: discordUser.osuName,
+								osuVerified: discordUser.osuVerified,
+								rank: discordUser.maniaRank,
+								pp: discordUser.maniaPP,
+							});
+						}
 					}
 				}
 
@@ -80,9 +117,10 @@ module.exports = {
 					}
 
 					let dataset = {
-						name: userDisplayName,
-						value: `#${humanReadable(osuAccounts[i].osuRank)} | ${humanReadable(Math.floor(osuAccounts[i].osuPP).toString())}pp | ${verified} ${osuAccounts[i].osuName}`,
+						name: userDisplayName
 					};
+
+					dataset.value = `#${humanReadable(osuAccounts[i].rank)} | ${humanReadable(Math.floor(osuAccounts[i].pp).toString())}pp | ${verified} ${osuAccounts[i].osuName}`;
 
 					leaderboardData.push(dataset);
 				}
@@ -109,7 +147,7 @@ module.exports = {
 					filename = `osu-leaderboard-${msg.author.id}-${msg.guild.name}-page${page}.png`;
 				}
 
-				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${msg.guild.name}'s osu! leaderboard`, filename, page);
+				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${msg.guild.name}'s osu! ${getGameModeName(mode)} leaderboard`, filename, page);
 
 				const guildPrefix = await getGuildPrefix(msg);
 
@@ -150,7 +188,7 @@ function partition(list, start, end) {
 	const pivot = list[end];
 	let i = start;
 	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].osuPP) >= parseFloat(pivot.osuPP)) {
+		if (parseFloat(list[j].pp) >= parseFloat(pivot.pp)) {
 			[list[j], list[i]] = [list[i], list[j]];
 			i++;
 		}
