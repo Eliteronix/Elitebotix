@@ -1,13 +1,14 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
-const { getGuildPrefix, pause, getIDFromPotentialOsuLink, logDatabaseQueries } = require('../utils.js');
+const { DBElitiriCupSignUp } = require('../dbObjects.js');
+const { getIDFromPotentialOsuLink, logDatabaseQueries, populateMsgFromInteraction } = require('../utils.js');
+const { currentElitiriCup } = require('../config.json');
 
 module.exports = {
-	name: 'ecs2021-submit',
+	name: 'elitiri-check',
 	//aliases: ['osu-map', 'beatmap-info'],
-	description: 'Allows you to submit beatmaps for the Elitiri Cup Summer 2021',
-	usage: '<NM/HD/HR/DT/FM> <id> | <list>',
+	description: `Sends an info card about the viability of the beatmap for the ${currentElitiriCup}`,
+	usage: '<NM/HD/HR/DT/FM> <id> [Bracket]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -16,139 +17,66 @@ module.exports = {
 	args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
-	tags: 'ecs2021',
+	tags: 'elitiri',
 	prefixCommand: true,
-	async execute(msg, args) {
-		logDatabaseQueries(4, 'commands/ecs2021-submit.js DBElitiriCupSignUp');
-		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-			where: { tournamentName: 'Elitiri Cup Summer 2021', userId: msg.author.id }
-		});
+	// eslint-disable-next-line no-unused-vars
+	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
 
-		if (!elitiriSignUp) {
-			return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.');
-		}
+			await interaction.deferReply({ ephemeral: true });
 
-		if (args[0].toLowerCase() === 'list') {
-			logDatabaseQueries(4, 'commands/ecs2021-submit.js DBElitiriCupSubmissions 1');
-			const submissions = await DBElitiriCupSubmissions.findAll({
-				where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUp.osuUserId }
-			});
-
-			const guildPrefix = await getGuildPrefix(msg);
-
-			const submissionsEmbed = new Discord.MessageEmbed()
-				.setColor('#00FF00')
-				.setTitle('You can find your submissions for the Elitiri Cup below')
-				.setDescription(`To submit a map use \`${guildPrefix}${this.name} <NM/HD/HR/DT/FM> <id>\``);
-
-			let NMSubmission = null;
-			let HDSubmission = null;
-			let HRSubmission = null;
-			let DTSubmission = null;
-			let FMSubmission = null;
-
-			for (let i = 0; i < submissions.length; i++) {
-				if (submissions[i].modPool === 'NM') {
-					NMSubmission = submissions[i];
-				} else if (submissions[i].modPool === 'HD') {
-					HDSubmission = submissions[i];
-				} else if (submissions[i].modPool === 'HR') {
-					HRSubmission = submissions[i];
-				} else if (submissions[i].modPool === 'DT') {
-					DTSubmission = submissions[i];
-				} else if (submissions[i].modPool === 'FM') {
-					FMSubmission = submissions[i];
+			let modpool = null;
+			let id = null;
+			let bracket = null;
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				if (interaction.options._hoistedOptions[i].name === 'modpool') {
+					modpool = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'id') {
+					id = interaction.options._hoistedOptions[i].value;
+				} else {
+					bracket = interaction.options._hoistedOptions[i].value;
 				}
 			}
-
-			if (NMSubmission) {
-				submissionsEmbed.addField(`NoMod Map: Submitted (${NMSubmission.beatmapId})`, `${NMSubmission.artist} - ${NMSubmission.title} [${NMSubmission.difficulty}] (${Math.round(NMSubmission.starRating * 100) / 100}*)`);
-			} else {
-				submissionsEmbed
-					.setColor('#FF0000')
-					.addField('NoMod Map: Not yet submitted', `Please submit a map by using \`${guildPrefix}${this.name} NM <ID>\``);
+			args.push(modpool);
+			args.push(id);
+			if (bracket) {
+				args.push(bracket);
 			}
-
-			if (HDSubmission) {
-				submissionsEmbed.addField(`Hidden Map: Submitted (${HDSubmission.beatmapId})`, `${HDSubmission.artist} - ${HDSubmission.title} [${HDSubmission.difficulty}] (${Math.round(HDSubmission.starRating * 100) / 100}*)`);
-			} else {
-				submissionsEmbed
-					.setColor('#FF0000')
-					.addField('Hidden Map: Not yet submitted', `Please submit a map by using \`${guildPrefix}${this.name} HD <ID>\``);
-			}
-
-			if (HRSubmission) {
-				submissionsEmbed.addField(`HardRock Map: Submitted (${HRSubmission.beatmapId})`, `${HRSubmission.artist} - ${HRSubmission.title} [${HRSubmission.difficulty}] (${Math.round(HRSubmission.starRating * 100) / 100}*)`);
-			} else {
-				submissionsEmbed
-					.setColor('#FF0000')
-					.addField('HardRock Map: Not yet submitted', `Please submit a map by using \`${guildPrefix}${this.name} HR <ID>\``);
-			}
-
-			if (DTSubmission) {
-				submissionsEmbed.addField(`DoubleTime Map: Submitted (${DTSubmission.beatmapId})`, `${DTSubmission.artist} - ${DTSubmission.title} [${DTSubmission.difficulty}] (${Math.round(DTSubmission.starRating * 100) / 100}*)`);
-			} else {
-				submissionsEmbed
-					.setColor('#FF0000')
-					.addField('DoubleTime Map: Not yet submitted', `Please submit a map by using \`${guildPrefix}${this.name} DT <ID>\``);
-			}
-
-			if (FMSubmission) {
-				submissionsEmbed.addField(`FreeMod Map: Submitted (${FMSubmission.beatmapId})`, `${FMSubmission.artist} - ${FMSubmission.title} [${FMSubmission.difficulty}] (${Math.round(FMSubmission.starRating * 100) / 100}*)`);
-			} else {
-				submissionsEmbed
-					.setColor('#FF0000')
-					.addField('FreeMod Map: Not yet submitted', `Please submit a map by using \`${guildPrefix}${this.name} FM <ID>\``);
-			}
-
-			if (msg.channel.type !== 'DM') {
-				submissionsEmbed.setFooter(`This embed will automatically get deleted in 30 seconds to avoid leaking maps.\nYou can use 'e!${this.name} list' in my DMs to send the embed without a timer.`);
-			}
-
-			let sentMessage = await msg.reply({ embeds: [submissionsEmbed] });
-
-			if (msg.channel.type !== 'DM') {
-				await pause(30000);
-				const editEmbed = new Discord.MessageEmbed()
-					.setTitle('The embed was automatically deleted to avoid leaking maps.')
-					.setDescription(`You can use \`e!${this.name} list\` in my DMs to send the embed without a timer.`);
-				sentMessage.edit({ embed: editEmbed });
-			}
-
-			return;
 		}
+		logDatabaseQueries(4, 'commands/elitiri-check.js DBElitiriCupSignUp');
+		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
+			where: { tournamentName: currentElitiriCup, userId: msg.author.id }
+		});
 
-		let now = new Date();
-		let startOfSubmission = new Date();
-		startOfSubmission.setUTCMilliseconds(0);
-		startOfSubmission.setUTCSeconds(0);
-		startOfSubmission.setUTCMinutes(0);
-		startOfSubmission.setUTCHours(0);
-		startOfSubmission.setUTCDate(28);
-		startOfSubmission.setUTCMonth(5); //Zero Indexed
-		startOfSubmission.setUTCFullYear(2021);
-		if (now < startOfSubmission) {
-			return msg.reply('The submission period hasn\'t started yet and maps can\'t be submitted yet.');
-		}
-
-		let endOfSubmission = new Date();
-		endOfSubmission.setUTCMilliseconds(999);
-		endOfSubmission.setUTCSeconds(59);
-		endOfSubmission.setUTCMinutes(59);
-		endOfSubmission.setUTCHours(23);
-		endOfSubmission.setUTCDate(18);
-		endOfSubmission.setUTCMonth(6); //Zero Indexed
-		endOfSubmission.setUTCFullYear(2021);
-		if (now > endOfSubmission) {
-			return msg.reply('The submission period has ended and maps can\'t be changed anymore.');
+		if (!elitiriSignUp && !args[2]) {
+			if (msg.id) {
+				return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
+			}
+			return interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.', ephemeral: true });
+		} else if (!elitiriSignUp && args[2].toLowerCase() !== 'top' && args[2].toLowerCase() !== 'middle' && args[2].toLowerCase() !== 'lower' && args[2].toLowerCase() !== 'beginner') {
+			if (msg.id) {
+				return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
+			}
+			return interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.', ephemeral: true });
 		}
 
 		if (args[0].toLowerCase() !== 'nm' && args[0].toLowerCase() !== 'hd' && args[0].toLowerCase() !== 'hr' && args[0].toLowerCase() !== 'dt' && args[0].toLowerCase() !== 'fm') {
-			return msg.reply('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
+			if (msg.id) {
+				return msg.reply('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
+			}
+			return interaction.editReply({ content: 'Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)', ephemeral: true });
 		}
 
-		let bracketNameParts = elitiriSignUp.bracketName.split(' ');
-		let bracket = bracketNameParts[0].toLowerCase();
+		let bracket = '';
+		if (elitiriSignUp) {
+			let bracketNameParts = elitiriSignUp.bracketName.split(' ');
+			bracket = bracketNameParts[0].toLowerCase();
+		}
+
+		if (args[2]) {
+			bracket = args[2].toLowerCase();
+		}
 
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -160,30 +88,12 @@ module.exports = {
 
 		osuApi.getBeatmaps({ b: getIDFromPotentialOsuLink(args[1]) })
 			.then(async (beatmaps) => {
-				getBeatmap(msg, args);
-
-				logDatabaseQueries(4, 'commands/ecs2021-submit.js DBElitiriCupSubmissions 2');
-				const existingMap = await DBElitiriCupSubmissions.findOne({
-					where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUp.osuUserId, beatmapId: beatmaps[0].id }
-				});
-
-				const guildPrefix = await getGuildPrefix(msg);
+				getBeatmap(msg, args, interaction);
 
 				const viabilityEmbed = new Discord.MessageEmbed()
 					.setColor('#00FF00')
-					.setTitle(`You have submitted the beatmap for the tournament (${bracket} bracket)`)
-					.setDescription(`To look at your submitted maps use \`${guildPrefix}${this.name} list\``)
+					.setTitle(`The Beatmap is viable for the tournament (${bracket} bracket)`)
 					.setFooter(`ID: ${beatmaps[0].id}; Checked by ${msg.author.username}#${msg.author.discriminator}`);
-
-				if (existingMap) {
-					viabilityEmbed
-						.setColor('#FF0000')
-						.setTitle('You already submitted the same map once. Please replace the map by another one in the modpool where it has been submitted already.')
-						.setDescription(`To look at your submitted maps use \`${guildPrefix}${this.name} list\`\nIf you think the map is within the restrictions please contact Eliteronix#4208`)
-						.addField('Map has been submitted already', 'Each map can just be submitted once for each player');
-
-					return msg.reply({ embeds: [viabilityEmbed] });
-				}
 
 				//The map has to have audio
 				if (!(beatmaps[0].hasAudio)) {
@@ -344,61 +254,17 @@ module.exports = {
 						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}`);
 				}
 
-				if (viabilityEmbed.title.startsWith('You have submitted the beatmap for the tournament')) {
-					logDatabaseQueries(4, 'commands/ecs2021-submit.js DBElitiriCupSubmissions 3');
-					const submittedModMap = await DBElitiriCupSubmissions.findOne({
-						where: { tournamentName: 'Elitiri Cup Summer 2021', osuUserId: elitiriSignUp.osuUserId, modPool: args[0].toUpperCase() }
-					});
-
-					if (submittedModMap) {
-						submittedModMap.osuUserId = elitiriSignUp.osuUserId;
-						submittedModMap.osuName = elitiriSignUp.osuName;
-						submittedModMap.bracketName = elitiriSignUp.bracketName;
-						submittedModMap.tournamentName = 'Elitiri Cup Summer 2021';
-						submittedModMap.modPool = args[0].toUpperCase();
-						submittedModMap.title = beatmaps[0].title;
-						submittedModMap.artist = beatmaps[0].artist;
-						submittedModMap.difficulty = beatmaps[0].version;
-						submittedModMap.starRating = beatmaps[0].difficulty.rating;
-						submittedModMap.drainLength = beatmaps[0].length.drain;
-						submittedModMap.circleSize = beatmaps[0].difficulty.size;
-						submittedModMap.approachRate = beatmaps[0].difficulty.approach;
-						submittedModMap.overallDifficulty = beatmaps[0].difficulty.overall;
-						submittedModMap.hpDrain = beatmaps[0].difficulty.drain;
-						submittedModMap.mapper = beatmaps[0].creator;
-						submittedModMap.beatmapId = beatmaps[0].id;
-						submittedModMap.beatmapsetId = beatmaps[0].beatmapSetId;
-						submittedModMap.bpm = beatmaps[0].bpm;
-						submittedModMap.save();
-					} else {
-						DBElitiriCupSubmissions.create({
-							osuUserId: elitiriSignUp.osuUserId,
-							osuName: elitiriSignUp.osuName,
-							bracketName: elitiriSignUp.bracketName,
-							tournamentName: 'Elitiri Cup Summer 2021',
-							modPool: args[0].toUpperCase(),
-							title: beatmaps[0].title,
-							artist: beatmaps[0].artist,
-							difficulty: beatmaps[0].version,
-							starRating: beatmaps[0].difficulty.rating,
-							drainLength: beatmaps[0].length.drain,
-							circleSize: beatmaps[0].difficulty.size,
-							approachRate: beatmaps[0].difficulty.approach,
-							overallDifficulty: beatmaps[0].difficulty.overall,
-							hpDrain: beatmaps[0].difficulty.drain,
-							mapper: beatmaps[0].creator,
-							beatmapId: beatmaps[0].id,
-							beatmapsetId: beatmaps[0].beatmapSetId,
-							bpm: beatmaps[0].bpm,
-						});
-					}
+				if (msg.id) {
+					return msg.reply({ embeds: [viabilityEmbed] });
 				}
-
-				msg.reply({ embeds: [viabilityEmbed] });
+				return interaction.editReply({ embeds: [viabilityEmbed], ephemeral: true });
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.reply(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
+					if (msg.id) {
+						return msg.reply(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
+					}
+					return interaction.editReply({ content: `Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`, ephemeral: true });
 				} else {
 					console.log(err);
 				}
@@ -407,11 +273,11 @@ module.exports = {
 	}
 };
 
-async function getBeatmap(msg, args) {
+async function getBeatmap(msg, args, interaction) {
 	let command = require('./osu-beatmap.js');
 	let newArgs = [args[1]];
 	try {
-		command.execute(msg, newArgs, true);
+		command.execute(msg, newArgs, interaction);
 	} catch (error) {
 		console.error(error);
 		const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');

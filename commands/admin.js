@@ -2,6 +2,7 @@ const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { saveOsuMultiScores, pause } = require('../utils');
 const osu = require('node-osu');
 const { developers } = require('../config.json');
+const fetch = require('node-fetch');
 
 module.exports = {
 	name: 'admin',
@@ -314,6 +315,30 @@ module.exports = {
 			// 				'description': 'The page of the leaderboard to display',
 			// 				'type': 4,
 			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'mode',
+			// 				'description': 'The osu! mode you want as your main',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'standard',
+			// 						'value': '--s'
+			// 					},
+			// 					{
+			// 						'name': 'taiko',
+			// 						'value': '--t'
+			// 					},
+			// 					{
+			// 						'name': 'catch',
+			// 						'value': '--c'
+			// 					},
+			// 					{
+			// 						'name': 'mania',
+			// 						'value': '--m'
+			// 					}
+			// 				]
 			// 			}
 			// 		]
 			// 	},
@@ -488,6 +513,30 @@ module.exports = {
 			// 				'description': 'The page of the leaderboard to display',
 			// 				'type': 4,
 			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'mode',
+			// 				'description': 'The osu! mode you want as your main',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'standard',
+			// 						'value': '--s'
+			// 					},
+			// 					{
+			// 						'name': 'taiko',
+			// 						'value': '--t'
+			// 					},
+			// 					{
+			// 						'name': 'catch',
+			// 						'value': '--c'
+			// 					},
+			// 					{
+			// 						'name': 'mania',
+			// 						'value': '--m'
+			// 					}
+			// 				]
 			// 			}
 			// 		]
 			// 	},
@@ -773,7 +822,13 @@ module.exports = {
 			// 						'description': 'The username, id or link of the player',
 			// 						'type': 3,
 			// 						'required': false
-			// 					}
+			// 					},
+			// 					{
+			// 						'name': 'mappool',
+			// 						'description': 'The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
 			// 				]
 			// 			},
 			// 			{
@@ -808,6 +863,12 @@ module.exports = {
 			// 								'value': '3'
 			// 							}
 			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'mappool',
+			// 						'description': 'The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+			// 						'type': 3,
+			// 						'required': false
 			// 					},
 			// 				]
 			// 			},
@@ -2305,6 +2366,30 @@ module.exports = {
 							'description': 'The page of the leaderboard to display',
 							'type': 4,
 							'required': false
+						},
+						{
+							'name': 'mode',
+							'description': 'The osu! mode you want as your main',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'standard',
+									'value': '--s'
+								},
+								{
+									'name': 'taiko',
+									'value': '--t'
+								},
+								{
+									'name': 'catch',
+									'value': '--c'
+								},
+								{
+									'name': 'mania',
+									'value': '--m'
+								}
+							]
 						}
 					]
 				},
@@ -2479,6 +2564,30 @@ module.exports = {
 							'description': 'The page of the leaderboard to display',
 							'type': 4,
 							'required': false
+						},
+						{
+							'name': 'mode',
+							'description': 'The osu! mode you want as your main',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'standard',
+									'value': '--s'
+								},
+								{
+									'name': 'taiko',
+									'value': '--t'
+								},
+								{
+									'name': 'catch',
+									'value': '--c'
+								},
+								{
+									'name': 'mania',
+									'value': '--m'
+								}
+							]
 						}
 					]
 				},
@@ -2764,7 +2873,13 @@ module.exports = {
 									'description': 'The username, id or link of the player',
 									'type': 3,
 									'required': false
-								}
+								},
+								{
+									'name': 'mappool',
+									'description': 'The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+									'type': 3,
+									'required': false
+								},
 							]
 						},
 						{
@@ -2799,6 +2914,12 @@ module.exports = {
 											'value': '3'
 										}
 									]
+								},
+								{
+									'name': 'mappool',
+									'description': 'The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+									'type': 3,
+									'required': false
 								},
 							]
 						},
@@ -4102,6 +4223,14 @@ module.exports = {
 					score.save();
 					console.log(score.id, score.freeMod);
 				}
+			}
+		} else if (args[0] === 'fetchMulti') {
+			let response = await fetch('https://osu.ppy.sh/community/matches/90613627');
+			let htmlCode = await response.text();
+			let isolatedContent = htmlCode.replace(/[\s\S]+<script id="json-events" type="application\/json">/gm, '').replace(/<\/script>[\s\S]+/gm, '');
+			let json = JSON.parse(isolatedContent);
+			if (Date.parse(json.events[json.events.length - 1].timestamp) - Date.parse(json.match.start_time) > 86400000) {
+				console.log('Longer than 24 hours');
 			}
 		} else {
 			msg.reply('Invalid command');

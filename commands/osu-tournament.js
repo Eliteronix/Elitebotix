@@ -31,9 +31,17 @@ module.exports = {
 		logDatabaseQueries(4, 'commands/osu-tournament.js DBOsuMultiScores');
 		const userScores = await DBOsuMultiScores.findAll({
 			where: {
-				matchName: {
-					[Op.like]: `${args.join(' ')}%`,
-				}
+				[Op.or]: [
+					{
+						matchName: {
+							[Op.like]: `${args.join(' ')}:%`,
+						},
+					}, {
+						matchName: {
+							[Op.like]: `${args.join(' ')} :%`,
+						}
+					}
+				]
 			}
 		});
 

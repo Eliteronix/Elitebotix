@@ -711,6 +711,8 @@ module.exports = {
 					let mods = getScoreModpool(scores[0][j]);
 					if (`${scoring}-${mods}-${scores[0][j].beatmapId}` === mapsPlayedByBoth[i]) {
 						scoreUser1 = scores[0][j];
+						scores[0].splice(j, 1);
+						j--;
 					}
 				}
 
@@ -724,6 +726,8 @@ module.exports = {
 					let mods = getScoreModpool(scores[1][j]);
 					if (`${scoring}-${mods}-${scores[1][j].beatmapId}` === mapsPlayedByBoth[i]) {
 						scoreUser2 = scores[1][j];
+						scores[1].splice(j, 1);
+						j--;
 					}
 				}
 
@@ -756,7 +760,7 @@ module.exports = {
 					scoringType = 'V2';
 				}
 
-				mapsPlayedByBothReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(scoreUser1)} https://osu.ppy.sh/b/${scoreUser1.beatmapId} - Won by: ${usersReadable[winner]} - ${humanReadable(scoreUser1.score)} vs ${humanReadable(scoreUser2.score)}`);
+				mapsPlayedByBothReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(scoreUser1)} https://osu.ppy.sh/b/${scoreUser1.beatmapId} - Won by: ${usersReadable[winner]} (by ${humanReadable(Math.abs(parseInt(scoreUser1.score) - parseInt(scoreUser2.score)))}) - ${humanReadable(scoreUser1.score)} vs ${humanReadable(scoreUser2.score)}`);
 			}
 
 			//Convert modpool arrays into strings

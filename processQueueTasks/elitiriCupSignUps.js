@@ -1,18 +1,19 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { DBElitiriCupSignUp, DBProcessQueue } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
+const { currentElitiriCup, currentElitiriCupTopSheetId, currentElitiriCupMiddleSheetId, currentElitiriCupLowerSheetId, currentElitiriCupBeginnerSheetId } = require('../config.json');
 
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(client, bancho, processQueueEntry) {
 		if (processQueueEntry.additions === 'Top Bracket') {
-			await updateSheet('1FeGwyeI-GLLej4HxfOJ0R4A9ZAnJ7ofdMPgKrgnpBG8', processQueueEntry.additions);
+			await updateSheet(currentElitiriCupTopSheetId, processQueueEntry.additions);
 		} else if (processQueueEntry.additions === 'Middle Bracket') {
-			await updateSheet('1swtWHJoO5vdUq6LPS4-eXziIDc4dZ2QJIRhNWyU9PVE', processQueueEntry.additions);
+			await updateSheet(currentElitiriCupMiddleSheetId, processQueueEntry.additions);
 		} else if (processQueueEntry.additions === 'Lower Bracket') {
-			await updateSheet('1jjZm93sA0XQs6Zfgh1Ev-46IuNunobDiW80uQMM8K2k', processQueueEntry.additions);
+			await updateSheet(currentElitiriCupLowerSheetId, processQueueEntry.additions);
 		} else if (processQueueEntry.additions === 'Beginner Bracket') {
-			await updateSheet('1AIyEGG2_X2gwy01XQl2pINc2yYU8XicrdfyOEvZYY-Q', processQueueEntry.additions);
+			await updateSheet(currentElitiriCupBeginnerSheetId, processQueueEntry.additions);
 		}
 
 		processQueueEntry.destroy();
@@ -44,7 +45,7 @@ async function updateSheet(spreadsheetID, bracketName) {
 		logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBElitiriCupSignUp');
 		let bracketPlayers = await DBElitiriCupSignUp.findAll({
 			where: {
-				tournamentName: 'Elitiri Cup Summer 2021',
+				tournamentName: currentElitiriCup,
 				bracketName: bracketName
 			}
 		});
