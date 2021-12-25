@@ -774,7 +774,13 @@ module.exports = {
 			// 						'description': 'The username, id or link of the player',
 			// 						'type': 3,
 			// 						'required': false
-			// 					}
+			// 					},
+			// 					{
+			// 						'name': 'mappool',
+			// 						'description': 'The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
 			// 				]
 			// 			},
 			// 			{
@@ -809,6 +815,12 @@ module.exports = {
 			// 								'value': '3'
 			// 							}
 			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'mappool',
+			// 						'description': 'The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+			// 						'type': 3,
+			// 						'required': false
 			// 					},
 			// 				]
 			// 			},
@@ -2765,7 +2777,13 @@ module.exports = {
 									'description': 'The username, id or link of the player',
 									'type': 3,
 									'required': false
-								}
+								},
+								{
+									'name': 'mappool',
+									'description': 'The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+									'type': 3,
+									'required': false
+								},
 							]
 						},
 						{
@@ -2800,6 +2818,12 @@ module.exports = {
 											'value': '3'
 										}
 									]
+								},
+								{
+									'name': 'mappool',
+									'description': 'The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+									'type': 3,
+									'required': false
 								},
 							]
 						},

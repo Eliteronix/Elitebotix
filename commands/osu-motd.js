@@ -28,6 +28,7 @@ module.exports = {
 		let lowerStarLimit = 0;
 		let higherStarLimit = 10;
 		let scoreversion = 0;
+		let mappool = null;
 
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
@@ -53,6 +54,8 @@ module.exports = {
 					higherStarLimit = parseFloat(interaction.options._hoistedOptions[i].value);
 				} else if (interaction.options._hoistedOptions[i].name === 'scoreversion') {
 					scoreversion = parseFloat(interaction.options._hoistedOptions[i].value);
+				} else if (interaction.options._hoistedOptions[i].name === 'mappool') {
+					mappool = interaction.options._hoistedOptions[i].value.split(',');
 				} else {
 					args.push(interaction.options._hoistedOptions[i].value);
 				}
@@ -81,6 +84,57 @@ module.exports = {
 			//Swap lower and higher star limits if they're the wrong way around
 			if ((interaction.options._subcommand === 'custom-fixed-players' || interaction.options._subcommand === 'custom-react-to-play') && lowerStarLimit > higherStarLimit) {
 				[lowerStarLimit, higherStarLimit] = [higherStarLimit, lowerStarLimit];
+			}
+
+			if (interaction.options._subcommand === 'custom-fixed-players' || interaction.options._subcommand === 'custom-react-to-play') {
+				//Defer the interaction
+				await interaction.deferReply();
+			}
+
+			if (mappool) {
+				for (let i = 0; i < mappool.length; i++) {
+					if (i === 3 || i === 7) {
+						mappool[i] = await getOsuBeatmap(mappool[i].trim(), 64);
+					} else {
+						mappool[i] = await getOsuBeatmap(mappool[i].trim(), 0);
+					}
+
+					mappool[i] = {
+						id: mappool[i].beatmapId,
+						beatmapSetId: mappool[i].beatmapsetId,
+						title: mappool[i].title,
+						creator: mappool[i].mapper,
+						version: mappool[i].difficulty,
+						artist: mappool[i].artist,
+						rating: mappool[i].userRating,
+						bpm: mappool[i].bpm,
+						mode: mappool[i].mode,
+						approvalStatus: mappool[i].approvalStatus,
+						maxCombo: mappool[i].maxCombo,
+						objects: {
+							normal: mappool[i].circles,
+							slider: mappool[i].sliders,
+							spinner: mappool[i].spinners
+						},
+						difficulty: {
+							rating: mappool[i].starRating,
+							aim: mappool[i].aimRating,
+							speed: mappool[i].speedRating,
+							size: mappool[i].circleSize,
+							overall: mappool[i].overallDifficulty,
+							approach: mappool[i].approachRate,
+							drain: mappool[i].hpDrain
+						},
+						length: {
+							total: mappool[i].totalLength,
+							drain: mappool[i].drainLength
+						}
+					};
+				}
+
+				if (mappool.length !== 10) {
+					return interaction.editReply('You need to provide exactly 10 maps if you want to use a custom mappool!');
+				}
 			}
 		}
 
@@ -295,9 +349,6 @@ module.exports = {
 			}
 			args.shift();
 
-			//Defer the interaction
-			await interaction.deferReply();
-
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -378,246 +429,255 @@ module.exports = {
 				return interaction.editReply(`The following users are not reachable: ${unreachableUsers.join(', ')}\nThe custom MOTD has been aborted.`);
 			}
 
-			//Get the amount of Maps in the DB
-			let amountOfMapsInDB = -1;
-
-			while (amountOfMapsInDB === -1) {
-				const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
-
-				const dbBeatmap = await getOsuBeatmap(mostRecentBeatmap[0].id, 0);
-
-				if (dbBeatmap) {
-					amountOfMapsInDB = dbBeatmap.id;
-				}
-			}
-
-			//Fill a Nomod map array with random tourney maps from the db
-			//More maps than needed to get a better distribution
-			let nomodMaps = [];
-			let backupBeatmapIds = [];
-			let i = 0;
-			while (nomodMaps.length < 30) {
-
-				let beatmap = null;
-				while (!beatmap) {
-					i++;
-					const index = Math.floor(Math.random() * amountOfMapsInDB);
-
-					logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 1');
-					const dbBeatmap = await DBOsuBeatmaps.findOne({
-						where: { id: index }
-					});
-
-					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
-						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
-						&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
-						&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
-						backupBeatmapIds.push(dbBeatmap.beatmapId);
-						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 1');
-						const multiScores = await DBOsuMultiScores.findAll({
-							where: {
-								tourneyMatch: true,
-								beatmapId: dbBeatmap.beatmapId
-							}
-						});
-
-						let onlyMOTD = true;
-						for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
-							if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
-								onlyMOTD = false;
-							}
-						}
-
-						if (!onlyMOTD) {
-							beatmap = {
-								id: dbBeatmap.beatmapId,
-								beatmapSetId: dbBeatmap.beatmapsetId,
-								title: dbBeatmap.title,
-								creator: dbBeatmap.mapper,
-								version: dbBeatmap.difficulty,
-								artist: dbBeatmap.artist,
-								rating: dbBeatmap.userRating,
-								bpm: dbBeatmap.bpm,
-								mode: dbBeatmap.mode,
-								approvalStatus: dbBeatmap.approvalStatus,
-								maxCombo: dbBeatmap.maxCombo,
-								objects: {
-									normal: dbBeatmap.circles,
-									slider: dbBeatmap.sliders,
-									spinner: dbBeatmap.spinners
-								},
-								difficulty: {
-									rating: dbBeatmap.starRating,
-									aim: dbBeatmap.aimRating,
-									speed: dbBeatmap.speedRating,
-									size: dbBeatmap.circleSize,
-									overall: dbBeatmap.overallDifficulty,
-									approach: dbBeatmap.approachRate,
-									drain: dbBeatmap.hpDrain
-								},
-								length: {
-									total: dbBeatmap.totalLength,
-									drain: dbBeatmap.drainLength
-								}
-							};
-						}
-					}
-				}
-
-				nomodMaps.push(beatmap);
-			}
-
-			quicksort(nomodMaps);
-
-			//Remove maps if more than enough to make it scale better
-			while (nomodMaps.length > 9) {
-				if (Math.round(nomodMaps[0].difficulty.rating * 100) / 100 < 4) {
-					nomodMaps.splice(0, 1);
-				} else {
-					//Set initial object
-					let smallestGap = {
-						index: 1,
-						gap: nomodMaps[2].difficulty.rating - nomodMaps[0].difficulty.rating,
-					};
-
-					//start at 2 because the first gap is already in initial object
-					//Skip 0 and the end to avoid out of bounds exception
-					for (let i = 2; i < nomodMaps.length - 1; i++) {
-						if (smallestGap.gap > nomodMaps[i + 1].difficulty.rating - nomodMaps[i - 1].difficulty.rating) {
-							smallestGap.gap = nomodMaps[i + 1].difficulty.rating - nomodMaps[i - 1].difficulty.rating;
-							smallestGap.index = i;
-						}
-					}
-
-					//Remove the map that causes the smallest gap
-					nomodMaps.splice(smallestGap.index, 1);
-				}
-			}
-
-			//Fill a DoubleTime map array with 50 random tourney maps from the db
-			let doubleTimeMaps = [];
-
-			backupBeatmapIds = [];
-
-			i = 0;
-			while (doubleTimeMaps.length < 50) {
-
-				let beatmap = null;
-				while (!beatmap) {
-					i++;
-
-					const index = Math.floor(Math.random() * amountOfMapsInDB);
-
-					logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 2');
-					const dbBeatmap = await DBOsuBeatmaps.findOne({
-						where: { id: index }
-					});
-
-					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
-						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
-						&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
-						&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
-						backupBeatmapIds.push(dbBeatmap.beatmapId);
-						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 2');
-						const multiScores = await DBOsuMultiScores.findAll({
-							where: {
-								tourneyMatch: true,
-								beatmapId: dbBeatmap.beatmapId
-							}
-						});
-
-						let onlyMOTD = true;
-						for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
-							if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
-								onlyMOTD = false;
-							}
-						}
-
-						if (!onlyMOTD) {
-							beatmap = {
-								id: dbBeatmap.beatmapId,
-								beatmapSetId: dbBeatmap.beatmapsetId,
-								title: dbBeatmap.title,
-								creator: dbBeatmap.mapper,
-								version: dbBeatmap.difficulty,
-								artist: dbBeatmap.artist,
-								rating: dbBeatmap.userRating,
-								bpm: dbBeatmap.bpm,
-								mode: dbBeatmap.mode,
-								approvalStatus: dbBeatmap.approvalStatus,
-								maxCombo: dbBeatmap.maxCombo,
-								objects: {
-									normal: dbBeatmap.circles,
-									slider: dbBeatmap.sliders,
-									spinner: dbBeatmap.spinners
-								},
-								difficulty: {
-									rating: dbBeatmap.starRating,
-									aim: dbBeatmap.aimRating,
-									speed: dbBeatmap.speedRating,
-									size: dbBeatmap.circleSize,
-									overall: dbBeatmap.overallDifficulty,
-									approach: dbBeatmap.approachRate,
-									drain: dbBeatmap.hpDrain
-								},
-								length: {
-									total: dbBeatmap.totalLength,
-									drain: dbBeatmap.drainLength
-								}
-							};
-						}
-					}
-				}
-
-				doubleTimeMaps.push(beatmap);
-			}
-
-			quicksort(doubleTimeMaps);
-
 			//Push the chosen maps in correct order
 			const mappoolInOrder = [];
 
-			// Max 16 players join the lobby
-			//Push first map twice to simulate the qualifier map existing
-			mappoolInOrder.push(nomodMaps[0]);
-			// First map 16 -> 14
-			mappoolInOrder.push(nomodMaps[0]);
-			// Second map 14 -> 12
-			mappoolInOrder.push(nomodMaps[1]);
-			// Third map 12 -> 10
-			mappoolInOrder.push(nomodMaps[2]);
-			// Fourth map (DT) 10 -> 8  -> Between difficulty of third and fifth
-			const firstDTDifficulty = (parseFloat(nomodMaps[3].difficulty.rating) + parseFloat(nomodMaps[2].difficulty.rating)) / 2;
-			let mapUsedIndex = 0;
-			let firstDTMap = doubleTimeMaps[0];
-			for (let i = 1; i < doubleTimeMaps.length; i++) {
-				if (Math.abs(firstDTMap.difficulty.rating - firstDTDifficulty) > Math.abs(doubleTimeMaps[i].difficulty.rating - firstDTDifficulty)) {
-					firstDTMap = doubleTimeMaps[i];
-					mapUsedIndex = i;
+			if (mappool) {
+				for (let i = 0; i < mappool.length; i++) {
+					mappoolInOrder.push(mappool[i]);
+					if (i === 0) {
+						mappoolInOrder.push(mappool[i]);
+					}
 				}
-			}
-			doubleTimeMaps.splice(mapUsedIndex, 1);
+			} else {
+				//Get the amount of Maps in the DB
+				let amountOfMapsInDB = -1;
 
-			mappoolInOrder.push(firstDTMap);
-			// Fifth map 8 -> 6
-			mappoolInOrder.push(nomodMaps[3]);
-			// Sixth map 6 -> 5
-			mappoolInOrder.push(nomodMaps[4]);
-			// Seventh map 5 -> 4
-			mappoolInOrder.push(nomodMaps[5]);
-			// Eigth map (DT) 4 -> 3  -> Between difficulty of seventh and eigth
-			const secondDTDifficulty = (parseFloat(nomodMaps[5].difficulty.rating) + parseFloat(nomodMaps[6].difficulty.rating)) / 2;
-			let secondDTMap = doubleTimeMaps[0];
-			for (let i = 1; i < doubleTimeMaps.length; i++) {
-				if (Math.abs(secondDTMap.difficulty.rating - secondDTDifficulty) > Math.abs(doubleTimeMaps[i].difficulty.rating - secondDTDifficulty)) {
-					secondDTMap = doubleTimeMaps[i];
+				while (amountOfMapsInDB === -1) {
+					const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
+
+					const dbBeatmap = await getOsuBeatmap(mostRecentBeatmap[0].id, 0);
+
+					if (dbBeatmap) {
+						amountOfMapsInDB = dbBeatmap.id;
+					}
 				}
+
+				//Fill a Nomod map array with random tourney maps from the db
+				//More maps than needed to get a better distribution
+				let nomodMaps = [];
+				let backupBeatmapIds = [];
+				let i = 0;
+				while (nomodMaps.length < 30) {
+
+					let beatmap = null;
+					while (!beatmap) {
+						i++;
+						const index = Math.floor(Math.random() * amountOfMapsInDB);
+
+						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 1');
+						const dbBeatmap = await DBOsuBeatmaps.findOne({
+							where: { id: index }
+						});
+
+						if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
+							&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
+							&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
+							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
+							backupBeatmapIds.push(dbBeatmap.beatmapId);
+							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 1');
+							const multiScores = await DBOsuMultiScores.findAll({
+								where: {
+									tourneyMatch: true,
+									beatmapId: dbBeatmap.beatmapId
+								}
+							});
+
+							let onlyMOTD = true;
+							for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
+								if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
+									onlyMOTD = false;
+								}
+							}
+
+							if (!onlyMOTD) {
+								beatmap = {
+									id: dbBeatmap.beatmapId,
+									beatmapSetId: dbBeatmap.beatmapsetId,
+									title: dbBeatmap.title,
+									creator: dbBeatmap.mapper,
+									version: dbBeatmap.difficulty,
+									artist: dbBeatmap.artist,
+									rating: dbBeatmap.userRating,
+									bpm: dbBeatmap.bpm,
+									mode: dbBeatmap.mode,
+									approvalStatus: dbBeatmap.approvalStatus,
+									maxCombo: dbBeatmap.maxCombo,
+									objects: {
+										normal: dbBeatmap.circles,
+										slider: dbBeatmap.sliders,
+										spinner: dbBeatmap.spinners
+									},
+									difficulty: {
+										rating: dbBeatmap.starRating,
+										aim: dbBeatmap.aimRating,
+										speed: dbBeatmap.speedRating,
+										size: dbBeatmap.circleSize,
+										overall: dbBeatmap.overallDifficulty,
+										approach: dbBeatmap.approachRate,
+										drain: dbBeatmap.hpDrain
+									},
+									length: {
+										total: dbBeatmap.totalLength,
+										drain: dbBeatmap.drainLength
+									}
+								};
+							}
+						}
+					}
+
+					nomodMaps.push(beatmap);
+				}
+
+				quicksort(nomodMaps);
+
+				//Remove maps if more than enough to make it scale better
+				while (nomodMaps.length > 9) {
+					if (Math.round(nomodMaps[0].difficulty.rating * 100) / 100 < 4) {
+						nomodMaps.splice(0, 1);
+					} else {
+						//Set initial object
+						let smallestGap = {
+							index: 1,
+							gap: nomodMaps[2].difficulty.rating - nomodMaps[0].difficulty.rating,
+						};
+
+						//start at 2 because the first gap is already in initial object
+						//Skip 0 and the end to avoid out of bounds exception
+						for (let i = 2; i < nomodMaps.length - 1; i++) {
+							if (smallestGap.gap > nomodMaps[i + 1].difficulty.rating - nomodMaps[i - 1].difficulty.rating) {
+								smallestGap.gap = nomodMaps[i + 1].difficulty.rating - nomodMaps[i - 1].difficulty.rating;
+								smallestGap.index = i;
+							}
+						}
+
+						//Remove the map that causes the smallest gap
+						nomodMaps.splice(smallestGap.index, 1);
+					}
+				}
+
+				//Fill a DoubleTime map array with 50 random tourney maps from the db
+				let doubleTimeMaps = [];
+
+				backupBeatmapIds = [];
+
+				i = 0;
+				while (doubleTimeMaps.length < 50) {
+
+					let beatmap = null;
+					while (!beatmap) {
+						i++;
+
+						const index = Math.floor(Math.random() * amountOfMapsInDB);
+
+						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 2');
+						const dbBeatmap = await DBOsuBeatmaps.findOne({
+							where: { id: index }
+						});
+
+						if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
+							&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
+							&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
+							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
+							backupBeatmapIds.push(dbBeatmap.beatmapId);
+							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 2');
+							const multiScores = await DBOsuMultiScores.findAll({
+								where: {
+									tourneyMatch: true,
+									beatmapId: dbBeatmap.beatmapId
+								}
+							});
+
+							let onlyMOTD = true;
+							for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
+								if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
+									onlyMOTD = false;
+								}
+							}
+
+							if (!onlyMOTD) {
+								beatmap = {
+									id: dbBeatmap.beatmapId,
+									beatmapSetId: dbBeatmap.beatmapsetId,
+									title: dbBeatmap.title,
+									creator: dbBeatmap.mapper,
+									version: dbBeatmap.difficulty,
+									artist: dbBeatmap.artist,
+									rating: dbBeatmap.userRating,
+									bpm: dbBeatmap.bpm,
+									mode: dbBeatmap.mode,
+									approvalStatus: dbBeatmap.approvalStatus,
+									maxCombo: dbBeatmap.maxCombo,
+									objects: {
+										normal: dbBeatmap.circles,
+										slider: dbBeatmap.sliders,
+										spinner: dbBeatmap.spinners
+									},
+									difficulty: {
+										rating: dbBeatmap.starRating,
+										aim: dbBeatmap.aimRating,
+										speed: dbBeatmap.speedRating,
+										size: dbBeatmap.circleSize,
+										overall: dbBeatmap.overallDifficulty,
+										approach: dbBeatmap.approachRate,
+										drain: dbBeatmap.hpDrain
+									},
+									length: {
+										total: dbBeatmap.totalLength,
+										drain: dbBeatmap.drainLength
+									}
+								};
+							}
+						}
+					}
+
+					doubleTimeMaps.push(beatmap);
+				}
+
+				quicksort(doubleTimeMaps);
+
+				// Max 16 players join the lobby
+				//Push first map twice to simulate the qualifier map existing
+				mappoolInOrder.push(nomodMaps[0]);
+				// First map 16 -> 14
+				mappoolInOrder.push(nomodMaps[0]);
+				// Second map 14 -> 12
+				mappoolInOrder.push(nomodMaps[1]);
+				// Third map 12 -> 10
+				mappoolInOrder.push(nomodMaps[2]);
+				// Fourth map (DT) 10 -> 8  -> Between difficulty of third and fifth
+				const firstDTDifficulty = (parseFloat(nomodMaps[3].difficulty.rating) + parseFloat(nomodMaps[2].difficulty.rating)) / 2;
+				let mapUsedIndex = 0;
+				let firstDTMap = doubleTimeMaps[0];
+				for (let i = 1; i < doubleTimeMaps.length; i++) {
+					if (Math.abs(firstDTMap.difficulty.rating - firstDTDifficulty) > Math.abs(doubleTimeMaps[i].difficulty.rating - firstDTDifficulty)) {
+						firstDTMap = doubleTimeMaps[i];
+						mapUsedIndex = i;
+					}
+				}
+				doubleTimeMaps.splice(mapUsedIndex, 1);
+
+				mappoolInOrder.push(firstDTMap);
+				// Fifth map 8 -> 6
+				mappoolInOrder.push(nomodMaps[3]);
+				// Sixth map 6 -> 5
+				mappoolInOrder.push(nomodMaps[4]);
+				// Seventh map 5 -> 4
+				mappoolInOrder.push(nomodMaps[5]);
+				// Eigth map (DT) 4 -> 3  -> Between difficulty of seventh and eigth
+				const secondDTDifficulty = (parseFloat(nomodMaps[5].difficulty.rating) + parseFloat(nomodMaps[6].difficulty.rating)) / 2;
+				let secondDTMap = doubleTimeMaps[0];
+				for (let i = 1; i < doubleTimeMaps.length; i++) {
+					if (Math.abs(secondDTMap.difficulty.rating - secondDTDifficulty) > Math.abs(doubleTimeMaps[i].difficulty.rating - secondDTDifficulty)) {
+						secondDTMap = doubleTimeMaps[i];
+					}
+				}
+				mappoolInOrder.push(secondDTMap);
+				// Ninth map 3 -> 2
+				mappoolInOrder.push(nomodMaps[6]);
+				// 10th map 2 -> 1
+				mappoolInOrder.push(nomodMaps[7]);
 			}
-			mappoolInOrder.push(secondDTMap);
-			// Ninth map 3 -> 2
-			mappoolInOrder.push(nomodMaps[6]);
-			// 10th map 2 -> 1
-			mappoolInOrder.push(nomodMaps[7]);
 
 			let mappoolLength = 0;
 			let gameLength = 0;
@@ -674,9 +734,6 @@ module.exports = {
 
 			args.shift();
 
-			//Defer the interaction
-			await interaction.deferReply();
-
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -685,246 +742,255 @@ module.exports = {
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
 
-			//Get the amount of Maps in the DB
-			let amountOfMapsInDB = -1;
-
-			while (amountOfMapsInDB === -1) {
-				const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
-
-				const dbBeatmap = await getOsuBeatmap(mostRecentBeatmap[0].id, 0);
-
-				if (dbBeatmap) {
-					amountOfMapsInDB = dbBeatmap.id;
-				}
-			}
-
-			//Fill a Nomod map array with random tourney maps from the db
-			//More maps than needed to get a better distribution
-			let nomodMaps = [];
-			let backupBeatmapIds = [];
-			let i = 0;
-			while (nomodMaps.length < 30) {
-
-				let beatmap = null;
-				while (!beatmap) {
-					i++;
-					const index = Math.floor(Math.random() * amountOfMapsInDB);
-
-					logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 3');
-					const dbBeatmap = await DBOsuBeatmaps.findOne({
-						where: { id: index }
-					});
-
-					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
-						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
-						&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
-						&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
-						backupBeatmapIds.push(dbBeatmap.beatmapId);
-						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 3');
-						const multiScores = await DBOsuMultiScores.findAll({
-							where: {
-								tourneyMatch: true,
-								beatmapId: dbBeatmap.beatmapId
-							}
-						});
-
-						let onlyMOTD = true;
-						for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
-							if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
-								onlyMOTD = false;
-							}
-						}
-
-						if (!onlyMOTD) {
-							beatmap = {
-								id: dbBeatmap.beatmapId,
-								beatmapSetId: dbBeatmap.beatmapsetId,
-								title: dbBeatmap.title,
-								creator: dbBeatmap.mapper,
-								version: dbBeatmap.difficulty,
-								artist: dbBeatmap.artist,
-								rating: dbBeatmap.userRating,
-								bpm: dbBeatmap.bpm,
-								mode: dbBeatmap.mode,
-								approvalStatus: dbBeatmap.approvalStatus,
-								maxCombo: dbBeatmap.maxCombo,
-								objects: {
-									normal: dbBeatmap.circles,
-									slider: dbBeatmap.sliders,
-									spinner: dbBeatmap.spinners
-								},
-								difficulty: {
-									rating: dbBeatmap.starRating,
-									aim: dbBeatmap.aimRating,
-									speed: dbBeatmap.speedRating,
-									size: dbBeatmap.circleSize,
-									overall: dbBeatmap.overallDifficulty,
-									approach: dbBeatmap.approachRate,
-									drain: dbBeatmap.hpDrain
-								},
-								length: {
-									total: dbBeatmap.totalLength,
-									drain: dbBeatmap.drainLength
-								}
-							};
-						}
-					}
-				}
-
-				nomodMaps.push(beatmap);
-			}
-
-			quicksort(nomodMaps);
-
-			//Remove maps if more than enough to make it scale better
-			while (nomodMaps.length > 9) {
-				if (Math.round(nomodMaps[0].difficulty.rating * 100) / 100 < 4) {
-					nomodMaps.splice(0, 1);
-				} else {
-					//Set initial object
-					let smallestGap = {
-						index: 1,
-						gap: nomodMaps[2].difficulty.rating - nomodMaps[0].difficulty.rating,
-					};
-
-					//start at 2 because the first gap is already in initial object
-					//Skip 0 and the end to avoid out of bounds exception
-					for (let i = 2; i < nomodMaps.length - 1; i++) {
-						if (smallestGap.gap > nomodMaps[i + 1].difficulty.rating - nomodMaps[i - 1].difficulty.rating) {
-							smallestGap.gap = nomodMaps[i + 1].difficulty.rating - nomodMaps[i - 1].difficulty.rating;
-							smallestGap.index = i;
-						}
-					}
-
-					//Remove the map that causes the smallest gap
-					nomodMaps.splice(smallestGap.index, 1);
-				}
-			}
-
-			//Fill a DoubleTime map array with 50 random tourney maps from the db
-			let doubleTimeMaps = [];
-
-			backupBeatmapIds = [];
-
-			i = 0;
-			while (doubleTimeMaps.length < 50) {
-
-				let beatmap = null;
-				while (!beatmap) {
-					i++;
-
-					const index = Math.floor(Math.random() * amountOfMapsInDB);
-
-					logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 4');
-					const dbBeatmap = await DBOsuBeatmaps.findOne({
-						where: { id: index }
-					});
-
-					if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
-						&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
-						&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
-						&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
-						backupBeatmapIds.push(dbBeatmap.beatmapId);
-						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 4');
-						const multiScores = await DBOsuMultiScores.findAll({
-							where: {
-								tourneyMatch: true,
-								beatmapId: dbBeatmap.beatmapId
-							}
-						});
-
-						let onlyMOTD = true;
-						for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
-							if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
-								onlyMOTD = false;
-							}
-						}
-
-						if (!onlyMOTD) {
-							beatmap = {
-								id: dbBeatmap.beatmapId,
-								beatmapSetId: dbBeatmap.beatmapsetId,
-								title: dbBeatmap.title,
-								creator: dbBeatmap.mapper,
-								version: dbBeatmap.difficulty,
-								artist: dbBeatmap.artist,
-								rating: dbBeatmap.userRating,
-								bpm: dbBeatmap.bpm,
-								mode: dbBeatmap.mode,
-								approvalStatus: dbBeatmap.approvalStatus,
-								maxCombo: dbBeatmap.maxCombo,
-								objects: {
-									normal: dbBeatmap.circles,
-									slider: dbBeatmap.sliders,
-									spinner: dbBeatmap.spinners
-								},
-								difficulty: {
-									rating: dbBeatmap.starRating,
-									aim: dbBeatmap.aimRating,
-									speed: dbBeatmap.speedRating,
-									size: dbBeatmap.circleSize,
-									overall: dbBeatmap.overallDifficulty,
-									approach: dbBeatmap.approachRate,
-									drain: dbBeatmap.hpDrain
-								},
-								length: {
-									total: dbBeatmap.totalLength,
-									drain: dbBeatmap.drainLength
-								}
-							};
-						}
-					}
-				}
-
-				doubleTimeMaps.push(beatmap);
-			}
-
-			quicksort(doubleTimeMaps);
-
 			//Push the chosen maps in correct order
 			const mappoolInOrder = [];
 
-			// Max 16 players join the lobby
-			//Push first map twice to simulate the qualifier map existing
-			mappoolInOrder.push(nomodMaps[0]);
-			// First map 16 -> 14
-			mappoolInOrder.push(nomodMaps[0]);
-			// Second map 14 -> 12
-			mappoolInOrder.push(nomodMaps[1]);
-			// Third map 12 -> 10
-			mappoolInOrder.push(nomodMaps[2]);
-			// Fourth map (DT) 10 -> 8  -> Between difficulty of third and fifth
-			const firstDTDifficulty = (parseFloat(nomodMaps[3].difficulty.rating) + parseFloat(nomodMaps[2].difficulty.rating)) / 2;
-			let mapUsedIndex = 0;
-			let firstDTMap = doubleTimeMaps[0];
-			for (let i = 1; i < doubleTimeMaps.length; i++) {
-				if (Math.abs(firstDTMap.difficulty.rating - firstDTDifficulty) > Math.abs(doubleTimeMaps[i].difficulty.rating - firstDTDifficulty)) {
-					firstDTMap = doubleTimeMaps[i];
-					mapUsedIndex = i;
+			if (mappool) {
+				for (let i = 0; i < mappool.length; i++) {
+					mappoolInOrder.push(mappool[i]);
+					if (i === 0) {
+						mappoolInOrder.push(mappool[i]);
+					}
 				}
-			}
-			doubleTimeMaps.splice(mapUsedIndex, 1);
+			} else {
+				//Get the amount of Maps in the DB
+				let amountOfMapsInDB = -1;
 
-			mappoolInOrder.push(firstDTMap);
-			// Fifth map 8 -> 6
-			mappoolInOrder.push(nomodMaps[3]);
-			// Sixth map 6 -> 5
-			mappoolInOrder.push(nomodMaps[4]);
-			// Seventh map 5 -> 4
-			mappoolInOrder.push(nomodMaps[5]);
-			// Eigth map (DT) 4 -> 3  -> Between difficulty of seventh and eigth
-			const secondDTDifficulty = (parseFloat(nomodMaps[5].difficulty.rating) + parseFloat(nomodMaps[6].difficulty.rating)) / 2;
-			let secondDTMap = doubleTimeMaps[0];
-			for (let i = 1; i < doubleTimeMaps.length; i++) {
-				if (Math.abs(secondDTMap.difficulty.rating - secondDTDifficulty) > Math.abs(doubleTimeMaps[i].difficulty.rating - secondDTDifficulty)) {
-					secondDTMap = doubleTimeMaps[i];
+				while (amountOfMapsInDB === -1) {
+					const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
+
+					const dbBeatmap = await getOsuBeatmap(mostRecentBeatmap[0].id, 0);
+
+					if (dbBeatmap) {
+						amountOfMapsInDB = dbBeatmap.id;
+					}
 				}
+
+				//Fill a Nomod map array with random tourney maps from the db
+				//More maps than needed to get a better distribution
+				let nomodMaps = [];
+				let backupBeatmapIds = [];
+				let i = 0;
+				while (nomodMaps.length < 30) {
+
+					let beatmap = null;
+					while (!beatmap) {
+						i++;
+						const index = Math.floor(Math.random() * amountOfMapsInDB);
+
+						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 3');
+						const dbBeatmap = await DBOsuBeatmaps.findOne({
+							where: { id: index }
+						});
+
+						if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 300
+							&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
+							&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
+							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
+							backupBeatmapIds.push(dbBeatmap.beatmapId);
+							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 3');
+							const multiScores = await DBOsuMultiScores.findAll({
+								where: {
+									tourneyMatch: true,
+									beatmapId: dbBeatmap.beatmapId
+								}
+							});
+
+							let onlyMOTD = true;
+							for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
+								if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
+									onlyMOTD = false;
+								}
+							}
+
+							if (!onlyMOTD) {
+								beatmap = {
+									id: dbBeatmap.beatmapId,
+									beatmapSetId: dbBeatmap.beatmapsetId,
+									title: dbBeatmap.title,
+									creator: dbBeatmap.mapper,
+									version: dbBeatmap.difficulty,
+									artist: dbBeatmap.artist,
+									rating: dbBeatmap.userRating,
+									bpm: dbBeatmap.bpm,
+									mode: dbBeatmap.mode,
+									approvalStatus: dbBeatmap.approvalStatus,
+									maxCombo: dbBeatmap.maxCombo,
+									objects: {
+										normal: dbBeatmap.circles,
+										slider: dbBeatmap.sliders,
+										spinner: dbBeatmap.spinners
+									},
+									difficulty: {
+										rating: dbBeatmap.starRating,
+										aim: dbBeatmap.aimRating,
+										speed: dbBeatmap.speedRating,
+										size: dbBeatmap.circleSize,
+										overall: dbBeatmap.overallDifficulty,
+										approach: dbBeatmap.approachRate,
+										drain: dbBeatmap.hpDrain
+									},
+									length: {
+										total: dbBeatmap.totalLength,
+										drain: dbBeatmap.drainLength
+									}
+								};
+							}
+						}
+					}
+
+					nomodMaps.push(beatmap);
+				}
+
+				quicksort(nomodMaps);
+
+				//Remove maps if more than enough to make it scale better
+				while (nomodMaps.length > 9) {
+					if (Math.round(nomodMaps[0].difficulty.rating * 100) / 100 < 4) {
+						nomodMaps.splice(0, 1);
+					} else {
+						//Set initial object
+						let smallestGap = {
+							index: 1,
+							gap: nomodMaps[2].difficulty.rating - nomodMaps[0].difficulty.rating,
+						};
+
+						//start at 2 because the first gap is already in initial object
+						//Skip 0 and the end to avoid out of bounds exception
+						for (let i = 2; i < nomodMaps.length - 1; i++) {
+							if (smallestGap.gap > nomodMaps[i + 1].difficulty.rating - nomodMaps[i - 1].difficulty.rating) {
+								smallestGap.gap = nomodMaps[i + 1].difficulty.rating - nomodMaps[i - 1].difficulty.rating;
+								smallestGap.index = i;
+							}
+						}
+
+						//Remove the map that causes the smallest gap
+						nomodMaps.splice(smallestGap.index, 1);
+					}
+				}
+
+				//Fill a DoubleTime map array with 50 random tourney maps from the db
+				let doubleTimeMaps = [];
+
+				backupBeatmapIds = [];
+
+				i = 0;
+				while (doubleTimeMaps.length < 50) {
+
+					let beatmap = null;
+					while (!beatmap) {
+						i++;
+
+						const index = Math.floor(Math.random() * amountOfMapsInDB);
+
+						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 4');
+						const dbBeatmap = await DBOsuBeatmaps.findOne({
+							where: { id: index }
+						});
+
+						if (dbBeatmap && dbBeatmap.mode === 'Standard' && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && parseInt(dbBeatmap.totalLength) <= 450
+							&& parseFloat(dbBeatmap.starRating) >= lowerStarLimit - Math.floor(i * 0.001) * 0.1 && parseFloat(dbBeatmap.starRating) <= higherStarLimit + Math.floor(i * 0.001) * 0.1
+							&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
+							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
+							backupBeatmapIds.push(dbBeatmap.beatmapId);
+							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 4');
+							const multiScores = await DBOsuMultiScores.findAll({
+								where: {
+									tourneyMatch: true,
+									beatmapId: dbBeatmap.beatmapId
+								}
+							});
+
+							let onlyMOTD = true;
+							for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
+								if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
+									onlyMOTD = false;
+								}
+							}
+
+							if (!onlyMOTD) {
+								beatmap = {
+									id: dbBeatmap.beatmapId,
+									beatmapSetId: dbBeatmap.beatmapsetId,
+									title: dbBeatmap.title,
+									creator: dbBeatmap.mapper,
+									version: dbBeatmap.difficulty,
+									artist: dbBeatmap.artist,
+									rating: dbBeatmap.userRating,
+									bpm: dbBeatmap.bpm,
+									mode: dbBeatmap.mode,
+									approvalStatus: dbBeatmap.approvalStatus,
+									maxCombo: dbBeatmap.maxCombo,
+									objects: {
+										normal: dbBeatmap.circles,
+										slider: dbBeatmap.sliders,
+										spinner: dbBeatmap.spinners
+									},
+									difficulty: {
+										rating: dbBeatmap.starRating,
+										aim: dbBeatmap.aimRating,
+										speed: dbBeatmap.speedRating,
+										size: dbBeatmap.circleSize,
+										overall: dbBeatmap.overallDifficulty,
+										approach: dbBeatmap.approachRate,
+										drain: dbBeatmap.hpDrain
+									},
+									length: {
+										total: dbBeatmap.totalLength,
+										drain: dbBeatmap.drainLength
+									}
+								};
+							}
+						}
+					}
+
+					doubleTimeMaps.push(beatmap);
+				}
+
+				quicksort(doubleTimeMaps);
+
+				// Max 16 players join the lobby
+				//Push first map twice to simulate the qualifier map existing
+				mappoolInOrder.push(nomodMaps[0]);
+				// First map 16 -> 14
+				mappoolInOrder.push(nomodMaps[0]);
+				// Second map 14 -> 12
+				mappoolInOrder.push(nomodMaps[1]);
+				// Third map 12 -> 10
+				mappoolInOrder.push(nomodMaps[2]);
+				// Fourth map (DT) 10 -> 8  -> Between difficulty of third and fifth
+				const firstDTDifficulty = (parseFloat(nomodMaps[3].difficulty.rating) + parseFloat(nomodMaps[2].difficulty.rating)) / 2;
+				let mapUsedIndex = 0;
+				let firstDTMap = doubleTimeMaps[0];
+				for (let i = 1; i < doubleTimeMaps.length; i++) {
+					if (Math.abs(firstDTMap.difficulty.rating - firstDTDifficulty) > Math.abs(doubleTimeMaps[i].difficulty.rating - firstDTDifficulty)) {
+						firstDTMap = doubleTimeMaps[i];
+						mapUsedIndex = i;
+					}
+				}
+				doubleTimeMaps.splice(mapUsedIndex, 1);
+
+				mappoolInOrder.push(firstDTMap);
+				// Fifth map 8 -> 6
+				mappoolInOrder.push(nomodMaps[3]);
+				// Sixth map 6 -> 5
+				mappoolInOrder.push(nomodMaps[4]);
+				// Seventh map 5 -> 4
+				mappoolInOrder.push(nomodMaps[5]);
+				// Eigth map (DT) 4 -> 3  -> Between difficulty of seventh and eigth
+				const secondDTDifficulty = (parseFloat(nomodMaps[5].difficulty.rating) + parseFloat(nomodMaps[6].difficulty.rating)) / 2;
+				let secondDTMap = doubleTimeMaps[0];
+				for (let i = 1; i < doubleTimeMaps.length; i++) {
+					if (Math.abs(secondDTMap.difficulty.rating - secondDTDifficulty) > Math.abs(doubleTimeMaps[i].difficulty.rating - secondDTDifficulty)) {
+						secondDTMap = doubleTimeMaps[i];
+					}
+				}
+				mappoolInOrder.push(secondDTMap);
+				// Ninth map 3 -> 2
+				mappoolInOrder.push(nomodMaps[6]);
+				// 10th map 2 -> 1
+				mappoolInOrder.push(nomodMaps[7]);
 			}
-			mappoolInOrder.push(secondDTMap);
-			// Ninth map 3 -> 2
-			mappoolInOrder.push(nomodMaps[6]);
-			// 10th map 2 -> 1
-			mappoolInOrder.push(nomodMaps[7]);
 
 			let mappoolLength = 0;
 			let gameLength = 0;
