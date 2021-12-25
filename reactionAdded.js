@@ -3,7 +3,7 @@ const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } 
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { isWrongSystem, getMods, logDatabaseQueries } = require('./utils');
+const { isWrongSystem, getMods, logDatabaseQueries, getOsuBeatmap } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user, additionalObjects) {
@@ -539,6 +539,198 @@ module.exports = async function (reaction, user, additionalObjects) {
 				guild: reaction.message.guild,
 				guildId: guildId,
 				content: `e!osu-profile ${args}`,
+				author: user,
+				channel: reaction.message.channel,
+			};
+
+			try {
+				command.execute(tempMessage, args, null, additionalObjects);
+			} catch (error) {
+				console.error(error);
+				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+			}
+		}
+	}
+
+	//For the compare emoji | EZ | HT | HD | DT | HR | FL | FI
+	if (reaction._emoji.id === '918920760586805259'
+		|| reaction._emoji.id === '918921193426411544'
+		|| reaction._emoji.id === '918922015182827531'
+		|| reaction._emoji.id === '918920670023397396'
+		|| reaction._emoji.id === '918938816377671740'
+		|| reaction._emoji.id === '918920836755382343'
+		|| reaction._emoji.id === '918922047994880010') {
+		if (reaction.message.attachments.first().name.startsWith('osu-beatmap')) {
+			const beatmapId = reaction.message.attachments.first().name.replace('osu-beatmap-', '').replace(/-.+/gm, '');
+
+			const dbBeatmap = await getOsuBeatmap(beatmapId, 0);
+
+			//get the mods used
+			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+
+			let mods = getMods(modBits);
+
+			if (reaction._emoji.name === 'EZ' && mods.includes('HR')) {
+				mods.splice(mods.indexOf('HR'), 1);
+			} else if (reaction._emoji.name === 'HR' && mods.includes('EZ')) {
+				mods.splice(mods.indexOf('EZ'), 1);
+			} else if (reaction._emoji.name === 'HT' && mods.includes('DT')) {
+				mods.splice(mods.indexOf('DT'), 1);
+			} else if (reaction._emoji.name === 'DT' && mods.includes('HT')) {
+				mods.splice(mods.indexOf('HT'), 1);
+			} else if (reaction._emoji.name === 'HD' && dbBeatmap.mode === 'Mania' && mods.includes('FL')) {
+				mods.splice(mods.indexOf('FL'), 1);
+			} else if (reaction._emoji.name === 'HD' && dbBeatmap.mode === 'Mania' && mods.includes('FI')) {
+				mods.splice(mods.indexOf('FI'), 1);
+			} else if (reaction._emoji.name === 'FL' && dbBeatmap.mode === 'Mania' && mods.includes('FI')) {
+				mods.splice(mods.indexOf('FI'), 1);
+			} else if (reaction._emoji.name === 'FL' && dbBeatmap.mode === 'Mania' && mods.includes('HD')) {
+				mods.splice(mods.indexOf('HD'), 1);
+			} else if (reaction._emoji.name === 'FI' && dbBeatmap.mode === 'Mania' && mods.includes('HD')) {
+				mods.splice(mods.indexOf('HD'), 1);
+			} else if (reaction._emoji.name === 'FI' && dbBeatmap.mode === 'Mania' && mods.includes('FL')) {
+				mods.splice(mods.indexOf('FL'), 1);
+			}
+
+			if (!mods.includes(reaction._emoji.name)) {
+				mods.push(reaction._emoji.name);
+			} else {
+				mods.splice(mods.indexOf(reaction._emoji.name), 1);
+			}
+
+			if (!mods[0]) {
+				mods = ['NM'];
+			}
+
+			let args = [beatmapId, `--${mods.join('')}`];
+
+			const command = require('./commands/osu-beatmap.js');
+
+			//Set author of a temporary message copy to the reacting user to not break the commands
+			let guildId = null;
+
+			if (reaction.message.guild) {
+				guildId = reaction.message.guild.id;
+			}
+
+			let tempMessage = {
+				guild: reaction.message.guild,
+				guildId: guildId,
+				content: `e!osu-score ${beatmapId} --${mods.join('')}`,
+				author: user,
+				channel: reaction.message.channel,
+			};
+
+			try {
+				command.execute(tempMessage, args, null, additionalObjects);
+			} catch (error) {
+				console.error(error);
+				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+			}
+		}
+	}
+
+	//For the compare emoji
+	if (reaction._emoji.id === '918935327215861760') {
+		if (reaction.message.attachments.first().name.startsWith('osu-beatmap')) {
+			const beatmapId = reaction.message.content.replace('osu-beatmap-', '').replace(/-.+/gm, '');
+
+			//get the mods used
+			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+
+			let mods = getMods(modBits);
+
+			if (!mods.includes('HD') && !mods.includes('HR')) {
+				mods.push('HD');
+				mods.push('HR');
+			} else if (mods.includes('HD') && !mods.includes('HR')) {
+				mods.push('HR');
+			} else if (!mods.includes('HD') && mods.includes('HR')) {
+				mods.push('HD');
+			} else {
+				mods.splice(mods.indexOf('HD'), 1);
+				mods.splice(mods.indexOf('HR'), 1);
+			}
+
+			if (!mods[0]) {
+				mods = ['NM'];
+			}
+
+			let args = [beatmapId, `--${mods.join('')}`];
+
+			const command = require('./commands/osu-beatmap.js');
+
+			//Set author of a temporary message copy to the reacting user to not break the commands
+			let guildId = null;
+
+			if (reaction.message.guild) {
+				guildId = reaction.message.guild.id;
+			}
+
+			let tempMessage = {
+				guild: reaction.message.guild,
+				guildId: guildId,
+				content: `e!osu-score ${beatmapId} --${mods.join('')}`,
+				author: user,
+				channel: reaction.message.channel,
+			};
+
+			try {
+				command.execute(tempMessage, args, null, additionalObjects);
+			} catch (error) {
+				console.error(error);
+				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+			}
+		}
+	}
+
+	//For the compare emoji
+	if (reaction._emoji.id === '918935350125142036') {
+		if (reaction.message.attachments.first().name.startsWith('osu-beatmap')) {
+			const beatmapId = reaction.message.content.replace('osu-beatmap-', '').replace(/-.+/gm, '');
+
+			//get the mods used
+			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+
+			let mods = getMods(modBits);
+
+			if (!mods.includes('HD') && !mods.includes('DT')) {
+				mods.push('HD');
+				mods.push('DT');
+			} else if (mods.includes('HD') && !mods.includes('DT')) {
+				mods.push('DT');
+			} else if (!mods.includes('HD') && mods.includes('DT')) {
+				mods.push('HD');
+			} else {
+				mods.splice(mods.indexOf('HD'), 1);
+				mods.splice(mods.indexOf('DT'), 1);
+			}
+
+			if (!mods[0]) {
+				mods = ['NM'];
+			}
+
+			let args = [beatmapId, `--${mods.join('')}`];
+
+			const command = require('./commands/osu-beatmap.js');
+
+			//Set author of a temporary message copy to the reacting user to not break the commands
+			let guildId = null;
+
+			if (reaction.message.guild) {
+				guildId = reaction.message.guild.id;
+			}
+
+			let tempMessage = {
+				guild: reaction.message.guild,
+				guildId: guildId,
+				content: `e!osu-score ${beatmapId} --${mods.join('')}`,
 				author: user,
 				channel: reaction.message.channel,
 			};
