@@ -132,8 +132,6 @@ module.exports = {
 					};
 				}
 
-				console.log(mappool);
-
 				if (mappool.length !== 10) {
 					return interaction.editReply('You need to provide exactly 10 maps if you want to use a custom mappool!');
 				}
