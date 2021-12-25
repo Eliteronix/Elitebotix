@@ -1,4 +1,4 @@
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
@@ -145,6 +145,14 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				processingMessage.delete();
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
+
+				const userScores = await DBOsuMultiScores.findAll({
+					where: { osuUserId: user.id }
+				});
+
+				if (userScores.length) {
+					await sentMessage.react('📊');
+				}
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
@@ -202,6 +210,14 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				processingMessage.delete();
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
+
+				const userScores = await DBOsuMultiScores.findAll({
+					where: { osuUserId: user.id }
+				});
+
+				if (userScores.length) {
+					await sentMessage.react('📊');
+				}
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
