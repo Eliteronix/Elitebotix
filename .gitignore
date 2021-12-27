@@ -1,3 +1,4 @@
 *.sqlite
 .env
 database.sqlite-journal
+maps
