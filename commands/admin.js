@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
-const { saveOsuMultiScores, pause } = require('../utils');
+const { saveOsuMultiScores, pause, getOsuPP } = require('../utils');
 const osu = require('node-osu');
 const { developers } = require('../config.json');
 const fetch = require('node-fetch');
@@ -4232,6 +4232,8 @@ module.exports = {
 			if (Date.parse(json.events[json.events.length - 1].timestamp) - Date.parse(json.match.start_time) > 86400000) {
 				console.log('Longer than 24 hours');
 			}
+		} else if (args[0] === 'calcPP') {
+			getOsuPP(args[1], false, args[2], args[3], args[4], args[5]);
 		} else {
 			msg.reply('Invalid command');
 		}

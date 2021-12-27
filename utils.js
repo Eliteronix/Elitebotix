@@ -1077,6 +1077,47 @@ module.exports = {
 		} else {
 			return 'FM';
 		}
+	},
+	async getOsuPP(beatmapId, forceDownload, modBits, accuracy, misses, combo) {
+		const rosu = require('rosu-pp');
+		const fs = require('fs');
+
+		//Check if the maps folder exists and create it if necessary
+		if (!fs.existsSync('./maps')) {
+			fs.mkdirSync('./maps');
+		}
+
+		//Check if the map is already downloaded and download if necessary
+		const path = `./maps/${beatmapId}.osu`;
+
+		try {
+			if (forceDownload || !fs.existsSync(path)) {
+				const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
+				await new Promise((resolve, reject) => {
+					const fileStream = fs.createWriteStream(`./maps/${beatmapId}.osu`);
+					res.body.pipe(fileStream);
+					res.body.on('error', (err) => {
+						reject(err);
+					});
+					fileStream.on('finish', function () {
+						resolve();
+					});
+				});
+			}
+		} catch (err) {
+			console.error(err);
+		}
+
+		let arg = {
+			path: `./maps/${beatmapId}.osu`,
+			mods: parseInt(modBits),
+			acc: parseFloat(accuracy),
+			nMisses: parseInt(misses),
+			combo: parseInt(combo),
+		};
+
+		let results = rosu.calculate(arg);
+		console.log(results);
 	}
 };
 
