@@ -1103,13 +1103,17 @@ module.exports = {
 			console.error(err);
 		}
 
+
 		let arg = {
 			path: `./maps/${beatmapId}.osu`,
 			mods: parseInt(modBits),
 			acc: parseFloat(accuracy),
 			nMisses: parseInt(misses),
-			combo: parseInt(combo),
 		};
+
+		if (combo) {
+			arg.combo = parseInt(combo);
+		}
 
 		return rosu.calculate(arg)[0].pp;
 	}
