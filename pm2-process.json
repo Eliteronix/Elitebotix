@@ -1,9 +1,14 @@
 {
-    "script": "bot.js",
-    "watch": true,
-    "ignore_watch": ["database.sqlite","database.sqlite-journal",".git"],
-    "watch_options": {
-        "followSymlinks": false
-    },
-    "name": "Elitebotix"
+	"script": "bot.js",
+	"watch": true,
+	"ignore_watch": [
+		"database.sqlite",
+		"database.sqlite-journal",
+		".git",
+		"maps"
+	],
+	"watch_options": {
+		"followSymlinks": false
+	},
+	"name": "Elitebotix"
 }
