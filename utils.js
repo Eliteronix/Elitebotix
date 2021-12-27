@@ -935,22 +935,6 @@ module.exports = {
 	async getOsuBeatmap(beatmapId, modBits) {
 		return await getOsuBeatmapFunction(beatmapId, modBits);
 	},
-	async populatePP(score, beatmap, accuracy) {
-		if (!score.pp) {
-			try {
-				let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=${accuracy}&x=${score.counts.miss}&c=${score.maxCombo}&m=${score.raw_mods}`);
-				let htmlCode = await response.text();
-				const ppRegex = /"pp":.+, "length"/gm;
-				const matches = ppRegex.exec(htmlCode);
-				score.pp = matches[0].replace('"pp": [', '').replace('], "length"', '');
-			} catch (err) {
-				console.log('error fetching osu pp', err);
-				console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=${accuracy}&x=${score.counts.miss}&c=${score.maxCombo}&m=${score.raw_mods}`);
-			}
-		}
-
-		return score;
-	},
 	async getMatchesPlanned(startDate, endDate) {
 		let matchesPlanned = 0;
 		if (startDate.getUTCHours() <= 18 && endDate.getUTCHours() >= 18) {
@@ -1078,7 +1062,7 @@ module.exports = {
 			return 'FM';
 		}
 	},
-	async getOsuPP(beatmapId, forceDownload, modBits, accuracy, misses, combo) {
+	async getOsuPP(beatmapId, modBits, accuracy, misses, combo) {
 		const rosu = require('rosu-pp');
 		const fs = require('fs');
 
@@ -1089,6 +1073,17 @@ module.exports = {
 
 		//Check if the map is already downloaded and download if necessary
 		const path = `./maps/${beatmapId}.osu`;
+
+		//Force download if the map is recently updated in the database and therefore probably updated
+		const dbBeatmap = await getOsuBeatmapFunction(beatmapId, 0);
+
+		const recent = new Date();
+		recent.setUTCMinutes(recent.getUTCMinutes() - 3);
+
+		let forceDownload = false;
+		if (recent < dbBeatmap.updatedAt) {
+			forceDownload = true;
+		}
 
 		try {
 			if (forceDownload || !fs.existsSync(path)) {
@@ -1116,8 +1111,7 @@ module.exports = {
 			combo: parseInt(combo),
 		};
 
-		let results = rosu.calculate(arg);
-		console.log(results);
+		return rosu.calculate(arg)[0].pp;
 	}
 };
 

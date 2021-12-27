@@ -4233,7 +4233,7 @@ module.exports = {
 				console.log('Longer than 24 hours');
 			}
 		} else if (args[0] === 'calcPP') {
-			getOsuPP(args[1], false, args[2], args[3], args[4], args[5]);
+			getOsuPP(args[1], args[2], args[3], args[4], args[5]);
 		} else {
 			msg.reply('Invalid command');
 		}
