@@ -41,7 +41,12 @@ module.exports = {
 
 				await pause(60000);
 
-				messagesArray[messagesArray.length - 1].delete();
+				try {
+					messagesArray[messagesArray.length - 1].delete();
+				} catch (err) {
+					//Nothing
+					//Probably no permissions
+				}
 
 				let date = new Date();
 
