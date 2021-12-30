@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getBeatmapApprovalStatusImage, logDatabaseQueries, getGameModeName, getOsuPP } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP, getBeatmapApprovalStatusImage, logDatabaseQueries, getGameModeName } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -616,10 +616,9 @@ async function drawAccInfo(input, mode, mapRank) {
 
 	let pp = 'None';
 
+	score = await populatePP(score, beatmap, accuracy);
 	if (score.pp) {
 		pp = Math.round(score.pp);
-	} else {
-		pp = Math.round(await getOsuPP(beatmap.beatmapId, score.raw_mods, Math.round(accuracy * 100) / 100, score.counts.miss, score.maxCombo));
 	}
 
 	ctx.font = '18px comfortaa, sans-serif';
@@ -634,10 +633,19 @@ async function drawAccInfo(input, mode, mapRank) {
 		};
 
 		let fcScoreAccuracy = getAccuracy(fcScore, 0) * 100;
-		let fcpp = Math.round(await getOsuPP(beatmap.beatmapId, score.raw_mods, fcScoreAccuracy, 0, beatmap.maxCombo));
-		if (pp !== fcpp) {
-			pp = `${pp} (${Math.round(fcpp)} If FC)`;
-			ctx.font = '16px comfortaa, sans-serif';
+		try {
+			let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${score.beatmapId}&a=${fcScoreAccuracy}&x=0&c=${beatmap.maxCombo}&m=${score.raw_mods}`);
+			let htmlCode = await response.text();
+			const ppRegex = /"pp":.+, "length"/gm;
+			const matches = ppRegex.exec(htmlCode);
+			let fcpp = matches[0].replace('"pp": [', '').replace('], "length"', '');
+			if (Math.round(pp) !== Math.round(fcpp)) {
+				pp = `${pp} (${Math.round(fcpp)} If FC)`;
+				ctx.font = '16px comfortaa, sans-serif';
+			}
+		} catch (err) {
+			console.log('error fetching osu-recent pp', err);
+			console.log(`https://osu.gatari.pw/api/v1/pp?b=${score.beatmapId}&a=${fcScoreAccuracy}&x=${score.counts.miss}&c=${score.maxCombo}&m=${score.raw_mods}`);
 		}
 	}
 
