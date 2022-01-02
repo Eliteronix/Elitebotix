@@ -53,26 +53,25 @@ module.exports = {
 						registeredPlayer.save();
 					}
 
+					let now = new Date();
+					if (registeredPlayer && registeredPlayer.osuMOTDlastRoundPlayed === null) {
+						registeredPlayer.osuMOTDlastRoundPlayed = now;
+						registeredPlayer.save();
+					}
+
+					if (registeredPlayer && registeredPlayer.osuMOTDMuted && registeredPlayer.osuMOTDmutedUntil && registeredPlayer.osuMOTDmutedUntil < now) {
+						registeredPlayer.osuMOTDMuted = false;
+						registeredPlayer.osuMOTDmutedUntil = null;
+						registeredPlayer.save();
+						try {
+							members[i].user.send('The `Maps of the Day` competition is no longer muted for you.\nFeel free to mute it again by using `e!osu-motd mute <#mo/#w/#d/#h>`.');
+						} catch {
+							//Nothing
+						}
+					}
+
 					//check for registration
 					if (registeredPlayer && !registeredPlayer.osuMOTDMuted) {
-
-						let now = new Date();
-						if (registeredPlayer.osuMOTDlastRoundPlayed === null) {
-							registeredPlayer.osuMOTDlastRoundPlayed = now;
-							registeredPlayer.save();
-						}
-
-						if (registeredPlayer.osuMOTDmutedUntil && registeredPlayer.osuMOTDmutedUntil < now) {
-							registeredPlayer.osuMOTDMuted = false;
-							registeredPlayer.osuMOTDmutedUntil = null;
-							registeredPlayer.save();
-							try {
-								members[i].user.send('The `Maps of the Day` competition is no longer muted for you.\nFeel free to mute it again by using `e!osu-motd mute <#mo/#w/#d/#h>`.');
-							} catch {
-								//Nothing
-							}
-						}
-
 						let seasonAgo = new Date();
 						seasonAgo.setUTCDate(seasonAgo.getUTCDate() - 90);
 						let weekAgo = new Date();
