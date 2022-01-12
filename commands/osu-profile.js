@@ -146,11 +146,13 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
 
+				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores');
 				const userScores = await DBOsuMultiScores.findAll({
 					where: { osuUserId: user.id }
 				});
 
 				if (userScores.length) {
+					await sentMessage.react('🆚');
 					await sentMessage.react('📊');
 				}
 			})
@@ -211,11 +213,13 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
 
+				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores');
 				const userScores = await DBOsuMultiScores.findAll({
 					where: { osuUserId: user.id }
 				});
 
 				if (userScores.length) {
+					await sentMessage.react('🆚');
 					await sentMessage.react('📊');
 				}
 			})
