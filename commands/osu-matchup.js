@@ -804,7 +804,11 @@ module.exports = {
 
 		let sentMessage;
 		if (msg.id) {
-			sentMessage = await msg.reply({ content: content, files: files });
+			if (msg.id === 1) {
+				sentMessage = await msg.channel.send({ content: content, files: files });
+			} else {
+				sentMessage = await msg.reply({ content: content, files: files });
+			}
 		} else {
 			sentMessage = await interaction.followUp({ content: content, files: files });
 		}
