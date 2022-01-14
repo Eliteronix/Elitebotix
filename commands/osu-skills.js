@@ -761,6 +761,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				await sentMessage.react('👤');
 				await sentMessage.react('🥇');
 				if (userScores.length) {
+					await sentMessage.react('🆚');
 					await sentMessage.react('📊');
 				}
 
