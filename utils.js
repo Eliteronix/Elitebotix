@@ -1084,6 +1084,7 @@ async function getOsuBadgeNumberByIdFunction(osuUserId) {
 	return await fetch(`https://osu.ppy.sh/users/${osuUserId}/osu`)
 		.then(async (res) => {
 			let htmlCode = await res.text();
+			htmlCode = htmlCode.replace(/&quot;/gm, '"');
 			const badgesRegex = /,"badges".+,"beatmap_playcounts_count":/gm;
 			const matches = badgesRegex.exec(htmlCode);
 			if (matches && matches[0]) {
