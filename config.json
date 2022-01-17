@@ -14,17 +14,17 @@
 	"currentElitiriCupBeginnerSheetId": "1U_U1AklzxgxCq5zMA9lJsIPJ-UBltQDMKxWG3oCJwAU",
 	"currentElitiriCupEndOfRegs": {
 		"year": 2022,
-		"zeroIndexMonth": 0,
-		"day": 16
+		"zeroIndexMonth": 1,
+		"day": 6
 	},
 	"currentElitiriCupStartOfSubmissions": {
 		"year": 2022,
-		"zeroIndexMonth": 0,
-		"day": 17
+		"zeroIndexMonth": 1,
+		"day": 7
 	},
 	"currentElitiriCupEndOfSubmissions": {
 		"year": 2022,
 		"zeroIndexMonth": 1,
-		"day": 6
+		"day": 27
 	}
 }
