@@ -22,6 +22,10 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		let teamsize = 1;
+		let team1 = [];
+		let team2 = [];
+
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -29,43 +33,44 @@ module.exports = {
 
 			args = [];
 
-			if (interaction.options._hoistedOptions) {
+			if (interaction.options._hoistedOptions && interaction.options._subcommand === '1v1') {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					args.push(interaction.options._hoistedOptions[i].value);
 				}
+			} else if (interaction.options._hoistedOptions && interaction.options._subcommand === 'teamvs') {
+				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+					if (interaction.options._hoistedOptions[i].name === 'teamsize') {
+						teamsize = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name.startsWith('team1')) {
+						team1.push(interaction.options._hoistedOptions[i].value);
+					} else {
+						team2.push(interaction.options._hoistedOptions[i].value);
+					}
+				}
 			}
 		}
+
 		const guildPrefix = await getGuildPrefix(msg);
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
-		let users = [];
 
-		if (!args[1]) {//Get profile by author if no argument
-			if (commandUser && commandUser.osuUserId) {
-				users.push(commandUser.osuUserId);
-			} else {
-				const userDisplayName = await getMessageUserDisplayname(msg);
-				users.push(userDisplayName);
-			}
-		}
-
-		//Get profiles by arguments
-		for (let i = 0; i < args.length; i++) {
-			if (args[i].startsWith('<@') && args[i].endsWith('>')) {
-				logDatabaseQueries(4, 'commands/osu-matchup.js DBDiscordUsers');
-				const discordUser = await DBDiscordUsers.findOne({
-					where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
-				});
-
-				if (discordUser && discordUser.osuUserId) {
-					users.push(discordUser.osuUserId);
+		//Teamvs subcommand is the only occasion that args is empty
+		if (interaction.options._subcommand !== 'teamvs') {
+			//If only one player got specified the author wants to see the matchup between them and themselves
+			if (!args[1]) {
+				if (commandUser && commandUser.osuUserId) {
+					team1.push(commandUser.osuUserId);
 				} else {
-					msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-					users.push(args[i]);
+					const userDisplayName = await getMessageUserDisplayname(msg);
+					team1.push(userDisplayName);
 				}
+
+				team2.push(args[0]);
 			} else {
-				users.push(getIDFromPotentialOsuLink(args[i]));
+				//If two players got specified the author wants to see the matchup between them
+				team1.push(args[0]);
+				team2.push(args[1]);
 			}
 		}
 
@@ -77,50 +82,124 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		let usersReadable = [];
-		for (let i = 0; i < users.length; i++) {
-			await osuApi.getUser({ u: users[i] })
-				.then(user => {
-					users[i] = user.id;
-					usersReadable.push(user.name);
-				})
-				.catch(err => {
-					if (err.message === 'Not found') {
-						msg.channel.send(`Could not find user \`${users[i].replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
-						users.splice(i, 1);
-						i--;
+		//Define 2 new arrays to store the name of the players while we fill the others with the ID exclusively
+		const team1Names = [];
+		const team2Names = [];
+
+		//Loop through team one and get the user Ids if they were mentions
+		//Get profiles by arguments
+		for (let i = 0; i < team1.length; i++) {
+			if (team1[i]) {
+				if (team1[i].startsWith('<@') && team1[i].endsWith('>')) {
+					logDatabaseQueries(4, 'commands/osu-matchup.js DBDiscordUsers1');
+					const discordUser = await DBDiscordUsers.findOne({
+						where: { userId: team1[i].replace('<@', '').replace('>', '').replace('!', '') },
+					});
+
+					if (discordUser && discordUser.osuUserId) {
+						team1[i] = discordUser.osuUserId;
 					} else {
-						console.log(err);
+						msg.channel.send(`\`${team1[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						team1.splice(i, 1);
+						i--;
+						continue;
 					}
-				});
+				} else {
+					team1[i] = getIDFromPotentialOsuLink(team1[i]);
+				}
+
+				await osuApi.getUser({ u: team1[i] })
+					.then(user => {
+						team1[i] = user.id;
+						team1Names.push(user.name);
+					})
+					.catch(err => {
+						if (err.message === 'Not found') {
+							msg.channel.send(`Could not find user \`${team1[i].replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
+							team1.splice(i, 1);
+							i--;
+						} else {
+							console.log(err);
+						}
+					});
+			}
 		}
 
-		if (users.length < 2) {
+		//Do the same for team2
+		for (let i = 0; i < team2.length; i++) {
+			if (team2[i]) {
+				if (team2[i].startsWith('<@') && team2[i].endsWith('>')) {
+					logDatabaseQueries(4, 'commands/osu-matchup.js DBDiscordUsers2');
+					const discordUser = await DBDiscordUsers.findOne({
+						where: { userId: team2[i].replace('<@', '').replace('>', '').replace('!', '') },
+					});
+
+					if (discordUser && discordUser.osuUserId) {
+						team2[i] = discordUser.osuUserId;
+					} else {
+						msg.channel.send(`\`${team2[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						team2.splice(i, 1);
+						i--;
+						continue;
+					}
+				} else {
+					team2[i] = getIDFromPotentialOsuLink(team2[i]);
+				}
+
+				await osuApi.getUser({ u: team2[i] })
+					.then(user => {
+						team2[i] = user.id;
+						team2Names.push(user.name);
+					})
+					.catch(err => {
+						if (err.message === 'Not found') {
+							msg.channel.send(`Could not find user \`${team2[i].replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
+							team2.splice(i, 1);
+							i--;
+						} else {
+							console.log(err);
+						}
+					});
+			}
+		}
+
+		if (team1.length < 1 || team2.length < 1) {
 			return msg.channel.send('Not enough users left for the matchup.');
 		}
 
-		let processingMessage = await msg.channel.send(`[${usersReadable[0]} vs ${usersReadable[1]}] Processing...`);
+		let processingMessage = await msg.channel.send(`[\`${team1Names.join(' ')}\` vs \`${team2Names.join(' ')}\`] Processing...`);
 
-		//Add all multiscores from both players to an array
-		let scores = [];
-		logDatabaseQueries(4, 'commands/osu-matchup.js DBOsuMultiScores User1');
-		scores.push(await DBOsuMultiScores.findAll({
-			where: {
-				osuUserId: users[0],
-				tourneyMatch: true,
-				mode: 'Standard'
-			}
-		}));
-		logDatabaseQueries(4, 'commands/osu-matchup.js DBOsuMultiScores User2');
-		scores.push(await DBOsuMultiScores.findAll({
-			where: {
-				osuUserId: users[1],
-				tourneyMatch: true,
-				mode: 'Standard'
-			}
-		}));
-		quicksort(scores[0]);
-		quicksort(scores[1]);
+		//Add all multiscores from both teams to an array
+		let scoresTeam1 = [];
+		let scoresTeam2 = [];
+
+		//Loop throught team one and get all their multi scores
+		for (let i = 0; i < team1.length; i++) {
+			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiScores User${i + 1}`);
+			scoresTeam1.push(await DBOsuMultiScores.findAll({
+				where: {
+					osuUserId: team1[i],
+					tourneyMatch: true,
+					mode: 'Standard'
+				}
+			}));
+
+			quicksort(scoresTeam1[i]);
+		}
+
+		//Loop throught team two and get all their multi scores
+		for (let i = 0; i < team2.length; i++) {
+			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiScores User${i + 1}`);
+			scoresTeam2.push(await DBOsuMultiScores.findAll({
+				where: {
+					osuUserId: team2[i],
+					tourneyMatch: true,
+					mode: 'Standard'
+				}
+			}));
+
+			quicksort(scoresTeam2[i]);
+		}
 
 		//Create arrays of standings for each player/Mod/Score
 		//[ScoreV1[User1Wins, User2Wins], ScoreV2[User1Wins, User2Wins]]
@@ -135,6 +214,9 @@ module.exports = {
 		let indirectHardRockWins = [[0, 0], [0, 0]];
 		let indirectDoubleTimeWins = [[0, 0], [0, 0]];
 		let indirectFreeModWins = [[0, 0], [0, 0]];
+
+		//Collect scores first | Compare all scores afterwards second
+		//Good luck future elite
 
 		let matchesPlayed = [];
 		for (let i = 0; i < scores[0].length; i++) {
@@ -282,7 +364,7 @@ module.exports = {
 		ctx.fillStyle = '#ffffff';
 
 		ctx.textAlign = 'left';
-		ctx.fillText(`UserIDs: ${users[0]} vs ${users[1]}`, canvas.width / 140, canvas.height - canvas.height / 70);
+		ctx.fillText(`UserIDs: ${team1.join('-')} vs ${team2.join('-')}`, canvas.width / 140, canvas.height - canvas.height / 70);
 
 		ctx.textAlign = 'right';
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
@@ -290,7 +372,7 @@ module.exports = {
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.font = 'bold 40px comfortaa, sans-serif';
-		fitTextOnMiddleCanvas(ctx, `${usersReadable[0]} vs. ${usersReadable[1]}`, 40, 'comfortaa, sans-serif', 90, 1000, 400);
+		fitTextOnMiddleCanvas(ctx, `${team1Names.join(' | ')} vs. ${team2Names.join(' | ')}`, 40, 'comfortaa, sans-serif', 90, 1000, 400);
 
 		ctx.font = 'bold 30px comfortaa, sans-serif';
 		ctx.fillText('Direct Matchups', 250, 210);
@@ -369,7 +451,7 @@ module.exports = {
 
 		//Draw a shape onto the main canvas
 		try {
-			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${users[0]}`);
+			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${team1[0]}`);
 			ctx.drawImage(avatar, 10, 10, 160, 160);
 		} catch (error) {
 			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
@@ -394,7 +476,7 @@ module.exports = {
 
 		//Draw a shape onto the main canvas
 		try {
-			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${users[1]}`);
+			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${team2[0]}`);
 			ctx.drawImage(avatar, 830, 10, 160, 160);
 		} catch (error) {
 			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
@@ -403,14 +485,14 @@ module.exports = {
 
 		let files = [];
 		//Create as an attachment
-		const matchUpStats = new Discord.MessageAttachment(canvas.toBuffer(), `osu-matchup-${users[0]}-${users[1]}.png`);
+		const matchUpStats = new Discord.MessageAttachment(canvas.toBuffer(), `osu-matchup-${team1.join('-')}-${team2.join('-')}.png`);
 
 		files.push(matchUpStats);
 
-		let content = `Matchup analysis for \`${usersReadable[0]}\` vs \`${usersReadable[1]}\``;
+		let content = `Matchup analysis for \`${team1Names.join(' | ')}\` vs \`${team2Names.join(' | ')}\``;
 
 		if (mapsPlayedByBoth.length) {
-			content += `\nWinrate chart for \`${usersReadable[0]}\` against \`${usersReadable[1]}\` attached.`;
+			content += `\nWinrate chart for \`${team1Names.join(' | ')}\` against \`${team2Names.join(' | ')}\` attached.`;
 			//Loop through all maps played by both players and fill an array of rounds won with timestamp
 			let rounds = [];
 			for (let i = 0; i < mapsPlayedByBoth.length; i++) {
@@ -671,7 +753,7 @@ module.exports = {
 							display: true,
 							title: {
 								display: true,
-								text: `Winrate for ${usersReadable[0]} in %`,
+								text: `Winrate for ${team1Names.join(' | ')} in %`,
 								color: '#FFFFFF'
 							},
 							grid: {
@@ -689,7 +771,7 @@ module.exports = {
 
 			const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
 
-			const matchupWinrateChart = new Discord.MessageAttachment(imageBuffer, `osu-matchup-${users[0]}-vs-${users[1]}.png`);
+			const matchupWinrateChart = new Discord.MessageAttachment(imageBuffer, `osu-matchup-${team1.join('-')}-vs-${team2.join('-')}.png`);
 
 			files.push(matchupWinrateChart);
 
@@ -760,7 +842,19 @@ module.exports = {
 					scoringType = 'V2';
 				}
 
-				mapsPlayedByBothReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(scoreUser1)} https://osu.ppy.sh/b/${scoreUser1.beatmapId} - Won by: ${usersReadable[winner]} (by ${humanReadable(Math.abs(parseInt(scoreUser1.score) - parseInt(scoreUser2.score)))}) - ${humanReadable(scoreUser1.score)} vs ${humanReadable(scoreUser2.score)}`);
+				if (winner === 0) {
+					if (team1.length === 1) {
+						mapsPlayedByBothReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(scoreUser1)} https://osu.ppy.sh/b/${scoreUser1.beatmapId} - Won by: ${team1[0]} (by ${humanReadable(Math.abs(parseInt(scoreUser1.score) - parseInt(scoreUser2.score)))}) - ${humanReadable(scoreUser1.score)} vs ${humanReadable(scoreUser2.score)}`);
+					} else {
+						mapsPlayedByBothReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(scoreUser1)} https://osu.ppy.sh/b/${scoreUser1.beatmapId} - Won by: Team 1 (by ${humanReadable(Math.abs(parseInt(scoreUser1.score) - parseInt(scoreUser2.score)))}) - ${humanReadable(scoreUser1.score)} vs ${humanReadable(scoreUser2.score)}`);
+					}
+				} else {
+					if (team1.length === 1) {
+						mapsPlayedByBothReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(scoreUser1)} https://osu.ppy.sh/b/${scoreUser1.beatmapId} - Won by: ${team2[0]} (by ${humanReadable(Math.abs(parseInt(scoreUser1.score) - parseInt(scoreUser2.score)))}) - ${humanReadable(scoreUser1.score)} vs ${humanReadable(scoreUser2.score)}`);
+					} else {
+						mapsPlayedByBothReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(scoreUser1)} https://osu.ppy.sh/b/${scoreUser1.beatmapId} - Won by: Team 2 (by ${humanReadable(Math.abs(parseInt(scoreUser1.score) - parseInt(scoreUser2.score)))}) - ${humanReadable(scoreUser1.score)} vs ${humanReadable(scoreUser2.score)}`);
+					}
+				}
 			}
 
 			//Convert modpool arrays into strings
@@ -785,9 +879,8 @@ module.exports = {
 			}
 
 			//Add the player names in front of both strings
-			for (let i = 0; i < mapsPlayedByBothReadable.length; i++) {
-				mapsPlayedByBothReadable[i] = `----------${usersReadable[i]}----------\n${mapsPlayedByBothReadable[i]}`;
-			}
+			mapsPlayedByBothReadable[0] = `----------${team1Names.join(' ')}----------\n${mapsPlayedByBothReadable[0]}`;
+			mapsPlayedByBothReadable[1] = `----------${team2Names.join(' ')}----------\n${mapsPlayedByBothReadable[1]}`;
 
 			// eslint-disable-next-line no-undef
 			mapsPlayedByBothReadable = new Discord.MessageAttachment(Buffer.from(mapsPlayedByBothReadable.join('\n\n\n\n'), 'utf-8'), `indirect-matchups-${users[0]}-vs-${users[1]}.txt`);
@@ -813,8 +906,10 @@ module.exports = {
 			sentMessage = await interaction.followUp({ content: content, files: files });
 		}
 
-		sentMessage.react('🔵');
-		sentMessage.react('🔴');
+		if (interaction.options._subcommand !== 'teamvs') {
+			sentMessage.react('🔵');
+			sentMessage.react('🔴');
+		}
 		return;
 	},
 };
