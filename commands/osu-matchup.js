@@ -521,9 +521,9 @@ module.exports = {
 			}
 
 			if (winner === 0) {
-				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(team1MapScores[0])} https://osu.ppy.sh/b/${team1MapScores[0].beatmapId} - Won by: ${team1Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)}`);
+				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(team1MapScores[0])} https://osu.ppy.sh/b/${team1MapScores[0].beatmapId} - Won by: ${team1Players.join(', ')} against ${team2Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)}`);
 			} else {
-				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(team1MapScores[0])} https://osu.ppy.sh/b/${team1MapScores[0].beatmapId} - Won by: ${team2Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)}`);
+				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(team1MapScores[0])} https://osu.ppy.sh/b/${team1MapScores[0].beatmapId} - Won by: ${team2Players.join(', ')} against ${team1Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)}`);
 			}
 		}
 
