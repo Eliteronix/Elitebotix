@@ -428,6 +428,7 @@ async function drawBadges(input, server) {
 		await fetch(`https://osu.ppy.sh/users/${user.id}/osu`)
 			.then(async (res) => {
 				let htmlCode = await res.text();
+				htmlCode = htmlCode.replace(/&quot;/gm, '"');
 				const badgesRegex = /,"badges".+,"beatmap_playcounts_count":/gm;
 				const matches = badgesRegex.exec(htmlCode);
 				if (matches && matches[0]) {
