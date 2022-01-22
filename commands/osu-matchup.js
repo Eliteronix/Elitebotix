@@ -74,6 +74,12 @@ module.exports = {
 			}
 		}
 
+		if (team1.length < teamsize) {
+			return msg.channel.send('You did not specify enough players for team 1.');
+		} else if (team2.length < teamsize) {
+			return msg.channel.send('You did not specify enough players for team 2.');
+		}
+
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -163,7 +169,7 @@ module.exports = {
 			}
 		}
 
-		if (team1.length < 1 || team2.length < 1) {
+		if (team1.length < teamsize || team2.length < teamsize) {
 			return msg.channel.send('Not enough users left for the matchup.');
 		}
 
