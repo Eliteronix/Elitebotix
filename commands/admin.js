@@ -612,125 +612,125 @@ module.exports = {
 			// 	}
 			// });
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'osu-matchup',
-					description: 'Sends an info card about the matchups between the specified players',
-					options: [
-						{
-							'name': '1v1',
-							'description': 'Get an info card about the matchups between the specified players',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'username',
-									'description': 'The name of a player to compare with',
-									'type': 3,
-									'required': true
-								},
-								{
-									'name': 'username2',
-									'description': 'The name of a player to compare with',
-									'type': 3,
-								},
-							]
-						},
-						{
-							'name': 'teamvs',
-							'description': 'Get an info card about the matchups between the specified teams',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'teamsize',
-									'description': 'The amount of players that are playing against each other on the maps',
-									'type': 4,
-									'required': true
-								},
-								{
-									'name': 'team1player1',
-									'description': 'The first user of the first team',
-									'type': 3,
-								},
-								{
-									'name': 'team1player2',
-									'description': 'The second user of the first team',
-									'type': 3,
-								},
-								{
-									'name': 'team1player3',
-									'description': 'The third user of the first team',
-									'type': 3,
-								},
-								{
-									'name': 'team1player4',
-									'description': 'The fourth user of the first team',
-									'type': 3,
-								},
-								{
-									'name': 'team1player5',
-									'description': 'The fifth user of the first team',
-									'type': 3,
-								},
-								{
-									'name': 'team1player6',
-									'description': 'The sixth user of the first team',
-									'type': 3,
-								},
-								{
-									'name': 'team1player7',
-									'description': 'The seventh user of the first team',
-									'type': 3,
-								},
-								{
-									'name': 'team1player8',
-									'description': 'The eighth user of the first team',
-									'type': 3,
-								},
-								{
-									'name': 'team2player1',
-									'description': 'The first user of the second team',
-									'type': 3,
-								},
-								{
-									'name': 'team2player2',
-									'description': 'The second user of the second team',
-									'type': 3,
-								},
-								{
-									'name': 'team2player3',
-									'description': 'The third user of the second team',
-									'type': 3,
-								},
-								{
-									'name': 'team2player4',
-									'description': 'The fourth user of the second team',
-									'type': 3,
-								},
-								{
-									'name': 'team2player5',
-									'description': 'The fifth user of the second team',
-									'type': 3,
-								},
-								{
-									'name': 'team2player6',
-									'description': 'The sixth user of the second team',
-									'type': 3,
-								},
-								{
-									'name': 'team2player7',
-									'description': 'The seventh user of the second team',
-									'type': 3,
-								},
-								{
-									'name': 'team2player8',
-									'description': 'The eighth user of the second team',
-									'type': 3,
-								},
-							]
-						},
-					]
-				}
-			});
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'osu-matchup',
+			// 		description: 'Sends an info card about the matchups between the specified players',
+			// 		options: [
+			// 			{
+			// 				'name': '1v1',
+			// 				'description': 'Get an info card about the matchups between the specified players',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'The name of a player to compare with',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'username2',
+			// 						'description': 'The name of a player to compare with',
+			// 						'type': 3,
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'teamvs',
+			// 				'description': 'Get an info card about the matchups between the specified teams',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'teamsize',
+			// 						'description': 'The amount of players that are playing against each other on the maps',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'team1player1',
+			// 						'description': 'The first user of the first team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team1player2',
+			// 						'description': 'The second user of the first team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team1player3',
+			// 						'description': 'The third user of the first team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team1player4',
+			// 						'description': 'The fourth user of the first team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team1player5',
+			// 						'description': 'The fifth user of the first team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team1player6',
+			// 						'description': 'The sixth user of the first team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team1player7',
+			// 						'description': 'The seventh user of the first team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team1player8',
+			// 						'description': 'The eighth user of the first team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team2player1',
+			// 						'description': 'The first user of the second team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team2player2',
+			// 						'description': 'The second user of the second team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team2player3',
+			// 						'description': 'The third user of the second team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team2player4',
+			// 						'description': 'The fourth user of the second team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team2player5',
+			// 						'description': 'The fifth user of the second team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team2player6',
+			// 						'description': 'The sixth user of the second team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team2player7',
+			// 						'description': 'The seventh user of the second team',
+			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'team2player8',
+			// 						'description': 'The eighth user of the second team',
+			// 						'type': 3,
+			// 					},
+			// 				]
+			// 			},
+			// 		]
+			// 	}
+			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -2769,15 +2769,115 @@ module.exports = {
 					description: 'Sends an info card about the matchups between the specified players',
 					options: [
 						{
-							'name': 'username',
-							'description': 'The name of a player to compare with',
-							'type': 3,
-							'required': true
+							'name': '1v1',
+							'description': 'Get an info card about the matchups between the specified players',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'username',
+									'description': 'The name of a player to compare with',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'username2',
+									'description': 'The name of a player to compare with',
+									'type': 3,
+								},
+							]
 						},
 						{
-							'name': 'username2',
-							'description': 'The name of a player to compare with',
-							'type': 3,
+							'name': 'teamvs',
+							'description': 'Get an info card about the matchups between the specified teams',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'teamsize',
+									'description': 'The amount of players that are playing against each other on the maps',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'team1player1',
+									'description': 'The first user of the first team',
+									'type': 3,
+								},
+								{
+									'name': 'team1player2',
+									'description': 'The second user of the first team',
+									'type': 3,
+								},
+								{
+									'name': 'team1player3',
+									'description': 'The third user of the first team',
+									'type': 3,
+								},
+								{
+									'name': 'team1player4',
+									'description': 'The fourth user of the first team',
+									'type': 3,
+								},
+								{
+									'name': 'team1player5',
+									'description': 'The fifth user of the first team',
+									'type': 3,
+								},
+								{
+									'name': 'team1player6',
+									'description': 'The sixth user of the first team',
+									'type': 3,
+								},
+								{
+									'name': 'team1player7',
+									'description': 'The seventh user of the first team',
+									'type': 3,
+								},
+								{
+									'name': 'team1player8',
+									'description': 'The eighth user of the first team',
+									'type': 3,
+								},
+								{
+									'name': 'team2player1',
+									'description': 'The first user of the second team',
+									'type': 3,
+								},
+								{
+									'name': 'team2player2',
+									'description': 'The second user of the second team',
+									'type': 3,
+								},
+								{
+									'name': 'team2player3',
+									'description': 'The third user of the second team',
+									'type': 3,
+								},
+								{
+									'name': 'team2player4',
+									'description': 'The fourth user of the second team',
+									'type': 3,
+								},
+								{
+									'name': 'team2player5',
+									'description': 'The fifth user of the second team',
+									'type': 3,
+								},
+								{
+									'name': 'team2player6',
+									'description': 'The sixth user of the second team',
+									'type': 3,
+								},
+								{
+									'name': 'team2player7',
+									'description': 'The seventh user of the second team',
+									'type': 3,
+								},
+								{
+									'name': 'team2player8',
+									'description': 'The eighth user of the second team',
+									'type': 3,
+								},
+							]
 						},
 					]
 				}
