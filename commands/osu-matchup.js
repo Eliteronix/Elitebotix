@@ -22,6 +22,10 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		let teamsize = 1;
+		let team1 = [];
+		let team2 = [];
+
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -29,44 +33,51 @@ module.exports = {
 
 			args = [];
 
-			if (interaction.options._hoistedOptions) {
+			if (interaction.options._hoistedOptions && interaction.options._subcommand === '1v1') {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					args.push(interaction.options._hoistedOptions[i].value);
 				}
+			} else if (interaction.options._hoistedOptions && interaction.options._subcommand === 'teamvs') {
+				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+					if (interaction.options._hoistedOptions[i].name === 'teamsize') {
+						teamsize = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name.startsWith('team1')) {
+						team1.push(interaction.options._hoistedOptions[i].value);
+					} else {
+						team2.push(interaction.options._hoistedOptions[i].value);
+					}
+				}
 			}
 		}
+
 		const guildPrefix = await getGuildPrefix(msg);
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
-		let users = [];
 
-		if (!args[1]) {//Get profile by author if no argument
-			if (commandUser && commandUser.osuUserId) {
-				users.push(commandUser.osuUserId);
+		//Teamvs subcommand is the only occasion that args is empty
+		if (!interaction || interaction && interaction.options._subcommand !== 'teamvs') {
+			//If only one player got specified the author wants to see the matchup between them and themselves
+			if (!args[1]) {
+				if (commandUser && commandUser.osuUserId) {
+					team1.push(commandUser.osuUserId);
+				} else {
+					const userDisplayName = await getMessageUserDisplayname(msg);
+					team1.push(userDisplayName);
+				}
+
+				team2.push(args[0]);
 			} else {
-				const userDisplayName = await getMessageUserDisplayname(msg);
-				users.push(userDisplayName);
+				//If two players got specified the author wants to see the matchup between them
+				team1.push(args[0]);
+				team2.push(args[1]);
 			}
 		}
 
-		//Get profiles by arguments
-		for (let i = 0; i < args.length; i++) {
-			if (args[i].startsWith('<@') && args[i].endsWith('>')) {
-				logDatabaseQueries(4, 'commands/osu-matchup.js DBDiscordUsers');
-				const discordUser = await DBDiscordUsers.findOne({
-					where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
-				});
-
-				if (discordUser && discordUser.osuUserId) {
-					users.push(discordUser.osuUserId);
-				} else {
-					msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-					users.push(args[i]);
-				}
-			} else {
-				users.push(getIDFromPotentialOsuLink(args[i]));
-			}
+		if (team1.length < teamsize) {
+			return msg.channel.send('You did not specify enough players for team 1.');
+		} else if (team2.length < teamsize) {
+			return msg.channel.send('You did not specify enough players for team 2.');
 		}
 
 		// eslint-disable-next-line no-undef
@@ -77,50 +88,124 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		let usersReadable = [];
-		for (let i = 0; i < users.length; i++) {
-			await osuApi.getUser({ u: users[i] })
-				.then(user => {
-					users[i] = user.id;
-					usersReadable.push(user.name);
-				})
-				.catch(err => {
-					if (err.message === 'Not found') {
-						msg.channel.send(`Could not find user \`${users[i].replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
-						users.splice(i, 1);
-						i--;
+		//Define 2 new arrays to store the name of the players while we fill the others with the ID exclusively
+		const team1Names = [];
+		const team2Names = [];
+
+		//Loop through team one and get the user Ids if they were mentions
+		//Get profiles by arguments
+		for (let i = 0; i < team1.length; i++) {
+			if (team1[i]) {
+				if (team1[i].startsWith('<@') && team1[i].endsWith('>')) {
+					logDatabaseQueries(4, 'commands/osu-matchup.js DBDiscordUsers1');
+					const discordUser = await DBDiscordUsers.findOne({
+						where: { userId: team1[i].replace('<@', '').replace('>', '').replace('!', '') },
+					});
+
+					if (discordUser && discordUser.osuUserId) {
+						team1[i] = discordUser.osuUserId;
 					} else {
-						console.log(err);
+						msg.channel.send(`\`${team1[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						team1.splice(i, 1);
+						i--;
+						continue;
 					}
-				});
+				} else {
+					team1[i] = getIDFromPotentialOsuLink(team1[i]);
+				}
+
+				await osuApi.getUser({ u: team1[i] })
+					.then(user => {
+						team1[i] = user.id;
+						team1Names.push(user.name);
+					})
+					.catch(err => {
+						if (err.message === 'Not found') {
+							msg.channel.send(`Could not find user \`${team1[i].replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
+							team1.splice(i, 1);
+							i--;
+						} else {
+							console.log(err);
+						}
+					});
+			}
 		}
 
-		if (users.length < 2) {
+		//Do the same for team2
+		for (let i = 0; i < team2.length; i++) {
+			if (team2[i]) {
+				if (team2[i].startsWith('<@') && team2[i].endsWith('>')) {
+					logDatabaseQueries(4, 'commands/osu-matchup.js DBDiscordUsers2');
+					const discordUser = await DBDiscordUsers.findOne({
+						where: { userId: team2[i].replace('<@', '').replace('>', '').replace('!', '') },
+					});
+
+					if (discordUser && discordUser.osuUserId) {
+						team2[i] = discordUser.osuUserId;
+					} else {
+						msg.channel.send(`\`${team2[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						team2.splice(i, 1);
+						i--;
+						continue;
+					}
+				} else {
+					team2[i] = getIDFromPotentialOsuLink(team2[i]);
+				}
+
+				await osuApi.getUser({ u: team2[i] })
+					.then(user => {
+						team2[i] = user.id;
+						team2Names.push(user.name);
+					})
+					.catch(err => {
+						if (err.message === 'Not found') {
+							msg.channel.send(`Could not find user \`${team2[i].replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
+							team2.splice(i, 1);
+							i--;
+						} else {
+							console.log(err);
+						}
+					});
+			}
+		}
+
+		if (team1.length < teamsize || team2.length < teamsize) {
 			return msg.channel.send('Not enough users left for the matchup.');
 		}
 
-		let processingMessage = await msg.channel.send(`[${usersReadable[0]} vs ${usersReadable[1]}] Processing...`);
+		let processingMessage = await msg.channel.send(`[\`${team1Names.join(' ')}\` vs \`${team2Names.join(' ')}\`] Processing...`);
 
-		//Add all multiscores from both players to an array
-		let scores = [];
-		logDatabaseQueries(4, 'commands/osu-matchup.js DBOsuMultiScores User1');
-		scores.push(await DBOsuMultiScores.findAll({
-			where: {
-				osuUserId: users[0],
-				tourneyMatch: true,
-				mode: 'Standard'
-			}
-		}));
-		logDatabaseQueries(4, 'commands/osu-matchup.js DBOsuMultiScores User2');
-		scores.push(await DBOsuMultiScores.findAll({
-			where: {
-				osuUserId: users[1],
-				tourneyMatch: true,
-				mode: 'Standard'
-			}
-		}));
-		quicksort(scores[0]);
-		quicksort(scores[1]);
+		//Add all multiscores from both teams to an array
+		let scoresTeam1 = [];
+		let scoresTeam2 = [];
+
+		//Loop throught team one and get all their multi scores
+		for (let i = 0; i < team1.length; i++) {
+			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiScores User${i + 1}`);
+			scoresTeam1.push(await DBOsuMultiScores.findAll({
+				where: {
+					osuUserId: team1[i],
+					tourneyMatch: true,
+					mode: 'Standard'
+				}
+			}));
+
+			quicksort(scoresTeam1[i]);
+		}
+
+		//Loop throught team two and get all their multi scores
+		for (let i = 0; i < team2.length; i++) {
+			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiScores User${i + 1}`);
+			scoresTeam2.push(await DBOsuMultiScores.findAll({
+				where: {
+					osuUserId: team2[i],
+					tourneyMatch: true,
+					mode: 'Standard'
+				}
+			}));
+
+			quicksort(scoresTeam2[i]);
+		}
 
 		//Create arrays of standings for each player/Mod/Score
 		//[ScoreV1[User1Wins, User2Wins], ScoreV2[User1Wins, User2Wins]]
@@ -136,126 +221,320 @@ module.exports = {
 		let indirectDoubleTimeWins = [[0, 0], [0, 0]];
 		let indirectFreeModWins = [[0, 0], [0, 0]];
 
+		//Direct matchups
+		//Get a list of all games played by both teams
+		let gamesPlayed = [];
+		for (let i = 0; i < scoresTeam1.length; i++) {
+			for (let j = 0; j < scoresTeam1[i].length; j++) {
+				if (gamesPlayed.indexOf(scoresTeam1[i][j].gameId) === -1) {
+					gamesPlayed.push(scoresTeam1[i][j].gameId);
+				}
+			}
+		}
+
+		for (let i = 0; i < scoresTeam2.length; i++) {
+			for (let j = 0; j < scoresTeam2[i].length; j++) {
+				if (gamesPlayed.indexOf(scoresTeam2[i][j].gameId) === -1) {
+					gamesPlayed.push(scoresTeam2[i][j].gameId);
+				}
+			}
+		}
+
+		//Loop through all games played and check if on both team sides at least teamsize players played the game aswell
+		for (let i = 0; i < gamesPlayed.length; i++) {
+			let team1Count = 0;
+			let team2Count = 0;
+
+			for (let j = 0; j < scoresTeam1.length; j++) {
+				for (let k = 0; k < scoresTeam1[j].length; k++) {
+					if (scoresTeam1[j][k].gameId === gamesPlayed[i]) {
+						team1Count++;
+					}
+				}
+			}
+
+			for (let j = 0; j < scoresTeam2.length; j++) {
+				for (let k = 0; k < scoresTeam2[j].length; k++) {
+					if (scoresTeam2[j][k].gameId === gamesPlayed[i]) {
+						team2Count++;
+					}
+				}
+			}
+
+			if (team1Count < teamsize || team2Count < teamsize) {
+				gamesPlayed.splice(i, 1);
+				i--;
+			}
+		}
+
+		//Loop through all games, get the score for each player and add the teamsize best scores together and compare
 		let matchesPlayed = [];
-		for (let i = 0; i < scores[0].length; i++) {
-			for (let j = 0; j < scores[1].length; j++) {
-				//Find a score from the same game
-				if (scores[0][i].gameId === scores[1][j].gameId) {
-					//Push matches for the history txt
-					if (!matchesPlayed.includes(`${(scores[0][i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${scores[0][i].matchStartDate.getUTCFullYear()} - ${scores[0][i].matchName} ----- https://osu.ppy.sh/community/matches/${scores[0][i].matchId}`)) {
-						matchesPlayed.push(`${(scores[0][i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${scores[0][i].matchStartDate.getUTCFullYear()} - ${scores[0][i].matchName} ----- https://osu.ppy.sh/community/matches/${scores[0][i].matchId}`);
-					}
+		for (let i = 0; i < gamesPlayed.length; i++) {
+			let team1GameScores = [];
+			let team2GameScores = [];
 
-					//Evaluate if it was played with Score v2 or not (0 = v1, 1 = v2)
-					let scoreVersion = 0;
-					if (scores[0][i].scoringType === 'Score v2') {
-						scoreVersion = 1;
-					}
-
-					//Evaluate which score is better (0 = user1; 1 = user2)
-					let winner = 0;
-					if (parseInt(scores[0][i].score) < parseInt(scores[1][j].score)) {
-						winner = 1;
-					}
-
-					//Evaluate with which mods the game was played
-					if (!scores[0][i].freeMod && scores[0][i].rawMods === '0' && (scores[0][i].gameRawMods === '0' || scores[0][i].gameRawMods === '1')) {
-						directNoModWins[scoreVersion][winner]++;
-					} else if (scores[0][i].rawMods === '0' && (scores[0][i].gameRawMods === '8' || scores[0][i].gameRawMods === '9')) {
-						directHiddenWins[scoreVersion][winner]++;
-					} else if (scores[0][i].rawMods === '0' && (scores[0][i].gameRawMods === '16' || scores[0][i].gameRawMods === '17')) {
-						directHardRockWins[scoreVersion][winner]++;
-					} else if (scores[0][i].rawMods === '0' && (scores[0][i].gameRawMods === '64' || scores[0][i].gameRawMods === '65' || scores[0][i].gameRawMods === '576' || scores[0][i].gameRawMods === '577')) {
-						directDoubleTimeWins[scoreVersion][winner]++;
-					} else {
-						directFreeModWins[scoreVersion][winner]++;
+			//Get all game scores for team 1
+			for (let j = 0; j < scoresTeam1.length; j++) {
+				for (let k = 0; k < scoresTeam1[j].length; k++) {
+					if (scoresTeam1[j][k].gameId === gamesPlayed[i]) {
+						team1GameScores.push(scoresTeam1[j][k]);
 					}
 				}
 			}
-		}
 
-		//Get an array of all played maps by both players
-		let mapsPlayedByFirst = [];
-		for (let i = 0; i < scores[0].length; i++) {
-			let scoring = 'V1';
-			if (scores[0][i].scoringType === 'Score v2') {
-				scoring = 'V2';
-			}
-			let mods = getScoreModpool(scores[0][i]);
-			if (!mapsPlayedByFirst.includes(`${scoring}-${mods}-${scores[0][i].beatmapId}`)) {
-				mapsPlayedByFirst.push(`${scoring}-${mods}-${scores[0][i].beatmapId}`);
-			}
-		}
-
-		let mapsPlayedByBoth = [];
-		for (let i = 0; i < scores[1].length; i++) {
-			let scoring = 'V1';
-			if (scores[1][i].scoringType === 'Score v2') {
-				scoring = 'V2';
-			}
-			let mods = getScoreModpool(scores[1][i]);
-			if (!mapsPlayedByBoth.includes(`${scoring}-${mods}-${scores[1][i].beatmapId}`) && mapsPlayedByFirst.includes(`${scoring}-${mods}-${scores[1][i].beatmapId}`)) {
-				mapsPlayedByBoth.push(`${scoring}-${mods}-${scores[1][i].beatmapId}`);
-			}
-		}
-
-		for (let i = 0; i < mapsPlayedByBoth.length; i++) {
-			//Keep one score for mod evaluation later
-			let score = null;
-
-			//Loop throught all the scores of User 1 and get the most recent score on the map
-			let scoreUser1 = 0;
-			for (let j = 0; j < scores[0].length; j++) {
-				let scoring = 'V1';
-				if (scores[0][j].scoringType === 'Score v2') {
-					scoring = 'V2';
-				}
-				let mods = getScoreModpool(scores[0][j]);
-				if (`${scoring}-${mods}-${scores[0][j].beatmapId}` === mapsPlayedByBoth[i]) {
-					scoreUser1 = parseInt(scores[0][j].score);
-					score = scores[0][j];
+			//Get all game scores for team 2
+			for (let j = 0; j < scoresTeam2.length; j++) {
+				for (let k = 0; k < scoresTeam2[j].length; k++) {
+					if (scoresTeam2[j][k].gameId === gamesPlayed[i]) {
+						team2GameScores.push(scoresTeam2[j][k]);
+					}
 				}
 			}
 
-			//Loop throught all the scores of User 2 and get the most recent score on the map
-			let scoreUser2 = 0;
-			for (let j = 0; j < scores[1].length; j++) {
-				let scoring = 'V1';
-				if (scores[1][j].scoringType === 'Score v2') {
-					scoring = 'V2';
-				}
-				let mods = getScoreModpool(scores[1][j]);
-				if (`${scoring}-${mods}-${scores[1][j].beatmapId}` === mapsPlayedByBoth[i]) {
-					scoreUser2 = parseInt(scores[1][j].score);
-					score = scores[1][j];
-				}
+			//Sort the scores for each team
+			quicksortScore(team1GameScores);
+			quicksortScore(team2GameScores);
+
+			//Add the best scores together
+			let team1Score = 0;
+			let team2Score = 0;
+
+			for (let j = 0; j < teamsize; j++) {
+				team1Score += parseInt(team1GameScores[j].score);
+				team2Score += parseInt(team2GameScores[j].score);
+			}
+
+			//Compare the scores | Winner is by default team 1 | If team 2 is better, change winner
+			let winner = 0;
+			if (team1Score < team2Score) {
+				winner = 1;
 			}
 
 			//Evaluate if it was played with Score v2 or not (0 = v1, 1 = v2)
 			let scoreVersion = 0;
-			if (score.scoringType === 'Score v2') {
+			if (team1GameScores[0].scoringType === 'Score v2') {
 				scoreVersion = 1;
 			}
 
-			//Evaluate which score is better (0 = user1; 1 = user2)
+			//Evaluate with which mods the game was played
+			if (getScoreModpool(team1GameScores[0]) === 'NM') {
+				directNoModWins[scoreVersion][winner]++;
+			} else if (getScoreModpool(team1GameScores[0]) === 'HD') {
+				directHiddenWins[scoreVersion][winner]++;
+			} else if (getScoreModpool(team1GameScores[0]) === 'HR') {
+				directHardRockWins[scoreVersion][winner]++;
+			} else if (getScoreModpool(team1GameScores[0]) === 'DT') {
+				directDoubleTimeWins[scoreVersion][winner]++;
+			} else {
+				directFreeModWins[scoreVersion][winner]++;
+			}
+
+			//Push matches for the history txt
+			if (!matchesPlayed.includes(`${(team1GameScores[0].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${team1GameScores[0].matchStartDate.getUTCFullYear()} - ${team1GameScores[0].matchName} ----- https://osu.ppy.sh/community/matches/${team1GameScores[0].matchId}`)) {
+				matchesPlayed.push(`${(team1GameScores[0].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${team1GameScores[0].matchStartDate.getUTCFullYear()} - ${team1GameScores[0].matchName} ----- https://osu.ppy.sh/community/matches/${team1GameScores[0].matchId}`);
+			}
+		}
+
+		//Indirect matchups
+		//Get a list of all maps played for each modPool by all players from both teams
+		let mapsPlayed = [];
+		for (let i = 0; i < scoresTeam1.length; i++) {
+			for (let j = 0; j < scoresTeam1[i].length; j++) {
+				let scoreVersion = 'V1';
+				if (scoresTeam1[i][j].scoringType === 'Score v2') {
+					scoreVersion = 'V2';
+				}
+				if (mapsPlayed.indexOf(`${scoreVersion}${getScoreModpool(scoresTeam1[i][j])}${scoresTeam1[i][j].beatmapId}`) === -1) {
+					mapsPlayed.push(`${scoreVersion}${getScoreModpool(scoresTeam1[i][j])}${scoresTeam1[i][j].beatmapId}`);
+				}
+			}
+		}
+
+		for (let i = 0; i < scoresTeam2.length; i++) {
+			for (let j = 0; j < scoresTeam2[i].length; j++) {
+				let scoreVersion = 'V1';
+				if (scoresTeam2[i][j].scoringType === 'Score v2') {
+					scoreVersion = 'V2';
+				}
+				if (mapsPlayed.indexOf(`${scoreVersion}${getScoreModpool(scoresTeam2[i][j])}${scoresTeam2[i][j].beatmapId}`) === -1) {
+					mapsPlayed.push(`${scoreVersion}${getScoreModpool(scoresTeam2[i][j])}${scoresTeam2[i][j].beatmapId}`);
+				}
+			}
+		}
+
+		//Loop through all maps played and check if on both team sides at least teamsize players played the map aswell
+		for (let i = 0; i < mapsPlayed.length; i++) {
+			let team1Count = 0;
+			let team2Count = 0;
+
+			for (let j = 0; j < scoresTeam1.length; j++) {
+				for (let k = 0; k < scoresTeam1[j].length; k++) {
+					let scoreVersion = 'V1';
+					if (scoresTeam1[j][k].scoringType === 'Score v2') {
+						scoreVersion = 'V2';
+					}
+					if (`${scoreVersion}${getScoreModpool(scoresTeam1[j][k])}${scoresTeam1[j][k].beatmapId}` === mapsPlayed[i]) {
+						team1Count++;
+						break;
+					}
+				}
+			}
+
+			for (let j = 0; j < scoresTeam2.length; j++) {
+				for (let k = 0; k < scoresTeam2[j].length; k++) {
+					let scoreVersion = 'V1';
+					if (scoresTeam2[j][k].scoringType === 'Score v2') {
+						scoreVersion = 'V2';
+					}
+					if (`${scoreVersion}${getScoreModpool(scoresTeam2[j][k])}${scoresTeam2[j][k].beatmapId}` === mapsPlayed[i]) {
+						team2Count++;
+						break;
+					}
+				}
+			}
+
+			if (team1Count < teamsize || team2Count < teamsize) {
+				mapsPlayed.splice(i, 1);
+				i--;
+			}
+		}
+
+		//Loop through all maps, get the most recent score for each player and add the teamsize best scores together and compare
+		//For the graph
+		let rounds = [];
+
+		//For the maps played txt
+		//[won by team1 array[NM[], HD[], HR[], DT[], FM[]], won by team2 array[NM[], HD[], HR[], DT[], FM[]]]]
+		//divided by player who won -> divided by modpool
+		let mapsPlayedReadable = [[[], [], [], [], []], [[], [], [], [], []]];
+		for (let i = 0; i < mapsPlayed.length; i++) {
+			let team1MapScores = [];
+			let team2MapScores = [];
+
+			//For the round array
+			let matchId = null;
+			let date = null;
+			let dateReadable = null;
+
+			//Get all map scores for team 1 | Scores are already sorted by matchID descending so the first score is the most recent
+			for (let j = 0; j < scoresTeam1.length; j++) {
+				for (let k = 0; k < scoresTeam1[j].length; k++) {
+					let scoreVersion = 'V1';
+					if (scoresTeam1[j][k].scoringType === 'Score v2') {
+						scoreVersion = 'V2';
+					}
+					if (`${scoreVersion}${getScoreModpool(scoresTeam1[j][k])}${scoresTeam1[j][k].beatmapId}` === mapsPlayed[i]) {
+						team1MapScores.push(scoresTeam1[j][k]);
+						if (!matchId || matchId < scoresTeam1[j][k].matchId) {
+							matchId = scoresTeam1[j][k].matchId;
+							date = scoresTeam1[j][k].matchStartDate;
+							dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
+						}
+						break;
+					}
+				}
+			}
+
+			//Get all map scores for team 2 | Scores are already sorted by matchID descending so the first score is the most recent
+			for (let j = 0; j < scoresTeam2.length; j++) {
+				for (let k = 0; k < scoresTeam2[j].length; k++) {
+					let scoreVersion = 'V1';
+					if (scoresTeam2[j][k].scoringType === 'Score v2') {
+						scoreVersion = 'V2';
+					}
+					if (`${scoreVersion}${getScoreModpool(scoresTeam2[j][k])}${scoresTeam2[j][k].beatmapId}` === mapsPlayed[i]) {
+						team2MapScores.push(scoresTeam2[j][k]);
+						if (!matchId || matchId < scoresTeam2[j][k].matchId) {
+							matchId = scoresTeam2[j][k].matchId;
+							date = scoresTeam2[j][k].matchStartDate;
+							dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
+						}
+						break;
+					}
+				}
+			}
+
+			//Sort the scores for each team
+			quicksortScore(team1MapScores);
+			quicksortScore(team2MapScores);
+
+			//Add the best scores together
+			let team1Score = 0;
+			let team2Score = 0;
+
+			let team1Players = [];
+			let team2Players = [];
+
+			for (let j = 0; j < teamsize; j++) {
+				team1Score += parseInt(team1MapScores[j].score);
+				team2Score += parseInt(team2MapScores[j].score);
+
+				team1Players.push(team1Names[team1.indexOf(team1MapScores[j].osuUserId)]);
+				team2Players.push(team2Names[team2.indexOf(team2MapScores[j].osuUserId)]);
+			}
+
+			//Compare the scores | Winner is by default team 1 | If team 2 is better, change winner
 			let winner = 0;
-			if (scoreUser1 < scoreUser2) {
+			if (team1Score < team2Score) {
 				winner = 1;
 			}
 
+			//Evaluate if it was played with Score v2 or not (0 = v1, 1 = v2)
+			let scoreVersion = 0;
+			if (team1MapScores[0].scoringType === 'Score v2') {
+				scoreVersion = 1;
+			}
+
 			//Evaluate with which mods the game was played
-			if (getScoreModpool(score) === 'NM') {
+			if (getScoreModpool(team1MapScores[0]) === 'NM') {
 				indirectNoModWins[scoreVersion][winner]++;
-			} else if (getScoreModpool(score) === 'HD') {
+			} else if (getScoreModpool(team1MapScores[0]) === 'HD') {
 				indirectHiddenWins[scoreVersion][winner]++;
-			} else if (getScoreModpool(score) === 'HR') {
+			} else if (getScoreModpool(team1MapScores[0]) === 'HR') {
 				indirectHardRockWins[scoreVersion][winner]++;
-			} else if (getScoreModpool(score) === 'DT') {
+			} else if (getScoreModpool(team1MapScores[0]) === 'DT') {
 				indirectDoubleTimeWins[scoreVersion][winner]++;
 			} else {
 				indirectFreeModWins[scoreVersion][winner]++;
 			}
+
+			//For the graph
+			rounds.push({
+				mod: getScoreModpool(team1MapScores[0]),
+				winner: winner,
+				matchId: matchId,
+				date: date,
+				dateReadable: dateReadable,
+			});
+
+			//For the maps played txt
+			let modPoolNumber = 0;
+			if (getScoreModpool(team1MapScores[0]) === 'NM') {
+				modPoolNumber = 0;
+			} else if (getScoreModpool(team1MapScores[0]) === 'HD') {
+				modPoolNumber = 1;
+			} else if (getScoreModpool(team1MapScores[0]) === 'HR') {
+				modPoolNumber = 2;
+			} else if (getScoreModpool(team1MapScores[0]) === 'DT') {
+				modPoolNumber = 3;
+			} else if (getScoreModpool(team1MapScores[0]) === 'FM') {
+				modPoolNumber = 4;
+			}
+
+			let scoringType = 'V1';
+			if (team1MapScores[0].scoringType === 'Score v2') {
+				scoringType = 'V2';
+			}
+
+			if (winner === 0) {
+				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(team1MapScores[0])} https://osu.ppy.sh/b/${team1MapScores[0].beatmapId} - Won by: ${team1Players.join(', ')} against ${team2Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)}`);
+			} else {
+				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(team1MapScores[0])} https://osu.ppy.sh/b/${team1MapScores[0].beatmapId} - Won by: ${team2Players.join(', ')} against ${team1Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)}`);
+			}
 		}
+
+		//Sort the rounds for the graph
+		quicksort(rounds);
 
 		const canvasWidth = 1000;
 		const canvasHeight = 700;
@@ -282,7 +561,7 @@ module.exports = {
 		ctx.fillStyle = '#ffffff';
 
 		ctx.textAlign = 'left';
-		ctx.fillText(`UserIDs: ${users[0]} vs ${users[1]}`, canvas.width / 140, canvas.height - canvas.height / 70);
+		ctx.fillText(`UserIDs: ${team1.join('|')} vs ${team2.join('|')}`, canvas.width / 140, canvas.height - canvas.height / 70);
 
 		ctx.textAlign = 'right';
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
@@ -290,7 +569,7 @@ module.exports = {
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.font = 'bold 40px comfortaa, sans-serif';
-		fitTextOnMiddleCanvas(ctx, `${usersReadable[0]} vs. ${usersReadable[1]}`, 40, 'comfortaa, sans-serif', 90, 1000, 400);
+		fitTextOnMiddleCanvas(ctx, `${team1Names.join(' | ')} vs. ${team2Names.join(' | ')}`, 40, 'comfortaa, sans-serif', 90, 1000, 400);
 
 		ctx.font = 'bold 30px comfortaa, sans-serif';
 		ctx.fillText('Direct Matchups', 250, 210);
@@ -354,7 +633,7 @@ module.exports = {
 		//Save old context
 		ctx.save();
 
-		//Add a stroke around the level by how much it is completed
+		//Add a stroke around
 		ctx.beginPath();
 		ctx.arc(90, 90, 85, 0, Math.PI * 2);
 		ctx.strokeStyle = '#2299BB';
@@ -369,7 +648,7 @@ module.exports = {
 
 		//Draw a shape onto the main canvas
 		try {
-			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${users[0]}`);
+			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${team1[0]}`);
 			ctx.drawImage(avatar, 10, 10, 160, 160);
 		} catch (error) {
 			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
@@ -379,7 +658,7 @@ module.exports = {
 		//Restore old context
 		ctx.restore();
 
-		//Add a stroke around the level by how much it is completed
+		//Add a stroke around
 		ctx.beginPath();
 		ctx.arc(910, 90, 85, 0, Math.PI * 2);
 		ctx.strokeStyle = '#BB1177';
@@ -394,7 +673,7 @@ module.exports = {
 
 		//Draw a shape onto the main canvas
 		try {
-			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${users[1]}`);
+			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${team2[0]}`);
 			ctx.drawImage(avatar, 830, 10, 160, 160);
 		} catch (error) {
 			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
@@ -403,74 +682,14 @@ module.exports = {
 
 		let files = [];
 		//Create as an attachment
-		const matchUpStats = new Discord.MessageAttachment(canvas.toBuffer(), `osu-matchup-${users[0]}-${users[1]}.png`);
+		const matchUpStats = new Discord.MessageAttachment(canvas.toBuffer(), `osu-matchup-${team1.join('-')}-${team2.join('-')}.png`);
 
 		files.push(matchUpStats);
 
-		let content = `Matchup analysis for \`${usersReadable[0]}\` vs \`${usersReadable[1]}\``;
+		let content = `Matchup analysis for \`${team1Names.join(' | ')}\` vs \`${team2Names.join(' | ')}\` (Teamsize: ${teamsize})`;
 
-		if (mapsPlayedByBoth.length) {
-			content += `\nWinrate chart for \`${usersReadable[0]}\` against \`${usersReadable[1]}\` attached.`;
-			//Loop through all maps played by both players and fill an array of rounds won with timestamp
-			let rounds = [];
-			for (let i = 0; i < mapsPlayedByBoth.length; i++) {
-				let scoreUser1 = null;
-				let scoreUser2 = null;
-
-				//Loop through all scores of player 1
-				for (let j = 0; j < scores[0].length; j++) {
-					//If the score is for the map played by both players
-					let scoring = 'V1';
-					if (scores[0][j].scoringType === 'Score v2') {
-						scoring = 'V2';
-					}
-					let mods = getScoreModpool(scores[0][j]);
-					if (`${scoring}-${mods}-${scores[0][j].beatmapId}` === mapsPlayedByBoth[i]) {
-						scoreUser1 = scores[0][j];
-					}
-				}
-
-				//Loop through all scores of player 2
-				for (let j = 0; j < scores[1].length; j++) {
-					//If the score is for the map played by both players
-					let scoring = 'V1';
-					if (scores[1][j].scoringType === 'Score v2') {
-						scoring = 'V2';
-					}
-					let mods = getScoreModpool(scores[1][j]);
-					if (`${scoring}-${mods}-${scores[1][j].beatmapId}` === mapsPlayedByBoth[i]) {
-						scoreUser2 = scores[1][j];
-					}
-				}
-
-				//Evaluate with which modPool the game was played
-				let modPool = getScoreModpool(scoreUser1);
-
-				//Set winner (0 = user1; 1 = user2)
-				let winner = 0;
-				if (parseInt(scoreUser1.score) < parseInt(scoreUser2.score)) {
-					winner = 1;
-				}
-
-				let matchId = scoreUser1.matchId;
-				let date = scoreUser1.matchStartDate;
-				let dateReadable = `${(scoreUser1.matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${scoreUser1.matchStartDate.getUTCFullYear()}`;
-				if (parseInt(scoreUser1.matchId) < parseInt(scoreUser2.matchId)) {
-					matchId = scoreUser2.matchId;
-					date = scoreUser2.matchStartDate;
-					dateReadable = `${(scoreUser2.matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${scoreUser2.matchStartDate.getUTCFullYear()}`;
-				}
-
-				rounds.push({
-					mod: modPool,
-					winner: winner,
-					matchId: matchId,
-					date: date,
-					dateReadable: dateReadable,
-				});
-			}
-
-			quicksort(rounds);
+		if (mapsPlayed.length) {
+			content += `\nWinrate chart for \`${team1Names.join(' | ')}\` against \`${team2Names.join(' | ')}\` (Teamsize: ${teamsize}) attached.`;
 
 			//Fill an array of labels for the rounds won
 			let labels = [];
@@ -671,7 +890,7 @@ module.exports = {
 							display: true,
 							title: {
 								display: true,
-								text: `Winrate for ${usersReadable[0]} in %`,
+								text: `Winrate for ${team1Names.join(' | ')} in %`,
 								color: '#FFFFFF'
 							},
 							grid: {
@@ -689,114 +908,43 @@ module.exports = {
 
 			const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
 
-			const matchupWinrateChart = new Discord.MessageAttachment(imageBuffer, `osu-matchup-${users[0]}-vs-${users[1]}.png`);
+			const matchupWinrateChart = new Discord.MessageAttachment(imageBuffer, `osu-matchup-${team1.join('-')}-vs-${team2.join('-')}.png`);
 
 			files.push(matchupWinrateChart);
 
-			//[won by user1 array[NM[], HD[], HR[], DT[], FM[]], won by user2 array[NM[], HD[], HR[], DT[], FM[]]]]
-			//divided by player who won -> divided by modpool
-			let mapsPlayedByBothReadable = [[[], [], [], [], []], [[], [], [], [], []]];
-
-			for (let i = 0; i < mapsPlayedByBoth.length; i++) {
-				let scoreUser1 = null;
-				let scoreUser2 = null;
-
-				//Loop through all scores of player 1
-				for (let j = 0; j < scores[0].length; j++) {
-					//If the score is for the map played by both players
-					let scoring = 'V1';
-					if (scores[0][j].scoringType === 'Score v2') {
-						scoring = 'V2';
-					}
-					let mods = getScoreModpool(scores[0][j]);
-					if (`${scoring}-${mods}-${scores[0][j].beatmapId}` === mapsPlayedByBoth[i]) {
-						scoreUser1 = scores[0][j];
-						scores[0].splice(j, 1);
-						j--;
-					}
-				}
-
-				//Loop through all scores of player 2
-				for (let j = 0; j < scores[1].length; j++) {
-					//If the score is for the map played by both players
-					let scoring = 'V1';
-					if (scores[1][j].scoringType === 'Score v2') {
-						scoring = 'V2';
-					}
-					let mods = getScoreModpool(scores[1][j]);
-					if (`${scoring}-${mods}-${scores[1][j].beatmapId}` === mapsPlayedByBoth[i]) {
-						scoreUser2 = scores[1][j];
-						scores[1].splice(j, 1);
-						j--;
-					}
-				}
-
-				let dateReadable = `${(scoreUser1.matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${scoreUser1.matchStartDate.getUTCFullYear()}`;
-				if (parseInt(scoreUser1.matchId) < parseInt(scoreUser2.matchId)) {
-					dateReadable = `${(scoreUser2.matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${scoreUser2.matchStartDate.getUTCFullYear()}`;
-				}
-
-				//Evaluate which score is better (0 = user1; 1 = user2)
-				let winner = 0;
-				if (parseInt(scoreUser1.score) < parseInt(scoreUser2.score)) {
-					winner = 1;
-				}
-
-				let modPoolNumber = 0;
-				if (getScoreModpool(scoreUser1) === 'NM') {
-					modPoolNumber = 0;
-				} else if (getScoreModpool(scoreUser1) === 'HD') {
-					modPoolNumber = 1;
-				} else if (getScoreModpool(scoreUser1) === 'HR') {
-					modPoolNumber = 2;
-				} else if (getScoreModpool(scoreUser1) === 'DT') {
-					modPoolNumber = 3;
-				} else if (getScoreModpool(scoreUser1) === 'FM') {
-					modPoolNumber = 4;
-				}
-
-				let scoringType = 'V1';
-				if (scoreUser1.scoringType === 'Score v2') {
-					scoringType = 'V2';
-				}
-
-				mapsPlayedByBothReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(scoreUser1)} https://osu.ppy.sh/b/${scoreUser1.beatmapId} - Won by: ${usersReadable[winner]} (by ${humanReadable(Math.abs(parseInt(scoreUser1.score) - parseInt(scoreUser2.score)))}) - ${humanReadable(scoreUser1.score)} vs ${humanReadable(scoreUser2.score)}`);
-			}
-
 			//Convert modpool arrays into strings
-			for (let i = 0; i < mapsPlayedByBothReadable.length; i++) {
-				for (let j = 0; j < mapsPlayedByBothReadable[i].length; j++) {
-					if (mapsPlayedByBothReadable[i][j].length) {
-						mapsPlayedByBothReadable[i][j] = mapsPlayedByBothReadable[i][j].join('\n');
+			for (let i = 0; i < mapsPlayedReadable.length; i++) {
+				for (let j = 0; j < mapsPlayedReadable[i].length; j++) {
+					if (mapsPlayedReadable[i][j].length) {
+						mapsPlayedReadable[i][j] = mapsPlayedReadable[i][j].join('\n');
 					} else {
-						mapsPlayedByBothReadable[i].splice(j, 1);
+						mapsPlayedReadable[i].splice(j, 1);
 						j--;
 					}
 				}
 			}
 
 			//Convert player arrays into strings
-			for (let i = 0; i < mapsPlayedByBothReadable.length; i++) {
-				if (mapsPlayedByBothReadable[i].length) {
-					mapsPlayedByBothReadable[i] = mapsPlayedByBothReadable[i].join('\n\n');
+			for (let i = 0; i < mapsPlayedReadable.length; i++) {
+				if (mapsPlayedReadable[i].length) {
+					mapsPlayedReadable[i] = mapsPlayedReadable[i].join('\n\n');
 				} else {
-					mapsPlayedByBothReadable[i].push('No maps won');
+					mapsPlayedReadable[i].push('No maps won');
 				}
 			}
 
 			//Add the player names in front of both strings
-			for (let i = 0; i < mapsPlayedByBothReadable.length; i++) {
-				mapsPlayedByBothReadable[i] = `----------${usersReadable[i]}----------\n${mapsPlayedByBothReadable[i]}`;
-			}
+			mapsPlayedReadable[0] = `----------${team1Names.join(' ')}----------\n${mapsPlayedReadable[0]}`;
+			mapsPlayedReadable[1] = `----------${team2Names.join(' ')}----------\n${mapsPlayedReadable[1]}`;
 
 			// eslint-disable-next-line no-undef
-			mapsPlayedByBothReadable = new Discord.MessageAttachment(Buffer.from(mapsPlayedByBothReadable.join('\n\n\n\n'), 'utf-8'), `indirect-matchups-${users[0]}-vs-${users[1]}.txt`);
-			files.push(mapsPlayedByBothReadable);
+			mapsPlayedReadable = new Discord.MessageAttachment(Buffer.from(mapsPlayedReadable.join('\n\n\n\n'), 'utf-8'), `indirect-matchups-${team1.join('-')}-vs-${team2.join('-')}.txt`);
+			files.push(mapsPlayedReadable);
 		}
 
 		if (matchesPlayed.length) {
 			// eslint-disable-next-line no-undef
-			matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${users[0]}-vs-${users[1]}.txt`);
+			matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${team1.join('-')}-vs-${team2.join('-')}.txt`);
 			files.push(matchesPlayed);
 		}
 
@@ -813,8 +961,10 @@ module.exports = {
 			sentMessage = await interaction.followUp({ content: content, files: files });
 		}
 
-		sentMessage.react('🔵');
-		sentMessage.react('🔴');
+		if (!interaction || interaction && interaction.options._subcommand !== 'teamvs') {
+			sentMessage.react('🔵');
+			sentMessage.react('🔴');
+		}
 		return;
 	},
 };
@@ -840,6 +990,31 @@ function quicksort(list, start = 0, end = undefined) {
 		const p = partition(list, start, end);
 		quicksort(list, start, p - 1);
 		quicksort(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionScore(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseInt(list[j].score) >= parseInt(pivot.score)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksortScore(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionScore(list, start, end);
+		quicksortScore(list, start, p - 1);
+		quicksortScore(list, p + 1, end);
 	}
 	return list;
 }
