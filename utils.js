@@ -773,6 +773,8 @@ module.exports = {
 		return link.replace(/.+\//g, '');
 	},
 	saveOsuMultiScores(match) {
+		console.log(process, process.pid, process.ppid);
+
 		let tourneyMatch = false;
 		if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 			tourneyMatch = true;
