@@ -773,7 +773,21 @@ module.exports = {
 		return link.replace(/.+\//g, '');
 	},
 	saveOsuMultiScores(match) {
-		console.log(process, process.pid, process.ppid);
+		//Move the function to a different file and fork it
+		console.log(process.pid, process.ppid);
+		const { spawn } = require('child_process');
+		const child = spawn('ls');
+
+		child.on('spawn', pid => {
+			console.log(`Spawned child process ${pid}`);
+		});
+
+		child.on('close', (code) => {
+			console.log(`child process exited with code ${code}`);
+		});
+
+		//Create a child and pass it the match
+		const child2 = spawn('node', ['osu-multi-scores.js', match]);
 
 		let tourneyMatch = false;
 		if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
