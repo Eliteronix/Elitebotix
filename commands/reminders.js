@@ -49,23 +49,14 @@ module.exports = {
 
 		for (let i = 0; i < reminders.length; i++) {
 			let args = reminders[i].additions.split(';');
-			date = reminders[i].date;
-
+			date = Date.parse(reminders[i].date) / 1000;
 			setReminders.push(args[1]);
-			reminderTime.push(date.toLocaleTimeString('en-UK', {
-				day: 'numeric', // numeric, 2-digit
-				year: 'numeric', // numeric, 2-digit
-				month: '2-digit', // numeric, 2-digit, long, short, narrow
-				hour: 'numeric', // numeric, 2-digit
-				minute: 'numeric', // numeric, 2-digit
-				second: 'numeric', // numeric, 2-digit
-			}));
+			reminderTime.push(date);
 		}
 
 		for (let i = 0; i < setReminders.length; i++) {
-			message += `[${i + 1}] \`${setReminders[i]}\`  -  will be sent on ${reminderTime[i]}\n`;
+			message += `[${i + 1}] \`${setReminders[i]}\`  -  will be sent on <t:${reminderTime[i]}:F>\n`;
 		}
-
 		if (msg.id) {
 			//Try DM'ing the user
 			return msg.author.send(message, { split: true })
