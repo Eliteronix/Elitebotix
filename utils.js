@@ -782,18 +782,22 @@ module.exports = {
 		const child = spawn('node', ['./saveOsuMultiScores.js'], { stdio: ['inherit', 'inherit', 'inherit', 'ipc'], });
 
 		child.on('spawn', () => {
-			console.log('Spawned child process');
+			// console.log('Spawned child process');
 
 			child.send(stringifiedMatch);
 		});
 
-		child.on('close', (code) => {
-			console.log(`child process exited with code ${code}`);
+		child.on('message', () => {
+			child.kill('SIGINT');
 		});
 
-		child.on('error', (err) => {
-			console.log(`child process error: ${err}`);
-		});
+		// child.on('close', (code) => {
+		// 	console.log(`child process exited with code ${code}`);
+		// });
+
+		// child.on('error', (err) => {
+		// 	console.log(`child process error: ${err}`);
+		// });
 	},
 	async populateMsgFromInteraction(interaction) {
 		let userMentions = new Discord.Collection();

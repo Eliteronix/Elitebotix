@@ -2,35 +2,34 @@ const { logDatabaseQueries } = require('./utils');
 const { DBOsuMultiScores } = require('./dbObjects');
 
 // eslint-disable-next-line no-undef
-process.on('message', (message) => {
+process.on('message', async (message) => {
 	let match = JSON.parse(message);
-
-	console.log(match);
 
 	let tourneyMatch = false;
 	if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 		tourneyMatch = true;
 	}
-	match.games.forEach(game => {
+
+	for (let gameIndex = 0; gameIndex < match.games.length; gameIndex++) {
 		//Define if the game is freemod or not
 		let freeMod = false;
-		if (game.scores[0]) {
-			let rawMods = game.scores[0].raw_mods;
-			for (let i = 0; i < game.scores.length; i++) {
-				if (rawMods !== game.scores[i].raw_mods) {
+		if (match.games[gameIndex].scores[0]) {
+			let rawMods = match.games[gameIndex].scores[0].raw_mods;
+			for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
+				if (rawMods !== match.games[gameIndex].scores[i].raw_mods) {
 					freeMod = true;
 					break;
 				}
 			}
 		}
 
-		game.scores.forEach(async (score) => {
+		for (let scoreIndex = 0; scoreIndex < match.games[gameIndex].scores.length; scoreIndex++) {
 			//Calculate evaluation
 			let evaluation = null;
 
 			let gameScores = [];
-			for (let i = 0; i < game.scores.length; i++) {
-				gameScores.push(game.scores[i]);
+			for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
+				gameScores.push(match.games[gameIndex].scores[i]);
 			}
 
 			if (gameScores.length > 1) {
@@ -46,7 +45,7 @@ process.on('message', (message) => {
 				let sortedScores = [];
 				for (let j = 0; j < gameScores.length; j++) {
 					//Remove the own score to make it odd for the middle score
-					if (!(gameScores.length % 2 === 0 && score.userId === gameScores[j].userId)) {
+					if (!(gameScores.length % 2 === 0 && match.games[gameIndex].scores[scoreIndex].userId === gameScores[j].userId)) {
 						sortedScores.push(gameScores[j].score);
 					}
 				}
@@ -54,7 +53,7 @@ process.on('message', (message) => {
 				const middleScore = getMiddleScore(sortedScores);
 
 				for (let i = 0; i < gameScores.length; i++) {
-					if (score.userId === gameScores[i].userId && gameScores.length > 1) {
+					if (match.games[gameIndex].scores[scoreIndex].userId === gameScores[i].userId && gameScores.length > 1) {
 						evaluation = 1 / parseInt(middleScore) * parseInt(gameScores[i].score);
 					}
 				}
@@ -64,35 +63,38 @@ process.on('message', (message) => {
 			logDatabaseQueries(2, 'saveosuMultiScores.js');
 			const existingScore = await DBOsuMultiScores.findOne({
 				where: {
-					osuUserId: score.userId,
+					osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
 					matchId: match.id,
-					gameId: game.id,
+					gameId: match.games[gameIndex].id,
 				}
 			});
 
 			if (!existingScore) {
-				DBOsuMultiScores.create({
-					osuUserId: score.userId,
+				await DBOsuMultiScores.create({
+					osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
 					matchId: match.id,
 					matchName: match.name,
-					gameId: game.id,
-					scoringType: game.scoringType,
-					mode: game.mode,
-					beatmapId: game.beatmapId,
+					gameId: match.games[gameIndex].id,
+					scoringType: match.games[gameIndex].scoringType,
+					mode: match.games[gameIndex].mode,
+					beatmapId: match.games[gameIndex].beatmapId,
 					tourneyMatch: tourneyMatch,
 					evaluation: evaluation,
-					score: score.score,
-					gameRawMods: game.raw_mods,
-					rawMods: score.raw_mods,
+					score: match.games[gameIndex].scores[scoreIndex].score,
+					gameRawMods: match.games[gameIndex].raw_mods,
+					rawMods: match.games[gameIndex].scores[scoreIndex].raw_mods,
 					matchStartDate: match.raw_start,
 					matchEndDate: match.raw_end,
-					gameStartDate: game.raw_start,
-					gameEndDate: game.raw_end,
+					gameStartDate: match.games[gameIndex].raw_start,
+					gameEndDate: match.games[gameIndex].raw_end,
 					freeMod: freeMod,
 				});
 			}
-		});
-	});
+		}
+	}
+
+	// eslint-disable-next-line no-undef
+	process.send('done');
 });
 
 
