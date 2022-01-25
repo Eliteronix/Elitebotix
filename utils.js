@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBOsuMultiScores, DBActivityRoles, DBOsuBeatmaps } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -773,92 +773,31 @@ module.exports = {
 		return link.replace(/.+\//g, '');
 	},
 	saveOsuMultiScores(match) {
-		let tourneyMatch = false;
-		if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
-			tourneyMatch = true;
-		}
-		match.games.forEach(game => {
-			//Define if the game is freemod or not
-			let freeMod = false;
-			if (game.scores[0]) {
-				let rawMods = game.scores[0].raw_mods;
-				for (let i = 0; i < game.scores.length; i++) {
-					if (rawMods !== game.scores[i].raw_mods) {
-						freeMod = true;
-						break;
-					}
-				}
-			}
+		let stringifiedMatch = JSON.stringify(match);
 
-			game.scores.forEach(async (score) => {
-				//Calculate evaluation
-				let evaluation = null;
+		//Move the match by spawning child process
+		const { spawn } = require('child_process');
 
-				let gameScores = [];
-				for (let i = 0; i < game.scores.length; i++) {
-					gameScores.push(game.scores[i]);
-				}
+		//Create a child and pass it the match
+		const child = spawn('node', ['./saveOsuMultiScores.js'], { stdio: ['inherit', 'inherit', 'inherit', 'ipc'], });
 
-				if (gameScores.length > 1) {
-					quicksort(gameScores);
+		child.on('spawn', () => {
+			// console.log('Spawned child process');
 
-					for (let i = 0; i < gameScores.length; i++) {
-						if (parseInt(gameScores[i].score) < 10000) {
-							gameScores.splice(i, 1);
-							i--;
-						}
-					}
-
-					let sortedScores = [];
-					for (let j = 0; j < gameScores.length; j++) {
-						//Remove the own score to make it odd for the middle score
-						if (!(gameScores.length % 2 === 0 && score.userId === gameScores[j].userId)) {
-							sortedScores.push(gameScores[j].score);
-						}
-					}
-
-					const middleScore = getMiddleScore(sortedScores);
-
-					for (let i = 0; i < gameScores.length; i++) {
-						if (score.userId === gameScores[i].userId && gameScores.length > 1) {
-							evaluation = 1 / parseInt(middleScore) * parseInt(gameScores[i].score);
-						}
-					}
-				}
-
-				//Add score to db
-				logDatabaseQueriesFunction(2, 'utils.js saveOsuMultiScores');
-				const existingScore = await DBOsuMultiScores.findOne({
-					where: {
-						osuUserId: score.userId,
-						matchId: match.id,
-						gameId: game.id,
-					}
-				});
-
-				if (!existingScore) {
-					DBOsuMultiScores.create({
-						osuUserId: score.userId,
-						matchId: match.id,
-						matchName: match.name,
-						gameId: game.id,
-						scoringType: game.scoringType,
-						mode: game.mode,
-						beatmapId: game.beatmapId,
-						tourneyMatch: tourneyMatch,
-						evaluation: evaluation,
-						score: score.score,
-						gameRawMods: game.raw_mods,
-						rawMods: score.raw_mods,
-						matchStartDate: match.raw_start,
-						matchEndDate: match.raw_end,
-						gameStartDate: game.raw_start,
-						gameEndDate: game.raw_end,
-						freeMod: freeMod,
-					});
-				}
-			});
+			child.send(stringifiedMatch);
 		});
+
+		child.on('message', () => {
+			child.kill('SIGINT');
+		});
+
+		// child.on('close', (code) => {
+		// 	console.log(`child process exited with code ${code}`);
+		// });
+
+		// child.on('error', (err) => {
+		// 	console.log(`child process error: ${err}`);
+		// });
 	},
 	async populateMsgFromInteraction(interaction) {
 		let userMentions = new Discord.Collection();
@@ -1134,46 +1073,6 @@ function fitTextOnMiddleCanvasFunction(ctx, text, startingSize, fontface, yPosit
 
 	return fontsize;
 
-}
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].score) >= parseFloat(pivot.score)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
-}
-
-function getMiddleScore(scores) {
-	if (scores.length % 2) {
-		//Odd amount of scores
-		const middleIndex = scores.length - Math.round(scores.length / 2);
-		return scores[middleIndex];
-	}
-
-	while (scores.length > 2) {
-		scores.splice(0, 1);
-		scores.splice(scores.length - 1, 1);
-	}
-
-	return (parseInt(scores[0]) + parseInt(scores[1])) / 2;
 }
 
 async function getOsuBeatmapFunction(beatmapId, modBits) {

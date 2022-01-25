@@ -1,0 +1,139 @@
+const { logDatabaseQueries } = require('./utils');
+const { DBOsuMultiScores } = require('./dbObjects');
+
+// eslint-disable-next-line no-undef
+process.on('message', async (message) => {
+	let match = JSON.parse(message);
+
+	let tourneyMatch = false;
+	if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
+		tourneyMatch = true;
+	}
+
+	for (let gameIndex = 0; gameIndex < match.games.length; gameIndex++) {
+		//Define if the game is freemod or not
+		let freeMod = false;
+		if (match.games[gameIndex].scores[0]) {
+			let rawMods = match.games[gameIndex].scores[0].raw_mods;
+			for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
+				if (rawMods !== match.games[gameIndex].scores[i].raw_mods) {
+					freeMod = true;
+					break;
+				}
+			}
+		}
+
+		for (let scoreIndex = 0; scoreIndex < match.games[gameIndex].scores.length; scoreIndex++) {
+			//Calculate evaluation
+			let evaluation = null;
+
+			let gameScores = [];
+			for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
+				gameScores.push(match.games[gameIndex].scores[i]);
+			}
+
+			if (gameScores.length > 1) {
+				quicksort(gameScores);
+
+				for (let i = 0; i < gameScores.length; i++) {
+					if (parseInt(gameScores[i].score) < 10000) {
+						gameScores.splice(i, 1);
+						i--;
+					}
+				}
+
+				let sortedScores = [];
+				for (let j = 0; j < gameScores.length; j++) {
+					//Remove the own score to make it odd for the middle score
+					if (!(gameScores.length % 2 === 0 && match.games[gameIndex].scores[scoreIndex].userId === gameScores[j].userId)) {
+						sortedScores.push(gameScores[j].score);
+					}
+				}
+
+				const middleScore = getMiddleScore(sortedScores);
+
+				for (let i = 0; i < gameScores.length; i++) {
+					if (match.games[gameIndex].scores[scoreIndex].userId === gameScores[i].userId && gameScores.length > 1) {
+						evaluation = 1 / parseInt(middleScore) * parseInt(gameScores[i].score);
+					}
+				}
+			}
+
+			//Add score to db
+			logDatabaseQueries(2, 'saveosuMultiScores.js');
+			const existingScore = await DBOsuMultiScores.findOne({
+				where: {
+					osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
+					matchId: match.id,
+					gameId: match.games[gameIndex].id,
+				}
+			});
+
+			if (!existingScore) {
+				await DBOsuMultiScores.create({
+					osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
+					matchId: match.id,
+					matchName: match.name,
+					gameId: match.games[gameIndex].id,
+					scoringType: match.games[gameIndex].scoringType,
+					mode: match.games[gameIndex].mode,
+					beatmapId: match.games[gameIndex].beatmapId,
+					tourneyMatch: tourneyMatch,
+					evaluation: evaluation,
+					score: match.games[gameIndex].scores[scoreIndex].score,
+					gameRawMods: match.games[gameIndex].raw_mods,
+					rawMods: match.games[gameIndex].scores[scoreIndex].raw_mods,
+					matchStartDate: match.raw_start,
+					matchEndDate: match.raw_end,
+					gameStartDate: match.games[gameIndex].raw_start,
+					gameEndDate: match.games[gameIndex].raw_end,
+					freeMod: freeMod,
+				});
+			}
+		}
+	}
+
+	// eslint-disable-next-line no-undef
+	process.send('done');
+});
+
+
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].score) >= parseFloat(pivot.score)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
+}
+
+function getMiddleScore(scores) {
+	if (scores.length % 2) {
+		//Odd amount of scores
+		const middleIndex = scores.length - Math.round(scores.length / 2);
+		return scores[middleIndex];
+	}
+
+	while (scores.length > 2) {
+		scores.splice(0, 1);
+		scores.splice(scores.length - 1, 1);
+	}
+
+	return (parseInt(scores[0]) + parseInt(scores[1])) / 2;
+}
