@@ -54,7 +54,7 @@ module.exports = {
 			reminderTime.push(date);
 		}
 
-		for (let i = 0; i < setReminders.length; i++) { 			
+		for (let i = 0; i < setReminders.length; i++) {
 			message += `[${i + 1}] \`${setReminders[i]}\`  -  will be sent on <t:${reminderTime[i]}:F>\n`;
 		}
 		if (msg.id) {
