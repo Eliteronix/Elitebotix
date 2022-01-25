@@ -773,24 +773,19 @@ module.exports = {
 		return link.replace(/.+\//g, '');
 	},
 	saveOsuMultiScores(match) {
-		//Move the function to a different file and fork it
-		console.log(process.pid, process.ppid);
+		let stringifiedMatch = JSON.stringify(match);
 
+		//Move the match by spawning child process
 		const { spawn } = require('child_process');
 
 		//Create a child and pass it the match
-		const child = spawn('node', ['./saveOsuMultiScores.js', match]);
+		const child = spawn('node', ['./saveOsuMultiScores.js'], { stdio: ['inherit', 'inherit', 'inherit', 'ipc'], });
 
 		child.on('spawn', () => {
-			console.log('Spawned child process', child.spawnargs, child.pid, child.ppid);
-		});
+			console.log('Spawned child process');
 
-		child.on('message', (m) => {
-			console.log('PARENT got message:', m);
+			child.send(stringifiedMatch);
 		});
-
-		// Causes the child to print: CHILD got message: { hello: 'world' }
-		child.send({ hello: 'world' });
 
 		child.on('close', (code) => {
 			console.log(`child process exited with code ${code}`);
