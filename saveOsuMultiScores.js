@@ -59,36 +59,40 @@ process.on('message', async (message) => {
 				}
 			}
 
-			//Add score to db
-			logDatabaseQueries(2, 'saveosuMultiScores.js');
-			const existingScore = await DBOsuMultiScores.findOne({
-				where: {
-					osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
-					matchId: match.id,
-					gameId: match.games[gameIndex].id,
-				}
-			});
-
-			if (!existingScore) {
-				await DBOsuMultiScores.create({
-					osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
-					matchId: match.id,
-					matchName: match.name,
-					gameId: match.games[gameIndex].id,
-					scoringType: match.games[gameIndex].scoringType,
-					mode: match.games[gameIndex].mode,
-					beatmapId: match.games[gameIndex].beatmapId,
-					tourneyMatch: tourneyMatch,
-					evaluation: evaluation,
-					score: match.games[gameIndex].scores[scoreIndex].score,
-					gameRawMods: match.games[gameIndex].raw_mods,
-					rawMods: match.games[gameIndex].scores[scoreIndex].raw_mods,
-					matchStartDate: match.raw_start,
-					matchEndDate: match.raw_end,
-					gameStartDate: match.games[gameIndex].raw_start,
-					gameEndDate: match.games[gameIndex].raw_end,
-					freeMod: freeMod,
+			try {
+				//Add score to db
+				logDatabaseQueries(2, 'saveosuMultiScores.js');
+				const existingScore = await DBOsuMultiScores.findOne({
+					where: {
+						osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
+						matchId: match.id,
+						gameId: match.games[gameIndex].id,
+					}
 				});
+
+				if (!existingScore) {
+					await DBOsuMultiScores.create({
+						osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
+						matchId: match.id,
+						matchName: match.name,
+						gameId: match.games[gameIndex].id,
+						scoringType: match.games[gameIndex].scoringType,
+						mode: match.games[gameIndex].mode,
+						beatmapId: match.games[gameIndex].beatmapId,
+						tourneyMatch: tourneyMatch,
+						evaluation: evaluation,
+						score: match.games[gameIndex].scores[scoreIndex].score,
+						gameRawMods: match.games[gameIndex].raw_mods,
+						rawMods: match.games[gameIndex].scores[scoreIndex].raw_mods,
+						matchStartDate: match.raw_start,
+						matchEndDate: match.raw_end,
+						gameStartDate: match.games[gameIndex].raw_start,
+						gameEndDate: match.games[gameIndex].raw_end,
+						freeMod: freeMod,
+					});
+				}
+			} catch (error) {
+				scoreIndex--;
 			}
 		}
 	}
