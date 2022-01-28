@@ -18,10 +18,11 @@ const DBProcessQueue = require('./models/DBProcessQueue')(sequelize, Sequelize.D
 const DBActivityRoles = require('./models/DBActivityRoles')(sequelize, Sequelize.DataTypes);
 const DBMOTDPoints = require('./models/DBMOTDPoints')(sequelize, Sequelize.DataTypes);
 const DBElitiriCupSignUp = require('./models/DBElitiriCupSignUp')(sequelize, Sequelize.DataTypes);
+const DBElitiriCupStaff = require('./models/DBElitiriCupStaff')(sequelize, Sequelize.DataTypes);
 const DBElitiriCupSubmissions = require('./models/DBElitiriCupSubmissions')(sequelize, Sequelize.DataTypes);
 const DBStarBoardMessages = require('./models/DBStarBoardMessages')(sequelize, Sequelize.DataTypes);
 const DBTickets = require('./models/DBTickets')(sequelize, Sequelize.DataTypes);
 const DBOsuMultiScores = require('./models/DBOsuMultiScores')(sequelize, Sequelize.DataTypes);
 const DBOsuBeatmaps = require('./models/DBOsuBeatmaps')(sequelize, Sequelize.DataTypes);
 
-module.exports = { DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBAutoRoles, DBTemporaryVoices, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps };
+module.exports = { DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBAutoRoles, DBTemporaryVoices, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupStaff, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps };
