@@ -1,4 +1,4 @@
-const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
+const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBElitiriCupStaff } = require('../dbObjects.js');
 const { pause, logDatabaseQueries } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { currentElitiriCup, currentElitiriCupHostSheetId } = require('../config.json');
@@ -49,7 +49,7 @@ module.exports = {
 	name: 'elitiri-admin',
 	//aliases: ['osu-map', 'beatmap-info'],
 	description: 'Admin control for the Elitiri Cup',
-	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <osuPlayerID> | slashCommands',
+	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <osuPlayerID> | <slashCommands> | <staff> <osuUserId> <host/streamer/commentator/referee> [tournament]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -61,7 +61,11 @@ module.exports = {
 	tags: 'debug',
 	prefixCommand: true,
 	async execute(msg, args) {
-		if (msg.author.id !== '138273136285057025') {
+		const host = await DBElitiriCupStaff.findOne({
+			where: { discordId: msg.author.id, host: true, tournamentName: currentElitiriCup },
+		});
+
+		if (msg.author.id !== '138273136285057025' || !host) {
 			return;
 		}
 
@@ -330,6 +334,32 @@ module.exports = {
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: { osuUserId: args[1], tournamentName: currentElitiriCup }
 			});
+
+			if (args[2]) {
+				elitiriSignUp.rankAchieved = args[2];
+			} else {
+				elitiriSignUp.rankAchieved = '';
+			}
+
+			elitiriSignUp.save();
+
+			msg.reply(`Placement of \`${elitiriSignUp.osuName}\` set to \`${elitiriSignUp.rankAchieved}\``);
+		} else if (args[0] === 'staff') {
+			if (args[1]) {
+				let tournamentName = currentElitiriCup;
+				if (msg.author.id !== '138273136285057025' && args[3] && args[4] && args[5] && args[6]) {
+					tournamentName = `${args[3]} ${args[4]} ${args[5]} ${args[6]}`;
+				}
+
+				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupStaff');
+				const staffMember = await DBElitiriCupStaff.findOne({
+					where: { osuUserId: args[1], tournamentName: tournamentName }
+				});
+
+			} else {
+				msg.reply('Please specify a staff member to add or remove. (osu! user id)');
+			}
+
 
 			if (args[2]) {
 				elitiriSignUp.rankAchieved = args[2];
