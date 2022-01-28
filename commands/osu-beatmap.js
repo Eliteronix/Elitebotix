@@ -272,8 +272,8 @@ async function drawStats(input) {
 		const matches = ppRegex.exec(htmlCode);
 		ppOne = `${Math.round(matches[0].replace('"pp": [', '').replace('], "length"', ''))} pp`;
 	} catch (err) {
-		console.log('error fetching osu-beatmap pp', err);
-		console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=95&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+		// console.log('error fetching osu-beatmap pp', err);
+		// console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=95&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
 	}
 
 	ctx.font = 'bold 15px comfortaa, sans-serif';
@@ -308,8 +308,8 @@ async function drawStats(input) {
 		const matches = ppRegex.exec(htmlCode);
 		ppTwo = `${Math.round(matches[0].replace('"pp": [', '').replace('], "length"', ''))} pp`;
 	} catch (err) {
-		console.log('error fetching osu-beatmap pp', err);
-		console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=99&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+		// console.log('error fetching osu-beatmap pp', err);
+		// console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=99&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
 	}
 
 	ctx.font = 'bold 15px comfortaa, sans-serif';
@@ -351,8 +351,8 @@ async function drawStats(input) {
 		const matches = ppRegex.exec(htmlCode);
 		ppThree = `${Math.round(matches[0].replace('"pp": [', '').replace('], "length"', ''))} pp`;
 	} catch (err) {
-		console.log('error fetching osu-beatmap pp', err);
-		console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=100&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
+		// console.log('error fetching osu-beatmap pp', err);
+		// console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=100&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
 	}
 
 	ctx.font = 'bold 15px comfortaa, sans-serif';

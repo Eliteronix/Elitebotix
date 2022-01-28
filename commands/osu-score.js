@@ -666,8 +666,8 @@ async function drawAccInfo(input, mode, mapRank) {
 				ctx.font = '16px comfortaa, sans-serif';
 			}
 		} catch (err) {
-			console.log('error fetching osu-score pp', err);
-			console.log(`https://osu.gatari.pw/api/v1/pp?b=${score.beatmapId}&a=${fcScoreAccuracy}&x=${score.counts.miss}&c=${score.maxCombo}&m=${score.raw_mods}`);
+			// console.log('error fetching osu-score pp', err);
+			// console.log(`https://osu.gatari.pw/api/v1/pp?b=${score.beatmapId}&a=${fcScoreAccuracy}&x=${score.counts.miss}&c=${score.maxCombo}&m=${score.raw_mods}`);
 		}
 	}
 
