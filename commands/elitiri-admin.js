@@ -1,4 +1,4 @@
-const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBElitiriCupStaff, DBProcessQueue } = require('../dbObjects.js');
+const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBElitiriCupStaff, DBProcessQueue, DBDiscordUsers } = require('../dbObjects.js');
 const { pause, logDatabaseQueries } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { currentElitiriCup, currentElitiriCupHostSheetId } = require('../config.json');
@@ -61,11 +61,16 @@ module.exports = {
 	tags: 'debug',
 	prefixCommand: true,
 	async execute(msg, args) {
-		const host = await DBElitiriCupStaff.findOne({
-			where: { discordId: msg.author.id, host: true, tournamentName: currentElitiriCup },
+		//Get the user from the DBDiscordUsers
+		const discordUser = await DBDiscordUsers.findOne({
+			where: { userId: msg.author.id }
 		});
 
-		if (msg.author.id !== '138273136285057025' || !host) {
+		const host = await DBElitiriCupStaff.findOne({
+			where: { osuUserId: discordUser.osuUserId, host: true, tournamentName: currentElitiriCup },
+		});
+
+		if (msg.author.id !== '138273136285057025' && !host) {
 			return;
 		}
 

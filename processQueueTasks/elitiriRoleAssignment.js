@@ -1,4 +1,4 @@
-const { DBElitiriCupSignUp, DBDiscordUsers } = require('../dbObjects');
+const { DBElitiriCupSignUp, DBDiscordUsers, DBElitiriCupStaff } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
 const { currentElitiriCup } = require('../config.json');
 
@@ -137,7 +137,7 @@ module.exports = {
 
 					if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
 						//Find out if they are registered or not
-						const staffSignups = await DBElitiriCupSignUp.findAll({
+						const staffSignups = await DBElitiriCupStaff.findAll({
 							where: { osuUserId: discordUser.osuUserId }
 						});
 
@@ -156,9 +156,9 @@ module.exports = {
 						let currentIterationRecordExists = false;
 
 						for (let j = 0; j < staffSignups.length; j++) {
-							if (staffSignups.tournamentName === currentElitiriCup) {
+							if (staffSignups[j].tournamentName === currentElitiriCup) {
 								currentIterationRecordExists = true;
-								if (staffSignups.host) {
+								if (staffSignups[j].host) {
 									//Assign host role if not there yet
 									try {
 										if (!members[i].roles.cache.has(hostRole.id)) {
@@ -180,7 +180,7 @@ module.exports = {
 									}
 								}
 
-								if (staffSignups.streamer) {
+								if (staffSignups[j].streamer) {
 									//Assign streamer role if not there yet
 									try {
 										if (!members[i].roles.cache.has(streamerRole.id)) {
@@ -202,7 +202,7 @@ module.exports = {
 									}
 								}
 
-								if (staffSignups.commentator) {
+								if (staffSignups[j].commentator) {
 									//Assign commentator role if not there yet
 									try {
 										if (!members[i].roles.cache.has(commentatorRole.id)) {
@@ -224,7 +224,7 @@ module.exports = {
 									}
 								}
 
-								if (staffSignups.referee) {
+								if (staffSignups[j].referee) {
 									//Assign referee role if not there yet
 									try {
 										if (!members[i].roles.cache.has(refereeRole.id)) {
@@ -246,7 +246,7 @@ module.exports = {
 									}
 								}
 
-								if (staffSignups.replayer) {
+								if (staffSignups[j].replayer) {
 									//Assign replayer role if not there yet
 									try {
 										if (!members[i].roles.cache.has(replayerRole.id)) {
