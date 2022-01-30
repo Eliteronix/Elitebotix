@@ -58,6 +58,7 @@ module.exports = async function (msg, bancho) {
 			require('./models/DBActivityRoles')(sequelize, Sequelize.DataTypes);
 			require('./models/DBMOTDPoints')(sequelize, Sequelize.DataTypes);
 			require('./models/DBElitiriCupSignUp')(sequelize, Sequelize.DataTypes);
+			require('./models/DBElitiriCupStaff')(sequelize, Sequelize.DataTypes);
 			require('./models/DBElitiriCupSubmissions')(sequelize, Sequelize.DataTypes);
 			require('./models/DBStarBoardMessages')(sequelize, Sequelize.DataTypes);
 			require('./models/DBTickets')(sequelize, Sequelize.DataTypes);

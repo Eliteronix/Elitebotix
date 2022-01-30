@@ -1,4 +1,4 @@
-const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
+const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBElitiriCupStaff, DBProcessQueue } = require('../dbObjects.js');
 const { pause, logDatabaseQueries } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { currentElitiriCup, currentElitiriCupHostSheetId } = require('../config.json');
@@ -49,7 +49,7 @@ module.exports = {
 	name: 'elitiri-admin',
 	//aliases: ['osu-map', 'beatmap-info'],
 	description: 'Admin control for the Elitiri Cup',
-	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <osuPlayerID> | slashCommands',
+	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <osuPlayerID> | <slashCommands> | <staff> <osuUserId> <host/streamer/commentator/referee/replayer> [tournament]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -61,7 +61,11 @@ module.exports = {
 	tags: 'debug',
 	prefixCommand: true,
 	async execute(msg, args) {
-		if (msg.author.id !== '138273136285057025') {
+		const host = await DBElitiriCupStaff.findOne({
+			where: { discordId: msg.author.id, host: true, tournamentName: currentElitiriCup },
+		});
+
+		if (msg.author.id !== '138273136285057025' || !host) {
 			return;
 		}
 
@@ -340,6 +344,153 @@ module.exports = {
 			elitiriSignUp.save();
 
 			msg.reply(`Placement of \`${elitiriSignUp.osuName}\` set to \`${elitiriSignUp.rankAchieved}\``);
+		} else if (args[0] === 'staff') {
+			if (args[1]) {
+				let tournamentName = currentElitiriCup;
+				if (msg.author.id !== '138273136285057025' && args[3] && args[4] && args[5] && args[6]) {
+					tournamentName = `${args[3]} ${args[4]} ${args[5]} ${args[6]}`;
+				}
+
+				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupStaff');
+				const staffMember = await DBElitiriCupStaff.findOne({
+					where: { osuUserId: args[1], tournamentName: tournamentName }
+				});
+
+				if (args[2] === 'host') {
+					if (msg.author.id !== '138273136285057025') {
+						return msg.reply('Only Eliteronix can set hosts of the Elitiri Cup.');
+					}
+
+					if (staffMember) {
+						//If they are host already
+						if (staffMember.host) {
+							staffMember.host = false;
+							staffMember.save();
+							createElitiriRoleAssignmentTask();
+							return msg.reply(`${args[1]} is no longer host.`);
+						}
+
+						//If they are not host already
+						staffMember.host = true;
+						staffMember.save();
+						createElitiriRoleAssignmentTask();
+						return msg.reply(`${args[1]} has been given the host role.`);
+					}
+
+					//If there is no record for them in the db
+					await DBElitiriCupStaff.create({
+						osuUserId: args[1],
+						tournamentName: tournamentName,
+						host: true
+					});
+					createElitiriRoleAssignmentTask();
+					return msg.reply(`${args[1]} has been given the host role.`);
+				} else if (args[2] === 'streamer') {
+					if (staffMember) {
+						//If they are streamer already
+						if (staffMember.streamer) {
+							staffMember.streamer = false;
+							staffMember.save();
+							createElitiriRoleAssignmentTask();
+							return msg.reply(`${args[1]} is no longer streamer.`);
+						}
+
+						//If they are not streamer already
+						staffMember.streamer = true;
+						staffMember.save();
+						createElitiriRoleAssignmentTask();
+						return msg.reply(`${args[1]} has been given the streamer role.`);
+					}
+
+					//If there is no record for them in the db
+					await DBElitiriCupStaff.create({
+						osuUserId: args[1],
+						tournamentName: tournamentName,
+						streamer: true
+					});
+					createElitiriRoleAssignmentTask();
+					return msg.reply(`${args[1]} has been given the streamer role.`);
+				} else if (args[2] === 'commentator') {
+					if (staffMember) {
+						//If they are commentator already
+						if (staffMember.commentator) {
+							staffMember.commentator = false;
+							staffMember.save();
+							createElitiriRoleAssignmentTask();
+							return msg.reply(`${args[1]} is no longer commentator.`);
+						}
+
+						//If they are not commentator already
+						staffMember.commentator = true;
+						staffMember.save();
+						createElitiriRoleAssignmentTask();
+						return msg.reply(`${args[1]} has been given the commentator role.`);
+					}
+
+					//If there is no record for them in the db
+					await DBElitiriCupStaff.create({
+						osuUserId: args[1],
+						tournamentName: tournamentName,
+						commentator: true
+					});
+					createElitiriRoleAssignmentTask();
+					return msg.reply(`${args[1]} has been given the commentator role.`);
+				} else if (args[2] === 'referee') {
+					if (staffMember) {
+						//If they are referee already
+						if (staffMember.referee) {
+							staffMember.referee = false;
+							staffMember.save();
+							createElitiriRoleAssignmentTask();
+							return msg.reply(`${args[1]} is no longer referee.`);
+						}
+
+						//If they are not referee already
+						staffMember.referee = true;
+						staffMember.save();
+						createElitiriRoleAssignmentTask();
+						return msg.reply(`${args[1]} has been given the referee role.`);
+					}
+
+					//If there is no record for them in the db
+					await DBElitiriCupStaff.create({
+						osuUserId: args[1],
+						tournamentName: tournamentName,
+						referee: true
+					});
+					createElitiriRoleAssignmentTask();
+					return msg.reply(`${args[1]} has been given the referee role.`);
+				} else if (args[2] === 'replayer') {
+					if (staffMember) {
+						//If they are replayer already
+						if (staffMember.replayer) {
+							staffMember.replayer = false;
+							staffMember.save();
+							createElitiriRoleAssignmentTask();
+							return msg.reply(`${args[1]} is no longer replayer.`);
+						}
+
+						//If they are not replayer already
+						staffMember.replayer = true;
+						staffMember.save();
+						createElitiriRoleAssignmentTask();
+						return msg.reply(`${args[1]} has been given the replayer role.`);
+					}
+
+					//If there is no record for them in the db
+					await DBElitiriCupStaff.create({
+						osuUserId: args[1],
+						tournamentName: tournamentName,
+						replayer: true
+					});
+					createElitiriRoleAssignmentTask();
+					return msg.reply(`${args[1]} has been given the replayer role.`);
+				} else {
+					return msg.reply('Invalid role.');
+				}
+			} else {
+				msg.reply('Please specify a staff member to add or remove. (osu! user id)');
+			}
 		} else if (args[0] === 'slashCommands') {
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
@@ -1226,4 +1377,16 @@ function quicksort(list, start = 0, end = undefined) {
 		quicksort(list, p + 1, end);
 	}
 	return list;
+}
+
+async function createElitiriRoleAssignmentTask() {
+	logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 2');
+	const task = await DBProcessQueue.findOne({
+		where: { task: 'elitiriRoleAssignment' }
+	});
+	if (!task) {
+		DBProcessQueue.create({
+			guildId: 'None', task: 'elitiriRoleAssignment', priority: 3
+		});
+	}
 }
