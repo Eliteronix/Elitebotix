@@ -5,20 +5,7 @@ module.exports = (sequelize, DataTypes) => {
 			primaryKey: true,
 			autoIncrement: true,
 		},
-		userId: {
-			type: DataTypes.STRING,
-			allowNullValue: false,
-		},
-		discordTag: {
-			type: DataTypes.STRING
-		},
 		osuUserId: {
-			type: DataTypes.STRING,
-		},
-		osuName: {
-			type: DataTypes.STRING,
-		},
-		bracketName: {
 			type: DataTypes.STRING,
 		},
 		tournamentName: {
@@ -34,6 +21,9 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 		},
 		referee: {
+			type: DataTypes.BOOLEAN,
+		},
+		replayer: {
 			type: DataTypes.BOOLEAN,
 		},
 		paranoid: true,

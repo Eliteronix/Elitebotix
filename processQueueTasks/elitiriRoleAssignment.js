@@ -1,5 +1,6 @@
 const { DBElitiriCupSignUp } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
+const { currentElitiriCup } = require('../config.json');
 
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
@@ -15,7 +16,6 @@ module.exports = {
 		//Fetch all members
 		await guild.members.fetch()
 			.then(async (guildMembers) => {
-
 				//Filter members and push into array
 				const members = [];
 				guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
@@ -39,12 +39,30 @@ module.exports = {
 				//Fetch standard Elitiri role for every registered user
 				const ElitiriRole = await guild.roles.cache.get('798862219335958569');
 
+				//Fetch alumni role for every staff member
+				const alumniRole = await guild.roles.cache.get('937322283633111070');
+
+				//Fetch host role for every staff member
+				const hostRole = await guild.roles.cache.get('851356668415311963');
+
+				//Fetch streamer role for every staff member
+				const streamerRole = await guild.roles.cache.get('812832570777534538');
+
+				//Fetch commentator role for every staff member
+				const commentatorRole = await guild.roles.cache.get('812832829196730389');
+
+				//Fetch referee role for every staff member
+				const refereeRole = await guild.roles.cache.get('798865525483765781');
+
+				//Fetch referee role for every staff member
+				const replayerRole = await guild.roles.cache.get('866776520928264252');
+
 				//Iterate through all members
 				for (let i = 0; i < members.length; i++) {
 					logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupSignUp');
 					//Find out if they are registered or not
 					const registeredPlayer = await DBElitiriCupSignUp.findOne({
-						where: { userId: members[i].user.id }
+						where: { userId: members[i].user.id, tournamentName: currentElitiriCup }
 					});
 
 					//check for registration
@@ -108,6 +126,175 @@ module.exports = {
 							} catch (e) {
 								console.log(e);
 							}
+						}
+					}
+
+					logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupSignUp');
+					//Find out if they are registered or not
+					const staffSignups = await DBElitiriCupSignUp.findAll({
+						where: { userId: members[i].user.id }
+					});
+
+					if (staffSignups.length > 0) {
+						//Assign Alumni role if not there yet
+						try {
+							if (!members[i].roles.cache.has(alumniRole.id)) {
+								//Assign role if not there yet
+								await members[i].roles.add(alumniRole);
+							}
+						} catch (e) {
+							console.log(e);
+						}
+					}
+
+					let currentIterationRecordExists = false;
+
+					for (let j = 0; j < staffSignups.length; j++) {
+						if (staffSignups.tournamentName === currentElitiriCup) {
+							currentIterationRecordExists = true;
+							if (staffSignups.host) {
+								//Assign host role if not there yet
+								try {
+									if (!members[i].roles.cache.has(hostRole.id)) {
+										//Assign role if not there yet
+										await members[i].roles.add(hostRole);
+									}
+								} catch (e) {
+									console.log(e);
+								}
+							} else {
+								//Remove host role if not removed yet
+								try {
+									if (members[i].roles.cache.has(hostRole.id)) {
+										//Remove role if not removed yet
+										await members[i].roles.remove(hostRole);
+									}
+								} catch (e) {
+									console.log(e);
+								}
+							}
+
+							if (staffSignups.streamer) {
+								//Assign streamer role if not there yet
+								try {
+									if (!members[i].roles.cache.has(streamerRole.id)) {
+										//Assign role if not there yet
+										await members[i].roles.add(streamerRole);
+									}
+								} catch (e) {
+									console.log(e);
+								}
+							} else {
+								//Remove streamer role if not removed yet
+								try {
+									if (members[i].roles.cache.has(streamerRole.id)) {
+										//Remove role if not removed yet
+										await members[i].roles.remove(streamerRole);
+									}
+								} catch (e) {
+									console.log(e);
+								}
+							}
+
+							if (staffSignups.commentator) {
+								//Assign commentator role if not there yet
+								try {
+									if (!members[i].roles.cache.has(commentatorRole.id)) {
+										//Assign role if not there yet
+										await members[i].roles.add(commentatorRole);
+									}
+								} catch (e) {
+									console.log(e);
+								}
+							} else {
+								//Remove commentator role if not removed yet
+								try {
+									if (members[i].roles.cache.has(commentatorRole.id)) {
+										//Remove role if not removed yet
+										await members[i].roles.remove(commentatorRole);
+									}
+								} catch (e) {
+									console.log(e);
+								}
+							}
+
+							if (staffSignups.referee) {
+								//Assign referee role if not there yet
+								try {
+									if (!members[i].roles.cache.has(refereeRole.id)) {
+										//Assign role if not there yet
+										await members[i].roles.add(refereeRole);
+									}
+								} catch (e) {
+									console.log(e);
+								}
+							} else {
+								//Remove referee role if not removed yet
+								try {
+									if (members[i].roles.cache.has(refereeRole.id)) {
+										//Remove role if not removed yet
+										await members[i].roles.remove(refereeRole);
+									}
+								} catch (e) {
+									console.log(e);
+								}
+							}
+
+							if (staffSignups.replayer) {
+								//Assign replayer role if not there yet
+								try {
+									if (!members[i].roles.cache.has(replayerRole.id)) {
+										//Assign role if not there yet
+										await members[i].roles.add(replayerRole);
+									}
+								} catch (e) {
+									console.log(e);
+								}
+							} else {
+								//Remove replayer role if not removed yet
+								try {
+									if (members[i].roles.cache.has(replayerRole.id)) {
+										//Remove role if not removed yet
+										await members[i].roles.remove(replayerRole);
+									}
+								} catch (e) {
+									console.log(e);
+								}
+							}
+						}
+					}
+
+					if (!currentIterationRecordExists) {
+						//Remove all roles if no record exists
+						try {
+							await members[i].roles.remove(hostRole);
+						} catch (e) {
+							console.log(e);
+						}
+
+						try {
+							await members[i].roles.remove(streamerRole);
+						} catch (e) {
+							console.log(e);
+						}
+
+						try {
+							await members[i].roles.remove(commentatorRole);
+						}
+						catch (e) {
+							console.log(e);
+						}
+
+						try {
+							await members[i].roles.remove(refereeRole);
+						} catch (e) {
+							console.log(e);
+						}
+
+						try {
+							await members[i].roles.remove(replayerRole);
+						} catch (e) {
+							console.log(e);
 						}
 					}
 				}
