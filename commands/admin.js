@@ -4432,6 +4432,9 @@ module.exports = {
 			if (Date.parse(json.events[json.events.length - 1].timestamp) - Date.parse(json.match.start_time) > 86400000) {
 				console.log('Longer than 24 hours');
 			}
+		} else if (args[0] === 'api') {
+			// eslint-disable-next-line no-undef
+			console.log(process.env.OSUTOKENV1.split('-'));
 		} else {
 			msg.reply('Invalid command');
 		}
