@@ -7,14 +7,10 @@ module.exports = {
 	async execute(client, bancho, processQueueEntry) {
 		let args = processQueueEntry.additions.split(';');
 
-		// eslint-disable-next-line no-undef
-		let APItoken = process.env.OSUTOKENV1;
+		let matchID = args[0];
 
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'QA') {
-			// eslint-disable-next-line no-undef
-			APItoken = process.env.OSUTOKENV1BACKUP;
-		}
+		let APItoken = process.env.OSUTOKENSV1.split('-')[parseInt(matchID) % process.env.OSUTOKENSV1.split('-').length];
 
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(APItoken, {
@@ -23,8 +19,6 @@ module.exports = {
 			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
-
-		let matchID = args[0];
 
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Live' && matchID === '90305374') {
@@ -54,6 +48,7 @@ module.exports = {
 				let sixHoursAgo = new Date();
 				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
 				if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
+					let date = new Date();
 					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 						saveOsuMultiScores(match);
 						let now = new Date();
@@ -67,6 +62,7 @@ module.exports = {
 						} else {
 							channel = await client.channels.fetch('892873577479692358');
 						}
+						date.setUTCSeconds(date.getUTCSeconds() + 10);
 						channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m ${match.name} done`);
 					}
 					//Go next if match found and ended / too long going already
@@ -76,7 +72,6 @@ module.exports = {
 					} else {
 						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
 					}
-					let date = new Date();
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
 					return processQueueEntry.save();
