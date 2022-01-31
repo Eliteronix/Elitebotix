@@ -272,7 +272,7 @@ module.exports = {
 			if (elitiriSignUp.osuName !== discordUser.osuName && !elitiriSignUp.rankAchieved && process.env.SERVER === 'Live') {
 				const guild = await client.guilds.fetch('727407178499096597');
 				const channel = await guild.channels.fetch('830534251757174824');
-				channel.send(`<@851356668415311963> The player \`${elitiriSignUp.osuName}\` from \`${elitiriSignUp.bracketName}\` changed their osu! name to \`${discordUser.osuName}\`.`);
+				channel.send(`<@&851356668415311963> The player \`${elitiriSignUp.osuName}\` from \`${elitiriSignUp.bracketName}\` changed their osu! name to \`${discordUser.osuName}\`.`);
 			}
 
 			elitiriSignUp.osuName = discordUser.osuName;
