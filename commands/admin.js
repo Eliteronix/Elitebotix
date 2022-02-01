@@ -1,4 +1,4 @@
-const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers } = require('../dbObjects');
 const { saveOsuMultiScores, pause } = require('../utils');
 const osu = require('node-osu');
 const { developers } = require('../config.json');
@@ -4435,6 +4435,19 @@ module.exports = {
 		} else if (args[0] === 'api') {
 			// eslint-disable-next-line no-undef
 			console.log(process.env.OSUTOKENV1.split('-'));
+		} else if (args[0] === 'removeOsuUserConnection') {
+			let DBDiscordUser = await DBDiscordUsers.findOne({
+				where: { osuUserId: args[1], osuVerified: true }
+			});
+
+			if (DBDiscordUser) {
+				DBDiscordUser.osuUserId = false;
+				DBDiscordUser.osuVerified = false;
+				DBDiscordUser.save();
+				console.log('Removed osuUserId and verification for:', args[1]);
+			} else {
+				msg.reply('User not found');
+			}
 		} else {
 			msg.reply('Invalid command');
 		}
