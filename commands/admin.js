@@ -4441,8 +4441,19 @@ module.exports = {
 			});
 
 			if (DBDiscordUser) {
-				DBDiscordUser.osuUserId = false;
+				DBDiscordUser.osuUserId = null;
+				DBDiscordUser.osuVerificationCode = null;
 				DBDiscordUser.osuVerified = false;
+				DBDiscordUser.osuName = null;
+				DBDiscordUser.osuBadges = 0;
+				DBDiscordUser.osuPP = null;
+				DBDiscordUser.osuRank = null;
+				DBDiscordUser.taikoPP = null;
+				DBDiscordUser.taikoRank = null;
+				DBDiscordUser.catchPP = null;
+				DBDiscordUser.catchRank = null;
+				DBDiscordUser.maniaPP = null;
+				DBDiscordUser.maniaRank = null;
 				DBDiscordUser.save();
 				console.log('Removed osuUserId and verification for:', args[1]);
 			} else {
