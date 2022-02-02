@@ -42,7 +42,7 @@ module.exports = {
 				await pause(60000);
 
 				try {
-					messagesArray[messagesArray.length - 1].delete();
+					await messagesArray[messagesArray.length - 1].delete();
 				} catch (err) {
 					//Nothing
 					//Probably no permissions
