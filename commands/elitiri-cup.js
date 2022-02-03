@@ -162,7 +162,10 @@ module.exports = {
 			endOfRegs.setUTCMonth(currentElitiriCupEndOfRegs.zeroIndexMonth); //Zero Indexed
 			endOfRegs.setUTCFullYear(currentElitiriCupEndOfRegs.year);
 			if (now > endOfRegs) {
-				return msg.reply('The registration period has ended and signups can\'t be changed anymore.');
+				if (msg.id) {
+					return msg.reply('The registration period has ended and signups can\'t be changed anymore.');
+				}
+				return interaction.reply({ content: 'The registration period has ended and signups can\'t be changed anymore.', ephemeral: true });
 			}
 
 			const guildPrefix = await getGuildPrefix(msg);

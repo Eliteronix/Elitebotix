@@ -1,4 +1,4 @@
-const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp } = require('../dbObjects');
 const { saveOsuMultiScores, pause } = require('../utils');
 const osu = require('node-osu');
 const { developers } = require('../config.json');
@@ -4458,6 +4458,17 @@ module.exports = {
 				console.log('Removed osuUserId and verification for:', args[1]);
 			} else {
 				msg.reply('User not found');
+			}
+		} else if (args[0] === 'deleteElitiriSignup') {
+			let DBElitiriSignup = await DBElitiriCupSignUp.findOne({
+				where: { id: args[1] }
+			});
+
+			if (DBElitiriSignup) {
+				DBElitiriCupSignUp.destroy();
+				console.log('Deleted Elitiri Signup:', args[1]);
+			} else {
+				msg.reply('Signup not found');
 			}
 		} else {
 			msg.reply('Invalid command');
