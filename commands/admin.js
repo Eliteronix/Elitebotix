@@ -1,7 +1,7 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp } = require('../dbObjects');
-const { saveOsuMultiScores, pause } = require('../utils');
+const { saveOsuMultiScores, pause, logDatabaseQueries } = require('../utils');
 const osu = require('node-osu');
-const { developers } = require('../config.json');
+const { developers, currentElitiriCup } = require('../config.json');
 const fetch = require('node-fetch');
 
 module.exports = {
@@ -4469,6 +4469,19 @@ module.exports = {
 				console.log('Deleted Elitiri Signup:', args[1]);
 			} else {
 				msg.reply('Signup not found');
+			}
+		} else if (args[0] === 'updateElitiriRanks') {
+			logDatabaseQueries(4, 'commands/admin.js updateElitiriRanks DBElitiriCupSignUp');
+			let DBElitiriSignups = await DBElitiriCupSignUp.findOne({
+				where: { tournamentName: currentElitiriCup }
+			});
+
+			for (let i = 0; i < DBElitiriSignups.length; i++) {
+				logDatabaseQueries(4, 'commands/admin.js updateElitiriRanks DBProcessQueue');
+				const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: DBElitiriSignups[i].userId } });
+				if (!existingTask) {
+					DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: DBElitiriSignups[i].userId });
+				}
 			}
 		} else {
 			msg.reply('Invalid command');
