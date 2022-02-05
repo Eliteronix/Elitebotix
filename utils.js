@@ -481,7 +481,7 @@ module.exports = {
 	},
 	refreshOsuRank: async function () {
 		let date = new Date();
-		date.setUTCHours(date.getUTCHours() - 12);
+		date.setUTCHours(date.getUTCHours() - 24);
 
 		logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBDiscordUsers');
 		const discordUsers = await DBDiscordUsers.findAll();
