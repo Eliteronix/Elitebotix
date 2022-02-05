@@ -4465,7 +4465,7 @@ module.exports = {
 			});
 
 			if (DBElitiriSignup) {
-				DBElitiriCupSignUp.destroy();
+				DBElitiriSignup.destroy();
 				console.log('Deleted Elitiri Signup:', args[1]);
 			} else {
 				msg.reply('Signup not found');
