@@ -4472,7 +4472,7 @@ module.exports = {
 			}
 		} else if (args[0] === 'updateElitiriRanks') {
 			logDatabaseQueries(4, 'commands/admin.js updateElitiriRanks DBElitiriCupSignUp');
-			let DBElitiriSignups = await DBElitiriCupSignUp.findOne({
+			let DBElitiriSignups = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: currentElitiriCup }
 			});
 
