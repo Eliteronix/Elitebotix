@@ -607,29 +607,6 @@ module.exports = {
 									'type': 3,
 									'required': true
 								},
-								{
-									'name': 'bracket',
-									'description': 'The bracket the map should be checked for',
-									'type': 3,
-									'choices': [
-										{
-											'name': 'Top Bracket',
-											'value': 'top'
-										},
-										{
-											'name': 'Middle Bracket',
-											'value': 'middle'
-										},
-										{
-											'name': 'Lower Bracket',
-											'value': 'lower'
-										},
-										{
-											'name': 'Beginner Bracket',
-											'value': 'beginner'
-										}
-									]
-								},
 							]
 						},
 						{

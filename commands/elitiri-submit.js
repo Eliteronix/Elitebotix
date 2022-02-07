@@ -26,8 +26,6 @@ module.exports = {
 
 			await interaction.deferReply({ ephemeral: true });
 
-			args = [interaction.options._subcommand];
-
 			let modpool = null;
 			let id = null;
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
@@ -37,8 +35,12 @@ module.exports = {
 					id = interaction.options._hoistedOptions[i].value;
 				}
 			}
-			args.push(modpool);
-			args.push(id);
+
+			if (interaction.options._subcommand === 'list') {
+				args = ['list'];
+			} else {
+				args = [modpool, id];
+			}
 		}
 		logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSignUp');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({

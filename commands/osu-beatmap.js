@@ -62,6 +62,9 @@ module.exports = {
 				mods = args[i].substring(2);
 				args.splice(i, 1);
 				i--;
+			} else if (args[i].startsWith('--FM')) {
+				args.splice(i, 1);
+				i--;
 			}
 		}
 
@@ -72,7 +75,11 @@ module.exports = {
 			if (dbBeatmap) {
 				getBeatmap(msg, interaction, dbBeatmap);
 			} else {
-				await msg.channel.send({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
+				if (msg.id) {
+					await msg.reply({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
+				} else {
+					await interaction.followUp({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
+				}
 			}
 		});
 	},
