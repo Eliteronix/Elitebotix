@@ -173,16 +173,16 @@ module.exports = {
 				}
 
 				//Top:
-				const topLowerDiff = 5.5;
-				const topUpperDiff = 7;
+				const topLowerDiff = 5.52;
+				const topUpperDiff = 7.18;
 				//Middle:
-				const middleLowerDiff = 5.07;
-				const middleUpperDiff = 6.37;
+				const middleLowerDiff = 5.15;
+				const middleUpperDiff = 6.48;
 				//Lower:
-				const lowerLowerDiff = 4.49;
-				const lowerUpperDiff = 5.97;
+				const lowerLowerDiff = 4.57;
+				const lowerUpperDiff = 5.87;
 				//Beginner:
-				const beginnerLowerDiff = 3.64;
+				const beginnerLowerDiff = 3.91;
 				const beginnerUpperDiff = 5.54;
 
 				if (args[0].toLowerCase() === 'hr') {

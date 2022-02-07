@@ -4483,6 +4483,20 @@ module.exports = {
 					DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: DBElitiriSignups[i].userId });
 				}
 			}
+		} else if (args[0] === 'updateElitiriPlayer') {
+			logDatabaseQueries(4, 'commands/admin.js updateElitiriRanks DBElitiriCupSignUp');
+			let DBElitiriSignup = await DBElitiriCupSignUp.findOne({
+				where: { tournamentName: currentElitiriCup, osuUserId: args[1] }
+			});
+
+			logDatabaseQueries(4, 'commands/admin.js updateElitiriRanks DBProcessQueue');
+			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: DBElitiriSignup.userId } });
+			if (!existingTask) {
+				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: DBElitiriSignup.userId });
+			}
+			// DBElitiriSignup.osuRank = args[2];
+			// DBElitiriSignup.bracketName = args[3] + ' ' + args[4];
+			// DBElitiriSignup.save();
 		} else {
 			msg.reply('Invalid command');
 		}
