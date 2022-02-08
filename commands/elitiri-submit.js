@@ -142,7 +142,7 @@ module.exports = {
 					const editEmbed = new Discord.MessageEmbed()
 						.setTitle('The embed was automatically deleted to avoid leaking maps.')
 						.setDescription(`You can use \`${guildPrefix}${this.name} list\` in my DMs to send the embed without a timer.`);
-					sentMessage.edit({ embed: editEmbed });
+					sentMessage.edit({ embeds: [editEmbed] });
 				}
 
 				return;
