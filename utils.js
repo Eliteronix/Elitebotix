@@ -465,6 +465,10 @@ module.exports = {
 			}
 			try {
 				if (nextTask[0]) {
+					if (nextTask[0].task === 'remind') {
+						console.log('Reminder to be executed:', now, nextTask[0].date);
+					}
+
 					const task = require(`./processQueueTasks/${nextTask[0].task}.js`);
 
 					nextTask[0].beingExecuted = true;
