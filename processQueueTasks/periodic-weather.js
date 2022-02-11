@@ -1,4 +1,3 @@
-const { DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix, pause } = require('../utils');
 
 module.exports = {
@@ -60,8 +59,9 @@ module.exports = {
 					date.setUTCDate(date.getUTCDate() + 1);
 				}
 
-				processQueueEntry.destroy();
-				await DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${args[0]};${args[1]};${args[2]};${args[3]}`, date: date });
+				processQueueEntry.date = date;
+				processQueueEntry.beingExecuted = false;
+				await processQueueEntry.save();
 			});
 		} else {
 			processQueueEntry.destroy();
