@@ -1174,6 +1174,19 @@ module.exports = {
 					description: 'Lets you schedule matches which are being reffed by the bot',
 					options: [
 						{
+							'name': 'duel',
+							'description': 'Lets you instantly create a Bo7 match against an opponent',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'opponent',
+									'description': 'The username, id or link of the opponent',
+									'type': 3,
+									'required': true
+								},
+							]
+						},
+						{
 							'name': 'soloqualifiers',
 							'description': 'Lets you schedule a match which is being reffed by the bot',
 							'type': 1, // 1 is type SUB_COMMAND
