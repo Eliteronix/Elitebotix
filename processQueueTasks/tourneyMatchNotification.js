@@ -33,15 +33,14 @@ module.exports = {
 			inviteTime.setUTCSeconds(processQueueEntry.date.getUTCSeconds());
 			inviteTime.setUTCMinutes(processQueueEntry.date.getUTCMinutes() + 5);
 			let now = new Date();
-			let timeUntilMatch = Math.round((matchTime - now) / 1000 / 60);
-			if (timeUntilMatch < 1) {
-				timeUntilMatch = 1;
+
+			if (inviteTime < now) {
+				inviteTime = Date.parse(now) / 1000;
+			} else {
+				inviteTime = Date.parse(inviteTime) / 1000;
 			}
-			let timeUntilInvites = Math.round((inviteTime - now) / 1000 / 60);
-			if (timeUntilInvites < 1) {
-				timeUntilInvites = 1;
-			}
-			channel.send(`Hi, I will be reffing your match <@${dbPlayers.join('>, <@')}>!\nYour match starts in ${timeUntilMatch} minutes. Invites will be sent in ${timeUntilInvites} minutes.\nIngame invites will be sent out by \`Eliteronix\` - be sure to allow DMs on discord as a backup.`);
+
+			channel.send(`Hi, I will be reffing your match <@${dbPlayers.join('>, <@')}>!\nYour match starts <t:${Date.parse(matchTime) / 1000}:R>. Invites will be sent <t:${inviteTime}:R>.\nIngame invites will be sent out by \`Eliteronix\` - be sure to allow DMs on discord as a backup.`);
 			DBProcessQueue.create({ guildId: processQueueEntry.guildId, task: 'tourneyMatchReferee', priority: 10, additions: processQueueEntry.additions, date: inviteTime });
 		} else {
 			let players = args[3].split(',');
