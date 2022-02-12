@@ -1,6 +1,6 @@
-const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
+const { DBDiscordUsers, DBProcessQueue, DBOsuMultiScores } = require('../dbObjects');
 const osu = require('node-osu');
-const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, getMatchesPlanned, logDatabaseQueries } = require('../utils');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, getMatchesPlanned, logDatabaseQueries, getScoreModpool, getOsuUserServerMode, populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -24,7 +24,42 @@ module.exports = {
 		}
 		if (interaction) {
 			await interaction.reply('Information is being processed');
-			if (interaction.options._subcommand === 'soloqualifiers') {
+			if (interaction.options._subcommand === 'duel') {
+				//Get the first users average Star rating from tournament scores
+				msg = await populateMsgFromInteraction(interaction);
+				const commandConfig = await getOsuUserServerMode(msg, []);
+				const commandUser = commandConfig[0];
+
+				if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
+					return await interaction.followUp('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect <username>`.');
+				}
+
+				let firstStarRating = await getUserDuelStarRating(commandUser.osuUserId);
+
+				console.log(`First user's star rating: ${firstStarRating}`);
+
+				let secondStarRating = null;
+				logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers');
+				const discordUser = await DBDiscordUsers.findOne({
+					where: { userId: interaction.options._hoistedOptions[0].value, osuVerified: true }
+				});
+
+				if (discordUser && discordUser.osuUserId) {
+					secondStarRating = await getUserDuelStarRating(discordUser.osuUserId);
+				} else {
+					return await interaction.followUp(`<@${interaction.options._hoistedOptions[0].value}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
+				}
+				console.log(`Second user's star rating: ${secondStarRating}`);
+
+				let averageStarRating = (firstStarRating + secondStarRating) / 2;
+
+				console.log(`Average star rating: ${averageStarRating}`);
+
+				let lowerBound = averageStarRating - 0.25;
+				let upperBound = averageStarRating + 0.25;
+				console.log(`Lower bound: ${lowerBound}`);
+				console.log(`Upper bound: ${upperBound}`);
+			} else if (interaction.options._subcommand === 'soloqualifiers') {
 				let date = new Date();
 				date.setUTCSeconds(0);
 				let dbMaps = [];
@@ -260,3 +295,34 @@ module.exports = {
 		}
 	},
 };
+
+async function getUserDuelStarRating(osuUserId) {
+	const userScores = await DBOsuMultiScores.findAll({
+		where: { osuUserId: osuUserId }
+	});
+
+	const userMapIds = [];
+	for (let i = 0; i < userScores.length; i++) {
+		if (parseInt(userScores[i].score) > 200000 && parseInt(userScores[i].score) < 750000 && getScoreModpool(userScores[i]) === 'NM' && userScores[i].scoringType === 'Score v2') {
+			if (userMapIds.indexOf(userScores[i].beatmapId === -1)) {
+				userMapIds.push(userScores[i].beatmapId);
+			}
+		}
+	}
+
+	let starRating = 0;
+	for (let i = 0; i < userMapIds.length; i++) {
+		const dbBeatmap = await getOsuBeatmap(userMapIds[i], 0);
+
+		if (dbBeatmap) {
+			starRating += parseFloat(dbBeatmap.starRating);
+		} else {
+			userMapIds.splice(i, 1);
+			i--;
+		}
+	}
+
+	starRating = starRating / userMapIds.length;
+
+	return starRating;
+}

@@ -1180,8 +1180,8 @@ module.exports = {
 							'options': [
 								{
 									'name': 'opponent',
-									'description': 'The username, id or link of the opponent',
-									'type': 3,
+									'description': 'The opponent you want to play against',
+									'type': 6, // 6 is type USER
 									'required': true
 								},
 							]
