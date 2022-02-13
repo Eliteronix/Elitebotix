@@ -1,6 +1,6 @@
-const { DBDiscordUsers, DBProcessQueue, DBOsuMultiScores } = require('../dbObjects');
+const { DBDiscordUsers, DBProcessQueue, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
 const osu = require('node-osu');
-const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, getMatchesPlanned, logDatabaseQueries, getScoreModpool, getOsuUserServerMode, populateMsgFromInteraction } = require('../utils');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, getMatchesPlanned, logDatabaseQueries, getScoreModpool, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -18,14 +18,15 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
-	async execute(msg, args, interaction) {
+	async execute(msg, args, interaction, additionalObjects) {
 		if (msg) {
 			return msg.reply('Please set up the game using the / command `/osu-referee`');
 		}
 		if (interaction) {
 			await interaction.reply('Information is being processed');
 			if (interaction.options._subcommand === 'duel') {
-				//Get the first users average Star rating from tournament scores
+				let TODONoDuplicatePlayerHandling;
+				//Get the star ratings for both users
 				msg = await populateMsgFromInteraction(interaction);
 				const commandConfig = await getOsuUserServerMode(msg, []);
 				const commandUser = commandConfig[0];
@@ -35,8 +36,6 @@ module.exports = {
 				}
 
 				let firstStarRating = await getUserDuelStarRating(commandUser.osuUserId);
-
-				console.log(`First user's star rating: ${firstStarRating}`);
 
 				let secondStarRating = null;
 				logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers');
@@ -49,16 +48,256 @@ module.exports = {
 				} else {
 					return await interaction.followUp(`<@${interaction.options._hoistedOptions[0].value}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
 				}
-				console.log(`Second user's star rating: ${secondStarRating}`);
 
 				let averageStarRating = (firstStarRating + secondStarRating) / 2;
-
-				console.log(`Average star rating: ${averageStarRating}`);
 
 				let lowerBound = averageStarRating - 0.25;
 				let upperBound = averageStarRating + 0.25;
 				console.log(`Lower bound: ${lowerBound}`);
 				console.log(`Upper bound: ${upperBound}`);
+
+				//Set up the lobby
+				let bancho = additionalObjects[1];
+				let channel = null;
+				for (let i = 0; i < 5; i++) {
+					try {
+						try {
+							await bancho.connect();
+						} catch (error) {
+							if (!error.message === 'Already connected/connecting') {
+								throw (error);
+							}
+						}
+						let changeThisInTheEnd;
+						channel = await bancho.createLobby(`ETX- ${commandUser.osuName} vs ${discordUser.osuName}`);
+						break;
+					} catch (error) {
+						if (i === 4) {
+							return await interaction.followUp('I am having issues creating the lobby and the match has been aborted.\nPlease try again later.');
+						} else {
+							await pause(10000);
+						}
+					}
+				}
+
+				const lobby = channel.lobby;
+
+				const password = Math.random().toString(36).substring(8);
+
+				await lobby.setPassword(password);
+				await channel.sendMessage('!mp map 975342 0');
+				await channel.sendMessage('!mp set 0 3 3');
+
+				let lobbyStatus = 'Joining phase';
+				let mapIndex = 0;
+				let dbMaps = [];
+				let dbMapIds = [];
+
+				// Used like so
+				let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
+				shuffle(modPools);
+				modPools.push('NM', 'FM');
+
+				//Get the amount of Maps in the DB
+				let amountOfMapsInDB = -1;
+				// eslint-disable-next-line no-undef
+				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+				});
+
+				while (amountOfMapsInDB === -1) {
+					const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
+
+					const dbBeatmap = await getOsuBeatmap(mostRecentBeatmap[0].id, 0);
+
+					if (dbBeatmap) {
+						amountOfMapsInDB = dbBeatmap.id;
+					}
+				}
+
+				//Get the map for each modpool
+				for (let i = 0; i < modPools.length; i++) {
+					let dbBeatmap = null;
+
+					while (dbBeatmap === null) {
+						const index = Math.floor(Math.random() * amountOfMapsInDB);
+
+						logDatabaseQueries(4, 'commands/osu-referee.js DBOsuBeatmaps');
+						dbBeatmap = await DBOsuBeatmaps.findOne({
+							where: { id: index }
+						});
+
+						let correctModPool = false;
+						if (dbBeatmap) {
+							const mapScores = await DBOsuMultiScores.findAll({
+								where: { beatmapId: dbBeatmap.beatmapId, tourneyMatch: true }
+							});
+
+							for (let j = 0; j < mapScores.length; j++) {
+								if (modPools[i] === getScoreModpool(mapScores[j]) && mapScores[j].matchName && !mapScores[j].matchName.startsWith('MOTD')) {
+									correctModPool = true;
+									break;
+								}
+							}
+						}
+
+						//No need to check for tourney map because its done by correctModPool boolean already
+						if (dbBeatmap && parseFloat(dbBeatmap.starRating) >= lowerBound && parseFloat(dbBeatmap.starRating) <= upperBound && correctModPool && !dbMapIds.includes(dbBeatmap.id)) {
+							if (i < 6 && dbBeatmap.drainLength < 270 || i === 6 && dbBeatmap.drainLength >= 270) {
+								dbMaps.push(dbBeatmap);
+							} else {
+								dbBeatmap = null;
+							}
+						} else {
+							dbBeatmap = null;
+						}
+					}
+				}
+
+				modPools[6] = 'FreeMod';
+				modPools[modPools.indexOf('FM')] = 'FreeMod';
+
+				await channel.sendMessage(`!mp invite #${commandUser.osuUserId}`);
+				let user = await additionalObjects[0].users.fetch(commandUser.userId);
+				await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+
+				await channel.sendMessage(`!mp invite #${discordUser.osuUserId}`);
+				user = await additionalObjects[0].users.fetch(discordUser.userId);
+				await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+
+				interaction.followUp(`<@${commandUser.userId}> <@${discordUser.userId}> your match has been created. You have been invited ingame by \`Eliteronix\` and also got a DM as a backup.`);
+				//Start the timer to close the lobby if not everyone joined by then
+				await channel.sendMessage('!mp timer 300');
+
+				let playerIds = [commandUser.osuUserId, discordUser.osuUserId];
+				let dbPlayers = [commandUser, discordUser];
+				let scores = [0, 0];
+
+				//Add discord messages and also ingame invites for the timers
+				channel.on('message', async (msg) => {
+					if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
+						//Banchobot countdown finished
+						if (lobbyStatus === 'Joining phase') {
+							//Not everyone joined and the lobby will be closed
+							await channel.sendMessage('The lobby will be closed as not everyone joined.');
+							pause(60000);
+							await channel.sendMessage('!mp close');
+							return await channel.leave();
+						} else if (lobbyStatus === 'Waiting for start') {
+							await channel.sendMessage('!mp start 10');
+
+							lobbyStatus === 'Map being played';
+						}
+					}
+				});
+
+				lobby.on('playerJoined', async (obj) => {
+					if (!playerIds.includes(obj.player.user.id.toString())) {
+						channel.sendMessage(`!mp kick #${obj.player.user.id}`);
+					} else if (lobbyStatus === 'Joining phase') {
+						let allPlayersJoined = true;
+						for (let i = 0; i < dbPlayers.length && allPlayersJoined; i++) {
+							if (!lobby.playersById[dbPlayers[i].osuUserId.toString()]) {
+								allPlayersJoined = false;
+							}
+						}
+						if (allPlayersJoined) {
+							lobbyStatus = 'Waiting for start';
+
+							while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
+								await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+								await pause(5000);
+							}
+
+							let noFail = 'NF';
+							if (modPools[mapIndex] === 'FreeMod') {
+								noFail = '';
+							}
+
+							await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+							await channel.sendMessage('Everyone please ready up!');
+							await channel.sendMessage('!mp timer 120');
+							mapIndex++;
+						}
+					}
+				});
+
+				lobby.on('allPlayersReady', async () => {
+					await lobby.updateSettings();
+					let playersInLobby = 0;
+					for (let i = 0; i < 16; i++) {
+						if (lobby.slots[i]) {
+							playersInLobby++;
+						}
+					}
+					if (lobbyStatus === 'Waiting for start' && playersInLobby === dbPlayers.length) {
+						await channel.sendMessage('!mp start 10');
+
+						lobbyStatus === 'Map being played';
+					}
+				});
+
+				lobby.on('matchFinished', async (results) => {
+					let TODOModHandling;
+
+					quicksort(results);
+
+					await channel.sendMessage(`${results[0].player.user.username}: ${results[0].score} | ${results[1].player.user.username}: ${results[1].score}`);
+
+					//Increase the score of the player at the top of the list
+					scores[playerIds.indexOf(results[0].player.user.id.toString())]++;
+					await channel.sendMessage(`Score: ${results[0].player.user.username} | ${scores[0]} - ${scores[1]} | ${results[1].player.user.username}`);
+
+					if (mapIndex < dbMaps.length && scores[0] < 4 && scores[1] < 4) {
+						lobbyStatus = 'Waiting for start';
+
+						while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
+							await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+							await pause(5000);
+						}
+
+						let noFail = 'NF';
+						if (modPools[mapIndex] === 'FreeMod') {
+							noFail = '';
+						}
+
+						await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+						await channel.sendMessage('Everyone please ready up!');
+						await channel.sendMessage('!mp timer 120');
+						mapIndex++;
+					} else {
+						lobbyStatus = 'Lobby finished';
+
+						if (scores[0] === 4) {
+							await channel.sendMessage(`Congratulations ${dbPlayers[0].osuName} for winning the match!`);
+						} else {
+							await channel.sendMessage(`Congratulations ${dbPlayers[1].osuName} for winning the match!`);
+						}
+						await channel.sendMessage('Thank you for playing! The lobby will automatically close in one minute.');
+						await pause(60000);
+						await channel.sendMessage('!mp close');
+						// eslint-disable-next-line no-undef
+						const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+							// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+							notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+							completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+							parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+						});
+
+						osuApi.getMatch({ mp: lobby.id })
+							.then(async (match) => {
+								saveOsuMultiScores(match);
+							})
+							.catch(() => {
+								//Nothing
+							});
+
+						return await channel.leave();
+					}
+				});
 			} else if (interaction.options._subcommand === 'soloqualifiers') {
 				let date = new Date();
 				date.setUTCSeconds(0);
@@ -297,6 +536,7 @@ module.exports = {
 };
 
 async function getUserDuelStarRating(osuUserId) {
+	//Try to get it from tournament data if available
 	const userScores = await DBOsuMultiScores.findAll({
 		where: { osuUserId: osuUserId }
 	});
@@ -322,7 +562,109 @@ async function getUserDuelStarRating(osuUserId) {
 		}
 	}
 
-	starRating = starRating / userMapIds.length;
+	if (userMapIds.length) {
+		return starRating / userMapIds.length;
+	}
 
-	return starRating;
+	//Get it from the top plays if no tournament data is available
+
+	// eslint-disable-next-line no-undef
+	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+	});
+
+	const topScores = await osuApi.getUserBest({ u: osuUserId, m: 0, limit: 100 })
+		.catch(err => {
+			if (err.message === 'Not found') {
+				throw new Error('No standard plays');
+			} else {
+				console.log(err);
+			}
+		});
+
+	let stars = [];
+	for (let i = 0; i < topScores.length; i++) {
+		//Add difficulty ratings
+		const dbBeatmap = await getOsuBeatmap(topScores[i].beatmapId, topScores[i].raw_mods);
+		if (dbBeatmap && dbBeatmap.starRating && parseFloat(dbBeatmap.starRating) > 0) {
+			stars.push(dbBeatmap.starRating);
+		}
+	}
+
+	let averageStars = 0;
+	for (let i = 0; i < stars.length; i++) {
+		averageStars += parseFloat(stars[i]);
+	}
+	return (averageStars / stars.length) - 0.25;
+}
+
+async function messageUserWithRetries(user, interaction, content) {
+	for (let i = 0; i < 3; i++) {
+		try {
+			await user.send(content)
+				.then(() => {
+					i = Infinity;
+				})
+				.catch(async (error) => {
+					throw (error);
+				});
+		} catch (error) {
+			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
+				if (i === 2) {
+					interaction.followUp(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+				} else {
+					await pause(2500);
+				}
+			} else {
+				i = Infinity;
+				console.log(error);
+			}
+		}
+	}
+}
+
+function shuffle(array) {
+	let currentIndex = array.length, randomIndex;
+
+	// While there remain elements to shuffle...
+	while (currentIndex != 0) {
+
+		// Pick a remaining element...
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex--;
+
+		// And swap it with the current element.
+		[array[currentIndex], array[randomIndex]] = [
+			array[randomIndex], array[currentIndex]];
+	}
+
+	return array;
+}
+
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseInt(list[j].score) >= parseInt(pivot.score)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
 }
