@@ -25,11 +25,14 @@ module.exports = {
 		if (interaction) {
 			await interaction.reply('Information is being processed');
 			if (interaction.options._subcommand === 'duel') {
-				let TODONoDuplicatePlayerHandling;
 				//Get the star ratings for both users
 				msg = await populateMsgFromInteraction(interaction);
 				const commandConfig = await getOsuUserServerMode(msg, []);
 				const commandUser = commandConfig[0];
+
+				if (commandUser.userId === interaction.options._hoistedOptions[0].value) {
+					return await interaction.followUp('You cannot play against yourself.');
+				}
 
 				if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
 					return await interaction.followUp('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect <username>`.');
@@ -50,11 +53,33 @@ module.exports = {
 				}
 
 				let averageStarRating = (firstStarRating + secondStarRating) / 2;
+				console.log(firstStarRating, secondStarRating);
 
 				let lowerBound = averageStarRating - 0.25;
 				let upperBound = averageStarRating + 0.25;
-				console.log(`Lower bound: ${lowerBound}`);
-				console.log(`Upper bound: ${upperBound}`);
+
+				let startDate = new Date();
+				let endDate = new Date();
+				let gameLength = 0;
+				//Add initial waiting time
+				endDate.setUTCMinutes(endDate.getUTCMinutes() + 5);
+				gameLength += 300;
+				//Add maximum waiting time between maps
+				endDate.setUTCMinutes(endDate.getUTCMinutes() + 2 * 7);
+				gameLength += 120 * 7;
+				//Add map times; 5 per map
+				endDate.setUTCMinutes(endDate.getUTCMinutes() + 5 * 7);
+				gameLength += 300 * 7;
+				//Add leaving time
+				endDate.setUTCMinutes(endDate.getUTCMinutes() + 1);
+				gameLength += 60;
+				let matchesPlanned = await getMatchesPlanned(startDate, endDate);
+
+				if (matchesPlanned > 3) {
+					return interaction.followUp('The bot cannot host another match at the moment because there will already be 4 matches running. (Maximum limit is 4)');
+				}
+
+				let processQueueTask = await DBProcessQueue.create({ guildId: 'None', task: 'customMOTD', priority: 10, additions: gameLength, date: startDate });
 
 				//Set up the lobby
 				let bancho = additionalObjects[1];
@@ -69,7 +94,7 @@ module.exports = {
 							}
 						}
 						let changeThisInTheEnd;
-						channel = await bancho.createLobby(`ETX- ${commandUser.osuName} vs ${discordUser.osuName}`);
+						channel = await bancho.createLobby(`ETX- (${commandUser.osuName}) vs (${discordUser.osuName})`);
 						break;
 					} catch (error) {
 						if (i === 4) {
@@ -86,7 +111,7 @@ module.exports = {
 
 				await lobby.setPassword(password);
 				await channel.sendMessage('!mp map 975342 0');
-				await channel.sendMessage('!mp set 0 3 3');
+				await channel.sendMessage('!mp set 0 3 2');
 
 				let lobbyStatus = 'Joining phase';
 				let mapIndex = 0;
@@ -145,8 +170,8 @@ module.exports = {
 						}
 
 						//No need to check for tourney map because its done by correctModPool boolean already
-						if (dbBeatmap && parseFloat(dbBeatmap.starRating) >= lowerBound && parseFloat(dbBeatmap.starRating) <= upperBound && correctModPool && !dbMapIds.includes(dbBeatmap.id)) {
-							if (i < 6 && dbBeatmap.drainLength < 270 || i === 6 && dbBeatmap.drainLength >= 270) {
+						if (dbBeatmap && dbBeatmap.mode === 'Standard' && parseFloat(dbBeatmap.starRating) >= lowerBound && parseFloat(dbBeatmap.starRating) <= upperBound && correctModPool && !dbMapIds.includes(dbBeatmap.id)) {
+							if (i < 6 && dbBeatmap.drainLength > 100 && dbBeatmap.drainLength < 270 || i === 6 && dbBeatmap.drainLength >= 270 && dbBeatmap.drainLength < 360) {
 								dbMaps.push(dbBeatmap);
 							} else {
 								dbBeatmap = null;
@@ -185,6 +210,11 @@ module.exports = {
 							await channel.sendMessage('The lobby will be closed as not everyone joined.');
 							pause(60000);
 							await channel.sendMessage('!mp close');
+							try {
+								await processQueueTask.destroy();
+							} catch (error) {
+								//Nothing
+							}
 							return await channel.leave();
 						} else if (lobbyStatus === 'Waiting for start') {
 							await channel.sendMessage('!mp start 10');
@@ -218,6 +248,9 @@ module.exports = {
 							}
 
 							await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+							if (modPools[mapIndex] === 'FreeMod') {
+								await channel.sendMessage('Valid Mods: HD, HR | NM will be 0.5x of the score achieved.');
+							}
 							await channel.sendMessage('Everyone please ready up!');
 							await channel.sendMessage('!mp timer 120');
 							mapIndex++;
@@ -241,15 +274,61 @@ module.exports = {
 				});
 
 				lobby.on('matchFinished', async (results) => {
-					let TODOModHandling;
+					if (modPools[mapIndex - 1] === 'FreeMod' && mapIndex - 1 < 6) {
+						for (let i = 0; i < results.length; i++) {
+							//Reduce the score by 0.5 if it was FreeMod and no mods / only nofail was picked
+							if (results[i].player.mods.length === 0 || results[i].player.mods.length === 1 && results[i].player.mods[0].enumValue === 1) {
+								results[i].score = results[i].score * 0.5;
+							} else {
+								let invalidModsPicked = false;
+								for (let j = 0; j < results[i].player.mods.length; j++) {
+									if (results[i].player.mods[j].enumValue !== 1 && results[i].player.mods[j].enumValue !== 8 && results[i].player.mods[j].enumValue !== 16) {
+										invalidModsPicked = true;
+									}
+								}
+
+								if (invalidModsPicked) {
+									results[i].score = results[i].score / 100;
+								}
+							}
+						}
+					}
 
 					quicksort(results);
 
-					await channel.sendMessage(`${results[0].player.user.username}: ${results[0].score} | ${results[1].player.user.username}: ${results[1].score}`);
+					if (results.length === 2) {
+						await channel.sendMessage(`${results[0].player.user.username}: ${results[0].score} | ${results[1].player.user.username}: ${results[1].score}`);
+					} else if (results.length === 1) {
+						await channel.sendMessage(`${results[0].player.user.username} wins this round by default.`);
+					} else {
+						await channel.sendMessage('!mp close');
+						// eslint-disable-next-line no-undef
+						const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+							// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+							notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+							completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+							parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+						});
+
+						osuApi.getMatch({ mp: lobby.id })
+							.then(async (match) => {
+								saveOsuMultiScores(match);
+							})
+							.catch(() => {
+								//Nothing
+							});
+
+						try {
+							await processQueueTask.destroy();
+						} catch (error) {
+							//Nothing
+						}
+						return await channel.leave();
+					}
 
 					//Increase the score of the player at the top of the list
 					scores[playerIds.indexOf(results[0].player.user.id.toString())]++;
-					await channel.sendMessage(`Score: ${results[0].player.user.username} | ${scores[0]} - ${scores[1]} | ${results[1].player.user.username}`);
+					await channel.sendMessage(`Score: ${dbPlayers[0].osuName} | ${scores[0]} - ${scores[1]} | ${dbPlayers[1].osuName}`);
 
 					if (mapIndex < dbMaps.length && scores[0] < 4 && scores[1] < 4) {
 						lobbyStatus = 'Waiting for start';
@@ -266,6 +345,11 @@ module.exports = {
 
 						await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
 						await channel.sendMessage('Everyone please ready up!');
+						if (modPools[mapIndex] === 'FreeMod' && mapIndex < 6) {
+							await channel.sendMessage('Valid Mods: HD, HR | NM will be 0.5x of the score achieved.');
+						} else if (modPools[mapIndex] === 'FreeMod' && mapIndex === 6) {
+							await channel.sendMessage('Valid Mods: HD, HR | NM will be just as achieved.');
+						}
 						await channel.sendMessage('!mp timer 120');
 						mapIndex++;
 					} else {
@@ -295,6 +379,11 @@ module.exports = {
 								//Nothing
 							});
 
+						try {
+							await processQueueTask.destroy();
+						} catch (error) {
+							//Nothing
+						}
 						return await channel.leave();
 					}
 				});
