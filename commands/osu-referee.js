@@ -25,6 +25,8 @@ module.exports = {
 		if (interaction) {
 			await interaction.reply('Information is being processed');
 			if (interaction.options._subcommand === 'duel') {
+				let TODOSwitchToSeperateCommandInstead;
+				let TODOAddSubcommandToGetYourDuelStarRating;
 				//Get the star ratings for both users
 				msg = await populateMsgFromInteraction(interaction);
 				const commandConfig = await getOsuUserServerMode(msg, []);
@@ -169,6 +171,7 @@ module.exports = {
 							}
 						}
 
+						let TODOChangeDrainRequirementsWhenDT;
 						//No need to check for tourney map because its done by correctModPool boolean already
 						if (dbBeatmap && dbBeatmap.mode === 'Standard' && parseFloat(dbBeatmap.starRating) >= lowerBound && parseFloat(dbBeatmap.starRating) <= upperBound && correctModPool && !dbMapIds.includes(dbBeatmap.id)) {
 							if (i < 6 && dbBeatmap.drainLength > 100 && dbBeatmap.drainLength < 270 || i === 6 && dbBeatmap.drainLength >= 270 && dbBeatmap.drainLength < 360) {
