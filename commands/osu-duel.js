@@ -157,6 +157,8 @@ module.exports = {
 							where: { id: index }
 						});
 
+						dbBeatmap = await getOsuBeatmap(dbBeatmap.beatmapId, 0);
+
 						let correctModPool = false;
 						if (dbBeatmap) {
 							const mapScores = await DBOsuMultiScores.findAll({
