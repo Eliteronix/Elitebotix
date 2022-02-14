@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
 const osu = require('node-osu');
-const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getScoreModpool, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname } = require('../utils');
+const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getScoreModpool, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -23,21 +23,19 @@ module.exports = {
 			return msg.reply('Please set up the game using the / command `/osu-duel`');
 		}
 		if (interaction) {
-			await interaction.reply('Information is being processed');
+			await interaction.deferReply({ ephemeral: true });
 			if (interaction.options._subcommand === 'duel') {
-				let TODOSwitchToSeperateCommandInstead;
-				let TODOAddSubcommandToGetYourDuelStarRating;
 				//Get the star ratings for both users
 				msg = await populateMsgFromInteraction(interaction);
 				const commandConfig = await getOsuUserServerMode(msg, []);
 				const commandUser = commandConfig[0];
 
 				if (commandUser.userId === interaction.options._hoistedOptions[0].value) {
-					return await interaction.followUp('You cannot play against yourself.');
+					return await interaction.editReply('You cannot play against yourself.');
 				}
 
 				if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
-					return await interaction.followUp('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect <username>`.');
+					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect <username>`.');
 				}
 
 				let firstStarRating = await getUserDuelStarRating(commandUser.osuUserId);
@@ -51,7 +49,7 @@ module.exports = {
 				if (discordUser && discordUser.osuUserId) {
 					secondStarRating = await getUserDuelStarRating(discordUser.osuUserId);
 				} else {
-					return await interaction.followUp(`<@${interaction.options._hoistedOptions[0].value}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
+					return await interaction.editReply(`<@${interaction.options._hoistedOptions[0].value}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
 				}
 
 				let averageStarRating = (firstStarRating + secondStarRating) / 2;
@@ -78,7 +76,7 @@ module.exports = {
 				let matchesPlanned = await getMatchesPlanned(startDate, endDate);
 
 				if (matchesPlanned > 3) {
-					return interaction.followUp('The bot cannot host another match at the moment because there will already be 4 matches running. (Maximum limit is 4)');
+					return await interaction.editReply('The bot cannot host another match at the moment because there will already be 4 matches running. (Maximum limit is 4)');
 				}
 
 				let processQueueTask = await DBProcessQueue.create({ guildId: 'None', task: 'customMOTD', priority: 10, additions: gameLength, date: startDate });
@@ -100,7 +98,7 @@ module.exports = {
 						break;
 					} catch (error) {
 						if (i === 4) {
-							return await interaction.followUp('I am having issues creating the lobby and the match has been aborted.\nPlease try again later.');
+							return await interaction.editReply('I am having issues creating the lobby and the match has been aborted.\nPlease try again later.');
 						} else {
 							await pause(10000);
 						}
@@ -173,10 +171,15 @@ module.exports = {
 							}
 						}
 
-						let TODOChangeDrainRequirementsWhenDT;
+						let lowerDrain = 100;
+						let upperDrain = 270;
+						if (modPools[i] === 'DT') {
+							lowerDrain = lowerDrain * 1.5;
+							upperDrain = upperDrain * 1.5;
+						}
 						//No need to check for tourney map because its done by correctModPool boolean already
 						if (dbBeatmap && dbBeatmap.mode === 'Standard' && parseFloat(dbBeatmap.starRating) >= lowerBound && parseFloat(dbBeatmap.starRating) <= upperBound && correctModPool && !dbMapIds.includes(dbBeatmap.id)) {
-							if (i < 6 && dbBeatmap.drainLength > 100 && dbBeatmap.drainLength < 270 || i === 6 && dbBeatmap.drainLength >= 270 && dbBeatmap.drainLength < 360) {
+							if (i < 6 && dbBeatmap.drainLength > lowerDrain && dbBeatmap.drainLength < upperDrain || i === 6 && dbBeatmap.drainLength >= 270 && dbBeatmap.drainLength < 360) {
 								dbMaps.push(dbBeatmap);
 							} else {
 								dbBeatmap = null;
@@ -198,7 +201,7 @@ module.exports = {
 				user = await additionalObjects[0].users.fetch(discordUser.userId);
 				await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 
-				interaction.followUp(`<@${commandUser.userId}> <@${discordUser.userId}> your match has been created. You have been invited ingame by \`Eliteronix\` and also got a DM as a backup.`);
+				await interaction.editReply(`<@${commandUser.userId}> <@${discordUser.userId}> your match has been created. You have been invited ingame by \`Eliteronix\` and also got a DM as a backup.`);
 				//Start the timer to close the lobby if not everyone joined by then
 				await channel.sendMessage('!mp timer 300');
 
@@ -399,9 +402,25 @@ module.exports = {
 					name: null,
 				};
 
-				if (interaction.options._hoistedOptions) {
-					args.push(interaction.options._hoistedOptions[0].value);
+				if (interaction.options._hoistedOptions[0]) {
+					//Get the user by the argument given
+					if (interaction.options._hoistedOptions[0].value.startsWith('<@') && interaction.options._hoistedOptions[0].value.endsWith('>')) {
+						logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers');
+						const discordUser = await DBDiscordUsers.findOne({
+							where: { userId: interaction.options._hoistedOptions[0].value.replace('<@', '').replace('>', '').replace('!', '') },
+						});
+
+						if (discordUser && discordUser.osuUserId) {
+							osuUser.id = discordUser.osuUserId;
+							osuUser.name = discordUser.osuName;
+						} else {
+							return await interaction.editReply({ content: `\`${interaction.options._hoistedOptions[0].value.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect <username>\`.`, ephemeral: true });
+						}
+					} else {
+						osuUser.id = getIDFromPotentialOsuLink(interaction.options._hoistedOptions[0].value);
+					}
 				} else {
+					//Try to get the user by the message if no argument given
 					msg = await populateMsgFromInteraction(interaction);
 					const commandConfig = await getOsuUserServerMode(msg, []);
 					const commandUser = commandConfig[0];
@@ -415,38 +434,33 @@ module.exports = {
 					}
 				}
 
-				if (!args[0]) {//Get profile by author if no argument
+				if (!osuUser.name) {
+					// eslint-disable-next-line no-undef
+					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+					});
 
-
-				} else {
-					//Get profiles by arguments
-					for (let i = 0; i < args.length; i++) {
-						if (args[i].startsWith('<@') && args[i].endsWith('>')) {
-							logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers');
-							const discordUser = await DBDiscordUsers.findOne({
-								where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
-							});
-
-							if (discordUser && discordUser.osuUserId) {
-								getProfile(msg, discordUser.osuUserId, server, mode);
-							} else {
-								msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-								getProfile(msg, args[i], server, mode);
+					const user = await osuApi.getUser({ u: osuUser.id, m: 0 })
+						.catch(err => {
+							if (err.message !== 'Not found') {
+								console.log(err);
 							}
-						} else {
+						});
 
-							if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
-								if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-									getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode, true);
-								} else {
-									getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode);
-								}
-							} else {
-								getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode);
-							}
-						}
+					if (!user) {
+						return await interaction.editReply({ content: `Could not find user \`${osuUser.name.replace(/`/g, '')}\`.`, ephemeral: true });
 					}
+
+					osuUser.id = user.id;
+					osuUser.name = user.name;
 				}
+
+				const starRating = await getUserDuelStarRating(osuUser.id);
+
+				return await interaction.editReply({ content: `The user \`${osuUser.name.replace(/`/g, '')}\` has a star rating evaluation of \`${Math.round(starRating * 100) / 100}\`.`, ephemeral: true });
 			}
 		}
 	},
@@ -460,7 +474,7 @@ async function getUserDuelStarRating(osuUserId) {
 
 	const userMapIds = [];
 	for (let i = 0; i < userScores.length; i++) {
-		if (parseInt(userScores[i].score) > 200000 && parseInt(userScores[i].score) < 750000 && getScoreModpool(userScores[i]) === 'NM' && userScores[i].scoringType === 'Score v2') {
+		if (parseInt(userScores[i].score) > 200000 && parseInt(userScores[i].score) < 600000 && getScoreModpool(userScores[i]) === 'NM' && userScores[i].scoringType === 'Score v2') {
 			if (userMapIds.indexOf(userScores[i].beatmapId === -1)) {
 				userMapIds.push(userScores[i].beatmapId);
 			}
@@ -515,7 +529,7 @@ async function getUserDuelStarRating(osuUserId) {
 	for (let i = 0; i < stars.length; i++) {
 		averageStars += parseFloat(stars[i]);
 	}
-	return (averageStars / stars.length) - 0.25;
+	return (averageStars / stars.length) - 0.5;
 }
 
 async function messageUserWithRetries(user, interaction, content) {
@@ -531,7 +545,7 @@ async function messageUserWithRetries(user, interaction, content) {
 		} catch (error) {
 			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
 				if (i === 2) {
-					interaction.followUp(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+					interaction.followUp(`[Duel] <@${user.id}>, it seems like I can't DM you in Discord. Please enable DMs so that I can keep you up to date with the match procedure!`);
 				} else {
 					await pause(2500);
 				}
