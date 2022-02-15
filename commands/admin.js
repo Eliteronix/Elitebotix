@@ -1,8 +1,9 @@
-const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBOsuBeatmaps } = require('../dbObjects');
 const { saveOsuMultiScores, pause, logDatabaseQueries } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 const fetch = require('node-fetch');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'admin',
@@ -4663,6 +4664,21 @@ module.exports = {
 			// DBElitiriSignup.osuRank = args[2];
 			// DBElitiriSignup.bracketName = args[3] + ' ' + args[4];
 			// DBElitiriSignup.save();
+		} else if (args[0] === 'getBeatmap') {
+			let osuBeatmaps = await DBOsuBeatmaps.findAll({
+				where: {
+					starRating: {
+						[Op.and]: {
+							[Op.lte]: 4.7,
+							[Op.gte]: 4.6,
+						}
+					}
+				}
+			});
+
+			for (let i = 0; i < osuBeatmaps.length; i++) {
+				console.log(osuBeatmaps[i].starRating);
+			}
 		} else {
 			msg.reply('Invalid command');
 		}

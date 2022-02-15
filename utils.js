@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -989,18 +989,7 @@ module.exports = {
 		return fitTextOnMiddleCanvasFunction(ctx, text, startingSize, fontface, yPosition, width, widthReduction);
 	},
 	getScoreModpool(dbScore) {
-		//Evaluate with which mods the game was played
-		if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '0' || dbScore.gameRawMods === '1')) {
-			return 'NM';
-		} else if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '8' || dbScore.gameRawMods === '9')) {
-			return 'HD';
-		} else if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '16' || dbScore.gameRawMods === '17')) {
-			return 'HR';
-		} else if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '64' || dbScore.gameRawMods === '65' || dbScore.gameRawMods === '576' || dbScore.gameRawMods === '577')) {
-			return 'DT';
-		} else {
-			return 'FM';
-		}
+		return getScoreModpoolFunction(dbScore);
 	},
 };
 
@@ -1139,6 +1128,39 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 					dbBeatmap.userRating = beatmaps[0].rating;
 					await dbBeatmap.save();
 				} else { // Map has to be added new
+					//Get the tourney map flags
+					let tourneyMap = false;
+					let noModMap = false;
+					let hiddenMap = false;
+					let hardRockMap = false;
+					let doubleTimeMap = false;
+					let freeModMap = false;
+
+					let tourneyScores = await DBOsuMultiScores.findAll({
+						where: {
+							beatmapId: beatmaps[0].id,
+							tourneyMatch: true
+						}
+					});
+
+					if (tourneyScores.length > 0) {
+						tourneyMap = true;
+					}
+
+					for (let i = 0; i < tourneyScores.length; i++) {
+						if (getScoreModpoolFunction(tourneyScores[i]) === 'NM') {
+							noModMap = true;
+						} else if (getScoreModpoolFunction(tourneyScores[i]) === 'HD') {
+							hiddenMap = true;
+						} else if (getScoreModpoolFunction(tourneyScores[i]) === 'HR') {
+							hardRockMap = true;
+						} else if (getScoreModpoolFunction(tourneyScores[i]) === 'DT') {
+							doubleTimeMap = true;
+						} else if (getScoreModpoolFunction(tourneyScores[i]) === 'FM') {
+							freeModMap = true;
+						}
+					}
+
 					dbBeatmap = await DBOsuBeatmaps.create({
 						title: beatmaps[0].title,
 						artist: beatmaps[0].artist,
@@ -1164,6 +1186,12 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 						spinners: beatmaps[0].objects.spinner,
 						mods: modBits,
 						userRating: beatmaps[0].rating,
+						tourneyMap: tourneyMap,
+						noModMap: noModMap,
+						hiddenMap: hiddenMap,
+						hardRockMap: hardRockMap,
+						doubleTimeMap: doubleTimeMap,
+						freeModMap: freeModMap,
 					});
 				}
 			})
@@ -1416,5 +1444,20 @@ function logDatabaseQueriesFunction(level, output) {
 	//Level 1: Log all queries
 	if (traceDatabaseQueries <= level) {
 		console.log('traceDatabaseQueries: ', output);
+	}
+}
+
+function getScoreModpoolFunction(dbScore) {
+	//Evaluate with which mods the game was played
+	if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '0' || dbScore.gameRawMods === '1')) {
+		return 'NM';
+	} else if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '8' || dbScore.gameRawMods === '9')) {
+		return 'HD';
+	} else if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '16' || dbScore.gameRawMods === '17')) {
+		return 'HR';
+	} else if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '64' || dbScore.gameRawMods === '65' || dbScore.gameRawMods === '576' || dbScore.gameRawMods === '577')) {
+		return 'DT';
+	} else {
+		return 'FM';
 	}
 }

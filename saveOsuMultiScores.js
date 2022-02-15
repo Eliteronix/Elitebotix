@@ -1,5 +1,5 @@
-const { logDatabaseQueries } = require('./utils');
-const { DBOsuMultiScores } = require('./dbObjects');
+const { logDatabaseQueries, getScoreModpool } = require('./utils');
+const { DBOsuMultiScores, DBOsuBeatmaps } = require('./dbObjects');
 
 // eslint-disable-next-line no-undef
 process.on('message', async (message) => {
@@ -71,7 +71,7 @@ process.on('message', async (message) => {
 				});
 
 				if (!existingScore) {
-					await DBOsuMultiScores.create({
+					let score = await DBOsuMultiScores.create({
 						osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
 						matchId: match.id,
 						matchName: match.name,
@@ -90,6 +90,33 @@ process.on('message', async (message) => {
 						gameEndDate: match.games[gameIndex].raw_end,
 						freeMod: freeMod,
 					});
+
+					//Set the tournament flags on the corresponding beatmap
+					if (tourneyMatch) {
+						let dbBeatmaps = await DBOsuBeatmaps.findAll({
+							where: {
+								beatmapId: match.games[gameIndex].beatmapId,
+							}
+						});
+
+						for (let i = 0; i < dbBeatmaps.length; i++) {
+							dbBeatmaps[i].tourneyMap = true;
+
+							if (getScoreModpool(score) === 'NM') {
+								dbBeatmaps[i].noModMap = true;
+							} else if (getScoreModpool(score) === 'HD') {
+								dbBeatmaps[i].hiddenMap = true;
+							} else if (getScoreModpool(score) === 'HR') {
+								dbBeatmaps[i].hardRockMap = true;
+							} else if (getScoreModpool(score) === 'DT') {
+								dbBeatmaps[i].doubleTimeMap = true;
+							} else if (getScoreModpool(score) === 'FM') {
+								dbBeatmaps[i].freeModMap = true;
+							}
+
+							await dbBeatmaps[i].save();
+						}
+					}
 				}
 			} catch (error) {
 				scoreIndex--;
