@@ -24,7 +24,7 @@ module.exports = {
 		}
 		if (interaction) {
 			await interaction.deferReply({ ephemeral: true });
-			if (interaction.options._subcommand === 'duel') {
+			if (interaction.options._subcommand === 'match') {
 				//Get the star ratings for both users
 				msg = await populateMsgFromInteraction(interaction);
 				const commandConfig = await getOsuUserServerMode(msg, []);
@@ -155,37 +155,47 @@ module.exports = {
 							where: { id: index }
 						});
 
-						dbBeatmap = await getOsuBeatmap(dbBeatmap.beatmapId, 0);
-
-						let correctModPool = false;
 						if (dbBeatmap) {
-							const mapScores = await DBOsuMultiScores.findAll({
-								where: { beatmapId: dbBeatmap.beatmapId, tourneyMatch: true }
-							});
+							console.log(i, dbBeatmap.beatmapId);
 
-							for (let j = 0; j < mapScores.length; j++) {
-								if (modPools[i] === getScoreModpool(mapScores[j]) && mapScores[j].matchName && !mapScores[j].matchName.startsWith('MOTD')) {
-									correctModPool = true;
-									break;
+							if (modPools[i] === 'HR') {
+								dbBeatmap = await getOsuBeatmap(dbBeatmap.beatmapId, 16);
+							} else if (modPools[i] === 'DT') {
+								dbBeatmap = await getOsuBeatmap(dbBeatmap.beatmapId, 64);
+							} else {
+								dbBeatmap = await getOsuBeatmap(dbBeatmap.beatmapId, 0);
+							}
+
+							let correctModPool = false;
+							if (dbBeatmap) {
+								const mapScores = await DBOsuMultiScores.findAll({
+									where: { beatmapId: dbBeatmap.beatmapId, tourneyMatch: true }
+								});
+
+								for (let j = 0; j < mapScores.length; j++) {
+									if (modPools[i] === getScoreModpool(mapScores[j]) && mapScores[j].matchName && !mapScores[j].matchName.startsWith('MOTD')) {
+										correctModPool = true;
+										break;
+									}
 								}
 							}
-						}
 
-						let lowerDrain = 100;
-						let upperDrain = 270;
-						if (modPools[i] === 'DT') {
-							lowerDrain = lowerDrain * 1.5;
-							upperDrain = upperDrain * 1.5;
-						}
-						//No need to check for tourney map because its done by correctModPool boolean already
-						if (dbBeatmap && dbBeatmap.mode === 'Standard' && parseFloat(dbBeatmap.starRating) >= lowerBound && parseFloat(dbBeatmap.starRating) <= upperBound && correctModPool && !dbMapIds.includes(dbBeatmap.id)) {
-							if (i < 6 && dbBeatmap.drainLength > lowerDrain && dbBeatmap.drainLength < upperDrain || i === 6 && dbBeatmap.drainLength >= 270 && dbBeatmap.drainLength < 360) {
-								dbMaps.push(dbBeatmap);
+							let lowerDrain = 100;
+							let upperDrain = 270;
+							if (modPools[i] === 'DT') {
+								lowerDrain = lowerDrain * 1.5;
+								upperDrain = upperDrain * 1.5;
+							}
+							//No need to check for tourney map because its done by correctModPool boolean already
+							if (dbBeatmap && dbBeatmap.mode === 'Standard' && parseFloat(dbBeatmap.starRating) >= lowerBound && parseFloat(dbBeatmap.starRating) <= upperBound && correctModPool && !dbMapIds.includes(dbBeatmap.id)) {
+								if (i < 6 && dbBeatmap.drainLength > lowerDrain && dbBeatmap.drainLength < upperDrain || i === 6 && dbBeatmap.drainLength >= 270 && dbBeatmap.drainLength < 360) {
+									dbMaps.push(dbBeatmap);
+								} else {
+									dbBeatmap = null;
+								}
 							} else {
 								dbBeatmap = null;
 							}
-						} else {
-							dbBeatmap = null;
 						}
 					}
 				}
