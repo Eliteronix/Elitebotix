@@ -53,7 +53,6 @@ module.exports = {
 				}
 
 				let averageStarRating = (firstStarRating + secondStarRating) / 2;
-				console.log(firstStarRating, secondStarRating);
 
 				let lowerBound = averageStarRating - 0.25;
 				let upperBound = averageStarRating + 0.25;
@@ -156,8 +155,6 @@ module.exports = {
 						});
 
 						if (dbBeatmap) {
-							console.log(i, dbBeatmap.beatmapId);
-
 							if (modPools[i] === 'HR') {
 								dbBeatmap = await getOsuBeatmap(dbBeatmap.beatmapId, 16);
 							} else if (modPools[i] === 'DT') {

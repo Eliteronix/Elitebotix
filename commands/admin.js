@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBOsuBeatmaps } = require('../dbObjects');
-const { saveOsuMultiScores, pause, logDatabaseQueries } = require('../utils');
+const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 const fetch = require('node-fetch');
@@ -4678,6 +4678,48 @@ module.exports = {
 
 			for (let i = 0; i < osuBeatmaps.length; i++) {
 				console.log(osuBeatmaps[i].starRating);
+			}
+		} else if (args[0] === 'updateBeatmapTourneyFlags') {
+			let osuBeatmaps = await DBOsuBeatmaps.findAll();
+
+			for (let i = 0; i < osuBeatmaps.length; i++) {
+				//Get the tourney map flags
+				let tourneyScores = await DBOsuMultiScores.findAll({
+					where: {
+						beatmapId: osuBeatmaps[i].beatmapId,
+						tourneyMatch: true,
+						matchName: {
+							[Op.notLike]: 'MOTD:%',
+						}
+					}
+				});
+
+				osuBeatmaps[i].tourneyMap = false;
+				osuBeatmaps[i].noModMap = false;
+				osuBeatmaps[i].hiddenMap = false;
+				osuBeatmaps[i].hardRockMap = false;
+				osuBeatmaps[i].doubleTimeMap = false;
+				osuBeatmaps[i].freeModMap = false;
+
+				if (tourneyScores.length > 0) {
+					osuBeatmaps[i].tourneyMap = true;
+				}
+
+				for (let j = 0; j < tourneyScores.length; j++) {
+					if (getScoreModpool(tourneyScores[j]) === 'NM') {
+						osuBeatmaps[i].noModMap = true;
+					} else if (getScoreModpool(tourneyScores[j]) === 'HD') {
+						osuBeatmaps[i].hiddenMap = true;
+					} else if (getScoreModpool(tourneyScores[j]) === 'HR') {
+						osuBeatmaps[i].hardRockMap = true;
+					} else if (getScoreModpool(tourneyScores[j]) === 'DT') {
+						osuBeatmaps[i].doubleTimeMap = true;
+					} else if (getScoreModpool(tourneyScores[j]) === 'FM') {
+						osuBeatmaps[i].freeModMap = true;
+					}
+				}
+
+				await osuBeatmaps[i].save();
 			}
 		} else {
 			msg.reply('Invalid command');

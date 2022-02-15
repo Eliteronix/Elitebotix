@@ -92,7 +92,7 @@ process.on('message', async (message) => {
 					});
 
 					//Set the tournament flags on the corresponding beatmap
-					if (tourneyMatch) {
+					if (tourneyMatch && !match.name.startsWith('MOTD:')) {
 						let dbBeatmaps = await DBOsuBeatmaps.findAll({
 							where: {
 								beatmapId: match.games[gameIndex].beatmapId,

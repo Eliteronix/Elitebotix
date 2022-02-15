@@ -1139,7 +1139,10 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 					let tourneyScores = await DBOsuMultiScores.findAll({
 						where: {
 							beatmapId: beatmaps[0].id,
-							tourneyMatch: true
+							tourneyMatch: true,
+							matchName: {
+								[Op.notLike]: 'MOTD:%',
+							}
 						}
 					});
 
