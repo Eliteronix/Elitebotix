@@ -100,21 +100,27 @@ process.on('message', async (message) => {
 						});
 
 						for (let i = 0; i < dbBeatmaps.length; i++) {
-							dbBeatmaps[i].tourneyMap = true;
-
-							if (getScoreModpool(score) === 'NM') {
-								dbBeatmaps[i].noModMap = true;
-							} else if (getScoreModpool(score) === 'HD') {
-								dbBeatmaps[i].hiddenMap = true;
-							} else if (getScoreModpool(score) === 'HR') {
-								dbBeatmaps[i].hardRockMap = true;
-							} else if (getScoreModpool(score) === 'DT') {
-								dbBeatmaps[i].doubleTimeMap = true;
-							} else if (getScoreModpool(score) === 'FM') {
-								dbBeatmaps[i].freeModMap = true;
+							if (!dbBeatmaps[i].tourneyMap) {
+								dbBeatmaps[i].tourneyMap = true;
+								await dbBeatmaps[i].save();
 							}
 
-							await dbBeatmaps[i].save();
+							if (getScoreModpool(score) === 'NM' && !dbBeatmaps[i].noModMap) {
+								dbBeatmaps[i].noModMap = true;
+								await dbBeatmaps[i].save();
+							} else if (getScoreModpool(score) === 'HD' && !dbBeatmaps[i].hiddenMap) {
+								dbBeatmaps[i].hiddenMap = true;
+								await dbBeatmaps[i].save();
+							} else if (getScoreModpool(score) === 'HR' && !dbBeatmaps[i].hardRockMap) {
+								dbBeatmaps[i].hardRockMap = true;
+								await dbBeatmaps[i].save();
+							} else if (getScoreModpool(score) === 'DT' && !dbBeatmaps[i].doubleTimeMap) {
+								dbBeatmaps[i].doubleTimeMap = true;
+								await dbBeatmaps[i].save();
+							} else if (getScoreModpool(score) === 'FM' && !dbBeatmaps[i].freeModMap) {
+								dbBeatmaps[i].freeModMap = true;
+								await dbBeatmaps[i].save();
+							}
 						}
 					}
 				}
