@@ -204,8 +204,6 @@ module.exports = {
 								},
 							}
 						});
-
-						console.log(beatmaps.length);
 					} else if (modPools[i] === 'HD') {
 						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps HD');
 						beatmaps = await DBOsuBeatmaps.findAll({
