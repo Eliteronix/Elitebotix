@@ -92,6 +92,8 @@ module.exports = {
 					return await interaction.editReply(`<@${discordUser.userId}> declined or didn't respond in time.`);
 				}
 
+				await interaction.editReply('Duel has been accepted. Creating pool and lobby...');
+
 				//Set up the mappools
 				let dbMaps = [];
 				let dbMapIds = [];
@@ -201,8 +203,6 @@ module.exports = {
 								},
 							}
 						});
-
-						console.log(beatmaps.length);
 					} else if (modPools[i] === 'HD') {
 						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps HD');
 						beatmaps = await DBOsuBeatmaps.findAll({
