@@ -1,4 +1,4 @@
-const { logDatabaseQueries, getScoreModpool } = require('./utils');
+const { logDatabaseQueries, getScoreModpool, getOsuBeatmap } = require('./utils');
 const { DBOsuMultiScores, DBOsuBeatmaps } = require('./dbObjects');
 
 // eslint-disable-next-line no-undef
@@ -101,23 +101,29 @@ process.on('message', async (message) => {
 
 						for (let i = 0; i < dbBeatmaps.length; i++) {
 							if (!dbBeatmaps[i].tourneyMap) {
+								dbBeatmaps[i] = await getOsuBeatmap(dbBeatmaps[i].beatmapId, dbBeatmaps[i].mods);
 								dbBeatmaps[i].tourneyMap = true;
 								await dbBeatmaps[i].save();
 							}
 
 							if (getScoreModpool(score) === 'NM' && !dbBeatmaps[i].noModMap) {
+								dbBeatmaps[i] = await getOsuBeatmap(dbBeatmaps[i].beatmapId, dbBeatmaps[i].mods);
 								dbBeatmaps[i].noModMap = true;
 								await dbBeatmaps[i].save();
 							} else if (getScoreModpool(score) === 'HD' && !dbBeatmaps[i].hiddenMap) {
+								dbBeatmaps[i] = await getOsuBeatmap(dbBeatmaps[i].beatmapId, dbBeatmaps[i].mods);
 								dbBeatmaps[i].hiddenMap = true;
 								await dbBeatmaps[i].save();
 							} else if (getScoreModpool(score) === 'HR' && !dbBeatmaps[i].hardRockMap) {
+								dbBeatmaps[i] = await getOsuBeatmap(dbBeatmaps[i].beatmapId, dbBeatmaps[i].mods);
 								dbBeatmaps[i].hardRockMap = true;
 								await dbBeatmaps[i].save();
 							} else if (getScoreModpool(score) === 'DT' && !dbBeatmaps[i].doubleTimeMap) {
+								dbBeatmaps[i] = await getOsuBeatmap(dbBeatmaps[i].beatmapId, dbBeatmaps[i].mods);
 								dbBeatmaps[i].doubleTimeMap = true;
 								await dbBeatmaps[i].save();
 							} else if (getScoreModpool(score) === 'FM' && !dbBeatmaps[i].freeModMap) {
+								dbBeatmaps[i] = await getOsuBeatmap(dbBeatmaps[i].beatmapId, dbBeatmaps[i].mods);
 								dbBeatmaps[i].freeModMap = true;
 								await dbBeatmaps[i].save();
 							}
