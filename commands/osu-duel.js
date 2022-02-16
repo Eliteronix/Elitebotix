@@ -61,24 +61,36 @@ module.exports = {
 				let lowerBound = averageStarRating - 0.125;
 				let upperBound = averageStarRating + 0.125;
 
-				let sentMessage = await interaction.editReply(`<@${discordUser.userId}> please react with a ✅ if you want to play against <@${commandUser.userId}>.`);
-				sentMessage.react('✅');
+				let sentMessage = await interaction.editReply(`<@${discordUser.userId}>, you were challenged to a duel by <@${commandUser.userId}>. React with ✅ to accept. React with ❌ to decline.`);
 
-				let TODOAddConfirmationToPlay;
+				let pingMessage = await interaction.channel.send(`<@${discordUser.userId}>`);
+				await sentMessage.react('✅');
+				await sentMessage.react('❌');
+				pingMessage.delete();
 				//Await for the user to react with a checkmark
-				// message.awaitReactions({ filter, max: 1, time: 120000, errors: ['time'] })
-				// 	.then(collected => {
-				// 		const reaction = collected.first();
+				const filter = (reaction, user) => {
+					return ['✅', '❌'].includes(reaction.emoji.name) && user.id === discordUser.userId;
+				};
 
-				// 		if (reaction.emoji.name === '👍') {
-				// 			message.reply('You reacted with a thumbs up.');
-				// 		} else {
-				// 			message.reply('You reacted with a thumbs down.');
-				// 		}
-				// 	})
-				// 	.catch(collected => {
-				// 		message.reply('You reacted with neither a thumbs up, nor a thumbs down.');
-				// 	});
+				let responded = await sentMessage.awaitReactions({ filter, max: 1, time: 120000, errors: ['time'] })
+					.then(collected => {
+						const reaction = collected.first();
+
+						if (reaction.emoji.name === '✅') {
+							return true;
+						} else {
+							return false;
+						}
+					})
+					.catch(() => {
+						return false;
+					});
+
+				sentMessage.reactions.removeAll();
+
+				if (!responded) {
+					return await interaction.editReply(`<@${discordUser.userId}> declined or didn't respond in time.`);
+				}
 
 				//Set up the mappools
 				let dbMaps = [];
@@ -397,8 +409,7 @@ module.exports = {
 								throw (error);
 							}
 						}
-						let changeThisInTheEnd;
-						channel = await bancho.createLobby(`ETX- (${commandUser.osuName}) vs (${discordUser.osuName})`);
+						channel = await bancho.createLobby(`ETX: (${commandUser.osuName}) vs (${discordUser.osuName})`);
 						break;
 					} catch (error) {
 						if (i === 4) {
@@ -429,6 +440,8 @@ module.exports = {
 				await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 
 				await interaction.editReply(`<@${commandUser.userId}> <@${discordUser.userId}> your match has been created. You have been invited ingame by \`Eliteronix\` and also got a DM as a backup.`);
+				pingMessage = await interaction.channel.send(`<@${commandUser.userId}> <@${discordUser.userId}>`);
+				pingMessage.delete();
 				//Start the timer to close the lobby if not everyone joined by then
 				await channel.sendMessage('!mp timer 300');
 
