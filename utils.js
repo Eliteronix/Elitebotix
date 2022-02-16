@@ -1202,6 +1202,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 				//Nothing
 				//Map is already saved; Delay next check until 7 days
 				if (dbBeatmap) {
+					dbBeatmap.approvalStatus = 'Not found';
 					await dbBeatmap.save();
 				} else if (error.message === 'Not found') { // Map has to be added new
 					dbBeatmap = await DBOsuBeatmaps.create({

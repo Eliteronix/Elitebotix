@@ -4680,9 +4680,16 @@ module.exports = {
 				console.log(osuBeatmaps[i].starRating);
 			}
 		} else if (args[0] === 'updateBeatmapTourneyFlags') {
-			let osuBeatmaps = await DBOsuBeatmaps.findAll();
+			let osuBeatmaps = await DBOsuBeatmaps.findAll({
+				where: {
+					tourneyMap: {
+						[Op.not]: true,
+					}
+				}
+			});
 
 			for (let i = 0; i < osuBeatmaps.length; i++) {
+				console.log(i, osuBeatmaps.length);
 				//Get the tourney map flags
 				let tourneyScores = await DBOsuMultiScores.findAll({
 					where: {

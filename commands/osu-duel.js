@@ -2,6 +2,7 @@ const { DBDiscordUsers, DBProcessQueue, DBOsuMultiScores, DBOsuBeatmaps } = requ
 const osu = require('node-osu');
 const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getScoreModpool, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink } = require('../utils');
 const { Permissions } = require('discord.js');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-duel',
@@ -54,8 +55,8 @@ module.exports = {
 
 				let averageStarRating = (firstStarRating + secondStarRating) / 2;
 
-				let lowerBound = averageStarRating - 0.25;
-				let upperBound = averageStarRating + 0.25;
+				let lowerBound = averageStarRating - 0.125;
+				let upperBound = averageStarRating + 0.125;
 
 				let startDate = new Date();
 				let endDate = new Date();
@@ -122,78 +123,177 @@ module.exports = {
 				shuffle(modPools);
 				modPools.push('NM', 'FM');
 
-				//Get the amount of Maps in the DB
-				let amountOfMapsInDB = -1;
-				// eslint-disable-next-line no-undef
-				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-				});
-
-				while (amountOfMapsInDB === -1) {
-					const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
-
-					const dbBeatmap = await getOsuBeatmap(mostRecentBeatmap[0].id, 0);
-
-					if (dbBeatmap) {
-						amountOfMapsInDB = dbBeatmap.id;
-					}
-				}
-
 				//Get the map for each modpool
 				for (let i = 0; i < modPools.length; i++) {
 					let dbBeatmap = null;
+					let beatmaps = null;
 
-					while (dbBeatmap === null) {
-						const index = Math.floor(Math.random() * amountOfMapsInDB);
-
-						logDatabaseQueries(4, 'commands/osu-referee.js DBOsuBeatmaps');
-						dbBeatmap = await DBOsuBeatmaps.findOne({
-							where: { id: index }
-						});
-
-						if (dbBeatmap) {
-							if (modPools[i] === 'HR') {
-								dbBeatmap = await getOsuBeatmap(dbBeatmap.beatmapId, 16);
-							} else if (modPools[i] === 'DT') {
-								dbBeatmap = await getOsuBeatmap(dbBeatmap.beatmapId, 64);
-							} else {
-								dbBeatmap = await getOsuBeatmap(dbBeatmap.beatmapId, 0);
-							}
-
-							let correctModPool = false;
-							if (dbBeatmap) {
-								const mapScores = await DBOsuMultiScores.findAll({
-									where: { beatmapId: dbBeatmap.beatmapId, tourneyMatch: true }
-								});
-
-								for (let j = 0; j < mapScores.length; j++) {
-									if (modPools[i] === getScoreModpool(mapScores[j]) && mapScores[j].matchName && !mapScores[j].matchName.startsWith('MOTD')) {
-										correctModPool = true;
-										break;
+					if (i === 6) {
+						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps TB');
+						beatmaps = await DBOsuBeatmaps.findAll({
+							where: {
+								mode: 'Standard',
+								approvalStatus: {
+									[Op.not]: 'Not found',
+								},
+								[Op.or]: {
+									noModMap: true,
+									freeModMap: true,
+								},
+								drainLength: {
+									[Op.and]: {
+										[Op.gte]: 270,
+										[Op.lte]: 360,
+									}
+								},
+								starRating: {
+									[Op.and]: {
+										[Op.gte]: lowerBound,
+										[Op.lte]: upperBound,
 									}
 								}
 							}
-
-							let lowerDrain = 100;
-							let upperDrain = 270;
-							if (modPools[i] === 'DT') {
-								lowerDrain = lowerDrain * 1.5;
-								upperDrain = upperDrain * 1.5;
-							}
-							//No need to check for tourney map because its done by correctModPool boolean already
-							if (dbBeatmap && dbBeatmap.mode === 'Standard' && parseFloat(dbBeatmap.starRating) >= lowerBound && parseFloat(dbBeatmap.starRating) <= upperBound && correctModPool && !dbMapIds.includes(dbBeatmap.id)) {
-								if (i < 6 && dbBeatmap.drainLength > lowerDrain && dbBeatmap.drainLength < upperDrain || i === 6 && dbBeatmap.drainLength >= 270 && dbBeatmap.drainLength < 360) {
-									dbMaps.push(dbBeatmap);
-								} else {
-									dbBeatmap = null;
+						});
+					} else if (modPools[i] === 'NM') {
+						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps NM');
+						beatmaps = await DBOsuBeatmaps.findAll({
+							where: {
+								mode: 'Standard',
+								approvalStatus: {
+									[Op.not]: 'Not found',
+								},
+								noModMap: true,
+								drainLength: {
+									[Op.and]: {
+										[Op.gte]: 100,
+										[Op.lte]: 270,
+									}
+								},
+								starRating: {
+									[Op.and]: {
+										[Op.gte]: lowerBound,
+										[Op.lte]: upperBound,
+									}
 								}
-							} else {
-								dbBeatmap = null;
 							}
+						});
+					} else if (modPools[i] === 'HD') {
+						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps HD');
+						beatmaps = await DBOsuBeatmaps.findAll({
+							where: {
+								mode: 'Standard',
+								approvalStatus: {
+									[Op.not]: 'Not found',
+								},
+								hiddenMap: true,
+								drainLength: {
+									[Op.and]: {
+										[Op.gte]: 100,
+										[Op.lte]: 270,
+									}
+								},
+								starRating: {
+									[Op.and]: {
+										[Op.gte]: lowerBound,
+										[Op.lte]: upperBound,
+									}
+								}
+							}
+						});
+					} else if (modPools[i] === 'HR') {
+						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps HR');
+						beatmaps = await DBOsuBeatmaps.findAll({
+							where: {
+								mode: 'Standard',
+								approvalStatus: {
+									[Op.not]: 'Not found',
+								},
+								hardRockMap: true,
+								drainLength: {
+									[Op.and]: {
+										[Op.gte]: 100,
+										[Op.lte]: 270,
+									}
+								},
+								starRating: {
+									[Op.and]: {
+										[Op.gte]: lowerBound,
+										[Op.lte]: upperBound,
+									}
+								}
+							}
+						});
+
+					} else if (modPools[i] === 'DT') {
+						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps DT');
+						beatmaps = await DBOsuBeatmaps.findAll({
+							where: {
+								mode: 'Standard',
+								approvalStatus: {
+									[Op.not]: 'Not found',
+								},
+								doubleTimeMap: true,
+								drainLength: {
+									[Op.and]: {
+										[Op.gte]: 150,
+										[Op.lte]: 405,
+									}
+								},
+								starRating: {
+									[Op.and]: {
+										[Op.gte]: lowerBound,
+										[Op.lte]: upperBound,
+									}
+								}
+							}
+						});
+
+					} else if (modPools[i] === 'FM') {
+						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps FM');
+						beatmaps = await DBOsuBeatmaps.findAll({
+							where: {
+								mode: 'Standard',
+								approvalStatus: {
+									[Op.not]: 'Not found',
+								},
+								freeModMap: true,
+								drainLength: {
+									[Op.and]: {
+										[Op.gte]: 100,
+										[Op.lte]: 270,
+									}
+								},
+								starRating: {
+									[Op.and]: {
+										[Op.gte]: lowerBound,
+										[Op.lte]: upperBound,
+									}
+								}
+							}
+						});
+					}
+
+					while (dbBeatmap === null) {
+						const index = Math.floor(Math.random() * beatmaps.length);
+
+						let TODOOnlyAllowMapsPlayedOrNotPlayedByBothPlayers;
+
+						if (modPools[i] === 'HR') {
+							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 16);
+						} else if (modPools[i] === 'DT') {
+							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 64);
+						} else {
+							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 0);
 						}
+
+						if (parseFloat(beatmaps[index].starRating) < lowerBound || parseFloat(beatmaps[index].starRating) > upperBound) {
+							beatmaps.splice(index, 1);
+						} else if (!dbMapIds.includes(beatmaps[index].beatmapsetId)) {
+							dbBeatmap = beatmaps[index];
+							dbMapIds.push(beatmaps[index].beatmapsetId);
+							dbMaps.push(beatmaps[index]);
+						}
+
 					}
 				}
 
@@ -292,7 +392,7 @@ module.exports = {
 					if (modPools[mapIndex - 1] === 'FreeMod' && mapIndex - 1 < 6) {
 						for (let i = 0; i < results.length; i++) {
 							//Reduce the score by 0.5 if it was FreeMod and no mods / only nofail was picked
-							if (results[i].player.mods.length === 0 || results[i].player.mods.length === 1 && results[i].player.mods[0].enumValue === 1) {
+							if (!results[i].player.mods || results[i].player.mods.length === 0 || results[i].player.mods.length === 1 && results[i].player.mods[0].enumValue === 1) {
 								results[i].score = results[i].score * 0.5;
 							} else {
 								let invalidModsPicked = false;
@@ -478,6 +578,8 @@ async function getUserDuelStarRating(osuUserId) {
 	const userScores = await DBOsuMultiScores.findAll({
 		where: { osuUserId: osuUserId }
 	});
+
+	let TODOOnlyGetTheMostRecentScoreOnAMap;
 
 	const userMapIds = [];
 	for (let i = 0; i < userScores.length; i++) {
