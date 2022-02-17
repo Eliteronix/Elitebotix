@@ -444,7 +444,7 @@ module.exports = {
 			]
 		});
 		for (let i = 0; i < nextPriorityTasklevel.length; i++) {
-			if (nextPriorityTasklevel[i].date && nextPriorityTasklevel[i].date > now) {
+			if (nextPriorityTasklevel[i].date && nextPriorityTasklevel[i].date.getTime() > now.getTime()) {
 				nextPriorityTasklevel.splice(i, 1);
 				i--;
 			}
@@ -458,7 +458,7 @@ module.exports = {
 				]
 			});
 			for (let i = 0; i < nextTask.length; i++) {
-				if (nextTask[i].date && nextTask[i].date > now) {
+				if (nextTask[i].date && nextTask[i].date.getTime() > now.getTime()) {
 					nextTask.splice(i, 1);
 					i--;
 				}
@@ -466,7 +466,7 @@ module.exports = {
 			try {
 				if (nextTask[0]) {
 					if (nextTask[0].task === 'remind') {
-						console.log('Reminder to be executed:', now, nextTask[0].date);
+						console.log('Reminder to be executed:', now, now.getTime(), nextTask[0].date, nextTask[0].date.getTime());
 					}
 
 					const task = require(`./processQueueTasks/${nextTask[0].task}.js`);
