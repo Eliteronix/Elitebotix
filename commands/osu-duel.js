@@ -13,7 +13,7 @@ module.exports = {
 	// permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
-	guildOnly: true,
+	// guildOnly: true,
 	//args: true,
 	cooldown: 5,
 	//noCooldownMessage: true,
