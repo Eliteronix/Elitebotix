@@ -132,7 +132,6 @@ module.exports = {
 
 					if (i === 6) {
 						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps TB');
-						let TODOLimitCSandARForTB;
 						beatmaps = await DBOsuBeatmaps.findAll({
 							where: {
 								mode: 'Standard',
@@ -166,6 +165,12 @@ module.exports = {
 											[Op.notIn]: player2Scores,
 										},
 									}
+								},
+								circleSize: {
+									[Op.lte]: 5,
+								},
+								approachRate: {
+									[Op.gte]: 8,
 								},
 							}
 						});
