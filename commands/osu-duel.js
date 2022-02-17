@@ -61,7 +61,7 @@ module.exports = {
 				let lowerBound = averageStarRating - 0.125;
 				let upperBound = averageStarRating + 0.125;
 
-				let sentMessage = await interaction.editReply(`<@${discordUser.userId}>, you were challenged to a duel by <@${commandUser.userId}>. React with ✅ to accept. React with ❌ to decline.`);
+				let sentMessage = await interaction.editReply(`<@${discordUser.userId}>, you were challenged to a duel by <@${commandUser.userId}>.\nReact with ✅ to accept.\nReact with ❌ to decline.`);
 
 				let pingMessage = await interaction.channel.send(`<@${discordUser.userId}>`);
 				await sentMessage.react('✅');
@@ -132,6 +132,7 @@ module.exports = {
 
 					if (i === 6) {
 						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps TB');
+						let TODOLimitCSandARForTB;
 						beatmaps = await DBOsuBeatmaps.findAll({
 							where: {
 								mode: 'Standard',
