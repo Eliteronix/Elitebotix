@@ -1,7 +1,7 @@
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
 		let date = new Date();
-		console.log('Reminder executed:', date, date.getTime(), processQueueEntry.date, processQueueEntry.date.getTime());
+		console.log('Reminder executed:', date, processQueueEntry.date);
 
 		if (processQueueEntry.date && processQueueEntry.date.getTime() < date.getTime()) {
 			let args = processQueueEntry.additions.split(';');

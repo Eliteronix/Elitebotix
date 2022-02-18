@@ -4,6 +4,7 @@ const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const osu = require('node-osu');
+const { Op } = require('sequelize');
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -434,53 +435,33 @@ module.exports = {
 			return;
 		}
 		let now = new Date();
-		logDatabaseQueriesFunction(1, 'utils.js DBProcessQueue nextPriorityTasklevel');
-		let nextPriorityTasklevel = await DBProcessQueue.findAll({
+		logDatabaseQueriesFunction(1, 'utils.js DBProcessQueue nextTask');
+		let nextTask = await DBProcessQueue.findOne({
 			where: {
 				beingExecuted: false,
+				date: {
+					[Op.lt]: now
+				}
 			},
 			order: [
-				['priority', 'DESC']
+				['priority', 'DESC'],
+				['date', 'ASC'],
 			]
 		});
-		for (let i = 0; i < nextPriorityTasklevel.length; i++) {
-			if (nextPriorityTasklevel[i].date && nextPriorityTasklevel[i].date.getTime() > now.getTime()) {
-				nextPriorityTasklevel.splice(i, 1);
-				i--;
-			}
-		}
-		if (nextPriorityTasklevel.length > 0) {
-			logDatabaseQueriesFunction(1, 'utils.js DBProcessQueue nextTask');
-			let nextTask = await DBProcessQueue.findAll({
-				where: { beingExecuted: false, priority: nextPriorityTasklevel[0].priority },
-				order: [
-					['createdAt', 'ASC']
-				]
-			});
-			for (let i = 0; i < nextTask.length; i++) {
-				if (nextTask[i].date && nextTask[i].date.getTime() > now.getTime()) {
-					nextTask.splice(i, 1);
-					i--;
-				}
-			}
-			try {
-				if (nextTask[0]) {
-					if (nextTask[0].task === 'remind') {
-						console.log('Reminder to be executed:', now, now.getTime(), nextTask[0].date, nextTask[0].date.getTime());
-					}
 
-					const task = require(`./processQueueTasks/${nextTask[0].task}.js`);
+		try {
+			if (nextTask) {
+				const task = require(`./processQueueTasks/${nextTask.task}.js`);
 
-					nextTask[0].beingExecuted = true;
-					await nextTask[0].save();
+				nextTask.beingExecuted = true;
+				await nextTask.save();
 
-					await task.execute(client, bancho, nextTask[0]);
-				}
-			} catch (e) {
-				console.log('Error executing process queue task', e);
-				console.log('Process Queue entry:', nextTask[0]);
-				nextTask[0].destroy();
+				await task.execute(client, bancho, nextTask);
 			}
+		} catch (e) {
+			console.log('Error executing process queue task', e);
+			console.log('Process Queue entry:', nextTask);
+			nextTask.destroy();
 		}
 	},
 	refreshOsuRank: async function () {
