@@ -5,6 +5,7 @@ const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMess
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-matchup',
@@ -186,7 +187,10 @@ module.exports = {
 				where: {
 					osuUserId: team1[i],
 					tourneyMatch: true,
-					mode: 'Standard'
+					mode: 'Standard',
+					score: {
+						[Op.gte]: 10000
+					}
 				}
 			}));
 
@@ -200,7 +204,10 @@ module.exports = {
 				where: {
 					osuUserId: team2[i],
 					tourneyMatch: true,
-					mode: 'Standard'
+					mode: 'Standard',
+					score: {
+						[Op.gte]: 10000
+					}
 				}
 			}));
 
