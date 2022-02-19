@@ -4814,6 +4814,13 @@ module.exports = {
 				}
 
 			}
+		} else if (args[0] === 'fixUpdateOsuRank') {
+			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'updateOsuRank' } });
+			for (let i = 0; processQueueTasks.length; i++) {
+				let now = new Date();
+				processQueueTasks[i].date = now;
+				await processQueueTasks[i].save();
+			}
 		} else {
 			msg.reply('Invalid command');
 		}
