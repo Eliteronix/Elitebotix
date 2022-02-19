@@ -540,6 +540,12 @@ module.exports = {
 			}
 		}
 
+		for (let i = 0; i < mapsPlayedReadable.length; i++) {
+			for (let j = 0; j < mapsPlayedReadable[i].length; j++) {
+				quicksortMapsPlayedReadable(mapsPlayedReadable[i][j]);
+			}
+		}
+
 		//Sort the rounds for the graph
 		quicksort(rounds);
 
@@ -1022,6 +1028,32 @@ function quicksortScore(list, start = 0, end = undefined) {
 		const p = partitionScore(list, start, end);
 		quicksortScore(list, start, p - 1);
 		quicksortScore(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionMapsPlayedReadable(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		console.log(`${list[j].substring(3, 7)}${list[j].substring(0, 2)}`);
+		if (parseInt(`${list[j].substring(3, 7)}${list[j].substring(0, 2)}`) >= parseInt(`${pivot.substring(3, 7)}${pivot.substring(0, 2)}`)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksortMapsPlayedReadable(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionMapsPlayedReadable(list, start, end);
+		quicksortMapsPlayedReadable(list, start, p - 1);
+		quicksortMapsPlayedReadable(list, p + 1, end);
 	}
 	return list;
 }
