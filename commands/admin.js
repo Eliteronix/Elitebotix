@@ -4620,7 +4620,13 @@ module.exports = {
 				}
 			});
 		} else if (args[0] === 'saveMultiMatches') {
-			DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${args[1]}`, priority: 0 });
+			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'saveMultiMatches' } });
+			for (let i = 0; i < processQueueTasks.length; i++) {
+				await processQueueTasks[i].destroy();
+			}
+
+			let now = new Date();
+			DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${args[1]}`, priority: 0, date: now });
 		} else if (args[0] === 'sendMultis') {
 			for (let i = parseInt(args[1]); i < parseInt(args[2]); i++) {
 				msg.reply(`https://osu.ppy.sh/community/matches/${i}`);
