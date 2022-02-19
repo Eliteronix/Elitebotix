@@ -20,7 +20,7 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		if (msg) {
-			msg.reply('Please set up the game using the / command `/osu-referee`');
+			return msg.reply('Please set up the game using the / command `/osu-referee`');
 		}
 		if (interaction) {
 			await interaction.reply('Information is being processed');

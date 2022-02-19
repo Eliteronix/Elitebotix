@@ -77,6 +77,24 @@ module.exports = (sequelize, DataTypes) => {
 		userRating: {
 			type: DataTypes.STRING,
 		},
+		tourneyMap: {
+			type: DataTypes.BOOLEAN,
+		},
+		noModMap: {
+			type: DataTypes.BOOLEAN,
+		},
+		hiddenMap: {
+			type: DataTypes.BOOLEAN,
+		},
+		hardRockMap: {
+			type: DataTypes.BOOLEAN,
+		},
+		doubleTimeMap: {
+			type: DataTypes.BOOLEAN,
+		},
+		freeModMap: {
+			type: DataTypes.BOOLEAN,
+		},
 		paranoid: true,
 	});
 };

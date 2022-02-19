@@ -1,8 +1,9 @@
-const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp } = require('../dbObjects');
-const { saveOsuMultiScores, pause, logDatabaseQueries } = require('../utils');
+const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBOsuBeatmaps } = require('../dbObjects');
+const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool, getOsuBeatmap } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 const fetch = require('node-fetch');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'admin',
@@ -498,6 +499,76 @@ module.exports = {
 			// 				'description': 'The username, id or link of the player to compare',
 			// 				'type': 3,
 			// 				'required': false
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'osu-duel',
+			// 		description: 'Lets you play matches which are being reffed by the bot',
+			// 		options: [
+			// 			{
+			// 				'name': 'match',
+			// 				'description': 'Lets you instantly create a Bo7 match against an opponent',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'opponent',
+			// 						'description': 'The opponent you want to play against',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'starrating',
+			// 				'description': 'Get shown what a users star rating is',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'The username, id or link of the player to get the duel star rating for',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 				]
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'osu-duel',
+			// 		description: 'Lets you play matches which are being reffed by the bot',
+			// 		options: [
+			// 			{
+			// 				'name': 'match',
+			// 				'description': 'Lets you instantly create a Bo7 match against an opponent',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'opponent',
+			// 						'description': 'The opponent you want to play against',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'starrating',
+			// 				'description': 'Get shown what a users star rating is',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'The username, id or link of the player to get the duel star rating for',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 				]
 			// 			},
 			// 		]
 			// 	},
@@ -1132,119 +1203,250 @@ module.exports = {
 			// 	},
 			// });
 
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'osu-referee',
-			// 		description: 'Lets you schedule matches which are being reffed by the bot',
-			// 		options: [
-			// 			{
-			// 				'name': 'soloqualifiers',
-			// 				'description': 'Lets you schedule a match which is being reffed by the bot',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'date',
-			// 						'description': 'The date of the month in UTC (i.e. 29)',
-			// 						'type': 4,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'month',
-			// 						'description': 'The month in UTC (i.e. 11)',
-			// 						'type': 4,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'year',
-			// 						'description': 'The year in UTC (i.e. 2021)',
-			// 						'type': 4,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'hour',
-			// 						'description': 'The hour in UTC (i.e. 18)',
-			// 						'type': 4,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'minute',
-			// 						'description': 'The minute in UTC (i.e. 0)',
-			// 						'type': 4,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'channel',
-			// 						'description': 'The channel in which the players should be notified.',
-			// 						'type': 7,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'matchname',
-			// 						'description': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
-			// 						'type': 3,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'mappool',
-			// 						'description': 'The mappool in the following format: NM234826,HD123141,HR123172. Available mods: NM, HD, HR, DT',
-			// 						'type': 3,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'players',
-			// 						'description': 'The username, id or link of the players seperated by a \',\'',
-			// 						'type': 3,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'usenofail',
-			// 						'description': 'Should nofail be applied to all maps?',
-			// 						'type': 5,
-			// 						'required': true,
-			// 					},
-			// 					{
-			// 						'name': 'score',
-			// 						'description': 'What is the winning condition of the match?',
-			// 						'type': 3,
-			// 						'required': true,
-			// 						'choices': [
-			// 							{
-			// 								'name': 'Score v1',
-			// 								'value': '0'
-			// 							},
-			// 							{
-			// 								'name': 'Score v2',
-			// 								'value': '3'
-			// 							},
-			// 							{
-			// 								'name': 'Accuracy',
-			// 								'value': '1'
-			// 							}
-			// 						]
-			// 					},
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'scheduled',
-			// 				'description': 'Show what matches you have scheduled',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'remove',
-			// 				'description': 'Remove matches that you have scheduled over the bot',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'internalid',
-			// 						'description': 'The internal ID which can be found when using /osu-referee scheduled',
-			// 						'type': 4,
-			// 						'required': true
-			// 					},
-			// 				]
-			// 			},
-			// 		]
-			// 	},
-			// });
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'osu-referee',
+					description: 'Lets you schedule matches which are being reffed by the bot',
+					options: [
+						{
+							'name': 'soloqualifiers',
+							'description': 'Lets you schedule a match which is being reffed by the bot',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'date',
+									'description': 'The date of the month in UTC (i.e. 29)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'month',
+									'description': 'The month in UTC (i.e. 11)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'year',
+									'description': 'The year in UTC (i.e. 2021)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'hour',
+									'description': 'The hour in UTC (i.e. 18)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'minute',
+									'description': 'The minute in UTC (i.e. 0)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'channel',
+									'description': 'The channel in which the players should be notified.',
+									'type': 7,
+									'required': true
+								},
+								{
+									'name': 'matchname',
+									'description': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'mappool',
+									'description': 'The mappool in the following format: NM234826,HD123141,HR123172. Available mods: NM, HD, HR, DT',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'players',
+									'description': 'The username, id or link of the players seperated by a \',\'',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'usenofail',
+									'description': 'Should nofail be applied to all maps?',
+									'type': 5,
+									'required': true,
+								},
+								{
+									'name': 'score',
+									'description': 'What is the winning condition of the match?',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Score v1',
+											'value': '0'
+										},
+										{
+											'name': 'Score v2',
+											'value': '3'
+										},
+										{
+											'name': 'Accuracy',
+											'value': '1'
+										}
+									]
+								},
+							]
+						},
+						{
+							'name': '1v1',
+							'description': 'Lets you schedule a match which is being reffed by the bot',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'date',
+									'description': 'The date of the month in UTC (i.e. 29)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'month',
+									'description': 'The month in UTC (i.e. 11)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'year',
+									'description': 'The year in UTC (i.e. 2021)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'hour',
+									'description': 'The hour in UTC (i.e. 18)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'minute',
+									'description': 'The minute in UTC (i.e. 0)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'channel',
+									'description': 'The channel in which the players should be notified.',
+									'type': 7,
+									'required': true
+								},
+								{
+									'name': 'matchname',
+									'description': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'mappool',
+									'description': 'The mappool in the following format: NM234826,HD123141,HR123172. Available mods: NM,HD,HR,DT,FM,TB',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'bestof',
+									'description': 'The best of for the match.',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'bans',
+									'description': 'The amount of bans for each player.',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'players',
+									'description': 'The username, id or link of the players seperated by a \',\'',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'pickbanorder',
+									'description': 'What is the pick and ban order?',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Determined: Roll Winner Bans Second and Picks First (Bans: ABAB)',
+											'value': '1'
+										},
+										{
+											'name': 'Determined: Roll Winner Bans Second and Picks First (Bans: ABBA)',
+											'value': '2'
+										},
+										{
+											'name': 'Choice: Roll Winner chooses Ban Second and Pick First or opposite (Bans: ABAB)',
+											'value': '3'
+										},
+										{
+											'name': 'Choice: Roll Winner chooses Ban Second and Pick First or opposite (Bans: ABBA)',
+											'value': '4'
+										},
+										{
+											'name': 'Choice: Roll Winner chooses Ban First and Pick First or opposite (Bans: ABAB)',
+											'value': '5'
+										},
+										{
+											'name': 'Choice: Roll Winner chooses Ban First and Pick First or opposite (Bans: ABBA)',
+											'value': '6'
+										},
+									]
+								},
+								{
+									'name': 'usenofail',
+									'description': 'Should nofail be applied to all maps?',
+									'type': 5,
+									'required': true,
+								},
+								{
+									'name': 'score',
+									'description': 'What is the winning condition of the match?',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Score v1',
+											'value': '0'
+										},
+										{
+											'name': 'Score v2',
+											'value': '3'
+										},
+										{
+											'name': 'Accuracy',
+											'value': '1'
+										}
+									]
+								},
+							]
+						},
+						{
+							'name': 'scheduled',
+							'description': 'Show what matches you have scheduled',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'remove',
+							'description': 'Remove matches that you have scheduled over the bot',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'internalid',
+									'description': 'The internal ID which can be found when using /osu-referee scheduled',
+									'type': 4,
+									'required': true
+								},
+							]
+						},
+					]
+				},
+			});
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -2649,6 +2851,41 @@ module.exports = {
 							'description': 'The username, id or link of the player to compare',
 							'type': 3,
 							'required': false
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-duel',
+					description: 'Lets you play matches which are being reffed by the bot',
+					options: [
+						{
+							'name': 'match',
+							'description': 'Lets you instantly create a Bo7 match against an opponent',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'opponent',
+									'description': 'The opponent you want to play against',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+							]
+						},
+						{
+							'name': 'starrating',
+							'description': 'Get shown what a users star rating is',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'username',
+									'description': 'The username, id or link of the player to get the duel star rating for',
+									'type': 3,
+									'required': false
+								},
+							]
 						},
 					]
 				},
@@ -4497,6 +4734,93 @@ module.exports = {
 			// DBElitiriSignup.osuRank = args[2];
 			// DBElitiriSignup.bracketName = args[3] + ' ' + args[4];
 			// DBElitiriSignup.save();
+		} else if (args[0] === 'getBeatmap') {
+			let osuBeatmaps = await DBOsuBeatmaps.findAll({
+				where: {
+					starRating: {
+						[Op.and]: {
+							[Op.lte]: 4.7,
+							[Op.gte]: 4.6,
+						}
+					}
+				}
+			});
+
+			for (let i = 0; i < osuBeatmaps.length; i++) {
+				console.log(osuBeatmaps[i].starRating);
+			}
+		} else if (args[0] === 'updateBeatmapTourneyFlags') {
+			for (let i = args[1]; i < 100000; i++) {
+				await pause(5000);
+				if (i % 500 === 0) {
+					console.log('updateBeatmapTourneyFlags:', i);
+				}
+				let osuBeatmap = await DBOsuBeatmaps.findOne({
+					where: {
+						id: i
+					}
+				});
+
+				if (!osuBeatmap) {
+					continue;
+				}
+
+				//Get the tourney map flags
+				let tourneyScores = await DBOsuMultiScores.findAll({
+					where: {
+						beatmapId: osuBeatmap.beatmapId,
+						tourneyMatch: true,
+						matchName: {
+							[Op.notLike]: 'MOTD:%',
+						}
+					}
+				});
+
+				// osuBeatmap.tourneyMap = false;
+				// osuBeatmap.noModMap = false;
+				// osuBeatmap.hiddenMap = false;
+				// osuBeatmap.hardRockMap = false;
+				// osuBeatmap.doubleTimeMap = false;
+				// osuBeatmap.freeModMap = false;
+
+				if (tourneyScores.length > 0 && !osuBeatmap.tourneyMap) {
+					osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
+					osuBeatmap.tourneyMap = true;
+					await osuBeatmap.save();
+				}
+
+				for (let j = 0; j < tourneyScores.length; j++) {
+					if (getScoreModpool(tourneyScores[j]) === 'NM' && !osuBeatmap.noModMap) {
+						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
+						osuBeatmap.noModMap = true;
+						await osuBeatmap.save();
+					} else if (getScoreModpool(tourneyScores[j]) === 'HD' && !osuBeatmap.hiddenMap) {
+						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
+						osuBeatmap.hiddenMap = true;
+						await osuBeatmap.save();
+					} else if (getScoreModpool(tourneyScores[j]) === 'HR' && !osuBeatmap.hardRockMap) {
+						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
+						osuBeatmap.hardRockMap = true;
+						await osuBeatmap.save();
+					} else if (getScoreModpool(tourneyScores[j]) === 'DT' && !osuBeatmap.doubleTimeMap) {
+						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
+						osuBeatmap.doubleTimeMap = true;
+						await osuBeatmap.save();
+					} else if (getScoreModpool(tourneyScores[j]) === 'FM' && !osuBeatmap.freeModMap) {
+						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
+						osuBeatmap.freeModMap = true;
+						await osuBeatmap.save();
+					}
+				}
+
+			}
+		} else if (args[0] === 'fixUpdateOsuRank') {
+			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'updateOsuRank' } });
+			for (let i = 0; processQueueTasks.length; i++) {
+				let now = new Date();
+				processQueueTasks[i].date = now;
+				await processQueueTasks[i].save();
+			}
 		} else {
 			msg.reply('Invalid command');
 		}

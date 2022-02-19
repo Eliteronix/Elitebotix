@@ -1,5 +1,5 @@
-const { logDatabaseQueries } = require('./utils');
-const { DBOsuMultiScores } = require('./dbObjects');
+const { logDatabaseQueries, getScoreModpool, getOsuBeatmap } = require('./utils');
+const { DBOsuMultiScores, DBOsuBeatmaps } = require('./dbObjects');
 
 // eslint-disable-next-line no-undef
 process.on('message', async (message) => {
@@ -71,7 +71,7 @@ process.on('message', async (message) => {
 				});
 
 				if (!existingScore) {
-					await DBOsuMultiScores.create({
+					let score = await DBOsuMultiScores.create({
 						osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
 						matchId: match.id,
 						matchName: match.name,
@@ -90,6 +90,45 @@ process.on('message', async (message) => {
 						gameEndDate: match.games[gameIndex].raw_end,
 						freeMod: freeMod,
 					});
+
+					//Set the tournament flags on the corresponding beatmap
+					if (tourneyMatch && !match.name.startsWith('MOTD:')) {
+						let dbBeatmaps = await DBOsuBeatmaps.findAll({
+							where: {
+								beatmapId: match.games[gameIndex].beatmapId,
+							}
+						});
+
+						for (let i = 0; i < dbBeatmaps.length; i++) {
+							if (!dbBeatmaps[i].tourneyMap) {
+								dbBeatmaps[i] = await getOsuBeatmap(dbBeatmaps[i].beatmapId, dbBeatmaps[i].mods);
+								dbBeatmaps[i].tourneyMap = true;
+								await dbBeatmaps[i].save();
+							}
+
+							if (getScoreModpool(score) === 'NM' && !dbBeatmaps[i].noModMap) {
+								dbBeatmaps[i] = await getOsuBeatmap(dbBeatmaps[i].beatmapId, dbBeatmaps[i].mods);
+								dbBeatmaps[i].noModMap = true;
+								await dbBeatmaps[i].save();
+							} else if (getScoreModpool(score) === 'HD' && !dbBeatmaps[i].hiddenMap) {
+								dbBeatmaps[i] = await getOsuBeatmap(dbBeatmaps[i].beatmapId, dbBeatmaps[i].mods);
+								dbBeatmaps[i].hiddenMap = true;
+								await dbBeatmaps[i].save();
+							} else if (getScoreModpool(score) === 'HR' && !dbBeatmaps[i].hardRockMap) {
+								dbBeatmaps[i] = await getOsuBeatmap(dbBeatmaps[i].beatmapId, dbBeatmaps[i].mods);
+								dbBeatmaps[i].hardRockMap = true;
+								await dbBeatmaps[i].save();
+							} else if (getScoreModpool(score) === 'DT' && !dbBeatmaps[i].doubleTimeMap) {
+								dbBeatmaps[i] = await getOsuBeatmap(dbBeatmaps[i].beatmapId, dbBeatmaps[i].mods);
+								dbBeatmaps[i].doubleTimeMap = true;
+								await dbBeatmaps[i].save();
+							} else if (getScoreModpool(score) === 'FM' && !dbBeatmaps[i].freeModMap) {
+								dbBeatmaps[i] = await getOsuBeatmap(dbBeatmaps[i].beatmapId, dbBeatmaps[i].mods);
+								dbBeatmaps[i].freeModMap = true;
+								await dbBeatmaps[i].save();
+							}
+						}
+					}
 				}
 			} catch (error) {
 				scoreIndex--;
