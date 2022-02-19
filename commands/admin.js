@@ -4752,7 +4752,7 @@ module.exports = {
 		} else if (args[0] === 'updateBeatmapTourneyFlags') {
 			for (let i = args[1]; i < 100000; i++) {
 				await pause(5000);
-				if (i % 500 === 0) {
+				if (i % 100 === 0) {
 					console.log('updateBeatmapTourneyFlags:', i);
 				}
 				let osuBeatmap = await DBOsuBeatmaps.findOne({
