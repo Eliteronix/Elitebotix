@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBOsuBeatmaps } = require('../dbObjects');
-const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool } = require('../utils');
+const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool, getOsuBeatmap } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 const fetch = require('node-fetch');
@@ -4750,20 +4750,25 @@ module.exports = {
 				console.log(osuBeatmaps[i].starRating);
 			}
 		} else if (args[0] === 'updateBeatmapTourneyFlags') {
-			let osuBeatmaps = await DBOsuBeatmaps.findAll({
-				where: {
-					tourneyMap: {
-						[Op.not]: true,
-					}
+			for (let i = args[1]; i < 100000; i++) {
+				await pause(5000);
+				if (i % 500 === 0) {
+					console.log('updateBeatmapTourneyFlags:', i);
 				}
-			});
+				let osuBeatmap = await DBOsuBeatmaps.findOne({
+					where: {
+						id: i
+					}
+				});
 
-			for (let i = 0; i < osuBeatmaps.length; i++) {
-				console.log(i, osuBeatmaps.length);
+				if (!osuBeatmap) {
+					continue;
+				}
+
 				//Get the tourney map flags
 				let tourneyScores = await DBOsuMultiScores.findAll({
 					where: {
-						beatmapId: osuBeatmaps[i].beatmapId,
+						beatmapId: osuBeatmap.beatmapId,
 						tourneyMatch: true,
 						matchName: {
 							[Op.notLike]: 'MOTD:%',
@@ -4771,32 +4776,43 @@ module.exports = {
 					}
 				});
 
-				osuBeatmaps[i].tourneyMap = false;
-				osuBeatmaps[i].noModMap = false;
-				osuBeatmaps[i].hiddenMap = false;
-				osuBeatmaps[i].hardRockMap = false;
-				osuBeatmaps[i].doubleTimeMap = false;
-				osuBeatmaps[i].freeModMap = false;
+				// osuBeatmap.tourneyMap = false;
+				// osuBeatmap.noModMap = false;
+				// osuBeatmap.hiddenMap = false;
+				// osuBeatmap.hardRockMap = false;
+				// osuBeatmap.doubleTimeMap = false;
+				// osuBeatmap.freeModMap = false;
 
-				if (tourneyScores.length > 0) {
-					osuBeatmaps[i].tourneyMap = true;
+				if (tourneyScores.length > 0 && !osuBeatmap.tourneyMap) {
+					osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
+					osuBeatmap.tourneyMap = true;
+					await osuBeatmap.save();
 				}
 
 				for (let j = 0; j < tourneyScores.length; j++) {
-					if (getScoreModpool(tourneyScores[j]) === 'NM') {
-						osuBeatmaps[i].noModMap = true;
-					} else if (getScoreModpool(tourneyScores[j]) === 'HD') {
-						osuBeatmaps[i].hiddenMap = true;
-					} else if (getScoreModpool(tourneyScores[j]) === 'HR') {
-						osuBeatmaps[i].hardRockMap = true;
-					} else if (getScoreModpool(tourneyScores[j]) === 'DT') {
-						osuBeatmaps[i].doubleTimeMap = true;
-					} else if (getScoreModpool(tourneyScores[j]) === 'FM') {
-						osuBeatmaps[i].freeModMap = true;
+					if (getScoreModpool(tourneyScores[j]) === 'NM' && !osuBeatmap.noModMap) {
+						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
+						osuBeatmap.noModMap = true;
+						await osuBeatmap.save();
+					} else if (getScoreModpool(tourneyScores[j]) === 'HD' && !osuBeatmap.hiddenMap) {
+						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
+						osuBeatmap.hiddenMap = true;
+						await osuBeatmap.save();
+					} else if (getScoreModpool(tourneyScores[j]) === 'HR' && !osuBeatmap.hardRockMap) {
+						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
+						osuBeatmap.hardRockMap = true;
+						await osuBeatmap.save();
+					} else if (getScoreModpool(tourneyScores[j]) === 'DT' && !osuBeatmap.doubleTimeMap) {
+						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
+						osuBeatmap.doubleTimeMap = true;
+						await osuBeatmap.save();
+					} else if (getScoreModpool(tourneyScores[j]) === 'FM' && !osuBeatmap.freeModMap) {
+						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
+						osuBeatmap.freeModMap = true;
+						await osuBeatmap.save();
 					}
 				}
 
-				await osuBeatmaps[i].save();
 			}
 		} else {
 			msg.reply('Invalid command');
