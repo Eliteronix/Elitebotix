@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBOsuBeatmaps } = require('../dbObjects');
-const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool, getOsuBeatmap } = require('../utils');
+const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 const fetch = require('node-fetch');
@@ -4751,7 +4751,7 @@ module.exports = {
 			}
 		} else if (args[0] === 'updateBeatmapTourneyFlags') {
 			for (let i = args[1]; i < 100000; i++) {
-				await pause(5000);
+				await pause(500);
 				if (i % 100 === 0) {
 					console.log('updateBeatmapTourneyFlags:', i);
 				}
@@ -4784,42 +4784,34 @@ module.exports = {
 				// osuBeatmap.freeModMap = false;
 
 				if (tourneyScores.length > 0 && !osuBeatmap.tourneyMap) {
-					osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
 					osuBeatmap.tourneyMap = true;
-					await osuBeatmap.save();
+					await osuBeatmap.save({ silent: true });
 				}
 
 				for (let j = 0; j < tourneyScores.length; j++) {
 					if (getScoreModpool(tourneyScores[j]) === 'NM' && !osuBeatmap.noModMap) {
-						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
 						osuBeatmap.noModMap = true;
-						await osuBeatmap.save();
+						await osuBeatmap.save({ silent: true });
 					} else if (getScoreModpool(tourneyScores[j]) === 'HD' && !osuBeatmap.hiddenMap) {
-						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
 						osuBeatmap.hiddenMap = true;
-						await osuBeatmap.save();
+						await osuBeatmap.save({ silent: true });
 					} else if (getScoreModpool(tourneyScores[j]) === 'HR' && !osuBeatmap.hardRockMap) {
-						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
 						osuBeatmap.hardRockMap = true;
-						await osuBeatmap.save();
+						await osuBeatmap.save({ silent: true });
 					} else if (getScoreModpool(tourneyScores[j]) === 'DT' && !osuBeatmap.doubleTimeMap) {
-						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
 						osuBeatmap.doubleTimeMap = true;
-						await osuBeatmap.save();
+						await osuBeatmap.save({ silent: true });
 					} else if (getScoreModpool(tourneyScores[j]) === 'FM' && !osuBeatmap.freeModMap) {
-						osuBeatmap = await getOsuBeatmap(osuBeatmap.beatmapId, osuBeatmap.mods);
 						osuBeatmap.freeModMap = true;
-						await osuBeatmap.save();
+						await osuBeatmap.save({ silent: true });
 					}
 				}
 
 			}
-		} else if (args[0] === 'fixUpdateOsuRank') {
+		} else if (args[0] === 'deleteUpdateOsuRank') {
 			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'updateOsuRank' } });
-			for (let i = 0; processQueueTasks.length; i++) {
-				let now = new Date();
-				processQueueTasks[i].date = now;
-				await processQueueTasks[i].save();
+			for (let i = 0; i < processQueueTasks.length; i++) {
+				await processQueueTasks[i].destroy();
 			}
 		} else {
 			msg.reply('Invalid command');
