@@ -5,6 +5,7 @@ const Canvas = require('canvas');
 const { getGuildPrefix, humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-profile',
@@ -148,7 +149,12 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 
 				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores');
 				const userScores = await DBOsuMultiScores.findAll({
-					where: { osuUserId: user.id }
+					where: {
+						osuUserId: user.id,
+						score: {
+							[Op.gte]: 10000
+						}
+					}
 				});
 
 				if (userScores.length) {
@@ -215,7 +221,12 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 
 				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores');
 				const userScores = await DBOsuMultiScores.findAll({
-					where: { osuUserId: user.id }
+					where: {
+						osuUserId: user.id,
+						score: {
+							[Op.gte]: 10000
+						}
+					}
 				});
 
 				if (userScores.length) {

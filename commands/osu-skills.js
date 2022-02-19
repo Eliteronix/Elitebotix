@@ -5,6 +5,7 @@ const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
 const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-skills',
@@ -399,7 +400,12 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			(async () => {
 				logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiScores');
 				const userScores = await DBOsuMultiScores.findAll({
-					where: { osuUserId: user.id }
+					where: {
+						osuUserId: user.id,
+						score: {
+							[Op.gte]: 10000
+						}
+					}
 				});
 				//Remove userScores which don't fit the criteria
 				for (let i = 0; i < userScores.length; i++) {
