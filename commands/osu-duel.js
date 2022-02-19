@@ -720,33 +720,71 @@ async function getUserDuelStarRating(osuUserId) {
 
 	quicksortMatchId(userScores);
 
+	// Old version
+	// const checkedMapIds = [];
+	// const userMapIds = [];
+	// for (let i = 0; i < userScores.length; i++) {
+	// 	if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1) {
+	// 		checkedMapIds.push(userScores[i].beatmapId);
+	// 		if (parseInt(userScores[i].score) > 200000 && parseInt(userScores[i].score) < 600000 && getScoreModpool(userScores[i]) === 'NM' && userScores[i].scoringType === 'Score v2') {
+	// 			if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
+	// 				userMapIds.push(userScores[i].beatmapId);
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	// let starRating = 0;
+	// for (let i = 0; i < userMapIds.length && i < 100; i++) {
+	// 	const dbBeatmap = await getOsuBeatmap(userMapIds[i], 0);
+
+	// 	if (dbBeatmap) {
+	// 		starRating += parseFloat(dbBeatmap.starRating);
+	// 	} else {
+	// 		userMapIds.splice(i, 1);
+	// 		i--;
+	// 	}
+	// }
+
+	// if (userMapIds.length) {
+	// 	return starRating / userMapIds.length;
+	// }
+
 	const checkedMapIds = [];
 	const userMapIds = [];
+	const userMaps = [];
 	for (let i = 0; i < userScores.length; i++) {
 		if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1) {
 			checkedMapIds.push(userScores[i].beatmapId);
-			if (parseInt(userScores[i].score) > 200000 && parseInt(userScores[i].score) < 600000 && getScoreModpool(userScores[i]) === 'NM' && userScores[i].scoringType === 'Score v2') {
+			if (getScoreModpool(userScores[i]) === 'NM' && userScores[i].scoringType === 'Score v2') {
 				if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
 					userMapIds.push(userScores[i].beatmapId);
+					userMaps.push({ beatmapId: userScores[i].beatmapId, score: parseInt(userScores[i].score) });
 				}
 			}
 		}
 	}
 
-	let starRating = 0;
-	for (let i = 0; i < userMapIds.length && i < 100; i++) {
-		const dbBeatmap = await getOsuBeatmap(userMapIds[i], 0);
+	let totalWeight = 0;
+	let totalWeightedStarRating = 0;
+	for (let i = 0; i < userMaps.length && i < 100; i++) {
+		const dbBeatmap = await getOsuBeatmap(userMaps[i].beatmapId, 0);
 
 		if (dbBeatmap) {
-			starRating += parseFloat(dbBeatmap.starRating);
+			let weigth = (1 / (0.708 * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / 200000) - 2) / 0.708), 2));
+			if (userMaps[i].score > 800000) {
+				weigth = 0;
+			}
+			totalWeight += Math.abs(weigth);
+			totalWeightedStarRating += weigth * parseFloat(dbBeatmap.starRating);
 		} else {
-			userMapIds.splice(i, 1);
+			userMaps.splice(i, 1);
 			i--;
 		}
 	}
 
-	if (userMapIds.length) {
-		return starRating / userMapIds.length;
+	if (userMaps.length) {
+		return totalWeightedStarRating / totalWeight;
 	}
 
 	//Get it from the top plays if no tournament data is available
