@@ -469,16 +469,26 @@ module.exports = {
 		date.setUTCHours(date.getUTCHours() - 24);
 
 		logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBDiscordUsers');
-		const discordUsers = await DBDiscordUsers.findAll();
-
-		for (let i = 0; i < discordUsers.length; i++) {
-			if (discordUsers[i].osuUserId && discordUsers[i].updatedAt < date) {
-				logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBProcessQueue');
-				const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUsers[i].userId } });
-				if (!existingTask) {
-					let now = new Date();
-					DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUsers[i].userId, date: now });
+		const discordUser = await DBDiscordUsers.findOne({
+			where: {
+				osuUserId: {
+					[Op.not]: null
+				},
+				updatedAt: {
+					[Op.lt]: date
 				}
+			},
+			order: [
+				['updatedAt', 'ASC'],
+			]
+		});
+
+		if (discordUser) {
+			logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBProcessQueue');
+			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.userId } });
+			if (!existingTask) {
+				let now = new Date();
+				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.userId, date: now });
 			}
 		}
 	},

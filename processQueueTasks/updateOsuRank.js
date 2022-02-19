@@ -49,7 +49,7 @@ module.exports = {
 			}
 
 			discordUser.osuNotFoundFirstOccurence = null;
-
+			discordUser.changed('updatedAt', true);
 			await discordUser.save();
 		} catch (error) {
 			if (error.message === 'Not found') {
