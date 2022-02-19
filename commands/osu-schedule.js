@@ -4,6 +4,7 @@ const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
 const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-schedule',
@@ -140,7 +141,12 @@ module.exports = {
 
 			logDatabaseQueries(4, 'commands/osu-schedule.js DBOsuMultiScores');
 			const allMatches = await DBOsuMultiScores.findAll({
-				where: { osuUserId: users[i] }
+				where: {
+					osuUserId: users[i],
+					score: {
+						[Op.gte]: 10000
+					}
+				}
 			});
 
 			for (let j = 0; j < 24; j++) {
