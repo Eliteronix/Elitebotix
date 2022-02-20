@@ -504,75 +504,53 @@ module.exports = {
 			// 	},
 			// });
 
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'osu-duel',
-			// 		description: 'Lets you play matches which are being reffed by the bot',
-			// 		options: [
-			// 			{
-			// 				'name': 'match',
-			// 				'description': 'Lets you instantly create a Bo7 match against an opponent',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'opponent',
-			// 						'description': 'The opponent you want to play against',
-			// 						'type': 6, // 6 is type USER
-			// 						'required': true
-			// 					},
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'starrating',
-			// 				'description': 'Get shown what a users star rating is',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'username',
-			// 						'description': 'The username, id or link of the player to get the duel star rating for',
-			// 						'type': 3,
-			// 						'required': false
-			// 					},
-			// 				]
-			// 			},
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'osu-duel',
-			// 		description: 'Lets you play matches which are being reffed by the bot',
-			// 		options: [
-			// 			{
-			// 				'name': 'match',
-			// 				'description': 'Lets you instantly create a Bo7 match against an opponent',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'opponent',
-			// 						'description': 'The opponent you want to play against',
-			// 						'type': 6, // 6 is type USER
-			// 						'required': true
-			// 					},
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'starrating',
-			// 				'description': 'Get shown what a users star rating is',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'username',
-			// 						'description': 'The username, id or link of the player to get the duel star rating for',
-			// 						'type': 3,
-			// 						'required': false
-			// 					},
-			// 				]
-			// 			},
-			// 		]
-			// 	},
-			// });
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'osu-duel',
+					description: 'Lets you play matches which are being reffed by the bot',
+					options: [
+						{
+							'name': 'match',
+							'description': 'Lets you instantly create a Bo7 match against an opponent',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'opponent',
+									'description': 'The opponent you want to play against',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+							]
+						},
+						{
+							'name': 'starrating',
+							'description': 'Get shown what a users star rating is',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'username',
+									'description': 'The username, id or link of the player to get the duel star rating for',
+									'type': 3,
+									'required': false
+								},
+							]
+						},
+						{
+							'name': 'rating-leaderboard',
+							'description': 'Get a leaderboard of the duel star ratings',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'page',
+									'description': 'The page of the leaderboard to display',
+									'type': 4,
+									'required': false
+								},
+							]
+						},
+					]
+				},
+			});
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {

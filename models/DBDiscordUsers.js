@@ -29,6 +29,9 @@ module.exports = (sequelize, DataTypes) => {
 		osuPP: {
 			type: DataTypes.STRING,
 		},
+		osuDuelStarRating: {
+			type: DataTypes.STRING,
+		},
 		osuRank: {
 			type: DataTypes.STRING,
 		},

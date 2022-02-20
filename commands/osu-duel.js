@@ -1,8 +1,9 @@
 const { DBDiscordUsers, DBProcessQueue, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
 const osu = require('node-osu');
-const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getScoreModpool, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink } = require('../utils');
+const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
+const { leaderboardEntriesPerPage } = require('../config.json');
 
 module.exports = {
 	name: 'osu-duel',
@@ -706,121 +707,107 @@ module.exports = {
 
 				const starRating = await getUserDuelStarRating(osuUser.id);
 
-				return await interaction.editReply({ content: `The user \`${osuUser.name.replace(/`/g, '')}\` has a star rating evaluation of \`${Math.round(starRating * 100) / 100}\`.`, ephemeral: true });
+				return await interaction.editReply({ content: `The user \`${osuUser.name.replace(/`/g, '')}\` has a star rating evaluation of \`${Math.round(starRating * 100) / 100}*\`.`, ephemeral: true });
+			} else if (interaction.options._subcommand === 'rating-leaderboard') {
+				interaction.deferReply();
+
+				interaction.guild.members.fetch()
+					.then(async (guildMembers) => {
+						const members = [];
+						guildMembers.each(member => members.push(member));
+						let osuAccounts = [];
+						for (let i = 0; i < members.length; i++) {
+							logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
+							const discordUser = await DBDiscordUsers.findOne({
+								where: {
+									userId: members[i].id,
+									osuUserId: {
+										[Op.not]: null,
+									},
+									osuDuelStarRating: {
+										[Op.not]: null,
+									}
+								},
+							});
+
+							if (discordUser) {
+								osuAccounts.push({
+									userId: discordUser.userId,
+									osuUserId: discordUser.osuUserId,
+									osuName: discordUser.osuName,
+									osuVerified: discordUser.osuVerified,
+									osuDuelStarRating: parseFloat(discordUser.osuDuelStarRating),
+								});
+							}
+						}
+
+						quicksortDuelStarRating(osuAccounts);
+
+						let leaderboardData = [];
+
+						let messageToAuthor = '';
+
+						for (let i = 0; i < osuAccounts.length; i++) {
+							if (interaction.user.id === osuAccounts[i].userId) {
+								messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
+							}
+							const member = await interaction.guild.members.fetch(osuAccounts[i].userId);
+
+							let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
+
+							if (member.nickname) {
+								userDisplayName = `${member.nickname} / ${userDisplayName}`;
+							}
+
+							let verified = '⨯';
+
+							if (osuAccounts[i].osuVerified) {
+								verified = '✔';
+							}
+
+							let dataset = {
+								name: userDisplayName
+							};
+
+							dataset.value = `#${Math.round(osuAccounts[i].osuDuelStarRating * 1000) / 1000}* | ${verified} ${osuAccounts[i].osuName}`;
+
+							leaderboardData.push(dataset);
+						}
+
+						let totalPages = Math.floor(leaderboardData.length / leaderboardEntriesPerPage) + 1;
+
+						let page;
+
+						if (args[0] && !isNaN(args[0])) {
+							page = parseInt(args[0]);
+						}
+
+						if (!page && leaderboardData.length > 300) {
+							page = 1;
+						}
+
+						if (totalPages === 1) {
+							page = null;
+						}
+
+						let filename = `osu-duelrating-leaderboard-${interaction.user.id}-${interaction.guild.name}.png`;
+
+						if (page) {
+							filename = `osu-duelrating-leaderboard-${interaction.user.id}-${interaction.guild.name}-page${page}.png`;
+						}
+
+						const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${interaction.guild.name}'s osu! Duel Star Rating leaderboard`, filename, page);
+
+						//Send attachment
+						await interaction.followUp({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect <username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-duel starrating username:[username]\` is being used.`, files: [attachment] });
+					})
+					.catch(err => {
+						console.log(err);
+					});
 			}
 		}
 	},
 };
-
-async function getUserDuelStarRating(osuUserId) {
-	//Try to get it from tournament data if available
-	const userScores = await DBOsuMultiScores.findAll({
-		where: { osuUserId: osuUserId }
-	});
-
-	quicksortMatchId(userScores);
-
-	// Old version
-	// const checkedMapIds = [];
-	// const userMapIds = [];
-	// for (let i = 0; i < userScores.length; i++) {
-	// 	if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1) {
-	// 		checkedMapIds.push(userScores[i].beatmapId);
-	// 		if (parseInt(userScores[i].score) > 200000 && parseInt(userScores[i].score) < 600000 && getScoreModpool(userScores[i]) === 'NM' && userScores[i].scoringType === 'Score v2') {
-	// 			if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
-	// 				userMapIds.push(userScores[i].beatmapId);
-	// 			}
-	// 		}
-	// 	}
-	// }
-
-	// let starRating = 0;
-	// for (let i = 0; i < userMapIds.length && i < 100; i++) {
-	// 	const dbBeatmap = await getOsuBeatmap(userMapIds[i], 0);
-
-	// 	if (dbBeatmap) {
-	// 		starRating += parseFloat(dbBeatmap.starRating);
-	// 	} else {
-	// 		userMapIds.splice(i, 1);
-	// 		i--;
-	// 	}
-	// }
-
-	// if (userMapIds.length) {
-	// 	return starRating / userMapIds.length;
-	// }
-
-	const checkedMapIds = [];
-	const userMapIds = [];
-	const userMaps = [];
-	for (let i = 0; i < userScores.length; i++) {
-		if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1) {
-			checkedMapIds.push(userScores[i].beatmapId);
-			if (getScoreModpool(userScores[i]) === 'NM' && userScores[i].scoringType === 'Score v2') {
-				if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
-					userMapIds.push(userScores[i].beatmapId);
-					userMaps.push({ beatmapId: userScores[i].beatmapId, score: parseInt(userScores[i].score) });
-				}
-			}
-		}
-	}
-
-	let totalWeight = 0;
-	let totalWeightedStarRating = 0;
-	for (let i = 0; i < userMaps.length && i < 100; i++) {
-		const dbBeatmap = await getOsuBeatmap(userMaps[i].beatmapId, 0);
-
-		if (dbBeatmap) {
-			let weigth = (1 / (0.708 * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / 200000) - 2) / 0.708), 2));
-			if (userMaps[i].score > 800000) {
-				weigth = 0;
-			}
-			totalWeight += Math.abs(weigth);
-			totalWeightedStarRating += weigth * parseFloat(dbBeatmap.starRating);
-		} else {
-			userMaps.splice(i, 1);
-			i--;
-		}
-	}
-
-	if (userMaps.length) {
-		return totalWeightedStarRating / totalWeight;
-	}
-
-	//Get it from the top plays if no tournament data is available
-
-	// eslint-disable-next-line no-undef
-	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-	});
-
-	const topScores = await osuApi.getUserBest({ u: osuUserId, m: 0, limit: 100 })
-		.catch(err => {
-			if (err.message === 'Not found') {
-				throw new Error('No standard plays');
-			} else {
-				console.log(err);
-			}
-		});
-
-	let stars = [];
-	for (let i = 0; i < topScores.length; i++) {
-		//Add difficulty ratings
-		const dbBeatmap = await getOsuBeatmap(topScores[i].beatmapId, topScores[i].raw_mods);
-		if (dbBeatmap && dbBeatmap.starRating && parseFloat(dbBeatmap.starRating) > 0) {
-			stars.push(dbBeatmap.starRating);
-		}
-	}
-
-	let averageStars = 0;
-	for (let i = 0; i < stars.length; i++) {
-		averageStars += parseFloat(stars[i]);
-	}
-	return (averageStars / stars.length) - 0.5;
-}
 
 async function messageUserWithRetries(user, interaction, content) {
 	for (let i = 0; i < 3; i++) {
@@ -890,11 +877,11 @@ function quicksort(list, start = 0, end = undefined) {
 	return list;
 }
 
-function partitionMatchId(list, start, end) {
+function partitionDuelStarRating(list, start, end) {
 	const pivot = list[end];
 	let i = start;
 	for (let j = start; j < end; j += 1) {
-		if (parseInt(list[j].matchId) >= parseInt(pivot.matchId)) {
+		if (list[j].osuDuelStarRating >= pivot.osuDuelStarRating) {
 			[list[j], list[i]] = [list[i], list[j]];
 			i++;
 		}
@@ -903,14 +890,14 @@ function partitionMatchId(list, start, end) {
 	return i;
 }
 
-function quicksortMatchId(list, start = 0, end = undefined) {
+function quicksortDuelStarRating(list, start = 0, end = undefined) {
 	if (end === undefined) {
 		end = list.length - 1;
 	}
 	if (start < end) {
-		const p = partitionMatchId(list, start, end);
-		quicksortMatchId(list, start, p - 1);
-		quicksortMatchId(list, p + 1, end);
+		const p = partitionDuelStarRating(list, start, end);
+		quicksortDuelStarRating(list, start, p - 1);
+		quicksortDuelStarRating(list, p + 1, end);
 	}
 	return list;
 }

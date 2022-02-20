@@ -1036,7 +1036,6 @@ function partitionMapsPlayedReadable(list, start, end) {
 	const pivot = list[end];
 	let i = start;
 	for (let j = start; j < end; j += 1) {
-		console.log(`${list[j].substring(3, 7)}${list[j].substring(0, 2)}`);
 		if (parseInt(`${list[j].substring(3, 7)}${list[j].substring(0, 2)}`) >= parseInt(`${pivot.substring(3, 7)}${pivot.substring(0, 2)}`)) {
 			[list[j], list[i]] = [list[i], list[j]];
 			i++;
