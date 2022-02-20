@@ -91,7 +91,8 @@ module.exports = {
         if (lobbyId > 12) {
             lobbyId++;
         }
-
+        
+        //this shit is wrong and not working
         let PlayerNameCell = sheet.getCell(3 + lobbyId, 6);
         for (let i = 0; PlayerNameCell !== ''; i++) {
             PlayerNameCell = sheet.getCell(3 + lobbyId, 6 + i); //getCell(row, column) zero-indexed
