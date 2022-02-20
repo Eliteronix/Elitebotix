@@ -48,7 +48,15 @@ module.exports = {
 				discordUser.osuBadges = badges;
 			}
 
-			discordUser.osuDuelStarRating = await getUserDuelStarRating(discordUser.osuUserId);
+			try {
+				discordUser.osuDuelStarRating = await getUserDuelStarRating(discordUser.osuUserId);
+			} catch (e) {
+				if (e === 'No standard plays') {
+					discordUser.osuDuelStarRating = null;
+				} else {
+					console.log(e);
+				}
+			}
 
 			discordUser.osuNotFoundFirstOccurence = null;
 			discordUser.changed('updatedAt', true);

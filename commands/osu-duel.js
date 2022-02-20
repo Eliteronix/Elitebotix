@@ -40,9 +40,16 @@ module.exports = {
 					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect <username>`.');
 				}
 
-				let firstStarRating = await getUserDuelStarRating(commandUser.osuUserId);
+				let firstStarRating = 4;
+				try {
+					firstStarRating = await getUserDuelStarRating(commandUser.osuUserId);
+				} catch (e) {
+					if (e !== 'No standard plays') {
+						console.log(e);
+					}
+				}
 
-				let secondStarRating = null;
+				let secondStarRating = 4;
 				logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers');
 				const discordUser = await DBDiscordUsers.findOne({
 					where: {
@@ -52,7 +59,13 @@ module.exports = {
 				});
 
 				if (discordUser && discordUser.osuUserId) {
-					secondStarRating = await getUserDuelStarRating(discordUser.osuUserId);
+					try {
+						secondStarRating = await getUserDuelStarRating(discordUser.osuUserId);
+					} catch (e) {
+						if (e !== 'No standard plays') {
+							console.log(e);
+						}
+					}
 				} else {
 					return await interaction.editReply(`<@${interaction.options._hoistedOptions[0].value}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
 				}
@@ -705,7 +718,14 @@ module.exports = {
 					osuUser.name = user.name;
 				}
 
-				const starRating = await getUserDuelStarRating(osuUser.id);
+				let starRating = 4;
+				try {
+					starRating = await getUserDuelStarRating(osuUser.id);
+				} catch (e) {
+					if (e !== 'No standard plays') {
+						console.log(e);
+					}
+				}
 
 				return await interaction.editReply({ content: `The user \`${osuUser.name.replace(/`/g, '')}\` has a star rating evaluation of \`${Math.round(starRating * 100) / 100}*\`.`, ephemeral: true });
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
