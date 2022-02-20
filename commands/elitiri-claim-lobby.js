@@ -40,7 +40,7 @@ module.exports = {
                 return interaction.reply({ content: 'Please make sure your lobby ID is correct' });
             }
         }
-
+        // STUFF NEEDS TESTING
         let player = await DBElitiriCupSignUp.findAll({
             where: {
                 tournamentName: currentElitiriCup,
@@ -48,7 +48,7 @@ module.exports = {
             }
         });
 
-        if (!player[0]) {
+        if (!player) {
             if (msg && msg.id) {
                 return msg.reply(`Seems like you're not registered for ${currentElitiriCup}`);
             } else {
@@ -86,20 +86,19 @@ module.exports = {
         const sheet = doc.sheetsByTitle[scheduleSheetId];
         await sheet.loadCells('A1:U29');
 
+
         //we need to skip 17th row
         if (lobbyId > 12) {
             lobbyId++;
         }
 
-        // let PlayerNameCell = sheet.getCell(3 + lobbyId, 6); //getCell(row, column) zero-indexed
-
-        // if (PlayerNameCell.value !== player[0].osuName && PlayerNameCell.value == '') {
-        //     PlayerNameCell.value = player[0].osuName;
-        // } else {
-        //     PlayerNameCell = sheet.getCell(3 + lobbyId, 6);
-        //     PlayerNameCell.value = player[0].osuName;
-        // }
-
+        let PlayerNameCell = sheet.getCell(3 + lobbyId, 6);
+        for (let i = 0; PlayerNameCell !== ''; i++) {
+            PlayerNameCell = sheet.getCell(3 + lobbyId, 6 + i); //getCell(row, column) zero-indexed
+            if (PlayerNameCell.value !== player[0].osuName) {
+                PlayerNameCell.value = player[0].osuName;
+            }
+        }
         await sheet.saveUpdatedCells();
 
         if (msg && msg.id) {
