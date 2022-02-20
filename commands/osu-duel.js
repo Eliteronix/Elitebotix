@@ -769,7 +769,7 @@ module.exports = {
 								name: userDisplayName
 							};
 
-							dataset.value = `#${Math.round(osuAccounts[i].osuDuelStarRating * 1000) / 1000}* | ${verified} ${osuAccounts[i].osuName}`;
+							dataset.value = `${Math.round(osuAccounts[i].osuDuelStarRating * 1000) / 1000}* | ${verified} ${osuAccounts[i].osuName}`;
 
 							leaderboardData.push(dataset);
 						}
