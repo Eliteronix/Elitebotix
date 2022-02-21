@@ -1002,6 +1002,172 @@ module.exports = {
 	getScoreModpool(dbScore) {
 		return getScoreModpoolFunction(dbScore);
 	},
+	async getUserDuelStarRating(osuUserId) {
+		// Old version
+		// //Try to get it from tournament data if available
+		// const userScores = await DBOsuMultiScores.findAll({
+		// 	where: { osuUserId: osuUserId }
+		// });
+
+		// quicksortMatchId(userScores);
+
+		// const checkedMapIds = [];
+		// const userMapIds = [];
+		// const userMaps = [];
+		// for (let i = 0; i < userScores.length; i++) {
+		// 	if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1) {
+		// 		checkedMapIds.push(userScores[i].beatmapId);
+		// 		if (getScoreModpoolFunction(userScores[i]) === 'NM' && userScores[i].scoringType === 'Score v2') {
+		// 			if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
+		// 				userMapIds.push(userScores[i].beatmapId);
+		// 				userMaps.push({ beatmapId: userScores[i].beatmapId, score: parseInt(userScores[i].score) });
+		// 			}
+		// 		}
+		// 	}
+		// }
+
+		// let totalWeight = 0;
+		// let totalWeightedStarRating = 0;
+		// for (let i = 0; i < userMaps.length && i < 100; i++) {
+		// 	const dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
+
+		// 	if (dbBeatmap && dbBeatmap.approvalStatus !== 'Not found') {
+		// 		let weigth = (1 / (0.708 * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / 200000) - 2) / 0.708), 2));
+		// 		if (userMaps[i].score > 800000) {
+		// 			weigth = 0;
+		// 		}
+		// 		totalWeight += Math.abs(weigth);
+		// 		totalWeightedStarRating += weigth * parseFloat(dbBeatmap.starRating);
+		// 	} else {
+		// 		userMaps.splice(i, 1);
+		// 		i--;
+		// 	}
+		// }
+
+		// if (userMaps.length > 4) {
+		// 	const discordUser = await DBDiscordUsers.findOne({
+		// 		where: {
+		// 			osuUserId: osuUserId
+		// 		}
+		// 	});
+		// 	if (discordUser) {
+		// 		discordUser.osuDuelStarRating = totalWeightedStarRating / totalWeight;
+		// 		await discordUser.save();
+		// 	}
+		// 	return totalWeightedStarRating / totalWeight;
+		// }
+
+		//Try to get it from tournament data if available
+		const userScores = await DBOsuMultiScores.findAll({
+			where: { osuUserId: osuUserId }
+		});
+
+		quicksortMatchId(userScores);
+
+		//Get unique maps
+		const checkedMapIds = [];
+		const userMapIds = [];
+		const userMaps = [];
+		for (let i = 0; i < userScores.length; i++) {
+			if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1) {
+				checkedMapIds.push(userScores[i].beatmapId);
+				if (getScoreModpoolFunction(userScores[i]) === 'NM' && userScores[i].scoringType === 'Score v2') {
+					if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
+						userMapIds.push(userScores[i].beatmapId);
+						userMaps.push({ beatmapId: userScores[i].beatmapId, score: parseInt(userScores[i].score) });
+					}
+				}
+			}
+		}
+
+		//Group the maps into steps of 0.1 of difficulty
+		const steps = [];
+		const stepData = [];
+		for (let i = 0; i < userMaps.length; i++) {
+			const dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
+			if (dbBeatmap && dbBeatmap.approvalStatus !== 'Not found') {
+				let weigth = (1 / (0.708 * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / 200000) - 2) / 0.708), 2));
+				if (userMaps[i].score > 800000) {
+					weigth = 0;
+				}
+				let starRatingStep = Math.round(dbBeatmap.starRating * 10) / 10;
+				if (steps.indexOf(starRatingStep) === -1) {
+					stepData.push({ step: starRatingStep, totalWeight: weigth, amount: 1, averageWeight: weigth, weightedStarRating: (starRatingStep) * weigth });
+					steps.push(starRatingStep);
+				} else {
+					stepData[steps.indexOf(starRatingStep)].totalWeight += weigth;
+					stepData[steps.indexOf(starRatingStep)].amount++;
+					stepData[steps.indexOf(starRatingStep)].averageWeight = stepData[steps.indexOf(starRatingStep)].totalWeight / stepData[steps.indexOf(starRatingStep)].amount;
+					stepData[steps.indexOf(starRatingStep)].weightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageWeight;
+				}
+			} else {
+				userMaps.splice(i, 1);
+				i--;
+			}
+		}
+
+		let totalWeight = 0;
+		let totalWeightedStarRating = 0;
+		for (let i = 0; i < stepData.length; i++) {
+			totalWeight += stepData[i].averageWeight;
+			totalWeightedStarRating += stepData[i].weightedStarRating;
+		}
+
+		if (totalWeight > 0) {
+			const discordUser = await DBDiscordUsers.findOne({
+				where: {
+					osuUserId: osuUserId
+				}
+			});
+			if (discordUser) {
+				discordUser.osuDuelStarRating = totalWeightedStarRating / totalWeight;
+				await discordUser.save();
+			}
+			return totalWeightedStarRating / totalWeight;
+		}
+
+		//Get it from the top plays if no tournament data is available
+		// eslint-disable-next-line no-undef
+		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+		});
+
+		const topScores = await osuApi.getUserBest({ u: osuUserId, m: 0, limit: 100 })
+			.catch(err => {
+				if (err.message === 'Not found') {
+					throw new Error('No standard plays');
+				} else {
+					console.log(err);
+				}
+			});
+
+		let stars = [];
+		for (let i = 0; i < topScores.length; i++) {
+			//Add difficulty ratings
+			const dbBeatmap = await getOsuBeatmapFunction(topScores[i].beatmapId, topScores[i].raw_mods);
+			if (dbBeatmap && dbBeatmap.starRating && parseFloat(dbBeatmap.starRating) > 0) {
+				stars.push(dbBeatmap.starRating);
+			}
+		}
+
+		let averageStars = 0;
+		for (let i = 0; i < stars.length; i++) {
+			averageStars += parseFloat(stars[i]);
+		}
+		const discordUser = await DBDiscordUsers.findOne({
+			where: {
+				osuUserId: osuUserId
+			}
+		});
+		if (discordUser) {
+			discordUser.osuDuelStarRating = (averageStars / stars.length) - 0.5;
+			await discordUser.save();
+		}
+		return (averageStars / stars.length) - 0.5;
+	}
 };
 
 async function getOsuBadgeNumberByIdFunction(osuUserId) {
@@ -1475,4 +1641,29 @@ function getScoreModpoolFunction(dbScore) {
 	} else {
 		return 'FM';
 	}
+}
+
+function partitionMatchId(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseInt(list[j].matchId) >= parseInt(pivot.matchId)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksortMatchId(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionMatchId(list, start, end);
+		quicksortMatchId(list, start, p - 1);
+		quicksortMatchId(list, p + 1, end);
+	}
+	return list;
 }

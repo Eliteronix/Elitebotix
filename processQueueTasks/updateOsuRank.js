@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { getOsuBadgeNumberById, logDatabaseQueries } = require('../utils.js');
+const { getOsuBadgeNumberById, logDatabaseQueries, getUserDuelStarRating } = require('../utils.js');
 const osu = require('node-osu');
 const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.json');
 
@@ -46,6 +46,16 @@ module.exports = {
 
 			if (parseInt(badges) > -1) {
 				discordUser.osuBadges = badges;
+			}
+
+			try {
+				discordUser.osuDuelStarRating = await getUserDuelStarRating(discordUser.osuUserId);
+			} catch (e) {
+				if (e === 'No standard plays') {
+					discordUser.osuDuelStarRating = null;
+				} else {
+					console.log(e);
+				}
 			}
 
 			discordUser.osuNotFoundFirstOccurence = null;
