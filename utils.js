@@ -1003,6 +1003,60 @@ module.exports = {
 		return getScoreModpoolFunction(dbScore);
 	},
 	async getUserDuelStarRating(osuUserId) {
+		// Old version
+		// //Try to get it from tournament data if available
+		// const userScores = await DBOsuMultiScores.findAll({
+		// 	where: { osuUserId: osuUserId }
+		// });
+
+		// quicksortMatchId(userScores);
+
+		// const checkedMapIds = [];
+		// const userMapIds = [];
+		// const userMaps = [];
+		// for (let i = 0; i < userScores.length; i++) {
+		// 	if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1) {
+		// 		checkedMapIds.push(userScores[i].beatmapId);
+		// 		if (getScoreModpoolFunction(userScores[i]) === 'NM' && userScores[i].scoringType === 'Score v2') {
+		// 			if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
+		// 				userMapIds.push(userScores[i].beatmapId);
+		// 				userMaps.push({ beatmapId: userScores[i].beatmapId, score: parseInt(userScores[i].score) });
+		// 			}
+		// 		}
+		// 	}
+		// }
+
+		// let totalWeight = 0;
+		// let totalWeightedStarRating = 0;
+		// for (let i = 0; i < userMaps.length && i < 100; i++) {
+		// 	const dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
+
+		// 	if (dbBeatmap && dbBeatmap.approvalStatus !== 'Not found') {
+		// 		let weigth = (1 / (0.708 * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / 200000) - 2) / 0.708), 2));
+		// 		if (userMaps[i].score > 800000) {
+		// 			weigth = 0;
+		// 		}
+		// 		totalWeight += Math.abs(weigth);
+		// 		totalWeightedStarRating += weigth * parseFloat(dbBeatmap.starRating);
+		// 	} else {
+		// 		userMaps.splice(i, 1);
+		// 		i--;
+		// 	}
+		// }
+
+		// if (userMaps.length > 4) {
+		// 	const discordUser = await DBDiscordUsers.findOne({
+		// 		where: {
+		// 			osuUserId: osuUserId
+		// 		}
+		// 	});
+		// 	if (discordUser) {
+		// 		discordUser.osuDuelStarRating = totalWeightedStarRating / totalWeight;
+		// 		await discordUser.save();
+		// 	}
+		// 	return totalWeightedStarRating / totalWeight;
+		// }
+
 		//Try to get it from tournament data if available
 		const userScores = await DBOsuMultiScores.findAll({
 			where: { osuUserId: osuUserId }
@@ -1010,6 +1064,7 @@ module.exports = {
 
 		quicksortMatchId(userScores);
 
+		//Get unique maps
 		const checkedMapIds = [];
 		const userMapIds = [];
 		const userMaps = [];
@@ -1025,22 +1080,37 @@ module.exports = {
 			}
 		}
 
-		let totalWeight = 0;
-		let totalWeightedStarRating = 0;
-		for (let i = 0; i < userMaps.length && i < 100; i++) {
+		//Group the maps into steps of 0.1 of difficulty
+		const steps = [];
+		const stepData = [];
+		for (let i = 0; i < userMaps.length; i++) {
 			const dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
-
 			if (dbBeatmap && dbBeatmap.approvalStatus !== 'Not found') {
 				let weigth = (1 / (0.708 * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / 200000) - 2) / 0.708), 2));
 				if (userMaps[i].score > 800000) {
 					weigth = 0;
 				}
-				totalWeight += Math.abs(weigth);
-				totalWeightedStarRating += weigth * parseFloat(dbBeatmap.starRating);
+				let starRatingStep = Math.round(dbBeatmap.starRating * 10) / 10;
+				if (steps.indexOf(starRatingStep) === -1) {
+					stepData.push({ step: starRatingStep, totalWeight: weigth, amount: 1, averageWeight: weigth, weightedStarRating: (starRatingStep) * weigth });
+					steps.push(starRatingStep);
+				} else {
+					stepData[steps.indexOf(starRatingStep)].totalWeight += weigth;
+					stepData[steps.indexOf(starRatingStep)].amount++;
+					stepData[steps.indexOf(starRatingStep)].averageWeight = stepData[steps.indexOf(starRatingStep)].totalWeight / stepData[steps.indexOf(starRatingStep)].amount;
+					stepData[steps.indexOf(starRatingStep)].weightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageWeight;
+				}
 			} else {
 				userMaps.splice(i, 1);
 				i--;
 			}
+		}
+
+		let totalWeight = 0;
+		let totalWeightedStarRating = 0;
+		for (let i = 0; i < stepData.length; i++) {
+			totalWeight += stepData[i].averageWeight;
+			totalWeightedStarRating += stepData[i].weightedStarRating;
 		}
 
 		if (userMaps.length > 4) {
