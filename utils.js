@@ -1113,7 +1113,7 @@ module.exports = {
 			totalWeightedStarRating += stepData[i].weightedStarRating;
 		}
 
-		if (userMaps.length > 4) {
+		if (totalWeight > 0) {
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
 					osuUserId: osuUserId
