@@ -1059,7 +1059,12 @@ module.exports = {
 
 		//Try to get it from tournament data if available
 		const userScores = await DBOsuMultiScores.findAll({
-			where: { osuUserId: osuUserId }
+			where: {
+				osuUserId: osuUserId,
+				tourneyMatch: true,
+				scoringType: 'Score v2',
+				mode: 'Standard'
+			}
 		});
 
 		quicksortMatchId(userScores);
@@ -1071,7 +1076,7 @@ module.exports = {
 		for (let i = 0; i < userScores.length; i++) {
 			if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1) {
 				checkedMapIds.push(userScores[i].beatmapId);
-				if (getScoreModpoolFunction(userScores[i]) === 'NM' && userScores[i].scoringType === 'Score v2') {
+				if (getScoreModpoolFunction(userScores[i]) === 'NM') {
 					if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
 						userMapIds.push(userScores[i].beatmapId);
 						userMaps.push({ beatmapId: userScores[i].beatmapId, score: parseInt(userScores[i].score) });
