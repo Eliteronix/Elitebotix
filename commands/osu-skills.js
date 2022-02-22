@@ -261,6 +261,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				}
 			}
 
+			//Set Duel Rating and League Rank
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.font = 'bold 15px comfortaa, sans-serif';
@@ -275,7 +276,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					mode: 'Standard'
 				}
 			});
-
 
 			let leagueText = 'Bronze 1';
 			let leagueImage = await Canvas.loadImage('./other/emblems/bronze_1.png');
@@ -325,11 +325,13 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				leagueText = 'Bronze 2';
 				leagueImage = await Canvas.loadImage('./other/emblems/bronze_2.png');
 			}
+
 			ctx.drawImage(leagueImage, 50, 195, 100, 100);
 
 			if (userScores < 10) {
 				leagueText = 'Provisional: ' + leagueText;
 			}
+
 			ctx.fillText(leagueText, 90, 310);
 			ctx.fillText(`(${Math.round(userDuelStarRating * 1000) / 1000}*)`, 90, 330);
 
