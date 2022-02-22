@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 const { Op } = require('sequelize');
@@ -260,6 +260,35 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
 				}
 			}
+
+			ctx.fillStyle = '#ffffff';
+			ctx.textAlign = 'center';
+			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.fillText('Duel Rating', 90, 195);
+			let userDuelStarRating = await getUserDuelStarRating(user.id);
+
+			const userScores = await DBOsuMultiScores.findAll({
+				where: {
+					osuUserId: user.id,
+					tourneyMatch: true,
+					scoringType: 'Score v2',
+					mode: 'Standard'
+				}
+			});
+
+
+			let leagueText = 'Bronze 1';
+			leagueText = 'Bronze 5';
+			leagueText = 'Silver 1';
+			leagueText = 'Gold 1';
+			leagueText = 'Platinum 1';
+			leagueText = 'Diamond 1';
+			leagueText = 'Master 1';
+			if (userScores < 10) {
+				leagueText = 'Provisional: ' + leagueText;
+			}
+			ctx.fillText(leagueText, 90, 310);
+			ctx.fillText(`(${Math.round(userDuelStarRating * 1000) / 1000}*)`, 90, 330);
 
 			let today = new Date().toLocaleDateString();
 
