@@ -729,6 +729,9 @@ module.exports = {
 
 				return await interaction.editReply({ content: `The user \`${osuUser.name.replace(/`/g, '')}\` has a star rating evaluation of \`${Math.round(starRating * 100) / 100}*\`.`, ephemeral: true });
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
+				if (!interaction.guild) {
+					return interaction.reply('The leaderboard can currently only be used in servers.');
+				}
 				interaction.deferReply();
 
 				interaction.guild.members.fetch()

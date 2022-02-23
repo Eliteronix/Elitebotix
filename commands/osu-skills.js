@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 const { Op } = require('sequelize');
@@ -260,6 +260,80 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
 				}
 			}
+
+			//Set Duel Rating and League Rank
+			ctx.fillStyle = '#ffffff';
+			ctx.textAlign = 'center';
+			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.fillText('Duel Rating', 90, 195);
+			let userDuelStarRating = await getUserDuelStarRating(user.id);
+
+			const userScores = await DBOsuMultiScores.findAll({
+				where: {
+					osuUserId: user.id,
+					tourneyMatch: true,
+					scoringType: 'Score v2',
+					mode: 'Standard'
+				}
+			});
+
+			let leagueText = 'Bronze 1';
+			let leagueImage = await Canvas.loadImage('./other/emblems/bronze_1.png');
+			if (userDuelStarRating > 7) {
+				leagueText = 'Master';
+				leagueImage = await Canvas.loadImage('./other/emblems/master.png');
+			} else if (userDuelStarRating > 6.8) {
+				leagueText = 'Diamond 3';
+				leagueImage = await Canvas.loadImage('./other/emblems/diamond_3.png');
+			} else if (userDuelStarRating > 6.6) {
+				leagueText = 'Diamond 2';
+				leagueImage = await Canvas.loadImage('./other/emblems/diamond_2.png');
+			} else if (userDuelStarRating > 6.4) {
+				leagueText = 'Diamond 1';
+				leagueImage = await Canvas.loadImage('./other/emblems/diamond_1.png');
+			} else if (userDuelStarRating > 6.2) {
+				leagueText = 'Platinum 3';
+				leagueImage = await Canvas.loadImage('./other/emblems/platinum_3.png');
+			} else if (userDuelStarRating > 6) {
+				leagueText = 'Platinum 2';
+				leagueImage = await Canvas.loadImage('./other/emblems/platinum_2.png');
+			} else if (userDuelStarRating > 5.8) {
+				leagueText = 'Platinum 1';
+				leagueImage = await Canvas.loadImage('./other/emblems/platinum_1.png');
+			} else if (userDuelStarRating > 5.6) {
+				leagueText = 'Gold 3';
+				leagueImage = await Canvas.loadImage('./other/emblems/gold_3.png');
+			} else if (userDuelStarRating > 5.4) {
+				leagueText = 'Gold 2';
+				leagueImage = await Canvas.loadImage('./other/emblems/gold_2.png');
+			} else if (userDuelStarRating > 5.2) {
+				leagueText = 'Gold 1';
+				leagueImage = await Canvas.loadImage('./other/emblems/gold_1.png');
+			} else if (userDuelStarRating > 5) {
+				leagueText = 'Silver 3';
+				leagueImage = await Canvas.loadImage('./other/emblems/silver_3.png');
+			} else if (userDuelStarRating > 4.8) {
+				leagueText = 'Silver 2';
+				leagueImage = await Canvas.loadImage('./other/emblems/silver_2.png');
+			} else if (userDuelStarRating > 4.6) {
+				leagueText = 'Silver 1';
+				leagueImage = await Canvas.loadImage('./other/emblems/silver_1.png');
+			} else if (userDuelStarRating > 4.4) {
+				leagueText = 'Bronze 3';
+				leagueImage = await Canvas.loadImage('./other/emblems/bronze_3.png');
+			} else if (userDuelStarRating > 4.2) {
+				leagueText = 'Bronze 2';
+				leagueImage = await Canvas.loadImage('./other/emblems/bronze_2.png');
+			}
+
+			ctx.drawImage(leagueImage, 50, 195, 100, 100);
+
+			if (userScores < 10) {
+				leagueText = 'Provisional: ' + leagueText;
+			}
+
+			ctx.fillText(leagueText, 90, 310);
+			ctx.fillText(`(${Math.round(userDuelStarRating * 1000) / 1000}*)`, 90, 330);
 
 			let today = new Date().toLocaleDateString();
 
