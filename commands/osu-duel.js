@@ -1,9 +1,11 @@
 const { DBDiscordUsers, DBProcessQueue, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
 const osu = require('node-osu');
-const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard } = require('../utils');
+const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
+const Canvas = require('canvas');
+const Discord = require('discord.js');
 
 module.exports = {
 	name: 'osu-duel',
@@ -657,8 +659,8 @@ module.exports = {
 						return await channel.leave();
 					}
 				});
-			} else if (interaction.options._subcommand === 'starrating') {
-				await interaction.deferReply({ ephemeral: true });
+			} else if (interaction.options._subcommand === 'ranking') {
+				await interaction.deferReply();
 				let osuUser = {
 					id: null,
 					name: null,
@@ -729,7 +731,158 @@ module.exports = {
 					}
 				}
 
-				return await interaction.editReply({ content: `The user \`${osuUser.name.replace(/`/g, '')}\` has a star rating evaluation of \`${Math.round(starRating.total * 100) / 100}*\`.`, ephemeral: true });
+				const canvasWidth = 700;
+				const canvasHeight = 800;
+
+				//Create Canvas
+				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+				//Get context and load the image
+				const ctx = canvas.getContext('2d');
+
+				const background = await Canvas.loadImage('./other/osu-background.png');
+
+				for (let i = 0; i < canvas.height / background.height; i++) {
+					for (let j = 0; j < canvas.width / background.width; j++) {
+						ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+					}
+				}
+
+				//Footer
+				let today = new Date().toLocaleDateString();
+
+				ctx.font = 'bold 15px comfortaa, sans-serif';
+				ctx.fillStyle = '#ffffff';
+
+				ctx.textAlign = 'left';
+				ctx.fillText(`UserID: ${osuUser.id}`, canvas.width / 140, canvas.height - canvas.height / 70);
+
+				ctx.textAlign = 'right';
+				ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
+
+				//Title
+				ctx.fillStyle = '#ffffff';
+				ctx.textAlign = 'center';
+				ctx.font = 'bold 30px comfortaa, sans-serif';
+				ctx.fillText(`League Rankings for ${osuUser.name}`, 350, 40);
+
+				//Set Duel Rating and League Rank
+				ctx.fillStyle = '#ffffff';
+				ctx.textAlign = 'center';
+				ctx.font = 'bold 20px comfortaa, sans-serif';
+				//Current Total Rating
+				ctx.fillText('Current Total Rating', 475, 100);
+				let userDuelStarRating = await getUserDuelStarRating(osuUser.id, interaction.client);
+
+				let duelLeague = getOsuDuelLeague(userDuelStarRating.total);
+
+				let leagueText = duelLeague.name;
+				let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+				ctx.drawImage(leagueImage, 400, 100, 150, 150);
+
+				if (userDuelStarRating.noMod === null
+					|| userDuelStarRating.hidden === null
+					|| userDuelStarRating.hardRock === null
+					|| userDuelStarRating.doubleTime === null
+					|| userDuelStarRating.freeMod === null) {
+					leagueText = 'Provisional: ' + leagueText;
+				}
+
+				ctx.fillText(leagueText, 475, 275);
+				ctx.fillText(`(${Math.round(userDuelStarRating.total * 1000) / 1000}*)`, 475, 300);
+
+				//Current NoMod Rating
+				ctx.fillText('NoMod Rating', 150, 350);
+				duelLeague = getOsuDuelLeague(userDuelStarRating.noMod);
+
+				leagueText = duelLeague.name;
+				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+				ctx.drawImage(leagueImage, 100, 350, 100, 100);
+
+				ctx.fillText(leagueText, 150, 475);
+				if (userDuelStarRating.noMod !== null) {
+					ctx.fillText(`(${Math.round(userDuelStarRating.noMod * 1000) / 1000}*)`, 150, 500);
+				}
+
+				//Current Hidden Rating
+				ctx.fillText('Hidden Rating', 350, 350);
+				duelLeague = getOsuDuelLeague(userDuelStarRating.hidden);
+
+				leagueText = duelLeague.name;
+				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+				ctx.drawImage(leagueImage, 300, 350, 100, 100);
+
+				ctx.fillText(leagueText, 350, 475);
+				if (userDuelStarRating.hidden !== null) {
+					ctx.fillText(`(${Math.round(userDuelStarRating.hidden * 1000) / 1000}*)`, 350, 500);
+				}
+
+				//Current HardRock Rating
+				ctx.fillText('HardRock Rating', 550, 350);
+				duelLeague = getOsuDuelLeague(userDuelStarRating.hardRock);
+
+				leagueText = duelLeague.name;
+				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+				ctx.drawImage(leagueImage, 500, 350, 100, 100);
+
+				ctx.fillText(leagueText, 550, 475);
+				if (userDuelStarRating.hardRock !== null) {
+					ctx.fillText(`(${Math.round(userDuelStarRating.hardRock * 1000) / 1000}*)`, 550, 500);
+				}
+
+				//Current DoubleTime Rating
+				ctx.fillText('DoubleTime Rating', 250, 550);
+				duelLeague = getOsuDuelLeague(userDuelStarRating.doubleTime);
+
+				leagueText = duelLeague.name;
+				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+				ctx.drawImage(leagueImage, 200, 550, 100, 100);
+
+				ctx.fillText(leagueText, 250, 675);
+				if (userDuelStarRating.doubleTime !== null) {
+					ctx.fillText(`(${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}*)`, 250, 700);
+				}
+
+				//Current FreeMod Rating
+				ctx.fillText('FreeMod Rating', 450, 550);
+				duelLeague = getOsuDuelLeague(userDuelStarRating.freeMod);
+
+				leagueText = duelLeague.name;
+				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+				ctx.drawImage(leagueImage, 400, 550, 100, 100);
+
+				ctx.fillText(leagueText, 450, 675);
+				if (userDuelStarRating.freeMod !== null) {
+					ctx.fillText(`(${Math.round(userDuelStarRating.freeMod * 1000) / 1000}*)`, 450, 700);
+				}
+
+				//Get a circle for inserting the player avatar
+				ctx.beginPath();
+				ctx.arc(180, 180, 80, 0, Math.PI * 2, true);
+				ctx.closePath();
+				ctx.clip();
+
+				//Draw a shape onto the main canvas
+				try {
+					const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.id}`);
+					ctx.drawImage(avatar, 100, 100, 160, 160);
+				} catch (error) {
+					const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
+					ctx.drawImage(avatar, 100, 100, 160, 160);
+				}
+
+				//Create as an attachment
+				const leagueRankings = new Discord.MessageAttachment(canvas.toBuffer(), `osu-leagueRankings-${osuUser.id}.png`);
+
+				return await interaction.editReply({ content: `The user \`${osuUser.name.replace(/`/g, '')}\` has a star rating evaluation of \`${Math.round(starRating.total * 100) / 100}*\`.`, files: [leagueRankings] });
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
 				if (!interaction.guild) {
 					return interaction.reply('The leaderboard can currently only be used in servers.');

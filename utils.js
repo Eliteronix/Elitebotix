@@ -1262,6 +1262,43 @@ module.exports = {
 		}
 
 		return duelRatings;
+	},
+	getOsuDuelLeague(rating) {
+		if (rating > 7) {
+			return { name: 'Master', imageName: 'master' };
+		} else if (rating > 6.8) {
+			return { name: 'Diamond 3', imageName: 'diamond_3' };
+		} else if (rating > 6.6) {
+			return { name: 'Diamond 2', imageName: 'diamond_2' };
+		} else if (rating > 6.4) {
+			return { name: 'Diamond 1', imageName: 'diamond_1' };
+		} else if (rating > 6.2) {
+			return { name: 'Platinum 3', imageName: 'platinum_3' };
+		} else if (rating > 6) {
+			return { name: 'Platinum 2', imageName: 'platinum_2' };
+		} else if (rating > 5.8) {
+			return { name: 'Platinum 1', imageName: 'platinum_1' };
+		} else if (rating > 5.6) {
+			return { name: 'Gold 3', imageName: 'gold_3' };
+		} else if (rating > 5.4) {
+			return { name: 'Gold 2', imageName: 'gold_2' };
+		} else if (rating > 5.2) {
+			return { name: 'Gold 1', imageName: 'gold_1' };
+		} else if (rating > 5) {
+			return { name: 'Silver 3', imageName: 'silver_3' };
+		} else if (rating > 4.8) {
+			return { name: 'Silver 2', imageName: 'silver_2' };
+		} else if (rating > 4.6) {
+			return { name: 'Silver 1', imageName: 'silver_1' };
+		} else if (rating > 4.4) {
+			return { name: 'Bronze 3', imageName: 'bronze_3' };
+		} else if (rating > 4.2) {
+			return { name: 'Bronze 2', imageName: 'bronze_2' };
+		} else if (rating > 0) {
+			return { name: 'Bronze 1', imageName: 'bronze_1' };
+		} else {
+			return { name: 'Unranked', imageName: 'unranked' };
+		}
 	}
 };
 
