@@ -20,6 +20,8 @@ module.exports = {
 			where: { userId: discordUserId }
 		});
 
+		discordUser.changed('updatedAt', true);
+
 		try {
 			const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
 
@@ -59,7 +61,6 @@ module.exports = {
 			}
 
 			discordUser.osuNotFoundFirstOccurence = null;
-			discordUser.changed('updatedAt', true);
 			await discordUser.save();
 		} catch (error) {
 			if (error.message === 'Not found') {
@@ -148,8 +149,8 @@ module.exports = {
 							}
 						}
 					}
-
 				}
+				await discordUser.save();
 
 			} else {
 				console.log(error);
