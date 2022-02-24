@@ -32,6 +32,21 @@ module.exports = (sequelize, DataTypes) => {
 		osuDuelStarRating: {
 			type: DataTypes.STRING,
 		},
+		osuNoModDuelStarRating: {
+			type: DataTypes.STRING,
+		},
+		osuHiddenDuelStarRating: {
+			type: DataTypes.STRING,
+		},
+		osuHardRockDuelStarRating: {
+			type: DataTypes.STRING,
+		},
+		osuDoubleTimeDuelStarRating: {
+			type: DataTypes.STRING,
+		},
+		osuFreeModDuelStarRating: {
+			type: DataTypes.STRING,
+		},
 		osuRank: {
 			type: DataTypes.STRING,
 		},
