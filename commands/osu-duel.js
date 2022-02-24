@@ -42,7 +42,7 @@ module.exports = {
 
 				let firstStarRating = 4;
 				try {
-					firstStarRating = await getUserDuelStarRating(commandUser.osuUserId);
+					firstStarRating = await getUserDuelStarRating(commandUser.osuUserId, interaction.client);
 				} catch (e) {
 					if (e !== 'No standard plays') {
 						console.log(e);
@@ -60,7 +60,7 @@ module.exports = {
 
 				if (discordUser && discordUser.osuUserId) {
 					try {
-						secondStarRating = await getUserDuelStarRating(discordUser.osuUserId);
+						secondStarRating = await getUserDuelStarRating(discordUser.osuUserId, interaction.client);
 					} catch (e) {
 						if (e !== 'No standard plays') {
 							console.log(e);
@@ -70,7 +70,7 @@ module.exports = {
 					return await interaction.editReply(`<@${interaction.options._hoistedOptions[0].value}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
 				}
 
-				let averageStarRating = (firstStarRating + secondStarRating) / 2;
+				let averageStarRating = (firstStarRating.total + secondStarRating.total) / 2;
 
 				let lowerBound = averageStarRating - 0.125;
 				let upperBound = averageStarRating + 0.125;
@@ -121,6 +121,7 @@ module.exports = {
 					where: {
 						osuUserId: commandUser.osuUserId,
 						tourneyMatch: true,
+						mode: 'Standard'
 					}
 				});
 
@@ -132,6 +133,7 @@ module.exports = {
 					where: {
 						osuUserId: discordUser.osuUserId,
 						tourneyMatch: true,
+						mode: 'Standard'
 					}
 				});
 
@@ -720,14 +722,14 @@ module.exports = {
 
 				let starRating = 4;
 				try {
-					starRating = await getUserDuelStarRating(osuUser.id);
+					starRating = await getUserDuelStarRating(osuUser.id, interaction.client);
 				} catch (e) {
 					if (e !== 'No standard plays') {
 						console.log(e);
 					}
 				}
 
-				return await interaction.editReply({ content: `The user \`${osuUser.name.replace(/`/g, '')}\` has a star rating evaluation of \`${Math.round(starRating * 100) / 100}*\`.`, ephemeral: true });
+				return await interaction.editReply({ content: `The user \`${osuUser.name.replace(/`/g, '')}\` has a star rating evaluation of \`${Math.round(starRating.total * 100) / 100}*\`.`, ephemeral: true });
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
 				if (!interaction.guild) {
 					return interaction.reply('The leaderboard can currently only be used in servers.');
