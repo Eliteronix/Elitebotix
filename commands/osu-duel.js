@@ -722,15 +722,6 @@ module.exports = {
 					osuUser.name = user.name;
 				}
 
-				let starRating = 4;
-				try {
-					starRating = await getUserDuelStarRating(osuUser.id, interaction.client);
-				} catch (e) {
-					if (e !== 'No standard plays') {
-						console.log(e);
-					}
-				}
-
 				const canvasWidth = 700;
 				const canvasHeight = 800;
 
@@ -882,7 +873,7 @@ module.exports = {
 				//Create as an attachment
 				const leagueRankings = new Discord.MessageAttachment(canvas.toBuffer(), `osu-leagueRankings-${osuUser.id}.png`);
 
-				return await interaction.editReply({ content: `The user \`${osuUser.name.replace(/`/g, '')}\` has a star rating evaluation of \`${Math.round(starRating.total * 100) / 100}*\`.`, files: [leagueRankings] });
+				return await interaction.editReply({ content: 'The data is based on matches played using `/osu-duel match` and any other tournament matches.', files: [leagueRankings] });
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
 				if (!interaction.guild) {
 					return interaction.reply('The leaderboard can currently only be used in servers.');
