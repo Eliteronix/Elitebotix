@@ -1048,10 +1048,16 @@ module.exports = {
 			const stepData = [];
 			for (let i = 0; i < userMaps.length && i < 50; i++) {
 				let dbBeatmap = null;
-				if (modPools[modIndex] === 'HR' || modPools[modIndex] === 'FM') {
+				if (modPools[modIndex] === 'HR') {
 					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 16);
 				} else if (modPools[modIndex] === 'DT') {
 					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 64);
+				} else if (modPools[modIndex] === 'FM') {
+					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 16);
+					let dbBeatmap2 = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
+					if (dbBeatmap && dbBeatmap2) {
+						dbBeatmap.starRating = (parseFloat(dbBeatmap.starRating) * 2 + parseFloat(dbBeatmap2.starRating)) / 3;
+					}
 				} else {
 					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
 				}
