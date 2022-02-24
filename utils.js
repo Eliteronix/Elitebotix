@@ -1046,7 +1046,7 @@ module.exports = {
 			//Group the maps into steps of 0.1 of difficulty
 			const steps = [];
 			const stepData = [];
-			for (let i = 0; i < userMaps.length && i < 30; i++) {
+			for (let i = 0; i < userMaps.length && i < 50; i++) {
 				let dbBeatmap = null;
 				if (modPools[modIndex] === 'HR' || modPools[modIndex] === 'FM') {
 					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 16);
@@ -1056,7 +1056,7 @@ module.exports = {
 					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
 				}
 
-				if (dbBeatmap && dbBeatmap.approvalStatus === 'Ranked') {
+				if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved')) {
 					let weigth = (1 / (0.708 * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / 200000) - 2) / 0.708), 2));
 					if (userMaps[i].score > 800000) {
 						weigth = 0;
@@ -1118,6 +1118,22 @@ module.exports = {
 			const modPoolAmounts = [0, 0, 0, 0, 0];
 			for (let i = 0; i < userScores.length && i < 100; i++) {
 				modPoolAmounts[modPools.indexOf(getScoreModpoolFunction(userScores[i]))]++;
+			}
+
+			if (duelRatings.noMod === null) {
+				modPoolAmounts[0] = 0;
+			}
+			if (duelRatings.hidden === null) {
+				modPoolAmounts[1] = 0;
+			}
+			if (duelRatings.hardRock === null) {
+				modPoolAmounts[2] = 0;
+			}
+			if (duelRatings.doubleTime === null) {
+				modPoolAmounts[3] = 0;
+			}
+			if (duelRatings.freeMod === null) {
+				modPoolAmounts[4] = 0;
 			}
 
 			//Set total star rating

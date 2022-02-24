@@ -268,15 +268,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			ctx.fillText('Duel Rating', 90, 195);
 			let userDuelStarRating = await getUserDuelStarRating(user.id, msg.client);
 
-			const userScores = await DBOsuMultiScores.findAll({
-				where: {
-					osuUserId: user.id,
-					tourneyMatch: true,
-					scoringType: 'Score v2',
-					mode: 'Standard'
-				}
-			});
-
 			let leagueText = 'Bronze 1';
 			let leagueImage = await Canvas.loadImage('./other/emblems/bronze_1.png');
 			if (userDuelStarRating.total > 7) {
@@ -328,7 +319,11 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 			ctx.drawImage(leagueImage, 50, 195, 100, 100);
 
-			if (userScores < 10) {
+			if (userDuelStarRating.noMod === null
+				|| userDuelStarRating.hidden === null
+				|| userDuelStarRating.hardRock === null
+				|| userDuelStarRating.doubleTime === null
+				|| userDuelStarRating.freeMod === null) {
 				leagueText = 'Provisional: ' + leagueText;
 			}
 
