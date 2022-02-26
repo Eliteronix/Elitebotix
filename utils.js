@@ -1002,16 +1002,32 @@ module.exports = {
 	getScoreModpool(dbScore) {
 		return getScoreModpoolFunction(dbScore);
 	},
-	async getUserDuelStarRating(osuUserId, client) {
+	async getUserDuelStarRating(osuUserId, client, date) {
 		//Try to get it from tournament data if available
-		const userScores = await DBOsuMultiScores.findAll({
-			where: {
-				osuUserId: osuUserId,
-				tourneyMatch: true,
-				scoringType: 'Score v2',
-				mode: 'Standard'
-			}
-		});
+		let userScores;
+
+		if (date) {
+			userScores = await DBOsuMultiScores.findAll({
+				where: {
+					osuUserId: osuUserId,
+					tourneyMatch: true,
+					scoringType: 'Score v2',
+					mode: 'Standard',
+					gameEndDate: {
+						[Op.lte]: date
+					}
+				}
+			});
+		} else {
+			userScores = await DBOsuMultiScores.findAll({
+				where: {
+					osuUserId: osuUserId,
+					tourneyMatch: true,
+					scoringType: 'Score v2',
+					mode: 'Standard'
+				}
+			});
+		}
 
 		quicksortMatchId(userScores);
 
@@ -1063,7 +1079,11 @@ module.exports = {
 				}
 
 				if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved')) {
-					let weigth = (1 / (0.708 * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / 200000) - 2) / 0.708), 2));
+					//https://www.desmos.com/calculator/wmdwcyfduw
+					let c = 175000;
+					let b = 2;
+					let a = 0.708;
+					let weigth = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
 					if (userMaps[i].score > 800000) {
 						weigth = 0;
 					}
@@ -1150,7 +1170,7 @@ module.exports = {
 					osuUserId: osuUserId
 				}
 			});
-			if (discordUser) {
+			if (discordUser && !date) {
 				if (client) {
 					try {
 						let guildId = '727407178499096597';
@@ -1202,6 +1222,10 @@ module.exports = {
 				await discordUser.save();
 			}
 
+			return duelRatings;
+		}
+
+		if (date) {
 			return duelRatings;
 		}
 
