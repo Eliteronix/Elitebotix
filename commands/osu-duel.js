@@ -18,7 +18,7 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	// guildOnly: true,
 	//args: true,
-	cooldown: 5,
+	cooldown: 60,
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
@@ -715,7 +715,7 @@ module.exports = {
 						});
 
 					if (!user) {
-						return await interaction.editReply({ content: `Could not find user \`${osuUser.name.replace(/`/g, '')}\`.`, ephemeral: true });
+						return await interaction.editReply({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`, ephemeral: true });
 					}
 
 					osuUser.id = user.id;
