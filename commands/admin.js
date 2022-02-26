@@ -523,13 +523,13 @@ module.exports = {
 			// 				]
 			// 			},
 			// 			{
-			// 				'name': 'starrating',
-			// 				'description': 'Get shown what a users star rating is',
+			// 				'name': 'ranking',
+			// 				'description': 'Get shown what a users ranking is',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'username',
-			// 						'description': 'The username, id or link of the player to get the duel star rating for',
+			// 						'description': 'The username, id or link of the player to get the ranking for',
 			// 						'type': 3,
 			// 						'required': false
 			// 					},
@@ -2853,13 +2853,13 @@ module.exports = {
 							]
 						},
 						{
-							'name': 'starrating',
-							'description': 'Get shown what a users star rating is',
+							'name': 'ranking',
+							'description': 'Get shown what a users ranking is',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'username',
-									'description': 'The username, id or link of the player to get the duel star rating for',
+									'description': 'The username, id or link of the player to get the ranking for',
 									'type': 3,
 									'required': false
 								},

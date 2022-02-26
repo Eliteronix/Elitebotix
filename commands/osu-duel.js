@@ -1,9 +1,11 @@
 const { DBDiscordUsers, DBProcessQueue, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
 const osu = require('node-osu');
-const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard } = require('../utils');
+const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
+const Canvas = require('canvas');
+const Discord = require('discord.js');
 
 module.exports = {
 	name: 'osu-duel',
@@ -657,8 +659,8 @@ module.exports = {
 						return await channel.leave();
 					}
 				});
-			} else if (interaction.options._subcommand === 'starrating') {
-				await interaction.deferReply({ ephemeral: true });
+			} else if (interaction.options._subcommand === 'ranking') {
+				await interaction.deferReply();
 				let osuUser = {
 					id: null,
 					name: null,
@@ -720,16 +722,292 @@ module.exports = {
 					osuUser.name = user.name;
 				}
 
-				let starRating = 4;
-				try {
-					starRating = await getUserDuelStarRating(osuUser.id, interaction.client);
-				} catch (e) {
-					if (e !== 'No standard plays') {
-						console.log(e);
+				const now = new Date();
+
+				let seasonEnd = new Date();
+				seasonEnd.setUTCFullYear(2018);
+				seasonEnd.setUTCMonth(11);
+				seasonEnd.setUTCDate(30);
+				seasonEnd.setUTCHours(23);
+				seasonEnd.setUTCMinutes(59);
+				seasonEnd.setUTCSeconds(59);
+				seasonEnd.setUTCMilliseconds(999);
+
+				let historicalUserDuelStarRatings = [];
+
+				while (seasonEnd < now) {
+					let historicalDataset = {
+						seasonEnd: `${seasonEnd.getUTCMonth() + 1}/${seasonEnd.getUTCFullYear()}`,
+						ratings: await getUserDuelStarRating(osuUser.id, interaction.client, seasonEnd)
+					};
+
+					if (historicalUserDuelStarRatings.length === 0 && historicalDataset.ratings.total || historicalUserDuelStarRatings.length && historicalDataset.ratings.total && historicalDataset.ratings.total !== historicalUserDuelStarRatings[historicalUserDuelStarRatings.length - 1].ratings.total) {
+						historicalUserDuelStarRatings.push(historicalDataset);
+					}
+
+					seasonEnd.setUTCMonth(seasonEnd.getUTCMonth() + 12);
+				}
+
+				historicalUserDuelStarRatings.reverse();
+
+				const canvasWidth = 700;
+				const canvasHeight = 575 + historicalUserDuelStarRatings.length * 250;
+
+				//Create Canvas
+				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+				//Get context and load the image
+				const ctx = canvas.getContext('2d');
+
+				const background = await Canvas.loadImage('./other/osu-background.png');
+
+				for (let i = 0; i < canvas.height / background.height; i++) {
+					for (let j = 0; j < canvas.width / background.width; j++) {
+						ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
 					}
 				}
 
-				return await interaction.editReply({ content: `The user \`${osuUser.name.replace(/`/g, '')}\` has a star rating evaluation of \`${Math.round(starRating.total * 100) / 100}*\`.`, ephemeral: true });
+				//Footer
+				let today = new Date().toLocaleDateString();
+
+				ctx.font = 'bold 15px comfortaa, sans-serif';
+				ctx.fillStyle = '#ffffff';
+
+				ctx.textAlign = 'left';
+				ctx.fillText(`UserID: ${osuUser.id}`, 10, canvas.height - 10);
+
+				ctx.textAlign = 'right';
+				ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 10, canvas.height - 10);
+
+				//Title
+				ctx.fillStyle = '#ffffff';
+				ctx.textAlign = 'center';
+				ctx.font = 'bold 30px comfortaa, sans-serif';
+				ctx.fillText(`League Rankings for ${osuUser.name}`, 350, 40);
+
+				//Set Duel Rating and League Rank
+				ctx.fillStyle = '#ffffff';
+				ctx.textAlign = 'center';
+				ctx.font = 'bold 25px comfortaa, sans-serif';
+				//Current Total Rating
+				ctx.fillText('Current Total Rating', 475, 100);
+				let userDuelStarRating = await getUserDuelStarRating(osuUser.id, interaction.client);
+
+				let duelLeague = getOsuDuelLeague(userDuelStarRating.total);
+
+				let leagueText = duelLeague.name;
+				let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+				ctx.drawImage(leagueImage, 400, 100, 150, 150);
+
+				if (userDuelStarRating.noMod === null
+					|| userDuelStarRating.hidden === null
+					|| userDuelStarRating.hardRock === null
+					|| userDuelStarRating.doubleTime === null
+					|| userDuelStarRating.freeMod === null) {
+					leagueText = 'Provisional: ' + leagueText;
+				}
+
+				ctx.fillText(leagueText, 475, 275);
+				ctx.fillText(`(${Math.round(userDuelStarRating.total * 1000) / 1000}*)`, 475, 300);
+
+				ctx.font = 'bold 18px comfortaa, sans-serif';
+
+				//Current NoMod Rating
+				ctx.fillText('NoMod', 100, 350);
+				duelLeague = getOsuDuelLeague(userDuelStarRating.noMod);
+
+				leagueText = duelLeague.name;
+				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+				ctx.drawImage(leagueImage, 50, 350, 100, 100);
+
+				ctx.fillText(leagueText, 100, 475);
+				if (userDuelStarRating.noMod !== null) {
+					ctx.fillText(`(${Math.round(userDuelStarRating.noMod * 1000) / 1000}*)`, 100, 500);
+				}
+
+				//Current Hidden Rating
+				ctx.fillText('Hidden', 225, 350);
+				duelLeague = getOsuDuelLeague(userDuelStarRating.hidden);
+
+				leagueText = duelLeague.name;
+				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+				ctx.drawImage(leagueImage, 175, 350, 100, 100);
+
+				ctx.fillText(leagueText, 225, 475);
+				if (userDuelStarRating.hidden !== null) {
+					ctx.fillText(`(${Math.round(userDuelStarRating.hidden * 1000) / 1000}*)`, 225, 500);
+				}
+
+				//Current HardRock Rating
+				ctx.fillText('HardRock', 350, 350);
+				duelLeague = getOsuDuelLeague(userDuelStarRating.hardRock);
+
+				leagueText = duelLeague.name;
+				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+				ctx.drawImage(leagueImage, 300, 350, 100, 100);
+
+				ctx.fillText(leagueText, 350, 475);
+				if (userDuelStarRating.hardRock !== null) {
+					ctx.fillText(`(${Math.round(userDuelStarRating.hardRock * 1000) / 1000}*)`, 350, 500);
+				}
+
+				//Current DoubleTime Rating
+				ctx.fillText('DoubleTime', 475, 350);
+				duelLeague = getOsuDuelLeague(userDuelStarRating.doubleTime);
+
+				leagueText = duelLeague.name;
+				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+				ctx.drawImage(leagueImage, 425, 350, 100, 100);
+
+				ctx.fillText(leagueText, 475, 475);
+				if (userDuelStarRating.doubleTime !== null) {
+					ctx.fillText(`(${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}*)`, 475, 500);
+				}
+
+				//Current FreeMod Rating
+				ctx.fillText('FreeMod', 600, 350);
+				duelLeague = getOsuDuelLeague(userDuelStarRating.freeMod);
+
+				leagueText = duelLeague.name;
+				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+				ctx.drawImage(leagueImage, 550, 350, 100, 100);
+
+				ctx.fillText(leagueText, 600, 475);
+				if (userDuelStarRating.freeMod !== null) {
+					ctx.fillText(`(${Math.round(userDuelStarRating.freeMod * 1000) / 1000}*)`, 600, 500);
+				}
+
+				for (let i = 0; i < historicalUserDuelStarRatings.length; i++) {
+					ctx.beginPath();
+					ctx.moveTo(20, 545 + i * 250);
+					ctx.lineTo(680, 545 + i * 250);
+					ctx.strokeStyle = 'white';
+					ctx.stroke();
+
+					//Set Duel Rating and League Rank
+					ctx.fillStyle = '#ffffff';
+					ctx.textAlign = 'center';
+					ctx.font = 'bold 20px comfortaa, sans-serif';
+					//Season Total Rating
+					ctx.fillText(`${historicalUserDuelStarRatings[i].seasonEnd} Total Rating`, 125, 575 + i * 250);
+					let duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.total);
+
+					let leagueText = duelLeague.name;
+					let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+					ctx.drawImage(leagueImage, 50, 575 + i * 250, 150, 150);
+
+					if (historicalUserDuelStarRatings[i].ratings.noMod === null
+						|| historicalUserDuelStarRatings[i].ratings.hidden === null
+						|| historicalUserDuelStarRatings[i].ratings.hardRock === null
+						|| historicalUserDuelStarRatings[i].ratings.doubleTime === null
+						|| historicalUserDuelStarRatings[i].ratings.freeMod === null) {
+						leagueText = 'Provisional: ' + leagueText;
+					}
+
+					ctx.fillText(leagueText, 125, 750 + i * 250, 150, 150);
+					ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.total * 1000) / 1000}*)`, 125, 775 + i * 250, 150, 150);
+
+					ctx.font = 'bold 15px comfortaa, sans-serif';
+
+					//Season NoMod Rating
+					ctx.fillText('NoMod', 287, 600 + i * 250);
+					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.noMod);
+
+					leagueText = duelLeague.name;
+					leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+					ctx.drawImage(leagueImage, 250, 600 + i * 250, 75, 75);
+
+					ctx.fillText(leagueText, 287, 700 + i * 250);
+					if (historicalUserDuelStarRatings[i].ratings.noMod !== null) {
+						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.noMod * 1000) / 1000}*)`, 287, 725 + i * 250);
+					}
+
+					//Season Hidden Rating
+					ctx.fillText('Hidden', 377, 650 + i * 250);
+					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.hidden);
+
+					leagueText = duelLeague.name;
+					leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+					ctx.drawImage(leagueImage, 340, 650 + i * 250, 75, 75);
+
+					ctx.fillText(leagueText, 377, 750 + i * 250);
+					if (historicalUserDuelStarRatings[i].ratings.hidden !== null) {
+						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.hidden * 1000) / 1000}*)`, 377, 775 + i * 250);
+					}
+
+					//Season HardRock Rating
+					ctx.fillText('HardRock', 467, 600 + i * 250);
+					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.hardRock);
+
+					leagueText = duelLeague.name;
+					leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+					ctx.drawImage(leagueImage, 430, 600 + i * 250, 75, 75);
+
+					ctx.fillText(leagueText, 467, 700 + i * 250);
+					if (historicalUserDuelStarRatings[i].ratings.hardRock !== null) {
+						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.hardRock * 1000) / 1000}*)`, 467, 725 + i * 250);
+					}
+
+					//Season DoubleTime Rating
+					ctx.fillText('DoubleTime', 557, 650 + i * 250);
+					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.doubleTime);
+
+					leagueText = duelLeague.name;
+					leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+					ctx.drawImage(leagueImage, 520, 650 + i * 250, 75, 75);
+
+					ctx.fillText(leagueText, 557, 750 + i * 250);
+					if (historicalUserDuelStarRatings[i].ratings.doubleTime !== null) {
+						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.doubleTime * 1000) / 1000}*)`, 557, 775 + i * 250);
+					}
+
+					//Season FreeMod Rating
+					ctx.fillText('FreeMod', 647, 600 + i * 250);
+					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.freeMod);
+
+					leagueText = duelLeague.name;
+					leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+					ctx.drawImage(leagueImage, 610, 600 + i * 250, 75, 75);
+
+					ctx.fillText(leagueText, 647, 700 + i * 250);
+					if (historicalUserDuelStarRatings[i].ratings.freeMod !== null) {
+						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.freeMod * 1000) / 1000}*)`, 647, 725 + i * 250);
+					}
+				}
+
+				//Get a circle for inserting the player avatar
+				ctx.beginPath();
+				ctx.arc(180, 180, 80, 0, Math.PI * 2, true);
+				ctx.closePath();
+				ctx.clip();
+
+				//Draw a shape onto the main canvas
+				try {
+					const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.id}`);
+					ctx.drawImage(avatar, 100, 100, 160, 160);
+				} catch (error) {
+					const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
+					ctx.drawImage(avatar, 100, 100, 160, 160);
+				}
+
+				//Create as an attachment
+				const leagueRankings = new Discord.MessageAttachment(canvas.toBuffer(), `osu-league-rankings-${osuUser.id}.png`);
+
+				return await interaction.editReply({ content: 'The data is based on matches played using `/osu-duel match` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRankings] });
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
 				if (!interaction.guild) {
 					return interaction.reply('The leaderboard can currently only be used in servers.');
