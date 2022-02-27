@@ -352,7 +352,7 @@ module.exports = {
 		} else if (args[0] === 'staff') {
 			if (args[1]) {
 				let tournamentName = currentElitiriCup;
-				if (msg.author.id !== '138273136285057025' && args[3] && args[4] && args[5] && args[6]) {
+				if (msg.author.id === '138273136285057025' && args[3] && args[4] && args[5] && args[6]) {
 					tournamentName = `${args[3]} ${args[4]} ${args[5]} ${args[6]}`;
 				}
 
