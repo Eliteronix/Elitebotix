@@ -616,6 +616,8 @@ module.exports = {
 						}
 
 						await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+						let mapInfo = await getOsuMapInfo(dbMaps[mapIndex]);
+						await channel.sendMessage(mapInfo);
 						await channel.sendMessage('Everyone please ready up!');
 						if (modPools[mapIndex] === 'FreeMod' && mapIndex < 6) {
 							await channel.sendMessage('Valid Mods: HD, HR | NM will be 0.5x of the score achieved.');
@@ -1274,4 +1276,8 @@ function quicksortDuelStarRating(list, start = 0, end = undefined) {
 		quicksortDuelStarRating(list, p + 1, end);
 	}
 	return list;
+}
+
+async function getOsuMapInfo(dbBeatmap) {
+	return `https://osu.ppy.sh/b/${dbBeatmap.beatmapId} | https://beatconnect.io/b/${dbBeatmap.beatmapsetId}`;
 }
