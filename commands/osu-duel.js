@@ -34,12 +34,12 @@ module.exports = {
 				const commandConfig = await getOsuUserServerMode(msg, []);
 				const commandUser = commandConfig[0];
 
-				if (commandUser.userId === interaction.options._hoistedOptions[0].value) {
-					return await interaction.editReply('You cannot play against yourself.');
-				}
-
 				if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
 					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect <username>`.');
+				}
+
+				if (commandUser.userId === interaction.options._hoistedOptions[0].value) {
+					return await interaction.editReply('You cannot play against yourself.');
 				}
 
 				let firstStarRating = 4;
@@ -646,6 +646,62 @@ module.exports = {
 						osuApi.getMatch({ mp: lobby.id })
 							.then(async (match) => {
 								saveOsuMultiScores(match);
+
+								await pause(15000);
+
+								let userDuelStarRating = await getUserDuelStarRating(commandUser.osuUserId, interaction.client);
+								let messages = ['Your SR has been updated!'];
+								if (Math.round(commandUser.osuDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.total * 100) / 100) {
+									messages.push(`SR: ${Math.round(commandUser.osuDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.total * 100) / 100}`);
+								}
+								if (Math.round(commandUser.osuNoModDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.noMod * 100) / 100) {
+									messages.push(`NM: ${Math.round(commandUser.osuNoModDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.noMod * 100) / 100}`);
+								}
+								if (Math.round(commandUser.osuHiddenDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.hidden * 100) / 100) {
+									messages.push(`HD: ${Math.round(commandUser.osuHiddenDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.hidden * 100) / 100}`);
+								}
+								if (Math.round(commandUser.osuHardRockDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.hardRock * 100) / 100) {
+									messages.push(`HR: ${Math.round(commandUser.osuHardRockDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.hardRock * 100) / 100}`);
+								}
+								if (Math.round(commandUser.osuDoubleTimeDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.doubleTime * 100) / 100) {
+									messages.push(`DT: ${Math.round(commandUser.osuDoubleTimeDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.doubleTime * 100) / 100}`);
+								}
+								if (Math.round(commandUser.osuFreeModDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.freeMod * 100) / 100) {
+									messages.push(`FM: ${Math.round(commandUser.osuFreeModDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.freeMod * 100) / 100}`);
+								}
+								if (messages.length > 1) {
+									const IRCUser = await bancho.getUser(commandUser.osuName);
+									for (let i = 0; i < messages.length; i++) {
+										await IRCUser.sendMessage(messages[i]);
+									}
+								}
+
+								userDuelStarRating = await getUserDuelStarRating(discordUser.osuUserId, interaction.client);
+								messages = ['Your SR has been updated!'];
+								if (Math.round(discordUser.osuDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.total * 100) / 100) {
+									messages.push(`SR: ${Math.round(discordUser.osuDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.total * 100) / 100}`);
+								}
+								if (Math.round(discordUser.osuNoModDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.noMod * 100) / 100) {
+									messages.push(`NM: ${Math.round(discordUser.osuNoModDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.noMod * 100) / 100}`);
+								}
+								if (Math.round(discordUser.osuHiddenDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.hidden * 100) / 100) {
+									messages.push(`HD: ${Math.round(discordUser.osuHiddenDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.hidden * 100) / 100}`);
+								}
+								if (Math.round(discordUser.osuHardRockDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.hardRock * 100) / 100) {
+									messages.push(`HR: ${Math.round(discordUser.osuHardRockDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.hardRock * 100) / 100}`);
+								}
+								if (Math.round(discordUser.osuDoubleTimeDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.doubleTime * 100) / 100) {
+									messages.push(`DT: ${Math.round(discordUser.osuDoubleTimeDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.doubleTime * 100) / 100}`);
+								}
+								if (Math.round(discordUser.osuFreeModDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.freeMod * 100) / 100) {
+									messages.push(`FM: ${Math.round(discordUser.osuFreeModDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.freeMod * 100) / 100}`);
+								}
+								if (messages.length > 1) {
+									const IRCUser = await bancho.getUser(discordUser.osuName);
+									for (let i = 0; i < messages.length; i++) {
+										await IRCUser.sendMessage(messages[i]);
+									}
+								}
 							})
 							.catch(() => {
 								//Nothing
