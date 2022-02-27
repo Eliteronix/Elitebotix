@@ -520,6 +520,8 @@ module.exports = {
 							}
 
 							await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+							let mapInfo = await getOsuMapInfo(dbMaps[mapIndex]);
+							await channel.sendMessage(mapInfo);
 							if (modPools[mapIndex] === 'FreeMod') {
 								await channel.sendMessage('Valid Mods: HD, HR | NM will be 0.5x of the score achieved.');
 							}
