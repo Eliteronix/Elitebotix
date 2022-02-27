@@ -1098,15 +1098,18 @@ module.exports = {
 
 						mapStarRating = parseFloat(dbBeatmap.starRating) + starRatingAdjust;
 					}
-					let starRatingStep = Math.round(mapStarRating * 10) / 10;
-					if (steps.indexOf(starRatingStep) === -1) {
-						stepData.push({ step: starRatingStep, totalWeight: weigth, amount: 1, averageWeight: weigth, weightedStarRating: (starRatingStep) * weigth });
-						steps.push(starRatingStep);
-					} else {
-						stepData[steps.indexOf(starRatingStep)].totalWeight += weigth;
-						stepData[steps.indexOf(starRatingStep)].amount++;
-						stepData[steps.indexOf(starRatingStep)].averageWeight = stepData[steps.indexOf(starRatingStep)].totalWeight / stepData[steps.indexOf(starRatingStep)].amount;
-						stepData[steps.indexOf(starRatingStep)].weightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageWeight;
+
+					for (let i = 0; i < 5; i++) {
+						let starRatingStep = Math.round((Math.round(mapStarRating * 10) / 10 + 0.1 * i - 0.2) * 10) / 10;
+						if (steps.indexOf(starRatingStep) === -1) {
+							stepData.push({ step: starRatingStep, totalWeight: weigth, amount: 1, averageWeight: weigth, weightedStarRating: (starRatingStep) * weigth });
+							steps.push(starRatingStep);
+						} else {
+							stepData[steps.indexOf(starRatingStep)].totalWeight += weigth;
+							stepData[steps.indexOf(starRatingStep)].amount++;
+							stepData[steps.indexOf(starRatingStep)].averageWeight = stepData[steps.indexOf(starRatingStep)].totalWeight / stepData[steps.indexOf(starRatingStep)].amount;
+							stepData[steps.indexOf(starRatingStep)].weightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageWeight;
+						}
 					}
 				} else {
 					userMaps.splice(i, 1);
@@ -1117,8 +1120,10 @@ module.exports = {
 			let totalWeight = 0;
 			let totalWeightedStarRating = 0;
 			for (let i = 0; i < stepData.length; i++) {
-				totalWeight += stepData[i].averageWeight;
-				totalWeightedStarRating += stepData[i].weightedStarRating;
+				if (stepData[i].amount > 1) {
+					totalWeight += stepData[i].averageWeight;
+					totalWeightedStarRating += stepData[i].weightedStarRating;
+				}
 			}
 
 			if (totalWeight > 0 && userMaps.length > 4) {
@@ -1184,23 +1189,23 @@ module.exports = {
 						const guild = await client.guilds.fetch(guildId);
 						const channel = await guild.channels.fetch(channelId);
 						let message = [`${discordUser.osuName}:`];
-						if (Math.round(discordUser.osuDuelStarRating * 100) / 100 !== Math.round(duelRatings.total * 100) / 100) {
-							message.push(`SR: ${Math.round(discordUser.osuDuelStarRating * 100) / 100} -> ${Math.round(duelRatings.total * 100) / 100}`);
+						if (Math.round(discordUser.osuDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.total * 1000) / 1000) {
+							message.push(`SR: ${Math.round(discordUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.total * 1000) / 1000}`);
 						}
-						if (Math.round(discordUser.osuNoModDuelStarRating * 100) / 100 !== Math.round(duelRatings.noMod * 100) / 100) {
-							message.push(`NM: ${Math.round(discordUser.osuNoModDuelStarRating * 100) / 100} -> ${Math.round(duelRatings.noMod * 100) / 100}`);
+						if (Math.round(discordUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.noMod * 1000) / 1000) {
+							message.push(`NM: ${Math.round(discordUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.noMod * 1000) / 1000}`);
 						}
-						if (Math.round(discordUser.osuHiddenDuelStarRating * 100) / 100 !== Math.round(duelRatings.hidden * 100) / 100) {
-							message.push(`HD: ${Math.round(discordUser.osuHiddenDuelStarRating * 100) / 100} -> ${Math.round(duelRatings.hidden * 100) / 100}`);
+						if (Math.round(discordUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.hidden * 1000) / 1000) {
+							message.push(`HD: ${Math.round(discordUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.hidden * 1000) / 1000}`);
 						}
-						if (Math.round(discordUser.osuHardRockDuelStarRating * 100) / 100 !== Math.round(duelRatings.hardRock * 100) / 100) {
-							message.push(`HR: ${Math.round(discordUser.osuHardRockDuelStarRating * 100) / 100} -> ${Math.round(duelRatings.hardRock * 100) / 100}`);
+						if (Math.round(discordUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.hardRock * 1000) / 1000) {
+							message.push(`HR: ${Math.round(discordUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.hardRock * 1000) / 1000}`);
 						}
-						if (Math.round(discordUser.osuDoubleTimeDuelStarRating * 100) / 100 !== Math.round(duelRatings.doubleTime * 100) / 100) {
-							message.push(`DT: ${Math.round(discordUser.osuDoubleTimeDuelStarRating * 100) / 100} -> ${Math.round(duelRatings.doubleTime * 100) / 100}`);
+						if (Math.round(discordUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.doubleTime * 1000) / 1000) {
+							message.push(`DT: ${Math.round(discordUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.doubleTime * 1000) / 1000}`);
 						}
-						if (Math.round(discordUser.osuFreeModDuelStarRating * 100) / 100 !== Math.round(duelRatings.freeMod * 100) / 100) {
-							message.push(`FM: ${Math.round(discordUser.osuFreeModDuelStarRating * 100) / 100} -> ${Math.round(duelRatings.freeMod * 100) / 100}`);
+						if (Math.round(discordUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.freeMod * 1000) / 1000) {
+							message.push(`FM: ${Math.round(discordUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.freeMod * 1000) / 1000}`);
 						}
 						if (message.length > 1) {
 							channel.send(`\`\`\`${message.join('\n')}\`\`\``);

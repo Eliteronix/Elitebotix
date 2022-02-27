@@ -655,23 +655,23 @@ module.exports = {
 
 								let userDuelStarRating = await getUserDuelStarRating(commandUser.osuUserId, interaction.client);
 								let messages = ['Your SR has been updated!'];
-								if (Math.round(commandUser.osuDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.total * 100) / 100) {
-									messages.push(`SR: ${Math.round(commandUser.osuDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.total * 100) / 100}`);
+								if (Math.round(commandUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
+									messages.push(`SR: ${Math.round(commandUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
 								}
-								if (Math.round(commandUser.osuNoModDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.noMod * 100) / 100) {
-									messages.push(`NM: ${Math.round(commandUser.osuNoModDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.noMod * 100) / 100}`);
+								if (Math.round(commandUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
+									messages.push(`NM: ${Math.round(commandUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
 								}
-								if (Math.round(commandUser.osuHiddenDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.hidden * 100) / 100) {
-									messages.push(`HD: ${Math.round(commandUser.osuHiddenDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.hidden * 100) / 100}`);
+								if (Math.round(commandUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
+									messages.push(`HD: ${Math.round(commandUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
 								}
-								if (Math.round(commandUser.osuHardRockDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.hardRock * 100) / 100) {
-									messages.push(`HR: ${Math.round(commandUser.osuHardRockDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.hardRock * 100) / 100}`);
+								if (Math.round(commandUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
+									messages.push(`HR: ${Math.round(commandUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
 								}
-								if (Math.round(commandUser.osuDoubleTimeDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.doubleTime * 100) / 100) {
-									messages.push(`DT: ${Math.round(commandUser.osuDoubleTimeDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.doubleTime * 100) / 100}`);
+								if (Math.round(commandUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
+									messages.push(`DT: ${Math.round(commandUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
 								}
-								if (Math.round(commandUser.osuFreeModDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.freeMod * 100) / 100) {
-									messages.push(`FM: ${Math.round(commandUser.osuFreeModDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.freeMod * 100) / 100}`);
+								if (Math.round(commandUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
+									messages.push(`FM: ${Math.round(commandUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
 								}
 								if (messages.length > 1) {
 									const IRCUser = await bancho.getUser(commandUser.osuName);
@@ -682,23 +682,23 @@ module.exports = {
 
 								userDuelStarRating = await getUserDuelStarRating(discordUser.osuUserId, interaction.client);
 								messages = ['Your SR has been updated!'];
-								if (Math.round(discordUser.osuDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.total * 100) / 100) {
-									messages.push(`SR: ${Math.round(discordUser.osuDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.total * 100) / 100}`);
+								if (Math.round(discordUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
+									messages.push(`SR: ${Math.round(discordUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
 								}
-								if (Math.round(discordUser.osuNoModDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.noMod * 100) / 100) {
-									messages.push(`NM: ${Math.round(discordUser.osuNoModDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.noMod * 100) / 100}`);
+								if (Math.round(discordUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
+									messages.push(`NM: ${Math.round(discordUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
 								}
-								if (Math.round(discordUser.osuHiddenDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.hidden * 100) / 100) {
-									messages.push(`HD: ${Math.round(discordUser.osuHiddenDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.hidden * 100) / 100}`);
+								if (Math.round(discordUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
+									messages.push(`HD: ${Math.round(discordUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
 								}
-								if (Math.round(discordUser.osuHardRockDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.hardRock * 100) / 100) {
-									messages.push(`HR: ${Math.round(discordUser.osuHardRockDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.hardRock * 100) / 100}`);
+								if (Math.round(discordUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
+									messages.push(`HR: ${Math.round(discordUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
 								}
-								if (Math.round(discordUser.osuDoubleTimeDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.doubleTime * 100) / 100) {
-									messages.push(`DT: ${Math.round(discordUser.osuDoubleTimeDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.doubleTime * 100) / 100}`);
+								if (Math.round(discordUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
+									messages.push(`DT: ${Math.round(discordUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
 								}
-								if (Math.round(discordUser.osuFreeModDuelStarRating * 100) / 100 !== Math.round(userDuelStarRating.freeMod * 100) / 100) {
-									messages.push(`FM: ${Math.round(discordUser.osuFreeModDuelStarRating * 100) / 100} -> ${Math.round(userDuelStarRating.freeMod * 100) / 100}`);
+								if (Math.round(discordUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
+									messages.push(`FM: ${Math.round(discordUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
 								}
 								if (messages.length > 1) {
 									const IRCUser = await bancho.getUser(discordUser.osuName);
