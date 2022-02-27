@@ -1084,9 +1084,6 @@ module.exports = {
 					let b = 2;
 					let a = 0.708;
 					let weigth = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
-					if (userMaps[i].score > 800000) {
-						weigth = 0;
-					}
 					let mapStarRating = dbBeatmap.starRating;
 					if (modPools[modIndex] === 'HD') {
 						//Adapt starRating from 0.2 to 0.75 depending on the AR
