@@ -382,7 +382,7 @@ module.exports = {
 							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 0);
 						}
 
-						if (parseFloat(beatmaps[index].starRating) < lowerBound || parseFloat(beatmaps[index].starRating) > upperBound) {
+						if (!beatmaps[index] || parseFloat(beatmaps[index].starRating) < lowerBound || parseFloat(beatmaps[index].starRating) > upperBound) {
 							beatmaps.splice(index, 1);
 						} else if (!dbMapIds.includes(beatmaps[index].beatmapsetId)) {
 							dbBeatmap = beatmaps[index];
@@ -1281,5 +1281,21 @@ function quicksortDuelStarRating(list, start = 0, end = undefined) {
 }
 
 async function getOsuMapInfo(dbBeatmap) {
-	return `https://osu.ppy.sh/b/${dbBeatmap.beatmapId} | https://beatconnect.io/b/${dbBeatmap.beatmapsetId}`;
+	const mapScores = await DBOsuMultiScores.findAll({
+		where: {
+			beatmapId: dbBeatmap.beatmapId,
+		}
+	});
+
+	let tournaments = [];
+
+	for (let i = 0; i < mapScores.length; i++) {
+		let acronym = mapScores[i].matchName.replace(/:.+/gm, '');
+
+		if (tournaments.indexOf(acronym) === -1) {
+			tournaments.push(acronym);
+		}
+	}
+
+	return `https://osu.ppy.sh/b/${dbBeatmap.beatmapId} | https://beatconnect.io/b/${dbBeatmap.beatmapsetId} | Map played ${mapScores.length} times in: ${tournaments.join(', ')}`;
 }
