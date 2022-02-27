@@ -849,7 +849,22 @@ module.exports = {
 				ctx.font = 'bold 25px comfortaa, sans-serif';
 				//Current Total Rating
 				ctx.fillText('Current Total Rating', 475, 100);
-				let userDuelStarRating = await getUserDuelStarRating(osuUser.id, interaction.client);
+				let userDuelStarRating = null;
+				for (let i = 0; i < 5 && !userDuelStarRating; i++) {
+					try {
+						userDuelStarRating = await getUserDuelStarRating(osuUser.id, interaction.client);
+					} catch (e) {
+						if (i === 4) {
+							if (e === 'No standard plays') {
+								return interaction.editReply(`Could not find any standard plays for user \`${osuUser.name.replace(/`/g, '')}\`.\nPlease try again later.`);
+							} else {
+								return interaction.editReply('The API seems to be running into errors right now.\nPlease try again later.');
+							}
+						} else {
+							await pause(15000);
+						}
+					}
+				}
 
 				let duelLeague = getOsuDuelLeague(userDuelStarRating.total);
 
