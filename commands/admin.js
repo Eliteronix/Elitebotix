@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBOsuBeatmaps } = require('../dbObjects');
-const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool } = require('../utils');
+const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool, getUserDuelStarRating } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 const fetch = require('node-fetch');
@@ -4810,6 +4810,96 @@ module.exports = {
 			for (let i = 0; i < processQueueTasks.length; i++) {
 				await processQueueTasks[i].destroy();
 			}
+		} else if (args[0] === 'derank') {
+			let osuUserId = args[1];
+
+			let discordUser = await DBDiscordUsers.findOne({
+				where: {
+					osuUserId: osuUserId
+				}
+			});
+
+			if (!discordUser) {
+				// eslint-disable-next-line no-undef
+				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+				});
+
+				let user = await osuApi.getUser({ u: osuUserId, m: 0 });
+
+				let duelRating = await getUserDuelStarRating(osuUserId, msg.client);
+
+				discordUser = {
+					osuName: user.name,
+					osuUserId: osuUserId,
+					osuPP: user.pp.raw,
+					osuDuelStarRating: duelRating.total,
+				};
+			}
+
+			let ppDiscordUsers = await DBDiscordUsers.findAll({
+				where: {
+					osuUserId: {
+						[Op.gt]: 0
+					},
+					osuPP: {
+						[Op.gt]: 0
+					}
+				},
+				order: [
+					['osuPP', 'DESC']
+				]
+			});
+
+			let duelDiscordUsers = await DBDiscordUsers.findAll({
+				where: {
+					osuUserId: {
+						[Op.gt]: 0
+					},
+					osuDuelStarRating: {
+						[Op.gt]: 0
+					}
+				},
+				order: [
+					['osuDuelStarRating', 'DESC']
+				]
+			});
+
+			let ppRank = null;
+
+			for (let i = 0; i < ppDiscordUsers.length && !ppRank; i++) {
+				if (parseFloat(discordUser.osuPP) >= parseFloat(ppDiscordUsers[i].osuPP)) {
+					ppRank = i + 1;
+				}
+			}
+
+			if (!ppRank) {
+				ppRank = ppDiscordUsers.length + 1;
+			}
+
+			let duelRank = null;
+
+			for (let i = 0; i < duelDiscordUsers.length && !duelRank; i++) {
+				if (parseFloat(discordUser.osuDuelStarRating) >= parseFloat(duelDiscordUsers[i].osuDuelStarRating)) {
+					duelRank = i + 1;
+				}
+			}
+
+			if (!duelRank) {
+				duelRank = duelDiscordUsers.length + 1;
+			}
+
+			if (!discordUser.userId) {
+				ppDiscordUsers.length = ppDiscordUsers.length + 1;
+				duelDiscordUsers.length = duelDiscordUsers.length + 1;
+			}
+
+			let expectedPpRank = Math.round(duelRank / duelDiscordUsers.length * ppDiscordUsers.length);
+			let expectedPpRankPercentageDifference = Math.round((100 / ppDiscordUsers.length * ppRank - 100 / ppDiscordUsers.length * expectedPpRank) * 100) / 100;
+			msg.reply(`${discordUser.osuName} is:\n\`\`\`PP-Rank ${ppRank} out of ${ppDiscordUsers.length}\nDuel-Rating-Rank ${duelRank} out of ${duelDiscordUsers.length}\n\nExpected osu! pp rank for that duel rating would be: ${expectedPpRank} (Difference: ${ppRank - expectedPpRank} | ${expectedPpRankPercentageDifference}%)\`\`\``);
 		} else {
 			msg.reply('Invalid command');
 		}
