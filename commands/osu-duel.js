@@ -523,7 +523,7 @@ module.exports = {
 							let mapInfo = await getOsuMapInfo(dbMaps[mapIndex]);
 							await channel.sendMessage(mapInfo);
 							if (modPools[mapIndex] === 'FreeMod') {
-								await channel.sendMessage('Valid Mods: HD, HR | NM will be 0.5x of the score achieved.');
+								await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
 							}
 							await channel.sendMessage('Everyone please ready up!');
 							await channel.sendMessage('!mp timer 120');
@@ -548,6 +548,20 @@ module.exports = {
 				});
 
 				lobby.on('matchFinished', async (results) => {
+					if (modPools[mapIndex - 1] === 'FreeMod') {
+						for (let i = 0; i < results.length; i++) {
+							//Increase the score by 1.7 if EZ was played
+							if (results[i].player.mods) {
+								for (let j = 0; j < results[i].player.mods.length; j++) {
+									if (results[i].player.mods[j].enumValue === 2) {
+										console.log(results[i].score);
+										results[i].score = results[i].score * 1.7;
+										console.log(results[i].score);
+									}
+								}
+							}
+						}
+					}
 					if (modPools[mapIndex - 1] === 'FreeMod' && mapIndex - 1 < 6) {
 						for (let i = 0; i < results.length; i++) {
 							//Reduce the score by 0.5 if it was FreeMod and no mods / only nofail was picked
@@ -556,7 +570,7 @@ module.exports = {
 							} else {
 								let invalidModsPicked = false;
 								for (let j = 0; j < results[i].player.mods.length; j++) {
-									if (results[i].player.mods[j].enumValue !== 1 && results[i].player.mods[j].enumValue !== 8 && results[i].player.mods[j].enumValue !== 16) {
+									if (results[i].player.mods[j].enumValue !== 1 && results[i].player.mods[j].enumValue !== 2 && results[i].player.mods[j].enumValue !== 8 && results[i].player.mods[j].enumValue !== 16) {
 										invalidModsPicked = true;
 									}
 								}
@@ -571,7 +585,7 @@ module.exports = {
 					quicksort(results);
 
 					if (results.length === 2) {
-						await channel.sendMessage(`${results[0].player.user.username}: ${results[0].score} | ${results[1].player.user.username}: ${results[1].score}`);
+						await channel.sendMessage(`${results[0].player.user.username}: ${Math.round(results[0].score)} | ${results[1].player.user.username}: ${Math.round(results[1].score)}`);
 					} else if (results.length === 1) {
 						await channel.sendMessage(`${results[0].player.user.username} wins this round by default.`);
 					} else {
@@ -622,9 +636,9 @@ module.exports = {
 						await channel.sendMessage(mapInfo);
 						await channel.sendMessage('Everyone please ready up!');
 						if (modPools[mapIndex] === 'FreeMod' && mapIndex < 6) {
-							await channel.sendMessage('Valid Mods: HD, HR | NM will be 0.5x of the score achieved.');
+							await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
 						} else if (modPools[mapIndex] === 'FreeMod' && mapIndex === 6) {
-							await channel.sendMessage('Valid Mods: HD, HR | NM will be just as achieved.');
+							await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
 						}
 						await channel.sendMessage('!mp timer 120');
 						mapIndex++;
