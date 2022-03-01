@@ -4907,6 +4907,10 @@ module.exports = {
 			for (let i = 0; i < processQueueTasks.length; i++) {
 				await processQueueTasks[i].destroy();
 			}
+		} else if (args[0] === 'multiScoresDBSize') {
+			const mapScoreAmount = await DBOsuMultiScores.count();
+
+			console.log(mapScoreAmount);
 		} else {
 			msg.reply('Invalid command');
 		}
