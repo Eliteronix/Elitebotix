@@ -1367,8 +1367,9 @@ async function createElitiriRoleAssignmentTask() {
 		where: { task: 'elitiriRoleAssignment' }
 	});
 	if (!task) {
+		let date = new Date();
 		DBProcessQueue.create({
-			guildId: 'None', task: 'elitiriRoleAssignment', priority: 3
+			guildId: 'None', task: 'elitiriRoleAssignment', priority: 3, date: date
 		});
 	}
 }

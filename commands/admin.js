@@ -4902,6 +4902,11 @@ module.exports = {
 			let expectedPpRank = Math.round(duelRank / duelDiscordUsers.length * ppDiscordUsers.length);
 			let expectedPpRankPercentageDifference = Math.round((100 / ppDiscordUsers.length * ppRank - 100 / ppDiscordUsers.length * expectedPpRank) * 100) / 100;
 			msg.reply(`${discordUser.osuName} is:\n\`\`\`PP-Rank ${ppRank} out of ${ppDiscordUsers.length}\nDuel-Rating-Rank ${duelRank} out of ${duelDiscordUsers.length}\n\nExpected osu! pp rank for that duel rating would be: ${expectedPpRank} (Difference: ${ppRank - expectedPpRank} | ${expectedPpRankPercentageDifference}%)\`\`\``);
+		} else if (args[0] === 'deleteElitiriRoleAssignment') {
+			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'elitiriRoleAssignment' } });
+			for (let i = 0; i < processQueueTasks.length; i++) {
+				await processQueueTasks[i].destroy();
+			}
 		} else {
 			msg.reply('Invalid command');
 		}
