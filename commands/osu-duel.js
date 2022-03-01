@@ -309,7 +309,7 @@ module.exports = {
 								doubleTimeMap: true,
 								drainLength: {
 									[Op.and]: {
-										[Op.gte]: 150,
+										[Op.gte]: 120,
 										[Op.lte]: 405,
 									}
 								},
