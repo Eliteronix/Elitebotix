@@ -28,6 +28,17 @@ module.exports = {
 			args = [interaction.options._hoistedOptions[0].value];
 		}
 
+		if (args.join(' ') === 'o!mm Ranked'
+			|| args.join(' ') === 'o!mm Private'
+			|| args.join(' ') === 'o!mm Team Ranked'
+			|| args.join(' ') === 'o!mm Team Private'
+			|| args.join(' ') === 'ETX') {
+			if (msg.id) {
+				return msg.reply(`The acronym \`${args.join(' ').replace(/`/g, '')}\` can't be used for this command.`);
+			}
+			return interaction.followUp(`The acronym \`${args.join(' ').replace(/`/g, '')}\` can't be used for this command.`);
+		}
+
 		logDatabaseQueries(4, 'commands/osu-tournament.js DBOsuMultiScores');
 		const userScores = await DBOsuMultiScores.findAll({
 			where: {
