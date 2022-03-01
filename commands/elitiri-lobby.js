@@ -1,6 +1,6 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 //eslint-disable-next-line no-unused-vars
-const { DBElitiriCupSignUp, DBElitiriLobbies } = require('../dbObjects');
+const { DBElitiriCupSignUp, DBElitiriCupLobbies } = require('../dbObjects');
 const { currentElitiriCup } = require('../config.json');
 
 // To-Do (it is 5:27 right now i havent slept yet my code sucks ass as always thanks)
@@ -44,7 +44,7 @@ module.exports = {
 				}
 			}
 
-			let lobbyId = Number(args[0]);
+			let lobbyId = Number(args[1]);
 
 			// Make sure lobbyId is valid
 			if (lobbyId > 24 || lobbyId < 1) {
@@ -53,9 +53,13 @@ module.exports = {
 				} else {
 					return interaction.reply({ content: 'Please make sure your lobby ID is correct' });
 				}
+			} else if (!args){
+				if (msg && msg.id) {
+					return msg.reply('You didn\'t provide lobby ID');
+				} else {
+					return interaction.reply({ content: 'You didn\'t provide lobby ID' });
+				}
 			}
-
-
 
 			let scheduleSheetId;
 			let lobbyAbbreviation;
@@ -72,6 +76,30 @@ module.exports = {
 			} else if (player[0].bracketName == 'Beginner Bracket') {
 				scheduleSheetId = 'Qualifiers Schedules-Beginner';
 				lobbyAbbreviation = 'AQ-';
+			}
+
+			let date = new Date();
+
+			const tournamentLobby = await DBElitiriCupLobbies.findOne({
+				where: {
+					tournament: currentElitiriCup,
+					lobbyId: lobbyAbbreviation + lobbyId,
+				}
+			});
+			
+			if (!tournamentLobby){
+				//create a lobby
+				await DBElitiriCupLobbies.create({
+					tournament: currentElitiriCup,
+					lobbyId: lobbyAbbreviation + lobbyId,
+					lobbyDate: date,
+					bracketName: player[0].bracketName,
+					refdiscordTag: '',
+					refOsuUserId : '',
+					refOsuName : '',
+				});
+			} else {
+				DBElitiriCupSignUp.tournamentLobbyId = lobbyAbbreviation + lobbyId;
 			}
 
 			// Initialize the sheet - doc ID is the long id in the sheets URL
