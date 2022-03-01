@@ -382,7 +382,19 @@ module.exports = {
 							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 0);
 						}
 
-						if (!beatmaps[index] || parseFloat(beatmaps[index].starRating) < lowerBound || parseFloat(beatmaps[index].starRating) > upperBound) {
+						if (!beatmaps[index]) {
+							beatmaps.splice(index, 1);
+							continue;
+						}
+
+						const mapScoreAmount = await DBOsuMultiScores.count({
+							where: {
+								beatmapId: beatmaps[index].beatmapId,
+							}
+						});
+
+						// eslint-disable-next-line no-undef
+						if (!beatmaps[index] || parseFloat(beatmaps[index].starRating) < lowerBound || parseFloat(beatmaps[index].starRating) > upperBound || mapScoreAmount < 25 && process.env.SERVER !== 'Dev') {
 							beatmaps.splice(index, 1);
 						} else if (!dbMapIds.includes(beatmaps[index].beatmapsetId)) {
 							dbBeatmap = beatmaps[index];
