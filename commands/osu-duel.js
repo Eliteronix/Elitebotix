@@ -1310,6 +1310,7 @@ async function getOsuMapInfo(dbBeatmap) {
 	const mapScores = await DBOsuMultiScores.findAll({
 		where: {
 			beatmapId: dbBeatmap.beatmapId,
+			tourneyMatch: true,
 		}
 	});
 
