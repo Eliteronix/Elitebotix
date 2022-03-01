@@ -24,7 +24,7 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
 		if (msg) {
-			return msg.reply('Please set up the game using the / command `/osu-duel`');
+			return msg.reply('Please use the / command `/osu-duel`');
 		}
 		if (interaction) {
 			if (interaction.options._subcommand === 'match') {
