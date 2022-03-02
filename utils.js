@@ -1060,8 +1060,26 @@ module.exports = {
 			}
 
 			//Group the maps into steps of 0.1 of difficulty
-			const steps = [];
+			// let testSr = 6;
+			const steps = [
+				// testSr
+			];
 			const stepData = [];
+			// stepData.push({
+			// 	step: testSr,
+			// 	totalWeight: 0,
+			// 	totalOverPerformWeight: 1,
+			// 	totalUnderPerformWeight: 0,
+			// 	amount: 1,
+			// 	averageWeight: 0,
+			// 	averageOverPerformWeight: 1,
+			// 	averageUnderPerformWeight: 0,
+			// 	newAverageWeight: Math.abs((((1 + 0) / 2) - 0.5)),
+			// 	weightedStarRating: (testSr) * 0,
+			// 	overPerformWeightedStarRating: (testSr) * 1,
+			// 	underPerformWeightedStarRating: (testSr) * 0,
+			// 	newWeightedStarRating: (testSr) * Math.abs((((1 + 0) / 2) - 0.5)),
+			// });
 			for (let i = 0; i < userMaps.length && i < 50; i++) {
 				let dbBeatmap = null;
 				if (modPools[modIndex] === 'HR') {
