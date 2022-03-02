@@ -4811,11 +4811,16 @@ module.exports = {
 				await processQueueTasks[i].destroy();
 			}
 		} else if (args[0] === 'derank') {
-			let osuUserId = args[1];
+			if (!args[1]) {
+				return msg.reply('You didn\'t give a player to compare');
+			}
 
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
-					osuUserId: osuUserId
+					[Op.or]: {
+						osuUserId: args[1],
+						osuName: args[1]
+					}
 				}
 			});
 
@@ -4828,13 +4833,13 @@ module.exports = {
 					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 				});
 
-				let user = await osuApi.getUser({ u: osuUserId, m: 0 });
+				let user = await osuApi.getUser({ u: args[1], m: 0 });
 
-				let duelRating = await getUserDuelStarRating(osuUserId, msg.client);
+				let duelRating = await getUserDuelStarRating(user.id, msg.client);
 
 				discordUser = {
 					osuName: user.name,
-					osuUserId: osuUserId,
+					osuUserId: user.id,
 					osuPP: user.pp.raw,
 					osuRank: user.pp.rank,
 					osuDuelStarRating: duelRating.total,
