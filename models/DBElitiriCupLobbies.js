@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
 			primaryKey: true,
 			autoIncrement: true,
 		},
-		tournament: {
+		tournamentName: {
 			type: DataTypes.STRING,
 		},
 		lobbyId: {

@@ -52,14 +52,11 @@ module.exports = (sequelize, DataTypes) => {
 		tournamentName: {
 			type: DataTypes.STRING,
 		},
-		tournamentLobbyId: {
-			type: DataTypes.STRING,
-		},
 		rankAchieved: {
 			type: DataTypes.STRING,
 		},
-		lobbyId: {
-			type: DataTypes.INTEGER,
+		tournamentLobbyId: {
+			type: DataTypes.STRING,
 		},
 		paranoid: true,
 	});

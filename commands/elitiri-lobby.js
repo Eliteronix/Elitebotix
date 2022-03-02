@@ -3,9 +3,15 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { DBElitiriCupSignUp, DBElitiriCupLobbies } = require('../dbObjects');
 const { currentElitiriCup } = require('../config.json');
 
-// To-Do (it is 5:27 right now i havent slept yet my code sucks ass as always thanks)
-// what to do if lobby is full
-// lobbyId regex
+
+
+
+//to-do
+//what if lobby already has 15 players in it, is there a way to limit number of id's in the table?
+//if player changes his lobby, previews lobby' row should 
+// the empty string '' is recognized as a cell with a value and the counta function counts it as a cell with a value, so we need a way to put the empty empty string
+//avoid players breaking the bot by providing wrong lobby id
+
 
 module.exports = {
 	name: 'elitiri-lobby',
@@ -24,19 +30,22 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, client) {
+
 		// UNCOMMENT THIS LATER
 		// eslint-disable-next-line no-undef
 		// if (process.env.SERVER !== 'Live') {
 		//     return;
 		// }
+
 		if (args[0].toLowerCase() === 'claim') {
-			let player = await DBElitiriCupSignUp.findAll({
+			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: {
 					tournamentName: currentElitiriCup,
 					userId: msg.author.id,
 				}
 			});
-			if (!player[0]) {
+
+			if (!elitiriSignUp) {
 				if (msg && msg.id) {
 					return msg.reply(`Seems like you're not registered for ${currentElitiriCup}`);
 				} else {
@@ -44,63 +53,62 @@ module.exports = {
 				}
 			}
 
-			let lobbyId = Number(args[1]);
-
+			let lobbyId = args[1];
+			
 			// Make sure lobbyId is valid
-			if (lobbyId > 24 || lobbyId < 1) {
+			if (lobbyId.replace(/\D+/, '') > 24 || lobbyId.replace(/\D+/, '') < 1) {
 				if (msg && msg.id) {
 					return msg.reply('Please make sure your lobby ID is correct');
 				} else {
 					return interaction.reply({ content: 'Please make sure your lobby ID is correct' });
 				}
-			} else if (!args){
-				if (msg && msg.id) {
-					return msg.reply('You didn\'t provide lobby ID');
-				} else {
-					return interaction.reply({ content: 'You didn\'t provide lobby ID' });
-				}
 			}
 
+			//set schedule sheets for different brackets
 			let scheduleSheetId;
-			let lobbyAbbreviation;
-			// players bracket check
-			if (player[0].bracketName == 'Top Bracket') {
+			// player bracket check
+			if (elitiriSignUp.bracketName == 'Top Bracket') {
 				scheduleSheetId = 'Qualifiers Schedules-Top';
-				lobbyAbbreviation = 'DQ-';
-			} else if (player[0].bracketName == 'Middle Bracket') {
+			} else if (elitiriSignUp.bracketName == 'Middle Bracket') { 
 				scheduleSheetId = 'Qualifiers Schedules-Middle';
-				lobbyAbbreviation = 'CQ-';
-			} else if (player[0].bracketName == 'Lower Bracket') {
+			} else if (elitiriSignUp.bracketName == 'Lower Bracket') {
 				scheduleSheetId = 'Qualifiers Schedules-Lower';
-				lobbyAbbreviation = 'BQ-';
-			} else if (player[0].bracketName == 'Beginner Bracket') {
+			} else if (elitiriSignUp.bracketName == 'Beginner Bracket') {
 				scheduleSheetId = 'Qualifiers Schedules-Beginner';
-				lobbyAbbreviation = 'AQ-';
 			}
 
+			//fancy hardcoded function will be here soon tm
 			let date = new Date();
-
+			// eslint-disable-next-line no-unused-vars
 			const tournamentLobby = await DBElitiriCupLobbies.findOne({
 				where: {
-					tournament: currentElitiriCup,
-					lobbyId: lobbyAbbreviation + lobbyId,
+					tournamentName: currentElitiriCup,
+					lobbyId: lobbyId,
 				}
 			});
-			
+			//no lobby table with given Id has been created yet
 			if (!tournamentLobby){
 				//create a lobby
 				await DBElitiriCupLobbies.create({
-					tournament: currentElitiriCup,
-					lobbyId: lobbyAbbreviation + lobbyId,
+					tournamentName: currentElitiriCup,
+					lobbyId: lobbyId,
 					lobbyDate: date,
-					bracketName: player[0].bracketName,
-					refdiscordTag: '',
-					refOsuUserId : '',
-					refOsuName : '',
+					bracketName: elitiriSignUp.bracketName,
+					refdiscordTag: null,
+					refOsuUserId : null,
+					refOsuName : null,
 				});
-			} else {
-				DBElitiriCupSignUp.tournamentLobbyId = lobbyAbbreviation + lobbyId;
 			}
+			// previousLobbyId is used to clear the previous playerNameCell with player' name
+			let previousLobbyId;
+			// set tournamentLobbyId for the player
+			if (elitiriSignUp.tournamentLobbyId !== null){
+				previousLobbyId = elitiriSignUp.tournamentLobbyId;
+				elitiriSignUp.tournamentLobbyId = lobbyId;
+			} else {
+				elitiriSignUp.tournamentLobbyId = lobbyId;
+			}
+			await elitiriSignUp.save();
 
 			// Initialize the sheet - doc ID is the long id in the sheets URL
 			const doc = new GoogleSpreadsheet('1FPr133dAROYGUpJOaQPGTvGq5hjk8B-Ik82rmZsa9NM');
@@ -115,28 +123,79 @@ module.exports = {
 			const sheet = doc.sheetsByTitle[scheduleSheetId];
 			await sheet.loadCells('A1:U29');
 
+			//search for players in the lobby with given ID
+			let lobbyPlayers = await DBElitiriCupSignUp.findAll({
+				where:{
+					tournamentName: currentElitiriCup,
+					tournamentLobbyId: lobbyId
+				}
+			});
 
-			//we need to skip 17th row
-			if (lobbyId > 12) {
-				lobbyId++;
+			//lobby wasnt created before
+			if(previousLobbyId == undefined){
+				// 'j' is the counter for the row
+				let j = Number(elitiriSignUp.tournamentLobbyId.replace(/\D+/, ''));
+				if (j > 12){
+					j++;
+				}
+				for (let i = 0; i < lobbyPlayers.length; i++) {
+					let playerName = lobbyPlayers[i].osuName;
+					let  playerNameCell = sheet.getCell(3 + j, 6 + i); //getCell(row, column) zero-indexed
+					playerNameCell.value =  playerName;
+
+				}
+				//Lobby was created before
+			} else {
+				let j = Number(previousLobbyId.replace(/\D+/, ''));
+				if (j > 12){
+					j++;
+				}
+				//clear row
+				for (let i = 0; i < lobbyPlayers.length; i++) {
+					let  playerNameCell = sheet.getCell(3 + j, 6 + i); //getCell(row, column) zero-indexed
+					playerNameCell.value = null;
+				}
+				//add names back
+				j = Number(elitiriSignUp.tournamentLobbyId.replace(/\D+/, ''));
+				if (j > 12){
+					j++;
+				}
+				for (let i = 0; i < lobbyPlayers.length; i++) {
+					let playerName = lobbyPlayers[i].osuName;
+					let playerNameCell = sheet.getCell(3 + j, 6 + i); //getCell(row, column) zero-indexed
+					playerNameCell.value =  playerName;
+				}
 			}
-
-			// let PlayerNameCell = sheet.getCell(3 + lobbyId, 6); //getCell(row, column) zero-indexed
-
-			// if (PlayerNameCell.value !== player[0].osuName && PlayerNameCell.value == '') {
-			//     PlayerNameCell.value = player[0].osuName;
-			// } else {
-			//     PlayerNameCell = sheet.getCell(3 + lobbyId, 6);
-			//     PlayerNameCell.value = player[0].osuName;
-			// }
 
 			await sheet.saveUpdatedCells();
 
 			if (msg && msg.id) {
-				return msg.reply(`You have successfully claimed lobby ${lobbyAbbreviation}${args[0]}`);
+				return msg.reply(`You have successfully claimed lobby ${lobbyId}`);
 			} else {
-				return interaction.reply({ content: `You have successfully claimed lobby ${lobbyAbbreviation}${args[0]}` });
+				return interaction.reply({ content: `You have successfully claimed lobby ${lobbyId}` });
 			}
+
+			//delete before merging
+		} else if (args[0] == 'prune'){
+			DBElitiriCupLobbies.destroy({
+				where: {
+					tournamentName: currentElitiriCup,
+				}
+			});
+			let elitiriSignUp = await DBElitiriCupSignUp.findOne({
+				where:{
+					userId: msg.author.id
+				}
+			});
+			elitiriSignUp.tournamentLobbyId = null;
+			await elitiriSignUp.save();
+			msg.reply('Done');
+		} else if (args[0].toLowerCase == 'referee'){
+			//WIP
 		}
 	}
 };
+
+
+
+
