@@ -1240,14 +1240,26 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		const topScores = await osuApi.getUserBest({ u: osuUserId, m: 0, limit: 100 })
-			.catch(err => {
-				if (err.message === 'Not found') {
-					throw new Error('No standard plays');
-				} else {
-					console.log(err);
-				}
-			});
+		let topScores = null;
+
+		for (let i = 0; i < 5 && !topScores; i++) {
+			topScores = await osuApi.getUserBest({ u: osuUserId, m: 0, limit: 100 })
+				.then((response) => {
+					i = Infinity;
+					return response;
+				})
+				.catch(async (err) => {
+					if (i === 4) {
+						if (err.message === 'Not found') {
+							throw new Error('No standard plays');
+						} else {
+							console.log(err);
+						}
+					} else {
+						await new Promise(resolve => setTimeout(resolve, 10000));
+					}
+				});
+		}
 
 		let stars = [];
 		for (let i = 0; i < topScores.length; i++) {
