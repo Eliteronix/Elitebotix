@@ -4836,6 +4836,7 @@ module.exports = {
 					osuName: user.name,
 					osuUserId: osuUserId,
 					osuPP: user.pp.raw,
+					osuRank: user.pp.rank,
 					osuDuelStarRating: duelRating.total,
 				};
 			}
@@ -4894,14 +4895,17 @@ module.exports = {
 				duelRank = duelDiscordUsers.length + 1;
 			}
 
+			let rankOffset = 0;
 			if (!discordUser.userId) {
 				ppDiscordUsers.length = ppDiscordUsers.length + 1;
 				duelDiscordUsers.length = duelDiscordUsers.length + 1;
+				rankOffset = 1;
 			}
 
 			let expectedPpRank = Math.round(duelRank / duelDiscordUsers.length * ppDiscordUsers.length);
+
 			let expectedPpRankPercentageDifference = Math.round((100 / ppDiscordUsers.length * ppRank - 100 / ppDiscordUsers.length * expectedPpRank) * 100) / 100;
-			msg.reply(`${discordUser.osuName} is:\n\`\`\`PP-Rank ${ppRank} out of ${ppDiscordUsers.length}\nDuel-Rating-Rank ${duelRank} out of ${duelDiscordUsers.length}\n\nExpected osu! pp rank for that duel rating would be: ${expectedPpRank} (Difference: ${ppRank - expectedPpRank} | ${expectedPpRankPercentageDifference}%)\`\`\``);
+			msg.reply(`${discordUser.osuName} is:\n\`\`\`PP-Rank ${ppRank} out of ${ppDiscordUsers.length}\nDuel-Rating-Rank ${duelRank} out of ${duelDiscordUsers.length}\n\nExpected osu! pp rank for that duel rating would be:\n${expectedPpRank} (Difference: ${ppRank - expectedPpRank} | ${expectedPpRankPercentageDifference}%)\n\nThat is in rank numbers:\n#${discordUser.osuRank} -> ~#${ppDiscordUsers[expectedPpRank - 1 - rankOffset].osuRank} (Difference: ${discordUser.osuRank - ppDiscordUsers[expectedPpRank - 1 - rankOffset].osuRank} ranks)\`\`\``);
 		} else if (args[0] === 'deleteElitiriRoleAssignment') {
 			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'elitiriRoleAssignment' } });
 			for (let i = 0; i < processQueueTasks.length; i++) {
