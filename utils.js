@@ -1100,8 +1100,19 @@ module.exports = {
 					//https://www.desmos.com/calculator/wmdwcyfduw
 					let c = 175000;
 					let b = 2;
-					let a = 0.708;
-					let weigth = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
+					let a = 0.7071;
+					let weight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
+					let overPerformWeight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
+					overPerformWeight = Math.abs(overPerformWeight - 1);
+					let underPerformWeight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
+					underPerformWeight = Math.abs(underPerformWeight - 1);
+
+					if (parseFloat(userMaps[i].score) < 350000) {
+						overPerformWeight = 0;
+					} else if (parseFloat(userMaps[i].score) > 350000) {
+						underPerformWeight = 0;
+					}
+
 					let mapStarRating = dbBeatmap.starRating;
 					if (modPools[modIndex] === 'HD') {
 						//Adapt starRating from 0.2 to 0.75 depending on the AR
@@ -1120,13 +1131,35 @@ module.exports = {
 					for (let i = 0; i < 5; i++) {
 						let starRatingStep = Math.round((Math.round(mapStarRating * 10) / 10 + 0.1 * i - 0.2) * 10) / 10;
 						if (steps.indexOf(starRatingStep) === -1) {
-							stepData.push({ step: starRatingStep, totalWeight: weigth, amount: 1, averageWeight: weigth, weightedStarRating: (starRatingStep) * weigth });
+							stepData.push({
+								step: starRatingStep,
+								totalWeight: weight,
+								totalOverPerformWeight: overPerformWeight,
+								totalUnderPerformWeight: underPerformWeight,
+								amount: 1,
+								averageWeight: weight,
+								averageOverPerformWeight: overPerformWeight,
+								averageUnderPerformWeight: underPerformWeight,
+								newAverageWeight: Math.abs((((overPerformWeight + underPerformWeight) / 2) - 0.5)),
+								weightedStarRating: (starRatingStep) * weight,
+								overPerformWeightedStarRating: (starRatingStep) * overPerformWeight,
+								underPerformWeightedStarRating: (starRatingStep) * underPerformWeight,
+								newWeightedStarRating: (starRatingStep) * Math.abs((((overPerformWeight + underPerformWeight) / 2) - 0.5)),
+							});
 							steps.push(starRatingStep);
 						} else {
-							stepData[steps.indexOf(starRatingStep)].totalWeight += weigth;
+							stepData[steps.indexOf(starRatingStep)].totalWeight += weight;
+							stepData[steps.indexOf(starRatingStep)].totalOverPerformWeight += overPerformWeight;
+							stepData[steps.indexOf(starRatingStep)].totalUnderPerformWeight += underPerformWeight;
 							stepData[steps.indexOf(starRatingStep)].amount++;
 							stepData[steps.indexOf(starRatingStep)].averageWeight = stepData[steps.indexOf(starRatingStep)].totalWeight / stepData[steps.indexOf(starRatingStep)].amount;
+							stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight = stepData[steps.indexOf(starRatingStep)].totalOverPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
+							stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight = stepData[steps.indexOf(starRatingStep)].totalUnderPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
+							stepData[steps.indexOf(starRatingStep)].newAverageWeight = Math.abs((((stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight + stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight) / 2) - 0.5)) / stepData[steps.indexOf(starRatingStep)].amount;
 							stepData[steps.indexOf(starRatingStep)].weightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageWeight;
+							stepData[steps.indexOf(starRatingStep)].overPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight;
+							stepData[steps.indexOf(starRatingStep)].underPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight;
+							stepData[steps.indexOf(starRatingStep)].newWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].newAverageWeight;
 						}
 					}
 				} else {
@@ -1135,12 +1168,37 @@ module.exports = {
 				}
 			}
 
+			//Bubblesort stepData by step ascending
+			for (let i = 0; i < stepData.length; i++) {
+				for (let j = 0; j < stepData.length - 1; j++) {
+					if (stepData[j].step > stepData[j + 1].step) {
+						let temp = stepData[j];
+						stepData[j] = stepData[j + 1];
+						stepData[j + 1] = temp;
+					}
+				}
+			}
+
+			console.log(osuUserId);
+			for (let i = 0; i < stepData.length && modPools[modIndex] === 'NM'; i++) {
+				console.log(stepData[i].step + ': ' + Math.round(stepData[i].averageWeight * 100) / 100 + '(avg) ' + Math.round(stepData[i].newAverageWeight * 100) / 100 + '(avg comb.) ' + Math.round(stepData[i].averageOverPerformWeight * 100) / 100 + '(over) ' + Math.round(stepData[i].averageUnderPerformWeight * 100) / 100 + '(under)');
+			}
+
+			// let totalWeight = 0;
+			// let totalWeightedStarRating = 0;
+			// for (let i = 0; i < stepData.length; i++) {
+			// 	if (stepData[i].amount > 1) {
+			// 		totalWeight += stepData[i].averageWeight;
+			// 		totalWeightedStarRating += stepData[i].weightedStarRating;
+			// 	}
+			// }
+
 			let totalWeight = 0;
 			let totalWeightedStarRating = 0;
 			for (let i = 0; i < stepData.length; i++) {
 				if (stepData[i].amount > 1) {
-					totalWeight += stepData[i].averageWeight;
-					totalWeightedStarRating += stepData[i].weightedStarRating;
+					totalWeight += stepData[i].newAverageWeight;
+					totalWeightedStarRating += stepData[i].newWeightedStarRating;
 				}
 			}
 
