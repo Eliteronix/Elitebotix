@@ -1079,6 +1079,24 @@ module.exports = {
 				}
 
 				if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved')) {
+					//Standardize the score from the mod multiplier
+					if (modPools[modIndex] === 'HD') {
+						userMaps[i].score = userMaps[i].score / 1.06;
+					} else if (modPools[modIndex] === 'HR') {
+						userMaps[i].score = userMaps[i].score / 1.1;
+					} else if (modPools[modIndex] === 'DT') {
+						userMaps[i].score = userMaps[i].score / 1.2;
+					} else if (modPools[modIndex] === 'FM') {
+						if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('HD')) {
+							userMaps[i].score = userMaps[i].score / 1.06;
+						} else if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('HR')) {
+							userMaps[i].score = userMaps[i].score / 1.1;
+						} else if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('FL')) {
+							userMaps[i].score = userMaps[i].score / 1.12;
+						} else if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('DT')) {
+							userMaps[i].score = userMaps[i].score / 1.2;
+						}
+					}
 					//https://www.desmos.com/calculator/wmdwcyfduw
 					let c = 175000;
 					let b = 2;
