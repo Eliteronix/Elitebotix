@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { getGuildPrefix, humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
@@ -284,9 +284,22 @@ async function drawRank(input) {
 	// Write the title of the player
 	ctx.font = '18px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = 'right';
+	ctx.fillText(`Global Rank: #${globalRank} |`, canvas.width / 2, 60 + yOffset);
+	ctx.textAlign = 'left';
+	ctx.fillText(`${user.country} Rank: #${countryRank}`, 379, 60 + yOffset);
 	ctx.textAlign = 'center';
-	ctx.fillText(`Global Rank: #${globalRank} | ${user.country} Rank: #${countryRank}`, canvas.width / 2, 60 + yOffset);
 	ctx.fillText(`PP: ${pp}`, canvas.width / 2, 83 + yOffset);
+
+	let userDuelStarRating = await getUserDuelStarRating(user.id);
+	let leagueName = getOsuDuelLeague(userDuelStarRating.total);
+	let leagueImage = await Canvas.loadImage(`./other/emblems/${leagueName.imageName}.png`);
+
+	ctx.drawImage(leagueImage, 557, 40, 110, 110);
+
+	let flag = await Canvas.loadImage(`./other/flags/${user.country}.png`);
+
+	ctx.drawImage(flag, 352, 49, 25, 18);
 
 	const output = [canvas, ctx, user];
 	return output;
