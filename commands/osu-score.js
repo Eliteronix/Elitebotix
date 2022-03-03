@@ -317,6 +317,7 @@ async function drawTitle(input, mode) {
 	const gameMode = getGameMode(beatmap);
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
 	const beatmapStatusIcon = await Canvas.loadImage(getBeatmapApprovalStatusImage(beatmap));
+	const starImage = await Canvas.loadImage('./other/overall-difficulty.png');
 
 	ctx.drawImage(beatmapStatusIcon, 10, 5, canvas.height / 500 * 35, canvas.height / 500 * 35);
 	ctx.drawImage(modePic, canvas.width / 1000 * 10, canvas.height / 500 * 40, canvas.height / 500 * 35, canvas.height / 500 * 35);
@@ -344,6 +345,7 @@ async function drawTitle(input, mode) {
 		}
 	}
 
+	ctx.drawImage(starImage, 55, 42, canvas.height / 500 * 35, canvas.height / 500 * 35);
 	if (mods.includes('DT') || mods.includes('HT') || mods.includes('HR') || mods.includes('EZ')) {
 		let modMap = beatmap;
 		if (mods.includes('DT') && mods.includes('HR')) {
@@ -363,9 +365,9 @@ async function drawTitle(input, mode) {
 		} else if (mods.includes('HR')) {
 			modMap = await getOsuBeatmap(beatmap.beatmapId, 16);
 		}
-		ctx.fillText(`★ ${Math.round(beatmap.starRating * 100) / 100} (${Math.round(modMap.starRating * 100) / 100} with ${mods.join('')})   ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
+		ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100} (${Math.round(modMap.starRating * 100) / 100} with ${mods.join('')})  ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 90, canvas.height / 500 * 70);
 	} else {
-		ctx.fillText(`★ ${Math.round(beatmap.starRating * 100) / 100}   ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
+		ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100}  ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 90, canvas.height / 500 * 70);
 	}
 
 	const output = [canvas, ctx, score, beatmap, user];
@@ -398,17 +400,17 @@ async function drawCover(input, mode) {
 	const mods = getMods(score.raw_mods);
 
 	if (mods.includes('HD')) {
-		gradeSS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS-Silver.6681366c.svg');
-		gradeS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-S-Silver.811ae28c.svg');
+		gradeSS = await Canvas.loadImage('./other/rank_pictures/XH_Rank.png');
+		gradeS = await Canvas.loadImage('./other/rank_pictures/SH_Rank.png');
 	} else {
-		gradeSS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS.a21de890.svg');
-		gradeS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-S.3b4498a9.svg');
+		gradeSS = await Canvas.loadImage('./other/rank_pictures/X_Rank.png');
+		gradeS = await Canvas.loadImage('./other/rank_pictures/S_Rank.png');
 	}
 
-	const gradeA = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-A.d785e824.svg');
-	const gradeB = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-B.e19fc91b.svg');
-	const gradeC = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-C.6bb75adc.svg');
-	const gradeD = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-D.6b170c4c.svg');
+	const gradeA = await Canvas.loadImage('./other/rank_pictures/A_Rank.png');
+	const gradeB = await Canvas.loadImage('./other/rank_pictures/B_Rank.png');
+	const gradeC = await Canvas.loadImage('./other/rank_pictures/C_Rank.png');
+	const gradeD = await Canvas.loadImage('./other/rank_pictures/D_Rank.png');
 
 	ctx.globalAlpha = 0.2;
 
