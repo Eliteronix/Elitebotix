@@ -548,6 +548,19 @@ module.exports = {
 			// 					},
 			// 				]
 			// 			},
+			// 			{
+			// 				'name': 'data',
+			// 				'description': 'Get shown what a users ranking is based on',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'The username, id or link of the player to get the ranking for',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 				]
+			// 			},
 			// 		]
 			// 	},
 			// });
@@ -2878,6 +2891,19 @@ module.exports = {
 								},
 							]
 						},
+						{
+							'name': 'data',
+							'description': 'Get shown what a users ranking is based on',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'username',
+									'description': 'The username, id or link of the player to get the ranking for',
+									'type': 3,
+									'required': false
+								},
+							]
+						},
 					]
 				},
 			});
@@ -4938,7 +4964,7 @@ module.exports = {
 						});
 
 						if (discordUser) {
-							await getUserDuelStarRating(discordUser.osuUserId, msg.client);
+							await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: msg.client });
 
 							await pause(10000);
 						}

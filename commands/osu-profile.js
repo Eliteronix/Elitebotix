@@ -117,7 +117,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 
 				elements = await drawTitle(elements, server, mode);
 
-				elements = await drawRank(elements);
+				elements = await drawRank(elements, msg);
 
 				elements = await drawLevel(elements, server);
 
@@ -198,7 +198,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 
 				elements = await drawTitle(elements, server, mode);
 
-				elements = await drawRank(elements);
+				elements = await drawRank(elements, msg);
 
 				elements = await drawLevel(elements, server);
 
@@ -270,7 +270,7 @@ async function drawTitle(input, server, mode) {
 	return output;
 }
 
-async function drawRank(input) {
+async function drawRank(input, msg) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -291,7 +291,7 @@ async function drawRank(input) {
 	ctx.textAlign = 'center';
 	ctx.fillText(`PP: ${pp}`, canvas.width / 2, 83 + yOffset);
 
-	let userDuelStarRating = await getUserDuelStarRating(user.id);
+	let userDuelStarRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
 	let leagueName = getOsuDuelLeague(userDuelStarRating.total);
 	let leagueImage = await Canvas.loadImage(`./other/emblems/${leagueName.imageName}.png`);
 

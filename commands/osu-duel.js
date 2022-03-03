@@ -44,7 +44,7 @@ module.exports = {
 
 				let firstStarRating = 4;
 				try {
-					firstStarRating = await getUserDuelStarRating(commandUser.osuUserId, interaction.client);
+					firstStarRating = await getUserDuelStarRating({ osuUserId: commandUser.osuUserId, client: interaction.client });
 				} catch (e) {
 					if (e !== 'No standard plays') {
 						console.log(e);
@@ -62,7 +62,7 @@ module.exports = {
 
 				if (discordUser && discordUser.osuUserId) {
 					try {
-						secondStarRating = await getUserDuelStarRating(discordUser.osuUserId, interaction.client);
+						secondStarRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
 					} catch (e) {
 						if (e !== 'No standard plays') {
 							console.log(e);
@@ -688,7 +688,7 @@ module.exports = {
 
 								await pause(15000);
 
-								let userDuelStarRating = await getUserDuelStarRating(commandUser.osuUserId, interaction.client);
+								let userDuelStarRating = await getUserDuelStarRating({ osuUserId: commandUser.osuUserId, client: interaction.client });
 								let messages = ['Your SR has been updated!'];
 								if (Math.round(commandUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
 									messages.push(`SR: ${Math.round(commandUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
@@ -715,7 +715,7 @@ module.exports = {
 									}
 								}
 
-								userDuelStarRating = await getUserDuelStarRating(discordUser.osuUserId, interaction.client);
+								userDuelStarRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
 								messages = ['Your SR has been updated!'];
 								if (Math.round(discordUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
 									messages.push(`SR: ${Math.round(discordUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
@@ -833,7 +833,7 @@ module.exports = {
 				while (seasonEnd < now) {
 					let historicalDataset = {
 						seasonEnd: `${seasonEnd.getUTCMonth() + 1}/${seasonEnd.getUTCFullYear()}`,
-						ratings: await getUserDuelStarRating(osuUser.id, interaction.client, seasonEnd)
+						ratings: await getUserDuelStarRating({ osuUserId: osuUser.id, client: interaction.client, date: seasonEnd })
 					};
 
 					if (historicalUserDuelStarRatings.length === 0 && historicalDataset.ratings.total || historicalUserDuelStarRatings.length && historicalDataset.ratings.total && historicalDataset.ratings.total !== historicalUserDuelStarRatings[historicalUserDuelStarRatings.length - 1].ratings.total) {
@@ -891,7 +891,7 @@ module.exports = {
 				let userDuelStarRating = null;
 				for (let i = 0; i < 5 && !userDuelStarRating; i++) {
 					try {
-						userDuelStarRating = await getUserDuelStarRating(osuUser.id, interaction.client);
+						userDuelStarRating = await getUserDuelStarRating({ osuUserId: osuUser.id, client: interaction.client });
 					} catch (e) {
 						if (i === 4) {
 							if (e === 'No standard plays') {
@@ -1217,6 +1217,132 @@ module.exports = {
 					.catch(err => {
 						console.log(err);
 					});
+			} else if (interaction.options._subcommand === 'data') {
+				await interaction.deferReply({ ephemeral: true });
+				let osuUser = {
+					id: null,
+					name: null,
+				};
+
+				if (interaction.options._hoistedOptions[0]) {
+					//Get the user by the argument given
+					if (interaction.options._hoistedOptions[0].value.startsWith('<@') && interaction.options._hoistedOptions[0].value.endsWith('>')) {
+						logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers');
+						const discordUser = await DBDiscordUsers.findOne({
+							where: { userId: interaction.options._hoistedOptions[0].value.replace('<@', '').replace('>', '').replace('!', '') },
+						});
+
+						if (discordUser && discordUser.osuUserId) {
+							osuUser.id = discordUser.osuUserId;
+							osuUser.name = discordUser.osuName;
+						} else {
+							return await interaction.editReply({ content: `\`${interaction.options._hoistedOptions[0].value.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect <username>\`.`, ephemeral: true });
+						}
+					} else {
+						osuUser.id = getIDFromPotentialOsuLink(interaction.options._hoistedOptions[0].value);
+					}
+				} else {
+					//Try to get the user by the message if no argument given
+					msg = await populateMsgFromInteraction(interaction);
+					const commandConfig = await getOsuUserServerMode(msg, []);
+					const commandUser = commandConfig[0];
+
+					if (commandUser && commandUser.osuUserId) {
+						osuUser.id = commandUser.osuUserId;
+						osuUser.name = commandUser.osuName;
+					} else {
+						const userDisplayName = await getMessageUserDisplayname(msg);
+						osuUser.name = userDisplayName;
+					}
+				}
+
+				if (!osuUser.name) {
+					// eslint-disable-next-line no-undef
+					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+					});
+
+					const user = await osuApi.getUser({ u: osuUser.id, m: 0 })
+						.catch(err => {
+							if (err.message !== 'Not found') {
+								console.log(err);
+							}
+						});
+
+					if (!user) {
+						return await interaction.editReply({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`, ephemeral: true });
+					}
+
+					osuUser.id = user.id;
+					osuUser.name = user.name;
+				}
+
+				let userDuelStarRating = null;
+				for (let i = 0; i < 5 && !userDuelStarRating; i++) {
+					try {
+						userDuelStarRating = await getUserDuelStarRating({ osuUserId: osuUser.id, client: interaction.client });
+					} catch (e) {
+						if (i === 4) {
+							if (e === 'No standard plays') {
+								return interaction.editReply(`Could not find any standard plays for user \`${osuUser.name.replace(/`/g, '')}\`.\nPlease try again later.`);
+							} else {
+								return interaction.editReply('The API seems to be running into errors right now.\nPlease try again later.');
+							}
+						} else {
+							await pause(15000);
+						}
+					}
+				}
+
+				let files = [];
+
+				let stepData = [
+					userDuelStarRating.stepData.NM,
+					userDuelStarRating.stepData.HD,
+					userDuelStarRating.stepData.HR,
+					userDuelStarRating.stepData.DT,
+					userDuelStarRating.stepData.FM
+				];
+
+				for (let i = 0; i < stepData.length; i++) {
+					quicksortStep(stepData[i]);
+
+					for (let j = 0; j < stepData[i].length; j++) {
+						stepData[i][j] = `${stepData[i][j].step.toFixed(1)}: ${(Math.round(stepData[i][j].averageWeight * 1000) / 1000).toFixed(3)} (old) | ${(Math.round(stepData[i][j].newAverageWeight * 1000) / 1000).toFixed(3)} (new) -> ${(Math.round(stepData[i][j].averageOverPerformWeight * 1000) / 1000)} (over) - ${(Math.round(stepData[i][j].averageUnderPerformWeight * 1000) / 1000)} (under)`;
+					}
+
+					if (i === 0) {
+						// eslint-disable-next-line no-undef
+						let NMData = new Discord.MessageAttachment(Buffer.from('NM Starrating Weights:\n' + stepData[i].join('\n'), 'utf-8'), `osu-duel-NM-Data-${osuUser.id}.txt`);
+						files.push(NMData);
+					} else if (i === 1) {
+						// eslint-disable-next-line no-undef
+						let HDData = new Discord.MessageAttachment(Buffer.from('HD Starrating Weights:\n' + stepData[i].join('\n'), 'utf-8'), `osu-duel-HD-Data-${osuUser.id}.txt`);
+						files.push(HDData);
+					} else if (i === 2) {
+						// eslint-disable-next-line no-undef
+						let HRData = new Discord.MessageAttachment(Buffer.from('HR Starrating Weights:\n' + stepData[i].join('\n'), 'utf-8'), `osu-duel-HR-Data-${osuUser.id}.txt`);
+						files.push(HRData);
+					} else if (i === 3) {
+						// eslint-disable-next-line no-undef
+						let DTData = new Discord.MessageAttachment(Buffer.from('DT Starrating Weights:\n' + stepData[i].join('\n'), 'utf-8'), `osu-duel-DT-Data-${osuUser.id}.txt`);
+						files.push(DTData);
+					} else if (i === 4) {
+						// eslint-disable-next-line no-undef
+						let FMData = new Discord.MessageAttachment(Buffer.from('FM Starrating Weights:\n' + stepData[i].join('\n'), 'utf-8'), `osu-duel-FM-Data-${osuUser.id}.txt`);
+						files.push(FMData);
+					}
+				}
+
+				let TODOAddExplaination;
+				let TODOMergeAllDataFromSameTypeIntoOneFile;
+				let TODOAddDataOnTheScoresUsedAndTheirWeightAndScore;
+				let TODOAddMultiPlayerMatchesTheDataIsComingFrom;
+				let TODOCleanUpDataOutputForTheStepData;
+				return await interaction.editReply({ content: 'Add explaination here', files: files, ephemeral: true });
 			}
 		}
 	},
@@ -1311,6 +1437,31 @@ function quicksortDuelStarRating(list, start = 0, end = undefined) {
 		const p = partitionDuelStarRating(list, start, end);
 		quicksortDuelStarRating(list, start, p - 1);
 		quicksortDuelStarRating(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionStep(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (list[j].step < pivot.step) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksortStep(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionStep(list, start, end);
+		quicksortStep(list, start, p - 1);
+		quicksortStep(list, p + 1, end);
 	}
 	return list;
 }
