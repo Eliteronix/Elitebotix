@@ -4811,11 +4811,16 @@ module.exports = {
 				await processQueueTasks[i].destroy();
 			}
 		} else if (args[0] === 'derank') {
-			let osuUserId = args[1];
+			if (!args[1]) {
+				return msg.reply('You didn\'t give a player to compare');
+			}
 
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
-					osuUserId: osuUserId
+					[Op.or]: {
+						osuUserId: args[1],
+						osuName: args[1]
+					}
 				}
 			});
 
@@ -4828,14 +4833,15 @@ module.exports = {
 					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 				});
 
-				let user = await osuApi.getUser({ u: osuUserId, m: 0 });
+				let user = await osuApi.getUser({ u: args[1], m: 0 });
 
-				let duelRating = await getUserDuelStarRating(osuUserId, msg.client);
+				let duelRating = await getUserDuelStarRating(user.id, msg.client);
 
 				discordUser = {
 					osuName: user.name,
-					osuUserId: osuUserId,
+					osuUserId: user.id,
 					osuPP: user.pp.raw,
+					osuRank: user.pp.rank,
 					osuDuelStarRating: duelRating.total,
 				};
 			}
@@ -4894,14 +4900,17 @@ module.exports = {
 				duelRank = duelDiscordUsers.length + 1;
 			}
 
+			let rankOffset = 0;
 			if (!discordUser.userId) {
 				ppDiscordUsers.length = ppDiscordUsers.length + 1;
 				duelDiscordUsers.length = duelDiscordUsers.length + 1;
+				rankOffset = 1;
 			}
 
 			let expectedPpRank = Math.round(duelRank / duelDiscordUsers.length * ppDiscordUsers.length);
+
 			let expectedPpRankPercentageDifference = Math.round((100 / ppDiscordUsers.length * ppRank - 100 / ppDiscordUsers.length * expectedPpRank) * 100) / 100;
-			msg.reply(`${discordUser.osuName} is:\n\`\`\`PP-Rank ${ppRank} out of ${ppDiscordUsers.length}\nDuel-Rating-Rank ${duelRank} out of ${duelDiscordUsers.length}\n\nExpected osu! pp rank for that duel rating would be: ${expectedPpRank} (Difference: ${ppRank - expectedPpRank} | ${expectedPpRankPercentageDifference}%)\`\`\``);
+			msg.reply(`${discordUser.osuName} is:\n\`\`\`PP-Rank ${ppRank} out of ${ppDiscordUsers.length}\nDuel-Rating-Rank ${duelRank} out of ${duelDiscordUsers.length}\n\nExpected osu! pp rank for that duel rating would be:\n${expectedPpRank} (Difference: ${ppRank - expectedPpRank} | ${expectedPpRankPercentageDifference}%)\n\nThat is in rank numbers:\n#${discordUser.osuRank} -> ~#${ppDiscordUsers[expectedPpRank - 1 - rankOffset].osuRank} (Difference: ${discordUser.osuRank - ppDiscordUsers[expectedPpRank - 1 - rankOffset].osuRank} ranks)\`\`\``);
 		} else if (args[0] === 'deleteElitiriRoleAssignment') {
 			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'elitiriRoleAssignment' } });
 			for (let i = 0; i < processQueueTasks.length; i++) {
@@ -4911,6 +4920,35 @@ module.exports = {
 			const mapScoreAmount = await DBOsuMultiScores.count();
 
 			console.log(mapScoreAmount);
+		} else if (args[0] === 'updateServerDuelRatings') {
+			let sentMessage = await msg.reply('Processing...');
+			await msg.guild.members.fetch()
+				.then(async (guildMembers) => {
+
+					const members = [];
+					guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
+
+					for (let i = 0; i < members.length; i++) {
+						await sentMessage.edit(`${i} out of ${members.length} done`);
+						logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers');
+						const discordUser = await DBDiscordUsers.findOne({
+							where: {
+								userId: members[i].id
+							},
+						});
+
+						if (discordUser) {
+							await getUserDuelStarRating(discordUser.osuUserId, msg.client);
+
+							await pause(10000);
+						}
+					}
+
+					sentMessage.delete();
+				})
+				.catch(error => {
+					console.log(error);
+				});
 		} else {
 			msg.reply('Invalid command');
 		}

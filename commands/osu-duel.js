@@ -123,6 +123,9 @@ module.exports = {
 					where: {
 						osuUserId: commandUser.osuUserId,
 						tourneyMatch: true,
+						matchName: {
+							[Op.notLike]: 'MOTD:%',
+						},
 						mode: 'Standard'
 					}
 				});
@@ -135,6 +138,9 @@ module.exports = {
 					where: {
 						osuUserId: discordUser.osuUserId,
 						tourneyMatch: true,
+						matchName: {
+							[Op.notLike]: 'MOTD:%',
+						},
 						mode: 'Standard'
 					}
 				});
@@ -390,6 +396,9 @@ module.exports = {
 						const mapScoreAmount = await DBOsuMultiScores.count({
 							where: {
 								beatmapId: beatmaps[index].beatmapId,
+								matchName: {
+									[Op.notLike]: 'MOTD:%',
+								},
 							}
 						});
 
@@ -1311,6 +1320,9 @@ async function getOsuMapInfo(dbBeatmap) {
 		where: {
 			beatmapId: dbBeatmap.beatmapId,
 			tourneyMatch: true,
+			matchName: {
+				[Op.notLike]: 'MOTD:%',
+			},
 		}
 	});
 
