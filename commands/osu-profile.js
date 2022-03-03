@@ -291,15 +291,25 @@ async function drawRank(input) {
 	ctx.textAlign = 'center';
 	ctx.fillText(`PP: ${pp}`, canvas.width / 2, 83 + yOffset);
 
-	let userDuelStarRating = await getUserDuelStarRating(user.id);
-	let leagueName = getOsuDuelLeague(userDuelStarRating.total);
-	let leagueImage = await Canvas.loadImage(`./other/emblems/${leagueName.imageName}.png`);
+	try {
+		let userDuelStarRating = await getUserDuelStarRating(user.id);
+		let leagueName = getOsuDuelLeague(userDuelStarRating.total);
+		let leagueImage = await Canvas.loadImage(`./other/emblems/${leagueName.imageName}.png`);
 
-	ctx.drawImage(leagueImage, 557, 40, 110, 110);
+		ctx.drawImage(leagueImage, 557, 40, 110, 110);
+	} catch (e) {
+		//Nothing
+	}
 
-	let flag = await Canvas.loadImage(`./other/flags/${user.country}.png`);
+	try {
+		let flag = await Canvas.loadImage(`./other/flags/${user.country}.png`);
 
-	ctx.drawImage(flag, 352, 49, 25, 18);
+		ctx.drawImage(flag, 352, 49, flag.width * 0.1785, flag.height * 0.1785);
+	} catch (e) {
+		let flag = await Canvas.loadImage('./other/flags/__.png');
+
+		ctx.drawImage(flag, 352, 49, 25, 18);
+	}
 
 	const output = [canvas, ctx, user];
 	return output;
