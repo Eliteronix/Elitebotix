@@ -1060,7 +1060,7 @@ module.exports = {
 			}
 
 			//Group the maps into steps of 0.1 of difficulty
-			// let testSr = 6;
+			// let testSr = 6.7;
 			const steps = [
 				// testSr
 			];
@@ -1074,11 +1074,11 @@ module.exports = {
 			// 	averageWeight: 0,
 			// 	averageOverPerformWeight: 1,
 			// 	averageUnderPerformWeight: 0,
-			// 	newAverageWeight: Math.abs((((1 + 0) / 2) - 0.5)),
+			// 	newAverageWeight: Math.abs(((1 + 0) / 1) - 1),
 			// 	weightedStarRating: (testSr) * 0,
 			// 	overPerformWeightedStarRating: (testSr) * 1,
 			// 	underPerformWeightedStarRating: (testSr) * 0,
-			// 	newWeightedStarRating: (testSr) * Math.abs((((1 + 0) / 2) - 0.5)),
+			// 	newWeightedStarRating: (testSr) * Math.abs(((1 + 0) / 1) - 1),
 			// });
 			for (let i = 0; i < userMaps.length && i < 50; i++) {
 				let dbBeatmap = null;
@@ -1158,11 +1158,11 @@ module.exports = {
 								averageWeight: weight,
 								averageOverPerformWeight: overPerformWeight,
 								averageUnderPerformWeight: underPerformWeight,
-								newAverageWeight: Math.abs((((overPerformWeight + underPerformWeight) / 2) - 0.5)),
+								newAverageWeight: Math.abs(((overPerformWeight + underPerformWeight) / 1) - 1),
 								weightedStarRating: (starRatingStep) * weight,
 								overPerformWeightedStarRating: (starRatingStep) * overPerformWeight,
 								underPerformWeightedStarRating: (starRatingStep) * underPerformWeight,
-								newWeightedStarRating: (starRatingStep) * Math.abs((((overPerformWeight + underPerformWeight) / 2) - 0.5)),
+								newWeightedStarRating: (starRatingStep) * Math.abs(((overPerformWeight + underPerformWeight) / 1) - 1),
 							});
 							steps.push(starRatingStep);
 						} else {
@@ -1173,7 +1173,7 @@ module.exports = {
 							stepData[steps.indexOf(starRatingStep)].averageWeight = stepData[steps.indexOf(starRatingStep)].totalWeight / stepData[steps.indexOf(starRatingStep)].amount;
 							stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight = stepData[steps.indexOf(starRatingStep)].totalOverPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
 							stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight = stepData[steps.indexOf(starRatingStep)].totalUnderPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
-							stepData[steps.indexOf(starRatingStep)].newAverageWeight = Math.abs((((stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight + stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight) / 2) - 0.5)) / stepData[steps.indexOf(starRatingStep)].amount;
+							stepData[steps.indexOf(starRatingStep)].newAverageWeight = Math.abs(((stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight + stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight) / stepData[steps.indexOf(starRatingStep)].amount) - 1);
 							stepData[steps.indexOf(starRatingStep)].weightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageWeight;
 							stepData[steps.indexOf(starRatingStep)].overPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight;
 							stepData[steps.indexOf(starRatingStep)].underPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight;
