@@ -1328,7 +1328,7 @@ module.exports = {
 				}
 
 				// eslint-disable-next-line no-undef
-				stepData = new Discord.MessageAttachment(Buffer.from(stepData.join('\n\n'), 'utf-8'), `osu-duel-star-rating-weights-${osuUser.id}.txt`);
+				stepData = new Discord.MessageAttachment(Buffer.from(stepData.join('\n\n'), 'utf-8'), `osu-duel-star-rating-group-weights-${osuUser.id}.txt`);
 				files.push(stepData);
 
 				let scores = [
@@ -1342,31 +1342,58 @@ module.exports = {
 				for (let i = 0; i < scores.length; i++) {
 					quicksortScore(scores[i]);
 
-					console.log(scores[i]);
-
-					for (let j = 0; j < stepData[i].length; j++) {
-						stepData[i][j] = `${scores[i][j].score}: ${(Math.round(stepData[i][j].averageWeight * 1000) / 1000).toFixed(3)} (old) | ${(Math.round(stepData[i][j].newAverageWeight * 1000) / 1000).toFixed(3)} (new) -> ${(Math.round(stepData[i][j].averageOverPerformWeight * 1000) / 1000)} (over) - ${(Math.round(stepData[i][j].averageUnderPerformWeight * 1000) / 1000)} (under)`;
+					for (let j = 0; j < scores[i].length; j++) {
+						scores[i][j] = `${Math.round(scores[i][j].score)} points (${(Math.round(scores[i][j].weight * 1000) / 1000).toFixed(3)}): ${(Math.round(scores[i][j].starRating * 10) / 10).toFixed(1)}* | https://osu.ppy.sh/b/${scores[i][j].beatmapId}`;
 					}
 
-					// if (i === 0) {
-					// 	stepData[i] = 'NM Starrating Weights:\n' + stepData[i].join('\n');
-					// } else if (i === 1) {
-					// 	stepData[i] = 'HD Starrating Weights:\n' + stepData[i].join('\n');
-					// } else if (i === 2) {
-					// 	stepData[i] = 'HR Starrating Weights:\n' + stepData[i].join('\n');
-					// } else if (i === 3) {
-					// 	stepData[i] = 'DT Starrating Weights:\n' + stepData[i].join('\n');
-					// } else if (i === 4) {
-					// 	stepData[i] = 'FM Starrating Weights:\n' + stepData[i].join('\n');
-					// }
+					if (i === 0) {
+						scores[i] = 'NM Scores & Weights:\n' + scores[i].join('\n');
+					} else if (i === 1) {
+						scores[i] = 'HD Scores & Weights:\n' + scores[i].join('\n');
+					} else if (i === 2) {
+						scores[i] = 'HR Scores & Weights:\n' + scores[i].join('\n');
+					} else if (i === 3) {
+						scores[i] = 'DT Scores & Weights:\n' + scores[i].join('\n');
+					} else if (i === 4) {
+						scores[i] = 'FM Scores & Weights:\n' + scores[i].join('\n');
+					}
 				}
 
-				// // eslint-disable-next-line no-undef
-				// stepData = new Discord.MessageAttachment(Buffer.from(stepData.join('\n\n'), 'utf-8'), `osu-duel-star-rating-weights-${osuUser.id}.txt`);
-				// files.push(stepData);
+				// eslint-disable-next-line no-undef
+				scores = new Discord.MessageAttachment(Buffer.from(scores.join('\n\n'), 'utf-8'), `osu-duel-scores-and-weights-${osuUser.id}.txt`);
+				files.push(scores);
+
+				//Get the multiplayer matches
+				let multiScores = [
+					userDuelStarRating.scores.NM,
+					userDuelStarRating.scores.HD,
+					userDuelStarRating.scores.HR,
+					userDuelStarRating.scores.DT,
+					userDuelStarRating.scores.FM
+				];
+
+				let multiMatches = [];
+				let multiMatchIds = [];
+
+				for (let i = 0; i < multiScores.length; i++) {
+					for (let j = 0; j < multiScores[i].length; j++) {
+						if (!multiMatchIds.includes(multiScores[i][j].matchId)) {
+							multiMatches.push({ matchId: multiScores[i][j].matchId, matchName: multiScores[i][j].matchName, matchStartDate: multiScores[i][j].matchStartDate });
+							multiMatchIds.push(multiScores[i][j].matchId);
+						}
+					}
+				}
+
+				for (let i = 0; i < multiMatches.length; i++) {
+					console.log(multiScores[i].matchStartDate);
+					multiMatches[i] = `${(multiMatches[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${multiMatches[i].matchStartDate.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiMatches[i].matchId}`;
+				}
+
+				// eslint-disable-next-line no-undef
+				multiMatches = new Discord.MessageAttachment(Buffer.from(multiMatches.join('\n\n'), 'utf-8'), `osu-duel-multimatches-${osuUser.id}.txt`);
+				files.push(multiMatches);
 
 				let TODOAddExplaination;
-				let TODOAddDataOnTheScoresUsedAndTheirWeightAndScore;
 				let TODOAddMultiPlayerMatchesTheDataIsComingFrom;
 				let TODOCleanUpDataOutputForTheStepData;
 				return await interaction.editReply({ content: 'Add explaination here', files: files, ephemeral: true });

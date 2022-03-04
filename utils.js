@@ -1062,12 +1062,12 @@ module.exports = {
 			const userMapIds = [];
 			const userMaps = [];
 			for (let i = 0; i < userScores.length; i++) {
-				if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1) {
+				if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && parseInt(userScores[i].score) > 10000) {
 					checkedMapIds.push(userScores[i].beatmapId);
 					if (getScoreModpoolFunction(userScores[i]) === modPools[modIndex]) {
 						if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
 							userMapIds.push(userScores[i].beatmapId);
-							userMaps.push({ beatmapId: userScores[i].beatmapId, score: parseInt(userScores[i].score) });
+							userMaps.push({ beatmapId: userScores[i].beatmapId, score: parseInt(userScores[i].score), matchId: userScores[i].matchId, matchName: userScores[i].matchName, matchStartDate: userScores[i].matchStartDate });
 						}
 					}
 				}
@@ -1138,6 +1138,8 @@ module.exports = {
 					overPerformWeight = Math.abs(overPerformWeight - 1);
 					let underPerformWeight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
 					underPerformWeight = Math.abs(underPerformWeight - 1);
+
+					userMaps[i].weight = Math.abs(overPerformWeight + underPerformWeight - 1);
 
 					if (parseFloat(userMaps[i].score) < 350000) {
 						overPerformWeight = 0;
