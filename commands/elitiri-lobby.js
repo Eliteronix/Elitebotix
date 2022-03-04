@@ -3,15 +3,8 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { DBElitiriCupSignUp, DBElitiriCupLobbies } = require('../dbObjects');
 const { currentElitiriCup } = require('../config.json');
 
-
-
-
 //to-do
-//what if lobby already has 15 players in it, is there a way to limit number of id's in the table?
-//if player changes his lobby, previews lobby' row should 
-// the empty string '' is recognized as a cell with a value and the counta function counts it as a cell with a value, so we need a way to put the empty empty string
-//avoid players breaking the bot by providing wrong lobby id
-
+//date fuckery
 
 module.exports = {
 	name: 'elitiri-lobby',
@@ -38,6 +31,7 @@ module.exports = {
 		// }
 
 		if (args[0].toLowerCase() === 'claim') {
+			args.shift();
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: {
 					tournamentName: currentElitiriCup,
@@ -53,10 +47,8 @@ module.exports = {
 				}
 			}
 
-			let lobbyId = args[1];
-			
 			// Make sure lobbyId is valid
-			if (lobbyId.replace(/\D+/, '') > 24 || lobbyId.replace(/\D+/, '') < 1) {
+			if (args[0].replace(/\D+/, '') > 24 ||  args[0].replace(/\D+/, '') < 1) {
 				if (msg && msg.id) {
 					return msg.reply('Please make sure your lobby ID is correct');
 				} else {
@@ -66,19 +58,28 @@ module.exports = {
 
 			//set schedule sheets for different brackets
 			let scheduleSheetId;
+			let lobbyAb;
 			// player bracket check
 			if (elitiriSignUp.bracketName == 'Top Bracket') {
 				scheduleSheetId = 'Qualifiers Schedules-Top';
+				lobbyAb = 'DQ-';
 			} else if (elitiriSignUp.bracketName == 'Middle Bracket') { 
 				scheduleSheetId = 'Qualifiers Schedules-Middle';
+				lobbyAb = 'CQ-';
 			} else if (elitiriSignUp.bracketName == 'Lower Bracket') {
 				scheduleSheetId = 'Qualifiers Schedules-Lower';
+				lobbyAb = 'BQ-';
 			} else if (elitiriSignUp.bracketName == 'Beginner Bracket') {
 				scheduleSheetId = 'Qualifiers Schedules-Beginner';
+				lobbyAb = 'AQ-';
 			}
+			
+			let lobbyId = lobbyAb + args[0].replace(/\D+/, '') < 1;
 
-			//fancy hardcoded function will be here soon tm
+			//fancy hardcoded shit will be here soon tm
 			let date = new Date();
+
+
 			// eslint-disable-next-line no-unused-vars
 			const tournamentLobby = await DBElitiriCupLobbies.findOne({
 				where: {
@@ -99,16 +100,38 @@ module.exports = {
 					refOsuName : null,
 				});
 			}
-			// previousLobbyId is used to clear the previous playerNameCell with player' name
-			let previousLobbyId;
+
+			const playersInLobby = await DBElitiriCupSignUp.count({
+				where: {
+					lobbyId: lobbyId
+				}
+			});
+			if (playersInLobby > 15){
+				if (msg && msg.id) {
+					return msg.reply('This lobby is full. Please, choose another one');
+				} else {
+					return interaction.reply({ content: 'This lobby is full. Please, choose another one' });
+				}
+			}
+
+			// previousLobbyId is used to clear previous playerNameCell with player name
+			let previousLobbyId = null;
 			// set tournamentLobbyId for the player
-			if (elitiriSignUp.tournamentLobbyId !== null){
-				previousLobbyId = elitiriSignUp.tournamentLobbyId;
+			if (elitiriSignUp.tournamentLobbyId == null){
 				elitiriSignUp.tournamentLobbyId = lobbyId;
 			} else {
+				previousLobbyId = elitiriSignUp.tournamentLobbyId;
 				elitiriSignUp.tournamentLobbyId = lobbyId;
 			}
 			await elitiriSignUp.save();
+
+			if (previousLobbyId == elitiriSignUp.tournamentLobbyId){
+				if (msg && msg.id) {
+					return msg.reply('You are already in this lobby');
+				} else {
+					return interaction.reply({ content: 'You are already in this lobby' });
+				}
+			}
 
 			// Initialize the sheet - doc ID is the long id in the sheets URL
 			const doc = new GoogleSpreadsheet('1FPr133dAROYGUpJOaQPGTvGq5hjk8B-Ik82rmZsa9NM');
@@ -130,61 +153,98 @@ module.exports = {
 					tournamentLobbyId: lobbyId
 				}
 			});
+			// eslint-disable-next-line no-unused-vars
+			let previousLobbyPlayers = await DBElitiriCupSignUp.findAll({
+				where:{
+					tournamentName: currentElitiriCup,
+					tournamentLobbyId: previousLobbyId
+				}
+			});
 
-			//lobby wasnt created before
-			if(previousLobbyId == undefined){
-				// 'j' is the counter for the row
-				let j = Number(elitiriSignUp.tournamentLobbyId.replace(/\D+/, ''));
-				if (j > 12){
-					j++;
-				}
-				for (let i = 0; i < lobbyPlayers.length; i++) {
-					let playerName = lobbyPlayers[i].osuName;
-					let  playerNameCell = sheet.getCell(3 + j, 6 + i); //getCell(row, column) zero-indexed
-					playerNameCell.value =  playerName;
+			let playerName, playerNameCell, quantityCell;
 
-				}
-				//Lobby was created before
-			} else {
-				let j = Number(previousLobbyId.replace(/\D+/, ''));
-				if (j > 12){
-					j++;
-				}
-				//clear row
-				for (let i = 0; i < lobbyPlayers.length; i++) {
-					let  playerNameCell = sheet.getCell(3 + j, 6 + i); //getCell(row, column) zero-indexed
-					playerNameCell.value = null;
-				}
-				//add names back
+			//j is a row counter
+			let j; 
+			
+			// Your homework is to understand this block of code good luck agreeGe
+			try {
+				// clear new lobby row
 				j = Number(elitiriSignUp.tournamentLobbyId.replace(/\D+/, ''));
 				if (j > 12){
 					j++;
 				}
-				for (let i = 0; i < lobbyPlayers.length; i++) {
-					let playerName = lobbyPlayers[i].osuName;
-					let playerNameCell = sheet.getCell(3 + j, 6 + i); //getCell(row, column) zero-indexed
-					playerNameCell.value =  playerName;
+				for (let i = 0; i < 14; i++) {
+					playerNameCell = sheet.getCell(3 + j, 6 + i);
+					playerNameCell.value = null;
 				}
-			}
+				//if lobby was set before
+				if(previousLobbyId !== null){
+					//clear previous lobby row
+					j = Number(previousLobbyId.replace(/\D+/, ''));
+					if (j > 12){
+						j++;
+					}
+					for (let i = 0; i < 14; i++) {
+						playerNameCell = sheet.getCell(3 + j, 6 + i);
+						playerNameCell.value = null;
 
-			await sheet.saveUpdatedCells();
+						quantityCell = sheet.getCell(3 + j, 5);
+						quantityCell.value = previousLobbyPlayers.length + '/15';
+					}
+					//fill in previous lobby row
+					for (let i = 0; i < previousLobbyPlayers.length; i++) {
+						playerName = previousLobbyPlayers[i].osuName;
+						playerNameCell = sheet.getCell(3 + j, 6 + i);
+						playerNameCell.value = playerName;
+
+						quantityCell = sheet.getCell(3 + j, 5);
+						quantityCell.value = previousLobbyPlayers.length + '/15';
+					}
+					//fill in new lobby row
+					j = Number(elitiriSignUp.tournamentLobbyId.replace(/\D+/, ''));
+					if (j > 12){
+						j++;
+					}
+					for (let i = 0; i < lobbyPlayers.length; i++) {
+						playerName = lobbyPlayers[i].osuName;
+						playerNameCell = sheet.getCell(3 + j, 6 + i);
+						playerNameCell.value = playerName;
+
+						quantityCell = sheet.getCell(3 + j, 5);
+						quantityCell.value = lobbyPlayers.length + '/15';
+					}
+					//if lobby wasnt set before
+					//fill in lobby row
+				} else {
+					for (let i = 0; i < lobbyPlayers.length; i++) {
+						playerName = lobbyPlayers[i].osuName;
+						playerNameCell = sheet.getCell(3 + j, 6 + i);
+						playerNameCell.value = playerName;
+
+						quantityCell = sheet.getCell(3 + j, 5);
+						quantityCell.value = lobbyPlayers.length + '/15';
+					}
+				}
+				await sheet.saveUpdatedCells();
+
+			} catch (error) {
+				console.log(error);
+			}
+			
 
 			if (msg && msg.id) {
-				return msg.reply(`You have successfully claimed lobby ${lobbyId}`);
+				return msg.reply(`You have successfully claimed lobby  \`${lobbyId}\``);
 			} else {
-				return interaction.reply({ content: `You have successfully claimed lobby ${lobbyId}` });
+				return interaction.reply({ content: `You have successfully claimed lobby \`${lobbyId}\`` });
 			}
 
-			//delete before merging
+
+			//edit after
 		} else if (args[0] == 'prune'){
-			DBElitiriCupLobbies.destroy({
-				where: {
-					tournamentName: currentElitiriCup,
-				}
-			});
+			let target = args[1];
 			let elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where:{
-					userId: msg.author.id
+					userId: target
 				}
 			});
 			elitiriSignUp.tournamentLobbyId = null;
