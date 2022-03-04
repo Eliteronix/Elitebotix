@@ -1,7 +1,7 @@
 const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBElitiriCupStaff, DBProcessQueue, DBDiscordUsers } = require('../dbObjects.js');
 const { pause, logDatabaseQueries } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { currentElitiriCup, currentElitiriCupHostSheetId } = require('../config.json');
+const { currentElitiriCup, currentElitiriCupHostSheetId, developers } = require('../config.json');
 
 let potentialNMQualifierMaps = [];
 let potentialHDQualifierMaps = [];
@@ -61,16 +61,7 @@ module.exports = {
 	tags: 'debug',
 	prefixCommand: true,
 	async execute(msg, args) {
-		//Get the user from the DBDiscordUsers
-		const discordUser = await DBDiscordUsers.findOne({
-			where: { userId: msg.author.id }
-		});
-
-		const host = await DBElitiriCupStaff.findOne({
-			where: { osuUserId: discordUser.osuUserId, host: true, tournamentName: currentElitiriCup },
-		});
-
-		if (msg.author.id !== '138273136285057025' && !host) {
+		if (!developers.includes(msg.author.id)) {
 			return;
 		}
 
@@ -684,6 +675,28 @@ module.exports = {
 									'type': 10, // 10 is type Number
 									'required': true,
 								}
+							]
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'elitiri-lobby',
+					description: `Allows you to manage lobbies for the ${currentElitiriCup}`,
+					options: [
+						{
+							'name': 'claim',
+							'description': `Claim your qualifiers lobby for the ${currentElitiriCup}`,
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'lobbyid',
+									'description': 'Lobby ID of the desired qualifiers lobby in the following format: CQ-4, AQ-22, 7',
+									'type': 3, // 10 is type Number
+									'required': true,
+								},
 							]
 						},
 					]

@@ -7,7 +7,7 @@ const { populateMsgFromInteraction } = require('../utils');
 module.exports = {
 	name: 'elitiri-lobby',
 	//aliases: ['developer'],
-	description: `Manage lobbies for ${currentElitiriCup}`,
+	description: `Allows you to manage lobbies for the ${currentElitiriCup}`,
 	usage: 'claim <LobbyID>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
@@ -24,6 +24,19 @@ module.exports = {
 		//WIP
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
+
+			args = [interaction.options._subcommand];
+
+			let lobbyId = null;
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				if (interaction.options._hoistedOptions[i].name === 'lobbyid') {
+					lobbyId = interaction.options._hoistedOptions[i].value;
+				}
+			}
+
+			await interaction.deferReply({ ephemeral: true });
+			args.push(lobbyId);
+			console.log(lobbyId);
 		}
 
 		// UNCOMMENT THIS LATER
@@ -32,6 +45,7 @@ module.exports = {
 		//     return;
 		// }
 
+		console.log(1);
 		if (args[0].toLowerCase() === 'claim') {
 			args.shift();
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
@@ -42,10 +56,10 @@ module.exports = {
 			});
 
 			if (!elitiriSignUp) {
-				if (msg && msg.id) {
+				if (msg.id) {
 					return msg.reply(`Seems like you're not registered for ${currentElitiriCup}`);
 				} else {
-					return interaction.reply({ content: `Seems like you're not registered for ${currentElitiriCup}` });
+					return interaction.editReply({ content: `Seems like you're not registered for ${currentElitiriCup}` });
 				}
 			}
 
@@ -71,13 +85,13 @@ module.exports = {
 
 			// Make sure lobbyId is valid
 			if (lobbyId.replace(/\D+/, '') > 24 ||  lobbyId.replace(/\D+/, '') < 1 || lobbyId.replace(/\D+/, '').length > 2) {
-				if (msg && msg.id) {
+				if (msg.id) {
 					return msg.reply('Please make sure your lobby ID is correct');
 				} else {
-					return interaction.reply({ content: 'Please make sure your lobby ID is correct' });
+					return interaction.editReply({ content: 'Please make sure your lobby ID is correct' });
 				}
 			}
-
+			console.log(2);
 			//can be moved to config.json actually
 			let currentElitiriCupBeginnerQualsFirstLobby = 1646445600000; // ms 
 			let currentElitiriCupLowerQualsFirstLobby = 1647050400000; // ms
@@ -123,10 +137,10 @@ module.exports = {
 				}
 			});
 			if (playersInLobby > 15){
-				if (msg && msg.id) {
+				if (msg.id) {
 					return msg.reply('This lobby is full. Please, choose another one');
 				} else {
-					return interaction.reply({ content: 'This lobby is full. Please, choose another one' });
+					return interaction.editReply({ content: 'This lobby is full. Please, choose another one' });
 				}
 			}
 
@@ -142,10 +156,10 @@ module.exports = {
 			await elitiriSignUp.save();
 
 			if (previousLobbyId == elitiriSignUp.tournamentLobbyId){
-				if (msg && msg.id) {
+				if (msg.id) {
 					return msg.reply(`You are already in lobby ${lobbyId}`);
 				} else {
-					return interaction.reply({ content: `You are already in lobby ${lobbyId}` });
+					return interaction.editReply({ content: `You are already in lobby ${lobbyId}` });
 				}
 			}
 
@@ -248,10 +262,10 @@ module.exports = {
 			}
 			
 
-			if (msg && msg.id) {
+			if (msg.id) {
 				return msg.reply(`You have successfully claimed lobby  \`${lobbyId}\``);
 			} else {
-				return interaction.reply({ content: `You have successfully claimed lobby \`${lobbyId}\`` });
+				return interaction.editReply({ content: `You have successfully claimed lobby \`${lobbyId}\`` });
 			}
 
 
