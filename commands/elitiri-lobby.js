@@ -47,15 +47,6 @@ module.exports = {
 				}
 			}
 
-			// Make sure lobbyId is valid
-			if (args[0].replace(/\D+/, '') > 24 ||  args[0].replace(/\D+/, '') < 1) {
-				if (msg && msg.id) {
-					return msg.reply('Please make sure your lobby ID is correct');
-				} else {
-					return interaction.reply({ content: 'Please make sure your lobby ID is correct' });
-				}
-			}
-
 			//set schedule sheets for different brackets
 			let scheduleSheetId;
 			let lobbyAb;
@@ -74,19 +65,42 @@ module.exports = {
 				lobbyAb = 'AQ-';
 			}
 			
-			let lobbyId = lobbyAb + args[0].replace(/\D+/, '') < 1;
+			let lobbyId = lobbyAb + args[0].replace(/\D+/, '');
 
-			//fancy hardcoded shit will be here soon tm
-			let date = new Date();
+			// Make sure lobbyId is valid
+			if (lobbyId.replace(/\D+/, '') > 24 ||  lobbyId.replace(/\D+/, '') < 1 || lobbyId.replace(/\D+/, '').length > 2) {
+				if (msg && msg.id) {
+					return msg.reply('Please make sure your lobby ID is correct');
+				} else {
+					return interaction.reply({ content: 'Please make sure your lobby ID is correct' });
+				}
+			}
 
+			//can be moved to config.json actually
+			let currentElitiriCupBeginnerQualsFirstLobby = 1646445600000; // ms 
+			let currentElitiriCupLowerQualsFirstLobby = 1647050400000; // ms
+			let currentElitiriCupMiddleQualsFirstLobby = 1647655200000; // ms
+			let currentElitiriCupTopQualsFirstLobby = 1648260000000; // ms
+			let givenLobbyDate = new Date().getTime();
+			if (elitiriSignUp.bracketName == 'Top Bracket'){
+				givenLobbyDate = Number(currentElitiriCupTopQualsFirstLobby + Number(((lobbyId.replace(/\D+/, '') - 1) * 7200000))); // first lobby + ((lobby ID - 1) * 7200000) || 7200000 - is 2 hours in ms
+			}else if (elitiriSignUp.bracketName == 'Middle Bracket'){	
+				givenLobbyDate = Number(currentElitiriCupMiddleQualsFirstLobby) + Number(((lobbyId.replace(/\D+/, '') - 1) * 7200000));
+			}else if (elitiriSignUp.bracketName == 'Lower Bracket'){
+				givenLobbyDate = Number(currentElitiriCupLowerQualsFirstLobby + Number(((lobbyId.replace(/\D+/, '') - 1) * 7200000)));
+			}else {
+				givenLobbyDate = Number(currentElitiriCupBeginnerQualsFirstLobby + Number(((lobbyId.replace(/\D+/, '') - 1) * 7200000)));
+			}
 
+			let date = new Date(givenLobbyDate);
+		
 			// eslint-disable-next-line no-unused-vars
 			const tournamentLobby = await DBElitiriCupLobbies.findOne({
 				where: {
 					tournamentName: currentElitiriCup,
 					lobbyId: lobbyId,
 				}
-			});
+			});	
 			//no lobby table with given Id has been created yet
 			if (!tournamentLobby){
 				//create a lobby
@@ -100,10 +114,10 @@ module.exports = {
 					refOsuName : null,
 				});
 			}
-
+			
 			const playersInLobby = await DBElitiriCupSignUp.count({
 				where: {
-					lobbyId: lobbyId
+					tournamentLobbyId: lobbyId
 				}
 			});
 			if (playersInLobby > 15){
@@ -127,9 +141,9 @@ module.exports = {
 
 			if (previousLobbyId == elitiriSignUp.tournamentLobbyId){
 				if (msg && msg.id) {
-					return msg.reply('You are already in this lobby');
+					return msg.reply(`You are already in lobby ${lobbyId}`);
 				} else {
-					return interaction.reply({ content: 'You are already in this lobby' });
+					return interaction.reply({ content: `You are already in lobby ${lobbyId}` });
 				}
 			}
 
@@ -240,6 +254,7 @@ module.exports = {
 
 
 			//edit after
+			// THIS DOESNT DELETE PLAYER FROM THE SHEET
 		} else if (args[0] == 'prune'){
 			let target = args[1];
 			let elitiriSignUp = await DBElitiriCupSignUp.findOne({
