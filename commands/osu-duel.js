@@ -1311,34 +1311,61 @@ module.exports = {
 					quicksortStep(stepData[i]);
 
 					for (let j = 0; j < stepData[i].length; j++) {
-						stepData[i][j] = `${stepData[i][j].step.toFixed(1)}: ${(Math.round(stepData[i][j].averageWeight * 1000) / 1000).toFixed(3)} (old) | ${(Math.round(stepData[i][j].newAverageWeight * 1000) / 1000).toFixed(3)} (new) -> ${(Math.round(stepData[i][j].averageOverPerformWeight * 1000) / 1000)} (over) - ${(Math.round(stepData[i][j].averageUnderPerformWeight * 1000) / 1000)} (under)`;
+						stepData[i][j] = `${stepData[i][j].step.toFixed(1)}: ${(Math.round(stepData[i][j].averageWeight * 1000) / 1000).toFixed(3)}* (old) | ${(Math.round(stepData[i][j].newAverageWeight * 1000) / 1000).toFixed(3)}* (new) -> ${(Math.round(stepData[i][j].averageOverPerformWeight * 1000) / 1000)} (over) - ${(Math.round(stepData[i][j].averageUnderPerformWeight * 1000) / 1000)} (under)`;
 					}
 
 					if (i === 0) {
-						// eslint-disable-next-line no-undef
-						let NMData = new Discord.MessageAttachment(Buffer.from('NM Starrating Weights:\n' + stepData[i].join('\n'), 'utf-8'), `osu-duel-NM-Data-${osuUser.id}.txt`);
-						files.push(NMData);
+						stepData[i] = 'NM Starrating Weights:\n' + stepData[i].join('\n');
 					} else if (i === 1) {
-						// eslint-disable-next-line no-undef
-						let HDData = new Discord.MessageAttachment(Buffer.from('HD Starrating Weights:\n' + stepData[i].join('\n'), 'utf-8'), `osu-duel-HD-Data-${osuUser.id}.txt`);
-						files.push(HDData);
+						stepData[i] = 'HD Starrating Weights:\n' + stepData[i].join('\n');
 					} else if (i === 2) {
-						// eslint-disable-next-line no-undef
-						let HRData = new Discord.MessageAttachment(Buffer.from('HR Starrating Weights:\n' + stepData[i].join('\n'), 'utf-8'), `osu-duel-HR-Data-${osuUser.id}.txt`);
-						files.push(HRData);
+						stepData[i] = 'HR Starrating Weights:\n' + stepData[i].join('\n');
 					} else if (i === 3) {
-						// eslint-disable-next-line no-undef
-						let DTData = new Discord.MessageAttachment(Buffer.from('DT Starrating Weights:\n' + stepData[i].join('\n'), 'utf-8'), `osu-duel-DT-Data-${osuUser.id}.txt`);
-						files.push(DTData);
+						stepData[i] = 'DT Starrating Weights:\n' + stepData[i].join('\n');
 					} else if (i === 4) {
-						// eslint-disable-next-line no-undef
-						let FMData = new Discord.MessageAttachment(Buffer.from('FM Starrating Weights:\n' + stepData[i].join('\n'), 'utf-8'), `osu-duel-FM-Data-${osuUser.id}.txt`);
-						files.push(FMData);
+						stepData[i] = 'FM Starrating Weights:\n' + stepData[i].join('\n');
 					}
 				}
 
+				// eslint-disable-next-line no-undef
+				stepData = new Discord.MessageAttachment(Buffer.from(stepData.join('\n\n'), 'utf-8'), `osu-duel-star-rating-weights-${osuUser.id}.txt`);
+				files.push(stepData);
+
+				let scores = [
+					userDuelStarRating.scores.NM,
+					userDuelStarRating.scores.HD,
+					userDuelStarRating.scores.HR,
+					userDuelStarRating.scores.DT,
+					userDuelStarRating.scores.FM
+				];
+
+				for (let i = 0; i < scores.length; i++) {
+					quicksortScore(scores[i]);
+
+					console.log(scores[i]);
+
+					for (let j = 0; j < stepData[i].length; j++) {
+						stepData[i][j] = `${scores[i][j].score}: ${(Math.round(stepData[i][j].averageWeight * 1000) / 1000).toFixed(3)} (old) | ${(Math.round(stepData[i][j].newAverageWeight * 1000) / 1000).toFixed(3)} (new) -> ${(Math.round(stepData[i][j].averageOverPerformWeight * 1000) / 1000)} (over) - ${(Math.round(stepData[i][j].averageUnderPerformWeight * 1000) / 1000)} (under)`;
+					}
+
+					// if (i === 0) {
+					// 	stepData[i] = 'NM Starrating Weights:\n' + stepData[i].join('\n');
+					// } else if (i === 1) {
+					// 	stepData[i] = 'HD Starrating Weights:\n' + stepData[i].join('\n');
+					// } else if (i === 2) {
+					// 	stepData[i] = 'HR Starrating Weights:\n' + stepData[i].join('\n');
+					// } else if (i === 3) {
+					// 	stepData[i] = 'DT Starrating Weights:\n' + stepData[i].join('\n');
+					// } else if (i === 4) {
+					// 	stepData[i] = 'FM Starrating Weights:\n' + stepData[i].join('\n');
+					// }
+				}
+
+				// // eslint-disable-next-line no-undef
+				// stepData = new Discord.MessageAttachment(Buffer.from(stepData.join('\n\n'), 'utf-8'), `osu-duel-star-rating-weights-${osuUser.id}.txt`);
+				// files.push(stepData);
+
 				let TODOAddExplaination;
-				let TODOMergeAllDataFromSameTypeIntoOneFile;
 				let TODOAddDataOnTheScoresUsedAndTheirWeightAndScore;
 				let TODOAddMultiPlayerMatchesTheDataIsComingFrom;
 				let TODOCleanUpDataOutputForTheStepData;
@@ -1462,6 +1489,31 @@ function quicksortStep(list, start = 0, end = undefined) {
 		const p = partitionStep(list, start, end);
 		quicksortStep(list, start, p - 1);
 		quicksortStep(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionScore(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (list[j].score < pivot.score) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksortScore(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionScore(list, start, end);
+		quicksortScore(list, start, p - 1);
+		quicksortScore(list, p + 1, end);
 	}
 	return list;
 }
