@@ -2,9 +2,7 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 //eslint-disable-next-line no-unused-vars
 const { DBElitiriCupSignUp, DBElitiriCupLobbies } = require('../dbObjects');
 const { currentElitiriCup } = require('../config.json');
-
-//to-do
-//date fuckery
+const { populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'elitiri-lobby',
@@ -23,6 +21,10 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, client) {
+		//WIP
+		if (interaction) {
+			msg = await populateMsgFromInteraction(interaction);
+		}
 
 		// UNCOMMENT THIS LATER
 		// eslint-disable-next-line no-undef
