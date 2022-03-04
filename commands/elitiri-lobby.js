@@ -105,7 +105,7 @@ module.exports = {
 				givenLobbyDate = Number(currentElitiriCupBeginnerQualsFirstLobby + Number(((lobbyId.replace(/\D+/, '') - 1) * 7200000)));
 			}
 
-			let date = new Date(givenLobbyDate);
+			let date = new Date(givenLobbyDate).toUTCString();
 		
 			// eslint-disable-next-line no-unused-vars
 			const tournamentLobby = await DBElitiriCupLobbies.findOne({
