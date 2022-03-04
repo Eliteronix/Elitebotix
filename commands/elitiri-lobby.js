@@ -36,7 +36,6 @@ module.exports = {
 
 			await interaction.deferReply({ ephemeral: true });
 			args.push(lobbyId);
-			console.log(lobbyId);
 		}
 
 		// UNCOMMENT THIS LATER
@@ -45,7 +44,6 @@ module.exports = {
 		//     return;
 		// }
 
-		console.log(1);
 		if (args[0].toLowerCase() === 'claim') {
 			args.shift();
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
@@ -91,7 +89,6 @@ module.exports = {
 					return interaction.editReply({ content: 'Please make sure your lobby ID is correct' });
 				}
 			}
-			console.log(2);
 			//can be moved to config.json actually
 			let currentElitiriCupBeginnerQualsFirstLobby = 1646445600000; // ms 
 			let currentElitiriCupLowerQualsFirstLobby = 1647050400000; // ms
@@ -259,6 +256,11 @@ module.exports = {
 
 			} catch (error) {
 				console.log(error);
+				if (msg.id) {
+					return msg.reply('Something went wrong... Please, try again');
+				} else {
+					return interaction.editReply({ content: 'Something went wrong... Please, try again' });
+				}
 			}
 			
 
@@ -282,7 +284,12 @@ module.exports = {
 			await elitiriSignUp.save();
 			msg.reply('Done');
 		} else if (args[0].toLowerCase == 'referee'){
-			//WIP
+			// let lobbyid = args[0];
+			// let lobby = await DBElitiriCupLobbies.findOne({
+			// 	where:{
+			// 		lobbyId: lobbyId
+			// 	}
+			// });
 		}
 	}
 };
