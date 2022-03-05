@@ -1006,6 +1006,7 @@ module.exports = {
 		//Try to get it from tournament data if available
 		let userScores;
 
+		//Get the tournament data either limited by the date or everything
 		if (input.date) {
 			userScores = await DBOsuMultiScores.findAll({
 				where: {
@@ -1029,6 +1030,7 @@ module.exports = {
 			});
 		}
 
+		//Sort it by match ID
 		quicksortMatchId(userScores);
 
 		let duelRatings = {
@@ -1056,8 +1058,9 @@ module.exports = {
 
 		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
 
+		//Loop through all modpools
 		for (let modIndex = 0; modIndex < modPools.length; modIndex++) {
-			//Get unique maps
+			//Get only unique maps for each modpool
 			const checkedMapIds = [];
 			const userMapIds = [];
 			const userMaps = [];
@@ -1074,27 +1077,10 @@ module.exports = {
 			}
 
 			//Group the maps into steps of 0.1 of difficulty
-			// let testSr = 6;
-			const steps = [
-				// testSr
-			];
+			const steps = [];
 			const stepData = [];
-			// stepData.push({
-			// 	step: testSr,
-			// 	totalWeight: 0,
-			// 	totalOverPerformWeight: 1,
-			// 	totalUnderPerformWeight: 0,
-			// 	amount: 1,
-			// 	averageWeight: 0,
-			// 	averageOverPerformWeight: 1,
-			// 	averageUnderPerformWeight: 0,
-			// 	newAverageWeight: Math.abs(((1 + 0) / 1) - 1),
-			// 	weightedStarRating: (testSr) * 0,
-			// 	overPerformWeightedStarRating: (testSr) * 1,
-			// 	underPerformWeightedStarRating: (testSr) * 0,
-			// 	newWeightedStarRating: (testSr) * Math.abs(((1 + 0) / 1) - 1),
-			// });
 			for (let i = 0; i < userMaps.length && i < 50; i++) {
+				//Get the most recent data
 				let dbBeatmap = null;
 				if (modPools[modIndex] === 'HR') {
 					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 16);
@@ -1110,6 +1096,7 @@ module.exports = {
 					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
 				}
 
+				//Filter by ranked maps
 				if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved')) {
 					//Standardize the score from the mod multiplier
 					if (modPools[modIndex] === 'HD') {
@@ -1129,11 +1116,12 @@ module.exports = {
 							userMaps[i].score = userMaps[i].score / 1.2;
 						}
 					}
+
+					//Calculate the weights based on the graph below
 					//https://www.desmos.com/calculator/wmdwcyfduw
 					let c = 175000;
 					let b = 2;
 					let a = 0.7071;
-					let weight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
 					let overPerformWeight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
 					let underPerformWeight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
 
@@ -1147,7 +1135,7 @@ module.exports = {
 
 					let mapStarRating = dbBeatmap.starRating;
 					if (modPools[modIndex] === 'HD') {
-						//Adapt starRating from 0.2 to 0.75 depending on the AR
+						//Adapt starRating from 0.2 to 0.75 depending on the AR for the HD modpool only
 						let approachRate = parseFloat(dbBeatmap.approachRate);
 						if (approachRate < 7.5) {
 							approachRate = 7.5;
@@ -1162,6 +1150,7 @@ module.exports = {
 
 					userMaps[i].starRating = mapStarRating;
 
+					//Add the map to the scores array
 					if (modIndex === 0) {
 						duelRatings.scores.NM.push(userMaps[i]);
 					} else if (modIndex === 1) {
@@ -1174,38 +1163,33 @@ module.exports = {
 						duelRatings.scores.FM.push(userMaps[i]);
 					}
 
+					//Add the data to the 5 steps in the area of the maps' star rating -> 5.0 will be representing 4.8, 4.9, 5.0, 5.1, 5.2
 					for (let i = 0; i < 5; i++) {
 						let starRatingStep = Math.round((Math.round(mapStarRating * 10) / 10 + 0.1 * i - 0.2) * 10) / 10;
 						if (steps.indexOf(starRatingStep) === -1) {
 							stepData.push({
 								step: starRatingStep,
-								totalWeight: weight,
 								totalOverPerformWeight: overPerformWeight,
 								totalUnderPerformWeight: underPerformWeight,
 								amount: 1,
-								averageWeight: weight,
 								averageOverPerformWeight: overPerformWeight,
 								averageUnderPerformWeight: underPerformWeight,
-								newAverageWeight: Math.abs(((overPerformWeight + underPerformWeight) / 1) - 1),
-								weightedStarRating: (starRatingStep) * weight,
+								averageWeight: Math.abs(((overPerformWeight + underPerformWeight) / 1) - 1),
 								overPerformWeightedStarRating: (starRatingStep) * overPerformWeight,
 								underPerformWeightedStarRating: (starRatingStep) * underPerformWeight,
-								newWeightedStarRating: (starRatingStep) * Math.abs(((overPerformWeight + underPerformWeight) / 1) - 1),
+								weightedStarRating: (starRatingStep) * Math.abs(((overPerformWeight + underPerformWeight) / 1) - 1),
 							});
 							steps.push(starRatingStep);
 						} else {
-							stepData[steps.indexOf(starRatingStep)].totalWeight += weight;
 							stepData[steps.indexOf(starRatingStep)].totalOverPerformWeight += overPerformWeight;
 							stepData[steps.indexOf(starRatingStep)].totalUnderPerformWeight += underPerformWeight;
 							stepData[steps.indexOf(starRatingStep)].amount++;
-							stepData[steps.indexOf(starRatingStep)].averageWeight = stepData[steps.indexOf(starRatingStep)].totalWeight / stepData[steps.indexOf(starRatingStep)].amount;
 							stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight = stepData[steps.indexOf(starRatingStep)].totalOverPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
 							stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight = stepData[steps.indexOf(starRatingStep)].totalUnderPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
-							stepData[steps.indexOf(starRatingStep)].newAverageWeight = Math.abs(stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight + stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight - 1);
-							stepData[steps.indexOf(starRatingStep)].weightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageWeight;
+							stepData[steps.indexOf(starRatingStep)].averageWeight = Math.abs(stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight + stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight - 1);
 							stepData[steps.indexOf(starRatingStep)].overPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight;
 							stepData[steps.indexOf(starRatingStep)].underPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight;
-							stepData[steps.indexOf(starRatingStep)].newWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].newAverageWeight;
+							stepData[steps.indexOf(starRatingStep)].weightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageWeight;
 						}
 					}
 				} else {
@@ -1214,15 +1198,17 @@ module.exports = {
 				}
 			}
 
+			//Calculated the starrating for the modpool
 			let totalWeight = 0;
 			let totalWeightedStarRating = 0;
 			for (let i = 0; i < stepData.length; i++) {
 				if (stepData[i].amount > 1) {
-					totalWeight += stepData[i].newAverageWeight;
-					totalWeightedStarRating += stepData[i].newWeightedStarRating;
+					totalWeight += stepData[i].averageWeight;
+					totalWeightedStarRating += stepData[i].weightedStarRating;
 				}
 			}
 
+			//add the values to the modpool data
 			if (totalWeight > 0 && userMaps.length > 4) {
 				if (modIndex === 0) {
 					duelRatings.noMod = totalWeightedStarRating / totalWeight;
@@ -1243,6 +1229,7 @@ module.exports = {
 			}
 		}
 
+		//Get the modpool spread out of the past 100 user scores for the total value
 		if (duelRatings.noMod || duelRatings.hidden || duelRatings.hardRock || duelRatings.doubleTime || duelRatings.freeMod) {
 			//Get ratio of modPools played maps
 			const modPoolAmounts = [0, 0, 0, 0, 0];
@@ -1266,9 +1253,10 @@ module.exports = {
 				modPoolAmounts[4] = 0;
 			}
 
-			//Set total star rating
+			//Set total star rating based on the spread
 			duelRatings.total = (duelRatings.noMod * modPoolAmounts[0] + duelRatings.hidden * modPoolAmounts[1] + duelRatings.hardRock * modPoolAmounts[2] + duelRatings.doubleTime * modPoolAmounts[3] + duelRatings.freeMod * modPoolAmounts[4]) / (modPoolAmounts[0] + modPoolAmounts[1] + modPoolAmounts[2] + modPoolAmounts[3] + modPoolAmounts[4]);
 
+			//Log the values in the discords if they changed and the user is connected to the bot
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
 					osuUserId: input.osuUserId

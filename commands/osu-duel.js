@@ -1297,6 +1297,7 @@ module.exports = {
 					}
 				}
 
+				//Create all the output files
 				let files = [];
 
 				let stepData = [
@@ -1311,7 +1312,7 @@ module.exports = {
 					quicksortStep(stepData[i]);
 
 					for (let j = 0; j < stepData[i].length; j++) {
-						stepData[i][j] = `${stepData[i][j].step.toFixed(1)}: ${(Math.round(stepData[i][j].averageWeight * 1000) / 1000).toFixed(3)}* (old) | ${(Math.round(stepData[i][j].newAverageWeight * 1000) / 1000).toFixed(3)}* (new) -> ${(Math.round(stepData[i][j].averageOverPerformWeight * 1000) / 1000)} (over) - ${(Math.round(stepData[i][j].averageUnderPerformWeight * 1000) / 1000)} (under)`;
+						stepData[i][j] = `${stepData[i][j].step.toFixed(1)}*: ${(Math.round(stepData[i][j].averageWeight * 1000) / 1000).toFixed(3)} weight`;
 					}
 
 					if (i === 0) {
@@ -1366,7 +1367,7 @@ module.exports = {
 					quicksortScore(scores[i]);
 
 					for (let j = 0; j < scores[i].length; j++) {
-						scores[i][j] = `${Math.round(scores[i][j].score)} points (${(Math.round(scores[i][j].weight * 1000) / 1000).toFixed(3)}): ${(Math.round(scores[i][j].starRating * 100) / 100).toFixed(2)}* | https://osu.ppy.sh/b/${scores[i][j].beatmapId}`;
+						scores[i][j] = `${(scores[i][j].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${scores[i][j].matchStartDate.getUTCFullYear()} - ${Math.round(scores[i][j].score)} points (${(Math.round(scores[i][j].weight * 1000) / 1000).toFixed(3)}): ${(Math.round(scores[i][j].starRating * 100) / 100).toFixed(2)}* | https://osu.ppy.sh/b/${scores[i][j].beatmapId}`;
 					}
 
 					if (i === 0) {
@@ -1394,9 +1395,40 @@ module.exports = {
 				multiMatches = new Discord.MessageAttachment(Buffer.from(multiMatches.join('\n'), 'utf-8'), `osu-duel-multimatches-${osuUser.id}.txt`);
 				files.push(multiMatches);
 
-				let TODOAddExplaination;
-				let TODOCleanUpDataOutputForTheStepData;
-				return await interaction.editReply({ content: 'Add explaination here', files: files, ephemeral: true });
+				let explaination = [];
+				explaination.push('**Disclaimer: Everything is heavily Work in Progress**');
+				explaination.push('');
+				explaination.push('**Hello!**');
+				explaination.push('You will likely be overwhelmed by all the info that just popped up.');
+				explaination.push('If you are just here to get a rough explaination of how the calculation works, here is a tldr:');
+				explaination.push('');
+				explaination.push('**TL;DR:**');
+				explaination.push('The star rating is calculated based on your last 50 tournament score v2 scores for each modpool.');
+				explaination.push('You can see the scores taken into account in the first file attached.');
+				explaination.push('You can see the starratings and how they are evaluated in the second file. (The higher the weight the more effect the star rating has on the overall star rating)');
+				explaination.push('You can see the matches where the scores are from in the third file.');
+				explaination.push('');
+				explaination.push('**In Depth Explaination:**');
+				explaination.push('1. Step:');
+				explaination.push('The bot grabs the last 50 tournament score v2 scores for each modpool. (Limited to unique ranked maps)');
+				explaination.push('The limit exists to not evaluate the same maps twice, to limit the API calls to some extend and to get relatively recent data without losing accuracy due to limiting it to a timestamp.');
+				explaination.push('');
+				explaination.push('2. Step:');
+				explaination.push('After doing some adaptions to counter mods effects on the score each score will be assigned a weight using a bell curve with the highest weight at 350k; dropping lower on both sides to not get too hard and not too easy maps.');
+				explaination.push('You can find the weight graph here: <https://www.desmos.com/calculator/netnkpeupv>');
+				explaination.push('');
+				await interaction.editReply({ content: explaination.join('\n'), ephemeral: true });
+				explaination = [];
+				explaination.push('3. Step:');
+				explaination.push('Each score and its weight will be put into a star rating step. (A 5.0 map will be put into the 4.8, 4.9, 5.0, 5.1 and 5.2 steps)');
+				explaination.push('Each step will average the weights of their scores and will calculate a weighted star rating (e.g. 4.8 stars with an average weight of 0.5 will be a weighted star rating of 2.4)');
+				explaination.push('The weighted star ratings of each step will now be summed up and divided by all the average weights of each step summed up.');
+				explaination.push('This will result in the modpool star rating.');
+				explaination.push('');
+				explaination.push('4. Step:');
+				explaination.push('The total star rating will be calculated relative to how many maps of each modpool were played in the last 100 score v2 tournament scores.');
+				explaination.push('This will allow a player that mainly plays HD to have their HD modpool star rating have more impact on the total star rating than a player that mostly plays NM. This is being done because in a real match the HD player is more likely to play HD than the NM player and will therefore be more affected by their HD skill.');
+				return await interaction.followUp({ content: explaination.join('\n'), files: files, ephemeral: true });
 			}
 		}
 	},
