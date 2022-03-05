@@ -291,9 +291,10 @@ async function drawRank(input, msg) {
 	ctx.textAlign = 'center';
 	ctx.fillText(`PP: ${pp}`, canvas.width / 2, 83 + yOffset);
 
-	let userDuelStarRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
-	let leagueName = getOsuDuelLeague(userDuelStarRating.total);
-	let leagueImage = await Canvas.loadImage(`./other/emblems/${leagueName.imageName}.png`);
+	try {
+		let userDuelStarRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
+		let leagueName = getOsuDuelLeague(userDuelStarRating.total);
+		let leagueImage = await Canvas.loadImage(`./other/emblems/${leagueName.imageName}.png`);
 
 		ctx.drawImage(leagueImage, 557, 40, 110, 110);
 	} catch (e) {
@@ -396,7 +397,7 @@ async function drawRanks(input) {
 	ctx.font = 'bold 16px comfortaa, sans-serif';
 	ctx.textAlign = 'left';
 	//get SSH
-	
+
 	const SSH = await Canvas.loadImage('./other/rank_pictures/XH_Rank.png');
 	ctx.drawImage(SSH, canvas.width / 2 + canvas.height / 4 - 8, canvas.height / 2 - 8 + ranksOffset * -2 + yOffset, 32, 16);
 	ctx.fillText(humanReadable(user.counts.SSH), canvas.width / 2 + canvas.height / 4 + 32, canvas.height / 2 + ranksOffset * -2 + 6 + yOffset);
