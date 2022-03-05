@@ -44,7 +44,7 @@ module.exports = {
 
 				let firstStarRating = 4;
 				try {
-					firstStarRating = await getUserDuelStarRating(commandUser.osuUserId, interaction.client);
+					firstStarRating = await getUserDuelStarRating({ osuUserId: commandUser.osuUserId, client: interaction.client });
 				} catch (e) {
 					if (e !== 'No standard plays') {
 						console.log(e);
@@ -62,7 +62,7 @@ module.exports = {
 
 				if (discordUser && discordUser.osuUserId) {
 					try {
-						secondStarRating = await getUserDuelStarRating(discordUser.osuUserId, interaction.client);
+						secondStarRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
 					} catch (e) {
 						if (e !== 'No standard plays') {
 							console.log(e);
@@ -688,7 +688,7 @@ module.exports = {
 
 								await pause(15000);
 
-								let userDuelStarRating = await getUserDuelStarRating(commandUser.osuUserId, interaction.client);
+								let userDuelStarRating = await getUserDuelStarRating({ osuUserId: commandUser.osuUserId, client: interaction.client });
 								let messages = ['Your SR has been updated!'];
 								if (Math.round(commandUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
 									messages.push(`SR: ${Math.round(commandUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
@@ -715,7 +715,7 @@ module.exports = {
 									}
 								}
 
-								userDuelStarRating = await getUserDuelStarRating(discordUser.osuUserId, interaction.client);
+								userDuelStarRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
 								messages = ['Your SR has been updated!'];
 								if (Math.round(discordUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
 									messages.push(`SR: ${Math.round(discordUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
@@ -833,7 +833,7 @@ module.exports = {
 				while (seasonEnd < now) {
 					let historicalDataset = {
 						seasonEnd: `${seasonEnd.getUTCMonth() + 1}/${seasonEnd.getUTCFullYear()}`,
-						ratings: await getUserDuelStarRating(osuUser.id, interaction.client, seasonEnd)
+						ratings: await getUserDuelStarRating({ osuUserId: osuUser.id, client: interaction.client, date: seasonEnd })
 					};
 
 					if (historicalUserDuelStarRatings.length === 0 && historicalDataset.ratings.total || historicalUserDuelStarRatings.length && historicalDataset.ratings.total && historicalDataset.ratings.total !== historicalUserDuelStarRatings[historicalUserDuelStarRatings.length - 1].ratings.total) {
@@ -891,7 +891,7 @@ module.exports = {
 				let userDuelStarRating = null;
 				for (let i = 0; i < 5 && !userDuelStarRating; i++) {
 					try {
-						userDuelStarRating = await getUserDuelStarRating(osuUser.id, interaction.client);
+						userDuelStarRating = await getUserDuelStarRating({ osuUserId: osuUser.id, client: interaction.client });
 					} catch (e) {
 						if (i === 4) {
 							if (e === 'No standard plays') {
@@ -1217,6 +1217,218 @@ module.exports = {
 					.catch(err => {
 						console.log(err);
 					});
+			} else if (interaction.options._subcommand === 'data') {
+				await interaction.deferReply({ ephemeral: true });
+				let osuUser = {
+					id: null,
+					name: null,
+				};
+
+				if (interaction.options._hoistedOptions[0]) {
+					//Get the user by the argument given
+					if (interaction.options._hoistedOptions[0].value.startsWith('<@') && interaction.options._hoistedOptions[0].value.endsWith('>')) {
+						logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers');
+						const discordUser = await DBDiscordUsers.findOne({
+							where: { userId: interaction.options._hoistedOptions[0].value.replace('<@', '').replace('>', '').replace('!', '') },
+						});
+
+						if (discordUser && discordUser.osuUserId) {
+							osuUser.id = discordUser.osuUserId;
+							osuUser.name = discordUser.osuName;
+						} else {
+							return await interaction.editReply({ content: `\`${interaction.options._hoistedOptions[0].value.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect <username>\`.`, ephemeral: true });
+						}
+					} else {
+						osuUser.id = getIDFromPotentialOsuLink(interaction.options._hoistedOptions[0].value);
+					}
+				} else {
+					//Try to get the user by the message if no argument given
+					msg = await populateMsgFromInteraction(interaction);
+					const commandConfig = await getOsuUserServerMode(msg, []);
+					const commandUser = commandConfig[0];
+
+					if (commandUser && commandUser.osuUserId) {
+						osuUser.id = commandUser.osuUserId;
+						osuUser.name = commandUser.osuName;
+					} else {
+						const userDisplayName = await getMessageUserDisplayname(msg);
+						osuUser.name = userDisplayName;
+					}
+				}
+
+				if (!osuUser.name) {
+					// eslint-disable-next-line no-undef
+					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+					});
+
+					const user = await osuApi.getUser({ u: osuUser.id, m: 0 })
+						.catch(err => {
+							if (err.message !== 'Not found') {
+								console.log(err);
+							}
+						});
+
+					if (!user) {
+						return await interaction.editReply({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`, ephemeral: true });
+					}
+
+					osuUser.id = user.id;
+					osuUser.name = user.name;
+				}
+
+				let userDuelStarRating = null;
+				for (let i = 0; i < 5 && !userDuelStarRating; i++) {
+					try {
+						userDuelStarRating = await getUserDuelStarRating({ osuUserId: osuUser.id, client: interaction.client });
+					} catch (e) {
+						if (i === 4) {
+							if (e === 'No standard plays') {
+								return interaction.editReply(`Could not find any standard plays for user \`${osuUser.name.replace(/`/g, '')}\`.\nPlease try again later.`);
+							} else {
+								return interaction.editReply('The API seems to be running into errors right now.\nPlease try again later.');
+							}
+						} else {
+							await pause(15000);
+						}
+					}
+				}
+
+				//Create all the output files
+				let files = [];
+
+				let stepData = [
+					userDuelStarRating.stepData.NM,
+					userDuelStarRating.stepData.HD,
+					userDuelStarRating.stepData.HR,
+					userDuelStarRating.stepData.DT,
+					userDuelStarRating.stepData.FM
+				];
+
+				for (let i = 0; i < stepData.length; i++) {
+					quicksortStep(stepData[i]);
+
+					for (let j = 0; j < stepData[i].length; j++) {
+						stepData[i][j] = `${stepData[i][j].step.toFixed(1)}*: ${(Math.round(stepData[i][j].averageWeight * 1000) / 1000).toFixed(3)} weight`;
+					}
+
+					if (i === 0) {
+						stepData[i] = 'NM Starrating Weights:\n' + stepData[i].join('\n');
+					} else if (i === 1) {
+						stepData[i] = 'HD Starrating Weights:\n' + stepData[i].join('\n');
+					} else if (i === 2) {
+						stepData[i] = 'HR Starrating Weights:\n' + stepData[i].join('\n');
+					} else if (i === 3) {
+						stepData[i] = 'DT Starrating Weights:\n' + stepData[i].join('\n');
+					} else if (i === 4) {
+						stepData[i] = 'FM Starrating Weights:\n' + stepData[i].join('\n');
+					}
+				}
+
+				//Get the multiplayer matches
+				let multiScores = [
+					userDuelStarRating.scores.NM,
+					userDuelStarRating.scores.HD,
+					userDuelStarRating.scores.HR,
+					userDuelStarRating.scores.DT,
+					userDuelStarRating.scores.FM
+				];
+
+				let multiMatches = [];
+				let multiMatchIds = [];
+
+				for (let i = 0; i < multiScores.length; i++) {
+					for (let j = 0; j < multiScores[i].length; j++) {
+						if (!multiMatchIds.includes(multiScores[i][j].matchId)) {
+							multiMatches.push({ matchId: multiScores[i][j].matchId, matchName: multiScores[i][j].matchName, matchStartDate: multiScores[i][j].matchStartDate });
+							multiMatchIds.push(multiScores[i][j].matchId);
+						}
+					}
+				}
+
+				quicksortMatchId(multiMatches);
+
+				for (let i = 0; i < multiMatches.length; i++) {
+					multiMatches[i] = `${(multiMatches[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${multiMatches[i].matchStartDate.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiMatches[i].matchId}`;
+				}
+
+				let scores = [
+					userDuelStarRating.scores.NM,
+					userDuelStarRating.scores.HD,
+					userDuelStarRating.scores.HR,
+					userDuelStarRating.scores.DT,
+					userDuelStarRating.scores.FM
+				];
+
+				for (let i = 0; i < scores.length; i++) {
+					quicksortScore(scores[i]);
+
+					for (let j = 0; j < scores[i].length; j++) {
+						scores[i][j] = `${(scores[i][j].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${scores[i][j].matchStartDate.getUTCFullYear()} - ${Math.round(scores[i][j].score)} points (${(Math.round(scores[i][j].weight * 1000) / 1000).toFixed(3)}): ${(Math.round(scores[i][j].starRating * 100) / 100).toFixed(2)}* | https://osu.ppy.sh/b/${scores[i][j].beatmapId}`;
+					}
+
+					if (i === 0) {
+						scores[i] = 'NM Scores & Weights:\n' + scores[i].join('\n');
+					} else if (i === 1) {
+						scores[i] = 'HD Scores & Weights:\n' + scores[i].join('\n');
+					} else if (i === 2) {
+						scores[i] = 'HR Scores & Weights:\n' + scores[i].join('\n');
+					} else if (i === 3) {
+						scores[i] = 'DT Scores & Weights:\n' + scores[i].join('\n');
+					} else if (i === 4) {
+						scores[i] = 'FM Scores & Weights:\n' + scores[i].join('\n');
+					}
+				}
+
+				// eslint-disable-next-line no-undef
+				scores = new Discord.MessageAttachment(Buffer.from(scores.join('\n\n'), 'utf-8'), `osu-duel-scores-and-weights-${osuUser.id}.txt`);
+				files.push(scores);
+
+				// eslint-disable-next-line no-undef
+				stepData = new Discord.MessageAttachment(Buffer.from(stepData.join('\n\n'), 'utf-8'), `osu-duel-star-rating-group-weights-${osuUser.id}.txt`);
+				files.push(stepData);
+
+				// eslint-disable-next-line no-undef
+				multiMatches = new Discord.MessageAttachment(Buffer.from(multiMatches.join('\n'), 'utf-8'), `osu-duel-multimatches-${osuUser.id}.txt`);
+				files.push(multiMatches);
+
+				let explaination = [];
+				explaination.push('**Disclaimer: Everything is heavily Work in Progress**');
+				explaination.push('');
+				explaination.push('**Hello!**');
+				explaination.push('You will likely be overwhelmed by all the info that just popped up.');
+				explaination.push('If you are just here to get a rough explaination of how the calculation works, here is a tldr:');
+				explaination.push('');
+				explaination.push('**TL;DR:**');
+				explaination.push('The star rating is calculated based on your last 50 tournament score v2 scores for each modpool.');
+				explaination.push('You can see the scores taken into account in the first file attached.');
+				explaination.push('You can see the starratings and how they are evaluated in the second file. (The higher the weight the more effect the star rating has on the overall star rating)');
+				explaination.push('You can see the matches where the scores are from in the third file.');
+				explaination.push('');
+				explaination.push('**In Depth Explaination:**');
+				explaination.push('1. Step:');
+				explaination.push('The bot grabs the last 50 tournament score v2 scores for each modpool. (Limited to unique ranked maps)');
+				explaination.push('The limit exists to not evaluate the same maps twice, to limit the API calls to some extend and to get relatively recent data without losing accuracy due to limiting it to a timestamp.');
+				explaination.push('');
+				explaination.push('2. Step:');
+				explaination.push('After doing some adaptions to counter mods effects on the score each score will be assigned a weight using a bell curve with the highest weight at 350k; dropping lower on both sides to not get too hard and not too easy maps.');
+				explaination.push('You can find the weight graph here: <https://www.desmos.com/calculator/netnkpeupv>');
+				explaination.push('');
+				await interaction.editReply({ content: explaination.join('\n'), ephemeral: true });
+				explaination = [];
+				explaination.push('3. Step:');
+				explaination.push('Each score and its weight will be put into a star rating step. (A 5.0 map will be put into the 4.8, 4.9, 5.0, 5.1 and 5.2 steps)');
+				explaination.push('Each step will average the weights of their scores and will calculate a weighted star rating (e.g. 4.8 stars with an average weight of 0.5 will be a weighted star rating of 2.4)');
+				explaination.push('The weighted star ratings of each step will now be summed up and divided by all the average weights of each step summed up.');
+				explaination.push('This will result in the modpool star rating.');
+				explaination.push('');
+				explaination.push('4. Step:');
+				explaination.push('The total star rating will be calculated relative to how many maps of each modpool were played in the last 100 score v2 tournament scores.');
+				explaination.push('This will allow a player that mainly plays HD to have their HD modpool star rating have more impact on the total star rating than a player that mostly plays NM. This is being done because in a real match the HD player is more likely to play HD than the NM player and will therefore be more affected by their HD skill.');
+				return await interaction.followUp({ content: explaination.join('\n'), files: files, ephemeral: true });
 			}
 		}
 	},
@@ -1311,6 +1523,81 @@ function quicksortDuelStarRating(list, start = 0, end = undefined) {
 		const p = partitionDuelStarRating(list, start, end);
 		quicksortDuelStarRating(list, start, p - 1);
 		quicksortDuelStarRating(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionStep(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (list[j].step < pivot.step) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksortStep(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionStep(list, start, end);
+		quicksortStep(list, start, p - 1);
+		quicksortStep(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionScore(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (list[j].score < pivot.score) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksortScore(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionScore(list, start, end);
+		quicksortScore(list, start, p - 1);
+		quicksortScore(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionMatchId(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (list[j].matchId > pivot.matchId) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksortMatchId(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionMatchId(list, start, end);
+		quicksortMatchId(list, start, p - 1);
+		quicksortMatchId(list, p + 1, end);
 	}
 	return list;
 }

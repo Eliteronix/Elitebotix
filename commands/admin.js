@@ -548,6 +548,19 @@ module.exports = {
 			// 					},
 			// 				]
 			// 			},
+			// 			{
+			// 				'name': 'data',
+			// 				'description': 'Get shown what a users ranking is based on',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'The username, id or link of the player to get the ranking for',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 				]
+			// 			},
 			// 		]
 			// 	},
 			// });
@@ -2878,6 +2891,19 @@ module.exports = {
 								},
 							]
 						},
+						{
+							'name': 'data',
+							'description': 'Get shown what a users ranking is based on',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'username',
+									'description': 'The username, id or link of the player to get the ranking for',
+									'type': 3,
+									'required': false
+								},
+							]
+						},
 					]
 				},
 			});
@@ -4920,6 +4946,35 @@ module.exports = {
 			const mapScoreAmount = await DBOsuMultiScores.count();
 
 			console.log(mapScoreAmount);
+		} else if (args[0] === 'updateServerDuelRatings') {
+			let sentMessage = await msg.reply('Processing...');
+			await msg.guild.members.fetch()
+				.then(async (guildMembers) => {
+
+					const members = [];
+					guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
+
+					for (let i = 0; i < members.length; i++) {
+						await sentMessage.edit(`${i} out of ${members.length} done`);
+						logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers');
+						const discordUser = await DBDiscordUsers.findOne({
+							where: {
+								userId: members[i].id
+							},
+						});
+
+						if (discordUser) {
+							await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: msg.client });
+
+							await pause(10000);
+						}
+					}
+
+					sentMessage.delete();
+				})
+				.catch(error => {
+					console.log(error);
+				});
 		} else {
 			msg.reply('Invalid command');
 		}
