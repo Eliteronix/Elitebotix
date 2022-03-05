@@ -49,7 +49,7 @@ module.exports = {
 	name: 'elitiri-admin',
 	//aliases: ['osu-map', 'beatmap-info'],
 	description: 'Admin control for the Elitiri Cup',
-	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <osuPlayerID> | <slashCommands> | <staff> <osuUserId> <host/streamer/commentator/referee/replayer> [tournament]',
+	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <player lobby> <osuPlayerID> | slashCommands',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -326,6 +326,17 @@ module.exports = {
 						}
 						console.log('Player removed from Elitiri Cup');
 					}
+				}
+				if (args[1] == 'lobby') {
+					args.shift();
+					let elitiriSignUp = await DBElitiriCupSignUp.findOne({
+						where: {
+							osuUserId: args[1]
+						}
+					});
+					elitiriSignUp.tournamentLobbyId = null;
+					await elitiriSignUp.save();
+					msg.reply('Done. Remember, this command does not delete player from the sheet!');
 				}
 			}
 		} else if (args[0] === 'placement') {
@@ -694,7 +705,7 @@ module.exports = {
 								{
 									'name': 'lobbyid',
 									'description': 'Lobby ID of the desired qualifiers lobby. For example: "CQ-4" or just the number: "4"',
-									'type': 3, // 10 is type Number
+									'type': 3, // 3 is type String
 									'required': true,
 								},
 							]

@@ -12,6 +12,7 @@
 	"currentElitiriCupMiddleSheetId": "1Kasapzdjv6e38FGzN1YvHsYXYcaUbtqMbxeVtpd7mnk",
 	"currentElitiriCupLowerSheetId": "1dtUAjWVF4JoR8OMWkj5Nn5mi0FsqjQkTV9FbLjgKcto",
 	"currentElitiriCupBeginnerSheetId": "1U_U1AklzxgxCq5zMA9lJsIPJ-UBltQDMKxWG3oCJwAU",
+	"currentElitiriCupRefSheetId": "1FPr133dAROYGUpJOaQPGTvGq5hjk8B-Ik82rmZsa9NM",
 	"currentElitiriCupEndOfRegs": {
 		"year": 2022,
 		"zeroIndexMonth": 1,
@@ -26,5 +27,33 @@
 		"year": 2022,
 		"zeroIndexMonth": 1,
 		"day": 27
+	},
+	"currentElitiriCupBeginnerQualsFirstLobby": {
+		"year": 2022,
+		"zeroIndexMonth": 2,
+		"day": 5,
+		"hours": 2,
+		"minutes": 0
+	},
+	"currentElitiriCupLowerQualsFirstLobby": {
+		"year": 2022,
+		"zeroIndexMonth": 2,
+		"day": 12,
+		"hours": 2,
+		"minutes": 0
+	},
+	"currentElitiriCupMiddleQualsFirstLobby": {
+		"year": 2022,
+		"zeroIndexMonth": 2,
+		"day": 19,
+		"hours": 2,
+		"minutes": 0
+	},
+	"currentElitiriCupTopQualsFirstLobby": {
+		"year": 2022,
+		"zeroIndexMonth": 2,
+		"day": 26,
+		"hours": 2,
+		"minutes": 0
 	}
 }
