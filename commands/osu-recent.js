@@ -273,6 +273,7 @@ async function drawTitle(input, mode) {
 	const gameMode = getGameMode(beatmap);
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
 	const beatmapStatusIcon = await Canvas.loadImage(getBeatmapApprovalStatusImage(beatmap));
+	const starImage = await Canvas.loadImage('./other/overall-difficulty.png');
 
 	ctx.drawImage(beatmapStatusIcon, 10, 5, canvas.height / 500 * 35, canvas.height / 500 * 35);
 	ctx.drawImage(modePic, canvas.width / 1000 * 10, canvas.height / 500 * 40, canvas.height / 500 * 35, canvas.height / 500 * 35);
@@ -300,6 +301,7 @@ async function drawTitle(input, mode) {
 		}
 	}
 
+	ctx.drawImage(starImage, 55, 42, canvas.height / 500 * 35, canvas.height / 500 * 35);
 	if (mods.includes('DT') || mods.includes('HT') || mods.includes('HR') || mods.includes('EZ')) {
 		let modMap = beatmap;
 		if (mods.includes('DT') && mods.includes('HR')) {
@@ -319,9 +321,9 @@ async function drawTitle(input, mode) {
 		} else if (mods.includes('HR')) {
 			modMap = await getOsuBeatmap(beatmap.beatmapId, 16);
 		}
-		ctx.fillText(`★ ${Math.round(beatmap.starRating * 100) / 100} (${Math.round(modMap.starRating * 100) / 100} with ${mods.join('')})   ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
+		ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100} (${Math.round(modMap.starRating * 100) / 100} with ${mods.join('')})  ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 90, canvas.height / 500 * 70);
 	} else {
-		ctx.fillText(`★ ${Math.round(beatmap.starRating * 100) / 100}   ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 60, canvas.height / 500 * 70);
+		ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100}  ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 90, canvas.height / 500 * 70);
 	}
 
 	const output = [canvas, ctx, score, beatmap, user, lookedUpScore];
