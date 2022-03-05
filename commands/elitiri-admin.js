@@ -693,7 +693,7 @@ module.exports = {
 							'options': [
 								{
 									'name': 'lobbyid',
-									'description': 'Lobby ID of the desired qualifiers lobby in the following format: CQ-4, AQ-22, 7',
+									'description': 'Lobby ID of the desired qualifiers lobby. For example: "CQ-4" or just the number: "4"',
 									'type': 3, // 10 is type Number
 									'required': true,
 								},
