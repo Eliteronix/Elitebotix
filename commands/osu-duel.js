@@ -1327,42 +1327,6 @@ module.exports = {
 					}
 				}
 
-				// eslint-disable-next-line no-undef
-				stepData = new Discord.MessageAttachment(Buffer.from(stepData.join('\n\n'), 'utf-8'), `osu-duel-star-rating-group-weights-${osuUser.id}.txt`);
-				files.push(stepData);
-
-				let scores = [
-					userDuelStarRating.scores.NM,
-					userDuelStarRating.scores.HD,
-					userDuelStarRating.scores.HR,
-					userDuelStarRating.scores.DT,
-					userDuelStarRating.scores.FM
-				];
-
-				for (let i = 0; i < scores.length; i++) {
-					quicksortScore(scores[i]);
-
-					for (let j = 0; j < scores[i].length; j++) {
-						scores[i][j] = `${Math.round(scores[i][j].score)} points (${(Math.round(scores[i][j].weight * 1000) / 1000).toFixed(3)}): ${(Math.round(scores[i][j].starRating * 10) / 10).toFixed(1)}* | https://osu.ppy.sh/b/${scores[i][j].beatmapId}`;
-					}
-
-					if (i === 0) {
-						scores[i] = 'NM Scores & Weights:\n' + scores[i].join('\n');
-					} else if (i === 1) {
-						scores[i] = 'HD Scores & Weights:\n' + scores[i].join('\n');
-					} else if (i === 2) {
-						scores[i] = 'HR Scores & Weights:\n' + scores[i].join('\n');
-					} else if (i === 3) {
-						scores[i] = 'DT Scores & Weights:\n' + scores[i].join('\n');
-					} else if (i === 4) {
-						scores[i] = 'FM Scores & Weights:\n' + scores[i].join('\n');
-					}
-				}
-
-				// eslint-disable-next-line no-undef
-				scores = new Discord.MessageAttachment(Buffer.from(scores.join('\n\n'), 'utf-8'), `osu-duel-scores-and-weights-${osuUser.id}.txt`);
-				files.push(scores);
-
 				//Get the multiplayer matches
 				let multiScores = [
 					userDuelStarRating.scores.NM,
@@ -1384,17 +1348,53 @@ module.exports = {
 					}
 				}
 
+				quicksortMatchId(multiMatches);
+
 				for (let i = 0; i < multiMatches.length; i++) {
-					console.log(multiScores[i].matchStartDate);
 					multiMatches[i] = `${(multiMatches[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${multiMatches[i].matchStartDate.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiMatches[i].matchId}`;
 				}
 
+				let scores = [
+					userDuelStarRating.scores.NM,
+					userDuelStarRating.scores.HD,
+					userDuelStarRating.scores.HR,
+					userDuelStarRating.scores.DT,
+					userDuelStarRating.scores.FM
+				];
+
+				for (let i = 0; i < scores.length; i++) {
+					quicksortScore(scores[i]);
+
+					for (let j = 0; j < scores[i].length; j++) {
+						scores[i][j] = `${Math.round(scores[i][j].score)} points (${(Math.round(scores[i][j].weight * 1000) / 1000).toFixed(3)}): ${(Math.round(scores[i][j].starRating * 100) / 100).toFixed(2)}* | https://osu.ppy.sh/b/${scores[i][j].beatmapId}`;
+					}
+
+					if (i === 0) {
+						scores[i] = 'NM Scores & Weights:\n' + scores[i].join('\n');
+					} else if (i === 1) {
+						scores[i] = 'HD Scores & Weights:\n' + scores[i].join('\n');
+					} else if (i === 2) {
+						scores[i] = 'HR Scores & Weights:\n' + scores[i].join('\n');
+					} else if (i === 3) {
+						scores[i] = 'DT Scores & Weights:\n' + scores[i].join('\n');
+					} else if (i === 4) {
+						scores[i] = 'FM Scores & Weights:\n' + scores[i].join('\n');
+					}
+				}
+
 				// eslint-disable-next-line no-undef
-				multiMatches = new Discord.MessageAttachment(Buffer.from(multiMatches.join('\n\n'), 'utf-8'), `osu-duel-multimatches-${osuUser.id}.txt`);
+				scores = new Discord.MessageAttachment(Buffer.from(scores.join('\n\n'), 'utf-8'), `osu-duel-scores-and-weights-${osuUser.id}.txt`);
+				files.push(scores);
+
+				// eslint-disable-next-line no-undef
+				stepData = new Discord.MessageAttachment(Buffer.from(stepData.join('\n\n'), 'utf-8'), `osu-duel-star-rating-group-weights-${osuUser.id}.txt`);
+				files.push(stepData);
+
+				// eslint-disable-next-line no-undef
+				multiMatches = new Discord.MessageAttachment(Buffer.from(multiMatches.join('\n'), 'utf-8'), `osu-duel-multimatches-${osuUser.id}.txt`);
 				files.push(multiMatches);
 
 				let TODOAddExplaination;
-				let TODOAddMultiPlayerMatchesTheDataIsComingFrom;
 				let TODOCleanUpDataOutputForTheStepData;
 				return await interaction.editReply({ content: 'Add explaination here', files: files, ephemeral: true });
 			}
@@ -1541,6 +1541,31 @@ function quicksortScore(list, start = 0, end = undefined) {
 		const p = partitionScore(list, start, end);
 		quicksortScore(list, start, p - 1);
 		quicksortScore(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionMatchId(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (list[j].matchId > pivot.matchId) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksortMatchId(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionMatchId(list, start, end);
+		quicksortMatchId(list, start, p - 1);
+		quicksortMatchId(list, p + 1, end);
 	}
 	return list;
 }

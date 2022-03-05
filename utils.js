@@ -1135,17 +1135,15 @@ module.exports = {
 					let a = 0.7071;
 					let weight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
 					let overPerformWeight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
-					overPerformWeight = Math.abs(overPerformWeight - 1);
 					let underPerformWeight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
-					underPerformWeight = Math.abs(underPerformWeight - 1);
+
+					if (parseFloat(userMaps[i].score) > 350000) {
+						overPerformWeight = 1;
+					} else if (parseFloat(userMaps[i].score) < 350000) {
+						underPerformWeight = 1;
+					}
 
 					userMaps[i].weight = Math.abs(overPerformWeight + underPerformWeight - 1);
-
-					if (parseFloat(userMaps[i].score) < 350000) {
-						overPerformWeight = 0;
-					} else if (parseFloat(userMaps[i].score) > 350000) {
-						underPerformWeight = 0;
-					}
 
 					let mapStarRating = dbBeatmap.starRating;
 					if (modPools[modIndex] === 'HD') {
