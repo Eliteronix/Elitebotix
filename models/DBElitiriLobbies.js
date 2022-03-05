@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
 		bracketName: {
 			type: DataTypes.STRING,
 		},
-		refdiscordTag: {
+		refDiscordTag: {
 			type: DataTypes.STRING,
 		},
 		refOsuUserId: {
