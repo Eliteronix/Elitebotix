@@ -1393,39 +1393,39 @@ module.exports = {
 	},
 	getOsuDuelLeague(rating) {
 		if (rating > 7) {
-			return { name: 'Master', imageName: 'master' };
+			return { name: 'Master', imageName: 'master', color: '#FFAEFB' };
 		} else if (rating > 6.8) {
-			return { name: 'Diamond 3', imageName: 'diamond_3' };
+			return { name: 'Diamond 3', imageName: 'diamond_3', color: '#49B0FF' };
 		} else if (rating > 6.6) {
-			return { name: 'Diamond 2', imageName: 'diamond_2' };
+			return { name: 'Diamond 2', imageName: 'diamond_2', color: '#49B0FF' };
 		} else if (rating > 6.4) {
-			return { name: 'Diamond 1', imageName: 'diamond_1' };
+			return { name: 'Diamond 1', imageName: 'diamond_1', color: '#49B0FF' };
 		} else if (rating > 6.2) {
-			return { name: 'Platinum 3', imageName: 'platinum_3' };
+			return { name: 'Platinum 3', imageName: 'platinum_3', color: '#1DD9A5' };
 		} else if (rating > 6) {
-			return { name: 'Platinum 2', imageName: 'platinum_2' };
+			return { name: 'Platinum 2', imageName: 'platinum_2', color: '#1DD9A5' };
 		} else if (rating > 5.8) {
-			return { name: 'Platinum 1', imageName: 'platinum_1' };
+			return { name: 'Platinum 1', imageName: 'platinum_1', color: '#1DD9A5' };
 		} else if (rating > 5.6) {
-			return { name: 'Gold 3', imageName: 'gold_3' };
+			return { name: 'Gold 3', imageName: 'gold_3', color: '#FFEB47' };
 		} else if (rating > 5.4) {
-			return { name: 'Gold 2', imageName: 'gold_2' };
+			return { name: 'Gold 2', imageName: 'gold_2', color: '#FFEB47' };
 		} else if (rating > 5.2) {
-			return { name: 'Gold 1', imageName: 'gold_1' };
+			return { name: 'Gold 1', imageName: 'gold_1', color: '#FFEB47' };
 		} else if (rating > 5) {
-			return { name: 'Silver 3', imageName: 'silver_3' };
+			return { name: 'Silver 3', imageName: 'silver_3', color: '#B5B5B5' };
 		} else if (rating > 4.8) {
-			return { name: 'Silver 2', imageName: 'silver_2' };
+			return { name: 'Silver 2', imageName: 'silver_2', color: '#B5B5B5' };
 		} else if (rating > 4.6) {
-			return { name: 'Silver 1', imageName: 'silver_1' };
+			return { name: 'Silver 1', imageName: 'silver_1', color: '#B5B5B5' };
 		} else if (rating > 4.4) {
-			return { name: 'Bronze 3', imageName: 'bronze_3' };
+			return { name: 'Bronze 3', imageName: 'bronze_3', color: '#F07900' };
 		} else if (rating > 4.2) {
-			return { name: 'Bronze 2', imageName: 'bronze_2' };
+			return { name: 'Bronze 2', imageName: 'bronze_2', color: '#F07900' };
 		} else if (rating > 0) {
-			return { name: 'Bronze 1', imageName: 'bronze_1' };
+			return { name: 'Bronze 1', imageName: 'bronze_1', color: '#F07900' };
 		} else {
-			return { name: 'Unranked', imageName: 'unranked' };
+			return { name: 'Unranked', imageName: 'unranked', color: '#FF6552' };
 		}
 	}
 };
