@@ -40,7 +40,7 @@ module.exports = {
 		}
 
 		logDatabaseQueries(4, 'commands/osu-tournament.js DBOsuMultiScores');
-		const userScores = await DBOsuMultiScores.findAll({
+		let userScores = await DBOsuMultiScores.findAll({
 			where: {
 				[Op.or]: [
 					{
@@ -62,7 +62,7 @@ module.exports = {
 			}
 			return interaction.followUp(`No tournament matches found with the acronym \`${args.join(' ').replace(/`/g, '')}\`.`);
 		} else {
-			quicksort(userScores);
+			userScores = quicksort(userScores);
 			let matchesPlayed = [];
 			for (let i = 0; i < userScores.length; i++) {
 				//Push matches for the history txt
@@ -91,27 +91,23 @@ module.exports = {
 	}
 };
 
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].matchId) >= parseFloat(pivot.matchId)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
+function quicksort(array) {
+	if (array.length <= 1) {
+		return array;
+	}
+
+	var pivot = array[0];
+
+	var left = [];
+	var right = [];
+
+	for (var i = 1; i < array.length; i++) {
+		if (parseInt(array[i].matchId) > parseInt(pivot.matchId)) {
+			left.push(array[i]);
+		} else {
+			right.push(array[i]);
 		}
 	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
 
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
+	return quicksort(left).concat(pivot, quicksort(right));
 }
