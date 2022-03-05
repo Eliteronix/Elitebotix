@@ -396,27 +396,28 @@ async function drawRanks(input) {
 	ctx.font = 'bold 16px comfortaa, sans-serif';
 	ctx.textAlign = 'left';
 	//get SSH
-	const SSH = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS-Silver.6681366c.svg');
+	
+	const SSH = await Canvas.loadImage('./other/rank_pictures/XH_Rank.png');
 	ctx.drawImage(SSH, canvas.width / 2 + canvas.height / 4 - 8, canvas.height / 2 - 8 + ranksOffset * -2 + yOffset, 32, 16);
 	ctx.fillText(humanReadable(user.counts.SSH), canvas.width / 2 + canvas.height / 4 + 32, canvas.height / 2 + ranksOffset * -2 + 6 + yOffset);
 
 	//get SS
-	const SS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS.a21de890.svg');
+	const SS = await Canvas.loadImage('./other/rank_pictures/X_Rank.png');
 	ctx.drawImage(SS, canvas.width / 2 + canvas.height / 4 + 5, canvas.height / 2 - 8 + ranksOffset * -1 + yOffset, 32, 16);
 	ctx.fillText(humanReadable(user.counts.SS), canvas.width / 2 + canvas.height / 4 + 45, canvas.height / 2 + ranksOffset * -1 + 6 + yOffset);
 
 	//get SH
-	const SH = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-S-Silver.811ae28c.svg');
+	const SH = await Canvas.loadImage('./other/rank_pictures/SH_Rank.png');
 	ctx.drawImage(SH, canvas.width / 2 + canvas.height / 4 + 10, canvas.height / 2 - 8 + yOffset, 32, 16);
 	ctx.fillText(humanReadable(user.counts.SH), canvas.width / 2 + canvas.height / 4 + 50, canvas.height / 2 + 6 + yOffset);
 
 	//get S
-	const S = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-S.3b4498a9.svg');
+	const S = await Canvas.loadImage('./other/rank_pictures/S_Rank.png');
 	ctx.drawImage(S, canvas.width / 2 + canvas.height / 4 + 5, canvas.height / 2 - 8 + ranksOffset * 1 + yOffset, 32, 16);
 	ctx.fillText(humanReadable(user.counts.S), canvas.width / 2 + canvas.height / 4 + 45, canvas.height / 2 + ranksOffset * 1 + 6 + yOffset);
 
 	//get A
-	const A = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-A.d785e824.svg');
+	const A = await Canvas.loadImage('./other/rank_pictures/A_Rank.png');
 	ctx.drawImage(A, canvas.width / 2 + canvas.height / 4 - 8, canvas.height / 2 - 8 + ranksOffset * 2 + yOffset, 32, 16);
 	ctx.fillText(humanReadable(user.counts.A), canvas.width / 2 + canvas.height / 4 + 32, canvas.height / 2 + ranksOffset * 2 + 6 + yOffset);
 	const output = [canvas, ctx, user];
