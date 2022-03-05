@@ -1179,10 +1179,11 @@ module.exports = {
 							}
 
 							let dataset = {
-								name: userDisplayName
+								name: userDisplayName,
+								value: `${Math.round(osuAccounts[i].osuDuelStarRating * 1000) / 1000}* | ${verified} ${osuAccounts[i].osuName}`,
+								color: getOsuDuelLeague(osuAccounts[i].osuDuelStarRating).color,
 							};
 
-							dataset.value = `${Math.round(osuAccounts[i].osuDuelStarRating * 1000) / 1000}* | ${verified} ${osuAccounts[i].osuName}`;
 
 							leaderboardData.push(dataset);
 						}
