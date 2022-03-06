@@ -62,7 +62,17 @@ module.exports = {
 			}
 			return interaction.followUp(`No tournament matches found with the acronym \`${args.join(' ').replace(/`/g, '')}\`.`);
 		} else {
-			userScores = quicksort(userScores);
+			//Bubblesort userscores by matchId property descending
+			userScores.sort((a, b) => {
+				if (a.matchId > b.matchId) {
+					return -1;
+				}
+				if (a.matchId < b.matchId) {
+					return 1;
+				}
+				return 0;
+			});
+
 			let matchesPlayed = [];
 			for (let i = 0; i < userScores.length; i++) {
 				//Push matches for the history txt
@@ -90,24 +100,3 @@ module.exports = {
 		}
 	}
 };
-
-function quicksort(array) {
-	if (array.length <= 1) {
-		return array;
-	}
-
-	var pivot = array[0];
-
-	var left = [];
-	var right = [];
-
-	for (var i = 1; i < array.length; i++) {
-		if (parseInt(array[i].matchId) > parseInt(pivot.matchId)) {
-			left.push(array[i]);
-		} else {
-			right.push(array[i]);
-		}
-	}
-
-	return quicksort(left).concat(pivot, quicksort(right));
-}
