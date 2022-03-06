@@ -49,7 +49,7 @@ module.exports = {
 	name: 'elitiri-admin',
 	//aliases: ['osu-map', 'beatmap-info'],
 	description: 'Admin control for the Elitiri Cup',
-	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <player lobby> <osuPlayerID> | slashCommands',
+	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player/player lobby> <osuPlayerID> | slashCommands',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -1386,17 +1386,4 @@ function quicksort(list, start = 0, end = undefined) {
 		quicksort(list, p + 1, end);
 	}
 	return list;
-}
-
-async function createElitiriRoleAssignmentTask() {
-	logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 2');
-	const task = await DBProcessQueue.findOne({
-		where: { task: 'elitiriRoleAssignment' }
-	});
-	if (!task) {
-		let date = new Date();
-		DBProcessQueue.create({
-			guildId: 'None', task: 'elitiriRoleAssignment', priority: 3, date: date
-		});
-	}
 }
