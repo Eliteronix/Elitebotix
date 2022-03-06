@@ -3,6 +3,8 @@ const Canvas = require('canvas');
 const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage } = require('../utils');
 const { Permissions } = require('discord.js');
 const fetch = require('node-fetch');
+const { DBOsuMultiScores } = require('../dbObjects');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-beatmap',
@@ -124,11 +126,37 @@ async function getBeatmap(msg, interaction, beatmap) {
 		processingMessage.delete();
 	}
 
+	const mapScores = await DBOsuMultiScores.findAll({
+		where: {
+			beatmapId: beatmap.beatmapId,
+			tourneyMatch: true,
+			matchName: {
+				[Op.notLike]: 'MOTD:%',
+			},
+		}
+	});
+
+	let tournaments = [];
+
+	for (let i = 0; i < mapScores.length; i++) {
+		let acronym = mapScores[i].matchName.replace(/:.+/gm, '');
+
+		if (tournaments.indexOf(acronym) === -1) {
+			tournaments.push(acronym);
+		}
+	}
+
+	let tournamentOccurences = `The map was played ${mapScores.length} times with any mods in these tournaments:\n\`${tournaments.join('`, `')}\``;
+
+	if (tournaments.length === 0) {
+		tournamentOccurences = 'The map was never played in any tournaments.';
+	}
+
 	//Send attachment
 	if (interaction && interaction.commandName !== 'osu-beatmap') {
-		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment], ephemeral: true });
+		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: [attachment], ephemeral: true });
 	} else {
-		const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
+		const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: [attachment] });
 		if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
 			sentMessage.react('<:COMPARE:827974793365159997>');
 		}
