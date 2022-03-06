@@ -110,6 +110,9 @@ module.exports = {
 		if (args[4] === 'true') {
 			noFail = 1;
 		}
+
+		let playersThatDontSeemToForfeit = [];
+
 		//Add discord messages and also ingame invites for the timers
 		channel.on('message', async (msg) => {
 			let now = new Date();
@@ -179,6 +182,7 @@ module.exports = {
 				mapIndex++;
 			} else if (matchStartingTime < now && !secondRoundOfInvitesSent && lobbyStatus === 'Joining phase') {
 				secondRoundOfInvitesSent = true;
+				await lobby.updateSettings();
 				for (let i = 0; i < users.length; i++) {
 					if (!lobby.playersById[dbPlayers[i].osuUserId.toString()]) {
 						await channel.sendMessage(`!mp invite #${dbPlayers[i].osuUserId}`);
@@ -212,6 +216,11 @@ module.exports = {
 					mapIndex++;
 				}
 			}
+
+			//Add all players that belong into the lobby and have joined once already here
+			if (playerIds.includes(obj.player.user.id.toString()) && !playersThatDontSeemToForfeit.includes(obj.player.user.id.toString())) {
+				playersThatDontSeemToForfeit.push(obj.player.user.id.toString());
+			}
 		});
 
 		lobby.on('allPlayersReady', async () => {
@@ -222,7 +231,9 @@ module.exports = {
 					playersInLobby++;
 				}
 			}
-			if (lobbyStatus === 'Waiting for start' && playersInLobby === dbPlayers.length) {
+
+			//Check that all players are in the lobby that previously joined
+			if (lobbyStatus === 'Waiting for start' && playersInLobby >= playersThatDontSeemToForfeit.length) {
 				await channel.sendMessage('!mp start 10');
 
 				lobbyStatus === 'Map being played';
