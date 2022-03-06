@@ -37,9 +37,9 @@ module.exports = {
 		}
 
 		// eslint-disable-next-line no-undef
-		// if (process.env.SERVER !== 'Live') {
-		// 	return;
-		// }
+		if (process.env.SERVER !== 'Live') {
+			return;
+		}
 
 		if (args[0].toLowerCase() === 'claim') {
 			args.shift();
