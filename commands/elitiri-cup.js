@@ -187,7 +187,10 @@ module.exports = {
 			//get elitiriSignUp from db
 			logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBElitiriCupSignUp 3');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-				where: { userId: msg.author.id },
+				where: {
+					userId: msg.author.id,
+					tournamentName: currentElitiriCup
+				},
 			});
 
 			if (elitiriSignUp) {
