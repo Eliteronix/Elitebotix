@@ -2,7 +2,6 @@ const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBElitiriCupStaff, DBProces
 const { pause, logDatabaseQueries } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { currentElitiriCup, currentElitiriCupHostSheetId } = require('../config.json');
-const { Op } = require('sequelize');
 
 let potentialNMQualifierMaps = [];
 let potentialHDQualifierMaps = [];
@@ -173,9 +172,7 @@ module.exports = {
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: {
 					tournamentName: currentElitiriCup,
-					rankAchieved: {
-						[Op.not]: null
-					}
+					rankAchieved: null
 				}
 			});
 
