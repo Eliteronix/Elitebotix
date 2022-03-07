@@ -1208,22 +1208,28 @@ module.exports = {
 				}
 			}
 
+			let weightedStarRating = totalWeightedStarRating / totalWeight;
+
+			for (let i = 0; i < userMaps.length && i < 50; i++) {
+				weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i], Math.round((1 - i * 0.02) * 100) / 100);
+			}
+
 			//add the values to the modpool data
-			if (totalWeight > 0 && userMaps.length > 4) {
+			if (totalWeight > 0 && userMaps.length > 2) {
 				if (modIndex === 0) {
-					duelRatings.noMod = totalWeightedStarRating / totalWeight;
+					duelRatings.noMod = weightedStarRating;
 					duelRatings.stepData.NM = stepData;
 				} else if (modIndex === 1) {
-					duelRatings.hidden = totalWeightedStarRating / totalWeight;
+					duelRatings.hidden = weightedStarRating;
 					duelRatings.stepData.HD = stepData;
 				} else if (modIndex === 2) {
-					duelRatings.hardRock = totalWeightedStarRating / totalWeight;
+					duelRatings.hardRock = weightedStarRating;
 					duelRatings.stepData.HR = stepData;
 				} else if (modIndex === 3) {
-					duelRatings.doubleTime = totalWeightedStarRating / totalWeight;
+					duelRatings.doubleTime = weightedStarRating;
 					duelRatings.stepData.DT = stepData;
 				} else if (modIndex === 4) {
-					duelRatings.freeMod = totalWeightedStarRating / totalWeight;
+					duelRatings.freeMod = weightedStarRating;
 					duelRatings.stepData.FM = stepData;
 				}
 			}
@@ -1926,4 +1932,27 @@ function quicksortMatchId(list, start = 0, end = undefined) {
 		quicksortMatchId(list, p + 1, end);
 	}
 	return list;
+}
+
+function applyOsuDuelStarratingCorrection(rating, score, weight) {
+
+	//Get the expected score for the starrating
+	//https://www.desmos.com/calculator/m14czfzftm
+	const a = 60000; //Probably needs to be higher
+	const b = -2.4;
+	const c = 20000;
+	const expectedScore = a * Math.pow(parseFloat(score.starRating) + (b - rating), 2) + c;
+
+	//Get the difference to the actual score
+	const scoreDifference = score.score - expectedScore;
+
+	//Get the star rating change by the difference
+	//https://www.desmos.com/calculator/vmfkrfb3z2
+	const z = 0.0000000000000000001;
+	const starRatingChange = z * Math.pow(scoreDifference, 2) * scoreDifference;
+
+	//Get the new rating
+	const newRating = rating + (starRatingChange * weight);
+
+	return newRating;
 }
