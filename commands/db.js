@@ -2,6 +2,7 @@ const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesH
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
 const { logDatabaseQueries } = require('../utils');
+const { developers } = require('../config.json');
 
 module.exports = {
 	name: 'db',
@@ -99,8 +100,11 @@ module.exports = {
 		for (let i = 0; i < dbList.length; i++) {
 			data.push(dbList[i].dataValues);
 
+			if (!developers.includes(msg.author.id)) {
+				return;
+			}
 			if (i % 10000 === 0 && i > 0 || dbList.length - 1 === i) {
-				const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
+				const developerUser = await msg.client.users.cache.find(user => user.id === msg.author.id);
 				let csv = new ObjectsToCsv(data);
 				csv = await csv.toString();
 				// eslint-disable-next-line no-undef
@@ -109,7 +113,7 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 				const attachment = new Discord.MessageAttachment(buffer, `${dbTableName}-${process.env.SERVER}-${process.env.PROVIDER}.csv`);
 				// eslint-disable-next-line no-undef
-				await eliteronixUser.send({ content: `${dbTableName} - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`, files: [attachment] });
+				await developerUser.send({ content: `${dbTableName} - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`, files: [attachment] });
 				data = [];
 			}
 		}
