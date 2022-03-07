@@ -136,6 +136,17 @@ async function getBeatmap(msg, interaction, beatmap) {
 		}
 	});
 
+	//Bubblesort mapScores by matchId property descending
+	mapScores.sort((a, b) => {
+		if (a.matchId > b.matchId) {
+			return -1;
+		}
+		if (a.matchId < b.matchId) {
+			return 1;
+		}
+		return 0;
+	});
+
 	let tournaments = [];
 
 	for (let i = 0; i < mapScores.length; i++) {
@@ -146,7 +157,7 @@ async function getBeatmap(msg, interaction, beatmap) {
 		}
 	}
 
-	let tournamentOccurences = `The map was played ${mapScores.length} times with any mods in these tournaments:\n\`${tournaments.join('`, `')}\``;
+	let tournamentOccurences = `The map was played ${mapScores.length} times with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
 
 	if (tournaments.length === 0) {
 		tournamentOccurences = 'The map was never played in any tournaments.';
