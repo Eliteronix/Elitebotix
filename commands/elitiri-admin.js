@@ -2,6 +2,7 @@ const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBElitiriCupStaff, DBProces
 const { pause, logDatabaseQueries } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { currentElitiriCup, currentElitiriCupHostSheetId } = require('../config.json');
+const { Op } = require('sequelize');
 
 let potentialNMQualifierMaps = [];
 let potentialHDQualifierMaps = [];
@@ -170,7 +171,12 @@ module.exports = {
 
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 5');
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
-				where: { tournamentName: currentElitiriCup }
+				where: {
+					tournamentName: currentElitiriCup,
+					rankAchieved: {
+						[Op.not]: null
+					}
+				}
 			});
 
 			if (targetBracket !== 'Every Bracket') {
