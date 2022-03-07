@@ -21,6 +21,10 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
+		if (!developers.includes(msg.author.id)) {
+			return;
+		}
+
 		let data = [];
 		let dbTableName;
 		let dbList = [];
@@ -100,9 +104,6 @@ module.exports = {
 		for (let i = 0; i < dbList.length; i++) {
 			data.push(dbList[i].dataValues);
 
-			if (!developers.includes(msg.author.id)) {
-				return;
-			}
 			if (i % 10000 === 0 && i > 0 || dbList.length - 1 === i) {
 				const developerUser = await msg.client.users.cache.find(user => user.id === msg.author.id);
 				let csv = new ObjectsToCsv(data);
