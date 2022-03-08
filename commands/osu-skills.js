@@ -277,6 +277,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 			if (userDuelStarRating.provisional) {
 				leagueText = 'Provisional: ' + leagueText;
+			} else if (userDuelStarRating.outdated) {
+				leagueText = 'Outdated: ' + leagueText;
 			}
 
 			ctx.fillText(leagueText, 90, 310);
