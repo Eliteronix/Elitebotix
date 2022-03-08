@@ -1383,7 +1383,7 @@ module.exports = {
 		}
 
 		duelRatings = {
-			total: (averageStars / stars.length) - 0.5,
+			total: (averageStars / stars.length) * 0.9,
 			noMod: null,
 			hidden: null,
 			hardRock: null,

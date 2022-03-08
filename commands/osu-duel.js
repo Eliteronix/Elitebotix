@@ -1428,6 +1428,9 @@ module.exports = {
 				explaination.push('5. Step:');
 				explaination.push('The total star rating will be calculated relative to how many maps of each modpool were played in the last 100 score v2 tournament scores.');
 				explaination.push('This will allow a player that mainly plays HD to have their HD modpool star rating have more impact on the total star rating than a player that mostly plays NM. This is being done because in a real match the HD player is more likely to play HD than the NM player and will therefore be more affected by their HD skill.');
+				explaination.push('');
+				explaination.push('**What does Provisional mean?**');
+				explaination.push('A provisional rank is given if there is barely enough data to give a relatively reliable star rating.');
 
 				return await interaction.followUp({ content: explaination.join('\n'), files: files, ephemeral: true });
 			}
