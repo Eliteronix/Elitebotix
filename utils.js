@@ -1098,7 +1098,7 @@ module.exports = {
 				}
 
 				//Filter by ranked maps
-				if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved')) {
+				if (dbBeatmap && parseFloat(dbBeatmap.starRating) > 4) {
 					//Standardize the score from the mod multiplier
 					if (modPools[modIndex] === 'HD') {
 						userMaps[i].score = userMaps[i].score / 1.06;
