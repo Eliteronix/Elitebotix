@@ -1053,7 +1053,8 @@ module.exports = {
 				HR: [],
 				DT: [],
 				FM: []
-			}
+			},
+			provisional: false,
 		};
 
 		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
@@ -1208,14 +1209,18 @@ module.exports = {
 				}
 			}
 
-			let weightedStarRating = totalWeightedStarRating / totalWeight;
-
-			for (let i = 0; i < userMaps.length && i < 50; i++) {
-				weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i], Math.round((1 - i * 0.02) * 100) / 100);
+			if (userMaps.length < 5) {
+				duelRatings.provisional = true;
 			}
 
 			//add the values to the modpool data
-			if (totalWeight > 0 && userMaps.length > 2) {
+			if (totalWeight > 0 && userMaps.length > 0) {
+				let weightedStarRating = totalWeightedStarRating / totalWeight;
+
+				for (let i = 0; i < userMaps.length && i < 50; i++) {
+					weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i], Math.round((1 - i * 0.02) * 100) / 100);
+				}
+
 				if (modIndex === 0) {
 					duelRatings.noMod = weightedStarRating;
 					duelRatings.stepData.NM = stepData;
@@ -1326,6 +1331,8 @@ module.exports = {
 		if (input.date) {
 			return duelRatings;
 		}
+
+		duelRatings.provisional = true;
 
 		//Get it from the top plays if no tournament data is available
 		// eslint-disable-next-line no-undef
@@ -1945,10 +1952,16 @@ function applyOsuDuelStarratingCorrection(rating, score, weight) {
 	//Set the score to the lowest expected of c if a really high starrating occurs
 	if (parseFloat(score.starRating) > Math.abs(b - rating)) {
 		expectedScore = c;
+	} else if (expectedScore > 950000) {
+		expectedScore = 950000;
 	}
 
 	//Get the difference to the actual score
-	const scoreDifference = score.score - expectedScore;
+	let scoreDifference = score.score - expectedScore;
+
+	if (score.score > 950000) {
+		scoreDifference = 0;
+	}
 
 	//Get the star rating change by the difference
 	//https://www.desmos.com/calculator/vmfkrfb3z2
@@ -1957,6 +1970,8 @@ function applyOsuDuelStarratingCorrection(rating, score, weight) {
 
 	//Get the new rating
 	const newRating = rating + (starRatingChange * weight);
+
+	console.log(rating.toFixed(3), scoreDifference, starRatingChange.toFixed(5), newRating.toFixed(3));
 
 	return newRating;
 }

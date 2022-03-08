@@ -912,11 +912,7 @@ module.exports = {
 
 				ctx.drawImage(leagueImage, 400, 100, 150, 150);
 
-				if (userDuelStarRating.noMod === null
-					|| userDuelStarRating.hidden === null
-					|| userDuelStarRating.hardRock === null
-					|| userDuelStarRating.doubleTime === null
-					|| userDuelStarRating.freeMod === null) {
+				if (userDuelStarRating.provisional) {
 					leagueText = 'Provisional: ' + leagueText;
 				}
 
@@ -1015,11 +1011,7 @@ module.exports = {
 
 					ctx.drawImage(leagueImage, 50, 575 + i * 250, 150, 150);
 
-					if (historicalUserDuelStarRatings[i].ratings.noMod === null
-						|| historicalUserDuelStarRatings[i].ratings.hidden === null
-						|| historicalUserDuelStarRatings[i].ratings.hardRock === null
-						|| historicalUserDuelStarRatings[i].ratings.doubleTime === null
-						|| historicalUserDuelStarRatings[i].ratings.freeMod === null) {
+					if (historicalUserDuelStarRatings[i].provisional) {
 						leagueText = 'Provisional: ' + leagueText;
 					}
 
