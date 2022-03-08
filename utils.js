@@ -1218,6 +1218,10 @@ module.exports = {
 				let weightedStarRating = totalWeightedStarRating / totalWeight;
 
 				for (let i = 0; i < userMaps.length && i < 50; i++) {
+					// let weightMultiplier = 1;
+					// if (userMaps) {
+
+					// }
 					weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i], Math.round((1 - i * 0.02) * 100) / 100);
 				}
 

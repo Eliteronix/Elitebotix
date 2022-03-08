@@ -1211,6 +1211,7 @@ module.exports = {
 						console.log(err);
 					});
 			} else if (interaction.options._subcommand === 'data') {
+				let TODOUpdateExplaination;
 				await interaction.deferReply({ ephemeral: true });
 				let osuUser = {
 					id: null,
