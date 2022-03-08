@@ -1943,9 +1943,9 @@ function quicksortMatchId(list, start = 0, end = undefined) {
 
 function applyOsuDuelStarratingCorrection(rating, score, weight) {
 	//Get the expected score for the starrating
-	//https://www.desmos.com/calculator/m14czfzftm
-	const a = 60000; //Probably needs to be higher
-	const b = -2.4;
+	//https://www.desmos.com/calculator/oae69zr9ze
+	const a = 120000;
+	const b = -1.67;
 	const c = 20000;
 	let expectedScore = a * Math.pow(parseFloat(score.starRating) + (b - rating), 2) + c;
 
@@ -1964,9 +1964,9 @@ function applyOsuDuelStarratingCorrection(rating, score, weight) {
 	}
 
 	//Get the star rating change by the difference
-	//https://www.desmos.com/calculator/vmfkrfb3z2
+	//https://www.desmos.com/calculator/fdmdmr1qwn
 	const z = 0.0000000000000000007;
-	const starRatingChange = z * Math.pow(scoreDifference, 2) * scoreDifference;
+	const starRatingChange = z * Math.pow(scoreDifference, 3);
 
 	//Get the new rating
 	const newRating = rating + (starRatingChange * weight);
