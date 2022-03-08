@@ -1935,24 +1935,29 @@ function quicksortMatchId(list, start = 0, end = undefined) {
 }
 
 function applyOsuDuelStarratingCorrection(rating, score, weight) {
-
 	//Get the expected score for the starrating
 	//https://www.desmos.com/calculator/m14czfzftm
 	const a = 60000; //Probably needs to be higher
 	const b = -2.4;
 	const c = 20000;
-	const expectedScore = a * Math.pow(parseFloat(score.starRating) + (b - rating), 2) + c;
+	let expectedScore = a * Math.pow(parseFloat(score.starRating) + (b - rating), 2) + c;
+
+	//Set the score to the lowest expected of c if a really high starrating occurs
+	if (parseFloat(score.starRating) > Math.abs(b - rating)) {
+		expectedScore = c;
+	}
 
 	//Get the difference to the actual score
 	const scoreDifference = score.score - expectedScore;
 
 	//Get the star rating change by the difference
 	//https://www.desmos.com/calculator/vmfkrfb3z2
-	const z = 0.0000000000000000001;
+	const z = 0.0000000000000000007;
 	const starRatingChange = z * Math.pow(scoreDifference, 2) * scoreDifference;
 
 	//Get the new rating
 	const newRating = rating + (starRatingChange * weight);
+	console.log(weight.toFixed(2), (starRatingChange * weight).toFixed(5), scoreDifference.toFixed(0));
 
 	return newRating;
 }
