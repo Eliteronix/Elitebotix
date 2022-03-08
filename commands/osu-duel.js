@@ -914,6 +914,8 @@ module.exports = {
 
 				if (userDuelStarRating.provisional) {
 					leagueText = 'Provisional: ' + leagueText;
+				} else if (userDuelStarRating.outdated) {
+					leagueText = 'Outdated: ' + leagueText;
 				}
 
 				ctx.fillText(leagueText, 475, 275);
@@ -1431,6 +1433,9 @@ module.exports = {
 				explaination.push('');
 				explaination.push('**What does Provisional mean?**');
 				explaination.push('A provisional rank is given if there is barely enough data to give a relatively reliable star rating.');
+				explaination.push('');
+				explaination.push('**What does outdated mean?**');
+				explaination.push('An outdated rank means that there have not been equal to or more than 5 scores in the past 6 months.');
 
 				return await interaction.followUp({ content: explaination.join('\n'), files: files, ephemeral: true });
 			}

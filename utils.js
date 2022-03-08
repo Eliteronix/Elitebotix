@@ -1030,6 +1030,28 @@ module.exports = {
 			});
 		}
 
+		//Check for scores from the past half a year
+		const lastHalfYear = new Date();
+		lastHalfYear.setUTCMonth(lastHalfYear.getUTCMonth() - 6);
+
+		const pastHalfYearScoreCount = await DBOsuMultiScores.count({
+			where: {
+				osuUserId: input.osuUserId,
+				tourneyMatch: true,
+				scoringType: 'Score v2',
+				mode: 'Standard',
+				gameEndDate: {
+					[Op.gte]: lastHalfYear
+				}
+			}
+		});
+
+		let outdated = false;
+
+		if (pastHalfYearScoreCount < 5) {
+			outdated = true;
+		}
+
 		//Sort it by match ID
 		quicksortMatchId(userScores);
 
@@ -1055,6 +1077,7 @@ module.exports = {
 				FM: []
 			},
 			provisional: false,
+			outdated: outdated
 		};
 
 		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
