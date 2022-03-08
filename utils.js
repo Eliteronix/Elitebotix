@@ -1957,7 +1957,6 @@ function applyOsuDuelStarratingCorrection(rating, score, weight) {
 
 	//Get the new rating
 	const newRating = rating + (starRatingChange * weight);
-	console.log(weight.toFixed(2), (starRatingChange * weight).toFixed(5), scoreDifference.toFixed(0));
 
 	return newRating;
 }
