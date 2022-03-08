@@ -6,6 +6,7 @@ const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
+const fetch = require('node-fetch');
 
 module.exports = {
 	name: 'osu-duel',
@@ -1093,19 +1094,48 @@ module.exports = {
 					}
 				}
 
+				//Draw badges onto the canvas
+				const badgeURLs = [];
+				await fetch(`https://osu.ppy.sh/users/${osuUser.id}/osu`)
+					.then(async (res) => {
+						let htmlCode = await res.text();
+						htmlCode = htmlCode.replace(/&quot;/gm, '"');
+						const badgesRegex = /,"badges".+,"beatmap_playcounts_count":/gm;
+						const matches = badgesRegex.exec(htmlCode);
+						if (matches && matches[0]) {
+							const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"beatmap_playcounts_count":', '');
+							const rawBadgesArray = cleanedMatch.split('},{');
+							for (let i = 0; i < rawBadgesArray.length; i++) {
+								if (rawBadgesArray[i] !== '') {
+									const badgeArray = rawBadgesArray[i].split('","');
+									badgeURLs.push(badgeArray[2].substring(12));
+								}
+							}
+						}
+					});
+
+				let yOffset = -2;
+				if (badgeURLs.length < 6) {
+					yOffset = yOffset + (6 - badgeURLs.length) * 22;
+				}
+				for (let i = 0; i < badgeURLs.length && i < 6; i++) {
+					const badge = await Canvas.loadImage(badgeURLs[i].replace(/\\/gm, ''));
+					ctx.drawImage(badge, 10, 60 + i * 44 + yOffset);
+				}
+
 				//Get a circle for inserting the player avatar
 				ctx.beginPath();
-				ctx.arc(180, 180, 80, 0, Math.PI * 2, true);
+				ctx.arc(190, 180, 80, 0, Math.PI * 2, true);
 				ctx.closePath();
 				ctx.clip();
 
 				//Draw a shape onto the main canvas
 				try {
 					const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.id}`);
-					ctx.drawImage(avatar, 100, 100, 160, 160);
+					ctx.drawImage(avatar, 110, 100, 160, 160);
 				} catch (error) {
 					const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-					ctx.drawImage(avatar, 100, 100, 160, 160);
+					ctx.drawImage(avatar, 110, 100, 160, 160);
 				}
 
 				//Create as an attachment
