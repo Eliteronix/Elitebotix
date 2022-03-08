@@ -275,11 +275,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 			ctx.drawImage(leagueImage, 50, 195, 100, 100);
 
-			if (userDuelStarRating.noMod === null
-				|| userDuelStarRating.hidden === null
-				|| userDuelStarRating.hardRock === null
-				|| userDuelStarRating.doubleTime === null
-				|| userDuelStarRating.freeMod === null) {
+			if (userDuelStarRating.provisional) {
 				leagueText = 'Provisional: ' + leagueText;
 			}
 

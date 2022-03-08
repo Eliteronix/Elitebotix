@@ -1053,7 +1053,8 @@ module.exports = {
 				HR: [],
 				DT: [],
 				FM: []
-			}
+			},
+			provisional: false,
 		};
 
 		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
@@ -1096,8 +1097,8 @@ module.exports = {
 					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
 				}
 
-				//Filter by ranked maps
-				if (dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved')) {
+				//Filter by ranked maps > 4*
+				if (dbBeatmap && parseFloat(dbBeatmap.starRating) > 4 && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved')) {
 					//Standardize the score from the mod multiplier
 					if (modPools[modIndex] === 'HD') {
 						userMaps[i].score = userMaps[i].score / 1.06;
@@ -1208,22 +1209,36 @@ module.exports = {
 				}
 			}
 
+			if (userMaps.length < 5) {
+				duelRatings.provisional = true;
+			}
+
 			//add the values to the modpool data
-			if (totalWeight > 0 && userMaps.length > 4) {
+			if (totalWeight > 0 && userMaps.length > 0) {
+				let weightedStarRating = totalWeightedStarRating / totalWeight;
+
+				for (let i = 0; i < userMaps.length && i < 50; i++) {
+					let weightMultiplier = 1;
+					if (duelRatings.provisional && userMaps.lengt < 5) {
+						weightMultiplier = 5 / userMaps.length;
+					}
+					weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i], Math.round((weightMultiplier - i * 0.02) * 100) / 100);
+				}
+
 				if (modIndex === 0) {
-					duelRatings.noMod = totalWeightedStarRating / totalWeight;
+					duelRatings.noMod = weightedStarRating;
 					duelRatings.stepData.NM = stepData;
 				} else if (modIndex === 1) {
-					duelRatings.hidden = totalWeightedStarRating / totalWeight;
+					duelRatings.hidden = weightedStarRating;
 					duelRatings.stepData.HD = stepData;
 				} else if (modIndex === 2) {
-					duelRatings.hardRock = totalWeightedStarRating / totalWeight;
+					duelRatings.hardRock = weightedStarRating;
 					duelRatings.stepData.HR = stepData;
 				} else if (modIndex === 3) {
-					duelRatings.doubleTime = totalWeightedStarRating / totalWeight;
+					duelRatings.doubleTime = weightedStarRating;
 					duelRatings.stepData.DT = stepData;
 				} else if (modIndex === 4) {
-					duelRatings.freeMod = totalWeightedStarRating / totalWeight;
+					duelRatings.freeMod = weightedStarRating;
 					duelRatings.stepData.FM = stepData;
 				}
 			}
@@ -1320,6 +1335,8 @@ module.exports = {
 		if (input.date) {
 			return duelRatings;
 		}
+
+		duelRatings.provisional = true;
 
 		//Get it from the top plays if no tournament data is available
 		// eslint-disable-next-line no-undef
@@ -1926,4 +1943,37 @@ function quicksortMatchId(list, start = 0, end = undefined) {
 		quicksortMatchId(list, p + 1, end);
 	}
 	return list;
+}
+
+function applyOsuDuelStarratingCorrection(rating, score, weight) {
+	//Get the expected score for the starrating
+	//https://www.desmos.com/calculator/oae69zr9ze
+	const a = 120000;
+	const b = -1.67;
+	const c = 20000;
+	let expectedScore = a * Math.pow(parseFloat(score.starRating) + (b - rating), 2) + c;
+
+	//Set the score to the lowest expected of c if a really high starrating occurs
+	if (parseFloat(score.starRating) > Math.abs(b - rating)) {
+		expectedScore = c;
+	} else if (expectedScore > 950000) {
+		expectedScore = 950000;
+	}
+
+	//Get the difference to the actual score
+	let scoreDifference = score.score - expectedScore;
+
+	if (score.score > 950000) {
+		scoreDifference = 0;
+	}
+
+	//Get the star rating change by the difference
+	//https://www.desmos.com/calculator/fdmdmr1qwn
+	const z = 0.0000000000000000007;
+	const starRatingChange = z * Math.pow(scoreDifference, 3);
+
+	//Get the new rating
+	const newRating = rating + (starRatingChange * weight);
+
+	return newRating;
 }
