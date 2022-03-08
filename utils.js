@@ -1097,8 +1097,8 @@ module.exports = {
 					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
 				}
 
-				//Filter by ranked maps
-				if (dbBeatmap && parseFloat(dbBeatmap.starRating) > 4) {
+				//Filter by ranked maps > 4*
+				if (dbBeatmap && parseFloat(dbBeatmap.starRating) > 4 && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved')) {
 					//Standardize the score from the mod multiplier
 					if (modPools[modIndex] === 'HD') {
 						userMaps[i].score = userMaps[i].score / 1.06;
@@ -1218,11 +1218,11 @@ module.exports = {
 				let weightedStarRating = totalWeightedStarRating / totalWeight;
 
 				for (let i = 0; i < userMaps.length && i < 50; i++) {
-					// let weightMultiplier = 1;
-					// if (userMaps) {
-
-					// }
-					weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i], Math.round((1 - i * 0.02) * 100) / 100);
+					let weightMultiplier = 1;
+					if (duelRatings.provisional && userMaps.lengt < 5) {
+						weightMultiplier = 5 / userMaps.length;
+					}
+					weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i], Math.round((weightMultiplier - i * 0.02) * 100) / 100);
 				}
 
 				if (modIndex === 0) {
@@ -1974,8 +1974,6 @@ function applyOsuDuelStarratingCorrection(rating, score, weight) {
 
 	//Get the new rating
 	const newRating = rating + (starRatingChange * weight);
-
-	console.log(rating.toFixed(3), scoreDifference, starRatingChange.toFixed(5), newRating.toFixed(3));
 
 	return newRating;
 }

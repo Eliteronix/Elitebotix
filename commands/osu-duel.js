@@ -1211,7 +1211,6 @@ module.exports = {
 						console.log(err);
 					});
 			} else if (interaction.options._subcommand === 'data') {
-				let TODOUpdateExplaination;
 				await interaction.deferReply({ ephemeral: true });
 				let osuUser = {
 					id: null,
@@ -1417,11 +1416,19 @@ module.exports = {
 				explaination.push('Each score and its weight will be put into a star rating step. (A 5.0 map will be put into the 4.8, 4.9, 5.0, 5.1 and 5.2 steps)');
 				explaination.push('Each step will average the weights of their scores and will calculate a weighted star rating (e.g. 4.8 stars with an average weight of 0.5 will be a weighted star rating of 2.4)');
 				explaination.push('The weighted star ratings of each step will now be summed up and divided by all the average weights of each step summed up.');
-				explaination.push('This will result in the modpool star rating.');
 				explaination.push('');
 				explaination.push('4. Step:');
+				explaination.push('The last 50 scores from that modpool will now once again effect the star rating.');
+				explaination.push('For each score there will be an expected score calculated using this formula which is based on the starrating itself: <https://www.desmos.com/calculator/oae69zr9ze> (cap of 950k upwards | 20k downwards)');
+				explaination.push('The difference between the score and the expected score will now be calculated.');
+				explaination.push('The difference now decides the star rating change using this formula: <https://www.desmos.com/calculator/fdmdmr1qwn>');
+				explaination.push('Each star rating change will now be applied to the previously calculated star rating using a weight. (1x for the most recent score, 0.98 for the second most recent score, 0.96 for the third most recent score, etc.)');
+				explaination.push('After all scores applied their effect on the starrating this will result in the final modpool star rating.');
+				explaination.push('');
+				explaination.push('5. Step:');
 				explaination.push('The total star rating will be calculated relative to how many maps of each modpool were played in the last 100 score v2 tournament scores.');
 				explaination.push('This will allow a player that mainly plays HD to have their HD modpool star rating have more impact on the total star rating than a player that mostly plays NM. This is being done because in a real match the HD player is more likely to play HD than the NM player and will therefore be more affected by their HD skill.');
+
 				return await interaction.followUp({ content: explaination.join('\n'), files: files, ephemeral: true });
 			}
 		}
