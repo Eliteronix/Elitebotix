@@ -155,7 +155,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 	if (reaction.message.attachments.first() && reaction.message.attachments.first().name.match(/.+leaderboard.+page.+/g)) {
 		let commandName = reaction.message.attachments.first().name.match(/.+leaderboard/g);
 		let page = reaction.message.attachments.first().name.replace(/.+page/g, '').replace('.png', '');
-		console.log(page, 'initial');
 
 		if (reaction.message.attachments.first().name.replace(/.+leaderboard-/g, '').replace(/-.+/g, '') !== user.id) {
 			return;
@@ -168,7 +167,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 		} else {
 			return;
 		}
-		console.log(page, 'after');
 
 		if (commandName[0] !== 'osu-duelrating-leaderboard') {
 			let message = {
