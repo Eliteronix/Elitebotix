@@ -1146,7 +1146,10 @@ module.exports = {
 				if (!interaction.guild) {
 					return interaction.reply('The leaderboard can currently only be used in servers.');
 				}
-				interaction.deferReply();
+
+				if (interaction.id) {
+					interaction.reply('Processing leaderboard...');
+				}
 
 				interaction.guild.members.fetch()
 					.then(async (guildMembers) => {
@@ -1217,7 +1220,7 @@ module.exports = {
 						let page;
 
 						if (interaction.options._hoistedOptions && interaction.options._hoistedOptions[0] && interaction.options._hoistedOptions[0].value) {
-							page = parseInt(interaction.options._hoistedOptions[0].value);
+							page = Math.abs(parseInt(interaction.options._hoistedOptions[0].value));
 						}
 
 						if (!page && leaderboardData.length > 300) {
@@ -1237,7 +1240,17 @@ module.exports = {
 						const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${interaction.guild.name}'s osu! Duel Star Rating leaderboard`, filename, page);
 
 						//Send attachment
-						await interaction.followUp({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect <username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-duel starrating username:[username]\` is being used.`, files: [attachment] });
+						let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect <username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-duel starrating username:[username]\` is being used.`, files: [attachment] });
+
+						if (page) {
+							if (page > 1) {
+								await leaderboardMessage.react('◀️');
+							}
+
+							if (page < totalPages) {
+								await leaderboardMessage.react('▶️');
+							}
+						}
 					})
 					.catch(err => {
 						console.log(err);
