@@ -65,7 +65,7 @@ module.exports = {
 			if (elitiriSignUp.bracketName == 'Top Bracket') {
 				scheduleSheetId = 'Qualifiers Schedules-Top';
 				lobbyAbbreviation = 'DQ-';
-			} else if (elitiriSignUp.bracketName == 'Middle Bracket') { 
+			} else if (elitiriSignUp.bracketName == 'Middle Bracket') {
 				scheduleSheetId = 'Qualifiers Schedules-Middle';
 				lobbyAbbreviation = 'CQ-';
 			} else if (elitiriSignUp.bracketName == 'Lower Bracket') {
@@ -75,11 +75,11 @@ module.exports = {
 				scheduleSheetId = 'Qualifiers Schedules-Beginner';
 				lobbyAbbreviation = 'AQ-';
 			}
-			
+
 			let lobbyId = lobbyAbbreviation + args[0].replace(/\D+/, '');
 
 			// Make sure lobbyId is valid
-			if (lobbyId.replace(/\D+/, '') > 24 ||  lobbyId.replace(/\D+/, '') < 1 || lobbyId.replace(/\D+/, '').length > 2) {
+			if (lobbyId.replace(/\D+/, '') > 24 || lobbyId.replace(/\D+/, '') < 1 || lobbyId.replace(/\D+/, '').length > 2) {
 				if (msg.id) {
 					return msg.reply('Please make sure your lobby ID is correct');
 				} else {
@@ -92,8 +92,8 @@ module.exports = {
 			let k = 0;
 			if (lobbyId > 12) {
 				k = 1;
-			} 
-				
+			}
+
 			if (elitiriSignUp.bracketName == 'Top Bracket') {
 				givenLobbyDate.setUTCMilliseconds(0);
 				givenLobbyDate.setUTCSeconds(0);
@@ -102,7 +102,7 @@ module.exports = {
 				givenLobbyDate.setUTCDate(currentElitiriCupTopQualsFirstLobby.day + k);
 				givenLobbyDate.setUTCMonth(currentElitiriCupTopQualsFirstLobby.zeroIndexMonth); //Zero Indexed
 				givenLobbyDate.setUTCFullYear(currentElitiriCupTopQualsFirstLobby.year);
-			}else if (elitiriSignUp.bracketName == 'Middle Bracket'){	
+			} else if (elitiriSignUp.bracketName == 'Middle Bracket') {
 				givenLobbyDate.setUTCMilliseconds(0);
 				givenLobbyDate.setUTCSeconds(0);
 				givenLobbyDate.setUTCMinutes(0);
@@ -110,7 +110,7 @@ module.exports = {
 				givenLobbyDate.setUTCDate(currentElitiriCupMiddleQualsFirstLobby.day + k);
 				givenLobbyDate.setUTCMonth(currentElitiriCupMiddleQualsFirstLobby.zeroIndexMonth); //Zero Indexed
 				givenLobbyDate.setUTCFullYear(currentElitiriCupMiddleQualsFirstLobby.year);
-			}else if (elitiriSignUp.bracketName == 'Lower Bracket'){
+			} else if (elitiriSignUp.bracketName == 'Lower Bracket') {
 				givenLobbyDate.setUTCMilliseconds(0);
 				givenLobbyDate.setUTCSeconds(0);
 				givenLobbyDate.setUTCMinutes(0);
@@ -118,7 +118,7 @@ module.exports = {
 				givenLobbyDate.setUTCDate(currentElitiriCupLowerQualsFirstLobby.day) + k;
 				givenLobbyDate.setUTCMonth(currentElitiriCupLowerQualsFirstLobby.zeroIndexMonth); //Zero Indexed
 				givenLobbyDate.setUTCFullYear(currentElitiriCupLowerQualsFirstLobby.year);
-			}else {
+			} else {
 				givenLobbyDate.setUTCMilliseconds(0);
 				givenLobbyDate.setUTCSeconds(0);
 				givenLobbyDate.setUTCMinutes(0);
@@ -137,16 +137,16 @@ module.exports = {
 			}
 
 			let date = new Date(givenLobbyDate).toUTCString();
-		
+
 			// eslint-disable-next-line no-unused-vars
 			const tournamentLobby = await DBElitiriCupLobbies.findOne({
 				where: {
 					tournamentName: currentElitiriCup,
 					lobbyId: lobbyId,
 				}
-			});	
+			});
 			//no lobby table with given Id has been created yet
-			if (!tournamentLobby){
+			if (!tournamentLobby) {
 				//create a lobby
 				await DBElitiriCupLobbies.create({
 					tournamentName: currentElitiriCup,
@@ -154,17 +154,17 @@ module.exports = {
 					lobbyDate: date,
 					bracketName: elitiriSignUp.bracketName,
 					refDiscordTag: null,
-					refOsuUserId : null,
-					refOsuName : null,
+					refOsuUserId: null,
+					refOsuName: null,
 				});
 			}
-			
+
 			const playersInLobby = await DBElitiriCupSignUp.count({
 				where: {
 					tournamentLobbyId: lobbyId
 				}
 			});
-			if (playersInLobby > 15){
+			if (playersInLobby > 15) {
 				if (msg.id) {
 					return msg.reply('This lobby is full. Please, choose another one');
 				} else {
@@ -175,7 +175,7 @@ module.exports = {
 			// previousLobbyId is used to clear previous playerNameCell with player name
 			let previousLobbyId = null;
 			// set tournamentLobbyId for the player
-			if (elitiriSignUp.tournamentLobbyId == null){
+			if (elitiriSignUp.tournamentLobbyId == null) {
 				elitiriSignUp.tournamentLobbyId = lobbyId;
 			} else {
 				previousLobbyId = elitiriSignUp.tournamentLobbyId;
@@ -183,7 +183,7 @@ module.exports = {
 			}
 			await elitiriSignUp.save();
 
-			if (previousLobbyId == elitiriSignUp.tournamentLobbyId){
+			if (previousLobbyId == elitiriSignUp.tournamentLobbyId) {
 				if (msg.id) {
 					return msg.reply(`You are already in lobby ${lobbyId}`);
 				} else {
@@ -206,14 +206,14 @@ module.exports = {
 
 			//search for players in the lobby with given ID
 			let lobbyPlayers = await DBElitiriCupSignUp.findAll({
-				where:{
+				where: {
 					tournamentName: currentElitiriCup,
 					tournamentLobbyId: lobbyId
 				}
 			});
 			// eslint-disable-next-line no-unused-vars
 			let previousLobbyPlayers = await DBElitiriCupSignUp.findAll({
-				where:{
+				where: {
 					tournamentName: currentElitiriCup,
 					tournamentLobbyId: previousLobbyId
 				}
@@ -222,13 +222,13 @@ module.exports = {
 			let playerName, playerNameCell, quantityCell;
 
 			//j is a row counter
-			let j; 
-			
+			let j;
+
 
 			try {
 				// clear new lobby row
 				j = Number(elitiriSignUp.tournamentLobbyId.replace(/\D+/, ''));
-				if (j > 12){
+				if (j > 12) {
 					j++;
 				}
 				for (let i = 0; i < 14; i++) {
@@ -245,10 +245,10 @@ module.exports = {
 					quantityCell.value = lobbyPlayers.length + '/15';
 				}
 				//if lobby was set before
-				if(previousLobbyId !== null){
+				if (previousLobbyId !== null) {
 					//clear previous lobby row
 					j = Number(previousLobbyId.replace(/\D+/, ''));
-					if (j > 12){
+					if (j > 12) {
 						j++;
 					}
 					for (let i = 0; i < 14; i++) {
@@ -267,7 +267,7 @@ module.exports = {
 						quantityCell = sheet.getCell(3 + j, 5);
 						quantityCell.value = previousLobbyPlayers.length + '/15';
 					}
-				
+
 					//if lobby wasnt set before
 					//fill in lobby row
 				} else {
@@ -290,7 +290,7 @@ module.exports = {
 					return interaction.editReply({ content: 'Something went wrong... Please, try again' });
 				}
 			}
-			
+
 
 			if (msg.id) {
 				return msg.reply(`You have successfully claimed lobby  \`${lobbyId}\``);
@@ -298,7 +298,7 @@ module.exports = {
 				return interaction.editReply({ content: `You have successfully claimed lobby \`${lobbyId}\`` });
 			}
 
-		} else if (args[0].toLowerCase == 'referee'){
+		} else if (args[0].toLowerCase == 'referee') {
 			// let lobbyid = args[0];
 			// let lobby = await DBElitiriCupLobbies.findOne({
 			// 	where:{
