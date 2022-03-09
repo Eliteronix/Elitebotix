@@ -153,8 +153,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 	}
 
 	if (reaction.message.attachments.first() && reaction.message.attachments.first().name.match(/.+leaderboard.+page.+/g)) {
-		const commandName = reaction.message.attachments.first().name.match(/.+leaderboard/g);
+		let commandName = reaction.message.attachments.first().name.match(/.+leaderboard/g);
 		let page = reaction.message.attachments.first().name.replace(/.+page/g, '').replace('.png', '');
+		console.log(page, 'initial');
 
 		if (reaction.message.attachments.first().name.replace(/.+leaderboard-/g, '').replace(/-.+/g, '') !== user.id) {
 			return;
@@ -167,18 +168,36 @@ module.exports = async function (reaction, user, additionalObjects) {
 		} else {
 			return;
 		}
+		console.log(page, 'after');
 
-		let message = {
-			guild: reaction.message.guild,
-			guildId: reaction.message.guild.id,
-			content: `e!${commandName[0]} ${page}`,
-			author: user,
-			channel: reaction.message.channel,
-		};
+		if (commandName[0] !== 'osu-duelrating-leaderboard') {
+			let message = {
+				guild: reaction.message.guild,
+				guildId: reaction.message.guild.id,
+				content: `e!${commandName[0]} ${page}`,
+				author: user,
+				channel: reaction.message.channel,
+			};
 
-		const command = require(`./commands/${commandName[0]}.js`);
+			const command = require(`./commands/${commandName[0]}.js`);
 
-		command.execute(message, [page]);
+			command.execute(message, [page]);
+		} else {
+			let interaction = {
+				guild: reaction.message.guild,
+				guildId: reaction.message.guild.id,
+				options: {
+					_subcommand: 'rating-leaderboard',
+					_hoistedOptions: [{ name: 'page', value: page }]
+				},
+				user: user,
+				channel: reaction.message.channel,
+			};
+
+			const command = require('./commands/osu-duel.js');
+
+			command.execute(null, [page], interaction);
+		}
 
 		return reaction.message.delete();
 	}

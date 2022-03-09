@@ -130,7 +130,7 @@ module.exports = {
 				let page;
 
 				if (args[0] && !isNaN(args[0])) {
-					page = parseInt(args[0]);
+					page = Math.abs(parseInt(args[0]));
 				}
 
 				if (!page && leaderboardData.length > 300) {
