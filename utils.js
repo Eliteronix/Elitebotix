@@ -1159,17 +1159,7 @@ module.exports = {
 
 					let mapStarRating = dbBeatmap.starRating;
 					if (modPools[modIndex] === 'HD') {
-						//Adapt starRating from 0.2 to 0.75 depending on the AR for the HD modpool only
-						let approachRate = parseFloat(dbBeatmap.approachRate);
-						if (approachRate < 7.5) {
-							approachRate = 7.5;
-						} else if (approachRate > 9) {
-							approachRate = 9;
-						}
-
-						let starRatingAdjust = (0.55 / 1.5 * Math.abs(approachRate - 9)) + 0.2;
-
-						mapStarRating = parseFloat(dbBeatmap.starRating) + starRatingAdjust;
+						mapStarRating = adjustHDStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate);
 					}
 
 					userMaps[i].starRating = mapStarRating;
@@ -1467,6 +1457,9 @@ module.exports = {
 		} else {
 			return { name: 'Unranked', imageName: 'unranked', color: '#FF6552' };
 		}
+	},
+	adjustHDStarRating(starRating, approachRate) {
+		return adjustHDStarRatingFunction(starRating, approachRate);
 	}
 };
 
@@ -1999,4 +1992,19 @@ function applyOsuDuelStarratingCorrection(rating, score, weight) {
 	const newRating = rating + (starRatingChange * weight);
 
 	return newRating;
+}
+
+function adjustHDStarRatingFunction(starRating, approachRate) {
+
+	//Adapt starRating from 0.2 to 0.75 depending on the AR for the HD modpool only
+	approachRate = parseFloat(approachRate);
+	if (approachRate < 7.5) {
+		approachRate = 7.5;
+	} else if (approachRate > 9) {
+		approachRate = 9;
+	}
+
+	let starRatingAdjust = (0.55 / 1.5 * Math.abs(approachRate - 9)) + 0.2;
+
+	return parseFloat(starRating) + starRatingAdjust;
 }

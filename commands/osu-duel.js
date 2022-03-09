@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
 const osu = require('node-osu');
-const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague } = require('../utils');
+const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, adjustHDStarRating } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
@@ -236,6 +236,8 @@ module.exports = {
 						});
 					} else if (modPools[i] === 'HD') {
 						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps HD');
+						let HDLowerBound = lowerBound - 0.8;
+						let HDUpperBound = upperBound - 0.15;
 						beatmaps = await DBOsuBeatmaps.findAll({
 							where: {
 								mode: 'Standard',
@@ -251,8 +253,8 @@ module.exports = {
 								},
 								starRating: {
 									[Op.and]: {
-										[Op.gte]: lowerBound,
-										[Op.lte]: upperBound,
+										[Op.gte]: HDLowerBound,
+										[Op.lte]: HDUpperBound,
 									}
 								},
 								beatmapId: {
@@ -381,7 +383,10 @@ module.exports = {
 					while (dbBeatmap === null) {
 						const index = Math.floor(Math.random() * beatmaps.length);
 
-						if (modPools[i] === 'HR') {
+						if (modPools[i] === 'HD') {
+							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 0);
+							beatmaps[index].starRating = adjustHDStarRating(beatmaps[index].starRating, beatmaps[index].approachRate);
+						} else if (modPools[i] === 'HR') {
 							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 16);
 						} else if (modPools[i] === 'DT') {
 							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 64);
