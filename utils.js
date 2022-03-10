@@ -1132,11 +1132,14 @@ module.exports = {
 					} else if (modPools[modIndex] === 'FM') {
 						if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('HD')) {
 							userMaps[i].score = userMaps[i].score / 1.06;
-						} else if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('HR')) {
+						}
+						if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('HR')) {
 							userMaps[i].score = userMaps[i].score / 1.1;
-						} else if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('FL')) {
+						}
+						if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('FL')) {
 							userMaps[i].score = userMaps[i].score / 1.12;
-						} else if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('DT')) {
+						}
+						if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('DT')) {
 							userMaps[i].score = userMaps[i].score / 1.2;
 						}
 					}
