@@ -97,59 +97,17 @@ module.exports = {
 					return interaction.editReply({ content: 'Please make sure your lobby ID is correct' });
 				}
 			}
-			//can be moved to config.json actually
-			// let givenLobbyDate = new Date();
-			// let now = new Date();
-			// let k = 0;
-			// if (lobbyId > 12) {
-			// 	k = 1;
-			// }
-
-			// if (elitiriSignUp.bracketName == 'Top Bracket') {
-			// 	givenLobbyDate.setUTCMilliseconds(0);
-			// 	givenLobbyDate.setUTCSeconds(0);
-			// 	givenLobbyDate.setUTCMinutes(0);
-			// 	givenLobbyDate.setUTCHours(currentElitiriCupTopQualsFirstLobby.hours + 2 * (lobbyId.replace(/\D+/, '') - 1));
-			// 	givenLobbyDate.setUTCDate(currentElitiriCupTopQualsFirstLobby.day + k);
-			// 	givenLobbyDate.setUTCMonth(currentElitiriCupTopQualsFirstLobby.zeroIndexMonth); //Zero Indexed
-			// 	givenLobbyDate.setUTCFullYear(currentElitiriCupTopQualsFirstLobby.year);
-			// } else if (elitiriSignUp.bracketName == 'Middle Bracket') {
-			// 	givenLobbyDate.setUTCMilliseconds(0);
-			// 	givenLobbyDate.setUTCSeconds(0);
-			// 	givenLobbyDate.setUTCMinutes(0);
-			// 	givenLobbyDate.setUTCHours(currentElitiriCupMiddleQualsFirstLobby.hours + 2 * (lobbyId.replace(/\D+/, '') - 1));
-			// 	givenLobbyDate.setUTCDate(currentElitiriCupMiddleQualsFirstLobby.day + k);
-			// 	givenLobbyDate.setUTCMonth(currentElitiriCupMiddleQualsFirstLobby.zeroIndexMonth); //Zero Indexed
-			// 	givenLobbyDate.setUTCFullYear(currentElitiriCupMiddleQualsFirstLobby.year);
-			// } else if (elitiriSignUp.bracketName == 'Lower Bracket') {
-			// 	givenLobbyDate.setUTCMilliseconds(0);
-			// 	givenLobbyDate.setUTCSeconds(0);
-			// 	givenLobbyDate.setUTCMinutes(0);
-			// 	givenLobbyDate.setUTCHours(currentElitiriCupLowerQualsFirstLobby.hours + 2 * (lobbyId.replace(/\D+/, '') - 1));
-			// 	givenLobbyDate.setUTCDate(currentElitiriCupLowerQualsFirstLobby.day) + k;
-			// 	givenLobbyDate.setUTCMonth(currentElitiriCupLowerQualsFirstLobby.zeroIndexMonth); //Zero Indexed
-			// 	givenLobbyDate.setUTCFullYear(currentElitiriCupLowerQualsFirstLobby.year);
-			// } else {
-			// 	givenLobbyDate.setUTCMilliseconds(0);
-			// 	givenLobbyDate.setUTCSeconds(0);
-			// 	givenLobbyDate.setUTCMinutes(0);
-			// 	givenLobbyDate.setUTCHours(currentElitiriCupBeginnerQualsFirstLobby.hours + 2 * (lobbyId.replace(/\D+/, '') - 1));
-			// 	givenLobbyDate.setUTCDate(currentElitiriCupBeginnerQualsFirstLobby.day + k);
-			// 	givenLobbyDate.setUTCMonth(currentElitiriCupBeginnerQualsFirstLobby.zeroIndexMonth); //Zero Indexed
-			// 	givenLobbyDate.setUTCFullYear(currentElitiriCupBeginnerQualsFirstLobby.year);
-			// }
 
 			let date = new Date();
-			if (roundOverCheck(elitiriSignUp.bracketName, lobbyId) == true) {
+			if (roundOverCheck(elitiriSignUp.bracketName, lobbyId.replace(/\D+/, '')) == true) {
 				if (msg.id) {
 					return msg.reply('Your qualifier round is over');
 				} else {
 					return interaction.editReply({ content: 'Your qualifier round is over' });
 				}
 			} else {
-				date = new Date(roundOverCheck(elitiriSignUp.bracketName, lobbyId)).toUTCString();
+				date = new Date(roundOverCheck(elitiriSignUp.bracketName, lobbyId.replace(/\D+/, ''))).toUTCString();
 			}
-
 			// eslint-disable-next-line no-unused-vars
 			const tournamentLobby = await DBElitiriCupLobbies.findOne({
 				where: {
@@ -307,16 +265,16 @@ module.exports = {
 			let bracketName;
 			if (args[0].replace(/\d+/, '') == 'DQ-') {
 				scheduleSheetId = 'Qualifiers Schedules-Top';
-				bracketName = 'Top bracket';
+				bracketName = 'Top Bracket';
 			} else if (args[0].replace(/\d+/, '') == 'CQ-') {
 				scheduleSheetId = 'Qualifiers Schedules-Middle';
-				bracketName = 'Middle bracket';
+				bracketName = 'Middle Bracket';
 			} else if (args[0].replace(/\d+/, '') == 'BQ-') {
 				scheduleSheetId = 'Qualifiers Schedules-Lower';
-				bracketName = 'Lower bracket';
+				bracketName = 'Lower Bracket';
 			} else {
 				scheduleSheetId = 'Qualifiers Schedules-Beginner';
-				bracketName = 'Beginner bracket';
+				bracketName = 'Beginner Bracket';
 			}
 
 			const sheet = doc.sheetsByTitle[scheduleSheetId];
@@ -328,7 +286,6 @@ module.exports = {
 					lobbyId: lobbyId
 				}
 			});
-			console.log(potentialLobby);
 
 			if (!potentialLobby) {
 				if (msg.id) {
@@ -374,7 +331,7 @@ module.exports = {
 			}
 
 			if (elitirisignup) {
-				if (elitirisignup.bracketName == bracketName && !elitirisignup.rankAchived) {
+				if (elitirisignup.bracketName == bracketName && elitirisignup.rankAchived == null) {
 					if (msg.id) {
 						return msg.reply('You are not allowed to ref your own bracket unless you have lost');
 					} else {
@@ -406,8 +363,13 @@ module.exports = {
 			}
 			
 			potentialLobby.refOsuName = discordUser.osuName;
-			potentialLobby.refDiscordTag = interaction.member.user.tag;
-			potentialLobby.refOsuUserId = discordUser.OsuUserId;
+			if (msg.id) {
+				potentialLobby.refDiscordTag = msg.member.user.tag;
+			} else {
+				potentialLobby.refDiscordTag = interaction.member.user.tag;
+			}
+
+			potentialLobby.refOsuUserId = discordUser.osuUserId;
 			await potentialLobby.save();
 
 			//create notification task
@@ -433,7 +395,6 @@ module.exports = {
 				
 			}
 		} else if (args[0].toLowerCase() == 'refereedrop') {
-			console.log(args);
 			args.shift();
 			let lobbyId = args[0];
 			if (!args[0]) {
@@ -448,7 +409,6 @@ module.exports = {
 					lobbyId: lobbyId
 				}
 			});
-			console.log(potentialLobby);
 
 			if (!potentialLobby) {
 				if (msg.id) {
