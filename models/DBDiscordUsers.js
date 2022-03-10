@@ -47,6 +47,14 @@ module.exports = (sequelize, DataTypes) => {
 		osuFreeModDuelStarRating: {
 			type: DataTypes.STRING,
 		},
+		osuDuelProvisional: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
+		osuDuelOutdated: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		osuRank: {
 			type: DataTypes.STRING,
 		},
