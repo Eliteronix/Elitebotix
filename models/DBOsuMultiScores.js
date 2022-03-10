@@ -25,6 +25,8 @@ module.exports = (sequelize, DataTypes) => {
 		gameStartDate: DataTypes.DATE,
 		gameEndDate: DataTypes.DATE,
 		freeMod: DataTypes.BOOLEAN,
+		forceMod: DataTypes.BOOLEAN,
+		warmup: DataTypes.BOOLEAN,
 		paranoid: true,
 	});
 };
