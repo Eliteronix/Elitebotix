@@ -103,7 +103,7 @@ module.exports = {
 						return false;
 					});
 
-				sentMessage.reactions.removeAll();
+				sentMessage.reactions.removeAll().catch(() => { });
 
 				if (!responded) {
 					return await interaction.editReply(`<@${discordUser.userId}> declined or didn't respond in time.`);
