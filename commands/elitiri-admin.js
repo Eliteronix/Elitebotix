@@ -1,4 +1,4 @@
-const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBDiscordUsers, DBElitiriCupStaff } = require('../dbObjects.js');
+const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBDiscordUsers, DBElitiriCupStaff, DBProcessQueue } = require('../dbObjects.js');
 const { pause, logDatabaseQueries } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { currentElitiriCup, currentElitiriCupHostSheetId } = require('../config.json');
@@ -1395,4 +1395,17 @@ function quicksort(list, start = 0, end = undefined) {
 		quicksort(list, p + 1, end);
 	}
 	return list;
+}
+
+async function createElitiriRoleAssignmentTask() {
+	logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 2');
+	const task = await DBProcessQueue.findOne({
+		where: { task: 'elitiriRoleAssignment' }
+	});
+	if (!task) {
+		let date = new Date();
+		DBProcessQueue.create({
+			guildId: 'None', task: 'elitiriRoleAssignment', priority: 3, date: date
+		});
+	}
 }
