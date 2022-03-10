@@ -299,43 +299,6 @@ module.exports = {
 					}
 				}
 			} else if (targetGroup === 'A specific player') {
-				for (let i = 0; i < elitiriSignUps.length; i++) {
-					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 3');
-					let submissions = await DBElitiriCupSubmissions.findAll({
-						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
-					});
-
-					if (elitiriSignUps[i].osuUserId === args[1]) {
-						elitiriSignUps[i].destroy();
-						submissions.forEach(submission => {
-							submission.destroy();
-						});
-
-						const user = await msg.client.users.fetch(elitiriSignUps[i].userId);
-
-						for (let j = 0; j < 3; j++) {
-							try {
-								await user.send('You were removed from the `Elitiri Cup` by staff. If you have any questions feel free to ask any member of the staff.')
-									.then(() => {
-										j = Infinity;
-									})
-									.catch(async (error) => {
-										throw (error);
-									});
-							} catch (error) {
-								if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
-									if (j !== 2) {
-										await pause(5000);
-									}
-								} else {
-									j = Infinity;
-									console.log(error);
-								}
-							}
-						}
-						console.log('Player removed from Elitiri Cup');
-					}
-				}
 				if (args[1] == 'lobby') {
 					args.shift();
 					let elitiriSignUp = await DBElitiriCupSignUp.findOne({
@@ -346,6 +309,44 @@ module.exports = {
 					elitiriSignUp.tournamentLobbyId = null;
 					await elitiriSignUp.save();
 					msg.reply('Done. Remember, this command does not delete player from the sheet!');
+				} else {
+					for (let i = 0; i < elitiriSignUps.length; i++) {
+						logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 3');
+						let submissions = await DBElitiriCupSubmissions.findAll({
+							where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
+						});
+
+						if (elitiriSignUps[i].osuUserId === args[1]) {
+							elitiriSignUps[i].destroy();
+							submissions.forEach(submission => {
+								submission.destroy();
+							});
+
+							const user = await msg.client.users.fetch(elitiriSignUps[i].userId);
+
+							for (let j = 0; j < 3; j++) {
+								try {
+									await user.send('You were removed from the `Elitiri Cup` by staff. If you have any questions feel free to ask any member of the staff.')
+										.then(() => {
+											j = Infinity;
+										})
+										.catch(async (error) => {
+											throw (error);
+										});
+								} catch (error) {
+									if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
+										if (j !== 2) {
+											await pause(5000);
+										}
+									} else {
+										j = Infinity;
+										console.log(error);
+									}
+								}
+							}
+							console.log('Player removed from Elitiri Cup');
+						}
+					}
 				}
 			}
 		} else if (args[0] === 'placement') {
@@ -714,6 +715,32 @@ module.exports = {
 								{
 									'name': 'lobbyid',
 									'description': 'Lobby ID of the desired qualifiers lobby. For example: "CQ-4" or just the number: "4"',
+									'type': 3, // 3 is type String
+									'required': true,
+								},
+							]
+						},
+						{
+							'name': 'referee',
+							'description': `assigne yourself for the ${currentElitiriCup} lobby`,
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'lobbyid',
+									'description': 'Lobby ID of the desired qualifiers lobby. For example: "CQ-4".',
+									'type': 3, // 3 is type String
+									'required': true,
+								},
+							]
+						},
+						{
+							'name': 'refereedrop',
+							'description': `unassigne yourself for the ${currentElitiriCup}`,
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'lobbyid',
+									'description': 'Lobby ID of the desired qualifiers lobby. For example: "CQ-4".',
 									'type': 3, // 3 is type String
 									'required': true,
 								},
