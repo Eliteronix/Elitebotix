@@ -1,7 +1,7 @@
-const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBDiscordUsers, DBElitiriCupStaff, DBProcessQueue } = require('../dbObjects.js');
+const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBDiscordUsers, DBElitiriCupStaff, DBProcessQueue, DBElitiriCupLobbies } = require('../dbObjects.js');
 const { pause, logDatabaseQueries } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { currentElitiriCup, currentElitiriCupHostSheetId } = require('../config.json');
+const { currentElitiriCup, currentElitiriCupHostSheetId, currentElitiriCupRefSheetId } = require('../config.json');
 
 let potentialNMQualifierMaps = [];
 let potentialHDQualifierMaps = [];
@@ -349,6 +349,49 @@ module.exports = {
 					}
 				}
 			}
+		} else if (args[0].toLowerCase() === 'clearreflobby') {
+			args.shift();
+			let lobby = await DBElitiriCupLobbies.findOne({
+				where: {
+					lobbyId: args[0]
+				}
+			});
+			lobby.refOsuUserId = null;
+			lobby.refDiscordTag = null;
+			lobby.refOsuName = null;
+			let k = Number(args[0].replace(/\D+/, ''));
+			if (k > 12) {
+				k++;
+			}
+
+			let scheduleSheetId;
+			if (args[0].replace(/\d+/, '') == 'DQ-') {
+				scheduleSheetId = 'Qualifiers Schedules-Top';
+			} else if (args[0].replace(/\d+/, '') == 'CQ-') {
+				scheduleSheetId = 'Qualifiers Schedules-Middle';
+			} else if (args[0].replace(/\d+/, '') == 'BQ-') {
+				scheduleSheetId = 'Qualifiers Schedules-Lower';
+			} else {
+				scheduleSheetId = 'Qualifiers Schedules-Beginner';
+			}
+
+
+			const doc = new GoogleSpreadsheet(currentElitiriCupRefSheetId);
+			await doc.useServiceAccountAuth({
+				// eslint-disable-next-line no-undef
+				client_email: process.env.GOOGLESHEETSSERVICEACCOUNTMAIL,
+				// eslint-disable-next-line no-undef
+				private_key: process.env.GOOGLESHEETSSERVICEACCOUNTPRIVATEKEY.replace(/\\n/g, '\n'),
+			});
+			await doc.loadInfo(); // loads document properties and worksheet
+			const sheet = doc.sheetsByTitle[scheduleSheetId];
+			await sheet.loadCells('A1:U29');
+
+			let refereeCell = sheet.getCell(3 + k, 4);
+			refereeCell.value = null;
+
+			await sheet.saveUpdatedCells();
+
 		} else if (args[0] === 'placement') {
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 7');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
