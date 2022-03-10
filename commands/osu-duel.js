@@ -761,7 +761,13 @@ module.exports = {
 					}
 				});
 			} else if (interaction.options._subcommand === 'ranking') {
-				await interaction.deferReply();
+				let processingMessage = null;
+				if (interaction.id) {
+					await interaction.deferReply();
+				} else {
+					processingMessage = await interaction.channel.send('Processing league rankings...');
+				}
+
 				let osuUser = {
 					id: null,
 					name: null,
@@ -816,7 +822,11 @@ module.exports = {
 						});
 
 					if (!user) {
-						return await interaction.editReply({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`, ephemeral: true });
+						if (interaction.id) {
+							return await interaction.editReply({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`, ephemeral: true });
+						} else {
+							return processingMessage.edit(`Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`);
+						}
 					}
 
 					osuUser.id = user.id;
@@ -901,9 +911,17 @@ module.exports = {
 					} catch (e) {
 						if (i === 4) {
 							if (e === 'No standard plays') {
-								return interaction.editReply(`Could not find any standard plays for user \`${osuUser.name.replace(/`/g, '')}\`.\nPlease try again later.`);
+								if (interaction.id) {
+									return interaction.editReply(`Could not find any standard plays for user \`${osuUser.name.replace(/`/g, '')}\`.\nPlease try again later.`);
+								} else {
+									return processingMessage.edit(`Could not find any standard plays for user \`${osuUser.name.replace(/`/g, '')}\`.\nPlease try again later.`);
+								}
 							} else {
-								return interaction.editReply('The API seems to be running into errors right now.\nPlease try again later.');
+								if (interaction.id) {
+									return interaction.editReply('The API seems to be running into errors right now.\nPlease try again later.');
+								} else {
+									return processingMessage.edit('The API seems to be running into errors right now.\nPlease try again later.');
+								}
 							}
 						} else {
 							await pause(15000);
@@ -1146,7 +1164,26 @@ module.exports = {
 				//Create as an attachment
 				const leagueRankings = new Discord.MessageAttachment(canvas.toBuffer(), `osu-league-rankings-${osuUser.id}.png`);
 
-				return await interaction.editReply({ content: 'The data is based on matches played using `/osu-duel match` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRankings] });
+				let sentMessage = null;
+
+				if (interaction.id) {
+					sentMessage = await interaction.editReply({ content: 'The data is based on matches played using `/osu-duel match` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRankings] });
+				} else {
+					processingMessage.delete();
+					sentMessage = await interaction.channel.send({ content: 'The data is based on matches played using `/osu-duel match` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRankings] });
+				}
+				await sentMessage.react('👤');
+				await sentMessage.react('🥇');
+				await sentMessage.react('📈');
+				if (userDuelStarRating.noMod !== null
+					|| userDuelStarRating.hidden !== null
+					|| userDuelStarRating.hardRock !== null
+					|| userDuelStarRating.doubleTime !== null
+					|| userDuelStarRating.freeMod !== null) {
+					await sentMessage.react('🆚');
+					await sentMessage.react('📊');
+				}
+				return;
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
 				if (!interaction.guild) {
 					return interaction.reply('The leaderboard can currently only be used in servers.');

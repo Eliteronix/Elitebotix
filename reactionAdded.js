@@ -179,7 +179,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require(`./commands/${commandName[0]}.js`);
 
-			command.execute(message, [page]);
+			command.execute(message, [page], null, additionalObjects);
 		} else {
 			let interaction = {
 				guild: reaction.message.guild,
@@ -194,7 +194,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-duel.js');
 
-			command.execute(null, [page], interaction);
+			command.execute(null, [page], interaction, additionalObjects);
 		}
 
 		return reaction.message.delete();
@@ -350,7 +350,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for skills information
 	if (reaction._emoji.name === '📈') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-top')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-top') || reaction.message.attachments.first().name.startsWith('osu-league-rankings')) {
 			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 
@@ -388,9 +388,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for profile information
 	if (reaction._emoji.name === '👤') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-score') || reaction.message.attachments.first().name.startsWith('osu-recent')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-score') || reaction.message.attachments.first().name.startsWith('osu-recent') || reaction.message.attachments.first().name.startsWith('osu-league-rankings')) {
 			//get the osuUserId used
-			const osuUserId = reaction.message.attachments.first().name.replace('osu-recent-', '').replace('osu-score-', '').replace(/-.+.png/gm, '');
+			const osuUserId = reaction.message.attachments.first().name.replace('osu-recent-', '').replace('osu-score-', '').replace('osu-league-rankings-', '').replace(/-.+.png/gm, '').replace('.png', '');
 
 			//Setup artificial arguments
 			let args = [osuUserId];
@@ -458,7 +458,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for schedule information
 	if (reaction._emoji.name === '📊') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-rankings')) {
 			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 
@@ -496,7 +496,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for schedule information
 	if (reaction._emoji.name === '🥇') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-rankings')) {
 			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 
@@ -534,7 +534,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for matchup information
 	if (reaction._emoji.name === '🆚') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-rankings')) {
 			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 
@@ -601,6 +601,47 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			try {
 				command.execute(tempMessage, args, null, additionalObjects);
+			} catch (error) {
+				console.error(error);
+				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+			}
+		}
+	}
+
+	//Check if reacted for osu-duel-ranking information
+	if (reaction._emoji.id === '951396806653255700') {
+		//Check if it is a profile
+		if (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-topPlayStats')) {
+			//get the osuUserId used
+			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+
+			//Setup artificial arguments
+			let args = [osuUserId];
+
+			const command = require('./commands/osu-duel.js');
+
+			//Set author of a temporary message copy to the reacting user to not break the commands
+			let guildId = null;
+
+			if (reaction.message.guild) {
+				guildId = reaction.message.guild.id;
+			}
+
+			let interaction = {
+				guild: reaction.message.guild,
+				guildId: guildId,
+				options: {
+					_subcommand: 'ranking',
+					_hoistedOptions: [{ name: 'username', value: args[0] }]
+				},
+				user: user,
+				channel: reaction.message.channel,
+			};
+
+			try {
+				command.execute(null, args, interaction, additionalObjects);
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');

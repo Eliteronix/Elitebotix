@@ -210,7 +210,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 							sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 						}
 						if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
-							sentMessage.react('<:COMPARE:827974793365159997>');
+							await sentMessage.react('<:COMPARE:827974793365159997>');
 						}
 						await sentMessage.react('🗺️');
 						await sentMessage.react('👤');
