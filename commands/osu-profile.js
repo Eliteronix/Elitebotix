@@ -158,6 +158,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				});
 
 				if (userScores.length) {
+					await sentMessage.react('<:master:951396806653255700>');
 					await sentMessage.react('🆚');
 					await sentMessage.react('📊');
 				}
@@ -230,6 +231,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				});
 
 				if (userScores.length) {
+					await sentMessage.react('<:master:951396806653255700>');
 					await sentMessage.react('🆚');
 					await sentMessage.react('📊');
 				}
