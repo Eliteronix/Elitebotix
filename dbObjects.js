@@ -24,5 +24,6 @@ const DBStarBoardMessages = require('./models/DBStarBoardMessages')(sequelize, S
 const DBTickets = require('./models/DBTickets')(sequelize, Sequelize.DataTypes);
 const DBOsuMultiScores = require('./models/DBOsuMultiScores')(sequelize, Sequelize.DataTypes);
 const DBOsuBeatmaps = require('./models/DBOsuBeatmaps')(sequelize, Sequelize.DataTypes);
+const DBElitiriCupLobbies = require('./models/DBElitiriCupLobbies')(sequelize, Sequelize.DataTypes);
 
-module.exports = { DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBAutoRoles, DBTemporaryVoices, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupStaff, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps };
+module.exports = { DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBAutoRoles, DBTemporaryVoices, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps, DBElitiriCupLobbies, DBElitiriCupStaff };

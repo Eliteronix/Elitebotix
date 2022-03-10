@@ -44,6 +44,7 @@ module.exports = {
 			require('../models/DBTickets')(sequelize, Sequelize.DataTypes);
 			require('../models/DBOsuMultiScores')(sequelize, Sequelize.DataTypes);
 			require('../models/DBOsuBeatmaps')(sequelize, Sequelize.DataTypes);
+			require('../models/DBElitiriCupLobbies')(sequelize, Sequelize.DataTypes);
 
 			sequelize.sync({ alter: true })
 				.then(async () => {

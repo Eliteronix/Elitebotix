@@ -25,6 +25,7 @@ require('./models/DBStarBoardMessages')(sequelize, Sequelize.DataTypes);
 require('./models/DBTickets')(sequelize, Sequelize.DataTypes);
 require('./models/DBOsuMultiScores')(sequelize, Sequelize.DataTypes);
 require('./models/DBOsuBeatmaps')(sequelize, Sequelize.DataTypes);
+require('./models/DBElitiriCupLobbies')(sequelize, Sequelize.DataTypes);
 sequelize.sync({ alter: true })
 	.then(async () => {
 		console.log('Database synced');

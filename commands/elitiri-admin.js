@@ -1,7 +1,7 @@
-const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBElitiriCupStaff, DBProcessQueue, DBDiscordUsers } = require('../dbObjects.js');
+const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBDiscordUsers, DBElitiriCupStaff, DBProcessQueue, DBElitiriCupLobbies } = require('../dbObjects.js');
 const { pause, logDatabaseQueries } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { currentElitiriCup, currentElitiriCupHostSheetId } = require('../config.json');
+const { currentElitiriCup, currentElitiriCupHostSheetId, currentElitiriCupRefSheetId } = require('../config.json');
 
 let potentialNMQualifierMaps = [];
 let potentialHDQualifierMaps = [];
@@ -49,7 +49,7 @@ module.exports = {
 	name: 'elitiri-admin',
 	//aliases: ['osu-map', 'beatmap-info'],
 	description: 'Admin control for the Elitiri Cup',
-	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <osuPlayerID> | <slashCommands> | <staff> <osuUserId> <host/streamer/commentator/referee/replayer> [tournament]',
+	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <osuPlayerID> | <slashCommands> | | <clearRefLobby> <lobbyID> | <staff> <osuUserId> <host/streamer/commentator/referee/replayer> [tournament]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -299,44 +299,99 @@ module.exports = {
 					}
 				}
 			} else if (targetGroup === 'A specific player') {
-				for (let i = 0; i < elitiriSignUps.length; i++) {
-					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 3');
-					let submissions = await DBElitiriCupSubmissions.findAll({
-						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
+				if (args[1] == 'lobby') {
+					args.shift();
+					let elitiriSignUp = await DBElitiriCupSignUp.findOne({
+						where: {
+							osuUserId: args[1]
+						}
 					});
-
-					if (elitiriSignUps[i].osuUserId === args[1]) {
-						elitiriSignUps[i].destroy();
-						submissions.forEach(submission => {
-							submission.destroy();
+					elitiriSignUp.tournamentLobbyId = null;
+					await elitiriSignUp.save();
+					msg.reply('Done. Remember, this command does not delete player from the sheet!');
+				} else {
+					for (let i = 0; i < elitiriSignUps.length; i++) {
+						logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 3');
+						let submissions = await DBElitiriCupSubmissions.findAll({
+							where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
 						});
 
-						const user = await msg.client.users.fetch(elitiriSignUps[i].userId);
+						if (elitiriSignUps[i].osuUserId === args[1]) {
+							elitiriSignUps[i].destroy();
+							submissions.forEach(submission => {
+								submission.destroy();
+							});
 
-						for (let j = 0; j < 3; j++) {
-							try {
-								await user.send('You were removed from the `Elitiri Cup` by staff. If you have any questions feel free to ask any member of the staff.')
-									.then(() => {
+							const user = await msg.client.users.fetch(elitiriSignUps[i].userId);
+
+							for (let j = 0; j < 3; j++) {
+								try {
+									await user.send('You were removed from the `Elitiri Cup` by staff. If you have any questions feel free to ask any member of the staff.')
+										.then(() => {
+											j = Infinity;
+										})
+										.catch(async (error) => {
+											throw (error);
+										});
+								} catch (error) {
+									if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
+										if (j !== 2) {
+											await pause(5000);
+										}
+									} else {
 										j = Infinity;
-									})
-									.catch(async (error) => {
-										throw (error);
-									});
-							} catch (error) {
-								if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
-									if (j !== 2) {
-										await pause(5000);
+										console.log(error);
 									}
-								} else {
-									j = Infinity;
-									console.log(error);
 								}
 							}
+							console.log('Player removed from Elitiri Cup');
 						}
-						console.log('Player removed from Elitiri Cup');
 					}
 				}
 			}
+		} else if (args[0].toLowerCase() === 'clearreflobby') {
+			args.shift();
+			let lobby = await DBElitiriCupLobbies.findOne({
+				where: {
+					lobbyId: args[0]
+				}
+			});
+			lobby.refOsuUserId = null;
+			lobby.refDiscordTag = null;
+			lobby.refOsuName = null;
+			let k = Number(args[0].replace(/\D+/, ''));
+			if (k > 12) {
+				k++;
+			}
+
+			let scheduleSheetId;
+			if (args[0].replace(/\d+/, '') == 'DQ-') {
+				scheduleSheetId = 'Qualifiers Schedules-Top';
+			} else if (args[0].replace(/\d+/, '') == 'CQ-') {
+				scheduleSheetId = 'Qualifiers Schedules-Middle';
+			} else if (args[0].replace(/\d+/, '') == 'BQ-') {
+				scheduleSheetId = 'Qualifiers Schedules-Lower';
+			} else {
+				scheduleSheetId = 'Qualifiers Schedules-Beginner';
+			}
+
+
+			const doc = new GoogleSpreadsheet(currentElitiriCupRefSheetId);
+			await doc.useServiceAccountAuth({
+				// eslint-disable-next-line no-undef
+				client_email: process.env.GOOGLESHEETSSERVICEACCOUNTMAIL,
+				// eslint-disable-next-line no-undef
+				private_key: process.env.GOOGLESHEETSSERVICEACCOUNTPRIVATEKEY.replace(/\\n/g, '\n'),
+			});
+			await doc.loadInfo(); // loads document properties and worksheet
+			const sheet = doc.sheetsByTitle[scheduleSheetId];
+			await sheet.loadCells('A1:U29');
+
+			let refereeCell = sheet.getCell(3 + k, 4);
+			refereeCell.value = null;
+
+			await sheet.saveUpdatedCells();
+
 		} else if (args[0] === 'placement') {
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 7');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
@@ -684,6 +739,54 @@ module.exports = {
 									'type': 10, // 10 is type Number
 									'required': true,
 								}
+							]
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'elitiri-lobby',
+					description: `Allows you to manage lobbies for the ${currentElitiriCup}`,
+					options: [
+						{
+							'name': 'claim',
+							'description': `Claim your qualifiers lobby for the ${currentElitiriCup}`,
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'lobbyid',
+									'description': 'Lobby ID of the desired qualifiers lobby. For example: "CQ-4" or just the number: "4"',
+									'type': 3, // 3 is type String
+									'required': true,
+								},
+							]
+						},
+						{
+							'name': 'referee',
+							'description': `assigne yourself for the ${currentElitiriCup} lobby`,
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'lobbyid',
+									'description': 'Lobby ID of the desired qualifiers lobby. For example: "CQ-4".',
+									'type': 3, // 3 is type String
+									'required': true,
+								},
+							]
+						},
+						{
+							'name': 'refereedrop',
+							'description': `unassigne yourself for the ${currentElitiriCup}`,
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'lobbyid',
+									'description': 'Lobby ID of the desired qualifiers lobby. For example: "CQ-4".',
+									'type': 3, // 3 is type String
+									'required': true,
+								},
 							]
 						},
 					]

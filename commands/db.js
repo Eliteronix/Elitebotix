@@ -1,4 +1,4 @@
-const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps, DBElitiriCupStaff } = require('../dbObjects');
+const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps, DBElitiriCupStaff, DBElitiriCupLobbies } = require('../dbObjects');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
 const { logDatabaseQueries } = require('../utils');
@@ -73,6 +73,10 @@ module.exports = {
 			logDatabaseQueries(4, 'commands/db.js DBElitiriCupSignUp');
 			dbList = await DBElitiriCupSignUp.findAll();
 			dbTableName = 'DBElitiriCupSignUp';
+		} else if (args[0] === 'elitiricuplobbies') {
+			logDatabaseQueries(4, 'commands/db.js DBElitiriCupLobbies');
+			dbList = await DBElitiriCupLobbies.findAll();
+			dbTableName = 'DBElitiriCupLobbies';
 		} else if (args[0] === 'elitiricupstaff') {
 			logDatabaseQueries(4, 'commands/db.js DBElitiriCupStaff');
 			dbList = await DBElitiriCupStaff.findAll();
