@@ -266,7 +266,24 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			ctx.textAlign = 'center';
 			ctx.font = 'bold 15px comfortaa, sans-serif';
 			ctx.fillText('Duel Rating', 90, 195);
-			let userDuelStarRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
+
+			const discordUser = await DBDiscordUsers.findOne({
+				where: {
+					osuUserId: user.id
+				}
+			});
+
+			let userDuelStarRating = null;
+
+			if (discordUser) {
+				userDuelStarRating = {
+					total: discordUser.osuDuelStarRating,
+					provisional: discordUser.osuDuelProvisional,
+					outdated: discordUser.osuDuelOutdated
+				};
+			} else {
+				userDuelStarRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
+			}
 
 			let duelLeague = getOsuDuelLeague(userDuelStarRating.total);
 
