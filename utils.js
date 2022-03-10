@@ -1331,6 +1331,12 @@ module.exports = {
 						if (Math.round(discordUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.freeMod * 1000) / 1000) {
 							message.push(`FM: ${Math.round(discordUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.freeMod * 1000) / 1000}`);
 						}
+						if (discordUser.osuDuelProvisional !== duelRatings.provisional) {
+							message.push(`Provisional: ${discordUser.osuDuelProvisional} -> ${duelRatings.provisional}`);
+						}
+						if (discordUser.osuDuelOutdated !== duelRatings.outdated) {
+							message.push(`Outdated: ${discordUser.osuDuelOutdated} -> ${duelRatings.outdated}`);
+						}
 						if (message.length > 1) {
 							channel.send(`\`\`\`${message.join('\n')}\`\`\``);
 						}
@@ -1345,6 +1351,8 @@ module.exports = {
 				discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
 				discordUser.osuDoubleTimeDuelStarRating = duelRatings.doubleTime;
 				discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
+				discordUser.osuDuelProvisional = duelRatings.provisional;
+				discordUser.osuDuelOutdated = duelRatings.outdated;
 				await discordUser.save();
 			}
 
