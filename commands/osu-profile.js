@@ -294,8 +294,22 @@ async function drawRank(input, msg) {
 	ctx.fillText(`PP: ${pp}`, canvas.width / 2, 83 + yOffset);
 
 	try {
-		let userDuelStarRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
-		let leagueName = getOsuDuelLeague(userDuelStarRating.total);
+		const discordUser = await DBDiscordUsers.findOne({
+			where: {
+				osuUserId: user.id
+			}
+		});
+
+		let userDuelStarRating = null;
+
+		if (discordUser) {
+			userDuelStarRating = discordUser.osuDuelStarRating;
+		} else {
+			userDuelStarRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
+			userDuelStarRating = userDuelStarRating.total;
+		}
+
+		let leagueName = getOsuDuelLeague(userDuelStarRating);
 		let leagueImage = await Canvas.loadImage(`./other/emblems/${leagueName.imageName}.png`);
 
 		ctx.drawImage(leagueImage, 557, 40, 110, 110);
