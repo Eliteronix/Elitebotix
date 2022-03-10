@@ -1141,6 +1141,8 @@ module.exports = {
 						}
 						if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('DT')) {
 							userMaps[i].score = userMaps[i].score / 1.2;
+						} else if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('EZ')) {
+							userMaps[i].score = userMaps[i].score / 0.5;
 						}
 					}
 
