@@ -47,10 +47,10 @@ module.exports = {
 		await doc.loadInfo(); // loads document properties and worksheet
 
 		// eslint-disable-next-line no-undef
-		// if (process.env.SERVER !== 'Live') {
-		// 	return;
-		// }
-		
+		if (process.env.SERVER !== 'Live') {
+			return;
+		}
+
 
 		if (args[0].toLowerCase() === 'claim') {
 			args.shift();
@@ -348,7 +348,7 @@ module.exports = {
 				}
 			}
 
-			if (potentialLobby.refOsuName !== null && potentialLobby.refOsuName !== discordUser.osuName ) {
+			if (potentialLobby.refOsuName !== null && potentialLobby.refOsuName !== discordUser.osuName) {
 				if (msg.id) {
 					return msg.reply(`This lobby is already been taken by \`${potentialLobby.refOsuName}\`. If you want to take this lobby, please contact them`);
 				} else {
@@ -357,11 +357,11 @@ module.exports = {
 			} else if (potentialLobby.refOsuName == discordUser.osuName) {
 				if (msg.id) {
 					return msg.reply(`You have already claimed \`${lobbyId}\` lobby as referee`);
-				} else {	
+				} else {
 					return interaction.editReply({ content: `You have already claimed \`${lobbyId}\` lobby as referee` });
 				}
 			}
-			
+
 			potentialLobby.refOsuName = discordUser.osuName;
 			if (msg.id) {
 				potentialLobby.refDiscordTag = msg.member.user.tag;
@@ -373,7 +373,7 @@ module.exports = {
 			await potentialLobby.save();
 
 			//create notification task
-			
+
 			try {
 				refereeCell = sheet.getCell(3 + k, 4);
 				refereeCell.value = potentialLobby.refOsuName;
@@ -392,7 +392,7 @@ module.exports = {
 				} else {
 					interaction.editReply({ content: 'Something went wrong. Please, try again' });
 				}
-				
+
 			}
 		} else if (args[0].toLowerCase() == 'refereedrop') {
 			args.shift();
@@ -512,7 +512,7 @@ function roundOverCheck(bracketName, lobbyId) {
 		givenLobbyDate.setUTCDate(currentElitiriCupLowerQualsFirstLobby.day) + k;
 		givenLobbyDate.setUTCMonth(currentElitiriCupLowerQualsFirstLobby.zeroIndexMonth); //Zero Indexed
 		givenLobbyDate.setUTCFullYear(currentElitiriCupLowerQualsFirstLobby.year);
-	} else if (bracketName == 'Beginner Bracket'){
+	} else if (bracketName == 'Beginner Bracket') {
 		givenLobbyDate.setUTCMilliseconds(0);
 		givenLobbyDate.setUTCSeconds(0);
 		givenLobbyDate.setUTCMinutes(0);
