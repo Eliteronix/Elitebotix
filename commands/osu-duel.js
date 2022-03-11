@@ -538,7 +538,6 @@ module.exports = {
 
 							while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
 								await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
-								await pause(5000);
 							}
 
 							let noFail = 'NF';
@@ -546,7 +545,17 @@ module.exports = {
 								noFail = '';
 							}
 
-							await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+							while (modPools[mapIndex] === 'FreeMod' && !lobby.freemod //There is no FreeMod combination otherwise
+								|| modPools[mapIndex] === 'NM' && lobby.mods.length !== 1 //Only NM has only one mod
+								|| (modPools[mapIndex] === 'FreeMod' || modPools[mapIndex] === 'NM') && lobby.mods.length !== 2 //Only FreeMod and NM don't have two mods
+								|| modPools[mapIndex] === 'HD' && ((lobby.mods[0].shortMod === 'HD' && lobby.mods[1].shortMod === 'NF') || (lobby.mods[0].shortMod === 'NF' && lobby.mods[1].shortMod === 'HD')) //Only HD has HD and NF
+								|| modPools[mapIndex] === 'HR' && ((lobby.mods[0].shortMod === 'HR' && lobby.mods[1].shortMod === 'NF') || (lobby.mods[0].shortMod === 'NF' && lobby.mods[1].shortMod === 'HR')) //Only HR has HR and NF
+								|| modPools[mapIndex] === 'DT' && ((lobby.mods[0].shortMod === 'DT' && lobby.mods[1].shortMod === 'NF') || (lobby.mods[0].shortMod === 'NF' && lobby.mods[1].shortMod === 'DT')) //Only DT has DT and NF
+							) {
+								await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+								await pause(5000);
+							}
+
 							let mapInfo = await getOsuMapInfo(dbMaps[mapIndex]);
 							await channel.sendMessage(mapInfo);
 							if (modPools[mapIndex] === 'FreeMod') {
@@ -658,7 +667,16 @@ module.exports = {
 							noFail = '';
 						}
 
-						await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+						while (modPools[mapIndex] === 'FreeMod' && !lobby.freemod //There is no FreeMod combination otherwise
+							|| modPools[mapIndex] === 'NM' && lobby.mods.length !== 1 //Only NM has only one mod
+							|| (modPools[mapIndex] === 'FreeMod' || modPools[mapIndex] === 'NM') && lobby.mods.length !== 2 //Only FreeMod and NM don't have two mods
+							|| modPools[mapIndex] === 'HD' && ((lobby.mods[0].shortMod === 'HD' && lobby.mods[1].shortMod === 'NF') || (lobby.mods[0].shortMod === 'NF' && lobby.mods[1].shortMod === 'HD')) //Only HD has HD and NF
+							|| modPools[mapIndex] === 'HR' && ((lobby.mods[0].shortMod === 'HR' && lobby.mods[1].shortMod === 'NF') || (lobby.mods[0].shortMod === 'NF' && lobby.mods[1].shortMod === 'HR')) //Only HR has HR and NF
+							|| modPools[mapIndex] === 'DT' && ((lobby.mods[0].shortMod === 'DT' && lobby.mods[1].shortMod === 'NF') || (lobby.mods[0].shortMod === 'NF' && lobby.mods[1].shortMod === 'DT')) //Only DT has DT and NF
+						) {
+							await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+							await pause(5000);
+						}
 						let mapInfo = await getOsuMapInfo(dbMaps[mapIndex]);
 						await channel.sendMessage(mapInfo);
 						await channel.sendMessage('Everyone please ready up!');
