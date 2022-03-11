@@ -275,7 +275,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 			let userDuelStarRating = null;
 
-			if (discordUser) {
+			if (discordUser && discordUser.osuDuelStarRating) {
 				userDuelStarRating = {
 					total: discordUser.osuDuelStarRating,
 					provisional: discordUser.osuDuelProvisional,
