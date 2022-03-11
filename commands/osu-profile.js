@@ -302,7 +302,7 @@ async function drawRank(input, msg) {
 
 		let userDuelStarRating = null;
 
-		if (discordUser) {
+		if (discordUser && discordUser.osuDuelStarRating) {
 			userDuelStarRating = discordUser.osuDuelStarRating;
 		} else {
 			userDuelStarRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
