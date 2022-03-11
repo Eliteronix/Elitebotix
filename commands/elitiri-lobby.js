@@ -7,7 +7,7 @@ module.exports = {
 	name: 'elitiri-lobby',
 	//aliases: ['developer'],
 	description: `Allows you to claim lobby for the ${currentElitiriCup}`,
-	usage: 'claim <LobbyID>',
+	usage: 'claim <LobbyID> | referee <LobbyID> | refereeDrop <LobbyID>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	// botPermissions: Permissions.FLAGS.SEND_MESSAGES,
