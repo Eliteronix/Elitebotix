@@ -176,7 +176,23 @@ module.exports = {
 					await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
 					await pause(5000);
 				}
-				await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail}`);
+				//Check mods and set them if needed
+				let modBits = 0;
+				if (lobby.mods) {
+					for (let i = 0; i < lobby.mods.length; i++) {
+						modBits += lobby.mods[i].enumValue;
+					}
+				}
+				while (parseInt(dbMaps[mapIndex].mods) + noFail !== modBits) {
+					await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail}`);
+					await pause(5000);
+					modBits = 0;
+					if (lobby.mods) {
+						for (let i = 0; i < lobby.mods.length; i++) {
+							modBits += lobby.mods[i].enumValue;
+						}
+					}
+				}
 				await channel.sendMessage('Everyone please ready up!');
 				await channel.sendMessage('!mp timer 120');
 				mapIndex++;
@@ -210,7 +226,23 @@ module.exports = {
 						await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
 						await pause(5000);
 					}
-					await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail}`);
+					//Check mods and set them if needed
+					let modBits = 0;
+					if (lobby.mods) {
+						for (let i = 0; i < lobby.mods.length; i++) {
+							modBits += lobby.mods[i].enumValue;
+						}
+					}
+					while (parseInt(dbMaps[mapIndex].mods) + noFail !== modBits) {
+						await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail}`);
+						await pause(5000);
+						modBits = 0;
+						if (lobby.mods) {
+							for (let i = 0; i < lobby.mods.length; i++) {
+								modBits += lobby.mods[i].enumValue;
+							}
+						}
+					}
 					await channel.sendMessage('Everyone please ready up!');
 					await channel.sendMessage('!mp timer 120');
 					mapIndex++;
@@ -249,7 +281,23 @@ module.exports = {
 					await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
 					await pause(5000);
 				}
-				await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail}`);
+				//Check mods and set them if needed
+				let modBits = 0;
+				if (lobby.mods) {
+					for (let i = 0; i < lobby.mods.length; i++) {
+						modBits += lobby.mods[i].enumValue;
+					}
+				}
+				while (parseInt(dbMaps[mapIndex].mods) + noFail !== modBits) {
+					await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail}`);
+					await pause(5000);
+					modBits = 0;
+					if (lobby.mods) {
+						for (let i = 0; i < lobby.mods.length; i++) {
+							modBits += lobby.mods[i].enumValue;
+						}
+					}
+				}
 				await channel.sendMessage('Everyone please ready up!');
 				await channel.sendMessage('!mp timer 120');
 				mapIndex++;
