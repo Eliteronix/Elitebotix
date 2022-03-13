@@ -427,13 +427,6 @@ module.exports = {
 		return userDisplayName;
 	},
 	executeNextProcessQueueTask: async function (client, bancho) {
-		logDatabaseQueriesFunction(1, 'utils.js DBProcessQueue tasksInWork');
-		const tasksInWork = await DBProcessQueue.findAll({
-			where: { beingExecuted: true }
-		});
-		if (tasksInWork.length > 5) {
-			return;
-		}
 		let now = new Date();
 		logDatabaseQueriesFunction(1, 'utils.js DBProcessQueue nextTask');
 		let nextTask = await DBProcessQueue.findOne({
