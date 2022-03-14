@@ -77,6 +77,22 @@ module.exports = {
 			dbMaps.push(dbOsuBeatmap);
 		}
 
+		//Send the MP to the scheduler
+		try {
+			let dbPlayerNames = [];
+			for (let j = 0; j < players.length; j++) {
+				logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 4');
+				const dbDiscordUser = await DBDiscordUsers.findOne({
+					where: { id: players[j] }
+				});
+				dbPlayerNames.push(dbDiscordUser.osuName);
+			}
+
+			let user = await client.users.fetch(args[0]);
+			user.send(`The scheduled Qualifier match has started. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${args[6]}`);
+		} catch (e) {
+			//Nothing
+		}
 
 		for (let i = 0; i < users.length; i++) {
 			await channel.sendMessage(`!mp invite #${dbPlayers[i].osuUserId}`);
