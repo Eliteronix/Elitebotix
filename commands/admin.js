@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBOsuBeatmaps } = require('../dbObjects');
-const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool, getUserDuelStarRating } = require('../utils');
+const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool, getUserDuelStarRating, twitchConnect } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 const fetch = require('node-fetch');
@@ -21,7 +21,7 @@ module.exports = {
 	tags: 'debug',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
 		if (!developers.includes(msg.author.id)) {
 			return;
 		}
@@ -4997,6 +4997,7 @@ module.exports = {
 				discordUser.twitchOsuMapSync = true;
 			}
 			discordUser.save();
+			twitchConnect(additionalObjects[1]);
 		} else {
 			msg.reply('Invalid command');
 		}

@@ -1467,6 +1467,113 @@ module.exports = {
 	},
 	adjustHDStarRating(starRating, approachRate) {
 		return adjustHDStarRatingFunction(starRating, approachRate);
+	},
+	async twitchConnect(bancho) {
+		let twitchSyncUsers = await DBDiscordUsers.findAll({
+			where: {
+				twitchOsuMapSync: true
+			}
+		});
+
+		let twitchChannels = [];
+
+		for (let i = 0; i < twitchSyncUsers.length; i++) {
+			twitchChannels.push(twitchSyncUsers[i].twitchName);
+		}
+
+		//Require twitch irc module
+		const tmi = require('tmi.js');
+
+		// Define configuration options
+		const opts = {
+			identity: {
+				// eslint-disable-next-line no-undef
+				username: process.env.TWITCH_USERNAME,
+				// eslint-disable-next-line no-undef
+				password: process.env.TWITCH_OAUTH_TOKEN
+			},
+			channels: twitchChannels
+		};
+
+		// Create a client with our options
+		let twitchClient = new tmi.client(opts);
+
+		// Register our event handlers (defined below)
+		twitchClient.on('message', onMessageHandler);
+		twitchClient.on('connected', onConnectedHandler);
+
+		// Connect to Twitch:
+		twitchClient.connect();
+
+		// Called every time a message comes in
+		async function onMessageHandler(target, context, msg, self) {
+			if (self) { return; } // Ignore messages from the bot
+
+			const longRegex = /https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm;
+			const shortRegex = /https?:\/\/osu\.ppy\.sh\/b\/\d+/gm;
+			const longMatches = longRegex.exec(msg);
+			const shortMatches = shortRegex.exec(msg);
+
+			let map = null;
+			if (longMatches) {
+				map = longMatches[0];
+			} else if (shortMatches) {
+				map = shortMatches[0];
+			}
+
+			if (map) {
+				map = map.replace(/.+\//gm, '');
+				try {
+					await bancho.connect();
+				} catch (error) {
+					if (!error.message === 'Already connected/connecting') {
+						throw (error);
+					}
+				}
+
+				try {
+					let discordUser = await DBDiscordUsers.findOne({
+						where: {
+							twitchName: target.substring(1)
+						}
+					});
+
+					const IRCUser = await bancho.getUser(discordUser.osuName);
+
+					let prefix = [];
+					if (context.mod) {
+						prefix.push('MOD');
+					}
+					if (context.badges && context.badges.vip) {
+						prefix.push('VIP');
+					}
+					if (context.subscriber) {
+						prefix.push('SUB');
+					}
+
+					if (prefix.length > 0) {
+						prefix = `[${prefix.join('/')}] `;
+					} else {
+						prefix = '';
+					}
+
+					let dbBeatmap = await getOsuBeatmapFunction(map, 0);
+
+					await IRCUser.sendMessage(`${prefix}${context['display-name']} -> https://osu.ppy.sh/b/${dbBeatmap.beatmapId} ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}] | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);
+				} catch (error) {
+					if (error.message !== 'Currently disconnected!') {
+						console.log(error);
+					}
+				}
+
+				twitchClient.say(target.substring(1), `${context['display-name']} -> Your request has been sent.`);
+			}
+		}
+
+		// Called every time the bot connects to Twitch chat
+		function onConnectedHandler(addr, port) {
+			console.log(`* Connected to ${addr}:${port}`);
+		}
 	}
 };
 
