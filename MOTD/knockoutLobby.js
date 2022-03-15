@@ -107,7 +107,19 @@ module.exports = {
 				await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 				await pause(5000);
 			}
-			await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
+
+			//Check mods and set them if needed
+			if (mapIndex === 4 || mapIndex === 8) {
+				while (!lobby.mods || lobby.mods && lobby.mods.length === 0 || lobby.mods && lobby.mods[0].shortMod !== 'dt') {
+					await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
+					await pause(5000);
+				}
+			} else {
+				while (lobby.mods || lobby.mods && lobby.mods.length !== 0) {
+					await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
+					await pause(5000);
+				}
+			}
 
 			// eslint-disable-next-line no-undef
 			if (process.env.SERVER !== 'Dev' && lobbyNumber !== 'custom') {
@@ -372,8 +384,18 @@ module.exports = {
 						await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 						await pause(5000);
 					}
-					if (mapIndex === 4 || mapIndex === 5 || mapIndex === 8 || mapIndex === 9) {
-						await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
+
+					//Check mods and set them if needed
+					if (mapIndex === 4 || mapIndex === 8) {
+						while (!lobby.mods) {
+							await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
+							await pause(5000);
+						}
+					} else {
+						while (lobby.mods) {
+							await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
+							await pause(5000);
+						}
 					}
 
 					lobbyStatus = 'Waiting for start';
