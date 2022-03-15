@@ -1,6 +1,7 @@
 //Log message upon starting the bot
 console.log('Bot is starting...');
 const { getOsuBeatmap } = require('./utils');
+const { DBDiscordUsers } = require('./dbObjects');
 
 //require the dotenv node module
 require('dotenv').config();
@@ -199,7 +200,17 @@ client.on('interactionCreate', interaction => {
 	interactionCreate(client, bancho, interaction);
 });
 
-let twitchChannel = 'Eliteronix';
+let twitchSyncUsers = await DBDiscordUsers.findAll({
+	where: {
+		twitchOsuMapSync: true
+	}
+});
+
+let twitchChannels = [];
+
+for (let i = 0; i < twitchSyncUsers.length; i++) {
+	twitchChannels.push(twitchSyncUsers[i].twitchName);
+}
 
 //Require twitch irc module
 const tmi = require('tmi.js');
@@ -213,23 +224,28 @@ const opts = {
 		password: process.env.TWITCH_OAUTH_TOKEN
 	},
 	channels: [
-		twitchChannel
+		twitchChannels
 	]
 };
 
-// Create a client with our options
-const twitchClient = new tmi.client(opts);
+let twitchClient = null;
 
-// Register our event handlers (defined below)
-twitchClient.on('message', onMessageHandler);
-twitchClient.on('connected', onConnectedHandler);
+if (twitchChannels.length) {
+	// Create a client with our options
+	twitchClient = new tmi.client(opts);
 
-// Connect to Twitch:
-twitchClient.connect();
+	// Register our event handlers (defined below)
+	twitchClient.on('message', onMessageHandler);
+	twitchClient.on('connected', onConnectedHandler);
+
+	// Connect to Twitch:
+	twitchClient.connect();
+}
 
 // Called every time a message comes in
 async function onMessageHandler(target, context, msg, self) {
 	if (self) { return; } // Ignore messages from the bot
+	console.log(context);
 
 	const longRegex = /https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm;
 	const shortRegex = /https?:\/\/osu\.ppy\.sh\/b\/\d+/gm;
@@ -254,7 +270,13 @@ async function onMessageHandler(target, context, msg, self) {
 		}
 
 		try {
-			const IRCUser = await bancho.getUser(twitchChannel);
+			let discordUser = DBDiscordUsers.findOne({
+				where: {
+					twitchName: target.subString(1)
+				}
+			});
+
+			const IRCUser = await bancho.getUser(discordUser.osuUserId);
 
 			let prefix = [];
 			if (context.mod) {
@@ -282,7 +304,7 @@ async function onMessageHandler(target, context, msg, self) {
 			}
 		}
 
-		twitchClient.say(twitchChannel, `${context['display-name']} -> Your request has been sent.`);
+		twitchClient.say(target.subString(1), `${context['display-name']} -> Your request has been sent.`);
 	}
 }
 

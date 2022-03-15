@@ -4975,6 +4975,28 @@ module.exports = {
 				.catch(error => {
 					console.log(error);
 				});
+		} else if (args[0] === 'connectTwitch') {
+			const discordUser = await DBDiscordUsers.findOne({
+				where: {
+					osuName: args[1]
+				}
+			});
+
+			discordUser.twitchName = args[2];
+			discordUser.save();
+		} else if (args[0] === 'toggleTwitch') {
+			const discordUser = await DBDiscordUsers.findOne({
+				where: {
+					osuName: args[1]
+				}
+			});
+
+			if (discordUser.twitchOsuMapSync) {
+				discordUser.twitchOsuMapSync = false;
+			} else {
+				discordUser.twitchOsuMapSync = true;
+			}
+			discordUser.save();
 		} else {
 			msg.reply('Invalid command');
 		}
