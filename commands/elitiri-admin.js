@@ -148,6 +148,8 @@ module.exports = {
 				targetGroup = 'Players with missing availabilities';
 			} else if (args[0] === 'noSubmissions') {
 				targetGroup = 'Players with missing submissions';
+			} else if (args[0] === 'noLobby') { 
+				targetGroup = 'Players with missing lobby';
 			} else {
 				return msg.reply(`${args[0]} is not a valid target group. It should be \`everyone\`, \`noAvailability\` or \`noSubmissions\` instead.`);
 			}
@@ -200,6 +202,13 @@ module.exports = {
 					});
 
 					if (submissions.length === 5) {
+						elitiriSignUps.splice(i, 1);
+						i--;
+					}
+				}
+			} else if (targetGroup === 'Players with missing lobby') {
+				for (let i = 0; i < elitiriSignUps.length; i++) {
+					if (elitiriSignUps[i].tournamentLobbyId !== null) {
 						elitiriSignUps.splice(i, 1);
 						i--;
 					}
