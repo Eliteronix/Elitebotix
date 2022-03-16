@@ -21,7 +21,7 @@ module.exports = {
 	tags: 'debug',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(msg, args, interaction, additionalObjects) {
 		if (!developers.includes(msg.author.id)) {
 			return;
 		}
@@ -4975,6 +4975,15 @@ module.exports = {
 				.catch(error => {
 					console.log(error);
 				});
+		} else if (args[0] === 'connectTwitch') {
+			const discordUser = await DBDiscordUsers.findOne({
+				where: {
+					osuName: args[1]
+				}
+			});
+
+			discordUser.twitchName = args[2].toLowerCase();
+			discordUser.save();
 		} else {
 			msg.reply('Invalid command');
 		}

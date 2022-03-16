@@ -104,6 +104,16 @@ module.exports = (sequelize, DataTypes) => {
 		osuNotFoundFirstOccurence: {
 			type: DataTypes.DATE,
 		},
+		twitchName: {
+			type: DataTypes.STRING,
+		},
+		twitchId: {
+			type: DataTypes.STRING,
+		},
+		twitchOsuMapSync: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		paranoid: true,
 	});
 };
