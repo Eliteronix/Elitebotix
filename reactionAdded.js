@@ -74,8 +74,14 @@ module.exports = async function (reaction, user, additionalObjects) {
 								.addField('Attachment', attachment.name)
 								.setImage(attachment.url);
 						});
-
-						return message.edit(`${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, starBoardMessageEmbed);
+						
+						if (starBoardedMessage.starBoardMessageStarsQuantityMax <= reaction.count || starBoardedMessage.starBoardMessageStarsQuantityMax == null) {
+							starBoardedMessage.starBoardMessageStarsQuantityMax = reaction.count;
+							starBoardedMessage.save();
+							return message.edit(`${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, starBoardMessageEmbed);
+						} else {
+							return message.edit(`${reaction.count} ⭐ in <#${reaction.message.channel.id}>\nMaximum ⭐: ${starBoardedMessage.starBoardMessageStarsQuantityMax}`, starBoardMessageEmbed);
+						}
 					}
 				}
 
@@ -141,7 +147,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				}
 
 				const starBoardMessage = await channel.send({ content: `${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, embeds: [starBoardMessageEmbed] });
-				DBStarBoardMessages.create({ originalChannelId: reaction.message.channel.id, originalMessageId: reaction.message.id, starBoardChannelId: starBoardMessage.channel.id, starBoardMessageId: starBoardMessage.id });
+				DBStarBoardMessages.create({ originalChannelId: reaction.message.channel.id, originalMessageId: reaction.message.id, starBoardChannelId: starBoardMessage.channel.id, starBoardMessageId: starBoardMessage.id, starBoardedMessagestarBoardMessageStarsQuantityMax: 1 });
 			}
 		}
 

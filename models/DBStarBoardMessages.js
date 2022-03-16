@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
 		originalMessageId: DataTypes.STRING,
 		starBoardChannelId: DataTypes.STRING,
 		starBoardMessageId: DataTypes.STRING,
+		starBoardMessageStarsQuantityMax: DataTypes.INTEGER,
 		paranoid: true,
 	});
 };

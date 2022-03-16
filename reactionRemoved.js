@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { DBReactionRolesHeader, DBReactionRoles } = require('./dbObjects');
+const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } = require('./dbObjects');
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
@@ -103,6 +103,61 @@ module.exports = async function (reaction, user) {
 			}
 		}
 	}
+	if (reaction._emoji.name === '⭐') {
+		logDatabaseQueries(2, 'reactionRemoved.js DBGuilds Starboard');
+		const guild = await DBGuilds.findOne({
+			where: { guildId: reaction.message.guild.id }
+		});
+
+		if (guild && guild.starBoardEnabled && parseInt(guild.starBoardMinimum) <= reaction.count && guild.starBoardChannel !== reaction.message.channel.id) {
+			logDatabaseQueries(2, 'reactionRemoved.js DBStarBoardMessages Starboardmessage');
+			const starBoardedMessage = await DBStarBoardMessages.findOne({
+				where: { originalMessageId: reaction.message.id }
+			});
+
+			if (starBoardedMessage) {
+				let channel;
+				try {
+					channel = await reaction.client.channels.fetch(starBoardedMessage.starBoardChannelId);
+				} catch (error) {
+					if (error.message !== 'Unknown Channel') {
+						console.log(error);
+					}
+				}
+				if (channel) {
+					let message;
+					try {
+						message = await channel.messages.fetch(starBoardedMessage.starBoardMessageId);
+					} catch (error) {
+						if (error.message !== 'Unknown Message') {
+							console.log(error);
+						}
+					}
+					if (message) {
+						const starBoardMessageEmbed = new Discord.MessageEmbed()
+							.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
+							.setColor('#d9b51c')
+							.setDescription(reaction.message.content)
+							.addFields(
+								{ name: 'Link', value: `[Open](https://discord.com/channels/${reaction.message.guild.id}/${reaction.message.channel.id}/${reaction.message.id})` },
+							)
+							.setTimestamp();
+
+						reaction.message.attachments.forEach(attachment => {
+							starBoardMessageEmbed
+								.addField('Attachment', attachment.name)
+								.setImage(attachment.url);
+						});
+
+						return message.edit(`${reaction.count} ⭐ in <#${reaction.message.channel.id}>\nMaximum ⭐: ${starBoardedMessage.starBoardMessageStarsQuantityMax}`, starBoardMessageEmbed);
+					}
+				}
+			}
+		} 
+	
+		return;
+	}
+
 };
 
 async function editEmbed(msg, reactionRolesHeader) {
