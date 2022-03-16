@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Canvas = require('canvas');
 const weather = require('weather-js');
 const util = require('util');
-const { pause, populateMsgFromInteraction } = require('../utils');
+const { pause, populateMsgFromInteraction, fitTextOnMiddleCanvas } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -81,7 +81,7 @@ module.exports = {
 						ctx.font = 'bold 35px comfortaa, sans-serif';
 						ctx.fillStyle = '#ffffff';
 						ctx.textAlign = 'center';
-						ctx.fillText(`Weather for ${weather.location.name}`, canvas.width / 2, 50);
+						fitTextOnMiddleCanvas(ctx, `Weather for ${weather.location.name}`, 35, 'comfortaa, sans-serif', 50, canvas.width, 250);
 
 						// Write the weather of the current day
 						ctx.font = 'bold 30px comfortaa, sans-serif';
