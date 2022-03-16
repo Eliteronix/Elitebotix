@@ -107,6 +107,9 @@ module.exports = (sequelize, DataTypes) => {
 		twitchName: {
 			type: DataTypes.STRING,
 		},
+		twitchId: {
+			type: DataTypes.STRING,
+		},
 		twitchOsuMapSync: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,

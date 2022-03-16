@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBOsuBeatmaps } = require('../dbObjects');
-const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool, getUserDuelStarRating, twitchConnect } = require('../utils');
+const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool, getUserDuelStarRating } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 const fetch = require('node-fetch');
@@ -4982,22 +4982,8 @@ module.exports = {
 				}
 			});
 
-			discordUser.twitchName = args[2];
+			discordUser.twitchName = args[2].toLowerCase();
 			discordUser.save();
-		} else if (args[0] === 'toggleTwitch') {
-			const discordUser = await DBDiscordUsers.findOne({
-				where: {
-					osuName: args[1]
-				}
-			});
-
-			if (discordUser.twitchOsuMapSync) {
-				discordUser.twitchOsuMapSync = false;
-			} else {
-				discordUser.twitchOsuMapSync = true;
-			}
-			discordUser.save();
-			twitchConnect(additionalObjects[1]);
 		} else {
 			msg.reply('Invalid command');
 		}

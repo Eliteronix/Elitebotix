@@ -1469,6 +1469,7 @@ module.exports = {
 		return adjustHDStarRatingFunction(starRating, approachRate);
 	},
 	async twitchConnect(bancho) {
+
 		let twitchSyncUsers = await DBDiscordUsers.findAll({
 			where: {
 				twitchOsuMapSync: true
@@ -1503,7 +1504,7 @@ module.exports = {
 		twitchClient.on('connected', onConnectedHandler);
 
 		// Connect to Twitch:
-		twitchClient.connect();
+		await twitchClient.connect();
 
 		// Called every time a message comes in
 		async function onMessageHandler(target, context, msg, self) {
@@ -1534,39 +1535,42 @@ module.exports = {
 				try {
 					let discordUser = await DBDiscordUsers.findOne({
 						where: {
-							twitchName: target.substring(1)
+							twitchName: target.substring(1),
+							twitchOsuMapSync: true
 						}
 					});
 
-					const IRCUser = await bancho.getUser(discordUser.osuName);
+					if (discordUser) {
+						const IRCUser = await bancho.getUser(discordUser.osuName);
 
-					let prefix = [];
-					if (context.mod) {
-						prefix.push('MOD');
-					}
-					if (context.badges && context.badges.vip) {
-						prefix.push('VIP');
-					}
-					if (context.subscriber) {
-						prefix.push('SUB');
-					}
+						let prefix = [];
+						if (context.mod) {
+							prefix.push('MOD');
+						}
+						if (context.badges && context.badges.vip) {
+							prefix.push('VIP');
+						}
+						if (context.subscriber) {
+							prefix.push('SUB');
+						}
 
-					if (prefix.length > 0) {
-						prefix = `[${prefix.join('/')}] `;
-					} else {
-						prefix = '';
+						if (prefix.length > 0) {
+							prefix = `[${prefix.join('/')}] `;
+						} else {
+							prefix = '';
+						}
+
+						let dbBeatmap = await getOsuBeatmapFunction(map, 0);
+
+						await IRCUser.sendMessage(`${prefix}${context['display-name']} -> https://osu.ppy.sh/b/${dbBeatmap.beatmapId} ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}] | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);
+
+						twitchClient.say(target.substring(1), `${context['display-name']} -> Your request has been sent.`);
 					}
-
-					let dbBeatmap = await getOsuBeatmapFunction(map, 0);
-
-					await IRCUser.sendMessage(`${prefix}${context['display-name']} -> https://osu.ppy.sh/b/${dbBeatmap.beatmapId} ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}] | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);
 				} catch (error) {
 					if (error.message !== 'Currently disconnected!') {
 						console.log(error);
 					}
 				}
-
-				twitchClient.say(target.substring(1), `${context['display-name']} -> Your request has been sent.`);
 			}
 		}
 
@@ -1574,6 +1578,8 @@ module.exports = {
 		function onConnectedHandler(addr, port) {
 			console.log(`* Connected to ${addr}:${port}`);
 		}
+
+		return twitchClient;
 	}
 };
 

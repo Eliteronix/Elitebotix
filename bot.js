@@ -114,6 +114,12 @@ const Banchojs = require('bancho.js');
 // eslint-disable-next-line no-undef
 const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1 });
 
+let twitchClient = null;
+twitchConnect(bancho).then(twitch => {
+	twitchClient = twitch;
+	return;
+});
+
 //login with the Discord client using the Token from the .env file
 // eslint-disable-next-line no-undef
 client.login(process.env.BOTTOKEN);
@@ -137,7 +143,7 @@ function readyDiscord() {
 	restartProcessQueueTask();
 }
 
-client.on('messageCreate', msg => gotMessage(msg, bancho));
+client.on('messageCreate', msg => gotMessage(msg, bancho, twitchClient));
 
 client.on('messageUpdate', messageUpdate);
 
@@ -198,5 +204,3 @@ setInterval(() => refreshOsuRank(), 60000);
 client.on('interactionCreate', interaction => {
 	interactionCreate(client, bancho, interaction);
 });
-
-twitchConnect(bancho);
