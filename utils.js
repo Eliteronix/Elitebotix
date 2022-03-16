@@ -1562,9 +1562,9 @@ module.exports = {
 
 						let dbBeatmap = await getOsuBeatmapFunction(map, 0);
 
-						await IRCUser.sendMessage(`${prefix}${context['display-name']} -> https://osu.ppy.sh/b/${dbBeatmap.beatmapId} ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}] | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);
+						await IRCUser.sendMessage(`${prefix}${context['display-name']} -> https://osu.ppy.sh/b/${dbBeatmap.beatmapId} [${dbBeatmap.approvalStatus}] ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);
 
-						twitchClient.say(target.substring(1), `${context['display-name']} -> Your request has been sent.`);
+						twitchClient.say(target.substring(1), `${context['display-name']} -> [${dbBeatmap.approvalStatus}] ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);
 					}
 				} catch (error) {
 					if (error.message !== 'Currently disconnected!') {
