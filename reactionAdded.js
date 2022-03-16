@@ -75,7 +75,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 								.setImage(attachment.url);
 						});
 						
-						if (starBoardedMessage.starBoardMessageStarsQuantityMax <= reaction.count) {
+						if (starBoardedMessage.starBoardMessageStarsQuantityMax <= reaction.count || starBoardedMessage.starBoardMessageStarsQuantityMax == null) {
 							starBoardedMessage.starBoardMessageStarsQuantityMax = reaction.count;
 							starBoardedMessage.save();
 							return message.edit(`${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, starBoardMessageEmbed);
