@@ -47,6 +47,10 @@ module.exports = {
 		let date = new Date();
 		let message = '';
 
+		reminders.sort(function (a, b) {
+			return a.date - b.date;
+		});
+
 		for (let i = 0; i < reminders.length; i++) {
 			let args = reminders[i].additions.split(';');
 			date = Date.parse(reminders[i].date) / 1000;
@@ -69,6 +73,5 @@ module.exports = {
 				});
 		}
 		return interaction.reply({ content: message, ephemeral: true });
-
 	}
 };
