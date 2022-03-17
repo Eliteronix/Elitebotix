@@ -32,7 +32,10 @@ module.exports = {
 				additions: {
 					[Op.like]: `${msg.author.id}%`,
 				}
-			}
+			},
+			order: [
+				['date', 'ASC'],
+			]
 		});
 
 		if (reminders.length === 0) {
@@ -46,10 +49,6 @@ module.exports = {
 		let reminderTime = [];
 		let date = new Date();
 		let message = '';
-
-		reminders.sort(function (a, b) {
-			return a.date - b.date;
-		});
 
 		for (let i = 0; i < reminders.length; i++) {
 			let args = reminders[i].additions.split(';');
