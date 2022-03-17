@@ -148,7 +148,11 @@ module.exports = async function (reaction, user) {
 								.addField('Attachment', attachment.name)
 								.setImage(attachment.url);
 						});
-
+						if (starBoardedMessage.starBoardMessageStarsQuantityMax <= reaction.count || starBoardedMessage.starBoardMessageStarsQuantityMax == null) {
+							starBoardedMessage.starBoardMessageStarsQuantityMax = reaction.count + 1;
+							starBoardedMessage.save();
+						}
+						
 						return message.edit(`${reaction.count} ⭐ in <#${reaction.message.channel.id}>\nMaximum ⭐: ${starBoardedMessage.starBoardMessageStarsQuantityMax}`, starBoardMessageEmbed);
 					}
 				}
