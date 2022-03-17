@@ -242,7 +242,7 @@ function quicksort(list, start = 0, end = undefined) {
 
 async function rollRound(msg, sentMessage, players, rounds) {
 	let currentRound = rounds.length;
-	let toRoll = 1000000;
+	let toRoll = 5;
 	if (rounds.length) {
 		toRoll = rounds[rounds.length - 1];
 	}
@@ -291,8 +291,10 @@ async function rollRound(msg, sentMessage, players, rounds) {
 		if (rounds[rounds.length - 1] === 1) {
 			//avoiding another if statement with players.length condition by just checking first 2 player ID's
 			if (players[0][0] == msg.client.user.id || players[1][0] == msg.client.user.id) {
-				return sentMessage = await updateEmbed(sentMessage, players, rounds, `<@${players[(rounds.length - 1) % players.length][0]}> won the roll game!\n\nGood Game!`);
-			}else {
+				
+				sentMessage = await updateEmbed(sentMessage, players, rounds, `<@${players[(rounds.length - 1) % players.length][0]}> won the roll game!`);
+				return	msg.channel.send('Good game!');
+			} else {
 				return sentMessage = await updateEmbed(sentMessage, players, rounds, `<@${players[(rounds.length - 1) % players.length][0]}> won the roll game!`);
 			}
 		}
