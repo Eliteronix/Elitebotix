@@ -387,12 +387,12 @@ module.exports = {
 
 					//Check mods and set them if needed
 					if (mapIndex === 4 || mapIndex === 8) {
-						while (!lobby.mods) {
+						while (!lobby.mods || lobby.mods && lobby.mods.length === 0 || lobby.mods && lobby.mods[0].shortMod !== 'dt') {
 							await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
 							await pause(5000);
 						}
 					} else {
-						while (lobby.mods) {
+						while (lobby.mods || lobby.mods && lobby.mods.length !== 0) {
 							await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
 							await pause(5000);
 						}
