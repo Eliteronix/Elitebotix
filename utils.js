@@ -1652,12 +1652,12 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 		where: { beatmapId: beatmapId, mods: modBits }
 	});
 
-	// //Date of reworked DT and HT values
-	// if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('HT')) {
-	// 	lastRework.setUTCFullYear(2021);
-	// 	lastRework.setUTCMonth(10);
-	// 	lastRework.setUTCDate(7);
-	// }
+	//Date of reworked DT, HT, EZ and HR values
+	if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('HT') || getModsFunction(modBits).includes('EZ') || getModsFunction(modBits).includes('HR')) {
+		lastRework.setUTCFullYear(2022);
+		lastRework.setUTCMonth(2);
+		lastRework.setUTCDate(19);
+	}
 
 	if (!dbBeatmap
 		|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
