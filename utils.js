@@ -1648,6 +1648,11 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 	let lastWeek = new Date();
 	lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
 	logDatabaseQueriesFunction(4, 'utils.js getOsuBeatmapFunction');
+
+	for (let i = 0; i < 5; i++) {
+
+	}
+
 	let dbBeatmap = await DBOsuBeatmaps.findOne({
 		where: { beatmapId: beatmapId, mods: modBits }
 	});
