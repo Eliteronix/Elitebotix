@@ -1696,7 +1696,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 					drainLength = parseFloat(beatmaps[0].length.drain) / 1.5;
 					totalLength = parseFloat(beatmaps[0].length.total) / 1.5;
 				} else if (getModsFunction(modBits).includes('HT')) {
-					bpm = Math.round((parseFloat(beatmaps[0].bpm) * 0.75) * 10) / 10;
+					bpm = Math.round((parseFloat(beatmaps[0].bpm) * 0.75) * 100) / 100;
 					drainLength = parseFloat(beatmaps[0].length.drain) / 0.75;
 					totalLength = parseFloat(beatmaps[0].length.total) / 0.75;
 				}
