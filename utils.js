@@ -1580,7 +1580,46 @@ module.exports = {
 		}
 
 		return twitchClient;
-	}
+	},
+	checkModsCompatibility(input, beatmapMode) { //input = mods | beatmapMode needs to be NOT ID
+		let mods = getModsFunction(input);
+
+		//double time - halftime
+		if (mods.includes('DT') && mods.includes('HT')) {
+			return false;
+			//nightcore - halftime
+		} else if (mods.includes('NC') && mods.includes('HT')) {
+			return false;
+			//nightcore - double time
+		} else if (mods.includes('NC') && mods.includes('DT')) {
+			return false;
+			//hardrock - easy
+		} else if (mods.includes('HR') && mods.includes('EZ')) {
+			return false;
+			//no fail - sudden death
+		} else if (mods.includes('NF') && mods.includes('SD')) {
+			return false;
+			//no fail - perfect
+		} else if (mods.includes('NF') && mods.includes('PF')) {
+			return false;
+			// perfect - sudden death
+		} else if (mods.includes('PF') && mods.includes('SD')) {
+			return false;
+			//mania
+			// hidden + faid in
+		} else if ( beatmapMode !== null && beatmapMode.toLowerCase() == 'mania') {
+			console.log('mania');
+			if (mods.includes('HD') && mods.includes('FI')) {
+				return false;
+				//hidden - flashlight
+			} else if (mods.includes('HD') && mods.includes('FL')) {
+				return false;
+				// flashlight - fade in
+			} else if (mods.includes('FL') && mods.includes('FI')) {
+				return false;
+			}
+		} return true;
+	} 
 };
 
 async function getOsuBadgeNumberByIdFunction(osuUserId) {

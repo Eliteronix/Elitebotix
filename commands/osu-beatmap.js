@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility } = require('../utils');
 const { Permissions } = require('discord.js');
 const fetch = require('node-fetch');
 const { DBOsuMultiScores } = require('../dbObjects');
@@ -71,6 +71,10 @@ module.exports = {
 		}
 
 		let modBits = getModBits(mods);
+
+		if (!checkModsCompatibility(modBits, null)) {
+			modBits = 0;
+		}
 
 		args.forEach(async (arg) => {
 			const dbBeatmap = await getOsuBeatmap(getIDFromPotentialOsuLink(arg), modBits);
