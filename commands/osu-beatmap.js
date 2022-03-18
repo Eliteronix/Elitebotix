@@ -378,7 +378,7 @@ async function drawStats(input) {
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Beats per Minute', canvas.width / 1000 * 750, canvas.height / 500 * 230);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${beatmap.bpm} BPM`, canvas.width / 1000 * 750, canvas.height / 500 * 260);
+	ctx.fillText(`${Math.round(beatmap.bpm * 100) / 100} BPM`, canvas.width / 1000 * 750, canvas.height / 500 * 260);
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Length', canvas.width / 1000 * 750, canvas.height / 500 * 290);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
