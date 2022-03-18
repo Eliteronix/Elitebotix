@@ -1692,11 +1692,11 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 				let totalLength = beatmaps[0].length.total;
 
 				if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('NC')) {
-					bpm = Math.round((parseFloat(beatmaps[0].bpm) * 1.5) * 100) / 100;
+					bpm = parseFloat(beatmaps[0].bpm) * 1.5;
 					drainLength = parseFloat(beatmaps[0].length.drain) / 1.5;
 					totalLength = parseFloat(beatmaps[0].length.total) / 1.5;
 				} else if (getModsFunction(modBits).includes('HT')) {
-					bpm = Math.round((parseFloat(beatmaps[0].bpm) * 0.75) * 100) / 100;
+					bpm = parseFloat(beatmaps[0].bpm) * 0.75;
 					drainLength = parseFloat(beatmaps[0].length.drain) / 0.75;
 					totalLength = parseFloat(beatmaps[0].length.total) / 0.75;
 				}
