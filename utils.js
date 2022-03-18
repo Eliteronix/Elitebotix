@@ -1649,197 +1649,209 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 	lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
 	logDatabaseQueriesFunction(4, 'utils.js getOsuBeatmapFunction');
 
-	for (let i = 0; i < 5; i++) {
+	let dbBeatmap = null;
 
-	}
+	//Repeat up to 3 times if errors appear
+	for (let i = 0; i < 3; i++) {
+		console.log(i, beatmapId, modBits);
+		if (!dbBeatmap) {
+			try {
+				dbBeatmap = await DBOsuBeatmaps.findOne({
+					where: { beatmapId: beatmapId, mods: modBits }
+				});
 
-	let dbBeatmap = await DBOsuBeatmaps.findOne({
-		where: { beatmapId: beatmapId, mods: modBits }
-	});
-
-	//Date of reworked DT, HT, EZ and HR values
-	if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('HT') || getModsFunction(modBits).includes('EZ') || getModsFunction(modBits).includes('HR')) {
-		lastRework.setUTCFullYear(2022);
-		lastRework.setUTCMonth(2);
-		lastRework.setUTCDate(19);
-	}
-
-	if (!dbBeatmap
-		|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
-		|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && (!dbBeatmap.updatedAt || dbBeatmap.updatedAt.getTime() < lastWeek.getTime()) //Update if old non-ranked map
-		|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0 || !dbBeatmap.mode)) { //Always update ranked maps if values are missing
-		// eslint-disable-next-line no-undef
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
-
-		await osuApi.getBeatmaps({ b: beatmapId, mods: modBits })
-			.then(async (beatmaps) => {
-				let noVisualModBeatmap = beatmaps[0];
-				if (getModsFunction(modBits).includes('MI') || getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL') || getModsFunction(modBits).includes('FI') || getModsFunction(modBits).includes('NF') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('PF') || getModsFunction(modBits).includes('SD')) {
-					let realNoVisualModBeatmap = await getOsuBeatmapFunction(beatmapId, getModBitsFunction(getModsFunction(modBits).join(''), true));
-					noVisualModBeatmap.difficulty.rating = realNoVisualModBeatmap.starRating;
-					noVisualModBeatmap.difficulty.aim = realNoVisualModBeatmap.aimRating;
-					noVisualModBeatmap.difficulty.speed = realNoVisualModBeatmap.speedRating;
-					noVisualModBeatmap.maxCombo = realNoVisualModBeatmap.maxCombo;
+				//Date of reworked DT, HT, EZ and HR values
+				if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('HT') || getModsFunction(modBits).includes('EZ') || getModsFunction(modBits).includes('HR')) {
+					lastRework.setUTCFullYear(2022);
+					lastRework.setUTCMonth(2);
+					lastRework.setUTCDate(19);
 				}
 
-				//Recalculate bpm for HT and DT
-				let bpm = beatmaps[0].bpm;
-				let cs = beatmaps[0].difficulty.size;
-				let ar = beatmaps[0].difficulty.approach;
-				let od = beatmaps[0].difficulty.overall;
-				let hpDrain = beatmaps[0].difficulty.drain;
-				let drainLength = beatmaps[0].length.drain;
-				let totalLength = beatmaps[0].length.total;
+				if (!dbBeatmap
+					|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
+					|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && (!dbBeatmap.updatedAt || dbBeatmap.updatedAt.getTime() < lastWeek.getTime()) //Update if old non-ranked map
+					|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0 || !dbBeatmap.mode)) { //Always update ranked maps if values are missing
+					// eslint-disable-next-line no-undef
+					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+					});
 
-				if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('NC')) {
-					bpm = parseFloat(beatmaps[0].bpm) * 1.5;
-					drainLength = parseFloat(beatmaps[0].length.drain) / 1.5;
-					totalLength = parseFloat(beatmaps[0].length.total) / 1.5;
-				} else if (getModsFunction(modBits).includes('HT')) {
-					bpm = parseFloat(beatmaps[0].bpm) * 0.75;
-					drainLength = parseFloat(beatmaps[0].length.drain) / 0.75;
-					totalLength = parseFloat(beatmaps[0].length.total) / 0.75;
-				}
-
-				//HR
-				if (getModsFunction(modBits).includes('HR')) {
-					cs = parseFloat(beatmaps[0].difficulty.size) * 1.3;
-					ar = parseFloat(beatmaps[0].difficulty.approach) * 1.4;
-					od = parseFloat(beatmaps[0].difficulty.overall) * 1.4;
-					hpDrain = parseFloat(beatmaps[0].difficulty.drain) * 1.4;
-				}
-
-				//EZ
-				if (getModsFunction(modBits).includes('EZ')) {
-					cs = parseFloat(beatmaps[0].difficulty.size) / 2;
-					ar = parseFloat(beatmaps[0].difficulty.approach) / 2;
-					od = parseFloat(beatmaps[0].difficulty.overall) / 2;
-					hpDrain = parseFloat(beatmaps[0].difficulty.drain) / 2;
-				}
-
-				cs = Math.min(Math.round(cs * 100) / 100, 10);
-				ar = Math.min(Math.round(ar * 100) / 100, 10);
-				od = Math.min(Math.round(od * 100) / 100, 10);
-				hpDrain = Math.min(Math.round(hpDrain * 100) / 100, 10);
-
-				//Map has to be updated
-				if (dbBeatmap) {
-					dbBeatmap.title = beatmaps[0].title;
-					dbBeatmap.artist = beatmaps[0].artist;
-					dbBeatmap.difficulty = beatmaps[0].version;
-					dbBeatmap.starRating = noVisualModBeatmap.difficulty.rating;
-					dbBeatmap.aimRating = noVisualModBeatmap.difficulty.aim;
-					dbBeatmap.speedRating = noVisualModBeatmap.difficulty.speed;
-					dbBeatmap.drainLength = drainLength;
-					dbBeatmap.totalLength = totalLength;
-					dbBeatmap.circleSize = cs;
-					dbBeatmap.approachRate = ar;
-					dbBeatmap.overallDifficulty = od;
-					dbBeatmap.hpDrain = hpDrain;
-					dbBeatmap.mapper = beatmaps[0].creator;
-					dbBeatmap.beatmapsetId = beatmaps[0].beatmapSetId;
-					dbBeatmap.bpm = bpm;
-					dbBeatmap.mode = beatmaps[0].mode;
-					dbBeatmap.approvalStatus = beatmaps[0].approvalStatus;
-					dbBeatmap.maxCombo = noVisualModBeatmap.maxCombo;
-					dbBeatmap.circles = beatmaps[0].objects.normal;
-					dbBeatmap.sliders = beatmaps[0].objects.slider;
-					dbBeatmap.spinners = beatmaps[0].objects.spinner;
-					dbBeatmap.mods = modBits;
-					dbBeatmap.userRating = beatmaps[0].rating;
-					await dbBeatmap.save();
-				} else { // Map has to be added new
-					//Get the tourney map flags
-					let tourneyMap = false;
-					let noModMap = false;
-					let hiddenMap = false;
-					let hardRockMap = false;
-					let doubleTimeMap = false;
-					let freeModMap = false;
-
-					let tourneyScores = await DBOsuMultiScores.findAll({
-						where: {
-							beatmapId: beatmaps[0].id,
-							tourneyMatch: true,
-							matchName: {
-								[Op.notLike]: 'MOTD:%',
+					await osuApi.getBeatmaps({ b: beatmapId, mods: modBits })
+						.then(async (beatmaps) => {
+							let noVisualModBeatmap = beatmaps[0];
+							if (getModsFunction(modBits).includes('MI') || getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL') || getModsFunction(modBits).includes('FI') || getModsFunction(modBits).includes('NF') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('PF') || getModsFunction(modBits).includes('SD')) {
+								let realNoVisualModBeatmap = await getOsuBeatmapFunction(beatmapId, getModBitsFunction(getModsFunction(modBits).join(''), true));
+								noVisualModBeatmap.difficulty.rating = realNoVisualModBeatmap.starRating;
+								noVisualModBeatmap.difficulty.aim = realNoVisualModBeatmap.aimRating;
+								noVisualModBeatmap.difficulty.speed = realNoVisualModBeatmap.speedRating;
+								noVisualModBeatmap.maxCombo = realNoVisualModBeatmap.maxCombo;
 							}
-						}
-					});
 
-					if (tourneyScores.length > 0) {
-						tourneyMap = true;
-					}
+							//Recalculate bpm for HT and DT
+							let bpm = beatmaps[0].bpm;
+							let cs = beatmaps[0].difficulty.size;
+							let ar = beatmaps[0].difficulty.approach;
+							let od = beatmaps[0].difficulty.overall;
+							let hpDrain = beatmaps[0].difficulty.drain;
+							let drainLength = beatmaps[0].length.drain;
+							let totalLength = beatmaps[0].length.total;
 
-					for (let i = 0; i < tourneyScores.length; i++) {
-						if (getScoreModpoolFunction(tourneyScores[i]) === 'NM') {
-							noModMap = true;
-						} else if (getScoreModpoolFunction(tourneyScores[i]) === 'HD') {
-							hiddenMap = true;
-						} else if (getScoreModpoolFunction(tourneyScores[i]) === 'HR') {
-							hardRockMap = true;
-						} else if (getScoreModpoolFunction(tourneyScores[i]) === 'DT') {
-							doubleTimeMap = true;
-						} else if (getScoreModpoolFunction(tourneyScores[i]) === 'FM') {
-							freeModMap = true;
-						}
-					}
+							if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('NC')) {
+								bpm = parseFloat(beatmaps[0].bpm) * 1.5;
+								drainLength = parseFloat(beatmaps[0].length.drain) / 1.5;
+								totalLength = parseFloat(beatmaps[0].length.total) / 1.5;
+							} else if (getModsFunction(modBits).includes('HT')) {
+								bpm = parseFloat(beatmaps[0].bpm) * 0.75;
+								drainLength = parseFloat(beatmaps[0].length.drain) / 0.75;
+								totalLength = parseFloat(beatmaps[0].length.total) / 0.75;
+							}
 
-					dbBeatmap = await DBOsuBeatmaps.create({
-						title: beatmaps[0].title,
-						artist: beatmaps[0].artist,
-						difficulty: beatmaps[0].version,
-						starRating: noVisualModBeatmap.difficulty.rating,
-						aimRating: noVisualModBeatmap.difficulty.aim,
-						speedRating: noVisualModBeatmap.difficulty.speed,
-						drainLength: drainLength,
-						totalLength: totalLength,
-						circleSize: cs,
-						approachRate: ar,
-						overallDifficulty: od,
-						hpDrain: hpDrain,
-						mapper: beatmaps[0].creator,
-						beatmapId: beatmaps[0].id,
-						beatmapsetId: beatmaps[0].beatmapSetId,
-						bpm: bpm,
-						mode: beatmaps[0].mode,
-						approvalStatus: beatmaps[0].approvalStatus,
-						maxCombo: noVisualModBeatmap.maxCombo,
-						circles: beatmaps[0].objects.normal,
-						sliders: beatmaps[0].objects.slider,
-						spinners: beatmaps[0].objects.spinner,
-						mods: modBits,
-						userRating: beatmaps[0].rating,
-						tourneyMap: tourneyMap,
-						noModMap: noModMap,
-						hiddenMap: hiddenMap,
-						hardRockMap: hardRockMap,
-						doubleTimeMap: doubleTimeMap,
-						freeModMap: freeModMap,
-					});
+							//HR
+							if (getModsFunction(modBits).includes('HR')) {
+								cs = parseFloat(beatmaps[0].difficulty.size) * 1.3;
+								ar = parseFloat(beatmaps[0].difficulty.approach) * 1.4;
+								od = parseFloat(beatmaps[0].difficulty.overall) * 1.4;
+								hpDrain = parseFloat(beatmaps[0].difficulty.drain) * 1.4;
+							}
+
+							//EZ
+							if (getModsFunction(modBits).includes('EZ')) {
+								cs = parseFloat(beatmaps[0].difficulty.size) / 2;
+								ar = parseFloat(beatmaps[0].difficulty.approach) / 2;
+								od = parseFloat(beatmaps[0].difficulty.overall) / 2;
+								hpDrain = parseFloat(beatmaps[0].difficulty.drain) / 2;
+							}
+
+							cs = Math.min(Math.round(cs * 100) / 100, 10);
+							ar = Math.min(Math.round(ar * 100) / 100, 10);
+							od = Math.min(Math.round(od * 100) / 100, 10);
+							hpDrain = Math.min(Math.round(hpDrain * 100) / 100, 10);
+
+							//Map has to be updated
+							if (dbBeatmap) {
+								dbBeatmap.title = beatmaps[0].title;
+								dbBeatmap.artist = beatmaps[0].artist;
+								dbBeatmap.difficulty = beatmaps[0].version;
+								dbBeatmap.starRating = noVisualModBeatmap.difficulty.rating;
+								dbBeatmap.aimRating = noVisualModBeatmap.difficulty.aim;
+								dbBeatmap.speedRating = noVisualModBeatmap.difficulty.speed;
+								dbBeatmap.drainLength = drainLength;
+								dbBeatmap.totalLength = totalLength;
+								dbBeatmap.circleSize = cs;
+								dbBeatmap.approachRate = ar;
+								dbBeatmap.overallDifficulty = od;
+								dbBeatmap.hpDrain = hpDrain;
+								dbBeatmap.mapper = beatmaps[0].creator;
+								dbBeatmap.beatmapsetId = beatmaps[0].beatmapSetId;
+								dbBeatmap.bpm = bpm;
+								dbBeatmap.mode = beatmaps[0].mode;
+								dbBeatmap.approvalStatus = beatmaps[0].approvalStatus;
+								dbBeatmap.maxCombo = noVisualModBeatmap.maxCombo;
+								dbBeatmap.circles = beatmaps[0].objects.normal;
+								dbBeatmap.sliders = beatmaps[0].objects.slider;
+								dbBeatmap.spinners = beatmaps[0].objects.spinner;
+								dbBeatmap.mods = modBits;
+								dbBeatmap.userRating = beatmaps[0].rating;
+								await dbBeatmap.save();
+							} else { // Map has to be added new
+								//Get the tourney map flags
+								let tourneyMap = false;
+								let noModMap = false;
+								let hiddenMap = false;
+								let hardRockMap = false;
+								let doubleTimeMap = false;
+								let freeModMap = false;
+
+								let tourneyScores = await DBOsuMultiScores.findAll({
+									where: {
+										beatmapId: beatmaps[0].id,
+										tourneyMatch: true,
+										matchName: {
+											[Op.notLike]: 'MOTD:%',
+										}
+									}
+								});
+
+								if (tourneyScores.length > 0) {
+									tourneyMap = true;
+								}
+
+								for (let i = 0; i < tourneyScores.length; i++) {
+									if (getScoreModpoolFunction(tourneyScores[i]) === 'NM') {
+										noModMap = true;
+									} else if (getScoreModpoolFunction(tourneyScores[i]) === 'HD') {
+										hiddenMap = true;
+									} else if (getScoreModpoolFunction(tourneyScores[i]) === 'HR') {
+										hardRockMap = true;
+									} else if (getScoreModpoolFunction(tourneyScores[i]) === 'DT') {
+										doubleTimeMap = true;
+									} else if (getScoreModpoolFunction(tourneyScores[i]) === 'FM') {
+										freeModMap = true;
+									}
+								}
+
+								dbBeatmap = await DBOsuBeatmaps.create({
+									title: beatmaps[0].title,
+									artist: beatmaps[0].artist,
+									difficulty: beatmaps[0].version,
+									starRating: noVisualModBeatmap.difficulty.rating,
+									aimRating: noVisualModBeatmap.difficulty.aim,
+									speedRating: noVisualModBeatmap.difficulty.speed,
+									drainLength: drainLength,
+									totalLength: totalLength,
+									circleSize: cs,
+									approachRate: ar,
+									overallDifficulty: od,
+									hpDrain: hpDrain,
+									mapper: beatmaps[0].creator,
+									beatmapId: beatmaps[0].id,
+									beatmapsetId: beatmaps[0].beatmapSetId,
+									bpm: bpm,
+									mode: beatmaps[0].mode,
+									approvalStatus: beatmaps[0].approvalStatus,
+									maxCombo: noVisualModBeatmap.maxCombo,
+									circles: beatmaps[0].objects.normal,
+									sliders: beatmaps[0].objects.slider,
+									spinners: beatmaps[0].objects.spinner,
+									mods: modBits,
+									userRating: beatmaps[0].rating,
+									tourneyMap: tourneyMap,
+									noModMap: noModMap,
+									hiddenMap: hiddenMap,
+									hardRockMap: hardRockMap,
+									doubleTimeMap: doubleTimeMap,
+									freeModMap: freeModMap,
+								});
+							}
+						})
+						.catch(async (error) => {
+							//Nothing
+							//Map is already saved; Delay next check until 7 days
+							if (dbBeatmap) {
+								dbBeatmap.approvalStatus = 'Not found';
+								await dbBeatmap.save();
+							} else if (error.message === 'Not found') { // Map has to be added new
+								dbBeatmap = await DBOsuBeatmaps.create({
+									beatmapId: beatmapId,
+									approvalStatus: 'Not found',
+									mods: modBits,
+									starRating: 0,
+									maxCombo: 0,
+								});
+							}
+						});
 				}
-			})
-			.catch(async (error) => {
-				//Nothing
-				//Map is already saved; Delay next check until 7 days
-				if (dbBeatmap) {
-					dbBeatmap.approvalStatus = 'Not found';
-					await dbBeatmap.save();
-				} else if (error.message === 'Not found') { // Map has to be added new
-					dbBeatmap = await DBOsuBeatmaps.create({
-						beatmapId: beatmapId,
-						approvalStatus: 'Not found',
-						mods: modBits,
-						starRating: 0,
-						maxCombo: 0,
-					});
+
+				i = Infinity;
+			} catch (e) {
+				if (i < 2) {
+					dbBeatmap = null;
 				}
-			});
+			}
+		}
 	}
 
 	if (dbBeatmap && dbBeatmap.approvalStatus === 'Not found') {
