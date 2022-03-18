@@ -1684,12 +1684,44 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 
 				//Recalculate bpm for HT and DT
 				let bpm = beatmaps[0].bpm;
+				let cs = beatmaps[0].difficulty.size;
+				let ar = beatmaps[0].difficulty.approach;
+				let od = beatmaps[0].difficulty.overall;
+				let hpDrain = beatmaps[0].difficulty.drain;
+				let drainLength = beatmaps[0].length.drain;
+				let totalLength = beatmaps[0].length.total;
 
-				if (getModsFunction(modBits).includes('DT')) {
-					bpm = parseFloat(beatmaps[0].bpm) * 1.5;
+				if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('NC')) {
+					bpm = Math.round((parseFloat(beatmaps[0].bpm) * 1.5) * 10) / 10;
+					drainLength = parseFloat(beatmaps[0].length.drain) / 1.5;
+					totalLength = parseFloat(beatmaps[0].length.total) / 1.5;
 				} else if (getModsFunction(modBits).includes('HT')) {
-					bpm = parseFloat(beatmaps[0].bpm) * 0.75;
+					bpm = Math.round((parseFloat(beatmaps[0].bpm) * 0.75) * 10) / 10;
+					drainLength = parseFloat(beatmaps[0].length.drain) / 0.75;
+					totalLength = parseFloat(beatmaps[0].length.total) / 0.75;
 				}
+
+				//HR
+				if (getModsFunction(modBits).includes('HR')) {
+					cs = parseFloat(beatmaps[0].difficulty.size) * 1.3;
+					ar = parseFloat(beatmaps[0].difficulty.approach) * 1.4;
+					od = parseFloat(beatmaps[0].difficulty.overall) * 1.4;
+					hpDrain = parseFloat(beatmaps[0].difficulty.drain) * 1.4;
+
+				}
+				//EZ
+				if (getModsFunction(modBits).includes('EZ')) {
+					cs = parseFloat(beatmaps[0].difficulty.size) /2;
+					ar = parseFloat(beatmaps[0].difficulty.approach) /2;
+					od = parseFloat(beatmaps[0].difficulty.overall) /2;
+					hpDrain = parseFloat(beatmaps[0].difficulty.drain) /2;
+
+				}
+				
+				cs = Math.min(Math.round(cs * 100) / 100, 10);
+				ar = Math.min(Math.round(ar * 100) / 100, 10);
+				od = Math.min(Math.round(od * 100) / 100, 10);
+				hpDrain = Math.min(Math.round(hpDrain * 100) / 100, 10);
 
 				//Map has to be updated
 				if (dbBeatmap) {
@@ -1699,12 +1731,12 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 					dbBeatmap.starRating = noVisualModBeatmap.difficulty.rating;
 					dbBeatmap.aimRating = noVisualModBeatmap.difficulty.aim;
 					dbBeatmap.speedRating = noVisualModBeatmap.difficulty.speed;
-					dbBeatmap.drainLength = beatmaps[0].length.drain;
-					dbBeatmap.totalLength = beatmaps[0].length.total;
-					dbBeatmap.circleSize = beatmaps[0].difficulty.size;
-					dbBeatmap.approachRate = beatmaps[0].difficulty.approach;
-					dbBeatmap.overallDifficulty = beatmaps[0].difficulty.overall;
-					dbBeatmap.hpDrain = beatmaps[0].difficulty.drain;
+					dbBeatmap.drainLength = drainLength;
+					dbBeatmap.totalLength = totalLength;
+					dbBeatmap.circleSize = cs;
+					dbBeatmap.approachRate = ar;
+					dbBeatmap.overallDifficulty = od;
+					dbBeatmap.hpDrain = hpDrain;
 					dbBeatmap.mapper = beatmaps[0].creator;
 					dbBeatmap.beatmapsetId = beatmaps[0].beatmapSetId;
 					dbBeatmap.bpm = bpm;
@@ -1761,12 +1793,12 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 						starRating: noVisualModBeatmap.difficulty.rating,
 						aimRating: noVisualModBeatmap.difficulty.aim,
 						speedRating: noVisualModBeatmap.difficulty.speed,
-						drainLength: beatmaps[0].length.drain,
-						totalLength: beatmaps[0].length.total,
-						circleSize: beatmaps[0].difficulty.size,
-						approachRate: beatmaps[0].difficulty.approach,
-						overallDifficulty: beatmaps[0].difficulty.overall,
-						hpDrain: beatmaps[0].difficulty.drain,
+						drainLength: drainLength,
+						totalLength: totalLength,
+						circleSize: cs,
+						approachRate: ar,
+						overallDifficulty: od,
+						hpDrain: hpDrain,
 						mapper: beatmaps[0].creator,
 						beatmapId: beatmaps[0].id,
 						beatmapsetId: beatmaps[0].beatmapSetId,
