@@ -72,7 +72,7 @@ module.exports = {
 
 		let modBits = getModBits(mods);
 
-		if (!checkModsCompatibility(modBits, null)) {
+		if (!checkModsCompatibility(modBits, false)) {
 			modBits = 0;
 		}
 

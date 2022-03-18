@@ -1607,7 +1607,7 @@ module.exports = {
 			return false;
 			//mania
 			// hidden + faid in
-		} else if ( beatmapMode !== null && beatmapMode.toLowerCase() == 'mania') {
+		} else if (beatmapMode) {
 			console.log('mania');
 			if (mods.includes('HD') && mods.includes('FI')) {
 				return false;
