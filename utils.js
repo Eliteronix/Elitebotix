@@ -1707,17 +1707,16 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 					ar = parseFloat(beatmaps[0].difficulty.approach) * 1.4;
 					od = parseFloat(beatmaps[0].difficulty.overall) * 1.4;
 					hpDrain = parseFloat(beatmaps[0].difficulty.drain) * 1.4;
-
 				}
+
 				//EZ
 				if (getModsFunction(modBits).includes('EZ')) {
-					cs = parseFloat(beatmaps[0].difficulty.size) /2;
-					ar = parseFloat(beatmaps[0].difficulty.approach) /2;
-					od = parseFloat(beatmaps[0].difficulty.overall) /2;
-					hpDrain = parseFloat(beatmaps[0].difficulty.drain) /2;
-
+					cs = parseFloat(beatmaps[0].difficulty.size) / 2;
+					ar = parseFloat(beatmaps[0].difficulty.approach) / 2;
+					od = parseFloat(beatmaps[0].difficulty.overall) / 2;
+					hpDrain = parseFloat(beatmaps[0].difficulty.drain) / 2;
 				}
-				
+
 				cs = Math.min(Math.round(cs * 100) / 100, 10);
 				ar = Math.min(Math.round(ar * 100) / 100, 10);
 				od = Math.min(Math.round(od * 100) / 100, 10);
