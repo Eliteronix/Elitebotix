@@ -1653,7 +1653,6 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 
 	//Repeat up to 3 times if errors appear
 	for (let i = 0; i < 3; i++) {
-		console.log(i, beatmapId, modBits);
 		if (!dbBeatmap) {
 			try {
 				dbBeatmap = await DBOsuBeatmaps.findOne({
