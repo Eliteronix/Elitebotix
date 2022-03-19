@@ -484,7 +484,7 @@ function roundOverCheck(bracketName, lobbyId) {
 	let now = new Date();
 	let givenLobbyDate = new Date();
 	let k = 0;
-	if (lobbyId > 12) {
+	if (lobbyId >= 12) {
 		k = 1;
 	}
 
