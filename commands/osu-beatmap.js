@@ -73,13 +73,11 @@ module.exports = {
 
 		let modBits = getModBits(mods);
 
-		args.forEach(async (beatmapId) => {
-			if (await checkModsCompatibility(modBits, beatmapId)) {
+		args.forEach(async (arg) => {
+			let modCompatibility = await checkModsCompatibility(modBits, arg);
+			if (!modCompatibility) {
 				modBits = 0;
 			}
-		}); 
-		
-		args.forEach(async (arg) => {
 			const dbBeatmap = await getOsuBeatmap(getIDFromPotentialOsuLink(arg), modBits);
 			if (dbBeatmap) {
 				getBeatmap(msg, interaction, dbBeatmap);
