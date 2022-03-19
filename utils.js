@@ -1581,34 +1581,34 @@ module.exports = {
 
 		return twitchClient;
 	},
-	checkModsCompatibility(input, beatmapMode) { //input = mods | beatmapMode needs to be NOT ID
+	async checkModsCompatibility(input, beatmapId) { //input = mods | beatmapMode needs to be NOT ID
+		let beatmap = await getOsuBeatmapFunction(beatmapId, input);
 		let mods = getModsFunction(input);
-
-		//double time - halftime
-		if (mods.includes('DT') && mods.includes('HT')) {
-			return false;
-			//nightcore - halftime
-		} else if (mods.includes('NC') && mods.includes('HT')) {
-			return false;
-			//nightcore - double time
-		} else if (mods.includes('NC') && mods.includes('DT')) {
-			return false;
-			//hardrock - easy
-		} else if (mods.includes('HR') && mods.includes('EZ')) {
-			return false;
-			//no fail - sudden death
-		} else if (mods.includes('NF') && mods.includes('SD')) {
-			return false;
-			//no fail - perfect
-		} else if (mods.includes('NF') && mods.includes('PF')) {
-			return false;
-			// perfect - sudden death
-		} else if (mods.includes('PF') && mods.includes('SD')) {
-			return false;
-			//mania
+		if (beatmap.mode !== 'Mania') {
+			//double time - halftime
+			if (mods.includes('DT') && mods.includes('HT')) {
+				return false;
+				//nightcore - halftime
+			} else if (mods.includes('NC') && mods.includes('HT')) {
+				return false;
+				//nightcore - double time
+			} else if (mods.includes('NC') && mods.includes('DT')) {
+				return false;
+				//hardrock - easy
+			} else if (mods.includes('HR') && mods.includes('EZ')) {
+				return false;
+				//no fail - sudden death
+			} else if (mods.includes('NF') && mods.includes('SD')) {
+				return false;
+				//no fail - perfect
+			} else if (mods.includes('NF') && mods.includes('PF')) {
+				return false;
+				// perfect - sudden death
+			} else if (mods.includes('PF') && mods.includes('SD')) {
+				return false;
+			}		
+		} else {
 			// hidden + faid in
-		} else if (beatmapMode) {
-			console.log('mania');
 			if (mods.includes('HD') && mods.includes('FI')) {
 				return false;
 				//hidden - flashlight
@@ -1618,8 +1618,9 @@ module.exports = {
 			} else if (mods.includes('FL') && mods.includes('FI')) {
 				return false;
 			}
-		} return true;
-	} 
+		} 
+		return true;	
+	}
 };
 
 async function getOsuBadgeNumberByIdFunction(osuUserId) {
