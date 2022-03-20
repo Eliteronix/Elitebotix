@@ -140,10 +140,10 @@ module.exports = {
 					page = null;
 				}
 
-				let filename = `osu-leaderboard-mode-${getGameModeName(mode)}-${msg.author.id}-${msg.guild.name}.png`;
+				let filename = `osu-leaderboard-${msg.author.id}-mode-${getGameModeName(mode)}-${msg.guild.name}.png`;
 
 				if (page) {
-					filename = `osu-leaderboard-mode-${getGameModeName(mode)}-${msg.author.id}-${msg.guild.name}-page${page}.png`;
+					filename = `osu-leaderboard-${msg.author.id}-mode-${getGameModeName(mode)}-${msg.guild.name}-page${page}.png`;
 				}
 
 				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${msg.guild.name}'s osu! ${getGameModeName(mode)} leaderboard`, filename, page);
