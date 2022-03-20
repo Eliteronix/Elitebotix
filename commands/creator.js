@@ -55,7 +55,7 @@ module.exports = {
 				{ name: '\u200B', value: '\u200B', inline: true })
 			.addFields(
 				{ name: 'Twitch', value: '[Eliteronix](https://twitch.tv/Eliteronix)', inline: true },
-				{ name: 'Twitch', value: '[Roddy](https://twitch.tv/Roddy_dota)', inline: true },
+				{ name: 'Twitch', value: '[Roddy](https://twitch.tv/Roddythegod)', inline: true },
 				{ name: '\u200B', value: '\u200B', inline: true })
 			.addField('Paypal', '[paypal.me/Eliteronix](https://paypal.me/Eliteronix)')
 			.setTimestamp();
