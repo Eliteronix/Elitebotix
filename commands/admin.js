@@ -5019,6 +5019,14 @@ module.exports = {
 				.catch(error => {
 					console.log(error);
 				});
+		} else if (args[0] === 'fixOopsie') {
+			let map = await DBElitiriCupSubmissions.findOne({
+				where: {
+					id: args[1]
+				}
+			});
+
+			await map.destroy();
 		} else {
 			msg.reply('Invalid command');
 		}
