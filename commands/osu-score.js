@@ -17,7 +17,7 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	//guildOnly: true,
 	args: true,
-	cooldown: 5,
+	cooldown: 45,
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
