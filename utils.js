@@ -1621,8 +1621,6 @@ module.exports = {
 			combo: parseInt(combo),
 		};
 
-		console.log(rosu.calculate(arg)[0]);
-
 		return rosu.calculate(arg)[0].pp;
 	}
 };
