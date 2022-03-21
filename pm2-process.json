@@ -5,7 +5,8 @@
 		"database.sqlite",
 		"database.sqlite-journal",
 		".git",
-		"maps"
+		"maps",
+		"package-lock.json"
 	],
 	"watch_options": {
 		"followSymlinks": false
