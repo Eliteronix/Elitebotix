@@ -863,22 +863,6 @@ module.exports = {
 	async getOsuBeatmap(beatmapId, modBits) {
 		return await getOsuBeatmapFunction(beatmapId, modBits);
 	},
-	async populatePP(score, beatmap, accuracy) {
-		if (!score.pp) {
-			try {
-				let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=${accuracy}&x=${score.counts.miss}&c=${score.maxCombo}&m=${score.raw_mods}`);
-				let htmlCode = await response.text();
-				const ppRegex = /"pp":.+, "length"/gm;
-				const matches = ppRegex.exec(htmlCode);
-				score.pp = matches[0].replace('"pp": [', '').replace('], "length"', '');
-			} catch (err) {
-				// console.log('error fetching osu pp', err);
-				// console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=${accuracy}&x=${score.counts.miss}&c=${score.maxCombo}&m=${score.raw_mods}`);
-			}
-		}
-
-		return score;
-	},
 	async getMatchesPlanned(startDate, endDate) {
 		let matchesPlanned = 0;
 		if (startDate.getUTCHours() <= 18 && endDate.getUTCHours() >= 18) {
@@ -1587,6 +1571,57 @@ module.exports = {
 		}
 
 		return twitchClient;
+	},
+	async getOsuPP(beatmapId, modBits, accuracy, misses, combo) {
+		const rosu = require('rosu-pp');
+		const fs = require('fs');
+
+		//Check if the maps folder exists and create it if necessary
+		if (!fs.existsSync('./maps')) {
+			fs.mkdirSync('./maps');
+		}
+
+		//Check if the map is already downloaded and download if necessary
+		const path = `./maps/${beatmapId}.osu`;
+
+		//Force download if the map is recently updated in the database and therefore probably updated
+		const dbBeatmap = await getOsuBeatmapFunction(beatmapId, 0);
+
+		const recent = new Date();
+		recent.setUTCMinutes(recent.getUTCMinutes() - 3);
+
+		let forceDownload = false;
+		if (recent < dbBeatmap.updatedAt) {
+			forceDownload = true;
+		}
+
+		try {
+			if (forceDownload || !fs.existsSync(path)) {
+				const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
+				await new Promise((resolve, reject) => {
+					const fileStream = fs.createWriteStream(`./maps/${beatmapId}.osu`);
+					res.body.pipe(fileStream);
+					res.body.on('error', (err) => {
+						reject(err);
+					});
+					fileStream.on('finish', function () {
+						resolve();
+					});
+				});
+			}
+		} catch (err) {
+			console.error(err);
+		}
+
+		let arg = {
+			path: `./maps/${beatmapId}.osu`,
+			mods: parseInt(modBits),
+			acc: parseFloat(accuracy),
+			nMisses: parseInt(misses),
+			combo: parseInt(combo),
+		};
+
+		return rosu.calculate(arg)[0].pp;
 	}
 };
 
