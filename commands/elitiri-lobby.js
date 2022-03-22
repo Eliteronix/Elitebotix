@@ -1,5 +1,5 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { DBElitiriCupSignUp, DBElitiriCupLobbies, DBDiscordUsers, DBElitiriCupStaff } = require('../dbObjects');
+const { DBElitiriCupSignUp, DBElitiriCupLobbies, DBDiscordUsers, DBElitiriCupStaff, DBProcessQueue } = require('../dbObjects');
 const { currentElitiriCup, currentElitiriCupTopQualsFirstLobby, currentElitiriCupMiddleQualsFirstLobby, currentElitiriCupLowerQualsFirstLobby, currentElitiriCupBeginnerQualsFirstLobby, currentElitiriCupRefSheetId } = require('../config.json');
 const { populateMsgFromInteraction } = require('../utils');
 
@@ -391,6 +391,14 @@ module.exports = {
 			await potentialLobby.save();
 
 			//create notification task
+			let date = new Date(roundOverCheck(bracketName, lobbyId.replace(/\D+/, '')) - 1800000).toUTCString();
+			let user;
+			if (msg.id) {
+				user = msg.author.id;
+			} else {
+				user = interaction.member.user.id;
+			}
+			DBProcessQueue.create({ guildId: 'None', task: 'tourneyLobbyRemind', priority: 10, additions: `${user};${potentialLobby};${currentElitiriCup};${date}`, date: date });
 
 			try {
 				refereeCell = sheet.getCell(3 + k, 4);
@@ -469,7 +477,17 @@ module.exports = {
 			} else {
 				scheduleSheetId = 'Qualifiers Schedules-Beginner';
 			}
-
+			
+			// Delete notification task
+			let date = new Date(roundOverCheck(potentialLobby.bracketName, lobbyId.replace(/\D+/, '')) - 1800000).toUTCString();
+			const task = await DBProcessQueue.findOne({
+				where: {
+					task: 'tourneyLobbyRemind',
+					date: date
+				}
+			});
+			task.destroy();
+			
 			try {
 				const sheet = doc.sheetsByTitle[scheduleSheetId];
 				await sheet.loadCells('A1:U29');
