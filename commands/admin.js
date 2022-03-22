@@ -4978,7 +4978,7 @@ module.exports = {
 		} else if (args[0] === 'connectTwitch') {
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
-					osuName: args[1]
+					osuUserId: args[1]
 				}
 			});
 
