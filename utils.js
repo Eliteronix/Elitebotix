@@ -1613,6 +1613,10 @@ module.exports = {
 			console.error(err);
 		}
 
+		if (!combo) {
+			combo = 0;
+		}
+
 		let arg = {
 			path: `./maps/${beatmapId}.osu`,
 			mods: parseInt(modBits),
