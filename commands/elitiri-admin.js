@@ -425,8 +425,7 @@ module.exports = {
 			args.shift();
 
 			// lobbyID = args[0]
-			// Bracket Name = args[1]
-			// osuUserID = args[2]
+			// osuUserID = args[1]
 
 			let lobby = await DBElitiriCupLobbies.findOne({
 				where: {
@@ -435,12 +434,9 @@ module.exports = {
 				}
 			});
 
-			args[1] += ` ${args[2]}`;
-			args.splice(2, 1);
-
 			let elitirisignup = await DBElitiriCupSignUp.findOne({
 				where: {
-					osuUserId: args[2]
+					osuUserId: args[1]
 				}
 			});
 
@@ -453,7 +449,7 @@ module.exports = {
 					tournamentName: currentElitiriCup,
 					lobbyId: args[0],
 					lobbyDate: null,
-					bracketName: args[1],
+					bracketName: elitirisignup.bracketName,
 					refDiscordTag: null,
 					refOsuUserId: null,
 					refOsuName: null,
