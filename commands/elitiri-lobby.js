@@ -321,9 +321,8 @@ module.exports = {
 					osuUserId: discordUser.osuUserId
 				}
 			});
-			
+
 			if (roundOverCheck(bracketName, lobbyId) == true) {
-				console.log('4');
 				if (msg.id) {
 					return msg.reply('This qualifier round is over');
 				} else {
