@@ -49,7 +49,7 @@ module.exports = {
 	name: 'elitiri-admin',
 	//aliases: ['osu-map', 'beatmap-info'],
 	description: 'Admin control for the Elitiri Cup',
-	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability/noLobby> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <osuPlayerID> | <pruneLobby> <osuUserId> | <setLobby> <lobbyID> <Bracket> <osuUserId> | <slashCommands> | <clearRefLobby> <lobbyID> | <staff> <osuUserId> <host/streamer/commentator/referee/replayer> [tournament]',
+	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability/noLobby> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <osuPlayerID> | <pruneLobby> <osuUserId> | <setLobby> <lobbyID> <osuUserId> | <slashCommands> | <clearRefLobby> <lobbyID> | <staff> <osuUserId> <host/streamer/commentator/referee/replayer> [tournament]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
