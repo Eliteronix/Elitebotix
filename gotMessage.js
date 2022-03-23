@@ -36,45 +36,6 @@ module.exports = async function (msg, bancho, twitchClient) {
 		//Handle Ticket
 		handleTicketStatus(msg);
 
-		if (developers.includes(msg.author.id) && msg.content === 'e!dbinit') {
-			console.log('Syncing database...');
-			const Sequelize = require('sequelize');
-
-			const sequelize = new Sequelize('database', 'username', 'password', {
-				host: 'localhost',
-				dialect: 'sqlite',
-				logging: false,
-				storage: 'database.sqlite',
-			});
-
-			require('./models/DBGuilds')(sequelize, Sequelize.DataTypes);
-			require('./models/DBReactionRoles')(sequelize, Sequelize.DataTypes);
-			require('./models/DBReactionRolesHeader')(sequelize, Sequelize.DataTypes);
-			require('./models/DBAutoRoles')(sequelize, Sequelize.DataTypes);
-			require('./models/DBTemporaryVoices')(sequelize, Sequelize.DataTypes);
-			require('./models/DBDiscordUsers')(sequelize, Sequelize.DataTypes);
-			require('./models/DBServerUserActivity')(sequelize, Sequelize.DataTypes);
-			require('./models/DBProcessQueue')(sequelize, Sequelize.DataTypes);
-			require('./models/DBActivityRoles')(sequelize, Sequelize.DataTypes);
-			require('./models/DBMOTDPoints')(sequelize, Sequelize.DataTypes);
-			require('./models/DBElitiriCupSignUp')(sequelize, Sequelize.DataTypes);
-			require('./models/DBElitiriCupStaff')(sequelize, Sequelize.DataTypes);
-			require('./models/DBElitiriCupSubmissions')(sequelize, Sequelize.DataTypes);
-			require('./models/DBStarBoardMessages')(sequelize, Sequelize.DataTypes);
-			require('./models/DBTickets')(sequelize, Sequelize.DataTypes);
-			require('./models/DBOsuMultiScores')(sequelize, Sequelize.DataTypes);
-			require('./models/DBOsuBeatmaps')(sequelize, Sequelize.DataTypes);
-			require('./models/DBElitiriCupLobbies')(sequelize, Sequelize.DataTypes);
-
-			await sequelize.sync({ alter: true })
-				.then(async () => {
-					console.log('Database synced');
-					sequelize.close();
-				})
-				.catch(console.error);
-			return;
-		}
-
 		const guildPrefix = await getGuildPrefix(msg);
 
 		if (msg.content === '<@!784836063058329680>' || msg.content === '<@784836063058329680>') {
