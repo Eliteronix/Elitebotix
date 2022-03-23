@@ -1,8 +1,7 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP } = require('../utils');
 const { Permissions } = require('discord.js');
-const fetch = require('node-fetch');
 const { DBOsuMultiScores } = require('../dbObjects');
 const { Op } = require('sequelize');
 
@@ -314,23 +313,10 @@ async function drawStats(input) {
 	ctx.font = 'bold 20px comfortaa, sans-serif';
 	ctx.fillText(userRatingDisplay, canvas.width / 1000 * 330, canvas.height / 500 * 375);
 
-	let ppOne = 'None';
-
-	try {
-		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=95&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
-		let htmlCode = await response.text();
-		const ppRegex = /"pp":.+, "length"/gm;
-		const matches = ppRegex.exec(htmlCode);
-		ppOne = `${Math.round(matches[0].replace('"pp": [', '').replace('], "length"', ''))} pp`;
-	} catch (err) {
-		// console.log('error fetching osu-beatmap pp', err);
-		// console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=95&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
-	}
-
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('95% Accuracy', canvas.width / 1000 * 330, canvas.height / 500 * 410);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(ppOne, canvas.width / 1000 * 330, canvas.height / 500 * 440);
+	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, 95.00, 0, beatmap.maxCombo))} pp`, canvas.width / 1000 * 330, canvas.height / 500 * 440);
 
 	//Second column
 	ctx.font = 'bold 15px comfortaa, sans-serif';
@@ -350,23 +336,10 @@ async function drawStats(input) {
 	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(`HP ${beatmap.hpDrain}`, canvas.width / 1000 * 580, canvas.height / 500 * 380);
 
-	let ppTwo = 'None';
-
-	try {
-		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=99&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
-		let htmlCode = await response.text();
-		const ppRegex = /"pp":.+, "length"/gm;
-		const matches = ppRegex.exec(htmlCode);
-		ppTwo = `${Math.round(matches[0].replace('"pp": [', '').replace('], "length"', ''))} pp`;
-	} catch (err) {
-		// console.log('error fetching osu-beatmap pp', err);
-		// console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=99&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
-	}
-
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('99% Accuracy', canvas.width / 1000 * 580, canvas.height / 500 * 410);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(ppTwo, canvas.width / 1000 * 580, canvas.height / 500 * 440);
+	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, 99.00, 0, beatmap.maxCombo))} pp`, canvas.width / 1000 * 580, canvas.height / 500 * 440);
 
 	//Third column
 	if (beatmap.mode === 'Mania') {
@@ -383,7 +356,7 @@ async function drawStats(input) {
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Beats per Minute', canvas.width / 1000 * 750, canvas.height / 500 * 230);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${beatmap.bpm} BPM`, canvas.width / 1000 * 750, canvas.height / 500 * 260);
+	ctx.fillText(`${Math.round(beatmap.bpm * 100) / 100} BPM`, canvas.width / 1000 * 750, canvas.height / 500 * 260);
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Length', canvas.width / 1000 * 750, canvas.height / 500 * 290);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
@@ -393,23 +366,10 @@ async function drawStats(input) {
 	ctx.font = 'bold 30px comfortaa, sans-serif';
 	ctx.fillText(`${drainLength} Drain`, canvas.width / 1000 * 750, canvas.height / 500 * 380);
 
-	let ppThree = 'None';
-
-	try {
-		let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=100&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
-		let htmlCode = await response.text();
-		const ppRegex = /"pp":.+, "length"/gm;
-		const matches = ppRegex.exec(htmlCode);
-		ppThree = `${Math.round(matches[0].replace('"pp": [', '').replace('], "length"', ''))} pp`;
-	} catch (err) {
-		// console.log('error fetching osu-beatmap pp', err);
-		// console.log(`https://osu.gatari.pw/api/v1/pp?b=${beatmap.beatmapId}&a=100&x=0&c=${beatmap.maxCombo}&m=${beatmap.mods}`);
-	}
-
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('100% Accuracy', canvas.width / 1000 * 750, canvas.height / 500 * 410);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(ppThree, canvas.width / 1000 * 750, canvas.height / 500 * 440);
+	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, 100.00, 0, beatmap.maxCombo))} pp`, canvas.width / 1000 * 750, canvas.height / 500 * 440);
 
 	const output = [canvas, ctx, beatmap];
 	return output;

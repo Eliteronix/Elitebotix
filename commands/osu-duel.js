@@ -699,8 +699,8 @@ module.exports = {
 							await channel.sendMessage(`Congratulations ${dbPlayers[1].osuName} for winning the match!`);
 						}
 						await channel.sendMessage('Thank you for playing! The lobby will automatically close in one minute.');
-						await pause(60000);
-						await channel.sendMessage('!mp close');
+						await pause(5000);
+
 						// eslint-disable-next-line no-undef
 						const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 							// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -772,6 +772,9 @@ module.exports = {
 							.catch(() => {
 								//Nothing
 							});
+
+						await pause(55000);
+						await channel.sendMessage('!mp close');
 
 						try {
 							await processQueueTask.destroy();

@@ -36,7 +36,10 @@ module.exports = {
 				additions: {
 					[Op.like]: `${msg.author.id}%`,
 				}
-			}
+			},
+			order: [
+				['date', 'ASC'],
+			]
 		});
 
 		if (reminders.length === 0) {

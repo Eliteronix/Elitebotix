@@ -1,4 +1,4 @@
-const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBOsuBeatmaps } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBOsuBeatmaps, DBElitiriCupSubmissions } = require('../dbObjects');
 const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool, getUserDuelStarRating } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
@@ -4978,12 +4978,55 @@ module.exports = {
 		} else if (args[0] === 'connectTwitch') {
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
-					osuName: args[1]
+					osuUserId: args[1]
 				}
 			});
 
 			discordUser.twitchName = args[2].toLowerCase();
 			discordUser.save();
+		} else if (args[0] === 'addElitiriTopBracketNMMap') {
+			// eslint-disable-next-line no-undef
+			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+			});
+
+			osuApi.getBeatmaps({ b: args[1] })
+				.then(async (beatmaps) => {
+					DBElitiriCupSubmissions.create({
+						osuUserId: '-1',
+						osuName: 'ECW 2021 Submission',
+						bracketName: 'Top Bracket',
+						tournamentName: currentElitiriCup,
+						modPool: 'NM',
+						title: beatmaps[0].title,
+						artist: beatmaps[0].artist,
+						difficulty: beatmaps[0].version,
+						starRating: beatmaps[0].difficulty.rating,
+						drainLength: beatmaps[0].length.drain,
+						circleSize: beatmaps[0].difficulty.size,
+						approachRate: beatmaps[0].difficulty.approach,
+						overallDifficulty: beatmaps[0].difficulty.overall,
+						hpDrain: beatmaps[0].difficulty.drain,
+						mapper: beatmaps[0].creator,
+						beatmapId: beatmaps[0].id,
+						beatmapsetId: beatmaps[0].beatmapSetId,
+						bpm: beatmaps[0].bpm,
+					});
+				})
+				.catch(error => {
+					console.log(error);
+				});
+		} else if (args[0] === 'fixOopsie') {
+			let map = await DBElitiriCupSubmissions.findOne({
+				where: {
+					id: args[1]
+				}
+			});
+
+			await map.destroy();
 		} else {
 			msg.reply('Invalid command');
 		}

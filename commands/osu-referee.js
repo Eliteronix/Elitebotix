@@ -100,7 +100,7 @@ module.exports = {
 									if (dbDiscordUser) {
 										dbPlayers.push(dbDiscordUser.id);
 									} else {
-										return interaction.followUp(`${user.name}\` doesn't have their account connected. Please tell them to connect their account using \`/osu-link connect\`. (Use \`_\` instead of spaces)`);
+										return interaction.followUp(`\`${user.name}\` doesn't have their account connected. Please tell them to connect their account using \`/osu-link connect\`. (Use \`_\` instead of spaces)`);
 									}
 								})
 								.catch(err => {

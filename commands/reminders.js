@@ -32,7 +32,10 @@ module.exports = {
 				additions: {
 					[Op.like]: `${msg.author.id}%`,
 				}
-			}
+			},
+			order: [
+				['date', 'ASC'],
+			]
 		});
 
 		if (reminders.length === 0) {
@@ -69,6 +72,5 @@ module.exports = {
 				});
 		}
 		return interaction.reply({ content: message, ephemeral: true });
-
 	}
 };
