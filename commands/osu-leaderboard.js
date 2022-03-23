@@ -39,7 +39,6 @@ module.exports = {
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const mode = commandConfig[2];
-
 		msg.guild.members.fetch()
 			.then(async (guildMembers) => {
 				const members = [];
@@ -141,10 +140,10 @@ module.exports = {
 					page = null;
 				}
 
-				let filename = `osu-leaderboard-${msg.author.id}-${msg.guild.name}.png`;
+				let filename = `osu-leaderboard-${msg.author.id}-mode-${getGameModeName(mode)}-${msg.guild.name}.png`;
 
 				if (page) {
-					filename = `osu-leaderboard-${msg.author.id}-${msg.guild.name}-page${page}.png`;
+					filename = `osu-leaderboard-${msg.author.id}-mode-${getGameModeName(mode)}-${msg.guild.name}-page${page}.png`;
 				}
 
 				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${msg.guild.name}'s osu! ${getGameModeName(mode)} leaderboard`, filename, page);

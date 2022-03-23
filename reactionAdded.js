@@ -161,11 +161,11 @@ module.exports = async function (reaction, user, additionalObjects) {
 	if (reaction.message.attachments.first() && reaction.message.attachments.first().name.match(/.+leaderboard.+page.+/g)) {
 		let commandName = reaction.message.attachments.first().name.match(/.+leaderboard/g);
 		let page = reaction.message.attachments.first().name.replace(/.+page/g, '').replace('.png', '');
+		let mode = reaction.message.attachments.first().name.replace(/.+mode-/gm, '').replace(/-.+/gm, '');
 
 		if (reaction.message.attachments.first().name.replace(/.+leaderboard-/g, '').replace(/-.+/g, '') !== user.id) {
 			return;
 		}
-
 		if (reaction._emoji.name === '◀️') {
 			page--;
 		} else if (reaction._emoji.name === '▶️') {
@@ -173,19 +173,28 @@ module.exports = async function (reaction, user, additionalObjects) {
 		} else {
 			return;
 		}
-
+		let message;
 		if (commandName[0] !== 'osu-duelrating-leaderboard') {
-			let message = {
-				guild: reaction.message.guild,
-				guildId: reaction.message.guild.id,
-				content: `e!${commandName[0]} ${page}`,
-				author: user,
-				channel: reaction.message.channel,
-			};
-
 			const command = require(`./commands/${commandName[0]}.js`);
-
-			command.execute(message, [page], null, additionalObjects);
+			if (commandName[0] == 'osu-leaderboard') {
+				message = {
+					guild: reaction.message.guild,
+					guildId: reaction.message.guild.id,
+					content: `e!${commandName[0]} --${mode} ${page}`,
+					author: user,
+					channel: reaction.message.channel,
+				};
+				command.execute(message, [page, `--${mode}`], null, additionalObjects);
+			} else {
+				message = {
+					guild: reaction.message.guild,
+					guildId: reaction.message.guild.id,
+					content: `e!${commandName[0]} ${page}`,
+					author: user,
+					channel: reaction.message.channel,
+				};
+				command.execute(message, [page], null, additionalObjects);
+			}
 		} else {
 			let interaction = {
 				guild: reaction.message.guild,
