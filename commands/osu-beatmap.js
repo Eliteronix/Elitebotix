@@ -259,10 +259,10 @@ async function drawStats(input) {
 
 	const totalLengthSeconds = (beatmap.totalLength % 60) + '';
 	const totalLengthMinutes = (beatmap.totalLength - beatmap.totalLength % 60) / 60;
-	const totalLength = totalLengthMinutes + ':' + totalLengthSeconds.padStart(2, '0');
+	const totalLength = totalLengthMinutes + ':' + Math.round(totalLengthSeconds.padStart(2, '0'));
 	const drainLengthSeconds = (beatmap.drainLength % 60) + '';
 	const drainLengthMinutes = (beatmap.drainLength - beatmap.drainLength % 60) / 60;
-	const drainLength = drainLengthMinutes + ':' + drainLengthSeconds.padStart(2, '0');
+	const drainLength = drainLengthMinutes + ':' + Math.round(drainLengthSeconds.padStart(2, '0'));
 
 	//Round user rating and display as 10 stars
 	const userRating = Math.round(beatmap.userRating);
