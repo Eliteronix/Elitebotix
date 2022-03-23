@@ -4851,6 +4851,8 @@ module.exports = {
 			});
 
 			if (!discordUser) {
+
+				console.log(1);
 				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -4861,7 +4863,7 @@ module.exports = {
 
 				let user = await osuApi.getUser({ u: args[1], m: 0 });
 
-				let duelRating = await getUserDuelStarRating(user.id, msg.client);
+				let duelRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
 
 				discordUser = {
 					osuName: user.name,
