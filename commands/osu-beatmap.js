@@ -73,7 +73,7 @@ module.exports = {
 		let modBits = getModBits(mods);
 
 		args.forEach(async (arg) => {
-			let modCompatibility = await checkModsCompatibility(modBits, arg);
+			let modCompatibility = await checkModsCompatibility(modBits, getIDFromPotentialOsuLink(arg));
 			if (!modCompatibility) {
 				modBits = 0;
 			}
