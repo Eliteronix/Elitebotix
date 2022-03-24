@@ -200,7 +200,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 				//Add and count mappers
 				let mapperAdded = false;
-				const dbBeatmap = await getOsuBeatmap(topScores[i].beatmapId, topScores[i].raw_mods);
+				const dbBeatmap = await getOsuBeatmap({ beatmapId: topScores[i].beatmapId, modBits: topScores[i].raw_mods });
 				for (let j = 0; j < mappers.length && !mapperAdded; j++) {
 					if (mappers[j] && dbBeatmap && mappers[j].mapper === dbBeatmap.mapper) {
 						mappers[j].amount++;
@@ -814,7 +814,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 				//Save the maps locally
 				for (let i = 0; i < userScores.length; i++) {
-					let dbBeatmap = await getOsuBeatmap(userScores[i].beatmapId, userScores[i].gameRawMods);
+					let dbBeatmap = await getOsuBeatmap({ beatmapId: userScores[i].beatmapId, modBits: userScores[i].gameRawMods });
 					if (dbBeatmap && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.approvalStatus !== 'Ranked') {
 						await pause(500);
 					}

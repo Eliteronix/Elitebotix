@@ -62,7 +62,7 @@ module.exports = {
 			while (amountOfMapsInDB === -1) {
 				const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
 
-				const dbBeatmap = await getOsuBeatmap(mostRecentBeatmap[0].id, 0);
+				const dbBeatmap = await getOsuBeatmap({ beatmapId: mostRecentBeatmap[0].id, modBits: 0 });
 
 				if (dbBeatmap) {
 					amountOfMapsInDB = dbBeatmap.id;

@@ -683,7 +683,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 		if (reaction.message.attachments.first().name.startsWith('osu-beatmap')) {
 			const beatmapId = reaction.message.attachments.first().name.replace('osu-beatmap-', '').replace(/-.+/gm, '');
 
-			const dbBeatmap = await getOsuBeatmap(beatmapId, 0);
+			const dbBeatmap = await getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
 
 			//get the mods used
 			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');

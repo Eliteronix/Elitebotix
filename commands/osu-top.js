@@ -344,7 +344,7 @@ async function drawTopPlays(input, server, mode, msg, recentScores, showLimit) {
 		ctx.textAlign = 'right';
 		ctx.fillText(humanReadable(Math.round(scores[i].pp)) + 'pp', (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
 
-		const dbBeatmap = await getOsuBeatmap(scores[i].beatmapId, 0);
+		const dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: 0 });
 		let beatmapTitle = `${dbBeatmap.title} by ${dbBeatmap.artist}`;
 		const maxSize = canvas.width / 250 * 19;
 		if (beatmapTitle.length > maxSize) {
