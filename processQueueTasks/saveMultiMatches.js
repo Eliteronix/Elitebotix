@@ -62,7 +62,7 @@ module.exports = {
 						} else {
 							channel = await client.channels.fetch('892873577479692358');
 						}
-						date.setUTCSeconds(date.getUTCSeconds() + 15);
+						date.setUTCSeconds(date.getUTCSeconds() + 20);
 						channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m ${match.name} done`);
 					}
 					//Go next if match found and ended / too long going already
