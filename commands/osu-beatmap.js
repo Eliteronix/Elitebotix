@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, getOsuPP } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP } = require('../utils');
 const { Permissions } = require('discord.js');
 const { DBOsuMultiScores } = require('../dbObjects');
 const { Op } = require('sequelize');
@@ -69,9 +69,14 @@ module.exports = {
 			}
 		}
 
+
 		let modBits = getModBits(mods);
 
 		args.forEach(async (arg) => {
+			let modCompatibility = await checkModsCompatibility(modBits, getIDFromPotentialOsuLink(arg));
+			if (!modCompatibility) {
+				modBits = 0;
+			}
 			const dbBeatmap = await getOsuBeatmap(getIDFromPotentialOsuLink(arg), modBits);
 			if (dbBeatmap) {
 				getBeatmap(msg, interaction, dbBeatmap);
@@ -254,10 +259,10 @@ async function drawStats(input) {
 
 	const totalLengthSeconds = (beatmap.totalLength % 60) + '';
 	const totalLengthMinutes = (beatmap.totalLength - beatmap.totalLength % 60) / 60;
-	const totalLength = totalLengthMinutes + ':' + totalLengthSeconds.padStart(2, '0');
+	const totalLength = totalLengthMinutes + ':' + Math.round(totalLengthSeconds.padStart(2, '0'));
 	const drainLengthSeconds = (beatmap.drainLength % 60) + '';
 	const drainLengthMinutes = (beatmap.drainLength - beatmap.drainLength % 60) / 60;
-	const drainLength = drainLengthMinutes + ':' + drainLengthSeconds.padStart(2, '0');
+	const drainLength = drainLengthMinutes + ':' + Math.round(drainLengthSeconds.padStart(2, '0'));
 
 	//Round user rating and display as 10 stars
 	const userRating = Math.round(beatmap.userRating);
