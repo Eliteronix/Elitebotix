@@ -74,7 +74,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 								.addField('Attachment', attachment.name)
 								.setImage(attachment.url);
 						});
-						
+
 						if (starBoardedMessage.starBoardMessageStarsQuantityMax <= reaction.count || starBoardedMessage.starBoardMessageStarsQuantityMax == null) {
 							starBoardedMessage.starBoardMessageStarsQuantityMax = reaction.count;
 							starBoardedMessage.save();
@@ -196,9 +196,15 @@ module.exports = async function (reaction, user, additionalObjects) {
 				command.execute(message, [page], null, additionalObjects);
 			}
 		} else {
+			let guild = null;
+			let guildId = null;
+			if (reaction.message.guild) {
+				guild = reaction.message.guild;
+				guildId = reaction.message.guild.id;
+			}
 			let interaction = {
-				guild: reaction.message.guild,
-				guildId: reaction.message.guild.id,
+				guild: guild,
+				guildId: guildId,
 				options: {
 					_subcommand: 'rating-leaderboard',
 					_hoistedOptions: [{ name: 'page', value: page }]
