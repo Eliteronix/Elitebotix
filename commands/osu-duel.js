@@ -384,14 +384,14 @@ module.exports = {
 						const index = Math.floor(Math.random() * beatmaps.length);
 
 						if (modPools[i] === 'HD') {
-							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 0);
+							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
 							beatmaps[index].starRating = adjustHDStarRating(beatmaps[index].starRating, beatmaps[index].approachRate);
 						} else if (modPools[i] === 'HR') {
-							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 16);
+							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 16 });
 						} else if (modPools[i] === 'DT') {
-							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 64);
+							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 64 });
 						} else {
-							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 0);
+							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
 						}
 
 						if (!beatmaps[index]) {

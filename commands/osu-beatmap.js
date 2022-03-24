@@ -77,7 +77,7 @@ module.exports = {
 			if (!modCompatibility) {
 				modBits = 0;
 			}
-			const dbBeatmap = await getOsuBeatmap(getIDFromPotentialOsuLink(arg), modBits);
+			const dbBeatmap = await getOsuBeatmap({ beatmapId: getIDFromPotentialOsuLink(arg), modBits: modBits });
 			if (dbBeatmap) {
 				getBeatmap(msg, interaction, dbBeatmap);
 			} else {

@@ -76,7 +76,7 @@ module.exports = {
 
 		const beatmapId = getIDFromPotentialOsuLink(args.shift());
 
-		const dbBeatmap = await getOsuBeatmap(beatmapId, 0);
+		const dbBeatmap = await getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
 		if (!dbBeatmap) {
 			return msg.channel.send(`Couldn't find beatmap \`${beatmapId.replace(/`/g, '')}\``);
 		} else if (dbBeatmap.mode !== 'Standard') {
@@ -349,21 +349,21 @@ async function drawTitle(input, mode) {
 	if (mods.includes('DT') || mods.includes('HT') || mods.includes('HR') || mods.includes('EZ')) {
 		let modMap = beatmap;
 		if (mods.includes('DT') && mods.includes('HR')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 80);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 80 });
 		} else if (mods.includes('DT') && mods.includes('EZ')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 66);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 66 });
 		} else if (mods.includes('DT')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 64);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 64 });
 		} else if (mods.includes('HT') && mods.includes('HR')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 272);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 272 });
 		} else if (mods.includes('HT') && mods.includes('EZ')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 258);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 258 });
 		} else if (mods.includes('HT')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 256);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 256 });
 		} else if (mods.includes('EZ')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 2);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 2 });
 		} else if (mods.includes('HR')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 16);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 16 });
 		}
 		ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100} (${Math.round(modMap.starRating * 100) / 100} with ${mods.join('')})  ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 90, canvas.height / 500 * 70);
 	} else {

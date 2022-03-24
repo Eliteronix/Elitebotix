@@ -860,8 +860,8 @@ module.exports = {
 		//Otherwise its on the correct server
 		return false;
 	},
-	async getOsuBeatmap(beatmapId, modBits) {
-		return await getOsuBeatmapFunction(beatmapId, modBits);
+	async getOsuBeatmap(input) {
+		return await getOsuBeatmapFunction(input);
 	},
 	async getMatchesPlanned(startDate, endDate) {
 		let matchesPlanned = 0;
@@ -1084,17 +1084,17 @@ module.exports = {
 				//Get the most recent data
 				let dbBeatmap = null;
 				if (modPools[modIndex] === 'HR') {
-					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 16);
+					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 16 });
 				} else if (modPools[modIndex] === 'DT') {
-					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 64);
+					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 64 });
 				} else if (modPools[modIndex] === 'FM') {
-					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 16);
-					let dbBeatmap2 = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
+					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 16 });
+					let dbBeatmap2 = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 0 });
 					if (dbBeatmap && dbBeatmap2) {
 						dbBeatmap.starRating = (parseFloat(dbBeatmap.starRating) * 2 + parseFloat(dbBeatmap2.starRating)) / 3;
 					}
 				} else {
-					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
+					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 0 });
 				}
 
 				//Filter by ranked maps > 4*
@@ -1375,7 +1375,7 @@ module.exports = {
 		let stars = [];
 		for (let i = 0; i < topScores.length; i++) {
 			//Add difficulty ratings
-			const dbBeatmap = await getOsuBeatmapFunction(topScores[i].beatmapId, topScores[i].raw_mods);
+			const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: topScores[i].beatmapId, modBits: topScores[i].raw_mods });
 			if (dbBeatmap && dbBeatmap.starRating && parseFloat(dbBeatmap.starRating) > 0) {
 				stars.push(dbBeatmap.starRating);
 			}
@@ -1548,7 +1548,7 @@ module.exports = {
 							prefix = '';
 						}
 
-						let dbBeatmap = await getOsuBeatmapFunction(map, 0);
+						let dbBeatmap = await getOsuBeatmapFunction({ beatmapId: map, modBits: 0 });
 
 						await IRCUser.sendMessage(`${prefix}${context['display-name']} -> https://osu.ppy.sh/b/${dbBeatmap.beatmapId} [${dbBeatmap.approvalStatus}] ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);
 						if (message) {
@@ -1573,7 +1573,7 @@ module.exports = {
 		return twitchClient;
 	},
 	async checkModsCompatibility(input, beatmapId) { //input = mods | beatmapMode needs to be NOT ID
-		let beatmap = await getOsuBeatmapFunction(beatmapId, input);
+		let beatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: input });
 		if (beatmap) {
 			let mods = getModsFunction(input);
 			if (beatmap.mode !== 'Mania') {
@@ -1627,7 +1627,7 @@ module.exports = {
 		const path = `./maps/${beatmapId}.osu`;
 
 		//Force download if the map is recently updated in the database and therefore probably updated
-		const dbBeatmap = await getOsuBeatmapFunction(beatmapId, 0);
+		const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: 0 });
 
 		const recent = new Date();
 		recent.setUTCMinutes(recent.getUTCMinutes() - 3);
@@ -1727,7 +1727,17 @@ function fitTextOnMiddleCanvasFunction(ctx, text, startingSize, fontface, yPosit
 
 }
 
-async function getOsuBeatmapFunction(beatmapId, modBits) {
+async function getOsuBeatmapFunction(input) {
+	let beatmapId = input.beatmapId;
+	let modBits = 0;
+	if (input.modBits) {
+		modBits = input.modBits;
+	}
+	let forceUpdate = false;
+	if (input.forceUpdate) {
+		forceUpdate = true;
+	}
+
 	let lastRework = new Date();
 	lastRework.setUTCFullYear(2021);
 	lastRework.setUTCMonth(10);
@@ -1755,6 +1765,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 				}
 
 				if (!dbBeatmap
+					|| forceUpdate
 					|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
 					|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && (!dbBeatmap.updatedAt || dbBeatmap.updatedAt.getTime() < lastWeek.getTime()) //Update if old non-ranked map
 					|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0 || !dbBeatmap.mode)) { //Always update ranked maps if values are missing
@@ -1770,7 +1781,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 						.then(async (beatmaps) => {
 							let noVisualModBeatmap = beatmaps[0];
 							if (getModsFunction(modBits).includes('MI') || getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL') || getModsFunction(modBits).includes('FI') || getModsFunction(modBits).includes('NF') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('PF') || getModsFunction(modBits).includes('SD')) {
-								let realNoVisualModBeatmap = await getOsuBeatmapFunction(beatmapId, getModBitsFunction(getModsFunction(modBits).join(''), true));
+								let realNoVisualModBeatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: getModBitsFunction(getModsFunction(modBits).join(''), true) });
 								noVisualModBeatmap.difficulty.rating = realNoVisualModBeatmap.starRating;
 								noVisualModBeatmap.difficulty.aim = realNoVisualModBeatmap.aimRating;
 								noVisualModBeatmap.difficulty.speed = realNoVisualModBeatmap.speedRating;

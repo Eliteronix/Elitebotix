@@ -68,7 +68,7 @@ module.exports = {
 								return interaction.followUp(`${maps[j].substring(0, 2)} is not a valid mod.`);
 							}
 
-							let dbBeatmap = await getOsuBeatmap(maps[j].substring(2), modBits);
+							let dbBeatmap = await getOsuBeatmap({ beatmapId: maps[j].substring(2), modBits: modBits });
 
 							if (dbBeatmap) {
 								dbMaps.push(dbBeatmap.id);
