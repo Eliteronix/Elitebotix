@@ -667,7 +667,11 @@ async function drawAccInfo(input, mode, mapRank) {
 
 	//PP
 	roundedRect(ctx, canvas.width / 1000 * 870, canvas.height / 500 * 365, 110, 50, 5, '00', '00', '00', 0.5);
-	ctx.fillStyle = '#ffffff';
+	if (beatmap.approvalStatus !== 'Ranked') {
+		ctx.fillStyle = '#808080';	
+	} else {
+		ctx.fillStyle = '#ffffff';
+	}
 	ctx.textAlign = 'center';
 	ctx.fillText('PP', canvas.width / 1000 * 870 + 55, canvas.height / 500 * 385);
 	ctx.fillText(`${pp}`, canvas.width / 1000 * 870 + 55, canvas.height / 500 * 410);
