@@ -36,6 +36,14 @@ module.exports = {
 			}
 		}
 		const guildPrefix = await getGuildPrefix(msg);
+		let pass = false;
+		for (let i = 0; i < args.length; i++) {
+			if (args[i] === '--pass') {
+				pass = true;
+				args.splice(i, 1);
+				i--;
+			}
+		}
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
@@ -45,10 +53,10 @@ module.exports = {
 		if (!args[0]) {//Get profile by author if no argument
 			//get discordUser from db
 			if (commandUser && commandUser.osuUserId) {
-				getScore(msg, commandUser.osuUserId, server, mode);
+				getScore(msg, commandUser.osuUserId, server, mode, false, pass);
 			} else {
 				const userDisplayName = await getMessageUserDisplayname(msg);
-				getScore(msg, userDisplayName, server, mode);
+				getScore(msg, userDisplayName, server, mode, false, pass);
 			}
 		} else {
 			//Get profiles by arguments
@@ -60,7 +68,7 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getScore(msg, discordUser.osuUserId, server, mode);
+						getScore(msg, discordUser.osuUserId, server, mode, false, pass);
 					} else {
 						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
 						getScore(msg, args[i], server, mode);
@@ -69,12 +77,12 @@ module.exports = {
 
 					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getScore(msg, getIDFromPotentialOsuLink(args[i]), server, mode, true);
+							getScore(msg, getIDFromPotentialOsuLink(args[i]), server, mode, true, pass);
 						} else {
-							getScore(msg, getIDFromPotentialOsuLink(args[i]), server, mode);
+							getScore(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, pass);
 						}
 					} else {
-						getScore(msg, getIDFromPotentialOsuLink(args[i]), server, mode);
+						getScore(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, pass);
 					}
 				}
 			}
@@ -82,7 +90,7 @@ module.exports = {
 	},
 };
 
-async function getScore(msg, username, server, mode, noLinkedAccount) {
+async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 	if (server === 'bancho') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -91,14 +99,23 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
-
+		let i = 0;
 		osuApi.getUserRecent({ u: username, m: mode })
 			.then(async (scores) => {
 				if (!(scores[0])) {
 					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; --r for ripple; Use --s/--t/--c/--m for modes)`);
+				} else {
+					if (pass) {
+						do {
+							i++;
+						} while (scores[i] && scores[i].rank == 'F');
+						if (scores[i].rank == 'F') {
+							return msg.channel.send(`Couldn't find any recent passes for \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; --r for ripple; Use --s/--t/--c/--m for modes)`);
+						}
+					}
 				}
 
-				const dbBeatmap = await getOsuBeatmap(scores[0].beatmapId, 0);
+				const dbBeatmap = await getOsuBeatmap(scores[i].beatmapId, 0);
 				const user = await osuApi.getUser({ u: username, m: mode });
 				updateOsuDetailsforUser(user, mode);
 
@@ -107,7 +124,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 				await osuApi.getScores({ b: dbBeatmap.beatmapId, m: mode, limit: 100 })
 					.then(async (mapScores) => {
 						for (let j = 0; j < mapScores.length && !mapRank; j++) {
-							if (scores[0].raw_mods === mapScores[j].raw_mods && scores[0].user.id === mapScores[j].user.id && scores[0].score === mapScores[j].score) {
+							if (scores[i].raw_mods === mapScores[j].raw_mods && scores[i].user.id === mapScores[j].user.id && scores[i].score === mapScores[j].score) {
 								mapRank = j + 1;
 							}
 						}
@@ -123,7 +140,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 				let lookedUpScore;
 
 				try {
-					lookedUpScore = await osuApi.getScores({ b: scores[0].beatmapId, u: user.id, m: beatmapMode, mods: scores[0].raw_mods });
+					lookedUpScore = await osuApi.getScores({ b: scores[i].beatmapId, u: user.id, m: beatmapMode, mods: scores[i].raw_mods });
 				} catch (err) {
 					//No score found
 				}
@@ -143,9 +160,9 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 				const background = await Canvas.loadImage('./other/osu-background.png');
 				ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-				let elements = [canvas, ctx, scores[0], dbBeatmap, user];
+				let elements = [canvas, ctx, scores[i], dbBeatmap, user];
 				if (lookedUpScore) {
-					elements = [canvas, ctx, scores[0], dbBeatmap, user, lookedUpScore[0]];
+					elements = [canvas, ctx, scores[i], dbBeatmap, user, lookedUpScore[0]];
 				}
 
 				elements = await drawTitle(elements, mode);
@@ -159,7 +176,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 				await drawUserInfo(elements, server);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${dbBeatmap.beatmapId}-${scores[0].raw_mods}.png`);
+				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${dbBeatmap.beatmapId}-${scores[i].raw_mods}.png`);
 
 				let guildPrefix = await getGuildPrefix(msg);
 

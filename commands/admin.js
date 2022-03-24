@@ -1122,6 +1122,19 @@ module.exports = {
 			// 		description: 'Sends an info card about the specified player',
 			// 		options: [
 			// 			{
+			// 				'name': 'not-failed',
+			// 				'description': 'Show the recent pass?',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'True',
+			// 						'value': '--pass'
+			// 					},
+
+			// 				]
+			// 			},
+			// 			{
 			// 				'name': 'username',
 			// 				'description': 'The username, id or link of the player',
 			// 				'type': 3,
@@ -1160,6 +1173,19 @@ module.exports = {
 			// 		name: 'ors',
 			// 		description: 'Sends an info card about the last score of the specified player',
 			// 		options: [
+			// 			{
+			// 				'name': 'not-failed',
+			// 				'description': 'Show the recent pass?',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'True',
+			// 						'value': '--pass'
+			// 					},
+
+			// 				]
+			// 			},
 			// 			{
 			// 				'name': 'username',
 			// 				'description': 'The username, id or link of the player',
@@ -3465,6 +3491,19 @@ module.exports = {
 					description: 'Sends an info card about the specified player',
 					options: [
 						{
+							'name': 'not-failed',
+							'description': 'Show the recent pass?',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'True',
+									'value': '--pass'
+								},
+
+							]
+						},
+						{
 							'name': 'username',
 							'description': 'The username, id or link of the player',
 							'type': 3,
@@ -3503,6 +3542,19 @@ module.exports = {
 					name: 'ors',
 					description: 'Sends an info card about the last score of the specified player',
 					options: [
+						{
+							'name': 'not-failed',
+							'description': 'Show the recent pass?',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'True',
+									'value': '--pass'
+								},
+
+							]
+						},
 						{
 							'name': 'username',
 							'description': 'The username, id or link of the player',
