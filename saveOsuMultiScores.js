@@ -3,12 +3,15 @@ const { DBOsuMultiScores, DBOsuBeatmaps } = require('./dbObjects');
 
 // eslint-disable-next-line no-undef
 process.on('message', async (message) => {
+	let start = new Date();
 	let match = JSON.parse(message);
 
 	let tourneyMatch = false;
 	if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 		tourneyMatch = true;
 	}
+	//log how long it takes to process the match
+	console.log(`${match.name} took ${new Date() - start}ms to process`);
 
 	for (let gameIndex = 0; gameIndex < match.games.length; gameIndex++) {
 		//Define if the game is freemod or not
@@ -22,6 +25,7 @@ process.on('message', async (message) => {
 				}
 			}
 		}
+		console.log(`Freemod took ${new Date() - start}ms to process`);
 
 		for (let scoreIndex = 0; scoreIndex < match.games[gameIndex].scores.length; scoreIndex++) {
 			//Calculate evaluation
@@ -41,6 +45,7 @@ process.on('message', async (message) => {
 						i--;
 					}
 				}
+				console.log(`Gamescores sort and clean up took ${new Date() - start}ms to process`);
 
 				let sortedScores = [];
 				for (let j = 0; j < gameScores.length; j++) {
@@ -55,11 +60,14 @@ process.on('message', async (message) => {
 				for (let i = 0; i < gameScores.length; i++) {
 					if (match.games[gameIndex].scores[scoreIndex].userId === gameScores[i].userId && gameScores.length > 1) {
 						evaluation = 1 / parseInt(middleScore) * parseInt(gameScores[i].score);
+						console.log('Evaluation done');
 					}
 				}
+				console.log(`Evaluation took ${new Date() - start}ms to process`);
 			}
 
 			try {
+				let startDataUpdate = new Date();
 				//Add score to db
 				logDatabaseQueries(2, 'saveosuMultiScores.js');
 				const existingScore = await DBOsuMultiScores.findOne({
@@ -124,11 +132,16 @@ process.on('message', async (message) => {
 						}
 					}
 				}
+				let dataUpdate = new Date() - startDataUpdate;
+				console.log('Took ' + dataUpdate + 'ms to save score to db');
 			} catch (error) {
 				scoreIndex--;
 			}
 		}
 	}
+	//get the time difference compared to start
+	const finalTimeDiff = new Date() - start;
+	console.log(`${finalTimeDiff}ms to finish match ${match.name}`);
 
 	// eslint-disable-next-line no-undef
 	process.send('done');
