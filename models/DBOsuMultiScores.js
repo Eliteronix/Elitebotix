@@ -28,5 +28,13 @@ module.exports = (sequelize, DataTypes) => {
 		forceMod: DataTypes.BOOLEAN,
 		warmup: DataTypes.BOOLEAN,
 		paranoid: true,
-	});
+	},
+		{
+			indexes: [
+				{
+					unique: false,
+					fields: ['osuUserId', 'matchId', 'gameId']
+				}
+			]
+		});
 };
