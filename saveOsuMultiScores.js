@@ -3,7 +3,6 @@ const { DBOsuMultiScores, DBOsuBeatmaps } = require('./dbObjects');
 
 // eslint-disable-next-line no-undef
 process.on('message', async (message) => {
-	let start = new Date();
 	let match = JSON.parse(message);
 
 	let tourneyMatch = false;
@@ -61,7 +60,6 @@ process.on('message', async (message) => {
 			}
 
 			try {
-				let startDataUpdate = new Date();
 				//Add score to db
 				logDatabaseQueries(2, 'saveosuMultiScores.js');
 				const existingScore = await DBOsuMultiScores.findOne({
@@ -71,10 +69,8 @@ process.on('message', async (message) => {
 						gameId: match.games[gameIndex].id,
 					}
 				});
-				console.log(`Took ${new Date() - startDataUpdate}ms to get existing score`);
 
 				if (!existingScore) {
-					let createScore = new Date();
 					let score = await DBOsuMultiScores.create({
 						osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
 						matchId: match.id,
@@ -94,19 +90,15 @@ process.on('message', async (message) => {
 						gameEndDate: match.games[gameIndex].raw_end,
 						freeMod: freeMod,
 					});
-					console.log(`Took ${new Date() - createScore}ms to create score`);
 
 					//Set the tournament flags on the corresponding beatmap
 					if (tourneyMatch && !match.name.startsWith('MOTD:')) {
-						let getMaps = new Date();
 						let dbBeatmaps = await DBOsuBeatmaps.findAll({
 							where: {
 								beatmapId: match.games[gameIndex].beatmapId,
 							}
 						});
-						console.log(`Took ${new Date() - getMaps}ms to get maps`);
 
-						let updateMaps = new Date();
 						for (let i = 0; i < dbBeatmaps.length; i++) {
 							if (!dbBeatmaps[i].tourneyMap) {
 								dbBeatmaps[i].tourneyMap = true;
@@ -130,19 +122,13 @@ process.on('message', async (message) => {
 								await dbBeatmaps[i].save({ silent: true });
 							}
 						}
-						console.log(`Took ${new Date() - updateMaps}ms to update maps`);
 					}
 				}
-				let dataUpdate = new Date() - startDataUpdate;
-				console.log('Took ' + dataUpdate + 'ms to save score to db');
 			} catch (error) {
 				scoreIndex--;
 			}
 		}
 	}
-	//get the time difference compared to start
-	const finalTimeDiff = new Date() - start;
-	console.log(`${finalTimeDiff}ms to finish match ${match.name}`);
 
 	// eslint-disable-next-line no-undef
 	process.send('done');
