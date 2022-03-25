@@ -96,5 +96,13 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 		},
 		paranoid: true,
-	});
+	},
+		{
+			indexes: [
+				{
+					unique: false,
+					fields: ['beatmapId', 'mods']
+				}
+			]
+		});
 };
