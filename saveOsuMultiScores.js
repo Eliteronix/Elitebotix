@@ -10,8 +10,6 @@ process.on('message', async (message) => {
 	if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 		tourneyMatch = true;
 	}
-	//log how long it takes to process the match
-	console.log(`${match.name} took ${new Date() - start}ms to process`);
 
 	for (let gameIndex = 0; gameIndex < match.games.length; gameIndex++) {
 		//Define if the game is freemod or not
@@ -25,7 +23,6 @@ process.on('message', async (message) => {
 				}
 			}
 		}
-		console.log(`Freemod took ${new Date() - start}ms to process`);
 
 		for (let scoreIndex = 0; scoreIndex < match.games[gameIndex].scores.length; scoreIndex++) {
 			//Calculate evaluation
@@ -45,7 +42,6 @@ process.on('message', async (message) => {
 						i--;
 					}
 				}
-				console.log(`Gamescores sort and clean up took ${new Date() - start}ms to process`);
 
 				let sortedScores = [];
 				for (let j = 0; j < gameScores.length; j++) {
@@ -60,10 +56,8 @@ process.on('message', async (message) => {
 				for (let i = 0; i < gameScores.length; i++) {
 					if (match.games[gameIndex].scores[scoreIndex].userId === gameScores[i].userId && gameScores.length > 1) {
 						evaluation = 1 / parseInt(middleScore) * parseInt(gameScores[i].score);
-						console.log('Evaluation done');
 					}
 				}
-				console.log(`Evaluation took ${new Date() - start}ms to process`);
 			}
 
 			try {
@@ -77,8 +71,10 @@ process.on('message', async (message) => {
 						gameId: match.games[gameIndex].id,
 					}
 				});
+				console.log(`Took ${new Date() - startDataUpdate}ms to get existing score`);
 
 				if (!existingScore) {
+					let createScore = new Date();
 					let score = await DBOsuMultiScores.create({
 						osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
 						matchId: match.id,
@@ -98,15 +94,19 @@ process.on('message', async (message) => {
 						gameEndDate: match.games[gameIndex].raw_end,
 						freeMod: freeMod,
 					});
+					console.log(`Took ${new Date() - createScore}ms to get create score`);
 
 					//Set the tournament flags on the corresponding beatmap
 					if (tourneyMatch && !match.name.startsWith('MOTD:')) {
+						let getMaps = new Date();
 						let dbBeatmaps = await DBOsuBeatmaps.findAll({
 							where: {
 								beatmapId: match.games[gameIndex].beatmapId,
 							}
 						});
+						console.log(`Took ${new Date() - getMaps}ms to get maps`);
 
+						let updateMaps = new Date();
 						for (let i = 0; i < dbBeatmaps.length; i++) {
 							if (!dbBeatmaps[i].tourneyMap) {
 								dbBeatmaps[i].tourneyMap = true;
@@ -130,6 +130,7 @@ process.on('message', async (message) => {
 								await dbBeatmaps[i].save({ silent: true });
 							}
 						}
+						console.log(`Took ${new Date() - updateMaps}ms to update maps`);
 					}
 				}
 				let dataUpdate = new Date() - startDataUpdate;
