@@ -94,7 +94,7 @@ process.on('message', async (message) => {
 						gameEndDate: match.games[gameIndex].raw_end,
 						freeMod: freeMod,
 					});
-					console.log(`Took ${new Date() - createScore}ms to get create score`);
+					console.log(`Took ${new Date() - createScore}ms to create score`);
 
 					//Set the tournament flags on the corresponding beatmap
 					if (tourneyMatch && !match.name.startsWith('MOTD:')) {
