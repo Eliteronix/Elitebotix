@@ -25,5 +25,7 @@ const DBTickets = require('./models/DBTickets')(sequelize, Sequelize.DataTypes);
 const DBOsuMultiScores = require('./models/DBOsuMultiScores')(sequelize, Sequelize.DataTypes);
 const DBOsuBeatmaps = require('./models/DBOsuBeatmaps')(sequelize, Sequelize.DataTypes);
 const DBElitiriCupLobbies = require('./models/DBElitiriCupLobbies')(sequelize, Sequelize.DataTypes);
+const DBGuildWhiteListed = require('./models/DBGuildWhiteListed')(sequelize, Sequelize.DataTypes);
+const DBGuildBlackListed = require('./models/DBGuildBlackListed')(sequelize, Sequelize.DataTypes);
 
-module.exports = { DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBAutoRoles, DBTemporaryVoices, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps, DBElitiriCupLobbies, DBElitiriCupStaff };
+module.exports = { DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBAutoRoles, DBTemporaryVoices, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps, DBElitiriCupLobbies, DBElitiriCupStaff, DBGuildBlackListed, DBGuildWhiteListed };

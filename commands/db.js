@@ -1,4 +1,4 @@
-const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps, DBElitiriCupStaff, DBElitiriCupLobbies } = require('../dbObjects');
+const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps, DBElitiriCupStaff, DBElitiriCupLobbies, DBGuildBlackListed, DBGuildWhiteListed } = require('../dbObjects');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
 const { logDatabaseQueries } = require('../utils');
@@ -41,6 +41,14 @@ module.exports = {
 			logDatabaseQueries(4, 'commands/db.js DBGuilds');
 			dbList = await DBGuilds.findAll();
 			dbTableName = 'DBGuilds';
+		} else if (args[0] === 'guildblacklist') {
+			logDatabaseQueries(4, 'commands/db.js DBGuildBlackListed');
+			dbList = await DBGuildBlackListed.findAll();
+			dbTableName = 'DBGuildBlackListed';
+		} else if (args[0] === 'guildwhitelist') {
+			logDatabaseQueries(4, 'commands/db.js DBGuildWhiteListed');
+			dbList = await DBGuildWhiteListed.findAll();
+			dbTableName = 'DBGuildWhiteListed';
 		} else if (args[0] === 'reactionroles') {
 			logDatabaseQueries(4, 'commands/db.js DBReactionRoles');
 			dbList = await DBReactionRoles.findAll();
@@ -105,6 +113,10 @@ module.exports = {
 			return msg.reply('no corresponding table found');
 		}
 
+		if (dbList.length === 0) {
+			return msg.reply(`no entries found in ${dbTableName}`);
+		}
+		
 		for (let i = 0; i < dbList.length; i++) {
 			data.push(dbList[i].dataValues);
 

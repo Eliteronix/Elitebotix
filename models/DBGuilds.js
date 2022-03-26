@@ -33,6 +33,14 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		whiteListEnabled: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false
+		},
+		blackListEnabled: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false
+		},
 		goodbyeMessageChannel: DataTypes.STRING,
 		goodbyeMessageText: DataTypes.STRING,
 		temporaryVoices: DataTypes.BOOLEAN,

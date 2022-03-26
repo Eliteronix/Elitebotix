@@ -2364,6 +2364,117 @@ module.exports = {
 			// 	}
 			// });
 
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'whitelist',
+			// 		description: 'Manages the whitelist of the channels',
+			// 		options: [
+			// 			{
+			// 				'name': 'enable',
+			// 				'description': 'Enables the whitelist',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'required': false,
+			// 			},
+			// 			{
+			// 				'name': 'disable',
+			// 				'description': 'Disables the whitelist',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'required': false,
+			// 			},
+			// 			{
+			// 				'name': 'add',
+			// 				'description': 'Adds a channel to the whitelist',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'required': false,
+			// 				'options': [
+			// 					{
+			// 						'name': 'mentioned-channel',
+			// 						'description': 'The channel to add to the whitelist',
+			// 						'type': 7,
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'remove',
+			// 				'description': 'Removes a channel from the whitelist',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'required': false,
+			// 				'options': [
+			// 					{
+			// 						'name': 'mentioned-channel',
+			// 						'description': 'The channel to remove from the whitelist',
+			// 						'type': 7,
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'list',
+			// 				'description': 'Lists all channels in the whitelist',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'required': false,
+			// 			},
+			// 		]
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'blacklist',
+			// 		description: 'Manages the blacklist of the channels',
+			// 		options: [
+			// 			{
+			// 				'name': 'enable',
+			// 				'description': 'Enables the blacklist',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'required': false,
+			// 			},
+			// 			{
+			// 				'name': 'disable',
+			// 				'description': 'Disables the blacklist',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'required': false,
+			// 			},
+			// 			{
+			// 				'name': 'add',
+			// 				'description': 'Adds a channel to the whitelist',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'required': false,
+			// 				'options': [
+			// 					{
+			// 						'name': 'mentioned-channel',
+			// 						'description': 'The channel to add to the whitelist',
+			// 						'type': 7,
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'remove',
+			// 				'description': 'Removes a channel from the whitelist',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'required': false,
+			// 				'options': [
+			// 					{
+			// 						'name': 'mentioned-channel',
+			// 						'description': 'The channel to remove from the whitelist',
+			// 						'type': 7,
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'list',
+			// 				'description': 'Lists all channels in the blacklist',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'required': false,
+			// 			},
+			// 		]
+			// 	}
+			// });
+
+
 
 		} else if (args[0] === 'removeGuildCommands') {
 			const commands = await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.get();
@@ -4573,6 +4684,116 @@ module.exports = {
 							'type': 3,
 							'required': true
 						}
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'whitelist',
+					description: 'Manages the whitelist of the channels',
+					options: [
+						{
+							'name': 'enable',
+							'description': 'Enables the whitelist',
+							'type': 1, // 1 is type SUB_COMMAND
+							'required': false,
+						},
+						{
+							'name': 'disable',
+							'description': 'Disables the whitelist',
+							'type': 1, // 1 is type SUB_COMMAND
+							'required': false,
+						},
+						{
+							'name': 'add',
+							'description': 'Adds a channel to the whitelist',
+							'type': 1, // 1 is type SUB_COMMAND
+							'required': false,
+							'options': [
+								{
+									'name': 'mentioned channel',
+									'description': 'The channel to add to the whitelist',
+									'type': 7, // 7 is type CHANNEL
+									'required': true
+								},
+							]
+						},
+						{
+							'name': 'remove',
+							'description': 'Removes a channel from the whitelist',
+							'type': 1, // 1 is type SUB_COMMAND
+							'required': false,
+							'options': [
+								{
+									'name': 'mentioned channel',
+									'description': 'The channel to remove from the whitelist',
+									'type': 7, // 7 is type CHANNEL
+									'required': true
+								},
+							]
+						},
+						{
+							'name': 'list',
+							'description': 'Lists all channels in the whitelist',
+							'type': 1, // 1 is type SUB_COMMAND
+							'required': false,
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'blacklist',
+					description: 'Manages the blacklist of the channels',
+					options: [
+						{
+							'name': 'enable',
+							'description': 'Enables the blacklist',
+							'type': 1, // 1 is type SUB_COMMAND
+							'required': false,
+						},
+						{
+							'name': 'disable',
+							'description': 'Disables the blacklist',
+							'type': 1, // 1 is type SUB_COMMAND
+							'required': false,
+						},
+						{
+							'name': 'add',
+							'description': 'Adds a channel to the whitelist',
+							'type': 1, // 1 is type SUB_COMMAND
+							'required': false,
+							'options': [
+								{
+									'name': 'mentioned channel',
+									'description': 'The channel to add to the whitelist',
+									'type': 7,
+									'required': true
+								},
+							]
+						},
+						{
+							'name': 'remove',
+							'description': 'Removes a channel from the whitelist',
+							'type': 1, // 1 is type SUB_COMMAND
+							'required': false,
+							'options': [
+								{
+									'name': 'mentioned channel',
+									'description': 'The channel to remove from the whitelist',
+									'type': 7,
+									'required': true
+								},
+							]
+						},
+						{
+							'name': 'list',
+							'description': 'Lists all channels in the blacklist',
+							'type': 1, // 1 is type SUB_COMMAND
+							'required': false,
+						},
 					]
 				}
 			});

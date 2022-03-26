@@ -5,7 +5,7 @@ const osu = require('node-osu');
 const cooldowns = new Discord.Collection();
 const { closest } = require('fastest-levenshtein');
 const { Permissions } = require('discord.js');
-const { DBElitiriCupSignUp, DBTickets } = require('./dbObjects');
+const { DBElitiriCupSignUp, DBTickets, DBGuildBlackListed, DBGuildWhiteListed, DBGuilds } = require('./dbObjects');
 const { developers, currentElitiriCup } = require('./config.json');
 
 module.exports = async function (msg, bancho, twitchClient) {
@@ -62,6 +62,53 @@ module.exports = async function (msg, bancho, twitchClient) {
 		//Set the command and check for possible uses of aliases
 		let command = msg.client.commands.get(commandName)
 			|| msg.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+		
+		if (command){
+			if (msg.channel.type !== 'DM') {
+				let guild = await DBGuilds.findOne({
+					where: { guildId: msg.guildId }
+				});
+				// if not guild exists, create it
+				if (!guild) {
+					DBGuilds.create({
+						guildId: msg.guildId,
+						guildName: msg.guild.name
+					});
+				}
+				// check if the command is whitelist or blacklist
+				if (command.name !== 'whitelist' && command.name !== 'blacklist') {
+				// check if the guild has a whitelist enabled
+					if (guild.whiteListEnabled) {
+						let channelWhiteList = await DBGuildWhiteListed.findOne({
+							where: {
+								guildId: msg.guildId,
+								whiteListedChannelId: msg.channel.id
+							}
+						});
+						// if the channel is not whitelisted, return
+						if (!channelWhiteList) return;
+						if (channelWhiteList.whiteListedChannelId !== msg.channel.id) {
+							return;
+						}
+					// check if the guild has a blacklist enabled
+					} else if (guild.blackListEnabled) {
+						let channelBlackList = await DBGuildBlackListed.findOne({
+							where: {
+								guildId: msg.guildId,
+								blackListedChannelId: msg.channel.id
+							}
+						});
+						// if the channel is blacklisted, return
+						if (channelBlackList !== null) {
+							if (channelBlackList.blackListedChannelId == msg.channel.id) {
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
+		
 
 		//if there is no command used then break
 		if (!command && prefixCommand === true) {

@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } = require('./dbObjects');
+const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages, DBGuildWhiteListed, DBGuildBlackListed } = require('./dbObjects');
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
@@ -26,6 +26,49 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Return if the bot reacted itself or if it was not a bot message
 	if (user.id === reaction.client.user.id) {
 		return;
+	}
+
+	if (reaction.message.channel.type !== 'DM') {
+		let guild = await DBGuilds.findOne({
+			where: { guildId: reaction.message.guild.id }
+		});
+			// if not guild exists, create it
+		if (!guild) {
+			DBGuilds.create({
+				guildId: reaction.message.guild.id,
+				guildName: reaction.message.guild.name
+			});
+		}
+		// check if the command is whitelist or blacklist
+
+		// check if the guild has a whitelist enabled
+		if (guild.whiteListEnabled) {
+			let channelWhiteList = await DBGuildWhiteListed.findOne({
+				where: {
+					guildId: reaction.message.guild.id,
+					whiteListedChannelId: reaction.message.channel.id
+				}
+			});
+			// if the channel is not whitelisted, return
+			if (!channelWhiteList) return;
+			if (channelWhiteList.whiteListedChannelId !== reaction.message.channel.id) {
+				return;
+			}
+			// check if the guild has a blacklist enabled
+		} else if (guild.blackListEnabled) {
+			let channelBlackList = await DBGuildBlackListed.findOne({
+				where: {
+					guildId: reaction.message.guild.id,
+					blackListedChannelId: reaction.message.channel.id
+				}
+			});
+			// if the channel is blacklisted, return
+			if (channelBlackList !== null) {
+				if (channelBlackList.blackListedChannelId == reaction.message.channel.id) {
+					return;
+				}
+			}
+		}
 	}
 
 	if (reaction._emoji.name === '⭐') {
