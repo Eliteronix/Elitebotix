@@ -4,6 +4,7 @@ const { isWrongSystem } = require('./utils');
 const cooldowns = new Discord.Collection();
 const { Permissions } = require('discord.js');
 const { developers } = require('./config.json');
+const { DBGuilds, DBGuildWhiteListed, DBGuildBlackListed } = require('./dbObjects');
 
 module.exports = async function (client, bancho, interaction) {
 	if (!interaction.isCommand()) return;
@@ -42,6 +43,52 @@ module.exports = async function (client, bancho, interaction) {
 			return interaction.reply({ content: `You need the ${command.permissionsTranslated} permission to do this!`, ephemeral: true });
 		}
 	}
+	if (command) {
+		if (interaction.channel.type !== 'DM') {
+			let guild = await DBGuilds.findOne({
+				where: { guildId: interaction.guildId }
+			});
+			// if not guild exists, create it
+			if (!guild) {
+				DBGuilds.create({
+					guildId: interaction.guildId,
+					guildName: interaction.guild.name
+				});
+			}
+			// check if the command is whitelist or blacklist
+			if (command.name !== 'whitelist' && command.name !== 'blacklist') {
+				// check if the guild has a whitelist enabled
+				if (guild.whiteListEnabled) {
+					let channelWhiteList = await DBGuildWhiteListed.findOne({
+						where: {
+							guildId: interaction.guildId,
+							whiteListedChannelId: interaction.channel.id
+						}
+					});
+					// if the channel is not whitelisted, return
+					if (!channelWhiteList) return;
+					if (channelWhiteList.whiteListedChannelId !== interaction.channel.id) {
+						return;
+					}
+					// check if the guild has a blacklist enabled
+				} else if (guild.blackListEnabled) {
+					let channelBlackList = await DBGuildBlackListed.findOne({
+						where: {
+							guildId: interaction.guildId,
+							blackListedChannelId: interaction.channel.id
+						}
+					});
+					// if the channel is blacklisted, return
+					if (channelBlackList !== null) {
+						if (channelBlackList.blackListedChannelId == interaction.channel.id) {
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+
 
 	//Check permissions of the bot
 	if (interaction.guildId) {
