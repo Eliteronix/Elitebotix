@@ -408,7 +408,7 @@ module.exports = {
 			let playerArray = [];
 			if (players) {
 				for (let i = 0; i < players.length; i++) {
-					playerArray.push(players[i].osuUserId);
+					playerArray.push(players[i].osuName);
 				}
 			}
 				

@@ -11,9 +11,11 @@ module.exports = {
 		for (let i = 0; i < players.length; i++) {
 			playerNames += `${players[i]} `;
 		}
+		// args[3] is the date. convert it to a discord timestamp
+		let date = new Date(args[3]);
 
 		if (user) {
-			user.send(`The lobby \`${args[1]}\` in ${args[2]} is going to happen <t:${args[3]}:R>\nThe players are: ${playerNames}`);
+			user.send(`The lobby \`${args[1]}\` in ${args[2]} is going to happen <t:${date}:R>\nThe players are: ${playerNames}`);
 		}
 		processQueueEntry.destroy();
 	},
