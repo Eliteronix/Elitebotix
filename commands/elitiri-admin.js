@@ -49,7 +49,7 @@ module.exports = {
 	name: 'elitiri-admin',
 	//aliases: ['osu-map', 'beatmap-info'],
 	description: 'Admin control for the Elitiri Cup',
-	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability/noLobby> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <osuPlayerID> | <slashCommands> | | <clearRefLobby> <lobbyID> | <staff> <osuUserId> <host/streamer/commentator/referee/replayer> [tournament]',
+	usage: '<sr> | <message> <everyone/noSubmissions/noAvailability/noLobby> <all/top/middle/lower/beginner> | <createPools> <top/middle/lower/beginner> | <prune> <noSubmissions/player> <osuPlayerID> | <pruneLobby> <osuUserId> | <setLobby> <lobbyID> <osuUserId> | <slashCommands> | <clearRefLobby> <lobbyID> | <staff> <osuUserId> <host/streamer/commentator/referee/replayer> [tournament]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -308,56 +308,159 @@ module.exports = {
 					}
 				}
 			} else if (targetGroup === 'A specific player') {
-				if (args[1] == 'lobby') {
-					args.shift();
-					let elitiriSignUp = await DBElitiriCupSignUp.findOne({
-						where: {
-							osuUserId: args[1]
-						}
+				for (let i = 0; i < elitiriSignUps.length; i++) {
+					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 3');
+					let submissions = await DBElitiriCupSubmissions.findAll({
+						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
 					});
-					elitiriSignUp.tournamentLobbyId = null;
-					await elitiriSignUp.save();
-					msg.reply('Done. Remember, this command does not delete player from the sheet!');
-				} else {
-					for (let i = 0; i < elitiriSignUps.length; i++) {
-						logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 3');
-						let submissions = await DBElitiriCupSubmissions.findAll({
-							where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
+
+					if (elitiriSignUps[i].osuUserId === args[1]) {
+						elitiriSignUps[i].destroy();
+						submissions.forEach(submission => {
+							submission.destroy();
 						});
 
-						if (elitiriSignUps[i].osuUserId === args[1]) {
-							elitiriSignUps[i].destroy();
-							submissions.forEach(submission => {
-								submission.destroy();
-							});
+						const user = await msg.client.users.fetch(elitiriSignUps[i].userId);
 
-							const user = await msg.client.users.fetch(elitiriSignUps[i].userId);
-
-							for (let j = 0; j < 3; j++) {
-								try {
-									await user.send('You were removed from the `Elitiri Cup` by staff. If you have any questions feel free to ask any member of the staff.')
-										.then(() => {
-											j = Infinity;
-										})
-										.catch(async (error) => {
-											throw (error);
-										});
-								} catch (error) {
-									if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
-										if (j !== 2) {
-											await pause(5000);
-										}
-									} else {
+						for (let j = 0; j < 3; j++) {
+							try {
+								await user.send('You were removed from the `Elitiri Cup` by staff. If you have any questions feel free to ask any member of the staff.')
+									.then(() => {
 										j = Infinity;
-										console.log(error);
+									})
+									.catch(async (error) => {
+										throw (error);
+									});
+							} catch (error) {
+								if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
+									if (j !== 2) {
+										await pause(5000);
 									}
+								} else {
+									j = Infinity;
+									console.log(error);
 								}
 							}
-							console.log('Player removed from Elitiri Cup');
 						}
+						console.log('Player removed from Elitiri Cup');
 					}
 				}
 			}
+		} else if (args[0].toLowerCase() === 'prunelobby') { 
+			args.shift();
+			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
+				where: {
+					osuUserId: args[1]
+				}
+			});
+
+			if (!elitiriSignUp.tournamentLobbyId) {
+				return msg.channel.send(`${args[1]} does not have a lobby set`);
+			}
+
+			let k = Number(elitiriSignUp.tournamentLobbyId.replace(/\D+/, ''));
+			if (k > 12) {
+				k++;
+			}
+
+			let scheduleSheetId;
+			if (elitiriSignUp.tournamentLobbyId.replace(/\d+/, '') == 'DQ-') {
+				scheduleSheetId = 'Qualifiers Schedules-Top';
+			} else if (elitiriSignUp.tournamentLobbyId.replace(/\d+/, '') == 'CQ-') {
+				scheduleSheetId = 'Qualifiers Schedules-Middle';
+			} else if (elitiriSignUp.tournamentLobbyId.replace(/\d+/, '') == 'BQ-') {
+				scheduleSheetId = 'Qualifiers Schedules-Lower';
+			} else {
+				scheduleSheetId = 'Qualifiers Schedules-Beginner';
+			}
+
+			const doc = new GoogleSpreadsheet(currentElitiriCupRefSheetId);
+			await doc.useServiceAccountAuth({
+				// eslint-disable-next-line no-undef
+				client_email: process.env.GOOGLESHEETSSERVICEACCOUNTMAIL,
+				// eslint-disable-next-line no-undef
+				private_key: process.env.GOOGLESHEETSSERVICEACCOUNTPRIVATEKEY.replace(/\\n/g, '\n'),
+			});
+			await doc.loadInfo(); // loads document properties and worksheet
+
+			const sheet = doc.sheetsByTitle[scheduleSheetId];
+			await sheet.loadCells('A1:U29');
+
+			let quantityCell;
+			let playerNameCell;
+			let lobbyPlayers = await DBElitiriCupSignUp.findAll({
+				where: {
+					tournamentName: currentElitiriCup,
+					tournamentLobbyId: elitiriSignUp.tournamentLobbyId
+				}
+			});
+
+			let j = Number(elitiriSignUp.tournamentLobbyId.replace(/\D+/, ''));
+			if (j > 12) {
+				j++;
+			}
+
+			elitiriSignUp.tournamentLobbyId = null;
+			await elitiriSignUp.save();
+
+			for (let i = 0; i < 14; i++) {
+				playerNameCell = sheet.getCell(3 + j, 6 + i);
+				playerNameCell.value = null;
+
+				quantityCell = sheet.getCell(3 + j, 5);
+				quantityCell.value = lobbyPlayers.length + '/15';
+			}
+			for (let i = 0; i < lobbyPlayers.length; i++) {
+				let playerName = lobbyPlayers[i].osuName;
+				playerNameCell = sheet.getCell(3 + j, 6 + i);
+				playerNameCell.value = playerName;
+
+				quantityCell = sheet.getCell(3 + j, 5);
+				quantityCell.value = lobbyPlayers.length + '/15';
+			}
+
+			await sheet.saveUpdatedCells();
+			msg.reply('Done.');
+		} else if (args[0].toLowerCase() === 'setlobby') { 
+			args.shift();
+
+			// lobbyID = args[0]
+			// osuUserID = args[1]
+
+			let lobby = await DBElitiriCupLobbies.findOne({
+				where: {
+					lobbyId: args[0],
+					tournamentName: currentElitiriCup
+				}
+			});
+
+			let elitirisignup = await DBElitiriCupSignUp.findOne({
+				where: {
+					osuUserId: args[1]
+				}
+			});
+
+			if (!elitirisignup) {
+				return msg.channel.send(`${args[0]} is not registered for ${currentElitiriCup}`);
+			}
+
+			if (!lobby) {
+				await DBElitiriCupLobbies.create({
+					tournamentName: currentElitiriCup,
+					lobbyId: args[0],
+					lobbyDate: null,
+					bracketName: elitirisignup.bracketName,
+					refDiscordTag: null,
+					refOsuUserId: null,
+					refOsuName: null,
+				});
+				elitirisignup.tournamentLobbyId = args[0];
+				await elitirisignup.save();
+			} else {
+				elitirisignup.tournamentLobbyId = args[0];
+				await elitirisignup.save();
+			}
+			msg.reply('Done.');
 		} else if (args[0].toLowerCase() === 'clearreflobby') {
 			args.shift();
 			let lobby = await DBElitiriCupLobbies.findOne({
@@ -400,7 +503,7 @@ module.exports = {
 			refereeCell.value = null;
 
 			await sheet.saveUpdatedCells();
-
+			msg.reply('Done.');
 		} else if (args[0] === 'placement') {
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 7');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({

@@ -89,6 +89,14 @@ process.on('message', async (message) => {
 						gameStartDate: match.games[gameIndex].raw_start,
 						gameEndDate: match.games[gameIndex].raw_end,
 						freeMod: freeMod,
+						maxCombo: match.games[gameIndex].scores[scoreIndex].maxCombo,
+						count50: match.games[gameIndex].scores[scoreIndex].counts['50'],
+						count100: match.games[gameIndex].scores[scoreIndex].counts['100'],
+						count300: match.games[gameIndex].scores[scoreIndex].counts['300'],
+						countMiss: match.games[gameIndex].scores[scoreIndex].counts.miss,
+						countKatu: match.games[gameIndex].scores[scoreIndex].counts.katu,
+						countGeki: match.games[gameIndex].scores[scoreIndex].counts.geki,
+						perfect: match.games[gameIndex].scores[scoreIndex].perfect,
 					});
 
 					//Set the tournament flags on the corresponding beatmap

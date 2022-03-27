@@ -229,6 +229,7 @@ module.exports = {
 			if (!playerIds.includes(obj.player.user.id.toString())) {
 				channel.sendMessage(`!mp kick #${obj.player.user.id}`);
 			} else if (lobbyStatus === 'Joining phase') {
+				await lobby.updateSettings();
 				let allPlayersJoined = true;
 				for (let i = 0; i < dbPlayers.length && allPlayersJoined; i++) {
 					if (!lobby.playersById[dbPlayers[i].osuUserId.toString()]) {
