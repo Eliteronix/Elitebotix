@@ -4767,7 +4767,7 @@ module.exports = {
 							'required': false,
 							'options': [
 								{
-									'name': 'mentioned channel',
+									'name': 'mentioned-channel',
 									'description': 'The channel to add to the whitelist',
 									'type': 7,
 									'required': true
@@ -4781,7 +4781,7 @@ module.exports = {
 							'required': false,
 							'options': [
 								{
-									'name': 'mentioned channel',
+									'name': 'mentioned-channel',
 									'description': 'The channel to remove from the whitelist',
 									'type': 7,
 									'required': true
