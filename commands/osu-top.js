@@ -526,21 +526,24 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 	}
 
 	for (let i = 0; i < beatmaps.length && i < showLimit; i++) {
-		let scores = await osuApi.getScores({ u: user.name, b: beatmaps[i].beatmapId, m: mode });
-		sortedScores.push(scores);
+		for (let j = 0; j < scores.length; j++) {
+			if (beatmaps[i].beatmapId === scores[j].beatmapId) {
+				sortedScores.push(scores[j]);
+			}
+		}
 	}
 
 
 	for (let i = 0; i < sortedScores.length && i < showLimit; i++) {
 		roundedRect(ctx, canvas.width / 70, 500 / 8 + (500 / 12) * i, canvas.width - canvas.width / 35, 500 / 13, 500 / 70, '70', '57', '63', 0.75);
 
-		const rankImage = await Canvas.loadImage(getRankImage(sortedScores[i][0].rank));
+		const rankImage = await Canvas.loadImage(getRankImage(sortedScores[i].rank));
 		ctx.drawImage(rankImage, canvas.width / 35, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 - 500 / 31.25 / 2, canvas.width / 31.25, 500 / 31.25);
 
 		ctx.font = 'bold 18px comfortaa, sans-serif';
 		ctx.fillStyle = '#FF66AB';
 		ctx.textAlign = 'right';
-		ctx.fillText(humanReadable(Math.round(sortedScores[i][0].pp)) + 'pp', (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
+		ctx.fillText(humanReadable(Math.round(sortedScores[i].pp)) + 'pp', (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
 
 		let beatmapTitle = `${beatmaps[i].title} by ${beatmaps[i].artist}`;
 		const maxSize = canvas.width / 250 * 19;
@@ -564,7 +567,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 		const todayMilliseconds = today.getTime();	//Get the time (milliseconds since January 1, 1970)
 
-		const scoreMilliseconds = Date.parse(sortedScores[i][0].raw_date); //Get the time (milliseconds since January 1, 1970)
+		const scoreMilliseconds = Date.parse(sortedScores[i].raw_date); //Get the time (milliseconds since January 1, 1970)
 
 		let timeDifference = todayMilliseconds - scoreMilliseconds;
 
@@ -591,14 +594,14 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		ctx.fillStyle = '#A08C95';
 		ctx.textAlign = 'left';
 		ctx.fillText(achievedTime, (canvas.width / 35) * 3 + parseInt(beatmaps[i].difficulty.length) * 6 + canvas.width / 50, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
-		let accuracy = getAccuracy(sortedScores[i][0], mode) * 100;
+		let accuracy = getAccuracy(sortedScores[i], mode) * 100;
 
 		let combo;
 
 		if (mode === 3) {
-			combo = `(${sortedScores[i][0].maxCombo}x)`;
+			combo = `(${sortedScores[i].maxCombo}x)`;
 		} else {
-			combo = `(${sortedScores[i][0].maxCombo}/${beatmaps[i].maxCombo})`;
+			combo = `(${sortedScores[i].maxCombo}/${beatmaps[i].maxCombo})`;
 		}
 
 		ctx.font = 'bold 10px comfortaa, sans-serif';
@@ -607,7 +610,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		ctx.fillText(combo, (canvas.width / 28) * 23.4, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 		ctx.fillText(Math.round(accuracy * 100) / 100 + '%', (canvas.width / 28) * 24.75, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 
-		const mods = getMods(sortedScores[i][0].raw_mods);
+		const mods = getMods(sortedScores[i].raw_mods);
 		for (let j = 0; j < mods.length; j++) {
 			const modImage = await Canvas.loadImage(getModImage(mods[mods.length - j - 1]));
 			ctx.drawImage(modImage, (canvas.width / 28) * 24.75 - (canvas.width / 1000 * 23) * (j + 1), 500 / 8 + (500 / 12) * i + (500 / 12) / 5, canvas.width / 1000 * 23, 500 / 125 * 4);
