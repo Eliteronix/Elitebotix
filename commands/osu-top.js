@@ -490,10 +490,8 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		}
 
 		//Feed the scores into the array
-		for (let i = 0; i < multiScores.length; i++) {
-			if (multiScores[i].maxCombo) {
-				scores.push(multiScores[i]);
-			}
+		for (let i = 0; i < multiScores.length && i < 100; i++) {
+			scores.push(multiScores[i]);
 		}
 	}
 
