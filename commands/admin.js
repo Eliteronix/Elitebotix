@@ -1741,10 +1741,40 @@ module.exports = {
 			// 		description: 'Sends an info card about the topplays of the specified player',
 			// 		options: [
 			// 			{
-			// 				'name': 'new',
-			// 				'description': 'Should the newest topplays be shown?',
-			// 				'type': 5,
-			// 				'required': false
+			// 				'name': 'sorting',
+			// 				'description': 'Sort your top plays by...',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Approach Rate',
+			// 						'value': '--ar',
+			// 					},
+			// 					{
+			// 						'name': 'Circle Size',
+			// 						'value': '--cs',
+			// 					},
+			// 					{
+			// 						'name': 'Overall Difficulty',
+			// 						'value': '--od',
+			// 					},
+			// 					{
+			// 						'name': 'HP Drain',
+			// 						'value': '--hp',
+			// 					},
+			// 					{
+			// 						'name': 'Beats Per Minute',
+			// 						'value': '--bpm',
+			// 					},
+			// 					{
+			// 						'name': 'Length',
+			// 						'value': '--length',
+			// 					},
+			// 					{
+			// 						'name': 'Recent',
+			// 						'value': '--new',
+			// 					},
+			// 				]
 			// 			},
 			// 			{
 			// 				'name': 'amount',
@@ -3953,10 +3983,41 @@ module.exports = {
 					description: 'Sends an info card about the topplays of the specified player',
 					options: [
 						{
-							'name': 'new',
-							'description': 'Should the newest topplays be shown?',
-							'type': 5,
-							'required': false
+							'name': 'sorting',
+							'description': 'Sort your top plays by...',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'Approach Rate',
+									'value': '--ar',
+								},
+								{
+									'name': 'Circle Size',
+									'value': '--cs',
+								},
+								{
+									'name': 'Overall Difficulty',
+									'value': '--od',
+								},
+								{
+									'name': 'HP Drain',
+									'value': '--hp',
+								},
+								{
+									'name': 'Beats Per Minute',
+									'value': '--bpm',
+								},
+								{
+									'name': 'Length',
+									'value': '--length',
+								},
+								{
+									'name': 'Recent',
+									'value': '--new',
+								},
+
+							]
 						},
 						{
 							'name': 'amount',
