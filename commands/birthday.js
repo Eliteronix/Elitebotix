@@ -50,7 +50,7 @@ module.exports = {
 				}
 				
 				if (user.birthday) {
-					return interaction.channel.send({ content: 'You already have a birthday set.', ephemeral: true });
+					return interaction.reply({ content: 'You already have a birthday set.', ephemeral: true });
 				}
 
 				user.birthday = date;
@@ -61,7 +61,6 @@ module.exports = {
 					month: 'long',
 					day: 'numeric',
 				});
-                
 				return interaction.reply({content:`Your birthday has been set for \`${dateString}\``, ephemeral: true});
 			} else if (interaction.options._subcommand === 'enable') {
                 
@@ -82,7 +81,6 @@ module.exports = {
 				}
                 
 				if (currentGuild.birthdayEnabled) {
-					// you already have birthday logging enabled for ${guild.name}} 
 					return interaction.reply({content:`You already have birthday logging enabled for ${interaction.guild.name}`, ephemeral: true});
 				}
             

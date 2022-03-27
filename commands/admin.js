@@ -123,8 +123,16 @@ module.exports = {
 						{
 							'name': 'channel',
 							'description': 'Sets the channel for birthday logging',
-							'type': 7,
-							'required': false
+							'type': 1,
+							'required': false,
+							'options': [
+								{
+									'name': 'set',
+									'description': 'Sets the channel for birthday logging',
+									'type': 7,
+									'required': true,
+								}
+							]
 						},
 					]
 				},
@@ -2604,8 +2612,16 @@ module.exports = {
 						{
 							'name': 'channel',
 							'description': 'Sets the channel for birthday logging',
-							'type': 7,
-							'required': false
+							'type': 1,
+							'required': false,
+							'options': [
+								{
+									'name': 'set',
+									'description': 'Sets the channel for birthday logging',
+									'type': 7,
+									'required': true,
+								}
+							]
 						},
 					]
 				},
