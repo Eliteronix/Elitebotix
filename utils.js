@@ -357,6 +357,10 @@ module.exports = {
 				server = 'bancho';
 				args.splice(i, 1);
 				i--;
+			} else if (args[i] === '--tournaments') {
+				server = 'tournaments';
+				args.splice(i, 1);
+				i--;
 			}
 
 		}
@@ -726,17 +730,7 @@ module.exports = {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	},
 	getAccuracy(score, mode) {
-		let accuracy = ((score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss))) / 100;
-
-		if (mode === 1) {
-			accuracy = (parseInt(score.counts[300]) + parseInt(score.counts[100] * 0.5)) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss));
-		} else if (mode === 2) {
-			let objects = parseInt(score.counts[300]) + parseInt(score.counts[50]) + parseInt(score.counts.miss);
-			accuracy = (objects / (objects + parseInt(score.counts.katu) + parseInt(score.counts.miss)));
-		} else if (mode === 3) {
-			accuracy = (50 * parseInt(score.counts[50]) + 100 * parseInt(score.counts[100]) + 200 * parseInt(score.counts.katu) + 300 * (parseInt(score.counts[300]) + parseInt(score.counts.geki))) / (300 * (parseInt(score.counts.miss) + parseInt(score.counts[50]) + parseInt(score.counts[100]) + parseInt(score.counts.katu) + parseInt(score.counts[300]) + parseInt(score.counts.geki)));
-		}
-		return accuracy;
+		return getAccuracyFunction(score, mode);
 	},
 	fitTextOnLeftCanvas(ctx, text, startingSize, fontface, yPosition, width, xOffset) {
 
@@ -1611,61 +1605,101 @@ module.exports = {
 		return true;
 	},
 	async getOsuPP(beatmapId, modBits, accuracy, misses, combo) {
-		const rosu = require('rosu-pp');
-		const fs = require('fs');
-
-		//Check if the maps folder exists and create it if necessary
-		if (!fs.existsSync('./maps')) {
-			fs.mkdirSync('./maps');
-		}
-
-		//Check if the map is already downloaded and download if necessary
-		const path = `./maps/${beatmapId}.osu`;
-
-		//Force download if the map is recently updated in the database and therefore probably updated
-		const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: 0 });
-
-		const recent = new Date();
-		recent.setUTCMinutes(recent.getUTCMinutes() - 3);
-
-		let forceDownload = false;
-		if (recent < dbBeatmap.updatedAt) {
-			forceDownload = true;
-		}
-
-		try {
-			if (forceDownload || !fs.existsSync(path)) {
-				const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
-				await new Promise((resolve, reject) => {
-					const fileStream = fs.createWriteStream(`./maps/${beatmapId}.osu`);
-					res.body.pipe(fileStream);
-					res.body.on('error', (err) => {
-						reject(err);
-					});
-					fileStream.on('finish', function () {
-						resolve();
-					});
-				});
-			}
-		} catch (err) {
-			console.error(err);
-		}
-
-		if (!combo) {
-			combo = 0;
-		}
-
-		let arg = {
-			path: `./maps/${beatmapId}.osu`,
-			mods: parseInt(modBits),
-			acc: parseFloat(accuracy),
-			nMisses: parseInt(misses),
-			combo: parseInt(combo),
+		return await getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo);
+	},
+	async multiToBanchoScore(inputScore) {
+		let outputScore = {
+			score: inputScore.score,
+			user: {
+				name: null,
+				id: inputScore.osuUserId
+			},
+			beatmapId: inputScore.beatmapId,
+			counts: {
+				'50': inputScore.count50,
+				'100': inputScore.count100,
+				'300': inputScore.count300,
+				geki: inputScore.countGeki,
+				katu: inputScore.countKatu,
+				miss: inputScore.countMiss
+			},
+			maxCombo: inputScore.maxCombo,
+			perfect: inputScore.perfect,
+			raw_date: inputScore.gameStartDate,
+			rank: inputScore.rank,
+			pp: inputScore.pp,
+			hasReplay: false,
+			raw_mods: parseInt(inputScore.gameRawMods) + parseInt(inputScore.rawMods),
+			beatmap: undefined
 		};
 
-		return rosu.calculate(arg)[0].pp;
+		const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: outputScore.beatmapId, modBits: 0 });
+
+		if (!outputScore.pp && outputScore.maxCombo && dbBeatmap) {
+			outputScore.pp = await getOsuPPFunction(outputScore.beatmapId, outputScore.raw_mods, getAccuracyFunction(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
+		}
+
+		outputScore.rank = calculateGradeFunction(outputScore.counts, outputScore.raw_mods);
+
+		return outputScore;
 	}
 };
+
+async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo) {
+	const rosu = require('rosu-pp');
+	const fs = require('fs');
+
+	//Check if the maps folder exists and create it if necessary
+	if (!fs.existsSync('./maps')) {
+		fs.mkdirSync('./maps');
+	}
+
+	//Check if the map is already downloaded and download if necessary
+	const path = `./maps/${beatmapId}.osu`;
+
+	//Force download if the map is recently updated in the database and therefore probably updated
+	const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: 0 });
+
+	const recent = new Date();
+	recent.setUTCMinutes(recent.getUTCMinutes() - 3);
+
+	let forceDownload = false;
+	if (recent < dbBeatmap.updatedAt) {
+		forceDownload = true;
+	}
+
+	try {
+		if (forceDownload || !fs.existsSync(path)) {
+			const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
+			await new Promise((resolve, reject) => {
+				const fileStream = fs.createWriteStream(`./maps/${beatmapId}.osu`);
+				res.body.pipe(fileStream);
+				res.body.on('error', (err) => {
+					reject(err);
+				});
+				fileStream.on('finish', function () {
+					resolve();
+				});
+			});
+		}
+	} catch (err) {
+		console.error(err);
+	}
+
+	if (!combo) {
+		combo = 0;
+	}
+
+	let arg = {
+		path: `./maps/${beatmapId}.osu`,
+		mods: parseInt(modBits),
+		acc: parseFloat(accuracy),
+		nMisses: parseInt(misses),
+		combo: parseInt(combo),
+	};
+
+	return rosu.calculate(arg)[0].pp;
+}
 
 async function getOsuBadgeNumberByIdFunction(osuUserId) {
 	return await fetch(`https://osu.ppy.sh/users/${osuUserId}/osu`)
@@ -2276,3 +2310,66 @@ function adjustHDStarRatingFunction(starRating, approachRate) {
 
 	return parseFloat(starRating) + starRatingAdjust;
 }
+
+function getAccuracyFunction(score, mode) {
+	let accuracy = ((score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss))) / 100;
+
+	if (mode === 1) {
+		accuracy = (parseInt(score.counts[300]) + parseInt(score.counts[100] * 0.5)) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss));
+	} else if (mode === 2) {
+		let objects = parseInt(score.counts[300]) + parseInt(score.counts[50]) + parseInt(score.counts.miss);
+		accuracy = (objects / (objects + parseInt(score.counts.katu) + parseInt(score.counts.miss)));
+	} else if (mode === 3) {
+		accuracy = (50 * parseInt(score.counts[50]) + 100 * parseInt(score.counts[100]) + 200 * parseInt(score.counts.katu) + 300 * (parseInt(score.counts[300]) + parseInt(score.counts.geki))) / (300 * (parseInt(score.counts.miss) + parseInt(score.counts[50]) + parseInt(score.counts[100]) + parseInt(score.counts.katu) + parseInt(score.counts[300]) + parseInt(score.counts.geki)));
+	}
+
+	return accuracy;
+}
+
+function calculateGradeFunction(counts, modBits) {
+	let grade = 'D';
+
+	let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
+	let count50Rate = parseInt(counts['50']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
+
+	if (count300Rate === 1) {
+		grade = 'X';
+	} else if (count300Rate > 0.9 && count50Rate <= 0.01 && parseInt(counts.miss) === 0) {
+		grade = 'S';
+	} else if (count300Rate > 0.9 || count300Rate > 0.8 && parseInt(counts.miss) === 0) {
+		grade = 'A';
+	} else if (count300Rate > 0.8 || count300Rate > 0.7 && parseInt(counts.miss) === 0) {
+		grade = 'B';
+	} else if (count300Rate > 0.6) {
+		grade = 'C';
+	}
+
+	if (grade === 'X' || grade === 'S') {
+		if (getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL')) {
+			grade = grade + 'H';
+		}
+	}
+
+	return grade;
+}
+
+// getRankImage: function (rank) {
+// 	let URL = 'https://osu.ppy.sh/assets/images/GradeSmall-D.6b170c4c.svg'; //D Rank
+
+// 	if (rank === 'XH') {
+// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-SS-Silver.6681366c.svg';
+// 	} else if (rank === 'X') {
+// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-SS.a21de890.svg';
+// 	} else if (rank === 'SH') {
+// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-S-Silver.811ae28c.svg';
+// 	} else if (rank === 'S') {
+// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-S.3b4498a9.svg';
+// 	} else if (rank === 'A') {
+// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-A.d785e824.svg';
+// 	} else if (rank === 'B') {
+// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-B.e19fc91b.svg';
+// 	} else if (rank === 'C') {
+// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-C.6bb75adc.svg';
+// 	}
+// 	return URL;
+// },
