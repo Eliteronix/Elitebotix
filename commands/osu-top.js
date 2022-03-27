@@ -274,40 +274,33 @@ async function drawTitle(input, server, mode, sorting) {
 		serverDisplay = `[${server}] `;
 	}
 
-	let sortingText;
+	let sortingText = '';
 
 	if (sorting !== null) {
 		sortingText = 'sorted by ';
 		if (sorting == 'recent') {
-			sortingText += 'date';
+			sortingText += 'date ';
 		} else if (sorting == 'ar') {
-			sortingText += 'AR';
+			sortingText += 'AR ';
 		} else if (sorting == 'cs') {
-			sortingText += 'CS';
+			sortingText += 'CS ';
 		} else if (sorting == 'drain') {
-			sortingText += 'HP'; 
+			sortingText += 'HP ';
 		} else if (sorting == 'od') {
-			sortingText += 'OD';
+			sortingText += 'OD ';
 		} else if (sorting == 'bpm') {
-			sortingText += 'BPM';
+			sortingText += 'BPM ';
 		} else if (sorting == 'length') {
-			sortingText += 'length';
+			sortingText += 'length ';
 		}
 	}
 
 	let gameMode = getGameModeName(mode);
 	let title;
 
-	if(sorting !== null){
-		title = `✰ ${serverDisplay}${user.name}'s ${gameMode} top plays ${sortingText} ✰`;
-		if (user.name.endsWith('s') || user.name.endsWith('x')) {
-			title = `✰ ${serverDisplay}${user.name}' ${gameMode} top plays ${sortingText} ✰`;
-		}
-	} else {
-		title = `✰ ${serverDisplay}${user.name}'s ${gameMode} top plays ✰`;
-		if (user.name.endsWith('s') || user.name.endsWith('x')) {
-			title = `✰ ${serverDisplay}${user.name}' ${gameMode} top plays ✰`;
-		}
+	title = `✰ ${serverDisplay}${user.name}'s ${gameMode} top plays ${sortingText}✰`;
+	if (user.name.endsWith('s') || user.name.endsWith('x')) {
+		title = `✰ ${serverDisplay}${user.name}' ${gameMode} top plays ${sortingText}✰`;
 	}
 
 	roundedRect(ctx, canvas.width / 2 - title.length * 8.5, 500 / 50, title.length * 17, 500 / 12, 5, '28', '28', '28', 0.75);
@@ -378,10 +371,10 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit) {
 
 	let sortedScores = [];
 	let beatmaps = [];
-	
+
 	if (sorting && sorting == 'recent') {
 		quicksortRecent(scores);
-	} 
+	}
 
 	for (let i = 0; i < showLimit; i++) {
 		let dbBeatmap = await getOsuBeatmap(scores[i].beatmapId, scores[i].raw_mods);

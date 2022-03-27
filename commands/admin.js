@@ -1774,7 +1774,6 @@ module.exports = {
 			// 						'name': 'Recent',
 			// 						'value': '--new',
 			// 					},
-
 			// 				]
 			// 			},
 			// 			{
