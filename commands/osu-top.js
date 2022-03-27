@@ -274,7 +274,7 @@ async function drawTitle(input, server, mode, sorting) {
 		serverDisplay = `[${server}] `;
 	}
 
-	let sortingText;
+	let sortingText = '';
 
 	if (sorting !== null) {
 		sortingText = 'sorted by ';
