@@ -400,8 +400,11 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit) {
 	}
 
 	for (let i = 0; i < beatmaps.length && i < showLimit; i++) {
-		let scores = await osuApi.getScores({ u: user.name, b: beatmaps[i].beatmapId, m: mode });
-		sortedScores.push(scores);
+		for (let j = 0; j < scores.length; j++) {
+			if (beatmaps[i].beatmapId === scores[j].beatmapId) {
+				sortedScores.push(scores[j]);
+			}
+		}
 	}
 
 
