@@ -27,6 +27,22 @@ module.exports = (sequelize, DataTypes) => {
 		freeMod: DataTypes.BOOLEAN,
 		forceMod: DataTypes.BOOLEAN,
 		warmup: DataTypes.BOOLEAN,
+		maxCombo: DataTypes.STRING,
+		count50: DataTypes.STRING,
+		count100: DataTypes.STRING,
+		count300: DataTypes.STRING,
+		countMiss: DataTypes.STRING,
+		countKatu: DataTypes.STRING,
+		countGeki: DataTypes.STRING,
+		perfect: DataTypes.BOOLEAN,
 		paranoid: true,
-	});
+	},
+		{
+			indexes: [
+				{
+					unique: false,
+					fields: ['osuUserId', 'matchId', 'gameId', 'beatmapId']
+				}
+			]
+		});
 };

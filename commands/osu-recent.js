@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, populatePP, getBeatmapApprovalStatusImage, logDatabaseQueries, getGameModeName } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getBeatmapApprovalStatusImage, logDatabaseQueries, getGameModeName, getOsuPP } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -98,7 +98,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; --r for ripple; Use --s/--t/--c/--m for modes)`);
 				}
 
-				const dbBeatmap = await getOsuBeatmap(scores[0].beatmapId, 0);
+				const dbBeatmap = await getOsuBeatmap({ beatmapId: scores[0].beatmapId, modBits: 0 });
 				const user = await osuApi.getUser({ u: username, m: mode });
 				updateOsuDetailsforUser(user, mode);
 
@@ -196,7 +196,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount) {
 
 				let score = rippleToBanchoScore(responseJson[0]);
 
-				const dbBeatmap = await getOsuBeatmap(score.beatmapId, 0);
+				const dbBeatmap = await getOsuBeatmap({ beatmapId: score.beatmapId, modBits: 0 });
 				fetch(`https://www.ripple.moe/api/get_user?u=${username}&m=${mode}`)
 					.then(async (response) => {
 						const responseJson = await response.json();
@@ -305,21 +305,21 @@ async function drawTitle(input, mode) {
 	if (mods.includes('DT') || mods.includes('HT') || mods.includes('HR') || mods.includes('EZ')) {
 		let modMap = beatmap;
 		if (mods.includes('DT') && mods.includes('HR')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 80);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 80 });
 		} else if (mods.includes('DT') && mods.includes('EZ')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 66);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 66 });
 		} else if (mods.includes('DT')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 64);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 64 });
 		} else if (mods.includes('HT') && mods.includes('HR')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 272);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 272 });
 		} else if (mods.includes('HT') && mods.includes('EZ')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 258);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 258 });
 		} else if (mods.includes('HT')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 256);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 256 });
 		} else if (mods.includes('EZ')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 2);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 2 });
 		} else if (mods.includes('HR')) {
-			modMap = await getOsuBeatmap(beatmap.beatmapId, 16);
+			modMap = await getOsuBeatmap({ beatmapId: beatmap.beatmapId, modBits: 16 });
 		}
 		ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100} (${Math.round(modMap.starRating * 100) / 100} with ${mods.join('')})  ${beatmap.difficulty} mapped by ${beatmap.mapper}`, canvas.width / 1000 * 90, canvas.height / 500 * 70);
 	} else {
@@ -618,9 +618,10 @@ async function drawAccInfo(input, mode, mapRank) {
 
 	let pp = 'None';
 
-	score = await populatePP(score, beatmap, accuracy);
 	if (score.pp) {
 		pp = Math.round(score.pp);
+	} else {
+		pp = Math.round(await getOsuPP(beatmap.beatmapId, score.raw_mods, Math.round(accuracy * 100) / 100, score.counts.miss, score.maxCombo));
 	}
 
 	ctx.font = '18px comfortaa, sans-serif';
@@ -635,19 +636,10 @@ async function drawAccInfo(input, mode, mapRank) {
 		};
 
 		let fcScoreAccuracy = getAccuracy(fcScore, 0) * 100;
-		try {
-			let response = await fetch(`https://osu.gatari.pw/api/v1/pp?b=${score.beatmapId}&a=${fcScoreAccuracy}&x=0&c=${beatmap.maxCombo}&m=${score.raw_mods}`);
-			let htmlCode = await response.text();
-			const ppRegex = /"pp":.+, "length"/gm;
-			const matches = ppRegex.exec(htmlCode);
-			let fcpp = matches[0].replace('"pp": [', '').replace('], "length"', '');
-			if (Math.round(pp) !== Math.round(fcpp)) {
-				pp = `${pp} (${Math.round(fcpp)} If FC)`;
-				ctx.font = '16px comfortaa, sans-serif';
-			}
-		} catch (err) {
-			// console.log('error fetching osu-recent pp', err);
-			// console.log(`https://osu.gatari.pw/api/v1/pp?b=${score.beatmapId}&a=${fcScoreAccuracy}&x=${score.counts.miss}&c=${score.maxCombo}&m=${score.raw_mods}`);
+		let fcpp = Math.round(await getOsuPP(beatmap.beatmapId, score.raw_mods, fcScoreAccuracy, 0, beatmap.maxCombo));
+		if (pp !== fcpp) {
+			pp = `${pp} (${Math.round(fcpp)} If FC)`;
+			ctx.font = '16px comfortaa, sans-serif';
 		}
 	}
 

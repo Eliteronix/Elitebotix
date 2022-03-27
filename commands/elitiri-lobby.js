@@ -1,5 +1,5 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { DBElitiriCupSignUp, DBElitiriCupLobbies, DBDiscordUsers, DBElitiriCupStaff } = require('../dbObjects');
+const { DBElitiriCupSignUp, DBElitiriCupLobbies, DBDiscordUsers, DBElitiriCupStaff, DBProcessQueue } = require('../dbObjects');
 const { currentElitiriCup, currentElitiriCupTopQualsFirstLobby, currentElitiriCupMiddleQualsFirstLobby, currentElitiriCupLowerQualsFirstLobby, currentElitiriCupBeginnerQualsFirstLobby, currentElitiriCupRefSheetId } = require('../config.json');
 const { populateMsgFromInteraction } = require('../utils');
 
@@ -259,10 +259,18 @@ module.exports = {
 					return interaction.editReply({ content: 'Please provide a valid lobby ID' });
 				}
 			}
-			let lobbyId;
+			let lobbyId = args[0].toUpperCase();
 			let refereeCell;
 			let scheduleSheetId;
 			let bracketName;
+			let potentialLobbyAbbreviations = ['AQ-', 'BQ-', 'CQ-', 'DQ-'];
+			if (!potentialLobbyAbbreviations.includes(lobbyId.replace(/\d+/, '')) || lobbyId.replace(/\D+/, '') > 24 || lobbyId.replace(/\D+/, '') < 1 || lobbyId.replace(/\D+/, '').length > 2) {
+				if (msg.id) {
+					return msg.reply('Please make sure your lobby ID is correct');
+				} else {
+					return interaction.editReply({ content: 'Please make sure your lobby ID is correct' });
+				}
+			}
 			if (args[0].replace(/\d+/, '') == 'DQ-') {
 				scheduleSheetId = 'Qualifiers Schedules-Top';
 				bracketName = 'Top Bracket';
@@ -280,20 +288,12 @@ module.exports = {
 			const sheet = doc.sheetsByTitle[scheduleSheetId];
 			await sheet.loadCells('A1:U29');
 
-			lobbyId = args[0];
 			let potentialLobby = await DBElitiriCupLobbies.findOne({
 				where: {
 					lobbyId: lobbyId
 				}
 			});
 
-			if (!potentialLobby) {
-				if (msg.id) {
-					return msg.reply(`There are no players in the \`${lobbyId}\` lobby`);
-				} else {
-					return interaction.editReply({ content: `There are no players in the \`${lobbyId}\` lobby` });
-				}
-			}
 			//row counter
 			let k;
 			k = Number(lobbyId.replace(/\D+/, ''));
@@ -328,6 +328,19 @@ module.exports = {
 				} else {
 					return interaction.editReply({ content: 'This qualifier round is over' });
 				}
+			} else {
+				let date = new Date(roundOverCheck(bracketName, lobbyId.replace(/\D+/, ''))).toUTCString();
+				if (!potentialLobby) {
+					await DBElitiriCupLobbies.create({
+						tournamentName: currentElitiriCup,
+						lobbyId: lobbyId,
+						lobbyDate: date,
+						bracketName: args[0].replace(/\d+/, '').bracketName,
+						refDiscordTag: null,
+						refOsuUserId: null,
+						refOsuName: null,
+					});
+				}
 			}
 
 			if (elitirisignup) {
@@ -347,6 +360,11 @@ module.exports = {
 					return interaction.editReply({ content: `You're not a referee for the ${currentElitiriCup}. If you think this is a mistake, please contact head staff of the tournament` });
 				}
 			}
+			potentialLobby = await DBElitiriCupLobbies.findOne({
+				where: {
+					lobbyId: lobbyId
+				}
+			});
 
 			if (potentialLobby.refOsuName !== null && potentialLobby.refOsuName !== discordUser.osuName) {
 				if (msg.id) {
@@ -373,6 +391,28 @@ module.exports = {
 			await potentialLobby.save();
 
 			//create notification task
+			let date = new Date(roundOverCheck(bracketName, lobbyId.replace(/\D+/, '')) - 1800000);
+			let user;
+			if (msg.id) {
+				user = msg.author.id;
+			} else {
+				user = interaction.member.user.id;
+			}
+			// get players from DBElitiriCupSignUp with the same tournamentName and lobbyId then push it to the array
+			let players = await DBElitiriCupSignUp.findAll({
+				where: {
+					tournamentName: currentElitiriCup,
+					tournamentLobbyId: lobbyId
+				}
+			});
+			let playerArray = [];
+			if (players) {
+				for (let i = 0; i < players.length; i++) {
+					playerArray.push(players[i].osuName);
+				}
+			}
+				
+			DBProcessQueue.create({ guildId: 'None', task: 'tourneyLobbyRemind', priority: 10, additions: `${user};${potentialLobby.lobbyId};${currentElitiriCup};${date};${playerArray}`, date: date });
 
 			try {
 				refereeCell = sheet.getCell(3 + k, 4);
@@ -451,7 +491,17 @@ module.exports = {
 			} else {
 				scheduleSheetId = 'Qualifiers Schedules-Beginner';
 			}
-
+			
+			// Delete notification task
+			let date = new Date(roundOverCheck(potentialLobby.bracketName, lobbyId.replace(/\D+/, '')) - 1800000).toUTCString();
+			const task = await DBProcessQueue.findOne({
+				where: {
+					task: 'tourneyLobbyRemind',
+					date: date
+				}
+			});
+			task.destroy();
+			
 			try {
 				const sheet = doc.sheetsByTitle[scheduleSheetId];
 				await sheet.loadCells('A1:U29');
@@ -484,7 +534,7 @@ function roundOverCheck(bracketName, lobbyId) {
 	let now = new Date();
 	let givenLobbyDate = new Date();
 	let k = 0;
-	if (lobbyId > 12) {
+	if (lobbyId.replace(/\D+/, '') >= 12) {
 		k = 1;
 	}
 

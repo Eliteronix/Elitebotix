@@ -74,7 +74,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 								.addField('Attachment', attachment.name)
 								.setImage(attachment.url);
 						});
-						
+
 						if (starBoardedMessage.starBoardMessageStarsQuantityMax <= reaction.count || starBoardedMessage.starBoardMessageStarsQuantityMax == null) {
 							starBoardedMessage.starBoardMessageStarsQuantityMax = reaction.count;
 							starBoardedMessage.save();
@@ -161,11 +161,11 @@ module.exports = async function (reaction, user, additionalObjects) {
 	if (reaction.message.attachments.first() && reaction.message.attachments.first().name.match(/.+leaderboard.+page.+/g)) {
 		let commandName = reaction.message.attachments.first().name.match(/.+leaderboard/g);
 		let page = reaction.message.attachments.first().name.replace(/.+page/g, '').replace('.png', '');
+		let mode = reaction.message.attachments.first().name.replace(/.+mode-/gm, '').replace(/-.+/gm, '');
 
 		if (reaction.message.attachments.first().name.replace(/.+leaderboard-/g, '').replace(/-.+/g, '') !== user.id) {
 			return;
 		}
-
 		if (reaction._emoji.name === '◀️') {
 			page--;
 		} else if (reaction._emoji.name === '▶️') {
@@ -173,23 +173,38 @@ module.exports = async function (reaction, user, additionalObjects) {
 		} else {
 			return;
 		}
-
+		let message;
 		if (commandName[0] !== 'osu-duelrating-leaderboard') {
-			let message = {
-				guild: reaction.message.guild,
-				guildId: reaction.message.guild.id,
-				content: `e!${commandName[0]} ${page}`,
-				author: user,
-				channel: reaction.message.channel,
-			};
-
 			const command = require(`./commands/${commandName[0]}.js`);
-
-			command.execute(message, [page], null, additionalObjects);
+			if (commandName[0] == 'osu-leaderboard') {
+				message = {
+					guild: reaction.message.guild,
+					guildId: reaction.message.guild.id,
+					content: `e!${commandName[0]} --${mode} ${page}`,
+					author: user,
+					channel: reaction.message.channel,
+				};
+				command.execute(message, [page, `--${mode}`], null, additionalObjects);
+			} else {
+				message = {
+					guild: reaction.message.guild,
+					guildId: reaction.message.guild.id,
+					content: `e!${commandName[0]} ${page}`,
+					author: user,
+					channel: reaction.message.channel,
+				};
+				command.execute(message, [page], null, additionalObjects);
+			}
 		} else {
+			let guild = null;
+			let guildId = null;
+			if (reaction.message.guild) {
+				guild = reaction.message.guild;
+				guildId = reaction.message.guild.id;
+			}
 			let interaction = {
-				guild: reaction.message.guild,
-				guildId: reaction.message.guild.id,
+				guild: guild,
+				guildId: guildId,
 				options: {
 					_subcommand: 'rating-leaderboard',
 					_hoistedOptions: [{ name: 'page', value: page }]
@@ -668,7 +683,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 		if (reaction.message.attachments.first().name.startsWith('osu-beatmap')) {
 			const beatmapId = reaction.message.attachments.first().name.replace('osu-beatmap-', '').replace(/-.+/gm, '');
 
-			const dbBeatmap = await getOsuBeatmap(beatmapId, 0);
+			const dbBeatmap = await getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
 
 			//get the mods used
 			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');

@@ -384,14 +384,14 @@ module.exports = {
 						const index = Math.floor(Math.random() * beatmaps.length);
 
 						if (modPools[i] === 'HD') {
-							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 0);
+							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
 							beatmaps[index].starRating = adjustHDStarRating(beatmaps[index].starRating, beatmaps[index].approachRate);
 						} else if (modPools[i] === 'HR') {
-							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 16);
+							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 16 });
 						} else if (modPools[i] === 'DT') {
-							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 64);
+							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 64 });
 						} else {
-							beatmaps[index] = await getOsuBeatmap(beatmaps[index].beatmapId, 0);
+							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
 						}
 
 						if (!beatmaps[index]) {
@@ -699,8 +699,8 @@ module.exports = {
 							await channel.sendMessage(`Congratulations ${dbPlayers[1].osuName} for winning the match!`);
 						}
 						await channel.sendMessage('Thank you for playing! The lobby will automatically close in one minute.');
-						await pause(60000);
-						await channel.sendMessage('!mp close');
+						await pause(5000);
+
 						// eslint-disable-next-line no-undef
 						const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 							// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -772,6 +772,9 @@ module.exports = {
 							.catch(() => {
 								//Nothing
 							});
+
+						await pause(55000);
+						await channel.sendMessage('!mp close');
 
 						try {
 							await processQueueTask.destroy();
@@ -1206,118 +1209,155 @@ module.exports = {
 				}
 				return;
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
-				if (!interaction.guild) {
-					return interaction.reply('The leaderboard can currently only be used in servers.');
-				}
-
 				if (interaction.id) {
 					interaction.reply('Processing leaderboard...');
 				}
 
-				interaction.guild.members.fetch()
-					.then(async (guildMembers) => {
-						const members = [];
-						guildMembers.each(member => members.push(member));
-						let osuAccounts = [];
-						for (let i = 0; i < members.length; i++) {
-							logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
-							const discordUser = await DBDiscordUsers.findOne({
-								where: {
-									userId: members[i].id,
-									osuUserId: {
-										[Op.not]: null,
+				let osuAccounts = [];
+
+				if (interaction.guild) {
+					await interaction.guild.members.fetch()
+						.then(async (guildMembers) => {
+							const members = [];
+							guildMembers.each(member => members.push(member));
+							for (let i = 0; i < members.length; i++) {
+								logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
+								const discordUser = await DBDiscordUsers.findOne({
+									where: {
+										userId: members[i].id,
+										osuUserId: {
+											[Op.not]: null,
+										},
+										osuDuelStarRating: {
+											[Op.not]: null,
+										}
 									},
-									osuDuelStarRating: {
-										[Op.not]: null,
-									}
-								},
-							});
-
-							if (discordUser) {
-								osuAccounts.push({
-									userId: discordUser.userId,
-									osuUserId: discordUser.osuUserId,
-									osuName: discordUser.osuName,
-									osuVerified: discordUser.osuVerified,
-									osuDuelStarRating: parseFloat(discordUser.osuDuelStarRating),
 								});
+
+								if (discordUser) {
+									osuAccounts.push({
+										userId: discordUser.userId,
+										osuUserId: discordUser.osuUserId,
+										osuName: discordUser.osuName,
+										osuVerified: discordUser.osuVerified,
+										osuDuelStarRating: parseFloat(discordUser.osuDuelStarRating),
+									});
+								}
 							}
-						}
-
-						quicksortDuelStarRating(osuAccounts);
-
-						let leaderboardData = [];
-
-						let messageToAuthor = '';
-
-						for (let i = 0; i < osuAccounts.length; i++) {
-							if (interaction.user.id === osuAccounts[i].userId) {
-								messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
+						})
+						.catch(err => {
+							console.log(err);
+						});
+				} else {
+					logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
+					const discordUsers = await DBDiscordUsers.findAll({
+						where: {
+							osuUserId: {
+								[Op.not]: null,
+							},
+							osuDuelStarRating: {
+								[Op.not]: null,
 							}
-							const member = await interaction.guild.members.fetch(osuAccounts[i].userId);
-
-							let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
-
-							if (member.nickname) {
-								userDisplayName = `${member.nickname} / ${userDisplayName}`;
-							}
-
-							let verified = '⨯';
-
-							if (osuAccounts[i].osuVerified) {
-								verified = '✔';
-							}
-
-							let dataset = {
-								name: userDisplayName,
-								value: `${Math.round(osuAccounts[i].osuDuelStarRating * 1000) / 1000}* | ${verified} ${osuAccounts[i].osuName}`,
-								color: getOsuDuelLeague(osuAccounts[i].osuDuelStarRating).color,
-							};
-
-
-							leaderboardData.push(dataset);
-						}
-
-						let totalPages = Math.floor(leaderboardData.length / leaderboardEntriesPerPage) + 1;
-
-						let page;
-
-						if (interaction.options._hoistedOptions && interaction.options._hoistedOptions[0] && interaction.options._hoistedOptions[0].value) {
-							page = Math.abs(parseInt(interaction.options._hoistedOptions[0].value));
-						}
-
-						if (!page && leaderboardData.length > 300) {
-							page = 1;
-						}
-
-						if (totalPages === 1) {
-							page = null;
-						}
-
-						let filename = `osu-duelrating-leaderboard-${interaction.user.id}-${interaction.guild.name}.png`;
-
-						if (page) {
-							filename = `osu-duelrating-leaderboard-${interaction.user.id}-${interaction.guild.name}-page${page}.png`;
-						}
-
-						const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${interaction.guild.name}'s osu! Duel Star Rating leaderboard`, filename, page);
-
-						//Send attachment
-						let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect <username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-duel starrating username:[username]\` is being used.`, files: [attachment] });
-
-						if (page) {
-							if (page > 1) {
-								await leaderboardMessage.react('◀️');
-							}
-
-							if (page < totalPages) {
-								await leaderboardMessage.react('▶️');
-							}
-						}
-					})
-					.catch(err => {
-						console.log(err);
+						},
 					});
+
+					for (let i = 0; i < discordUsers.length; i++) {
+						osuAccounts.push({
+							userId: discordUsers[i].userId,
+							osuUserId: discordUsers[i].osuUserId,
+							osuName: discordUsers[i].osuName,
+							osuVerified: discordUsers[i].osuVerified,
+							osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
+						});
+					}
+				}
+
+				quicksortDuelStarRating(osuAccounts);
+
+				let leaderboardData = [];
+
+				let messageToAuthor = '';
+
+				for (let i = 0; i < osuAccounts.length; i++) {
+					if (interaction.user.id === osuAccounts[i].userId) {
+						messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
+					}
+
+					if (interaction.guild) {
+						const member = await interaction.guild.members.fetch(osuAccounts[i].userId);
+
+						let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
+
+						if (member.nickname) {
+							userDisplayName = `${member.nickname} / ${userDisplayName}`;
+						}
+
+						let verified = '⨯';
+
+						if (osuAccounts[i].osuVerified) {
+							verified = '✔';
+						}
+
+						let dataset = {
+							name: userDisplayName,
+							value: `${Math.round(osuAccounts[i].osuDuelStarRating * 1000) / 1000}* | ${verified} ${osuAccounts[i].osuName}`,
+							color: getOsuDuelLeague(osuAccounts[i].osuDuelStarRating).color,
+						};
+
+						leaderboardData.push(dataset);
+					} else {
+						let dataset = {
+							name: osuAccounts[i].osuName,
+							value: `${Math.round(osuAccounts[i].osuDuelStarRating * 1000) / 1000}*`,
+							color: getOsuDuelLeague(osuAccounts[i].osuDuelStarRating).color,
+						};
+
+						leaderboardData.push(dataset);
+					}
+				}
+
+				let totalPages = Math.floor(leaderboardData.length / leaderboardEntriesPerPage) + 1;
+
+				let page;
+
+				if (interaction.options._hoistedOptions && interaction.options._hoistedOptions[0] && interaction.options._hoistedOptions[0].value) {
+					page = Math.abs(parseInt(interaction.options._hoistedOptions[0].value));
+				}
+
+				if (!page && leaderboardData.length > 300) {
+					page = 1;
+				}
+
+				if (totalPages === 1) {
+					page = null;
+				}
+
+				let guildName = 'Global';
+
+				if (interaction.guild) {
+					guildName = `${interaction.guild.name}'s`;
+				}
+
+				let filename = `osu-duelrating-leaderboard-${interaction.user.id}-${guildName}.png`;
+
+				if (page) {
+					filename = `osu-duelrating-leaderboard-${interaction.user.id}-${guildName}-page${page}.png`;
+				}
+
+				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${guildName} osu! Duel Star Rating leaderboard`, filename, page);
+
+				//Send attachment
+				let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect <username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-duel starrating username:[username]\` is being used.`, files: [attachment] });
+
+				if (page) {
+					if (page > 1) {
+						await leaderboardMessage.react('◀️');
+					}
+
+					if (page < totalPages) {
+						await leaderboardMessage.react('▶️');
+					}
+				}
 			} else if (interaction.options._subcommand === 'data') {
 				await interaction.deferReply({ ephemeral: true });
 				let osuUser = {
@@ -1529,7 +1569,7 @@ module.exports = {
 				explaination.push('The last 50 scores from that modpool will now once again effect the star rating.');
 				explaination.push('For each score there will be an expected score calculated using this formula which is based on the starrating itself: <https://www.desmos.com/calculator/oae69zr9ze> (cap of 950k upwards | 20k downwards)');
 				explaination.push('The difference between the score and the expected score will now be calculated.');
-				explaination.push('The difference now decides the star rating change using this formula: <https://www.desmos.com/calculator/fdmdmr1qwn>');
+				explaination.push('The difference now decides the star rating change using this formula: <https://www.desmos.com/calculator/zlckiq6hgx> (cap of 1*)');
 				explaination.push('Each star rating change will now be applied to the previously calculated star rating using a weight. (1x for the most recent score, 0.98 for the second most recent score, 0.96 for the third most recent score, etc.)');
 				explaination.push('After all scores applied their effect on the starrating this will result in the final modpool star rating.');
 				explaination.push('');

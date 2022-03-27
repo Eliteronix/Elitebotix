@@ -105,6 +105,10 @@ module.exports = {
 			return msg.reply('no corresponding table found');
 		}
 
+		if (dbList.length === 0) {
+			return msg.reply(`no entries found in ${dbTableName}`);
+		}
+		
 		for (let i = 0; i < dbList.length; i++) {
 			data.push(dbList[i].dataValues);
 
