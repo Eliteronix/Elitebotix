@@ -1569,7 +1569,7 @@ module.exports = {
 				explaination.push('The last 50 scores from that modpool will now once again effect the star rating.');
 				explaination.push('For each score there will be an expected score calculated using this formula which is based on the starrating itself: <https://www.desmos.com/calculator/oae69zr9ze> (cap of 950k upwards | 20k downwards)');
 				explaination.push('The difference between the score and the expected score will now be calculated.');
-				explaination.push('The difference now decides the star rating change using this formula: <https://www.desmos.com/calculator/fdmdmr1qwn>');
+				explaination.push('The difference now decides the star rating change using this formula: <https://www.desmos.com/calculator/zlckiq6hgx> (cap of 1*)');
 				explaination.push('Each star rating change will now be applied to the previously calculated star rating using a weight. (1x for the most recent score, 0.98 for the second most recent score, 0.96 for the third most recent score, etc.)');
 				explaination.push('After all scores applied their effect on the starrating this will result in the final modpool star rating.');
 				explaination.push('');

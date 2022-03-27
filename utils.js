@@ -1213,12 +1213,8 @@ module.exports = {
 			if (totalWeight > 0 && userMaps.length > 0) {
 				let weightedStarRating = totalWeightedStarRating / totalWeight;
 
-				for (let i = 0; i < userMaps.length && i < 50; i++) {
-					let weightMultiplier = 1;
-					if (duelRatings.provisional && userMaps.lengt < 5) {
-						weightMultiplier = 5 / userMaps.length;
-					}
-					weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i], Math.round((weightMultiplier - i * 0.02) * 100) / 100);
+				for (let i = 0; i < 50; i++) {
+					weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i % userMaps.length], Math.round((1 - i * 0.02) * 100) / 100);
 				}
 
 				if (modIndex === 0) {
@@ -2250,9 +2246,15 @@ function applyOsuDuelStarratingCorrection(rating, score, weight) {
 	}
 
 	//Get the star rating change by the difference
-	//https://www.desmos.com/calculator/fdmdmr1qwn
-	const z = 0.0000000000000000007;
-	const starRatingChange = z * Math.pow(scoreDifference, 3);
+	//https://www.desmos.com/calculator/zlckiq6hgx
+	const z = 0.000000000000000005;
+	let starRatingChange = z * Math.pow(scoreDifference, 3);
+
+	if (starRatingChange > 1) {
+		starRatingChange = 1;
+	} else if (starRatingChange < -1) {
+		starRatingChange = -1;
+	}
 
 	//Get the new rating
 	const newRating = rating + (starRatingChange * weight);
