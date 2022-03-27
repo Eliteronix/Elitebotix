@@ -33,6 +33,8 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		birthdayEnabled: DataTypes.BOOLEAN,
+		birthdayMessageChannel: DataTypes.STRING,
 		goodbyeMessageChannel: DataTypes.STRING,
 		goodbyeMessageText: DataTypes.STRING,
 		temporaryVoices: DataTypes.BOOLEAN,

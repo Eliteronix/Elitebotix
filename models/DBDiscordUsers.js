@@ -118,6 +118,9 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		birthday: {
+			type: DataTypes.DATE,
+		},
 		paranoid: true,
 	});
 };
