@@ -157,6 +157,13 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 					}
 				});
 
+				for (let i = 0; i < userScores.length; i++) {
+					if (parseInt(userScores[i].score) <= 10000) {
+						userScores.splice(i, 1);
+						i--;
+					}
+				}
+
 				if (userScores.length) {
 					await sentMessage.react('<:master:951396806653255700>');
 					await sentMessage.react('🆚');
@@ -229,6 +236,13 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 						}
 					}
 				});
+
+				for (let i = 0; i < userScores.length; i++) {
+					if (parseInt(userScores[i].score) <= 10000) {
+						userScores.splice(i, 1);
+						i--;
+					}
+				}
 
 				if (userScores.length) {
 					await sentMessage.react('<:master:951396806653255700>');

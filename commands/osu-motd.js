@@ -94,9 +94,9 @@ module.exports = {
 			if (mappool) {
 				for (let i = 0; i < mappool.length; i++) {
 					if (i === 3 || i === 7) {
-						mappool[i] = await getOsuBeatmap(mappool[i].trim(), 64);
+						mappool[i] = await getOsuBeatmap({ beatmapId: mappool[i].trim(), modBits: 64 });
 					} else {
-						mappool[i] = await getOsuBeatmap(mappool[i].trim(), 0);
+						mappool[i] = await getOsuBeatmap({ beatmapId: mappool[i].trim(), modBits: 0 });
 					}
 
 					mappool[i] = {
@@ -446,7 +446,7 @@ module.exports = {
 				while (amountOfMapsInDB === -1) {
 					const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
 
-					const dbBeatmap = await getOsuBeatmap(mostRecentBeatmap[0].id, 0);
+					const dbBeatmap = await getOsuBeatmap({ beatmapId: mostRecentBeatmap[0].id, modBits: 0 });
 
 					if (dbBeatmap) {
 						amountOfMapsInDB = dbBeatmap.id;
@@ -759,7 +759,7 @@ module.exports = {
 				while (amountOfMapsInDB === -1) {
 					const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
 
-					const dbBeatmap = await getOsuBeatmap(mostRecentBeatmap[0].id, 0);
+					const dbBeatmap = await getOsuBeatmap({ beatmapId: mostRecentBeatmap[0].id, modBits: 0 });
 
 					if (dbBeatmap) {
 						amountOfMapsInDB = dbBeatmap.id;

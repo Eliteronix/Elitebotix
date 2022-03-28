@@ -92,7 +92,7 @@ module.exports = {
 
 			//Save the maps locally
 			for (let i = 0; i < userScores.length; i++) {
-				let dbBeatmap = await getOsuBeatmap(userScores[i].beatmapId, userScores[i].gameRawMods);
+				let dbBeatmap = await getOsuBeatmap({ beatmapId: userScores[i].beatmapId, modBits: userScores[i].gameRawMods });
 				if (dbBeatmap && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.approvalStatus !== 'Ranked') {
 					await pause(500);
 				}

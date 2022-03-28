@@ -5,9 +5,9 @@ const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'osu-leaderboard',
-	aliases: ['osu-guild-leaderboard', 'osu-ranking', 'osu-guild-ranking'],
+	aliases: ['osu-guild-leaderboard', 'osu-ranking', 'osu-guild-ranking', 'osu-lb'],
 	description: 'Sends a leaderboard of all the players in the guild that have their account connected',
-	usage: '<page>',
+	usage: '[page]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],

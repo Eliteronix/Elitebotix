@@ -89,6 +89,14 @@ process.on('message', async (message) => {
 						gameStartDate: match.games[gameIndex].raw_start,
 						gameEndDate: match.games[gameIndex].raw_end,
 						freeMod: freeMod,
+						maxCombo: match.games[gameIndex].scores[scoreIndex].maxCombo,
+						count50: match.games[gameIndex].scores[scoreIndex].counts['50'],
+						count100: match.games[gameIndex].scores[scoreIndex].counts['100'],
+						count300: match.games[gameIndex].scores[scoreIndex].counts['300'],
+						countMiss: match.games[gameIndex].scores[scoreIndex].counts.miss,
+						countKatu: match.games[gameIndex].scores[scoreIndex].counts.katu,
+						countGeki: match.games[gameIndex].scores[scoreIndex].counts.geki,
+						perfect: match.games[gameIndex].scores[scoreIndex].perfect,
 					});
 
 					//Set the tournament flags on the corresponding beatmap
@@ -123,6 +131,16 @@ process.on('message', async (message) => {
 							}
 						}
 					}
+				} else if (!existingScore.maxCombo) {
+					existingScore.maxCombo = match.games[gameIndex].scores[scoreIndex].maxCombo;
+					existingScore.count50 = match.games[gameIndex].scores[scoreIndex].counts['50'];
+					existingScore.count100 = match.games[gameIndex].scores[scoreIndex].counts['100'];
+					existingScore.count300 = match.games[gameIndex].scores[scoreIndex].counts['300'];
+					existingScore.countMiss = match.games[gameIndex].scores[scoreIndex].counts.miss;
+					existingScore.countKatu = match.games[gameIndex].scores[scoreIndex].counts.katu;
+					existingScore.countGeki = match.games[gameIndex].scores[scoreIndex].counts.geki;
+					existingScore.perfect = match.games[gameIndex].scores[scoreIndex].perfect;
+					await existingScore.save();
 				}
 			} catch (error) {
 				scoreIndex--;

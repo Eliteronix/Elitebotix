@@ -460,6 +460,7 @@ module.exports = {
 				elitirisignup.tournamentLobbyId = args[0];
 				await elitirisignup.save();
 			}
+			msg.reply('Done.');
 		} else if (args[0].toLowerCase() === 'clearreflobby') {
 			args.shift();
 			let lobby = await DBElitiriCupLobbies.findOne({
@@ -502,7 +503,7 @@ module.exports = {
 			refereeCell.value = null;
 
 			await sheet.saveUpdatedCells();
-
+			msg.reply('Done.');
 		} else if (args[0] === 'placement') {
 			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 7');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({

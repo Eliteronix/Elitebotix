@@ -149,6 +149,13 @@ module.exports = {
 				}
 			});
 
+			for (let j = 0; j < allMatches.length; j++) {
+				if (parseInt(allMatches[j].score) <= 10000) {
+					allMatches.splice(j, 1);
+					j--;
+				}
+			}
+
 			for (let j = 0; j < 24; j++) {
 				let count = 0;
 				for (let k = 0; k < allMatches.length; k++) {

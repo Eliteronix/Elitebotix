@@ -391,14 +391,28 @@ module.exports = {
 			await potentialLobby.save();
 
 			//create notification task
-			let date = new Date(roundOverCheck(bracketName, lobbyId.replace(/\D+/, '')) - 1800000).toUTCString();
+			let date = new Date(roundOverCheck(bracketName, lobbyId.replace(/\D+/, '')) - 1800000);
 			let user;
 			if (msg.id) {
 				user = msg.author.id;
 			} else {
 				user = interaction.member.user.id;
 			}
-			DBProcessQueue.create({ guildId: 'None', task: 'tourneyLobbyRemind', priority: 10, additions: `${user};${potentialLobby};${currentElitiriCup};${date}`, date: date });
+			// get players from DBElitiriCupSignUp with the same tournamentName and lobbyId then push it to the array
+			let players = await DBElitiriCupSignUp.findAll({
+				where: {
+					tournamentName: currentElitiriCup,
+					tournamentLobbyId: lobbyId
+				}
+			});
+			let playerArray = [];
+			if (players) {
+				for (let i = 0; i < players.length; i++) {
+					playerArray.push(players[i].osuName);
+				}
+			}
+				
+			DBProcessQueue.create({ guildId: 'None', task: 'tourneyLobbyRemind', priority: 10, additions: `${user};${potentialLobby.lobbyId};${currentElitiriCup};${date};${playerArray}`, date: date });
 
 			try {
 				refereeCell = sheet.getCell(3 + k, 4);

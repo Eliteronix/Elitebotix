@@ -357,6 +357,10 @@ module.exports = {
 				server = 'bancho';
 				args.splice(i, 1);
 				i--;
+			} else if (args[i] === '--tournaments') {
+				server = 'tournaments';
+				args.splice(i, 1);
+				i--;
 			}
 
 		}
@@ -726,17 +730,7 @@ module.exports = {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	},
 	getAccuracy(score, mode) {
-		let accuracy = ((score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss))) / 100;
-
-		if (mode === 1) {
-			accuracy = (parseInt(score.counts[300]) + parseInt(score.counts[100] * 0.5)) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss));
-		} else if (mode === 2) {
-			let objects = parseInt(score.counts[300]) + parseInt(score.counts[50]) + parseInt(score.counts.miss);
-			accuracy = (objects / (objects + parseInt(score.counts.katu) + parseInt(score.counts.miss)));
-		} else if (mode === 3) {
-			accuracy = (50 * parseInt(score.counts[50]) + 100 * parseInt(score.counts[100]) + 200 * parseInt(score.counts.katu) + 300 * (parseInt(score.counts[300]) + parseInt(score.counts.geki))) / (300 * (parseInt(score.counts.miss) + parseInt(score.counts[50]) + parseInt(score.counts[100]) + parseInt(score.counts.katu) + parseInt(score.counts[300]) + parseInt(score.counts.geki)));
-		}
-		return accuracy;
+		return getAccuracyFunction(score, mode);
 	},
 	fitTextOnLeftCanvas(ctx, text, startingSize, fontface, yPosition, width, xOffset) {
 
@@ -860,8 +854,8 @@ module.exports = {
 		//Otherwise its on the correct server
 		return false;
 	},
-	async getOsuBeatmap(beatmapId, modBits) {
-		return await getOsuBeatmapFunction(beatmapId, modBits);
+	async getOsuBeatmap(input) {
+		return await getOsuBeatmapFunction(input);
 	},
 	async getMatchesPlanned(startDate, endDate) {
 		let matchesPlanned = 0;
@@ -1084,17 +1078,17 @@ module.exports = {
 				//Get the most recent data
 				let dbBeatmap = null;
 				if (modPools[modIndex] === 'HR') {
-					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 16);
+					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 16 });
 				} else if (modPools[modIndex] === 'DT') {
-					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 64);
+					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 64 });
 				} else if (modPools[modIndex] === 'FM') {
-					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 16);
-					let dbBeatmap2 = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
+					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 16 });
+					let dbBeatmap2 = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 0 });
 					if (dbBeatmap && dbBeatmap2) {
 						dbBeatmap.starRating = (parseFloat(dbBeatmap.starRating) * 2 + parseFloat(dbBeatmap2.starRating)) / 3;
 					}
 				} else {
-					dbBeatmap = await getOsuBeatmapFunction(userMaps[i].beatmapId, 0);
+					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 0 });
 				}
 
 				//Filter by ranked maps > 4*
@@ -1213,12 +1207,8 @@ module.exports = {
 			if (totalWeight > 0 && userMaps.length > 0) {
 				let weightedStarRating = totalWeightedStarRating / totalWeight;
 
-				for (let i = 0; i < userMaps.length && i < 50; i++) {
-					let weightMultiplier = 1;
-					if (duelRatings.provisional && userMaps.lengt < 5) {
-						weightMultiplier = 5 / userMaps.length;
-					}
-					weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i], Math.round((weightMultiplier - i * 0.02) * 100) / 100);
+				for (let i = 0; i < 50; i++) {
+					weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i % userMaps.length], Math.round((1 - i * 0.02) * 100) / 100);
 				}
 
 				if (modIndex === 0) {
@@ -1375,7 +1365,7 @@ module.exports = {
 		let stars = [];
 		for (let i = 0; i < topScores.length; i++) {
 			//Add difficulty ratings
-			const dbBeatmap = await getOsuBeatmapFunction(topScores[i].beatmapId, topScores[i].raw_mods);
+			const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: topScores[i].beatmapId, modBits: topScores[i].raw_mods });
 			if (dbBeatmap && dbBeatmap.starRating && parseFloat(dbBeatmap.starRating) > 0) {
 				stars.push(dbBeatmap.starRating);
 			}
@@ -1548,7 +1538,7 @@ module.exports = {
 							prefix = '';
 						}
 
-						let dbBeatmap = await getOsuBeatmapFunction(map, 0);
+						let dbBeatmap = await getOsuBeatmapFunction({ beatmapId: map, modBits: 0 });
 
 						await IRCUser.sendMessage(`${prefix}${context['display-name']} -> https://osu.ppy.sh/b/${dbBeatmap.beatmapId} [${dbBeatmap.approvalStatus}] ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);
 						if (message) {
@@ -1573,7 +1563,7 @@ module.exports = {
 		return twitchClient;
 	},
 	async checkModsCompatibility(input, beatmapId) { //input = mods | beatmapMode needs to be NOT ID
-		let beatmap = await getOsuBeatmapFunction(beatmapId, input);
+		let beatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: input });
 		if (beatmap) {
 			let mods = getModsFunction(input);
 			if (beatmap.mode !== 'Mania') {
@@ -1615,61 +1605,102 @@ module.exports = {
 		return true;
 	},
 	async getOsuPP(beatmapId, modBits, accuracy, misses, combo) {
-		const rosu = require('rosu-pp');
-		const fs = require('fs');
-
-		//Check if the maps folder exists and create it if necessary
-		if (!fs.existsSync('./maps')) {
-			fs.mkdirSync('./maps');
-		}
-
-		//Check if the map is already downloaded and download if necessary
-		const path = `./maps/${beatmapId}.osu`;
-
-		//Force download if the map is recently updated in the database and therefore probably updated
-		const dbBeatmap = await getOsuBeatmapFunction(beatmapId, 0);
-
-		const recent = new Date();
-		recent.setUTCMinutes(recent.getUTCMinutes() - 3);
-
-		let forceDownload = false;
-		if (recent < dbBeatmap.updatedAt) {
-			forceDownload = true;
-		}
-
-		try {
-			if (forceDownload || !fs.existsSync(path)) {
-				const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
-				await new Promise((resolve, reject) => {
-					const fileStream = fs.createWriteStream(`./maps/${beatmapId}.osu`);
-					res.body.pipe(fileStream);
-					res.body.on('error', (err) => {
-						reject(err);
-					});
-					fileStream.on('finish', function () {
-						resolve();
-					});
-				});
-			}
-		} catch (err) {
-			console.error(err);
-		}
-
-		if (!combo) {
-			combo = 0;
-		}
-
-		let arg = {
-			path: `./maps/${beatmapId}.osu`,
-			mods: parseInt(modBits),
-			acc: parseFloat(accuracy),
-			nMisses: parseInt(misses),
-			combo: parseInt(combo),
+		return await getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo);
+	},
+	async multiToBanchoScore(inputScore) {
+		let outputScore = {
+			score: inputScore.score,
+			user: {
+				name: null,
+				id: inputScore.osuUserId
+			},
+			beatmapId: inputScore.beatmapId,
+			counts: {
+				'50': inputScore.count50,
+				'100': inputScore.count100,
+				'300': inputScore.count300,
+				geki: inputScore.countGeki,
+				katu: inputScore.countKatu,
+				miss: inputScore.countMiss
+			},
+			maxCombo: inputScore.maxCombo,
+			perfect: inputScore.perfect,
+			raw_date: inputScore.gameStartDate,
+			rank: inputScore.rank,
+			pp: inputScore.pp,
+			hasReplay: false,
+			raw_mods: parseInt(inputScore.gameRawMods) + parseInt(inputScore.rawMods),
+			beatmap: undefined,
+			matchName: inputScore.matchName,
 		};
 
-		return rosu.calculate(arg)[0].pp;
+		const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: outputScore.beatmapId, modBits: 0 });
+
+		if (!outputScore.pp && outputScore.maxCombo && dbBeatmap) {
+			outputScore.pp = await getOsuPPFunction(outputScore.beatmapId, outputScore.raw_mods, getAccuracyFunction(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
+		}
+
+		outputScore.rank = calculateGradeFunction(inputScore.mode, outputScore.counts, outputScore.raw_mods);
+
+		return outputScore;
 	}
 };
+
+async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo) {
+	const rosu = require('rosu-pp');
+	const fs = require('fs');
+
+	//Check if the maps folder exists and create it if necessary
+	if (!fs.existsSync('./maps')) {
+		fs.mkdirSync('./maps');
+	}
+
+	//Check if the map is already downloaded and download if necessary
+	const path = `./maps/${beatmapId}.osu`;
+
+	//Force download if the map is recently updated in the database and therefore probably updated
+	const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: 0 });
+
+	const recent = new Date();
+	recent.setUTCMinutes(recent.getUTCMinutes() - 3);
+
+	let forceDownload = false;
+	if (recent < dbBeatmap.updatedAt) {
+		forceDownload = true;
+	}
+
+	try {
+		if (forceDownload || !fs.existsSync(path)) {
+			const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
+			await new Promise((resolve, reject) => {
+				const fileStream = fs.createWriteStream(`./maps/${beatmapId}.osu`);
+				res.body.pipe(fileStream);
+				res.body.on('error', (err) => {
+					reject(err);
+				});
+				fileStream.on('finish', function () {
+					resolve();
+				});
+			});
+		}
+	} catch (err) {
+		console.error(err);
+	}
+
+	if (!combo) {
+		combo = 0;
+	}
+
+	let arg = {
+		path: `./maps/${beatmapId}.osu`,
+		mods: parseInt(modBits),
+		acc: parseFloat(accuracy),
+		nMisses: parseInt(misses),
+		combo: parseInt(combo),
+	};
+
+	return rosu.calculate(arg)[0].pp;
+}
 
 async function getOsuBadgeNumberByIdFunction(osuUserId) {
 	return await fetch(`https://osu.ppy.sh/users/${osuUserId}/osu`)
@@ -1727,7 +1758,17 @@ function fitTextOnMiddleCanvasFunction(ctx, text, startingSize, fontface, yPosit
 
 }
 
-async function getOsuBeatmapFunction(beatmapId, modBits) {
+async function getOsuBeatmapFunction(input) {
+	let beatmapId = input.beatmapId;
+	let modBits = 0;
+	if (input.modBits) {
+		modBits = input.modBits;
+	}
+	let forceUpdate = false;
+	if (input.forceUpdate) {
+		forceUpdate = true;
+	}
+
 	let lastRework = new Date();
 	lastRework.setUTCFullYear(2021);
 	lastRework.setUTCMonth(10);
@@ -1755,6 +1796,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 				}
 
 				if (!dbBeatmap
+					|| forceUpdate
 					|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
 					|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && (!dbBeatmap.updatedAt || dbBeatmap.updatedAt.getTime() < lastWeek.getTime()) //Update if old non-ranked map
 					|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0 || !dbBeatmap.mode)) { //Always update ranked maps if values are missing
@@ -1770,7 +1812,7 @@ async function getOsuBeatmapFunction(beatmapId, modBits) {
 						.then(async (beatmaps) => {
 							let noVisualModBeatmap = beatmaps[0];
 							if (getModsFunction(modBits).includes('MI') || getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL') || getModsFunction(modBits).includes('FI') || getModsFunction(modBits).includes('NF') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('PF') || getModsFunction(modBits).includes('SD')) {
-								let realNoVisualModBeatmap = await getOsuBeatmapFunction(beatmapId, getModBitsFunction(getModsFunction(modBits).join(''), true));
+								let realNoVisualModBeatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: getModBitsFunction(getModsFunction(modBits).join(''), true) });
 								noVisualModBeatmap.difficulty.rating = realNoVisualModBeatmap.starRating;
 								noVisualModBeatmap.difficulty.aim = realNoVisualModBeatmap.aimRating;
 								noVisualModBeatmap.difficulty.speed = realNoVisualModBeatmap.speedRating;
@@ -2239,9 +2281,15 @@ function applyOsuDuelStarratingCorrection(rating, score, weight) {
 	}
 
 	//Get the star rating change by the difference
-	//https://www.desmos.com/calculator/fdmdmr1qwn
-	const z = 0.0000000000000000007;
-	const starRatingChange = z * Math.pow(scoreDifference, 3);
+	//https://www.desmos.com/calculator/zlckiq6hgx
+	const z = 0.000000000000000005;
+	let starRatingChange = z * Math.pow(scoreDifference, 3);
+
+	if (starRatingChange > 1) {
+		starRatingChange = 1;
+	} else if (starRatingChange < -1) {
+		starRatingChange = -1;
+	}
 
 	//Get the new rating
 	const newRating = rating + (starRatingChange * weight);
@@ -2262,4 +2310,122 @@ function adjustHDStarRatingFunction(starRating, approachRate) {
 	let starRatingAdjust = (0.55 / 1.5 * Math.abs(approachRate - 9)) + 0.2;
 
 	return parseFloat(starRating) + starRatingAdjust;
+}
+
+function getAccuracyFunction(score, mode) {
+	let accuracy = ((score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss))) / 100;
+
+	if (mode === 1) {
+		accuracy = (parseInt(score.counts[300]) + parseInt(score.counts[100] * 0.5)) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss));
+	} else if (mode === 2) {
+		let objects = parseInt(score.counts[300]) + parseInt(score.counts[50]) + parseInt(score.counts.miss);
+		accuracy = (objects / (objects + parseInt(score.counts.katu) + parseInt(score.counts.miss)));
+	} else if (mode === 3) {
+		accuracy = (50 * parseInt(score.counts[50]) + 100 * parseInt(score.counts[100]) + 200 * parseInt(score.counts.katu) + 300 * (parseInt(score.counts[300]) + parseInt(score.counts.geki))) / (300 * (parseInt(score.counts.miss) + parseInt(score.counts[50]) + parseInt(score.counts[100]) + parseInt(score.counts.katu) + parseInt(score.counts[300]) + parseInt(score.counts.geki)));
+	}
+
+	return accuracy;
+}
+
+function calculateGradeFunction(mode, counts, modBits) {
+	if (mode === 'Standard') {
+		let grade = 'D';
+
+		let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
+		let count50Rate = parseInt(counts['50']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
+
+		if (count300Rate === 1) {
+			grade = 'X';
+		} else if (count300Rate > 0.9 && count50Rate <= 0.01 && parseInt(counts.miss) === 0) {
+			grade = 'S';
+		} else if (count300Rate > 0.9 || count300Rate > 0.8 && parseInt(counts.miss) === 0) {
+			grade = 'A';
+		} else if (count300Rate > 0.8 || count300Rate > 0.7 && parseInt(counts.miss) === 0) {
+			grade = 'B';
+		} else if (count300Rate > 0.6) {
+			grade = 'C';
+		}
+
+		if (grade === 'X' || grade === 'S') {
+			if (getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL')) {
+				grade = grade + 'H';
+			}
+		}
+
+		return grade;
+	} else if (mode === 'Taiko') {
+		let grade = 'D';
+
+		let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
+
+		if (count300Rate === 1) {
+			grade = 'X';
+		} else if (count300Rate > 0.9 && parseInt(counts.miss) === 0) {
+			grade = 'S';
+		} else if (count300Rate > 0.9 || count300Rate > 0.8 && parseInt(counts.miss) === 0) {
+			grade = 'A';
+		} else if (count300Rate > 0.8 || count300Rate > 0.7 && parseInt(counts.miss) === 0) {
+			grade = 'B';
+		} else if (count300Rate > 0.6) {
+			grade = 'C';
+		}
+
+		if (grade === 'X' || grade === 'S') {
+			if (getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL')) {
+				grade = grade + 'H';
+			}
+		}
+
+		return grade;
+	} else if (mode === 'Catch') {
+		let grade = 'D';
+
+		let accuracy = getAccuracyFunction({ counts: counts }, 2);
+
+		if (accuracy === 1) {
+			grade = 'X';
+		} else if (accuracy > 0.98) {
+			grade = 'S';
+		} else if (accuracy > 0.94) {
+			grade = 'A';
+		} else if (accuracy > 0.90) {
+			grade = 'B';
+		} else if (accuracy > 0.85) {
+			grade = 'C';
+		}
+
+		if (grade === 'X' || grade === 'S') {
+			if (getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL')) {
+				grade = grade + 'H';
+			}
+		}
+
+		return grade;
+	} else if (mode === 'Mania') {
+		let grade = 'D';
+
+		let accuracy = getAccuracyFunction({ counts: counts }, 3);
+
+		if (accuracy === 1) {
+			grade = 'X';
+		} else if (accuracy > 0.95) {
+			grade = 'S';
+		} else if (accuracy > 0.90) {
+			grade = 'A';
+		} else if (accuracy > 0.80) {
+			grade = 'B';
+		} else if (accuracy > 0.70) {
+			grade = 'C';
+		}
+
+		if (grade === 'X' || grade === 'S') {
+			if (getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL')) {
+				grade = grade + 'H';
+			}
+		}
+
+		return grade;
+	} else {
+		return 'D';
+	}
 }
