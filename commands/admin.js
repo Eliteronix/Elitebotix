@@ -1819,6 +1819,10 @@ module.exports = {
 			// 						'name': 'Ripple',
 			// 						'value': 'r',
 			// 					},
+			// 					{
+			// 						'name': 'Tournaments',
+			// 						'value': 'tournaments',
+			// 					},
 			// 				]
 			// 			},
 			// 			{
@@ -4016,7 +4020,6 @@ module.exports = {
 									'name': 'Recent',
 									'value': '--new',
 								},
-
 							]
 						},
 						{
@@ -4027,7 +4030,7 @@ module.exports = {
 						},
 						{
 							'name': 'gamemode',
-							'description': 'The username, id or link of the player',
+							'description': 'Gamemode',
 							'type': 3,
 							'required': false,
 							'choices': [
@@ -4040,7 +4043,7 @@ module.exports = {
 									'value': 'm',
 								},
 								{
-									'name': 'Catch the beat',
+									'name': 'Catch The Beat',
 									'value': 'c',
 								},
 								{
@@ -4048,8 +4051,7 @@ module.exports = {
 									'value': 't',
 								},
 							]
-						},
-						{
+						}, {
 							'name': 'server',
 							'description': 'The server from which the results will be displayed',
 							'type': 3,
@@ -4062,6 +4064,10 @@ module.exports = {
 								{
 									'name': 'Ripple',
 									'value': 'r',
+								},
+								{
+									'name': 'Tournaments',
+									'value': 'tournaments',
 								},
 							]
 						},
@@ -5080,14 +5086,16 @@ module.exports = {
 				.catch(error => {
 					console.log(error);
 				});
-		} else if (args[0] === 'fixOopsie') {
-			let map = await DBElitiriCupSubmissions.findOne({
+		} else if (args[0] === 'fix') {
+			let scores = await DBOsuMultiScores.findAll({
 				where: {
-					id: args[1]
+					matchId: args[1]
 				}
 			});
 
-			await map.destroy();
+			for (let i = 0; i < scores.length; i++) {
+				await scores[i].destroy();
+			}
 		} else {
 			msg.reply('Invalid command');
 		}

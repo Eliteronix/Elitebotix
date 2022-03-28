@@ -194,6 +194,13 @@ module.exports = {
 				}
 			}));
 
+			for (let j = 0; j < scoresTeam1.length; j++) {
+				if (parseInt(scoresTeam1[j].score) <= 10000) {
+					scoresTeam1.splice(j, 1);
+					j--;
+				}
+			}
+
 			quicksort(scoresTeam1[i]);
 		}
 
@@ -210,6 +217,13 @@ module.exports = {
 					}
 				}
 			}));
+
+			for (let j = 0; j < scoresTeam2.length; j++) {
+				if (parseInt(scoresTeam2[j].score) <= 10000) {
+					scoresTeam2.splice(j, 1);
+					j--;
+				}
+			}
 
 			quicksort(scoresTeam2[i]);
 		}

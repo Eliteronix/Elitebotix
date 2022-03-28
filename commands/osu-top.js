@@ -1,10 +1,11 @@
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, saveOsuMultiScores, pause } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-top',
@@ -260,6 +261,73 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 					console.log(err);
 				}
 			});
+	} else if (server === 'tournaments') {
+		// eslint-disable-next-line no-undef
+		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+		});
+
+		osuApi.getUser({ u: username, m: mode })
+			.then(async (user) => {
+				updateOsuDetailsforUser(user, mode);
+
+				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
+
+				const canvasWidth = 1000;
+				const canvasHeight = 83 + limit * 41.66666;
+
+				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+				//Create Canvas
+				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+				//Get context and load the image
+				const ctx = canvas.getContext('2d');
+				const background = await Canvas.loadImage('./other/osu-background.png');
+				for (let i = 0; i < canvas.height / background.height; i++) {
+					for (let j = 0; j < canvas.width / background.width; j++) {
+						ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+					}
+				}
+
+				let elements = [canvas, ctx, user];
+
+				elements = await drawTitle(elements, server, mode, sorting);
+
+				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage);
+
+				await drawFooter(elements);
+
+				//Create as an attachment
+				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}.png`);
+
+				//If created by osu-tracking
+				if (tracking) {
+					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: [attachment] });
+				} else {
+					//Send attachment
+					let sentMessage;
+					if (noLinkedAccount) {
+						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`/osu-link connect:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+					} else {
+						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
+					}
+					await sentMessage.react('👤');
+					await sentMessage.react('📈');
+				}
+
+				processingMessage.delete();
+			})
+			.catch(err => {
+				if (err.message === 'Not found') {
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --r for ripple; --s/--t/--c/--m for modes; --n / --new / --recent for recent scores; --25 for top 25...)`);
+				} else {
+					console.log(err);
+				}
+			});
 	}
 }
 
@@ -331,7 +399,7 @@ async function drawFooter(input) {
 	return output;
 }
 
-async function drawTopPlays(input, server, mode, msg, sorting, showLimit) {
+async function drawTopPlays(input, server, mode, msg, sorting, showLimit, processingMessage) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -367,6 +435,94 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit) {
 
 			scores.push(score);
 		}
+	} else if (server === 'tournaments') {
+		let modeName = getGameModeName(mode);
+		modeName = modeName.substring(0, 1).toUpperCase() + modeName.substring(1);
+
+		//Get all scores from tournaments
+		let multiScores = await DBOsuMultiScores.findAll({
+			where: {
+				osuUserId: user.id,
+				mode: modeName,
+				tourneyMatch: true,
+				score: {
+					[Op.gte]: 10000
+				}
+			}
+		});
+
+		for (let i = 0; i < multiScores.length; i++) {
+			if (parseInt(multiScores[i].score) <= 10000) {
+				multiScores.splice(i, 1);
+				i--;
+			}
+		}
+
+		let multisToUpdate = [];
+		for (let i = 0; i < multiScores.length; i++) {
+			if (!multiScores[i].maxCombo && !multisToUpdate.includes(multiScores[i].matchId)) {
+				multisToUpdate.push(multiScores[i].matchId);
+			}
+		}
+
+		for (let i = 0; i < multisToUpdate.length; i++) {
+			processingMessage.edit(`[One time process] Updating legacy scores for ${user.name}... ${i + 1}/${multisToUpdate.length}`);
+			osuApi.getMatch({ mp: multisToUpdate[i] })
+				.then(async (match) => {
+					saveOsuMultiScores(match);
+				})
+				.catch(() => {
+					//Nothing
+				});
+			await pause(20000);
+		}
+
+		//Get all scores from tournaments
+		multiScores = await DBOsuMultiScores.findAll({
+			where: {
+				osuUserId: user.id,
+				mode: modeName,
+				tourneyMatch: true,
+				score: {
+					[Op.gte]: 10000
+				}
+			}
+		});
+
+		for (let i = 0; i < multiScores.length; i++) {
+			if (parseInt(multiScores[i].score) <= 10000) {
+				multiScores.splice(i, 1);
+				i--;
+			}
+		}
+
+		//Translate the scores to bancho scores
+		for (let i = 0; i < multiScores.length; i++) {
+			if (parseInt(multiScores[i].gameRawMods) % 2 === 1) {
+				multiScores[i].gameRawMods = parseInt(multiScores[i].gameRawMods) - 1;
+			}
+			if (parseInt(multiScores[i].rawMods) % 2 === 1) {
+				multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
+			}
+			multiScores[i] = await multiToBanchoScore(multiScores[i]);
+		}
+
+		//Sort scores by pp
+		quicksortPP(multiScores);
+
+		//Remove duplicates by beatmapId
+		for (let i = 0; i < multiScores.length; i++) {
+			for (let j = i + 1; j < multiScores.length; j++) {
+				if (multiScores[i].beatmapId === multiScores[j].beatmapId) {
+					multiScores.splice(j, 1);
+				}
+			}
+		}
+
+		//Feed the scores into the array
+		for (let i = 0; i < multiScores.length && i < 100; i++) {
+			scores.push(multiScores[i]);
+		}
 	}
 
 	let sortedScores = [];
@@ -376,7 +532,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit) {
 		quicksortRecent(scores);
 	}
 
-	for (let i = 0; i < showLimit; i++) {
+	for (let i = 0; i < showLimit && i < scores.length; i++) {
 		let dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: scores[i].raw_mods });
 		beatmaps.push(dbBeatmap);
 	}
@@ -466,7 +622,11 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit) {
 		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.fillStyle = '#A08C95';
 		ctx.textAlign = 'left';
-		ctx.fillText(achievedTime, (canvas.width / 35) * 3 + parseInt(beatmaps[i].difficulty.length) * 6 + canvas.width / 50, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+		if (server === 'tournaments') {
+			ctx.fillText(`${achievedTime} in ${sortedScores[i].matchName}`, (canvas.width / 35) * 3 + parseInt(beatmaps[i].difficulty.length) * 6 + canvas.width / 50, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+		} else {
+			ctx.fillText(achievedTime, (canvas.width / 35) * 3 + parseInt(beatmaps[i].difficulty.length) * 6 + canvas.width / 50, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+		}
 		let accuracy = getAccuracy(sortedScores[i], mode) * 100;
 
 		let combo;
@@ -518,6 +678,7 @@ function quicksortRecent(list, start = 0, end = undefined) {
 	}
 	return list;
 }
+
 function partitionAR(list, start, end) {
 	const pivot = list[end];
 	let i = start;
@@ -626,6 +787,19 @@ function partitionBPM(list, start, end) {
 	return i;
 }
 
+function partitionPP(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (list[j].pp >= pivot.pp) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
 function quicksortBPM(list, start = 0, end = undefined) {
 	if (end === undefined) {
 		end = list.length - 1;
@@ -657,6 +831,18 @@ function quicksortLength(list, start = 0, end = undefined) {
 		const p = partitionLength(list, start, end);
 		quicksortLength(list, start, p - 1);
 		quicksortLength(list, p + 1, end);
+	}
+	return list;
+}
+
+function quicksortPP(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionPP(list, start, end);
+		quicksortPP(list, start, p - 1);
+		quicksortPP(list, p + 1, end);
 	}
 	return list;
 }
