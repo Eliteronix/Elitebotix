@@ -1,4 +1,4 @@
-const { DBDiscordUsers } = require('../dbObjects');
+﻿const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
@@ -662,7 +662,7 @@ async function drawAccInfo(input, mode, mapRank) {
 
 	//PP
 	roundedRect(ctx, canvas.width / 1000 * 870, canvas.height / 500 * 365, 110, 50, 5, '00', '00', '00', 0.5);
-	if (beatmap.approvalStatus !== 'Ranked' && beatmap.approvalStatus === 'Approved') {
+	if (beatmap.approvalStatus !== 'Ranked' && beatmap.approvalStatus !== 'Approved') {
 		ctx.fillStyle = '#808080';
 	} else {
 		ctx.fillStyle = '#ffffff';
