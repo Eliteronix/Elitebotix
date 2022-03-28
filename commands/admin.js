@@ -1122,7 +1122,7 @@ module.exports = {
 			// 		description: 'Sends an info card about the specified player',
 			// 		options: [
 			// 			{
-			// 				'name': 'not-failed',
+			// 				'name': 'pass',
 			// 				'description': 'Show the recent pass?',
 			// 				'type': 3,
 			// 				'required': false,
@@ -1174,7 +1174,7 @@ module.exports = {
 			// 		description: 'Sends an info card about the last score of the specified player',
 			// 		options: [
 			// 			{
-			// 				'name': 'not-failed',
+			// 				'name': 'pass',
 			// 				'description': 'Show the recent pass?',
 			// 				'type': 3,
 			// 				'required': false,
@@ -3491,7 +3491,7 @@ module.exports = {
 					description: 'Sends an info card about the specified player',
 					options: [
 						{
-							'name': 'not-failed',
+							'name': 'pass',
 							'description': 'Show the recent pass?',
 							'type': 3,
 							'required': false,
@@ -3543,7 +3543,7 @@ module.exports = {
 					description: 'Sends an info card about the last score of the specified player',
 					options: [
 						{
-							'name': 'not-failed',
+							'name': 'pass',
 							'description': 'Show the recent pass?',
 							'type': 3,
 							'required': false,
