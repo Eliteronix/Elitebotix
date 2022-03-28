@@ -154,7 +154,7 @@ async function getBeatmap(msg, interaction, beatmap) {
 	let tournaments = [];
 
 	for (let i = 0; i < mapScores.length; i++) {
-		let acronym = mapScores[i].matchName.replace(/:.+/gm, '');
+		let acronym = mapScores[i].matchName.replace(/:.+/gm, '').replace(/`/g, '');
 
 		if (tournaments.indexOf(acronym) === -1) {
 			tournaments.push(acronym);
@@ -259,10 +259,10 @@ async function drawStats(input) {
 
 	const totalLengthSeconds = (beatmap.totalLength % 60) + '';
 	const totalLengthMinutes = (beatmap.totalLength - beatmap.totalLength % 60) / 60;
-	const totalLength = totalLengthMinutes + ':' + Math.round(totalLengthSeconds.padStart(2, '0'));
+	const totalLength = totalLengthMinutes + ':' + Math.round(totalLengthSeconds).toString().padStart(2, '0');
 	const drainLengthSeconds = (beatmap.drainLength % 60) + '';
 	const drainLengthMinutes = (beatmap.drainLength - beatmap.drainLength % 60) / 60;
-	const drainLength = drainLengthMinutes + ':' + Math.round(drainLengthSeconds.padStart(2, '0'));
+	const drainLength = drainLengthMinutes + ':' + Math.round(drainLengthSeconds).toString().padStart(2, '0');
 
 	//Round user rating and display as 10 stars
 	const userRating = Math.round(beatmap.userRating);
