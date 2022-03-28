@@ -32,11 +32,14 @@ module.exports = {
 					guild = await DBGuilds.create({
 						guildId: interaction.guild.id,
 						guildName: interaction.guild.name,
-						birthdayLogging: true,
 					});
 				}
-                
-				guild.birthdayLogging = true;
+
+				if (guild.birthdayEnabled) {
+					return interaction.reply({ content: 'Birthday logging is already enabled.', ephemeral: true });
+				}
+
+				guild.birthdayEnabled = true;
 				guild.save();
 				return interaction.reply({ content: 'Birthday logging has been enabled.', ephemeral: true });
 			} else if (interaction.options._subcommand === 'disable') {
@@ -44,16 +47,18 @@ module.exports = {
 					guild = await DBGuilds.create({
 						guildId: interaction.guild.id,
 						guildName: interaction.guild.name,
-						birthdayLogging: false,
 					});
 				}
+
+				if (!guild.birthdayEnabled) {
+					return interaction.reply({ content: 'Birthday logging is already disabled.', ephemeral: true });
+				}
                 
-				guild.birthdayLogging = false;
+				guild.birthdayEnabled = false;
 				guild.save();
 				return interaction.reply({ content: 'Birthday logging has been disabled.', ephemeral: true });
 			} else if (interaction.options._subcommand === 'channel') {
 				let channel;
-				console.log(interaction.options._hoistedOptions);
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					if (interaction.options._hoistedOptions[i].name === 'set') {
 						channel = interaction.options._hoistedOptions[i].value;
@@ -68,11 +73,10 @@ module.exports = {
 					guild = await DBGuilds.create({
 						guildId: interaction.guild.id,
 						guildName: interaction.guild.name,
-						birthdayLogging: false,
 					});
 				}
 
-				guild.birthdayLoggingChannel = channel;
+				guild.birthdayMessageChannel = channel;
 				guild.save();
 				return interaction.reply({content: `Birthday logging channel has been set to <#${channel}>`, ephemeral: true });
 			}

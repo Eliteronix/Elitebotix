@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -973,6 +973,9 @@ module.exports = {
 	getScoreModpool(dbScore) {
 		return getScoreModpoolFunction(dbScore);
 	},
+	checkForBirthdays(client) {
+		return checkForBirthdaysFunction(client);
+	},
 	async getUserDuelStarRating(input) {
 		//Try to get it from tournament data if available
 		let userScores;
@@ -1809,6 +1812,70 @@ function fitTextOnMiddleCanvasFunction(ctx, text, startingSize, fontface, yPosit
 
 	return fontsize;
 
+}
+
+async function checkForBirthdaysFunction(client) {
+	//get birthday date from DBDiscordUsers for all users in the database that have a birthday set
+	let users = await DBDiscordUsers.findAll({
+		where: {
+			birthday: {
+				[Op.ne]: null
+			},
+		}
+	});
+
+	//get current date
+	const currentDate = new Date();
+
+	// iterate through all users and check if the current date is the same as the birthday date 
+	for (let i = 0; i < users.length; i++) {
+		const user = users[i];
+		const birthdayDate = new Date(user.birthday);
+		// check if the current date is the same as the birthday date
+		// also check for the minutes to avoid it triggering multiple times || because minutes are set to 0 
+		if (currentDate.getDate() === birthdayDate.getDate() && currentDate.getMonth() === birthdayDate.getMonth()) {  //&& currentDate.getMinutes() === birthdayDate.getMinutes()
+			// get all guilds with the birthday logging enabled
+			let userBirthdayguilds = await DBBirthdayGuilds.findAll({
+				where: {
+					birthdayEnabled: true,
+					userId: user.userId
+				}
+			});
+
+			// iterate through all guilds in DBGuilds and check if the birthday message is enabled
+			let guildsRaw;
+			let guilds = [];
+			for (let i = 0; i < userBirthdayguilds.length; i++) {
+				guildsRaw = await DBGuilds.findOne({
+					where: {
+						birthdayEnabled: true,
+						guildId: userBirthdayguilds[i].guildId
+					}
+				});
+				guilds.push(guildsRaw);
+			}
+
+			// send the birthday message in all channels in the guilds that have the birthday message enabled
+			for (let i = 0; i < guilds.length; i++) {
+				if (guilds[i]) {
+					let birthdayMessageChannel = await client.channels.fetch(guilds[i].birthdayMessageChannel);
+					if (birthdayMessageChannel !== null) {
+						// send a birthday gif from tenor 
+						let index;
+						const birthdayGif = await fetch('https://api.tenor.com/v1/search?q=anime_birthday&key=${process.env.TENORTOKEN}&limit=30&contentfilter=medium')
+							.then(async (res) => {
+								let gifs = await res.json();
+								index = Math.floor(Math.random() * gifs.results.length);
+								return gifs.results[index].media[0].gif.url;
+							});
+						
+						// send the birthday message
+						birthdayMessageChannel.send(`<@${user.userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`); 
+					}
+				}
+			}
+		}
+	}
 }
 
 async function getOsuBeatmapFunction(input) {

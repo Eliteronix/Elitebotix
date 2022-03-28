@@ -36,7 +36,6 @@ module.exports = {
 						date.setUTCMonth(interaction.options._hoistedOptions[i].value - 1);
 					}
 				}
-				console.log(date);
 				let user = await DBDiscordUsers.findOne({
 					where: {
 						userId: interaction.member.user.id,
@@ -76,7 +75,6 @@ module.exports = {
 						guildId: interaction.guild.id,
 						guildName: interaction.guild.name,
 						userId: interaction.member.user.id,
-						birthdayEnabled: true,
 					});
 				}
                 

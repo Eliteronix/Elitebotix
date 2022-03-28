@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { DBGuilds } = require('./dbObjects');
+const { DBGuilds, DBBirthdayGuilds } = require('./dbObjects');
 const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (member) {
@@ -67,5 +67,12 @@ module.exports = async function (member) {
 
 			channel.send({ embeds: [changeEmbed] });
 		}
+		// destroy the guild dataset in the db
+		await DBBirthdayGuilds.destroy({
+			where: {
+				userId: member.user.username,
+				guildId: guild.guildId
+			}
+		});
 	}
 };
