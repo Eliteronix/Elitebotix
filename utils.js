@@ -1640,7 +1640,7 @@ module.exports = {
 			outputScore.pp = await getOsuPPFunction(outputScore.beatmapId, outputScore.raw_mods, getAccuracyFunction(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
 		}
 
-		outputScore.rank = calculateGradeFunction(outputScore.counts, outputScore.raw_mods);
+		outputScore.rank = calculateGradeFunction(inputScore.mode, outputScore.counts, outputScore.raw_mods);
 
 		return outputScore;
 	}
@@ -2327,50 +2327,105 @@ function getAccuracyFunction(score, mode) {
 	return accuracy;
 }
 
-function calculateGradeFunction(counts, modBits) {
-	let grade = 'D';
+function calculateGradeFunction(mode, counts, modBits) {
+	if (mode === 'Standard') {
+		let grade = 'D';
 
-	let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
-	let count50Rate = parseInt(counts['50']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
+		let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
+		let count50Rate = parseInt(counts['50']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
 
-	if (count300Rate === 1) {
-		grade = 'X';
-	} else if (count300Rate > 0.9 && count50Rate <= 0.01 && parseInt(counts.miss) === 0) {
-		grade = 'S';
-	} else if (count300Rate > 0.9 || count300Rate > 0.8 && parseInt(counts.miss) === 0) {
-		grade = 'A';
-	} else if (count300Rate > 0.8 || count300Rate > 0.7 && parseInt(counts.miss) === 0) {
-		grade = 'B';
-	} else if (count300Rate > 0.6) {
-		grade = 'C';
-	}
-
-	if (grade === 'X' || grade === 'S') {
-		if (getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL')) {
-			grade = grade + 'H';
+		if (count300Rate === 1) {
+			grade = 'X';
+		} else if (count300Rate > 0.9 && count50Rate <= 0.01 && parseInt(counts.miss) === 0) {
+			grade = 'S';
+		} else if (count300Rate > 0.9 || count300Rate > 0.8 && parseInt(counts.miss) === 0) {
+			grade = 'A';
+		} else if (count300Rate > 0.8 || count300Rate > 0.7 && parseInt(counts.miss) === 0) {
+			grade = 'B';
+		} else if (count300Rate > 0.6) {
+			grade = 'C';
 		}
+
+		if (grade === 'X' || grade === 'S') {
+			if (getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL')) {
+				grade = grade + 'H';
+			}
+		}
+
+		return grade;
+	} else if (mode === 'Taiko') {
+		let grade = 'D';
+
+		let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
+
+		if (count300Rate === 1) {
+			grade = 'X';
+		} else if (count300Rate > 0.9 && parseInt(counts.miss) === 0) {
+			grade = 'S';
+		} else if (count300Rate > 0.9 || count300Rate > 0.8 && parseInt(counts.miss) === 0) {
+			grade = 'A';
+		} else if (count300Rate > 0.8 || count300Rate > 0.7 && parseInt(counts.miss) === 0) {
+			grade = 'B';
+		} else if (count300Rate > 0.6) {
+			grade = 'C';
+		}
+
+		if (grade === 'X' || grade === 'S') {
+			if (getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL')) {
+				grade = grade + 'H';
+			}
+		}
+
+		return grade;
+	} else if (mode === 'Catch') {
+		let grade = 'D';
+
+		let accuracy = getAccuracyFunction({ counts: counts }, 2);
+
+		if (accuracy === 1) {
+			grade = 'X';
+		} else if (accuracy > 0.98) {
+			grade = 'S';
+		} else if (accuracy > 0.94) {
+			grade = 'A';
+		} else if (accuracy > 0.90) {
+			grade = 'B';
+		} else if (accuracy > 0.85) {
+			grade = 'C';
+		}
+
+		if (grade === 'X' || grade === 'S') {
+			if (getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL')) {
+				grade = grade + 'H';
+			}
+		}
+
+		return grade;
+	} else if (mode === 'Mania') {
+		let grade = 'D';
+
+		let accuracy = getAccuracyFunction({ counts: counts }, 3);
+
+		if (accuracy === 1) {
+			grade = 'X';
+		} else if (accuracy > 0.95) {
+			grade = 'S';
+		} else if (accuracy > 0.90) {
+			grade = 'A';
+		} else if (accuracy > 0.80) {
+			grade = 'B';
+		} else if (accuracy > 0.70) {
+			grade = 'C';
+		}
+
+		if (grade === 'X' || grade === 'S') {
+			if (getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FL')) {
+				grade = grade + 'H';
+			}
+		}
+
+		return grade;
+	} else {
+		return 'D';
 	}
-
-	return grade;
 }
-
-// getRankImage: function (rank) {
-// 	let URL = 'https://osu.ppy.sh/assets/images/GradeSmall-D.6b170c4c.svg'; //D Rank
-
-// 	if (rank === 'XH') {
-// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-SS-Silver.6681366c.svg';
-// 	} else if (rank === 'X') {
-// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-SS.a21de890.svg';
-// 	} else if (rank === 'SH') {
-// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-S-Silver.811ae28c.svg';
-// 	} else if (rank === 'S') {
-// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-S.3b4498a9.svg';
-// 	} else if (rank === 'A') {
-// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-A.d785e824.svg';
-// 	} else if (rank === 'B') {
-// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-B.e19fc91b.svg';
-// 	} else if (rank === 'C') {
-// 		URL = 'https://osu.ppy.sh/assets/images/GradeSmall-C.6bb75adc.svg';
-// 	}
-// 	return URL;
-// },

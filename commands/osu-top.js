@@ -5,6 +5,7 @@ const Canvas = require('canvas');
 const { getGuildPrefix, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, saveOsuMultiScores, pause } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-top',
@@ -435,14 +436,27 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 			scores.push(score);
 		}
 	} else if (server === 'tournaments') {
+		let modeName = getGameModeName(mode);
+		modeName = modeName.substring(0, 1).toUpperCase() + modeName.substring(1);
+
 		//Get all scores from tournaments
 		let multiScores = await DBOsuMultiScores.findAll({
 			where: {
 				osuUserId: user.id,
-				mode: 'Standard',
-				tourneyMatch: true
+				mode: modeName,
+				tourneyMatch: true,
+				score: {
+					[Op.gte]: 10000
+				}
 			}
 		});
+
+		for (let i = 0; i < multiScores.length; i++) {
+			if (parseInt(multiScores[i].score) <= 10000) {
+				multiScores.splice(i, 1);
+				i--;
+			}
+		}
 
 		let multisToUpdate = [];
 		for (let i = 0; i < multiScores.length; i++) {
@@ -467,10 +481,20 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		multiScores = await DBOsuMultiScores.findAll({
 			where: {
 				osuUserId: user.id,
-				mode: 'Standard',
-				tourneyMatch: true
+				mode: modeName,
+				tourneyMatch: true,
+				score: {
+					[Op.gte]: 10000
+				}
 			}
 		});
+
+		for (let i = 0; i < multiScores.length; i++) {
+			if (parseInt(multiScores[i].score) <= 10000) {
+				multiScores.splice(i, 1);
+				i--;
+			}
+		}
 
 		//Translate the scores to bancho scores
 		for (let i = 0; i < multiScores.length; i++) {
@@ -508,7 +532,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		quicksortRecent(scores);
 	}
 
-	for (let i = 0; i < showLimit; i++) {
+	for (let i = 0; i < showLimit && i < scores.length; i++) {
 		let dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: scores[i].raw_mods });
 		beatmaps.push(dbBeatmap);
 	}

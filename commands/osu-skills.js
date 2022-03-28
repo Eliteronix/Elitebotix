@@ -447,6 +447,14 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 						}
 					}
 				});
+
+				for (let i = 0; i < userScores.length; i++) {
+					if (parseInt(userScores[i].score) <= 10000) {
+						userScores.splice(i, 1);
+						i--;
+					}
+				}
+
 				//Remove userScores which don't fit the criteria
 				for (let i = 0; i < userScores.length; i++) {
 					if (userScores[i].mode !== 'Standard'
