@@ -474,6 +474,12 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 		//Translate the scores to bancho scores
 		for (let i = 0; i < multiScores.length; i++) {
+			if (parseInt(multiScores[i].gameRawMods) % 2 === 1) {
+				multiScores[i].gameRawMods = parseInt(multiScores[i].gameRawMods) - 1;
+			}
+			if (parseInt(multiScores[i].rawMods) % 2 === 1) {
+				multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
+			}
 			multiScores[i] = await multiToBanchoScore(multiScores[i]);
 		}
 
@@ -593,7 +599,11 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.fillStyle = '#A08C95';
 		ctx.textAlign = 'left';
-		ctx.fillText(achievedTime, (canvas.width / 35) * 3 + parseInt(beatmaps[i].difficulty.length) * 6 + canvas.width / 50, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+		if (server === 'tournaments') {
+			ctx.fillText(`${achievedTime} in ${sortedScores[i].matchName}`, (canvas.width / 35) * 3 + parseInt(beatmaps[i].difficulty.length) * 6 + canvas.width / 50, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+		} else {
+			ctx.fillText(achievedTime, (canvas.width / 35) * 3 + parseInt(beatmaps[i].difficulty.length) * 6 + canvas.width / 50, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+		}
 		let accuracy = getAccuracy(sortedScores[i], mode) * 100;
 
 		let combo;

@@ -1630,7 +1630,8 @@ module.exports = {
 			pp: inputScore.pp,
 			hasReplay: false,
 			raw_mods: parseInt(inputScore.gameRawMods) + parseInt(inputScore.rawMods),
-			beatmap: undefined
+			beatmap: undefined,
+			matchName: inputScore.matchName,
 		};
 
 		const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: outputScore.beatmapId, modBits: 0 });
