@@ -563,7 +563,6 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		}
 	}
 
-
 	for (let i = 0; i < sortedScores.length && i < showLimit; i++) {
 		roundedRect(ctx, canvas.width / 70, 500 / 8 + (500 / 12) * i, canvas.width - canvas.width / 35, 500 / 13, 500 / 70, '70', '57', '63', 0.75);
 
