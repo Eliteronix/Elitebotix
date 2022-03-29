@@ -278,7 +278,7 @@ async function drawMostPlayed(input, server, limit) {
 				roundedRect(ctx, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38, 500 / 70, '70', '57', '63', 0.75);
 				ctx.save();
 				ctx.clip();
-				let beatmapImage = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmaps[j].beatmapsetId}/covers/list@2x.jpg`);
+				let beatmapImage = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmaps[j].beatmapsetId}/covers/list.jpg`);
 				ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
 				ctx.restore();
 				ctx.font = 'bold 18px comfortaa, sans-serif';
