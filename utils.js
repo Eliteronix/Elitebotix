@@ -1627,7 +1627,7 @@ module.exports = {
 			perfect: inputScore.perfect,
 			raw_date: inputScore.gameStartDate,
 			rank: inputScore.rank,
-			pp: inputScore.pp,
+			pp: 0,
 			hasReplay: false,
 			raw_mods: parseInt(inputScore.gameRawMods) + parseInt(inputScore.rawMods),
 			beatmap: undefined,
@@ -1636,8 +1636,12 @@ module.exports = {
 
 		const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: outputScore.beatmapId, modBits: 0 });
 
-		if (!outputScore.pp && outputScore.maxCombo && dbBeatmap) {
-			outputScore.pp = await getOsuPPFunction(outputScore.beatmapId, outputScore.raw_mods, getAccuracyFunction(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
+		try {
+			if (!outputScore.pp && outputScore.maxCombo && dbBeatmap) {
+				outputScore.pp = await getOsuPPFunction(outputScore.beatmapId, outputScore.raw_mods, getAccuracyFunction(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
+			}
+		} catch (e) {
+			console.log(`Error calculating pp for beatmap ${outputScore.beatmapId}`, e);
 		}
 
 		outputScore.rank = calculateGradeFunction(inputScore.mode, outputScore.counts, outputScore.raw_mods);
