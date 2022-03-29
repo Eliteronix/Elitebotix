@@ -2335,6 +2335,67 @@ module.exports = {
 			// 	},
 			// });
 
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'osu-mostplayed',
+					description: 'Sends an info card about the most played maps of the specified player',
+					options: [
+						{
+							'name': 'amount',
+							'description': 'The amount of most played maps to be displayed',
+							'type': 4,
+							'required': false
+						},
+						{
+							'name': 'server',
+							'description': 'The server from which the results will be displayed',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'Bancho',
+									'value': 'b',
+								},
+								{
+									'name': 'Ripple',
+									'value': 'r',
+								},
+							]
+						},
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+					]
+				},
+			});
+
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'osu-tournament',
@@ -5499,6 +5560,67 @@ module.exports = {
 								{
 									'name': 'Tournaments',
 									'value': 'tournaments',
+								},
+							]
+						},
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-mostplayed',
+					description: 'Sends an info card about the most played maps of the specified player',
+					options: [
+						{
+							'name': 'amount',
+							'description': 'The amount of most played maps to be displayed',
+							'type': 4,
+							'required': false
+						},
+						{
+							'name': 'server',
+							'description': 'The server from which the results will be displayed',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'Bancho',
+									'value': 'b',
+								},
+								{
+									'name': 'Ripple',
+									'value': 'r',
 								},
 							]
 						},
