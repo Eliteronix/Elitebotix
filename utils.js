@@ -1665,6 +1665,10 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo) {
 	//Force download if the map is recently updated in the database and therefore probably updated
 	const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: 0 });
 
+	if (dbBeatmap.approvalStatus === 'Not found') {
+		return null;
+	}
+
 	const recent = new Date();
 	recent.setUTCMinutes(recent.getUTCMinutes() - 3);
 
