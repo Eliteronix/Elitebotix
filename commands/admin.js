@@ -561,6 +561,11 @@ module.exports = {
 			// 					},
 			// 				]
 			// 			},
+			// 			{
+			// 				'name': 'rating-spread',
+			// 				'description': 'Get shown how the ranks are spread across all connected users',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
 			// 		]
 			// 	},
 			// });
@@ -2963,6 +2968,11 @@ module.exports = {
 									'required': false
 								},
 							]
+						},
+						{
+							'name': 'rating-spread',
+							'description': 'Get shown how the ranks are spread across all connected users',
+							'type': 1, // 1 is type SUB_COMMAND
 						},
 					]
 				},

@@ -7,6 +7,7 @@ const { leaderboardEntriesPerPage } = require('../config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
 module.exports = {
 	name: 'osu-duel',
@@ -1584,6 +1585,162 @@ module.exports = {
 				explaination.push('An outdated rank means that there have not been equal to or more than 5 scores in the past 6 months.');
 
 				return await interaction.followUp({ content: explaination.join('\n'), files: files, ephemeral: true });
+			} else if (interaction.options._subcommand === 'rating-spread') {
+				await interaction.deferReply();
+
+				const width = 1500; //px
+				const height = 750; //px
+				const canvasRenderService = new ChartJSNodeCanvas({ width, height });
+
+				let labels = ['Bronze 1', 'Bronze 2', 'Bronze 3', 'Silver 1', 'Silver 2', 'Silver 3', 'Gold 1', 'Gold 2', 'Gold 3', 'Platinum 1', 'Platinum 2', 'Platinum 3', 'Diamond 1', 'Diamond 2', 'Diamond 3', 'Master'];
+				let colors = ['#F07900', '#F07900', '#F07900', '#B5B5B5', '#B5B5B5', '#B5B5B5', '#FFEB47', '#FFEB47', '#FFEB47', '#1DD9A5', '#1DD9A5', '#1DD9A5', '#49B0FF', '#49B0FF', '#49B0FF', '#FFAEFB'];
+				let leagueAmounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+				let osuAccounts = [];
+
+				if (interaction.guild) {
+					await interaction.guild.members.fetch()
+						.then(async (guildMembers) => {
+							const members = [];
+							guildMembers.each(member => members.push(member));
+							for (let i = 0; i < members.length; i++) {
+								logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers');
+								const discordUser = await DBDiscordUsers.findOne({
+									where: {
+										userId: members[i].id,
+										osuUserId: {
+											[Op.not]: null,
+										},
+										osuDuelStarRating: {
+											[Op.not]: null,
+										}
+									},
+								});
+
+								if (discordUser) {
+									osuAccounts.push({
+										userId: discordUser.userId,
+										osuUserId: discordUser.osuUserId,
+										osuName: discordUser.osuName,
+										osuVerified: discordUser.osuVerified,
+										osuDuelStarRating: parseFloat(discordUser.osuDuelStarRating),
+									});
+								}
+							}
+						})
+						.catch(err => {
+							console.log(err);
+						});
+				} else {
+					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers');
+					const discordUsers = await DBDiscordUsers.findAll({
+						where: {
+							osuUserId: {
+								[Op.not]: null,
+							},
+							osuDuelStarRating: {
+								[Op.not]: null,
+							}
+						},
+					});
+
+					for (let i = 0; i < discordUsers.length; i++) {
+						osuAccounts.push({
+							userId: discordUsers[i].userId,
+							osuUserId: discordUsers[i].osuUserId,
+							osuName: discordUsers[i].osuName,
+							osuVerified: discordUsers[i].osuVerified,
+							osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
+						});
+					}
+				}
+
+				for (let i = 0; i < osuAccounts.length; i++) {
+					leagueAmounts[labels.indexOf(getOsuDuelLeague(osuAccounts[i].osuDuelStarRating).name)]++;
+				}
+
+				let finalAmounts = [];
+				for (let i = 0; i < labels.length; i++) {
+					let amountArray = [];
+					for (let j = 0; j < labels.length; j++) {
+						amountArray.push(0);
+					}
+					amountArray[i] = leagueAmounts[i];
+					finalAmounts.push(amountArray);
+				}
+
+				let datasets = [];
+
+				for (let i = 0; i < labels.length; i++) {
+					datasets.push({
+						label: labels[i],
+						data: finalAmounts[i],
+						backgroundColor: colors[i],
+						fill: true,
+					});
+				}
+
+				const data = {
+					labels: labels,
+					datasets: datasets,
+				};
+
+				const configuration = {
+					type: 'bar',
+					data: data,
+					options: {
+						plugins: {
+							title: {
+								display: true,
+								text: 'Rating Spread',
+								color: '#FFFFFF',
+							},
+							legend: {
+								labels: {
+									color: '#FFFFFF',
+								}
+							},
+						},
+						responsive: true,
+						scales: {
+							x: {
+								stacked: true,
+								title: {
+									display: true,
+									text: 'Time',
+									color: '#FFFFFF'
+								},
+								grid: {
+									color: '#8F8F8F'
+								},
+								ticks: {
+									color: '#FFFFFF',
+								},
+							},
+							y: {
+								stacked: true,
+								grid: {
+									color: '#8F8F8F'
+								},
+								ticks: {
+									color: '#FFFFFF',
+								},
+							}
+						}
+					}
+				};
+
+				const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+
+				const attachment = new Discord.MessageAttachment(imageBuffer, 'osu-league-spread.png');
+
+				let guildName = 'Global';
+
+				if (interaction.guild) {
+					guildName = `${interaction.guild.name}'s`;
+				}
+
+				interaction.editReply({ content: `${guildName} osu! Duel League Rating Spread`, files: [attachment] });
 			}
 		}
 	},
