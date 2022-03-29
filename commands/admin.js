@@ -5156,8 +5156,30 @@ module.exports = {
 			});
 
 			for (let i = 0; i < scores.length; i++) {
-				await scores[i].destroy();
+				// await scores[i].destroy();
+				if (scores[i].osuUserId === '11290031') {
+					console.log(scores[i].matchId, scores[i].gameId, scores[i].matchStartDate, scores[i].maxCombo);
+				}
 			}
+		} else if (args[0] === 'query') {
+			const Sequelize = require('sequelize');
+
+			const sequelize = new Sequelize('database', 'username', 'password', {
+				host: 'localhost',
+				dialect: 'sqlite',
+				logging: false,
+				storage: 'database.sqlite',
+			});
+
+			let result = await sequelize.query(
+				'SELECT * FROM DBOsuMultiScores WHERE osuUserId = 11290031 AND 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = 11290031 AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id) ORDER BY maxCombo ASC',
+			);
+
+			console.log(result[0].length);
+			for (let i = 0; i < result[0].length; i++) {
+				console.log(result[0][i].matchId, result[0][i].gameId, result[0][i].osuUserId, result[0][i].matchStartDate, result[0][i].maxCombo);
+			}
+			console.log(result[0][0]);
 		} else {
 			msg.reply('Invalid command');
 		}
