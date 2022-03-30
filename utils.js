@@ -1647,6 +1647,42 @@ module.exports = {
 		outputScore.rank = calculateGradeFunction(inputScore.mode, outputScore.counts, outputScore.raw_mods);
 
 		return outputScore;
+	},
+	async cleanUpDuplicateMultiScores() {
+		let duplicates = true;
+		let deleted = 0;
+
+		const Sequelize = require('sequelize');
+
+		const sequelize = new Sequelize('database', 'username', 'password', {
+			host: 'localhost',
+			dialect: 'sqlite',
+			logging: false,
+			storage: 'database.sqlite',
+		});
+
+		while (duplicates) {
+			let result = await sequelize.query(
+				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id) ORDER BY maxCombo ASC',
+			);
+
+			duplicates = result[0].length;
+
+			if (result[0].length) {
+				let duplicate = await DBOsuMultiScores.findOne({
+					where: {
+						id: result[0][0].id
+					}
+				});
+
+				deleted++;
+				await duplicate.destroy();
+			}
+		}
+
+		if (deleted) {
+			console.log(`Cleaned up ${deleted} duplicate scores`);
+		}
 	}
 };
 
