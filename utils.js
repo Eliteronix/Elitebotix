@@ -1661,9 +1661,9 @@ module.exports = {
 			storage: 'database.sqlite',
 		});
 
-		while (duplicates && deleted < 100) {
+		while (duplicates && deleted < 10) {
 			let result = await sequelize.query(
-				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id) ORDER BY maxCombo ASC LIMIT 10',
+				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id) ORDER BY maxCombo ASC LIMIT 1',
 			);
 
 			duplicates = result[0].length;
@@ -1678,6 +1678,7 @@ module.exports = {
 				deleted++;
 				await duplicate.destroy();
 			}
+			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
 
 		if (deleted) {
