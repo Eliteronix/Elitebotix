@@ -1,6 +1,6 @@
 {
 	"script": "bot.js",
-	"watch": true,
+	"watch": false,
 	"ignore_watch": [
 		"database.sqlite",
 		"database.sqlite-journal",
