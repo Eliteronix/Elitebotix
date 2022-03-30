@@ -1663,12 +1663,13 @@ module.exports = {
 
 		while (duplicates && deleted < 10) {
 			let result = await sequelize.query(
-				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id) ORDER BY maxCombo ASC LIMIT 10',
+				'SELECT a.* FROM DBOsuMultiScores as a, DBOsuMultiScores as b WHERE a.id <> b.id AND a.osuUserId = b.osuUserId AND a.gameId = b.gameId ORDER BY maxCombo ASC LIMIT 10',
 			);
 
 			duplicates = result[0].length;
 
 			if (result[0].length) {
+				console.log(result[0][0]);
 				let duplicate = await DBOsuMultiScores.findOne({
 					where: {
 						id: result[0][0].id
