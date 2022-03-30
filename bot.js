@@ -201,7 +201,7 @@ setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
 
 setInterval(() => refreshOsuRank(), 60000);
 
-setInterval(() => cleanUpDuplicateMultiScores(), 600000);
+setInterval(() => cleanUpDuplicateMultiScores(), 3600000);
 
 client.on('interactionCreate', interaction => {
 	interactionCreate(client, bancho, interaction);
