@@ -131,7 +131,7 @@ process.on('message', async (message) => {
 							}
 						}
 					}
-				} else if (!existingScore.maxCombo) {
+				} else if (!existingScore.teamType) {
 					existingScore.maxCombo = match.games[gameIndex].scores[scoreIndex].maxCombo;
 					existingScore.count50 = match.games[gameIndex].scores[scoreIndex].counts['50'];
 					existingScore.count100 = match.games[gameIndex].scores[scoreIndex].counts['100'];
@@ -140,6 +140,8 @@ process.on('message', async (message) => {
 					existingScore.countKatu = match.games[gameIndex].scores[scoreIndex].counts.katu;
 					existingScore.countGeki = match.games[gameIndex].scores[scoreIndex].counts.geki;
 					existingScore.perfect = match.games[gameIndex].scores[scoreIndex].perfect;
+					existingScore.teamType = match.games[gameIndex].teamType;
+					existingScore.team = match.games[gameIndex].scores[scoreIndex].team;
 					await existingScore.save();
 				}
 			} catch (error) {

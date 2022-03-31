@@ -35,6 +35,9 @@ module.exports = (sequelize, DataTypes) => {
 		countKatu: DataTypes.STRING,
 		countGeki: DataTypes.STRING,
 		perfect: DataTypes.BOOLEAN,
+		teamType: DataTypes.STRING,
+		team: DataTypes.STRING,
+		pp: DataTypes.STRING,
 		paranoid: true,
 	},
 		{
