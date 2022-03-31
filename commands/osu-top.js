@@ -793,7 +793,7 @@ function partitionPP(list, start, end) {
 	const pivot = list[end];
 	let i = start;
 	for (let j = start; j < end; j += 1) {
-		if (list[j].pp >= pivot.pp) {
+		if (parseFloat(list[j].pp) >= parseFloat(pivot.pp)) {
 			[list[j], list[i]] = [list[i], list[j]];
 			i++;
 		}
