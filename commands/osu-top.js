@@ -490,7 +490,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		});
 
 		for (let i = 0; i < multiScores.length; i++) {
-			if (parseInt(multiScores[i].score) <= 10000) {
+			if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].teamType === 'Tag Team vs' || multiScores[i].teamType === 'Tag Co-op') {
 				multiScores.splice(i, 1);
 				i--;
 			}
