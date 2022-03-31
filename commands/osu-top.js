@@ -534,12 +534,15 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		quicksortRecent(scores);
 	}
 
+	let now = new Date();
+	if (now.getUTCDate() === 1 && now.getUTCMonth() === 3) {
+		beatmaps.push(await getOsuBeatmap({ beatmapId: '658127', modBits: 16 }));
+	}
+
 	for (let i = 0; i < showLimit && i < scores.length; i++) {
 		let dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: scores[i].raw_mods });
 		beatmaps.push(dbBeatmap);
 	}
-
-
 
 	if (sorting) {
 		if (sorting == 'ar') {
@@ -555,6 +558,34 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		} else if (sorting == 'length') {
 			quicksortLength(beatmaps);
 		}
+	}
+
+	if (now.getUTCDate() === 1 && now.getUTCMonth() === 3) {
+		sortedScores.push({
+			score: '150551330',
+			user: {
+				name: user.name,
+				id: user.id
+			},
+			beatmapId: '658127',
+			counts: {
+				'50': '0',
+				'100': '7',
+				'300': '1965',
+				geki: '223',
+				katu: '6',
+				miss: '1'
+			},
+			maxCombo: '2358',
+			perfect: false,
+			raw_date: '2016-01-02 23:49:11',
+			rank: 'A',
+			pp: '727',
+			hasReplay: false,
+			raw_mods: 16,
+			beatmap: undefined,
+			matchName: 'WYSI',
+		});
 	}
 
 	for (let i = 0; i < beatmaps.length && i < showLimit; i++) {
