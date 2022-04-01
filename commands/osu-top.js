@@ -617,12 +617,6 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 			beatmapTitle = beatmapTitle.substring(0, maxSize - 3) + '...';
 		}
 
-		//Write title per map
-		ctx.font = 'bold 15px comfortaa, sans-serif';
-		ctx.fillStyle = '#FFFFFF';
-		ctx.textAlign = 'left';
-		ctx.fillText(beatmapTitle, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2);
-
 		//Write Difficulty per map
 		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.fillStyle = '#FFCC22';
@@ -674,6 +668,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 			combo = `(${sortedScores[i].maxCombo}/${beatmaps[i].maxCombo})`;
 		}
 
+		// Write accuracy and combo per map
 		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.fillStyle = '#FFCC22';
 		ctx.textAlign = 'right';
@@ -681,6 +676,38 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		ctx.fillText(Math.round(accuracy * 100) / 100 + '%', (canvas.width / 28) * 24.75, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 
 		const mods = getMods(sortedScores[i].raw_mods);
+		let arrow = '';
+		if (mods.includes('DT') || mods.includes('NC')) {
+			arrow = '^';
+		}
+
+		let sortingText;
+		if (sorting !== null) {
+			if (sorting == 'ar') {
+				sortingText = ` (AR: ${beatmaps[i].approachRate + arrow})`;
+			} else if (sorting == 'cs') {
+				sortingText = ` (CS: ${beatmaps[i].circleSize})`;
+			} else if (sorting == 'drain') {
+				sortingText = ` (HP: ${beatmaps[i].drain + arrow})`;
+			} else if (sorting == 'od') {
+				sortingText = ` (OD: ${beatmaps[i].overallDifficulty + arrow})`;
+			} else if (sorting == 'bpm') {
+				sortingText = ` (BPM: ${beatmaps[i].bpm})`;
+			} else if (sorting == 'length') {
+				const totalLengthSeconds = (beatmaps[i].totalLength % 60) + '';
+				const totalLengthMinutes = (beatmaps[i].totalLength - beatmaps[i].totalLength % 60) / 60;
+				const totalLength = totalLengthMinutes + ':' + Math.round(totalLengthSeconds).toString().padStart(2, '0');
+				sortingText = ` (Length: ${totalLength})`;
+			}
+		}
+
+		//Write title and sortingText per map
+		ctx.font = 'bold 15px comfortaa, sans-serif';
+		ctx.fillStyle = '#FFFFFF';
+		ctx.textAlign = 'left';
+		ctx.fillText(beatmapTitle + sortingText, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2);
+
+		//Write mods per map
 		for (let j = 0; j < mods.length; j++) {
 			const modImage = await Canvas.loadImage(getModImage(mods[mods.length - j - 1]));
 			ctx.drawImage(modImage, (canvas.width / 28) * 24.75 - (canvas.width / 1000 * 23) * (j + 1), 500 / 8 + (500 / 12) * i + (500 / 12) / 5, canvas.width / 1000 * 23, 500 / 125 * 4);
