@@ -439,6 +439,10 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		let modeName = getGameModeName(mode);
 		modeName = modeName.substring(0, 1).toUpperCase() + modeName.substring(1);
 
+		if (modeName === 'Catch') {
+			modeName = 'Catch the Beat';
+		}
+
 		//Get all scores from tournaments
 		let multiScores = await DBOsuMultiScores.findAll({
 			where: {
