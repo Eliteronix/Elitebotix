@@ -2426,7 +2426,7 @@ function calculateGradeFunction(mode, counts, modBits) {
 		}
 
 		return grade;
-	} else if (mode === 'Catch') {
+	} else if (mode === 'Catch the Beat') {
 		let grade = 'D';
 
 		let accuracy = getAccuracyFunction({ counts: counts }, 2);
