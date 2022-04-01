@@ -5158,6 +5158,21 @@ module.exports = {
 			for (let i = 0; i < scores.length; i++) {
 				await scores[i].destroy();
 			}
+		} else if (args[0] === 'patreon') {
+			const discordUser = await DBDiscordUsers.findOne({
+				where: {
+					userId: args[1]
+				}
+			});
+
+			if (discordUser.patreon) {
+				discordUser.patreon = false;
+				msg.reply('Patreon status set to false');
+			} else {
+				discordUser.patreon = true;
+				msg.reply('Patreon status set to true');
+			}
+			discordUser.save();
 		} else {
 			msg.reply('Invalid command');
 		}

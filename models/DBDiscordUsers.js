@@ -114,6 +114,10 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		patreon: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		paranoid: true,
 	});
 };
