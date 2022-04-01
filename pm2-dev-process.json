@@ -1,13 +1,12 @@
 {
 	"script": "bot.js",
-	"watch": false,
+	"watch": true,
 	"ignore_watch": [
 		"database.sqlite",
 		"database.sqlite-journal",
 		".git",
 		"maps",
-		"package-lock.json",
-		".env"
+		"package-lock.json"
 	],
 	"watch_options": {
 		"followSymlinks": false

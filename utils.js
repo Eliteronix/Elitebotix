@@ -1627,18 +1627,22 @@ module.exports = {
 			perfect: inputScore.perfect,
 			raw_date: inputScore.gameStartDate,
 			rank: inputScore.rank,
-			pp: 0,
+			pp: inputScore.pp,
 			hasReplay: false,
 			raw_mods: parseInt(inputScore.gameRawMods) + parseInt(inputScore.rawMods),
 			beatmap: undefined,
 			matchName: inputScore.matchName,
 		};
 
-		const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: outputScore.beatmapId, modBits: 0 });
-
 		try {
-			if (!outputScore.pp && outputScore.maxCombo && dbBeatmap) {
-				outputScore.pp = await getOsuPPFunction(outputScore.beatmapId, outputScore.raw_mods, getAccuracyFunction(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
+			if (!outputScore.pp && outputScore.maxCombo) {
+				const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: outputScore.beatmapId, modBits: 0 });
+				if (dbBeatmap) {
+					let pp = await getOsuPPFunction(outputScore.beatmapId, outputScore.raw_mods, getAccuracyFunction(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
+					inputScore.pp = pp;
+					inputScore.save();
+					outputScore.pp = pp;
+				}
 			}
 		} catch (e) {
 			console.log(`Error calculating pp for beatmap ${outputScore.beatmapId}`, e);
@@ -1647,6 +1651,43 @@ module.exports = {
 		outputScore.rank = calculateGradeFunction(inputScore.mode, outputScore.counts, outputScore.raw_mods);
 
 		return outputScore;
+	},
+	async cleanUpDuplicateMultiScores() {
+		let duplicates = true;
+		let deleted = 0;
+
+		const Sequelize = require('sequelize');
+
+		const sequelize = new Sequelize('database', 'username', 'password', {
+			host: 'localhost',
+			dialect: 'sqlite',
+			logging: false,
+			storage: 'database.sqlite',
+		});
+
+		while (duplicates && deleted < 25) {
+			let result = await sequelize.query(
+				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id) ORDER BY maxCombo ASC LIMIT 1',
+			);
+
+			duplicates = result[0].length;
+
+			if (result[0].length) {
+				let duplicate = await DBOsuMultiScores.findOne({
+					where: {
+						id: result[0][0].id
+					}
+				});
+
+				deleted++;
+				await duplicate.destroy();
+			}
+			await new Promise(resolve => setTimeout(resolve, 10000));
+		}
+
+		if (deleted) {
+			console.log(`Cleaned up ${deleted} duplicate scores`);
+		}
 	}
 };
 
@@ -1664,6 +1705,10 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo) {
 
 	//Force download if the map is recently updated in the database and therefore probably updated
 	const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: 0 });
+
+	if (dbBeatmap.approvalStatus === 'Not found') {
+		return null;
+	}
 
 	const recent = new Date();
 	recent.setUTCMinutes(recent.getUTCMinutes() - 3);
@@ -2381,7 +2426,7 @@ function calculateGradeFunction(mode, counts, modBits) {
 		}
 
 		return grade;
-	} else if (mode === 'Catch') {
+	} else if (mode === 'Catch the Beat') {
 		let grade = 'D';
 
 		let accuracy = getAccuracyFunction({ counts: counts }, 2);

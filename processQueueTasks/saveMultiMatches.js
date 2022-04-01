@@ -1,4 +1,5 @@
 const osu = require('node-osu');
+const { DBOsuMultiScores } = require('../dbObjects');
 const { saveOsuMultiScores } = require('../utils');
 
 //Archiving started around 40000000
@@ -78,6 +79,39 @@ module.exports = {
 				}
 
 				//Go same if match found and not ended / too long going already
+				//Reimport an old match to clean up the database
+				let incompleteMatchScore = await DBOsuMultiScores.findOne({
+					where: {
+						tourneyMatch: true,
+						teamType: null
+					},
+					order: [
+						['updatedAt', 'ASC']
+					]
+				});
+
+				if (incompleteMatchScore) {
+					osuApi.getMatch({ mp: incompleteMatchScore.matchId })
+						.then(async (match) => {
+							saveOsuMultiScores(match);
+							let channel = await client.channels.fetch('959499050246344754');
+							channel.send(`<https://osu.ppy.sh/mp/${matchID}> | ${match.name} | ${incompleteMatchScore.updatedAt}`);
+						})
+						.catch(async () => {
+							//Nothing
+							let incompleteScores = await DBOsuMultiScores.findAll({
+								where: {
+									matchId: incompleteMatchScore.matchId
+								}
+							});
+
+							for (let i = 0; i < incompleteScores.length; i++) {
+								incompleteScores[i].changed('updatedAt', true);
+								incompleteScores[i].save();
+							}
+						});
+				}
+
 				let date = new Date();
 				date.setUTCMinutes(date.getUTCMinutes() + 1);
 				processQueueEntry.date = date;

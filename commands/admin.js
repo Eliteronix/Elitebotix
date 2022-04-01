@@ -5156,7 +5156,10 @@ module.exports = {
 			});
 
 			for (let i = 0; i < scores.length; i++) {
-				await scores[i].destroy();
+				// await scores[i].destroy();
+				if (scores[i].osuUserId === '11290031') {
+					console.log(scores[i].matchId, scores[i].gameId, scores[i].matchStartDate, scores[i].maxCombo);
+				}
 			}
 		} else if (args[0] === 'patreon') {
 			const discordUser = await DBDiscordUsers.findOne({
@@ -5173,6 +5176,21 @@ module.exports = {
 				msg.reply('Patreon status set to true');
 			}
 			discordUser.save();
+		} else if (args[0] === 'query') {
+			const Sequelize = require('sequelize');
+
+			const sequelize = new Sequelize('database', 'username', 'password', {
+				host: 'localhost',
+				dialect: 'sqlite',
+				logging: false,
+				storage: 'database.sqlite',
+			});
+
+			let result = await sequelize.query(
+				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id) ORDER BY maxCombo ASC',
+			);
+
+			console.log(result[0].length);
 		} else {
 			msg.reply('Invalid command');
 		}

@@ -287,6 +287,67 @@ module.exports = {
 		// 10th map 2 -> 1
 		mappoolInOrder.push(selectedNMMaps[8]);
 
+		let now = new Date();
+		if (now.getUTCDate(1) === 1 && now.getUTCMonth() === 3) {
+			for (let i = 0; i < mappoolInOrder.length; i++) {
+				let dbBeatmap = null;
+				if (i === 0) {
+					dbBeatmap = await getOsuBeatmap({ beatmapId: '1797548', modBits: 0 });
+				} else if (i === 1) {
+					dbBeatmap = await getOsuBeatmap({ beatmapId: '1764213', modBits: 0 });
+				} else if (i === 2) {
+					dbBeatmap = await getOsuBeatmap({ beatmapId: '1893461', modBits: 0 });
+				} else if (i === 3) {
+					dbBeatmap = await getOsuBeatmap({ beatmapId: '1401608', modBits: 0 });
+				} else if (i === 4) {
+					dbBeatmap = await getOsuBeatmap({ beatmapId: '1180037', modBits: 64 });
+				} else if (i === 5) {
+					dbBeatmap = await getOsuBeatmap({ beatmapId: '2030431', modBits: 0 });
+				} else if (i === 6) {
+					dbBeatmap = await getOsuBeatmap({ beatmapId: '1383389', modBits: 0 });
+				} else if (i === 7) {
+					dbBeatmap = await getOsuBeatmap({ beatmapId: '1321495', modBits: 0 });
+				} else if (i === 8) {
+					dbBeatmap = await getOsuBeatmap({ beatmapId: '1948941', modBits: 64 });
+				} else if (i === 9) {
+					dbBeatmap = await getOsuBeatmap({ beatmapId: '1797542', modBits: 0 });
+				} else if (i === 10) {
+					dbBeatmap = await getOsuBeatmap({ beatmapId: '1851299', modBits: 0 });
+				}
+				mappoolInOrder[i] = {
+					id: dbBeatmap.beatmapId,
+					beatmapSetId: dbBeatmap.beatmapsetId,
+					title: dbBeatmap.title,
+					creator: dbBeatmap.mapper,
+					version: dbBeatmap.difficulty,
+					artist: dbBeatmap.artist,
+					rating: dbBeatmap.userRating,
+					bpm: dbBeatmap.bpm,
+					mode: dbBeatmap.mode,
+					approvalStatus: dbBeatmap.approvalStatus,
+					maxCombo: dbBeatmap.maxCombo,
+					objects: {
+						normal: dbBeatmap.circles,
+						slider: dbBeatmap.sliders,
+						spinner: dbBeatmap.spinners
+					},
+					difficulty: {
+						rating: dbBeatmap.starRating,
+						aim: dbBeatmap.aimRating,
+						speed: dbBeatmap.speedRating,
+						size: dbBeatmap.circleSize,
+						overall: dbBeatmap.overallDifficulty,
+						approach: dbBeatmap.approachRate,
+						drain: dbBeatmap.hpDrain
+					},
+					length: {
+						total: dbBeatmap.totalLength,
+						drain: dbBeatmap.drainLength
+					}
+				};
+			}
+		}
+
 		let mappoolLength = 0;
 		let gameLength = 0;
 

@@ -57,7 +57,10 @@ module.exports = {
 				{ name: 'Twitch', value: '[Eliteronix](https://twitch.tv/Eliteronix)', inline: true },
 				{ name: 'Twitch', value: '[Roddy](https://twitch.tv/Roddythegod)', inline: true },
 				{ name: '\u200B', value: '\u200B', inline: true })
-			.addField('Paypal', '[paypal.me/Eliteronix](https://paypal.me/Eliteronix)')
+			.addFields(
+				{ name: 'Paypal', value: '[paypal.me/Eliteronix](https://paypal.me/Eliteronix)', inline: true },
+				{ name: 'Patreon', value: '[Elitebotix Patreon](https://www.patreon.com/Elitebotix)', inline: true },
+				{ name: '\u200B', value: '\u200B', inline: true })
 			.setTimestamp();
 
 

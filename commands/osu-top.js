@@ -439,6 +439,10 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		let modeName = getGameModeName(mode);
 		modeName = modeName.substring(0, 1).toUpperCase() + modeName.substring(1);
 
+		if (modeName === 'Catch') {
+			modeName = 'Catch the Beat';
+		}
+
 		//Get all scores from tournaments
 		let multiScores = await DBOsuMultiScores.findAll({
 			where: {
@@ -490,7 +494,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		});
 
 		for (let i = 0; i < multiScores.length; i++) {
-			if (parseInt(multiScores[i].score) <= 10000) {
+			if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].teamType === 'Tag Team vs' || multiScores[i].teamType === 'Tag Co-op') {
 				multiScores.splice(i, 1);
 				i--;
 			}
@@ -534,12 +538,15 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		quicksortRecent(scores);
 	}
 
+	let now = new Date();
+	if (now.getUTCDate() === 1 && now.getUTCMonth() === 3) {
+		beatmaps.push(await getOsuBeatmap({ beatmapId: '658127', modBits: 16 }));
+	}
+
 	for (let i = 0; i < showLimit && i < scores.length; i++) {
 		let dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: scores[i].raw_mods });
 		beatmaps.push(dbBeatmap);
 	}
-
-
 
 	if (sorting) {
 		if (sorting == 'ar') {
@@ -555,6 +562,34 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		} else if (sorting == 'length') {
 			quicksortLength(beatmaps);
 		}
+	}
+
+	if (now.getUTCDate() === 1 && now.getUTCMonth() === 3) {
+		sortedScores.push({
+			score: '150551330',
+			user: {
+				name: user.name,
+				id: user.id
+			},
+			beatmapId: '658127',
+			counts: {
+				'50': '0',
+				'100': '7',
+				'300': '1965',
+				geki: '223',
+				katu: '6',
+				miss: '1'
+			},
+			maxCombo: '2358',
+			perfect: false,
+			raw_date: '2016-01-02 23:49:11',
+			rank: 'A',
+			pp: '727',
+			hasReplay: false,
+			raw_mods: 16,
+			beatmap: undefined,
+			matchName: 'WYSI',
+		});
 	}
 
 	for (let i = 0; i < beatmaps.length && i < showLimit; i++) {
@@ -793,7 +828,7 @@ function partitionPP(list, start, end) {
 	const pivot = list[end];
 	let i = start;
 	for (let j = start; j < end; j += 1) {
-		if (list[j].pp >= pivot.pp) {
+		if (parseFloat(list[j].pp) >= parseFloat(pivot.pp)) {
 			[list[j], list[i]] = [list[i], list[j]];
 			i++;
 		}
