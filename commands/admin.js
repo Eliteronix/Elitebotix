@@ -5161,6 +5161,21 @@ module.exports = {
 					console.log(scores[i].matchId, scores[i].gameId, scores[i].matchStartDate, scores[i].maxCombo);
 				}
 			}
+		} else if (args[0] === 'patreon') {
+			const discordUser = await DBDiscordUsers.findOne({
+				where: {
+					userId: args[1]
+				}
+			});
+
+			if (discordUser.patreon) {
+				discordUser.patreon = false;
+				msg.reply('Patreon status set to false');
+			} else {
+				discordUser.patreon = true;
+				msg.reply('Patreon status set to true');
+			}
+			discordUser.save();
 		} else if (args[0] === 'query') {
 			const Sequelize = require('sequelize');
 
