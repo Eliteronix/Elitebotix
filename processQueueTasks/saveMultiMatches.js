@@ -95,7 +95,7 @@ module.exports = {
 						.then(async (match) => {
 							saveOsuMultiScores(match);
 							let channel = await client.channels.fetch('959499050246344754');
-							channel.send(`<https://osu.ppy.sh/mp/${matchID}> | ${match.name} | ${incompleteMatchScore.updatedAt}`);
+							channel.send(`<https://osu.ppy.sh/mp/${matchID}> | ${incompleteMatchScore.updatedAt} | ${match.name}`);
 						})
 						.catch(async () => {
 							//Nothing
