@@ -113,7 +113,7 @@ module.exports = {
 				}
 
 				let date = new Date();
-				date.setUTCMinutes(date.getUTCMinutes() + 1);
+				date.setUTCSeconds(date.getUTCSeconds() + 20);
 				processQueueEntry.date = date;
 				processQueueEntry.beingExecuted = false;
 				return processQueueEntry.save();
