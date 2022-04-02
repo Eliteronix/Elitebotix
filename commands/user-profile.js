@@ -53,7 +53,7 @@ async function sendUserEmbed(msg, interaction, user) {
 
 	let patreonEmoji = '';
 	if (discordUser && discordUser.patreon) {
-		patreonEmoji = '<:patreon:959615426822799361> '; 
+		patreonEmoji = '<:patreon:959660462222503937> '; 
 	}
 	
 	//Send embed
