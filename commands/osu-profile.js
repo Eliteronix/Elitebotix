@@ -267,7 +267,10 @@ async function drawTitle(input, server, mode) {
 
 	let gameMode = getGameModeName(mode);
 
-	let title = `${user.name.endsWith('s') || user.name.endsWith('x') ? `${user.name}'` : `${user.name}'s`} ${gameMode} Profile`;
+	let title = `${user.name}'s ${gameMode} profile`;
+	if (user.name.endsWith('s') || user.name.endsWith('x')) {
+		title = `${user.name}' ${gameMode} profile`;
+	}
 
 	if (server !== 'bancho') {
 		title = `[${server}] ${title}`;

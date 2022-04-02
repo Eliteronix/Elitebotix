@@ -55,10 +55,15 @@ async function sendUserEmbed(msg, interaction, user) {
 		patreonEmoji = '<:patreon:959660462222503937> ';
 	}
 
+	let username = `${user.username}'s`;
+	if (user.username.endsWith('s') || user.username.endsWith('x')) {
+		username = `${user.username}'`;
+	}
+
 	//Send embed
 	const userInfoEmbed = new Discord.MessageEmbed()
 		.setColor('#7289DA')
-		.setTitle(`${patreonEmoji}${user.username.endsWith('s') || user.username.endsWith('x') ? `${user.username}'` : `${user.username}'s`} profile info card`)
+		.setTitle(`${patreonEmoji}${username} profile info card`)
 		.setThumbnail(`${user.displayAvatarURL({ format: 'png', dynamic: true })}`)
 		.addFields(
 			{ name: 'Discord Name', value: `<@${user.id}>` }
