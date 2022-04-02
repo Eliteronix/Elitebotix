@@ -2,6 +2,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
+const { client } = require('../bot.js');
 
 //Require discord.js module
 const Discord = require('discord.js');
@@ -11,7 +12,7 @@ const osu = require('node-osu');
 
 module.exports = {
 	name: 'user-profile',
-	aliases: ['discord-profile'],
+	aliases: ['discord-profile', 'u-p'],
 	description: 'Sends an info card about the specified user',
 	usage: '[@user]',
 	//permissions: 'MANAGE_GUILD',
@@ -46,28 +47,27 @@ module.exports = {
 };
 
 async function sendUserEmbed(msg, interaction, user) {
+	const discordUser = await DBDiscordUsers.findOne({
+		where: { userId: user.id },
+	});
+
+	let patreonEmoji = '';
+	if (discordUser && discordUser.patreon) {
+		patreonEmoji = '<:patreon:959615426822799361> '; 
+	}
+	
 	//Send embed
 	const userInfoEmbed = new Discord.MessageEmbed()
 		.setColor('#7289DA')
-		.setTitle(`${user.username}'s profile info card`)
+		.setTitle(`${patreonEmoji}${user.username.endsWith('s') || user.username.endsWith('x') ? `${user.username}'` : `${user.username}'s`} profile info card`)
 		.setThumbnail(`${user.displayAvatarURL({ format: 'png', dynamic: true })}`)
 		.addFields(
-			{ name: 'Discord Name', value: `${user.username}#${user.discriminator}` }
+			{ name: 'Discord Name', value: `<@${user.id}>` }
 		)
 		.setTimestamp();
 
 	if (msg.channel.type !== 'DM') {
 		const member = await msg.guild.members.fetch(user.id);
-
-		let userDisplayName = user.username;
-
-		if (member.nickname) {
-			userDisplayName = member.nickname;
-		}
-
-		userInfoEmbed.addFields(
-			{ name: 'Nickname', value: `${userDisplayName}` }
-		);
 
 		//Get the member roles and push the IDs into an array
 		const memberRoles = [];
@@ -123,14 +123,10 @@ async function sendUserEmbed(msg, interaction, user) {
 					minute: 'numeric',
 				})}`
 			}
-		);
+		).setFooter(`Created by ${client.user.username}`, `${client.user.displayAvatarURL({ format: 'png', dynamic: true })}`);
 	}
-
 	logDatabaseQueries(4, 'commands/user-profile.js DBDiscordUsers');
 	//get discordUser from db
-	const discordUser = await DBDiscordUsers.findOne({
-		where: { userId: user.id },
-	});
 
 	if (discordUser && discordUser.osuUserId) {
 		// eslint-disable-next-line no-undef
@@ -146,13 +142,9 @@ async function sendUserEmbed(msg, interaction, user) {
 			userInfoEmbed.addFields(
 				{ name: 'osu! Account', value: `☑️ ${osuUser.name}` },
 			);
-		} else {
-			userInfoEmbed.addFields(
-				{ name: 'osu! Account', value: `❌ ${osuUser.name}` },
-			);
 		}
-
 	}
+		
 	if (msg.id) {
 		return msg.reply({ embeds: [userInfoEmbed] });
 	}

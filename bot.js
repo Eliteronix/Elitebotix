@@ -26,6 +26,8 @@ const client = new Discord.Client({
 	partials: ['MESSAGE', 'REACTION', 'CHANNEL']
 });
 
+module.exports = { client };
+
 //Get gotMessage
 const gotMessage = require('./gotMessage');
 
