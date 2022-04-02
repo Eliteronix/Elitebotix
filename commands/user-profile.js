@@ -2,7 +2,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
-const { client } = require('../bot.js');
 
 //Require discord.js module
 const Discord = require('discord.js');
@@ -53,9 +52,9 @@ async function sendUserEmbed(msg, interaction, user) {
 
 	let patreonEmoji = '';
 	if (discordUser && discordUser.patreon) {
-		patreonEmoji = '<:patreon:959660462222503937> '; 
+		patreonEmoji = '<:patreon:959660462222503937> ';
 	}
-	
+
 	//Send embed
 	const userInfoEmbed = new Discord.MessageEmbed()
 		.setColor('#7289DA')
@@ -123,7 +122,7 @@ async function sendUserEmbed(msg, interaction, user) {
 					minute: 'numeric',
 				})}`
 			}
-		).setFooter(`Created by ${client.user.username}`, `${client.user.displayAvatarURL({ format: 'png', dynamic: true })}`);
+		).setFooter(`Created by ${msg.client.user.username}`, `${msg.client.user.displayAvatarURL({ format: 'png', dynamic: true })}`);
 	}
 	logDatabaseQueries(4, 'commands/user-profile.js DBDiscordUsers');
 	//get discordUser from db
@@ -142,9 +141,13 @@ async function sendUserEmbed(msg, interaction, user) {
 			userInfoEmbed.addFields(
 				{ name: 'osu! Account', value: `☑️ ${osuUser.name}` },
 			);
+		} else {
+			userInfoEmbed.addFields(
+				{ name: 'osu! Account', value: `❌ ${osuUser.name}` },
+			);
 		}
 	}
-		
+
 	if (msg.id) {
 		return msg.reply({ embeds: [userInfoEmbed] });
 	}
