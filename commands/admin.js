@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBOsuBeatmaps, DBElitiriCupSubmissions } = require('../dbObjects');
-const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool, getUserDuelStarRating, getMods } = require('../utils');
+const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool, getUserDuelStarRating, getMods, getModBits } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 const fetch = require('node-fetch');
@@ -5231,14 +5231,65 @@ module.exports = {
 			let faultyMultis = [];
 
 			for (let i = 0; i < faultyDTMaps.length; i++) {
-				if (faultyMultis.indexOf(faultyDTMaps[i].matchId) === -1) {
-					faultyMultis.push(faultyDTMaps[i].matchId);
+				if (faultyMultis.indexOf(`${faultyDTMaps[i].matchId} - ${faultyDTMaps[i].osuUserId} - ${faultyDTMaps[i].beatmapId}`) === -1) {
+					faultyMultis.push(`${faultyDTMaps[i].matchId} - ${faultyDTMaps[i].osuUserId} - ${faultyDTMaps[i].beatmapId}`);
 				}
 			}
 
 			msg.reply(faultyMultis.join('\n'), { split: true });
 
 			console.log(faultyMultis.length);
+		} else if (args[0] === 'cleanFaultyDTMaps') {
+			let faultyDTMaps = await DBOsuMultiScores.findAll({
+				where: {
+					rawMods: {
+						[Op.gte]: 64
+					}
+				}
+			});
+
+			for (let i = 0; i < faultyDTMaps.length; i++) {
+				if (!getMods(faultyDTMaps[i].rawMods).includes('DT')) {
+					faultyDTMaps.splice(i, 1);
+					i--;
+					continue;
+				}
+
+				let otherGameScores = await DBOsuMultiScores.findAll({
+					where: {
+						gameId: faultyDTMaps[i].gameId,
+					}
+				});
+
+				let oneDoesNotHaveDT = false;
+
+				for (let i = 0; i < otherGameScores.length; i++) {
+					if (!getMods(otherGameScores[i].rawMods).includes('DT') && !getMods(otherGameScores[i].gameRawMods).includes('DT')) {
+						oneDoesNotHaveDT = true;
+						break;
+					}
+				}
+
+				if (!oneDoesNotHaveDT) {
+					faultyDTMaps.splice(i, 1);
+					i--;
+				}
+			}
+
+			for (let i = 0; i < faultyDTMaps.length; i++) {
+				let mods = getMods(faultyDTMaps[i].rawMods);
+
+				for (let i = 0; i < mods.length; i++) {
+					if (mods[i] === 'DT') {
+						mods.splice(i, 1);
+						i--;
+					}
+				}
+
+				faultyDTMaps[i].rawMods = getModBits(mods.join(''));
+				faultyDTMaps[i].pp = null;
+				await faultyDTMaps[i].save();
+			}
 		} else {
 			msg.reply('Invalid command');
 		}

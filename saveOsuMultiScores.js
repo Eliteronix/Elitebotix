@@ -1,4 +1,4 @@
-const { logDatabaseQueries, getScoreModpool } = require('./utils');
+const { logDatabaseQueries, getScoreModpool, getMods, getModBits } = require('./utils');
 const { DBOsuMultiScores, DBOsuBeatmaps } = require('./dbObjects');
 
 // eslint-disable-next-line no-undef
@@ -60,6 +60,16 @@ process.on('message', async (message) => {
 			}
 
 			try {
+				//Remove DT and NC from scoreMods
+				let scoreMods = getMods(match.games[gameIndex].scores[scoreIndex].raw_mods);
+				for (let i = 0; i < scoreMods.length; i++) {
+					if (scoreMods[i] === 'DT' || scoreMods[i] === 'NC') {
+						scoreMods.splice(i, 1);
+						i--;
+					}
+				}
+				scoreMods = getModBits(scoreMods.join(''));
+
 				//Add score to db
 				logDatabaseQueries(2, 'saveosuMultiScores.js');
 				const existingScore = await DBOsuMultiScores.findOne({
@@ -83,7 +93,7 @@ process.on('message', async (message) => {
 						evaluation: evaluation,
 						score: match.games[gameIndex].scores[scoreIndex].score,
 						gameRawMods: match.games[gameIndex].raw_mods,
-						rawMods: match.games[gameIndex].scores[scoreIndex].raw_mods,
+						rawMods: scoreMods,
 						matchStartDate: match.raw_start,
 						matchEndDate: match.raw_end,
 						gameStartDate: match.games[gameIndex].raw_start,
