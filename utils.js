@@ -1673,13 +1673,17 @@ module.exports = {
 			duplicates = result[0].length;
 
 			if (result[0].length) {
+				await new Promise(resolve => setTimeout(resolve, 2000));
 				let duplicate = await DBOsuMultiScores.findOne({
 					where: {
 						id: result[0][0].id
 					}
 				});
 
+				console.log(duplicate.matchId, duplicate.gameId, duplicate.osuUserId, duplicate.matchStartDate, duplicate.maxCombo);
+
 				deleted++;
+				await new Promise(resolve => setTimeout(resolve, 2000));
 				await duplicate.destroy();
 			}
 			await new Promise(resolve => setTimeout(resolve, 10000));
