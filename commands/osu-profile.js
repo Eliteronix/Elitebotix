@@ -282,6 +282,15 @@ async function drawTitle(input, server, mode) {
 	ctx.textAlign = 'center';
 	ctx.fillText(title, canvas.width / 2, 35);
 
+	const discordUser = await DBDiscordUsers.findOne({
+		where: {
+			osuUserId: user.id
+		}
+	});
+	if (discordUser && discordUser.patreon) {
+		const patreonLogo = await Canvas.loadImage('./other/patreonLogo.png');
+		ctx.drawImage(patreonLogo, 10, 10, 30, 30);
+	}
 	const output = [canvas, ctx, user];
 	return output;
 }
