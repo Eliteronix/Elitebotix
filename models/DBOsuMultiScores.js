@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
 			indexes: [
 				{
 					unique: false,
-					fields: ['osuUserId', 'matchId', 'gameId', 'beatmapId']
+					fields: ['osuUserId', 'matchId', 'gameId', 'beatmapId', 'tourneyMatch', 'mode', 'score']
 				}
 			]
 		});
