@@ -72,6 +72,8 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		birthdayEnabled: DataTypes.BOOLEAN,
+		birthdayMessageChannel: DataTypes.STRING,
 		paranoid: true,
 	});
 };

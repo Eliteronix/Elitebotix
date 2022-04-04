@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -977,6 +977,9 @@ module.exports = {
 	getScoreModpool(dbScore) {
 		return getScoreModpoolFunction(dbScore);
 	},
+	checkForBirthdays(client) {
+		return checkForBirthdaysFunction(client);
+	},
 	async getUserDuelStarRating(input) {
 		//Try to get it from tournament data if available
 		let userScores;
@@ -1813,6 +1816,74 @@ function fitTextOnMiddleCanvasFunction(ctx, text, startingSize, fontface, yPosit
 
 	return fontsize;
 
+}
+
+async function checkForBirthdaysFunction(client) {
+	//get current date
+	const currentDate = new Date();
+
+	//get birthday dates from DBBirthdayGuilds for all users in the database that have a birthday set
+	let birthdayAnnouncements = await DBBirthdayGuilds.findAll({
+		where: {
+			birthdayTime: {
+				[Op.lte]: currentDate
+			},
+		}
+	});
+
+
+	// iterate through all users and check if the current date is the same as the birthday date 
+	for (let i = 0; i < birthdayAnnouncements.length; i++) {
+
+		//Check if the birthday announcement is enabled on the guild
+		let dbGuild = await DBGuilds.findOne({
+			where: {
+				guildId: birthdayAnnouncements[i].guildId
+			}
+		});
+
+		if (dbGuild && dbGuild.birthdayEnabled) {
+			//Fetch the channel
+			const birthdayMessageChannel = await client.channels.fetch(dbGuild.birthdayMessageChannel);
+
+			if (birthdayMessageChannel) {
+				// send a birthday gif from tenor 
+				let index;
+				// eslint-disable-next-line no-undef
+				const birthdayGif = await fetch(`https://api.tenor.com/v1/search?q=anime_birthday&key=${process.env.TENORTOKEN}&limit=30&contentfilter=medium`)
+					.then(async (res) => {
+						let gifs = await res.json();
+						index = Math.floor(Math.random() * gifs.results.length);
+						return gifs.results[index].media[0].gif.url;
+					});
+
+				// send the birthday message
+				birthdayMessageChannel.send(`<@${birthdayAnnouncements.userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
+
+				birthdayAnnouncements.birthdayTime.setUTCFullYear(birthdayAnnouncements.birthdayTime.getUTCFullYear() + 1);
+				birthdayAnnouncements.birthdayTime.setUTCHours(0);
+				birthdayAnnouncements.birthdayTime.setUTCMinutes(0);
+				birthdayAnnouncements.birthdayTime.setUTCSeconds(0);
+				await birthdayAnnouncements.save();
+				continue;
+			}
+		} else if (dbGuild) {
+			//Guild was found but birthdays are disabled; Delay by a year
+			birthdayAnnouncements.birthdayTime.setUTCFullYear(birthdayAnnouncements.birthdayTime.getUTCFullYear() + 1);
+			birthdayAnnouncements.birthdayTime.setUTCHours(0);
+			birthdayAnnouncements.birthdayTime.setUTCMinutes(0);
+			birthdayAnnouncements.birthdayTime.setUTCSeconds(0);
+			await birthdayAnnouncements.save();
+			continue;
+		}
+
+		//Guild or Channel was not found; Delay by 5 minutes unless its after 12 UTC already
+		if (currentDate.getUTCHours() < 12) {
+			birthdayAnnouncements.birthdayTime.setUTCMinutes(birthdayAnnouncements.birthdayTime.getUTCMinutes() + 5);
+		} else {
+			birthdayAnnouncements.destroy();
+		}
+	}
 }
 
 async function getOsuBeatmapFunction(input) {
