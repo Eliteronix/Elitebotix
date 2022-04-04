@@ -58,86 +58,85 @@ module.exports = {
 			// 	},
 			// });
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'birthday',
-					description: 'Sets your birthday',
-					type: 1,
-					required: true,
-					options: [
-						{
-							'name': 'set',
-							'description': 'Sets your birthday',
-							'type': 1,
-							'required': false,
-							'options': [
-								{
-									'name': 'date',
-									'description': 'The date of the month in UTC (i.e. 29)',
-									'type': 4,
-									'required': true
-								},
-								{
-									'name': 'month',
-									'description': 'The month in UTC (i.e. 11)',
-									'type': 4,
-									'required': true
-								},
-							]
-						},
-						{
-							'name': 'enable',
-							'description': 'Enables your birthday logging on this server',
-							'type': 1,
-							'required': false
-						},
-						{
-							'name': 'disable',
-							'description': 'Enables your birthday logging on this server',
-							'type': 1,
-							'required': false
-						},
-					]
-				},
-			});
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'birthday',
+			// 		description: 'Sets your birthday',
+			// 		type: 1,
+			// 		required: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'set',
+			// 				'description': 'Sets your birthday',
+			// 				'type': 1,
+			// 				'required': false,
+			// 				'options': [
+			// 					{
+			// 						'name': 'date',
+			// 						'description': 'The date of the month in UTC (i.e. 29)',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'month',
+			// 						'description': 'The month in UTC (i.e. 11)',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'enable',
+			// 				'description': 'Enables your birthday announcement on this server',
+			// 				'type': 1,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'disable',
+			// 				'description': 'Enables your birthday announcement on this server',
+			// 				'type': 1,
+			// 				'required': false
+			// 			},
+			// 		]
+			// 	},
+			// });
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'birthday-admin',
-					description: 'Manage birthday logging on your server',
-					type: 1,
-					required: true,
-					options: [
-						{
-							'name': 'enable',
-							'description': 'Enables your birthday logging on this server',
-							'type': 1,
-							'required': false
-						},
-						{
-							'name': 'disable',
-							'description': 'Disables your birthday logging on this server',
-							'type': 1,
-							'required': false
-						},
-						{
-							'name': 'channel',
-							'description': 'Sets the channel for birthday logging',
-							'type': 1,
-							'required': false,
-							'options': [
-								{
-									'name': 'set',
-									'description': 'Sets the channel for birthday logging',
-									'type': 7,
-									'required': true,
-								}
-							]
-						},
-					]
-				},
-			});
-
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'birthday-admin',
+			// 		description: 'Manage birthday announcements on your server',
+			// 		type: 1,
+			// 		required: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'enable',
+			// 				'description': 'Enables birthday announcements on the server',
+			// 				'type': 1,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'disable',
+			// 				'description': 'Disables birthday announcements on the server',
+			// 				'type': 1,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'channel',
+			// 				'description': 'Sets the channel for birthday announcements',
+			// 				'type': 1,
+			// 				'required': false,
+			// 				'options': [
+			// 					{
+			// 						'name': 'set',
+			// 						'description': 'Sets the channel for birthday announcements',
+			// 						'type': 7,
+			// 						'required': true,
+			// 					}
+			// 				]
+			// 			},
+			// 		]
+			// 	},
+			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -2576,13 +2575,13 @@ module.exports = {
 						},
 						{
 							'name': 'enable',
-							'description': 'Enables your birthday logging on this server',
+							'description': 'Enables your birthday announcement on this server',
 							'type': 1,
 							'required': false
 						},
 						{
 							'name': 'disable',
-							'description': 'Enables your birthday logging on this server',
+							'description': 'Enables your birthday announcement on this server',
 							'type': 1,
 							'required': false
 						},
@@ -2590,34 +2589,34 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'birthday-admin',
-					description: 'Manage birthday logging on your server',
+					description: 'Manage birthday announcements on your server',
 					type: 1,
 					required: true,
 					options: [
 						{
 							'name': 'enable',
-							'description': 'Enables your birthday logging on this server',
+							'description': 'Enables birthday announcements on the server',
 							'type': 1,
 							'required': false
 						},
 						{
 							'name': 'disable',
-							'description': 'Disables your birthday logging on this server',
+							'description': 'Disables birthday announcements on the server',
 							'type': 1,
 							'required': false
 						},
 						{
 							'name': 'channel',
-							'description': 'Sets the channel for birthday logging',
+							'description': 'Sets the channel for birthday announcements',
 							'type': 1,
 							'required': false,
 							'options': [
 								{
 									'name': 'set',
-									'description': 'Sets the channel for birthday logging',
+									'description': 'Sets the channel for birthday announcements',
 									'type': 7,
 									'required': true,
 								}
