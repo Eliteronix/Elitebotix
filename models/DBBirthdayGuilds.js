@@ -13,9 +13,8 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 			allowNullValue: false,
 		},
-		birthdayEnabled: {
-			type: DataTypes.BOOLEAN,
-			defaultValue: false,
+		birthdayTime: {
+			type: DataTypes.DATE,
 		},
 	});
 };

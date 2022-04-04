@@ -1815,66 +1815,69 @@ function fitTextOnMiddleCanvasFunction(ctx, text, startingSize, fontface, yPosit
 }
 
 async function checkForBirthdaysFunction(client) {
-	//get birthday date from DBDiscordUsers for all users in the database that have a birthday set
-	let users = await DBDiscordUsers.findAll({
+	//get current date
+	const currentDate = new Date();
+
+	//get birthday dates from DBBirthdayGuilds for all users in the database that have a birthday set
+	let birthdayAnnouncements = await DBBirthdayGuilds.findAll({
 		where: {
 			birthday: {
-				[Op.ne]: null
+				[Op.lte]: currentDate
 			},
 		}
 	});
 
-	//get current date
-	const currentDate = new Date();
 
 	// iterate through all users and check if the current date is the same as the birthday date 
-	for (let i = 0; i < users.length; i++) {
-		const user = users[i];
-		const birthdayDate = new Date(user.birthday);
-		// check if the current date is the same as the birthday date
-		// also check for the minutes to avoid it triggering multiple times || because minutes are set to 0 
-		if (currentDate.getDate() === birthdayDate.getDate() && currentDate.getMonth() === birthdayDate.getMonth()) {  //&& currentDate.getMinutes() === birthdayDate.getMinutes()
-			// get all guilds with the birthday logging enabled
-			let userBirthdayguilds = await DBBirthdayGuilds.findAll({
-				where: {
-					birthdayEnabled: true,
-					userId: user.userId
-				}
-			});
+	for (let i = 0; i < birthdayAnnouncements.length; i++) {
 
-			// iterate through all guilds in DBGuilds and check if the birthday message is enabled
-			let guildsRaw;
-			let guilds = [];
-			for (let i = 0; i < userBirthdayguilds.length; i++) {
-				guildsRaw = await DBGuilds.findOne({
-					where: {
-						birthdayEnabled: true,
-						guildId: userBirthdayguilds[i].guildId
-					}
-				});
-				guilds.push(guildsRaw);
+		//Check if the birthday announcement is enabled on the guild
+		let dbGuild = await DBGuilds.findOne({
+			where: {
+				guildId: birthdayAnnouncements[i].guildId
 			}
+		});
 
-			// send the birthday message in all channels in the guilds that have the birthday message enabled
-			for (let i = 0; i < guilds.length; i++) {
-				if (guilds[i]) {
-					let birthdayMessageChannel = await client.channels.fetch(guilds[i].birthdayMessageChannel);
-					if (birthdayMessageChannel) {
-						// send a birthday gif from tenor 
-						let index;
-						// eslint-disable-next-line no-undef
-						const birthdayGif = await fetch(`https://api.tenor.com/v1/search?q=anime_birthday&key=${process.env.TENORTOKEN}&limit=30&contentfilter=medium`)
-							.then(async (res) => {
-								let gifs = await res.json();
-								index = Math.floor(Math.random() * gifs.results.length);
-								return gifs.results[index].media[0].gif.url;
-							});
+		if (dbGuild && dbGuild.birthdayEnabled) {
+			//Fetch the channel
+			const birthdayMessageChannel = await client.channels.fetch(dbGuild.birthdayMessageChannel);
 
-						// send the birthday message
-						birthdayMessageChannel.send(`<@${user.userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
-					}
-				}
+			if (birthdayMessageChannel) {
+				// send a birthday gif from tenor 
+				let index;
+				// eslint-disable-next-line no-undef
+				const birthdayGif = await fetch(`https://api.tenor.com/v1/search?q=anime_birthday&key=${process.env.TENORTOKEN}&limit=30&contentfilter=medium`)
+					.then(async (res) => {
+						let gifs = await res.json();
+						index = Math.floor(Math.random() * gifs.results.length);
+						return gifs.results[index].media[0].gif.url;
+					});
+
+				// send the birthday message
+				birthdayMessageChannel.send(`<@${birthdayAnnouncements.userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
+
+				birthdayAnnouncements.birthdayTime.setUTCFullYear(birthdayAnnouncements.birthdayTime.getUTCFullYear() + 1);
+				birthdayAnnouncements.birthdayTime.setUTCHours(0);
+				birthdayAnnouncements.birthdayTime.setUTCMinutes(0);
+				birthdayAnnouncements.birthdayTime.setUTCSeconds(0);
+				await birthdayAnnouncements.save();
+				continue;
 			}
+		} else if (dbGuild) {
+			//Guild was found but birthdays are disabled; Delay by a year
+			birthdayAnnouncements.birthdayTime.setUTCFullYear(birthdayAnnouncements.birthdayTime.getUTCFullYear() + 1);
+			birthdayAnnouncements.birthdayTime.setUTCHours(0);
+			birthdayAnnouncements.birthdayTime.setUTCMinutes(0);
+			birthdayAnnouncements.birthdayTime.setUTCSeconds(0);
+			await birthdayAnnouncements.save();
+			continue;
+		}
+
+		//Guild or Channel was not found; Delay by 5 minutes unless its after 12 UTC already
+		if (currentDate.getUTCHours() < 12) {
+			birthdayAnnouncements.birthdayTime.setUTCMinutes(birthdayAnnouncements.birthdayTime.getUTCMinutes() + 5);
+		} else {
+			birthdayAnnouncements.destroy();
 		}
 	}
 }
