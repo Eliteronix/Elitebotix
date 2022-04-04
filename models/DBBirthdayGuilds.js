@@ -13,10 +13,6 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 			allowNullValue: false,
 		},
-		guildName: {
-			type: DataTypes.STRING,
-			allowNullValue: false,
-		},
 		birthdayEnabled: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,

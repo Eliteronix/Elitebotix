@@ -1859,18 +1859,19 @@ async function checkForBirthdaysFunction(client) {
 			for (let i = 0; i < guilds.length; i++) {
 				if (guilds[i]) {
 					let birthdayMessageChannel = await client.channels.fetch(guilds[i].birthdayMessageChannel);
-					if (birthdayMessageChannel !== null) {
+					if (birthdayMessageChannel) {
 						// send a birthday gif from tenor 
 						let index;
-						const birthdayGif = await fetch('https://api.tenor.com/v1/search?q=anime_birthday&key=${process.env.TENORTOKEN}&limit=30&contentfilter=medium')
+						// eslint-disable-next-line no-undef
+						const birthdayGif = await fetch(`https://api.tenor.com/v1/search?q=anime_birthday&key=${process.env.TENORTOKEN}&limit=30&contentfilter=medium`)
 							.then(async (res) => {
 								let gifs = await res.json();
 								index = Math.floor(Math.random() * gifs.results.length);
 								return gifs.results[index].media[0].gif.url;
 							});
-						
+
 						// send the birthday message
-						birthdayMessageChannel.send(`<@${user.userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`); 
+						birthdayMessageChannel.send(`<@${user.userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
 					}
 				}
 			}
