@@ -681,7 +681,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 			arrow = '^';
 		}
 
-		let sortingText;
+		let sortingText = '';
 		if (sorting !== null) {
 			if (sorting == 'ar') {
 				sortingText = ` (AR: ${beatmaps[i].approachRate + arrow})`;
