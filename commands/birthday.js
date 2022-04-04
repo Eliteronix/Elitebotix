@@ -104,10 +104,10 @@ module.exports = {
 			}
 
 			let now = new Date();
-			let nextBirthday = new Date(dbDiscordUser.birthday);
+			let nextBirthday = dbDiscordUser.birthday;
 
 			while (nextBirthday < now) {
-				nextBirthday.setUTCFullYear(nextBirthday.setUTCFullYear() + 1);
+				nextBirthday.setUTCFullYear(nextBirthday.getUTCFullYear() + 1);
 			}
 
 			await DBBirthdayGuilds.create({
