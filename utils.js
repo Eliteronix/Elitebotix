@@ -1821,7 +1821,7 @@ async function checkForBirthdaysFunction(client) {
 	//get birthday dates from DBBirthdayGuilds for all users in the database that have a birthday set
 	let birthdayAnnouncements = await DBBirthdayGuilds.findAll({
 		where: {
-			birthday: {
+			birthdayTime: {
 				[Op.lte]: currentDate
 			},
 		}

@@ -199,7 +199,7 @@ setInterval(() => executeNextProcessQueueTask(client, bancho), 725);
 
 setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
 
-setInterval(() => checkForBirthdays(client), 8000);
+setInterval(() => checkForBirthdays(client), 60000);
 
 setInterval(() => refreshOsuRank(), 60000);
 
