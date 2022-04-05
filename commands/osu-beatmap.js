@@ -175,19 +175,20 @@ async function getBeatmap(msg, interaction, beatmap) {
 		if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
 			sentMessage.react('<:COMPARE:827974793365159997>');
 		}
-		sentMessage.react('<:EZ:918920760586805259>');
-		sentMessage.react('<:HT:918921193426411544>');
 		sentMessage.react('<:HD:918922015182827531>');
-		if (beatmap.mode === 'Mania') {
-			sentMessage.react('<:FI:918922047994880010>');
-		}
-		sentMessage.react('<:DT:918920670023397396>');
 		sentMessage.react('<:HR:918938816377671740>');
-		sentMessage.react('<:FL:918920836755382343>');
+		sentMessage.react('<:DT:918920670023397396>');
 		if (beatmap.mode === 'Standard') {
 			sentMessage.react('<:HDHR:918935327215861760>');
 			sentMessage.react('<:HDDT:918935350125142036>');
 		}
+		if (beatmap.mode === 'Mania') {
+			sentMessage.react('<:FI:918922047994880010>');
+		}
+		sentMessage.react('<:EZ:918920760586805259>');
+		sentMessage.react('<:HT:918921193426411544>');
+		sentMessage.react('<:FL:918920836755382343>');
+
 		return;
 	}
 }
