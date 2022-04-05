@@ -133,6 +133,20 @@ async function sendUserEmbed(msg, interaction, user) {
 				})}`
 			}
 		).setFooter(`Created by ${msg.client.user.username}`, `${msg.client.user.displayAvatarURL({ format: 'png', dynamic: true })}`);
+		// add field which shows when the user joined the server
+		if (member.joinedAt) {
+			userInfoEmbed.addFields(
+				{
+					name: 'Joined at: ', value: `${member.joinedAt.toLocaleString('en-UK', { // en-UK if 24hour format
+						day: 'numeric',
+						year: 'numeric',
+						month: 'long',
+						hour: 'numeric',
+						minute: 'numeric',
+					})}`
+				}
+			);
+		}
 	}
 	logDatabaseQueries(4, 'commands/user-profile.js DBDiscordUsers');
 	//get discordUser from db
