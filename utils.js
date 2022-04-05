@@ -1072,7 +1072,7 @@ module.exports = {
 					if (getScoreModpoolFunction(userScores[i]) === modPools[modIndex]) {
 						if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
 							userMapIds.push(userScores[i].beatmapId);
-							userMaps.push({ beatmapId: userScores[i].beatmapId, score: parseInt(userScores[i].score), matchId: userScores[i].matchId, matchName: userScores[i].matchName, matchStartDate: userScores[i].matchStartDate });
+							userMaps.push({ beatmapId: userScores[i].beatmapId, score: parseInt(userScores[i].score), matchId: userScores[i].matchId, matchName: userScores[i].matchName, matchStartDate: userScores[i].matchStartDate, modBits: parseInt(userScores[i].gameRawMods) + parseInt(userScores[i].rawMods) });
 						}
 					}
 				}
@@ -1089,11 +1089,7 @@ module.exports = {
 				} else if (modPools[modIndex] === 'DT') {
 					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 64 });
 				} else if (modPools[modIndex] === 'FM') {
-					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 16 });
-					let dbBeatmap2 = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 0 });
-					if (dbBeatmap && dbBeatmap2) {
-						dbBeatmap.starRating = (parseFloat(dbBeatmap.starRating) * 2 + parseFloat(dbBeatmap2.starRating)) / 3;
-					}
+					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: userMaps[i].modBits });
 				} else {
 					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 0 });
 				}
@@ -1143,6 +1139,8 @@ module.exports = {
 
 					let mapStarRating = dbBeatmap.starRating;
 					if (modPools[modIndex] === 'HD') {
+						mapStarRating = adjustHDStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate);
+					} else if (modPools[modIndex] === 'FM' && getModsFunction(dbBeatmap.mods).includes('HD') && !getModsFunction(dbBeatmap.mods).includes('DT')) {
 						mapStarRating = adjustHDStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate);
 					}
 
