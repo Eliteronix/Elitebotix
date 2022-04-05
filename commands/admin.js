@@ -2634,7 +2634,7 @@ module.exports = {
 			// 				'name': 'unit',
 			// 				'description': 'The unit that should be used',
 			// 				'type': 3,
-			// 				'required': true,
+			// 				'required': false,
 			// 				'choices': [
 			// 					{
 			// 						'name': 'celcius',
@@ -2650,12 +2650,56 @@ module.exports = {
 			// 				'name': 'location',
 			// 				'description': 'The location name or zip',
 			// 				'type': 3,
-			// 				'required': true
+			// 				'required': false
 			// 			}
 			// 		]
 			// 	}
 			// });
 
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'weather-set',
+			// 		description: 'Allows you to set the default degree type/location for the weather command',
+			// 		options: [
+			// 			{
+			// 				'name': 'location',
+			// 				'description': 'The location name or zip',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'location',
+			// 						'description': 'The location name or zip',
+			// 						'type': 3,
+			// 						'required': true,
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'unit',
+			// 				'description': 'The unit that should be used',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'unit',
+			// 						'description': 'The unit that should be used',
+			// 						'type': 3,
+			// 						'required': true,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Celcius',
+			// 								'value': 'c'
+			// 							},
+			// 							{
+			// 								'name': 'Fahrenheit',
+			// 								'value': 'f'
+			// 							},
+			// 						]
+			// 					}
+			// 				]
+			// 			},
+			// 		]
+			// 	}
+			// });
 
 		} else if (args[0] === 'removeGuildCommands') {
 			const commands = await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.get();
@@ -5131,7 +5175,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).commands.post({
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'weather',
 					description: 'Sends info about the weather of the given location',
@@ -5140,7 +5184,7 @@ module.exports = {
 							'name': 'unit',
 							'description': 'The unit that should be used',
 							'type': 3,
-							'required': true,
+							'required': false,
 							'choices': [
 								{
 									'name': 'celcius',
@@ -5156,8 +5200,53 @@ module.exports = {
 							'name': 'location',
 							'description': 'The location name or zip',
 							'type': 3,
-							'required': true
+							'required': false
 						}
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'weather-set',
+					description: 'Allows you to set the default degree type/location for the weather command',
+					options: [
+						{
+							'name': 'location',
+							'description': 'The location name or zip',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'location',
+									'description': 'The location name or zip',
+									'type': 3,
+									'required': true,
+								}
+							]
+						},
+						{
+							'name': 'unit',
+							'description': 'The unit that should be used',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'unit',
+									'description': 'The unit that should be used',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Celcius',
+											'value': 'c'
+										},
+										{
+											'name': 'Fahrenheit',
+											'value': 'f'
+										},
+									]
+								}
+							]
+						},
 					]
 				}
 			});
