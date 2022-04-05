@@ -1858,30 +1858,31 @@ async function checkForBirthdaysFunction(client) {
 					});
 
 				// send the birthday message
-				birthdayMessageChannel.send(`<@${birthdayAnnouncements.userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
+				birthdayMessageChannel.send(`<@${birthdayAnnouncements[i].userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
 
-				birthdayAnnouncements.birthdayTime.setUTCFullYear(birthdayAnnouncements.birthdayTime.getUTCFullYear() + 1);
-				birthdayAnnouncements.birthdayTime.setUTCHours(0);
-				birthdayAnnouncements.birthdayTime.setUTCMinutes(0);
-				birthdayAnnouncements.birthdayTime.setUTCSeconds(0);
-				await birthdayAnnouncements.save();
+				birthdayAnnouncements[i].birthdayTime.setUTCFullYear(birthdayAnnouncements[i].birthdayTime.getUTCFullYear() + 1);
+				birthdayAnnouncements[i].birthdayTime.setUTCHours(0);
+				birthdayAnnouncements[i].birthdayTime.setUTCMinutes(0);
+				birthdayAnnouncements[i].birthdayTime.setUTCSeconds(0);
+				await birthdayAnnouncements[i].save();
 				continue;
 			}
 		} else if (dbGuild) {
 			//Guild was found but birthdays are disabled; Delay by a year
-			birthdayAnnouncements.birthdayTime.setUTCFullYear(birthdayAnnouncements.birthdayTime.getUTCFullYear() + 1);
-			birthdayAnnouncements.birthdayTime.setUTCHours(0);
-			birthdayAnnouncements.birthdayTime.setUTCMinutes(0);
-			birthdayAnnouncements.birthdayTime.setUTCSeconds(0);
-			await birthdayAnnouncements.save();
+			birthdayAnnouncements[i].birthdayTime.setUTCFullYear(birthdayAnnouncements[i].birthdayTime.getUTCFullYear() + 1);
+			birthdayAnnouncements[i].birthdayTime.setUTCHours(0);
+			birthdayAnnouncements[i].birthdayTime.setUTCMinutes(0);
+			birthdayAnnouncements[i].birthdayTime.setUTCSeconds(0);
+			await birthdayAnnouncements[i].save();
 			continue;
 		}
 
 		//Guild or Channel was not found; Delay by 5 minutes unless its after 12 UTC already
 		if (currentDate.getUTCHours() < 12) {
-			birthdayAnnouncements.birthdayTime.setUTCMinutes(birthdayAnnouncements.birthdayTime.getUTCMinutes() + 5);
+			birthdayAnnouncements[i].birthdayTime.setUTCMinutes(birthdayAnnouncements[i].birthdayTime.getUTCMinutes() + 5);
+			birthdayAnnouncements[i].save();
 		} else {
-			birthdayAnnouncements.destroy();
+			birthdayAnnouncements[i].destroy();
 		}
 	}
 }
