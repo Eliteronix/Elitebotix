@@ -519,6 +519,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 			for (let j = i + 1; j < multiScores.length; j++) {
 				if (multiScores[i].beatmapId === multiScores[j].beatmapId) {
 					multiScores.splice(j, 1);
+					j--;
 				}
 			}
 		}
