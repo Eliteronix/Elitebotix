@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } = require('./dbObjects');
-
+const cooldowns = new Discord.Collection();
+const { developers } = require('./config.json');
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
 const { isWrongSystem, getMods, logDatabaseQueries, getOsuBeatmap } = require('./utils');
@@ -260,6 +261,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-score.js');
 
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
+	
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
 
@@ -290,6 +295,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 			let args = [beatmapId];
 
 			const command = require('./commands/osu-score.js');
+
+			if (checkCooldown(reaction, command, user, beatmapId) !== undefined) {
+				return;
+			}
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
@@ -342,6 +351,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-beatmap.js');
 
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
+
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
 
@@ -379,6 +392,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 			let args = [osuUserId];
 
 			const command = require('./commands/osu-skills.js');
+
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
@@ -418,6 +435,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-profile.js');
 
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
+
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
 
@@ -449,6 +470,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 			let args = [osuUserId];
 
 			const command = require('./commands/osu-profile.js');
+
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
@@ -488,6 +513,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-schedule.js');
 
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
+
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
 
@@ -526,6 +555,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-top.js');
 
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
+
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
 
@@ -563,6 +596,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 			let args = [osuUserId];
 
 			const command = require('./commands/osu-matchup.js');
+
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
@@ -606,6 +643,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-profile.js');
 
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
+
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
 
@@ -642,6 +683,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 			let args = [osuUserId];
 
 			const command = require('./commands/osu-duel.js');
+
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
@@ -726,6 +771,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-beatmap.js');
 
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
+
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
 
@@ -782,6 +831,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 			const command = require('./commands/osu-beatmap.js');
 
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
+
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
 
@@ -837,6 +890,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 			let args = [beatmapId, `--${mods.join('')}`];
 
 			const command = require('./commands/osu-beatmap.js');
+
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
 
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
@@ -1011,4 +1068,38 @@ async function editEmbed(msg, reactionRolesHeader) {
 			}
 		}
 	}
+}
+
+
+function checkCooldown(reaction, command, user, args) {
+	if (!cooldowns.has(command.name + args)) {
+		cooldowns.set(command.name + args, new Discord.Collection());
+	}
+
+	//Set current time
+	const now = Date.now();
+	//gets the collections for the current command used
+	const timestamps = cooldowns.get(command.name + args);
+	//set necessary cooldown amount; if non stated in command default to 5; calculate ms afterwards
+	const cooldownAmount = (command.cooldown || 5) * 1000;
+
+	//get expiration times for the cooldowns for the reaction author
+	if (timestamps.has(user.id)) {
+		const expirationTime = timestamps.get(user.id) + cooldownAmount;
+
+		//If cooldown didn't expire yet send cooldown message
+		if (command.noCooldownMessage) {
+			return;
+		} else if (now < expirationTime) {
+			const timeLeft = (expirationTime - now) / 1000;
+			return reaction.message.channel.send(`<@${user.id}>, you need to wait ${timeLeft.toFixed(1)} seconds before you can use this command again.`);
+		}
+	}
+
+	//Set timestamp for the used command
+	if (!developers.includes(user.id)) {
+		timestamps.set(user.id, now);
+	}
+	//Automatically delete the timestamp after the cooldown
+	setTimeout(() => timestamps.delete(user.id), cooldownAmount);
 }
