@@ -5361,44 +5361,10 @@ module.exports = {
 			});
 
 			for (let i = 0; i < faultyDTMaps.length; i++) {
-				if (!getMods(faultyDTMaps[i].rawMods).includes('DT')) {
-					faultyDTMaps.splice(i, 1);
-					i--;
-					continue;
-				}
-
-				let otherGameScores = await DBOsuMultiScores.findAll({
-					where: {
-						gameId: faultyDTMaps[i].gameId,
-					}
-				});
-
-				let oneDoesNotHaveDT = false;
-
-				for (let i = 0; i < otherGameScores.length; i++) {
-					if (!getMods(otherGameScores[i].rawMods).includes('DT') && !getMods(otherGameScores[i].gameRawMods).includes('DT')) {
-						oneDoesNotHaveDT = true;
-						break;
-					}
-				}
-
-				if (!oneDoesNotHaveDT) {
-					faultyDTMaps.splice(i, 1);
-					i--;
+				if (getMods(faultyDTMaps[i].rawMods).includes('DT') || getMods(faultyDTMaps[i].rawMods).includes('NC')) {
+					console.log(`MatchID: ${faultyDTMaps[i].matchId} - osuId: ${faultyDTMaps[i].osuUserId} - MapID: ${faultyDTMaps[i].beatmapId} | UserMods: ${getMods(faultyDTMaps[i].rawMods).join('')} - GameMods: ${getMods(faultyDTMaps[i].gameRawMods).join('')}`);
 				}
 			}
-
-			let faultyMultis = [];
-
-			for (let i = 0; i < faultyDTMaps.length; i++) {
-				if (faultyMultis.indexOf(`${faultyDTMaps[i].matchId} - ${faultyDTMaps[i].osuUserId} - ${faultyDTMaps[i].beatmapId}`) === -1) {
-					faultyMultis.push(`${faultyDTMaps[i].matchId} - ${faultyDTMaps[i].osuUserId} - ${faultyDTMaps[i].beatmapId}`);
-				}
-			}
-
-			msg.reply(faultyMultis.join('\n'), { split: true });
-
-			console.log(faultyMultis.length);
 		} else if (args[0] === 'cleanFaultyDTMaps') {
 			let faultyDTMaps = await DBOsuMultiScores.findAll({
 				where: {
@@ -5409,46 +5375,24 @@ module.exports = {
 			});
 
 			for (let i = 0; i < faultyDTMaps.length; i++) {
-				if (!getMods(faultyDTMaps[i].rawMods).includes('DT')) {
-					faultyDTMaps.splice(i, 1);
-					i--;
-					continue;
-				}
+				if (getMods(faultyDTMaps[i].rawMods).includes('DT') || getMods(faultyDTMaps[i].rawMods).includes('NC')) {
+					let mods = getMods(faultyDTMaps[i].rawMods);
 
-				let otherGameScores = await DBOsuMultiScores.findAll({
-					where: {
-						gameId: faultyDTMaps[i].gameId,
+					for (let i = 0; i < mods.length; i++) {
+						if (mods[i] === 'DT') {
+							mods.splice(i, 1);
+							i--;
+						} else if (mods[i] === 'NC') {
+							mods.splice(i, 1);
+							i--;
+						}
 					}
-				});
 
-				let oneDoesNotHaveDT = false;
-
-				for (let i = 0; i < otherGameScores.length; i++) {
-					if (!getMods(otherGameScores[i].rawMods).includes('DT') && !getMods(otherGameScores[i].gameRawMods).includes('DT')) {
-						oneDoesNotHaveDT = true;
-						break;
-					}
+					faultyDTMaps[i].rawMods = getModBits(mods.join(''));
+					faultyDTMaps[i].pp = null;
+					await faultyDTMaps[i].save();
+					console.log(`Finished ${i + 1} of ${faultyDTMaps.length}`);
 				}
-
-				if (!oneDoesNotHaveDT) {
-					faultyDTMaps.splice(i, 1);
-					i--;
-				}
-			}
-
-			for (let i = 0; i < faultyDTMaps.length; i++) {
-				let mods = getMods(faultyDTMaps[i].rawMods);
-
-				for (let i = 0; i < mods.length; i++) {
-					if (mods[i] === 'DT') {
-						mods.splice(i, 1);
-						i--;
-					}
-				}
-
-				faultyDTMaps[i].rawMods = getModBits(mods.join(''));
-				faultyDTMaps[i].pp = null;
-				await faultyDTMaps[i].save();
 			}
 		} else {
 			msg.reply('Invalid command');
