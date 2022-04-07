@@ -2,6 +2,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
+const { developers } = require('../config.json');
 
 //Require discord.js module
 const Discord = require('discord.js');
@@ -50,9 +51,13 @@ async function sendUserEmbed(msg, interaction, user) {
 		where: { userId: user.id },
 	});
 
-	let patreonEmoji = '';
+	let customEmoji = '';
 	if (discordUser && discordUser.patreon) {
-		patreonEmoji = '<:patreon:959660462222503937> ';
+		customEmoji = '<:patreon:959660462222503937> ';
+	}
+	
+	if (developers.includes(user.id)) {
+		customEmoji = '<:devLogo:960689809419010090> ';
 	}
 
 	let username = `${user.username}'s`;
@@ -63,7 +68,7 @@ async function sendUserEmbed(msg, interaction, user) {
 	//Send embed
 	const userInfoEmbed = new Discord.MessageEmbed()
 		.setColor('#7289DA')
-		.setTitle(`${patreonEmoji}${username} profile info card`)
+		.setTitle(`${customEmoji}${username} profile info card`)
 		.setThumbnail(`${user.displayAvatarURL({ format: 'png', dynamic: true })}`)
 		.addFields(
 			{ name: 'Discord Name', value: `<@${user.id}>` }
@@ -128,6 +133,20 @@ async function sendUserEmbed(msg, interaction, user) {
 				})}`
 			}
 		).setFooter(`Created by ${msg.client.user.username}`, `${msg.client.user.displayAvatarURL({ format: 'png', dynamic: true })}`);
+		// add field which shows when the user joined the server
+		if (member.joinedAt) {
+			userInfoEmbed.addFields(
+				{
+					name: 'Joined at: ', value: `${member.joinedAt.toLocaleString('en-UK', { // en-UK if 24hour format
+						day: 'numeric',
+						year: 'numeric',
+						month: 'long',
+						hour: 'numeric',
+						minute: 'numeric',
+					})}`
+				}
+			);
+		}
 	}
 	logDatabaseQueries(4, 'commands/user-profile.js DBDiscordUsers');
 	//get discordUser from db

@@ -6,6 +6,7 @@ const { getGuildPrefix, humanReadable, getGameModeName, getLinkModeName, rippleT
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
+const { developers } = require('../config.json');
 
 module.exports = {
 	name: 'osu-profile',
@@ -291,6 +292,12 @@ async function drawTitle(input, server, mode) {
 		const patreonLogo = await Canvas.loadImage('./other/patreonLogo.png');
 		ctx.drawImage(patreonLogo, 10, 10, 30, 30);
 	}
+	
+	if (discordUser && developers.includes(discordUser.userId)) {
+		const devLogo = await Canvas.loadImage('./other/devLogo.png');
+		ctx.drawImage(devLogo, 10, 10, 30, 30);
+	}
+
 	const output = [canvas, ctx, user];
 	return output;
 }
