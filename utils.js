@@ -1869,26 +1869,32 @@ async function checkForBirthdaysFunction(client) {
 				// send the birthday message
 				birthdayMessageChannel.send(`<@${birthdayAnnouncements[i].userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
 
-				birthdayAnnouncements[i].birthdayTime.setUTCFullYear(birthdayAnnouncements[i].birthdayTime.getUTCFullYear() + 1);
-				birthdayAnnouncements[i].birthdayTime.setUTCHours(0);
-				birthdayAnnouncements[i].birthdayTime.setUTCMinutes(0);
-				birthdayAnnouncements[i].birthdayTime.setUTCSeconds(0);
+				let date = new Date(birthdayAnnouncements[i].birthdayTime);
+				date.setUTCFullYear(date.getUTCFullYear() + 1);
+				date.setUTCHours(0);
+				date.setUTCMinutes(0);
+				date.setUTCSeconds(0);
+				birthdayAnnouncements[i].birthdayTime = date;
 				await birthdayAnnouncements[i].save();
 				continue;
 			}
 		} else if (dbGuild) {
 			//Guild was found but birthdays are disabled; Delay by a year
-			birthdayAnnouncements[i].birthdayTime.setUTCFullYear(birthdayAnnouncements[i].birthdayTime.getUTCFullYear() + 1);
-			birthdayAnnouncements[i].birthdayTime.setUTCHours(0);
-			birthdayAnnouncements[i].birthdayTime.setUTCMinutes(0);
-			birthdayAnnouncements[i].birthdayTime.setUTCSeconds(0);
+			let date = new Date(birthdayAnnouncements[i].birthdayTime);
+			date.setUTCFullYear(date.getUTCFullYear() + 1);
+			date.setUTCHours(0);
+			date.setUTCMinutes(0);
+			date.setUTCSeconds(0);
+			birthdayAnnouncements[i].birthdayTime = date;
 			await birthdayAnnouncements[i].save();
 			continue;
 		}
 
 		//Guild or Channel was not found; Delay by 5 minutes unless its after 12 UTC already
 		if (currentDate.getUTCHours() < 12) {
-			birthdayAnnouncements[i].birthdayTime.setUTCMinutes(birthdayAnnouncements[i].birthdayTime.getUTCMinutes() + 5);
+			let date = new Date(birthdayAnnouncements[i].birthdayTime);
+			date.setUTCMinutes(date.getUTCMinutes() + 5);
+			birthdayAnnouncements[i].birthdayTime = date;
 			birthdayAnnouncements[i].save();
 		} else {
 			birthdayAnnouncements[i].destroy();
