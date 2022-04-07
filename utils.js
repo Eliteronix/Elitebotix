@@ -461,8 +461,19 @@ module.exports = {
 			}
 		} catch (e) {
 			console.log('Error executing process queue task', e);
-			console.log('Process Queue entry:', nextTask);
-			nextTask.destroy();
+			if (nextTask.task === 'saveMultiMatches') {
+				nextTask.beingExecuted = false;
+				await new Promise(resolve => setTimeout(resolve, 10000));
+				try {
+					await nextTask.save();
+				} catch (e) {
+					await new Promise(resolve => setTimeout(resolve, 10000));
+					await nextTask.save();
+				}
+			} else {
+				console.log('Process Queue entry:', nextTask);
+				nextTask.destroy();
+			}
 		}
 	},
 	refreshOsuRank: async function () {
