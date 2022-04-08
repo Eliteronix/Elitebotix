@@ -511,7 +511,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					}
 
 					let uncompletedMonths = [];
-					let runningAverageAmount = 75;
+					let runningAverageAmount = 150; //All mods together
 					for (let i = 0; i < userScores.length; i++) {
 						//Push matches for the history txt
 						if (!matchesPlayed.includes(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`)) {
@@ -550,31 +550,31 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 									if (rawModsData[j].label !== uncompletedMonths[k].label) {
 
 										//Add values to Mods
-										if (uncompletedMonths[k].NMCount < 15 && getScoreModpool(userScores[i]) === 'NM') {
+										if (uncompletedMonths[k].NMCount < runningAverageAmount / 5 && getScoreModpool(userScores[i]) === 'NM') {
 											uncompletedMonths[k].NMEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].NMCount++;
 											//add to total evaluation
 											uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].totalCount++;
-										} else if (uncompletedMonths[k].HDCount < 15 && getScoreModpool(userScores[i]) === 'HD') {
+										} else if (uncompletedMonths[k].HDCount < runningAverageAmount / 5 && getScoreModpool(userScores[i]) === 'HD') {
 											uncompletedMonths[k].HDEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].HDCount++;
 											//add to total evaluation
 											uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].totalCount++;
-										} else if (uncompletedMonths[k].HRCount < 15 && getScoreModpool(userScores[i]) === 'HR') {
+										} else if (uncompletedMonths[k].HRCount < runningAverageAmount / 5 && getScoreModpool(userScores[i]) === 'HR') {
 											uncompletedMonths[k].HREvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].HRCount++;
 											//add to total evaluation
 											uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].totalCount++;
-										} else if (uncompletedMonths[k].DTCount < 15 && getScoreModpool(userScores[i]) === 'DT') {
+										} else if (uncompletedMonths[k].DTCount < runningAverageAmount / 5 && getScoreModpool(userScores[i]) === 'DT') {
 											uncompletedMonths[k].DTEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].DTCount++;
 											//add to total evaluation
 											uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].totalCount++;
-										} else if (uncompletedMonths[k].FMCount < 15) {
+										} else if (uncompletedMonths[k].FMCount < runningAverageAmount / 5) {
 											uncompletedMonths[k].FMEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].FMCount++;
 											//add to total evaluation
@@ -583,11 +583,11 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 										}
 
 										if (uncompletedMonths[k].totalCount >= runningAverageAmount
-											&& uncompletedMonths[k].NMCount >= 15
-											&& uncompletedMonths[k].HDCount >= 15
-											&& uncompletedMonths[k].HRCount >= 15
-											&& uncompletedMonths[k].DTCount >= 15
-											&& uncompletedMonths[k].FMCount >= 15) {
+											&& uncompletedMonths[k].NMCount >= runningAverageAmount / 5
+											&& uncompletedMonths[k].HDCount >= runningAverageAmount / 5
+											&& uncompletedMonths[k].HRCount >= runningAverageAmount / 5
+											&& uncompletedMonths[k].DTCount >= runningAverageAmount / 5
+											&& uncompletedMonths[k].FMCount >= runningAverageAmount / 5) {
 											uncompletedMonths.splice(k, 1);
 										}
 									}
@@ -801,7 +801,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 					let runningAverageText = '';
 					if (runningAverage) {
-						runningAverageText = ' (Running Average of at least 15 maps per mod per month)';
+						runningAverageText = ` (Running Average of at least ${runningAverageAmount / 5} maps per mod per month)`;
 					}
 
 					// eslint-disable-next-line no-undef
