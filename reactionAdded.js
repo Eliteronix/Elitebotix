@@ -4,7 +4,7 @@ const cooldowns = new Discord.Collection();
 const { developers } = require('./config.json');
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { isWrongSystem, getMods, logDatabaseQueries, getOsuBeatmap } = require('./utils');
+const { isWrongSystem, getMods, logDatabaseQueries, getOsuBeatmap, pause } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user, additionalObjects) {
@@ -1092,7 +1092,11 @@ function checkCooldown(reaction, command, user, args) {
 			return;
 		} else if (now < expirationTime) {
 			const timeLeft = (expirationTime - now) / 1000;
-			return reaction.message.channel.send(`<@${user.id}>, you need to wait ${timeLeft.toFixed(1)} seconds before you can use this command again.`);
+			return reaction.message.channel.send(`<@${user.id}>, you need to wait ${timeLeft.toFixed(1)} seconds before you can use this command again.`)
+				.then(async (msg) => {
+					await pause(5000);
+					msg.delete();
+				});
 		}
 	}
 
