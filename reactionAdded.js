@@ -264,7 +264,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 			if (checkCooldown(reaction, command, user, args) !== undefined) {
 				return;
 			}
-	
+
 			//Set author of a temporary message copy to the reacting user to not break the commands
 			let guildId = null;
 
