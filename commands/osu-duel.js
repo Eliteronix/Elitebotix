@@ -1330,7 +1330,7 @@ module.exports = {
 				if (!page && leaderboardData.length > 300) {
 					page = 1;
 					if (authorPlacement) {
-						page = Math.floor(authorPlacement / leaderboardEntriesPerPage);
+						page = Math.floor(authorPlacement / leaderboardEntriesPerPage) + 1;
 					}
 				}
 
