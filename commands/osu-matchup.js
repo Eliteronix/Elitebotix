@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
@@ -547,10 +547,18 @@ module.exports = {
 				scoringType = 'V2';
 			}
 
+			let dbBeatmap = await getOsuBeatmap({ beatmapId: team1MapScores[0].beatmapId });
+
+			let beatmapString = `https://osu.ppy.sh/b/${team1MapScores[0].beatmapId}`;
+
+			if (dbBeatmap) {
+				beatmapString += ` (${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}])`;
+			}
+
 			if (winner === 0) {
-				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(team1MapScores[0])} https://osu.ppy.sh/b/${team1MapScores[0].beatmapId} - Won by: ${team1Players.join(', ')} against ${team2Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)}`);
+				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(team1MapScores[0])} - Won by: ${team1Players.join(', ')} against ${team2Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)} - ${beatmapString}`);
 			} else {
-				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(team1MapScores[0])} https://osu.ppy.sh/b/${team1MapScores[0].beatmapId} - Won by: ${team2Players.join(', ')} against ${team1Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)}`);
+				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(team1MapScores[0])} - Won by: ${team2Players.join(', ')} against ${team1Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)} - ${beatmapString}`);
 			}
 		}
 
