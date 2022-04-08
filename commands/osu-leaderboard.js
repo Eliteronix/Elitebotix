@@ -96,10 +96,12 @@ module.exports = {
 				let leaderboardData = [];
 
 				let messageToAuthor = '';
+				let authorPlacement = 0;
 
 				for (let i = 0; i < osuAccounts.length; i++) {
 					if (msg.author.id === osuAccounts[i].userId) {
 						messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
+						authorPlacement = i + 1;
 					}
 					const member = await msg.guild.members.fetch(osuAccounts[i].userId);
 
@@ -109,7 +111,7 @@ module.exports = {
 						userDisplayName = `${member.nickname} / ${userDisplayName}`;
 					}
 
-					let verified = '⨯';
+					let verified = 'x';
 
 					if (osuAccounts[i].osuVerified) {
 						verified = '✔';
@@ -134,6 +136,9 @@ module.exports = {
 
 				if (!page && leaderboardData.length > 300) {
 					page = 1;
+					if (authorPlacement) {
+						page = Math.floor(authorPlacement / leaderboardEntriesPerPage);
+					}
 				}
 
 				if (totalPages === 1) {

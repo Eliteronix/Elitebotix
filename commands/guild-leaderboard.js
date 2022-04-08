@@ -61,10 +61,12 @@ module.exports = {
 				let leaderboardData = [];
 
 				let messageToAuthor = '';
+				let authorPlacement = 0;
 
 				for (let i = 0; i < discordUsers.length; i++) {
 					if (msg.author.id === discordUsers[i].userId) {
 						messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
+						authorPlacement = i + 1;
 					}
 					const member = await msg.guild.members.fetch(discordUsers[i].userId);
 
@@ -93,6 +95,9 @@ module.exports = {
 
 				if (!page && leaderboardData.length > 300) {
 					page = 1;
+					if (authorPlacement) {
+						page = Math.floor(authorPlacement / leaderboardEntriesPerPage);
+					}
 				}
 
 				if (totalPages === 1) {
