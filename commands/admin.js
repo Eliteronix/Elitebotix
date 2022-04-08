@@ -1,9 +1,7 @@
-const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBOsuBeatmaps, DBElitiriCupSubmissions } = require('../dbObjects');
-const { saveOsuMultiScores, pause, logDatabaseQueries, getScoreModpool, getUserDuelStarRating, getMods, getModBits } = require('../utils');
+const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
+const { pause, logDatabaseQueries, getUserDuelStarRating } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
-const fetch = require('node-fetch');
-const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'admin',
@@ -4871,60 +4869,6 @@ module.exports = {
 			for (let i = 0; i < commands.length; i++) {
 				await msg.client.api.applications(msg.client.user.id).commands(commands[i].id).delete();
 			}
-		} else if (args[0] === 'recalculateMultiScores') {
-			//recalculate existing scores in the db
-			const allScores = await DBOsuMultiScores.findAll();
-
-			for (let i = 0; i < allScores.length; i++) {
-				let matchId = allScores[i].matchId;
-				for (let j = 0; j < allScores.length; j++) {
-					if (allScores[j].matchId === matchId) {
-						allScores.splice(j, 1);
-						j--;
-					}
-				}
-
-				// eslint-disable-next-line no-undef
-				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-				});
-
-				await pause(250);
-
-				await osuApi.getMatch({ mp: matchId })
-					.then(async (match) => {
-						const allMatchScores = await DBOsuMultiScores.findAll({
-							where: { matchId: match.id }
-						});
-
-						for (let j = 0; j < allMatchScores.length; j++) {
-							await allMatchScores[j].destroy();
-						}
-
-						saveOsuMultiScores(match);
-
-						console.log('MatchId done:', matchId);
-					})
-					.catch(error => {
-						console.log('MatchId went into an error (Not found):', matchId, error);
-					});
-			}
-			console.log('Done');
-		} else if (args[0] === 'fixMultiTourneyScores') {
-			const allScores = await DBOsuMultiScores.findAll({
-				where: { tourneyMatch: false }
-			});
-
-			allScores.forEach(score => {
-				if (score.matchName.toLowerCase().match(/.+: (.+) vs (.+)/g) || score.matchName.toLowerCase().match(/.+: (.+) vs. (.+)/g)) {
-					score.tourneyMatch = true;
-					score.save();
-					console.log(score.matchName);
-				}
-			});
 		} else if (args[0] === 'saveMultiMatches') {
 			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'saveMultiMatches' } });
 			for (let i = 0; i < processQueueTasks.length; i++) {
@@ -4937,53 +4881,6 @@ module.exports = {
 			for (let i = parseInt(args[1]); i < parseInt(args[2]); i++) {
 				msg.reply(`https://osu.ppy.sh/community/matches/${i}`);
 			}
-		} else if (args[0] === 'fillFreemod') {
-			//Iterate over all multi scores finding one by one from the database to not run out of memory
-			for (let i = 0; i < 1000000; i++) {
-				const score = await DBOsuMultiScores.findOne({
-					where: {
-						id: i
-					}
-				});
-
-				//If score found set freemod
-				if (score) {
-					const sameGameScores = await DBOsuMultiScores.findAll({
-						where: {
-							matchId: score.matchId,
-							gameId: score.gameId,
-						}
-					});
-
-					//find out if they are freemod scores
-					let freeMod = false;
-					if (sameGameScores.length > 0) {
-						let rawMods = score.rawMods;
-						for (let i = 0; i < sameGameScores.length; i++) {
-							if (rawMods !== sameGameScores[i].rawMods) {
-								freeMod = true;
-								break;
-							}
-						}
-					}
-
-					//Set freemod value
-					score.freeMod = freeMod;
-					score.save();
-					console.log(score.id, score.freeMod);
-				}
-			}
-		} else if (args[0] === 'fetchMulti') {
-			let response = await fetch('https://osu.ppy.sh/community/matches/90613627');
-			let htmlCode = await response.text();
-			let isolatedContent = htmlCode.replace(/[\s\S]+<script id="json-events" type="application\/json">/gm, '').replace(/<\/script>[\s\S]+/gm, '');
-			let json = JSON.parse(isolatedContent);
-			if (Date.parse(json.events[json.events.length - 1].timestamp) - Date.parse(json.match.start_time) > 86400000) {
-				console.log('Longer than 24 hours');
-			}
-		} else if (args[0] === 'api') {
-			// eslint-disable-next-line no-undef
-			console.log(process.env.OSUTOKENV1.split('-'));
 		} else if (args[0] === 'removeOsuUserConnection') {
 			let DBDiscordUser = await DBDiscordUsers.findOne({
 				where: { osuUserId: args[1], osuVerified: true }
@@ -5046,191 +4943,6 @@ module.exports = {
 			// DBElitiriSignup.osuRank = args[2];
 			// DBElitiriSignup.bracketName = args[3] + ' ' + args[4];
 			// DBElitiriSignup.save();
-		} else if (args[0] === 'getBeatmap') {
-			let osuBeatmaps = await DBOsuBeatmaps.findAll({
-				where: {
-					starRating: {
-						[Op.and]: {
-							[Op.lte]: 4.7,
-							[Op.gte]: 4.6,
-						}
-					}
-				}
-			});
-
-			for (let i = 0; i < osuBeatmaps.length; i++) {
-				console.log(osuBeatmaps[i].starRating);
-			}
-		} else if (args[0] === 'updateBeatmapTourneyFlags') {
-			for (let i = args[1]; i < 100000; i++) {
-				await pause(500);
-				if (i % 100 === 0) {
-					console.log('updateBeatmapTourneyFlags:', i);
-				}
-				let osuBeatmap = await DBOsuBeatmaps.findOne({
-					where: {
-						id: i
-					}
-				});
-
-				if (!osuBeatmap) {
-					continue;
-				}
-
-				//Get the tourney map flags
-				let tourneyScores = await DBOsuMultiScores.findAll({
-					where: {
-						beatmapId: osuBeatmap.beatmapId,
-						tourneyMatch: true,
-						matchName: {
-							[Op.notLike]: 'MOTD:%',
-						}
-					}
-				});
-
-				// osuBeatmap.tourneyMap = false;
-				// osuBeatmap.noModMap = false;
-				// osuBeatmap.hiddenMap = false;
-				// osuBeatmap.hardRockMap = false;
-				// osuBeatmap.doubleTimeMap = false;
-				// osuBeatmap.freeModMap = false;
-
-				if (tourneyScores.length > 0 && !osuBeatmap.tourneyMap) {
-					osuBeatmap.tourneyMap = true;
-					await osuBeatmap.save({ silent: true });
-				}
-
-				for (let j = 0; j < tourneyScores.length; j++) {
-					if (getScoreModpool(tourneyScores[j]) === 'NM' && !osuBeatmap.noModMap) {
-						osuBeatmap.noModMap = true;
-						await osuBeatmap.save({ silent: true });
-					} else if (getScoreModpool(tourneyScores[j]) === 'HD' && !osuBeatmap.hiddenMap) {
-						osuBeatmap.hiddenMap = true;
-						await osuBeatmap.save({ silent: true });
-					} else if (getScoreModpool(tourneyScores[j]) === 'HR' && !osuBeatmap.hardRockMap) {
-						osuBeatmap.hardRockMap = true;
-						await osuBeatmap.save({ silent: true });
-					} else if (getScoreModpool(tourneyScores[j]) === 'DT' && !osuBeatmap.doubleTimeMap) {
-						osuBeatmap.doubleTimeMap = true;
-						await osuBeatmap.save({ silent: true });
-					} else if (getScoreModpool(tourneyScores[j]) === 'FM' && !osuBeatmap.freeModMap) {
-						osuBeatmap.freeModMap = true;
-						await osuBeatmap.save({ silent: true });
-					}
-				}
-
-			}
-		} else if (args[0] === 'deleteUpdateOsuRank') {
-			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'updateOsuRank' } });
-			for (let i = 0; i < processQueueTasks.length; i++) {
-				await processQueueTasks[i].destroy();
-			}
-		} else if (args[0] === 'derank') {
-			if (!args[1]) {
-				return msg.reply('You didn\'t give a player to compare');
-			}
-
-			let discordUser = await DBDiscordUsers.findOne({
-				where: {
-					[Op.or]: {
-						osuUserId: args[1],
-						osuName: args[1]
-					}
-				}
-			});
-
-			if (!discordUser) {
-				// eslint-disable-next-line no-undef
-				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-				});
-
-				let user = await osuApi.getUser({ u: args[1], m: 0 });
-
-				let duelRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
-
-				discordUser = {
-					osuName: user.name,
-					osuUserId: user.id,
-					osuPP: user.pp.raw,
-					osuRank: user.pp.rank,
-					osuDuelStarRating: duelRating.total,
-				};
-			}
-
-			let ppDiscordUsers = await DBDiscordUsers.findAll({
-				where: {
-					osuUserId: {
-						[Op.gt]: 0
-					},
-					osuPP: {
-						[Op.gt]: 0
-					}
-				},
-				order: [
-					['osuPP', 'DESC']
-				]
-			});
-
-			quicksort(ppDiscordUsers);
-
-			let duelDiscordUsers = await DBDiscordUsers.findAll({
-				where: {
-					osuUserId: {
-						[Op.gt]: 0
-					},
-					osuDuelStarRating: {
-						[Op.gt]: 0
-					}
-				},
-				order: [
-					['osuDuelStarRating', 'DESC']
-				]
-			});
-
-			let ppRank = null;
-
-			for (let i = 0; i < ppDiscordUsers.length && !ppRank; i++) {
-				if (parseFloat(discordUser.osuPP) >= parseFloat(ppDiscordUsers[i].osuPP)) {
-					ppRank = i + 1;
-				}
-			}
-
-			if (!ppRank) {
-				ppRank = ppDiscordUsers.length + 1;
-			}
-
-			let duelRank = null;
-
-			for (let i = 0; i < duelDiscordUsers.length && !duelRank; i++) {
-				if (parseFloat(discordUser.osuDuelStarRating) >= parseFloat(duelDiscordUsers[i].osuDuelStarRating)) {
-					duelRank = i + 1;
-				}
-			}
-
-			if (!duelRank) {
-				duelRank = duelDiscordUsers.length + 1;
-			}
-
-			let rankOffset = 0;
-			if (!discordUser.userId) {
-				ppDiscordUsers.length = ppDiscordUsers.length + 1;
-				duelDiscordUsers.length = duelDiscordUsers.length + 1;
-				rankOffset = 1;
-			}
-
-			let expectedPpRank = Math.round(duelRank / duelDiscordUsers.length * ppDiscordUsers.length);
-
-			let expectedPpRankPercentageDifference = Math.round((100 / ppDiscordUsers.length * ppRank - 100 / ppDiscordUsers.length * expectedPpRank) * 100) / 100;
-			msg.reply(`${discordUser.osuName} is:\n\`\`\`PP-Rank ${ppRank} out of ${ppDiscordUsers.length}\nDuel-Rating-Rank ${duelRank} out of ${duelDiscordUsers.length}\n\nExpected osu! pp rank for that duel rating would be:\n${expectedPpRank} (Difference: ${ppRank - expectedPpRank} | ${expectedPpRankPercentageDifference}%)\n\nThat is in rank numbers:\n#${discordUser.osuRank} -> ~#${ppDiscordUsers[expectedPpRank - 1 - rankOffset].osuRank} (Difference: ${discordUser.osuRank - ppDiscordUsers[expectedPpRank - 1 - rankOffset].osuRank} ranks)\`\`\``);
-		} else if (args[0] === 'deleteElitiriRoleAssignment') {
-			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'elitiriRoleAssignment' } });
-			for (let i = 0; i < processQueueTasks.length; i++) {
-				await processQueueTasks[i].destroy();
-			}
 		} else if (args[0] === 'multiScoresDBSize') {
 			const mapScoreAmount = await DBOsuMultiScores.count();
 
@@ -5308,19 +5020,6 @@ module.exports = {
 				.catch(error => {
 					console.log(error);
 				});
-		} else if (args[0] === 'fix') {
-			let scores = await DBOsuMultiScores.findAll({
-				where: {
-					matchId: args[1]
-				}
-			});
-
-			for (let i = 0; i < scores.length; i++) {
-				// await scores[i].destroy();
-				if (scores[i].osuUserId === '11290031') {
-					console.log(scores[i].matchId, scores[i].gameId, scores[i].matchStartDate, scores[i].maxCombo);
-				}
-			}
 		} else if (args[0] === 'patreon') {
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -5351,49 +5050,6 @@ module.exports = {
 			);
 
 			console.log(result[0]);
-		} else if (args[0] === 'faultyDTMaps') {
-			let faultyDTMaps = await DBOsuMultiScores.findAll({
-				where: {
-					rawMods: {
-						[Op.gte]: 64
-					}
-				}
-			});
-
-			for (let i = 0; i < faultyDTMaps.length; i++) {
-				if (getMods(faultyDTMaps[i].rawMods).includes('DT') || getMods(faultyDTMaps[i].rawMods).includes('NC')) {
-					console.log(`MatchID: ${faultyDTMaps[i].matchId} - osuId: ${faultyDTMaps[i].osuUserId} - MapID: ${faultyDTMaps[i].beatmapId} | UserMods: ${getMods(faultyDTMaps[i].rawMods).join('')} - GameMods: ${getMods(faultyDTMaps[i].gameRawMods).join('')}`);
-				}
-			}
-		} else if (args[0] === 'cleanFaultyDTMaps') {
-			let faultyDTMaps = await DBOsuMultiScores.findAll({
-				where: {
-					rawMods: {
-						[Op.gte]: 64
-					}
-				}
-			});
-
-			for (let i = 0; i < faultyDTMaps.length; i++) {
-				if (getMods(faultyDTMaps[i].rawMods).includes('DT') || getMods(faultyDTMaps[i].rawMods).includes('NC')) {
-					let mods = getMods(faultyDTMaps[i].rawMods);
-
-					for (let i = 0; i < mods.length; i++) {
-						if (mods[i] === 'DT') {
-							mods.splice(i, 1);
-							i--;
-						} else if (mods[i] === 'NC') {
-							mods.splice(i, 1);
-							i--;
-						}
-					}
-
-					faultyDTMaps[i].rawMods = getModBits(mods.join(''));
-					faultyDTMaps[i].pp = null;
-					await faultyDTMaps[i].save();
-					console.log(`Finished ${i + 1} of ${faultyDTMaps.length}`);
-				}
-			}
 		} else {
 			msg.reply('Invalid command');
 		}
@@ -5401,28 +5057,3 @@ module.exports = {
 		msg.reply('Done.');
 	},
 };
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].osuPP) >= parseFloat(pivot.osuPP)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
-}
