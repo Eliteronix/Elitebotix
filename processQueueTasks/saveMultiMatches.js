@@ -35,16 +35,16 @@ module.exports = {
 		if (process.env.SERVER === 'QA' && matchID === '56267496') {
 			// eslint-disable-next-line no-undef
 			console.log(`Manually deleted task for saving Multi Matches for ${matchID} ${process.env.SERVER}`);
-			return processQueueEntry.destroy();
+			return await processQueueEntry.destroy();
 		}
 
 		// eslint-disable-next-line no-undef
 		if (args[0] === '-1' || process.env.SERVER === 'Dev') {
 			console.log(`Manually deleted task for saving Multi Matches for ${matchID}`);
-			return processQueueEntry.destroy();
+			return await processQueueEntry.destroy();
 		}
 
-		osuApi.getMatch({ mp: matchID })
+		await osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
 				let sixHoursAgo = new Date();
 				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
@@ -64,7 +64,7 @@ module.exports = {
 							channel = await client.channels.fetch('892873577479692358');
 						}
 						date.setUTCSeconds(date.getUTCSeconds() + 10);
-						channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m ${match.name} done`);
+						await channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m ${match.name} done`);
 					}
 					//Go next if match found and ended / too long going already
 					// eslint-disable-next-line no-undef
@@ -75,7 +75,7 @@ module.exports = {
 					}
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
-					return processQueueEntry.save();
+					return await processQueueEntry.save();
 				}
 
 				//Go same if match found and not ended / too long going already
@@ -91,11 +91,11 @@ module.exports = {
 				});
 
 				if (incompleteMatchScore) {
-					osuApi.getMatch({ mp: incompleteMatchScore.matchId })
+					await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
 						.then(async (match) => {
 							saveOsuMultiScores(match);
 							let channel = await client.channels.fetch('959499050246344754');
-							channel.send(`<https://osu.ppy.sh/mp/${matchID}> | ${incompleteMatchScore.updatedAt} | ${match.name}`);
+							await channel.send(`<https://osu.ppy.sh/mp/${matchID}> | ${incompleteMatchScore.updatedAt} | ${match.name}`);
 						})
 						.catch(async () => {
 							//Nothing
@@ -107,7 +107,7 @@ module.exports = {
 
 							for (let i = 0; i < incompleteScores.length; i++) {
 								incompleteScores[i].changed('updatedAt', true);
-								incompleteScores[i].save();
+								await incompleteScores[i].save();
 							}
 						});
 				}
@@ -116,7 +116,7 @@ module.exports = {
 				date.setUTCSeconds(date.getUTCSeconds() + 20);
 				processQueueEntry.date = date;
 				processQueueEntry.beingExecuted = false;
-				return processQueueEntry.save();
+				return await processQueueEntry.save();
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
@@ -130,7 +130,7 @@ module.exports = {
 					let date = new Date();
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
-					return processQueueEntry.save();
+					return await processQueueEntry.save();
 				} else {
 					try {
 						// Check using node fetch
@@ -150,14 +150,14 @@ module.exports = {
 							let date = new Date();
 							processQueueEntry.date = date;
 							processQueueEntry.beingExecuted = false;
-							return processQueueEntry.save();
+							return await processQueueEntry.save();
 						} else {
 							//Go same if under 24 hours long game
 							let date = new Date();
 							date.setUTCMinutes(date.getUTCMinutes() + 1);
 							processQueueEntry.date = date;
 							processQueueEntry.beingExecuted = false;
-							return processQueueEntry.save();
+							return await processQueueEntry.save();
 						}
 					} catch (error) {
 						console.log(error, `going same saveMultiMatches.js https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
@@ -166,7 +166,7 @@ module.exports = {
 						date.setUTCMinutes(date.getUTCMinutes() + 1);
 						processQueueEntry.date = date;
 						processQueueEntry.beingExecuted = false;
-						return processQueueEntry.save();
+						return await processQueueEntry.save();
 					}
 				}
 			});
