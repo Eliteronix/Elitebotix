@@ -22,6 +22,7 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		let weekday = 7;
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -31,7 +32,11 @@ module.exports = {
 
 			if (interaction.options._hoistedOptions) {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					args.push(interaction.options._hoistedOptions[i].value);
+					if (interaction.options._hoistedOptions[i].name === 'weekday') {
+						weekday = interaction.options._hoistedOptions[i].value;
+					} else {
+						args.push(interaction.options._hoistedOptions[i].value);
+					}
 				}
 			}
 		}
@@ -150,7 +155,8 @@ module.exports = {
 			});
 
 			for (let j = 0; j < allMatches.length; j++) {
-				if (parseInt(allMatches[j].score) <= 10000) {
+				if (parseInt(allMatches[j].score) <= 10000
+					|| weekday != 7 && allMatches[j].gameStartDate.getUTCDay() != weekday) {
 					allMatches.splice(j, 1);
 					j--;
 				}
@@ -248,6 +254,8 @@ module.exports = {
 
 		const attachment = new Discord.MessageAttachment(imageBuffer, 'osu-schedules.png');
 
-		msg.channel.send({ content: `Schedule for: ${usersReadable.join(', ')}\nThe data is based on multiplayer matches evaluated by / sent to the bot`, files: [attachment] });
+		let weekdayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'All Week'];
+
+		msg.channel.send({ content: `${weekdayName[weekday]} Schedule for: ${usersReadable.join(', ')}\nThe data is based on multiplayer matches evaluated by / sent to the bot`, files: [attachment] });
 	},
 };
