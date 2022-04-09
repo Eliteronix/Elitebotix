@@ -778,6 +778,32 @@ module.exports = {
 			// 						'description': 'The name of a player to compare with',
 			// 						'type': 3,
 			// 					},
+			// 					{
+			// 						'name': 'scores',
+			// 						'description': 'Which types of scores should the matchup evaluate?',
+			// 						'type': 3,
+			// 						'required': false,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Only Score v2',
+			// 								'value': '--v2'
+			// 							},
+			// 							{
+			// 								'name': 'Only Score v1',
+			// 								'value': '--v1'
+			// 							},
+			// 							{
+			// 								'name': 'All Scores',
+			// 								'value': '--vx'
+			// 							},
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'tourney',
+			// 						'description': 'Should it only count scores from tournaments?',
+			// 						'type': 5,
+			// 						'required': false
+			// 					},
 			// 				]
 			// 			},
 			// 			{
@@ -870,6 +896,32 @@ module.exports = {
 			// 						'name': 'team2player8',
 			// 						'description': 'The eighth user of the second team',
 			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'scores',
+			// 						'description': 'Which types of scores should the matchup evaluate?',
+			// 						'type': 3,
+			// 						'required': false,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Only Score v2',
+			// 								'value': '--v2'
+			// 							},
+			// 							{
+			// 								'name': 'Only Score v1',
+			// 								'value': '--v1'
+			// 							},
+			// 							{
+			// 								'name': 'All Scores',
+			// 								'value': '--vx'
+			// 							},
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'tourney',
+			// 						'description': 'Should it only count scores from tournaments?',
+			// 						'type': 5,
+			// 						'required': false
 			// 					},
 			// 				]
 			// 			},
@@ -3266,6 +3318,32 @@ module.exports = {
 									'description': 'The name of a player to compare with',
 									'type': 3,
 								},
+								{
+									'name': 'scores',
+									'description': 'Which types of scores should the matchup evaluate?',
+									'type': 3,
+									'required': false,
+									'choices': [
+										{
+											'name': 'Only Score v2',
+											'value': '--v2'
+										},
+										{
+											'name': 'Only Score v1',
+											'value': '--v1'
+										},
+										{
+											'name': 'All Scores',
+											'value': '--vx'
+										},
+									]
+								},
+								{
+									'name': 'tourney',
+									'description': 'Should it only count scores from tournaments?',
+									'type': 5,
+									'required': false
+								},
 							]
 						},
 						{
@@ -3358,6 +3436,32 @@ module.exports = {
 									'name': 'team2player8',
 									'description': 'The eighth user of the second team',
 									'type': 3,
+								},
+								{
+									'name': 'scores',
+									'description': 'Which types of scores should the matchup evaluate?',
+									'type': 3,
+									'required': false,
+									'choices': [
+										{
+											'name': 'Only Score v2',
+											'value': '--v2'
+										},
+										{
+											'name': 'Only Score v1',
+											'value': '--v1'
+										},
+										{
+											'name': 'All Scores',
+											'value': '--vx'
+										},
+									]
+								},
+								{
+									'name': 'tourney',
+									'description': 'Should it only count scores from tournaments?',
+									'type': 5,
+									'required': false
 								},
 							]
 						},

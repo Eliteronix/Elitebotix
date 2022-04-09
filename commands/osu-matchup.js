@@ -36,7 +36,15 @@ module.exports = {
 
 			if (interaction.options._hoistedOptions && interaction.options._subcommand === '1v1') {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					args.push(interaction.options._hoistedOptions[i].value);
+					if (interaction.options._hoistedOptions[i].name === 'tourney') {
+						if (interaction.options._hoistedOptions[i].value) {
+							args.push('--tourney');
+						} else {
+							args.push('--all');
+						}
+					} else {
+						args.push(interaction.options._hoistedOptions[i].value);
+					}
 				}
 			} else if (interaction.options._hoistedOptions && interaction.options._subcommand === 'teamvs') {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
@@ -44,6 +52,14 @@ module.exports = {
 						teamsize = interaction.options._hoistedOptions[i].value;
 					} else if (interaction.options._hoistedOptions[i].name.startsWith('team1')) {
 						team1.push(interaction.options._hoistedOptions[i].value);
+					} else if (interaction.options._hoistedOptions[i].name === 'tourney') {
+						if (interaction.options._hoistedOptions[i].value) {
+							args.push('--tourney');
+						} else {
+							args.push('--all');
+						}
+					} else if (interaction.options._hoistedOptions[i].name === 'scores') {
+						args.push(interaction.options._hoistedOptions[i].value);
 					} else {
 						team2.push(interaction.options._hoistedOptions[i].value);
 					}
@@ -55,6 +71,32 @@ module.exports = {
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
+
+		let scoringType = 'v2';
+		let tourneyMatch = true;
+		for (let i = 0; i < args.length; i++) {
+			if (args[i].toLowerCase().startsWith('--v2')) {
+				scoringType = 'v2';
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase().startsWith('--v1')) {
+				scoringType = 'v1';
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase().startsWith('--tourney')) {
+				tourneyMatch = true;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase().startsWith('--all')) {
+				tourneyMatch = false;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase().startsWith('--vx')) {
+				scoringType = 'vx';
+				args.splice(i, 1);
+				i--;
+			}
+		}
 
 		//Teamvs subcommand is the only occasion that args is empty
 		if (!interaction || interaction && interaction.options._subcommand !== 'teamvs') {
@@ -186,7 +228,6 @@ module.exports = {
 			scoresTeam1.push(await DBOsuMultiScores.findAll({
 				where: {
 					osuUserId: team1[i],
-					tourneyMatch: true,
 					mode: 'Standard',
 					score: {
 						[Op.gte]: 10000
@@ -194,8 +235,12 @@ module.exports = {
 				}
 			}));
 
+			//Remove userScores which don't fit the criteria
 			for (let j = 0; j < scoresTeam1[i].length; j++) {
-				if (parseInt(scoresTeam1[i][j].score) <= 10000) {
+				if (parseInt(scoresTeam1[i][j].score) <= 10000
+					|| scoringType === 'v2' && scoresTeam1[i][j].scoringType !== 'Score v2'
+					|| scoringType === 'v1' && scoresTeam1[i][j].scoringType !== 'Score'
+					|| tourneyMatch && !scoresTeam1[i][j].tourneyMatch) {
 					scoresTeam1[i].splice(j, 1);
 					j--;
 				}
@@ -210,7 +255,6 @@ module.exports = {
 			scoresTeam2.push(await DBOsuMultiScores.findAll({
 				where: {
 					osuUserId: team2[i],
-					tourneyMatch: true,
 					mode: 'Standard',
 					score: {
 						[Op.gte]: 10000
@@ -218,8 +262,12 @@ module.exports = {
 				}
 			}));
 
+			//Remove userScores which don't fit the criteria
 			for (let j = 0; j < scoresTeam2[i].length; j++) {
-				if (parseInt(scoresTeam2[i][j].score) <= 10000) {
+				if (parseInt(scoresTeam2[i][j].score) <= 10000
+					|| scoringType === 'v2' && scoresTeam2[i][j].scoringType !== 'Score v2'
+					|| scoringType === 'v1' && scoresTeam2[i][j].scoringType !== 'Score'
+					|| tourneyMatch && !scoresTeam2[i][j].tourneyMatch) {
 					scoresTeam2[i].splice(j, 1);
 					j--;
 				}
@@ -721,7 +769,12 @@ module.exports = {
 
 		files.push(matchUpStats);
 
-		let content = `Matchup analysis for \`${team1Names.join(' | ')}\` vs \`${team2Names.join(' | ')}\` (Teamsize: ${teamsize})`;
+		let tourneyMatchText = '; Casual & Tourney matches';
+		if (tourneyMatch) {
+			tourneyMatchText = '; Tourney matches only';
+		}
+
+		let content = `Matchup analysis for \`${team1Names.join(' | ')}\` vs \`${team2Names.join(' | ')}\` (Teamsize: ${teamsize}; Score ${scoringType}${tourneyMatchText})`;
 
 		if (mapsPlayed.length) {
 			content += `\nWinrate chart for \`${team1Names.join(' | ')}\` against \`${team2Names.join(' | ')}\` (Teamsize: ${teamsize}) attached.`;
