@@ -2028,6 +2028,8 @@ async function getOsuBeatmapFunction(input) {
 								dbBeatmap.spinners = beatmaps[0].objects.spinner;
 								dbBeatmap.mods = modBits;
 								dbBeatmap.userRating = beatmaps[0].rating;
+								dbBeatmap.submitDate = beatmaps[0].raw_submitDate;
+								dbBeatmap.approvedDate = beatmaps[0].raw_approvedDate;
 								await dbBeatmap.save();
 							} else { // Map has to be added new
 								//Get the tourney map flags
