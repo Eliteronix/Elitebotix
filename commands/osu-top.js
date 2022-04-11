@@ -243,7 +243,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				elements = await drawTitle(elements, server, mode, sorting);
 
-				elements = await drawTopPlays(elements, server, mode, msg, sorting);
+				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit);
 
 				await drawFooter(elements);
 
@@ -255,6 +255,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				processingMessage.delete();
 			})
 			.catch(err => {
+				processingMessage.delete();
 				if (err.message === 'Not found') {
 					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --s/--t/--c/--m for modes; --n / --new / --recent for recent scores; --25 for top 25...)`);
 				} else {
