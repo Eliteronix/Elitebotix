@@ -436,7 +436,7 @@ module.exports = {
 			let team1Count = 0;
 			let team2Count = 0;
 
-			for (let j = 0; j < scoresTeam1.length; j++) {
+			for (let j = 0; j < scoresTeam1.length && team1Count < teamsize; j++) {
 				for (let k = 0; k < scoresTeam1[j].length; k++) {
 					let scoreVersion = 'V1';
 					if (scoresTeam1[j][k].scoringType === 'Score v2') {
@@ -449,7 +449,13 @@ module.exports = {
 				}
 			}
 
-			for (let j = 0; j < scoresTeam2.length; j++) {
+			if (team1Count < teamsize) {
+				mapsPlayed.splice(i, 1);
+				i--;
+				continue;
+			}
+
+			for (let j = 0; j < scoresTeam2.length && team2Count < teamsize; j++) {
 				for (let k = 0; k < scoresTeam2[j].length; k++) {
 					let scoreVersion = 'V1';
 					if (scoresTeam2[j][k].scoringType === 'Score v2') {
@@ -462,9 +468,10 @@ module.exports = {
 				}
 			}
 
-			if (team1Count < teamsize || team2Count < teamsize) {
+			if (team2Count < teamsize) {
 				mapsPlayed.splice(i, 1);
 				i--;
+				continue;
 			}
 		}
 
