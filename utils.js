@@ -1392,14 +1392,12 @@ module.exports = {
 			averageStars += parseFloat(stars[i]);
 		}
 
-		duelRatings = {
-			total: (averageStars / stars.length) * 0.9,
-			noMod: null,
-			hidden: null,
-			hardRock: null,
-			doubleTime: null,
-			freeMod: null
-		};
+		duelRatings.total = (averageStars / stars.length) * 0.9;
+		duelRatings.noMod = null;
+		duelRatings.hidden = null;
+		duelRatings.hardRock = null;
+		duelRatings.doubleTime = null;
+		duelRatings.freeMod = null;
 
 		const discordUser = await DBDiscordUsers.findOne({
 			where: {
@@ -1408,11 +1406,11 @@ module.exports = {
 		});
 		if (discordUser) {
 			discordUser.osuDuelStarRating = duelRatings.total;
-			discordUser.osuNoModDuelStarRating = null;
-			discordUser.osuHiddenDuelStarRating = null;
-			discordUser.osuHardRockDuelStarRating = null;
-			discordUser.osuDoubleTimeDuelStarRating = null;
-			discordUser.osuFreeModDuelStarRating = null;
+			discordUser.osuNoModDuelStarRating = duelRatings.noMod;
+			discordUser.osuHiddenDuelStarRating = duelRatings.hidden;
+			discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
+			discordUser.osuDoubleTimeDuelStarRating = duelRatings.doubleTime;
+			discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
 			await discordUser.save();
 		}
 
