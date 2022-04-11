@@ -1062,7 +1062,7 @@ module.exports = {
 
 					ctx.drawImage(leagueImage, 50, 575 + i * 250, 150, 150);
 
-					if (historicalUserDuelStarRatings[i].provisional) {
+					if (historicalUserDuelStarRatings[i].ratings.provisional) {
 						leagueText = 'Provisional: ' + leagueText;
 					}
 
