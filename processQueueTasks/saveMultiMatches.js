@@ -83,7 +83,7 @@ module.exports = {
 				let incompleteMatchScore = await DBOsuMultiScores.findOne({
 					where: {
 						tourneyMatch: true,
-						teamType: null
+						forceMod: null
 					},
 					order: [
 						['updatedAt', 'ASC']
