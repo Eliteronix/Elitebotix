@@ -1642,101 +1642,85 @@ module.exports = {
 			// 				]
 			// 			},
 			// 			{
-			// 				'name': 'username',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team1player1',
+			// 				'description': 'The first user of the first team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username2',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team1player2',
+			// 				'description': 'The second user of the first team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username3',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team1player3',
+			// 				'description': 'The third user of the first team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username4',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team1player4',
+			// 				'description': 'The fourth user of the first team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username5',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team1player5',
+			// 				'description': 'The fifth user of the first team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username6',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team1player6',
+			// 				'description': 'The sixth user of the first team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username7',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team1player7',
+			// 				'description': 'The seventh user of the first team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username8',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team1player8',
+			// 				'description': 'The eighth user of the first team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username9',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team2player1',
+			// 				'description': 'The first user of the second team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username10',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team2player2',
+			// 				'description': 'The second user of the second team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username11',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team2player3',
+			// 				'description': 'The third user of the second team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username12',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team2player4',
+			// 				'description': 'The fourth user of the second team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username13',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team2player5',
+			// 				'description': 'The fifth user of the second team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username14',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team2player6',
+			// 				'description': 'The sixth user of the second team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username15',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team2player7',
+			// 				'description': 'The seventh user of the second team',
 			// 				'type': 3,
-			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username16',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'team2player8',
+			// 				'description': 'The eighth user of the second team',
 			// 				'type': 3,
-			// 				'required': false
-			// 			}
+			// 			},
 			// 		]
 			// 	},
 			// });
@@ -4087,101 +4071,85 @@ module.exports = {
 							]
 						},
 						{
-							'name': 'username',
-							'description': 'The username, id or link of the player',
+							'name': 'team1player1',
+							'description': 'The first user of the first team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username2',
-							'description': 'The username, id or link of the player',
+							'name': 'team1player2',
+							'description': 'The second user of the first team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username3',
-							'description': 'The username, id or link of the player',
+							'name': 'team1player3',
+							'description': 'The third user of the first team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username4',
-							'description': 'The username, id or link of the player',
+							'name': 'team1player4',
+							'description': 'The fourth user of the first team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username5',
-							'description': 'The username, id or link of the player',
+							'name': 'team1player5',
+							'description': 'The fifth user of the first team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username6',
-							'description': 'The username, id or link of the player',
+							'name': 'team1player6',
+							'description': 'The sixth user of the first team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username7',
-							'description': 'The username, id or link of the player',
+							'name': 'team1player7',
+							'description': 'The seventh user of the first team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username8',
-							'description': 'The username, id or link of the player',
+							'name': 'team1player8',
+							'description': 'The eighth user of the first team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username9',
-							'description': 'The username, id or link of the player',
+							'name': 'team2player1',
+							'description': 'The first user of the second team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username10',
-							'description': 'The username, id or link of the player',
+							'name': 'team2player2',
+							'description': 'The second user of the second team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username11',
-							'description': 'The username, id or link of the player',
+							'name': 'team2player3',
+							'description': 'The third user of the second team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username12',
-							'description': 'The username, id or link of the player',
+							'name': 'team2player4',
+							'description': 'The fourth user of the second team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username13',
-							'description': 'The username, id or link of the player',
+							'name': 'team2player5',
+							'description': 'The fifth user of the second team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username14',
-							'description': 'The username, id or link of the player',
+							'name': 'team2player6',
+							'description': 'The sixth user of the second team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username15',
-							'description': 'The username, id or link of the player',
+							'name': 'team2player7',
+							'description': 'The seventh user of the second team',
 							'type': 3,
-							'required': false
 						},
 						{
-							'name': 'username16',
-							'description': 'The username, id or link of the player',
+							'name': 'team2player8',
+							'description': 'The eighth user of the second team',
 							'type': 3,
-							'required': false
-						}
+						},
 					]
 				},
 			});

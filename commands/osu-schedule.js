@@ -23,6 +23,8 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		let weekday = 7;
+		let team1 = [];
+		let team2 = [];
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -34,51 +36,55 @@ module.exports = {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					if (interaction.options._hoistedOptions[i].name === 'weekday') {
 						weekday = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name.startsWith('team1')) {
+						team1.push(interaction.options._hoistedOptions[i].value);
+						args.push(interaction.options._hoistedOptions[i].value);
 					} else {
+						team2.push(interaction.options._hoistedOptions[i].value);
 						args.push(interaction.options._hoistedOptions[i].value);
 					}
 				}
 			}
+		} else {
+			for (let i = 0; i < args.length; i++) {
+				team1.push(args[i]);
+			}
 		}
+
 		const guildPrefix = await getGuildPrefix(msg);
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
-		let users = [];
 
 		if (!args[0]) {//Get profile by author if no argument
 			if (commandUser && commandUser.osuUserId) {
-				users.push(commandUser.osuUserId);
+				team1.push(commandUser.osuUserId);
 			} else {
 				const userDisplayName = await getMessageUserDisplayname(msg);
-				users.push(userDisplayName);
+				team1.push(userDisplayName);
 			}
 		}
 
+		let teams = [team1, team2];
+
 		//Get profiles by arguments
-		for (let i = 0; i < args.length; i++) {
-			if (args[i].startsWith('<@') && args[i].endsWith('>')) {
-				logDatabaseQueries(4, 'commands/osu-schedule.js DBDiscordUsers');
-				const discordUser = await DBDiscordUsers.findOne({
-					where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
-				});
+		for (let i = 0; i < teams.length; i++) {
+			for (let j = 0; j < teams[i].length; j++) {
+				if (teams[i][j].startsWith('<@') && teams[i][j].endsWith('>')) {
+					logDatabaseQueries(4, 'commands/osu-schedule.js DBDiscordUsers');
+					const discordUser = await DBDiscordUsers.findOne({
+						where: { userId: teams[i][j].replace('<@', '').replace('>', '').replace('!', '') },
+					});
 
-				if (discordUser && discordUser.osuUserId) {
-					users.push(discordUser.osuUserId);
-				} else {
-					msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-					users.push(args[i]);
-				}
-			} else {
-
-				if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
-					if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-						users.push(getIDFromPotentialOsuLink(args[i]));
+					if (discordUser && discordUser.osuUserId) {
+						teams[i][j] = discordUser.osuUserId;
 					} else {
-						users.push(getIDFromPotentialOsuLink(args[i]));
+						msg.channel.send(`\`${teams[i][j].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						teams[i].splice(j, 1);
+						j--;
 					}
 				} else {
-					users.push(getIDFromPotentialOsuLink(args[i]));
+					teams[i][j] = getIDFromPotentialOsuLink(teams[i][j]);
 				}
 			}
 		}
@@ -91,25 +97,27 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		let usersReadable = [];
-		for (let i = 0; i < users.length; i++) {
-			await osuApi.getUser({ u: users[i] })
-				.then(user => {
-					users[i] = user.id;
-					usersReadable.push(user.name);
-				})
-				.catch(err => {
-					if (err.message === 'Not found') {
-						msg.channel.send(`Could not find user \`${users[i].replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
-						users.splice(i, 1);
-						i--;
-					} else {
-						console.log(err);
-					}
-				});
+		let teamsReadable = [[], []];
+		for (let i = 0; i < teams.length; i++) {
+			for (let j = 0; j < teams[i].length; j++) {
+				await osuApi.getUser({ u: teams[i][j] })
+					.then(user => {
+						teams[i][j] = user.id;
+						teamsReadable[i].push(user.name);
+					})
+					.catch(err => {
+						if (err.message === 'Not found') {
+							msg.channel.send(`Could not find user \`${teams[i][j].replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
+							teams[i].splice(j, 1);
+							j--;
+						} else {
+							console.log(err);
+						}
+					});
+			}
 		}
 
-		if (users.length === 0) {
+		if (teams[0].length + teams[1].length === 0) {
 			return msg.channel.send('No users left to look for schedules.');
 		}
 
@@ -133,12 +141,38 @@ module.exports = {
 		let endGreen = 0;
 		let endBlue = 128;
 
-		for (let i = 0; i < users.length; i++) {
-			let currentRed = ((startRed - endRed) / users.length * (i + 1) + endRed);
-			let currentGreen = ((startGreen - endGreen) / users.length * (i + 1) + endGreen);
-			let currentBlue = ((startBlue - endBlue) / users.length * (i + 1) + endBlue);
+		for (let i = 0; i < teams[0].length; i++) {
+			let currentRed = ((startRed - endRed) / teams[0].length * (i + 1) + endRed);
+			let currentGreen = ((startGreen - endGreen) / teams[0].length * (i + 1) + endGreen);
+			let currentBlue = ((startBlue - endBlue) / teams[0].length * (i + 1) + endBlue);
 
 			colors.push(`#${Math.round(currentRed).toString(16)}${Math.round(currentGreen).toString(16)}${Math.round(currentBlue).toString(16)}`);
+		}
+
+		startRed = 255;
+		startGreen = 175;
+		startBlue = 122;
+
+		endRed = 170;
+		endGreen = 20;
+		endBlue = 0;
+
+		for (let i = 0; i < teams[1].length; i++) {
+			let currentRed = ((startRed - endRed) / teams[1].length * (i + 1) + endRed);
+			let currentGreen = ((startGreen - endGreen) / teams[1].length * (i + 1) + endGreen);
+			let currentBlue = ((startBlue - endBlue) / teams[1].length * (i + 1) + endBlue);
+
+			colors.push(`#${Math.round(currentRed).toString(16)}${Math.round(currentGreen).toString(16)}${Math.round(currentBlue).toString(16)}`);
+		}
+
+		let users = [];
+		let usersReadable = [];
+
+		for (let i = 0; i < teams.length; i++) {
+			for (let j = 0; j < teams[i].length; j++) {
+				users.push(teams[i][j]);
+				usersReadable.push(teamsReadable[i][j]);
+			}
 		}
 
 		for (let i = 0; i < users.length; i++) {
