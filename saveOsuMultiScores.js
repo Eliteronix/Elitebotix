@@ -13,15 +13,38 @@ process.on('message', async (message) => {
 	for (let gameIndex = 0; gameIndex < match.games.length; gameIndex++) {
 		//Define if the game is freemod or not
 		let freeMod = false;
-		if (match.games[gameIndex].scores[0]) {
-			let rawMods = match.games[gameIndex].scores[0].raw_mods;
-			for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
-				if (rawMods !== match.games[gameIndex].scores[i].raw_mods) {
-					freeMod = true;
-					break;
+		for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
+			if (match.games[gameIndex].scores[i].raw_mods) {
+				freeMod = true;
+				break;
+			}
+		}
+
+		let forceMod = true;
+
+		if (!freeMod) {
+			forceMod = false;
+		}
+
+		for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
+			if (parseInt(match.games[gameIndex].scores[i].score) >= 10000 && forceMod) {
+				//Remove DT and NC from scoreMods
+				let scoreMods = getMods(match.games[gameIndex].scores[i].raw_mods);
+				for (let j = 0; j < scoreMods.length; j++) {
+					if (scoreMods[j] === 'DT' || scoreMods[j] === 'NC') {
+						scoreMods.splice(j, 1);
+						j--;
+					}
+				}
+				scoreMods = getModBits(scoreMods.join(''));
+
+				if (scoreMods <= 1) {
+					forceMod = false;
 				}
 			}
 		}
+
+		console.log(`${match.name} - ${match.games[gameIndex].beatmapId} - ${forceMod} - ${freeMod}`);
 
 		for (let scoreIndex = 0; scoreIndex < match.games[gameIndex].scores.length; scoreIndex++) {
 			//Calculate evaluation
@@ -99,6 +122,7 @@ process.on('message', async (message) => {
 						gameStartDate: match.games[gameIndex].raw_start,
 						gameEndDate: match.games[gameIndex].raw_end,
 						freeMod: freeMod,
+						forceMod: forceMod,
 						maxCombo: match.games[gameIndex].scores[scoreIndex].maxCombo,
 						count50: match.games[gameIndex].scores[scoreIndex].counts['50'],
 						count100: match.games[gameIndex].scores[scoreIndex].counts['100'],
@@ -141,7 +165,7 @@ process.on('message', async (message) => {
 							}
 						}
 					}
-				} else if (!existingScore.teamType) {
+				} else if (existingScore.forceMod === null) {
 					existingScore.maxCombo = match.games[gameIndex].scores[scoreIndex].maxCombo;
 					existingScore.count50 = match.games[gameIndex].scores[scoreIndex].counts['50'];
 					existingScore.count100 = match.games[gameIndex].scores[scoreIndex].counts['100'];
@@ -152,6 +176,8 @@ process.on('message', async (message) => {
 					existingScore.perfect = match.games[gameIndex].scores[scoreIndex].perfect;
 					existingScore.teamType = match.games[gameIndex].teamType;
 					existingScore.team = match.games[gameIndex].scores[scoreIndex].team;
+					existingScore.freeMod = freeMod;
+					existingScore.forceMod = forceMod;
 					await existingScore.save();
 				}
 			} catch (error) {
