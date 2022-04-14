@@ -87,7 +87,6 @@ async function sendUserEmbed(msg, interaction, user) {
 			});
 		});
 		quicksort(memberRoles);
-		memberRoles.forEach(role => delete role.rawPosition);
 		//18 characters role ID + <@& + > -> 22 characters per role
 		//Divide into as many fields as needed
 		const roleFieldValues = [];
