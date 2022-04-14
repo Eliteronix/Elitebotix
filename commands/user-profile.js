@@ -78,10 +78,16 @@ async function sendUserEmbed(msg, interaction, user) {
 	if (msg.channel.type !== 'DM') {
 		const member = await msg.guild.members.fetch(user.id);
 
-		//Get the member roles and push the IDs into an array
+		//Get the member roles and push the IDs and rawPosition related to the id into an array
 		const memberRoles = [];
-		member.roles.cache.filter(role => role.name !== '@everyone').each(role => memberRoles.push(`<@&${role.id}>`));
-
+		member.roles.cache.filter(role => role.name !== '@everyone').forEach(role => {
+			memberRoles.push({
+				id: `<@&${role.id}>`,
+				rawPosition: role.rawPosition,
+			});
+		});
+		quicksort(memberRoles);
+		memberRoles.forEach(role => delete role.rawPosition);
 		//18 characters role ID + <@& + > -> 22 characters per role
 		//Divide into as many fields as needed
 		const roleFieldValues = [];
@@ -90,16 +96,16 @@ async function sendUserEmbed(msg, interaction, user) {
 		//Fill up roleFieldValue with each role and push it to the array when character limit is reached
 		for (let i = 0; i < memberRoles.length; i++) {
 			//Character limit will be reached; push to array and reset the helper variable
-			if (roleFieldValue.length + 2 + memberRoles[i].length > 1024) {
+			if (roleFieldValue.length + 2 + memberRoles[i].id.length > 1024) {
 				roleFieldValues.push(roleFieldValue);
 				roleFieldValue = '';
 			}
 
 			//Differentiate between empty string and already filled string with some roles
 			if (roleFieldValue) {
-				roleFieldValue = `${roleFieldValue}, ${memberRoles[i]}`;
+				roleFieldValue = `${roleFieldValue}, ${memberRoles[i].id}`;
 			} else {
-				roleFieldValue = memberRoles[i];
+				roleFieldValue = memberRoles[i].id;
 			}
 		}
 
@@ -176,4 +182,29 @@ async function sendUserEmbed(msg, interaction, user) {
 		return msg.reply({ embeds: [userInfoEmbed] });
 	}
 	return interaction.followUp({ embeds: [userInfoEmbed] });
+}
+
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].rawPosition) >= parseFloat(pivot.rawPosition)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
 }
