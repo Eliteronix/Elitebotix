@@ -44,8 +44,6 @@ process.on('message', async (message) => {
 			}
 		}
 
-		console.log(`${match.name} - ${match.games[gameIndex].beatmapId} - ${forceMod} - ${freeMod}`);
-
 		for (let scoreIndex = 0; scoreIndex < match.games[gameIndex].scores.length; scoreIndex++) {
 			//Calculate evaluation
 			let evaluation = null;
