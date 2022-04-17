@@ -128,7 +128,11 @@ module.exports = {
 						matchName: {
 							[Op.notLike]: 'MOTD:%',
 						},
-						mode: 'Standard'
+						mode: 'Standard',
+						[Op.or]: [
+							{ warmup: false },
+							{ warmup: null }
+						],
 					}
 				});
 
@@ -143,7 +147,11 @@ module.exports = {
 						matchName: {
 							[Op.notLike]: 'MOTD:%',
 						},
-						mode: 'Standard'
+						mode: 'Standard',
+						[Op.or]: [
+							{ warmup: false },
+							{ warmup: null }
+						],
 					}
 				});
 
@@ -406,6 +414,10 @@ module.exports = {
 								matchName: {
 									[Op.notLike]: 'MOTD:%',
 								},
+								[Op.or]: [
+									{ warmup: false },
+									{ warmup: null }
+								],
 							}
 						});
 
@@ -1927,6 +1939,10 @@ async function getOsuMapInfo(dbBeatmap) {
 			matchName: {
 				[Op.notLike]: 'MOTD:%',
 			},
+			[Op.or]: [
+				{ warmup: false },
+				{ warmup: null }
+			],
 		}
 	});
 

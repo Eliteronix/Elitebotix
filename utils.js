@@ -1003,9 +1003,13 @@ module.exports = {
 					tourneyMatch: true,
 					scoringType: 'Score v2',
 					mode: 'Standard',
+					[Op.or]: [
+						{ warmup: false },
+						{ warmup: null }
+					],
 					gameEndDate: {
 						[Op.lte]: input.date
-					}
+					},
 				}
 			});
 		} else {
@@ -1014,7 +1018,11 @@ module.exports = {
 					osuUserId: input.osuUserId,
 					tourneyMatch: true,
 					scoringType: 'Score v2',
-					mode: 'Standard'
+					mode: 'Standard',
+					[Op.or]: [
+						{ warmup: false },
+						{ warmup: null }
+					],
 				}
 			});
 		}
@@ -2042,7 +2050,11 @@ async function getOsuBeatmapFunction(input) {
 										tourneyMatch: true,
 										matchName: {
 											[Op.notLike]: 'MOTD:%',
-										}
+										},
+										[Op.or]: [
+											{ warmup: false },
+											{ warmup: null }
+										],
 									}
 								});
 

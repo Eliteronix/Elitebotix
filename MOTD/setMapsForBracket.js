@@ -3,6 +3,7 @@ const { humanReadable, getOsuBeatmap, logDatabaseQueries } = require('../utils.j
 const { qualifier } = require('./qualifier.js');
 const { DBOsuBeatmaps, DBOsuMultiScores } = require('../dbObjects.js');
 const osu = require('node-osu');
+const { Op } = require('sequelize');
 
 module.exports = {
 	setMapsForBracket: async function (client, bancho, bracketName, SRLimit, NMBeatmaps, DTBeatmaps, upperRank, lowerRank, channelId, roleId, players) {
@@ -96,8 +97,12 @@ module.exports = {
 						const multiScores = await DBOsuMultiScores.findAll({
 							where: {
 								tourneyMatch: true,
-								beatmapId: dbBeatmap.beatmapId
-							}
+								beatmapId: dbBeatmap.beatmapId,
+								[Op.or]: [
+									{ warmup: false },
+									{ warmup: null }
+								],
+							},
 						});
 
 						let onlyMOTD = true;
@@ -174,7 +179,11 @@ module.exports = {
 						const multiScores = await DBOsuMultiScores.findAll({
 							where: {
 								tourneyMatch: true,
-								beatmapId: dbBeatmap.beatmapId
+								beatmapId: dbBeatmap.beatmapId,
+								[Op.or]: [
+									{ warmup: false },
+									{ warmup: null }
+								],
 							}
 						});
 

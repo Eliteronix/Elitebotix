@@ -154,7 +154,11 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 						osuUserId: user.id,
 						score: {
 							[Op.gte]: 10000
-						}
+						},
+						[Op.or]: [
+							{ warmup: false },
+							{ warmup: null }
+						],
 					}
 				});
 
@@ -234,7 +238,11 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 						osuUserId: user.id,
 						score: {
 							[Op.gte]: 10000
-						}
+						},
+						[Op.or]: [
+							{ warmup: false },
+							{ warmup: null }
+						],
 					}
 				});
 
@@ -292,7 +300,7 @@ async function drawTitle(input, server, mode) {
 		const patreonLogo = await Canvas.loadImage('./other/patreonLogo.png');
 		ctx.drawImage(patreonLogo, 10, 10, 30, 30);
 	}
-	
+
 	if (discordUser && developers.includes(discordUser.userId)) {
 		const devLogo = await Canvas.loadImage('./other/devLogo.png');
 		ctx.drawImage(devLogo, 10, 10, 30, 30);
