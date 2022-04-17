@@ -444,7 +444,11 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 						osuUserId: user.id,
 						score: {
 							[Op.gte]: 10000
-						}
+						},
+						[Op.or]: [
+							{ warmup: false },
+							{ warmup: null }
+						],
 					}
 				});
 

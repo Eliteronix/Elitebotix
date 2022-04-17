@@ -2,6 +2,7 @@ const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiScores } = require('../dbObject
 const { getGuildPrefix, populateMsgFromInteraction, getOsuBeatmap, pause, logDatabaseQueries } = require('../utils');
 const Discord = require('discord.js');
 const osu = require('node-osu');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-motd',
@@ -479,7 +480,11 @@ module.exports = {
 							const multiScores = await DBOsuMultiScores.findAll({
 								where: {
 									tourneyMatch: true,
-									beatmapId: dbBeatmap.beatmapId
+									beatmapId: dbBeatmap.beatmapId,
+									[Op.or]: [
+										{ warmup: false },
+										{ warmup: null }
+									],
 								}
 							});
 
@@ -584,7 +589,11 @@ module.exports = {
 							const multiScores = await DBOsuMultiScores.findAll({
 								where: {
 									tourneyMatch: true,
-									beatmapId: dbBeatmap.beatmapId
+									beatmapId: dbBeatmap.beatmapId,
+									[Op.or]: [
+										{ warmup: false },
+										{ warmup: null }
+									],
 								}
 							});
 
@@ -792,7 +801,11 @@ module.exports = {
 							const multiScores = await DBOsuMultiScores.findAll({
 								where: {
 									tourneyMatch: true,
-									beatmapId: dbBeatmap.beatmapId
+									beatmapId: dbBeatmap.beatmapId,
+									[Op.or]: [
+										{ warmup: false },
+										{ warmup: null }
+									],
 								}
 							});
 
@@ -897,7 +910,11 @@ module.exports = {
 							const multiScores = await DBOsuMultiScores.findAll({
 								where: {
 									tourneyMatch: true,
-									beatmapId: dbBeatmap.beatmapId
+									beatmapId: dbBeatmap.beatmapId,
+									[Op.or]: [
+										{ warmup: false },
+										{ warmup: null }
+									],
 								}
 							});
 

@@ -137,6 +137,10 @@ async function getBeatmap(msg, interaction, beatmap) {
 			matchName: {
 				[Op.notLike]: 'MOTD:%',
 			},
+			[Op.or]: [
+				{ warmup: false },
+				{ warmup: null }
+			],
 		}
 	});
 

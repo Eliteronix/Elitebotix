@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
 		freeMod: DataTypes.BOOLEAN,
 		forceMod: DataTypes.BOOLEAN,
 		warmup: DataTypes.BOOLEAN,
+		warmupDecidedByAmount: DataTypes.BOOLEAN,
 		maxCombo: DataTypes.STRING,
 		count50: DataTypes.STRING,
 		count100: DataTypes.STRING,

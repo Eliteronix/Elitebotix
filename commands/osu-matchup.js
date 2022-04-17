@@ -231,7 +231,11 @@ module.exports = {
 					mode: 'Standard',
 					score: {
 						[Op.gte]: 10000
-					}
+					},
+					[Op.or]: [
+						{ warmup: false },
+						{ warmup: null }
+					],
 				}
 			}));
 
@@ -258,7 +262,11 @@ module.exports = {
 					mode: 'Standard',
 					score: {
 						[Op.gte]: 10000
-					}
+					},
+					[Op.or]: [
+						{ warmup: false },
+						{ warmup: null }
+					],
 				}
 			}));
 

@@ -28,20 +28,14 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'QA' && matchID === '56267496') {
-			matchID = '90000000';
-		}
-
-		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'QA' && matchID === '56267496') {
 			// eslint-disable-next-line no-undef
 			console.log(`Manually deleted task for saving Multi Matches for ${matchID} ${process.env.SERVER}`);
 			return await processQueueEntry.destroy();
 		}
 
 		// eslint-disable-next-line no-undef
-		if (args[0] === '-1' || process.env.SERVER === 'Dev') {
-			console.log(`Manually deleted task for saving Multi Matches for ${matchID}`);
-			return await processQueueEntry.destroy();
+		if (process.env.SERVER === 'Dev') {
+			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364');
 		}
 
 		await osuApi.getMatch({ mp: matchID })
@@ -78,45 +72,7 @@ module.exports = {
 					return await processQueueEntry.save();
 				}
 
-				//Go same if match found and not ended / too long going already
-				//Reimport an old match to clean up the database
-				let incompleteMatchScore = await DBOsuMultiScores.findOne({
-					where: {
-						tourneyMatch: true,
-						forceMod: null
-					},
-					order: [
-						['updatedAt', 'ASC']
-					]
-				});
-
-				if (incompleteMatchScore) {
-					await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
-						.then(async (match) => {
-							saveOsuMultiScores(match);
-							let channel = await client.channels.fetch('959499050246344754');
-							await channel.send(`<https://osu.ppy.sh/mp/${matchID}> | ${incompleteMatchScore.updatedAt} | ${match.name}`);
-						})
-						.catch(async () => {
-							//Nothing
-							let incompleteScores = await DBOsuMultiScores.findAll({
-								where: {
-									matchId: incompleteMatchScore.matchId
-								}
-							});
-
-							for (let i = 0; i < incompleteScores.length; i++) {
-								incompleteScores[i].changed('updatedAt', true);
-								await incompleteScores[i].save();
-							}
-						});
-				}
-
-				let date = new Date();
-				date.setUTCSeconds(date.getUTCSeconds() + 10);
-				processQueueEntry.date = date;
-				processQueueEntry.beingExecuted = false;
-				return await processQueueEntry.save();
+				return await processIncompleteScores(osuApi, client, processQueueEntry, '959499050246344754');
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
@@ -172,3 +128,50 @@ module.exports = {
 			});
 	},
 };
+
+async function processIncompleteScores(osuApi, client, processQueueEntry, channelId) {
+	//Go same if match found and not ended / too long going already
+	//Reimport an old match to clean up the database
+	let incompleteMatchScore = await DBOsuMultiScores.findOne({
+		where: {
+			tourneyMatch: true,
+			warmup: null
+		},
+		order: [
+			['updatedAt', 'ASC']
+		]
+	});
+
+	if (incompleteMatchScore) {
+		await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
+			.then(async (match) => {
+				saveOsuMultiScores(match);
+				let channel = await client.channels.fetch(channelId);
+				await channel.send(`<https://osu.ppy.sh/mp/${match.id}> | ${incompleteMatchScore.updatedAt.getUTCHours().toString().padStart(2, 0)}:${incompleteMatchScore.updatedAt.getUTCMinutes().toString().padStart(2, 0)} ${incompleteMatchScore.updatedAt.getUTCDate().toString().padStart(2, 0)}.${(incompleteMatchScore.updatedAt.getUTCMonth() + 1).toString().padStart(2, 0)}.${incompleteMatchScore.updatedAt.getUTCFullYear()} | ${match.name}`);
+			})
+			.catch(async (err) => {
+				let incompleteScores = await DBOsuMultiScores.findAll({
+					where: {
+						matchId: incompleteMatchScore.matchId
+					}
+				});
+				if (err.message === 'Not found') {
+					for (let i = 0; i < incompleteScores.length; i++) {
+						incompleteScores[i].warmup = false;
+						await incompleteScores[i].save();
+					}
+				} else {
+					for (let i = 0; i < incompleteScores.length; i++) {
+						incompleteScores[i].changed('updatedAt', true);
+						await incompleteScores[i].save();
+					}
+				}
+			});
+	}
+
+	let date = new Date();
+	date.setUTCSeconds(date.getUTCSeconds() + 30);
+	processQueueEntry.date = date;
+	processQueueEntry.beingExecuted = false;
+	return await processQueueEntry.save();
+}

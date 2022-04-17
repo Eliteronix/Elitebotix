@@ -1,5 +1,6 @@
 const { logDatabaseQueries, getScoreModpool, getMods, getModBits } = require('./utils');
 const { DBOsuMultiScores, DBOsuBeatmaps } = require('./dbObjects');
+const { Op } = require('sequelize');
 
 // eslint-disable-next-line no-undef
 process.on('message', async (message) => {
@@ -43,6 +44,12 @@ process.on('message', async (message) => {
 				}
 			}
 		}
+
+		let warmupCheckResult = await checkWarmup(match, gameIndex, tourneyMatch);
+
+		let warmup = warmupCheckResult.warmup;
+
+		let warmupDecidedByAmount = warmupCheckResult.byAmount;
 
 		for (let scoreIndex = 0; scoreIndex < match.games[gameIndex].scores.length; scoreIndex++) {
 			//Calculate evaluation
@@ -121,6 +128,8 @@ process.on('message', async (message) => {
 						gameEndDate: match.games[gameIndex].raw_end,
 						freeMod: freeMod,
 						forceMod: forceMod,
+						warmup: warmup,
+						warmupDecidedByAmount: warmupDecidedByAmount,
 						maxCombo: match.games[gameIndex].scores[scoreIndex].maxCombo,
 						count50: match.games[gameIndex].scores[scoreIndex].counts['50'],
 						count100: match.games[gameIndex].scores[scoreIndex].counts['100'],
@@ -132,7 +141,7 @@ process.on('message', async (message) => {
 					});
 
 					//Set the tournament flags on the corresponding beatmap
-					if (tourneyMatch && !match.name.startsWith('MOTD:')) {
+					if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
 						let dbBeatmaps = await DBOsuBeatmaps.findAll({
 							where: {
 								beatmapId: match.games[gameIndex].beatmapId,
@@ -163,7 +172,46 @@ process.on('message', async (message) => {
 							}
 						}
 					}
-				} else if (existingScore.forceMod === null) {
+
+					if (scoreIndex === 0 && tourneyMatch) {
+						let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
+
+						let weeksPrior = new Date(match.games[gameIndex].raw_start);
+						weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
+
+						let weeksAfter = new Date(match.games[gameIndex].raw_start);
+						weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
+
+						let sameMapSameTournamentScores = await DBOsuMultiScores.findAll({
+							where: {
+								beatmapId: match.games[gameIndex].beatmapId,
+								matchName: {
+									[Op.like]: `${acronym}:%`,
+								},
+								matchId: {
+									[Op.ne]: match.id,
+								},
+								gameStartDate: {
+									[Op.gte]: weeksPrior
+								},
+								gameEndDate: {
+									[Op.lte]: weeksAfter
+								},
+								tourneyMatch: true,
+								[Op.or]: [
+									{ warmup: false },
+									{ warmup: true }
+								],
+								warmupDecidedByAmount: true
+							}
+						});
+
+						for (let i = 0; i < sameMapSameTournamentScores.length; i++) {
+							sameMapSameTournamentScores[i].warmup = null;
+							await sameMapSameTournamentScores[i].save();
+						}
+					}
+				} else if (existingScore.warmup === null) {
 					existingScore.maxCombo = match.games[gameIndex].scores[scoreIndex].maxCombo;
 					existingScore.count50 = match.games[gameIndex].scores[scoreIndex].counts['50'];
 					existingScore.count100 = match.games[gameIndex].scores[scoreIndex].counts['100'];
@@ -176,7 +224,43 @@ process.on('message', async (message) => {
 					existingScore.team = match.games[gameIndex].scores[scoreIndex].team;
 					existingScore.freeMod = freeMod;
 					existingScore.forceMod = forceMod;
+					existingScore.warmup = warmup;
+					existingScore.warmupDecidedByAmount = warmupDecidedByAmount;
+					existingScore.changed('updatedAt', true);
 					await existingScore.save();
+
+					//Set the tournament flags on the corresponding beatmap
+					if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
+						let dbBeatmaps = await DBOsuBeatmaps.findAll({
+							where: {
+								beatmapId: match.games[gameIndex].beatmapId,
+							}
+						});
+
+						for (let i = 0; i < dbBeatmaps.length; i++) {
+							if (!dbBeatmaps[i].tourneyMap) {
+								dbBeatmaps[i].tourneyMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							}
+
+							if (getScoreModpool(existingScore) === 'NM' && !dbBeatmaps[i].noModMap) {
+								dbBeatmaps[i].noModMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							} else if (getScoreModpool(existingScore) === 'HD' && !dbBeatmaps[i].hiddenMap) {
+								dbBeatmaps[i].hiddenMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							} else if (getScoreModpool(existingScore) === 'HR' && !dbBeatmaps[i].hardRockMap) {
+								dbBeatmaps[i].hardRockMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							} else if (getScoreModpool(existingScore) === 'DT' && !dbBeatmaps[i].doubleTimeMap) {
+								dbBeatmaps[i].doubleTimeMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							} else if (getScoreModpool(existingScore) === 'FM' && !dbBeatmaps[i].freeModMap) {
+								dbBeatmaps[i].freeModMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							}
+						}
+					}
 				}
 			} catch (error) {
 				scoreIndex--;
@@ -227,4 +311,144 @@ function getMiddleScore(scores) {
 	}
 
 	return (parseInt(scores[0]) + parseInt(scores[1])) / 2;
+}
+
+async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
+
+	let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
+
+	//Matches without warmups
+	if (!tourneyMatch || gameIndex > 1 || acronym === 'etx' || acronym === 'o!mm ranked' || acronym === 'o!mm private' || acronym === 'o!mm team ranked' || acronym === 'o!mm team private' || acronym === 'motd') {
+		// console.log('Not a warmup due to naming / map #');
+		return { warmup: false, byAmount: false };
+	}
+
+	let playersTeamBlue = 0;
+	let playersTeamRed = 0;
+	let playersNoTeam = 0;
+
+	for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
+		let scoreMods = getMods(match.games[gameIndex].scores[i].raw_mods);
+		if (scoreMods.includes('RX')
+			|| scoreMods.includes('AP')
+			|| scoreMods.includes('EZ')
+			|| scoreMods.includes('FL')
+			|| scoreMods.includes('SO')
+			|| scoreMods.includes('PF')
+			|| scoreMods.includes('SD')) {
+			// console.log('Warmup due to mods');
+			return { warmup: true, byAmount: false };
+		}
+
+		if (parseInt(match.games[gameIndex].scores[i].score) >= 10000) {
+			if (match.games[gameIndex].scores[i].team === 'Blue') {
+				playersTeamBlue++;
+			} else if (match.games[gameIndex].scores[i].team === 'Red') {
+				playersTeamRed++;
+			} else {
+				playersNoTeam++;
+			}
+		}
+	}
+
+	if (playersTeamBlue !== playersTeamRed) {
+		// console.log('Warmup due to uneven teams');
+		return { warmup: true, byAmount: false };
+	}
+
+	if (playersNoTeam > 2) {
+		// console.log('No warmup due to lobby');
+		return { warmup: false, byAmount: false };
+	}
+
+	let weeksPrior = new Date(match.games[gameIndex].raw_start);
+	weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
+
+	let weeksAfter = new Date(match.games[gameIndex].raw_start);
+	weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
+
+	let sameMapSameTournamentScores = await DBOsuMultiScores.count({
+		where: {
+			beatmapId: match.games[gameIndex].beatmapId,
+			matchName: {
+				[Op.like]: `${acronym}:%`,
+			},
+			matchId: {
+				[Op.ne]: match.id,
+			},
+			gameStartDate: {
+				[Op.gte]: weeksPrior
+			},
+			gameEndDate: {
+				[Op.lte]: weeksAfter
+			},
+			tourneyMatch: true
+		}
+	});
+
+	if (sameMapSameTournamentScores > 0) {
+		// console.log('No warmup due to same map same tournament');
+		return { warmup: false, byAmount: false };
+	}
+
+	//Check if the first map was not a warmup
+	if (gameIndex === 1 && !crossCheck) {
+		// console.log('Crosscheck for first map no warmup:');
+		let firstMapWarmup = await checkWarmup(match, 0, tourneyMatch, true);
+
+		//Return not a warmup if the first map was not a warmup
+		if (firstMapWarmup.warmup === false) {
+			// console.log('Not a warmup due to first map not being a warmup');
+			return { warmup: false, byAmount: false };
+		}
+	}
+
+	//Check if the second map is a warmup
+	if (gameIndex === 0 && match.games.length > 1 && !crossCheck) {
+		// console.log('Crosscheck for second map warmup:');
+		let secondMapWarmup = await checkWarmup(match, 1, tourneyMatch, true);
+
+		//Return not a warmup if the first map was not a warmup
+		if (secondMapWarmup.warmup === true) {
+			// console.log('Warmup due to second map being a warmup');
+			return { warmup: true, byAmount: false };
+		}
+	}
+
+	//get all matches around the current one
+	let amountOfMatches = await DBOsuMultiScores.findAll({
+		where: {
+			matchName: {
+				[Op.like]: `${acronym}:%`,
+			},
+			gameStartDate: {
+				[Op.gte]: weeksPrior
+			},
+			gameEndDate: {
+				[Op.lte]: weeksAfter
+			},
+			tourneyMatch: true
+		}
+	});
+
+	//Check for unique matchIds
+	let matchIds = [];
+	for (let i = 0; i < amountOfMatches.length; i++) {
+		if (!matchIds.includes(amountOfMatches[i].matchId)) {
+			matchIds.push(amountOfMatches[i].matchId);
+		}
+	}
+
+	//Last resort
+	//Set to warmup if more than 5 matches were played and didn't have the map
+	if (matchIds.length > 5 && !crossCheck) {
+		// console.log('Warmup due to amount of matches that still don\'t have the map');
+		return { warmup: true, byAmount: true };
+	} else if (!crossCheck) {
+		// console.log('Not a warmup due to amount of matches that still don\'t have the map');
+		return { warmup: false, byAmount: true };
+	}
+
+	// console.log('Warmup status unclear');
+	return { warmup: null, byAmount: false };
 }
