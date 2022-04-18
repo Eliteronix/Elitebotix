@@ -770,7 +770,7 @@ module.exports = {
 		}
 		return link.replace(/.+\//g, '');
 	},
-	saveOsuMultiScores(match) {
+	async saveOsuMultiScores(match) {
 		let stringifiedMatch = JSON.stringify(match);
 
 		//Move the match by spawning child process
@@ -780,8 +780,6 @@ module.exports = {
 		const child = spawn('node', ['./saveOsuMultiScores.js'], { stdio: ['inherit', 'inherit', 'inherit', 'ipc'], });
 
 		child.on('spawn', () => {
-			// console.log('Spawned child process');
-
 			child.send(stringifiedMatch);
 		});
 
@@ -789,13 +787,9 @@ module.exports = {
 			child.kill('SIGINT');
 		});
 
-		// child.on('close', (code) => {
-		// 	console.log(`child process exited with code ${code}`);
-		// });
-
-		// child.on('error', (err) => {
-		// 	console.log(`child process error: ${err}`);
-		// });
+		await new Promise((resolve) => {
+			child.on('close', resolve);
+		});
 	},
 	async populateMsgFromInteraction(interaction) {
 		let userMentions = new Discord.Collection();

@@ -45,7 +45,7 @@ module.exports = {
 				if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
 					let date = new Date();
 					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
-						saveOsuMultiScores(match);
+						await saveOsuMultiScores(match);
 						let now = new Date();
 						let minutesBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60) % 60;
 						let hoursBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60) % 24;
@@ -57,7 +57,6 @@ module.exports = {
 						} else {
 							channel = await client.channels.fetch('892873577479692358');
 						}
-						date.setUTCSeconds(date.getUTCSeconds() + 10);
 						await channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m ${match.name} done`);
 					}
 					//Go next if match found and ended / too long going already
@@ -149,7 +148,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 		await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
 			.then(async (match) => {
 				console.log('match gotten');
-				saveOsuMultiScores(match);
+				await saveOsuMultiScores(match);
 				console.log('match saved');
 				let channel = await client.channels.fetch(channelId);
 				await channel.send(`<https://osu.ppy.sh/mp/${match.id}> | ${incompleteMatchScore.updatedAt.getUTCHours().toString().padStart(2, 0)}:${incompleteMatchScore.updatedAt.getUTCMinutes().toString().padStart(2, 0)} ${incompleteMatchScore.updatedAt.getUTCDate().toString().padStart(2, 0)}.${(incompleteMatchScore.updatedAt.getUTCMonth() + 1).toString().padStart(2, 0)}.${incompleteMatchScore.updatedAt.getUTCFullYear()} | ${match.name}`);
