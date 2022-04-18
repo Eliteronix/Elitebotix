@@ -173,44 +173,44 @@ process.on('message', async (message) => {
 						}
 					}
 
-					if (scoreIndex === 0 && tourneyMatch) {
-						let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
+					// if (scoreIndex === 0 && tourneyMatch) {
+					// 	let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
 
-						let weeksPrior = new Date(match.games[gameIndex].raw_start);
-						weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
+					// 	let weeksPrior = new Date(match.games[gameIndex].raw_start);
+					// 	weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
 
-						let weeksAfter = new Date(match.games[gameIndex].raw_start);
-						weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
+					// 	let weeksAfter = new Date(match.games[gameIndex].raw_start);
+					// 	weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
 
-						let sameMapSameTournamentScores = await DBOsuMultiScores.findAll({
-							where: {
-								beatmapId: match.games[gameIndex].beatmapId,
-								matchName: {
-									[Op.like]: `${acronym}:%`,
-								},
-								matchId: {
-									[Op.ne]: match.id,
-								},
-								gameStartDate: {
-									[Op.gte]: weeksPrior
-								},
-								gameEndDate: {
-									[Op.lte]: weeksAfter
-								},
-								tourneyMatch: true,
-								[Op.or]: [
-									{ warmup: false },
-									{ warmup: true }
-								],
-								warmupDecidedByAmount: true
-							}
-						});
+					// 	let sameMapSameTournamentScores = await DBOsuMultiScores.findAll({
+					// 		where: {
+					// 			beatmapId: match.games[gameIndex].beatmapId,
+					// 			matchName: {
+					// 				[Op.like]: `${acronym}:%`,
+					// 			},
+					// 			matchId: {
+					// 				[Op.ne]: match.id,
+					// 			},
+					// 			gameStartDate: {
+					// 				[Op.gte]: weeksPrior
+					// 			},
+					// 			gameEndDate: {
+					// 				[Op.lte]: weeksAfter
+					// 			},
+					// 			tourneyMatch: true,
+					// 			[Op.or]: [
+					// 				{ warmup: false },
+					// 				{ warmup: true }
+					// 			],
+					// 			warmupDecidedByAmount: true
+					// 		}
+					// 	});
 
-						for (let i = 0; i < sameMapSameTournamentScores.length; i++) {
-							sameMapSameTournamentScores[i].warmup = null;
-							await sameMapSameTournamentScores[i].save();
-						}
-					}
+					// 	for (let i = 0; i < sameMapSameTournamentScores.length; i++) {
+					// 		sameMapSameTournamentScores[i].warmup = null;
+					// 		await sameMapSameTournamentScores[i].save();
+					// 	}
+					// }
 				} else if (existingScore.warmup === null) {
 					existingScore.maxCombo = match.games[gameIndex].scores[scoreIndex].maxCombo;
 					existingScore.count50 = match.games[gameIndex].scores[scoreIndex].counts['50'];
@@ -322,6 +322,8 @@ async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
 		// console.log('Not a warmup due to naming / map #');
 		return { warmup: false, byAmount: false };
 	}
+
+	return { warmup: null, byAmount: false };
 
 	let weeksPrior = new Date(match.games[gameIndex].raw_start);
 	weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
