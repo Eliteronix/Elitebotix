@@ -1936,7 +1936,7 @@ async function getOsuBeatmapFunction(input) {
 	for (let i = 0; i < 3; i++) {
 		if (!dbBeatmap) {
 			try {
-				logDatabaseQueriesFunction(4, 'utils.js getOsuBeatmapFunction');
+				logDatabaseQueriesFunction(2, 'utils.js getOsuBeatmapFunction');
 				dbBeatmap = await DBOsuBeatmaps.findOne({
 					where: { beatmapId: beatmapId, mods: modBits }
 				});
