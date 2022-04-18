@@ -1675,6 +1675,10 @@ module.exports = {
 		return outputScore;
 	},
 	async cleanUpDuplicateMultiScores() {
+		let date = new Date();
+		if (date.getUTCHours() > 1 && date.getUTCHours() < 6) {
+			return;
+		}
 		let duplicates = true;
 		let deleted = 0;
 
