@@ -132,7 +132,7 @@ module.exports = {
 						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'elitebotix-changelog.png');
 
 						if (msg.id) {
-							msg.reply({ content: `Weather for ${args.join(' ')}`, files: [attachment] });
+							msg.channel.send({ content: `Weather for ${args.join(' ')}`, files: [attachment] });
 						} else {
 							interaction.followUp({ content: `Weather for ${args.join(' ')}`, files: [attachment] });
 						}
