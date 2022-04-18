@@ -323,6 +323,38 @@ async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
 		return { warmup: false, byAmount: false };
 	}
 
+	return { warmup: null, warmupDecidedByAmount: false };
+
+	let weeksPrior = new Date(match.games[gameIndex].raw_start);
+	weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
+
+	let weeksAfter = new Date(match.games[gameIndex].raw_start);
+	weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
+
+	let sameMapSameTournamentScore = await DBOsuMultiScores.findOne({
+		where: {
+			beatmapId: match.games[gameIndex].beatmapId,
+			matchName: {
+				[Op.like]: `${acronym}:%`,
+			},
+			matchId: {
+				[Op.ne]: match.id,
+			},
+			gameStartDate: {
+				[Op.gte]: weeksPrior
+			},
+			gameEndDate: {
+				[Op.lte]: weeksAfter
+			},
+			tourneyMatch: true
+		}
+	});
+
+	if (sameMapSameTournamentScore) {
+		// console.log('No warmup due to same map same tournament');
+		return { warmup: false, byAmount: false };
+	}
+
 	let playersTeamBlue = 0;
 	let playersTeamRed = 0;
 	let playersNoTeam = 0;
@@ -358,36 +390,6 @@ async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
 
 	if (playersNoTeam > 2) {
 		// console.log('No warmup due to lobby');
-		return { warmup: false, byAmount: false };
-	}
-
-	let weeksPrior = new Date(match.games[gameIndex].raw_start);
-	weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
-
-	let weeksAfter = new Date(match.games[gameIndex].raw_start);
-	weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
-
-	let sameMapSameTournamentScore = await DBOsuMultiScores.findOne({
-		where: {
-			beatmapId: match.games[gameIndex].beatmapId,
-			matchName: {
-				[Op.like]: `${acronym}:%`,
-			},
-			matchId: {
-				[Op.ne]: match.id,
-			},
-			gameStartDate: {
-				[Op.gte]: weeksPrior
-			},
-			gameEndDate: {
-				[Op.lte]: weeksAfter
-			},
-			tourneyMatch: true
-		}
-	});
-
-	if (sameMapSameTournamentScore) {
-		// console.log('No warmup due to same map same tournament');
 		return { warmup: false, byAmount: false };
 	}
 
