@@ -176,7 +176,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 
 	console.log('Resetting processQueueEntry');
 	let date = new Date();
-	date.setUTCSeconds(date.getUTCSeconds() + 60);
+	date.setUTCSeconds(date.getUTCSeconds() + 30);
 	processQueueEntry.date = date;
 	processQueueEntry.beingExecuted = false;
 	return await processQueueEntry.save();
