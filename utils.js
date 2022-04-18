@@ -1936,7 +1936,7 @@ async function getOsuBeatmapFunction(input) {
 	for (let i = 0; i < 3; i++) {
 		if (!dbBeatmap) {
 			try {
-				logDatabaseQueriesFunction(2, 'utils.js getOsuBeatmapFunction');
+				logDatabaseQueriesFunction(1, 'utils.js getOsuBeatmapFunction');
 				dbBeatmap = await DBOsuBeatmaps.findOne({
 					where: { beatmapId: beatmapId, mods: modBits }
 				});
@@ -2047,7 +2047,7 @@ async function getOsuBeatmapFunction(input) {
 								let doubleTimeMap = false;
 								let freeModMap = false;
 
-								logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores getOsuBeatmapFunction');
+								logDatabaseQueriesFunction(1, 'utils.js DBOsuMultiScores getOsuBeatmapFunction');
 								let tourneyScores = await DBOsuMultiScores.findAll({
 									where: {
 										beatmapId: beatmaps[0].id,
