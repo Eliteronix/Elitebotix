@@ -29,7 +29,7 @@ module.exports = {
 		});
 
 		if (!developers.includes(msg.author.id) && !discordUser) {
-			return;
+			return msg.reply('Earlyaccess commands are reserved for admins and patreons. As soon as they are up to standard for release you will be able to use them.');
 		}
 
 		if (args[0] === 'derank') {
