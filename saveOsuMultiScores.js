@@ -323,8 +323,6 @@ async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
 		return { warmup: false, byAmount: false };
 	}
 
-	return { warmup: null, warmupDecidedByAmount: false };
-
 	let weeksPrior = new Date(match.games[gameIndex].raw_start);
 	weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
 
