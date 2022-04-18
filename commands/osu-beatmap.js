@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 const { DBOsuMultiScores } = require('../dbObjects');
 const { Op } = require('sequelize');
@@ -130,6 +130,7 @@ async function getBeatmap(msg, interaction, beatmap) {
 		processingMessage.delete();
 	}
 
+	logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
 	const mapScores = await DBOsuMultiScores.findAll({
 		where: {
 			beatmapId: beatmap.beatmapId,

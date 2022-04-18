@@ -291,6 +291,7 @@ async function drawTitle(input, server, mode) {
 	ctx.textAlign = 'center';
 	ctx.fillText(title, canvas.width / 2, 35);
 
+	logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers Patreon/Dev');
 	const discordUser = await DBDiscordUsers.findOne({
 		where: {
 			osuUserId: user.id
@@ -332,6 +333,7 @@ async function drawRank(input, msg) {
 	ctx.fillText(`PP: ${pp}`, canvas.width / 2, 83 + yOffset);
 
 	try {
+		logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers Duelrating');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: {
 				osuUserId: user.id

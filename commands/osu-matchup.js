@@ -224,7 +224,7 @@ module.exports = {
 
 		//Loop throught team one and get all their multi scores
 		for (let i = 0; i < team1.length; i++) {
-			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiScores User${i + 1}`);
+			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiScores 1User${i + 1}`);
 			scoresTeam1.push(await DBOsuMultiScores.findAll({
 				where: {
 					osuUserId: team1[i],
@@ -255,7 +255,7 @@ module.exports = {
 
 		//Loop throught team two and get all their multi scores
 		for (let i = 0; i < team2.length; i++) {
-			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiScores User${i + 1}`);
+			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiScores 2User${i + 1}`);
 			scoresTeam2.push(await DBOsuMultiScores.findAll({
 				where: {
 					osuUserId: team2[i],

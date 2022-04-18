@@ -1,6 +1,6 @@
 const osu = require('node-osu');
 const { DBOsuMultiScores } = require('../dbObjects');
-const { saveOsuMultiScores } = require('../utils');
+const { saveOsuMultiScores, logDatabaseQueries } = require('../utils');
 
 //Archiving started around 40000000
 
@@ -131,6 +131,7 @@ module.exports = {
 async function processIncompleteScores(osuApi, client, processQueueEntry, channelId) {
 	//Go same if match found and not ended / too long going already
 	//Reimport an old match to clean up the database
+	logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores incomplete scores');
 	let incompleteMatchScore = await DBOsuMultiScores.findOne({
 		where: {
 			tourneyMatch: true,
@@ -149,6 +150,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				await channel.send(`<https://osu.ppy.sh/mp/${match.id}> | ${incompleteMatchScore.updatedAt.getUTCHours().toString().padStart(2, 0)}:${incompleteMatchScore.updatedAt.getUTCMinutes().toString().padStart(2, 0)} ${incompleteMatchScore.updatedAt.getUTCDate().toString().padStart(2, 0)}.${(incompleteMatchScore.updatedAt.getUTCMonth() + 1).toString().padStart(2, 0)}.${incompleteMatchScore.updatedAt.getUTCFullYear()} | ${match.name}`);
 			})
 			.catch(async (err) => {
+				logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores incomplete scores backup');
 				let incompleteScores = await DBOsuMultiScores.findAll({
 					where: {
 						matchId: incompleteMatchScore.matchId

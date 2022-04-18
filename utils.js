@@ -991,6 +991,7 @@ module.exports = {
 
 		//Get the tournament data either limited by the date or everything
 		if (input.date) {
+			logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores getUserDuelStarRating');
 			userScores = await DBOsuMultiScores.findAll({
 				where: {
 					osuUserId: input.osuUserId,
@@ -1007,6 +1008,7 @@ module.exports = {
 				}
 			});
 		} else {
+			logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores getUserDuelStarRating2');
 			userScores = await DBOsuMultiScores.findAll({
 				where: {
 					osuUserId: input.osuUserId,
@@ -1276,6 +1278,7 @@ module.exports = {
 			duelRatings.total = (duelRatings.noMod * modPoolAmounts[0] + duelRatings.hidden * modPoolAmounts[1] + duelRatings.hardRock * modPoolAmounts[2] + duelRatings.doubleTime * modPoolAmounts[3] + duelRatings.freeMod * modPoolAmounts[4]) / (modPoolAmounts[0] + modPoolAmounts[1] + modPoolAmounts[2] + modPoolAmounts[3] + modPoolAmounts[4]);
 
 			//Log the values in the discords if they changed and the user is connected to the bot
+			logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getUserDuelStarRating');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
 					osuUserId: input.osuUserId
@@ -1401,6 +1404,7 @@ module.exports = {
 		duelRatings.doubleTime = null;
 		duelRatings.freeMod = null;
 
+		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getUserDuelRatings backup');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: {
 				osuUserId: input.osuUserId
@@ -1460,6 +1464,7 @@ module.exports = {
 	},
 	async twitchConnect(bancho) {
 
+		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers twitchConnect');
 		let twitchSyncUsers = await DBDiscordUsers.findAll({
 			where: {
 				twitchOsuMapSync: true
@@ -1527,6 +1532,7 @@ module.exports = {
 				}
 
 				try {
+					logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers twitchConnect 2');
 					let discordUser = await DBDiscordUsers.findOne({
 						where: {
 							twitchName: target.substring(1),
@@ -1690,6 +1696,7 @@ module.exports = {
 
 			if (result[0].length) {
 				await new Promise(resolve => setTimeout(resolve, 2000));
+				logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateMultiScores');
 				let duplicate = await DBOsuMultiScores.findOne({
 					where: {
 						id: result[0][0].id
@@ -1832,6 +1839,7 @@ async function checkForBirthdaysFunction(client) {
 	const currentDate = new Date();
 
 	//get birthday dates from DBBirthdayGuilds for all users in the database that have a birthday set
+	logDatabaseQueriesFunction(2, 'utils.js DBBirthdayGuilds checkForBirthdaysFunction');
 	let birthdayAnnouncements = await DBBirthdayGuilds.findAll({
 		where: {
 			birthdayTime: {
@@ -1845,6 +1853,7 @@ async function checkForBirthdaysFunction(client) {
 	for (let i = 0; i < birthdayAnnouncements.length; i++) {
 
 		//Check if the birthday announcement is enabled on the guild
+		logDatabaseQueriesFunction(2, 'utils.js DBGuilds checkForBirthdaysFunction');
 		let dbGuild = await DBGuilds.findOne({
 			where: {
 				guildId: birthdayAnnouncements[i].guildId
@@ -1920,7 +1929,6 @@ async function getOsuBeatmapFunction(input) {
 	lastRework.setUTCHours(17);
 	let lastWeek = new Date();
 	lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
-	logDatabaseQueriesFunction(4, 'utils.js getOsuBeatmapFunction');
 
 	let dbBeatmap = null;
 
@@ -1928,6 +1936,7 @@ async function getOsuBeatmapFunction(input) {
 	for (let i = 0; i < 3; i++) {
 		if (!dbBeatmap) {
 			try {
+				logDatabaseQueriesFunction(4, 'utils.js getOsuBeatmapFunction');
 				dbBeatmap = await DBOsuBeatmaps.findOne({
 					where: { beatmapId: beatmapId, mods: modBits }
 				});
@@ -2038,6 +2047,7 @@ async function getOsuBeatmapFunction(input) {
 								let doubleTimeMap = false;
 								let freeModMap = false;
 
+								logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores getOsuBeatmapFunction');
 								let tourneyScores = await DBOsuMultiScores.findAll({
 									where: {
 										beatmapId: beatmaps[0].id,

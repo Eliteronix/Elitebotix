@@ -54,7 +54,7 @@ module.exports = {
 				}
 
 				let secondStarRating = 4;
-				logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers');
+				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers');
 				const discordUser = await DBDiscordUsers.findOne({
 					where: {
 						userId: interaction.options._hoistedOptions[0].value,
@@ -121,6 +121,7 @@ module.exports = {
 				shuffle(modPools);
 				modPools.push('NM', 'FM');
 
+				logDatabaseQueries(4, 'commands/osu-duel.js DBOsuMultiScores Match player 1 scores');
 				const player1Scores = await DBOsuMultiScores.findAll({
 					where: {
 						osuUserId: commandUser.osuUserId,
@@ -140,6 +141,7 @@ module.exports = {
 					player1Scores[i] = player1Scores[i].beatmapId;
 				}
 
+				logDatabaseQueries(4, 'commands/osu-duel.js DBOsuMultiScores Match player 2 scores');
 				const player2Scores = await DBOsuMultiScores.findAll({
 					where: {
 						osuUserId: discordUser.osuUserId,
@@ -813,7 +815,7 @@ module.exports = {
 				if (interaction.options._hoistedOptions[0]) {
 					//Get the user by the argument given
 					if (interaction.options._hoistedOptions[0].value.startsWith('<@') && interaction.options._hoistedOptions[0].value.endsWith('>')) {
-						logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers');
+						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers ranking');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: { userId: interaction.options._hoistedOptions[0].value.replace('<@', '').replace('>', '').replace('!', '') },
 						});
@@ -1234,7 +1236,7 @@ module.exports = {
 							const members = [];
 							guildMembers.each(member => members.push(member));
 							for (let i = 0; i < members.length; i++) {
-								logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
+								logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard');
 								const discordUser = await DBDiscordUsers.findOne({
 									where: {
 										userId: members[i].id,
@@ -1262,7 +1264,7 @@ module.exports = {
 							console.log(err);
 						});
 				} else {
-					logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
+					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard 2');
 					const discordUsers = await DBDiscordUsers.findAll({
 						where: {
 							osuUserId: {
@@ -1386,7 +1388,7 @@ module.exports = {
 				if (interaction.options._hoistedOptions[0]) {
 					//Get the user by the argument given
 					if (interaction.options._hoistedOptions[0].value.startsWith('<@') && interaction.options._hoistedOptions[0].value.endsWith('>')) {
-						logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers');
+						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers data');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: { userId: interaction.options._hoistedOptions[0].value.replace('<@', '').replace('>', '').replace('!', '') },
 						});
@@ -1621,7 +1623,7 @@ module.exports = {
 							const members = [];
 							guildMembers.each(member => members.push(member));
 							for (let i = 0; i < members.length; i++) {
-								logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers');
+								logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread');
 								const discordUser = await DBDiscordUsers.findOne({
 									where: {
 										userId: members[i].id,
@@ -1649,7 +1651,7 @@ module.exports = {
 							console.log(err);
 						});
 				} else {
-					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers');
+					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread 2');
 					const discordUsers = await DBDiscordUsers.findAll({
 						where: {
 							osuUserId: {
@@ -1932,6 +1934,7 @@ function quicksortMatchId(list, start = 0, end = undefined) {
 }
 
 async function getOsuMapInfo(dbBeatmap) {
+	logDatabaseQueries(4, 'commands/osu-duel.js DBOsuMultiScores Mapinfo');
 	const mapScores = await DBOsuMultiScores.findAll({
 		where: {
 			beatmapId: dbBeatmap.beatmapId,

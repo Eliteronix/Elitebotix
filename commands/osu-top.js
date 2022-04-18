@@ -445,6 +445,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		}
 
 		//Get all scores from tournaments
+		logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores');
 		let multiScores = await DBOsuMultiScores.findAll({
 			where: {
 				osuUserId: user.id,
@@ -483,6 +484,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		}
 
 		//Get all scores from tournaments
+		logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores2');
 		multiScores = await DBOsuMultiScores.findAll({
 			where: {
 				osuUserId: user.id,

@@ -142,6 +142,7 @@ process.on('message', async (message) => {
 
 					//Set the tournament flags on the corresponding beatmap
 					if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
+						logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps tourney flags new score');
 						let dbBeatmaps = await DBOsuBeatmaps.findAll({
 							where: {
 								beatmapId: match.games[gameIndex].beatmapId,
@@ -182,6 +183,7 @@ process.on('message', async (message) => {
 					// 	let weeksAfter = new Date(match.games[gameIndex].raw_start);
 					// 	weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
 
+					// logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores reset warmup flags');
 					// 	let sameMapSameTournamentScores = await DBOsuMultiScores.findAll({
 					// 		where: {
 					// 			beatmapId: match.games[gameIndex].beatmapId,
@@ -231,6 +233,7 @@ process.on('message', async (message) => {
 
 					//Set the tournament flags on the corresponding beatmap
 					if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
+						logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps tourney flags old score');
 						let dbBeatmaps = await DBOsuBeatmaps.findAll({
 							where: {
 								beatmapId: match.games[gameIndex].beatmapId,
@@ -325,12 +328,15 @@ async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
 
 	return { warmup: null, byAmount: false };
 
+	console.log('KEKWait');
+
 	let weeksPrior = new Date(match.games[gameIndex].raw_start);
 	weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
 
 	let weeksAfter = new Date(match.games[gameIndex].raw_start);
 	weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
 
+	logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores warmup detection same tourney');
 	let sameMapSameTournamentScore = await DBOsuMultiScores.findOne({
 		where: {
 			beatmapId: match.games[gameIndex].beatmapId,
@@ -418,6 +424,7 @@ async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
 	}
 
 	// //get all matches around the current one
+	// logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores amount of matches');
 	// let amountOfMatches = await DBOsuMultiScores.findAll({
 	// 	where: {
 	// 		matchName: {
