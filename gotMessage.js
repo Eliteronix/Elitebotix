@@ -367,9 +367,7 @@ async function saveSentOsuMatches(msg, oldArgs) {
 		if (arg.replace(/\D/g, '')) {
 			osuApi.getMatch({ mp: arg.replace(/\D/g, '') })
 				.then(async (match) => {
-					console.log(1);
 					await saveOsuMultiScores(match);
-					console.log(2);
 				})
 				.catch(() => {
 					//Nothing
