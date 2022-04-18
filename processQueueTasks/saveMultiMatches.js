@@ -72,8 +72,7 @@ module.exports = {
 					return await processQueueEntry.save();
 				}
 
-				// await processIncompleteScores(osuApi, client, processQueueEntry, '959499050246344754');
-				return;
+				return await processIncompleteScores(osuApi, client, processQueueEntry, '959499050246344754');
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
@@ -131,6 +130,7 @@ module.exports = {
 };
 
 async function processIncompleteScores(osuApi, client, processQueueEntry, channelId) {
+	console.log('processIncompleteScores');
 	//Go same if match found and not ended / too long going already
 	//Reimport an old match to clean up the database
 	let incompleteMatchScore = await DBOsuMultiScores.findOne({
@@ -143,12 +143,17 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 		]
 	});
 
+	console.log('incompleteMatchScore gotten');
+
 	if (incompleteMatchScore) {
 		await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
 			.then(async (match) => {
+				console.log('match gotten');
 				saveOsuMultiScores(match);
+				console.log('match saved');
 				let channel = await client.channels.fetch(channelId);
 				await channel.send(`<https://osu.ppy.sh/mp/${match.id}> | ${incompleteMatchScore.updatedAt.getUTCHours().toString().padStart(2, 0)}:${incompleteMatchScore.updatedAt.getUTCMinutes().toString().padStart(2, 0)} ${incompleteMatchScore.updatedAt.getUTCDate().toString().padStart(2, 0)}.${(incompleteMatchScore.updatedAt.getUTCMonth() + 1).toString().padStart(2, 0)}.${incompleteMatchScore.updatedAt.getUTCFullYear()} | ${match.name}`);
+				console.log('match sent');
 			})
 			.catch(async (err) => {
 				let incompleteScores = await DBOsuMultiScores.findAll({
@@ -170,6 +175,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 			});
 	}
 
+	console.log('Resetting processQueueEntry');
 	let date = new Date();
 	date.setUTCSeconds(date.getUTCSeconds() + 60);
 	processQueueEntry.date = date;
