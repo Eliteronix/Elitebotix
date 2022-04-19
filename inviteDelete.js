@@ -1,8 +1,12 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries } = require('./utils');
+const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
 
 module.exports = async function (invite) {
+	if (wrongCluster(invite.inviter.id)) {
+		return;
+	}
+
 	if (isWrongSystem(invite.guild.id, false)) {
 		return;
 	}

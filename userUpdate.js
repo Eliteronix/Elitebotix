@@ -1,8 +1,12 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { logDatabaseQueries } = require('./utils');
+const { logDatabaseQueries, wrongCluster } = require('./utils');
 
 module.exports = async function (oldUser, newUser) {
+	if (wrongCluster(newUser.id)) {
+		return;
+	}
+
 	if (oldUser.username !== newUser.username) {
 		logDatabaseQueries(2, 'userUpdate.js DBGuilds Username');
 		const guilds = await DBGuilds.findAll({

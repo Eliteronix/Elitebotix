@@ -1,6 +1,6 @@
 //Log message upon starting the bot
 console.log('Bot is starting...');
-const { twitchConnect } = require('./utils');
+const { twitchConnect, wrongCluster } = require('./utils');
 
 //require the dotenv node module
 require('dotenv').config();
@@ -112,7 +112,7 @@ const { initializeMOTD } = require('./MOTD/initializeMOTD');
 
 const Banchojs = require('bancho.js');
 // eslint-disable-next-line no-undef
-const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1 });
+const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterPrivate: 1, limiterPublic: 1 });
 
 let twitchClient = null;
 twitchConnect(bancho).then(twitch => {
@@ -140,7 +140,9 @@ function readyDiscord() {
 		}]
 	});
 
-	restartProcessQueueTask();
+	if (!wrongCluster()) {
+		restartProcessQueueTask();
+	}
 }
 
 client.on('messageCreate', msg => gotMessage(msg, bancho, twitchClient));
@@ -162,6 +164,9 @@ client.on('guildBanRemove', guildBanRemove);
 client.on('userUpdate', userUpdate);
 
 client.on('messageReactionAdd', (reaction, user) => {
+	if (wrongCluster(user.id)) {
+		return;
+	}
 	reactionAdded(reaction, user, [client, bancho]);
 });
 
@@ -206,5 +211,8 @@ setInterval(() => refreshOsuRank(), 60000);
 setInterval(() => cleanUpDuplicateMultiScores(), 3600000);
 
 client.on('interactionCreate', interaction => {
+	if (wrongCluster(interaction.id)) {
+		return;
+	}
 	interactionCreate(client, bancho, interaction);
 });

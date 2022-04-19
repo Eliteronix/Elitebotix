@@ -1,4 +1,4 @@
-const { getGuildPrefix, updateServerUserActivity, saveOsuMultiScores, isWrongSystem, logDatabaseQueries } = require('./utils');
+const { getGuildPrefix, updateServerUserActivity, saveOsuMultiScores, isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
 const fs = require('fs');
 const Discord = require('discord.js');
 const osu = require('node-osu');
@@ -9,6 +9,9 @@ const { DBElitiriCupSignUp, DBTickets } = require('./dbObjects');
 const { developers, currentElitiriCup } = require('./config.json');
 
 module.exports = async function (msg, bancho, twitchClient) {
+	if (wrongCluster(msg.id)) {
+		return;
+	}
 	//check if the message wasn't sent by the bot itself or another bot
 	if (!(msg.author.bot) || msg.channel.id === '892873577479692358') {
 		//Create a collection for the commands

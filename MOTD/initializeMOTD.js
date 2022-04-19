@@ -3,12 +3,16 @@ const { assignPlayerRoles } = require('./assignPlayerRoles');
 const { setMapsForBracket } = require('./setMapsForBracket');
 const { createLeaderboard } = require('./createLeaderboard');
 const { DBDiscordUsers } = require('../dbObjects');
-const { logDatabaseQueries } = require('../utils');
+const { logDatabaseQueries, wrongCluster } = require('../utils');
 
 module.exports = {
 	initializeMOTD: async function (client, bancho, manualStart, manualLeaderboard) {
 		//Start everything in that minute
 		const today = new Date();
+		if (!manualStart && !manualLeaderboard && wrongCluster()) {
+			return;
+		}
+
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Live' && today.getUTCHours() === 18 && today.getUTCMinutes() === 0 || manualStart) {
 			// eslint-disable-next-line no-undef
