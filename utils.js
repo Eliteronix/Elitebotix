@@ -775,7 +775,6 @@ module.exports = {
 		return link.replace(/.+\//g, '');
 	},
 	async saveOsuMultiScores(match) {
-		console.log(match.name);
 		let stringifiedMatch = JSON.stringify(match);
 
 		//Move the match by spawning child process
@@ -790,7 +789,6 @@ module.exports = {
 
 		child.on('message', () => {
 			child.kill('SIGINT');
-			console.log('done', match.name);
 		});
 
 		await new Promise((resolve) => {
