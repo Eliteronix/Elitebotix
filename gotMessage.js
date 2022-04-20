@@ -9,7 +9,9 @@ const { DBElitiriCupSignUp, DBTickets } = require('./dbObjects');
 const { developers, currentElitiriCup } = require('./config.json');
 
 module.exports = async function (msg, bancho, twitchClient) {
-	if (wrongCluster(msg.id)) {
+	if (wrongCluster(msg.id) && !msg.content.includes('twitch-mapsync')) {
+		return;
+	} else if (wrongCluster() && msg.content.includes('twitch-mapsync')) {
 		return;
 	}
 	//check if the message wasn't sent by the bot itself or another bot
