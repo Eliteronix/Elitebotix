@@ -1745,7 +1745,7 @@ function wrongClusterFunction(id) {
 
 	//Allow the modulo cluster to execute
 	// eslint-disable-next-line no-undef
-	if (id && id.toString().substring(id.toString().length - 1) % clusterAmount === parseInt(process.env.pm_id)) {
+	if (id && id.toString().substring(id.toString().length - 3) % clusterAmount === parseInt(process.env.pm_id)) {
 		return false;
 	}
 
