@@ -159,6 +159,8 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				if (err.message === 'Not found') {
 					for (let i = 0; i < incompleteScores.length; i++) {
 						incompleteScores[i].warmup = false;
+						incompleteScores[i].maxCombo = 0;
+						incompleteScores[i].pp = 0;
 						await incompleteScores[i].save();
 					}
 				} else {

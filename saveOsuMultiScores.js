@@ -138,6 +138,8 @@ process.on('message', async (message) => {
 						countKatu: match.games[gameIndex].scores[scoreIndex].counts.katu,
 						countGeki: match.games[gameIndex].scores[scoreIndex].counts.geki,
 						perfect: match.games[gameIndex].scores[scoreIndex].perfect,
+						teamType: match.games[gameIndex].teamType,
+						team: match.games[gameIndex].scores[scoreIndex].team,
 					});
 
 					//Set the tournament flags on the corresponding beatmap
@@ -174,7 +176,7 @@ process.on('message', async (message) => {
 						}
 					}
 
-					if (false && scoreIndex === 0 && tourneyMatch) {
+					if (scoreIndex === 0 && tourneyMatch) {
 						let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
 
 						let weeksPrior = new Date(match.games[gameIndex].raw_start);
@@ -184,36 +186,38 @@ process.on('message', async (message) => {
 						weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
 
 						logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores reset warmup flags');
-						let sameMapSameTournamentScores = await DBOsuMultiScores.findAll({
-							where: {
-								beatmapId: match.games[gameIndex].beatmapId,
-								matchName: {
-									[Op.like]: `${acronym}:%`,
-								},
-								matchId: {
-									[Op.ne]: match.id,
-								},
-								gameStartDate: {
-									[Op.gte]: weeksPrior
-								},
-								gameEndDate: {
-									[Op.lte]: weeksAfter
-								},
-								tourneyMatch: true,
-								[Op.or]: [
-									{ warmup: false },
-									{ warmup: true }
-								],
-								warmupDecidedByAmount: true
+						await DBOsuMultiScores.update(
+							{ warmup: null },
+							{
+								where: {
+									beatmapId: match.games[gameIndex].beatmapId,
+									matchName: {
+										[Op.like]: `${acronym}:%`,
+									},
+									matchId: {
+										[Op.ne]: match.id,
+									},
+									gameStartDate: {
+										[Op.gte]: weeksPrior
+									},
+									gameEndDate: {
+										[Op.lte]: weeksAfter
+									},
+									tourneyMatch: true,
+									[Op.or]: [
+										{ warmup: false },
+										{ warmup: true }
+									],
+									warmupDecidedByAmount: true
+								}
 							}
-						});
-
-						for (let i = 0; i < sameMapSameTournamentScores.length; i++) {
-							sameMapSameTournamentScores[i].warmup = null;
-							await sameMapSameTournamentScores[i].save();
-						}
+						);
 					}
 				} else if (existingScore.warmup === null) {
+					existingScore.freeMod = freeMod;
+					existingScore.forceMod = forceMod;
+					existingScore.warmup = warmup;
+					existingScore.warmupDecidedByAmount = warmupDecidedByAmount;
 					existingScore.maxCombo = match.games[gameIndex].scores[scoreIndex].maxCombo;
 					existingScore.count50 = match.games[gameIndex].scores[scoreIndex].counts['50'];
 					existingScore.count100 = match.games[gameIndex].scores[scoreIndex].counts['100'];
@@ -224,10 +228,6 @@ process.on('message', async (message) => {
 					existingScore.perfect = match.games[gameIndex].scores[scoreIndex].perfect;
 					existingScore.teamType = match.games[gameIndex].teamType;
 					existingScore.team = match.games[gameIndex].scores[scoreIndex].team;
-					existingScore.freeMod = freeMod;
-					existingScore.forceMod = forceMod;
-					existingScore.warmup = warmup;
-					existingScore.warmupDecidedByAmount = warmupDecidedByAmount;
 					existingScore.changed('updatedAt', true);
 					await existingScore.save();
 
@@ -333,14 +333,10 @@ async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
 	weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
 
 	logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores warmup detection same tourney');
-	let sameMapSameTournamentScore = await DBOsuMultiScores.findOne({
+	let sameTournamentMatches = await DBOsuMultiScores.findAll({
 		where: {
-			beatmapId: match.games[gameIndex].beatmapId,
 			matchName: {
 				[Op.like]: `${acronym}:%`,
-			},
-			matchId: {
-				[Op.ne]: match.id,
 			},
 			gameStartDate: {
 				[Op.gte]: weeksPrior
@@ -352,8 +348,16 @@ async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
 		}
 	});
 
+	let sameMapSameTournamentScore = null;
+
+	for (let i = 0; i < sameTournamentMatches.length; i++) {
+		if (sameTournamentMatches[i].beatmapId == match.games[gameIndex].beatmapId && sameTournamentMatches[i].matchId != match.id) {
+			sameMapSameTournamentScore = sameTournamentMatches[i];
+			break;
+		}
+	}
+
 	if (sameMapSameTournamentScore) {
-		// console.log('No warmup due to same map same tournament');
 		return { warmup: false, byAmount: false };
 	}
 
@@ -418,31 +422,12 @@ async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
 			return { warmup: true, byAmount: false };
 		}
 	}
-	
-	return { warmup: null, byAmount: false };
-
-	//get all matches around the current one
-	logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores amount of matches');
-	let amountOfMatches = await DBOsuMultiScores.findAll({
-		where: {
-			matchName: {
-				[Op.like]: `${acronym}:%`,
-			},
-			gameStartDate: {
-				[Op.gte]: weeksPrior
-			},
-			gameEndDate: {
-				[Op.lte]: weeksAfter
-			},
-			tourneyMatch: true
-		}
-	});
 
 	//Check for unique matchIds
 	let matchIds = [];
-	for (let i = 0; i < amountOfMatches.length; i++) {
-		if (!matchIds.includes(amountOfMatches[i].matchId)) {
-			matchIds.push(amountOfMatches[i].matchId);
+	for (let i = 0; i < sameTournamentMatches.length; i++) {
+		if (!matchIds.includes(sameTournamentMatches[i].matchId)) {
+			matchIds.push(sameTournamentMatches[i].matchId);
 		}
 	}
 
