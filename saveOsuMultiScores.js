@@ -11,6 +11,30 @@ process.on('message', async (message) => {
 		tourneyMatch = true;
 	}
 
+	let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
+
+	let weeksPrior = new Date(match.raw_start);
+	weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
+
+	let weeksAfter = new Date(match.raw_start);
+	weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
+
+	logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores warmup detection same tourney');
+	let sameTournamentMatches = await DBOsuMultiScores.findAll({
+		where: {
+			matchName: {
+				[Op.like]: `${acronym}:%`,
+			},
+			gameStartDate: {
+				[Op.gte]: weeksPrior
+			},
+			gameEndDate: {
+				[Op.lte]: weeksAfter
+			},
+			tourneyMatch: true
+		}
+	});
+
 	for (let gameIndex = 0; gameIndex < match.games.length; gameIndex++) {
 		//Define if the game is freemod or not
 		let freeMod = false;
@@ -45,7 +69,7 @@ process.on('message', async (message) => {
 			}
 		}
 
-		let warmupCheckResult = await checkWarmup(match, gameIndex, tourneyMatch);
+		let warmupCheckResult = await checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches);
 
 		let warmup = warmupCheckResult.warmup;
 
@@ -98,15 +122,16 @@ process.on('message', async (message) => {
 				}
 				scoreMods = getModBits(scoreMods.join(''));
 
-				//Add score to db
-				logDatabaseQueries(2, 'saveosuMultiScores.js');
-				const existingScore = await DBOsuMultiScores.findOne({
-					where: {
-						osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
-						matchId: match.id,
-						gameId: match.games[gameIndex].id,
+				let existingScore = null;
+
+				for (let i = 0; i < sameTournamentMatches.length; i++) {
+					if (sameTournamentMatches[i].osuUserId == match.games[gameIndex].scores[scoreIndex].userId
+						&& sameTournamentMatches[i].matchId == match.id
+						&& sameTournamentMatches[i].gameId == match.games[gameIndex].id) {
+						existingScore = sameTournamentMatches[i];
+						break;
 					}
-				});
+				}
 
 				if (!existingScore) {
 					let score = await DBOsuMultiScores.create({
@@ -214,6 +239,22 @@ process.on('message', async (message) => {
 						);
 					}
 				} else if (existingScore.warmup === null) {
+					existingScore.osuUserId = match.games[gameIndex].scores[scoreIndex].userId;
+					existingScore.matchId = match.id;
+					existingScore.matchName = match.name;
+					existingScore.gameId = match.games[gameIndex].id;
+					existingScore.scoringType = match.games[gameIndex].scoringType;
+					existingScore.mode = match.games[gameIndex].mode;
+					existingScore.beatmapId = match.games[gameIndex].beatmapId;
+					existingScore.tourneyMatch = tourneyMatch;
+					existingScore.evaluation = evaluation;
+					existingScore.score = match.games[gameIndex].scores[scoreIndex].score;
+					existingScore.gameRawMods = match.games[gameIndex].raw_mods;
+					existingScore.rawMods = scoreMods;
+					existingScore.matchStartDate = match.raw_start;
+					existingScore.matchEndDate = match.raw_end;
+					existingScore.gameStartDate = match.games[gameIndex].raw_start;
+					existingScore.gameEndDate = match.games[gameIndex].raw_end;
 					existingScore.freeMod = freeMod;
 					existingScore.forceMod = forceMod;
 					existingScore.warmup = warmup;
@@ -316,7 +357,7 @@ function getMiddleScore(scores) {
 	return (parseInt(scores[0]) + parseInt(scores[1])) / 2;
 }
 
-async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
+async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches, crossCheck) {
 
 	let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
 
@@ -325,28 +366,6 @@ async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
 		// console.log('Not a warmup due to naming / map #');
 		return { warmup: false, byAmount: false };
 	}
-
-	let weeksPrior = new Date(match.games[gameIndex].raw_start);
-	weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
-
-	let weeksAfter = new Date(match.games[gameIndex].raw_start);
-	weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
-
-	logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores warmup detection same tourney');
-	let sameTournamentMatches = await DBOsuMultiScores.findAll({
-		where: {
-			matchName: {
-				[Op.like]: `${acronym}:%`,
-			},
-			gameStartDate: {
-				[Op.gte]: weeksPrior
-			},
-			gameEndDate: {
-				[Op.lte]: weeksAfter
-			},
-			tourneyMatch: true
-		}
-	});
 
 	let sameMapSameTournamentScore = null;
 
@@ -402,7 +421,7 @@ async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
 	//Check if the first map was not a warmup
 	if (gameIndex === 1 && !crossCheck) {
 		// console.log('Crosscheck for first map no warmup:');
-		let firstMapWarmup = await checkWarmup(match, 0, tourneyMatch, true);
+		let firstMapWarmup = await checkWarmup(match, 0, tourneyMatch, sameTournamentMatches, true);
 
 		//Return not a warmup if the first map was not a warmup
 		if (firstMapWarmup.warmup === false) {
@@ -414,7 +433,7 @@ async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
 	//Check if the second map is a warmup
 	if (gameIndex === 0 && match.games.length > 1 && !crossCheck) {
 		// console.log('Crosscheck for second map warmup:');
-		let secondMapWarmup = await checkWarmup(match, 1, tourneyMatch, true);
+		let secondMapWarmup = await checkWarmup(match, 1, tourneyMatch, sameTournamentMatches, true);
 
 		//Return not a warmup if the first map was not a warmup
 		if (secondMapWarmup.warmup === true) {
