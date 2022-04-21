@@ -174,7 +174,7 @@ process.on('message', async (message) => {
 						}
 					}
 
-					if (scoreIndex === 0 && tourneyMatch) {
+					if (false && scoreIndex === 0 && tourneyMatch) {
 						let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
 
 						let weeksPrior = new Date(match.games[gameIndex].raw_start);
@@ -418,6 +418,8 @@ async function checkWarmup(match, gameIndex, tourneyMatch, crossCheck) {
 			return { warmup: true, byAmount: false };
 		}
 	}
+	
+	return { warmup: null, byAmount: false };
 
 	//get all matches around the current one
 	logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores amount of matches');
