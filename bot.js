@@ -200,7 +200,7 @@ client.on('emojiUpdate', emojiUpdate);
 
 client.on('emojiDelete', emojiDelete);
 
-executeProcessQueue();
+setInterval(() => executeNextProcessQueueTask(client, bancho), 1000);
 
 setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
 
@@ -216,11 +216,3 @@ client.on('interactionCreate', interaction => {
 	}
 	interactionCreate(client, bancho, interaction);
 });
-
-async function executeProcessQueue() {
-	// eslint-disable-next-line no-constant-condition
-	while (true) {
-		await pause(700);
-		executeNextProcessQueueTask(client, bancho);
-	}
-}
