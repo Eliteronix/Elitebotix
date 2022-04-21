@@ -451,7 +451,7 @@ module.exports = {
 		});
 
 		try {
-			if (nextTask) {
+			if (nextTask && !wrongClusterFunction(nextTask.id)) {
 				const task = require(`./processQueueTasks/${nextTask.task}.js`);
 
 				nextTask.beingExecuted = true;
@@ -477,6 +477,10 @@ module.exports = {
 		}
 	},
 	refreshOsuRank: async function () {
+		if (wrongClusterFunction()) {
+			return;
+		}
+
 		let date = new Date();
 		date.setUTCHours(date.getUTCHours() - 24);
 
@@ -1463,7 +1467,9 @@ module.exports = {
 		return adjustHDStarRatingFunction(starRating, approachRate);
 	},
 	async twitchConnect(bancho) {
-
+		if (wrongClusterFunction()) {
+			return;
+		}
 		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers twitchConnect');
 		let twitchSyncUsers = await DBDiscordUsers.findAll({
 			where: {
@@ -1675,6 +1681,9 @@ module.exports = {
 		return outputScore;
 	},
 	async cleanUpDuplicateMultiScores() {
+		if (wrongClusterFunction()) {
+			return;
+		}
 		let date = new Date();
 		if (date.getUTCHours() > 1 && date.getUTCHours() < 6) {
 			return;
@@ -1719,8 +1728,34 @@ module.exports = {
 		if (deleted) {
 			console.log(`Cleaned up ${deleted} duplicate scores`);
 		}
+	},
+	wrongCluster(id) {
+		return wrongClusterFunction(id);
 	}
 };
+
+function wrongClusterFunction(id) {
+	let clusterAmount = require('os').cpus().length;
+	// eslint-disable-next-line no-undef
+	if (process.env.SERVER === 'Dev') {
+		clusterAmount = 4;
+	}
+
+	//Allow the modulo cluster to execute
+	// eslint-disable-next-line no-undef
+	if (id && id.toString().substring(id.toString().length - 3) % clusterAmount === parseInt(process.env.pm_id)) {
+		return false;
+	}
+
+	// Allow cluster 0 if no id is provided
+	// eslint-disable-next-line no-undef
+	if (!id && process.env.pm_id === '0') {
+		return false;
+	}
+
+	// Else its the wrong cluster
+	return true;
+}
 
 async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo) {
 	const rosu = require('rosu-pp');
@@ -1841,6 +1876,10 @@ function fitTextOnMiddleCanvasFunction(ctx, text, startingSize, fontface, yPosit
 async function checkForBirthdaysFunction(client) {
 	//get current date
 	const currentDate = new Date();
+
+	if (wrongClusterFunction()) {
+		return;
+	}
 
 	//get birthday dates from DBBirthdayGuilds for all users in the database that have a birthday set
 	logDatabaseQueriesFunction(2, 'utils.js DBBirthdayGuilds checkForBirthdaysFunction');

@@ -1,5 +1,7 @@
 {
 	"script": "bot.js",
+	"instances": 0,
+	"exec_mode": "cluster",
 	"watch": false,
 	"ignore_watch": [
 		"database.sqlite",

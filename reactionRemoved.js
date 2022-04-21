@@ -3,10 +3,14 @@ const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } 
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { isWrongSystem, logDatabaseQueries } = require('./utils');
+const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user) {
+	if (wrongCluster(user.id)) {
+		return;
+	}
+
 	if (isWrongSystem(reaction.message.guild.id, reaction.message.channel.type === 'DM')) {
 		return;
 	}
@@ -152,13 +156,13 @@ module.exports = async function (reaction, user) {
 							starBoardedMessage.starBoardMessageStarsQuantityMax = reaction.count + 1;
 							starBoardedMessage.save();
 						}
-						
+
 						return message.edit(`${reaction.count} ⭐ in <#${reaction.message.channel.id}>\nMaximum ⭐: ${starBoardedMessage.starBoardMessageStarsQuantityMax}`, starBoardMessageEmbed);
 					}
 				}
 			}
-		} 
-	
+		}
+
 		return;
 	}
 

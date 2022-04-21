@@ -25,5 +25,13 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		}
-	});
+	},
+		{
+			indexes: [
+				{
+					unique: false,
+					fields: ['beingExecuted', 'date', 'priority']
+				}
+			]
+		});
 };
