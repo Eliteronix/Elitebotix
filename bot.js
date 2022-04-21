@@ -105,7 +105,7 @@ const emojiDelete = require('./emojiDelete');
 const interactionCreate = require('./interactionCreate');
 
 //Get executeNextProcessQueueTask
-const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateMultiScores, checkForBirthdays, pause } = require('./utils');
+const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateMultiScores, checkForBirthdays } = require('./utils');
 
 //Get MOTD/getMapsOnTime
 const { initializeMOTD } = require('./MOTD/initializeMOTD');
@@ -200,7 +200,7 @@ client.on('emojiUpdate', emojiUpdate);
 
 client.on('emojiDelete', emojiDelete);
 
-setInterval(() => executeNextProcessQueueTask(client, bancho), 1000);
+setInterval(() => executeNextProcessQueueTask(client, bancho), 700);
 
 setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
 
