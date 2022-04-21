@@ -473,9 +473,9 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 		for (let i = 0; i < multisToUpdate.length; i++) {
 			processingMessage.edit(`[One time process] Updating legacy scores for ${user.name}... ${i + 1}/${multisToUpdate.length}`);
-			osuApi.getMatch({ mp: multisToUpdate[i] })
+			await osuApi.getMatch({ mp: multisToUpdate[i] })
 				.then(async (match) => {
-					saveOsuMultiScores(match);
+					await saveOsuMultiScores(match);
 				})
 				.catch(() => {
 					//Nothing
