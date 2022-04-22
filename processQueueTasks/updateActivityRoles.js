@@ -98,7 +98,7 @@ module.exports = {
 							} catch (e) {
 								if (e.message === 'Missing Access') {
 									if (!missingPermissionsMessage) {
-										const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
+										const owner = await member.client.users.fetch(member.guild.ownerId);
 										owner.send(`I could not assign an activityrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
 										missingPermissionsMessage = true;
 									}
@@ -118,7 +118,7 @@ module.exports = {
 							} catch (e) {
 								if (e.message === 'Missing Access') {
 									if (!missingPermissionsMessage) {
-										const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
+										const owner = await member.client.users.fetch(member.guild.ownerId);
 										owner.send(`I could not remove an activityrole from an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
 										missingPermissionsMessage = true;
 									}
