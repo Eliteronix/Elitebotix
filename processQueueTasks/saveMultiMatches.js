@@ -66,8 +66,9 @@ module.exports = {
 					} else {
 						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
 
-						date.setUTCMinutes(date.getUTCMinutes() + 1);
+						date.setUTCMinutes(date.getUTCMinutes() + 5);
 					}
+
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
 					return await processQueueEntry.save();
