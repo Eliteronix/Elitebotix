@@ -74,7 +74,9 @@ module.exports = {
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
 					console.log(`${matchID} Saving processQueueEntry`);
-					return await processQueueEntry.save();
+					await processQueueEntry.save();
+					console.log(`${matchID} Saved processQueueEntry`);
+					return;
 				}
 
 				return await processIncompleteScores(osuApi, client, processQueueEntry, '959499050246344754');
