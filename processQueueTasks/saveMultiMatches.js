@@ -10,8 +10,6 @@ module.exports = {
 
 		let matchID = args[0];
 
-		console.log(matchID);
-
 		// eslint-disable-next-line no-undef
 		let APItoken = process.env.OSUTOKENSV1.split('-')[parseInt(matchID) % process.env.OSUTOKENSV1.split('-').length];
 
@@ -42,7 +40,6 @@ module.exports = {
 
 		await osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
-				console.log(`${matchID} Fetched`);
 				let sixHoursAgo = new Date();
 				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
 				if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
@@ -73,10 +70,7 @@ module.exports = {
 					}
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
-					console.log(`${matchID} Saving processQueueEntry`);
-					await processQueueEntry.save();
-					console.log(`${matchID} Saved processQueueEntry`);
-					return;
+					return await processQueueEntry.save();
 				}
 
 				return await processIncompleteScores(osuApi, client, processQueueEntry, '959499050246344754');
