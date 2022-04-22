@@ -42,6 +42,7 @@ module.exports = {
 
 		await osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
+				console.log(`${matchID} Fetched`);
 				let sixHoursAgo = new Date();
 				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
 				if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
@@ -72,6 +73,7 @@ module.exports = {
 					}
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
+					console.log(`${matchID} Saving processQueueEntry`);
 					return await processQueueEntry.save();
 				}
 
