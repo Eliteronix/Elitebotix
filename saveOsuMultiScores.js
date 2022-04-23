@@ -204,9 +204,10 @@ process.on('message', async (message) => {
 					//Set back warmup flag if it was set by amount
 					if (scoreIndex === 0 && tourneyMatch) {
 						for (let i = 0; i < sameTournamentMatches.length; i++) {
-							if (sameTournamentMatches[i].warmupDecidedByAmount
-								&& sameTournamentMatches[i].warmup !== null
+							if (sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup !== null
 								&& sameTournamentMatches[i].beatmapId == match.games[gameIndex].beatmapId
+								&& sameTournamentMatches[i].matchId != match.id
+								|| sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup === false
 								&& sameTournamentMatches[i].matchId != match.id) {
 								sameTournamentMatches[i].warmup = null;
 								await sameTournamentMatches[i].save();
@@ -420,14 +421,14 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 	//Check for unique matchIds
 	let matchIds = [];
 	for (let i = 0; i < sameTournamentMatches.length; i++) {
-		if (!matchIds.includes(sameTournamentMatches[i].matchId)) {
+		if (!matchIds.includes(sameTournamentMatches[i].matchId) && sameTournamentMatches[i].matchId != match.id) {
 			matchIds.push(sameTournamentMatches[i].matchId);
 		}
 	}
 
 	//Last resort
 	//Set to warmup if more than 5 matches were played and didn't have the map
-	if (matchIds.length > 5 && !crossCheck) {
+	if (matchIds.length + 1 > 5 && !crossCheck) {
 		// console.log('Warmup due to amount of matches that still don\'t have the map');
 		return { warmup: true, byAmount: true };
 	} else if (!crossCheck) {

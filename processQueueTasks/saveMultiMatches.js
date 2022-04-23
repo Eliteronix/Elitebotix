@@ -35,7 +35,7 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
-			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364');
+			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 5);
 		}
 
 		await osuApi.getMatch({ mp: matchID })
@@ -72,7 +72,7 @@ module.exports = {
 					return await processQueueEntry.save();
 				}
 
-				return await processIncompleteScores(osuApi, client, processQueueEntry, '959499050246344754');
+				return await processIncompleteScores(osuApi, client, processQueueEntry, '959499050246344754', 30);
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
@@ -129,7 +129,7 @@ module.exports = {
 	},
 };
 
-async function processIncompleteScores(osuApi, client, processQueueEntry, channelId) {
+async function processIncompleteScores(osuApi, client, processQueueEntry, channelId, secondsToWait) {
 	//Go same if match found and not ended / too long going already
 	//Reimport an old match to clean up the database
 	logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores incomplete scores');
@@ -178,7 +178,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 	}
 
 	let date = new Date();
-	date.setUTCSeconds(date.getUTCSeconds() + 30);
+	date.setUTCSeconds(date.getUTCSeconds() + secondsToWait);
 	processQueueEntry.date = date;
 	processQueueEntry.beingExecuted = false;
 	return await processQueueEntry.save();

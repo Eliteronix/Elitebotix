@@ -5227,6 +5227,17 @@ module.exports = {
 					console.log(`Finished ${i + 1} of ${faultyDTMaps.length}`);
 				}
 			}
+		} else if (args[0] === 'resetWarmup') {
+			await DBOsuMultiScores.update(
+				{
+					warmup: null
+				},
+				{
+					where: {
+						warmupDecidedByAmount: true
+					}
+				}
+			);
 		} else {
 			msg.reply('Invalid command');
 		}
