@@ -2,6 +2,7 @@ const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DB
 const { pause, logDatabaseQueries, getUserDuelStarRating, getMods, getModBits } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'admin',
@@ -5200,7 +5201,11 @@ module.exports = {
 
 			console.log(result[0]);
 		} else if (args[0] === 'faultyHTMaps') {
-			let faultyDTMaps = await DBOsuMultiScores.findAll();
+			let faultyDTMaps = await DBOsuMultiScores.findAll({
+				where: {
+					[Op.gt]: 0
+				}
+			});
 
 			for (let i = 0; i < faultyDTMaps.length; i++) {
 				if (getMods(faultyDTMaps[i].rawMods).includes('HT')) {
@@ -5208,7 +5213,11 @@ module.exports = {
 				}
 			}
 		} else if (args[0] === 'cleanFaultyHTMaps') {
-			let faultyDTMaps = await DBOsuMultiScores.findAll();
+			let faultyDTMaps = await DBOsuMultiScores.findAll({
+				where: {
+					[Op.gt]: 0
+				}
+			});
 
 			for (let i = 0; i < faultyDTMaps.length; i++) {
 				if (getMods(faultyDTMaps[i].rawMods).includes('HT')) {
