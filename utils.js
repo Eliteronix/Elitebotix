@@ -1721,7 +1721,7 @@ module.exports = {
 					}
 				});
 
-				console.log(duplicate.matchId, duplicate.gameId, duplicate.osuUserId, duplicate.matchStartDate, duplicate.maxCombo);
+				console.log(duplicate.matchId, duplicate.gameId, duplicate.osuUserId, duplicate.matchStartDate, duplicate.updatedAt);
 
 				deleted++;
 				await new Promise(resolve => setTimeout(resolve, 2000));
