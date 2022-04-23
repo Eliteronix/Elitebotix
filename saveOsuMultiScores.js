@@ -115,7 +115,7 @@ process.on('message', async (message) => {
 				//Remove DT and NC from scoreMods
 				let scoreMods = getMods(match.games[gameIndex].scores[scoreIndex].raw_mods);
 				for (let i = 0; i < scoreMods.length; i++) {
-					if (scoreMods[i] === 'DT' || scoreMods[i] === 'NC') {
+					if (scoreMods[i] === 'HT' || scoreMods[i] === 'DT' || scoreMods[i] === 'NC') {
 						scoreMods.splice(i, 1);
 						i--;
 					}

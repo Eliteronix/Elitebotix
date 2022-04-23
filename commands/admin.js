@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { pause, logDatabaseQueries, getUserDuelStarRating } = require('../utils');
+const { pause, logDatabaseQueries, getUserDuelStarRating, getMods, getModBits } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 
@@ -5199,6 +5199,34 @@ module.exports = {
 			);
 
 			console.log(result[0]);
+		} else if (args[0] === 'faultyHTMaps') {
+			let faultyDTMaps = await DBOsuMultiScores.findAll();
+
+			for (let i = 0; i < faultyDTMaps.length; i++) {
+				if (getMods(faultyDTMaps[i].rawMods).includes('HT')) {
+					console.log(`MatchID: ${faultyDTMaps[i].matchId} - osuId: ${faultyDTMaps[i].osuUserId} - MapID: ${faultyDTMaps[i].beatmapId} | UserMods: ${getMods(faultyDTMaps[i].rawMods).join('')} - GameMods: ${getMods(faultyDTMaps[i].gameRawMods).join('')}`);
+				}
+			}
+		} else if (args[0] === 'cleanFaultyHTMaps') {
+			let faultyDTMaps = await DBOsuMultiScores.findAll();
+
+			for (let i = 0; i < faultyDTMaps.length; i++) {
+				if (getMods(faultyDTMaps[i].rawMods).includes('HT')) {
+					let mods = getMods(faultyDTMaps[i].rawMods);
+
+					for (let i = 0; i < mods.length; i++) {
+						if (mods[i] === 'HT') {
+							mods.splice(i, 1);
+							i--;
+						}
+					}
+
+					faultyDTMaps[i].rawMods = getModBits(mods.join(''));
+					faultyDTMaps[i].pp = null;
+					await faultyDTMaps[i].save();
+					console.log(`Finished ${i + 1} of ${faultyDTMaps.length}`);
+				}
+			}
 		} else {
 			msg.reply('Invalid command');
 		}
