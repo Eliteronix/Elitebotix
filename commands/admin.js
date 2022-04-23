@@ -5203,7 +5203,7 @@ module.exports = {
 		} else if (args[0] === 'faultyHTMaps') {
 			let faultyDTMaps = await DBOsuMultiScores.findAll({
 				where: {
-					[Op.gt]: 0
+					[Op.gte]: 1
 				}
 			});
 
@@ -5215,7 +5215,7 @@ module.exports = {
 		} else if (args[0] === 'cleanFaultyHTMaps') {
 			let faultyDTMaps = await DBOsuMultiScores.findAll({
 				where: {
-					[Op.gt]: 0
+					[Op.gte]: 1
 				}
 			});
 
