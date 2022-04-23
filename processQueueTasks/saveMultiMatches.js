@@ -146,14 +146,14 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 	});
 
 	if (incompleteMatchScore) {
-		incompleteMatchScore.changed('updatedAt', true);
-		await incompleteMatchScore.save();
-
 		await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
 			.then(async (match) => {
 				await saveOsuMultiScores(match);
 				let channel = await client.channels.fetch(channelId);
 				await channel.send(`<https://osu.ppy.sh/mp/${match.id}> | ${incompleteMatchScore.updatedAt.getUTCHours().toString().padStart(2, 0)}:${incompleteMatchScore.updatedAt.getUTCMinutes().toString().padStart(2, 0)} ${incompleteMatchScore.updatedAt.getUTCDate().toString().padStart(2, 0)}.${(incompleteMatchScore.updatedAt.getUTCMonth() + 1).toString().padStart(2, 0)}.${incompleteMatchScore.updatedAt.getUTCFullYear()} | \`${match.name}\``);
+
+				incompleteMatchScore.changed('updatedAt', true);
+				await incompleteMatchScore.save();
 			})
 			.catch(async (err) => {
 				logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores incomplete scores backup');
