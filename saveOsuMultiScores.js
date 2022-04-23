@@ -53,10 +53,10 @@ process.on('message', async (message) => {
 
 		for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
 			if (parseInt(match.games[gameIndex].scores[i].score) >= 10000 && forceMod) {
-				//Remove DT and NC from scoreMods
+				//Remove HT, DT and NC from scoreMods
 				let scoreMods = getMods(match.games[gameIndex].scores[i].raw_mods);
 				for (let j = 0; j < scoreMods.length; j++) {
-					if (scoreMods[j] === 'DT' || scoreMods[j] === 'NC') {
+					if (scoreMods[j] === 'HT' || scoreMods[j] === 'DT' || scoreMods[j] === 'NC') {
 						scoreMods.splice(j, 1);
 						j--;
 					}
@@ -112,7 +112,7 @@ process.on('message', async (message) => {
 			}
 
 			try {
-				//Remove DT and NC from scoreMods
+				//Remove HT, DT and NC from scoreMods
 				let scoreMods = getMods(match.games[gameIndex].scores[scoreIndex].raw_mods);
 				for (let i = 0; i < scoreMods.length; i++) {
 					if (scoreMods[i] === 'HT' || scoreMods[i] === 'DT' || scoreMods[i] === 'NC') {
