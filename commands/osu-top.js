@@ -480,7 +480,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 				.catch(() => {
 					//Nothing
 				});
-			await pause(20000);
+			await pause(5000);
 		}
 
 		//Get all scores from tournaments
