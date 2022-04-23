@@ -1,8 +1,7 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { pause, logDatabaseQueries, getUserDuelStarRating, getMods, getModBits } = require('../utils');
+const { pause, logDatabaseQueries, getUserDuelStarRating } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
-const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'admin',
@@ -5200,57 +5199,6 @@ module.exports = {
 			);
 
 			console.log(result[0]);
-		} else if (args[0] === 'faultyHTMaps') {
-			let faultyHTMaps = await DBOsuMultiScores.findAll({
-				where: {
-					rawMods: {
-						[Op.gt]: 0
-					}
-				}
-			});
-
-			for (let i = 0; i < faultyHTMaps.length; i++) {
-				if (getMods(faultyHTMaps[i].rawMods).includes('HT')) {
-					console.log(`MatchID: ${faultyHTMaps[i].matchId} - osuId: ${faultyHTMaps[i].osuUserId} - MapID: ${faultyHTMaps[i].beatmapId} | UserMods: ${getMods(faultyHTMaps[i].rawMods).join('')} - GameMods: ${getMods(faultyHTMaps[i].gameRawMods).join('')}`);
-				}
-			}
-		} else if (args[0] === 'cleanFaultyHTMaps') {
-			let faultyHTMaps = await DBOsuMultiScores.findAll({
-				where: {
-					rawMods: {
-						[Op.gt]: 0
-					}
-				}
-			});
-
-			for (let i = 0; i < faultyHTMaps.length; i++) {
-				if (getMods(faultyHTMaps[i].rawMods).includes('HT')) {
-					let mods = getMods(faultyHTMaps[i].rawMods);
-
-					for (let i = 0; i < mods.length; i++) {
-						if (mods[i] === 'HT') {
-							mods.splice(i, 1);
-							i--;
-						}
-					}
-
-					faultyHTMaps[i].rawMods = getModBits(mods.join(''));
-					faultyHTMaps[i].pp = null;
-					await faultyHTMaps[i].save();
-					console.log(`Finished ${i + 1} of ${faultyHTMaps.length}`);
-				}
-			}
-		} else if (args[0] === 'resetWarmup') {
-			await DBOsuMultiScores.update(
-				{
-					warmup: null
-				},
-				{
-					where: {
-						warmupDecidedByAmount: true
-					}
-				}
-			);
 		} else {
 			msg.reply('Invalid command');
 		}
