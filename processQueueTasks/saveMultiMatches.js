@@ -145,10 +145,10 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 		]
 	});
 
-	incompleteMatchScore.changed('updatedAt', true);
-	await incompleteMatchScore.save();
-
 	if (incompleteMatchScore) {
+		incompleteMatchScore.changed('updatedAt', true);
+		await incompleteMatchScore.save();
+
 		await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
 			.then(async (match) => {
 				await saveOsuMultiScores(match);

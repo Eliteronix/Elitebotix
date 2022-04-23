@@ -201,42 +201,17 @@ process.on('message', async (message) => {
 						}
 					}
 
+					//Set back warmup flag if it was set by amount
 					if (scoreIndex === 0 && tourneyMatch) {
-						let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
-
-						let weeksPrior = new Date(match.games[gameIndex].raw_start);
-						weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
-
-						let weeksAfter = new Date(match.games[gameIndex].raw_start);
-						weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
-
-						logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores reset warmup flags');
-						await DBOsuMultiScores.update(
-							{ warmup: null },
-							{
-								where: {
-									beatmapId: match.games[gameIndex].beatmapId,
-									matchName: {
-										[Op.like]: `${acronym}:%`,
-									},
-									matchId: {
-										[Op.ne]: match.id,
-									},
-									gameStartDate: {
-										[Op.gte]: weeksPrior
-									},
-									gameEndDate: {
-										[Op.lte]: weeksAfter
-									},
-									tourneyMatch: true,
-									[Op.or]: [
-										{ warmup: false },
-										{ warmup: true }
-									],
-									warmupDecidedByAmount: true
-								}
+						for (let i = 0; i < sameTournamentMatches.length; i++) {
+							if (sameTournamentMatches[i].warmupDecidedByAmount
+								&& sameTournamentMatches[i].warmup !== null
+								&& sameTournamentMatches[i].beatmapId == match.games[gameIndex].beatmapId
+								&& sameTournamentMatches[i].matchId != match.id) {
+								sameTournamentMatches[i].warmup = null;
+								await sameTournamentMatches[i].save();
 							}
-						);
+						}
 					}
 				} else if (existingScore.warmup === null) {
 					existingScore.osuUserId = match.games[gameIndex].scores[scoreIndex].userId;
