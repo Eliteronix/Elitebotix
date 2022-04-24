@@ -318,6 +318,18 @@ module.exports = {
 									args.shift();
 									args.shift();
 									args.shift();
+
+									let totalEmojis = await DBReactionRoles.count({
+										where: { dbReactionRolesHeaderId: headerId },
+									});
+
+									if (totalEmojis == 20) {
+										if (msg.id) {
+											return msg.reply('You can only have a maximum of 20 reactionroles in one embed.');
+										}
+										return interaction.editReply({ content: 'You can only have a maximum of 20 reactionroles in one embed.', ephemeral: true });
+									}
+
 									DBReactionRoles.create({ dbReactionRolesHeaderId: headerId, roleId: roleMentioned, emoji: emoji, description: args.join(' ') });
 									if (msg.id) {
 										msg.reply('The role has been added as an reactionrole.');
