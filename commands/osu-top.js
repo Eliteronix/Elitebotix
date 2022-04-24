@@ -186,7 +186,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}.png`);
+				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}-mode${mode}.png`);
 
 				//If created by osu-tracking
 				if (tracking) {
