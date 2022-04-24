@@ -185,7 +185,7 @@ module.exports = {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'feedback',
-			// 		description: 'Sends feedback to the dev',
+			// 		description: 'Sends feedback to the devs',
 			// 		options: [
 			// 			{
 			// 				'name': 'type',
@@ -2745,7 +2745,7 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'feedback',
-					description: 'Sends feedback to the dev',
+					description: 'Sends feedback to the devs',
 					options: [
 						{
 							'name': 'type',
