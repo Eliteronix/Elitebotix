@@ -217,11 +217,10 @@ client.on('interactionCreate', interaction => {
 	interactionCreate(client, bancho, interaction);
 });
 
-async function executeProcessQueue() {
-	// eslint-disable-next-line no-constant-condition
-	while (true) {
-		executeNextProcessQueueTask(client, bancho);
+async function executeProcessQueue(client, bancho) {
+	executeNextProcessQueueTask(client, bancho);
 
-		await pause(700);
-	}
+	setTimeout(() => {
+		executeProcessQueue(client, bancho);
+	}, 700);
 }
