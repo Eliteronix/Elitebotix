@@ -64,10 +64,10 @@ module.exports = {
 		} else {
 			//Bubblesort userscores by matchId property descending
 			userScores.sort((a, b) => {
-				if (a.matchId > b.matchId) {
+				if (parseInt(a.matchId) > parseInt(b.matchId)) {
 					return -1;
 				}
-				if (a.matchId < b.matchId) {
+				if (parseInt(a.matchId) < parseInt(b.matchId)) {
 					return 1;
 				}
 				return 0;

@@ -1912,7 +1912,7 @@ function partitionMatchId(list, start, end) {
 	const pivot = list[end];
 	let i = start;
 	for (let j = start; j < end; j += 1) {
-		if (list[j].matchId > pivot.matchId) {
+		if (parseInt(list[j].matchId) > parseInt(pivot.matchId)) {
 			[list[j], list[i]] = [list[i], list[j]];
 			i++;
 		}
