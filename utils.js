@@ -450,7 +450,13 @@ module.exports = {
 			]
 		});
 
-		executeFoundTask(client, bancho, nextTask);
+		if (nextTask && !wrongClusterFunction(nextTask.id)) {
+			nextTask.beingExecuted = true;
+			await nextTask.save();
+
+			executeFoundTask(client, bancho, nextTask);
+		}
+
 	},
 	refreshOsuRank: async function () {
 		if (wrongClusterFunction()) {
@@ -2616,9 +2622,6 @@ async function executeFoundTask(client, bancho, nextTask) {
 	try {
 		if (nextTask && !wrongClusterFunction(nextTask.id)) {
 			const task = require(`./processQueueTasks/${nextTask.task}.js`);
-
-			nextTask.beingExecuted = true;
-			await nextTask.save();
 
 			await task.execute(client, bancho, nextTask);
 		}
