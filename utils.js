@@ -450,31 +450,7 @@ module.exports = {
 			]
 		});
 
-		try {
-			if (nextTask && !wrongClusterFunction(nextTask.id)) {
-				const task = require(`./processQueueTasks/${nextTask.task}.js`);
-
-				nextTask.beingExecuted = true;
-				await nextTask.save();
-
-				await task.execute(client, bancho, nextTask);
-			}
-		} catch (e) {
-			console.log('Error executing process queue task', e);
-			if (nextTask.task === 'saveMultiMatches') {
-				nextTask.beingExecuted = false;
-				await new Promise(resolve => setTimeout(resolve, 10000));
-				try {
-					await nextTask.save();
-				} catch (e) {
-					await new Promise(resolve => setTimeout(resolve, 10000));
-					await nextTask.save();
-				}
-			} else {
-				console.log('Process Queue entry:', nextTask);
-				nextTask.destroy();
-			}
-		}
+		executeFoundTask(client, bancho, nextTask);
 	},
 	refreshOsuRank: async function () {
 		if (wrongClusterFunction()) {
@@ -2633,5 +2609,33 @@ function calculateGradeFunction(mode, counts, modBits) {
 		return grade;
 	} else {
 		return 'D';
+	}
+}
+
+async function executeFoundTask(client, bancho, nextTask) {
+	try {
+		if (nextTask && !wrongClusterFunction(nextTask.id)) {
+			const task = require(`./processQueueTasks/${nextTask.task}.js`);
+
+			nextTask.beingExecuted = true;
+			await nextTask.save();
+
+			await task.execute(client, bancho, nextTask);
+		}
+	} catch (e) {
+		console.log('Error executing process queue task', e);
+		if (nextTask.task === 'saveMultiMatches') {
+			nextTask.beingExecuted = false;
+			await new Promise(resolve => setTimeout(resolve, 10000));
+			try {
+				await nextTask.save();
+			} catch (e) {
+				await new Promise(resolve => setTimeout(resolve, 10000));
+				await nextTask.save();
+			}
+		} else {
+			console.log('Process Queue entry:', nextTask);
+			nextTask.destroy();
+		}
 	}
 }
