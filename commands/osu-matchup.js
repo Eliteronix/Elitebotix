@@ -528,7 +528,7 @@ module.exports = {
 					}
 					if (`${scoreVersion}${getScoreModpool(scoresTeam2[j][k])}${scoresTeam2[j][k].beatmapId}` === mapsPlayed[i]) {
 						team2MapScores.push(scoresTeam2[j][k]);
-						if (!matchId || matchId < scoresTeam2[j][k].matchId) {
+						if (!matchId || parseInt(matchId) < parseInt(scoresTeam2[j][k].matchId)) {
 							matchId = scoresTeam2[j][k].matchId;
 							date = scoresTeam2[j][k].matchStartDate;
 							dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;

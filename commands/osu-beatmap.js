@@ -147,10 +147,10 @@ async function getBeatmap(msg, interaction, beatmap) {
 
 	//Bubblesort mapScores by matchId property descending
 	mapScores.sort((a, b) => {
-		if (a.matchId > b.matchId) {
+		if (parseInt(a.matchId) > parseInt(b.matchId)) {
 			return -1;
 		}
-		if (a.matchId < b.matchId) {
+		if (parseInt(a.matchId) < parseInt(b.matchId)) {
 			return 1;
 		}
 		return 0;
