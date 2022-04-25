@@ -105,7 +105,7 @@ const emojiDelete = require('./emojiDelete');
 const interactionCreate = require('./interactionCreate');
 
 //Get executeNextProcessQueueTask
-const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateMultiScores, checkForBirthdays, pause } = require('./utils');
+const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateMultiScores, checkForBirthdays } = require('./utils');
 
 //Get MOTD/getMapsOnTime
 const { initializeMOTD } = require('./MOTD/initializeMOTD');
