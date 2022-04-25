@@ -222,5 +222,5 @@ async function executeProcessQueue(client, bancho) {
 
 	setTimeout(() => {
 		executeProcessQueue(client, bancho);
-	}, 700);
+	}, 650);
 }
