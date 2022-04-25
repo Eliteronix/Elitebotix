@@ -696,6 +696,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 			}
 
 			let interaction = {
+				client: reaction.client,
 				guild: reaction.message.guild,
 				guildId: guildId,
 				options: {
