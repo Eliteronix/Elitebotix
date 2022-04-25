@@ -450,6 +450,8 @@ module.exports = {
 			]
 		});
 
+		console.log(`Took ${new Date() - now}ms to get the processqueuetasks`);
+
 		if (nextTask && !wrongClusterFunction(nextTask.id)) {
 			nextTask.beingExecuted = true;
 			await nextTask.save();
