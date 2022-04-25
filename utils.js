@@ -1685,7 +1685,7 @@ module.exports = {
 			return;
 		}
 		let date = new Date();
-		if (date.getUTCHours() > 1 && date.getUTCHours() < 6) {
+		if (date.getUTCHours() < 1 || date.getUTCHours() > 6) {
 			return;
 		}
 		let duplicates = true;
