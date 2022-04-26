@@ -273,32 +273,47 @@ module.exports = {
 						if (!currentIterationRecordExists) {
 							//Remove all roles if no record exists
 							try {
-								await members[i].roles.remove(hostRole);
+								if (members[i].roles.cache.has(hostRole.id)) {
+									//Remove role if not removed yet
+									await members[i].roles.remove(hostRole);
+								}
 							} catch (e) {
 								console.log(e);
 							}
 
 							try {
-								await members[i].roles.remove(streamerRole);
+								if (members[i].roles.cache.has(streamerRole.id)) {
+									//Remove role if not removed yet
+									await members[i].roles.remove(streamerRole);
+								}
 							} catch (e) {
 								console.log(e);
 							}
 
 							try {
-								await members[i].roles.remove(commentatorRole);
+								if (members[i].roles.cache.has(commentatorRole.id)) {
+									//Remove role if not removed yet
+									await members[i].roles.remove(commentatorRole);
+								}
 							}
 							catch (e) {
 								console.log(e);
 							}
 
 							try {
-								await members[i].roles.remove(refereeRole);
+								if (members[i].roles.cache.has(refereeRole.id)) {
+									//Remove role if not removed yet
+									await members[i].roles.remove(refereeRole);
+								}
 							} catch (e) {
 								console.log(e);
 							}
 
 							try {
-								await members[i].roles.remove(replayerRole);
+								if (members[i].roles.cache.has(replayerRole.id)) {
+									//Remove role if not removed yet
+									await members[i].roles.remove(replayerRole);
+								}
 							} catch (e) {
 								console.log(e);
 							}
