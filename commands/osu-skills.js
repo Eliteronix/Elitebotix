@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague } = require('../utils');
+const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 const { Op } = require('sequelize');
@@ -316,7 +316,9 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.font = 'bold 30px comfortaa, sans-serif';
-			ctx.fillText(`Top Play Stats for ${user.name}`, 400, 40);
+			fitTextOnMiddleCanvas(ctx, `Top Play Stats for ${user.name}`, 30, 'comfortaa, sans-serif', 40, canvas.width + 150, 320 );
+			
+			// ctx.fillText(`Top Play Stats for ${user.name}`, 400, 40);
 
 			ctx.textAlign = 'left';
 			ctx.font = 'bold 15px comfortaa, sans-serif';
