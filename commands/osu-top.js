@@ -549,7 +549,12 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 	for (let i = 0; i < showLimit && i < scores.length; i++) {
 		let dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: scores[i].raw_mods });
-		beatmaps.push(dbBeatmap);
+		if (dbBeatmap) {
+			beatmaps.push(dbBeatmap);
+		} else {
+			scores.splice(i, 1);
+			i--;
+		}
 	}
 
 	if (sorting) {
