@@ -263,7 +263,7 @@ module.exports = {
 			}
 			// eslint-disable-next-line no-undef
 		} else if (process.env.SERVER === 'Live') {
-			console.log(discordUser.osuUserId, ecw2022SignUp);
+			console.log('Didn\'t find ecw sign up', discordUser.osuUserId, ecw2022SignUp);
 		}
 
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
