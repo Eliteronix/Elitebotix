@@ -660,7 +660,7 @@ async function drawAccInfo(input, mode, mapRank) {
 		let fcScoreAccuracy = getAccuracy(fcScore, 0) * 100;
 		let fcpp = Math.round(await getOsuPP(beatmap.beatmapId, score.raw_mods, fcScoreAccuracy, 0, beatmap.maxCombo));
 		if (pp !== fcpp) {
-			pp = `${pp} (${Math.round(fcpp)} If FC)`;
+			pp = `${pp} (${Math.round(fcpp)} FC)`;
 			ctx.font = '16px comfortaa, sans-serif';
 		}
 	}
