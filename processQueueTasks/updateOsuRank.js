@@ -209,12 +209,15 @@ module.exports = {
 			}
 		}
 
+		console.log('Processing user ' + discordUser.osuName);
+
 		const ecw2022SignUp = await DBElitiriCupSignUp.findOne({
 			where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Cup Winter 2022' }
 		});
 
 		// eslint-disable-next-line no-undef
 		if (ecw2022SignUp && process.env.SERVER === 'Live') {
+			console.log('Processing ecw2022 Sign Up ' + discordUser.osuName);
 			const guild = await client.guilds.fetch('727407178499096597');
 			try {
 				const member = await guild.members.fetch(discordUserId);
@@ -258,6 +261,9 @@ module.exports = {
 			} catch (error) {
 				//nothing
 			}
+			// eslint-disable-next-line no-undef
+		} else if (process.env.SERVER === 'Live') {
+			console.log(discordUser.osuUserId, ecw2022SignUp);
 		}
 
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
