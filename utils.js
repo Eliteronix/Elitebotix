@@ -905,6 +905,7 @@ module.exports = {
 					}
 
 					if (!existingScore) {
+						console.log('New score', match.id, match.name);
 						let score = await DBOsuMultiScores.create({
 							osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
 							matchId: match.id,
