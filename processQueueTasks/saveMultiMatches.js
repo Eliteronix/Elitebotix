@@ -72,7 +72,7 @@ module.exports = {
 					return await processQueueEntry.save();
 				}
 
-				return await processIncompleteScores(osuApi, client, processQueueEntry, '959499050246344754', 10);
+				return await processIncompleteScores(osuApi, client, processQueueEntry, '959499050246344754', 5);
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
