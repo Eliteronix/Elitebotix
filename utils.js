@@ -1387,19 +1387,19 @@ module.exports = {
 					} else if (modPools[modIndex] === 'DT') {
 						userMaps[i].score = userMaps[i].score / 1.2;
 					} else if (modPools[modIndex] === 'FM') {
-						if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('HD')) {
+						if (getModsFunction(userMaps[i].modBits).includes('HD')) {
 							userMaps[i].score = userMaps[i].score / 1.06;
 						}
-						if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('HR')) {
+						if (getModsFunction(userMaps[i].modBits).includes('HR')) {
 							userMaps[i].score = userMaps[i].score / 1.1;
 						}
-						if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('FL')) {
+						if (getModsFunction(userMaps[i].modBits).includes('FL')) {
 							userMaps[i].score = userMaps[i].score / 1.12;
 						}
-						if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('DT')) {
+						if (getModsFunction(userMaps[i].modBits).includes('DT')) {
 							userMaps[i].score = userMaps[i].score / 1.2;
 						}
-						if (getModsFunction(parseInt(userMaps[i].gameRawMods) + parseInt(userMaps[i].rawMods)).includes('EZ')) {
+						if (getModsFunction(userMaps[i].modBits).includes('EZ')) {
 							userMaps[i].score = userMaps[i].score / 0.5;
 						}
 					}
