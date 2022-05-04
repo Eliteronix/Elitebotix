@@ -1564,14 +1564,14 @@ module.exports = {
 				explaination.push('If you are just here to get a rough explaination of how the calculation works, here is a tldr:');
 				explaination.push('');
 				explaination.push('**TL;DR:**');
-				explaination.push('The star rating is calculated based on your last 50 tournament score v2 scores for each modpool.');
+				explaination.push('The star rating is calculated based on your last 35 tournament score v2 scores for each modpool.');
 				explaination.push('You can see the scores taken into account in the first file attached.');
 				explaination.push('You can see the starratings and how they are evaluated in the second file. (The higher the weight the more effect the star rating has on the overall star rating)');
 				explaination.push('You can see the matches where the scores are from in the third file.');
 				explaination.push('');
 				explaination.push('**In Depth Explaination:**');
 				explaination.push('1. Step:');
-				explaination.push('The bot grabs the last 50 tournament score v2 scores for each modpool. (Limited to unique ranked maps)');
+				explaination.push('The bot grabs the last 35 tournament score v2 scores for each modpool. (Limited to unique ranked maps)');
 				explaination.push('The limit exists to not evaluate the same maps twice, to limit the API calls to some extend and to get relatively recent data without losing accuracy due to limiting it to a timestamp.');
 				explaination.push('');
 				explaination.push('2. Step:');
@@ -1586,7 +1586,7 @@ module.exports = {
 				explaination.push('The weighted star ratings of each step will now be summed up and divided by all the average weights of each step summed up.');
 				explaination.push('');
 				explaination.push('4. Step:');
-				explaination.push('The last 50 scores from that modpool will now once again effect the star rating.');
+				explaination.push('The last 35 scores from that modpool will now once again effect the star rating.');
 				explaination.push('For each score there will be an expected score calculated using this formula which is based on the starrating itself: <https://www.desmos.com/calculator/oae69zr9ze> (cap of 950k upwards | 20k downwards)');
 				explaination.push('The difference between the score and the expected score will now be calculated.');
 				explaination.push('The difference now decides the star rating change using this formula: <https://www.desmos.com/calculator/zlckiq6hgx> (cap of 1*)');
