@@ -433,8 +433,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace('osu-recent-', '').replace('osu-score-', '').replace('osu-league-rankings-', '').replace('osu-topPlayStats-', '').replace(/-.+.png/gm, '').replace('.png', '');
 
-			console.log(osuUserId);
-
 			//Setup artificial arguments
 			let args = [osuUserId];
 
