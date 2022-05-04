@@ -386,7 +386,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 		//Check if it is a profile
 		if (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-top') || reaction.message.attachments.first().name.startsWith('osu-league-rankings')) {
 			//get the osuUserId used
-			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+			let osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+			if (reaction.message.attachments.first().name.startsWith('osu-top')) {
+				osuUserId = reaction.message.attachments.first().name.replace(/.mode./gm, '').replace('.png', '').replace(/.*-/, '');
+			}
 
 			//Setup artificial arguments
 			let args = [osuUserId];
