@@ -1341,6 +1341,8 @@ module.exports = {
 			outdated: outdated
 		};
 
+		let scoresPerMod = 35;
+
 		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
 
 		//Loop through all modpools
@@ -1364,7 +1366,7 @@ module.exports = {
 			//Group the maps into steps of 0.1 of difficulty
 			const steps = [];
 			const stepData = [];
-			for (let i = 0; i < userMaps.length && i < 50; i++) {
+			for (let i = 0; i < userMaps.length && i < scoresPerMod; i++) {
 				//Get the most recent data
 				let dbBeatmap = null;
 				if (modPools[modIndex] === 'HR') {
@@ -1495,8 +1497,8 @@ module.exports = {
 			if (totalWeight > 0 && userMaps.length > 0) {
 				let weightedStarRating = totalWeightedStarRating / totalWeight;
 
-				for (let i = 0; i < 50; i++) {
-					weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i % userMaps.length], Math.round((1 - i * 0.02) * 100) / 100);
+				for (let i = 0; i < scoresPerMod; i++) {
+					weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i % userMaps.length], Math.round((1 - (i * 1 / scoresPerMod)) * 100) / 100);
 				}
 
 				if (modIndex === 0) {
@@ -1571,6 +1573,7 @@ module.exports = {
 						let message = [`${discordUser.osuName}:`];
 						if (Math.round(discordUser.osuDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.total * 1000) / 1000) {
 							message.push(`SR: ${Math.round(discordUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.total * 1000) / 1000}`);
+							message.push(`Ratio: ${modPoolAmounts[0]} NM | ${modPoolAmounts[1]} HD | ${modPoolAmounts[2]} HR | ${modPoolAmounts[3]} DT | ${modPoolAmounts[4]} FM`);
 						}
 						if (Math.round(discordUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.noMod * 1000) / 1000) {
 							message.push(`NM: ${Math.round(discordUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.noMod * 1000) / 1000}`);
