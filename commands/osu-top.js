@@ -186,7 +186,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}.png`);
+				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}-mode${mode}.png`);
 
 				//If created by osu-tracking
 				if (tracking) {
@@ -248,7 +248,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}.png`);
+				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}-mode${mode}.png`);
 
 				//Send attachment
 				await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
@@ -303,7 +303,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}.png`);
+				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}-mode${mode}.png`);
 
 				//If created by osu-tracking
 				if (tracking) {

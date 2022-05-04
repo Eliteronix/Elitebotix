@@ -386,7 +386,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 		//Check if it is a profile
 		if (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-top') || reaction.message.attachments.first().name.startsWith('osu-league-rankings')) {
 			//get the osuUserId used
-			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+			let osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+			if (reaction.message.attachments.first().name.startsWith('osu-top')) {
+				osuUserId = reaction.message.attachments.first().name.replace(/.mode./gm, '').replace('.png', '').replace(/.*-/, '');
+			}
 
 			//Setup artificial arguments
 			let args = [osuUserId];
@@ -464,10 +467,21 @@ module.exports = async function (reaction, user, additionalObjects) {
 			}
 		} else if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-top')) {
 			//get the osuUserId used
-			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+			const osuUserId = reaction.message.attachments.first().name.replace(/.mode./gm, '').replace('.png', '').replace(/.*-/, '');
+			let mode = reaction.message.attachments.first().name.replace(/.+.mode/gm, '').replace('.png', '');
+
+			if (mode == 0) {
+				mode = '--s';
+			} else if (mode == 1) {
+				mode = '--t';
+			} else if (mode == 2) {
+				mode = '--c';
+			} else if (mode == 3) {
+				mode = '--m';
+			}
 
 			//Setup artificial arguments
-			let args = [osuUserId];
+			let args = [osuUserId, mode];
 
 			const command = require('./commands/osu-profile.js');
 
@@ -485,7 +499,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 			let tempMessage = {
 				guild: reaction.message.guild,
 				guildId: guildId,
-				content: `e!osu-profile ${osuUserId}`,
+				content: `e!osu-profile ${osuUserId} ${mode}`,
 				author: user,
 				channel: reaction.message.channel,
 			};
