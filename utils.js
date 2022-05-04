@@ -2007,6 +2007,7 @@ module.exports = {
 };
 
 function wrongClusterFunction(id) {
+	return false;
 	let clusterAmount = require('os').cpus().length;
 	// eslint-disable-next-line no-undef
 	if (process.env.SERVER === 'Dev') {
