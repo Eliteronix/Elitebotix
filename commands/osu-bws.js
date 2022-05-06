@@ -107,6 +107,8 @@ async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 			if (discordUser) {
 				discordUser.osuBadges = badgeAmount;
 				await discordUser.save();
+			} else {
+				DBDiscordUsers.create({ osuName: user.name, osuUserId: user.id });
 			}
 
 			let BWSRank = Math.round(Math.pow(user.pp.rank, Math.pow(0.9937, Math.pow(badgeAmount, 2))));

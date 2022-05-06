@@ -1589,11 +1589,16 @@ module.exports = {
 
 			//Log the values in the discords if they changed and the user is connected to the bot
 			logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getUserDuelStarRating');
-			const discordUser = await DBDiscordUsers.findOne({
+			let discordUser = await DBDiscordUsers.findOne({
 				where: {
 					osuUserId: input.osuUserId
 				}
 			});
+
+			if (!discordUser) {
+				discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId });
+			}
+
 			if (discordUser && !input.date) {
 				if (input.client) {
 					try {
@@ -1716,11 +1721,16 @@ module.exports = {
 		duelRatings.freeMod = null;
 
 		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getUserDuelRatings backup');
-		const discordUser = await DBDiscordUsers.findOne({
+		let discordUser = await DBDiscordUsers.findOne({
 			where: {
 				osuUserId: input.osuUserId
 			}
 		});
+
+		if (!discordUser) {
+			discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId });
+		}
+
 		if (discordUser) {
 			discordUser.osuDuelStarRating = duelRatings.total;
 			discordUser.osuNoModDuelStarRating = duelRatings.noMod;

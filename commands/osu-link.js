@@ -128,6 +128,15 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 					discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 					discordUser.save();
 
+					//Remove duplicate discord user if existing and not the same record
+					let existingDiscordUser = await DBDiscordUsers.findOne({
+						where: { osuUserId: osuUser.id },
+					});
+
+					if (existingDiscordUser.id !== discordUser.id) {
+						existingDiscordUser.destroy();
+					}
+
 					try {
 						await bancho.connect();
 					} catch (error) {
@@ -152,7 +161,23 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 					}
 					const verificationCode = Math.random().toString(36).substring(8);
 					let badges = await getOsuBadgeNumberById(osuUser.id);
-					DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuName: osuUser.name, osuBadges: badges, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
+
+					let existingDiscordUser = await DBDiscordUsers.findOne({
+						where: { osuUserId: osuUser.id },
+					});
+
+					//overwrite duplicate discord user if existing else create new
+					if (existingDiscordUser) {
+						existingDiscordUser.userId = msg.author.id;
+						existingDiscordUser.osuVerificationCode = verificationCode;
+						existingDiscordUser.osuName = osuUser.name;
+						existingDiscordUser.osuBadges = badges;
+						existingDiscordUser.osuPP = osuUser.pp.raw;
+						existingDiscordUser.osuRank = osuUser.pp.rank;
+						existingDiscordUser.save();
+					} else {
+						DBDiscordUsers.create({ userId: msg.author.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuName: osuUser.name, osuBadges: badges, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
+					}
 
 					try {
 						await bancho.connect();
