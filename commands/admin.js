@@ -2278,50 +2278,51 @@ module.exports = {
 			// 	}
 			// });
 
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'remindme',
-			// 		description: 'Sends a reminder at the specified time',
-			// 		options: [
-			// 			{
-			// 				'name': 'message',
-			// 				'description': 'The message of the reminder',
-			// 				'type': 3,
-			// 				'required': true
-			// 			},
-			// 			{
-			// 				'name': 'years',
-			// 				'description': 'The years until the reminder',
-			// 				'type': 4,
-			// 			},
-			// 			{
-			// 				'name': 'months',
-			// 				'description': 'The months until the reminder',
-			// 				'type': 4,
-			// 			},
-			// 			{
-			// 				'name': 'weeks',
-			// 				'description': 'The weeks until the reminder',
-			// 				'type': 4,
-			// 			},
-			// 			{
-			// 				'name': 'days',
-			// 				'description': 'The days until the reminder',
-			// 				'type': 4,
-			// 			},
-			// 			{
-			// 				'name': 'hours',
-			// 				'description': 'The hours until the reminder',
-			// 				'type': 4,
-			// 			},
-			// 			{
-			// 				'name': 'minutes',
-			// 				'description': 'The minutes until the reminder',
-			// 				'type': 4,
-			// 			},
-			// 		]
-			// 	}
-			// });
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'remindme',
+					description: 'Sends a reminder at the specified time',
+					options: [
+						{
+							'name': 'message',
+							'description': 'The message of the reminder',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'absolute',
+							'description': 'If the reminder time is absolute or relative',
+							'type': 5,
+							'required': false,
+						},
+						{
+							'name': 'years',
+							'description': 'The years until the reminder or the absolute date',
+							'type': 4,
+						},
+						{
+							'name': 'months',
+							'description': 'The months until the reminder or the absolute date',
+							'type': 4,
+						},
+						{
+							'name': 'days',
+							'description': 'The days until the reminder or the absolute date',
+							'type': 4,
+						},
+						{
+							'name': 'hours',
+							'description': 'The hours until the reminder or the absolute date',
+							'type': 4,
+						},
+						{
+							'name': 'minutes',
+							'description': 'The minutes until the reminder or the absolute date',
+							'type': 4,
+						},
+					]
+				}
+			});
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -4719,33 +4720,34 @@ module.exports = {
 							'required': true
 						},
 						{
+							'name': 'absolute',
+							'description': 'If the reminder time is absolute or relative',
+							'type': 5,
+							'required': false,
+						},
+						{
 							'name': 'years',
-							'description': 'The years until the reminder',
+							'description': 'The years until the reminder or the absolute date',
 							'type': 4,
 						},
 						{
 							'name': 'months',
-							'description': 'The months until the reminder',
-							'type': 4,
-						},
-						{
-							'name': 'weeks',
-							'description': 'The weeks until the reminder',
+							'description': 'The months until the reminder or the absolute date',
 							'type': 4,
 						},
 						{
 							'name': 'days',
-							'description': 'The days until the reminder',
+							'description': 'The days until the reminder or the absolute date',
 							'type': 4,
 						},
 						{
 							'name': 'hours',
-							'description': 'The hours until the reminder',
+							'description': 'The hours until the reminder or the absolute date',
 							'type': 4,
 						},
 						{
 							'name': 'minutes',
-							'description': 'The minutes until the reminder',
+							'description': 'The minutes until the reminder or the absolute date',
 							'type': 4,
 						},
 					]

@@ -25,16 +25,18 @@ module.exports = {
 		let hours = 0;
 		let minutes = 0;
 
+		let absolute = false;
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				if (interaction.options._hoistedOptions[i].name === 'absolute' && interaction.options._hoistedOptions[i].value) {
+					absolute = true;
+				}
 				if (interaction.options._hoistedOptions[i].name === 'years') {
 					years = interaction.options._hoistedOptions[i].value;
 				} else if (interaction.options._hoistedOptions[i].name === 'months') {
 					months = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'weeks') {
-					weeks = interaction.options._hoistedOptions[i].value;
 				} else if (interaction.options._hoistedOptions[i].name === 'days') {
 					days = interaction.options._hoistedOptions[i].value;
 				} else if (interaction.options._hoistedOptions[i].name === 'hours') {
@@ -53,8 +55,6 @@ module.exports = {
 				years += parseInt(args[i].replace('y', ''));
 			} else if (args[i].endsWith('mo') && !isNaN(args[i].replace('mo', ''))) {
 				months += parseInt(args[i].replace('mo', ''));
-			} else if (args[i].endsWith('w') && !isNaN(args[i].replace('w', ''))) {
-				weeks += parseInt(args[i].replace('w', ''));
 			} else if (args[i].endsWith('d') && !isNaN(args[i].replace('d', ''))) {
 				days += parseInt(args[i].replace('d', ''));
 			} else if (args[i].endsWith('h') && !isNaN(args[i].replace('h', ''))) {
@@ -78,11 +78,22 @@ module.exports = {
 
 		let now = new Date();
 		let date = new Date();
-		date.setUTCFullYear(date.getUTCFullYear() + years);
-		date.setUTCMonth(date.getUTCMonth() + months);
-		date.setUTCDate(date.getUTCDate() + weeks * 7 + days);
-		date.setUTCHours(date.getUTCHours() + hours);
-		date.setUTCMinutes(date.getUTCMinutes() + minutes);
+
+
+		// check if absolute is set and if so, set the date to the specified date else set the relative date
+		if (absolute) {
+			date.setUTCFullYear(years);
+			date.setUTCMonth(months - 1);
+			date.setUTCDate(days);
+			date.setUTCHours(hours);
+			date.setUTCMinutes(minutes);
+		} else {
+			date.setFullYear(now.getFullYear() + years);
+			date.setMonth(now.getMonth() + months);
+			date.setDate(now.getDate() + days);
+			date.setHours(now.getHours() + hours);
+			date.setMinutes(now.getMinutes() + minutes);
+		}
 
 		if (years < 0 || months < 0 || weeks < 0 || days < 0 || hours < 0 || minutes < 0) {
 			const guildPrefix = await getGuildPrefix(msg);
