@@ -463,17 +463,20 @@ module.exports = {
 			return;
 		}
 
-		let date = new Date();
-		date.setUTCHours(date.getUTCHours() - 24);
+		let yesterday = new Date();
+		yesterday.setUTCHours(yesterday.getUTCHours() - 24);
 
 		logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBDiscordUsers');
-		const discordUser = await DBDiscordUsers.findOne({
+		let discordUser = await DBDiscordUsers.findOne({
 			where: {
 				osuUserId: {
 					[Op.not]: null
 				},
+				userId: {
+					[Op.not]: null
+				},
 				updatedAt: {
-					[Op.lt]: date
+					[Op.lt]: yesterday
 				}
 			},
 			order: [
@@ -483,10 +486,47 @@ module.exports = {
 
 		if (discordUser) {
 			logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBProcessQueue');
-			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.userId } });
+			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
 			if (!existingTask) {
 				let now = new Date();
-				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.userId, date: now });
+				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId, date: now });
+			}
+		}
+
+		await new Promise(resolve => setTimeout(resolve, 30000));
+
+		let lastWeek = new Date();
+		lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
+
+		logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBDiscordUsers 2');
+		discordUser = await DBDiscordUsers.findOne({
+			where: {
+				osuUserId: {
+					[Op.not]: null
+				},
+				userId: null,
+				[Op.or]: [
+					{
+						updatedAt: {
+							[Op.lt]: lastWeek
+						}
+					},
+					{
+						osuRank: null
+					}
+				]
+			},
+			order: [
+				['updatedAt', 'ASC'],
+			]
+		});
+
+		if (discordUser) {
+			logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBProcessQueue');
+			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
+			if (!existingTask) {
+				let now = new Date();
+				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId, date: now });
 			}
 		}
 	},
@@ -1570,7 +1610,7 @@ module.exports = {
 						}
 						const guild = await input.client.guilds.fetch(guildId);
 						const channel = await guild.channels.fetch(channelId);
-						let message = [`${discordUser.osuName}:`];
+						let message = [`${discordUser.osuName} / ${discordUser.osuUserId}:`];
 						if (Math.round(discordUser.osuDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.total * 1000) / 1000) {
 							message.push(`SR: ${Math.round(discordUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.total * 1000) / 1000}`);
 							message.push(`Ratio: ${modPoolAmounts[0]} NM | ${modPoolAmounts[1]} HD | ${modPoolAmounts[2]} HR | ${modPoolAmounts[3]} DT | ${modPoolAmounts[4]} FM`);

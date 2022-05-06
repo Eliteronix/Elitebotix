@@ -340,6 +340,10 @@ async function drawRank(input, msg) {
 			}
 		});
 
+		if (!discordUser) {
+			await DBDiscordUsers.create({ osuName: user.name, osuUserId: user.id });
+		}
+
 		let userDuelStarRating = null;
 
 		if (discordUser && discordUser.osuDuelStarRating) {
