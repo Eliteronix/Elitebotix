@@ -6,7 +6,7 @@ module.exports = {
 	name: 'feedback',
 	//aliases: ['developer'],
 	description: 'Sends feedback to the dev',
-	usage: '<bug/feature/feedback> <description>',
+	usage: '<bug/feature/feedback/question> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
@@ -98,6 +98,30 @@ module.exports = {
 					return msg.reply('Your feedback has been sent to the developers.');
 				}
 				return interaction.reply('Your feedback has been sent to the developers.');
+			}
+		} else if (args[0].toLowerCase() === 'question') { //go to questions tree
+			if (!args[1]) { //check for second argument
+				msg.reply('Please add some text to your feedback after the command.');
+			} else {
+				//get rid of the first argument
+				args.shift();
+				//join the feedback in a variable
+				const question = args.join(' ').replace(/"/g, '');
+
+				//Return if the bug is too long
+				if (question.length > 200) {
+					if (msg.id) {
+						return msg.reply(`Your question is too long. Please shorten it. (Max: 200 characters, currently: ${question.length})`);
+					}
+					return interaction.reply(`Your question is too long. Please shorten it. (Max: 200 characters, currently: ${question.length})`);
+				}
+				//send the question into the correct Channel
+				createJiraIssue('10008', `[QUESTION] ${question} - ${msg.author.username}#${msg.author.discriminator}`);
+				//send a message to the user
+				if (msg.id) {
+					return msg.reply('Your question has been sent to the developers. They will respond to you as soon as possible.');
+				}
+				return interaction.reply('Your question has been sent to the developers. They will respond to you as soon as possible.');
 			}
 		} else {
 			let guildPrefix = await getGuildPrefix(msg);
