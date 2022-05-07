@@ -119,15 +119,6 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 					}
 					const verificationCode = Math.random().toString(36).substring(8);
 
-					discordUser.osuUserId = osuUser.id;
-					discordUser.osuVerificationCode = verificationCode;
-					discordUser.osuVerified = false;
-					discordUser.osuName = osuUser.name;
-					discordUser.osuPP = osuUser.pp.raw;
-					discordUser.osuRank = osuUser.pp.rank;
-					discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
-					discordUser.save();
-
 					//Remove duplicate discord user if existing and not the same record
 					let existingDiscordUser = await DBDiscordUsers.findOne({
 						where: { osuUserId: osuUser.id },
@@ -136,6 +127,15 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 					if (existingDiscordUser.id !== discordUser.id) {
 						existingDiscordUser.destroy();
 					}
+
+					discordUser.osuUserId = osuUser.id;
+					discordUser.osuVerificationCode = verificationCode;
+					discordUser.osuVerified = false;
+					discordUser.osuName = osuUser.name;
+					discordUser.osuPP = osuUser.pp.raw;
+					discordUser.osuRank = osuUser.pp.rank;
+					discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
+					discordUser.save();
 
 					try {
 						await bancho.connect();
