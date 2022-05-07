@@ -2,6 +2,7 @@ const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
 const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, getMatchesPlanned, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-referee',
@@ -94,7 +95,12 @@ module.exports = {
 
 									logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 1');
 									const dbDiscordUser = await DBDiscordUsers.findOne({
-										where: { osuUserId: user.id }
+										where: {
+											userId: {
+												[Op.not]: null
+											},
+											osuUserId: players[i].id
+										},
 									});
 
 									if (dbDiscordUser) {

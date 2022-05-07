@@ -25,7 +25,7 @@ module.exports = {
 		}
 
 		//get discordUser from db
-		logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers');
+		logDatabaseQueries(4, 'commands/osu-set.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { userId: msg.author.id },
 		});

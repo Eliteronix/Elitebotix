@@ -397,7 +397,12 @@ module.exports = {
 			for (let i = 0; i < players.length; i++) {
 				logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers custom-fixed-players');
 				let discordUser = await DBDiscordUsers.findOne({
-					where: { osuUserId: players[i].id },
+					where: {
+						userId: {
+							[Op.not]: null
+						},
+						osuUserId: players[i].id
+					},
 				});
 
 				if (discordUser) {

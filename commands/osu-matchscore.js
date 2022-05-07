@@ -177,6 +177,8 @@ module.exports = {
 							const osuUser = await osuApi.getUser({ u: playerMatchResults[i].userId });
 							if (osuUser) {
 								playerName = osuUser.name;
+
+								await DBDiscordUsers.create({ osuUserId: playerMatchResults[i].userId, osuName: osuUser.name });
 							}
 						}
 					}

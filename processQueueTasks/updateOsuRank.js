@@ -17,8 +17,10 @@ module.exports = {
 
 		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
-			where: { userId: discordUserId }
+			where: { osuUserId: discordUserId }
 		});
+
+		console.log(`Updating osu rank for ${discordUser.osuName}`, discordUser.userId);
 
 		discordUser.changed('updatedAt', true);
 
