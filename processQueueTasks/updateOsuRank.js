@@ -20,8 +20,6 @@ module.exports = {
 			where: { osuUserId: discordUserId }
 		});
 
-		console.log(`Updating osu rank for ${discordUser.osuName}`, discordUser.userId);
-
 		discordUser.changed('updatedAt', true);
 
 		try {
