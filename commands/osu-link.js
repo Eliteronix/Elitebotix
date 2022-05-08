@@ -124,7 +124,7 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 						where: { osuUserId: osuUser.id },
 					});
 
-					if (existingDiscordUser.id !== discordUser.id) {
+					if (existingDiscordUser && existingDiscordUser.id !== discordUser.id) {
 						existingDiscordUser.destroy();
 					}
 
