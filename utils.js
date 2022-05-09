@@ -1863,6 +1863,8 @@ module.exports = {
 						}
 					});
 
+					console.log(context['display-name'], discordUser.twitchName);
+
 					if (discordUser && context['display-name'] !== discordUser.twitchName) {
 						const IRCUser = await bancho.getUser(discordUser.osuName);
 
