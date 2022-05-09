@@ -1977,6 +1977,7 @@ module.exports = {
 			raw_mods: parseInt(inputScore.gameRawMods) + parseInt(inputScore.rawMods),
 			beatmap: undefined,
 			matchName: inputScore.matchName,
+			mapRank: inputScore.mapRank,
 		};
 
 		try {
