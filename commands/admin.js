@@ -1729,99 +1729,99 @@ module.exports = {
 			// 	},
 			// });
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'osu-score',
-					description: 'Sends an info card about the score of the specified player on the map',
-					options: [
-						{
-							'name': 'beatmap',
-							'description': 'The beatmap id or link',
-							'type': 3,
-							'required': true
-						},
-						{
-							'name': 'mods',
-							'description': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
-							'type': 3,
-							'required': false,
-						},
-						{
-							'name': 'gamemode',
-							'description': 'Gamemode',
-							'type': 3,
-							'required': false,
-							'choices': [
-								{
-									'name': 'Standard',
-									'value': '--s',
-								},
-								{
-									'name': 'Mania',
-									'value': '--m',
-								},
-								{
-									'name': 'Catch The Beat',
-									'value': '--c',
-								},
-								{
-									'name': 'Taiko',
-									'value': '--t',
-								},
-							]
-						}, {
-							'name': 'server',
-							'description': 'The server from which the results will be displayed',
-							'type': 3,
-							'required': false,
-							'choices': [
-								{
-									'name': 'Bancho',
-									'value': '--b',
-								},
-								{
-									'name': 'Ripple',
-									'value': '--r',
-								},
-								{
-									'name': 'Tournaments',
-									'value': '--tournaments',
-								},
-							]
-						},
-						{
-							'name': 'username',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username2',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username3',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username4',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username5',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						}
-					]
-				},
-			});
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'osu-score',
+			// 		description: 'Sends an info card about the score of the specified player on the map',
+			// 		options: [
+			// 			{
+			// 				'name': 'beatmap',
+			// 				'description': 'The beatmap id or link',
+			// 				'type': 3,
+			// 				'required': true
+			// 			},
+			// 			{
+			// 				'name': 'mods',
+			// 				'description': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
+			// 				'type': 3,
+			// 				'required': false,
+			// 			},
+			// 			{
+			// 				'name': 'gamemode',
+			// 				'description': 'Gamemode',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Standard',
+			// 						'value': '--s',
+			// 					},
+			// 					{
+			// 						'name': 'Mania',
+			// 						'value': '--m',
+			// 					},
+			// 					{
+			// 						'name': 'Catch The Beat',
+			// 						'value': '--c',
+			// 					},
+			// 					{
+			// 						'name': 'Taiko',
+			// 						'value': '--t',
+			// 					},
+			// 				]
+			// 			}, {
+			// 				'name': 'server',
+			// 				'description': 'The server from which the results will be displayed',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Bancho',
+			// 						'value': '--b',
+			// 					},
+			// 					{
+			// 						'name': 'Ripple',
+			// 						'value': '--r',
+			// 					},
+			// 					{
+			// 						'name': 'Tournaments',
+			// 						'value': '--tournaments',
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'username',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'username2',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'username3',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'username4',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'username5',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			}
+			// 		]
+			// 	},
+			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -4221,6 +4221,49 @@ module.exports = {
 							'description': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
 							'type': 3,
 							'required': false,
+						},
+						{
+							'name': 'gamemode',
+							'description': 'Gamemode',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'Standard',
+									'value': '--s',
+								},
+								{
+									'name': 'Mania',
+									'value': '--m',
+								},
+								{
+									'name': 'Catch The Beat',
+									'value': '--c',
+								},
+								{
+									'name': 'Taiko',
+									'value': '--t',
+								},
+							]
+						}, {
+							'name': 'server',
+							'description': 'The server from which the results will be displayed',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'Bancho',
+									'value': '--b',
+								},
+								{
+									'name': 'Ripple',
+									'value': '--r',
+								},
+								{
+									'name': 'Tournaments',
+									'value': '--tournaments',
+								},
+							]
 						},
 						{
 							'name': 'username',
