@@ -1885,7 +1885,7 @@ module.exports = {
 
 						let dbBeatmap = await getOsuBeatmapFunction({ beatmapId: map, modBits: 0 });
 
-						await IRCUser.sendMessage(`${prefix}${context['display-name']} -> https://osu.ppy.sh/b/${dbBeatmap.beatmapId} [${dbBeatmap.approvalStatus}] ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);
+						await IRCUser.sendMessage(`${prefix}${context['display-name']} -> [${dbBeatmap.approvalStatus}] [https://osu.ppy.sh/b/${dbBeatmap.beatmapId} ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}]] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);
 						if (message) {
 							await IRCUser.sendMessage(`${prefix}${context['display-name']} -> Comment: ${message}`);
 						}
