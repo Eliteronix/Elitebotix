@@ -325,86 +325,83 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 			}
 
 			if (beatmapScores[i].osuUserId === osuUser.id) {
-				if (mods === 'best'
-					|| getModBits(mods) === parseInt(beatmapScores[i].rawMods) + parseInt(beatmapScores[i].gameRawMods)
-					|| mods.includes('NF') && getModBits(mods) - 1 === parseInt(beatmapScores[i].rawMods) + parseInt(beatmapScores[i].gameRawMods)
-					|| !mods.includes('NF') && getModBits(mods) + 1 === parseInt(beatmapScores[i].rawMods) + parseInt(beatmapScores[i].gameRawMods)) {
+				if (mods === 'best' && userScores.length === 0 || mods === 'all'
+					|| mods !== 'best' && mods !== 'all' && getModBits(mods) === parseInt(beatmapScores[i].rawMods) + parseInt(beatmapScores[i].gameRawMods)
+					|| mods !== 'best' && mods !== 'all' && mods.includes('NF') && getModBits(mods) - 1 === parseInt(beatmapScores[i].rawMods) + parseInt(beatmapScores[i].gameRawMods)
+					|| mods !== 'best' && mods !== 'all' && !mods.includes('NF') && getModBits(mods) + 1 === parseInt(beatmapScores[i].rawMods) + parseInt(beatmapScores[i].gameRawMods)) {
+					beatmapScores[i].mapRank = i + 1;
 					userScores.push(beatmapScores[i]);
-					mapRank = i + 1;
 				}
 			}
 
-			console.log(beatmapScores[i].score, beatmapScores[i].osuUserId, beatmapScores[i].rawMods, beatmapScores[i].gameRawMods, mods);
-			for (let j = i + 1; j < beatmapScores.length; j++) {
-				if (beatmapScores[j] && beatmapScores[i].osuUserId === beatmapScores[j].osuUserId) {
-					beatmapScores.splice(j, 1);
-					j--;
+			if (beatmapScores[i].osuUserId !== osuUser.id) {
+				for (let j = i + 1; j < beatmapScores.length; j++) {
+					if (beatmapScores[j] && beatmapScores[i].osuUserId === beatmapScores[j].osuUserId) {
+						beatmapScores.splice(j, 1);
+						j--;
+					}
 				}
 			}
 		}
-
-		console.log(userScores);
 
 		if (!userScores.length) {
 			return msg.channel.send(`Couldn't find any tournament scores for \`${osuUser.name.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\`.`);
 		}
 
-		let score = await multiToBanchoScore(userScores[0]);
-		score.raw_date = score.raw_date.toLocaleDateString();
+		for (let i = 0; i < userScores.length; i++) {
+			userScores[i] = await multiToBanchoScore(userScores[i]);
+			userScores[i].raw_date = `${userScores[i].raw_date.getUTCFullYear()}-${userScores[i].raw_date.getUTCMonth().toString().padStart(2, '0')}-${userScores[i].raw_date.getUTCDate().toString().padStart(2, '0')} ${userScores[i].raw_date.getUTCHours().toString().padStart(2, '0')}:${userScores[i].raw_date.getUTCMinutes().toString().padStart(2, '0')}:${userScores[i].raw_date.getUTCSeconds().toString().padStart(2, '0')}`;
 
-		console.log(score);
+			updateOsuDetailsforUser(osuUser, mode);
 
-		updateOsuDetailsforUser(osuUser, mode);
+			let processingMessage = await msg.channel.send(`[${osuUser.name}] Processing...`);
 
-		let processingMessage = await msg.channel.send(`[${osuUser.name}] Processing...`);
+			const canvasWidth = 1000;
+			const canvasHeight = 500;
 
-		const canvasWidth = 1000;
-		const canvasHeight = 500;
+			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+			//Create Canvas
+			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-		//Create Canvas
-		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+			//Get context and load the image
+			const ctx = canvas.getContext('2d');
+			const background = await Canvas.loadImage('./other/osu-background.png');
+			ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-		//Get context and load the image
-		const ctx = canvas.getContext('2d');
-		const background = await Canvas.loadImage('./other/osu-background.png');
-		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+			let elements = [canvas, ctx, userScores[i], beatmap, osuUser];
 
-		let elements = [canvas, ctx, score, beatmap, osuUser];
+			elements = await drawTitle(elements, mode);
 
-		elements = await drawTitle(elements, mode);
+			elements = await drawCover(elements, mode);
 
-		elements = await drawCover(elements, mode);
+			elements = await drawFooter(elements);
 
-		elements = await drawFooter(elements);
+			elements = await drawAccInfo(elements, mode, userScores[i].mapRank);
 
-		elements = await drawAccInfo(elements, mode, mapRank);
+			await drawUserInfo(elements, server);
 
-		await drawUserInfo(elements, server);
+			//Create as an attachment
+			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-score-${osuUser.id}-${beatmap.beatmapId}-${userScores[i].raw_mods}.png`);
 
-		//Create as an attachment
-		const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-score-${osuUser.id}-${beatmap.beatmapId}-${score.raw_mods}.png`);
+			let guildPrefix = await getGuildPrefix(msg);
 
-		let guildPrefix = await getGuildPrefix(msg);
+			let sentMessage;
 
-		let sentMessage;
+			//Send attachment
+			if (noLinkedAccount) {
+				sentMessage = await msg.channel.send({ content: `${osuUser.name}: <https://osu.ppy.sh/users/${osuUser.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${osuUser.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`${guildPrefix}osu-link ${osuUser.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+			} else {
+				sentMessage = await msg.channel.send({ content: `${osuUser.name}: <https://osu.ppy.sh/users/${osuUser.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${osuUser.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
+			}
+			if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
+				await sentMessage.react('<:COMPARE:827974793365159997>');
+			}
+			await sentMessage.react('🗺️');
+			await sentMessage.react('👤');
 
-		//Send attachment
-		if (noLinkedAccount) {
-			sentMessage = await msg.channel.send({ content: `${osuUser.name}: <https://osu.ppy.sh/users/${osuUser.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${osuUser.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`${guildPrefix}osu-link ${osuUser.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
-		} else {
-			sentMessage = await msg.channel.send({ content: `${osuUser.name}: <https://osu.ppy.sh/users/${osuUser.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${osuUser.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
+			processingMessage.delete();
 		}
-		if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
-			await sentMessage.react('<:COMPARE:827974793365159997>');
-		}
-		await sentMessage.react('🗺️');
-		await sentMessage.react('👤');
-
-		processingMessage.delete();
-		//Reset maprank in case of multiple scores displayed
-		mapRank = 0;
 	}
 }
 
@@ -659,6 +656,7 @@ async function drawCover(input, mode) {
 	} else if (score.raw_date.substring(5, 7) === '12') {
 		month = 'December';
 	}
+
 	const formattedSubmitDate = `${score.raw_date.substring(8, 10)} ${month} ${score.raw_date.substring(0, 4)} ${score.raw_date.substring(11, 16)}`;
 
 	//Write Played By and Submitted on
