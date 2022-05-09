@@ -1863,9 +1863,7 @@ module.exports = {
 						}
 					});
 
-					console.log(context['display-name'], discordUser.twitchName);
-
-					if (discordUser && context['display-name'] !== discordUser.twitchName) {
+					if (discordUser && context['display-name'].toLowerCase() !== discordUser.twitchName.toLowerCase()) {
 						const IRCUser = await bancho.getUser(discordUser.osuName);
 
 						let prefix = [];
