@@ -1,8 +1,8 @@
-﻿const { DBDiscordUsers } = require('../dbObjects');
+﻿const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getBeatmapApprovalStatusImage, logDatabaseQueries, getBeatmapModeId, getGameModeName, getOsuPP } = require('../utils');
+const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getBeatmapApprovalStatusImage, logDatabaseQueries, getBeatmapModeId, getGameModeName, getOsuPP, getModBits, multiToBanchoScore } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -304,6 +304,107 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 					console.log(err);
 				}
 			});
+	} else if (server === 'tournaments') {
+		const osuUser = await osuApi.getUser({ u: username, m: mode });
+
+		const beatmapScores = await DBOsuMultiScores.findAll({
+			where: {
+				beatmapId: beatmap.beatmapId,
+			}
+		});
+
+		quicksort(beatmapScores);
+
+		const userScores = [];
+
+		for (let i = 0; i < beatmapScores.length; i++) {
+			if (parseInt(beatmapScores[i].score) < 10000) {
+				beatmapScores.splice(i, 1);
+				i--;
+				continue;
+			}
+
+			if (beatmapScores[i].osuUserId === osuUser.id) {
+				if (mods === 'best'
+					|| getModBits(mods) === parseInt(beatmapScores[i].rawMods) + parseInt(beatmapScores[i].gameRawMods)
+					|| mods.includes('NF') && getModBits(mods) - 1 === parseInt(beatmapScores[i].rawMods) + parseInt(beatmapScores[i].gameRawMods)
+					|| !mods.includes('NF') && getModBits(mods) + 1 === parseInt(beatmapScores[i].rawMods) + parseInt(beatmapScores[i].gameRawMods)) {
+					userScores.push(beatmapScores[i]);
+					mapRank = i + 1;
+				}
+			}
+
+			console.log(beatmapScores[i].score, beatmapScores[i].osuUserId, beatmapScores[i].rawMods, beatmapScores[i].gameRawMods, mods);
+			for (let j = i + 1; j < beatmapScores.length; j++) {
+				if (beatmapScores[j] && beatmapScores[i].osuUserId === beatmapScores[j].osuUserId) {
+					beatmapScores.splice(j, 1);
+					j--;
+				}
+			}
+		}
+
+		console.log(userScores);
+
+		if (!userScores.length) {
+			return msg.channel.send(`Couldn't find any tournament scores for \`${osuUser.name.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\`.`);
+		}
+
+		let score = await multiToBanchoScore(userScores[0]);
+		score.raw_date = score.raw_date.toLocaleDateString();
+
+		console.log(score);
+
+		updateOsuDetailsforUser(osuUser, mode);
+
+		let processingMessage = await msg.channel.send(`[${osuUser.name}] Processing...`);
+
+		const canvasWidth = 1000;
+		const canvasHeight = 500;
+
+		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+		//Create Canvas
+		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+		//Get context and load the image
+		const ctx = canvas.getContext('2d');
+		const background = await Canvas.loadImage('./other/osu-background.png');
+		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+		let elements = [canvas, ctx, score, beatmap, osuUser];
+
+		elements = await drawTitle(elements, mode);
+
+		elements = await drawCover(elements, mode);
+
+		elements = await drawFooter(elements);
+
+		elements = await drawAccInfo(elements, mode, mapRank);
+
+		await drawUserInfo(elements, server);
+
+		//Create as an attachment
+		const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-score-${osuUser.id}-${beatmap.beatmapId}-${score.raw_mods}.png`);
+
+		let guildPrefix = await getGuildPrefix(msg);
+
+		let sentMessage;
+
+		//Send attachment
+		if (noLinkedAccount) {
+			sentMessage = await msg.channel.send({ content: `${osuUser.name}: <https://osu.ppy.sh/users/${osuUser.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${osuUser.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`${guildPrefix}osu-link ${osuUser.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+		} else {
+			sentMessage = await msg.channel.send({ content: `${osuUser.name}: <https://osu.ppy.sh/users/${osuUser.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${osuUser.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
+		}
+		if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
+			await sentMessage.react('<:COMPARE:827974793365159997>');
+		}
+		await sentMessage.react('🗺️');
+		await sentMessage.react('👤');
+
+		processingMessage.delete();
+		//Reset maprank in case of multiple scores displayed
+		mapRank = 0;
 	}
 }
 
@@ -831,4 +932,29 @@ async function drawUserInfo(input, server) {
 
 	const output = [canvas, ctx, score, beatmap, user];
 	return output;
+}
+
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseInt(list[j].score) >= parseInt(pivot.score)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
 }
