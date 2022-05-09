@@ -310,6 +310,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 		const beatmapScores = await DBOsuMultiScores.findAll({
 			where: {
 				beatmapId: beatmap.beatmapId,
+				scoringType: 'Score v2'
 			}
 		});
 
