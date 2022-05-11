@@ -5296,7 +5296,7 @@ module.exports = {
 		} else if (args[0] === 'similar') {
 			let dbBeatmap = await getOsuBeatmap({ beatmapId: args[1] });
 
-			msg.reply(`Original Beatmap: ${dbBeatmap.beatmapId} - ${dbBeatmap.artist} - ${dbBeatmap.title} - ${dbBeatmap.difficulty}`);
+			msg.reply(`Original Beatmap: ${dbBeatmap.beatmapId} - ${dbBeatmap.artist} - ${dbBeatmap.title} - ${dbBeatmap.difficulty} - ${dbBeatmap.bpm}`);
 
 			const tourneyScores = await DBOsuMultiScores.findAll({
 				where: {
@@ -5347,9 +5347,14 @@ module.exports = {
 
 			console.log(maps);
 
-			let similarMap = await getOsuBeatmap({ beatmapId: maps[Math.floor(Math.random() * 10)].beatmapId });
+			let topTen = [];
+			for (let i = 0; i < maps.length; i++) {
+				let similarMap = await getOsuBeatmap({ beatmapId: maps[i].beatmapId });
+				topTen.push(`${similarMap.beatmapId} - ${similarMap.artist} - ${similarMap.title} - ${similarMap.difficulty} - ${similarMap.bpm}`);
+			}
 
-			msg.reply(`Similar map: ${similarMap.beatmapId} - ${similarMap.artist} - ${similarMap.title} - ${similarMap.difficulty}`);
+			msg.reply(topTen.join('\n'));
+
 		} else {
 			msg.reply('Invalid command');
 		}
