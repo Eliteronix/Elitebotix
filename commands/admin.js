@@ -5337,6 +5337,7 @@ module.exports = {
 
 			let maps = [];
 			for (let i = 0; i < mapsPlayed.length; i++) {
+				console.log(i, mapsPlayed.length);
 				if (timesPlayed[i] > 10) {
 					let mapScores = await DBOsuMultiScores.count({
 						where: {
