@@ -5337,11 +5337,19 @@ module.exports = {
 
 			let maps = [];
 			for (let i = 0; i < mapsPlayed.length; i++) {
-				maps.push({ beatmapId: mapsPlayed[i], count: timesPlayed[i] });
+				if (timesPlayed[i] > 10) {
+					let mapScores = await DBOsuMultiScores.count({
+						where: {
+							beatmapId: mapsPlayed[i]
+						}
+					});
+
+					maps.push({ beatmapId: mapsPlayed[i], count: timesPlayed[i], standardizedCount: timesPlayed[i] / mapScores });
+				}
 			}
 
 			maps.sort((a, b) => {
-				return b.count - a.count;
+				return b.standardizedCount - a.standardizedCount;
 			}
 			);
 
