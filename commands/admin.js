@@ -5350,7 +5350,13 @@ module.exports = {
 			let topTen = [];
 			for (let i = 0; i < maps.length; i++) {
 				let similarMap = await getOsuBeatmap({ beatmapId: maps[i].beatmapId });
-				topTen.push(`${similarMap.beatmapId} - ${similarMap.artist} - ${similarMap.title} - ${similarMap.difficulty} - ${similarMap.bpm}`);
+
+				if (similarMap) {
+					topTen.push(`${similarMap.beatmapId} - ${similarMap.artist} - ${similarMap.title} - ${similarMap.difficulty} - ${similarMap.bpm}`);
+				} else {
+					maps.splice(i, 1);
+					i--;
+				}
 			}
 
 			msg.reply(topTen.join('\n'));
