@@ -5348,7 +5348,7 @@ module.exports = {
 			console.log(maps);
 
 			let topTen = [];
-			for (let i = 0; i < maps.length; i++) {
+			for (let i = 0; i < maps.length && i < 10; i++) {
 				let similarMap = await getOsuBeatmap({ beatmapId: maps[i].beatmapId });
 
 				if (similarMap) {
