@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { pause, logDatabaseQueries, getUserDuelStarRating } = require('../utils');
+const { pause, logDatabaseQueries, getUserDuelStarRating, getOsuBeatmap } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 
@@ -5293,6 +5293,63 @@ module.exports = {
 			);
 
 			console.log(result[0]);
+		} else if (args[0] === 'similar') {
+			let dbBeatmap = await getOsuBeatmap({ beatmapId: args[1] });
+
+			msg.reply(`Original Beatmap: ${dbBeatmap.beatmapId} - ${dbBeatmap.artist} - ${dbBeatmap.title} - ${dbBeatmap.difficulty}`);
+
+			const tourneyScores = await DBOsuMultiScores.findAll({
+				where: {
+					beatmapId: args[1]
+				}
+			});
+
+			//Get all unique osuUserIds
+			let osuUserIds = [];
+			for (let i = 0; i < tourneyScores.length; i++) {
+				if (!osuUserIds.includes(tourneyScores[i].osuUserId)) {
+					osuUserIds.push(tourneyScores[i].osuUserId);
+				}
+			}
+
+			let mapsPlayed = [];
+			let timesPlayed = [];
+
+			//Loop through each users' scores
+			for (let i = 0; i < osuUserIds.length; i++) {
+				let userScores = await DBOsuMultiScores.findAll({
+					where: {
+						osuUserId: osuUserIds[i]
+					}
+				});
+
+				let duplicate = [];
+				for (let j = 0; j < userScores.length; j++) {
+					if (mapsPlayed.includes(userScores[j].beatmapId) && !duplicate.includes(userScores[j].beatmapId)) {
+						timesPlayed[mapsPlayed.indexOf(userScores[j].beatmapId)]++;
+					} else {
+						duplicate.push(userScores[j].beatmapId);
+						mapsPlayed.push(userScores[j].beatmapId);
+						timesPlayed.push(1);
+					}
+				}
+			}
+
+			let maps = [];
+			for (let i = 0; i < mapsPlayed.length; i++) {
+				maps.push({ beatmapId: mapsPlayed[i], count: timesPlayed[i] });
+			}
+
+			maps.sort((a, b) => {
+				return b.count - a.count;
+			}
+			);
+
+			console.log(maps);
+
+			let similarMap = await getOsuBeatmap({ beatmapId: maps[Math.floor(Math.random() * 10)].beatmapId });
+
+			msg.reply(`Similar map: ${similarMap.beatmapId} - ${similarMap.artist} - ${similarMap.title} - ${similarMap.difficulty}`);
 		} else {
 			msg.reply('Invalid command');
 		}
