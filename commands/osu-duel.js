@@ -33,6 +33,24 @@ module.exports = {
 				await interaction.deferReply();
 				//Get the star ratings for both users
 				msg = await populateMsgFromInteraction(interaction);
+
+				let opponentId = null;
+				let averageStarRating = null;
+
+				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+					if (interaction.options._hoistedOptions[i].name === 'opponent') {
+						opponentId = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'starrating') {
+						averageStarRating = interaction.options._hoistedOptions[i].value;
+
+						if (averageStarRating < 3) {
+							return await interaction.editReply('You can\'t play a match with a star rating lower than 3');
+						} else if (averageStarRating > 10) {
+							return await interaction.editReply('You can\'t play a match with a star rating higher than 10');
+						}
+					}
+				}
+
 				const commandConfig = await getOsuUserServerMode(msg, []);
 				const commandUser = commandConfig[0];
 
@@ -40,7 +58,7 @@ module.exports = {
 					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect <username>`.');
 				}
 
-				if (commandUser.userId === interaction.options._hoistedOptions[0].value) {
+				if (commandUser.userId === opponentId) {
 					return await interaction.editReply('You cannot play against yourself.');
 				}
 
@@ -57,7 +75,7 @@ module.exports = {
 				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers');
 				const discordUser = await DBDiscordUsers.findOne({
 					where: {
-						userId: interaction.options._hoistedOptions[0].value,
+						userId: opponentId,
 						osuVerified: true
 					}
 				});
@@ -71,10 +89,12 @@ module.exports = {
 						}
 					}
 				} else {
-					return await interaction.editReply(`<@${interaction.options._hoistedOptions[0].value}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
+					return await interaction.editReply(`<@${opponentId}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
 				}
 
-				let averageStarRating = (firstStarRating.total + secondStarRating.total) / 2;
+				if (!averageStarRating) {
+					averageStarRating = (firstStarRating.total + secondStarRating.total) / 2;
+				}
 
 				let lowerBound = averageStarRating - 0.125;
 				let upperBound = averageStarRating + 0.125;

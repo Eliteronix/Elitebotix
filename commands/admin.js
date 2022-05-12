@@ -602,6 +602,11 @@ module.exports = {
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
+			// 					{
+			// 						'name': 'starrating',
+			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'type': 10, // 10 is type NUMBER
+			// 					},
 			// 				]
 			// 			},
 			// 			{
@@ -3208,6 +3213,11 @@ module.exports = {
 									'description': 'The opponent you want to play against',
 									'type': 6, // 6 is type USER
 									'required': true
+								},
+								{
+									'name': 'starrating',
+									'description': 'The star rating you wanna play on. For example: 6.25',
+									'type': 10, // 10 is type NUMBER
 								},
 							]
 						},
