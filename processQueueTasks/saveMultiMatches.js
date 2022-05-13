@@ -144,6 +144,8 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 	});
 
 	if (incompleteMatchScore) {
+		console.log(incompleteMatchScore);
+
 		await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
 			.then(async (match) => {
 				let channel = await client.channels.fetch(channelId);
