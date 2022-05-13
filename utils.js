@@ -978,6 +978,8 @@ module.exports = {
 							team: match.games[gameIndex].scores[scoreIndex].team,
 						});
 
+						console.log(score.id, 'created');
+
 						//Set the tournament flags on the corresponding beatmap
 						if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
 							logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuBeatmaps tourney flags new score');
@@ -1058,6 +1060,8 @@ module.exports = {
 						existingScore.team = match.games[gameIndex].scores[scoreIndex].team;
 						existingScore.changed('updatedAt', true);
 						await existingScore.save();
+
+						console.log(existingScore.id, 'updated');
 
 						//Set the tournament flags on the corresponding beatmap
 						if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
