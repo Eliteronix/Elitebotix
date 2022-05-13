@@ -2003,7 +2003,7 @@ module.exports = {
 			return;
 		}
 		let date = new Date();
-		if (date.getUTCHours() < 1 || date.getUTCHours() > 6) {
+		if (date.getUTCHours() > 6) {
 			return;
 		}
 		let duplicates = true;
@@ -2023,7 +2023,7 @@ module.exports = {
 			},
 		});
 
-		while (duplicates && deleted < 25) {
+		while (duplicates && deleted < 50) {
 			let result = await sequelize.query(
 				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id) ORDER BY maxCombo ASC LIMIT 1',
 			);
