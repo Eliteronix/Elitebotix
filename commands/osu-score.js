@@ -430,7 +430,13 @@ async function drawTitle(input, mode) {
 	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'left';
-	ctx.fillText(`${beatmap.title} by ${beatmap.artist}`, canvas.width / 1000 * 60, canvas.height / 500 * 35);
+
+	let beatmapTitle = `${beatmap.title}`;
+	const maxSizeTitle = parseInt(canvas.width / 1000 * 50);
+	if (beatmapTitle.length > maxSizeTitle) {
+		beatmapTitle = beatmapTitle.substring(0, maxSizeTitle - 3) + '...';
+	}
+	ctx.fillText(`${beatmapTitle} by ${beatmap.artist}`, canvas.width / 1000 * 60, canvas.height / 500 * 35);
 	ctx.font = '25px comfortaa, sans-serif';
 
 	const mods = getMods(score.raw_mods);
