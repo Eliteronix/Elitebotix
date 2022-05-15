@@ -129,9 +129,9 @@ module.exports = {
 			.catch(err => {
 				if (err.message === 'Not found') {
 					if (msg.id) {
-						return msg.reply(`Could not find user \`${args.join('_').replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
+						return msg.reply(`Could not find user \`${args.join('_').replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
 					}
-					interaction.reply(`Could not find user \`${args.join('_').replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
+					interaction.reply(`Could not find user \`${args.join('_').replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
 				} else {
 					console.log(err);
 				}

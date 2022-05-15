@@ -7,7 +7,7 @@ module.exports = {
 	name: 'osu-bws',
 	// aliases: ['osu-player', 'osu-user', 'o-u', 'o-p'],
 	description: 'Sends info about the BWS rank of the specified player',
-	usage: '[username] [username] ... (Use "_" instead of spaces; Use --s/--t/--c/--m for modes)',
+	usage: '[username] [username] ... (Use `_` instead of spaces; Use `--s`/`--t`/`--c`/`--m` for modes)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
