@@ -10,7 +10,7 @@ module.exports = {
 	name: 'osu-score',
 	aliases: ['os', 'o-s'],
 	description: 'Sends an info card about the score of the specified player on the map',
-	usage: '<beatmapID> [username] [username] ... (Use "_" instead of spaces; --all for all mod combinations; --HD for HD highscore ...)',
+	usage: '<beatmapID> [username] [username] ... (Use `_` instead of spaces; `--all` for all mod combinations; `--HD` for HD highscore ...)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],

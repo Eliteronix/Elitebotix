@@ -11,7 +11,7 @@ module.exports = {
 	name: 'osu-top',
 	aliases: ['osu-plays', 'osu-topplays', 'osu-best'],
 	description: 'Sends an info card about the topplays of the specified player',
-	usage: '[username] [username] ... (Use "_" instead of spaces; Use --b for bancho / --r for ripple; Use --s/--t/--c/--m for modes; --n / --new / --recent for recent scores; --25 for top 25...)',
+	usage: '[username] [username] ... (Use `_` instead of spaces; Use `--b` for bancho / `--r` for ripple; Use `--s`/`--t`/`--c`/`--m` for modes; `--n` / `--new` / `--recent` for recent scores; `--25` for top 25...)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
@@ -210,7 +210,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --r for ripple; --s/--t/--c/--m for modes; --n / --new / --recent for recent scores; --25 for top 25...)`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--r\` for ripple; \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes; \`--n\` / \`--new\` / \`--recent\` for recent scores; \`--25\` for top 25...)`);
 				} else {
 					console.log(err);
 				}
@@ -221,7 +221,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --s/--t/--c/--m for modes; --n / --new / --recent for recent scores; --25 for top 25...)`);
+					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes; \`--n\` / \`--new\` / \`--recent\` for recent scores; \`--25\` for top 25...)`);
 				}
 
 				let user = rippleToBanchoUser(responseJson[0]);
@@ -257,7 +257,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 			.catch(err => {
 				processingMessage.delete();
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --b for bancho; Use --s/--t/--c/--m for modes; --n / --new / --recent for recent scores; --25 for top 25...)`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes; \`--n\` / \`--new\` / \`--recent\` for recent scores; \`--25\` for top 25...)`);
 				} else {
 					console.log(err);
 				}
@@ -324,7 +324,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --r for ripple; --s/--t/--c/--m for modes; --n / --new / --recent for recent scores; --25 for top 25...)`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--r\` for ripple; \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes; \`--n\` / \`--new\` / \`--recent\` for recent scores; \`--25\` for top 25...)`);
 				} else {
 					console.log(err);
 				}

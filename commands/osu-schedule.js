@@ -10,7 +10,7 @@ module.exports = {
 	name: 'osu-schedule',
 	// aliases: ['os', 'o-s'],
 	description: 'Sends an info graph about the schedules of the players',
-	usage: '[username] [username] ... (Use "_" instead of spaces)',
+	usage: '[username] [username] ... (Use `_` instead of spaces)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
@@ -107,7 +107,7 @@ module.exports = {
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {
-							msg.channel.send(`Could not find user \`${teams[i][j].replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
+							msg.channel.send(`Could not find user \`${teams[i][j].replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
 							teams[i].splice(j, 1);
 							j--;
 						} else {

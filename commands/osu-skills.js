@@ -11,7 +11,7 @@ module.exports = {
 	name: 'osu-skills',
 	// aliases: ['os', 'o-s'],
 	description: 'Sends an info card about the skills of the specified player',
-	usage: '[username] [username] ... (Use "_" instead of spaces; Use --noscale to not scale by totalEvaluation (better for mods); Use --vx/--v1/--v2 to change scoring type filter; Use --all to not filter by tourney matches only; Use --norunningavg to not take the running average)',
+	usage: '[username] [username] ... (Use `_` instead of spaces; Use `--noscale` to not scale by totalEvaluation (better for mods); Use `--vx`/`--v1`/`--v2` to change scoring type filter; Use `--all` to not filter by tourney matches only; Use `--norunningavg` to not take the running average)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
@@ -316,8 +316,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.font = 'bold 30px comfortaa, sans-serif';
-			fitTextOnMiddleCanvas(ctx, `Top Play Stats for ${user.name}`, 30, 'comfortaa, sans-serif', 40, canvas.width + 150, 320 );
-			
+			fitTextOnMiddleCanvas(ctx, `Top Play Stats for ${user.name}`, 30, 'comfortaa, sans-serif', 40, canvas.width + 150, 320);
+
 			// ctx.fillText(`Top Play Stats for ${user.name}`, 400, 40);
 
 			ctx.textAlign = 'left';
@@ -838,7 +838,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 		})
 		.catch(err => {
 			if (err.message === 'Not found') {
-				msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces)`);
+				msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
 			} else if (err.message === 'No standard plays') {
 				msg.channel.send(`Could not find any standard plays for user \`${username.replace(/`/g, '')}\`.`);
 			} else {
