@@ -429,9 +429,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for profile information
 	if (reaction._emoji.name === '👤') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-score') || reaction.message.attachments.first().name.startsWith('osu-recent') || reaction.message.attachments.first().name.startsWith('osu-league-rankings')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-score') || reaction.message.attachments.first().name.startsWith('osu-recent') || reaction.message.attachments.first().name.startsWith('osu-league-rankings') || reaction.message.attachments.first().name.startsWith('osu-topPlayStats')) {
 			//get the osuUserId used
-			const osuUserId = reaction.message.attachments.first().name.replace('osu-recent-', '').replace('osu-score-', '').replace('osu-league-rankings-', '').replace(/-.+.png/gm, '').replace('.png', '');
+			const osuUserId = reaction.message.attachments.first().name.replace('osu-recent-', '').replace('osu-score-', '').replace('osu-league-rankings-', '').replace('osu-topPlayStats-', '').replace(/-.+.png/gm, '').replace('.png', '');
 
 			//Setup artificial arguments
 			let args = [osuUserId];
