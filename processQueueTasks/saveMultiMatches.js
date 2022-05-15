@@ -10,8 +10,6 @@ module.exports = {
 
 		let matchID = args[0];
 
-		console.log('saveMultiMatches', matchID);
-
 		// eslint-disable-next-line no-undef
 		let APItoken = process.env.OSUTOKENSV1.split('-')[parseInt(matchID) % process.env.OSUTOKENSV1.split('-').length];
 
