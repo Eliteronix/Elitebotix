@@ -99,7 +99,7 @@ module.exports = {
 				let lowerBound = averageStarRating - 0.125;
 				let upperBound = averageStarRating + 0.125;
 
-				let sentMessage = await interaction.editReply(`<@${discordUser.userId}>, you were challenged to a duel by <@${commandUser.userId}>.\nReact with ✅ to accept.\nReact with ❌ to decline.`);
+				let sentMessage = await interaction.editReply(`<@${discordUser.userId}>, you were challenged to a duel by <@${commandUser.userId}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`);
 
 				let pingMessage = await interaction.channel.send(`<@${discordUser.userId}>`);
 				await sentMessage.react('✅');
