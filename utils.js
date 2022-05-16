@@ -2033,7 +2033,7 @@ module.exports = {
 			},
 		});
 
-		while (duplicates && deleted < 50) {
+		while (duplicates && deleted < 30) {
 			let result = await sequelize.query(
 				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id) ORDER BY maxCombo ASC LIMIT 1',
 			);
