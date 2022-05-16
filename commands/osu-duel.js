@@ -832,22 +832,37 @@ module.exports = {
 					name: null,
 				};
 
-				if (interaction.options._hoistedOptions[0]) {
+				let username = null;
+				let historical = null;
+
+				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+					if (interaction.options._hoistedOptions[i].name === 'username') {
+						username = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'historical') {
+						historical = parseInt(interaction.options._hoistedOptions[i].value);
+					}
+				}
+
+				if (historical === null) {
+					historical = 1;
+				}
+
+				if (username) {
 					//Get the user by the argument given
-					if (interaction.options._hoistedOptions[0].value.startsWith('<@') && interaction.options._hoistedOptions[0].value.endsWith('>')) {
+					if (username.startsWith('<@') && username.endsWith('>')) {
 						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers ranking');
 						const discordUser = await DBDiscordUsers.findOne({
-							where: { userId: interaction.options._hoistedOptions[0].value.replace('<@', '').replace('>', '').replace('!', '') },
+							where: { userId: username.replace('<@', '').replace('>', '').replace('!', '') },
 						});
 
 						if (discordUser && discordUser.osuUserId) {
 							osuUser.id = discordUser.osuUserId;
 							osuUser.name = discordUser.osuName;
 						} else {
-							return await interaction.editReply({ content: `\`${interaction.options._hoistedOptions[0].value.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect <username>\`.`, ephemeral: true });
+							return await interaction.editReply({ content: `\`${username.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect <username>\`.`, ephemeral: true });
 						}
 					} else {
-						osuUser.id = getIDFromPotentialOsuLink(interaction.options._hoistedOptions[0].value);
+						osuUser.id = getIDFromPotentialOsuLink(username);
 					}
 				} else {
 					//Try to get the user by the message if no argument given
@@ -892,10 +907,8 @@ module.exports = {
 					osuUser.name = user.name;
 				}
 
-				const now = new Date();
-
 				let seasonEnd = new Date();
-				seasonEnd.setUTCFullYear(2018);
+				seasonEnd.setUTCFullYear(seasonEnd.getUTCFullYear() - 1);
 				seasonEnd.setUTCMonth(11);
 				seasonEnd.setUTCDate(30);
 				seasonEnd.setUTCHours(23);
@@ -905,7 +918,7 @@ module.exports = {
 
 				let historicalUserDuelStarRatings = [];
 
-				while (seasonEnd < now) {
+				while (seasonEnd.getUTCFullYear() > 2017 && historical) {
 					let historicalDataset = {
 						seasonEnd: `${seasonEnd.getUTCMonth() + 1}/${seasonEnd.getUTCFullYear()}`,
 						ratings: await getUserDuelStarRating({ osuUserId: osuUser.id, client: interaction.client, date: seasonEnd })
@@ -915,10 +928,9 @@ module.exports = {
 						historicalUserDuelStarRatings.push(historicalDataset);
 					}
 
-					seasonEnd.setUTCMonth(seasonEnd.getUTCMonth() + 12);
+					seasonEnd.setUTCMonth(seasonEnd.getUTCMonth() - 12);
+					historical--;
 				}
-
-				historicalUserDuelStarRatings.reverse();
 
 				const canvasWidth = 700;
 				const canvasHeight = 575 + historicalUserDuelStarRatings.length * 250;

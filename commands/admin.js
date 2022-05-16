@@ -620,6 +620,26 @@ module.exports = {
 			// 						'type': 3,
 			// 						'required': false
 			// 					},
+			// 					{
+			// 						'name': 'historical',
+			// 						'description': 'The amount of historical data to be shown.',
+			// 						'type': 3,
+			// 						'required': false,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Only the current data',
+			// 								'value': '0'
+			// 							},
+			// 							{
+			// 								'name': 'Including last year',
+			// 								'value': '1'
+			// 							},
+			// 							{
+			// 								'name': 'All historical data',
+			// 								'value': '99'
+			// 							}
+			// 						]
+			// 					}
 			// 				]
 			// 			},
 			// 			{
@@ -3232,6 +3252,26 @@ module.exports = {
 									'type': 3,
 									'required': false
 								},
+								{
+									'name': 'historical',
+									'description': 'The amount of historical data to be shown.',
+									'type': 3,
+									'required': false,
+									'choices': [
+										{
+											'name': 'Only the current data',
+											'value': '0'
+										},
+										{
+											'name': 'Including last year',
+											'value': '1'
+										},
+										{
+											'name': 'All historical data',
+											'value': '99'
+										}
+									]
+								}
 							]
 						},
 						{
