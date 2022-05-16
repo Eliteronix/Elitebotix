@@ -318,6 +318,8 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 		const userScores = [];
 
+		let userScoreAmount = 0;
+
 		for (let i = 0; i < beatmapScores.length; i++) {
 			if (parseInt(beatmapScores[i].score) < 10000) {
 				beatmapScores.splice(i, 1);
@@ -326,6 +328,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 			}
 
 			if (beatmapScores[i].osuUserId === osuUser.id) {
+				userScoreAmount++;
 				if (mods === 'best' && userScores.length === 0 || mods === 'all'
 					|| mods !== 'best' && mods !== 'all' && getModBits(mods) === parseInt(beatmapScores[i].rawMods) + parseInt(beatmapScores[i].gameRawMods)
 					|| mods !== 'best' && mods !== 'all' && mods.includes('NF') && getModBits(mods) - 1 === parseInt(beatmapScores[i].rawMods) + parseInt(beatmapScores[i].gameRawMods)
@@ -352,6 +355,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 		for (let i = 0; i < userScores.length; i++) {
 			userScores[i] = await multiToBanchoScore(userScores[i]);
 			userScores[i].raw_date = `${userScores[i].raw_date.getUTCFullYear()}-${userScores[i].raw_date.getUTCMonth().toString().padStart(2, '0')}-${userScores[i].raw_date.getUTCDate().toString().padStart(2, '0')} ${userScores[i].raw_date.getUTCHours().toString().padStart(2, '0')}:${userScores[i].raw_date.getUTCMinutes().toString().padStart(2, '0')}:${userScores[i].raw_date.getUTCSeconds().toString().padStart(2, '0')}`;
+			userScores[i].mapRank = `${userScores[i].mapRank}/${beatmapScores.length - userScoreAmount + 1}`;
 
 			updateOsuDetailsforUser(osuUser, mode);
 
@@ -704,7 +708,7 @@ async function drawAccInfo(input, mode, mapRank) {
 	let beatmap = input[3];
 	let user = input[4];
 
-	if (mapRank > 0) {
+	if (mapRank > 0 || mapRank && mapRank.includes('/')) {
 		//Draw completion
 		roundedRect(ctx, canvas.width / 1000 * 450, canvas.height / 500 * 395, 116, 50, 5, '00', '00', '00', 0.5);
 		ctx.font = '18px comfortaa, sans-serif';
