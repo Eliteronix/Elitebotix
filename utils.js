@@ -450,9 +450,15 @@ module.exports = {
 			]
 		});
 
+		if (nextTask) {
+			console.log(nextTask.task);
+		}
+
 		if (nextTask && !wrongClusterFunction(nextTask.id)) {
 			nextTask.beingExecuted = true;
 			await nextTask.save();
+
+			console.log('cluster executing', nextTask.task);
 
 			executeFoundTask(client, bancho, nextTask);
 		}
