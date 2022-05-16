@@ -839,9 +839,18 @@ module.exports = {
 		logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuMultiScores warmup detection same tourney');
 		let sameTournamentMatches = await DBOsuMultiScores.findAll({
 			where: {
-				matchName: {
-					[Op.like]: `${acronym}:%`,
-				},
+				[Op.or]: [
+					{
+						matchName: {
+							[Op.like]: `${acronym}:%`,
+						},
+					},
+					{
+						matchName: {
+							[Op.like]: `${acronym} :%`,
+						},
+					}
+				],
 				gameStartDate: {
 					[Op.gte]: weeksPrior
 				},
@@ -984,8 +993,6 @@ module.exports = {
 							team: match.games[gameIndex].scores[scoreIndex].team,
 						});
 
-						console.log(score.id, 'created');
-
 						//Set the tournament flags on the corresponding beatmap
 						if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
 							logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuBeatmaps tourney flags new score');
@@ -1066,8 +1073,6 @@ module.exports = {
 						existingScore.team = match.games[gameIndex].scores[scoreIndex].team;
 						existingScore.changed('updatedAt', true);
 						await existingScore.save();
-
-						console.log(existingScore.id, 'updated');
 
 						//Set the tournament flags on the corresponding beatmap
 						if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
