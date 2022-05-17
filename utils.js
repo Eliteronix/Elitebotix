@@ -501,8 +501,8 @@ module.exports = {
 
 		await new Promise(resolve => setTimeout(resolve, 30000));
 
-		let lastWeek = new Date();
-		lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
+		let lastMonth = new Date();
+		lastMonth.setUTCDate(lastMonth.getUTCMonth() - 1);
 
 		logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBDiscordUsers 2');
 		discordUser = await DBDiscordUsers.findOne({
@@ -514,7 +514,7 @@ module.exports = {
 				[Op.or]: [
 					{
 						updatedAt: {
-							[Op.lt]: lastWeek
+							[Op.lt]: lastMonth
 						}
 					},
 					{
