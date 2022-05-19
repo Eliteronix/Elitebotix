@@ -36,6 +36,7 @@ module.exports = {
 
 				let opponentId = null;
 				let averageStarRating = null;
+				let onlyRanked = false;
 
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					if (interaction.options._hoistedOptions[i].name === 'opponent') {
@@ -48,6 +49,8 @@ module.exports = {
 						} else if (averageStarRating > 10) {
 							return await interaction.editReply('You can\'t play a match with a star rating higher than 10');
 						}
+					} else if (interaction.options._hoistedOptions[i].name === 'ranked' && interaction.options._hoistedOptions[i].value === true) {
+						onlyRanked = true;
 					}
 				}
 
@@ -425,7 +428,7 @@ module.exports = {
 							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
 						}
 
-						if (!beatmaps[index]) {
+						if (!beatmaps[index] || onlyRanked && beatmaps[index].approvalStatus !== 'Ranked') {
 							beatmaps.splice(index, 1);
 							continue;
 						}
