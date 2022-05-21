@@ -678,6 +678,18 @@ module.exports = {
 							'description': 'Get shown how the ranks are spread across all connected users',
 							'type': 1, // 1 is type SUB_COMMAND
 						},
+						{
+							'name': 'rating-updates',
+							'description': 'Get notified when your rating changes',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'enabled',
+									'description': 'Change if updates should be sent or not',
+									'type': 5,
+								},
+							]
+						},
 					]
 				},
 			});

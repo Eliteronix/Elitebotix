@@ -1795,6 +1795,44 @@ module.exports = {
 				}
 
 				interaction.editReply({ content: `${guildName} osu! Duel League Rating Spread`, files: [attachment] });
+			} else if (interaction.options._subcommand === 'rating-updates') {
+				await interaction.deferReply({ ephemeral: true });
+
+				let enable = false;
+
+				if (interaction.options._hoistedOptions[0].value === true) {
+					enable = true;
+				}
+
+				let discordUser = await DBDiscordUsers.findOne({
+					where: {
+						userId: interaction.user.id,
+					},
+				});
+
+				if (!discordUser || !discordUser.osuUserId) {
+					return interaction.editReply('You must link your osu! account before using this command.');
+				}
+
+				if (enable) {
+					if (discordUser.osuDuelRatingUpdates) {
+						return interaction.editReply('You are already receiving osu! Duel rating updates.');
+					}
+
+					discordUser.osuDuelRatingUpdates = true;
+					await discordUser.save();
+
+					return interaction.editReply('You will now receive osu! Duel rating updates.');
+				}
+
+				if (!discordUser.osuDuelRatingUpdates) {
+					return interaction.editReply('You are not receiving osu! Duel rating updates.');
+				}
+
+				discordUser.osuDuelRatingUpdates = false;
+				await discordUser.save();
+
+				return interaction.editReply('You will no longer receive osu! Duel rating updates.');
 			}
 		}
 	},

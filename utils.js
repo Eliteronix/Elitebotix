@@ -1694,6 +1694,13 @@ module.exports = {
 						}
 						if (message.length > 1) {
 							channel.send(`\`\`\`${message.join('\n')}\`\`\``);
+
+							if (discordUser.osuDuelRatingUpdates) {
+								const user = await input.client.users.fetch(discordUser.userId);
+								if (user) {
+									user.send(`Your duel ratings have been updated.\`\`\`${message.join('\n')}\`\`\``);
+								}
+							}
 						}
 					} catch (e) {
 						console.log(e);
