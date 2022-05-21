@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -450,15 +450,9 @@ module.exports = {
 			]
 		});
 
-		if (nextTask) {
-			console.log(nextTask.task);
-		}
-
 		if (nextTask && !wrongClusterFunction(nextTask.id)) {
 			nextTask.beingExecuted = true;
 			await nextTask.save();
-
-			console.log('cluster executing', nextTask.task);
 
 			executeFoundTask(client, bancho, nextTask);
 		}
@@ -823,6 +817,9 @@ module.exports = {
 		// 	child.on('close', resolve);
 		// });
 
+		let tourneyMatchPlayers = [];
+		let newTourneyMatch = true;
+
 		let tourneyMatch = false;
 		if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 			tourneyMatch = true;
@@ -938,6 +935,11 @@ module.exports = {
 				}
 
 				try {
+					//Add the player ID to the list if needed
+					if (tourneyMatchPlayers.indexOf(match.games[gameIndex].scores[scoreIndex].userId) === -1) {
+						tourneyMatchPlayers.push(match.games[gameIndex].scores[scoreIndex].userId);
+					}
+
 					//Remove HT, DT and NC from scoreMods
 					let scoreMods = getModsFunction(match.games[gameIndex].scores[scoreIndex].raw_mods);
 					for (let i = 0; i < scoreMods.length; i++) {
@@ -1041,6 +1043,8 @@ module.exports = {
 							}
 						}
 					} else if (existingScore.warmup === null) {
+						newTourneyMatch = false;
+
 						existingScore.osuUserId = match.games[gameIndex].scores[scoreIndex].userId;
 						existingScore.matchId = match.id;
 						existingScore.matchName = match.name;
@@ -1107,10 +1111,42 @@ module.exports = {
 								}
 							}
 						}
+					} else {
+						newTourneyMatch = false;
 					}
 				} catch (error) {
 					scoreIndex--;
 				}
+			}
+		}
+
+		if (newTourneyMatch) {
+			//Get all follows for the players in the match
+			let follows = await DBOsuTourneyFollows.findAll({
+				where: {
+					osuUserId: {
+						[Op.in]: tourneyMatchPlayers
+					}
+				}
+			});
+
+			//Collect the follows per user
+			let usersToNotify = [];
+			let usersToNotifyIds = [];
+
+			for (let i = 0; i < follows.length; i++) {
+				if (usersToNotifyIds.indexOf(follows[i].userId) === -1) {
+					usersToNotifyIds.push(follows[i].userId);
+					usersToNotify.push({ userId: follows[i].userId, osuUserIds: [follows[i].osuUserId] });
+				} else {
+					usersToNotify[usersToNotifyIds.indexOf(follows[i].userId)].osuUserIds.push(follows[i].osuUserId);
+				}
+			}
+
+			//Create a notification for each user
+			let now = new Date();
+			for (let i = 0; i < usersToNotify.length; i++) {
+				await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')}`, date: now });
 			}
 		}
 	},
