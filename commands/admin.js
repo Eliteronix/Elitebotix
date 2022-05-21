@@ -5175,7 +5175,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'weather',
 					description: 'Sends info about the weather of the given location',
