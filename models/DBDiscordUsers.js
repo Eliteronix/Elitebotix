@@ -121,6 +121,12 @@ module.exports = (sequelize, DataTypes) => {
 		birthday: {
 			type: DataTypes.DATE,
 		},
+		weatherLocation: {
+			type: DataTypes.STRING,
+		},
+		weatherDegreeType: {
+			type: DataTypes.STRING,
+		},
 		paranoid: true,
 	});
 };

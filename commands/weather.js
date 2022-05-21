@@ -4,6 +4,7 @@ const weather = require('weather-js');
 const util = require('util');
 const { pause, populateMsgFromInteraction, fitTextOnMiddleCanvas } = require('../utils');
 const { Permissions } = require('discord.js');
+const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
 	name: 'weather',
@@ -15,7 +16,7 @@ module.exports = {
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	//guildOnly: true,
-	args: true,
+	args: false,
 	cooldown: 5,
 	//noCooldownMessage: true,
 	tags: 'misc',
@@ -34,26 +35,56 @@ module.exports = {
 			}
 		}
 
+		const discordUser = await DBDiscordUsers.findOne({
+			where: {
+				userId: msg.author.id
+			}
+		});
+
+		let weatherLocation;
 		let degreeType = 'C';
-		if (args[0].toLowerCase() === 'f' || args[0].toLowerCase() === 'fahrenheit') {
-			degreeType = 'F';
-			args.shift();
-		} else if (args[0].toLowerCase() === 'c' || args[0].toLowerCase() === 'celcius') {
-			args.shift();
+		if (discordUser && discordUser.weatherDegreeType) {
+			degreeType = discordUser.weatherDegreeType;
+		}
+
+		if (args) {
+			for (let i = 0; i < args.length; i++) {
+				if (args[i].toLowerCase() === 'f' || args[i].toLowerCase() === 'fahrenheit') {
+					degreeType = 'F';
+					args.splice(i, 1);
+				} else if (args[i].toLowerCase() === 'c' || args[i].toLowerCase() === 'celcius') {
+					degreeType = 'C';
+					args.splice(i, 1);
+				}
+			}
+
+			// if any args left, assume it's the location
+			if (args.length > 0) {
+				weatherLocation = args.join(' ');
+			} else {
+				if (discordUser && discordUser.weatherLocation) {
+					weatherLocation = discordUser.weatherLocation;
+				} else {
+					if (msg.id) {
+						return msg.reply('You must specify a location or set your location');
+					}
+					return interaction.editReply('You must specify a location or set your location');
+				}
+			}
 		}
 
 		const findWeather = util.promisify(weather.find);
 
 		for (let triesBeforeError = 0; triesBeforeError < 5; triesBeforeError++) {
 			try {
-				await findWeather({ search: args.join(' '), degreeType: degreeType })
+				await findWeather({ search: weatherLocation, degreeType: degreeType })
 					.then(async (result) => {
 						if (!result[0]) {
 							triesBeforeError = Infinity;
 							if (msg.id) {
-								return msg.reply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
+								return msg.reply(`Could not find location \`${weatherLocation.replace(/`/g, '')}\``);
 							}
-							return interaction.reply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
+							return interaction.reply(`Could not find location \`${weatherLocation.replace(/`/g, '')}\``);
 						}
 
 						const weather = result[0];
@@ -129,12 +160,12 @@ module.exports = {
 						ctx.drawImage(weatherPic, 25, 25, 100, 100);
 
 						//Create as an attachment
-						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'elitebotix-changelog.png');
+						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `elitebotix-weather-${weather.location.name}.png`);
 
 						if (msg.id) {
-							msg.channel.send({ content: `Weather for ${args.join(' ')}`, files: [attachment] });
+							msg.channel.send({ content: `Weather for ${weather.location.name}`, files: [attachment] });
 						} else {
-							interaction.followUp({ content: `Weather for ${args.join(' ')}`, files: [attachment] });
+							interaction.followUp({ content: `Weather for ${weather.location.name}`, files: [attachment] });
 						}
 
 						return triesBeforeError = Infinity;
