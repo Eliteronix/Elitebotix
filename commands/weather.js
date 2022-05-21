@@ -60,7 +60,6 @@ module.exports = {
 
 			// if any args left, assume it's the location
 			if (args.length > 0) {
-				console.log(1);
 				weatherLocation = args.join(' ');
 			} else {
 				if (discordUser && discordUser.weatherLocation) {
