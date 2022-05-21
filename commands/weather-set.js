@@ -23,13 +23,13 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		if (msg) {
-			return msg.reply('please use `/weather-set` instead');
+			return msg.reply('Please use `/weather-set` instead.');
 		}
 
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.deferReply();
+			await interaction.deferReply({ ephemeral: true });
 
 			args = [];
 
@@ -102,8 +102,8 @@ module.exports = {
 				}
 			}
 		}
-        
 
-        
+
+
 	}
 };
