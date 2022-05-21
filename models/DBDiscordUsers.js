@@ -55,6 +55,10 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		osuDuelRatingUpdates: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		osuRank: {
 			type: DataTypes.STRING,
 		},
