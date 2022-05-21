@@ -5206,7 +5206,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'weather-set',
 					description: 'Allows you to set the default degree type/location for the weather command',
