@@ -138,7 +138,7 @@ module.exports = {
 
 			let expectedPpRankPercentageDifference = Math.round((100 / ppDiscordUsers.length * ppRank - 100 / ppDiscordUsers.length * expectedPpRank) * 100) / 100;
 			msg.reply(`${discordUser.osuName} is:\n\`\`\`PP-Rank ${ppRank} out of ${ppDiscordUsers.length}\nDuel-Rating-Rank ${duelRank} out of ${duelDiscordUsers.length}\n\nExpected osu! pp rank for that duel rating would be:\n${expectedPpRank} (Difference: ${ppRank - expectedPpRank} | ${expectedPpRankPercentageDifference}%)\n\nThat is in rank numbers:\n#${discordUser.osuRank} -> ~#${ppDiscordUsers[expectedPpRank - 1 - rankOffset].osuRank} (Difference: ${discordUser.osuRank - ppDiscordUsers[expectedPpRank - 1 - rankOffset].osuRank} ranks)\`\`\``);
-		} if (args[0] === 'follow') {
+		} else if (args[0] === 'follow') {
 			if (!args[1]) {
 				return msg.reply('You did not give a user to follow');
 			}
