@@ -110,6 +110,15 @@ module.exports = {
 
 		let derankStats = await getDerankStats(discordUser);
 
-		interaction.editReply(`${discordUser.osuName} is:\n\`\`\`PP-Rank ${derankStats.ppRank} out of ${derankStats.ppUsersLength}\nDuel-Rating-Rank ${derankStats.duelRank} out of ${derankStats.duelUsersLength}\n\nExpected osu! pp rank for that duel rating would be:\n${derankStats.expectedPpRank} (Difference: ${derankStats.ppRank - derankStats.expectedPpRank} | ${derankStats.expectedPpRankPercentageDifference}%)\n\nThat is in rank numbers:\n#${discordUser.osuRank} -> ~#${derankStats.expectedPpRankOsu} (Difference: ${discordUser.osuRank - derankStats.expectedPpRankOsu} ranks)\`\`\``);
+		let message = [];
+
+		message.push(`${discordUser.osuName} is:`);
+		message.push(`\`\`\`Elitebotix users PP-Rank ${derankStats.ppRank} out of ${derankStats.ppUsersLength}`);
+		message.push(`Elitebotix users Duel-Rating-Rank ${derankStats.duelRank} out of ${derankStats.duelUsersLength}`);
+		message.push('');
+		message.push('The expected osu! rank change for that duel rating would be:');
+		message.push(`#${discordUser.osuRank} -> ~#${derankStats.expectedPpRankOsu} (Difference: ${discordUser.osuRank - derankStats.expectedPpRankOsu} ranks)\`\`\``);
+
+		interaction.editReply(message.join('\n'));
 	},
 };
