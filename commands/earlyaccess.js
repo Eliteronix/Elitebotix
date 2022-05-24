@@ -106,6 +106,48 @@ module.exports = {
 						console.log(err);
 					}
 				});
+		} else if (args[0] === 'followlist') {
+			//Get all follows for the user
+			let follows = await DBOsuTourneyFollows.findAll({
+				where: {
+					userId: msg.author.id
+				}
+			});
+
+			if (!follows.length) {
+				return msg.reply('You are not following anyone');
+			}
+
+			let followList = [];
+			for (let i = 0; i < follows.length; i++) {
+				let discordUser = await DBDiscordUsers.findOne({
+					where: {
+						osuUserId: follows[i].osuUserId
+					}
+				});
+
+				if (discordUser) {
+					followList.push(discordUser.osuName);
+				} else {
+					// eslint-disable-next-line no-undef
+					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+					});
+
+					await osuApi.getUser({ u: follows[i].osuUserId, m: 0 })
+						.then(async (osuUser) => {
+							followList.push(osuUser.name);
+						})
+						.catch(err => {
+							console.log(err);
+						});
+				}
+			}
+
+			msg.reply(`You are following: \`${followList.join('`, `')}\``);
 		} else {
 			msg.reply('Invalid command');
 		}
