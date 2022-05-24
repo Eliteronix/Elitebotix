@@ -53,7 +53,7 @@ module.exports = {
 			try {
 				await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: client });
 			} catch (e) {
-				if (e === 'No standard plays') {
+				if (e.message === 'No standard plays') {
 					discordUser.osuDuelStarRating = null;
 				} else {
 					console.log(e);

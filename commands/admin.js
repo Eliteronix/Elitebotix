@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { pause, logDatabaseQueries, getUserDuelStarRating, getOsuBeatmap } = require('../utils');
+const { pause, logDatabaseQueries, getUserDuelStarRating } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 
@@ -5476,103 +5476,17 @@ module.exports = {
 				msg.reply('Patreon status set to true');
 			}
 			discordUser.save();
-		} else if (args[0] === 'query') {
-			const Sequelize = require('sequelize');
-
-			const sequelize = new Sequelize('database', 'username', 'password', {
-				host: 'localhost',
-				dialect: 'sqlite',
-				logging: false,
-				storage: 'database.sqlite',
-				retry: {
-					max: 10, // Maximum rety 3 times
-					backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-					backoffExponent: 1.15, // Exponent to increase backoff each try. Default: 1.1
-				},
-			});
-
-			let result = await sequelize.query(
-				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id) ORDER BY maxCombo ASC',
-			);
-
-			console.log(result[0]);
-		} else if (args[0] === 'similar') {
-			let dbBeatmap = await getOsuBeatmap({ beatmapId: args[1] });
-
-			msg.reply(`Original Beatmap: ${dbBeatmap.beatmapId} - ${dbBeatmap.artist} - ${dbBeatmap.title} - ${dbBeatmap.difficulty} - ${dbBeatmap.bpm}`);
-
-			const tourneyScores = await DBOsuMultiScores.findAll({
+		} else if (args[0] === 'removeTwitchSyncEnable') {
+			let twitchSyncUsers = await DBDiscordUsers.findAll({
 				where: {
-					beatmapId: args[1]
+					twitchOsuMapSync: true
 				}
 			});
 
-			//Get all unique osuUserIds
-			let osuUserIds = [];
-			for (let i = 0; i < tourneyScores.length; i++) {
-				if (!osuUserIds.includes(tourneyScores[i].osuUserId)) {
-					osuUserIds.push(tourneyScores[i].osuUserId);
-				}
+			for (let i = 0; i < twitchSyncUsers.length; i++) {
+				twitchSyncUsers[i].twitchOsuMapSync = false;
+				await twitchSyncUsers[i].save();
 			}
-
-			let mapsPlayed = [];
-			let timesPlayed = [];
-
-			//Loop through each users' scores
-			for (let i = 0; i < osuUserIds.length; i++) {
-				let userScores = await DBOsuMultiScores.findAll({
-					where: {
-						osuUserId: osuUserIds[i]
-					}
-				});
-
-				let duplicate = [];
-				for (let j = 0; j < userScores.length; j++) {
-					if (mapsPlayed.includes(userScores[j].beatmapId) && !duplicate.includes(userScores[j].beatmapId)) {
-						timesPlayed[mapsPlayed.indexOf(userScores[j].beatmapId)]++;
-					} else {
-						duplicate.push(userScores[j].beatmapId);
-						mapsPlayed.push(userScores[j].beatmapId);
-						timesPlayed.push(1);
-					}
-				}
-			}
-
-			let maps = [];
-			for (let i = 0; i < mapsPlayed.length; i++) {
-				console.log(i, mapsPlayed.length);
-				if (timesPlayed[i] > 10) {
-					let mapScores = await DBOsuMultiScores.count({
-						where: {
-							beatmapId: mapsPlayed[i]
-						}
-					});
-
-					maps.push({ beatmapId: mapsPlayed[i], count: timesPlayed[i], standardizedCount: timesPlayed[i] / mapScores });
-				}
-			}
-
-			maps.sort((a, b) => {
-				return b.standardizedCount - a.standardizedCount;
-			}
-			);
-
-			console.log(maps);
-
-			let topTen = [];
-			for (let i = 0; i < maps.length && i < 10; i++) {
-				let similarMap = await getOsuBeatmap({ beatmapId: maps[i].beatmapId });
-
-				if (similarMap) {
-					topTen.push(`${similarMap.beatmapId} - ${similarMap.artist} - ${similarMap.title} - ${similarMap.difficulty} - ${similarMap.bpm}`);
-				} else {
-					maps.splice(i, 1);
-					i--;
-				}
-			}
-
-			msg.reply(topTen.join('\n'));
-
 		} else {
 			msg.reply('Invalid command');
 		}
