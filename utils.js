@@ -523,7 +523,6 @@ module.exports = {
 
 		if (discordUser) {
 			logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBProcessQueue');
-			console.log('unconnected', discordUser.osuUserId);
 			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
 			if (!existingTask) {
 				let now = new Date();
@@ -1708,7 +1707,6 @@ module.exports = {
 
 						if (oldDerankStats.expectedPpRankOsu !== newDerankStats.expectedPpRankOsu) {
 							message.push(`Deranked Rank change: #${oldDerankStats.expectedPpRankOsu} -> #${newDerankStats.expectedPpRankOsu} (${newDerankStats.expectedPpRankOsu - oldDerankStats.expectedPpRankOsu})`);
-							console.log(discordUser);
 						}
 
 						if (message.length > 1) {
