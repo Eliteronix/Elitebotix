@@ -105,7 +105,7 @@ const emojiDelete = require('./emojiDelete');
 const interactionCreate = require('./interactionCreate');
 
 //Get executeNextProcessQueueTask
-const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateMultiScores, checkForBirthdays } = require('./utils');
+const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateEntries, checkForBirthdays } = require('./utils');
 
 //Get MOTD/getMapsOnTime
 const { initializeMOTD } = require('./MOTD/initializeMOTD');
@@ -208,7 +208,7 @@ setInterval(() => checkForBirthdays(client), 300000);
 
 setInterval(() => refreshOsuRank(), 60000);
 
-setInterval(() => cleanUpDuplicateMultiScores(), 3600000);
+setInterval(() => cleanUpDuplicateEntries(), 3600000);
 
 client.on('interactionCreate', interaction => {
 	if (wrongCluster(interaction.id)) {
