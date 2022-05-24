@@ -68,7 +68,7 @@ module.exports = {
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
 
-			let user = await osuApi.getUser({ u: args[1], m: 0 })
+			let user = await osuApi.getUser({ u: username, m: 0 })
 				.then(osuUser => {
 					return osuUser;
 				})
@@ -85,6 +85,8 @@ module.exports = {
 			if (!user) {
 				return;
 			}
+
+			msg = await populateMsgFromInteraction(interaction);
 
 			let duelRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
 
