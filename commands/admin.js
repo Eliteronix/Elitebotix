@@ -586,8 +586,6 @@ module.exports = {
 			// 	},
 			// });
 
-<<<<<<< Updated upstream
-=======
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'osu-derank',
@@ -603,7 +601,6 @@ module.exports = {
 			// 	},
 			// });
 
->>>>>>> Stashed changes
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'osu-duel',

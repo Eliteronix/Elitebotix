@@ -35,7 +35,7 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
-			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 5);
+			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 60);
 		}
 
 		await osuApi.getMatch({ mp: matchID })
