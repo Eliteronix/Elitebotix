@@ -2073,16 +2073,10 @@ module.exports = {
 
 		return outputScore;
 	},
-	async cleanUpDuplicateMultiScores() {
+	async cleanUpDuplicateEntries() {
 		if (wrongClusterFunction()) {
 			return;
 		}
-		let date = new Date();
-		if (date.getUTCHours() > 6) {
-			return;
-		}
-		let duplicates = true;
-		let deleted = 0;
 
 		const Sequelize = require('sequelize');
 
@@ -2098,6 +2092,48 @@ module.exports = {
 			},
 		});
 
+		// Remove duplicate discorduser entries
+		let duplicates = true;
+		let deleted = 0;
+
+		while (duplicates && deleted < 25) {
+			let result = await sequelize.query(
+				'SELECT * FROM DBDiscordUsers WHERE 0 < (SELECT COUNT(1) FROM DBDiscordUsers as a WHERE a.osuUserId = DBDiscordUsers.osuUserId AND a.id <> DBDiscordUsers.id) ORDER BY userId ASC LIMIT 1',
+			);
+
+			duplicates = result[0].length;
+
+			if (result[0].length) {
+				await new Promise(resolve => setTimeout(resolve, 2000));
+				logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries');
+				let duplicate = await DBDiscordUsers.findOne({
+					where: {
+						id: result[0][0].id
+					}
+				});
+
+				console.log(duplicate.userId, duplicate.osuUserId, duplicate.updatedAt);
+
+				deleted++;
+				await new Promise(resolve => setTimeout(resolve, 2000));
+				await duplicate.destroy();
+			}
+			await new Promise(resolve => setTimeout(resolve, 10000));
+		}
+
+		if (deleted) {
+			console.log(`Cleaned up ${deleted} duplicate users`);
+		}
+
+
+		//Only clean up multi scores during the night
+		let date = new Date();
+		if (date.getUTCHours() > 6) {
+			return;
+		}
+		duplicates = true;
+		deleted = 0;
+
 		while (duplicates && deleted < 30) {
 			let result = await sequelize.query(
 				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id) ORDER BY maxCombo ASC LIMIT 1',
@@ -2107,7 +2143,7 @@ module.exports = {
 
 			if (result[0].length) {
 				await new Promise(resolve => setTimeout(resolve, 2000));
-				logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateMultiScores');
+				logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries');
 				let duplicate = await DBOsuMultiScores.findOne({
 					where: {
 						id: result[0][0].id
