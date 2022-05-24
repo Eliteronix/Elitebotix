@@ -1695,7 +1695,7 @@ module.exports = {
 
 						let oldDerankStats = await getDerankStatsFunction(discordUser);
 						//Setting the new values even tho it does that later just to get the new derank values
-						discordUser.osuDuelStarRating = duelRatings.total;
+						discordUser.osuDuelStarRating = Math.round(duelRatings.total * 100000000000000) / 100000000000000;
 						discordUser.osuNoModDuelStarRating = duelRatings.noMod;
 						discordUser.osuHiddenDuelStarRating = duelRatings.hidden;
 						discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
