@@ -523,6 +523,7 @@ module.exports = {
 
 		if (discordUser) {
 			logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBProcessQueue');
+			console.log('unconnected', discordUser.osuUserId);
 			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
 			if (!existingTask) {
 				let now = new Date();
@@ -1692,6 +1693,24 @@ module.exports = {
 						if (discordUser.osuDuelOutdated !== duelRatings.outdated) {
 							message.push(`Outdated: ${discordUser.osuDuelOutdated} -> ${duelRatings.outdated}`);
 						}
+
+						let oldDerankStats = await getDerankStatsFunction(discordUser);
+						//Setting the new values even tho it does that later just to get the new derank values
+						discordUser.osuDuelStarRating = duelRatings.total;
+						discordUser.osuNoModDuelStarRating = duelRatings.noMod;
+						discordUser.osuHiddenDuelStarRating = duelRatings.hidden;
+						discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
+						discordUser.osuDoubleTimeDuelStarRating = duelRatings.doubleTime;
+						discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
+						discordUser.osuDuelProvisional = duelRatings.provisional;
+						discordUser.osuDuelOutdated = duelRatings.outdated;
+						let newDerankStats = await getDerankStatsFunction(discordUser);
+
+						if (oldDerankStats.expectedPpRankOsu !== newDerankStats.expectedPpRankOsu) {
+							message.push(`Deranked Rank change: #${oldDerankStats.expectedPpRankOsu} -> #${newDerankStats.expectedPpRankOsu} (${newDerankStats.expectedPpRankOsu - oldDerankStats.expectedPpRankOsu})`);
+							console.log(discordUser);
+						}
+
 						if (message.length > 1) {
 							channel.send(`\`\`\`${message.join('\n')}\`\`\``);
 
@@ -2112,8 +2131,95 @@ module.exports = {
 	},
 	wrongCluster(id) {
 		return wrongClusterFunction(id);
+	},
+	async getDerankStats(discordUser) {
+		return await getDerankStatsFunction(discordUser);
 	}
 };
+
+async function getDerankStatsFunction(discordUser) {
+	let ppDiscordUsers = await DBDiscordUsers.findAll({
+		where: {
+			osuUserId: {
+				[Op.gt]: 0
+			},
+			osuPP: {
+				[Op.gt]: 0
+			}
+		},
+		order: [
+			['osuPP', 'DESC']
+		]
+	});
+
+	quicksortOsuPP(ppDiscordUsers);
+
+	let duelDiscordUsers = await DBDiscordUsers.findAll({
+		where: {
+			osuUserId: {
+				[Op.gt]: 0
+			},
+			osuDuelStarRating: {
+				[Op.gt]: 0
+			}
+		},
+		order: [
+			['osuDuelStarRating', 'DESC']
+		]
+	});
+
+	let ppRank = null;
+
+	for (let i = 0; i < ppDiscordUsers.length && !ppRank; i++) {
+		if (parseFloat(discordUser.osuPP) >= parseFloat(ppDiscordUsers[i].osuPP)) {
+			ppRank = i + 1;
+		}
+	}
+
+	if (!ppRank) {
+		ppRank = ppDiscordUsers.length + 1;
+	}
+
+	let duelRank = null;
+
+	for (let i = 0; i < duelDiscordUsers.length && !duelRank; i++) {
+		if (parseFloat(discordUser.osuDuelStarRating) >= parseFloat(duelDiscordUsers[i].osuDuelStarRating)) {
+			duelRank = i + 1;
+		}
+	}
+
+	if (!duelRank) {
+		duelRank = duelDiscordUsers.length + 1;
+	}
+
+	if (!discordUser.userId) {
+		ppDiscordUsers.length = ppDiscordUsers.length + 1;
+		duelDiscordUsers.length = duelDiscordUsers.length + 1;
+	}
+
+	let expectedPpRank = Math.round(duelRank / duelDiscordUsers.length * ppDiscordUsers.length);
+
+
+	let rankOffset = 0;
+
+	if (!discordUser.userId && expectedPpRank > 1) {
+		rankOffset = 1;
+	}
+
+	let expectedPpRankPercentageDifference = Math.round((100 / ppDiscordUsers.length * ppRank - 100 / ppDiscordUsers.length * expectedPpRank) * 100) / 100;
+
+	let expectedPpRankOsu = ppDiscordUsers[expectedPpRank - 1 - rankOffset].osuRank;
+
+	return {
+		ppRank: ppRank,
+		ppUsersLength: ppDiscordUsers.length,
+		duelRank: duelRank,
+		duelUsersLength: duelDiscordUsers.length,
+		expectedPpRank: expectedPpRank,
+		expectedPpRankPercentageDifference: expectedPpRankPercentageDifference,
+		expectedPpRankOsu: expectedPpRankOsu
+	};
+}
 
 function wrongClusterFunction(id) {
 	let clusterAmount = require('os').cpus().length;
@@ -3182,4 +3288,29 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 
 	// console.log('Warmup status unclear');
 	return { warmup: null, byAmount: false };
+}
+
+function partitionOsuPP(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].osuPP) >= parseFloat(pivot.osuPP)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksortOsuPP(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionOsuPP(list, start, end);
+		quicksortOsuPP(list, start, p - 1);
+		quicksortOsuPP(list, p + 1, end);
+	}
+	return list;
 }
