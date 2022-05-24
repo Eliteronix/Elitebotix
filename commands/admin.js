@@ -586,6 +586,24 @@ module.exports = {
 			// 	},
 			// });
 
+<<<<<<< Updated upstream
+=======
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'osu-derank',
+			// 		description: 'Reranks players based on their duel rating compared to others',
+			// 		options: [
+			// 			{
+			// 				'name': 'username',
+			// 				'description': 'The username, id or link of the player to calculate',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+>>>>>>> Stashed changes
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'osu-duel',
@@ -3272,6 +3290,21 @@ module.exports = {
 						{
 							'name': 'username5',
 							'description': 'The username, id or link of the player to compare',
+							'type': 3,
+							'required': false
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-derank',
+					description: 'Reranks players based on their duel rating compared to others',
+					options: [
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player to calculate',
 							'type': 3,
 							'required': false
 						},
