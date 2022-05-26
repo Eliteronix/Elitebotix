@@ -190,6 +190,7 @@ module.exports = {
 					let beatmaps = null;
 
 					if (i === 6) {
+						console.log('Duel Match: Get all TB Beatmaps');
 						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps TB');
 						beatmaps = await DBOsuBeatmaps.findAll({
 							where: {
@@ -233,7 +234,9 @@ module.exports = {
 								},
 							}
 						});
+						console.log('Duel Match: Grabbed all TB Beatmaps');
 					} else if (modPools[i] === 'NM') {
+						console.log('Duel Match: Get all NM Beatmaps');
 						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps NM');
 						beatmaps = await DBOsuBeatmaps.findAll({
 							where: {
@@ -268,7 +271,9 @@ module.exports = {
 								},
 							}
 						});
+						console.log('Duel Match: Grabbed all NM Beatmaps');
 					} else if (modPools[i] === 'HD') {
+						console.log('Duel Match: Get all HD Beatmaps');
 						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps HD');
 						let HDLowerBound = lowerBound - 0.8;
 						let HDUpperBound = upperBound - 0.15;
@@ -305,7 +310,9 @@ module.exports = {
 								},
 							}
 						});
+						console.log('Duel Match: Grabbed all HD Beatmaps');
 					} else if (modPools[i] === 'HR') {
+						console.log('Duel Match: Get all HR Beatmaps');
 						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps HR');
 						beatmaps = await DBOsuBeatmaps.findAll({
 							where: {
@@ -340,8 +347,9 @@ module.exports = {
 								},
 							}
 						});
-
+						console.log('Duel Match: Grabbed all HR Beatmaps');
 					} else if (modPools[i] === 'DT') {
+						console.log('Duel Match: Get all DT Beatmaps');
 						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps DT');
 						beatmaps = await DBOsuBeatmaps.findAll({
 							where: {
@@ -376,8 +384,9 @@ module.exports = {
 								},
 							}
 						});
-
+						console.log('Duel Match: Grabbed all DT Beatmaps');
 					} else if (modPools[i] === 'FM') {
+						console.log('Duel Match: Get all FM Beatmaps');
 						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps FM');
 						beatmaps = await DBOsuBeatmaps.findAll({
 							where: {
@@ -412,27 +421,38 @@ module.exports = {
 								},
 							}
 						});
+						console.log('Duel Match: Grabbed all FM Beatmaps');
 					}
 
 					while (dbBeatmap === null) {
 						const index = Math.floor(Math.random() * beatmaps.length);
 
 						if (modPools[i] === 'HD') {
+							console.log('Duel Match: Refresh the HD Beatmap');
 							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
 							beatmaps[index].starRating = adjustHDStarRating(beatmaps[index].starRating, beatmaps[index].approachRate);
+							console.log('Duel Match: Refreshed the HD Beatmap');
 						} else if (modPools[i] === 'HR') {
+							console.log('Duel Match: Refresh the HR Beatmap');
 							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 16 });
+							console.log('Duel Match: Refreshed the HR Beatmap');
 						} else if (modPools[i] === 'DT') {
+							console.log('Duel Match: Refresh the DT Beatmap');
 							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 64 });
+							console.log('Duel Match: Refreshed the DT Beatmap');
 						} else {
+							console.log('Duel Match: Refresh the NM/FM Beatmap');
 							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
+							console.log('Duel Match: Refreshed the NM/FM Beatmap');
 						}
 
 						if (!beatmaps[index] || onlyRanked && beatmaps[index].approvalStatus !== 'Ranked') {
 							beatmaps.splice(index, 1);
+							console.log('Beatmap was null or not ranked, removing from pool');
 							continue;
 						}
 
+						console.log('Duel Match: Get beatmap score count');
 						const mapScoreAmount = await DBOsuMultiScores.count({
 							where: {
 								beatmapId: beatmaps[index].beatmapId,
@@ -445,16 +465,18 @@ module.exports = {
 								],
 							}
 						});
+						console.log('Duel Match: Grabbed beatmap score count');
 
 						// eslint-disable-next-line no-undef
 						if (!beatmaps[index] || parseFloat(beatmaps[index].starRating) < lowerBound || parseFloat(beatmaps[index].starRating) > upperBound || mapScoreAmount < 25 && process.env.SERVER !== 'Dev') {
 							beatmaps.splice(index, 1);
+							console.log('Beatmap was null, lower bound, or upper bound, or score count was less than 25, removing from pool');
 						} else if (!dbMapIds.includes(beatmaps[index].beatmapsetId)) {
 							dbBeatmap = beatmaps[index];
 							dbMapIds.push(beatmaps[index].beatmapsetId);
 							dbMaps.push(beatmaps[index]);
+							console.log('Duel Match: Beatmap is valid, adding to pool');
 						}
-
 					}
 				}
 
