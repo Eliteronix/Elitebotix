@@ -6,7 +6,7 @@ module.exports = {
 	name: 'earlyaccess',
 	aliases: ['early', 'ea'],
 	description: 'Has some early access features for patreons if possible',
-	//usage: '<bug/feature/request> <description>',
+	usage: 'follow / unfollow / followlist / followers',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
@@ -148,6 +148,53 @@ module.exports = {
 			}
 
 			msg.reply(`You are following: \`${followList.join('`, `')}\``);
+		} else if (args[0] === 'followers') {
+			//Check if the user has a connected osu! account
+			let discordUser = await DBDiscordUsers.findOne({
+				where: {
+					userId: msg.author.id
+				}
+			});
+
+			if (!discordUser || !discordUser.osuUserId) {
+				return msg.reply('You have not connected your osu! account');
+			}
+
+			let followers = await DBDiscordUsers.findAll({
+				where: {
+					osuUserId: discordUser.osuUserId
+				}
+			});
+
+			if (!followers.length) {
+				return msg.reply('You have no followers');
+			}
+
+			let followerList = [];
+			for (let i = 0; i < followers.length; i++) {
+				let follower = '';
+				let discordName = null;
+				try {
+					discordName = await msg.client.users.fetch(followers[i].userId);
+				} catch (e) {
+					//Nothing
+				}
+
+				if (discordName) {
+					follower = `${discordName.username}#${discordName.discriminator}`;
+				}
+
+				if (!follower && followers[i].osuName) {
+					follower = followers[i].osuName;
+				} else if (follower && followers[i].osuName) {
+					follower = `${follower} (${followers[i].osuName})`;
+				}
+
+				followerList.push(follower);
+			}
+
+			return msg.reply(`You have ${followers.length} followers: \`${followerList.join('`, `')}\``);
+
 		} else {
 			msg.reply('Invalid command');
 		}
