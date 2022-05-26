@@ -160,7 +160,7 @@ module.exports = {
 				return msg.reply('You have not connected your osu! account');
 			}
 
-			let followers = await DBDiscordUsers.findAll({
+			let followers = await DBOsuTourneyFollows.findAll({
 				where: {
 					osuUserId: discordUser.osuUserId
 				}
