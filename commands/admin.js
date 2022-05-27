@@ -702,6 +702,7 @@ module.exports = {
 			// 						'name': 'enabled',
 			// 						'description': 'Change if updates should be sent or not',
 			// 						'type': 5,
+			// 						'required': true
 			// 					},
 			// 				]
 			// 			},
@@ -3410,6 +3411,7 @@ module.exports = {
 									'name': 'enabled',
 									'description': 'Change if updates should be sent or not',
 									'type': 5,
+									'required': true
 								},
 							]
 						},
