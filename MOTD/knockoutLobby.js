@@ -1,6 +1,6 @@
 const osu = require('node-osu');
 const { DBProcessQueue } = require('../dbObjects.js');
-const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause, saveOsuMultiScores, getMatchesPlanned } = require('../utils.js');
+const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause, saveOsuMultiScores, getMatchesPlanned, logMatchCreation } = require('../utils.js');
 const { assignKnockoutPoints } = require('./givePointsToPlayers.js');
 
 module.exports = {
@@ -96,6 +96,7 @@ module.exports = {
 
 
 			const lobby = channel.lobby;
+			logMatchCreation(client, lobby.name, lobby.id);
 
 			const password = Math.random().toString(36).substring(8);
 

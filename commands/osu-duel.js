@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
 const osu = require('node-osu');
-const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, adjustHDStarRating } = require('../utils');
+const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, adjustHDStarRating, logMatchCreation } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
@@ -532,6 +532,7 @@ module.exports = {
 				}
 
 				const lobby = channel.lobby;
+				logMatchCreation(additionalObjects[0], lobby.name, lobby.id);
 
 				const password = Math.random().toString(36).substring(8);
 
