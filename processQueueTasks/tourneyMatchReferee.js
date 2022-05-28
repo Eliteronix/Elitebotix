@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBOsuBeatmaps } = require('../dbObjects');
-const { pause, saveOsuMultiScores, logDatabaseQueries } = require('../utils');
+const { pause, saveOsuMultiScores, logDatabaseQueries, logMatchCreation } = require('../utils');
 const osu = require('node-osu');
 
 module.exports = {
@@ -59,6 +59,7 @@ module.exports = {
 		}
 
 		const lobby = channel.lobby;
+		logMatchCreation(client, lobby.name, lobby.id);
 
 		const password = Math.random().toString(36).substring(8);
 

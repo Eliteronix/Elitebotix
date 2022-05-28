@@ -2168,8 +2168,33 @@ module.exports = {
 	},
 	async getDerankStats(discordUser) {
 		return await getDerankStatsFunction(discordUser);
+	},
+	logMatchCreation() {
+		logMatchCreationFunction();
 	}
 };
+
+async function logMatchCreationFunction(client, name, matchId) {
+	let guildId = null;
+	let channelId = null;
+	// eslint-disable-next-line no-undef
+	if (process.env.SERVER === 'Dev') {
+		guildId = '800641468321759242';
+		channelId = '980119563381383228';
+		// eslint-disable-next-line no-undef
+	} else if (process.env.SERVER === 'QA') {
+		guildId = '800641367083974667';
+		channelId = '980119465998037084';
+	} else {
+		guildId = '727407178499096597';
+		channelId = '980119218047549470';
+	}
+
+	const guild = await client.guilds.fetch(guildId);
+	const channel = await guild.channels.fetch(channelId);
+
+	channel.send(`https://osu.ppy.sh/mp/${matchId} | ${name}`);
+}
 
 async function getDerankStatsFunction(discordUser) {
 	let ppDiscordUsers = await DBDiscordUsers.findAll({
