@@ -184,6 +184,16 @@ module.exports = {
 					follower = `${discordName.username}#${discordName.discriminator}`;
 				}
 
+				let followerUser = await DBDiscordUsers.findOne({
+					where: {
+						userId: followers[i].userId
+					}
+				});
+
+				if (followerUser) {
+					followers[i].osuName = followerUser.osuName;
+				}
+
 				if (!follower && followers[i].osuName) {
 					follower = followers[i].osuName;
 				} else if (follower && followers[i].osuName) {
