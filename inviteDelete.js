@@ -3,7 +3,7 @@ const { DBGuilds } = require('./dbObjects');
 const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
 
 module.exports = async function (invite) {
-	if (wrongCluster(invite.inviter.id)) {
+	if (wrongCluster(invite.guild.id)) {
 		return;
 	}
 
