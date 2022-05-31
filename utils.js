@@ -2169,8 +2169,8 @@ module.exports = {
 	async getDerankStats(discordUser) {
 		return await getDerankStatsFunction(discordUser);
 	},
-	logMatchCreation() {
-		logMatchCreationFunction();
+	logMatchCreation(client, name, matchId) {
+		logMatchCreationFunction(client, name, matchId);
 	}
 };
 
@@ -2189,8 +2189,6 @@ async function logMatchCreationFunction(client, name, matchId) {
 		guildId = '727407178499096597';
 		channelId = '980119218047549470';
 	}
-
-	console.log(client, name, matchId);
 
 	const guild = await client.guilds.fetch(guildId);
 	const channel = await guild.channels.fetch(channelId);
