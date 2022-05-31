@@ -1443,7 +1443,7 @@ module.exports = {
 			const userMapIds = [];
 			const userMaps = [];
 			for (let i = 0; i < userScores.length; i++) {
-				if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && parseInt(userScores[i].score) > 10000) {
+				if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && parseInt(userScores[i].score) > 10000 && userScores[i].beatmapId !== '1033882' && userScores[i].beatmapId !== '529285') {
 					checkedMapIds.push(userScores[i].beatmapId);
 					if (getScoreModpoolFunction(userScores[i]) === modPools[modIndex]) {
 						if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
