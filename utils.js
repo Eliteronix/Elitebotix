@@ -2190,6 +2190,8 @@ async function logMatchCreationFunction(client, name, matchId) {
 		channelId = '980119218047549470';
 	}
 
+	console.log(client, name, matchId);
+
 	const guild = await client.guilds.fetch(guildId);
 	const channel = await guild.channels.fetch(channelId);
 
