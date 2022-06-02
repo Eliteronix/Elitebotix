@@ -1348,39 +1348,40 @@ module.exports = {
 		//Try to get it from tournament data if available
 		let userScores;
 
-		//Get the tournament data either limited by the date or everything
+		let endDate = new Date();
 		if (input.date) {
-			logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores getUserDuelStarRating');
-			userScores = await DBOsuMultiScores.findAll({
-				where: {
-					osuUserId: input.osuUserId,
-					tourneyMatch: true,
-					scoringType: 'Score v2',
-					mode: 'Standard',
-					[Op.or]: [
-						{ warmup: false },
-						{ warmup: null }
-					],
-					gameEndDate: {
-						[Op.lte]: input.date
-					},
-				}
-			});
-		} else {
-			logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores getUserDuelStarRating2');
-			userScores = await DBOsuMultiScores.findAll({
-				where: {
-					osuUserId: input.osuUserId,
-					tourneyMatch: true,
-					scoringType: 'Score v2',
-					mode: 'Standard',
-					[Op.or]: [
-						{ warmup: false },
-						{ warmup: null }
-					],
-				}
-			});
+			endDate = input.date;
 		}
+
+		let startDate = new Date(endDate);
+		startDate.setUTCFullYear(endDate.getUTCFullYear() - 1);
+
+		//Get the tournament data either limited by the date
+		logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores getUserDuelStarRating');
+		userScores = await DBOsuMultiScores.findAll({
+			where: {
+				osuUserId: input.osuUserId,
+				tourneyMatch: true,
+				scoringType: 'Score v2',
+				mode: 'Standard',
+				[Op.or]: [
+					{ warmup: false },
+					{ warmup: null }
+				],
+				[Op.and]: [
+					{
+						gameEndDate: {
+							[Op.lte]: endDate
+						}
+					},
+					{
+						gameEndDate: {
+							[Op.gte]: startDate
+						}
+					},
+				]
+			}
+		});
 
 		//Check for scores from the past half a year
 		const lastHalfYear = new Date();
