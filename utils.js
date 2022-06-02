@@ -2194,7 +2194,7 @@ async function logMatchCreationFunction(client, name, matchId) {
 	const guild = await client.guilds.fetch(guildId);
 	const channel = await guild.channels.fetch(channelId);
 
-	channel.send(`https://osu.ppy.sh/mp/${matchId} | ${name}`);
+	channel.send(`https://osu.ppy.sh/mp/${matchId}`);
 }
 
 async function getDerankStatsFunction(discordUser) {
