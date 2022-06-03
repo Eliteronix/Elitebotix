@@ -1353,6 +1353,19 @@ module.exports = {
 			endDate = input.date;
 		}
 
+		//Check if it is the last moment of a year
+		let completeYear = false;
+		if (endDate.getUTCDate() === '31'
+			&& endDate.getUTCMonth() === '11'
+			&& endDate.getUTCHours() === '23'
+			&& endDate.getUTCMinutes() === '59'
+			&& endDate.getUTCSeconds() === '59'
+			&& endDate.getUTCMilliseconds() === '999') {
+			completeYear = true;
+		}
+
+		console.log(endDate, completeYear);
+
 		let startDate = new Date(endDate);
 		startDate.setUTCFullYear(endDate.getUTCFullYear() - 1);
 
