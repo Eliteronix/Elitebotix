@@ -44,5 +44,13 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.INTEGER,
 		},
 		paranoid: true,
-	});
+	},
+		{
+			indexes: [
+				{
+					unique: false,
+					fields: ['osuUserId', 'date', 'month', 'year']
+				}
+			]
+		});
 };
