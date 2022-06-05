@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -1353,21 +1353,71 @@ module.exports = {
 			endDate = input.date;
 		}
 
+		let startDate = new Date(endDate);
+		startDate.setUTCFullYear(endDate.getUTCFullYear() - 1);
+
 		//Check if it is the last moment of a year
 		let completeYear = false;
-		if (endDate.getUTCDate() === '31'
-			&& endDate.getUTCMonth() === '11'
-			&& endDate.getUTCHours() === '23'
-			&& endDate.getUTCMinutes() === '59'
-			&& endDate.getUTCSeconds() === '59'
-			&& endDate.getUTCMilliseconds() === '999') {
+		if (endDate.getUTCDate() === 31
+			&& endDate.getUTCMonth() === 11
+			&& endDate.getUTCHours() === 23
+			&& endDate.getUTCMinutes() === 59
+			&& endDate.getUTCSeconds() === 59
+			&& endDate.getUTCMilliseconds() === 999) {
 			completeYear = true;
 		}
 
-		console.log(endDate, completeYear);
+		let duelRatings = {
+			total: null,
+			noMod: null,
+			hidden: null,
+			hardRock: null,
+			doubleTime: null,
+			freeMod: null,
+			stepData: {
+				NM: [],
+				HD: [],
+				HR: [],
+				DT: [],
+				FM: []
+			},
+			scores: {
+				NM: [],
+				HD: [],
+				HR: [],
+				DT: [],
+				FM: []
+			},
+			provisional: false,
+			outdated: false
+		};
 
-		let startDate = new Date(endDate);
-		startDate.setUTCFullYear(endDate.getUTCFullYear() - 1);
+		let yearStats = null;
+		if (completeYear) {
+			yearStats = await DBDuelRatingHistory.findOne({
+				where: {
+					osuUserId: input.osuUserId,
+					year: endDate.getUTCFullYear(),
+					month: endDate.getUTCMonth() + 1,
+					date: endDate.getUTCDate()
+				}
+			});
+		}
+
+		if (yearStats) {
+			duelRatings.total = yearStats.osuDuelStarRating;
+			duelRatings.noMod = yearStats.osuNoModDuelStarRating;
+			duelRatings.hidden = yearStats.osuHiddenDuelStarRating;
+			duelRatings.hardRock = yearStats.osuHardRockDuelStarRating;
+			duelRatings.doubleTime = yearStats.osuDoubleTimeDuelStarRating;
+			duelRatings.freeMod = yearStats.osuFreeModDuelStarRating;
+			duelRatings.provisional = yearStats.osuDuelProvisional;
+			duelRatings.outdated = yearStats.osuDuelOutdated;
+
+			return duelRatings;
+		}
+
+		console.log(duelRatings);
 
 		//Get the tournament data either limited by the date
 		logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores getUserDuelStarRating');
@@ -1418,33 +1468,10 @@ module.exports = {
 			outdated = true;
 		}
 
+		duelRatings.outdated = outdated;
+
 		//Sort it by match ID
 		quicksortMatchId(userScores);
-
-		let duelRatings = {
-			total: null,
-			noMod: null,
-			hidden: null,
-			hardRock: null,
-			doubleTime: null,
-			freeMod: null,
-			stepData: {
-				NM: [],
-				HD: [],
-				HR: [],
-				DT: [],
-				FM: []
-			},
-			scores: {
-				NM: [],
-				HD: [],
-				HR: [],
-				DT: [],
-				FM: []
-			},
-			provisional: false,
-			outdated: outdated
-		};
 
 		let scoresPerMod = 35;
 
@@ -1652,6 +1679,24 @@ module.exports = {
 
 			//Set total star rating based on the spread
 			duelRatings.total = (duelRatings.noMod * modPoolAmounts[0] + duelRatings.hidden * modPoolAmounts[1] + duelRatings.hardRock * modPoolAmounts[2] + duelRatings.doubleTime * modPoolAmounts[3] + duelRatings.freeMod * modPoolAmounts[4]) / (modPoolAmounts[0] + modPoolAmounts[1] + modPoolAmounts[2] + modPoolAmounts[3] + modPoolAmounts[4]);
+
+			if (completeYear && !yearStats) {
+				//Create the yearStats
+				await DBDuelRatingHistory.create({
+					osuUserId: input.osuUserId,
+					year: endDate.getUTCFullYear(),
+					month: endDate.getUTCMonth() + 1,
+					date: endDate.getUTCDate(),
+					osuDuelStarRating: duelRatings.total,
+					osuNoModDuelStarRating: duelRatings.noMod,
+					osuHiddenDuelStarRating: duelRatings.hidden,
+					osuHardRockDuelStarRating: duelRatings.hardRock,
+					osuDoubleTimeDuelStarRating: duelRatings.doubleTime,
+					osuFreeModDuelStarRating: duelRatings.freeMod,
+					osuDuelProvisional: duelRatings.provisional,
+					osuDuelOutdated: duelRatings.outdated,
+				});
+			}
 
 			//Log the values in the discords if they changed and the user is connected to the bot
 			logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getUserDuelStarRating');

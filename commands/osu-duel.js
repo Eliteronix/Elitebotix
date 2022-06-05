@@ -936,7 +936,7 @@ module.exports = {
 				let seasonEnd = new Date();
 				seasonEnd.setUTCFullYear(seasonEnd.getUTCFullYear() - 1);
 				seasonEnd.setUTCMonth(11);
-				seasonEnd.setUTCDate(30);
+				seasonEnd.setUTCDate(31);
 				seasonEnd.setUTCHours(23);
 				seasonEnd.setUTCMinutes(59);
 				seasonEnd.setUTCSeconds(59);
