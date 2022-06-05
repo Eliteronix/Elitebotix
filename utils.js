@@ -1443,7 +1443,8 @@ module.exports = {
 			const userMapIds = [];
 			const userMaps = [];
 			for (let i = 0; i < userScores.length; i++) {
-				if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && parseInt(userScores[i].score) > 10000) {
+				//Check if the map is already in; the score is above 10k and the map is not an aspire map
+				if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && parseInt(userScores[i].score) > 10000 && userScores[i].beatmapId !== '1033882' && userScores[i].beatmapId !== '529285') {
 					checkedMapIds.push(userScores[i].beatmapId);
 					if (getScoreModpoolFunction(userScores[i]) === modPools[modIndex]) {
 						if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
@@ -2193,7 +2194,7 @@ async function logMatchCreationFunction(client, name, matchId) {
 	const guild = await client.guilds.fetch(guildId);
 	const channel = await guild.channels.fetch(channelId);
 
-	channel.send(`https://osu.ppy.sh/mp/${matchId} | ${name}`);
+	channel.send(`https://osu.ppy.sh/mp/${matchId}`);
 }
 
 async function getDerankStatsFunction(discordUser) {
