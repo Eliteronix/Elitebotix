@@ -1398,8 +1398,8 @@ module.exports = {
 				where: {
 					osuUserId: input.osuUserId,
 					year: endDate.getUTCFullYear(),
-					month: endDate.getUTCMonth() + 1,
-					date: endDate.getUTCDate()
+					month: 12,
+					date: 31
 				}
 			});
 		}
@@ -1650,6 +1650,35 @@ module.exports = {
 					duelRatings.freeMod = weightedStarRating;
 					duelRatings.stepData.FM = stepData;
 				}
+			}
+		}
+
+		//Check the past year for individual ratings and limit a potential drop to .2
+		let lastYearStats = await DBDuelRatingHistory.findOne({
+			where: {
+				osuUserId: input.osuUserId,
+				year: endDate.getUTCFullYear() - 1,
+				month: 12,
+				date: 31
+			}
+		});
+
+		console.log(endDate, lastYearStats);
+
+		if (!lastYearStats && (duelRatings.noMod || duelRatings.hidden || duelRatings.hardRock || duelRatings.doubleTime || duelRatings.freeMod)) {
+			let newEndDate = new Date(endDate);
+			newEndDate.setUTCFullYear(newEndDate.getUTCFullYear() - 1);
+			newEndDate.setUTCMonth(11);
+			newEndDate.setUTCDate(31);
+			newEndDate.setUTCHours(23);
+			newEndDate.setUTCMinutes(59);
+			newEndDate.setUTCSeconds(59);
+			newEndDate.setUTCMilliseconds(999);
+			console.log(newEndDate);
+			let lastYearDuelRating = await this.getUserDuelStarRating({ osuUserId: input.osuUserId, client: input.client, date: newEndDate });
+
+			if (lastYearDuelRating.noMod && duelRatings.noMod < lastYearDuelRating.noMod - 0.2) {
+				duelRatings.noMod = lastYearDuelRating.noMod - 0.2;
 			}
 		}
 
