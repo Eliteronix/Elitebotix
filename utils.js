@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -1120,6 +1120,24 @@ module.exports = {
 			}
 		}
 
+		if (tourneyMatch) {
+			//Delete duel rating history entries for the players in the match
+			let outdatedDuelRatings = await DBDuelRatingHistory.findAll({
+				where: {
+					osuUserId: {
+						[Op.in]: tourneyMatchPlayers
+					},
+					year: {
+						[Op.gte]: new Date(match.raw_end).getUTCFullYear()
+					}
+				}
+			});
+
+			for (let i = 0; i < outdatedDuelRatings.length; i++) {
+				await outdatedDuelRatings[i].destroy();
+			}
+		}
+
 		if (newTourneyMatch) {
 			//Get all follows for the players in the match
 			let follows = await DBOsuTourneyFollows.findAll({
@@ -1345,479 +1363,7 @@ module.exports = {
 		return checkForBirthdaysFunction(client);
 	},
 	async getUserDuelStarRating(input) {
-		//Try to get it from tournament data if available
-		let userScores;
-
-		//Get the tournament data either limited by the date or everything
-		if (input.date) {
-			logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores getUserDuelStarRating');
-			userScores = await DBOsuMultiScores.findAll({
-				where: {
-					osuUserId: input.osuUserId,
-					tourneyMatch: true,
-					scoringType: 'Score v2',
-					mode: 'Standard',
-					[Op.or]: [
-						{ warmup: false },
-						{ warmup: null }
-					],
-					gameEndDate: {
-						[Op.lte]: input.date
-					},
-				}
-			});
-		} else {
-			logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores getUserDuelStarRating2');
-			userScores = await DBOsuMultiScores.findAll({
-				where: {
-					osuUserId: input.osuUserId,
-					tourneyMatch: true,
-					scoringType: 'Score v2',
-					mode: 'Standard',
-					[Op.or]: [
-						{ warmup: false },
-						{ warmup: null }
-					],
-				}
-			});
-		}
-
-		//Check for scores from the past half a year
-		const lastHalfYear = new Date();
-		lastHalfYear.setUTCMonth(lastHalfYear.getUTCMonth() - 6);
-
-		const pastHalfYearScoreCount = await DBOsuMultiScores.count({
-			where: {
-				osuUserId: input.osuUserId,
-				tourneyMatch: true,
-				scoringType: 'Score v2',
-				mode: 'Standard',
-				gameEndDate: {
-					[Op.gte]: lastHalfYear
-				}
-			}
-		});
-
-		let outdated = false;
-
-		if (pastHalfYearScoreCount < 5) {
-			outdated = true;
-		}
-
-		//Sort it by match ID
-		quicksortMatchId(userScores);
-
-		let duelRatings = {
-			total: null,
-			noMod: null,
-			hidden: null,
-			hardRock: null,
-			doubleTime: null,
-			freeMod: null,
-			stepData: {
-				NM: [],
-				HD: [],
-				HR: [],
-				DT: [],
-				FM: []
-			},
-			scores: {
-				NM: [],
-				HD: [],
-				HR: [],
-				DT: [],
-				FM: []
-			},
-			provisional: false,
-			outdated: outdated
-		};
-
-		let scoresPerMod = 35;
-
-		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
-
-		//Loop through all modpools
-		for (let modIndex = 0; modIndex < modPools.length; modIndex++) {
-			//Get only unique maps for each modpool
-			const checkedMapIds = [];
-			const userMapIds = [];
-			const userMaps = [];
-			for (let i = 0; i < userScores.length; i++) {
-				//Check if the map is already in; the score is above 10k and the map is not an aspire map
-				if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && parseInt(userScores[i].score) > 10000 && userScores[i].beatmapId !== '1033882' && userScores[i].beatmapId !== '529285') {
-					checkedMapIds.push(userScores[i].beatmapId);
-					if (getScoreModpoolFunction(userScores[i]) === modPools[modIndex]) {
-						if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
-							userMapIds.push(userScores[i].beatmapId);
-							userMaps.push({ beatmapId: userScores[i].beatmapId, score: parseInt(userScores[i].score), matchId: userScores[i].matchId, matchName: userScores[i].matchName, matchStartDate: userScores[i].matchStartDate, modBits: parseInt(userScores[i].gameRawMods) + parseInt(userScores[i].rawMods) });
-						}
-					}
-				}
-			}
-
-			//Group the maps into steps of 0.1 of difficulty
-			const steps = [];
-			const stepData = [];
-			for (let i = 0; i < userMaps.length && i < scoresPerMod; i++) {
-				//Get the most recent data
-				let dbBeatmap = null;
-				if (modPools[modIndex] === 'HR') {
-					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 16 });
-				} else if (modPools[modIndex] === 'DT') {
-					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 64 });
-				} else if (modPools[modIndex] === 'FM') {
-					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: userMaps[i].modBits });
-				} else {
-					dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 0 });
-				}
-
-				//Filter by ranked maps > 4*
-				if (dbBeatmap && parseFloat(dbBeatmap.starRating) > 3.5 && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved')) {
-					//Standardize the score from the mod multiplier
-					if (modPools[modIndex] === 'HD') {
-						userMaps[i].score = userMaps[i].score / 1.06;
-					} else if (modPools[modIndex] === 'HR') {
-						userMaps[i].score = userMaps[i].score / 1.1;
-					} else if (modPools[modIndex] === 'DT') {
-						userMaps[i].score = userMaps[i].score / 1.2;
-					} else if (modPools[modIndex] === 'FM') {
-						if (getModsFunction(userMaps[i].modBits).includes('HD')) {
-							userMaps[i].score = userMaps[i].score / 1.06;
-						}
-						if (getModsFunction(userMaps[i].modBits).includes('HR')) {
-							userMaps[i].score = userMaps[i].score / 1.1;
-						}
-						if (getModsFunction(userMaps[i].modBits).includes('FL')) {
-							userMaps[i].score = userMaps[i].score / 1.12;
-						}
-						if (getModsFunction(userMaps[i].modBits).includes('DT')) {
-							userMaps[i].score = userMaps[i].score / 1.2;
-						}
-						if (getModsFunction(userMaps[i].modBits).includes('EZ')) {
-							userMaps[i].score = userMaps[i].score / 0.5;
-						}
-					}
-
-					//Calculate the weights based on the graph below
-					//https://www.desmos.com/calculator/wmdwcyfduw
-					let c = 175000;
-					let b = 2;
-					let a = 0.7071;
-					let overPerformWeight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
-					let underPerformWeight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
-
-					if (parseFloat(userMaps[i].score) > 350000) {
-						overPerformWeight = 1;
-					} else if (parseFloat(userMaps[i].score) < 350000) {
-						underPerformWeight = 1;
-					}
-
-					userMaps[i].weight = Math.abs(overPerformWeight + underPerformWeight - 1);
-
-					let mapStarRating = dbBeatmap.starRating;
-					if (modPools[modIndex] === 'HD') {
-						mapStarRating = adjustHDStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate);
-					} else if (modPools[modIndex] === 'FM' && getModsFunction(dbBeatmap.mods).includes('HD') && !getModsFunction(dbBeatmap.mods).includes('DT')) {
-						mapStarRating = adjustHDStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate);
-					}
-
-					userMaps[i].starRating = mapStarRating;
-
-					//Add the map to the scores array
-					if (modIndex === 0) {
-						duelRatings.scores.NM.push(userMaps[i]);
-					} else if (modIndex === 1) {
-						duelRatings.scores.HD.push(userMaps[i]);
-					} else if (modIndex === 2) {
-						duelRatings.scores.HR.push(userMaps[i]);
-					} else if (modIndex === 3) {
-						duelRatings.scores.DT.push(userMaps[i]);
-					} else if (modIndex === 4) {
-						duelRatings.scores.FM.push(userMaps[i]);
-					}
-
-					//Add the data to the 5 steps in the area of the maps' star rating -> 5.0 will be representing 4.8, 4.9, 5.0, 5.1, 5.2
-					for (let i = 0; i < 5; i++) {
-						let starRatingStep = Math.round((Math.round(mapStarRating * 10) / 10 + 0.1 * i - 0.2) * 10) / 10;
-						if (steps.indexOf(starRatingStep) === -1) {
-							stepData.push({
-								step: starRatingStep,
-								totalOverPerformWeight: overPerformWeight,
-								totalUnderPerformWeight: underPerformWeight,
-								amount: 1,
-								averageOverPerformWeight: overPerformWeight,
-								averageUnderPerformWeight: underPerformWeight,
-								averageWeight: Math.abs(((overPerformWeight + underPerformWeight) / 1) - 1),
-								overPerformWeightedStarRating: (starRatingStep) * overPerformWeight,
-								underPerformWeightedStarRating: (starRatingStep) * underPerformWeight,
-								weightedStarRating: (starRatingStep) * Math.abs(((overPerformWeight + underPerformWeight) / 1) - 1),
-							});
-							steps.push(starRatingStep);
-						} else {
-							stepData[steps.indexOf(starRatingStep)].totalOverPerformWeight += overPerformWeight;
-							stepData[steps.indexOf(starRatingStep)].totalUnderPerformWeight += underPerformWeight;
-							stepData[steps.indexOf(starRatingStep)].amount++;
-							stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight = stepData[steps.indexOf(starRatingStep)].totalOverPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
-							stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight = stepData[steps.indexOf(starRatingStep)].totalUnderPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
-							stepData[steps.indexOf(starRatingStep)].averageWeight = Math.abs(stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight + stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight - 1);
-							stepData[steps.indexOf(starRatingStep)].overPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight;
-							stepData[steps.indexOf(starRatingStep)].underPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight;
-							stepData[steps.indexOf(starRatingStep)].weightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageWeight;
-						}
-					}
-				} else {
-					userMaps.splice(i, 1);
-					i--;
-				}
-			}
-
-			//Calculated the starrating for the modpool
-			let totalWeight = 0;
-			let totalWeightedStarRating = 0;
-			for (let i = 0; i < stepData.length; i++) {
-				if (stepData[i].amount > 1) {
-					totalWeight += stepData[i].averageWeight;
-					totalWeightedStarRating += stepData[i].weightedStarRating;
-				}
-			}
-
-			if (userMaps.length < 5) {
-				duelRatings.provisional = true;
-			}
-
-			//add the values to the modpool data
-			if (totalWeight > 0 && userMaps.length > 0) {
-				let weightedStarRating = totalWeightedStarRating / totalWeight;
-
-				for (let i = 0; i < scoresPerMod; i++) {
-					weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i % userMaps.length], Math.round((1 - (i * 1 / scoresPerMod)) * 100) / 100);
-				}
-
-				if (modIndex === 0) {
-					duelRatings.noMod = weightedStarRating;
-					duelRatings.stepData.NM = stepData;
-				} else if (modIndex === 1) {
-					duelRatings.hidden = weightedStarRating;
-					duelRatings.stepData.HD = stepData;
-				} else if (modIndex === 2) {
-					duelRatings.hardRock = weightedStarRating;
-					duelRatings.stepData.HR = stepData;
-				} else if (modIndex === 3) {
-					duelRatings.doubleTime = weightedStarRating;
-					duelRatings.stepData.DT = stepData;
-				} else if (modIndex === 4) {
-					duelRatings.freeMod = weightedStarRating;
-					duelRatings.stepData.FM = stepData;
-				}
-			}
-		}
-
-		//Get the modpool spread out of the past 100 user scores for the total value
-		if (duelRatings.noMod || duelRatings.hidden || duelRatings.hardRock || duelRatings.doubleTime || duelRatings.freeMod) {
-			//Get ratio of modPools played maps
-			const modPoolAmounts = [0, 0, 0, 0, 0];
-			for (let i = 0; i < userScores.length && i < 100; i++) {
-				modPoolAmounts[modPools.indexOf(getScoreModpoolFunction(userScores[i]))]++;
-			}
-
-			if (duelRatings.noMod === null) {
-				modPoolAmounts[0] = 0;
-			}
-			if (duelRatings.hidden === null) {
-				modPoolAmounts[1] = 0;
-			}
-			if (duelRatings.hardRock === null) {
-				modPoolAmounts[2] = 0;
-			}
-			if (duelRatings.doubleTime === null) {
-				modPoolAmounts[3] = 0;
-			}
-			if (duelRatings.freeMod === null) {
-				modPoolAmounts[4] = 0;
-			}
-
-			//Set total star rating based on the spread
-			duelRatings.total = (duelRatings.noMod * modPoolAmounts[0] + duelRatings.hidden * modPoolAmounts[1] + duelRatings.hardRock * modPoolAmounts[2] + duelRatings.doubleTime * modPoolAmounts[3] + duelRatings.freeMod * modPoolAmounts[4]) / (modPoolAmounts[0] + modPoolAmounts[1] + modPoolAmounts[2] + modPoolAmounts[3] + modPoolAmounts[4]);
-
-			//Log the values in the discords if they changed and the user is connected to the bot
-			logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getUserDuelStarRating');
-			let discordUser = await DBDiscordUsers.findOne({
-				where: {
-					osuUserId: input.osuUserId
-				}
-			});
-
-			if (!discordUser) {
-				discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId });
-			}
-
-			if (discordUser && !input.date) {
-				if (input.client) {
-					try {
-						let guildId = '727407178499096597';
-						let channelId = '946150632128135239';
-						// eslint-disable-next-line no-undef
-						if (process.env.SERVER === 'Dev') {
-							guildId = '800641468321759242';
-							channelId = '946190123677126666';
-							// eslint-disable-next-line no-undef
-						} else if (process.env.SERVER === 'QA') {
-							guildId = '800641367083974667';
-							channelId = '946190678189293569';
-						}
-						const guild = await input.client.guilds.fetch(guildId);
-						const channel = await guild.channels.fetch(channelId);
-						let message = [`${discordUser.osuName} / ${discordUser.osuUserId}:`];
-						if (Math.round(discordUser.osuDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.total * 1000) / 1000) {
-							message.push(`SR: ${Math.round(discordUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.total * 1000) / 1000}`);
-							message.push(`Ratio: ${modPoolAmounts[0]} NM | ${modPoolAmounts[1]} HD | ${modPoolAmounts[2]} HR | ${modPoolAmounts[3]} DT | ${modPoolAmounts[4]} FM`);
-						}
-						if (Math.round(discordUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.noMod * 1000) / 1000) {
-							message.push(`NM: ${Math.round(discordUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.noMod * 1000) / 1000}`);
-						}
-						if (Math.round(discordUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.hidden * 1000) / 1000) {
-							message.push(`HD: ${Math.round(discordUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.hidden * 1000) / 1000}`);
-						}
-						if (Math.round(discordUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.hardRock * 1000) / 1000) {
-							message.push(`HR: ${Math.round(discordUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.hardRock * 1000) / 1000}`);
-						}
-						if (Math.round(discordUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.doubleTime * 1000) / 1000) {
-							message.push(`DT: ${Math.round(discordUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.doubleTime * 1000) / 1000}`);
-						}
-						if (Math.round(discordUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.freeMod * 1000) / 1000) {
-							message.push(`FM: ${Math.round(discordUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.freeMod * 1000) / 1000}`);
-						}
-						if (discordUser.osuDuelProvisional !== duelRatings.provisional) {
-							message.push(`Provisional: ${discordUser.osuDuelProvisional} -> ${duelRatings.provisional}`);
-						}
-						if (discordUser.osuDuelOutdated !== duelRatings.outdated) {
-							message.push(`Outdated: ${discordUser.osuDuelOutdated} -> ${duelRatings.outdated}`);
-						}
-
-						let oldDerankStats = await getDerankStatsFunction(discordUser);
-						//Setting the new values even tho it does that later just to get the new derank values
-						discordUser.osuDuelStarRating = Math.round(duelRatings.total * 100000000000000) / 100000000000000;
-						discordUser.osuNoModDuelStarRating = duelRatings.noMod;
-						discordUser.osuHiddenDuelStarRating = duelRatings.hidden;
-						discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
-						discordUser.osuDoubleTimeDuelStarRating = duelRatings.doubleTime;
-						discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
-						discordUser.osuDuelProvisional = duelRatings.provisional;
-						discordUser.osuDuelOutdated = duelRatings.outdated;
-						let newDerankStats = await getDerankStatsFunction(discordUser);
-
-						if (oldDerankStats.expectedPpRankOsu !== newDerankStats.expectedPpRankOsu) {
-							message.push(`Deranked Rank change: #${oldDerankStats.expectedPpRankOsu} -> #${newDerankStats.expectedPpRankOsu} (${newDerankStats.expectedPpRankOsu - oldDerankStats.expectedPpRankOsu})`);
-						}
-
-						if (message.length > 1) {
-							channel.send(`\`\`\`${message.join('\n')}\`\`\``);
-
-							if (discordUser.osuDuelRatingUpdates) {
-								const user = await input.client.users.fetch(discordUser.userId);
-								if (user) {
-									user.send(`Your duel ratings have been updated.\`\`\`${message.join('\n')}\`\`\``);
-								}
-							}
-						}
-					} catch (e) {
-						console.log(e);
-					}
-				}
-
-				discordUser.osuDuelStarRating = duelRatings.total;
-				discordUser.osuNoModDuelStarRating = duelRatings.noMod;
-				discordUser.osuHiddenDuelStarRating = duelRatings.hidden;
-				discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
-				discordUser.osuDoubleTimeDuelStarRating = duelRatings.doubleTime;
-				discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
-				discordUser.osuDuelProvisional = duelRatings.provisional;
-				discordUser.osuDuelOutdated = duelRatings.outdated;
-				await discordUser.save();
-			}
-
-			return duelRatings;
-		}
-
-		if (input.date) {
-			return duelRatings;
-		}
-
-		duelRatings.provisional = true;
-
-		//Get it from the top plays if no tournament data is available
-		// eslint-disable-next-line no-undef
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
-
-		let topScores = null;
-
-		for (let i = 0; i < 5 && !topScores; i++) {
-			topScores = await osuApi.getUserBest({ u: input.osuUserId, m: 0, limit: 100 })
-				.then((response) => {
-					i = Infinity;
-					return response;
-				})
-				.catch(async (err) => {
-					if (i === 4) {
-						if (err.message === 'Not found') {
-							throw new Error('No standard plays');
-						} else {
-							console.log(err);
-						}
-					} else {
-						await new Promise(resolve => setTimeout(resolve, 10000));
-					}
-				});
-		}
-
-		let stars = [];
-		for (let i = 0; i < topScores.length; i++) {
-			//Add difficulty ratings
-			const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: topScores[i].beatmapId, modBits: topScores[i].raw_mods });
-			if (dbBeatmap && dbBeatmap.starRating && parseFloat(dbBeatmap.starRating) > 0) {
-				stars.push(dbBeatmap.starRating);
-			}
-		}
-
-		let averageStars = 0;
-		for (let i = 0; i < stars.length; i++) {
-			averageStars += parseFloat(stars[i]);
-		}
-
-		duelRatings.total = (averageStars / stars.length) * 0.9;
-		duelRatings.noMod = null;
-		duelRatings.hidden = null;
-		duelRatings.hardRock = null;
-		duelRatings.doubleTime = null;
-		duelRatings.freeMod = null;
-
-		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getUserDuelRatings backup');
-		let discordUser = await DBDiscordUsers.findOne({
-			where: {
-				osuUserId: input.osuUserId
-			}
-		});
-
-		if (!discordUser) {
-			discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId });
-		}
-
-		if (discordUser) {
-			discordUser.osuDuelStarRating = duelRatings.total;
-			discordUser.osuNoModDuelStarRating = duelRatings.noMod;
-			discordUser.osuHiddenDuelStarRating = duelRatings.hidden;
-			discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
-			discordUser.osuDoubleTimeDuelStarRating = duelRatings.doubleTime;
-			discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
-			await discordUser.save();
-		}
-
-		return duelRatings;
+		return await getUserDuelStarRatingFunction(input);
 	},
 	getOsuDuelLeague(rating) {
 		if (rating > 7) {
@@ -2126,6 +1672,38 @@ module.exports = {
 			console.log(`Cleaned up ${deleted} duplicate users`);
 		}
 
+		// Remove duplicate discorduser entries
+		duplicates = true;
+		deleted = 0;
+
+		while (duplicates && deleted < 25) {
+			let result = await sequelize.query(
+				'SELECT * FROM DBDuelRatingHistory WHERE 0 < (SELECT COUNT(1) FROM DBDuelRatingHistory as a WHERE a.osuUserId = DBDuelRatingHistory.osuUserId AND a.year = DBDuelRatingHistory.year AND a.month = DBDuelRatingHistory.month AND a.date = DBDuelRatingHistory.date AND a.id <> DBDuelRatingHistory.id) ORDER BY userId ASC LIMIT 1',
+			);
+
+			duplicates = result[0].length;
+
+			if (result[0].length) {
+				await new Promise(resolve => setTimeout(resolve, 2000));
+				logDatabaseQueriesFunction(2, 'utils.js DBDuelRatingHistory cleanUpDuplicateEntries');
+				let duplicate = await DBDiscordUsers.findOne({
+					where: {
+						id: result[0][0].id
+					}
+				});
+
+				console.log(duplicate.osuUserId, duplicate.date, duplicate.month, duplicate.year, duplicate.updatedAt);
+
+				deleted++;
+				await new Promise(resolve => setTimeout(resolve, 2000));
+				await duplicate.destroy();
+			}
+			await new Promise(resolve => setTimeout(resolve, 10000));
+		}
+
+		if (deleted) {
+			console.log(`Cleaned up ${deleted} duplicate duel rating histories`);
+		}
 
 		//Only clean up multi scores during the night
 		let date = new Date();
@@ -2174,6 +1752,632 @@ module.exports = {
 		logMatchCreationFunction(client, name, matchId);
 	}
 };
+
+async function getUserDuelStarRatingFunction(input) {
+	//Try to get it from tournament data if available
+	let userScores;
+
+	let endDate = new Date();
+	if (input.date) {
+		endDate = input.date;
+	}
+
+	let startDate = new Date(endDate);
+	startDate.setUTCFullYear(endDate.getUTCFullYear() - 1);
+
+	//Check if it is the last moment of a year
+	let completeYear = false;
+	if (endDate.getUTCDate() === 31
+		&& endDate.getUTCMonth() === 11
+		&& endDate.getUTCHours() === 23
+		&& endDate.getUTCMinutes() === 59
+		&& endDate.getUTCSeconds() === 59
+		&& endDate.getUTCMilliseconds() === 999) {
+		completeYear = true;
+	}
+
+	let duelRatings = {
+		total: null,
+		noMod: null,
+		hidden: null,
+		hardRock: null,
+		doubleTime: null,
+		freeMod: null,
+		stepData: {
+			NM: [],
+			HD: [],
+			HR: [],
+			DT: [],
+			FM: []
+		},
+		scores: {
+			NM: [],
+			HD: [],
+			HR: [],
+			DT: [],
+			FM: []
+		},
+		provisional: false,
+		outdated: false
+	};
+
+	let yearStats = null;
+	if (completeYear) {
+		yearStats = await DBDuelRatingHistory.findOne({
+			where: {
+				osuUserId: input.osuUserId,
+				year: endDate.getUTCFullYear(),
+				month: 12,
+				date: 31
+			}
+		});
+
+		let halfAYearAgo = new Date();
+		halfAYearAgo.setUTCMonth(halfAYearAgo.getUTCMonth() - 6);
+
+		if (yearStats && yearStats.updatedAt < halfAYearAgo) {
+			await yearStats.destroy();
+			yearStats = null;
+		}
+	}
+
+	if (yearStats) {
+		duelRatings.total = yearStats.osuDuelStarRating;
+		duelRatings.noMod = yearStats.osuNoModDuelStarRating;
+		duelRatings.hidden = yearStats.osuHiddenDuelStarRating;
+		duelRatings.hardRock = yearStats.osuHardRockDuelStarRating;
+		duelRatings.doubleTime = yearStats.osuDoubleTimeDuelStarRating;
+		duelRatings.freeMod = yearStats.osuFreeModDuelStarRating;
+		duelRatings.provisional = yearStats.osuDuelProvisional;
+		duelRatings.outdated = yearStats.osuDuelOutdated;
+
+		return duelRatings;
+	}
+
+	//Get the tournament data either limited by the date
+	logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores getUserDuelStarRating');
+	userScores = await DBOsuMultiScores.findAll({
+		where: {
+			osuUserId: input.osuUserId,
+			tourneyMatch: true,
+			scoringType: 'Score v2',
+			mode: 'Standard',
+			[Op.or]: [
+				{ warmup: false },
+				{ warmup: null }
+			],
+			[Op.and]: [
+				{
+					gameEndDate: {
+						[Op.lte]: endDate
+					}
+				},
+				{
+					gameEndDate: {
+						[Op.gte]: startDate
+					}
+				},
+			]
+		}
+	});
+
+	//Check for scores from the past half a year
+	const lastHalfYear = new Date();
+	lastHalfYear.setUTCMonth(lastHalfYear.getUTCMonth() - 6);
+
+	const pastHalfYearScoreCount = await DBOsuMultiScores.count({
+		where: {
+			osuUserId: input.osuUserId,
+			tourneyMatch: true,
+			scoringType: 'Score v2',
+			mode: 'Standard',
+			gameEndDate: {
+				[Op.gte]: lastHalfYear
+			}
+		}
+	});
+
+	let outdated = false;
+
+	if (pastHalfYearScoreCount < 5) {
+		outdated = true;
+	}
+
+	duelRatings.outdated = outdated;
+
+	//Sort it by match ID
+	quicksortMatchId(userScores);
+
+	let scoresPerMod = 35;
+
+	let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
+
+	//Loop through all modpools
+	for (let modIndex = 0; modIndex < modPools.length; modIndex++) {
+		//Get only unique maps for each modpool
+		const checkedMapIds = [];
+		const userMapIds = [];
+		const userMaps = [];
+		for (let i = 0; i < userScores.length; i++) {
+			//Check if the map is already in; the score is above 10k and the map is not an aspire map
+			if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && parseInt(userScores[i].score) > 10000 && userScores[i].beatmapId !== '1033882' && userScores[i].beatmapId !== '529285') {
+				checkedMapIds.push(userScores[i].beatmapId);
+				if (getScoreModpoolFunction(userScores[i]) === modPools[modIndex]) {
+					if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
+						userMapIds.push(userScores[i].beatmapId);
+						userMaps.push({ beatmapId: userScores[i].beatmapId, score: parseInt(userScores[i].score), matchId: userScores[i].matchId, matchName: userScores[i].matchName, matchStartDate: userScores[i].matchStartDate, modBits: parseInt(userScores[i].gameRawMods) + parseInt(userScores[i].rawMods) });
+					}
+				}
+			}
+		}
+
+		//Group the maps into steps of 0.1 of difficulty
+		const steps = [];
+		const stepData = [];
+		for (let i = 0; i < userMaps.length && i < scoresPerMod; i++) {
+			//Get the most recent data
+			let dbBeatmap = null;
+			if (modPools[modIndex] === 'HR') {
+				dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 16 });
+			} else if (modPools[modIndex] === 'DT') {
+				dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 64 });
+			} else if (modPools[modIndex] === 'FM') {
+				dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: userMaps[i].modBits });
+			} else {
+				dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 0 });
+			}
+
+			//Filter by ranked maps > 4*
+			if (dbBeatmap && parseFloat(dbBeatmap.starRating) > 3.5 && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved')) {
+				//Standardize the score from the mod multiplier
+				if (modPools[modIndex] === 'HD') {
+					userMaps[i].score = userMaps[i].score / 1.06;
+				} else if (modPools[modIndex] === 'HR') {
+					userMaps[i].score = userMaps[i].score / 1.1;
+				} else if (modPools[modIndex] === 'DT') {
+					userMaps[i].score = userMaps[i].score / 1.2;
+				} else if (modPools[modIndex] === 'FM') {
+					if (getModsFunction(userMaps[i].modBits).includes('HD')) {
+						userMaps[i].score = userMaps[i].score / 1.06;
+					}
+					if (getModsFunction(userMaps[i].modBits).includes('HR')) {
+						userMaps[i].score = userMaps[i].score / 1.1;
+					}
+					if (getModsFunction(userMaps[i].modBits).includes('FL')) {
+						userMaps[i].score = userMaps[i].score / 1.12;
+					}
+					if (getModsFunction(userMaps[i].modBits).includes('DT')) {
+						userMaps[i].score = userMaps[i].score / 1.2;
+					}
+					if (getModsFunction(userMaps[i].modBits).includes('EZ')) {
+						userMaps[i].score = userMaps[i].score / 0.5;
+					}
+				}
+
+				//Calculate the weights based on the graph below
+				//https://www.desmos.com/calculator/wmdwcyfduw
+				let c = 175000;
+				let b = 2;
+				let a = 0.7071;
+				let overPerformWeight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
+				let underPerformWeight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
+
+				if (parseFloat(userMaps[i].score) > 350000) {
+					overPerformWeight = 1;
+				} else if (parseFloat(userMaps[i].score) < 350000) {
+					underPerformWeight = 1;
+				}
+
+				userMaps[i].weight = Math.abs(overPerformWeight + underPerformWeight - 1);
+
+				let mapStarRating = dbBeatmap.starRating;
+				if (modPools[modIndex] === 'HD') {
+					mapStarRating = adjustHDStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate);
+				} else if (modPools[modIndex] === 'FM' && getModsFunction(dbBeatmap.mods).includes('HD') && !getModsFunction(dbBeatmap.mods).includes('DT')) {
+					mapStarRating = adjustHDStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate);
+				}
+
+				userMaps[i].starRating = mapStarRating;
+
+				//Add the map to the scores array
+				if (modIndex === 0) {
+					duelRatings.scores.NM.push(userMaps[i]);
+				} else if (modIndex === 1) {
+					duelRatings.scores.HD.push(userMaps[i]);
+				} else if (modIndex === 2) {
+					duelRatings.scores.HR.push(userMaps[i]);
+				} else if (modIndex === 3) {
+					duelRatings.scores.DT.push(userMaps[i]);
+				} else if (modIndex === 4) {
+					duelRatings.scores.FM.push(userMaps[i]);
+				}
+
+				//Add the data to the 5 steps in the area of the maps' star rating -> 5.0 will be representing 4.8, 4.9, 5.0, 5.1, 5.2
+				for (let i = 0; i < 5; i++) {
+					let starRatingStep = Math.round((Math.round(mapStarRating * 10) / 10 + 0.1 * i - 0.2) * 10) / 10;
+					if (steps.indexOf(starRatingStep) === -1) {
+						stepData.push({
+							step: starRatingStep,
+							totalOverPerformWeight: overPerformWeight,
+							totalUnderPerformWeight: underPerformWeight,
+							amount: 1,
+							averageOverPerformWeight: overPerformWeight,
+							averageUnderPerformWeight: underPerformWeight,
+							averageWeight: Math.abs(((overPerformWeight + underPerformWeight) / 1) - 1),
+							overPerformWeightedStarRating: (starRatingStep) * overPerformWeight,
+							underPerformWeightedStarRating: (starRatingStep) * underPerformWeight,
+							weightedStarRating: (starRatingStep) * Math.abs(((overPerformWeight + underPerformWeight) / 1) - 1),
+						});
+						steps.push(starRatingStep);
+					} else {
+						stepData[steps.indexOf(starRatingStep)].totalOverPerformWeight += overPerformWeight;
+						stepData[steps.indexOf(starRatingStep)].totalUnderPerformWeight += underPerformWeight;
+						stepData[steps.indexOf(starRatingStep)].amount++;
+						stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight = stepData[steps.indexOf(starRatingStep)].totalOverPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
+						stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight = stepData[steps.indexOf(starRatingStep)].totalUnderPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
+						stepData[steps.indexOf(starRatingStep)].averageWeight = Math.abs(stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight + stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight - 1);
+						stepData[steps.indexOf(starRatingStep)].overPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight;
+						stepData[steps.indexOf(starRatingStep)].underPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight;
+						stepData[steps.indexOf(starRatingStep)].weightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageWeight;
+					}
+				}
+			} else {
+				userMaps.splice(i, 1);
+				i--;
+			}
+		}
+
+		//Calculated the starrating for the modpool
+		let totalWeight = 0;
+		let totalWeightedStarRating = 0;
+		for (let i = 0; i < stepData.length; i++) {
+			if (stepData[i].amount > 1) {
+				totalWeight += stepData[i].averageWeight;
+				totalWeightedStarRating += stepData[i].weightedStarRating;
+			}
+		}
+
+		if (userMaps.length < 5) {
+			duelRatings.provisional = true;
+		}
+
+		//add the values to the modpool data
+		if (totalWeight > 0 && userMaps.length > 0) {
+			let weightedStarRating = totalWeightedStarRating / totalWeight;
+
+			for (let i = 0; i < scoresPerMod; i++) {
+				weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i % userMaps.length], Math.round((1 - (i * 1 / scoresPerMod)) * 100) / 100);
+			}
+
+			if (modIndex === 0) {
+				duelRatings.noMod = weightedStarRating;
+				duelRatings.stepData.NM = stepData;
+			} else if (modIndex === 1) {
+				duelRatings.hidden = weightedStarRating;
+				duelRatings.stepData.HD = stepData;
+			} else if (modIndex === 2) {
+				duelRatings.hardRock = weightedStarRating;
+				duelRatings.stepData.HR = stepData;
+			} else if (modIndex === 3) {
+				duelRatings.doubleTime = weightedStarRating;
+				duelRatings.stepData.DT = stepData;
+			} else if (modIndex === 4) {
+				duelRatings.freeMod = weightedStarRating;
+				duelRatings.stepData.FM = stepData;
+			}
+		}
+	}
+
+	//Check the past year for individual ratings and limit a potential drop to .2
+	let lastYearStats = await DBDuelRatingHistory.findOne({
+		where: {
+			osuUserId: input.osuUserId,
+			year: endDate.getUTCFullYear() - 1,
+			month: 12,
+			date: 31
+		}
+	});
+
+	let halfAYearAgo = new Date();
+	halfAYearAgo.setUTCMonth(halfAYearAgo.getUTCMonth() - 6);
+
+	if (lastYearStats && lastYearStats.updatedAt < halfAYearAgo) {
+		await lastYearStats.destroy();
+		lastYearStats = null;
+	}
+
+	if (!lastYearStats && (duelRatings.noMod > 0 || duelRatings.hidden > 0 || duelRatings.hardRock > 0 || duelRatings.doubleTime > 0 || duelRatings.freeMod > 0)) {
+		let newEndDate = new Date(endDate);
+		newEndDate.setUTCFullYear(newEndDate.getUTCFullYear() - 1);
+		newEndDate.setUTCMonth(11);
+		newEndDate.setUTCDate(31);
+		newEndDate.setUTCHours(23);
+		newEndDate.setUTCMinutes(59);
+		newEndDate.setUTCSeconds(59);
+		newEndDate.setUTCMilliseconds(999);
+
+		let lastYearDuelRating = await getUserDuelStarRatingFunction({ osuUserId: input.osuUserId, client: input.client, date: newEndDate });
+
+		lastYearStats = {
+			osuUserId: input.osuUserId,
+			osuDuelStarRating: lastYearDuelRating.total,
+			osuNoModDuelStarRating: lastYearDuelRating.noMod,
+			osuHiddenDuelStarRating: lastYearDuelRating.hidden,
+			osuHardRockDuelStarRating: lastYearDuelRating.hardRock,
+			osuDoubleTimeDuelStarRating: lastYearDuelRating.doubleTime,
+			osuFreeModDuelStarRating: lastYearDuelRating.freeMod,
+		};
+	} else if (!lastYearStats) {
+		lastYearStats = {
+			osuUserId: input.osuUserId,
+			osuDuelStarRating: null,
+			osuNoModDuelStarRating: null,
+			osuHiddenDuelStarRating: null,
+			osuHardRockDuelStarRating: null,
+			osuDoubleTimeDuelStarRating: null,
+			osuFreeModDuelStarRating: null,
+		};
+	}
+
+	//Get the modpool spread out of the past 100 user scores for the total value
+	if (duelRatings.noMod || duelRatings.hidden || duelRatings.hardRock || duelRatings.doubleTime || duelRatings.freeMod) {
+
+		if (lastYearStats && lastYearStats.osuNoModDuelStarRating && duelRatings.noMod < lastYearStats.osuNoModDuelStarRating - 0.2) {
+			duelRatings.noMod = lastYearStats.osuNoModDuelStarRating - 0.2;
+		}
+
+		if (lastYearStats && lastYearStats.osuHiddenDuelStarRating && duelRatings.hidden < lastYearStats.osuHiddenDuelStarRating - 0.2) {
+			duelRatings.hidden = lastYearStats.osuHiddenDuelStarRating - 0.2;
+		}
+
+		if (lastYearStats && lastYearStats.osuHardRockDuelStarRating && duelRatings.hardRock < lastYearStats.osuHardRockDuelStarRating - 0.2) {
+			duelRatings.hardRock = lastYearStats.osuHardRockDuelStarRating - 0.2;
+		}
+
+		if (lastYearStats && lastYearStats.osuDoubleTimeDuelStarRating && duelRatings.doubleTime < lastYearStats.osuDoubleTimeDuelStarRating - 0.2) {
+			duelRatings.doubleTime = lastYearStats.osuDoubleTimeDuelStarRating - 0.2;
+		}
+
+		if (lastYearStats && lastYearStats.osuFreeModDuelStarRating && duelRatings.freeMod < lastYearStats.osuFreeModDuelStarRating - 0.2) {
+			duelRatings.freeMod = lastYearStats.osuFreeModDuelStarRating - 0.2;
+		}
+
+		//Get ratio of modPools played maps
+		const modPoolAmounts = [0, 0, 0, 0, 0];
+		for (let i = 0; i < userScores.length && i < 100; i++) {
+			modPoolAmounts[modPools.indexOf(getScoreModpoolFunction(userScores[i]))]++;
+		}
+
+		if (duelRatings.noMod === null) {
+			modPoolAmounts[0] = 0;
+		}
+		if (duelRatings.hidden === null) {
+			modPoolAmounts[1] = 0;
+		}
+		if (duelRatings.hardRock === null) {
+			modPoolAmounts[2] = 0;
+		}
+		if (duelRatings.doubleTime === null) {
+			modPoolAmounts[3] = 0;
+		}
+		if (duelRatings.freeMod === null) {
+			modPoolAmounts[4] = 0;
+		}
+
+		//Set total star rating based on the spread
+		duelRatings.total = (duelRatings.noMod * modPoolAmounts[0] + duelRatings.hidden * modPoolAmounts[1] + duelRatings.hardRock * modPoolAmounts[2] + duelRatings.doubleTime * modPoolAmounts[3] + duelRatings.freeMod * modPoolAmounts[4]) / (modPoolAmounts[0] + modPoolAmounts[1] + modPoolAmounts[2] + modPoolAmounts[3] + modPoolAmounts[4]);
+
+		if (completeYear && !yearStats) {
+			//Create the yearStats if they don't exist
+			await DBDuelRatingHistory.create({
+				osuUserId: input.osuUserId,
+				year: endDate.getUTCFullYear(),
+				month: endDate.getUTCMonth() + 1,
+				date: endDate.getUTCDate(),
+				osuDuelStarRating: duelRatings.total,
+				osuNoModDuelStarRating: duelRatings.noMod,
+				osuHiddenDuelStarRating: duelRatings.hidden,
+				osuHardRockDuelStarRating: duelRatings.hardRock,
+				osuDoubleTimeDuelStarRating: duelRatings.doubleTime,
+				osuFreeModDuelStarRating: duelRatings.freeMod,
+				osuDuelProvisional: duelRatings.provisional,
+				osuDuelOutdated: duelRatings.outdated,
+			});
+
+			let futurePossiblyAffectedDuelRatings = await DBDuelRatingHistory.findAll({
+				where: {
+					osuUserId: input.osuUserId,
+					year: {
+						[Op.gt]: endDate.getUTCFullYear()
+					}
+				}
+			});
+
+			for (let i = 0; i < futurePossiblyAffectedDuelRatings.length; i++) {
+				await futurePossiblyAffectedDuelRatings[i].destroy();
+			}
+		}
+
+		//Log the values in the discords if they changed and the user is connected to the bot
+		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getUserDuelStarRating');
+		let discordUser = await DBDiscordUsers.findOne({
+			where: {
+				osuUserId: input.osuUserId
+			}
+		});
+
+		if (!discordUser) {
+			discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId });
+		}
+
+		if (discordUser && !input.date) {
+			if (input.client) {
+				try {
+					let guildId = '727407178499096597';
+					let channelId = '946150632128135239';
+					// eslint-disable-next-line no-undef
+					if (process.env.SERVER === 'Dev') {
+						guildId = '800641468321759242';
+						channelId = '946190123677126666';
+						// eslint-disable-next-line no-undef
+					} else if (process.env.SERVER === 'QA') {
+						guildId = '800641367083974667';
+						channelId = '946190678189293569';
+					}
+					const guild = await input.client.guilds.fetch(guildId);
+					const channel = await guild.channels.fetch(channelId);
+					let message = [`${discordUser.osuName} / ${discordUser.osuUserId}:`];
+					if (Math.round(discordUser.osuDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.total * 1000) / 1000) {
+						message.push(`SR: ${Math.round(discordUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.total * 1000) / 1000}`);
+						message.push(`Ratio: ${modPoolAmounts[0]} NM | ${modPoolAmounts[1]} HD | ${modPoolAmounts[2]} HR | ${modPoolAmounts[3]} DT | ${modPoolAmounts[4]} FM`);
+					}
+					if (Math.round(discordUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.noMod * 1000) / 1000) {
+						message.push(`NM: ${Math.round(discordUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.noMod * 1000) / 1000}`);
+					}
+					if (Math.round(discordUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.hidden * 1000) / 1000) {
+						message.push(`HD: ${Math.round(discordUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.hidden * 1000) / 1000}`);
+					}
+					if (Math.round(discordUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.hardRock * 1000) / 1000) {
+						message.push(`HR: ${Math.round(discordUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.hardRock * 1000) / 1000}`);
+					}
+					if (Math.round(discordUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.doubleTime * 1000) / 1000) {
+						message.push(`DT: ${Math.round(discordUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.doubleTime * 1000) / 1000}`);
+					}
+					if (Math.round(discordUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.freeMod * 1000) / 1000) {
+						message.push(`FM: ${Math.round(discordUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.freeMod * 1000) / 1000}`);
+					}
+					if (discordUser.osuDuelProvisional !== duelRatings.provisional) {
+						message.push(`Provisional: ${discordUser.osuDuelProvisional} -> ${duelRatings.provisional}`);
+					}
+					if (discordUser.osuDuelOutdated !== duelRatings.outdated) {
+						message.push(`Outdated: ${discordUser.osuDuelOutdated} -> ${duelRatings.outdated}`);
+					}
+
+					let oldDerankStats = await getDerankStatsFunction(discordUser);
+					//Setting the new values even tho it does that later just to get the new derank values
+					discordUser.osuDuelStarRating = Math.round(duelRatings.total * 100000000000000) / 100000000000000;
+					discordUser.osuNoModDuelStarRating = duelRatings.noMod;
+					discordUser.osuHiddenDuelStarRating = duelRatings.hidden;
+					discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
+					discordUser.osuDoubleTimeDuelStarRating = duelRatings.doubleTime;
+					discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
+					discordUser.osuDuelProvisional = duelRatings.provisional;
+					discordUser.osuDuelOutdated = duelRatings.outdated;
+					let newDerankStats = await getDerankStatsFunction(discordUser);
+
+					if (oldDerankStats.expectedPpRankOsu !== newDerankStats.expectedPpRankOsu) {
+						message.push(`Deranked Rank change: #${oldDerankStats.expectedPpRankOsu} -> #${newDerankStats.expectedPpRankOsu} (${newDerankStats.expectedPpRankOsu - oldDerankStats.expectedPpRankOsu})`);
+					}
+
+					if (message.length > 1) {
+						channel.send(`\`\`\`${message.join('\n')}\`\`\``);
+
+						if (discordUser.osuDuelRatingUpdates) {
+							const user = await input.client.users.fetch(discordUser.userId);
+							if (user) {
+								user.send(`Your duel ratings have been updated.\`\`\`${message.join('\n')}\`\`\``);
+							}
+						}
+					}
+				} catch (e) {
+					console.log(e);
+				}
+			}
+
+			discordUser.osuDuelStarRating = duelRatings.total;
+			discordUser.osuNoModDuelStarRating = duelRatings.noMod;
+			discordUser.osuHiddenDuelStarRating = duelRatings.hidden;
+			discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
+			discordUser.osuDoubleTimeDuelStarRating = duelRatings.doubleTime;
+			discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
+			discordUser.osuDuelProvisional = duelRatings.provisional;
+			discordUser.osuDuelOutdated = duelRatings.outdated;
+			await discordUser.save();
+		}
+
+		return duelRatings;
+	}
+
+	if (input.date) {
+		return duelRatings;
+	}
+
+	duelRatings.provisional = true;
+
+	//Get it from the top plays if no tournament data is available
+	// eslint-disable-next-line no-undef
+	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+	});
+
+	let topScores = null;
+
+	for (let i = 0; i < 5 && !topScores; i++) {
+		topScores = await osuApi.getUserBest({ u: input.osuUserId, m: 0, limit: 100 })
+			.then((response) => {
+				i = Infinity;
+				return response;
+			})
+			.catch(async (err) => {
+				if (i === 4) {
+					if (err.message === 'Not found') {
+						throw new Error('No standard plays');
+					} else {
+						console.log(err);
+					}
+				} else {
+					await new Promise(resolve => setTimeout(resolve, 10000));
+				}
+			});
+	}
+
+	let stars = [];
+	for (let i = 0; i < topScores.length; i++) {
+		//Add difficulty ratings
+		const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: topScores[i].beatmapId, modBits: topScores[i].raw_mods });
+		if (dbBeatmap && dbBeatmap.starRating && parseFloat(dbBeatmap.starRating) > 0) {
+			stars.push(dbBeatmap.starRating);
+		}
+	}
+
+	let averageStars = 0;
+	for (let i = 0; i < stars.length; i++) {
+		averageStars += parseFloat(stars[i]);
+	}
+
+	duelRatings.total = (averageStars / stars.length) * 0.9;
+	duelRatings.noMod = null;
+	duelRatings.hidden = null;
+	duelRatings.hardRock = null;
+	duelRatings.doubleTime = null;
+	duelRatings.freeMod = null;
+
+	logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getUserDuelRatings backup');
+	let discordUser = await DBDiscordUsers.findOne({
+		where: {
+			osuUserId: input.osuUserId
+		}
+	});
+
+	if (!discordUser) {
+		discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId });
+	}
+
+	if (discordUser) {
+		discordUser.osuDuelStarRating = duelRatings.total;
+		discordUser.osuNoModDuelStarRating = duelRatings.noMod;
+		discordUser.osuHiddenDuelStarRating = duelRatings.hidden;
+		discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
+		discordUser.osuDoubleTimeDuelStarRating = duelRatings.doubleTime;
+		discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
+		await discordUser.save();
+	}
+
+	return duelRatings;
+}
 
 async function logMatchCreationFunction(client, name, matchId) {
 	let guildId = null;

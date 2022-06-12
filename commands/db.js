@@ -1,4 +1,4 @@
-const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBBirthdayGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps, DBElitiriCupStaff, DBElitiriCupLobbies, DBOsuTourneyFollows } = require('../dbObjects');
+const { DBAutoRoles, DBDiscordUsers, DBGuilds, DBBirthdayGuilds, DBReactionRoles, DBReactionRolesHeader, DBServerUserActivity, DBTemporaryVoices, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps, DBElitiriCupStaff, DBElitiriCupLobbies, DBOsuTourneyFollows, DBDuelRatingHistory } = require('../dbObjects');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
 const { logDatabaseQueries } = require('../utils');
@@ -109,6 +109,10 @@ module.exports = {
 			logDatabaseQueries(4, 'commands/db.js DBOsuTourneyFollows');
 			dbList = await DBOsuTourneyFollows.findAll();
 			dbTableName = 'DBOsuTourneyFollows';
+		} else if (args[0] === 'duelratinghistory') {
+			logDatabaseQueries(4, 'commands/db.js DBDuelRatingHistory');
+			dbList = await DBDuelRatingHistory.findAll();
+			dbTableName = 'DBDuelRatingHistory';
 		} else {
 			return msg.reply('no corresponding table found');
 		}

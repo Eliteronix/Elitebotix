@@ -8,7 +8,7 @@ const sequelize = new Sequelize('database', 'username', 'password', {
 	retry: {
 		max: 10, // Maximum rety 3 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		backoffExponent: 1.15, // Exponent to increase backoff each try. Default: 1.1
+		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
 });
 
@@ -32,5 +32,6 @@ const DBOsuBeatmaps = require('./models/DBOsuBeatmaps')(sequelize, Sequelize.Dat
 const DBElitiriCupLobbies = require('./models/DBElitiriCupLobbies')(sequelize, Sequelize.DataTypes);
 const DBBirthdayGuilds = require('./models/DBBirthdayGuilds')(sequelize, Sequelize.DataTypes);
 const DBOsuTourneyFollows = require('./models/DBOsuTourneyFollows')(sequelize, Sequelize.DataTypes);
+const DBDuelRatingHistory = require('./models/DBDuelRatingHistory')(sequelize, Sequelize.DataTypes);
 
-module.exports = { DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBAutoRoles, DBTemporaryVoices, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps, DBElitiriCupLobbies, DBElitiriCupStaff, DBBirthdayGuilds, DBOsuTourneyFollows };
+module.exports = { DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBAutoRoles, DBTemporaryVoices, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps, DBElitiriCupLobbies, DBElitiriCupStaff, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory };
