@@ -1134,7 +1134,6 @@ module.exports = {
 			});
 
 			for (let i = 0; i < outdatedDuelRatings.length; i++) {
-				console.log(outdatedDuelRatings[i].osuUserId, outdatedDuelRatings[i].year, 'Deleted year stats, match import');
 				await outdatedDuelRatings[i].destroy();
 			}
 		}
@@ -1812,6 +1811,14 @@ async function getUserDuelStarRatingFunction(input) {
 				date: 31
 			}
 		});
+
+		let halfAYearAgo = new Date();
+		halfAYearAgo.setUTCMonth(halfAYearAgo.getUTCMonth() - 6);
+
+		if (yearStats && yearStats.updatedAt < halfAYearAgo) {
+			await yearStats.destroy();
+			yearStats = null;
+		}
 	}
 
 	if (yearStats) {
@@ -2071,6 +2078,14 @@ async function getUserDuelStarRatingFunction(input) {
 		}
 	});
 
+	let halfAYearAgo = new Date();
+	halfAYearAgo.setUTCMonth(halfAYearAgo.getUTCMonth() - 6);
+
+	if (lastYearStats && lastYearStats.updatedAt < halfAYearAgo) {
+		await lastYearStats.destroy();
+		lastYearStats = null;
+	}
+
 	if (!lastYearStats && (duelRatings.noMod > 0 || duelRatings.hidden > 0 || duelRatings.hardRock > 0 || duelRatings.doubleTime > 0 || duelRatings.freeMod > 0)) {
 		let newEndDate = new Date(endDate);
 		newEndDate.setUTCFullYear(newEndDate.getUTCFullYear() - 1);
@@ -2104,28 +2119,29 @@ async function getUserDuelStarRatingFunction(input) {
 		};
 	}
 
-	if (lastYearStats && lastYearStats.osuNoModDuelStarRating && duelRatings.noMod < lastYearStats.osuNoModDuelStarRating - 0.2) {
-		duelRatings.noMod = lastYearStats.osuNoModDuelStarRating - 0.2;
-	}
-
-	if (lastYearStats && lastYearStats.osuHiddenDuelStarRating && duelRatings.hidden < lastYearStats.osuHiddenDuelStarRating - 0.2) {
-		duelRatings.hidden = lastYearStats.osuHiddenDuelStarRating - 0.2;
-	}
-
-	if (lastYearStats && lastYearStats.osuHardRockDuelStarRating && duelRatings.hardRock < lastYearStats.osuHardRockDuelStarRating - 0.2) {
-		duelRatings.hardRock = lastYearStats.osuHardRockDuelStarRating - 0.2;
-	}
-
-	if (lastYearStats && lastYearStats.osuDoubleTimeDuelStarRating && duelRatings.doubleTime < lastYearStats.osuDoubleTimeDuelStarRating - 0.2) {
-		duelRatings.doubleTime = lastYearStats.osuDoubleTimeDuelStarRating - 0.2;
-	}
-
-	if (lastYearStats && lastYearStats.osuFreeModDuelStarRating && duelRatings.freeMod < lastYearStats.osuFreeModDuelStarRating - 0.2) {
-		duelRatings.freeMod = lastYearStats.osuFreeModDuelStarRating - 0.2;
-	}
-
 	//Get the modpool spread out of the past 100 user scores for the total value
 	if (duelRatings.noMod || duelRatings.hidden || duelRatings.hardRock || duelRatings.doubleTime || duelRatings.freeMod) {
+
+		if (lastYearStats && lastYearStats.osuNoModDuelStarRating && duelRatings.noMod < lastYearStats.osuNoModDuelStarRating - 0.2) {
+			duelRatings.noMod = lastYearStats.osuNoModDuelStarRating - 0.2;
+		}
+
+		if (lastYearStats && lastYearStats.osuHiddenDuelStarRating && duelRatings.hidden < lastYearStats.osuHiddenDuelStarRating - 0.2) {
+			duelRatings.hidden = lastYearStats.osuHiddenDuelStarRating - 0.2;
+		}
+
+		if (lastYearStats && lastYearStats.osuHardRockDuelStarRating && duelRatings.hardRock < lastYearStats.osuHardRockDuelStarRating - 0.2) {
+			duelRatings.hardRock = lastYearStats.osuHardRockDuelStarRating - 0.2;
+		}
+
+		if (lastYearStats && lastYearStats.osuDoubleTimeDuelStarRating && duelRatings.doubleTime < lastYearStats.osuDoubleTimeDuelStarRating - 0.2) {
+			duelRatings.doubleTime = lastYearStats.osuDoubleTimeDuelStarRating - 0.2;
+		}
+
+		if (lastYearStats && lastYearStats.osuFreeModDuelStarRating && duelRatings.freeMod < lastYearStats.osuFreeModDuelStarRating - 0.2) {
+			duelRatings.freeMod = lastYearStats.osuFreeModDuelStarRating - 0.2;
+		}
+
 		//Get ratio of modPools played maps
 		const modPoolAmounts = [0, 0, 0, 0, 0];
 		for (let i = 0; i < userScores.length && i < 100; i++) {
@@ -2168,8 +2184,6 @@ async function getUserDuelStarRatingFunction(input) {
 				osuDuelOutdated: duelRatings.outdated,
 			});
 
-			console.log(input.osuUserId, endDate.getUTCFullYear(), 'Created new year stats');
-
 			let futurePossiblyAffectedDuelRatings = await DBDuelRatingHistory.findAll({
 				where: {
 					osuUserId: input.osuUserId,
@@ -2180,7 +2194,6 @@ async function getUserDuelStarRatingFunction(input) {
 			});
 
 			for (let i = 0; i < futurePossiblyAffectedDuelRatings.length; i++) {
-				console.log(input.osuUserId, futurePossiblyAffectedDuelRatings[i].year, 'Deleted year stats, duel rating update');
 				await futurePossiblyAffectedDuelRatings[i].destroy();
 			}
 		}
