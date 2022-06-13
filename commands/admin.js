@@ -1950,6 +1950,36 @@ module.exports = {
 			// 		description: 'Sends an info card about the skills of the specified player',
 			// 		options: [
 			// 			{
+			// 				'name': 'username',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'username2',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'username3',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'username4',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'username5',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
 			// 				'name': 'scaled',
 			// 				'description': 'Should the graph be scaled by the total evaluation?',
 			// 				'type': 5,
@@ -1985,36 +2015,6 @@ module.exports = {
 			// 				'name': 'runningaverage',
 			// 				'description': 'Should a running average be shown instead?',
 			// 				'type': 5,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username2',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username3',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username4',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username5',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
 			// 				'required': false
 			// 			}
 			// 		]
@@ -4528,6 +4528,36 @@ module.exports = {
 					description: 'Sends an info card about the skills of the specified player',
 					options: [
 						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username2',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username3',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username4',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'username5',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
 							'name': 'scaled',
 							'description': 'Should the graph be scaled by the total evaluation?',
 							'type': 5,
@@ -4563,36 +4593,6 @@ module.exports = {
 							'name': 'runningaverage',
 							'description': 'Should a running average be shown instead?',
 							'type': 5,
-							'required': false
-						},
-						{
-							'name': 'username',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username2',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username3',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username4',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username5',
-							'description': 'The username, id or link of the player',
-							'type': 3,
 							'required': false
 						}
 					]
