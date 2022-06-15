@@ -43,7 +43,7 @@ module.exports = async function (msg, bancho, twitchClient) {
 
 		const guildPrefix = await getGuildPrefix(msg);
 
-		if (msg.content === '<@!784836063058329680>' || msg.content === '<@784836063058329680>') {
+		if (msg.content === '<@!981205694340546571>' || msg.content === '<@981205694340546571>') {
 			msg.content = `${guildPrefix}help`;
 		}
 

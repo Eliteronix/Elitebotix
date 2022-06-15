@@ -33,7 +33,7 @@ module.exports = {
 		msg.channel.messages.fetch({ limit: 100 })
 			.then(async (messages) => {
 				const allRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+/gm;
-				const firstMessage = messages.filter(m => m.author.id === '784836063058329680' && m.content.match(allRegex)).first();
+				const firstMessage = messages.filter(m => m.author.id === '981205694340546571' && m.content.match(allRegex)).first();
 
 				const beginningRegex = /.+\nSpectate: .+\nBeatmap: <https:\/\/osu.ppy.sh\/b\//gm;
 				const endingRegex = />\nosu! direct:.+/gm;

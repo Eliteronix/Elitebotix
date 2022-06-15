@@ -60,7 +60,8 @@ module.exports = async function (reaction, user, additionalObjects) {
 						}
 					}
 
-					if (message) {
+					//Check that the message was sent from itself (Avoiding migration issues from legacy messages)
+					if (message && message.author.id === reaction.client.user.id) {
 						const starBoardMessageEmbed = new Discord.MessageEmbed()
 							.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
 							.setColor('#d9b51c')

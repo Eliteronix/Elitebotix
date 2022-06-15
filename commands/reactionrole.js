@@ -521,8 +521,20 @@ async function editEmbed(msg, reactionRolesHeader) {
 	}
 	//Get the message object
 	const embedMessage = await embedChannel.messages.fetch(embedMessageId);
-	//Edit the message
-	embedMessage.edit({ embeds: [reactionRoleEmbed] });
+
+	//Check if its a message from the old bot to handle legacy embeds
+	if (embedMessage.author.id === msg.author.id) {
+		//Edit the message if same user
+		embedMessage.edit({ embeds: [reactionRoleEmbed] });
+	} else {
+		//Delete the message if different user and send a new one
+		try {
+			await embedMessage.delete();
+		} catch (e) {
+			await embedChannel.send('Couldn\'t delete the old embed, please do so manually. (Can\'t be edited anymore due to the migration to the new account)');
+		}
+		embedChannel.send({ embeds: [reactionRoleEmbed] });
+	}
 
 	//Remove all reactions from the embed
 	embedMessage.reactions.removeAll().catch(error => console.error('Failed to clear reactions: ', error));
