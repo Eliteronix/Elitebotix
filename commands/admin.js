@@ -43,15 +43,98 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'admincommands',
-			// 		description: 'Adapt if server-admin commands should be shown or not',
+			// 		name: 'activityrole',
+			// 		description: 'Lets you set up roles which will be assigned based on useractivity',
 			// 		options: [
 			// 			{
-			// 				'name': 'show',
-			// 				'description': 'Should the commands for server-admins be shown?',
-			// 				'type': 5,
-			// 				'required': true
-			// 			}
+			// 				'name': 'add',
+			// 				'description': 'Lets you add a new role which will be assigned based on useractivity',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'role',
+			// 						'description': 'The role that should be an activityrole',
+			// 						'type': 8,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'rank',
+			// 						'description': 'The required rank for getting the role',
+			// 						'type': 4,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'percentage',
+			// 						'description': 'The required topx% rank for getting the role',
+			// 						'type': 4,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'points',
+			// 						'description': 'The required points for getting the role',
+			// 						'type': 4,
+			// 						'required': false
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'remove',
+			// 				'description': 'Remove an existing activityrole',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'role',
+			// 						'description': 'The role that should no longer be an activityrole',
+			// 						'type': 8, // 8 is type ROLE
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'list',
+			// 				'description': 'Show which activityroles are set up',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'autorole',
+			// 		description: 'Lets you set up roles that will be automatically assigned on joining',
+			// 		options: [
+			// 			{
+			// 				'name': 'add',
+			// 				'description': 'Lets you add a new role that will be automatically assigned on joining',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'role',
+			// 						'description': 'The role that should be an autorole',
+			// 						'type': 8,
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'remove',
+			// 				'description': 'Remove an existing autorole',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'role',
+			// 						'description': 'The role that should no longer be an autorole',
+			// 						'type': 8, // 8 is type ROLE
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'list',
+			// 				'description': 'Show which autoroles are set up',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
 			// 		]
 			// 	},
 			// });
@@ -217,6 +300,38 @@ module.exports = {
 			// 				'type': 3,
 			// 				'required': true,
 			// 			}
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'goodbye-message',
+			// 		description: 'Lets you set up a message to be sent when someone leaves the server',
+			// 		options: [
+			// 			{
+			// 				'name': 'current',
+			// 				'description': 'Shows the current goodbye-message',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'disable',
+			// 				'description': 'Disables goodbye-messages',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'set',
+			// 				'description': 'Allows you to set a new goodbye-message in the current channel',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'message',
+			// 						'description': 'The message to be sent (use "@member" to mention the member)',
+			// 						'type': 3, // 3 is type STRING
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
 			// 		]
 			// 	},
 			// });
@@ -432,6 +547,46 @@ module.exports = {
 			// 		name: 'link',
 			// 		description: 'Sends a link to add the bot to a server'
 			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'logging',
+			// 		description: 'Lets you set up a message to be sent when someone leaves the server',
+			// 		options: [
+			// 			{
+			// 				'name': 'list',
+			// 				'description': 'Shows the current logging settings',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'channel',
+			// 				'description': 'Set the channel that is supposed to log the information',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'channel',
+			// 						'description': 'The channel that is supposed to log the information',
+			// 						'type': 7, // 7 is type CHANNEL
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'toggleevent',
+			// 				'description': 'Allows you to toggle if an event should be logged',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'eventname',
+			// 						'description': 'The eventname found in the list embeds',
+			// 						'type': 3, // 3 is type STRING
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
+			// 		]
+			// 	},
 			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
@@ -2162,6 +2317,46 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'osu-track',
+			// 		description: 'Tracks new scores set by the specified users',
+			// 		options: [
+			// 			{
+			// 				'name': 'add',
+			// 				'description': 'Lets you add a new user to track',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'The user to track',
+			// 						'type': 3,
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'remove',
+			// 				'description': 'Stop tracking a user',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'The user to stop tracking',
+			// 						'type': 3,
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'list',
+			// 				'description': 'Show which users are being tracked in the channel',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'pat',
 			// 		description: 'Lets you send a gif to pat a user',
 			// 		options: [
@@ -2302,6 +2497,205 @@ module.exports = {
 			// 			},
 			// 		]
 			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'prefix',
+			// 		description: 'Change the bot\'s prefix on the server for chat commands',
+			// 		options: [
+			// 			{
+			// 				'name': 'prefix',
+			// 				'description': 'The new bot prefix',
+			// 				'type': 3,
+			// 				'required': true
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'prune',
+			// 		description: 'Delete recent messages',
+			// 		options: [
+			// 			{
+			// 				'name': 'amount',
+			// 				'description': 'The amount of messages to delete',
+			// 				'type': 4,
+			// 				'required': true
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'reactionrole',
+			// 		description: 'Set up roles that users can assign themselves',
+			// 		options: [
+			// 			{
+			// 				'name': 'embedadd',
+			// 				'description': 'Create a new embed for reactionroles',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'name',
+			// 						'description': 'The name of the embed',
+			// 						'type': 3,
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'embedremove',
+			// 				'description': 'Remove an existing embed',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'embedid',
+			// 						'description': 'The ID of the embed',
+			// 						'type': 4,
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'embedchange',
+			// 				'description': 'Change an existing embed',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'embedid',
+			// 						'description': 'The ID of the embed',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'property',
+			// 						'description': 'The property to change',
+			// 						'type': 3,
+			// 						'required': true,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Title',
+			// 								'value': 'title'
+			// 							},
+			// 							{
+			// 								'name': 'Description',
+			// 								'value': 'description'
+			// 							},
+			// 							{
+			// 								'name': 'Color',
+			// 								'value': 'color'
+			// 							},
+			// 							{
+			// 								'name': 'Image',
+			// 								'value': 'image'
+			// 							}
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'value',
+			// 						'description': 'The new title/description/color/image URL',
+			// 						'type': 3,
+			// 						'required': true,
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'roleadd',
+			// 				'description': 'Add a role to an embed',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'embedid',
+			// 						'description': 'The ID of the embed',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'emoji',
+			// 						'description': 'The emoji to represent the role',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'role',
+			// 						'description': 'The emoji to represent the role',
+			// 						'type': 8, // 8 is type ROLE
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'description',
+			// 						'description': 'The description for the reactionrole',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'roleremove',
+			// 				'description': 'Remove an existing reactionrole',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'embedid',
+			// 						'description': 'The ID of the embed',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'emoji',
+			// 						'description': 'The emoji that represents the role',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'rolechange',
+			// 				'description': 'Change an existing reactionrole',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'embedid',
+			// 						'description': 'The ID of the embed',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'emoji',
+			// 						'description': 'The emoji that represents the role',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'property',
+			// 						'description': 'The property to change',
+			// 						'type': 3,
+			// 						'required': true,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Emoji',
+			// 								'value': 'emoji'
+			// 							},
+			// 							{
+			// 								'name': 'Description',
+			// 								'value': 'description'
+			// 							}
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'value',
+			// 						'description': 'The new emoji/description',
+			// 						'type': 3,
+			// 						'required': true,
+			// 					}
+			// 				]
+			// 			},
+			// 		]
+			// 	},
 			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
@@ -2526,6 +2920,80 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'starboard',
+			// 		description: 'Highlight favourite messages with a star emoji!',
+			// 		options: [
+			// 			{
+			// 				'name': 'enable',
+			// 				'description': 'Enable the starboard for the server',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'disable',
+			// 				'description': 'Disable the starboard for the server',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'channel',
+			// 				'description': 'Set the starboard channel where starred messages get sent to',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'channel',
+			// 						'description': 'The channel to send messages to',
+			// 						'type': 7, // 7 is type CHANNEL
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'minimum',
+			// 				'description': 'Set the minimum amount of stars needed to highlight',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'amount',
+			// 						'description': 'The minimum amount of stars needed',
+			// 						'type': 4,
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'tempvoice',
+			// 		description: 'Create temporary voice- and textchannels',
+			// 		options: [
+			// 			{
+			// 				'name': 'enablevoice',
+			// 				'description': 'Enable temporary voices for the server',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'disablevoice',
+			// 				'description': 'Disable temporary voices for the server',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'enabletext',
+			// 				'description': 'Enable temporary textchannels along voices for the server',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'disabletext',
+			// 				'description': 'Disable temporary textchannels along voices for the server',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'ticket',
 			// 		description: 'Create and manage tickets',
 			// 		options: [
@@ -2655,37 +3123,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'weather',
-			// 		description: 'Sends info about the weather of the given location',
-			// 		options: [
-			// 			{
-			// 				'name': 'unit',
-			// 				'description': 'The unit that should be used',
-			// 				'type': 3,
-			// 				'required': false,
-			// 				'choices': [
-			// 					{
-			// 						'name': 'celcius',
-			// 						'value': 'c'
-			// 					},
-			// 					{
-			// 						'name': 'fahrenheit',
-			// 						'value': 'f'
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'location',
-			// 				'description': 'The location name or zip',
-			// 				'type': 3,
-			// 				'required': false
-			// 			}
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'weather-set',
 			// 		description: 'Allows you to set the default degree type/location for the weather command',
 			// 		options: [
@@ -2729,6 +3166,157 @@ module.exports = {
 			// 	}
 			// });
 
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'weather-track',
+			// 		description: 'Get hourly/daily weather updates for a specified location',
+			// 		options: [
+			// 			{
+			// 				'name': 'list',
+			// 				'description': 'List the currently tracked locations',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'add',
+			// 				'description': 'Track a new location',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'location',
+			// 						'description': 'The location or zipcode to track',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'frequency',
+			// 						'description': 'The tracking frequency',
+			// 						'type': 3,
+			// 						'required': true,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Daily',
+			// 								'value': 'daily'
+			// 							},
+			// 							{
+			// 								'name': 'Hourly',
+			// 								'value': 'hourly'
+			// 							},
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'unit',
+			// 						'description': 'The tracking unit',
+			// 						'type': 3,
+			// 						'required': true,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Celcius',
+			// 								'value': 'c'
+			// 							},
+			// 							{
+			// 								'name': 'Fahrenheit',
+			// 								'value': 'f'
+			// 							}
+			// 						]
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'remove',
+			// 				'description': 'Stop tracking a location',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'unit',
+			// 						'description': 'The tracking unit',
+			// 						'type': 3,
+			// 						'required': true,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Celcius',
+			// 								'value': 'c'
+			// 							},
+			// 							{
+			// 								'name': 'Fahrenheit',
+			// 								'value': 'f'
+			// 							}
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'location',
+			// 						'description': 'The location or zipcode to track',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'weather',
+			// 		description: 'Sends info about the weather of the given location',
+			// 		options: [
+			// 			{
+			// 				'name': 'unit',
+			// 				'description': 'The unit that should be used',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'celcius',
+			// 						'value': 'c'
+			// 					},
+			// 					{
+			// 						'name': 'fahrenheit',
+			// 						'value': 'f'
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'location',
+			// 				'description': 'The location name or zip',
+			// 				'type': 3,
+			// 				'required': false
+			// 			}
+			// 		]
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'welcome-message',
+			// 		description: 'Lets you set up a message to be sent when someone joins the server',
+			// 		options: [
+			// 			{
+			// 				'name': 'current',
+			// 				'description': 'Shows the current welcome-message',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'disable',
+			// 				'description': 'Disables welcome-messages',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'set',
+			// 				'description': 'Allows you to set a new welcome-message in the current channel',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'message',
+			// 						'description': 'The message to be sent (use "@member" to mention the member)',
+			// 						'type': 3, // 3 is type STRING
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
+			// 		]
+			// 	},
+			// });
+
 		} else if (args[0] === 'removeGuildCommands') {
 			const commands = await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.get();
 			for (let i = 0; i < commands.length; i++) {
@@ -2752,15 +3340,98 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
-					name: 'admincommands',
-					description: 'Adapt if server-admin commands should be shown or not',
+					name: 'activityrole',
+					description: 'Lets you set up roles which will be assigned based on useractivity',
 					options: [
 						{
-							'name': 'show',
-							'description': 'Should the commands for server-admins be shown?',
-							'type': 5,
-							'required': true
-						}
+							'name': 'add',
+							'description': 'Lets you add a new role which will be assigned based on useractivity',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'role',
+									'description': 'The role that should be an activityrole',
+									'type': 8,
+									'required': true
+								},
+								{
+									'name': 'rank',
+									'description': 'The required rank for getting the role',
+									'type': 4,
+									'required': false
+								},
+								{
+									'name': 'percentage',
+									'description': 'The required topx% rank for getting the role',
+									'type': 4,
+									'required': false
+								},
+								{
+									'name': 'points',
+									'description': 'The required points for getting the role',
+									'type': 4,
+									'required': false
+								},
+							]
+						},
+						{
+							'name': 'remove',
+							'description': 'Remove an existing activityrole',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'role',
+									'description': 'The role that should no longer be an activityrole',
+									'type': 8, // 8 is type ROLE
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'list',
+							'description': 'Show which activityroles are set up',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'autorole',
+					description: 'Lets you set up roles that will be automatically assigned on joining',
+					options: [
+						{
+							'name': 'add',
+							'description': 'Lets you add a new role that will be automatically assigned on joining',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'role',
+									'description': 'The role that should be an autorole',
+									'type': 8,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'remove',
+							'description': 'Remove an existing autorole',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'role',
+									'description': 'The role that should no longer be an autorole',
+									'type': 8, // 8 is type ROLE
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'list',
+							'description': 'Show which autoroles are set up',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
 					]
 				},
 			});
@@ -2926,6 +3597,38 @@ module.exports = {
 							'type': 3,
 							'required': true,
 						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'goodbye-message',
+					description: 'Lets you set up a message to be sent when someone leaves the server',
+					options: [
+						{
+							'name': 'current',
+							'description': 'Shows the current goodbye-message',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'disable',
+							'description': 'Disables goodbye-messages',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'set',
+							'description': 'Allows you to set a new goodbye-message in the current channel',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'message',
+									'description': 'The message to be sent (use "@member" to mention the member)',
+									'type': 3, // 3 is type STRING
+									'required': true
+								}
+							]
+						},
 					]
 				},
 			});
@@ -3141,6 +3844,46 @@ module.exports = {
 					name: 'link',
 					description: 'Sends a link to add the bot to a server'
 				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'logging',
+					description: 'Lets you set up a message to be sent when someone leaves the server',
+					options: [
+						{
+							'name': 'list',
+							'description': 'Shows the current logging settings',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'channel',
+							'description': 'Set the channel that is supposed to log the information',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'channel',
+									'description': 'The channel that is supposed to log the information',
+									'type': 7, // 7 is type CHANNEL
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'toggleevent',
+							'description': 'Allows you to toggle if an event should be logged',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'eventname',
+									'description': 'The eventname found in the list embeds',
+									'type': 3, // 3 is type STRING
+									'required': true
+								}
+							]
+						},
+					]
+				},
 			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
@@ -4740,6 +5483,46 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
+					name: 'osu-track',
+					description: 'Tracks new scores set by the specified users',
+					options: [
+						{
+							'name': 'add',
+							'description': 'Lets you add a new user to track',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'username',
+									'description': 'The user to track',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'remove',
+							'description': 'Stop tracking a user',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'username',
+									'description': 'The user to stop tracking',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'list',
+							'description': 'Show which users are being tracked in the channel',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
 					name: 'pat',
 					description: 'Lets you send a gif to pat a user',
 					options: [
@@ -4880,6 +5663,205 @@ module.exports = {
 						},
 					]
 				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'prefix',
+					description: 'Change the bot\'s prefix on the server for chat commands',
+					options: [
+						{
+							'name': 'prefix',
+							'description': 'The new bot prefix',
+							'type': 3,
+							'required': true
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'prune',
+					description: 'Delete recent messages',
+					options: [
+						{
+							'name': 'amount',
+							'description': 'The amount of messages to delete',
+							'type': 4,
+							'required': true
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'reactionrole',
+					description: 'Set up roles that users can assign themselves',
+					options: [
+						{
+							'name': 'embedadd',
+							'description': 'Create a new embed for reactionroles',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'name',
+									'description': 'The name of the embed',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'embedremove',
+							'description': 'Remove an existing embed',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'embedid',
+									'description': 'The ID of the embed',
+									'type': 4,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'embedchange',
+							'description': 'Change an existing embed',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'embedid',
+									'description': 'The ID of the embed',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'property',
+									'description': 'The property to change',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Title',
+											'value': 'title'
+										},
+										{
+											'name': 'Description',
+											'value': 'description'
+										},
+										{
+											'name': 'Color',
+											'value': 'color'
+										},
+										{
+											'name': 'Image',
+											'value': 'image'
+										}
+									]
+								},
+								{
+									'name': 'value',
+									'description': 'The new title/description/color/image URL',
+									'type': 3,
+									'required': true,
+								}
+							]
+						},
+						{
+							'name': 'roleadd',
+							'description': 'Add a role to an embed',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'embedid',
+									'description': 'The ID of the embed',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'emoji',
+									'description': 'The emoji to represent the role',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'role',
+									'description': 'The emoji to represent the role',
+									'type': 8, // 8 is type ROLE
+									'required': true
+								},
+								{
+									'name': 'description',
+									'description': 'The description for the reactionrole',
+									'type': 3,
+									'required': true
+								},
+							]
+						},
+						{
+							'name': 'roleremove',
+							'description': 'Remove an existing reactionrole',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'embedid',
+									'description': 'The ID of the embed',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'emoji',
+									'description': 'The emoji that represents the role',
+									'type': 3,
+									'required': true
+								},
+							]
+						},
+						{
+							'name': 'rolechange',
+							'description': 'Change an existing reactionrole',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'embedid',
+									'description': 'The ID of the embed',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'emoji',
+									'description': 'The emoji that represents the role',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'property',
+									'description': 'The property to change',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Emoji',
+											'value': 'emoji'
+										},
+										{
+											'name': 'Description',
+											'value': 'description'
+										}
+									]
+								},
+								{
+									'name': 'value',
+									'description': 'The new emoji/description',
+									'type': 3,
+									'required': true,
+								}
+							]
+						},
+					]
+				},
 			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
@@ -5104,6 +6086,80 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
+					name: 'starboard',
+					description: 'Highlight favourite messages with a star emoji!',
+					options: [
+						{
+							'name': 'enable',
+							'description': 'Enable the starboard for the server',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'disable',
+							'description': 'Disable the starboard for the server',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'channel',
+							'description': 'Set the starboard channel where starred messages get sent to',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'channel',
+									'description': 'The channel to send messages to',
+									'type': 7, // 7 is type CHANNEL
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'minimum',
+							'description': 'Set the minimum amount of stars needed to highlight',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'amount',
+									'description': 'The minimum amount of stars needed',
+									'type': 4,
+									'required': true
+								}
+							]
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'tempvoice',
+					description: 'Create temporary voice- and textchannels',
+					options: [
+						{
+							'name': 'enablevoice',
+							'description': 'Enable temporary voices for the server',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'disablevoice',
+							'description': 'Disable temporary voices for the server',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'enabletext',
+							'description': 'Enable temporary textchannels along voices for the server',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'disabletext',
+							'description': 'Disable temporary textchannels along voices for the server',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
 					name: 'ticket',
 					description: 'Create and manage tickets',
 					options: [
@@ -5233,37 +6289,6 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
-					name: 'weather',
-					description: 'Sends info about the weather of the given location',
-					options: [
-						{
-							'name': 'unit',
-							'description': 'The unit that should be used',
-							'type': 3,
-							'required': false,
-							'choices': [
-								{
-									'name': 'celcius',
-									'value': 'c'
-								},
-								{
-									'name': 'fahrenheit',
-									'value': 'f'
-								}
-							]
-						},
-						{
-							'name': 'location',
-							'description': 'The location name or zip',
-							'type': 3,
-							'required': false
-						}
-					]
-				}
-			});
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
 					name: 'weather-set',
 					description: 'Allows you to set the default degree type/location for the weather command',
 					options: [
@@ -5305,6 +6330,157 @@ module.exports = {
 						},
 					]
 				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'weather-track',
+					description: 'Get hourly/daily weather updates for a specified location',
+					options: [
+						{
+							'name': 'list',
+							'description': 'List the currently tracked locations',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'add',
+							'description': 'Track a new location',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'location',
+									'description': 'The location or zipcode to track',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'frequency',
+									'description': 'The tracking frequency',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Daily',
+											'value': 'daily'
+										},
+										{
+											'name': 'Hourly',
+											'value': 'hourly'
+										},
+									]
+								},
+								{
+									'name': 'unit',
+									'description': 'The tracking unit',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Celcius',
+											'value': 'c'
+										},
+										{
+											'name': 'Fahrenheit',
+											'value': 'f'
+										}
+									]
+								}
+							]
+						},
+						{
+							'name': 'remove',
+							'description': 'Stop tracking a location',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'unit',
+									'description': 'The tracking unit',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Celcius',
+											'value': 'c'
+										},
+										{
+											'name': 'Fahrenheit',
+											'value': 'f'
+										}
+									]
+								},
+								{
+									'name': 'location',
+									'description': 'The location or zipcode to track',
+									'type': 3,
+									'required': true
+								},
+							]
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'weather',
+					description: 'Sends info about the weather of the given location',
+					options: [
+						{
+							'name': 'unit',
+							'description': 'The unit that should be used',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'celcius',
+									'value': 'c'
+								},
+								{
+									'name': 'fahrenheit',
+									'value': 'f'
+								}
+							]
+						},
+						{
+							'name': 'location',
+							'description': 'The location name or zip',
+							'type': 3,
+							'required': false
+						}
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'welcome-message',
+					description: 'Lets you set up a message to be sent when someone joins the server',
+					options: [
+						{
+							'name': 'current',
+							'description': 'Shows the current welcome-message',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'disable',
+							'description': 'Disables welcome-messages',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'set',
+							'description': 'Allows you to set a new welcome-message in the current channel',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'message',
+									'description': 'The message to be sent (use "@member" to mention the member)',
+									'type': 3, // 3 is type STRING
+									'required': true
+								}
+							]
+						},
+					]
+				},
 			});
 
 		} else if (args[0] === 'removeGlobalCommands') {
