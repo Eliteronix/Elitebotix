@@ -11,7 +11,7 @@ module.exports = async function (reaction, user) {
 		return;
 	}
 
-	if (isWrongSystem(reaction.message.guild.id, reaction.message.channel.type === 'DM')) {
+	if (reaction.message.guild && isWrongSystem(reaction.message.guild.id, reaction.message.channel.type === 'DM')) {
 		return;
 	}
 
