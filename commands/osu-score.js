@@ -33,7 +33,7 @@ module.exports = {
 			if (interaction.options._hoistedOptions) {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					if (interaction.options._hoistedOptions[i].name === 'mods') {
-						args.push(`--${interaction.options._hoistedOptions[i].value}`);
+						args.push(`--${interaction.options._hoistedOptions[i].value.toUpperCase()}`);
 					} else {
 						args.push(interaction.options._hoistedOptions[i].value);
 					}
