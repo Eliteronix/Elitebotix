@@ -427,6 +427,17 @@ module.exports = {
 					while (dbBeatmap === null) {
 						const index = Math.floor(Math.random() * beatmaps.length);
 
+						if (!beatmaps.length) {
+							console.log('Duel Match: No more maps left to choose from');
+							return await interaction.editReply(`<@${commandUser.userId}>, <@${discordUser.userId}> the bot could not find enough viable maps with this criteria. (SR: ${Math.round(averageStarRating * 100) / 100}*)`);
+						}
+
+						if (!beatmaps[index]) {
+							beatmaps.splice(index, 1);
+							console.log('Duel Match: Beatmap was null, removed from array');
+							continue;
+						}
+
 						if (modPools[i] === 'HD') {
 							console.log('Duel Match: Refresh the HD Beatmap');
 							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
