@@ -269,7 +269,6 @@ async function rollRound(msg, sentMessage, players, rounds) {
 	});
 
 	const rCollector = sentMessage.createReactionCollector({ time: 3600000 });
-	await sentMessage.react('🎲');
 
 	rCollector.on('collect', async (reaction, user) => {
 		if (user.id === players[rounds.length % players.length][0]) {
@@ -300,4 +299,6 @@ async function rollRound(msg, sentMessage, players, rounds) {
 		}
 		return rollRound(msg, sentMessage, players, rounds);
 	});
+
+	await sentMessage.react('🎲');
 }
