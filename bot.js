@@ -143,6 +143,8 @@ function readyDiscord() {
 	if (!wrongCluster()) {
 		restartProcessQueueTask();
 	}
+
+	executeProcessQueue(client, bancho);
 }
 
 client.on('messageCreate', msg => gotMessage(msg, bancho, twitchClient));
@@ -199,8 +201,6 @@ client.on('emojiCreate', emojiCreate);
 client.on('emojiUpdate', emojiUpdate);
 
 client.on('emojiDelete', emojiDelete);
-
-executeProcessQueue(client, bancho);
 
 setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
 
