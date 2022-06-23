@@ -1922,8 +1922,19 @@ async function getUserDuelStarRatingFunction(input) {
 			} else if (modPools[modIndex] === 'DT') {
 				dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 64 });
 			} else if (modPools[modIndex] === 'FM') {
-				console.log(userMaps[i].modBits);
-				dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: userMaps[i].modBits });
+				let mods = getModsFunction(userMaps[i].modBits);
+
+				if (mods.includes('EZ')) {
+					mods.splice(mods.indexOf('EZ'), 1);
+				}
+
+				if (mods.length === 0) {
+					mods = 0;
+				} else {
+					mods = getModBitsFunction(mods.join(''));
+				}
+
+				dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: mods });
 			} else {
 				dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 0 });
 			}
