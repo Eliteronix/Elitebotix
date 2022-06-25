@@ -839,7 +839,7 @@ module.exports = {
 				[Op.or]: [
 					{
 						matchName: {
-							[Op.like]: `%${acronym}%`,
+							[Op.like]: `%${acronym}%:`,
 						},
 						gameStartDate: {
 							[Op.gte]: weeksPrior
