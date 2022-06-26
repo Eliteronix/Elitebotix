@@ -2518,9 +2518,13 @@ function wrongClusterFunction(id) {
 	return true;
 }
 
-async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo) {
+async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, depth) {
 	const rosu = require('rosu-pp');
 	const fs = require('fs');
+
+	if (!depth) {
+		depth = 0;
+	}
 
 	//Check if the maps folder exists and create it if necessary
 	if (!fs.existsSync('./maps')) {
@@ -2575,7 +2579,26 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo) {
 		combo: parseInt(combo),
 	};
 
-	return rosu.calculate(arg)[0].pp;
+	try {
+		return rosu.calculate(arg)[0].pp;
+	} catch (e) {
+		if (depth < 3) {
+			const path = `./maps/${beatmapId}.osu`;
+
+			try {
+				await fs.unlinkSync(path);
+			} catch (err) {
+				console.error(err);
+			}
+
+			depth++;
+
+			return await getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, depth);
+		} else {
+			console.log(`error with map ${beatmapId}`, e);
+			return null;
+		}
+	}
 }
 
 async function getOsuBadgeNumberByIdFunction(osuUserId) {
