@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { pause, logDatabaseQueries, getUserDuelStarRating } = require('../utils');
+const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 
@@ -6665,6 +6665,8 @@ module.exports = {
 				twitchSyncUsers[i].twitchOsuMapSync = false;
 				await twitchSyncUsers[i].save();
 			}
+		} else if (args[0] === 'cleanUp') {
+			cleanUpDuplicateEntries(true);
 		} else {
 			msg.reply('Invalid command');
 		}

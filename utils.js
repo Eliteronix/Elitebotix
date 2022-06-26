@@ -1618,9 +1618,11 @@ module.exports = {
 
 		return outputScore;
 	},
-	async cleanUpDuplicateEntries() {
+	async cleanUpDuplicateEntries(manually) {
 		if (wrongClusterFunction()) {
-			return;
+			if (!manually) {
+				return;
+			}
 		}
 
 		const Sequelize = require('sequelize');
@@ -1666,46 +1668,43 @@ module.exports = {
 			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
 
-		if (deleted) {
-			console.log(`Cleaned up ${deleted} duplicate users`);
-		}
+		console.log(`Cleaned up ${deleted} duplicate users`);
 
-		// Remove duplicate discorduser entries
-		duplicates = true;
-		deleted = 0;
+		// // Remove duplicate discorduser entries
+		// duplicates = true;
+		// deleted = 0;
 
-		while (duplicates && deleted < 25) {
-			let result = await sequelize.query(
-				'SELECT * FROM DBDuelRatingHistory WHERE 0 < (SELECT COUNT(1) FROM DBDuelRatingHistory as a WHERE a.osuUserId = DBDuelRatingHistory.osuUserId AND a.year = DBDuelRatingHistory.year AND a.month = DBDuelRatingHistory.month AND a.date = DBDuelRatingHistory.date AND a.id <> DBDuelRatingHistory.id) ORDER BY userId ASC LIMIT 1',
-			);
+		// while (duplicates && deleted < 25) {
+		// 	console.log(1);
+		// 	let result = await sequelize.query(
+		// 		'SELECT * FROM DBDuelRatingHistory WHERE 0 < (SELECT COUNT(1) FROM DBDuelRatingHistory as a WHERE a.osuUserId = DBDuelRatingHistory.osuUserId AND a.year = DBDuelRatingHistory.year AND a.month = DBDuelRatingHistory.month AND a.date = DBDuelRatingHistory.date AND a.id <> DBDuelRatingHistory.id) ORDER BY userId ASC LIMIT 1',
+		// 	);
 
-			duplicates = result[0].length;
+		// 	duplicates = result[0].length;
 
-			if (result[0].length) {
-				await new Promise(resolve => setTimeout(resolve, 2000));
-				logDatabaseQueriesFunction(2, 'utils.js DBDuelRatingHistory cleanUpDuplicateEntries');
-				let duplicate = await DBDiscordUsers.findOne({
-					where: {
-						id: result[0][0].id
-					}
-				});
+		// 	if (result[0].length) {
+		// 		await new Promise(resolve => setTimeout(resolve, 2000));
+		// 		logDatabaseQueriesFunction(2, 'utils.js DBDuelRatingHistory cleanUpDuplicateEntries');
+		// 		let duplicate = await DBDiscordUsers.findOne({
+		// 			where: {
+		// 				id: result[0][0].id
+		// 			}
+		// 		});
 
-				console.log(duplicate.osuUserId, duplicate.date, duplicate.month, duplicate.year, duplicate.updatedAt);
+		// 		console.log(duplicate.osuUserId, duplicate.date, duplicate.month, duplicate.year, duplicate.updatedAt);
 
-				deleted++;
-				await new Promise(resolve => setTimeout(resolve, 2000));
-				await duplicate.destroy();
-			}
-			await new Promise(resolve => setTimeout(resolve, 10000));
-		}
+		// 		deleted++;
+		// 		await new Promise(resolve => setTimeout(resolve, 2000));
+		// 		await duplicate.destroy();
+		// 	}
+		// 	await new Promise(resolve => setTimeout(resolve, 10000));
+		// }
 
-		if (deleted) {
-			console.log(`Cleaned up ${deleted} duplicate duel rating histories`);
-		}
+		// console.log(`Cleaned up ${deleted} duplicate duel rating histories`);
 
 		//Only clean up multi scores during the night
 		let date = new Date();
-		if (date.getUTCHours() > 6) {
+		if (date.getUTCHours() > 6 && !manually) {
 			return;
 		}
 		duplicates = true;
@@ -1736,9 +1735,7 @@ module.exports = {
 			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
 
-		if (deleted) {
-			console.log(`Cleaned up ${deleted} duplicate scores`);
-		}
+		console.log(`Cleaned up ${deleted} duplicate scores`);
 	},
 	wrongCluster(id) {
 		return wrongClusterFunction(id);
