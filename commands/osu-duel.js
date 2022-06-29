@@ -511,7 +511,9 @@ module.exports = {
 				//Add leaving time
 				endDate.setUTCMinutes(endDate.getUTCMinutes() + 1);
 				gameLength += 60;
+				console.log('Duel Match: Get matches planned');
 				let matchesPlanned = await getMatchesPlanned(startDate, endDate);
+				console.log('Duel Match: Got matches planned');
 
 				if (matchesPlanned > 3) {
 					return await interaction.editReply('The bot cannot host another match at the moment because there will already be 4 matches running. (Maximum limit is 4)');
@@ -519,19 +521,24 @@ module.exports = {
 
 				let processQueueTask = await DBProcessQueue.create({ guildId: 'None', task: 'customMOTD', priority: 10, additions: gameLength, date: startDate });
 
+				console.log('Duel Match: Created customMOTD processqueue task');
+
 				//Set up the lobby
 				let bancho = additionalObjects[1];
 				let channel = null;
 				for (let i = 0; i < 5; i++) {
 					try {
 						try {
+							console.log('Duel Match: Connecting to Bancho');
 							await bancho.connect();
 						} catch (error) {
 							if (!error.message === 'Already connected/connecting') {
 								throw (error);
 							}
 						}
+						console.log('Duel Match: Creating match');
 						channel = await bancho.createLobby(`ETX: (${commandUser.osuName}) vs (${discordUser.osuName})`);
+						console.log('Duel Match: Created match');
 						break;
 					} catch (error) {
 						if (i === 4) {
