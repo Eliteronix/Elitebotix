@@ -6668,30 +6668,6 @@ module.exports = {
 			}
 		} else if (args[0] === 'cleanUp') {
 			cleanUpDuplicateEntries(true);
-		} else if (args[0] === 'resetWarmup') {
-			// Set a date to the 25th june 2022
-			let date = new Date();
-			date.setDate(25);
-			date.setMonth(5);
-			date.setFullYear(2022);
-			date.setHours(0);
-
-			console.log(date);
-
-			let update = await DBOsuMultiScores.update(
-				{ warmup: null },
-				{
-					where: {
-						updatedAt: {
-							[Op.gt]: date
-						},
-						warmup: {
-							[Op.not]: null
-						}
-					}
-				});
-
-			console.log(update, 'reset');
 		} else {
 			msg.reply('Invalid command');
 		}
