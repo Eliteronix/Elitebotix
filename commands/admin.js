@@ -2,7 +2,6 @@ const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DB
 const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
-const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'admin',
