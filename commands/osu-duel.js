@@ -1258,7 +1258,7 @@ module.exports = {
 				}
 				for (let i = 0; i < badgeURLs.length && i < 6; i++) {
 					const badge = await Canvas.loadImage(badgeURLs[i].replace(/\\/gm, ''));
-					ctx.drawImage(badge, 10, 60 + i * 44 + yOffset);
+					ctx.drawImage(badge, 10, 60 + i * 44 + yOffset, 86, 40);
 				}
 
 				//Get a circle for inserting the player avatar

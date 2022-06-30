@@ -544,7 +544,7 @@ async function drawBadges(input, server) {
 		}
 		for (let i = 0; i < badgeURLs.length && i < 8; i++) {
 			const badge = await Canvas.loadImage(badgeURLs[i].replace(/\\/gm, ''));
-			ctx.drawImage(badge, xOffset + (i * 88), 290);
+			ctx.drawImage(badge, xOffset + (i * 88), 290, 86, 40);
 		}
 	}
 
