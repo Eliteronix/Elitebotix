@@ -51,7 +51,7 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						if (mode === 0) {
+						if (mode === 0 && parseInt(discordUser.osuPP) > 0) {
 							osuAccounts.push({
 								userId: discordUser.userId,
 								osuUserId: discordUser.osuUserId,
@@ -60,7 +60,7 @@ module.exports = {
 								rank: discordUser.osuRank,
 								pp: discordUser.osuPP,
 							});
-						} else if (mode === 1) {
+						} else if (mode === 1 && parseInt(discordUser.taikoPP) > 0) {
 							osuAccounts.push({
 								userId: discordUser.userId,
 								osuUserId: discordUser.osuUserId,
@@ -69,7 +69,7 @@ module.exports = {
 								rank: discordUser.taikoRank,
 								pp: discordUser.taikoPP,
 							});
-						} else if (mode === 2) {
+						} else if (mode === 2 && parseInt(discordUser.catchPP) > 0) {
 							osuAccounts.push({
 								userId: discordUser.userId,
 								osuUserId: discordUser.osuUserId,
@@ -78,7 +78,7 @@ module.exports = {
 								rank: discordUser.catchRank,
 								pp: discordUser.catchPP,
 							});
-						} else if (mode === 3) {
+						} else if (mode === 3 && parseInt(discordUser.maniaPP) > 0) {
 							osuAccounts.push({
 								userId: discordUser.userId,
 								osuUserId: discordUser.osuUserId,
