@@ -54,7 +54,7 @@ module.exports = {
 				mapRank = args[i].substring(7);
 				args.splice(i, 1);
 				i--;
-			} else if (args[i] === '--all') {
+			} else if (args[i] === '--ALL') {
 				mods = 'all';
 				args.splice(i, 1);
 				i--;
