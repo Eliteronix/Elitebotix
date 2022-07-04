@@ -218,7 +218,11 @@ client.on('interactionCreate', interaction => {
 });
 
 async function executeProcessQueue(client, bancho) {
-	await executeNextProcessQueueTask(client, bancho);
+	try {
+		await executeNextProcessQueueTask(client, bancho);
+	} catch (e) {
+		console.log(e);
+	}
 
 	setTimeout(() => {
 		executeProcessQueue(client, bancho);
