@@ -88,26 +88,34 @@ module.exports = {
 
 			msg = await populateMsgFromInteraction(interaction);
 
-			let duelRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
+			try {
+				let duelRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
 
-			discordUser = {
-				osuName: user.name,
-				osuUserId: user.id,
-				osuPP: user.pp.raw,
-				osuRank: user.pp.rank,
-				osuDuelStarRating: duelRating.total,
-			};
+				discordUser = {
+					osuName: user.name,
+					osuUserId: user.id,
+					osuPP: user.pp.raw,
+					osuRank: user.pp.rank,
+					osuDuelStarRating: duelRating.total,
+				};
 
-			discordUser = await DBDiscordUsers.findOne({
-				where: {
-					osuUserId: user.id
+				discordUser = await DBDiscordUsers.findOne({
+					where: {
+						osuUserId: user.id
+					}
+				});
+
+				discordUser.osuName = user.name;
+				discordUser.osuPP = user.pp.raw;
+				discordUser.osuRank = user.pp.rank;
+				discordUser.osuDuelStarRating = duelRating.total;
+			} catch (e) {
+				if (e.message === 'No standard plays') {
+					return interaction.editReply(`\`${username.replace(/`/g, '')}\` has no standard plays.`);
+				} else {
+					console.error(e);
 				}
-			});
-
-			discordUser.osuName = user.name;
-			discordUser.osuPP = user.pp.raw;
-			discordUser.osuRank = user.pp.rank;
-			discordUser.osuDuelStarRating = duelRating.total;
+			}
 		}
 
 		let derankStats = await getDerankStats(discordUser);
