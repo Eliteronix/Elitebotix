@@ -29,12 +29,15 @@ module.exports = {
 			return msg.reply('Please use the / command `/osu-duel`');
 		}
 		if (interaction) {
-			if (interaction.options._subcommand === 'match') {
+			if (interaction.options._subcommand === '1v1match' || interaction.options._subcommand === '2v2match') {
 				await interaction.deferReply();
 				//Get the star ratings for both users
 				msg = await populateMsgFromInteraction(interaction);
 
 				let opponentId = null;
+				let teammateId = null;
+				let firstOpponentId = null;
+				let secondOpponentId = null;
 				let averageStarRating = null;
 				let onlyRanked = false;
 
@@ -51,6 +54,12 @@ module.exports = {
 						}
 					} else if (interaction.options._hoistedOptions[i].name === 'ranked' && interaction.options._hoistedOptions[i].value === true) {
 						onlyRanked = true;
+					} else if (interaction.options._hoistedOptions[i].name === 'teammate') {
+						teammateId = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'firstopponent') {
+						firstOpponentId = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'secondopponent') {
+						secondOpponentId = interaction.options._hoistedOptions[i].value;
 					}
 				}
 
@@ -61,8 +70,20 @@ module.exports = {
 					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect <username>`.');
 				}
 
-				if (commandUser.userId === opponentId) {
+				if (opponentId && commandUser.userId === opponentId || firstOpponentId && commandUser.userId === firstOpponentId || secondOpponentId && commandUser.userId === secondOpponentId) {
 					return await interaction.editReply('You cannot play against yourself.');
+				}
+
+				if (teammateId && commandUser.userId === teammateId) {
+					return await interaction.editReply('You cannot team up with yourself.');
+				}
+
+				if (teammateId && firstOpponentId && teammateId === firstOpponentId || teammateId && secondOpponentId && teammateId === secondOpponentId) {
+					return await interaction.editReply('Your teammate can\t also be an opponent.');
+				}
+
+				if (firstOpponentId === secondOpponentId) {
+					return await interaction.editReply('You have to choose two different opponents.');
 				}
 
 				let firstStarRating = 4;
