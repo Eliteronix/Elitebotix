@@ -1709,28 +1709,39 @@ module.exports = {
 		}
 		duplicates = true;
 		deleted = 0;
+		let iterations = 0;
 
-		while (duplicates && deleted < 30) {
+		while (duplicates && iterations < 30) {
 			let result = await sequelize.query(
-				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id) ORDER BY maxCombo ASC LIMIT 1',
+				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id)',
 			);
+
+			iterations++;
 
 			duplicates = result[0].length;
 
 			if (result[0].length) {
-				await new Promise(resolve => setTimeout(resolve, 2000));
-				logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries');
-				let duplicate = await DBOsuMultiScores.findOne({
-					where: {
-						id: result[0][0].id
+				let matchIds = [];
+				for (let i = 0; i < result[0].length; i++) {
+					if (matchIds.indexOf(result[0][i].matchId) === -1) {
+						matchIds.push(result[0][i].matchId);
+
+						await new Promise(resolve => setTimeout(resolve, 2000));
+
+						logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries');
+						let duplicate = await DBOsuMultiScores.findOne({
+							where: {
+								id: result[0][i].id
+							}
+						});
+
+						console.log('matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'osuUserId', duplicate.osuUserId, 'matchStartDate', duplicate.matchStartDate, 'updatedAt', duplicate.updatedAt);
+
+						deleted++;
+						await new Promise(resolve => setTimeout(resolve, 2000));
+						await duplicate.destroy();
 					}
-				});
-
-				console.log(duplicate.matchId, duplicate.gameId, duplicate.osuUserId, duplicate.matchStartDate, duplicate.updatedAt);
-
-				deleted++;
-				await new Promise(resolve => setTimeout(resolve, 2000));
-				await duplicate.destroy();
+				}
 			}
 			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
