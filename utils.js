@@ -1726,6 +1726,8 @@ module.exports = {
 					if (matchIds.indexOf(result[0][i].matchId) === -1) {
 						matchIds.push(result[0][i].matchId);
 
+						await new Promise(resolve => setTimeout(resolve, 2000));
+
 						logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries');
 						let duplicate = await DBOsuMultiScores.findOne({
 							where: {
