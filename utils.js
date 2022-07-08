@@ -1711,7 +1711,7 @@ module.exports = {
 		deleted = 0;
 		let iterations = 0;
 
-		while (duplicates && iterations < 30) {
+		while (duplicates && iterations < 10) {
 			let result = await sequelize.query(
 				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id)',
 			);
@@ -1726,8 +1726,6 @@ module.exports = {
 					if (matchIds.indexOf(result[0][i].matchId) === -1) {
 						matchIds.push(result[0][i].matchId);
 
-						await new Promise(resolve => setTimeout(resolve, 2000));
-
 						logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries');
 						let duplicate = await DBOsuMultiScores.findOne({
 							where: {
@@ -1735,9 +1733,10 @@ module.exports = {
 							}
 						});
 
-						console.log('matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'osuUserId', duplicate.osuUserId, 'matchStartDate', duplicate.matchStartDate, 'updatedAt', duplicate.updatedAt);
-
 						deleted++;
+
+						console.log('#', deleted, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'osuUserId', duplicate.osuUserId, 'matchStartDate', duplicate.matchStartDate, 'updatedAt', duplicate.updatedAt);
+
 						await new Promise(resolve => setTimeout(resolve, 2000));
 						await duplicate.destroy();
 					}

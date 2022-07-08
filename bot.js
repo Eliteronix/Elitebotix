@@ -208,7 +208,9 @@ setInterval(() => checkForBirthdays(client), 300000);
 
 setInterval(() => refreshOsuRank(), 60000);
 
-setInterval(() => cleanUpDuplicateEntries(), 3600000);
+setTimeout(() => {
+	cleanUpDuplicates();
+}, 60000);
 
 client.on('interactionCreate', interaction => {
 	if (wrongCluster(interaction.id)) {
@@ -227,4 +229,16 @@ async function executeProcessQueue(client, bancho) {
 	setTimeout(() => {
 		executeProcessQueue(client, bancho);
 	}, 650);
+}
+
+async function cleanUpDuplicates() {
+	try {
+		await cleanUpDuplicateEntries();
+	} catch (e) {
+		console.log(e);
+	}
+
+	setTimeout(() => {
+		cleanUpDuplicates();
+	}, 3600000);
 }
