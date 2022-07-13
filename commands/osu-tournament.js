@@ -32,7 +32,8 @@ module.exports = {
 			|| args.join(' ').toLowerCase() === 'o!mm private'
 			|| args.join(' ').toLowerCase() === 'o!mm team ranked'
 			|| args.join(' ').toLowerCase() === 'o!mm team private'
-			|| args.join(' ').toLowerCase() === 'etx') {
+			|| args.join(' ').toLowerCase() === 'etx'
+			|| args.join(' ').toLowerCase() === 'etx teams') {
 			if (msg.id) {
 				return msg.reply(`The acronym \`${args.join(' ').replace(/`/g, '')}\` can't be used for this command.`);
 			}
