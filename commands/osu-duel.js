@@ -955,8 +955,11 @@ module.exports = {
 							}
 						}
 						console.log('Duel Match: Creating match');
-						let TODOFromHere;
-						channel = await bancho.createLobby(`ETX: (${commandUser.osuName}) vs (${secondUser.osuName})`);
+						if (opponentId) {
+							channel = await bancho.createLobby(`ETX: (${commandUser.osuName}) vs (${secondUser.osuName})`);
+						} else {
+							channel = await bancho.createLobby(`ETX Teams: (${commandUser.osuName.substring(0, commandUser.osuName.length / 2)}${secondUser.osuName.substring(secondUser.osuName.length / 2, secondUser.osuName.length)}) vs ${thirdUser.osuName.substring(0, thirdUser.osuName.length / 2)}${fourthUser.osuName.substring(fourthUser.osuName.length / 2, fourthUser.osuName.length)}`);
+						}
 						console.log('Duel Match: Created match');
 						break;
 					} catch (error) {
@@ -980,6 +983,7 @@ module.exports = {
 				let lobbyStatus = 'Joining phase';
 				let mapIndex = 0;
 
+				let TODOFromHere;
 				await channel.sendMessage(`!mp invite #${commandUser.osuUserId}`);
 				let user = await additionalObjects[0].users.fetch(commandUser.userId);
 				await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
