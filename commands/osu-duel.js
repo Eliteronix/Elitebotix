@@ -983,7 +983,6 @@ module.exports = {
 				let lobbyStatus = 'Joining phase';
 				let mapIndex = 0;
 
-				let TODOFromHere;
 				await channel.sendMessage(`!mp invite #${commandUser.osuUserId}`);
 				let user = await additionalObjects[0].users.fetch(commandUser.userId);
 				await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
@@ -992,12 +991,29 @@ module.exports = {
 				user = await additionalObjects[0].users.fetch(secondUser.userId);
 				await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 
-				await interaction.editReply(`<@${commandUser.userId}> <@${secondUser.userId}> your match has been created. You have been invited ingame by \`Eliteronix\` and also got a DM as a backup.`);
-				let pingMessage = await interaction.channel.send(`<@${commandUser.userId}> <@${secondUser.userId}>`);
+				if (thirdUser) {
+					await channel.sendMessage(`!mp invite #${thirdUser.osuUserId}`);
+					let user = await additionalObjects[0].users.fetch(thirdUser.userId);
+					await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+
+					await channel.sendMessage(`!mp invite #${fourthUser.osuUserId}`);
+					user = await additionalObjects[0].users.fetch(fourthUser.userId);
+					await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+				}
+
+				let pingMessage = null;
+				if (opponentId) {
+					await interaction.editReply(`<@${commandUser.userId}> <@${secondUser.userId}> your match has been created. You have been invited ingame by \`Eliteronix\` and also got a DM as a backup.`);
+					pingMessage = await interaction.channel.send(`<@${commandUser.userId}> <@${secondUser.userId}>`);
+				} else {
+					await interaction.editReply(`<@${commandUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}> your match has been created. You have been invited ingame by \`Eliteronix\` and also got a DM as a backup.`);
+					pingMessage = await interaction.channel.send(`<@${commandUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}>`);
+				}
 				pingMessage.delete();
 				//Start the timer to close the lobby if not everyone joined by then
 				await channel.sendMessage('!mp timer 300');
 
+				let TODOFromHere;
 				let playerIds = [commandUser.osuUserId, secondUser.osuUserId];
 				let dbPlayers = [commandUser, secondUser];
 				let scores = [0, 0];
