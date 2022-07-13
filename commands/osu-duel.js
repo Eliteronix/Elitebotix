@@ -978,7 +978,11 @@ module.exports = {
 
 				await lobby.setPassword(password);
 				await channel.sendMessage('!mp map 975342 0');
-				await channel.sendMessage('!mp set 0 3 2');
+				if (opponentId) {
+					await channel.sendMessage('!mp set 0 3 2');
+				} else {
+					await channel.sendMessage('!mp set 0 3 4');
+				}
 
 				let lobbyStatus = 'Joining phase';
 				let mapIndex = 0;
@@ -1013,9 +1017,15 @@ module.exports = {
 				//Start the timer to close the lobby if not everyone joined by then
 				await channel.sendMessage('!mp timer 300');
 
-				let TODOFromHere;
 				let playerIds = [commandUser.osuUserId, secondUser.osuUserId];
 				let dbPlayers = [commandUser, secondUser];
+				if (thirdUser) {
+					//Push the other 2 users aswell
+					playerIds.push(thirdUser.osuUserId);
+					playerIds.push(fourthUser.osuUserId);
+					dbPlayers.push(thirdUser);
+					dbPlayers.push(fourthUser);
+				}
 				let scores = [0, 0];
 
 				//Add discord messages and also ingame invites for the timers
@@ -1087,6 +1097,7 @@ module.exports = {
 					}
 				});
 
+				let TODOFromHere;
 				lobby.on('allPlayersReady', async () => {
 					await lobby.updateSettings();
 					let playersInLobby = 0;
