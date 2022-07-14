@@ -962,7 +962,7 @@ module.exports = {
 
 				let historicalUserDuelStarRatings = [];
 
-				while (seasonEnd.getUTCFullYear() > 2017 && historical) {
+				while (seasonEnd.getUTCFullYear() > 2014 && historical) {
 					let historicalDataset = {
 						seasonEnd: `${seasonEnd.getUTCMonth() + 1}/${seasonEnd.getUTCFullYear()}`,
 						ratings: await getUserDuelStarRating({ osuUserId: osuUser.id, client: interaction.client, date: seasonEnd })
