@@ -944,6 +944,14 @@ module.exports = {
 				//Set up the lobby
 				let bancho = additionalObjects[1];
 				let channel = null;
+
+				let teamname1 = commandUser.osuName;
+				let teamname2 = secondUser.osuName;
+
+				if (thirdUser) {
+					teamname1 = `${commandUser.osuName.substring(0, commandUser.osuName.length / 2)}${secondUser.osuName.substring(secondUser.osuName.length / 2, secondUser.osuName.length)}`;
+					teamname2 = `${thirdUser.osuName.substring(0, thirdUser.osuName.length / 2)}${fourthUser.osuName.substring(fourthUser.osuName.length / 2, fourthUser.osuName.length)}`;
+				}
 				for (let i = 0; i < 5; i++) {
 					try {
 						try {
@@ -956,9 +964,9 @@ module.exports = {
 						}
 						console.log('Duel Match: Creating match');
 						if (opponentId) {
-							channel = await bancho.createLobby(`ETX: (${commandUser.osuName}) vs (${secondUser.osuName})`);
+							channel = await bancho.createLobby(`ETX: (${teamname1}) vs (${teamname2})`);
 						} else {
-							channel = await bancho.createLobby(`ETX Teams: (${commandUser.osuName.substring(0, commandUser.osuName.length / 2)}${secondUser.osuName.substring(secondUser.osuName.length / 2, secondUser.osuName.length)}) vs ${thirdUser.osuName.substring(0, thirdUser.osuName.length / 2)}${fourthUser.osuName.substring(fourthUser.osuName.length / 2, fourthUser.osuName.length)}`);
+							channel = await bancho.createLobby(`ETX Teams: (${teamname1}) vs (${teamname2})`);
 						}
 						console.log('Duel Match: Created match');
 						break;
@@ -1097,7 +1105,6 @@ module.exports = {
 					}
 				});
 
-				let TODOFromHere;
 				lobby.on('allPlayersReady', async () => {
 					await lobby.updateSettings();
 					let playersInLobby = 0;
@@ -1150,10 +1157,27 @@ module.exports = {
 
 					quicksort(results);
 
-					if (results.length === 2) {
-						await channel.sendMessage(`${results[0].player.user.username}: ${Math.round(results[0].score)} | ${results[1].player.user.username}: ${Math.round(results[1].score)}`);
-					} else if (results.length === 1) {
-						await channel.sendMessage(`${results[0].player.user.username} wins this round by default.`);
+					let scoreTeam1 = 0;
+					let scoreTeam2 = 0;
+					if (opponentId) {
+						for (let i = 0; i < results.length; i++) {
+							if (playerIds[0] == results[i].player.user.id) {
+								scoreTeam1 = + parseFloat(results[i].score);
+							} else if (playerIds[1] == results[i].player.user.id) {
+								scoreTeam2 = + parseFloat(results[i].score);
+							}
+						}
+					} else {
+						for (let i = 0; i < results.length; i++) {
+							if (playerIds[0] == results[i].player.user.id || playerIds[1] == results[i].player.user.id) {
+								scoreTeam1 = + parseFloat(results[i].score);
+							} else if (playerIds[2] == results[i].player.user.id || playerIds[3] == results[i].player.user.id) {
+								scoreTeam2 = + parseFloat(results[i].score);
+							}
+						}
+					}
+					if (results.length) {
+						await channel.sendMessage(`${teamname1}: ${scoreTeam1} | ${teamname2}: ${scoreTeam2}`);
 					} else {
 						await channel.sendMessage('!mp close');
 						// eslint-disable-next-line no-undef
@@ -1181,8 +1205,12 @@ module.exports = {
 					}
 
 					//Increase the score of the player at the top of the list
-					scores[playerIds.indexOf(results[0].player.user.id.toString())]++;
-					await channel.sendMessage(`Score: ${dbPlayers[0].osuName} | ${scores[0]} - ${scores[1]} | ${dbPlayers[1].osuName}`);
+					if (scoreTeam1 > scoreTeam2) {
+						scores[0]++;
+					} else {
+						scores[1]++;
+					}
+					await channel.sendMessage(`Score: ${teamname1} | ${scores[0]} - ${scores[1]} | ${teamname2}`);
 
 					if (mapIndex < dbMaps.length && scores[0] < 4 && scores[1] < 4) {
 						lobbyStatus = 'Waiting for start';
@@ -1223,9 +1251,9 @@ module.exports = {
 						lobbyStatus = 'Lobby finished';
 
 						if (scores[0] === 4) {
-							await channel.sendMessage(`Congratulations ${dbPlayers[0].osuName} for winning the match!`);
+							await channel.sendMessage(`Congratulations ${teamname1} for winning the match!`);
 						} else {
-							await channel.sendMessage(`Congratulations ${dbPlayers[1].osuName} for winning the match!`);
+							await channel.sendMessage(`Congratulations ${teamname2} for winning the match!`);
 						}
 						await channel.sendMessage('Thank you for playing! The lobby will automatically close in one minute.');
 						await pause(5000);
@@ -1295,6 +1323,62 @@ module.exports = {
 									const IRCUser = await bancho.getUser(secondUser.osuName);
 									for (let i = 0; i < messages.length; i++) {
 										await IRCUser.sendMessage(messages[i]);
+									}
+								}
+
+								if (thirdUser) {
+									userDuelStarRating = await getUserDuelStarRating({ osuUserId: thirdUser.osuUserId, client: interaction.client });
+									messages = ['Your SR has been updated!'];
+									if (Math.round(thirdUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
+										messages.push(`SR: ${Math.round(thirdUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
+									}
+									if (Math.round(thirdUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
+										messages.push(`NM: ${Math.round(thirdUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
+									}
+									if (Math.round(thirdUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
+										messages.push(`HD: ${Math.round(thirdUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
+									}
+									if (Math.round(thirdUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
+										messages.push(`HR: ${Math.round(thirdUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
+									}
+									if (Math.round(thirdUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
+										messages.push(`DT: ${Math.round(thirdUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
+									}
+									if (Math.round(thirdUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
+										messages.push(`FM: ${Math.round(thirdUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
+									}
+									if (messages.length > 1) {
+										const IRCUser = await bancho.getUser(thirdUser.osuName);
+										for (let i = 0; i < messages.length; i++) {
+											await IRCUser.sendMessage(messages[i]);
+										}
+									}
+
+									userDuelStarRating = await getUserDuelStarRating({ osuUserId: fourthUser.osuUserId, client: interaction.client });
+									messages = ['Your SR has been updated!'];
+									if (Math.round(fourthUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
+										messages.push(`SR: ${Math.round(fourthUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
+									}
+									if (Math.round(fourthUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
+										messages.push(`NM: ${Math.round(fourthUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
+									}
+									if (Math.round(fourthUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
+										messages.push(`HD: ${Math.round(fourthUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
+									}
+									if (Math.round(fourthUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
+										messages.push(`HR: ${Math.round(fourthUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
+									}
+									if (Math.round(fourthUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
+										messages.push(`DT: ${Math.round(fourthUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
+									}
+									if (Math.round(fourthUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
+										messages.push(`FM: ${Math.round(fourthUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
+									}
+									if (messages.length > 1) {
+										const IRCUser = await bancho.getUser(fourthUser.osuName);
+										for (let i = 0; i < messages.length; i++) {
+											await IRCUser.sendMessage(messages[i]);
+										}
 									}
 								}
 							})
