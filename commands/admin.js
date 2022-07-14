@@ -756,149 +756,149 @@ module.exports = {
 			// 	},
 			// });
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'osu-duel',
-					description: 'Lets you play matches which are being reffed by the bot',
-					options: [
-						{
-							'name': '1v1match',
-							'description': 'Lets you instantly create a Bo7 match against an opponent',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'opponent',
-									'description': 'The opponent you want to play against',
-									'type': 6, // 6 is type USER
-									'required': true
-								},
-								{
-									'name': 'starrating',
-									'description': 'The star rating you wanna play on. For example: 6.25',
-									'type': 10, // 10 is type NUMBER
-								},
-								{
-									'name': 'ranked',
-									'description': 'Should only ranked maps be played?',
-									'type': 5, // 5 is type BOOLEAN
-								},
-							]
-						},
-						{
-							'name': '2v2match',
-							'description': 'Lets you instantly create a Bo7 match against an opponent',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'teammate',
-									'description': 'The opponent you want to play against',
-									'type': 6, // 6 is type USER
-									'required': true
-								},
-								{
-									'name': 'firstopponent',
-									'description': 'The opponent you want to play against',
-									'type': 6, // 6 is type USER
-									'required': true
-								},
-								{
-									'name': 'secondopponent',
-									'description': 'The opponent you want to play against',
-									'type': 6, // 6 is type USER
-									'required': true
-								},
-								{
-									'name': 'starrating',
-									'description': 'The star rating you wanna play on. For example: 6.25',
-									'type': 10, // 10 is type NUMBER
-								},
-								{
-									'name': 'ranked',
-									'description': 'Should only ranked maps be played?',
-									'type': 5, // 5 is type BOOLEAN
-								},
-							]
-						},
-						{
-							'name': 'ranking',
-							'description': 'Get shown what a users ranking is',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'username',
-									'description': 'The username, id or link of the player to get the ranking for',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'historical',
-									'description': 'The amount of historical data to be shown.',
-									'type': 3,
-									'required': false,
-									'choices': [
-										{
-											'name': 'Only the current data',
-											'value': '0'
-										},
-										{
-											'name': 'Including last year',
-											'value': '1'
-										},
-										{
-											'name': 'All historical data',
-											'value': '99'
-										}
-									]
-								}
-							]
-						},
-						{
-							'name': 'rating-leaderboard',
-							'description': 'Get a leaderboard of the duel star ratings',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'page',
-									'description': 'The page of the leaderboard to display',
-									'type': 4,
-									'required': false
-								},
-							]
-						},
-						{
-							'name': 'data',
-							'description': 'Get shown what a users ranking is based on',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'username',
-									'description': 'The username, id or link of the player to get the ranking for',
-									'type': 3,
-									'required': false
-								},
-							]
-						},
-						{
-							'name': 'rating-spread',
-							'description': 'Get shown how the ranks are spread across all connected users',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'rating-updates',
-							'description': 'Get notified when your rating changes',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'enabled',
-									'description': 'Change if updates should be sent or not',
-									'type': 5,
-									'required': true
-								},
-							]
-						},
-					]
-				},
-			});
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'osu-duel',
+			// 		description: 'Lets you play matches which are being reffed by the bot',
+			// 		options: [
+			// 			{
+			// 				'name': '1v1match',
+			// 				'description': 'Lets you instantly create a Bo7 match against an opponent',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'opponent',
+			// 						'description': 'The opponent you want to play against',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'starrating',
+			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'type': 10, // 10 is type NUMBER
+			// 					},
+			// 					{
+			// 						'name': 'ranked',
+			// 						'description': 'Should only ranked maps be played?',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': '2v2match',
+			// 				'description': 'Lets you instantly create a Bo7 match against an opponent',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'teammate',
+			// 						'description': 'The opponent you want to play against',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'firstopponent',
+			// 						'description': 'The opponent you want to play against',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondopponent',
+			// 						'description': 'The opponent you want to play against',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'starrating',
+			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'type': 10, // 10 is type NUMBER
+			// 					},
+			// 					{
+			// 						'name': 'ranked',
+			// 						'description': 'Should only ranked maps be played?',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'ranking',
+			// 				'description': 'Get shown what a users ranking is',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'The username, id or link of the player to get the ranking for',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'historical',
+			// 						'description': 'The amount of historical data to be shown.',
+			// 						'type': 3,
+			// 						'required': false,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Only the current data',
+			// 								'value': '0'
+			// 							},
+			// 							{
+			// 								'name': 'Including last year',
+			// 								'value': '1'
+			// 							},
+			// 							{
+			// 								'name': 'All historical data',
+			// 								'value': '99'
+			// 							}
+			// 						]
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'rating-leaderboard',
+			// 				'description': 'Get a leaderboard of the duel star ratings',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'page',
+			// 						'description': 'The page of the leaderboard to display',
+			// 						'type': 4,
+			// 						'required': false
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'data',
+			// 				'description': 'Get shown what a users ranking is based on',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'The username, id or link of the player to get the ranking for',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'rating-spread',
+			// 				'description': 'Get shown how the ranks are spread across all connected users',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'rating-updates',
+			// 				'description': 'Get notified when your rating changes',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'enabled',
+			// 						'description': 'Change if updates should be sent or not',
+			// 						'type': 5,
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 		]
+			// 	},
+			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -4094,12 +4094,47 @@ module.exports = {
 					description: 'Lets you play matches which are being reffed by the bot',
 					options: [
 						{
-							'name': 'match',
+							'name': '1v1match',
 							'description': 'Lets you instantly create a Bo7 match against an opponent',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'opponent',
+									'description': 'The opponent you want to play against',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'starrating',
+									'description': 'The star rating you wanna play on. For example: 6.25',
+									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'ranked',
+									'description': 'Should only ranked maps be played?',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
+						},
+						{
+							'name': '2v2match',
+							'description': 'Lets you instantly create a Bo7 match against an opponent',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'teammate',
+									'description': 'The opponent you want to play against',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'firstopponent',
+									'description': 'The opponent you want to play against',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondopponent',
 									'description': 'The opponent you want to play against',
 									'type': 6, // 6 is type USER
 									'required': true
