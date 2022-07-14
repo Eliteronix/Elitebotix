@@ -2360,6 +2360,10 @@ module.exports = {
 									'name': 'Ripple',
 									'value': 'r',
 								},
+								{
+									'name': 'Tournaments',
+									'value': 'tournaments',
+								},
 							]
 						},
 						{
@@ -5621,6 +5625,10 @@ module.exports = {
 								{
 									'name': 'Ripple',
 									'value': 'r',
+								},
+								{
+									'name': 'Tournaments',
+									'value': 'tournaments',
 								},
 							]
 						},

@@ -1,10 +1,11 @@
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
 const { getGuildPrefix, roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
+const sequelize = require('sequelize');
 
 module.exports = {
 	name: 'osu-mostplayed',
@@ -101,20 +102,20 @@ module.exports = {
 };
 
 async function getMostPlayed(msg, username, server, noLinkedAccount, limit) {
-	if (server === 'bancho') {
+	if (server === 'bancho' || server === 'tournaments') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			notFoundAsError: true,
 			completeScores: false,
 			parseNumeric: false,
 		});
-    
+
 		osuApi.getUser({ u: username })
 			.then(async (user) => {
 
 				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
-				const canvasWidth = 1000;	
+				const canvasWidth = 1000;
 				const canvasHeight = 83 + limit * 41.66666;
 
 				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
@@ -155,8 +156,8 @@ async function getMostPlayed(msg, username, server, noLinkedAccount, limit) {
 				await sentMessage.react('📈');
 
 				processingMessage.delete();
-            
-			})	
+
+			})
 			.catch(err => {
 				if (err.message === 'Not found') {
 					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use "_" instead of spaces; Use --r for ripple; --s/--t/--c/--m for modes; --n / --new / --recent for recent scores; --25 for top 25...)`);
@@ -164,7 +165,7 @@ async function getMostPlayed(msg, username, server, noLinkedAccount, limit) {
 					console.log(err);
 				}
 			});
-	}  else if (server === 'ripple') {
+	} else if (server === 'ripple') {
 		let processingMessage = await msg.channel.send(`[\`${username.replace(/`/g, '')}\`] Processing...`);
 		fetch(`https://www.ripple.moe/api/get_user?u=${username}`)
 			.then(async (response) => {
@@ -263,7 +264,7 @@ async function drawMostPlayed(input, server, limit) {
 		}
 	} else if (server === 'ripple') {
 		link = await fetch(`http://ripple.moe/api/v1/users/most_played?name=${user.name}&l=${limit}`).then(res => res.json());
-		
+
 		for (let i = 0; i < link.beatmaps.length; i++) {
 			let beatmaps = [];
 			let beatmap = await getOsuBeatmap({ beatmapId: link.beatmaps[i].beatmap.beatmap_id, modbits: 0 });
@@ -308,6 +309,67 @@ async function drawMostPlayed(input, server, limit) {
 				ctx.textAlign = 'left';
 				ctx.fillText(`Mapped by ${beatmaps[j].mapper}`, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 			}
+		}
+	} else if (server === 'tournaments') {
+		let mostplayed = await DBOsuMultiScores.findAll({
+			where: { osuUserId: user.id },
+			group: ['beatmapId'],
+			attributes: ['beatmapId', [sequelize.fn('COUNT', 'beatmapId'), 'playcount']],
+			order: [[sequelize.fn('COUNT', 'beatmapId'), 'DESC']],
+			limit: limit * 2
+		});
+
+		for (let i = 0; i < mostplayed.length && i < showLimit; i++) {
+			console.log(i, mostplayed.length);
+
+			let beatmap = await getOsuBeatmap({ beatmapId: mostplayed[i].beatmapId, modbits: 0 });
+
+			if (!beatmap) {
+				mostplayed.splice(i, 1);
+				i--;
+				continue;
+			}
+
+			// Draw the rectangle
+			roundedRect(ctx, canvas.width / 13, 500 / 8 + (500 / 12) * i, canvas.width - canvas.width / 10, 500 / 13, 500 / 70, '70', '57', '63', 0.75);
+
+			try {
+				// draw another rectangle for the image
+				roundedRect(ctx, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38, 500 / 70, '70', '57', '63', 0.75);
+				ctx.save();
+				ctx.clip();
+				let beatmapImage = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapsetId}/covers/list@2x.jpg`);
+				ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
+				ctx.restore();
+				ctx.font = 'bold 18px comfortaa, sans-serif';
+				ctx.fillStyle = '#FF66AB';
+				ctx.textAlign = 'right';
+			} catch (e) {
+				console.log(e, beatmap);
+			}
+
+			// Draw title and difficutly per beatmap
+			let beatmapTitle = `${beatmap.title} [${beatmap.difficulty}] by ${beatmap.artist}`;
+			const maxSize = canvas.width / 250 * 19;
+			if (beatmapTitle.length > maxSize) {
+				beatmapTitle = beatmapTitle.substring(0, maxSize - 3) + '...';
+			}
+			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.fillStyle = '#FFFFFF';
+			ctx.textAlign = 'left';
+			ctx.fillText(beatmapTitle, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2);
+
+			// Draw playcount per beatmap
+			ctx.font = 'bold 18px comfortaa, sans-serif';
+			ctx.fillStyle = '#FFCC22';
+			ctx.textAlign = 'right';
+			ctx.fillText('➤ ' + mostplayed[i].dataValues.playcount, (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
+
+			//Write mapper per map
+			ctx.font = 'bold 10px comfortaa, sans-serif';
+			ctx.fillStyle = '#98838C';
+			ctx.textAlign = 'left';
+			ctx.fillText(`Mapped by ${beatmap.mapper}`, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 		}
 	}
 
