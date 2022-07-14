@@ -385,7 +385,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for skills information
 	if (reaction._emoji.name === '📈') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-top') || reaction.message.attachments.first().name.startsWith('osu-league-rankings')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-top') || reaction.message.attachments.first().name.startsWith('osu-league-ratings')) {
 			//get the osuUserId used
 			let osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 			if (reaction.message.attachments.first().name.startsWith('osu-top')) {
@@ -430,9 +430,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for profile information
 	if (reaction._emoji.name === '👤') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-score') || reaction.message.attachments.first().name.startsWith('osu-recent') || reaction.message.attachments.first().name.startsWith('osu-league-rankings') || reaction.message.attachments.first().name.startsWith('osu-topPlayStats')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-score') || reaction.message.attachments.first().name.startsWith('osu-recent') || reaction.message.attachments.first().name.startsWith('osu-league-ratings') || reaction.message.attachments.first().name.startsWith('osu-topPlayStats')) {
 			//get the osuUserId used
-			const osuUserId = reaction.message.attachments.first().name.replace('osu-recent-', '').replace('osu-score-', '').replace('osu-league-rankings-', '').replace('osu-topPlayStats-', '').replace(/-.+.png/gm, '').replace('.png', '');
+			const osuUserId = reaction.message.attachments.first().name.replace('osu-recent-', '').replace('osu-score-', '').replace('osu-league-ratings-', '').replace('osu-topPlayStats-', '').replace(/-.+.png/gm, '').replace('.png', '');
 
 			//Setup artificial arguments
 			let args = [osuUserId];
@@ -519,7 +519,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for schedule information
 	if (reaction._emoji.name === '📊') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-rankings')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-ratings')) {
 			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 
@@ -561,7 +561,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for schedule information
 	if (reaction._emoji.name === '🥇') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-rankings')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-ratings')) {
 			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 
@@ -603,7 +603,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for matchup information
 	if (reaction._emoji.name === '🆚') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-rankings')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-ratings')) {
 			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 
@@ -687,7 +687,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 		}
 	}
 
-	//Check if reacted for osu-duel-ranking information
+	//Check if reacted for osu-duel-rating information
 	if (reaction._emoji.id === '951396806653255700') {
 		//Check if it is a profile
 		if (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-topPlayStats')) {
@@ -715,7 +715,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				guild: reaction.message.guild,
 				guildId: guildId,
 				options: {
-					_subcommand: 'ranking',
+					_subcommand: 'rating',
 					_hoistedOptions: [{ name: 'username', value: args[0] }]
 				},
 				user: user,
