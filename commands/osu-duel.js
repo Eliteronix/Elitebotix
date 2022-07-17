@@ -82,7 +82,7 @@ module.exports = {
 					return await interaction.editReply('Your teammate can\t also be an opponent.');
 				}
 
-				if (firstOpponentId === secondOpponentId) {
+				if (firstOpponentId && secondOpponentId && firstOpponentId === secondOpponentId) {
 					return await interaction.editReply('You have to choose two different opponents.');
 				}
 
@@ -233,23 +233,48 @@ module.exports = {
 					await sentMessage.react('✅');
 					await sentMessage.react('❌');
 					pingMessage.delete();
-					//Await for all 3 users to react with a checkmark
-					const acceptedFilter = (reaction, user) => {
-						return ['✅'].includes(reaction.emoji.name) && [secondUser.userId, thirdUser.userId, fourthUser.userId].includes(user.id);
-					};
 
-					let responded = await sentMessage.awaitReactions({ acceptedFilter, max: 3, time: 120000, errors: ['time'] })
-						.then(() => {
-							return true;
-						})
-						.catch(() => {
-							return false;
-						});
+					let responded = false;
+					let accepted = [];
+					let declined = false;
+					let decliner = null;
+
+					const collector = sentMessage.createReactionCollector({ time: 120000 });
+
+					collector.on('collect', (reaction, user) => {
+						if (reaction.emoji.name === '✅' && [secondUser.userId, thirdUser.userId, fourthUser.userId].includes(user.id)) {
+							if (!accepted.includes(user.id)) {
+								accepted.push(user.id);
+
+								if (accepted.length === 3) {
+									collector.stop();
+								}
+							}
+						} else if (reaction.emoji.name === '❌' && [secondUser.userId, thirdUser.userId, fourthUser.userId].includes(user.id)) {
+							decliner = user.id;
+							collector.stop();
+						}
+					});
+
+					collector.on('end', () => {
+						if (accepted.length < 3) {
+							declined = true;
+						}
+						responded = true;
+					});
+
+					while (!responded) {
+						await pause(1000);
+					}
 
 					sentMessage.reactions.removeAll().catch(() => { });
 
-					if (!responded) {
-						return await interaction.editReply(`<@${secondUser.userId}>, <@${thirdUser.userId}>, and <@${fourthUser.userId}> declined or didn't respond in time.`);
+					if (declined) {
+						if (decliner) {
+							return await interaction.editReply(`<@${decliner}> declined.`);
+						} else {
+							return await interaction.editReply('Someone didn\'t respond in time.');
+						}
 					}
 				}
 
@@ -1170,14 +1195,14 @@ module.exports = {
 					} else {
 						for (let i = 0; i < results.length; i++) {
 							if (playerIds[0] == results[i].player.user.id || playerIds[1] == results[i].player.user.id) {
-								scoreTeam1 = + parseFloat(results[i].score);
+								scoreTeam1 = scoreTeam1 + parseFloat(results[i].score);
 							} else if (playerIds[2] == results[i].player.user.id || playerIds[3] == results[i].player.user.id) {
-								scoreTeam2 = + parseFloat(results[i].score);
+								scoreTeam2 = scoreTeam2 + parseFloat(results[i].score);
 							}
 						}
 					}
 					if (results.length) {
-						await channel.sendMessage(`${teamname1}: ${scoreTeam1} | ${teamname2}: ${scoreTeam2}`);
+						await channel.sendMessage(`${teamname1}: ${scoreTeam1} | ${teamname2}: ${scoreTeam2} | Difference: ${Math.abs(scoreTeam1 - scoreTeam2)}`);
 					} else {
 						await channel.sendMessage('!mp close');
 						// eslint-disable-next-line no-undef
