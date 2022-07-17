@@ -762,12 +762,47 @@ module.exports = {
 			// 		description: 'Lets you play matches which are being reffed by the bot',
 			// 		options: [
 			// 			{
-			// 				'name': 'match',
+			// 				'name': '1v1match',
 			// 				'description': 'Lets you instantly create a Bo7 match against an opponent',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'opponent',
+			// 						'description': 'The opponent you want to play against',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'starrating',
+			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'type': 10, // 10 is type NUMBER
+			// 					},
+			// 					{
+			// 						'name': 'ranked',
+			// 						'description': 'Should only ranked maps be played?',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': '2v2match',
+			// 				'description': 'Lets you instantly create a Bo7 match against an opponent',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'teammate',
+			// 						'description': 'The opponent you want to play against',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'firstopponent',
+			// 						'description': 'The opponent you want to play against',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondopponent',
 			// 						'description': 'The opponent you want to play against',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
@@ -4059,12 +4094,47 @@ module.exports = {
 					description: 'Lets you play matches which are being reffed by the bot',
 					options: [
 						{
-							'name': 'match',
+							'name': '1v1match',
 							'description': 'Lets you instantly create a Bo7 match against an opponent',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'opponent',
+									'description': 'The opponent you want to play against',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'starrating',
+									'description': 'The star rating you wanna play on. For example: 6.25',
+									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'ranked',
+									'description': 'Should only ranked maps be played?',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
+						},
+						{
+							'name': '2v2match',
+							'description': 'Lets you instantly create a Bo7 match against an opponent',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'teammate',
+									'description': 'The opponent you want to play against',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'firstopponent',
+									'description': 'The opponent you want to play against',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondopponent',
 									'description': 'The opponent you want to play against',
 									'type': 6, // 6 is type USER
 									'required': true
