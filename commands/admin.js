@@ -762,7 +762,7 @@ module.exports = {
 			// 		description: 'Lets you play matches which are being reffed by the bot',
 			// 		options: [
 			// 			{
-			// 				'name': '1v1match',
+			// 				'name': 'match1v1',
 			// 				'description': 'Lets you instantly create a Bo7 match against an opponent',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
@@ -785,7 +785,7 @@ module.exports = {
 			// 				]
 			// 			},
 			// 			{
-			// 				'name': '2v2match',
+			// 				'name': 'match2v2',
 			// 				'description': 'Lets you instantly create a Bo7 match against an opponent',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
@@ -4094,7 +4094,7 @@ module.exports = {
 					description: 'Lets you play matches which are being reffed by the bot',
 					options: [
 						{
-							'name': '1v1match',
+							'name': 'match1v1',
 							'description': 'Lets you instantly create a Bo7 match against an opponent',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
@@ -4117,7 +4117,7 @@ module.exports = {
 							]
 						},
 						{
-							'name': '2v2match',
+							'name': 'match2v2',
 							'description': 'Lets you instantly create a Bo7 match against an opponent',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [

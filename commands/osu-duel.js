@@ -29,7 +29,7 @@ module.exports = {
 			return msg.reply('Please use the / command `/osu-duel`');
 		}
 		if (interaction) {
-			if (interaction.options._subcommand === '1v1match' || interaction.options._subcommand === '2v2match') {
+			if (interaction.options._subcommand === 'match1v1' || interaction.options._subcommand === 'match2v2') {
 				await interaction.deferReply();
 				//Get the star ratings for both users
 				msg = await populateMsgFromInteraction(interaction);
