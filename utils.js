@@ -3497,7 +3497,7 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 	let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
 
 	//Matches without warmups
-	if (!tourneyMatch || gameIndex > 1 || acronym === 'etx' || acronym === 'o!mm ranked' || acronym === 'o!mm private' || acronym === 'o!mm team ranked' || acronym === 'o!mm team private' || acronym === 'motd') {
+	if (!tourneyMatch || gameIndex > 1 || acronym === 'etx' || acronym === 'etx teams' || acronym === 'o!mm ranked' || acronym === 'o!mm private' || acronym === 'o!mm team ranked' || acronym === 'o!mm team private' || acronym === 'motd') {
 		// console.log('Not a warmup due to naming / map #');
 		return { warmup: false, byAmount: false };
 	}
