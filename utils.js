@@ -1721,10 +1721,10 @@ module.exports = {
 			duplicates = result[0].length;
 
 			if (result[0].length) {
-				let matchIds = [];
+				let gameIds = [];
 				for (let i = 0; i < result[0].length; i++) {
-					if (matchIds.indexOf(result[0][i].matchId) === -1) {
-						matchIds.push(result[0][i].matchId);
+					if (gameIds.indexOf(`${result[0][i].gameId}-${result[0][i].osuUserId}`) === -1) {
+						gameIds.push(`${result[0][i].gameId}-${result[0][i].osuUserId}`);
 
 						await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -1737,7 +1737,7 @@ module.exports = {
 
 						deleted++;
 
-						console.log('#', deleted, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'osuUserId', duplicate.osuUserId, 'matchStartDate', duplicate.matchStartDate, 'updatedAt', duplicate.updatedAt);
+						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'osuUserId', duplicate.osuUserId, 'matchStartDate', duplicate.matchStartDate, 'updatedAt', duplicate.updatedAt);
 
 						await new Promise(resolve => setTimeout(resolve, 2000));
 						await duplicate.destroy();
