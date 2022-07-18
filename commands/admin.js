@@ -820,13 +820,13 @@ module.exports = {
 			// 				]
 			// 			},
 			// 			{
-			// 				'name': 'ranking',
-			// 				'description': 'Get shown what a users ranking is',
+			// 				'name': 'rating',
+			// 				'description': 'Get shown what a users rating is',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'username',
-			// 						'description': 'The username, id or link of the player to get the ranking for',
+			// 						'description': 'The username, id or link of the player to get the rating for',
 			// 						'type': 3,
 			// 						'required': false
 			// 					},
@@ -867,12 +867,12 @@ module.exports = {
 			// 			},
 			// 			{
 			// 				'name': 'data',
-			// 				'description': 'Get shown what a users ranking is based on',
+			// 				'description': 'Get shown what a users rating is based on',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'username',
-			// 						'description': 'The username, id or link of the player to get the ranking for',
+			// 						'description': 'The username, id or link of the player to get the rating for',
 			// 						'type': 3,
 			// 						'required': false
 			// 					},
@@ -4152,13 +4152,13 @@ module.exports = {
 							]
 						},
 						{
-							'name': 'ranking',
-							'description': 'Get shown what a users ranking is',
+							'name': 'rating',
+							'description': 'Get shown what a users rating is',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'username',
-									'description': 'The username, id or link of the player to get the ranking for',
+									'description': 'The username, id or link of the player to get the rating for',
 									'type': 3,
 									'required': false
 								},
@@ -4199,12 +4199,12 @@ module.exports = {
 						},
 						{
 							'name': 'data',
-							'description': 'Get shown what a users ranking is based on',
+							'description': 'Get shown what a users rating is based on',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'username',
-									'description': 'The username, id or link of the player to get the ranking for',
+									'description': 'The username, id or link of the player to get the rating for',
 									'type': 3,
 									'required': false
 								},

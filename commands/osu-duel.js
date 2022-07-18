@@ -1422,12 +1422,12 @@ module.exports = {
 						return await channel.leave();
 					}
 				});
-			} else if (interaction.options._subcommand === 'ranking') {
+			} else if (interaction.options._subcommand === 'rating') {
 				let processingMessage = null;
 				if (interaction.id) {
 					await interaction.deferReply();
 				} else {
-					processingMessage = await interaction.channel.send('Processing league rankings...');
+					processingMessage = await interaction.channel.send('Processing league ratings...');
 				}
 
 				let osuUser = {
@@ -1453,7 +1453,7 @@ module.exports = {
 				if (username) {
 					//Get the user by the argument given
 					if (username.startsWith('<@') && username.endsWith('>')) {
-						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers ranking');
+						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: { userId: username.replace('<@', '').replace('>', '').replace('!', '') },
 						});
@@ -1570,7 +1570,7 @@ module.exports = {
 				ctx.fillStyle = '#ffffff';
 				ctx.textAlign = 'center';
 				ctx.font = 'bold 30px comfortaa, sans-serif';
-				ctx.fillText(`League Rankings for ${osuUser.name}`, 350, 40);
+				ctx.fillText(`League Ratings for ${osuUser.name}`, 350, 40);
 
 				//Set Duel Rating and League Rank
 				ctx.fillStyle = '#ffffff';
@@ -1836,15 +1836,15 @@ module.exports = {
 				}
 
 				//Create as an attachment
-				const leagueRankings = new Discord.MessageAttachment(canvas.toBuffer(), `osu-league-rankings-${osuUser.id}.png`);
+				const leagueRatings = new Discord.MessageAttachment(canvas.toBuffer(), `osu-league-ratings-${osuUser.id}.png`);
 
 				let sentMessage = null;
 
 				if (interaction.id) {
-					sentMessage = await interaction.editReply({ content: 'The data is based on matches played using `/osu-duel match` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRankings] });
+					sentMessage = await interaction.editReply({ content: 'The data is based on matches played using `/osu-duel match` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
 				} else {
 					processingMessage.delete();
-					sentMessage = await interaction.channel.send({ content: 'The data is based on matches played using `/osu-duel match` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRankings] });
+					sentMessage = await interaction.channel.send({ content: 'The data is based on matches played using `/osu-duel match` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
 				}
 				await sentMessage.react('👤');
 				await sentMessage.react('🥇');
