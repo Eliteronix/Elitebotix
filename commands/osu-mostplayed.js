@@ -5,7 +5,6 @@ const Canvas = require('canvas');
 const { getGuildPrefix, roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
-const sequelize = require('sequelize');
 
 module.exports = {
 	name: 'osu-mostplayed',
@@ -146,11 +145,16 @@ async function getMostPlayed(msg, username, server, noLinkedAccount, limit) {
 				let guildPrefix = await getGuildPrefix(msg);
 
 				//Send attachment
+				let duplicateMessage = '';
+				if (server === 'tournaments') {
+					duplicateMessage = '\n**Some users may have duplicate scores. These are currently getting deleted and you should be able to watch them go down with each day until they hit the correct amount.**';
+				}
+
 				let sentMessage;
 				if (noLinkedAccount) {
-					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>${duplicateMessage}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 				} else {
-					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>${duplicateMessage}`, files: [attachment] });
 				}
 				await sentMessage.react('👤');
 				await sentMessage.react('📈');
@@ -311,17 +315,41 @@ async function drawMostPlayed(input, server, limit) {
 			}
 		}
 	} else if (server === 'tournaments') {
-		let mostplayed = await DBOsuMultiScores.findAll({
+		// Keeping this here because its the cooler way to do it but the filtering doesn't work properly
+		// let mostplayed = await DBOsuMultiScores.findAll({
+		// 	where: { osuUserId: user.id },
+		// 	group: ['beatmapId'],
+		// 	attributes: ['beatmapId', [sequelize.fn('COUNT', 'beatmapId'), 'playcount']],
+		// 	order: [[sequelize.fn('COUNT', 'beatmapId'), 'DESC']],
+		// 	limit: limit * 2
+		// });
+
+		let multiScores = await DBOsuMultiScores.findAll({
 			where: { osuUserId: user.id },
-			group: ['beatmapId'],
-			attributes: ['beatmapId', [sequelize.fn('COUNT', 'beatmapId'), 'playcount']],
-			order: [[sequelize.fn('COUNT', 'beatmapId'), 'DESC']],
-			limit: limit * 2
 		});
 
-		for (let i = 0; i < mostplayed.length && i < showLimit; i++) {
-			console.log(i, mostplayed.length);
+		let mostplayed = [];
+		let beatmapIds = [];
 
+		for (let i = 0; i < multiScores.length; i++) {
+			if (parseInt(multiScores[i].score) < 10000 || !multiScores[i].tourneyMatch) {
+				continue;
+			}
+
+			if (!beatmapIds.includes(multiScores[i].beatmapId)) {
+				beatmapIds.push(multiScores[i].beatmapId);
+				mostplayed.push({
+					beatmapId: multiScores[i].beatmapId,
+					playcount: 1
+				});
+			} else {
+				mostplayed[beatmapIds.indexOf(multiScores[i].beatmapId)].playcount++;
+			}
+		}
+
+		mostplayed.sort((a, b) => b.playcount - a.playcount);
+
+		for (let i = 0; i < mostplayed.length && i < showLimit; i++) {
 			let beatmap = await getOsuBeatmap({ beatmapId: mostplayed[i].beatmapId, modbits: 0 });
 
 			if (!beatmap) {
@@ -333,20 +361,20 @@ async function drawMostPlayed(input, server, limit) {
 			// Draw the rectangle
 			roundedRect(ctx, canvas.width / 13, 500 / 8 + (500 / 12) * i, canvas.width - canvas.width / 10, 500 / 13, 500 / 70, '70', '57', '63', 0.75);
 
+			ctx.save();
 			try {
 				// draw another rectangle for the image
 				roundedRect(ctx, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38, 500 / 70, '70', '57', '63', 0.75);
-				ctx.save();
 				ctx.clip();
 				let beatmapImage = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapsetId}/covers/list@2x.jpg`);
 				ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
-				ctx.restore();
 				ctx.font = 'bold 18px comfortaa, sans-serif';
 				ctx.fillStyle = '#FF66AB';
 				ctx.textAlign = 'right';
 			} catch (e) {
-				console.log(e, beatmap);
+				//Nothing
 			}
+			ctx.restore();
 
 			// Draw title and difficutly per beatmap
 			let beatmapTitle = `${beatmap.title} [${beatmap.difficulty}] by ${beatmap.artist}`;
@@ -363,7 +391,7 @@ async function drawMostPlayed(input, server, limit) {
 			ctx.font = 'bold 18px comfortaa, sans-serif';
 			ctx.fillStyle = '#FFCC22';
 			ctx.textAlign = 'right';
-			ctx.fillText('➤ ' + mostplayed[i].dataValues.playcount, (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
+			ctx.fillText('➤ ' + mostplayed[i].playcount, (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
 
 			//Write mapper per map
 			ctx.font = 'bold 10px comfortaa, sans-serif';
