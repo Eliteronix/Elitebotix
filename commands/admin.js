@@ -786,7 +786,7 @@ module.exports = {
 			// 			},
 			// 			{
 			// 				'name': 'match2v2',
-			// 				'description': 'Lets you instantly create a Bo7 match against an opponent',
+			// 				'description': 'Lets you instantly create a Bo7 match with 3 other players',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
@@ -4118,7 +4118,7 @@ module.exports = {
 						},
 						{
 							'name': 'match2v2',
-							'description': 'Lets you instantly create a Bo7 match against an opponent',
+							'description': 'Lets you instantly create a Bo7 match with 3 other players',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
