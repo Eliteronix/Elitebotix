@@ -9,11 +9,14 @@ const { DBElitiriCupSignUp, DBTickets } = require('./dbObjects');
 const { developers, currentElitiriCup } = require('./config.json');
 
 module.exports = async function (msg, bancho, twitchClient) {
-	if (wrongCluster(msg.id) && !msg.content.includes('twitch-mapsync')) {
-		return;
-	} else if (wrongCluster() && msg.content.includes('twitch-mapsync')) {
-		return;
+	if (!(developers.includes(msg.author.id) && msg.content.includes('disconnectBancho'))) {
+		if (wrongCluster(msg.id) && !msg.content.includes('twitch-mapsync')) {
+			return;
+		} else if (wrongCluster() && msg.content.includes('twitch-mapsync')) {
+			return;
+		}
 	}
+
 	//check if the message wasn't sent by the bot itself or another bot
 	if (!(msg.author.bot) || msg.channel.id === '892873577479692358') {
 		//Create a collection for the commands
