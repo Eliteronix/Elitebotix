@@ -6867,6 +6867,16 @@ module.exports = {
 			}
 		} else if (args[0] === 'cleanUp') {
 			cleanUpDuplicateEntries(true);
+		} else if (args[0] === 'disconnectBancho') {
+			try {
+				await additionalObjects[1].disconnect();
+				// eslint-disable-next-line no-undef
+				return msg.reply(`Worker ${process.env.pm_id} disconnected`);
+			} catch (e) {
+				console.log(e);
+				// eslint-disable-next-line no-undef
+				return msg.reply(`Worker ${process.env.pm_id} errored disconnecting`);
+			}
 		} else {
 			msg.reply('Invalid command');
 		}
