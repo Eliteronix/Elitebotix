@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries, getScoreModpool, humanReadable } = require('../utils');
 const { Permissions } = require('discord.js');
 const { DBOsuMultiScores } = require('../dbObjects');
 const { Op } = require('sequelize');
@@ -21,6 +21,7 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		let tournament = false;
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -42,6 +43,10 @@ module.exports = {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					if (interaction.options._hoistedOptions[i].name === 'mods') {
 						args.push(`--${interaction.options._hoistedOptions[i].value.toUpperCase()}`);
+					} else if (interaction.options._hoistedOptions[i].name === 'tourney') {
+						if (interaction.options._hoistedOptions[i].value) {
+							tournament = true;
+						}
 					} else {
 						args.push(interaction.options._hoistedOptions[i].value);
 					}
@@ -79,7 +84,7 @@ module.exports = {
 			}
 			const dbBeatmap = await getOsuBeatmap({ beatmapId: getIDFromPotentialOsuLink(arg), modBits: modBits });
 			if (dbBeatmap) {
-				getBeatmap(msg, interaction, dbBeatmap);
+				getBeatmap(msg, interaction, dbBeatmap, tournament);
 			} else {
 				if (msg.id) {
 					await msg.reply({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
@@ -91,7 +96,7 @@ module.exports = {
 	},
 };
 
-async function getBeatmap(msg, interaction, beatmap) {
+async function getBeatmap(msg, interaction, beatmap, tournament) {
 	let processingMessage = null;
 
 	if (!interaction) {
@@ -157,6 +162,7 @@ async function getBeatmap(msg, interaction, beatmap) {
 	});
 
 	let tournaments = [];
+	let matches = [];
 
 	for (let i = 0; i < mapScores.length; i++) {
 		let acronym = mapScores[i].matchName.replace(/:.+/gm, '').replace(/`/g, '');
@@ -164,6 +170,13 @@ async function getBeatmap(msg, interaction, beatmap) {
 		if (tournaments.indexOf(acronym) === -1) {
 			tournaments.push(acronym);
 		}
+
+		let modPool = getScoreModpool(mapScores[i]);
+
+		let date = mapScores[i].matchStartDate;
+		let dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
+
+		matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}`);
 	}
 
 	let tournamentOccurences = `The map was played ${mapScores.length} times with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
@@ -172,11 +185,19 @@ async function getBeatmap(msg, interaction, beatmap) {
 		tournamentOccurences = 'The map was never played in any tournaments.';
 	}
 
+	let files = [attachment];
+
+	if (tournament) {
+		// eslint-disable-next-line no-undef
+		matches = new Discord.MessageAttachment(Buffer.from(matches.join('\n'), 'utf-8'), `tourney-scores-${beatmap.beatmapId}.txt`);
+		files.push(matches);
+	}
+
 	//Send attachment
 	if (interaction && interaction.commandName !== 'osu-beatmap') {
-		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: [attachment], ephemeral: true });
+		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files, ephemeral: true });
 	} else {
-		const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: [attachment] });
+		const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files });
 		if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
 			sentMessage.react('<:COMPARE:827974793365159997>');
 		}
