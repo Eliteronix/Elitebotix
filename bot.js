@@ -1,6 +1,6 @@
 //Log message upon starting the bot
 console.log('Bot is starting...');
-const { twitchConnect, wrongCluster } = require('./utils');
+const { twitchConnect, wrongCluster, syncJiraCards } = require('./utils');
 
 //require the dotenv node module
 require('dotenv').config();
@@ -145,6 +145,8 @@ function readyDiscord() {
 	}
 
 	executeProcessQueue(client, bancho);
+
+	startJiraCardSync(client);
 }
 
 client.on('messageCreate', msg => gotMessage(msg, bancho, twitchClient));
@@ -240,5 +242,17 @@ async function cleanUpDuplicates() {
 
 	setTimeout(() => {
 		cleanUpDuplicates();
+	}, 3600000);
+}
+
+async function startJiraCardSync(client) {
+	try {
+		await syncJiraCards(client);
+	} catch (e) {
+		console.log(e);
+	}
+
+	setTimeout(() => {
+		startJiraCardSync(client);
 	}, 3600000);
 }

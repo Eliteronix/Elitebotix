@@ -1757,6 +1757,58 @@ module.exports = {
 	},
 	logMatchCreation(client, name, matchId) {
 		logMatchCreationFunction(client, name, matchId);
+	},
+	async syncJiraCards(client) {
+		if (wrongClusterFunction()) {
+			return;
+		}
+
+		let response = await fetch('https://eliteronix.atlassian.net/rest/api/2/search?jql=project=EL and updated>=-1w&maxResults=100', {
+			method: 'GET',
+			headers: {
+				// eslint-disable-next-line no-undef
+				'Authorization': `Basic ${Buffer.from(
+					// eslint-disable-next-line no-undef
+					`zimmermann.mariomarvin@gmail.com:${process.env.ATLASSIANTOKEN}`
+				).toString('base64')}`,
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			}
+		})
+			.catch(err => console.error(err));
+
+		const responseJson = await response.json();
+		console.log(responseJson);
+
+		let issues = responseJson.issues;
+
+		console.log(issues.length);
+
+		console.log(issues[0].key);
+
+		const channel = await client.channels.fetch('1000062256253501540');
+
+		for (let i = 0; i < issues.length && i < 1; i++) {
+			if (issues[i].fields.parent) {
+				console.log(issues[i].fields.parent.key, issues[i].fields.parent.fields.summary);
+			} else {
+				console.log(issues[i].fields.key, issues[i].fields.summary);
+			}
+
+			let color = '#ffffff';
+
+			//Create embed
+			const issueEmbed = new Discord.MessageEmbed()
+				.setColor(color)
+				.setTitle(issues[i].fields.summary)
+				.setFooter(`Last updated: ${new Date(issues[i].updated)}`);
+
+			if (issues[i].assignee) {
+				issueEmbed.setAuthor({ name: issues[i].assignee.displayName, iconURL: issues[i].assignee.avatarUrls['48x48'] });
+			}
+
+			channel.send({ content: issues[i].key, embeds: [issueEmbed] });
+		}
 	}
 };
 
