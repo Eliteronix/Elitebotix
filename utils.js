@@ -1759,11 +1759,12 @@ module.exports = {
 		logMatchCreationFunction(client, name, matchId);
 	},
 	async syncJiraCards(client) {
-		if (wrongClusterFunction()) {
+		// eslint-disable-next-line no-undef
+		if (wrongClusterFunction() || process.env.SERVER !== 'Live') {
 			return;
 		}
 
-		let response = await fetch('https://eliteronix.atlassian.net/rest/api/2/search?jql=project=EL and updated>=-1w&maxResults=100', {
+		let response = await fetch('https://eliteronix.atlassian.net/rest/api/2/search?jql=project=EL and updated>=-2h&maxResults=100', {
 			method: 'GET',
 			headers: {
 				// eslint-disable-next-line no-undef
@@ -1778,34 +1779,82 @@ module.exports = {
 			.catch(err => console.error(err));
 
 		const responseJson = await response.json();
-		console.log(responseJson);
 
 		let issues = responseJson.issues;
 
-		console.log(issues.length);
+		const backlogChannel = await client.channels.fetch('1000372560552276028');
+		const selectedForDevChannel = await client.channels.fetch('1000372600251351070');
+		const inProgressChannel = await client.channels.fetch('1000372630060281856');
+		const doneChannel = await client.channels.fetch('1000372653762285708');
 
-		console.log(issues[0].key);
+		for (let i = 0; i < issues.length; i++) {
+			let channel = backlogChannel;
 
-		const channel = await client.channels.fetch('1000062256253501540');
-
-		for (let i = 0; i < issues.length && i < 1; i++) {
-			if (issues[i].fields.parent) {
-				console.log(issues[i].fields.parent.key, issues[i].fields.parent.fields.summary);
-			} else {
-				console.log(issues[i].fields.key, issues[i].fields.summary);
+			if (issues[i].fields.status.name === 'Selected for Development') {
+				channel = selectedForDevChannel;
+			} else if (issues[i].fields.status.name === 'In Progress') {
+				channel = inProgressChannel;
+			} else if (issues[i].fields.status.name === 'Done') {
+				channel = doneChannel;
 			}
 
-			let color = '#ffffff';
+			let color = '#000000';
+
+			if (issues[i].fields.priority.name === 'Highest') {
+				color = '#ff1500';
+			} else if (issues[i].fields.priority.name === 'High') {
+				color = '#f0655d';
+			} else if (issues[i].fields.priority.name === 'Medium') {
+				color = '#f59536';
+			} else if (issues[i].fields.priority.name === 'Low') {
+				color = '#0ecf00';
+			}
 
 			//Create embed
 			const issueEmbed = new Discord.MessageEmbed()
 				.setColor(color)
 				.setTitle(issues[i].fields.summary)
-				.setFooter(`Last updated: ${new Date(issues[i].updated)}`);
+				.setFooter(`Last updated: ${issues[i].fields.updated}`);
 
-			if (issues[i].assignee) {
-				issueEmbed.setAuthor({ name: issues[i].assignee.displayName, iconURL: issues[i].assignee.avatarUrls['48x48'] });
+			if (issues[i].fields.assignee) {
+				issueEmbed.setAuthor({ name: `Assigned to: ${issues[i].fields.assignee.displayName}`, iconURL: issues[i].fields.assignee.avatarUrls['48x48'] });
 			}
+
+			if (issues[i].fields.parent) {
+				issueEmbed.addField('Parent', `${issues[i].fields.parent.key} - ${issues[i].fields.parent.fields.summary}`);
+			}
+
+			await backlogChannel.messages.fetch({ limit: 100 })
+				.then(async (messages) => {
+					const issueMessages = messages.filter(m => m.content === issues[i].key);
+					issueMessages.forEach(async (message) => {
+						await message.delete();
+					});
+				});
+
+			await selectedForDevChannel.messages.fetch({ limit: 100 })
+				.then(async (messages) => {
+					const issueMessages = messages.filter(m => m.content === issues[i].key);
+					issueMessages.forEach(async (message) => {
+						await message.delete();
+					});
+				});
+
+			await inProgressChannel.messages.fetch({ limit: 100 })
+				.then(async (messages) => {
+					const issueMessages = messages.filter(m => m.content === issues[i].key);
+					issueMessages.forEach(async (message) => {
+						await message.delete();
+					});
+				});
+
+			await doneChannel.messages.fetch({ limit: 100 })
+				.then(async (messages) => {
+					const issueMessages = messages.filter(m => m.content === issues[i].key);
+					issueMessages.forEach(async (message) => {
+						await message.delete();
+					});
+				});
 
 			channel.send({ content: issues[i].key, embeds: [issueEmbed] });
 		}
