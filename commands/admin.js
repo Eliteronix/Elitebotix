@@ -618,56 +618,56 @@ module.exports = {
 			// 	},
 			// });
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'osu-beatmap',
-					description: 'Sends an info card about the specified beatmap',
-					options: [
-						{
-							'name': 'id',
-							'description': 'The id or link of the beatmap to display',
-							'type': 3,
-							'required': true
-						},
-						{
-							'name': 'mods',
-							'description': 'The mod combination that should be displayed (i.e. NM, HDHR, ...)',
-							'type': 3,
-							'required': false,
-						},
-						{
-							'name': 'tourney',
-							'description': 'Should additional tournament data be attached?',
-							'type': 5,
-							'required': false
-						},
-						{
-							'name': 'id2',
-							'description': 'The id or link of the beatmap to display',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'id3',
-							'description': 'The id or link of the beatmap to display',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'id4',
-							'description': 'The id or link of the beatmap to display',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'id5',
-							'description': 'The id or link of the beatmap to display',
-							'type': 3,
-							'required': false
-						}
-					]
-				},
-			});
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'osu-beatmap',
+			// 		description: 'Sends an info card about the specified beatmap',
+			// 		options: [
+			// 			{
+			// 				'name': 'id',
+			// 				'description': 'The id or link of the beatmap to display',
+			// 				'type': 3,
+			// 				'required': true
+			// 			},
+			// 			{
+			// 				'name': 'mods',
+			// 				'description': 'The mod combination that should be displayed (i.e. NM, HDHR, ...)',
+			// 				'type': 3,
+			// 				'required': false,
+			// 			},
+			// 			{
+			// 				'name': 'tourney',
+			// 				'description': 'Should additional tournament data be attached?',
+			// 				'type': 5,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'id2',
+			// 				'description': 'The id or link of the beatmap to display',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'id3',
+			// 				'description': 'The id or link of the beatmap to display',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'id4',
+			// 				'description': 'The id or link of the beatmap to display',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'id5',
+			// 				'description': 'The id or link of the beatmap to display',
+			// 				'type': 3,
+			// 				'required': false
+			// 			}
+			// 		]
+			// 	},
+			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -4037,6 +4037,12 @@ module.exports = {
 							'description': 'The mod combination that should be displayed (i.e. NM, HDHR, ...)',
 							'type': 3,
 							'required': false,
+						},
+						{
+							'name': 'tourney',
+							'description': 'Should additional tournament data be attached?',
+							'type': 5,
+							'required': false
 						},
 						{
 							'name': 'id2',
