@@ -1208,7 +1208,7 @@ module.exports = {
 							winner = teamname2;
 						}
 
-						await channel.sendMessage(`${teamname1}: ${humanReadable(scoreTeam1)} | ${teamname2}: ${humanReadable(scoreTeam2)} | Difference: ${Math.abs(scoreTeam1 - scoreTeam2)} | Winner: ${winner}`);
+						await channel.sendMessage(`${teamname1}: ${humanReadable(scoreTeam1)} | ${teamname2}: ${humanReadable(scoreTeam2)} | Difference: ${humanReadable(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
 					} else {
 						await channel.sendMessage('!mp close');
 						// eslint-disable-next-line no-undef
