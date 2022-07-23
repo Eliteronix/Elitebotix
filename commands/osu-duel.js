@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
 const osu = require('node-osu');
-const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, adjustHDStarRating, logMatchCreation } = require('../utils');
+const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, adjustHDStarRating, logMatchCreation, humanReadable } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
@@ -1202,7 +1202,13 @@ module.exports = {
 						}
 					}
 					if (results.length) {
-						await channel.sendMessage(`${teamname1}: ${scoreTeam1} | ${teamname2}: ${scoreTeam2} | Difference: ${Math.abs(scoreTeam1 - scoreTeam2)}`);
+						let winner = teamname1;
+
+						if (scoreTeam1 < scoreTeam2) {
+							winner = teamname2;
+						}
+
+						await channel.sendMessage(`${teamname1}: ${humanReadable(scoreTeam1)} | ${teamname2}: ${humanReadable(scoreTeam2)} | Difference: ${Math.abs(scoreTeam1 - scoreTeam2)} | Winner: ${winner}`);
 					} else {
 						await channel.sendMessage('!mp close');
 						// eslint-disable-next-line no-undef
