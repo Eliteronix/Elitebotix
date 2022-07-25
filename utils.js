@@ -1764,7 +1764,7 @@ module.exports = {
 			return;
 		}
 
-		let response = await fetch('https://eliteronix.atlassian.net/rest/api/2/search?jql=project=EL and updated>=-2h&maxResults=100', {
+		let response = await fetch('https://eliteronix.atlassian.net/rest/api/2/search?jql=project=EL and updated>=-20m&maxResults=100', {
 			method: 'GET',
 			headers: {
 				// eslint-disable-next-line no-undef

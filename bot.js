@@ -254,5 +254,5 @@ async function startJiraCardSync(client) {
 
 	setTimeout(() => {
 		startJiraCardSync(client);
-	}, 3600000);
+	}, 900000);
 }
