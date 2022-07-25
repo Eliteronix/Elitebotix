@@ -2259,6 +2259,19 @@ module.exports = {
 			// 				]
 			// 			},
 			// 			{
+			// 				'name': 'ascending',
+			// 				'description': 'Sort your top plays in ascending order?',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'True',
+			// 						'value': '--asc'
+			// 					},
+
+			// 				]
+			// 			},
+			// 			{
 			// 				'name': 'amount',
 			// 				'description': 'The amount of topplays to be displayed',
 			// 				'type': 4,
@@ -5528,6 +5541,19 @@ module.exports = {
 									'name': 'Recent',
 									'value': '--new',
 								},
+							]
+						},
+						{
+							'name': 'ascending',
+							'description': 'Sort your top plays in ascending order?',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'True',
+									'value': '--asc'
+								},
+
 							]
 						},
 						{
