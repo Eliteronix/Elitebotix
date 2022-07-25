@@ -168,11 +168,12 @@ async function sendUserEmbed(msg, interaction, user) {
 		const osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
 		if (discordUser.osuVerified) {
 			userInfoEmbed.addFields(
-				{ name: 'osu! Account', value: `☑️ ${osuUser.name}` },
+			// link to osu profile page
+				{ name: 'osu! Account', value: `☑️ [${osuUser.name}](https://osu.ppy.sh/users/${discordUser.osuUserId})` }
 			);
 		} else {
 			userInfoEmbed.addFields(
-				{ name: 'osu! Account', value: `❌ ${osuUser.name}` },
+				{ name: 'osu! Account', value: `❌ [${osuUser.name}](https://osu.ppy.sh/users/${discordUser.osuUserId})` },
 			);
 		}
 	}
