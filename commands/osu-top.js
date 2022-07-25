@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, saveOsuMultiScores, pause } = require('../utils');
+const { fitTextOnMiddleCanvas, getGuildPrefix, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, saveOsuMultiScores, pause } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
@@ -393,7 +393,7 @@ async function drawTitle(input, server, mode, sorting, order) {
 	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText(title, canvas.width / 2, 500 / 12);
+	fitTextOnMiddleCanvas(ctx, title, 30, 'comfortaa, sans-serif', 41, canvas.width, 25);
 
 	const output = [canvas, ctx, user];
 	return output;
@@ -586,7 +586,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		} else if (sorting == 'length') {
 			quicksortLength(beatmaps);
 		} else if (sorting == 'sr') {
-			quicksortSR(beatmaps);
+			bubblesortSR(beatmaps);
 		}
 	}
 
@@ -945,26 +945,16 @@ function partitionPP(list, start, end) {
 	return i;
 }
 
-function partitionSR(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].starRating) >= parseFloat(pivot.starRating)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
+function bubblesortSR(list) {
+	let swapped = true;
+	while (swapped) {
+		swapped = false;
+		for (let i = 0; i < list.length - 1; i++) {
+			if (parseFloat(list[i].starRating) < parseFloat(list[i + 1].starRating)) {
+				[list[i], list[i + 1]] = [list[i + 1], list[i]];
+				swapped = true;
+			}
 		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-function quicksortSR(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionSR(list, start, end);
-		partitionSR(list, start, p - 1);
-		partitionSR(list, p + 1, end);
 	}
 	return list;
 }
