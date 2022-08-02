@@ -3428,7 +3428,7 @@ function wrongClusterFunction(id) {
 	}
 
 	// Else its the wrong cluster
-	return true;
+	return false;
 }
 
 async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, depth) {
