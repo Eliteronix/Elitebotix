@@ -148,7 +148,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 				}
 				let scoreHasBeenOutput = false;
 				for (let i = 0; i < scores.length; i++) {
-					if (mods === 'best' && i === 0 || mods === 'all' || getModBits(mods) === scores[i].raw_mods) {
+					if (mods === 'best' && i === 0 || mods === 'all' || mods !== 'best' && mods !== 'all' && getModBits(mods) === scores[i].raw_mods) {
 						scoreHasBeenOutput = true;
 						const user = await osuApi.getUser({ u: username, m: mode });
 						updateOsuDetailsforUser(user, mode);
