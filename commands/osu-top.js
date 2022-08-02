@@ -58,6 +58,7 @@ module.exports = {
 		let limit = 10;
 		let tracking = false;
 		let sorting = null;
+		let order = false;
 
 		for (let i = 0; i < args.length; i++) {
 			if (args[i] === '--new' || args[i] === '--recent' || args[i] === '--n') {
@@ -88,6 +89,10 @@ module.exports = {
 				sorting = 'bpm';
 				args.splice(i, 1);
 				i--;
+			} else if (args[i] === '--asc' || args[i] === '--ascending') {
+				order = true;
+				args.splice(i, 1);
+				i--;
 			} else if (args[i].startsWith('--') && !isNaN(args[i].replace('--', ''))) {
 				limit = parseInt(args[i].replace('--', ''));
 				if (limit > 100) {
@@ -107,10 +112,10 @@ module.exports = {
 		if (!args[0]) {
 			//Get profile by author if no argument
 			if (commandUser && commandUser.osuUserId) {
-				getTopPlays(msg, commandUser.osuUserId, server, mode, false, sorting, limit, tracking);
+				getTopPlays(msg, commandUser.osuUserId, server, mode, false, sorting, limit, tracking, order);
 			} else {
 				const userDisplayName = await getMessageUserDisplayname(msg);
-				getTopPlays(msg, userDisplayName, server, mode, false, sorting, limit, tracking);
+				getTopPlays(msg, userDisplayName, server, mode, false, sorting, limit, tracking, order);
 			}
 		} else {
 			//Get profiles by arguments
@@ -122,21 +127,21 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getTopPlays(msg, discordUser.osuUserId, server, mode, false, sorting, limit, tracking);
+						getTopPlays(msg, discordUser.osuUserId, server, mode, false, sorting, limit, tracking, order);
 					} else {
 						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-						getTopPlays(msg, args[i], server, mode, false, sorting, limit, tracking);
+						getTopPlays(msg, args[i], server, mode, false, sorting, limit, tracking, order);
 					}
 				} else {
 
 					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, true, sorting, limit, tracking);
+							getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, true, sorting, limit, tracking, order);
 						} else {
-							getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, sorting, limit, tracking);
+							getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, sorting, limit, tracking, order);
 						}
 					} else {
-						getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, sorting, limit, tracking);
+						getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, sorting, limit, tracking, order);
 					}
 				}
 			}
@@ -144,7 +149,7 @@ module.exports = {
 	}
 };
 
-async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting, limit, tracking) {
+async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting, limit, tracking, order) {
 	if (server === 'bancho') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -179,9 +184,9 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				let elements = [canvas, ctx, user];
 
-				elements = await drawTitle(elements, server, mode, sorting);
+				elements = await drawTitle(elements, server, mode, sorting, order);
 
-				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit);
+				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order);
 
 				await drawFooter(elements);
 
@@ -241,9 +246,9 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				let elements = [canvas, ctx, user];
 
-				elements = await drawTitle(elements, server, mode, sorting);
+				elements = await drawTitle(elements, server, mode, sorting, order);
 
-				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit);
+				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order);
 
 				await drawFooter(elements);
 
@@ -296,9 +301,9 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				let elements = [canvas, ctx, user];
 
-				elements = await drawTitle(elements, server, mode, sorting);
+				elements = await drawTitle(elements, server, mode, sorting, order);
 
-				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage);
+				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order);
 
 				await drawFooter(elements);
 
@@ -332,7 +337,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 	}
 }
 
-async function drawTitle(input, server, mode, sorting) {
+async function drawTitle(input, server, mode, sorting, order) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -366,10 +371,14 @@ async function drawTitle(input, server, mode, sorting) {
 
 	let gameMode = getGameModeName(mode);
 	let title;
+	let orderText = '';
+	if (order) {
+		orderText = 'in ascending order ';
+	}
 
-	title = `✰ ${serverDisplay}${user.name}'s ${gameMode} top plays ${sortingText}✰`;
+	title = `✰ ${serverDisplay}${user.name}'s ${gameMode} top plays ${sortingText}${orderText}✰`;
 	if (user.name.endsWith('s') || user.name.endsWith('x')) {
-		title = `✰ ${serverDisplay}${user.name}' ${gameMode} top plays ${sortingText}✰`;
+		title = `✰ ${serverDisplay}${user.name}' ${gameMode} top plays ${sortingText}${orderText}✰`;
 	}
 
 	roundedRect(ctx, canvas.width / 2 - title.length * 8.5, 500 / 50, title.length * 17, 500 / 12, 5, '28', '28', '28', 0.75);
@@ -400,7 +409,7 @@ async function drawFooter(input) {
 	return output;
 }
 
-async function drawTopPlays(input, server, mode, msg, sorting, showLimit, processingMessage) {
+async function drawTopPlays(input, server, mode, msg, sorting, showLimit, processingMessage, order) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -607,6 +616,11 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 				sortedScores.push(scores[j]);
 			}
 		}
+	}
+
+	if (order) {
+		sortedScores.reverse();
+		beatmaps.reverse();
 	}
 
 	for (let i = 0; i < sortedScores.length && i < showLimit; i++) {
