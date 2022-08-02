@@ -2,11 +2,11 @@ const { DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getModBits, getBeatmapApprovalStatusImage,getGameMode , checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
+const { getModBits, getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
-	name: 'osu-map-leaderboard',
+	name: 'osu-mapleaderboard',
 	aliases: ['osu-map-leaderboard'],
 	description: 'Sends an info card about the leaderboard on the specified beatmap',
 	usage: '<id> [mode]',
@@ -42,8 +42,7 @@ module.exports = {
 				}
 			}
 		}
-        
-        
+
 		let mods = 0;
 		for (let i = 0; i < args.length; i++) {
 			if (args[i].startsWith('--NM') || args[i].startsWith('--NF') || args[i].startsWith('--HT') || args[i].startsWith('--EZ')
@@ -94,7 +93,6 @@ module.exports = {
 				}
 			}
 		});
-        
 
 		async function getBeatmapLeaderboard(msg, interaction, beatmap, limit) {
 			let processingMessage = null;
@@ -102,7 +100,7 @@ module.exports = {
 			if (msg.id) {
 				processingMessage = await msg.reply('Processing...');
 			}
-            
+
 			const canvasWidth = 900;
 			const canvasHeight = 133 + limit * 41.66666;
 
@@ -131,7 +129,7 @@ module.exports = {
 			elements = await drawScores(elements, mode);
 
 			await drawFooter(elements);
-            
+
 			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-map-leaderboard-${beatmap.beatmapId}-${beatmap.mods}.png`);
 
 			if (msg.id) {
@@ -139,7 +137,7 @@ module.exports = {
 			}
 
 			let files = [attachment];
-            
+
 			if (interaction && interaction.commandName !== 'osu-map-leaderboard') {
 				return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: files, ephemeral: true });
 			} else {
@@ -147,15 +145,13 @@ module.exports = {
 			}
 		}
 
-
-		
 		async function drawTitle(input) {
 			let canvas = input[0];
 			let ctx = input[1];
 			let beatmap = input[2];
 
 			let beatmapImage;
-			roundedRect(ctx, 20, 20, 860, 120, 500 / 70,'70', '57', '63', 0.75);
+			roundedRect(ctx, 20, 20, 860, 120, 500 / 70, '70', '57', '63', 0.75);
 			ctx.save();
 			ctx.clip();
 			ctx.globalCompositeOperation = 'source-over';
@@ -168,7 +164,7 @@ module.exports = {
 			}
 			ctx.drawImage(beatmapImage, 0, 0);
 			ctx.restore();
-			roundedRect(ctx, 20, 20, 860, 120, 500 / 70,'0', '0', '0', 0.65);
+			roundedRect(ctx, 20, 20, 860, 120, 500 / 70, '0', '0', '0', 0.65);
 
 			let beatmapTitle = `${beatmap.title}`;
 			const maxSizeTitle = parseInt(canvas.width / 1000 * 55);
@@ -208,7 +204,7 @@ module.exports = {
 			let beatmap = input[2];
 
 			let firstApiCall;
-			
+
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -229,7 +225,7 @@ module.exports = {
 						topScoreUserImage = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
 					}
 
-					roundedRect(ctx, 100, 175, canvas.height / 500 * 55, canvas.height / 500 * 55, 500 / 70,'0', '0', '0', 0.75);
+					roundedRect(ctx, 100, 175, canvas.height / 500 * 55, canvas.height / 500 * 55, 500 / 70, '0', '0', '0', 0.75);
 					ctx.save();
 					ctx.clip();
 					ctx.drawImage(topScoreUserImage, 100, 175, canvas.height / 500 * 55, canvas.height / 500 * 55);
@@ -242,7 +238,7 @@ module.exports = {
 
 					let gradeSS;
 					let gradeS;
-				
+
 					let mods = getMods(topScore.raw_mods);
 
 					if (mods.includes('HD')) {
@@ -250,7 +246,7 @@ module.exports = {
 						gradeS = await Canvas.loadImage('./other/rank_pictures/SH_Rank.png');
 					} else {
 						gradeSS = await Canvas.loadImage('./other/rank_pictures/X_Rank.png');
-						gradeS = await Canvas.loadImage('./other/rank_pictures/S_Rank.png'); 
+						gradeS = await Canvas.loadImage('./other/rank_pictures/S_Rank.png');
 					}
 
 					let gradeA = await Canvas.loadImage('other/rank_pictures/A_Rank.png');
@@ -332,13 +328,13 @@ module.exports = {
 					ctx.fillText('100', 525, 217);
 					ctx.fillText('300', 475, 217);
 				})
-			// eslint-disable-next-line no-unused-vars
+				// eslint-disable-next-line no-unused-vars
 				.catch(err => {
 					//Nothing
 				});
 			return [canvas, ctx, beatmap];
 		}
-		
+
 		async function drawScores(input, mode) {
 			let canvas = input[0];
 			let ctx = input[1];
@@ -349,7 +345,6 @@ module.exports = {
 					userId: msg.author.id
 				}
 			});
-			
 
 			let secondApiCall;
 			// eslint-disable-next-line no-undef
@@ -380,7 +375,7 @@ module.exports = {
 								topScoreUserImage = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
 							}
 
-							roundedRect(ctx, 100, 175 + 90, canvas.height / 500 * 55, canvas.height / 500 * 55, 500 / 70,'0', '0', '0', 0.75);
+							roundedRect(ctx, 100, 175 + 90, canvas.height / 500 * 55, canvas.height / 500 * 55, 500 / 70, '0', '0', '0', 0.75);
 							ctx.save();
 							ctx.clip();
 							ctx.drawImage(topScoreUserImage, 100, 175 + 90, canvas.height / 500 * 55, canvas.height / 500 * 55);
@@ -392,7 +387,7 @@ module.exports = {
 
 							let gradeSS;
 							let gradeS;
-				
+
 							let mods = getMods(topScore.raw_mods);
 
 							if (mods.includes('HD')) {
@@ -400,7 +395,7 @@ module.exports = {
 								gradeS = await Canvas.loadImage('./other/rank_pictures/SH_Rank.png');
 							} else {
 								gradeSS = await Canvas.loadImage('./other/rank_pictures/X_Rank.png');
-								gradeS = await Canvas.loadImage('./other/rank_pictures/S_Rank.png'); 
+								gradeS = await Canvas.loadImage('./other/rank_pictures/S_Rank.png');
 							}
 
 							let gradeA = await Canvas.loadImage('other/rank_pictures/A_Rank.png');
@@ -481,7 +476,7 @@ module.exports = {
 							ctx.fillText('50', 575, 217 + 90);
 							ctx.fillText('100', 525, 217 + 90);
 							ctx.fillText('300', 475, 217 + 90);
-						});	
+						});
 				} catch (error) {
 					// nothing
 				}
@@ -492,30 +487,11 @@ module.exports = {
 
 			for (let i = 0; i < mapArray.length && i < limit; i++) {
 				roundedRect(ctx, 50, 255 + globalOffset, 800, 80, 500 / 70, '70', '57', '63', 0.75);
-				
+
 			}
-
-
-
-
 
 			return [canvas, ctx, beatmap];
 		}
-
-		
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 		async function drawFooter(input) {
 			let canvas = input[0];
@@ -528,7 +504,7 @@ module.exports = {
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'right';
 			ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
-			
+
 			return [canvas, ctx, beatmap];
 		}
 	}
