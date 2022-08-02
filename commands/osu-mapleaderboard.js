@@ -487,6 +487,18 @@ module.exports = {
 				}
 			}
 
+			let thirdApiCall;
+			//here i need to get all the scores again 
+
+			for (let i = 0; i < mapArray.length && i < limit; i++) {
+				roundedRect(ctx, 50, 255 + globalOffset, 800, 80, 500 / 70, '70', '57', '63', 0.75);
+				
+			}
+
+
+
+
+
 			return [canvas, ctx, beatmap];
 		}
 
