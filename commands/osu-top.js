@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, saveOsuMultiScores, pause } = require('../utils');
+const { fitTextOnMiddleCanvas, getGuildPrefix, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, saveOsuMultiScores, pause } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
@@ -91,6 +91,10 @@ module.exports = {
 				i--;
 			} else if (args[i] === '--asc' || args[i] === '--ascending') {
 				order = true;
+				args.splice(i, 1);
+				i--;
+			} else if (args[i] === '--starrating' || args[i] === '--sr') {
+				sorting = 'sr';
 				args.splice(i, 1);
 				i--;
 			} else if (args[i].startsWith('--') && !isNaN(args[i].replace('--', ''))) {
@@ -366,6 +370,8 @@ async function drawTitle(input, server, mode, sorting, order) {
 			sortingText += 'BPM ';
 		} else if (sorting == 'length') {
 			sortingText += 'length ';
+		} else if (sorting == 'sr') {
+			sortingText += 'Star Rating ';
 		}
 	}
 
@@ -387,7 +393,7 @@ async function drawTitle(input, server, mode, sorting, order) {
 	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText(title, canvas.width / 2, 500 / 12);
+	fitTextOnMiddleCanvas(ctx, title, 30, 'comfortaa, sans-serif', 41, canvas.width, 25);
 
 	const output = [canvas, ctx, user];
 	return output;
@@ -579,8 +585,11 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 			quicksortBPM(beatmaps);
 		} else if (sorting == 'length') {
 			quicksortLength(beatmaps);
+		} else if (sorting == 'sr') {
+			bubblesortSR(beatmaps);
 		}
 	}
+
 
 	if (now.getUTCDate() === 1 && now.getUTCMonth() === 3) {
 		sortedScores.push({
@@ -721,6 +730,8 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 				const totalLengthMinutes = (beatmaps[i].totalLength - beatmaps[i].totalLength % 60) / 60;
 				const totalLength = totalLengthMinutes + ':' + Math.round(totalLengthSeconds).toString().padStart(2, '0');
 				sortingText = ` (Length: ${totalLength})`;
+			} else if (sorting == 'sr') {
+				sortingText = ` (${Math.round(beatmaps[i].starRating * 100) / 100}*)`;
 			}
 		}
 
@@ -789,6 +800,7 @@ function quicksortAR(list, start = 0, end = undefined) {
 	}
 	return list;
 }
+
 function partitionCS(list, start, end) {
 	const pivot = list[end];
 	let i = start;
@@ -801,7 +813,6 @@ function partitionCS(list, start, end) {
 	[list[i], list[end]] = [list[end], list[i]];
 	return i;
 }
-
 function quicksortCS(list, start = 0, end = undefined) {
 	if (end === undefined) {
 		end = list.length - 1;
@@ -813,6 +824,7 @@ function quicksortCS(list, start = 0, end = undefined) {
 	}
 	return list;
 }
+
 function partitionOD(list, start, end) {
 	const pivot = list[end];
 	let i = start;
@@ -825,7 +837,6 @@ function partitionOD(list, start, end) {
 	[list[i], list[end]] = [list[end], list[i]];
 	return i;
 }
-
 function quicksortOD(list, start = 0, end = undefined) {
 	if (end === undefined) {
 		end = list.length - 1;
@@ -837,6 +848,7 @@ function quicksortOD(list, start = 0, end = undefined) {
 	}
 	return list;
 }
+
 function partitionHP(list, start, end) {
 	const pivot = list[end];
 	let i = start;
@@ -849,7 +861,6 @@ function partitionHP(list, start, end) {
 	[list[i], list[end]] = [list[end], list[i]];
 	return i;
 }
-
 function quicksortHP(list, start = 0, end = undefined) {
 	if (end === undefined) {
 		end = list.length - 1;
@@ -861,6 +872,7 @@ function quicksortHP(list, start = 0, end = undefined) {
 	}
 	return list;
 }
+
 function partitionBPM(list, start, end) {
 	const pivot = list[end];
 	let i = start;
@@ -873,20 +885,6 @@ function partitionBPM(list, start, end) {
 	[list[i], list[end]] = [list[end], list[i]];
 	return i;
 }
-
-function partitionPP(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].pp) >= parseFloat(pivot.pp)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
 function quicksortBPM(list, start = 0, end = undefined) {
 	if (end === undefined) {
 		end = list.length - 1;
@@ -898,6 +896,7 @@ function quicksortBPM(list, start = 0, end = undefined) {
 	}
 	return list;
 }
+
 function partitionLength(list, start, end) {
 	const pivot = list[end];
 	let i = start;
@@ -933,3 +932,30 @@ function quicksortPP(list, start = 0, end = undefined) {
 	}
 	return list;
 }
+function partitionPP(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].pp) >= parseFloat(pivot.pp)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function bubblesortSR(list) {
+	let swapped = true;
+	while (swapped) {
+		swapped = false;
+		for (let i = 0; i < list.length - 1; i++) {
+			if (parseFloat(list[i].starRating) < parseFloat(list[i + 1].starRating)) {
+				[list[i], list[i + 1]] = [list[i + 1], list[i]];
+				swapped = true;
+			}
+		}
+	}
+	return list;
+}
+

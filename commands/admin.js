@@ -2256,7 +2256,11 @@ module.exports = {
 			// 						'name': 'Recent',
 			// 						'value': '--new',
 			// 					},
-			// 				]
+			// 					{
+			// 						'name': 'Star Rating',
+			// 						'value': '--sr',
+			// 					},
+			// 	]
 			// 			},
 			// 			{
 			// 				'name': 'ascending',
@@ -5541,6 +5545,10 @@ module.exports = {
 									'name': 'Recent',
 									'value': '--new',
 								},
+								{
+									'name': 'Star Rating',
+									'value': '--sr',
+								}
 							]
 						},
 						{
