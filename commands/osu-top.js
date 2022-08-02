@@ -186,7 +186,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				elements = await drawTitle(elements, server, mode, sorting, order);
 
-				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, order);
+				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order);
 
 				await drawFooter(elements);
 
@@ -248,7 +248,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				elements = await drawTitle(elements, server, mode, sorting, order);
 
-				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, order);
+				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order);
 
 				await drawFooter(elements);
 
@@ -373,7 +373,7 @@ async function drawTitle(input, server, mode, sorting, order) {
 	let title;
 	let orderText = '';
 	if (order) {
-		orderText = ' in ascending order ';
+		orderText = 'in ascending order ';
 	}
 
 	title = `✰ ${serverDisplay}${user.name}'s ${gameMode} top plays ${sortingText}${orderText}✰`;
