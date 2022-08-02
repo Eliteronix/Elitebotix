@@ -93,7 +93,7 @@ module.exports = {
 				order = true;
 				args.splice(i, 1);
 				i--;
-			} else if(args[i].startsWith('--') && !isNaN(args[i].replace('--', ''))) {
+			} else if (args[i].startsWith('--') && !isNaN(args[i].replace('--', ''))) {
 				limit = parseInt(args[i].replace('--', ''));
 				if (limit > 100) {
 					limit = 100;
