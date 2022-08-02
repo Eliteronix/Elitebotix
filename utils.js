@@ -2532,6 +2532,9 @@ async function getDerankStatsFunction(discordUser) {
 			},
 			osuPP: {
 				[Op.gt]: 0
+			},
+			osuDuelStarRating: {
+				[Op.gt]: 0
 			}
 		},
 		order: [
@@ -2544,6 +2547,9 @@ async function getDerankStatsFunction(discordUser) {
 	let duelDiscordUsers = await DBDiscordUsers.findAll({
 		where: {
 			osuUserId: {
+				[Op.gt]: 0
+			},
+			osuPP: {
 				[Op.gt]: 0
 			},
 			osuDuelStarRating: {
