@@ -632,7 +632,7 @@ module.exports = {
 		}
 
 		//Sort the rounds for the graph
-		quicksort(rounds);
+		quicksortMatchId(rounds);
 
 		const canvasWidth = 1000;
 		const canvasHeight = 700;
@@ -1076,7 +1076,7 @@ function partition(list, start, end) {
 	const pivot = list[end];
 	let i = start;
 	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].matchId) >= parseFloat(pivot.matchId)) {
+		if (parseFloat(list[j].gameId) >= parseFloat(pivot.gameId)) {
 			[list[j], list[i]] = [list[i], list[j]];
 			i++;
 		}
@@ -1093,6 +1093,31 @@ function quicksort(list, start = 0, end = undefined) {
 		const p = partition(list, start, end);
 		quicksort(list, start, p - 1);
 		quicksort(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionMatchId(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].matchId) >= parseFloat(pivot.matchId)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksortMatchId(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionMatchId(list, start, end);
+		quicksortMatchId(list, start, p - 1);
+		quicksortMatchId(list, p + 1, end);
 	}
 	return list;
 }

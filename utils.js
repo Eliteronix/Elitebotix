@@ -1993,8 +1993,8 @@ async function getUserDuelStarRatingFunction(input) {
 
 	duelRatings.outdated = outdated;
 
-	//Sort it by match ID
-	quicksortMatchId(userScores);
+	//Sort it by game ID
+	quicksortGameId(userScores);
 
 	let scoresPerMod = 35;
 
@@ -3337,11 +3337,11 @@ function getScoreModpoolFunction(dbScore) {
 	}
 }
 
-function partitionMatchId(list, start, end) {
+function partitionGameId(list, start, end) {
 	const pivot = list[end];
 	let i = start;
 	for (let j = start; j < end; j += 1) {
-		if (parseInt(list[j].matchId) >= parseInt(pivot.matchId)) {
+		if (parseInt(list[j].gameId) >= parseInt(pivot.gameId)) {
 			[list[j], list[i]] = [list[i], list[j]];
 			i++;
 		}
@@ -3350,14 +3350,14 @@ function partitionMatchId(list, start, end) {
 	return i;
 }
 
-function quicksortMatchId(list, start = 0, end = undefined) {
+function quicksortGameId(list, start = 0, end = undefined) {
 	if (end === undefined) {
 		end = list.length - 1;
 	}
 	if (start < end) {
-		const p = partitionMatchId(list, start, end);
-		quicksortMatchId(list, start, p - 1);
-		quicksortMatchId(list, p + 1, end);
+		const p = partitionGameId(list, start, end);
+		quicksortGameId(list, start, p - 1);
+		quicksortGameId(list, p + 1, end);
 	}
 	return list;
 }
