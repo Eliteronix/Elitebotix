@@ -851,7 +851,7 @@ function partition(list, start, end) {
 	const pivot = list[end];
 	let i = start;
 	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].matchId) >= parseFloat(pivot.matchId)) {
+		if (parseFloat(list[j].gameId) >= parseFloat(pivot.gameId)) {
 			[list[j], list[i]] = [list[i], list[j]];
 			i++;
 		}
