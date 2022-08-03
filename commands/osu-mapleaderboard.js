@@ -24,17 +24,19 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Players are being processed');
+			await interaction.deferReply();
 
 			args = [];
 
 			if (interaction.options._hoistedOptions) {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					if (interaction.options._hoistedOptions[i].name === 'id') {
-						args.push(`--${interaction.options._hoistedOptions[i].value}`);
+						args.push(`${interaction.options._hoistedOptions[i].value}`);
 					} else if (interaction.options._hoistedOptions[i].name === 'gamemode') {
 						args.push(`--${interaction.options._hoistedOptions[i].value}`);
 					} else if (interaction.options._hoistedOptions[i].name === 'server') {
+						args.push(`--${interaction.options._hoistedOptions[i].value}`);
+					} else if (interaction.options._hoistedOptions[i].name === 'amount') {
 						args.push(`--${interaction.options._hoistedOptions[i].value}`);
 					} else {
 						args.push(interaction.options._hoistedOptions[i].value);
@@ -44,31 +46,31 @@ module.exports = {
 		}
 
 		let mods = 0;
-		for (let i = 0; i < args.length; i++) {
-			if (args[i].startsWith('--NM') || args[i].startsWith('--NF') || args[i].startsWith('--HT') || args[i].startsWith('--EZ')
-				|| args[i].startsWith('--HR') || args[i].startsWith('--HD') || args[i].startsWith('--SD') || args[i].startsWith('--DT')
-				|| args[i].startsWith('--NC') || args[i].startsWith('--FL') || args[i].startsWith('--SO') || args[i].startsWith('--PF')
-				|| args[i].startsWith('--K4') || args[i].startsWith('--K5') || args[i].startsWith('--K6') || args[i].startsWith('--K7')
-				|| args[i].startsWith('--K8') || args[i].startsWith('--FI') || args[i].startsWith('--RD') || args[i].startsWith('--K9')
-				|| args[i].startsWith('--KC') || args[i].startsWith('--K1') || args[i].startsWith('--K2') || args[i].startsWith('--K3')
-				|| args[i].startsWith('--MR')) {
-				mods = args[i].substring(2);
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].startsWith('--FM')) {
-				args.splice(i, 1);
-				i--;
-			}
-		}
+		// for (let i = 0; i < args.length; i++) {
+		// 	if (args[i].startsWith('--NM') || args[i].startsWith('--NF') || args[i].startsWith('--HT') || args[i].startsWith('--EZ')
+		// 		|| args[i].startsWith('--HR') || args[i].startsWith('--HD') || args[i].startsWith('--SD') || args[i].startsWith('--DT')
+		// 		|| args[i].startsWith('--NC') || args[i].startsWith('--FL') || args[i].startsWith('--SO') || args[i].startsWith('--PF')
+		// 		|| args[i].startsWith('--K4') || args[i].startsWith('--K5') || args[i].startsWith('--K6') || args[i].startsWith('--K7')
+		// 		|| args[i].startsWith('--K8') || args[i].startsWith('--FI') || args[i].startsWith('--RD') || args[i].startsWith('--K9')
+		// 		|| args[i].startsWith('--KC') || args[i].startsWith('--K1') || args[i].startsWith('--K2') || args[i].startsWith('--K3')
+		// 		|| args[i].startsWith('--MR')) {
+		// 		mods = args[i].substring(2);
+		// 		args.splice(i, 1);
+		// 		i--;
+		// 	} else if (args[i].startsWith('--FM')) {
+		// 		args.splice(i, 1);
+		// 		i--;
+		// 	}
+		// }
 
 		let modBits = getModBits(mods);
 		let limit = 10;
 
 		for (let i = 0; i < args.length; i++) {
-			if (args[i].startsWith('--') && !isNaN(args[i].replace('--', '')) && args[i].replace('--', '').length > 3) {
+			if (args[i].startsWith('--') && !isNaN(args[i].replace('--', ''))) {
 				limit = parseInt(args[i].replace('--', ''));
-				if (limit > 100) {
-					limit = 100;
+				if (limit > 50) {
+					limit = 50;
 				} else if (limit < 1) {
 					limit = 1;
 				}
@@ -94,15 +96,33 @@ module.exports = {
 			}
 		});
 
+		// eslint-disable-next-line no-undef
+		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+		});
+
 		async function getBeatmapLeaderboard(msg, interaction, beatmap, limit) {
+
 			let processingMessage = null;
 
 			if (msg.id) {
 				processingMessage = await msg.reply('Processing...');
 			}
 
+			let offset = 36.6;
+			if (limit > 5) {
+				offset = 45;
+			}
+
 			const canvasWidth = 900;
-			const canvasHeight = 133 + limit * 41.66666;
+			let canvasHeight = 230 + (limit * offset);
+
+			if (canvasHeight > 1860) {
+				canvasHeight = 1860;
+			}
 
 			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
 
@@ -120,13 +140,46 @@ module.exports = {
 
 			let mode = 'Standard';
 
+			let scoresArray = [];
+			let userScore = {};
+
+
+			const user = await DBDiscordUsers.findOne({
+				where: {
+					userId: msg.author.id,
+				}
+			});
+
+			await osuApi.getScores({ b: beatmap.beatmapId, m: mode })
+				.then(async (mapScores) => {
+					scoresArray = mapScores;
+				});
+			
+			for (let i = 0; i < scoresArray.length; i++) {
+				if (user && scoresArray[i].user.id === user.osuUserId) {
+					userScore = {
+						score: scoresArray[i],
+						rank: i
+					}; break;
+				} else {
+					try {
+						await osuApi.getScores({ b: beatmap.beatmapId, u: user.osuName, m: mode})
+							.then(async scores => {
+								userScore = {score: scores[0]};
+							});
+					} catch (error) {
+						// nothing
+					}
+				}
+			}
+			
 			let elements = [canvas, ctx, beatmap];
 
 			elements = await drawTitle(elements);
 
-			elements = await drawTopScore(elements, mode);
+			elements = await drawTopScore(elements, mode, scoresArray);
 
-			elements = await drawScores(elements, mode);
+			elements = await drawScores(elements, mode, userScore, scoresArray);
 
 			await drawFooter(elements);
 
@@ -138,8 +191,9 @@ module.exports = {
 
 			let files = [attachment];
 
-			if (interaction && interaction.commandName !== 'osu-map-leaderboard') {
-				return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: files, ephemeral: true });
+			if (interaction) {
+				interaction.deleteReply();
+				return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: files, ephemeral: false });
 			} else {
 				return await msg.reply({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: files });
 			}
@@ -183,9 +237,9 @@ module.exports = {
 			const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
 			const starImage = await Canvas.loadImage('./other/overall-difficulty.png');
 
-			ctx.drawImage(starImage, 65, 75, canvas.height / 500 * 35, canvas.height / 500 * 35);
-			ctx.drawImage(beatmapStatusIcon, 22, 25, canvas.height / 500 * 35, canvas.height / 500 * 35);
-			ctx.drawImage(modePic, 22, 75, canvas.height / 500 * 35, canvas.height / 500 * 35);
+			ctx.drawImage(starImage, 65, 75, starImage.width / starImage.height * 40, 40);
+			ctx.drawImage(beatmapStatusIcon, 22, 25, beatmapStatusIcon.width / beatmapStatusIcon.height * 40, 40);
+			ctx.drawImage(modePic, 22, 75, modePic.width / modePic.height * 40, 40);
 
 			ctx.font = 'bold 30px comfortaa, sans-serif';
 			ctx.fillStyle = '#ffffff';
@@ -198,296 +252,309 @@ module.exports = {
 			return output;
 		}
 
-		async function drawTopScore(input, mode) {
+		async function drawTopScore(input, mode, mapScores) {
 			let canvas = input[0];
 			let ctx = input[1];
 			let beatmap = input[2];
 
-			let firstApiCall;
+			let topScore = mapScores[0];
+			roundedRect(ctx, 50, 165, 800, 80, 500 / 70, '70', '57', '63', 0.75);
 
-			// eslint-disable-next-line no-undef
-			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-			});
+			let topScoreUserImage;
+			try {
+				topScoreUserImage = await Canvas.loadImage(`https://s.ppy.sh/a/${topScore.user.id}`);
+			} catch (error) {
+				topScoreUserImage = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
+			}
 
-			await osuApi.getScores({ b: beatmap.beatmapId, m: mode, limit: limit })
-				.then(async (mapScores) => {
-					let topScore = mapScores[0];
-					roundedRect(ctx, 50, 165, 800, 80, 500 / 70, '70', '57', '63', 0.75);
+			roundedRect(ctx, 100, 175, 60.39, 60.39, 500 / 70, '0', '0', '0', 0.75);
+			ctx.save();
+			ctx.clip();
+			ctx.drawImage(topScoreUserImage, 100, 175, 60.39, 60.39);
+			ctx.restore();
 
-					let topScoreUserImage;
-					try {
-						topScoreUserImage = await Canvas.loadImage(`https://s.ppy.sh/a/${topScore.user.id}`);
-					} catch (error) {
-						topScoreUserImage = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-					}
+			ctx.font = 'bold 20px comfortaa, sans-serif';
+			ctx.fillStyle = '#ffffff';
+			ctx.textAlign = 'left';
+			ctx.fillText('#1', 65, 200);
 
-					roundedRect(ctx, 100, 175, canvas.height / 500 * 55, canvas.height / 500 * 55, 500 / 70, '0', '0', '0', 0.75);
-					ctx.save();
-					ctx.clip();
-					ctx.drawImage(topScoreUserImage, 100, 175, canvas.height / 500 * 55, canvas.height / 500 * 55);
-					ctx.restore();
+			let gradeSS;
+			let gradeS;
 
-					ctx.font = 'bold 20px comfortaa, sans-serif';
-					ctx.fillStyle = '#ffffff';
-					ctx.textAlign = 'left';
-					ctx.fillText('#1', 65, 200);
+			let mods = getMods(topScore.raw_mods);
 
-					let gradeSS;
-					let gradeS;
+			if (mods.includes('HD')) {
+				gradeSS = await Canvas.loadImage('./other/rank_pictures/XH_Rank.png');
+				gradeS = await Canvas.loadImage('./other/rank_pictures/SH_Rank.png');
+			} else {
+				gradeSS = await Canvas.loadImage('./other/rank_pictures/X_Rank.png');
+				gradeS = await Canvas.loadImage('./other/rank_pictures/S_Rank.png');
+			}
 
-					let mods = getMods(topScore.raw_mods);
+			let gradeA = await Canvas.loadImage('other/rank_pictures/A_Rank.png');
+			let gradeB = await Canvas.loadImage('other/rank_pictures/B_Rank.png');
+			let gradeC = await Canvas.loadImage('other/rank_pictures/C_Rank.png');
+			let gradeD = await Canvas.loadImage('other/rank_pictures/D_Rank.png');
 
-					if (mods.includes('HD')) {
-						gradeSS = await Canvas.loadImage('./other/rank_pictures/XH_Rank.png');
-						gradeS = await Canvas.loadImage('./other/rank_pictures/SH_Rank.png');
-					} else {
-						gradeSS = await Canvas.loadImage('./other/rank_pictures/X_Rank.png');
-						gradeS = await Canvas.loadImage('./other/rank_pictures/S_Rank.png');
-					}
+			if (topScore.rank === 'XH') {
+				ctx.drawImage(gradeSS, 60, 210, 32, 16);
+			} else if (topScore.rank === 'SH') {
+				ctx.drawImage(gradeS, 60, 210, 32, 16);
+			} else if (topScore.rank === 'X') {
+				ctx.drawImage(gradeSS, 60, 210, 32, 16);
+			} else if (topScore.grade === 'S') {
+				ctx.drawImage(gradeS, 60, 210, 32, 16);
+			} else if (topScore.rank === 'A') {
+				ctx.drawImage(gradeA, 60, 210, 32, 16);
+			} else if (topScore.rank === 'B') {
+				ctx.drawImage(gradeB, 60, 210, 32, 16);
+			} else if (topScore.rank === 'C') {
+				ctx.drawImage(gradeC, 60, 210, 32, 16);
+			} else if (topScore.rank === 'D') {
+				ctx.drawImage(gradeD, 60, 210, 32, 16);
+			}
 
-					let gradeA = await Canvas.loadImage('other/rank_pictures/A_Rank.png');
-					let gradeB = await Canvas.loadImage('other/rank_pictures/B_Rank.png');
-					let gradeC = await Canvas.loadImage('other/rank_pictures/C_Rank.png');
-					let gradeD = await Canvas.loadImage('other/rank_pictures/D_Rank.png');
+			// nickname
+			ctx.font = 'bold 20px comfortaa, sans-serif';
+			ctx.fillStyle = '#ffffff';
+			ctx.textAlign = 'left';
+			ctx.fillText(`${topScore.user.name}`, 170, 200);
 
-					if (topScore.rank === 'XH') {
-						ctx.drawImage(gradeSS, 60, 210, 32, 16);
-					} else if (topScore.rank === 'SH') {
-						ctx.drawImage(gradeS, 60, 210, 32, 16);
-					} else if (topScore.rank === 'X') {
-						ctx.drawImage(gradeSS, 60, 210, 32, 16);
-					} else if (topScore.grade === 'S') {
-						ctx.drawImage(gradeS, 60, 210, 32, 16);
-					} else if (topScore.rank === 'A') {
-						ctx.drawImage(gradeA, 60, 210, 32, 16);
-					} else if (topScore.rank === 'B') {
-						ctx.drawImage(gradeB, 60, 210, 32, 16);
-					} else if (topScore.rank === 'C') {
-						ctx.drawImage(gradeC, 60, 210, 32, 16);
-					} else if (topScore.rank === 'D') {
-						ctx.drawImage(gradeD, 60, 210, 32, 16);
-					}
+			// submitted on
+			ctx.font = '12px comfortaa, sans-serif';
+			ctx.textAlign = 'left';
+			ctx.fillStyle = '#FFFFFF';
+			ctx.fillText(getDate(topScore), 170, 228);
 
-					// nickname
-					ctx.font = 'bold 20px comfortaa, sans-serif';
-					ctx.fillStyle = '#ffffff';
-					ctx.textAlign = 'left';
-					ctx.fillText(`${topScore.user.name}`, 170, 200);
+			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.fillStyle = '#ffffff';
+			ctx.textAlign = 'left';
 
+			//total score
+			let score = Number(topScore.score);
+			ctx.fillText(`${score.toLocaleString('en-US')}`, 615, 195);
+			// accuracy
+			let accuracy = Math.floor(getAccuracy(topScore, mode) * 100 * 100) / 100;
+			ctx.fillText(`${accuracy}%`, 720, 195);
+			// maxCombo
+			ctx.fillText(`${topScore.maxCombo}`, 780, 195);
+			//mods
+			for (let i = 0; i < mods.length; i++) {
+				const modImage = await Canvas.loadImage(getModImage(mods[i]));
+				let xOffset = 28;
+				ctx.drawImage(modImage, 720 + xOffset * i, 220, modImage.width / 1.8, modImage.height / 1.8);
+			}
 
-					// submitted on
-					ctx.font = '12px comfortaa, sans-serif';
-					ctx.textAlign = 'left';
-					ctx.fillStyle = '#FFFFFF';
-					ctx.fillText(getDate(topScore), 170, 228);
+			// pp
+			ctx.fillText(`${Math.round(topScore.pp)}`, 675, 232);
+			// miss
+			ctx.fillText(`${topScore.counts['miss']}`, 625, 232);
+			//counts 50
+			ctx.fillText(`${topScore.counts['50']}`, 575, 232);
+			// counts 100
+			ctx.fillText(`${topScore.counts['100']}`, 525, 232);
+			// counts {300}
+			ctx.fillText(`${topScore.counts['300']}`, 475, 232);
 
-					ctx.font = 'bold 15px comfortaa, sans-serif';
-					ctx.fillStyle = '#ffffff';
-					ctx.textAlign = 'left';
+			ctx.font = 'bold 8px comfortaa, sans-serif';
+			ctx.fillStyle = '#898989';
+			ctx.fillText('Total Score', 615, 180);
+			ctx.fillText('Accuracy', 720, 180);
+			ctx.fillText('Max Combo', 780, 180);
 
-					//total score
-					let score = Number(topScore.score);
-					ctx.fillText(`${score.toLocaleString('en-US')}`, 615, 195);
-					// accuracy
-					let accuracy = Math.floor(getAccuracy(topScore, mode) * 100 * 100) / 100;
-					ctx.fillText(`${accuracy}%`, 720, 195);
-					// maxCombo
-					ctx.fillText(`${topScore.maxCombo}`, 780, 195);
-					//mods
-					for (let i = 0; i < mods.length; i++) {
-						const modImage = await Canvas.loadImage(getModImage(mods[i]));
-						let xOffset = 28;
-						ctx.drawImage(modImage, 720 + xOffset * i, 220, canvas.width / 1000 * 28, canvas.height / 500 * 18);
-					}
+			ctx.fillText('Mods', 720, 217);
+			ctx.fillText('PP', 675, 217);
+			ctx.fillText('Miss', 625, 217);
+			ctx.fillText('50', 575, 217);
+			ctx.fillText('100', 525, 217);
+			ctx.fillText('300', 475, 217);
 
-					// pp
-					ctx.fillText(`${Math.round(topScore.pp)}`, 675, 232);
-					// miss
-					ctx.fillText(`${topScore.counts['miss']}`, 625, 232);
-					//counts 50
-					ctx.fillText(`${topScore.counts['50']}`, 575, 232);
-					// counts 100
-					ctx.fillText(`${topScore.counts['100']}`, 525, 232);
-					// counts {300}
-					ctx.fillText(`${topScore.counts['300']}`, 475, 232);
-
-					ctx.font = 'bold 8px comfortaa, sans-serif';
-					ctx.fillStyle = '#898989';
-					ctx.fillText('Total Score', 615, 180);
-					ctx.fillText('Accuracy', 720, 180);
-					ctx.fillText('Max Combo', 780, 180);
-
-					ctx.fillText('Mods', 720, 217);
-					ctx.fillText('PP', 675, 217);
-					ctx.fillText('Miss', 625, 217);
-					ctx.fillText('50', 575, 217);
-					ctx.fillText('100', 525, 217);
-					ctx.fillText('300', 475, 217);
-				})
-				// eslint-disable-next-line no-unused-vars
-				.catch(err => {
-					//Nothing
-				});
 			return [canvas, ctx, beatmap];
 		}
 
-		async function drawScores(input, mode) {
+		async function drawScores(input, mode, userScore, scoresArray) {
 			let canvas = input[0];
 			let ctx = input[1];
 			let beatmap = input[2];
-
-			const user = await DBDiscordUsers.findOne({
-				where: {
-					userId: msg.author.id
-				}
-			});
-
-			let secondApiCall;
-			// eslint-disable-next-line no-undef
-			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-			});
 
 			let globalOffset = 0;
 
 			// check if the user has account linked
 			// if so, try to find and add user's score
-			if (user) {
+			if (userScore.score && limit >= 10) {
+				globalOffset = 90;
+				let topScore = userScore.score;
+				roundedRect(ctx, 50, 255, 800, 80, 500 / 70, '70', '57', '63', 0.75);
+
+				let topScoreUserImage;
 				try {
-					await osuApi.getScores({ b: beatmap.beatmapId, u: user.osuName, m: mode, limit: 100 })
-						.then(async scores => {
-							if (scores.length === 0) return;
-							globalOffset = 100;
-							let topScore = scores[0];
-							roundedRect(ctx, 50, 255, 800, 80, 500 / 70, '70', '57', '63', 0.75);
-
-							let topScoreUserImage;
-							try {
-								topScoreUserImage = await Canvas.loadImage(`https://s.ppy.sh/a/${topScore.user.id}`);
-							} catch (error) {
-								topScoreUserImage = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-							}
-
-							roundedRect(ctx, 100, 175 + 90, canvas.height / 500 * 55, canvas.height / 500 * 55, 500 / 70, '0', '0', '0', 0.75);
-							ctx.save();
-							ctx.clip();
-							ctx.drawImage(topScoreUserImage, 100, 175 + 90, canvas.height / 500 * 55, canvas.height / 500 * 55);
-							ctx.restore();
-
-							ctx.font = 'bold 20px comfortaa, sans-serif';
-							ctx.fillStyle = '#ffffff';
-							ctx.textAlign = 'left';
-
-							let gradeSS;
-							let gradeS;
-
-							let mods = getMods(topScore.raw_mods);
-
-							if (mods.includes('HD')) {
-								gradeSS = await Canvas.loadImage('./other/rank_pictures/XH_Rank.png');
-								gradeS = await Canvas.loadImage('./other/rank_pictures/SH_Rank.png');
-							} else {
-								gradeSS = await Canvas.loadImage('./other/rank_pictures/X_Rank.png');
-								gradeS = await Canvas.loadImage('./other/rank_pictures/S_Rank.png');
-							}
-
-							let gradeA = await Canvas.loadImage('other/rank_pictures/A_Rank.png');
-							let gradeB = await Canvas.loadImage('other/rank_pictures/B_Rank.png');
-							let gradeC = await Canvas.loadImage('other/rank_pictures/C_Rank.png');
-							let gradeD = await Canvas.loadImage('other/rank_pictures/D_Rank.png');
-
-							if (topScore.rank === 'XH') {
-								ctx.drawImage(gradeSS, 60, 210 + 90, 32, 16);
-							} else if (topScore.rank === 'SH') {
-								ctx.drawImage(gradeS, 60, 210 + 90, 32, 16);
-							} else if (topScore.rank === 'X') {
-								ctx.drawImage(gradeSS, 60, 210 + 90, 32, 16);
-							} else if (topScore.rank === 'S') {
-								ctx.drawImage(gradeS, 60, 210 + 90, 32, 16);
-							} else if (topScore.rank === 'A') {
-								ctx.drawImage(gradeA, 60, 210 + 90, 32, 16);
-							} else if (topScore.rank === 'B') {
-								ctx.drawImage(gradeB, 60, 210 + 90, 32, 16);
-							} else if (topScore.rank === 'C') {
-								ctx.drawImage(gradeC, 60, 210 + 90, 32, 16);
-							} else if (topScore.rank === 'D') {
-								ctx.drawImage(gradeD, 60, 210 + 90, 32, 16);
-							}
-
-							// nickname
-							ctx.font = 'bold 20px comfortaa, sans-serif';
-							ctx.fillStyle = '#ffffff';
-							ctx.textAlign = 'left';
-							ctx.fillText(`${topScore.user.name}`, 170, 200 + 90);
-
-
-							// submitted on
-							ctx.font = '12px comfortaa, sans-serif';
-							ctx.textAlign = 'left';
-							ctx.fillStyle = '#FFFFFF';
-							ctx.fillText(getDate(topScore), 170, 228 + 90);
-
-							ctx.font = 'bold 15px comfortaa, sans-serif';
-							ctx.fillStyle = '#ffffff';
-							ctx.textAlign = 'left';
-
-							//total score
-							let score = Number(topScore.score);
-							ctx.fillText(`${score.toLocaleString('en-US')}`, 615, 195 + 90);
-							// accuracy
-							let accuracy = Math.floor(getAccuracy(topScore, mode) * 100 * 100) / 100;
-							ctx.fillText(`${accuracy}%`, 720, 195 + 90);
-							// maxCombo
-							ctx.fillText(`${topScore.maxCombo}`, 780, 195 + 90);
-							//mods
-							for (let i = 0; i < mods.length; i++) {
-								const modImage = await Canvas.loadImage(getModImage(mods[i]));
-								let xOffset = 28;
-								ctx.drawImage(modImage, 720 + xOffset * i, 220 + 90, canvas.width / 1000 * 28, canvas.height / 500 * 18);
-							}
-
-							// pp
-							ctx.fillText(`${Math.round(topScore.pp)}`, 675, 232 + 90);
-							// miss
-							ctx.fillText(`${topScore.counts['miss']}`, 625, 232 + 90);
-							//counts 50
-							ctx.fillText(`${topScore.counts['50']}`, 575, 232 + 90);
-							// counts 100
-							ctx.fillText(`${topScore.counts['100']}`, 525, 232 + 90);
-							// counts {300}
-							ctx.fillText(`${topScore.counts['300']}`, 475, 232 + 90);
-
-							ctx.font = 'bold 8px comfortaa, sans-serif';
-							ctx.fillStyle = '#898989';
-							ctx.fillText('Total Score', 615, 180 + 90);
-							ctx.fillText('Accuracy', 720, 180 + 90);
-							ctx.fillText('Max Combo', 780, 180 + 90);
-
-							ctx.fillText('Mods', 720, 217 + 90);
-							ctx.fillText('PP', 675, 217 + 90);
-							ctx.fillText('Miss', 625, 217 + 90);
-							ctx.fillText('50', 575, 217 + 90);
-							ctx.fillText('100', 525, 217 + 90);
-							ctx.fillText('300', 475, 217 + 90);
-						});
+					topScoreUserImage = await Canvas.loadImage(`https://s.ppy.sh/a/${topScore.user.id}`);
 				} catch (error) {
-					// nothing
+					topScoreUserImage = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
 				}
+
+				roundedRect(ctx, 100, 175 + 90, 60.39, 60.39, 500 / 70, '0', '0', '0', 0.75);
+				ctx.save();
+				ctx.clip();
+				ctx.drawImage(topScoreUserImage, 100, 175 + 90, 60.39, 60.39);
+				ctx.restore();
+
+				ctx.font = 'bold 20px comfortaa, sans-serif';
+				ctx.fillStyle = '#ffffff';
+				ctx.textAlign = 'left';
+
+				let gradeSS;
+				let gradeS;
+
+				let mods = getMods(topScore.raw_mods);
+
+				if (mods.includes('HD')) {
+					gradeSS = await Canvas.loadImage('./other/rank_pictures/XH_Rank.png');
+					gradeS = await Canvas.loadImage('./other/rank_pictures/SH_Rank.png');
+				} else {
+					gradeSS = await Canvas.loadImage('./other/rank_pictures/X_Rank.png');
+					gradeS = await Canvas.loadImage('./other/rank_pictures/S_Rank.png');
+				}
+
+				let gradeA = await Canvas.loadImage('other/rank_pictures/A_Rank.png');
+				let gradeB = await Canvas.loadImage('other/rank_pictures/B_Rank.png');
+				let gradeC = await Canvas.loadImage('other/rank_pictures/C_Rank.png');
+				let gradeD = await Canvas.loadImage('other/rank_pictures/D_Rank.png');
+
+				let gradeOffset = 0;
+				if (userScore.rank) { 
+					gradeOffset += 10;
+					ctx.font = 'bold 20px comfortaa, sans-serif';
+					ctx.fillStyle = '#ffffff';
+					ctx.textAlign = 'left';
+					ctx.fillText(`#${userScore.rank}`, 60, 290);
+				}
+
+				if (topScore.rank === 'XH') {
+					ctx.drawImage(gradeSS, 60, 200 + 90 + gradeOffset, 32, 16);
+				} else if (topScore.rank === 'SH') {
+					ctx.drawImage(gradeS, 60, 200 + 90 + gradeOffset, 32, 16);
+				} else if (topScore.rank === 'X') {
+					ctx.drawImage(gradeSS, 60, 200 + 90 + gradeOffset, 32, 16);
+				} else if (topScore.rank === 'S') {
+					ctx.drawImage(gradeS, 60, 200 + 90 + gradeOffset, 32, 16);
+				} else if (topScore.rank === 'A') {
+					ctx.drawImage(gradeA, 60, 200 + 90 + gradeOffset, 32, 16);
+				} else if (topScore.rank === 'B') {
+					ctx.drawImage(gradeB, 60, 200 + 90 + gradeOffset, 32, 16);
+				} else if (topScore.rank === 'C') {
+					ctx.drawImage(gradeC, 60, 200 + 90 + gradeOffset, 32, 16);
+				} else if (topScore.rank === 'D') {
+					ctx.drawImage(gradeD, 60, 200 + 90 + gradeOffset, 32, 16);
+				}
+
+				// nickname
+				ctx.font = 'bold 20px comfortaa, sans-serif';
+				ctx.fillStyle = '#ffffff';
+				ctx.textAlign = 'left';
+				ctx.fillText(`${topScore.user.name}`, 170, 200 + 90);
+
+
+				// submitted on
+				ctx.font = '12px comfortaa, sans-serif';
+				ctx.textAlign = 'left';
+				ctx.fillStyle = '#FFFFFF';
+				ctx.fillText(getDate(topScore), 170, 228 + 90);
+
+				ctx.font = 'bold 15px comfortaa, sans-serif';
+				ctx.fillStyle = '#ffffff';
+				ctx.textAlign = 'left';
+
+				//total score
+				let score = Number(topScore.score);
+				ctx.fillText(`${score.toLocaleString('en-US')}`, 615, 195 + 90);
+				// accuracy
+				let accuracy = Math.floor(getAccuracy(topScore, mode) * 100 * 100) / 100;
+				ctx.fillText(`${accuracy}%`, 720, 195 + 90);
+				// maxCombo
+				ctx.fillText(`${topScore.maxCombo}`, 780, 195 + 90);
+				//mods
+				for (let i = 0; i < mods.length; i++) {
+					const modImage = await Canvas.loadImage(getModImage(mods[i]));
+					let xOffset = 28;
+					ctx.drawImage(modImage, 720 + xOffset * i, 220 + 90, modImage.width / 2, modImage.height / 2);
+				}
+
+				// pp
+				ctx.fillText(`${Math.round(topScore.pp)}`, 675, 232 + 90);
+				// miss
+				ctx.fillText(`${topScore.counts['miss']}`, 625, 232 + 90);
+				//counts 50
+				ctx.fillText(`${topScore.counts['50']}`, 575, 232 + 90);
+				// counts 100
+				ctx.fillText(`${topScore.counts['100']}`, 525, 232 + 90);
+				// counts {300}
+				ctx.fillText(`${topScore.counts['300']}`, 475, 232 + 90);
+
+				ctx.font = 'bold 8px comfortaa, sans-serif';
+				ctx.fillStyle = '#898989';
+				ctx.fillText('Total Score', 615, 180 + 90);
+				ctx.fillText('Accuracy', 720, 180 + 90);
+				ctx.fillText('Max Combo', 780, 180 + 90);
+
+				ctx.fillText('Mods', 720, 217 + 90);
+				ctx.fillText('PP', 675, 217 + 90);
+				ctx.fillText('Miss', 625, 217 + 90);
+				ctx.fillText('50', 575, 217 + 90);
+				ctx.fillText('100', 525, 217 + 90);
+				ctx.fillText('300', 475, 217 + 90);
 			}
 
-			let thirdApiCall;
-			//here i need to get all the scores again 
+			if (limit > 1 && scoresArray.length > 1) {
+				ctx.fillText('Rank', 60, 258.5 + globalOffset);
+				ctx.fillText('Score', 90, 258.5 + globalOffset);
+				ctx.fillText('Accuracy', 160, 258.5 + globalOffset);
+				ctx.fillText('Player', 215, 258.5 + globalOffset);
+				ctx.fillText('Max Combo', 380, 258.5 + globalOffset);
+				ctx.fillText('300', 475, 258.5 + globalOffset);
+				ctx.fillText('100', 525, 258.5 + globalOffset);
+				ctx.fillText('50', 575, 258.5 + globalOffset);
+				ctx.fillText('Miss', 625, 258.5 + globalOffset);
+				ctx.fillText('PP', 675, 258.5 + globalOffset);
+				ctx.fillText('Mods', 720, 258.5 + globalOffset);
+			}
 
-			for (let i = 0; i < mapArray.length && i < limit; i++) {
-				roundedRect(ctx, 50, 255 + globalOffset, 800, 80, 500 / 70, '70', '57', '63', 0.75);
+			let localOffset = 10;
+			for (let i = 1; i < scoresArray.length && i < limit; i++) {
+				localOffset += 30;
+				roundedRect(ctx, 50, 220.5 + globalOffset + localOffset, 800, 20, 500 / 70, '70', '57', '63', 0.75);
 
+				ctx.fillStyle = '#FFFFFF';
+				ctx.font = 'bold 10px comfortaa, sans-serif';
+
+				// rank
+				ctx.fillText(`#${i + 1}`, 63, 235.5 + globalOffset + localOffset);
+				// score
+				ctx.fillText(`${Number(scoresArray[i].score).toLocaleString('en-US')}`, 90, 235.5 + globalOffset + localOffset);
+				// accuracy
+				let accuracy = Math.floor(getAccuracy(scoresArray[i], mode) * 100 * 100) / 100;
+				ctx.fillText(`${accuracy}%`, 160, 235.5 + globalOffset + localOffset);
+				// nickname
+				ctx.fillText(`${scoresArray[i].user.name}`, 215, 235.5 + globalOffset + localOffset);
+				// maxCombo
+				ctx.fillText(`${scoresArray[i].maxCombo}`, 380, 235.5 + globalOffset + localOffset);
+				// counts 300
+				ctx.fillText(`${scoresArray[i].counts['300']}`, 475, 235.5 + globalOffset + localOffset);
+				// counts 100
+				ctx.fillText(`${scoresArray[i].counts['100']}`, 525, 235.5 + globalOffset + localOffset);
+				// counts 50
+				ctx.fillText(`${scoresArray[i].counts['50']}`, 575, 235.5 + globalOffset + localOffset);
+				// counts miss
+				ctx.fillText(`${scoresArray[i].counts['miss']}`, 625, 235.5 + globalOffset + localOffset);
+				// pp
+				ctx.fillText(`${Math.round(scoresArray[i].pp)}`, 675, 235.5 + globalOffset + localOffset);
+				// mods
+				let mods = getMods(scoresArray[i].raw_mods);
+				for (let j = 0; j < mods.length; j++) {
+					const modImage = await Canvas.loadImage(getModImage(mods[j]));
+					let xOffset = 28;
+					ctx.drawImage(modImage, 720 + xOffset * j, 223 + globalOffset + localOffset, modImage.width / 2, modImage.height / 2);
+				}
 			}
 
 			return [canvas, ctx, beatmap];

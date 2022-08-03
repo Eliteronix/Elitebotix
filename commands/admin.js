@@ -1000,6 +1000,37 @@ module.exports = {
 			// 	}
 			// });
 
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'osu-mapleaderboard',
+					description: 'Sends an info card about the leaderboard on the specified beatmap',
+					options: [
+						{
+							'name': 'id',
+							'description': 'beatmap ID',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'gamemode',
+							'description': 'The osu! mode',
+							'type': 3,
+						},
+						{
+							'name': 'server',
+							'description': 'The server you want to get the leaderboard from',
+							'type': 3,
+						},
+						{
+							'name': 'amount',
+							'description': 'The amount of scores you want to get',
+							'type': 4,
+						}
+					]
+				}
+			});
+
+
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'osu-matchscore',
@@ -4441,6 +4472,36 @@ module.exports = {
 								}
 							]
 						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-mapleaderboard',
+					description: 'Sends an info card about the leaderboard on the specified beatmap',
+					options: [
+						{
+							'name': 'id',
+							'description': 'beatmap ID',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'gamemode',
+							'description': 'The osu! mode',
+							'type': 3,
+						},
+						{
+							'name': 'server',
+							'description': 'The server you want to get the leaderboard from',
+							'type': 3,
+						},
+						{
+							'name': 'amount',
+							'description': 'The amount of scores you want to get',
+							'type': 3,
+						}
 					]
 				}
 			});

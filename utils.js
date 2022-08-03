@@ -3424,7 +3424,7 @@ function wrongClusterFunction(id) {
 	// Allow cluster 0 if no id is provided
 	// eslint-disable-next-line no-undef
 	if (!id && process.env.pm_id === '0') {
-		return false;
+		return true;
 	}
 
 	// Else its the wrong cluster
