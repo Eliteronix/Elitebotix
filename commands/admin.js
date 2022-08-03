@@ -1015,6 +1015,21 @@ module.exports = {
 			// 	}
 			// });
 
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'osu-matchtrack',
+					description: 'Tracks the progress of a match',
+					options: [
+						{
+							'name': 'match',
+							'description': 'Match ID or link',
+							'type': 3,
+							'required': true
+						},
+					]
+				}
+			});
+
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'osu-matchup',
