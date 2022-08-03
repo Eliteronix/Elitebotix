@@ -1244,7 +1244,7 @@ module.exports = {
 	async getMatchesPlanned(startDate, endDate) {
 		let matchesPlanned = 0;
 		if (startDate.getUTCHours() <= 18 && endDate.getUTCHours() >= 18) {
-			matchesPlanned += 2;
+			matchesPlanned += 1;
 		}
 
 		logDatabaseQueriesFunction(4, 'utils.js getMatchesPlanned DBProcessQueue tourneyMatchNotification');
