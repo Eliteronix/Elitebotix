@@ -1858,6 +1858,34 @@ module.exports = {
 
 			channel.send({ content: issues[i].key, embeds: [issueEmbed] });
 		}
+	},
+	async getOsuPlayerName(osuUserId) {
+		let playerName = null;
+		logDatabaseQueriesFunction(4, 'utils.js getOsuPlayerName');
+		let discordUser = await DBDiscordUsers.findOne({
+			where: { osuUserId: osuUserId }
+		});
+
+		if (discordUser) {
+			playerName = discordUser.osuName;
+		} else {
+			// eslint-disable-next-line no-undef
+			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+			});
+
+			const osuUser = await osuApi.getUser({ u: osuUserId });
+			if (osuUser) {
+				playerName = osuUser.name;
+
+				await DBDiscordUsers.create({ osuUserId: osuUserId, osuName: osuUser.name });
+			}
+		}
+
+		return playerName;
 	}
 };
 

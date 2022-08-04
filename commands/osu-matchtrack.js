@@ -1,6 +1,8 @@
 const osu = require('node-osu');
-const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName } = require('../utils');
 const { Permissions } = require('discord.js');
+const fetch = require('node-fetch');
+const Discord = require('discord.js');
 
 module.exports = {
 	name: 'osu-matchtrack',
@@ -70,17 +72,19 @@ module.exports = {
 					initialMessage = await interaction.editReply(`Tracking match \`${match.name.replace(/`/g, '')}\`\nReact to this message with :octagonal_sign: to stop tracking`);
 				}
 
+				let stop = false;
+
 				const reactionCollector = initialMessage.createReactionCollector();
 
 				reactionCollector.on('collect', (reaction, user) => {
-					console.log(reaction.emoji.name, user.id, msg.author.id);
 					if (reaction.emoji.name === '🛑' && user.id === msg.author.id) {
-						initialMessage.reactions.removeAll().catch(() => { });
 						reactionCollector.stop();
 					}
 				});
 
 				reactionCollector.on('end', () => {
+					stop = true;
+					initialMessage.reactions.removeAll().catch(() => { });
 					if (msg.id) {
 						msg.reply(`Stopped tracking match \`${match.name.replace(/`/g, '')}\``);
 					} else {
@@ -93,7 +97,102 @@ module.exports = {
 				});
 
 				initialMessage.react('🛑');
-				console.log(match);
+
+				let latestEventId = null;
+
+				let lastMessage = null;
+				let lastMessageType = 'mapresult';
+
+				while (!stop) {
+					console.log(match.id, latestEventId, lastMessageType);
+					await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
+						.then(async (res) => {
+							let htmlCode = await res.text();
+							htmlCode = htmlCode.replace(/&quot;/gm, '"');
+							// console.log(htmlCode);
+							const matchRunningRegex = /{"match".+,"current_game_id":d+}/gm;
+							const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
+							const matchesRunning = matchRunningRegex.exec(htmlCode);
+							const matchesPaused = matchPausedRegex.exec(htmlCode);
+
+							let regexMatch = null;
+							if (matchesRunning && matchesRunning[0]) {
+								regexMatch = matchesRunning[0];
+							}
+
+							if (matchesPaused && matchesPaused[0]) {
+								regexMatch = matchesPaused[0];
+							}
+
+							if (regexMatch) {
+								let json = JSON.parse(regexMatch);
+
+								if (!latestEventId) {
+									latestEventId = json.latest_event_id;
+								}
+
+								if (json.latest_event_id > latestEventId) {
+									let playerUpdates = [];
+									for (let i = 0; i < json.events.length; i++) {
+										if (json.events[i].detail.type === 'other') {
+											playerUpdates = [];
+										} else if (json.events[i].detail.type === 'host-changed') {
+											let playerName = await getOsuPlayerName(json.events[i].user_id);
+											playerUpdates.push(`${playerName} became the host.`);
+										} else if (json.events[i].detail.type === 'player-joined') {
+											let playerName = await getOsuPlayerName(json.events[i].user_id);
+											playerUpdates.push(`${playerName} joined the game.`);
+										} else if (json.events[i].detail.type === 'player-left') {
+											let playerName = await getOsuPlayerName(json.events[i].user_id);
+											playerUpdates.push(`${playerName} left the game.`);
+										} else if (json.events[i].detail.type === 'match-disbanded') {
+											playerUpdates.push('The match has been closed.');
+										} else {
+											playerUpdates.push(`${json.events[i].detail.type}, ${json.events[i].user_id}`);
+										}
+
+										if (json.events[i].id > latestEventId) {
+											console.log(json.events[i]);
+
+											if (json.events[i].detail.type === 'match-disbanded') {
+												reactionCollector.stop();
+											}
+
+											if (lastMessageType === 'mapresult' && json.events[i].detail.type !== 'other') {
+												let embed = new Discord.MessageEmbed()
+													.setColor(0x0099FF)
+													.setTitle(`Match \`${match.name.replace(/`/g, '')}\``)
+													.setDescription(`${playerUpdates.join('\n')}`);
+
+												lastMessage = await msg.channel.send({ embeds: [embed] });
+											} else if (json.events[i].detail.type === 'other') {
+												let message = `Match \`${match.name.replace(/`/g, '')}\` Map: ${json.events[i].game.beatmap.id}`;
+												lastMessage = await msg.channel.send(message);
+											} else if (json.events[i].detail.type !== 'other') {
+												let embed = new Discord.MessageEmbed()
+													.setColor(0x0099FF)
+													.setTitle(`Match \`${match.name.replace(/`/g, '')}\``)
+													.setDescription(`${playerUpdates.join('\n')}`);
+
+												lastMessage.edit({ embeds: [embed] });
+											}
+
+
+											if (json.events[i].detail.type === 'other') {
+												lastMessageType = 'mapresult';
+											} else {
+												lastMessageType = 'updates';
+											}
+										}
+									}
+
+									latestEventId = json.latest_event_id;
+								}
+							}
+						});
+
+					await pause(15000);
+				}
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
