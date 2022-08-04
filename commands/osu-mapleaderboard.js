@@ -9,14 +9,14 @@ module.exports = {
 	name: 'osu-mapleaderboard',
 	aliases: ['osu-map-leaderboard'],
 	description: 'Sends an info card about the leaderboard on the specified beatmap',
-	usage: '<id> [mode]',
+	usage: '<id>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.ATTACH_FILES, Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	guildOnly: false,
 	args: true,
-	cooldown: 5,
+	cooldown: 10,
 	noCooldownMessage: false,
 	tags: 'osu',
 	prefixCommand: true,
@@ -32,7 +32,7 @@ module.exports = {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					if (interaction.options._hoistedOptions[i].name === 'id') {
 						args.push(`${interaction.options._hoistedOptions[i].value}`);
-					} else if (interaction.options._hoistedOptions[i].name === 'gamemode') {
+					} else if (interaction.options._hoistedOptions[i].name === 'mode') {
 						args.push(`--${interaction.options._hoistedOptions[i].value}`);
 					} else if (interaction.options._hoistedOptions[i].name === 'server') {
 						args.push(`--${interaction.options._hoistedOptions[i].value}`);
@@ -117,6 +117,10 @@ module.exports = {
 				offset = 45;
 			}
 
+
+			let lookHere;
+			// canvas is too big with some limits and i aint fcuking with it
+
 			const canvasWidth = 900;
 			let canvasHeight = 230 + (limit * offset);
 
@@ -137,18 +141,28 @@ module.exports = {
 					ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
 				}
 			}
+			let mode = beatmap.mode;
 
-			let mode = 'Standard';
+			if (mode == 'Standard') {
+				mode = 0;
+			} else if (mode == 'Taiko') {
+				mode = 1;
+			} else if (mode == 'Catch') {
+				mode = 2;
+			} else if (mode == 'Mania') {
+				mode = 3;
+			}
 
 			let scoresArray = [];
 			let userScore = {};
-
 
 			const user = await DBDiscordUsers.findOne({
 				where: {
 					userId: msg.author.id,
 				}
 			});
+
+			let lookHere2;
 
 			await osuApi.getScores({ b: beatmap.beatmapId, m: mode })
 				.then(async (mapScores) => {
@@ -192,7 +206,6 @@ module.exports = {
 			let files = [attachment];
 
 			if (interaction) {
-				interaction.deleteReply();
 				return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: files, ephemeral: false });
 			} else {
 				return await msg.reply({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: files });
@@ -553,7 +566,11 @@ module.exports = {
 				for (let j = 0; j < mods.length; j++) {
 					const modImage = await Canvas.loadImage(getModImage(mods[j]));
 					let xOffset = 28;
-					ctx.drawImage(modImage, 720 + xOffset * j, 223 + globalOffset + localOffset, modImage.width / 2, modImage.height / 2);
+					let v = 2;
+					if (modImage.width > 45) {
+						v = 4;
+					}
+					ctx.drawImage(modImage, 720 + xOffset * j, 223 + globalOffset + localOffset, modImage.width / v, modImage.height / v);
 				}
 			}
 
