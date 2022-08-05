@@ -1860,7 +1860,7 @@ module.exports = {
 		}
 	},
 	async getOsuPlayerName(osuUserId) {
-		let playerName = null;
+		let playerName = osuUserId;
 		logDatabaseQueriesFunction(4, 'utils.js getOsuPlayerName');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: { osuUserId: osuUserId }
@@ -1877,11 +1877,15 @@ module.exports = {
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
 
-			const osuUser = await osuApi.getUser({ u: osuUserId });
-			if (osuUser) {
-				playerName = osuUser.name;
+			try {
+				const osuUser = await osuApi.getUser({ u: osuUserId });
+				if (osuUser) {
+					playerName = osuUser.name;
 
-				await DBDiscordUsers.create({ osuUserId: osuUserId, osuName: osuUser.name });
+					await DBDiscordUsers.create({ osuUserId: osuUserId, osuName: osuUser.name });
+				}
+			} catch (err) {
+				//Nothing
 			}
 		}
 
