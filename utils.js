@@ -1890,6 +1890,9 @@ module.exports = {
 		}
 
 		return playerName;
+	},
+	calculateGrade(mode, counts, modBits) {
+		return calculateGradeFunction(mode, counts, modBits);
 	}
 };
 
