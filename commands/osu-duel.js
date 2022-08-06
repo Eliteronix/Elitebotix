@@ -88,6 +88,7 @@ module.exports = {
 
 				let ownStarRating = 4;
 				try {
+					await interaction.editReply(`Processing Duel Rating for ${commandUser.osuName}...`);
 					ownStarRating = await getUserDuelStarRating({ osuUserId: commandUser.osuUserId, client: interaction.client });
 				} catch (e) {
 					if (e !== 'No standard plays') {
@@ -108,6 +109,7 @@ module.exports = {
 
 					if (secondUser && secondUser.osuUserId) {
 						try {
+							await interaction.editReply(`Processing Duel Rating for ${secondUser.osuName}...`);
 							secondStarRating = await getUserDuelStarRating({ osuUserId: secondUser.osuUserId, client: interaction.client });
 						} catch (e) {
 							if (e !== 'No standard plays') {
@@ -127,6 +129,7 @@ module.exports = {
 
 					if (secondUser && secondUser.osuUserId) {
 						try {
+							await interaction.editReply(`Processing Duel Rating for ${secondUser.osuName}...`);
 							secondStarRating = await getUserDuelStarRating({ osuUserId: secondUser.osuUserId, client: interaction.client });
 						} catch (e) {
 							if (e !== 'No standard plays') {
@@ -150,6 +153,7 @@ module.exports = {
 
 					if (thirdUser && thirdUser.osuUserId) {
 						try {
+							await interaction.editReply(`Processing Duel Rating for ${thirdUser.osuName}...`);
 							thirdStarRating = await getUserDuelStarRating({ osuUserId: thirdUser.osuUserId, client: interaction.client });
 						} catch (e) {
 							if (e !== 'No standard plays') {
@@ -173,6 +177,7 @@ module.exports = {
 
 					if (fourthUser && fourthUser.osuUserId) {
 						try {
+							await interaction.editReply(`Processing Duel Rating for ${fourthUser.osuName}...`);
 							fourthStarRating = await getUserDuelStarRating({ osuUserId: fourthUser.osuUserId, client: interaction.client });
 						} catch (e) {
 							if (e !== 'No standard plays') {
@@ -863,7 +868,13 @@ module.exports = {
 						console.log('Duel Match: Grabbed all FM Beatmaps');
 					}
 
+					await interaction.editReply(`Finding a ${modPools[i]} map out of ${beatmaps.length} possible maps...`);
+
 					while (dbBeatmap === null) {
+						if (beatmaps.length && beatmaps.length % 5 === 0) {
+							await interaction.editReply(`Finding a ${modPools[i]} map out of ${beatmaps.length} possible maps...`);
+						}
+
 						const index = Math.floor(Math.random() * beatmaps.length);
 
 						if (!beatmaps.length) {
@@ -977,12 +988,15 @@ module.exports = {
 					teamname1 = `${commandUser.osuName.substring(0, commandUser.osuName.length / 2)}${secondUser.osuName.substring(secondUser.osuName.length / 2, secondUser.osuName.length)}`;
 					teamname2 = `${thirdUser.osuName.substring(0, thirdUser.osuName.length / 2)}${fourthUser.osuName.substring(fourthUser.osuName.length / 2, fourthUser.osuName.length)}`;
 				}
+
+				await interaction.editReply(`Creating match lobby for ${teamname1} vs ${teamname2}`);
 				for (let i = 0; i < 5; i++) {
 					try {
 						try {
 							console.log('Duel Match: Connecting to Bancho');
 							await bancho.connect();
 						} catch (error) {
+							console.log(`Duel Match: Error connecting to Bancho: ${error}`);
 							if (!error.message === 'Already connected/connecting') {
 								throw (error);
 							}
