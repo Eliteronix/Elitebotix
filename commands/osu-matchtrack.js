@@ -170,7 +170,8 @@ module.exports = {
 												let embed = new Discord.MessageEmbed()
 													.setColor(0x0099FF)
 													.setTitle(`${match.name.replace(/`/g, '')}`)
-													.setDescription(`${playerUpdates.join('\n')}`);
+													.setDescription(`${playerUpdates.join('\n')}`)
+													.setURL(`https://osu.ppy.sh/mp/${match.id}`);
 
 												lastMessage = await msg.channel.send({ embeds: [embed] });
 											} else if (json.events[i].detail.type === 'other') {
@@ -180,7 +181,8 @@ module.exports = {
 												let embed = new Discord.MessageEmbed()
 													.setColor(0x0099FF)
 													.setTitle(`${match.name.replace(/`/g, '')}`)
-													.setDescription(`${playerUpdates.join('\n')}`);
+													.setDescription(`${playerUpdates.join('\n')}`)
+													.setURL(`https://osu.ppy.sh/mp/${match.id}`);
 
 												lastMessage.edit({ embeds: [embed] });
 											}
