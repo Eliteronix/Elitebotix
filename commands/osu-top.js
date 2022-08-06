@@ -562,7 +562,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		beatmaps.push(await getOsuBeatmap({ beatmapId: '658127', modBits: 16 }));
 	}
 
-	for (let i = 0; i < showLimit && i < scores.length; i++) {
+	for (let i = 0; i < limit && i < scores.length; i++) {
 		let dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: scores[i].raw_mods });
 		if (dbBeatmap) {
 			beatmaps.push(dbBeatmap);
@@ -619,7 +619,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		});
 	}
 
-	for (let i = 0; i < beatmaps.length && i < showLimit; i++) {
+	for (let i = 0; i < beatmaps.length && i < limit; i++) {
 		for (let j = 0; j < scores.length; j++) {
 			if (beatmaps[i].beatmapId === scores[j].beatmapId) {
 				sortedScores.push(scores[j]);
