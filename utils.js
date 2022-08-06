@@ -2032,6 +2032,7 @@ async function getUserDuelStarRatingFunction(input) {
 	quicksortGameId(userScores);
 
 	let scoresPerMod = 35;
+	let outliersPerMod = 3;
 
 	let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
 
@@ -2054,10 +2055,9 @@ async function getUserDuelStarRatingFunction(input) {
 			}
 		}
 
-		//Group the maps into steps of 0.1 of difficulty
-		const steps = [];
-		const stepData = [];
-		for (let i = 0; i < userMaps.length && i < scoresPerMod; i++) {
+		// Get all the maps and fill in their data
+		let relevantMaps = [];
+		for (let i = 0; i < userMaps.length && i < scoresPerMod + outliersPerMod * 2; i++) {
 			//Get the most recent data
 			let dbBeatmap = null;
 			if (modPools[modIndex] === 'HR') {
@@ -2126,6 +2126,8 @@ async function getUserDuelStarRatingFunction(input) {
 					underPerformWeight = 1;
 				}
 
+				userMaps[i].overPerformWeight = overPerformWeight;
+				userMaps[i].underPerformWeight = underPerformWeight;
 				userMaps[i].weight = Math.abs(overPerformWeight + underPerformWeight - 1);
 
 				let mapStarRating = dbBeatmap.starRating;
@@ -2137,55 +2139,109 @@ async function getUserDuelStarRatingFunction(input) {
 
 				userMaps[i].starRating = mapStarRating;
 
-				//Add the map to the scores array
-				if (modIndex === 0) {
-					duelRatings.scores.NM.push(userMaps[i]);
-				} else if (modIndex === 1) {
-					duelRatings.scores.HD.push(userMaps[i]);
-				} else if (modIndex === 2) {
-					duelRatings.scores.HR.push(userMaps[i]);
-				} else if (modIndex === 3) {
-					duelRatings.scores.DT.push(userMaps[i]);
-				} else if (modIndex === 4) {
-					duelRatings.scores.FM.push(userMaps[i]);
-				}
+				userMaps[i].expectedRating = getExpectedDuelRating(userMaps[i]);
 
-				//Add the data to the 5 steps in the area of the maps' star rating -> 5.0 will be representing 4.8, 4.9, 5.0, 5.1, 5.2
-				for (let i = 0; i < 5; i++) {
-					let starRatingStep = Math.round((Math.round(mapStarRating * 10) / 10 + 0.1 * i - 0.2) * 10) / 10;
-					if (steps.indexOf(starRatingStep) === -1) {
-						stepData.push({
-							step: starRatingStep,
-							totalOverPerformWeight: overPerformWeight,
-							totalUnderPerformWeight: underPerformWeight,
-							amount: 1,
-							averageOverPerformWeight: overPerformWeight,
-							averageUnderPerformWeight: underPerformWeight,
-							averageWeight: Math.abs(((overPerformWeight + underPerformWeight) / 1) - 1),
-							overPerformWeightedStarRating: (starRatingStep) * overPerformWeight,
-							underPerformWeightedStarRating: (starRatingStep) * underPerformWeight,
-							weightedStarRating: (starRatingStep) * Math.abs(((overPerformWeight + underPerformWeight) / 1) - 1),
-						});
-						steps.push(starRatingStep);
-					} else {
-						stepData[steps.indexOf(starRatingStep)].totalOverPerformWeight += overPerformWeight;
-						stepData[steps.indexOf(starRatingStep)].totalUnderPerformWeight += underPerformWeight;
-						stepData[steps.indexOf(starRatingStep)].amount++;
-						stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight = stepData[steps.indexOf(starRatingStep)].totalOverPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
-						stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight = stepData[steps.indexOf(starRatingStep)].totalUnderPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
-						stepData[steps.indexOf(starRatingStep)].averageWeight = Math.abs(stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight + stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight - 1);
-						stepData[steps.indexOf(starRatingStep)].overPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight;
-						stepData[steps.indexOf(starRatingStep)].underPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight;
-						stepData[steps.indexOf(starRatingStep)].weightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageWeight;
-					}
-				}
+				relevantMaps.push(userMaps[i]);
 			} else {
 				userMaps.splice(i, 1);
 				i--;
 			}
 		}
 
-		//Calculated the starrating for the modpool
+		//Get rid of the outliersPerMod best maps by expectedRating
+		if (relevantMaps.length < 10) {
+			outliersPerMod = 0;
+		} else if (relevantMaps.length < 20) {
+			outliersPerMod = 1;
+		} else if (relevantMaps.length < 30) {
+			outliersPerMod = 2;
+		}
+
+		for (let i = 0; i < outliersPerMod; i++) {
+			let worstBeatmap = relevantMaps[0];
+			let bestBeatmap = relevantMaps[0];
+
+			for (let j = 0; j < relevantMaps.length; j++) {
+				if (relevantMaps[j].expectedRating < worstBeatmap.expectedRating) {
+					worstBeatmap = relevantMaps[j];
+				} else if (relevantMaps[j].expectedRating > bestBeatmap.expectedRating) {
+					bestBeatmap = relevantMaps[j];
+				}
+			}
+
+			//Add the maps to the scores array
+			worstBeatmap.outlier = true;
+			bestBeatmap.outlier = true;
+			if (modIndex === 0) {
+				duelRatings.scores.NM.push(worstBeatmap);
+				duelRatings.scores.NM.push(bestBeatmap);
+			} else if (modIndex === 1) {
+				duelRatings.scores.HD.push(worstBeatmap);
+				duelRatings.scores.HD.push(bestBeatmap);
+			} else if (modIndex === 2) {
+				duelRatings.scores.HR.push(worstBeatmap);
+				duelRatings.scores.HR.push(bestBeatmap);
+			} else if (modIndex === 3) {
+				duelRatings.scores.DT.push(worstBeatmap);
+				duelRatings.scores.DT.push(bestBeatmap);
+			} else if (modIndex === 4) {
+				duelRatings.scores.FM.push(worstBeatmap);
+				duelRatings.scores.FM.push(bestBeatmap);
+			}
+
+			relevantMaps.splice(relevantMaps.indexOf(worstBeatmap), 1);
+			relevantMaps.splice(relevantMaps.indexOf(bestBeatmap), 1);
+		}
+
+		//Group the maps into steps of 0.1 of difficulty
+		const steps = [];
+		const stepData = [];
+		for (let i = 0; i < relevantMaps.length; i++) {
+			//Add the map to the scores array
+			if (modIndex === 0) {
+				duelRatings.scores.NM.push(relevantMaps[i]);
+			} else if (modIndex === 1) {
+				duelRatings.scores.HD.push(relevantMaps[i]);
+			} else if (modIndex === 2) {
+				duelRatings.scores.HR.push(relevantMaps[i]);
+			} else if (modIndex === 3) {
+				duelRatings.scores.DT.push(relevantMaps[i]);
+			} else if (modIndex === 4) {
+				duelRatings.scores.FM.push(relevantMaps[i]);
+			}
+
+			//Add the data to the 5 steps in the area of the maps' star rating -> 5.0 will be representing 4.8, 4.9, 5.0, 5.1, 5.2
+			for (let j = 0; j < 5; j++) {
+				let starRatingStep = Math.round((Math.round(relevantMaps[i].starRating * 10) / 10 + 0.1 * j - 0.2) * 10) / 10;
+				if (steps.indexOf(starRatingStep) === -1) {
+					stepData.push({
+						step: starRatingStep,
+						totalOverPerformWeight: relevantMaps[i].overPerformWeight,
+						totalUnderPerformWeight: relevantMaps[i].underPerformWeight,
+						amount: 1,
+						averageOverPerformWeight: relevantMaps[i].overPerformWeight,
+						averageUnderPerformWeight: relevantMaps[i].underPerformWeight,
+						averageWeight: Math.abs(((relevantMaps[i].overPerformWeight + relevantMaps[i].underPerformWeight) / 1) - 1),
+						overPerformWeightedStarRating: (starRatingStep) * relevantMaps[i].overPerformWeight,
+						underPerformWeightedStarRating: (starRatingStep) * relevantMaps[i].underPerformWeight,
+						weightedStarRating: (starRatingStep) * Math.abs(((relevantMaps[i].overPerformWeight + relevantMaps[i].underPerformWeight) / 1) - 1),
+					});
+					steps.push(starRatingStep);
+				} else {
+					stepData[steps.indexOf(starRatingStep)].totalOverPerformWeight += relevantMaps[i].overPerformWeight;
+					stepData[steps.indexOf(starRatingStep)].totalUnderPerformWeight += relevantMaps[i].underPerformWeight;
+					stepData[steps.indexOf(starRatingStep)].amount++;
+					stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight = stepData[steps.indexOf(starRatingStep)].totalOverPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
+					stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight = stepData[steps.indexOf(starRatingStep)].totalUnderPerformWeight / stepData[steps.indexOf(starRatingStep)].amount;
+					stepData[steps.indexOf(starRatingStep)].averageWeight = Math.abs(stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight + stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight - 1);
+					stepData[steps.indexOf(starRatingStep)].overPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageOverPerformWeight;
+					stepData[steps.indexOf(starRatingStep)].underPerformWeightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageUnderPerformWeight;
+					stepData[steps.indexOf(starRatingStep)].weightedStarRating = stepData[steps.indexOf(starRatingStep)].step * stepData[steps.indexOf(starRatingStep)].averageWeight;
+				}
+			}
+		}
+
+		//Calculate the starrating for the modpool
 		let totalWeight = 0;
 		let totalWeightedStarRating = 0;
 		for (let i = 0; i < stepData.length; i++) {
@@ -2195,16 +2251,16 @@ async function getUserDuelStarRatingFunction(input) {
 			}
 		}
 
-		if (userMaps.length < 5) {
+		if (relevantMaps.length < 5) {
 			duelRatings.provisional = true;
 		}
 
 		//add the values to the modpool data
-		if (totalWeight > 0 && userMaps.length > 0) {
+		if (totalWeight > 0 && relevantMaps.length > 0) {
 			let weightedStarRating = totalWeightedStarRating / totalWeight;
 
-			for (let i = 0; i < scoresPerMod; i++) {
-				weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, userMaps[i % userMaps.length], Math.round((1 - (i * 1 / scoresPerMod)) * 100) / 100);
+			for (let i = 0; i < relevantMaps.length; i++) {
+				weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, relevantMaps[i % relevantMaps.length], Math.round((1 - (i * 1 / relevantMaps.length)) * 100) / 100);
 			}
 
 			if (modIndex === 0) {
@@ -3764,4 +3820,19 @@ function quicksortOsuPP(list, start = 0, end = undefined) {
 		quicksortOsuPP(list, p + 1, end);
 	}
 	return list;
+}
+
+function getExpectedDuelRating(score) {
+	score.score = parseFloat(score.score);
+	score.starRating = parseFloat(score.starRating);
+
+	let rating = score.starRating;
+	let oldRating = 0;
+
+	while (oldRating.toFixed(5) !== rating.toFixed(5)) {
+		oldRating = rating;
+		rating = applyOsuDuelStarratingCorrection(rating, score, 1);
+	}
+
+	return rating;
 }
