@@ -2032,6 +2032,7 @@ async function getUserDuelStarRatingFunction(input) {
 	quicksortGameId(userScores);
 
 	let scoresPerMod = 35;
+	let outliersPerMod = 3;
 
 	let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
 
@@ -2057,7 +2058,7 @@ async function getUserDuelStarRatingFunction(input) {
 		//Group the maps into steps of 0.1 of difficulty
 		const steps = [];
 		const stepData = [];
-		for (let i = 0; i < userMaps.length && i < scoresPerMod; i++) {
+		for (let i = 0; i < userMaps.length && i < scoresPerMod + outliersPerMod * 2; i++) {
 			//Get the most recent data
 			let dbBeatmap = null;
 			if (modPools[modIndex] === 'HR') {
@@ -2137,6 +2138,8 @@ async function getUserDuelStarRatingFunction(input) {
 
 				userMaps[i].starRating = mapStarRating;
 
+				userMaps[i].expectedRating = getExpectedDuelRating(userMaps[i]);
+
 				//Add the map to the scores array
 				if (modIndex === 0) {
 					duelRatings.scores.NM.push(userMaps[i]);
@@ -2151,8 +2154,8 @@ async function getUserDuelStarRatingFunction(input) {
 				}
 
 				//Add the data to the 5 steps in the area of the maps' star rating -> 5.0 will be representing 4.8, 4.9, 5.0, 5.1, 5.2
-				for (let i = 0; i < 5; i++) {
-					let starRatingStep = Math.round((Math.round(mapStarRating * 10) / 10 + 0.1 * i - 0.2) * 10) / 10;
+				for (let j = 0; j < 5; j++) {
+					let starRatingStep = Math.round((Math.round(mapStarRating * 10) / 10 + 0.1 * j - 0.2) * 10) / 10;
 					if (steps.indexOf(starRatingStep) === -1) {
 						stepData.push({
 							step: starRatingStep,
@@ -2185,7 +2188,7 @@ async function getUserDuelStarRatingFunction(input) {
 			}
 		}
 
-		//Calculated the starrating for the modpool
+		//Calculate the starrating for the modpool
 		let totalWeight = 0;
 		let totalWeightedStarRating = 0;
 		for (let i = 0; i < stepData.length; i++) {
@@ -3764,4 +3767,22 @@ function quicksortOsuPP(list, start = 0, end = undefined) {
 		quicksortOsuPP(list, p + 1, end);
 	}
 	return list;
+}
+
+function getExpectedDuelRating(score) {
+	score.score = parseFloat(score.score);
+	score.starRating = parseFloat(score.starRating);
+	let rating = score.starRating;
+
+	let iteration = 0;
+	let oldRating = 0;
+	while (oldRating.toFixed(5) !== rating.toFixed(5)) {
+		oldRating = rating;
+		rating = applyOsuDuelStarratingCorrection(rating, score, 1);
+		iteration++;
+	}
+
+	console.log(iteration, rating, score.score, score.starRating);
+
+	return rating;
 }
