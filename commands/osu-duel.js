@@ -90,7 +90,7 @@ module.exports = {
 				];
 
 				console.log(now.getDate(), now.getMonth(), now.getUTCHours(), !rapidPlayers.includes(commandUser.osuUserId));
-				if (now.getDate() === 7 && now.getMonth() === 7 && now.getUTCHours() > 16 && !rapidPlayers.includes(commandUser.osuUserId)) {
+				if (now.getDate() === 7 && now.getMonth() === 7 && now.getUTCHours() >= 16 && !rapidPlayers.includes(commandUser.osuUserId)) {
 					return await interaction.editReply('The duel slots are currently reserved for a rapid tournament hosted by the Dev, Eliteronix. As soon as the tournament is over, the slots will be available again.');
 				}
 
