@@ -2954,7 +2954,7 @@ async function getOsuBeatmapFunction(input) {
 	if (input.modBits) {
 		modBits = input.modBits;
 	}
-	let forceUpdate = false;
+	let forceUpdate = true;
 	if (input.forceUpdate) {
 		forceUpdate = true;
 	}
@@ -3022,6 +3022,16 @@ async function getOsuBeatmapFunction(input) {
 								bpm = parseFloat(beatmaps[0].bpm) * 1.5;
 								drainLength = parseFloat(beatmaps[0].length.drain) / 1.5;
 								totalLength = parseFloat(beatmaps[0].length.total) / 1.5;
+								let ms;
+								if (ar > 5) {
+									ms = 200 + (11 - ar) * 100;
+								} else ms = 800 + (5 - ar) * 80;
+
+								if (ms < 300) {
+									ar = 11;
+								} else if (ms < 1200) {
+									ar = Math.round((11 - (ms - 300) / 150) * 100) / 100;
+								} else ar = Math.round((5 - (ms - 1200) / 120) * 100) / 100;
 							} else if (getModsFunction(modBits).includes('HT')) {
 								bpm = parseFloat(beatmaps[0].bpm) * 0.75;
 								drainLength = parseFloat(beatmaps[0].length.drain) / 0.75;
@@ -3045,7 +3055,7 @@ async function getOsuBeatmapFunction(input) {
 							}
 
 							cs = Math.min(Math.round(cs * 100) / 100, 10);
-							ar = Math.min(Math.round(ar * 100) / 100, 10);
+							ar = Math.min(Math.round(ar * 100) / 100, 11);
 							od = Math.min(Math.round(od * 100) / 100, 10);
 							hpDrain = Math.min(Math.round(hpDrain * 100) / 100, 10);
 
