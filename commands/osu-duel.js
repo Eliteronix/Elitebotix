@@ -992,9 +992,9 @@ module.exports = {
 				let matchesPlanned = await getMatchesPlanned(startDate, endDate);
 				console.log('Duel Match: Got matches planned');
 
-				if (matchesPlanned > 3) {
-					return await interaction.editReply('The bot cannot host another match at the moment because there will already be 4 matches running. (Maximum limit is 4)');
-				}
+				// if (matchesPlanned > 3) {
+				// 	return await interaction.editReply('The bot cannot host another match at the moment because there will already be 4 matches running. (Maximum limit is 4)');
+				// }
 
 				let processQueueTask = await DBProcessQueue.create({ guildId: 'None', task: 'customMOTD', priority: 10, additions: gameLength, date: startDate });
 
