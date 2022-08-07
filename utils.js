@@ -2954,7 +2954,7 @@ async function getOsuBeatmapFunction(input) {
 	if (input.modBits) {
 		modBits = input.modBits;
 	}
-	let forceUpdate = true;
+	let forceUpdate = false;
 	if (input.forceUpdate) {
 		forceUpdate = true;
 	}
