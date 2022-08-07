@@ -136,7 +136,7 @@ module.exports = {
 								let json = JSON.parse(regexMatch);
 
 								if (!latestEventId) {
-									latestEventId = json.latest_event_id;
+									latestEventId = json.latest_event_id - 1;
 								}
 
 								if (json.latest_event_id > latestEventId) {
