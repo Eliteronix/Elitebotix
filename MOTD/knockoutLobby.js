@@ -60,10 +60,11 @@ module.exports = {
 		plannedEndDate.setUTCSeconds(gameLength);
 
 		let matchesPlanned = await getMatchesPlanned(plannedStartDate, plannedEndDate);
+		let processQueueTask = null;
 
-		if (matchesPlanned < 4 && lobbyNumber === 'custom') {
+		if (matchesPlanned < 4) {
 			//Create processqueue task to block potential osu-referee schedules
-			DBProcessQueue.create({ guildId: 'None', task: 'customMOTD', priority: 10, additions: gameLength, date: plannedStartDate });
+			processQueueTask = DBProcessQueue.create({ guildId: 'None', task: 'customMOTD', priority: 10, additions: gameLength, date: plannedStartDate });
 		}
 
 		//Host multi only if lobbyNumber is below 5 or custom lobby with less than 4 matches planned
@@ -323,6 +324,11 @@ module.exports = {
 					}
 					await pause(15000);
 					await channel.sendMessage('!mp close');
+					try {
+						processQueueTask.destroy();
+					} catch (error) {
+						//Nothing
+					}
 					// eslint-disable-next-line no-undef
 					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -343,6 +349,11 @@ module.exports = {
 				} else if (players.length === 0) {
 					lobbyStatus = 'Lobby finished';
 					await channel.sendMessage('!mp close');
+					try {
+						processQueueTask.destroy();
+					} catch (error) {
+						//Nothing
+					}
 					// eslint-disable-next-line no-undef
 					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
