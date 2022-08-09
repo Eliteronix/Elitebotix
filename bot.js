@@ -1,6 +1,6 @@
 //Log message upon starting the bot
 console.log('Bot is starting...');
-const { twitchConnect, wrongCluster, syncJiraCards } = require('./utils');
+const { twitchConnect, wrongCluster, syncJiraCards, createNewForumPostRecords } = require('./utils');
 
 //require the dotenv node module
 require('dotenv').config();
@@ -226,6 +226,7 @@ setInterval(() => refreshOsuRank(), 60000);
 
 setTimeout(() => {
 	cleanUpDuplicates();
+	getForumPosts();
 }, 60000);
 
 client.on('interactionCreate', interaction => {
@@ -269,4 +270,16 @@ async function startJiraCardSync(client) {
 	setTimeout(() => {
 		startJiraCardSync(client);
 	}, 900000);
+}
+
+async function getForumPosts() {
+	try {
+		await createNewForumPostRecords();
+	} catch (e) {
+		console.log(e);
+	}
+
+	setTimeout(() => {
+		getForumPosts();
+	}, 3600000);
 }
