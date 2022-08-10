@@ -463,8 +463,8 @@ module.exports = {
 			return;
 		}
 
-		let yesterday = new Date();
-		yesterday.setUTCHours(yesterday.getUTCHours() - 24);
+		let lastWeek = new Date();
+		lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
 
 		logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
@@ -476,7 +476,7 @@ module.exports = {
 					[Op.not]: null
 				},
 				updatedAt: {
-					[Op.lt]: yesterday
+					[Op.lt]: lastWeek
 				}
 			},
 			order: [
