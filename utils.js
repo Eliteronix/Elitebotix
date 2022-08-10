@@ -437,8 +437,7 @@ module.exports = {
 	executeNextProcessQueueTask: async function (client, bancho) {
 		let now = new Date();
 		logDatabaseQueriesFunction(1, 'utils.js DBProcessQueue nextTask');
-		console.log('executeNextProcessQueueTask');
-		let nextTask = await DBProcessQueue.findOne({
+		let nextTasks = await DBProcessQueue.findAll({
 			where: {
 				beingExecuted: false,
 				date: {
@@ -451,14 +450,15 @@ module.exports = {
 			]
 		});
 
-		if (nextTask && !wrongClusterFunction(nextTask.id)) {
-			console.log('Claiming Task');
-			nextTask.beingExecuted = true;
-			await nextTask.save();
+		for (let i = 0; i < nextTasks.length; i++) {
+			if (!wrongClusterFunction(nextTasks[i].id)) {
+				nextTasks[i].beingExecuted = true;
+				await nextTasks[i].save();
 
-			executeFoundTask(client, bancho, nextTask);
+				executeFoundTask(client, bancho, nextTasks[i]);
+				break;
+			}
 		}
-
 	},
 	refreshOsuRank: async function () {
 		if (wrongClusterFunction()) {
