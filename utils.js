@@ -437,6 +437,7 @@ module.exports = {
 	executeNextProcessQueueTask: async function (client, bancho) {
 		let now = new Date();
 		logDatabaseQueriesFunction(1, 'utils.js DBProcessQueue nextTask');
+		console.log('executeNextProcessQueueTask');
 		let nextTask = await DBProcessQueue.findOne({
 			where: {
 				beingExecuted: false,
@@ -451,6 +452,7 @@ module.exports = {
 		});
 
 		if (nextTask && !wrongClusterFunction(nextTask.id)) {
+			console.log('Claiming Task');
 			nextTask.beingExecuted = true;
 			await nextTask.save();
 
