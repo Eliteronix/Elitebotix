@@ -333,19 +333,19 @@ module.exports = {
 		}
 
 		for (let i = 0; i < args.length; i++) {
-			if (args[i] === '--s' || args[i] === '--standard') {
+			if (args[i] === '--s' || args[i].toLowerCase() === '--standard') {
 				mode = 0;
 				args.splice(i, 1);
 				i--;
-			} else if (args[i] === '--t' || args[i] === '--taiko') {
+			} else if (args[i] === '--t' || args[i].toLowerCase() === '--taiko') {
 				mode = 1;
 				args.splice(i, 1);
 				i--;
-			} else if (args[i] === '--c' || args[i] === '--catch') {
+			} else if (args[i] === '--c' || args[i].toLowerCase() === '--catch') {
 				mode = 2;
 				args.splice(i, 1);
 				i--;
-			} else if (args[i] === '--m' || args[i] === '--mania') {
+			} else if (args[i] === '--m' || args[i].toLowerCase() === '--mania') {
 				mode = 3;
 				args.splice(i, 1);
 				i--;
