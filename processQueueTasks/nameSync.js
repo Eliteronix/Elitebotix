@@ -3,7 +3,6 @@ const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
-		console.log('nameSync');
 		let guild;
 		try {
 			guild = await client.guilds.fetch(processQueueEntry.guildId);

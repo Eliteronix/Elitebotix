@@ -6,7 +6,6 @@ const { saveOsuMultiScores, logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
-		console.log('saveMultiMatches');
 		let args = processQueueEntry.additions.split(';');
 
 		let matchID = args[0];

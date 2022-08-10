@@ -5,7 +5,6 @@ const osu = require('node-osu');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
-		console.log('osu-track');
 		let args = processQueueEntry.additions.split(';');
 
 		const channel = await client.channels.fetch(args[0]).catch(async () => {

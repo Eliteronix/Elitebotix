@@ -3,7 +3,6 @@ const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
-		console.log('updateActivityRoles');
 		logDatabaseQueries(2, 'processQueueTasks/updateActivityRoles.js DBActivityRoles');
 		const activityRoles = await DBActivityRoles.findAll({
 			where: { guildId: processQueueEntry.guildId }

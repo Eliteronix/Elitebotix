@@ -5,7 +5,6 @@ const { currentElitiriCup } = require('../config.json');
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(client, bancho, processQueueEntry) {
-		console.log('elitiriRoleAssignment');
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER !== 'Live') {
 			return processQueueEntry.destroy();

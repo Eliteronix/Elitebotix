@@ -3,7 +3,6 @@ const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
-		console.log('tourneyMatchNotification');
 		let args = processQueueEntry.additions.split(';');
 
 		let channel = await client.channels.fetch(args[1]);
