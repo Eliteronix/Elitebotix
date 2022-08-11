@@ -226,7 +226,7 @@ setInterval(() => refreshOsuRank(), 60000);
 
 setTimeout(() => {
 	cleanUpDuplicates();
-	getForumPosts();
+	getForumPosts(client);
 }, 60000);
 
 client.on('interactionCreate', interaction => {
@@ -272,14 +272,14 @@ async function startJiraCardSync(client) {
 	}, 900000);
 }
 
-async function getForumPosts() {
+async function getForumPosts(client) {
 	try {
-		await createNewForumPostRecords();
+		await createNewForumPostRecords(client);
 	} catch (e) {
 		console.log(e);
 	}
 
 	setTimeout(() => {
-		getForumPosts();
+		getForumPosts(client);
 	}, 3600000);
 }

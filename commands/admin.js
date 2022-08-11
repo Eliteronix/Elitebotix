@@ -7132,6 +7132,88 @@ module.exports = {
 						return processingMessage.edit(`Error reimporting match ${args[1]}`);
 					}
 				});
+		} else if (args[0] === 'tournamentFeedCommand') {
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'tournamentfeed-admin',
+					description: 'Allows for managing the tournament feed',
+					options: [
+						{
+							'name': 'update',
+							'description': 'Allows for updating the tournament feed',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'id',
+									'description': 'The forum post id',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'format',
+									'description': 'The format of the tournament',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'rankrange',
+									'description': 'The rankrange of the tournament',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'gamemode',
+									'description': 'The gamemode of the tournament',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'notes',
+									'description': 'Additional information about the tournament',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'bws',
+									'description': 'Is the rank range bws',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'outdated',
+									'description': 'Is the tournament post outdated',
+									'type': 5, // 5 is type BOOLEAN
+									'required': false
+								},
+								{
+									'name': 'notournament',
+									'description': 'Is the post not a tournament',
+									'type': 5, // 5 is type BOOLEAN
+									'required': false
+								},
+							]
+						},
+						{
+							'name': 'ping',
+							'description': 'Shares a new tournament',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'id',
+									'description': 'The forum post id',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'list',
+							'description': 'Show open forum posts',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+					]
+				},
+			});
 		} else {
 			msg.reply('Invalid command');
 		}

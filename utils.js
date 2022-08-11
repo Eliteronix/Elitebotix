@@ -2596,7 +2596,7 @@ module.exports = {
 
 		await channel.edit({ name: `1v1 Queue: ${existingQueueTasks.length} user${multipleString}` });
 	},
-	async createNewForumPostRecords() {
+	async createNewForumPostRecords(client) {
 		// eslint-disable-next-line no-undef
 		if (wrongClusterFunction()) {
 			return;
@@ -2700,6 +2700,9 @@ module.exports = {
 								rankRange: rankRange,
 								gamemode: gamemode,
 							});
+
+							const eliteronixUser = await client.users.fetch('138273136285057025');
+							eliteronixUser.send(`There is a new tournament post: ${uniqueTopics[i]}`);
 						});
 				}
 			});
