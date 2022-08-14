@@ -1896,6 +1896,7 @@ module.exports = {
 };
 
 async function getUserDuelStarRatingFunction(input) {
+	console.log('Calculating duel star rating', input.osuUserId);
 	//Try to get it from tournament data if available
 	let userScores;
 
@@ -1945,6 +1946,7 @@ async function getUserDuelStarRatingFunction(input) {
 
 	let yearStats = null;
 	if (completeYear) {
+		logDatabaseQueriesFunction(4, 'utils.js getUserDuelStarRatingFunction DuelRatingHistory');
 		yearStats = await DBDuelRatingHistory.findOne({
 			where: {
 				osuUserId: input.osuUserId,
