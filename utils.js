@@ -1897,9 +1897,6 @@ module.exports = {
 
 async function getUserDuelStarRatingFunction(input) {
 	console.log('Calculating duel star rating', input.osuUserId);
-	if (input.osuUserId === '9587896') {
-		return null;
-	}
 	//Try to get it from tournament data if available
 	let userScores;
 
@@ -2042,11 +2039,17 @@ async function getUserDuelStarRatingFunction(input) {
 
 	//Loop through all modpools
 	for (let modIndex = 0; modIndex < modPools.length; modIndex++) {
+		if (input.osuUserId === '9587896') {
+			console.log('modIndex', modIndex);
+		}
 		//Get only unique maps for each modpool
 		const checkedMapIds = [];
 		const userMapIds = [];
 		const userMaps = [];
 		for (let i = 0; i < userScores.length; i++) {
+			if (input.osuUserId === '9587896') {
+				console.log('Get unique maps for each modpool', i);
+			}
 			//Check if the map is already in; the score is above 10k and the map is not an aspire map
 			if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && parseInt(userScores[i].score) > 10000 && userScores[i].beatmapId !== '1033882' && userScores[i].beatmapId !== '529285') {
 				checkedMapIds.push(userScores[i].beatmapId);
@@ -2062,6 +2065,9 @@ async function getUserDuelStarRatingFunction(input) {
 		// Get all the maps and fill in their data
 		let relevantMaps = [];
 		for (let i = 0; i < userMaps.length && i < scoresPerMod + outliersPerMod * 2; i++) {
+			if (input.osuUserId === '9587896') {
+				console.log('Fill data and get relevant maps', i);
+			}
 			//Get the most recent data
 			let dbBeatmap = null;
 			if (modPools[modIndex] === 'HR') {
@@ -2162,10 +2168,16 @@ async function getUserDuelStarRatingFunction(input) {
 		}
 
 		for (let i = 0; i < outliersPerMod; i++) {
+			if (input.osuUserId === '9587896') {
+				console.log('OutliersPerMod', i);
+			}
 			let worstBeatmap = relevantMaps[0];
 			let bestBeatmap = relevantMaps[0];
 
 			for (let j = 0; j < relevantMaps.length; j++) {
+				if (input.osuUserId === '9587896') {
+					console.log('OutliersPerMod relevant maps', i);
+				}
 				if (relevantMaps[j].expectedRating < worstBeatmap.expectedRating) {
 					worstBeatmap = relevantMaps[j];
 				} else if (relevantMaps[j].expectedRating > bestBeatmap.expectedRating) {
@@ -2201,6 +2213,9 @@ async function getUserDuelStarRatingFunction(input) {
 		const steps = [];
 		const stepData = [];
 		for (let i = 0; i < relevantMaps.length; i++) {
+			if (input.osuUserId === '9587896') {
+				console.log('group maps into steps', i);
+			}
 			//Add the map to the scores array
 			if (modIndex === 0) {
 				duelRatings.scores.NM.push(relevantMaps[i]);
@@ -2216,6 +2231,9 @@ async function getUserDuelStarRatingFunction(input) {
 
 			//Add the data to the 5 steps in the area of the maps' star rating -> 5.0 will be representing 4.8, 4.9, 5.0, 5.1, 5.2
 			for (let j = 0; j < 5; j++) {
+				if (input.osuUserId === '9587896') {
+					console.log('steploop', j);
+				}
 				let starRatingStep = Math.round((Math.round(relevantMaps[i].starRating * 10) / 10 + 0.1 * j - 0.2) * 10) / 10;
 				if (steps.indexOf(starRatingStep) === -1) {
 					stepData.push({
@@ -2249,6 +2267,9 @@ async function getUserDuelStarRatingFunction(input) {
 		let totalWeight = 0;
 		let totalWeightedStarRating = 0;
 		for (let i = 0; i < stepData.length; i++) {
+			if (input.osuUserId === '9587896') {
+				console.log('Add weights per stepdata', i);
+			}
 			if (stepData[i].amount > 1) {
 				totalWeight += stepData[i].averageWeight;
 				totalWeightedStarRating += stepData[i].weightedStarRating;
@@ -2264,6 +2285,9 @@ async function getUserDuelStarRatingFunction(input) {
 			let weightedStarRating = totalWeightedStarRating / totalWeight;
 
 			for (let i = 0; i < relevantMaps.length; i++) {
+				if (input.osuUserId === '9587896') {
+					console.log('applyOsuDuelStarratingCorrection', i);
+				}
 				weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, relevantMaps[i % relevantMaps.length], Math.round((1 - (i * 1 / relevantMaps.length)) * 100) / 100);
 			}
 
@@ -2284,6 +2308,10 @@ async function getUserDuelStarRatingFunction(input) {
 				duelRatings.stepData.FM = stepData;
 			}
 		}
+	}
+
+	if (input.osuUserId === '9587896') {
+		console.log('Done with modIndex', input);
 	}
 
 	//Check the past year for individual ratings and limit a potential drop to .2
