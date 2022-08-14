@@ -2071,14 +2071,21 @@ async function getUserDuelStarRatingFunction(input) {
 			//Get the most recent data
 			let dbBeatmap = null;
 			if (modPools[modIndex] === 'HR') {
+				console.log('Getting Beatmap for HR');
 				dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 16 });
+				console.log('Got Beatmap for HR');
 			} else if (modPools[modIndex] === 'DT') {
+				console.log('Getting Beatmap for DT');
 				dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 64 });
+				console.log('Got Beatmap for DT');
 			} else if (modPools[modIndex] === 'FM') {
+				console.log('Getting Beatmap for FM');
 				let mods = getModsFunction(userMaps[i].modBits);
+				console.log('Got mods');
 
 				if (mods.includes('EZ')) {
 					mods.splice(mods.indexOf('EZ'), 1);
+					console.log('Spliced EZ');
 				}
 
 				if (mods.length === 0) {
@@ -2086,39 +2093,64 @@ async function getUserDuelStarRatingFunction(input) {
 				} else {
 					mods = getModBitsFunction(mods.join(''));
 				}
+				console.log('Got modbits');
 
 				dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: mods });
+				console.log('Got Beatmap for FM');
 			} else {
+				console.log('Getting Beatmap for NM or HD');
 				dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 0 });
+				console.log('Got Beatmap for NM or HD');
 			}
 
 			//Filter by ranked maps > 4*
+			console.log('Filtering by ranked maps > 4*');
 			if (dbBeatmap && parseFloat(dbBeatmap.starRating) > 3.5 && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved')) {
 				//Standardize the score from the mod multiplier
+				console.log('Standardize score');
 				if (modPools[modIndex] === 'HD') {
+					console.log('HD');
 					userMaps[i].score = userMaps[i].score / 1.06;
+					console.log('HD standardized');
 				} else if (modPools[modIndex] === 'HR') {
+					console.log('HR');
 					userMaps[i].score = userMaps[i].score / 1.1;
+					console.log('HR standardized');
 				} else if (modPools[modIndex] === 'DT') {
+					console.log('DT');
 					userMaps[i].score = userMaps[i].score / 1.2;
+					console.log('DT standardized');
 				} else if (modPools[modIndex] === 'FM') {
+					console.log('FM');
 					if (getModsFunction(userMaps[i].modBits).includes('HD')) {
+						console.log('FM HD');
 						userMaps[i].score = userMaps[i].score / 1.06;
+						console.log('FM HD standardized');
 					}
 					if (getModsFunction(userMaps[i].modBits).includes('HR')) {
+						console.log('FM HR');
 						userMaps[i].score = userMaps[i].score / 1.1;
+						console.log('FM HR standardized');
 					}
 					if (getModsFunction(userMaps[i].modBits).includes('FL')) {
+						console.log('FM FL');
 						userMaps[i].score = userMaps[i].score / 1.12;
+						console.log('FM FL standardized');
 					}
 					if (getModsFunction(userMaps[i].modBits).includes('DT')) {
+						console.log('FM DT');
 						userMaps[i].score = userMaps[i].score / 1.2;
+						console.log('FM DT standardized');
 					}
 					if (getModsFunction(userMaps[i].modBits).includes('EZ')) {
+						console.log('FM EZ');
 						userMaps[i].score = userMaps[i].score / 0.5;
+						console.log('FM EZ standardized');
 					}
 					if (getModsFunction(userMaps[i].modBits).includes('HT')) {
+						console.log('FM HT');
 						userMaps[i].score = userMaps[i].score / 0.3;
+						console.log('FM HT standardized');
 					}
 				}
 
@@ -2127,6 +2159,7 @@ async function getUserDuelStarRatingFunction(input) {
 				let c = 175000;
 				let b = 2;
 				let a = 0.7071;
+				console.log('Calculate Weights');
 				let overPerformWeight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
 				let underPerformWeight = (1 / (a * Math.sqrt(2))) * Math.E ** (-0.5 * Math.pow((((userMaps[i].score / c) - b) / a), 2));
 
@@ -2135,24 +2168,35 @@ async function getUserDuelStarRatingFunction(input) {
 				} else if (parseFloat(userMaps[i].score) < 350000) {
 					underPerformWeight = 1;
 				}
+				console.log('Calculated Weights');
 
 				userMaps[i].overPerformWeight = overPerformWeight;
 				userMaps[i].underPerformWeight = underPerformWeight;
 				userMaps[i].weight = Math.abs(overPerformWeight + underPerformWeight - 1);
 
+				console.log('Set all weights');
 				let mapStarRating = dbBeatmap.starRating;
 				if (modPools[modIndex] === 'HD') {
+					console.log('Adjusting for HD');
 					mapStarRating = adjustHDStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate);
+					console.log('Adjusted for HD');
 				} else if (modPools[modIndex] === 'FM' && getModsFunction(dbBeatmap.mods).includes('HD') && !getModsFunction(dbBeatmap.mods).includes('DT')) {
+					console.log('Adjusting for FM HD');
 					mapStarRating = adjustHDStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate);
+					console.log('Adjusted for FM HD');
 				}
 
 				userMaps[i].starRating = mapStarRating;
 
+				console.log('Set star rating');
+
 				userMaps[i].expectedRating = getExpectedDuelRating(userMaps[i]);
+
+				console.log('Set expected rating');
 
 				relevantMaps.push(userMaps[i]);
 			} else {
+				console.log('Filtered out map because not ranked and above 4*');
 				userMaps.splice(i, 1);
 				i--;
 			}
@@ -3860,10 +3904,13 @@ function getExpectedDuelRating(score) {
 
 	let rating = score.starRating;
 	let oldRating = 0;
+	let iterator = 0;
 
 	while (oldRating.toFixed(5) !== rating.toFixed(5)) {
+		iterator++;
 		oldRating = rating;
 		rating = applyOsuDuelStarratingCorrection(rating, score, 1);
+		console.log(iterator, oldRating, rating);
 	}
 
 	return rating;
