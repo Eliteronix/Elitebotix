@@ -1896,6 +1896,9 @@ module.exports = {
 };
 
 async function getUserDuelStarRatingFunction(input) {
+	if (input.osuUserId !== '9587896') {
+		return null;
+	}
 	//Try to get it from tournament data if available
 	let userScores;
 
@@ -3824,6 +3827,11 @@ function quicksortOsuPP(list, start = 0, end = undefined) {
 
 function getExpectedDuelRating(score) {
 	score.score = parseFloat(score.score);
+	if (score.score < 20000) {
+		score.score = 20000;
+	} else if (score.score > 950000) {
+		score.score = 950000;
+	}
 	score.starRating = parseFloat(score.starRating);
 
 	let rating = score.starRating;
