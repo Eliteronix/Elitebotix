@@ -1897,6 +1897,9 @@ module.exports = {
 
 async function getUserDuelStarRatingFunction(input) {
 	console.log('Calculating duel star rating', input.osuUserId);
+	if (input.osuUserId === '9587896') {
+		return null;
+	}
 	//Try to get it from tournament data if available
 	let userScores;
 
