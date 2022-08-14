@@ -2,7 +2,7 @@ const { getGuildPrefix, pause } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
-		console.log('periodic-weather');
+		// console.log('periodic-weather');
 		let args = processQueueEntry.additions.split(';');
 
 		const channel = await client.channels.fetch(args[0]).catch(async () => {

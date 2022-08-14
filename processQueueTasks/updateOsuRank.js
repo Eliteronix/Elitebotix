@@ -5,7 +5,7 @@ const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.jso
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
-		console.log('updateOsuRank');
+		// console.log('updateOsuRank');
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
