@@ -2066,7 +2066,7 @@ async function getUserDuelStarRatingFunction(input) {
 		let relevantMaps = [];
 		for (let i = 0; i < userMaps.length && i < scoresPerMod + outliersPerMod * 2; i++) {
 			if (input.osuUserId === '9587896') {
-				console.log('Fill data and get relevant maps', i);
+				console.log('Fill data and get relevant maps', i, modPools[modIndex], userMaps[i]);
 			}
 			//Get the most recent data
 			let dbBeatmap = null;
