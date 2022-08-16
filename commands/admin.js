@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries } = require('../utils');
+const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries, saveOsuMultiScores } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 
@@ -6953,6 +6953,43 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 				return msg.reply(`Worker ${process.env.pm_id} errored disconnecting`);
 			}
+		} else if (args[0] === 'reimportMatch') {
+			let matchScores = await DBOsuMultiScores.findAll({
+				where: {
+					matchId: args[1]
+				}
+			});
+
+			let processingMessage = await msg.channel.send(`Deleting match scores for match ${args[1]} [0/${matchScores.length}]`);
+			for (let i = 0; i < matchScores.length; i++) {
+				await matchScores[i].destroy();
+				if (i % 25 === 0) {
+					await processingMessage.edit(`Deleting match scores for match ${args[1]} [${i + 1}/${matchScores.length}]`);
+				}
+			}
+
+			await processingMessage.edit(`Reimporting match scores for match ${args[1]}`);
+
+			// eslint-disable-next-line no-undef
+			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+			});
+
+			return osuApi.getMatch({ mp: args[1] })
+				.then(async (match) => {
+					await saveOsuMultiScores(match);
+					return processingMessage.edit(`Reimported match ${args[1]}`);
+				})
+				.catch(async (err) => {
+					if (err.message === 'Not found') {
+						return processingMessage.edit(`Match ${args[1]} not found`);
+					} else {
+						return processingMessage.edit(`Error reimporting match ${args[1]}`);
+					}
+				});
 		} else {
 			msg.reply('Invalid command');
 		}
