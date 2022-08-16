@@ -145,16 +145,11 @@ async function getMostPlayed(msg, username, server, noLinkedAccount, limit) {
 				let guildPrefix = await getGuildPrefix(msg);
 
 				//Send attachment
-				let duplicateMessage = '';
-				if (server === 'tournaments') {
-					duplicateMessage = '\n**Some users may have duplicate scores. These are currently getting deleted and you should be able to watch them go down with each day until they hit the correct amount.**';
-				}
-
 				let sentMessage;
 				if (noLinkedAccount) {
-					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>${duplicateMessage}\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 				} else {
-					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>${duplicateMessage}`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>`, files: [attachment] });
 				}
 				await sentMessage.react('👤');
 				await sentMessage.react('📈');
