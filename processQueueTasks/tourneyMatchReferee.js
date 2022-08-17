@@ -65,6 +65,7 @@ module.exports = {
 		const password = Math.random().toString(36).substring(8);
 
 		await lobby.setPassword(password);
+		await channel.sendMessage('!mp addref Eliteronix');
 		await channel.sendMessage('!mp map 975342 0');
 		await channel.sendMessage(`!mp set 0 ${args[7]} ${dbPlayers.length}`);
 		let lobbyStatus = 'Joining phase';

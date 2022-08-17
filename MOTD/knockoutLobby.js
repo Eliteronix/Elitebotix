@@ -90,6 +90,7 @@ module.exports = {
 		const password = Math.random().toString(36).substring(8);
 
 		await lobby.setPassword(password);
+		await channel.sendMessage('!mp addref Eliteronix');
 		await channel.sendMessage('!mp lock');
 		await channel.sendMessage(`!mp set 0 ${scoreversion} ${players.length}`);
 		await pause(60000);
