@@ -176,6 +176,8 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					}
 				}
 			});
+	} else {
+		secondsToWait = secondsToWait + 60;
 	}
 
 	let date = new Date();
