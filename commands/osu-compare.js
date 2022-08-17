@@ -1,4 +1,4 @@
-const { populateMsgFromInteraction } = require('../utils');
+const { populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -33,7 +33,8 @@ module.exports = {
 		msg.channel.messages.fetch({ limit: 100 })
 			.then(async (messages) => {
 				const allRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+/gm;
-				const firstMessage = messages.filter(m => m.author.id === '981205694340546571' && m.content.match(allRegex)).first();
+
+				const firstMessage = messages.filter(m => m.author.id === msg.client.user.id && m.content.match(allRegex)).first();
 
 				const beginningRegex = /.+\nSpectate: .+\nBeatmap: <https:\/\/osu.ppy.sh\/b\//gm;
 				const endingRegex = />\nosu! direct:.+/gm;
@@ -46,7 +47,9 @@ module.exports = {
 
 				const beatmapId = firstMessage.content.replace(beginningRegex, '').replace(endingRegex, '');
 
-				let newArgs = [beatmapId];
+				const beatmap = await getOsuBeatmap({ beatmapId: beatmapId });
+
+				let newArgs = [beatmapId, `--${beatmap.mode}`];
 
 				for (let i = 0; i < args.length; i++) {
 					newArgs.push(args[i]);

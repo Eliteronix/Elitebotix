@@ -258,7 +258,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const endingRegex = />\nosu! direct:.+/gm;
 			const beatmapId = reaction.message.content.replace(beginningRegex, '').replace(endingRegex, '');
 
-			let args = [beatmapId];
+			const beatmap = await getOsuBeatmap({ beatmapId: beatmapId });
+
+			let args = [beatmapId, `--${beatmap.mode}`];
 
 			const command = require('./commands/osu-score.js');
 
@@ -276,7 +278,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 			let tempMessage = {
 				guild: reaction.message.guild,
 				guildId: guildId,
-				content: `e!osu-score ${beatmapId}`,
+				content: `e!osu-score ${beatmapId} --${beatmap.mode}`,
 				author: user,
 				channel: reaction.message.channel,
 			};
