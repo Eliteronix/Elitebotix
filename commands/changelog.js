@@ -66,11 +66,11 @@ module.exports = {
 
 			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Dev' || process.env.SERVER === 'QA') {
-				msg.reply({ content: '**Elitebotix has been updated** - Please report any bugs by using `e!feedback bug <Description>` / `/feedback`.', files: [attachment] });
+				msg.reply({ content: '**Elitebotix has been updated** - Please report any bugs by using `/feedback`.', files: [attachment] });
 				// eslint-disable-next-line no-undef
 			} else if (process.env.SERVER === 'Live') {
 				const changelogChannel = await msg.client.channels.fetch('804658828883787784');
-				changelogChannel.send({ content: '**Elitebotix has been updated** - Please report any bugs by using `e!feedback bug <Description>` / `/feedback`.', files: [attachment] });
+				changelogChannel.send({ content: '**Elitebotix has been updated** - Please report any bugs by using `/feedback`.', files: [attachment] });
 			}
 		}
 	},

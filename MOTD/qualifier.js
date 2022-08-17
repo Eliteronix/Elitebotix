@@ -324,7 +324,7 @@ async function messageIngame(bancho, map, players) {
 	for (let i = 0; i < players.length; i++) {
 		try {
 			const IRCUser = await bancho.getUser(players[i].osuName);
-			await IRCUser.sendMessage(`[Elitebotix]: A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
+			await IRCUser.sendMessage(`A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
 		} catch (error) {
 			try {
 				await bancho.connect();
@@ -335,7 +335,7 @@ async function messageIngame(bancho, map, players) {
 			}
 			try {
 				const IRCUser = await bancho.getUser(players[i].osuName);
-				await IRCUser.sendMessage(`[Elitebotix]: A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
+				await IRCUser.sendMessage(`A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
 			} catch (error) {
 				if (error.message !== 'Currently disconnected!') {
 					console.log('MOTD/qualifier.js', error);
