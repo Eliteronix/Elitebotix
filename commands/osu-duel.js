@@ -1,6 +1,6 @@
-const { DBDiscordUsers, DBProcessQueue, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
 const osu = require('node-osu');
-const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, adjustHDStarRating, logMatchCreation, humanReadable } = require('../utils');
+const { getOsuBeatmap, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, adjustHDStarRating, logMatchCreation, humanReadable } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
@@ -948,35 +948,6 @@ module.exports = {
 				modPools[6] = 'FreeMod';
 				modPools[modPools.indexOf('FM')] = 'FreeMod';
 
-
-				//Check if the game can be set up and set it up
-				let startDate = new Date();
-				let endDate = new Date();
-				let gameLength = 0;
-				//Add initial waiting time
-				endDate.setUTCMinutes(endDate.getUTCMinutes() + 5);
-				gameLength += 300;
-				//Add maximum waiting time between maps
-				endDate.setUTCMinutes(endDate.getUTCMinutes() + 2 * 7);
-				gameLength += 120 * 7;
-				//Add map times; 5 per map
-				endDate.setUTCMinutes(endDate.getUTCMinutes() + 5 * 7);
-				gameLength += 300 * 7;
-				//Add leaving time
-				endDate.setUTCMinutes(endDate.getUTCMinutes() + 1);
-				gameLength += 60;
-				console.log('Duel Match: Get matches planned');
-				let matchesPlanned = await getMatchesPlanned(startDate, endDate);
-				console.log('Duel Match: Got matches planned');
-
-				if (matchesPlanned > 3) {
-					return await interaction.editReply('The bot cannot host another match at the moment because there will already be 4 matches running. (Maximum limit is 4)');
-				}
-
-				let processQueueTask = await DBProcessQueue.create({ guildId: 'None', task: 'customMOTD', priority: 10, additions: gameLength, date: startDate });
-
-				console.log('Duel Match: Created customMOTD processqueue task');
-
 				//Set up the lobby
 				let bancho = additionalObjects[1];
 				let channel = null;
@@ -1086,11 +1057,7 @@ module.exports = {
 							await channel.sendMessage('The lobby will be closed as not everyone joined.');
 							pause(60000);
 							await channel.sendMessage('!mp close');
-							try {
-								await processQueueTask.destroy();
-							} catch (error) {
-								//Nothing
-							}
+
 							return await channel.leave();
 						} else if (lobbyStatus === 'Waiting for start') {
 							await channel.sendMessage('!mp start 5');
@@ -1243,11 +1210,6 @@ module.exports = {
 								//Nothing
 							});
 
-						try {
-							await processQueueTask.destroy();
-						} catch (error) {
-							//Nothing
-						}
 						return await channel.leave();
 					}
 
@@ -1436,11 +1398,6 @@ module.exports = {
 						await pause(55000);
 						await channel.sendMessage('!mp close');
 
-						try {
-							await processQueueTask.destroy();
-						} catch (error) {
-							//Nothing
-						}
 						return await channel.leave();
 					}
 				});

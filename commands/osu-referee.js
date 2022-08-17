@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, getMatchesPlanned, logDatabaseQueries } = require('../utils');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
 
@@ -151,12 +151,6 @@ module.exports = {
 				endDate.setUTCMinutes(date.getUTCMinutes());
 				endDate.setUTCSeconds(0);
 				endDate.setUTCSeconds(matchLength);
-
-				let matchesPlanned = await getMatchesPlanned(date, endDate);
-
-				if (matchesPlanned > 3) {
-					return interaction.followUp('The bot cannot host another match at the specified time because there will already be 4 matches running. (Maximum limit is 4)');
-				}
 
 				date.setUTCMinutes(date.getUTCMinutes() - 15);
 
