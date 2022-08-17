@@ -112,7 +112,7 @@ const { initializeMOTD } = require('./MOTD/initializeMOTD');
 
 const Banchojs = require('bancho.js');
 // eslint-disable-next-line no-undef
-const bancho = new Banchojs.BanchoClient({ username: 'Eliteronix', password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterPrivate: 1, limiterPublic: 1 });
+const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterPrivate: 1, limiterPublic: 1 });
 
 let twitchClient = null;
 twitchConnect(bancho).then(twitch => {

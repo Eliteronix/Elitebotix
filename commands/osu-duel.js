@@ -70,29 +70,6 @@ module.exports = {
 					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect <username>`.');
 				}
 
-				// let now = new Date();
-				// let rapidPlayers = [
-				// 	'17116333', // Husmor
-				// 	'3148418', // Terces
-				// 	'2166373', // Rubgish
-				// 	'15264880', // Laan_c
-				// 	'1983942', // Obi-nyan
-				// 	'17151706', // Mark Rober
-				// 	'11155994', // megahello
-				// 	'7516377', // Baiterzz
-				// 	'12079158', // cherry sweet
-				// 	'13326023', // LordYuto
-				// 	'23473167', // Julius Novacron
-				// 	'4280363', // x3Lydiia
-				// 	'10805810', // hexencoda
-				// 	'10497897', // Kaitiri
-				// 	'2844779', // boterham
-				// ];
-
-				// if (now.getDate() === 7 && now.getMonth() === 7 && now.getUTCHours() >= 16 && !rapidPlayers.includes(commandUser.osuUserId)) {
-				// 	return await interaction.editReply('The duel slots are currently reserved for a rapid tournament hosted by the Dev, Eliteronix. As soon as the tournament is over, the slots will be available again. (Around 21 UTC)');
-				// }
-
 				if (opponentId && commandUser.userId === opponentId || firstOpponentId && commandUser.userId === firstOpponentId || secondOpponentId && commandUser.userId === secondOpponentId) {
 					return await interaction.editReply('You cannot play against yourself.');
 				}
@@ -1077,10 +1054,12 @@ module.exports = {
 
 				let pingMessage = null;
 				if (opponentId) {
-					await interaction.editReply(`<@${commandUser.userId}> <@${secondUser.userId}> your match has been created. You have been invited ingame by \`Eliteronix\` and also got a DM as a backup.`);
+					// eslint-disable-next-line no-undef
+					await interaction.editReply(`<@${commandUser.userId}> <@${secondUser.userId}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup.`);
 					pingMessage = await interaction.channel.send(`<@${commandUser.userId}> <@${secondUser.userId}>`);
 				} else {
-					await interaction.editReply(`<@${commandUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}> your match has been created. You have been invited ingame by \`Eliteronix\` and also got a DM as a backup.`);
+					// eslint-disable-next-line no-undef
+					await interaction.editReply(`<@${commandUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup.`);
 					pingMessage = await interaction.channel.send(`<@${commandUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}>`);
 				}
 				pingMessage.delete();

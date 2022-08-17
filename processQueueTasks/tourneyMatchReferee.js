@@ -100,7 +100,8 @@ module.exports = {
 			await channel.sendMessage(`!mp invite #${dbPlayers[i].osuUserId}`);
 			await messageUserWithRetries(client, users[i], args[1], `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 		}
-		discordChannel.send(`<@${discordIds.join('>, <@')}> your match has been created. You have been invited ingame by \`Eliteronix\` and also got a DM as a backup.`);
+		// eslint-disable-next-line no-undef
+		discordChannel.send(`<@${discordIds.join('>, <@')}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup.`);
 
 		//Add timers to 10 minutes after the match and also during the scheduled time send another message
 		let matchStartingTime = new Date();
