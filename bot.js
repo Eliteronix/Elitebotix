@@ -104,6 +104,9 @@ const emojiDelete = require('./emojiDelete');
 //Get interactionCreate
 const interactionCreate = require('./interactionCreate');
 
+//Get gotBanchoPrivateMessage
+const gotBanchoPrivateMessage = require('./gotBanchoPrivateMessage');
+
 //Get executeNextProcessQueueTask
 const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateEntries, checkForBirthdays } = require('./utils');
 
@@ -113,6 +116,16 @@ const { initializeMOTD } = require('./MOTD/initializeMOTD');
 const Banchojs = require('bancho.js');
 // eslint-disable-next-line no-undef
 const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterTimespan: 60000, limiterPrivate: 67, limiterPublic: 13 });
+
+//Connect for the first worker
+if (!wrongCluster()) {
+	bancho.connect();
+
+	//Listen to messages
+	bancho.on('PM', async (message) => {
+		gotBanchoPrivateMessage(message);
+	});
+}
 
 let twitchClient = null;
 twitchConnect(bancho).then(twitch => {
