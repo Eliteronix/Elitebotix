@@ -97,12 +97,12 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		paranoid: true,
 	},
-		{
-			indexes: [
-				{
-					unique: false,
-					fields: ['beatmapId', 'mods']
-				}
-			]
-		});
+	{
+		indexes: [
+			{
+				unique: false,
+				fields: ['beatmapId', 'mods']
+			}
+		]
+	});
 };
