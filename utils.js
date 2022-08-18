@@ -2348,7 +2348,7 @@ module.exports = {
 				scoreTeam1 = Math.round(scoreTeam1);
 				scoreTeam2 = Math.round(scoreTeam2);
 
-				await channel.sendMessage(`${teamname1}: ${humanReadableFunction(scoreTeam1)} | ${teamname2}: ${humanReadableFunction(scoreTeam2)} | Difference: ${humanReadableFunction(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
+				await channel.sendMessage(`Bo7 | ${teamname1}: ${humanReadableFunction(scoreTeam1)} | ${teamname2}: ${humanReadableFunction(scoreTeam2)} | Difference: ${humanReadableFunction(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
 			} else {
 				await channel.sendMessage('!mp close');
 				// eslint-disable-next-line no-undef
