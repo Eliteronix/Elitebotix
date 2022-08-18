@@ -2174,13 +2174,13 @@ module.exports = {
 		if (!thirdUser) {
 			if (interaction) {
 				// eslint-disable-next-line no-undef
-				await interaction.editReply(`<@${commandUser.userId}> <@${secondUser.userId}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup.`);
+				await interaction.editReply(`<@${firstUser.userId}> <@${secondUser.userId}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup.`);
 				pingMessage = await interaction.channel.send(`<@${firstUser.userId}> <@${secondUser.userId}>`);
 			}
 		} else {
 			if (interaction) {
 				// eslint-disable-next-line no-undef
-				await interaction.editReply(`<@${commandUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup.`);
+				await interaction.editReply(`<@${firstUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup.`);
 				pingMessage = await interaction.channel.send(`<@${firstUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}>`);
 			}
 		}
