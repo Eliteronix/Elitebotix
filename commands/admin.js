@@ -797,7 +797,7 @@ module.exports = {
 			// 			},
 			// 			{
 			// 				'name': 'queue1v1-leave',
-			// 				'description': 'Lets you queue up for a Bo7 match against an opponent',
+			// 				'description': 'Lets you leave the queue for Bo7 matches',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 			},
 			// 			{
@@ -4242,7 +4242,7 @@ module.exports = {
 						},
 						{
 							'name': 'queue1v1-leave',
-							'description': 'Lets you queue up for a Bo7 match against an opponent',
+							'description': 'Lets you leave the queue for Bo7 matches',
 							'type': 1, // 1 is type SUB_COMMAND
 						},
 						{
