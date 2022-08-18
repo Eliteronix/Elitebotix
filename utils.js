@@ -2033,6 +2033,12 @@ module.exports = {
 					continue;
 				}
 
+				if (parseInt(beatmaps[index].drainLength) < 100 || parseInt(beatmaps[index].drainLength) > 405) {
+					beatmaps.splice(index, 1);
+					console.log('Duel Match: Beatmap drain length was out of bounds, removed from array');
+					continue;
+				}
+
 				if (modPools[i] === 'HD') {
 					console.log('Duel Match: Refresh the HD Beatmap');
 					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
