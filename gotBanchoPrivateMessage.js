@@ -1,7 +1,8 @@
-const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, getScoreModpool, humanReadable, adjustHDStarRating, getUserDuelStarRating, updateQueueChannels } = require('./utils');
+const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, getScoreModpool, humanReadable, adjustHDStarRating, getBeatmapModeId, getUserDuelStarRating, updateQueueChannels } = require('./utils');
 const { DBOsuMultiScores, DBOsuBeatmaps, DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
+const osu = require('node-osu');
 
 module.exports = async function (client, bancho, message) {
 	if (message.message === '!help') {
@@ -178,6 +179,7 @@ module.exports = async function (client, bancho, message) {
 			}
 		}
 
+		logDatabaseQueries(4, 'commands/osu-beatmap.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: {
 				osuName: message.user.banchojs.username
@@ -196,7 +198,7 @@ module.exports = async function (client, bancho, message) {
 				tourneyMap: true,
 			},
 			order: Sequelize.fn('RANDOM'),
-			limit: 1000,
+			limit: 500,
 		});
 
 		if (discordUser && discordUser.osuDuelProvisional && !userStarRating) {
@@ -213,33 +215,30 @@ module.exports = async function (client, bancho, message) {
 			userStarRating = parseFloat(discordUser.osuFreeModDuelStarRating);
 		}
 
-
 		let beatmap;
-
-
 		for (let i = 0; i < beatmaps.length; i = Math.floor(Math.random() * beatmaps.length)) {
 			if (beatmaps[i].noModMap === true && mod == 'NM') {
-				if (validSrRange(beatmaps[i], userStarRating)) {
+				if (validSrRange(beatmaps[i], userStarRating) && !checkIfPlayed(beatmaps[i], message.user.banchojs.username)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].hiddenMap === true && mod == 'HD') {
-				if (validSrRange(beatmaps[i], userStarRating, true)) {
+				if (validSrRange(beatmaps[i], userStarRating, true) && !checkIfPlayed(beatmaps[i], message.user.banchojs.username)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].hardRockMap === true && mod == 'HR') {
-				if (validSrRange(beatmaps[i], userStarRating)) {
+				if (validSrRange(beatmaps[i], userStarRating) && !checkIfPlayed(beatmaps[i], message.user.banchojs.username)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].doubleTimeMap === true && mod == 'DT') {
-				if (validSrRange(beatmaps[i], userStarRating)) {
+				if (validSrRange(beatmaps[i], userStarRating) && !checkIfPlayed(beatmaps[i], message.user.banchojs.username)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].freeModMap === true && mod == 'FM') {
-				if (validSrRange(beatmaps[i], userStarRating)) {
+				if (validSrRange(beatmaps[i], userStarRating) && !checkIfPlayed(beatmaps[i], message.user.banchojs.username)) {
 					beatmap = beatmaps[i];
 					break;
 				}
@@ -248,10 +247,6 @@ module.exports = async function (client, bancho, message) {
 				i++;
 			}
 		}
-
-		console.log(beatmap);
-		console.log(beatmap.starRating);
-		// console.log(beatmap.starRating);
 
 		const totalLengthSeconds = (beatmap.totalLength % 60) + '';
 		const totalLengthMinutes = (beatmap.totalLength - beatmap.totalLength % 60) / 60;
@@ -325,6 +320,37 @@ function validSrRange(beatmap, userStarRating, mod) {
 		return true;
 }
 
-function checkIfPlayed(osuUserId) {
+function checkIfPlayed(beatmap, osuName) {
+	let now = new Date();
 
+	// eslint-disable-next-line no-undef
+	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+	});
+
+	let mode = getBeatmapModeId(beatmap);
+
+	osuApi.getScores({ b: beatmap.beatmapId, u: osuName, m: mode })
+		.then(async (scores) => {
+			if (!scores[0]) {
+				return false;
+			} else {
+				let score = scores[0];
+				let date = new Date(score.raw_date);
+				let timeDiff = Math.abs(now.getTime() - date.getTime());
+				let diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+				if (diffDays < 60) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+			// eslint-disable-next-line no-unused-vars
+		}).catch(err => {
+			return true;
+		}
+		);
 }
