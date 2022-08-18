@@ -1071,6 +1071,10 @@ module.exports = {
 				explaination.push('You can see the matches where the scores are from in the third file.');
 				explaination.push('');
 				explaination.push('**In Depth Explaination:**');
+				explaination.push('Relevant Star Rating Change:');
+				explaination.push('HD maps always get a star rating buff in the calculations. These depend on the AR of the map.');
+				explaination.push('AR7.5 HD will count as a +0.75 SR buff (maximum) and AR9 will count as a +0.2 SR buff (minimum). Everything in between is rising linearly.');
+				explaination.push('');
 				explaination.push('1. Step:');
 				explaination.push('The bot grabs the last 35 tournament score v2 scores for each modpool. (Limited to unique ranked maps)');
 				explaination.push('The limit exists to not evaluate the same maps twice, to limit the API calls to some extend and to get relatively recent data without losing accuracy due to limiting it to a timestamp.');
