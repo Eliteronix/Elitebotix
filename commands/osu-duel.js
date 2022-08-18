@@ -1337,6 +1337,21 @@ module.exports = {
 					}
 				}
 
+				//Check again in case the cooldown had passed and it was triggered again
+				existingQueueTasks = await DBProcessQueue.findAll({
+					where: {
+						task: 'duelQueue1v1',
+					},
+				});
+
+				for (let i = 0; i < existingQueueTasks.length; i++) {
+					const osuUserId = existingQueueTasks[i].additions.split(';')[0];
+
+					if (osuUserId === commandUser.osuUserId) {
+						return await interaction.editReply('You are already in the queue for a 1v1 duel.');
+					}
+				}
+
 				await DBProcessQueue.create({
 					guildId: 'none',
 					task: 'duelQueue1v1',

@@ -2,7 +2,6 @@ const { DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
 const { getOsuPP, getOsuBeatmap, getMods, getUserDuelStarRating } = require('./utils');
 
 module.exports = async function (client, bancho, message) {
-
 	//Listen to now playing / now listening and send pp info
 	if (message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)) {
 		let beatmapId = message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)[0].replace(/.+\//gm, '');
@@ -60,6 +59,7 @@ module.exports = async function (client, bancho, message) {
 
 		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] [${mods}] | 95%: ${Math.round(firstPP)}pp | 98%: ${Math.round(secondPP)}pp | 99%: ${Math.round(thirdPP)}pp | 100%: ${Math.round(fourthPP)}pp`);
 	} else if (message.message === '!queue1v1' || message.message === '!play1v1' || message.message === '!play') {
+		await message.user.fetchFromAPI();
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
 				osuUserId: message.user.id,
@@ -87,12 +87,28 @@ module.exports = async function (client, bancho, message) {
 
 		let ownStarRating = 5;
 		try {
+			message.user.sendMessage('Processing duel rating...');
 			ownStarRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: client });
 
 			ownStarRating = ownStarRating.total;
 		} catch (e) {
 			if (e !== 'No standard plays') {
 				console.log(e);
+			}
+		}
+
+		//Check again in case the user spammed the command
+		existingQueueTasks = await DBProcessQueue.findAll({
+			where: {
+				task: 'duelQueue1v1',
+			},
+		});
+
+		for (let i = 0; i < existingQueueTasks.length; i++) {
+			const osuUserId = existingQueueTasks[i].additions.split(';')[0];
+
+			if (osuUserId === discordUser.osuUserId) {
+				return message.user.sendMessage('You are already in the queue for a 1v1 duel.');
 			}
 		}
 
@@ -105,5 +121,23 @@ module.exports = async function (client, bancho, message) {
 		});
 
 		return await message.user.sendMessage('You are now queued up for a 1v1 duel.');
+	} else if (message.message === '!queue1v1-leave' || message.message === '!leave1v1' || message.message === '!leave') {
+		await message.user.fetchFromAPI();
+		let existingQueueTasks = await DBProcessQueue.findAll({
+			where: {
+				task: 'duelQueue1v1',
+			},
+		});
+
+		for (let i = 0; i < existingQueueTasks.length; i++) {
+			const osuUserId = existingQueueTasks[i].additions.split(';')[0];
+
+			if (osuUserId == message.user.id) {
+				await existingQueueTasks[i].destroy();
+				return message.user.sendMessage('You have been removed from the queue for a 1v1 duel.');
+			}
+		}
+
+		return message.user.sendMessage('You are not in the queue for a 1v1 duel.');
 	}
 };
