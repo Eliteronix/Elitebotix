@@ -1,6 +1,7 @@
-const { getOsuPP, getOsuBeatmap, getMods } = require('./utils');
+const { DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
+const { getOsuPP, getOsuBeatmap, getMods, getUserDuelStarRating } = require('./utils');
 
-module.exports = async function (message) {
+module.exports = async function (client, bancho, message) {
 
 	//Listen to now playing / now listening and send pp info
 	if (message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)) {
@@ -58,5 +59,51 @@ module.exports = async function (message) {
 		mods = mods.join('');
 
 		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] [${mods}] | 95%: ${Math.round(firstPP)}pp | 98%: ${Math.round(secondPP)}pp | 99%: ${Math.round(thirdPP)}pp | 100%: ${Math.round(fourthPP)}pp`);
+	} else if (message.message === '!queue1v1' || message.message === '!play1v1' || message.message === '!play') {
+		let discordUser = await DBDiscordUsers.findOne({
+			where: {
+				osuUserId: message.user.id,
+				osuVerified: true
+			}
+		});
+
+		if (!discordUser) {
+			return message.user.sendMessage(`Please connect and verify your account with the bot on discord as a backup by using: '/osu-link connect username:${message.user.username}' [https://discord.gg/Asz5Gfe Discord]`);
+		}
+
+		let existingQueueTasks = await DBProcessQueue.findAll({
+			where: {
+				task: 'duelQueue1v1',
+			},
+		});
+
+		for (let i = 0; i < existingQueueTasks.length; i++) {
+			const osuUserId = existingQueueTasks[i].additions.split(';')[0];
+
+			if (osuUserId === discordUser.osuUserId) {
+				return message.user.sendMessage('You are already in the queue for a 1v1 duel.');
+			}
+		}
+
+		let ownStarRating = 5;
+		try {
+			ownStarRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: client });
+
+			ownStarRating = ownStarRating.total;
+		} catch (e) {
+			if (e !== 'No standard plays') {
+				console.log(e);
+			}
+		}
+
+		await DBProcessQueue.create({
+			guildId: 'none',
+			task: 'duelQueue1v1',
+			additions: `${discordUser.osuUserId};${ownStarRating};0.125`,
+			date: new Date(),
+			priority: 9
+		});
+
+		return await message.user.sendMessage('You are now queued up for a 1v1 duel.');
 	}
 };
