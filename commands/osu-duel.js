@@ -283,6 +283,31 @@ module.exports = {
 					}
 				}
 
+				//Remove the users from the queue
+				let existingQueueTasks = await DBProcessQueue.findAll({
+					where: {
+						task: 'duelQueue1v1',
+					},
+				});
+
+				for (let i = 0; i < existingQueueTasks.length; i++) {
+					const osuUserId = existingQueueTasks[i].additions.split(';')[0];
+
+					if (commandUser && osuUserId === commandUser.osuUserId) {
+						await existingQueueTasks[i].destroy();
+						await interaction.followUp(`<@${commandUser.userId}> you have been removed from the queue for a 1v1 duel.`);
+					} else if (secondUser && osuUserId === secondUser.osuUserId) {
+						await existingQueueTasks[i].destroy();
+						await interaction.followUp(`<@${secondUser.userId}> you have been removed from the queue for a 1v1 duel.`);
+					} else if (thirdUser && osuUserId === thirdUser.osuUserId) {
+						await existingQueueTasks[i].destroy();
+						await interaction.followUp(`<@${thirdUser.userId}> you have been removed from the queue for a 1v1 duel.`);
+					} else if (fourthUser && osuUserId === fourthUser.osuUserId) {
+						await existingQueueTasks[i].destroy();
+						await interaction.followUp(`<@${fourthUser.userId}> you have been removed from the queue for a 1v1 duel.`);
+					}
+				}
+
 				createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, onlyRanked, commandUser, secondUser, thirdUser, fourthUser);
 			} else if (interaction.options._subcommand === 'rating') {
 				let processingMessage = null;
