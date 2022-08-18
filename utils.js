@@ -2033,9 +2033,22 @@ module.exports = {
 					continue;
 				}
 
+				if (parseInt(beatmaps[index].drainLength) < 100 || parseInt(beatmaps[index].drainLength) > 405) {
+					beatmaps.splice(index, 1);
+					console.log('Duel Match: Beatmap drain length was out of bounds, removed from array');
+					continue;
+				}
+
 				if (modPools[i] === 'HD') {
 					console.log('Duel Match: Refresh the HD Beatmap');
 					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
+
+					if (!beatmaps[index]) {
+						beatmaps.splice(index, 1);
+						console.log('Duel Match: Beatmap was null, removed from array');
+						continue;
+					}
+
 					beatmaps[index].starRating = adjustHDStarRatingFunction(beatmaps[index].starRating, beatmaps[index].approachRate);
 					console.log('Duel Match: Refreshed the HD Beatmap');
 				} else if (modPools[i] === 'HR') {
