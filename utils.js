@@ -2235,6 +2235,7 @@ module.exports = {
 
 					while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
 						await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+						await new Promise(resolve => setTimeout(resolve, 5000));
 					}
 
 					let noFail = 'NF';
@@ -2343,6 +2344,9 @@ module.exports = {
 				if (scoreTeam1 < scoreTeam2) {
 					winner = teamname2;
 				}
+
+				scoreTeam1 = Math.round(scoreTeam1);
+				scoreTeam2 = Math.round(scoreTeam2);
 
 				await channel.sendMessage(`${teamname1}: ${humanReadableFunction(scoreTeam1)} | ${teamname2}: ${humanReadableFunction(scoreTeam2)} | Difference: ${humanReadableFunction(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
 			} else {
