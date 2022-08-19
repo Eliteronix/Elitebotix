@@ -3033,6 +3033,25 @@ async function getOsuBeatmapFunction(input) {
 									ar = Math.round((11 - (ms - 300) / 150) * 100) / 100;
 								} else ar = Math.round((5 - (ms - 1200) / 120) * 100) / 100;
 							} else if (getModsFunction(modBits).includes('HT')) {
+								let speed = 0.75;
+								let ar_ms;
+								let ar0_ms = 1800;
+								let ar5_ms = 1200;
+								let ar_ms_step1 = 120;
+								let ar_ms_step2 = 150;
+								let ar10_ms = 450;
+
+								if(ar <= 5) ar_ms = ar0_ms - ar_ms_step1 * ar;
+								else		ar_ms = ar5_ms - ar_ms_step2 * (ar - 5);
+
+								if(ar_ms < ar10_ms) ar_ms = ar10_ms;
+								if(ar_ms > ar0_ms) ar_ms = ar0_ms;
+
+								ar_ms /= speed;
+
+								if(ar <= 5) ar = (ar0_ms - ar_ms) / ar_ms_step1;
+								else		ar = 5 + (ar5_ms - ar_ms) / ar_ms_step2;
+
 								bpm = parseFloat(beatmaps[0].bpm) * 0.75;
 								drainLength = parseFloat(beatmaps[0].length.drain) / 0.75;
 								totalLength = parseFloat(beatmaps[0].length.total) / 0.75;
