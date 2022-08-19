@@ -66,8 +66,10 @@ module.exports = async function (message) {
 	} else if (message.message.toLowerCase().startsWith('!r')) {
 		let args = message.message.slice(2).trim().split(/ +/);
 
+		// set default values
 		let mod = 'NM';
 		let userStarRating;
+		
 		for (let i = 0; i < args.length; i++) {
 			if (args[i] == '-Hidden' || args[i] == '-HD') {
 				mod = 'HD';
@@ -98,8 +100,8 @@ module.exports = async function (message) {
 				osuName: message.user.banchojs.username
 			},
 		});
-		let beatmaps;
 
+		let beatmaps;
 		beatmaps = await DBOsuBeatmaps.findAll({
 			where: {
 				approvalStatus: {
@@ -111,9 +113,15 @@ module.exports = async function (message) {
 				tourneyMap: true,
 			},
 			order: Sequelize.fn('RANDOM'),
+			// because it gets random beatmaps each time, 500 limit is fine for quick reply
 			limit: 500,
 		});
-		
+
+		if (!discordUser && !userStarRating) {
+			userStarRating = 4.5;
+		}
+
+		// check if the user has account connected, duel star rating not provisioanl and did not specify SR
 		if (discordUser && discordUser.osuDuelProvisional && !userStarRating) {
 			userStarRating = parseFloat(discordUser.osuDuelStarRating);
 		} else if (mod == 'NM' && discordUser && discordUser.osuNoModDuelStarRating != null && !userStarRating) {
@@ -129,29 +137,32 @@ module.exports = async function (message) {
 		}
 
 		let beatmap;
+		// loop through beatmaps until we find one that meets the criteria =>
+		// Tourney map with the correct mod
+		// Check if the beatmap is within the user's star rating and haven't been played before
 		for (let i = 0; i < beatmaps.length; i = Math.floor(Math.random() * beatmaps.length)) {
 			if (beatmaps[i].noModMap === true && mod == 'NM') {
-				if (validSrRange(beatmaps[i], userStarRating) && !checkIfPlayed(beatmaps[i], message.user.banchojs.username)) {
+				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], message.user.banchojs.username)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].hiddenMap === true && mod == 'HD') {
-				if (validSrRange(beatmaps[i], userStarRating, true) && !checkIfPlayed(beatmaps[i], message.user.banchojs.username)) {
+				if (validSrRange(beatmaps[i], userStarRating, true) && !beatmapPlayed(beatmaps[i], message.user.banchojs.username)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].hardRockMap === true && mod == 'HR') {
-				if (validSrRange(beatmaps[i], userStarRating) && !checkIfPlayed(beatmaps[i], message.user.banchojs.username)) {
+				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], message.user.banchojs.username)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].doubleTimeMap === true && mod == 'DT') {
-				if (validSrRange(beatmaps[i], userStarRating) && !checkIfPlayed(beatmaps[i], message.user.banchojs.username)) {
+				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], message.user.banchojs.username)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].freeModMap === true && mod == 'FM') {
-				if (validSrRange(beatmaps[i], userStarRating) && !checkIfPlayed(beatmaps[i], message.user.banchojs.username)) {
+				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], message.user.banchojs.username)) {
 					beatmap = beatmaps[i];
 					break;
 				}
@@ -164,7 +175,7 @@ module.exports = async function (message) {
 		const totalLengthSeconds = (beatmap.totalLength % 60) + '';
 		const totalLengthMinutes = (beatmap.totalLength - beatmap.totalLength % 60) / 60;
 		const totalLength = totalLengthMinutes + ':' + Math.round(totalLengthSeconds).toString().padStart(2, '0');
-			
+		
 		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] + ${mod} | Beatmap ★: ${Math.floor(beatmap.starRating * 100) / 100} | Your ${mod} duel ★: ${Math.floor(userStarRating * 100) / 100} | ${totalLength}  ♫${beatmap.bpm}  AR${beatmap.approachRate}  OD${beatmap.overallDifficulty}`);
 		
 		logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
@@ -233,7 +244,8 @@ function validSrRange(beatmap, userStarRating, mod) {
 		return true;
 }
 
-function checkIfPlayed(beatmap, osuName) {
+// returns true if the user has already played the map, so we should skip it
+function beatmapPlayed(beatmap, osuName) {
 	let now = new Date();
 	
 	// eslint-disable-next-line no-undef
