@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
-const { getOsuPP, getOsuBeatmap, getMods, getUserDuelStarRating } = require('./utils');
+const { getOsuPP, getOsuBeatmap, getMods, getUserDuelStarRating, updateQueueChannels } = require('./utils');
 
 module.exports = async function (client, bancho, message) {
 	if (message.message === '!help') {
@@ -124,6 +124,8 @@ module.exports = async function (client, bancho, message) {
 			priority: 9
 		});
 
+		updateQueueChannels(client);
+
 		return await message.user.sendMessage('You are now queued up for a 1v1 duel.');
 	} else if (message.message === '!queue1v1-leave' || message.message === '!leave1v1' || message.message === '!leave') {
 		await message.user.fetchFromAPI();
@@ -138,6 +140,7 @@ module.exports = async function (client, bancho, message) {
 
 			if (osuUserId == message.user.id) {
 				await existingQueueTasks[i].destroy();
+				updateQueueChannels(client);
 				return message.user.sendMessage('You have been removed from the queue for a 1v1 duel.');
 			}
 		}

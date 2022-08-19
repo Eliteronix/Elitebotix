@@ -1,5 +1,5 @@
 const { DBProcessQueue, DBDiscordUsers } = require('../dbObjects');
-const { createDuelMatch } = require('../utils');
+const { createDuelMatch, updateQueueChannels } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -74,8 +74,9 @@ module.exports = {
 
 			createDuelMatch(client, bancho, null, averageStarRating, lowerBound, upperBound, false, firstUser, secondUser, null, null);
 
-			processQueueEntry.destroy();
-			otherQueueTask.destroy();
+			await processQueueEntry.destroy();
+			await otherQueueTask.destroy();
+			updateQueueChannels(client);
 		} else {
 			let date = new Date();
 			date.setUTCMinutes(date.getUTCMinutes() + 1);
