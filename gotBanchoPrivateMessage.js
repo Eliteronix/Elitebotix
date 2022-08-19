@@ -9,6 +9,7 @@ module.exports = async function (client, bancho, message) {
 		await message.user.sendMessage('/ /np - Get the pp values for the current beatmap with the current mods');
 		await message.user.sendMessage('!play / !play1v1 / !queue1v1 - Queue up for 1v1 matches');
 		await message.user.sendMessage('!leave / !leave1v1 / !queue1v1-leave - Leave the queue for 1v1 matches');
+		let TODO; //Add a help explanation for the recommendations
 		//Listen to now playing / now listening and send pp info
 	} else if (message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)) {
 		let beatmapId = message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)[0].replace(/.+\//gm, '');
