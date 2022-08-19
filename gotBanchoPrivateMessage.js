@@ -157,6 +157,8 @@ module.exports = async function (client, bancho, message) {
 		let mod = 'NM';
 		let userStarRating;
 
+
+		let TODO; //Is the - actually needed? What else would you add anyway after the !r?
 		for (let i = 0; i < args.length; i++) {
 			if (args[i] == '-Hidden' || args[i] == '-HD') {
 				mod = 'HD';
@@ -181,6 +183,7 @@ module.exports = async function (client, bancho, message) {
 			}
 		}
 
+		let TODO; // Do "await message.user.fetchFromAPI();" here and check by osuUserId instead of osuName
 		logDatabaseQueries(4, 'commands/osu-beatmap.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: {
@@ -228,6 +231,8 @@ module.exports = async function (client, bancho, message) {
 		// Tourney map with the correct mod
 		// Check if the beatmap is within the user's star rating and haven't been played before
 		for (let i = 0; i < beatmaps.length; i = Math.floor(Math.random() * beatmaps.length)) {
+			let TODO; //Refresh the beatmap just like I do it in the duel match creation (function: getOsuBeatmap)
+			let TODO; //Please check for the osuUserId here instead of osuName for beatmapPlayed aswell
 			if (beatmaps[i].noModMap === true && mod == 'NM') {
 				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], message.user.banchojs.username)) {
 					beatmap = beatmaps[i];
@@ -306,6 +311,7 @@ module.exports = async function (client, bancho, message) {
 			let date = mapScores[i].matchStartDate;
 			let dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
 
+			let TODO; //What do you fill this array for?
 			matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`);
 		}
 
@@ -331,7 +337,7 @@ function validSrRange(beatmap, userStarRating, mod) {
 		return true;
 }
 
-// returns true if the user has already played the map, so we should skip it
+// returns true if the user has already played the map in the last 60 days, so we should skip it
 function beatmapPlayed(beatmap, osuName) {
 	let now = new Date();
 
@@ -363,6 +369,5 @@ function beatmapPlayed(beatmap, osuName) {
 			// eslint-disable-next-line no-unused-vars
 		}).catch(err => {
 			return true;
-		}
-		);
+		});
 }
