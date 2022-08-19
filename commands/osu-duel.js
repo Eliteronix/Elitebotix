@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch } = require('../utils');
+const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
@@ -307,6 +307,8 @@ module.exports = {
 						await interaction.followUp(`<@${fourthUser.userId}> you have been removed from the queue for a 1v1 duel.`);
 					}
 				}
+
+				updateQueueChannels(interaction.client);
 
 				createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, onlyRanked, commandUser, secondUser, thirdUser, fourthUser);
 			} else if (interaction.options._subcommand === 'rating') {
@@ -1389,6 +1391,8 @@ module.exports = {
 					priority: 9
 				});
 
+				updateQueueChannels(interaction.client);
+
 				return await interaction.editReply('You are now queued up for a 1v1 duel.');
 			} else if (interaction.options._subcommand === 'queue1v1-leave') {
 				await interaction.deferReply({ ephemeral: true });
@@ -1413,6 +1417,7 @@ module.exports = {
 
 					if (osuUserId === commandUser.osuUserId) {
 						await existingQueueTasks[i].destroy();
+						updateQueueChannels(interaction.client);
 						return await interaction.editReply('You have been removed from the queue for a 1v1 duel.');
 					}
 				}
