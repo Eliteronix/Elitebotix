@@ -38,18 +38,7 @@ module.exports = {
 		return guildPrefix;
 	},
 	humanReadable: function (input) {
-		let output = '';
-		if (input) {
-			input = input.toString();
-			for (let i = 0; i < input.length; i++) {
-				if (i > 0 && (input.length - i) % 3 === 0) {
-					output = output + ',';
-				}
-				output = output + input.charAt(i);
-			}
-		}
-
-		return output;
+		return humanReadableFunction(input);
 	},
 	roundedRect: function (ctx, x, y, width, height, radius, R, G, B, A) {
 		ctx.beginPath();
@@ -799,374 +788,7 @@ module.exports = {
 		return link.replace(/.+\//g, '');
 	},
 	async saveOsuMultiScores(match) {
-		// let stringifiedMatch = JSON.stringify(match);
-
-		// //Move the match by spawning child process
-		// const { spawn } = require('child_process');
-
-		// //Create a child and pass it the match
-		// const child = spawn('node', ['./saveOsuMultiScores.js'], { stdio: ['inherit', 'inherit', 'inherit', 'ipc'], });
-
-		// child.on('spawn', () => {
-		// 	child.send(stringifiedMatch);
-		// });
-
-		// child.on('message', () => {
-		// 	child.kill('SIGINT');
-		// });
-
-		// await new Promise((resolve) => {
-		// 	child.on('close', resolve);
-		// });
-
-		let tourneyMatchPlayers = [];
-		let newTourneyMatch = true;
-
-		let tourneyMatch = false;
-		if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
-			tourneyMatch = true;
-		}
-
-		let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
-
-		let weeksPrior = new Date(match.raw_start);
-		weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
-
-		let weeksAfter = new Date(match.raw_start);
-		weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
-
-		logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuMultiScores warmup detection same tourney');
-		let sameTournamentMatches = await DBOsuMultiScores.findAll({
-			where: {
-				[Op.or]: [
-					{
-						matchName: {
-							[Op.like]: `%${acronym}%:%`,
-						},
-						gameStartDate: {
-							[Op.gte]: weeksPrior
-						},
-						gameEndDate: {
-							[Op.lte]: weeksAfter
-						},
-						tourneyMatch: true
-					},
-					{
-						matchId: match.id,
-					}
-				],
-			}
-		});
-
-		for (let gameIndex = 0; gameIndex < match.games.length; gameIndex++) {
-			//Define if the game is freemod or not
-			let freeMod = false;
-			for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
-				if (match.games[gameIndex].scores[i].raw_mods) {
-					freeMod = true;
-					break;
-				}
-			}
-
-			let forceMod = true;
-
-			if (!freeMod) {
-				forceMod = false;
-			}
-
-			for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
-				if (parseInt(match.games[gameIndex].scores[i].score) >= 10000 && forceMod) {
-					//Remove HT, DT and NC from scoreMods
-					let scoreMods = getModsFunction(match.games[gameIndex].scores[i].raw_mods);
-					for (let j = 0; j < scoreMods.length; j++) {
-						if (scoreMods[j] === 'HT' || scoreMods[j] === 'DT' || scoreMods[j] === 'NC') {
-							scoreMods.splice(j, 1);
-							j--;
-						}
-					}
-					scoreMods = getModBitsFunction(scoreMods.join(''));
-
-					if (scoreMods <= 1) {
-						forceMod = false;
-					}
-				}
-			}
-
-			let warmupCheckResult = await checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches);
-
-			let warmup = warmupCheckResult.warmup;
-
-			let warmupDecidedByAmount = warmupCheckResult.byAmount;
-
-			for (let scoreIndex = 0; scoreIndex < match.games[gameIndex].scores.length; scoreIndex++) {
-				//Calculate evaluation
-				let evaluation = null;
-
-				let gameScores = [];
-				for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
-					gameScores.push(match.games[gameIndex].scores[i]);
-				}
-
-				if (gameScores.length > 1) {
-					quicksort(gameScores);
-
-					for (let i = 0; i < gameScores.length; i++) {
-						if (parseInt(gameScores[i].score) < 10000) {
-							gameScores.splice(i, 1);
-							i--;
-						}
-					}
-
-					let sortedScores = [];
-					for (let j = 0; j < gameScores.length; j++) {
-						//Remove the own score to make it odd for the middle score
-						if (!(gameScores.length % 2 === 0 && match.games[gameIndex].scores[scoreIndex].userId === gameScores[j].userId)) {
-							sortedScores.push(gameScores[j].score);
-						}
-					}
-
-					const middleScore = getMiddleScore(sortedScores);
-
-					for (let i = 0; i < gameScores.length; i++) {
-						if (match.games[gameIndex].scores[scoreIndex].userId === gameScores[i].userId && gameScores.length > 1) {
-							evaluation = 1 / parseInt(middleScore) * parseInt(gameScores[i].score);
-						}
-					}
-				}
-
-				try {
-					//Add the player ID to the list if needed
-					if (tourneyMatchPlayers.indexOf(match.games[gameIndex].scores[scoreIndex].userId) === -1) {
-						tourneyMatchPlayers.push(match.games[gameIndex].scores[scoreIndex].userId);
-					}
-
-					//Remove HT, DT and NC from scoreMods
-					let scoreMods = getModsFunction(match.games[gameIndex].scores[scoreIndex].raw_mods);
-					for (let i = 0; i < scoreMods.length; i++) {
-						if (scoreMods[i] === 'HT' || scoreMods[i] === 'DT' || scoreMods[i] === 'NC') {
-							scoreMods.splice(i, 1);
-							i--;
-						}
-					}
-					scoreMods = getModBitsFunction(scoreMods.join(''));
-
-					let existingScore = null;
-
-					for (let i = 0; i < sameTournamentMatches.length; i++) {
-						if (sameTournamentMatches[i].osuUserId == match.games[gameIndex].scores[scoreIndex].userId
-							&& sameTournamentMatches[i].matchId == match.id
-							&& sameTournamentMatches[i].gameId == match.games[gameIndex].id) {
-							existingScore = sameTournamentMatches[i];
-							break;
-						}
-					}
-
-					if (!existingScore) {
-						let score = await DBOsuMultiScores.create({
-							osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
-							matchId: match.id,
-							matchName: match.name,
-							gameId: match.games[gameIndex].id,
-							scoringType: match.games[gameIndex].scoringType,
-							mode: match.games[gameIndex].mode,
-							beatmapId: match.games[gameIndex].beatmapId,
-							tourneyMatch: tourneyMatch,
-							evaluation: evaluation,
-							score: match.games[gameIndex].scores[scoreIndex].score,
-							gameRawMods: match.games[gameIndex].raw_mods,
-							rawMods: scoreMods,
-							matchStartDate: match.raw_start,
-							matchEndDate: match.raw_end,
-							gameStartDate: match.games[gameIndex].raw_start,
-							gameEndDate: match.games[gameIndex].raw_end,
-							freeMod: freeMod,
-							forceMod: forceMod,
-							warmup: warmup,
-							warmupDecidedByAmount: warmupDecidedByAmount,
-							maxCombo: match.games[gameIndex].scores[scoreIndex].maxCombo,
-							count50: match.games[gameIndex].scores[scoreIndex].counts['50'],
-							count100: match.games[gameIndex].scores[scoreIndex].counts['100'],
-							count300: match.games[gameIndex].scores[scoreIndex].counts['300'],
-							countMiss: match.games[gameIndex].scores[scoreIndex].counts.miss,
-							countKatu: match.games[gameIndex].scores[scoreIndex].counts.katu,
-							countGeki: match.games[gameIndex].scores[scoreIndex].counts.geki,
-							perfect: match.games[gameIndex].scores[scoreIndex].perfect,
-							teamType: match.games[gameIndex].teamType,
-							team: match.games[gameIndex].scores[scoreIndex].team,
-						});
-
-						//Set the tournament flags on the corresponding beatmap
-						if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
-							logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuBeatmaps tourney flags new score');
-							let dbBeatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									beatmapId: match.games[gameIndex].beatmapId,
-								}
-							});
-
-							for (let i = 0; i < dbBeatmaps.length; i++) {
-								if (!dbBeatmaps[i].tourneyMap) {
-									dbBeatmaps[i].tourneyMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								}
-
-								if (getScoreModpoolFunction(score) === 'NM' && !dbBeatmaps[i].noModMap) {
-									dbBeatmaps[i].noModMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								} else if (getScoreModpoolFunction(score) === 'HD' && !dbBeatmaps[i].hiddenMap) {
-									dbBeatmaps[i].hiddenMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								} else if (getScoreModpoolFunction(score) === 'HR' && !dbBeatmaps[i].hardRockMap) {
-									dbBeatmaps[i].hardRockMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								} else if (getScoreModpoolFunction(score) === 'DT' && !dbBeatmaps[i].doubleTimeMap) {
-									dbBeatmaps[i].doubleTimeMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								} else if (getScoreModpoolFunction(score) === 'FM' && !dbBeatmaps[i].freeModMap) {
-									dbBeatmaps[i].freeModMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								}
-							}
-						}
-
-						//Set back warmup flag if it was set by amount
-						if (scoreIndex === 0 && tourneyMatch) {
-							for (let i = 0; i < sameTournamentMatches.length; i++) {
-								if (sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup !== null
-									&& sameTournamentMatches[i].beatmapId == match.games[gameIndex].beatmapId
-									&& sameTournamentMatches[i].matchId != match.id
-									|| sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup === false
-									&& sameTournamentMatches[i].matchId != match.id) {
-									sameTournamentMatches[i].warmup = null;
-									await sameTournamentMatches[i].save();
-								}
-							}
-						}
-					} else if (existingScore.warmup === null) {
-						newTourneyMatch = false;
-
-						existingScore.osuUserId = match.games[gameIndex].scores[scoreIndex].userId;
-						existingScore.matchId = match.id;
-						existingScore.matchName = match.name;
-						existingScore.gameId = match.games[gameIndex].id;
-						existingScore.scoringType = match.games[gameIndex].scoringType;
-						existingScore.mode = match.games[gameIndex].mode;
-						existingScore.beatmapId = match.games[gameIndex].beatmapId;
-						existingScore.tourneyMatch = tourneyMatch;
-						existingScore.evaluation = evaluation;
-						existingScore.score = match.games[gameIndex].scores[scoreIndex].score;
-						existingScore.gameRawMods = match.games[gameIndex].raw_mods;
-						existingScore.rawMods = scoreMods;
-						existingScore.matchStartDate = match.raw_start;
-						existingScore.matchEndDate = match.raw_end;
-						existingScore.gameStartDate = match.games[gameIndex].raw_start;
-						existingScore.gameEndDate = match.games[gameIndex].raw_end;
-						existingScore.freeMod = freeMod;
-						existingScore.forceMod = forceMod;
-						existingScore.warmup = warmup;
-						existingScore.warmupDecidedByAmount = warmupDecidedByAmount;
-						existingScore.maxCombo = match.games[gameIndex].scores[scoreIndex].maxCombo;
-						existingScore.count50 = match.games[gameIndex].scores[scoreIndex].counts['50'];
-						existingScore.count100 = match.games[gameIndex].scores[scoreIndex].counts['100'];
-						existingScore.count300 = match.games[gameIndex].scores[scoreIndex].counts['300'];
-						existingScore.countMiss = match.games[gameIndex].scores[scoreIndex].counts.miss;
-						existingScore.countKatu = match.games[gameIndex].scores[scoreIndex].counts.katu;
-						existingScore.countGeki = match.games[gameIndex].scores[scoreIndex].counts.geki;
-						existingScore.perfect = match.games[gameIndex].scores[scoreIndex].perfect;
-						existingScore.teamType = match.games[gameIndex].teamType;
-						existingScore.team = match.games[gameIndex].scores[scoreIndex].team;
-						existingScore.changed('updatedAt', true);
-						await existingScore.save();
-
-						//Set the tournament flags on the corresponding beatmap
-						if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
-							logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuBeatmaps tourney flags old score');
-							let dbBeatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									beatmapId: match.games[gameIndex].beatmapId,
-								}
-							});
-
-							for (let i = 0; i < dbBeatmaps.length; i++) {
-								if (!dbBeatmaps[i].tourneyMap) {
-									dbBeatmaps[i].tourneyMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								}
-
-								if (getScoreModpoolFunction(existingScore) === 'NM' && !dbBeatmaps[i].noModMap) {
-									dbBeatmaps[i].noModMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								} else if (getScoreModpoolFunction(existingScore) === 'HD' && !dbBeatmaps[i].hiddenMap) {
-									dbBeatmaps[i].hiddenMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								} else if (getScoreModpoolFunction(existingScore) === 'HR' && !dbBeatmaps[i].hardRockMap) {
-									dbBeatmaps[i].hardRockMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								} else if (getScoreModpoolFunction(existingScore) === 'DT' && !dbBeatmaps[i].doubleTimeMap) {
-									dbBeatmaps[i].doubleTimeMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								} else if (getScoreModpoolFunction(existingScore) === 'FM' && !dbBeatmaps[i].freeModMap) {
-									dbBeatmaps[i].freeModMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								}
-							}
-						}
-					} else {
-						newTourneyMatch = false;
-					}
-				} catch (error) {
-					scoreIndex--;
-				}
-			}
-		}
-
-		if (tourneyMatch) {
-			//Delete duel rating history entries for the players in the match
-			let outdatedDuelRatings = await DBDuelRatingHistory.findAll({
-				where: {
-					osuUserId: {
-						[Op.in]: tourneyMatchPlayers
-					},
-					year: {
-						[Op.gte]: new Date(match.raw_end).getUTCFullYear()
-					}
-				}
-			});
-
-			for (let i = 0; i < outdatedDuelRatings.length; i++) {
-				await outdatedDuelRatings[i].destroy();
-			}
-		}
-
-		if (newTourneyMatch) {
-			//Get all follows for the players in the match
-			let follows = await DBOsuTourneyFollows.findAll({
-				where: {
-					osuUserId: {
-						[Op.in]: tourneyMatchPlayers
-					}
-				}
-			});
-
-			//Collect the follows per user
-			let usersToNotify = [];
-			let usersToNotifyIds = [];
-
-			for (let i = 0; i < follows.length; i++) {
-				if (usersToNotifyIds.indexOf(follows[i].userId) === -1) {
-					usersToNotifyIds.push(follows[i].userId);
-					usersToNotify.push({ userId: follows[i].userId, osuUserIds: [follows[i].osuUserId] });
-				} else {
-					usersToNotify[usersToNotifyIds.indexOf(follows[i].userId)].osuUserIds.push(follows[i].osuUserId);
-				}
-			}
-
-			//Create a notification for each user
-			let now = new Date();
-			for (let i = 0; i < usersToNotify.length; i++) {
-				await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')}`, date: now });
-			}
-		}
+		await saveOsuMultiScoresFunction(match);
 	},
 	async populateMsgFromInteraction(interaction) {
 		let userMentions = new Discord.Collection();
@@ -1788,6 +1410,1191 @@ module.exports = {
 	},
 	calculateGrade(mode, counts, modBits) {
 		return calculateGradeFunction(mode, counts, modBits);
+	},
+	async createDuelMatch(client, bancho, interaction, averageStarRating, lowerBound, upperBound, onlyRanked, firstUser, secondUser, thirdUser, fourthUser) {
+		if (interaction) {
+			await interaction.editReply('Duel has been accepted. Creating pool and lobby...');
+		}
+
+		//Set up the mappools
+		let dbMaps = [];
+		let dbMapIds = [];
+
+		// Set up the modpools
+		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
+		shuffle(modPools);
+		modPools.push('NM', 'FM');
+
+		logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 1 scores');
+		const player1Scores = await DBOsuMultiScores.findAll({
+			where: {
+				osuUserId: firstUser.osuUserId,
+				tourneyMatch: true,
+				matchName: {
+					[Op.notLike]: 'MOTD:%',
+				},
+				mode: 'Standard',
+				[Op.or]: [
+					{ warmup: false },
+					{ warmup: null }
+				],
+			}
+		});
+
+		for (let i = 0; i < player1Scores.length; i++) {
+			player1Scores[i] = player1Scores[i].beatmapId;
+		}
+
+		logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 2 scores');
+		const player2Scores = await DBOsuMultiScores.findAll({
+			where: {
+				osuUserId: secondUser.osuUserId,
+				tourneyMatch: true,
+				matchName: {
+					[Op.notLike]: 'MOTD:%',
+				},
+				mode: 'Standard',
+				[Op.or]: [
+					{ warmup: false },
+					{ warmup: null }
+				],
+			}
+		});
+
+		for (let i = 0; i < player2Scores.length; i++) {
+			player2Scores[i] = player2Scores[i].beatmapId;
+		}
+
+		let player3Scores = null;
+		let player4Scores = null;
+
+		if (thirdUser) {
+			logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 2 scores');
+			player3Scores = await DBOsuMultiScores.findAll({
+				where: {
+					osuUserId: thirdUser.osuUserId,
+					tourneyMatch: true,
+					matchName: {
+						[Op.notLike]: 'MOTD:%',
+					},
+					mode: 'Standard',
+					[Op.or]: [
+						{ warmup: false },
+						{ warmup: null }
+					],
+				}
+			});
+
+			for (let i = 0; i < player3Scores.length; i++) {
+				player3Scores[i] = player3Scores[i].beatmapId;
+			}
+
+			logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 2 scores');
+			player4Scores = await DBOsuMultiScores.findAll({
+				where: {
+					osuUserId: fourthUser.osuUserId,
+					tourneyMatch: true,
+					matchName: {
+						[Op.notLike]: 'MOTD:%',
+					},
+					mode: 'Standard',
+					[Op.or]: [
+						{ warmup: false },
+						{ warmup: null }
+					],
+				}
+			});
+
+			for (let i = 0; i < player4Scores.length; i++) {
+				player4Scores[i] = player4Scores[i].beatmapId;
+			}
+		}
+
+		//Get the map for each modpool; limited by drain time, star rating and both players either having played or not played it
+		for (let i = 0; i < modPools.length; i++) {
+			let dbBeatmap = null;
+			let beatmaps = null;
+
+			if (i === 6) {
+				console.log('Duel Match: Get all TB Beatmaps');
+				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps TB');
+				if (!thirdUser) {
+					beatmaps = await DBOsuBeatmaps.findAll({
+						where: {
+							mode: 'Standard',
+							approvalStatus: {
+								[Op.not]: 'Not found',
+							},
+							[Op.or]: {
+								noModMap: true,
+								freeModMap: true,
+							},
+							drainLength: {
+								[Op.and]: {
+									[Op.gte]: 270,
+									[Op.lte]: 360,
+								}
+							},
+							starRating: {
+								[Op.and]: {
+									[Op.gte]: lowerBound,
+									[Op.lte]: upperBound,
+								}
+							},
+							beatmapId: {
+								[Op.or]: {
+									[Op.and]: {
+										[Op.in]: player1Scores,
+										[Op.in]: player2Scores,
+									},
+									[Op.and]: {
+										[Op.notIn]: player1Scores,
+										[Op.notIn]: player2Scores,
+									},
+								}
+							},
+							circleSize: {
+								[Op.lte]: 5,
+							},
+							approachRate: {
+								[Op.gte]: 8,
+							},
+						}
+					});
+				} else {
+					beatmaps = await DBOsuBeatmaps.findAll({
+						where: {
+							mode: 'Standard',
+							approvalStatus: {
+								[Op.not]: 'Not found',
+							},
+							[Op.or]: {
+								noModMap: true,
+								freeModMap: true,
+							},
+							drainLength: {
+								[Op.and]: {
+									[Op.gte]: 270,
+									[Op.lte]: 360,
+								}
+							},
+							starRating: {
+								[Op.and]: {
+									[Op.gte]: lowerBound,
+									[Op.lte]: upperBound,
+								}
+							},
+							beatmapId: {
+								[Op.or]: {
+									[Op.and]: {
+										[Op.in]: player1Scores,
+										[Op.in]: player2Scores,
+										[Op.in]: player3Scores,
+										[Op.in]: player4Scores,
+									},
+									[Op.and]: {
+										[Op.notIn]: player1Scores,
+										[Op.notIn]: player2Scores,
+										[Op.notIn]: player3Scores,
+										[Op.notIn]: player4Scores,
+									},
+								}
+							},
+							circleSize: {
+								[Op.lte]: 5,
+							},
+							approachRate: {
+								[Op.gte]: 8,
+							},
+						}
+					});
+				}
+				console.log('Duel Match: Grabbed all TB Beatmaps');
+			} else if (modPools[i] === 'NM') {
+				console.log('Duel Match: Get all NM Beatmaps');
+				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps NM');
+				if (!thirdUser) {
+					beatmaps = await DBOsuBeatmaps.findAll({
+						where: {
+							mode: 'Standard',
+							approvalStatus: {
+								[Op.not]: 'Not found',
+							},
+							noModMap: true,
+							drainLength: {
+								[Op.and]: {
+									[Op.gte]: 100,
+									[Op.lte]: 270,
+								}
+							},
+							starRating: {
+								[Op.and]: {
+									[Op.gte]: lowerBound,
+									[Op.lte]: upperBound,
+								}
+							},
+							beatmapId: {
+								[Op.or]: {
+									[Op.and]: {
+										[Op.in]: player1Scores,
+										[Op.in]: player2Scores,
+									},
+									[Op.and]: {
+										[Op.notIn]: player1Scores,
+										[Op.notIn]: player2Scores,
+									},
+								}
+							},
+						}
+					});
+				} else {
+					beatmaps = await DBOsuBeatmaps.findAll({
+						where: {
+							mode: 'Standard',
+							approvalStatus: {
+								[Op.not]: 'Not found',
+							},
+							noModMap: true,
+							drainLength: {
+								[Op.and]: {
+									[Op.gte]: 100,
+									[Op.lte]: 270,
+								}
+							},
+							starRating: {
+								[Op.and]: {
+									[Op.gte]: lowerBound,
+									[Op.lte]: upperBound,
+								}
+							},
+							beatmapId: {
+								[Op.or]: {
+									[Op.and]: {
+										[Op.in]: player1Scores,
+										[Op.in]: player2Scores,
+										[Op.in]: player3Scores,
+										[Op.in]: player4Scores,
+									},
+									[Op.and]: {
+										[Op.notIn]: player1Scores,
+										[Op.notIn]: player2Scores,
+										[Op.notIn]: player3Scores,
+										[Op.notIn]: player4Scores,
+									},
+								}
+							},
+						}
+					});
+				}
+				console.log('Duel Match: Grabbed all NM Beatmaps');
+			} else if (modPools[i] === 'HD') {
+				console.log('Duel Match: Get all HD Beatmaps');
+				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps HD');
+				let HDLowerBound = lowerBound - 0.8;
+				let HDUpperBound = upperBound - 0.15;
+				if (!thirdUser) {
+					beatmaps = await DBOsuBeatmaps.findAll({
+						where: {
+							mode: 'Standard',
+							approvalStatus: {
+								[Op.not]: 'Not found',
+							},
+							hiddenMap: true,
+							drainLength: {
+								[Op.and]: {
+									[Op.gte]: 100,
+									[Op.lte]: 270,
+								}
+							},
+							starRating: {
+								[Op.and]: {
+									[Op.gte]: HDLowerBound,
+									[Op.lte]: HDUpperBound,
+								}
+							},
+							beatmapId: {
+								[Op.or]: {
+									[Op.and]: {
+										[Op.in]: player1Scores,
+										[Op.in]: player2Scores,
+									},
+									[Op.and]: {
+										[Op.notIn]: player1Scores,
+										[Op.notIn]: player2Scores,
+									},
+								}
+							},
+						}
+					});
+				} else {
+					beatmaps = await DBOsuBeatmaps.findAll({
+						where: {
+							mode: 'Standard',
+							approvalStatus: {
+								[Op.not]: 'Not found',
+							},
+							hiddenMap: true,
+							drainLength: {
+								[Op.and]: {
+									[Op.gte]: 100,
+									[Op.lte]: 270,
+								}
+							},
+							starRating: {
+								[Op.and]: {
+									[Op.gte]: HDLowerBound,
+									[Op.lte]: HDUpperBound,
+								}
+							},
+							beatmapId: {
+								[Op.or]: {
+									[Op.and]: {
+										[Op.in]: player1Scores,
+										[Op.in]: player2Scores,
+										[Op.in]: player3Scores,
+										[Op.in]: player4Scores,
+									},
+									[Op.and]: {
+										[Op.notIn]: player1Scores,
+										[Op.notIn]: player2Scores,
+										[Op.notIn]: player3Scores,
+										[Op.notIn]: player4Scores,
+									},
+								}
+							},
+						}
+					});
+				}
+				console.log('Duel Match: Grabbed all HD Beatmaps');
+			} else if (modPools[i] === 'HR') {
+				console.log('Duel Match: Get all HR Beatmaps');
+				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps HR');
+				if (!thirdUser) {
+					beatmaps = await DBOsuBeatmaps.findAll({
+						where: {
+							mode: 'Standard',
+							approvalStatus: {
+								[Op.not]: 'Not found',
+							},
+							hardRockMap: true,
+							drainLength: {
+								[Op.and]: {
+									[Op.gte]: 100,
+									[Op.lte]: 270,
+								}
+							},
+							starRating: {
+								[Op.and]: {
+									[Op.gte]: lowerBound,
+									[Op.lte]: upperBound,
+								}
+							},
+							beatmapId: {
+								[Op.or]: {
+									[Op.and]: {
+										[Op.in]: player1Scores,
+										[Op.in]: player2Scores,
+									},
+									[Op.and]: {
+										[Op.notIn]: player1Scores,
+										[Op.notIn]: player2Scores,
+									},
+								}
+							},
+						}
+					});
+				} else {
+					beatmaps = await DBOsuBeatmaps.findAll({
+						where: {
+							mode: 'Standard',
+							approvalStatus: {
+								[Op.not]: 'Not found',
+							},
+							hardRockMap: true,
+							drainLength: {
+								[Op.and]: {
+									[Op.gte]: 100,
+									[Op.lte]: 270,
+								}
+							},
+							starRating: {
+								[Op.and]: {
+									[Op.gte]: lowerBound,
+									[Op.lte]: upperBound,
+								}
+							},
+							beatmapId: {
+								[Op.or]: {
+									[Op.and]: {
+										[Op.in]: player1Scores,
+										[Op.in]: player2Scores,
+										[Op.in]: player3Scores,
+										[Op.in]: player4Scores,
+									},
+									[Op.and]: {
+										[Op.notIn]: player1Scores,
+										[Op.notIn]: player2Scores,
+										[Op.notIn]: player3Scores,
+										[Op.notIn]: player4Scores,
+									},
+								}
+							},
+						}
+					});
+				}
+				console.log('Duel Match: Grabbed all HR Beatmaps');
+			} else if (modPools[i] === 'DT') {
+				console.log('Duel Match: Get all DT Beatmaps');
+				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps DT');
+				if (!thirdUser) {
+					beatmaps = await DBOsuBeatmaps.findAll({
+						where: {
+							mode: 'Standard',
+							approvalStatus: {
+								[Op.not]: 'Not found',
+							},
+							doubleTimeMap: true,
+							drainLength: {
+								[Op.and]: {
+									[Op.gte]: 120,
+									[Op.lte]: 405,
+								}
+							},
+							starRating: {
+								[Op.and]: {
+									[Op.gte]: lowerBound,
+									[Op.lte]: upperBound,
+								}
+							},
+							beatmapId: {
+								[Op.or]: {
+									[Op.and]: {
+										[Op.in]: player1Scores,
+										[Op.in]: player2Scores,
+									},
+									[Op.and]: {
+										[Op.notIn]: player1Scores,
+										[Op.notIn]: player2Scores,
+									},
+								}
+							},
+						}
+					});
+				} else {
+					beatmaps = await DBOsuBeatmaps.findAll({
+						where: {
+							mode: 'Standard',
+							approvalStatus: {
+								[Op.not]: 'Not found',
+							},
+							doubleTimeMap: true,
+							drainLength: {
+								[Op.and]: {
+									[Op.gte]: 120,
+									[Op.lte]: 405,
+								}
+							},
+							starRating: {
+								[Op.and]: {
+									[Op.gte]: lowerBound,
+									[Op.lte]: upperBound,
+								}
+							},
+							beatmapId: {
+								[Op.or]: {
+									[Op.and]: {
+										[Op.in]: player1Scores,
+										[Op.in]: player2Scores,
+										[Op.in]: player3Scores,
+										[Op.in]: player4Scores,
+									},
+									[Op.and]: {
+										[Op.notIn]: player1Scores,
+										[Op.notIn]: player2Scores,
+										[Op.notIn]: player3Scores,
+										[Op.notIn]: player4Scores,
+									},
+								}
+							},
+						}
+					});
+				}
+				console.log('Duel Match: Grabbed all DT Beatmaps');
+			} else if (modPools[i] === 'FM') {
+				console.log('Duel Match: Get all FM Beatmaps');
+				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps FM');
+				if (!thirdUser) {
+					beatmaps = await DBOsuBeatmaps.findAll({
+						where: {
+							mode: 'Standard',
+							approvalStatus: {
+								[Op.not]: 'Not found',
+							},
+							freeModMap: true,
+							drainLength: {
+								[Op.and]: {
+									[Op.gte]: 100,
+									[Op.lte]: 270,
+								}
+							},
+							starRating: {
+								[Op.and]: {
+									[Op.gte]: lowerBound,
+									[Op.lte]: upperBound,
+								}
+							},
+							beatmapId: {
+								[Op.or]: {
+									[Op.and]: {
+										[Op.in]: player1Scores,
+										[Op.in]: player2Scores,
+									},
+									[Op.and]: {
+										[Op.notIn]: player1Scores,
+										[Op.notIn]: player2Scores,
+									},
+								}
+							},
+						}
+					});
+				} else {
+					beatmaps = await DBOsuBeatmaps.findAll({
+						where: {
+							mode: 'Standard',
+							approvalStatus: {
+								[Op.not]: 'Not found',
+							},
+							freeModMap: true,
+							drainLength: {
+								[Op.and]: {
+									[Op.gte]: 100,
+									[Op.lte]: 270,
+								}
+							},
+							starRating: {
+								[Op.and]: {
+									[Op.gte]: lowerBound,
+									[Op.lte]: upperBound,
+								}
+							},
+							beatmapId: {
+								[Op.or]: {
+									[Op.and]: {
+										[Op.in]: player1Scores,
+										[Op.in]: player2Scores,
+										[Op.in]: player3Scores,
+										[Op.in]: player4Scores,
+									},
+									[Op.and]: {
+										[Op.notIn]: player1Scores,
+										[Op.notIn]: player2Scores,
+										[Op.notIn]: player3Scores,
+										[Op.notIn]: player4Scores,
+									},
+								}
+							},
+						}
+					});
+				}
+				console.log('Duel Match: Grabbed all FM Beatmaps');
+			}
+
+			if (interaction) {
+				await interaction.editReply(`Finding a ${modPools[i]} map out of ${beatmaps.length} possible maps...`);
+			}
+
+			while (dbBeatmap === null) {
+				if (interaction && beatmaps.length && beatmaps.length % 5 === 0) {
+					await interaction.editReply(`Finding a ${modPools[i]} map out of ${beatmaps.length} possible maps...`);
+				}
+
+				const index = Math.floor(Math.random() * beatmaps.length);
+
+				if (!beatmaps.length) {
+					console.log('Duel Match: No more maps left to choose from');
+					if (!thirdUser) {
+						if (interaction) {
+							return await interaction.editReply(`<@${firstUser.userId}>, <@${secondUser.userId}> the bot could not find enough viable maps with this criteria. (SR: ${Math.round(averageStarRating * 100) / 100}*)`);
+						} else {
+							return console.log(`Queued Duel Match: No more maps left to choose from (SR: ${Math.round(averageStarRating * 100) / 100}*)`);
+						}
+					} else {
+						if (interaction) {
+							return await interaction.editReply(`<@${firstUser.userId}>, <@${secondUser.userId}>, <@${thirdUser.userId}>, <@${fourthUser.userId}> the bot could not find enough viable maps with this criteria. (SR: ${Math.round(averageStarRating * 100) / 100}*)`);
+						} else {
+							return console.log(`Queued Duel Match: No more maps left to choose from (SR: ${Math.round(averageStarRating * 100) / 100}*)`);
+						}
+					}
+				}
+
+				if (!beatmaps[index]) {
+					beatmaps.splice(index, 1);
+					console.log('Duel Match: Beatmap was null, removed from array');
+					continue;
+				}
+
+				if (parseInt(beatmaps[index].drainLength) < 100 || parseInt(beatmaps[index].drainLength) > 405) {
+					beatmaps.splice(index, 1);
+					console.log('Duel Match: Beatmap drain length was out of bounds, removed from array');
+					continue;
+				}
+
+				if (modPools[i] === 'HD') {
+					console.log('Duel Match: Refresh the HD Beatmap');
+					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
+
+					if (!beatmaps[index]) {
+						beatmaps.splice(index, 1);
+						console.log('Duel Match: Beatmap was null, removed from array');
+						continue;
+					}
+
+					beatmaps[index].starRating = adjustHDStarRatingFunction(beatmaps[index].starRating, beatmaps[index].approachRate);
+					console.log('Duel Match: Refreshed the HD Beatmap');
+				} else if (modPools[i] === 'HR') {
+					console.log('Duel Match: Refresh the HR Beatmap');
+					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 16 });
+					console.log('Duel Match: Refreshed the HR Beatmap');
+				} else if (modPools[i] === 'DT') {
+					console.log('Duel Match: Refresh the DT Beatmap');
+					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 64 });
+					console.log('Duel Match: Refreshed the DT Beatmap');
+				} else {
+					console.log('Duel Match: Refresh the NM/FM Beatmap');
+					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
+					console.log('Duel Match: Refreshed the NM/FM Beatmap');
+				}
+
+				if (!beatmaps[index] || onlyRanked && beatmaps[index].approvalStatus !== 'Ranked') {
+					beatmaps.splice(index, 1);
+					console.log('Beatmap was null or not ranked, removing from pool');
+					continue;
+				}
+
+				console.log('Duel Match: Get beatmap score count');
+				const mapScoreAmount = await DBOsuMultiScores.count({
+					where: {
+						beatmapId: beatmaps[index].beatmapId,
+						matchName: {
+							[Op.notLike]: 'MOTD:%',
+						},
+						[Op.or]: [
+							{ warmup: false },
+							{ warmup: null }
+						],
+					}
+				});
+				console.log('Duel Match: Grabbed beatmap score count');
+
+				// eslint-disable-next-line no-undef
+				if (!beatmaps[index] || parseFloat(beatmaps[index].starRating) < lowerBound || parseFloat(beatmaps[index].starRating) > upperBound || mapScoreAmount < 25 && process.env.SERVER !== 'Dev') {
+					beatmaps.splice(index, 1);
+					console.log('Beatmap was null, lower bound, or upper bound, or score count was less than 25, removing from pool');
+				} else if (!dbMapIds.includes(beatmaps[index].beatmapsetId)) {
+					dbBeatmap = beatmaps[index];
+					dbMapIds.push(beatmaps[index].beatmapsetId);
+					dbMaps.push(beatmaps[index]);
+					console.log('Duel Match: Beatmap is valid, adding to pool');
+				}
+			}
+		}
+
+		modPools[6] = 'FreeMod';
+		modPools[modPools.indexOf('FM')] = 'FreeMod';
+
+		//Set up the lobby
+		let channel = null;
+
+		let teamname1 = firstUser.osuName;
+		let teamname2 = secondUser.osuName;
+
+		if (thirdUser) {
+			teamname1 = `${firstUser.osuName.substring(0, firstUser.osuName.length / 2)}${secondUser.osuName.substring(secondUser.osuName.length / 2, secondUser.osuName.length)}`;
+			teamname2 = `${thirdUser.osuName.substring(0, thirdUser.osuName.length / 2)}${fourthUser.osuName.substring(fourthUser.osuName.length / 2, fourthUser.osuName.length)}`;
+		}
+
+		if (interaction) {
+			await interaction.editReply(`Creating match lobby for ${teamname1} vs ${teamname2}`);
+		}
+		for (let i = 0; i < 5; i++) {
+			try {
+				try {
+					console.log('Duel Match: Connecting to Bancho');
+					await bancho.connect();
+				} catch (error) {
+					console.log(`Duel Match: Error connecting to Bancho: ${error}`);
+					if (!error.message === 'Already connected/connecting') {
+						throw (error);
+					}
+				}
+				console.log('Duel Match: Creating match');
+				if (!thirdUser) {
+					channel = await bancho.createLobby(`ETX: (${teamname1}) vs (${teamname2})`);
+				} else {
+					channel = await bancho.createLobby(`ETX Teams: (${teamname1}) vs (${teamname2})`);
+				}
+				console.log('Duel Match: Created match');
+				break;
+			} catch (error) {
+				if (i === 4) {
+					if (interaction) {
+						return await interaction.editReply('I am having issues creating the lobby and the match has been aborted.\nPlease try again later.');
+					} else {
+						return console.log('I am having issues creating the lobby and the match has been aborted.');
+					}
+				} else {
+					await new Promise(resolve => setTimeout(resolve, 10000));
+				}
+			}
+		}
+
+		const lobby = channel.lobby;
+		logMatchCreationFunction(client, lobby.name, lobby.id);
+
+		const password = Math.random().toString(36).substring(8);
+
+		await lobby.setPassword(password);
+		await channel.sendMessage('!mp addref Eliteronix');
+		await channel.sendMessage('!mp map 975342 0');
+		if (!thirdUser) {
+			await channel.sendMessage('!mp set 0 3 2');
+		} else {
+			await channel.sendMessage('!mp set 0 3 4');
+		}
+
+		let lobbyStatus = 'Joining phase';
+		let mapIndex = 0;
+
+		await channel.sendMessage(`!mp invite #${firstUser.osuUserId}`);
+		let user = await client.users.fetch(firstUser.userId);
+		await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+
+		await channel.sendMessage(`!mp invite #${secondUser.osuUserId}`);
+		user = await client.users.fetch(secondUser.userId);
+		await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+
+		if (thirdUser) {
+			await channel.sendMessage(`!mp invite #${thirdUser.osuUserId}`);
+			let user = await client.users.fetch(thirdUser.userId);
+			await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+
+			await channel.sendMessage(`!mp invite #${fourthUser.osuUserId}`);
+			user = await client.users.fetch(fourthUser.userId);
+			await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+		}
+
+		let pingMessage = null;
+		if (!thirdUser) {
+			if (interaction) {
+				// eslint-disable-next-line no-undef
+				await interaction.editReply(`<@${firstUser.userId}> <@${secondUser.userId}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup.`);
+				pingMessage = await interaction.channel.send(`<@${firstUser.userId}> <@${secondUser.userId}>`);
+			}
+		} else {
+			if (interaction) {
+				// eslint-disable-next-line no-undef
+				await interaction.editReply(`<@${firstUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup.`);
+				pingMessage = await interaction.channel.send(`<@${firstUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}>`);
+			}
+		}
+		if (interaction) {
+			pingMessage.delete();
+		}
+		//Start the timer to close the lobby if not everyone joined by then
+		await channel.sendMessage('!mp timer 300');
+
+		let playerIds = [firstUser.osuUserId, secondUser.osuUserId];
+		let dbPlayers = [firstUser, secondUser];
+		if (thirdUser) {
+			//Push the other 2 users aswell
+			playerIds.push(thirdUser.osuUserId);
+			playerIds.push(fourthUser.osuUserId);
+			dbPlayers.push(thirdUser);
+			dbPlayers.push(fourthUser);
+		}
+		let scores = [0, 0];
+
+		//Add discord messages and also ingame invites for the timers
+		channel.on('message', async (msg) => {
+			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
+				//Banchobot countdown finished
+				if (lobbyStatus === 'Joining phase') {
+					//Not everyone joined and the lobby will be closed
+					await channel.sendMessage('The lobby will be closed as not everyone joined.');
+					await new Promise(resolve => setTimeout(resolve, 60000));
+					await channel.sendMessage('!mp close');
+
+					return await channel.leave();
+				} else if (lobbyStatus === 'Waiting for start') {
+					await channel.sendMessage('!mp start 5');
+
+					lobbyStatus === 'Map being played';
+				}
+			}
+		});
+
+		lobby.on('playerJoined', async (obj) => {
+			if (!playerIds.includes(obj.player.user.id.toString())) {
+				channel.sendMessage(`!mp kick #${obj.player.user.id}`);
+			} else if (lobbyStatus === 'Joining phase') {
+				let allPlayersJoined = true;
+				for (let i = 0; i < dbPlayers.length && allPlayersJoined; i++) {
+					if (!lobby.playersById[dbPlayers[i].osuUserId.toString()]) {
+						allPlayersJoined = false;
+					}
+				}
+				if (allPlayersJoined) {
+					lobbyStatus = 'Waiting for start';
+
+					while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
+						await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+						await new Promise(resolve => setTimeout(resolve, 5000));
+					}
+
+					let noFail = 'NF';
+					if (modPools[mapIndex] === 'FreeMod') {
+						noFail = '';
+					}
+
+					while (modPools[mapIndex] === 'FreeMod' && !lobby.freemod //There is no FreeMod combination otherwise
+						|| modPools[mapIndex] !== 'FreeMod' && !lobby.mods
+						|| modPools[mapIndex] === 'NM' && lobby.mods.length !== 1 //Only NM has only one mod
+						|| modPools[mapIndex] !== 'FreeMod' && modPools[mapIndex] !== 'NM' && lobby.mods.length !== 2 //Only FreeMod and NM don't have two mods
+						|| modPools[mapIndex] === 'HD' && !((lobby.mods[0].shortMod === 'hd' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'hd')) //Only HD has HD and NF
+						|| modPools[mapIndex] === 'HR' && !((lobby.mods[0].shortMod === 'hr' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'hr')) //Only HR has HR and NF
+						|| modPools[mapIndex] === 'DT' && !((lobby.mods[0].shortMod === 'dt' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'dt')) //Only DT has DT and NF
+					) {
+						await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+						await new Promise(resolve => setTimeout(resolve, 5000));
+					}
+
+					let mapInfo = await getOsuMapInfo(dbMaps[mapIndex]);
+					await channel.sendMessage(mapInfo);
+					if (modPools[mapIndex] === 'FreeMod') {
+						await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
+					}
+					await channel.sendMessage('Everyone please ready up!');
+					await channel.sendMessage('!mp timer 120');
+					mapIndex++;
+				}
+			}
+		});
+
+		lobby.on('allPlayersReady', async () => {
+			await lobby.updateSettings();
+			let playersInLobby = 0;
+			for (let i = 0; i < 16; i++) {
+				if (lobby.slots[i]) {
+					playersInLobby++;
+				}
+			}
+			if (lobbyStatus === 'Waiting for start' && playersInLobby === dbPlayers.length) {
+				await channel.sendMessage('!mp start 5');
+
+				lobbyStatus === 'Map being played';
+			}
+		});
+
+		lobby.on('matchFinished', async (results) => {
+			if (modPools[mapIndex - 1] === 'FreeMod') {
+				for (let i = 0; i < results.length; i++) {
+					//Increase the score by 1.7 if EZ was played
+					if (results[i].player.mods) {
+						for (let j = 0; j < results[i].player.mods.length; j++) {
+							if (results[i].player.mods[j].enumValue === 2) {
+								console.log(results[i].score);
+								results[i].score = results[i].score * 1.7;
+								console.log(results[i].score);
+							}
+						}
+					}
+				}
+			}
+			if (modPools[mapIndex - 1] === 'FreeMod' && mapIndex - 1 < 6) {
+				for (let i = 0; i < results.length; i++) {
+					//Reduce the score by 0.5 if it was FreeMod and no mods / only nofail was picked
+					if (!results[i].player.mods || results[i].player.mods.length === 0 || results[i].player.mods.length === 1 && results[i].player.mods[0].enumValue === 1) {
+						results[i].score = results[i].score * 0.5;
+					} else {
+						let invalidModsPicked = false;
+						for (let j = 0; j < results[i].player.mods.length; j++) {
+							if (results[i].player.mods[j].enumValue !== 1 && results[i].player.mods[j].enumValue !== 2 && results[i].player.mods[j].enumValue !== 8 && results[i].player.mods[j].enumValue !== 16) {
+								invalidModsPicked = true;
+							}
+						}
+
+						if (invalidModsPicked) {
+							results[i].score = results[i].score / 100;
+						}
+					}
+				}
+			}
+
+			quicksort(results);
+
+			let scoreTeam1 = 0;
+			let scoreTeam2 = 0;
+			if (!thirdUser) {
+				for (let i = 0; i < results.length; i++) {
+					if (playerIds[0] == results[i].player.user.id) {
+						scoreTeam1 = + parseFloat(results[i].score);
+					} else if (playerIds[1] == results[i].player.user.id) {
+						scoreTeam2 = + parseFloat(results[i].score);
+					}
+				}
+			} else {
+				for (let i = 0; i < results.length; i++) {
+					if (playerIds[0] == results[i].player.user.id || playerIds[1] == results[i].player.user.id) {
+						scoreTeam1 = scoreTeam1 + parseFloat(results[i].score);
+					} else if (playerIds[2] == results[i].player.user.id || playerIds[3] == results[i].player.user.id) {
+						scoreTeam2 = scoreTeam2 + parseFloat(results[i].score);
+					}
+				}
+			}
+			if (results.length) {
+				let winner = teamname1;
+
+				if (scoreTeam1 < scoreTeam2) {
+					winner = teamname2;
+				}
+
+				scoreTeam1 = Math.round(scoreTeam1);
+				scoreTeam2 = Math.round(scoreTeam2);
+
+				await channel.sendMessage(`Bo7 | ${teamname1}: ${humanReadableFunction(scoreTeam1)} | ${teamname2}: ${humanReadableFunction(scoreTeam2)} | Difference: ${humanReadableFunction(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
+			} else {
+				await channel.sendMessage('!mp close');
+				// eslint-disable-next-line no-undef
+				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+				});
+
+				osuApi.getMatch({ mp: lobby.id })
+					.then(async (match) => {
+						saveOsuMultiScoresFunction(match);
+					})
+					.catch(() => {
+						//Nothing
+					});
+
+				return await channel.leave();
+			}
+
+			//Increase the score of the player at the top of the list
+			if (scoreTeam1 > scoreTeam2) {
+				scores[0]++;
+			} else {
+				scores[1]++;
+			}
+			await channel.sendMessage(`Score: ${teamname1} | ${scores[0]} - ${scores[1]} | ${teamname2}`);
+
+			if (mapIndex < dbMaps.length && scores[0] < 4 && scores[1] < 4) {
+				lobbyStatus = 'Waiting for start';
+
+				while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
+					await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+					await new Promise(resolve => setTimeout(resolve, 5000));
+				}
+
+				let noFail = 'NF';
+				if (modPools[mapIndex] === 'FreeMod') {
+					noFail = '';
+				}
+
+				while (modPools[mapIndex] === 'FreeMod' && !lobby.freemod //There is no FreeMod combination otherwise
+					|| modPools[mapIndex] !== 'FreeMod' && !lobby.mods
+					|| modPools[mapIndex] === 'NM' && lobby.mods.length !== 1 //Only NM has only one mod
+					|| modPools[mapIndex] !== 'FreeMod' && modPools[mapIndex] !== 'NM' && lobby.mods.length !== 2 //Only FreeMod and NM don't have two mods
+					|| modPools[mapIndex] === 'HD' && !((lobby.mods[0].shortMod === 'hd' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'hd')) //Only HD has HD and NF
+					|| modPools[mapIndex] === 'HR' && !((lobby.mods[0].shortMod === 'hr' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'hr')) //Only HR has HR and NF
+					|| modPools[mapIndex] === 'DT' && !((lobby.mods[0].shortMod === 'dt' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'dt')) //Only DT has DT and NF
+				) {
+					await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+					await new Promise(resolve => setTimeout(resolve, 5000));
+				}
+
+				let mapInfo = await getOsuMapInfo(dbMaps[mapIndex]);
+				await channel.sendMessage(mapInfo);
+				await channel.sendMessage('Everyone please ready up!');
+				if (modPools[mapIndex] === 'FreeMod' && mapIndex < 6) {
+					await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
+				} else if (modPools[mapIndex] === 'FreeMod' && mapIndex === 6) {
+					await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
+				}
+				await channel.sendMessage('!mp timer 120');
+				mapIndex++;
+			} else {
+				lobbyStatus = 'Lobby finished';
+
+				if (scores[0] === 4) {
+					await channel.sendMessage(`Congratulations ${teamname1} for winning the match!`);
+				} else {
+					await channel.sendMessage(`Congratulations ${teamname2} for winning the match!`);
+				}
+				await channel.sendMessage('Thank you for playing! The lobby will automatically close in one minute.');
+				await new Promise(resolve => setTimeout(resolve, 5000));
+
+				// eslint-disable-next-line no-undef
+				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+				});
+
+				osuApi.getMatch({ mp: lobby.id })
+					.then(async (match) => {
+						saveOsuMultiScoresFunction(match);
+
+						await new Promise(resolve => setTimeout(resolve, 15000));
+
+						let userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: firstUser.osuUserId, client: client });
+						let messages = ['Your SR has been updated!'];
+						if (Math.round(firstUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
+							messages.push(`SR: ${Math.round(firstUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
+						}
+						if (Math.round(firstUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
+							messages.push(`NM: ${Math.round(firstUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
+						}
+						if (Math.round(firstUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
+							messages.push(`HD: ${Math.round(firstUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
+						}
+						if (Math.round(firstUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
+							messages.push(`HR: ${Math.round(firstUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
+						}
+						if (Math.round(firstUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
+							messages.push(`DT: ${Math.round(firstUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
+						}
+						if (Math.round(firstUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
+							messages.push(`FM: ${Math.round(firstUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
+						}
+						if (messages.length > 1) {
+							const IRCUser = await bancho.getUser(firstUser.osuName);
+							for (let i = 0; i < messages.length; i++) {
+								await IRCUser.sendMessage(messages[i]);
+							}
+						}
+
+						userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: secondUser.osuUserId, client: client });
+						messages = ['Your SR has been updated!'];
+						if (Math.round(secondUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
+							messages.push(`SR: ${Math.round(secondUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
+						}
+						if (Math.round(secondUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
+							messages.push(`NM: ${Math.round(secondUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
+						}
+						if (Math.round(secondUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
+							messages.push(`HD: ${Math.round(secondUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
+						}
+						if (Math.round(secondUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
+							messages.push(`HR: ${Math.round(secondUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
+						}
+						if (Math.round(secondUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
+							messages.push(`DT: ${Math.round(secondUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
+						}
+						if (Math.round(secondUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
+							messages.push(`FM: ${Math.round(secondUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
+						}
+						if (messages.length > 1) {
+							const IRCUser = await bancho.getUser(secondUser.osuName);
+							for (let i = 0; i < messages.length; i++) {
+								await IRCUser.sendMessage(messages[i]);
+							}
+						}
+
+						if (thirdUser) {
+							userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: thirdUser.osuUserId, client: client });
+							messages = ['Your SR has been updated!'];
+							if (Math.round(thirdUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
+								messages.push(`SR: ${Math.round(thirdUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
+							}
+							if (Math.round(thirdUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
+								messages.push(`NM: ${Math.round(thirdUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
+							}
+							if (Math.round(thirdUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
+								messages.push(`HD: ${Math.round(thirdUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
+							}
+							if (Math.round(thirdUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
+								messages.push(`HR: ${Math.round(thirdUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
+							}
+							if (Math.round(thirdUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
+								messages.push(`DT: ${Math.round(thirdUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
+							}
+							if (Math.round(thirdUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
+								messages.push(`FM: ${Math.round(thirdUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
+							}
+							if (messages.length > 1) {
+								const IRCUser = await bancho.getUser(thirdUser.osuName);
+								for (let i = 0; i < messages.length; i++) {
+									await IRCUser.sendMessage(messages[i]);
+								}
+							}
+
+							userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: fourthUser.osuUserId, client: client });
+							messages = ['Your SR has been updated!'];
+							if (Math.round(fourthUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
+								messages.push(`SR: ${Math.round(fourthUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
+							}
+							if (Math.round(fourthUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
+								messages.push(`NM: ${Math.round(fourthUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
+							}
+							if (Math.round(fourthUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
+								messages.push(`HD: ${Math.round(fourthUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
+							}
+							if (Math.round(fourthUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
+								messages.push(`HR: ${Math.round(fourthUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
+							}
+							if (Math.round(fourthUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
+								messages.push(`DT: ${Math.round(fourthUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
+							}
+							if (Math.round(fourthUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
+								messages.push(`FM: ${Math.round(fourthUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
+							}
+							if (messages.length > 1) {
+								const IRCUser = await bancho.getUser(fourthUser.osuName);
+								for (let i = 0; i < messages.length; i++) {
+									await IRCUser.sendMessage(messages[i]);
+								}
+							}
+						}
+					})
+					.catch(() => {
+						//Nothing
+					});
+
+				await new Promise(resolve => setTimeout(resolve, 55000));
+				await channel.sendMessage('!mp close');
+
+				return await channel.leave();
+			}
+		});
+	},
+	async updateQueueChannels(client) {
+		let existingQueueTasks = await DBProcessQueue.findAll({
+			where: {
+				task: 'duelQueue1v1',
+			},
+		});
+
+		let channelId = '1010093794714189865';
+		// eslint-disable-next-line no-undef
+		if (process.env.SERVER === 'Dev') {
+			channelId = '1010092736155762818';
+			// eslint-disable-next-line no-undef
+		} else if (process.env.SERVER === 'QA') {
+			channelId = '1010093409840660510';
+		}
+
+		let channel = await client.channels.fetch(channelId);
+		let multipleString = 's';
+		if (existingQueueTasks.length === 1) {
+			multipleString = '';
+		}
+
+		await channel.edit({ name: `1v1 Queue: ${existingQueueTasks.length} user${multipleString}` });
 	}
 };
 
@@ -3736,4 +4543,464 @@ function getExpectedDuelRating(score) {
 	}
 
 	return rating;
+}
+
+function shuffle(array) {
+	let currentIndex = array.length, randomIndex;
+
+	// While there remain elements to shuffle...
+	while (currentIndex != 0) {
+
+		// Pick a remaining element...
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex--;
+
+		// And swap it with the current element.
+		[array[currentIndex], array[randomIndex]] = [
+			array[randomIndex], array[currentIndex]];
+	}
+
+	return array;
+}
+
+async function messageUserWithRetries(user, interaction, content) {
+	for (let i = 0; i < 3; i++) {
+		try {
+			await user.send(content)
+				.then(() => {
+					i = Infinity;
+				})
+				.catch(async (error) => {
+					throw (error);
+				});
+		} catch (error) {
+			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
+				if (i === 2) {
+					if (interaction) {
+						interaction.followUp(`[Duel] <@${user.id}>, it seems like I can't DM you in Discord. Please enable DMs so that I can keep you up to date with the match procedure!`);
+					}
+				} else {
+					await new Promise(resolve => setTimeout(resolve, 2500));
+				}
+			} else {
+				i = Infinity;
+				console.log(error);
+			}
+		}
+	}
+}
+
+async function getOsuMapInfo(dbBeatmap) {
+	logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Mapinfo');
+	const mapScores = await DBOsuMultiScores.findAll({
+		where: {
+			beatmapId: dbBeatmap.beatmapId,
+			tourneyMatch: true,
+			matchName: {
+				[Op.notLike]: 'MOTD:%',
+			},
+			[Op.or]: [
+				{ warmup: false },
+				{ warmup: null }
+			],
+		}
+	});
+
+	let tournaments = [];
+
+	for (let i = 0; i < mapScores.length; i++) {
+		let acronym = mapScores[i].matchName.replace(/:.+/gm, '');
+
+		if (tournaments.indexOf(acronym) === -1) {
+			tournaments.push(acronym);
+		}
+	}
+
+	return `https://osu.ppy.sh/b/${dbBeatmap.beatmapId} | https://beatconnect.io/b/${dbBeatmap.beatmapsetId} | Map played ${mapScores.length} times in: ${tournaments.join(', ')}`;
+}
+
+function humanReadableFunction(input) {
+	let output = '';
+	if (input) {
+		input = input.toString();
+		for (let i = 0; i < input.length; i++) {
+			if (i > 0 && (input.length - i) % 3 === 0) {
+				output = output + ',';
+			}
+			output = output + input.charAt(i);
+		}
+	}
+
+	return output;
+}
+
+async function saveOsuMultiScoresFunction(match) {
+	// let stringifiedMatch = JSON.stringify(match);
+
+	// //Move the match by spawning child process
+	// const { spawn } = require('child_process');
+
+	// //Create a child and pass it the match
+	// const child = spawn('node', ['./saveOsuMultiScores.js'], { stdio: ['inherit', 'inherit', 'inherit', 'ipc'], });
+
+	// child.on('spawn', () => {
+	// 	child.send(stringifiedMatch);
+	// });
+
+	// child.on('message', () => {
+	// 	child.kill('SIGINT');
+	// });
+
+	// await new Promise((resolve) => {
+	// 	child.on('close', resolve);
+	// });
+
+	let tourneyMatchPlayers = [];
+	let newTourneyMatch = true;
+
+	let tourneyMatch = false;
+	if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
+		tourneyMatch = true;
+	}
+
+	let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
+
+	let weeksPrior = new Date(match.raw_start);
+	weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
+
+	let weeksAfter = new Date(match.raw_start);
+	weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
+
+	logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuMultiScores warmup detection same tourney');
+	let sameTournamentMatches = await DBOsuMultiScores.findAll({
+		where: {
+			[Op.or]: [
+				{
+					matchName: {
+						[Op.like]: `%${acronym}%:%`,
+					},
+					gameStartDate: {
+						[Op.gte]: weeksPrior
+					},
+					gameEndDate: {
+						[Op.lte]: weeksAfter
+					},
+					tourneyMatch: true
+				},
+				{
+					matchId: match.id,
+				}
+			],
+		}
+	});
+
+	for (let gameIndex = 0; gameIndex < match.games.length; gameIndex++) {
+		//Define if the game is freemod or not
+		let freeMod = false;
+		for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
+			if (match.games[gameIndex].scores[i].raw_mods) {
+				freeMod = true;
+				break;
+			}
+		}
+
+		let forceMod = true;
+
+		if (!freeMod) {
+			forceMod = false;
+		}
+
+		for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
+			if (parseInt(match.games[gameIndex].scores[i].score) >= 10000 && forceMod) {
+				//Remove HT, DT and NC from scoreMods
+				let scoreMods = getModsFunction(match.games[gameIndex].scores[i].raw_mods);
+				for (let j = 0; j < scoreMods.length; j++) {
+					if (scoreMods[j] === 'HT' || scoreMods[j] === 'DT' || scoreMods[j] === 'NC') {
+						scoreMods.splice(j, 1);
+						j--;
+					}
+				}
+				scoreMods = getModBitsFunction(scoreMods.join(''));
+
+				if (scoreMods <= 1) {
+					forceMod = false;
+				}
+			}
+		}
+
+		let warmupCheckResult = await checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches);
+
+		let warmup = warmupCheckResult.warmup;
+
+		let warmupDecidedByAmount = warmupCheckResult.byAmount;
+
+		for (let scoreIndex = 0; scoreIndex < match.games[gameIndex].scores.length; scoreIndex++) {
+			//Calculate evaluation
+			let evaluation = null;
+
+			let gameScores = [];
+			for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
+				gameScores.push(match.games[gameIndex].scores[i]);
+			}
+
+			if (gameScores.length > 1) {
+				quicksort(gameScores);
+
+				for (let i = 0; i < gameScores.length; i++) {
+					if (parseInt(gameScores[i].score) < 10000) {
+						gameScores.splice(i, 1);
+						i--;
+					}
+				}
+
+				let sortedScores = [];
+				for (let j = 0; j < gameScores.length; j++) {
+					//Remove the own score to make it odd for the middle score
+					if (!(gameScores.length % 2 === 0 && match.games[gameIndex].scores[scoreIndex].userId === gameScores[j].userId)) {
+						sortedScores.push(gameScores[j].score);
+					}
+				}
+
+				const middleScore = getMiddleScore(sortedScores);
+
+				for (let i = 0; i < gameScores.length; i++) {
+					if (match.games[gameIndex].scores[scoreIndex].userId === gameScores[i].userId && gameScores.length > 1) {
+						evaluation = 1 / parseInt(middleScore) * parseInt(gameScores[i].score);
+					}
+				}
+			}
+
+			try {
+				//Add the player ID to the list if needed
+				if (tourneyMatchPlayers.indexOf(match.games[gameIndex].scores[scoreIndex].userId) === -1) {
+					tourneyMatchPlayers.push(match.games[gameIndex].scores[scoreIndex].userId);
+				}
+
+				//Remove HT, DT and NC from scoreMods
+				let scoreMods = getModsFunction(match.games[gameIndex].scores[scoreIndex].raw_mods);
+				for (let i = 0; i < scoreMods.length; i++) {
+					if (scoreMods[i] === 'HT' || scoreMods[i] === 'DT' || scoreMods[i] === 'NC') {
+						scoreMods.splice(i, 1);
+						i--;
+					}
+				}
+				scoreMods = getModBitsFunction(scoreMods.join(''));
+
+				let existingScore = null;
+
+				for (let i = 0; i < sameTournamentMatches.length; i++) {
+					if (sameTournamentMatches[i].osuUserId == match.games[gameIndex].scores[scoreIndex].userId
+						&& sameTournamentMatches[i].matchId == match.id
+						&& sameTournamentMatches[i].gameId == match.games[gameIndex].id) {
+						existingScore = sameTournamentMatches[i];
+						break;
+					}
+				}
+
+				if (!existingScore) {
+					let score = await DBOsuMultiScores.create({
+						osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
+						matchId: match.id,
+						matchName: match.name,
+						gameId: match.games[gameIndex].id,
+						scoringType: match.games[gameIndex].scoringType,
+						mode: match.games[gameIndex].mode,
+						beatmapId: match.games[gameIndex].beatmapId,
+						tourneyMatch: tourneyMatch,
+						evaluation: evaluation,
+						score: match.games[gameIndex].scores[scoreIndex].score,
+						gameRawMods: match.games[gameIndex].raw_mods,
+						rawMods: scoreMods,
+						matchStartDate: match.raw_start,
+						matchEndDate: match.raw_end,
+						gameStartDate: match.games[gameIndex].raw_start,
+						gameEndDate: match.games[gameIndex].raw_end,
+						freeMod: freeMod,
+						forceMod: forceMod,
+						warmup: warmup,
+						warmupDecidedByAmount: warmupDecidedByAmount,
+						maxCombo: match.games[gameIndex].scores[scoreIndex].maxCombo,
+						count50: match.games[gameIndex].scores[scoreIndex].counts['50'],
+						count100: match.games[gameIndex].scores[scoreIndex].counts['100'],
+						count300: match.games[gameIndex].scores[scoreIndex].counts['300'],
+						countMiss: match.games[gameIndex].scores[scoreIndex].counts.miss,
+						countKatu: match.games[gameIndex].scores[scoreIndex].counts.katu,
+						countGeki: match.games[gameIndex].scores[scoreIndex].counts.geki,
+						perfect: match.games[gameIndex].scores[scoreIndex].perfect,
+						teamType: match.games[gameIndex].teamType,
+						team: match.games[gameIndex].scores[scoreIndex].team,
+					});
+
+					//Set the tournament flags on the corresponding beatmap
+					if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
+						logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuBeatmaps tourney flags new score');
+						let dbBeatmaps = await DBOsuBeatmaps.findAll({
+							where: {
+								beatmapId: match.games[gameIndex].beatmapId,
+							}
+						});
+
+						for (let i = 0; i < dbBeatmaps.length; i++) {
+							if (!dbBeatmaps[i].tourneyMap) {
+								dbBeatmaps[i].tourneyMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							}
+
+							if (getScoreModpoolFunction(score) === 'NM' && !dbBeatmaps[i].noModMap) {
+								dbBeatmaps[i].noModMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							} else if (getScoreModpoolFunction(score) === 'HD' && !dbBeatmaps[i].hiddenMap) {
+								dbBeatmaps[i].hiddenMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							} else if (getScoreModpoolFunction(score) === 'HR' && !dbBeatmaps[i].hardRockMap) {
+								dbBeatmaps[i].hardRockMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							} else if (getScoreModpoolFunction(score) === 'DT' && !dbBeatmaps[i].doubleTimeMap) {
+								dbBeatmaps[i].doubleTimeMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							} else if (getScoreModpoolFunction(score) === 'FM' && !dbBeatmaps[i].freeModMap) {
+								dbBeatmaps[i].freeModMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							}
+						}
+					}
+
+					//Set back warmup flag if it was set by amount
+					if (scoreIndex === 0 && tourneyMatch) {
+						for (let i = 0; i < sameTournamentMatches.length; i++) {
+							if (sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup !== null
+								&& sameTournamentMatches[i].beatmapId == match.games[gameIndex].beatmapId
+								&& sameTournamentMatches[i].matchId != match.id
+								|| sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup === false
+								&& sameTournamentMatches[i].matchId != match.id) {
+								sameTournamentMatches[i].warmup = null;
+								await sameTournamentMatches[i].save();
+							}
+						}
+					}
+				} else if (existingScore.warmup === null) {
+					newTourneyMatch = false;
+
+					existingScore.osuUserId = match.games[gameIndex].scores[scoreIndex].userId;
+					existingScore.matchId = match.id;
+					existingScore.matchName = match.name;
+					existingScore.gameId = match.games[gameIndex].id;
+					existingScore.scoringType = match.games[gameIndex].scoringType;
+					existingScore.mode = match.games[gameIndex].mode;
+					existingScore.beatmapId = match.games[gameIndex].beatmapId;
+					existingScore.tourneyMatch = tourneyMatch;
+					existingScore.evaluation = evaluation;
+					existingScore.score = match.games[gameIndex].scores[scoreIndex].score;
+					existingScore.gameRawMods = match.games[gameIndex].raw_mods;
+					existingScore.rawMods = scoreMods;
+					existingScore.matchStartDate = match.raw_start;
+					existingScore.matchEndDate = match.raw_end;
+					existingScore.gameStartDate = match.games[gameIndex].raw_start;
+					existingScore.gameEndDate = match.games[gameIndex].raw_end;
+					existingScore.freeMod = freeMod;
+					existingScore.forceMod = forceMod;
+					existingScore.warmup = warmup;
+					existingScore.warmupDecidedByAmount = warmupDecidedByAmount;
+					existingScore.maxCombo = match.games[gameIndex].scores[scoreIndex].maxCombo;
+					existingScore.count50 = match.games[gameIndex].scores[scoreIndex].counts['50'];
+					existingScore.count100 = match.games[gameIndex].scores[scoreIndex].counts['100'];
+					existingScore.count300 = match.games[gameIndex].scores[scoreIndex].counts['300'];
+					existingScore.countMiss = match.games[gameIndex].scores[scoreIndex].counts.miss;
+					existingScore.countKatu = match.games[gameIndex].scores[scoreIndex].counts.katu;
+					existingScore.countGeki = match.games[gameIndex].scores[scoreIndex].counts.geki;
+					existingScore.perfect = match.games[gameIndex].scores[scoreIndex].perfect;
+					existingScore.teamType = match.games[gameIndex].teamType;
+					existingScore.team = match.games[gameIndex].scores[scoreIndex].team;
+					existingScore.changed('updatedAt', true);
+					await existingScore.save();
+
+					//Set the tournament flags on the corresponding beatmap
+					if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
+						logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuBeatmaps tourney flags old score');
+						let dbBeatmaps = await DBOsuBeatmaps.findAll({
+							where: {
+								beatmapId: match.games[gameIndex].beatmapId,
+							}
+						});
+
+						for (let i = 0; i < dbBeatmaps.length; i++) {
+							if (!dbBeatmaps[i].tourneyMap) {
+								dbBeatmaps[i].tourneyMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							}
+
+							if (getScoreModpoolFunction(existingScore) === 'NM' && !dbBeatmaps[i].noModMap) {
+								dbBeatmaps[i].noModMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							} else if (getScoreModpoolFunction(existingScore) === 'HD' && !dbBeatmaps[i].hiddenMap) {
+								dbBeatmaps[i].hiddenMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							} else if (getScoreModpoolFunction(existingScore) === 'HR' && !dbBeatmaps[i].hardRockMap) {
+								dbBeatmaps[i].hardRockMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							} else if (getScoreModpoolFunction(existingScore) === 'DT' && !dbBeatmaps[i].doubleTimeMap) {
+								dbBeatmaps[i].doubleTimeMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							} else if (getScoreModpoolFunction(existingScore) === 'FM' && !dbBeatmaps[i].freeModMap) {
+								dbBeatmaps[i].freeModMap = true;
+								await dbBeatmaps[i].save({ silent: true });
+							}
+						}
+					}
+				} else {
+					newTourneyMatch = false;
+				}
+			} catch (error) {
+				scoreIndex--;
+			}
+		}
+	}
+
+	if (tourneyMatch) {
+		//Delete duel rating history entries for the players in the match
+		let outdatedDuelRatings = await DBDuelRatingHistory.findAll({
+			where: {
+				osuUserId: {
+					[Op.in]: tourneyMatchPlayers
+				},
+				year: {
+					[Op.gte]: new Date(match.raw_end).getUTCFullYear()
+				}
+			}
+		});
+
+		for (let i = 0; i < outdatedDuelRatings.length; i++) {
+			await outdatedDuelRatings[i].destroy();
+		}
+	}
+
+	if (newTourneyMatch) {
+		//Get all follows for the players in the match
+		let follows = await DBOsuTourneyFollows.findAll({
+			where: {
+				osuUserId: {
+					[Op.in]: tourneyMatchPlayers
+				}
+			}
+		});
+
+		//Collect the follows per user
+		let usersToNotify = [];
+		let usersToNotifyIds = [];
+
+		for (let i = 0; i < follows.length; i++) {
+			if (usersToNotifyIds.indexOf(follows[i].userId) === -1) {
+				usersToNotifyIds.push(follows[i].userId);
+				usersToNotify.push({ userId: follows[i].userId, osuUserIds: [follows[i].osuUserId] });
+			} else {
+				usersToNotify[usersToNotifyIds.indexOf(follows[i].userId)].osuUserIds.push(follows[i].osuUserId);
+			}
+		}
+
+		//Create a notification for each user
+		let now = new Date();
+		for (let i = 0; i < usersToNotify.length; i++) {
+			await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')}`, date: now });
+		}
+	}
 }

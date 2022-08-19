@@ -791,6 +791,16 @@ module.exports = {
 			// 				]
 			// 			},
 			// 			{
+			// 				'name': 'queue1v1',
+			// 				'description': 'Lets you queue up for a Bo7 match against an opponent',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'queue1v1-leave',
+			// 				'description': 'Lets you leave the queue for Bo7 matches',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
 			// 				'name': 'match2v2',
 			// 				'description': 'Lets you instantly create a Bo7 match with 3 other players',
 			// 				'type': 1, // 1 is type SUB_COMMAND
@@ -4224,6 +4234,16 @@ module.exports = {
 									'type': 5, // 5 is type BOOLEAN
 								},
 							]
+						},
+						{
+							'name': 'queue1v1',
+							'description': 'Lets you queue up for a Bo7 match against an opponent',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'queue1v1-leave',
+							'description': 'Lets you leave the queue for Bo7 matches',
+							'type': 1, // 1 is type SUB_COMMAND
 						},
 						{
 							'name': 'match2v2',

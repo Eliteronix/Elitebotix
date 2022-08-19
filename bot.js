@@ -124,7 +124,7 @@ if (!wrongCluster() && process.env.SERVER !== 'QA') {
 
 	//Listen to messages
 	bancho.on('PM', async (message) => {
-		gotBanchoPrivateMessage(message);
+		gotBanchoPrivateMessage(client, bancho, message);
 	});
 }
 
