@@ -2978,11 +2978,18 @@ async function getOsuBeatmapFunction(input) {
 					where: { beatmapId: beatmapId, mods: modBits }
 				});
 
-				//Date of reworked DT, HT, EZ and HR values
-				if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('HT') || getModsFunction(modBits).includes('EZ') || getModsFunction(modBits).includes('HR')) {
+				//Date of reworked EZ and HR values
+				if (getModsFunction(modBits).includes('EZ') || getModsFunction(modBits).includes('HR')) {
 					lastRework.setUTCFullYear(2022);
 					lastRework.setUTCMonth(2);
 					lastRework.setUTCDate(19);
+				}
+
+				//Date of reworked DT values
+				if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('HT')) {
+					lastRework.setUTCFullYear(2022);
+					lastRework.setUTCMonth(7);
+					lastRework.setUTCDate(21);
 				}
 
 				if (!dbBeatmap
