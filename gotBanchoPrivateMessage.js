@@ -209,7 +209,7 @@ module.exports = async function (client, bancho, message) {
 				tourneyMap: true,
 			},
 			order: Sequelize.fn('RANDOM'),
-			// because it gets random beatmaps each time, 500 limit is fine for quick reply
+			// because it gets random beatmaps each time, 150 limit is fine for quick reply
 			limit: 150,
 		});
 
