@@ -3041,16 +3041,16 @@ async function getOsuBeatmapFunction(input) {
 								let ar_ms_step2 = 150;
 								let ar10_ms = 450;
 
-								if(ar <= 5) ar_ms = ar0_ms - ar_ms_step1 * ar;
-								else		ar_ms = ar5_ms - ar_ms_step2 * (ar - 5);
+								if (ar <= 5) ar_ms = ar0_ms - ar_ms_step1 * ar;
+								else ar_ms = ar5_ms - ar_ms_step2 * (ar - 5);
 
-								if(ar_ms < ar10_ms) ar_ms = ar10_ms;
-								if(ar_ms > ar0_ms) ar_ms = ar0_ms;
+								if (ar_ms < ar10_ms) ar_ms = ar10_ms;
+								if (ar_ms > ar0_ms) ar_ms = ar0_ms;
 
 								ar_ms /= speed;
 
-								if(ar <= 5) ar = (ar0_ms - ar_ms) / ar_ms_step1;
-								else		ar = 5 + (ar5_ms - ar_ms) / ar_ms_step2;
+								if (ar <= 5) ar = (ar0_ms - ar_ms) / ar_ms_step1;
+								else ar = 5 + (ar5_ms - ar_ms) / ar_ms_step2;
 
 								bpm = parseFloat(beatmaps[0].bpm) * 0.75;
 								drainLength = parseFloat(beatmaps[0].length.drain) / 0.75;
