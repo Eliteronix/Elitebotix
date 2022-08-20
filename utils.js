@@ -3681,11 +3681,18 @@ async function getOsuBeatmapFunction(input) {
 					where: { beatmapId: beatmapId, mods: modBits }
 				});
 
-				//Date of reworked DT, HT, EZ and HR values
-				if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('HT') || getModsFunction(modBits).includes('EZ') || getModsFunction(modBits).includes('HR')) {
+				//Date of reworked EZ and HR values
+				if (getModsFunction(modBits).includes('EZ') || getModsFunction(modBits).includes('HR')) {
 					lastRework.setUTCFullYear(2022);
 					lastRework.setUTCMonth(2);
 					lastRework.setUTCDate(19);
+				}
+
+				//Date of reworked DT values
+				if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('HT')) {
+					lastRework.setUTCFullYear(2022);
+					lastRework.setUTCMonth(7);
+					lastRework.setUTCDate(21);
 				}
 
 				if (!dbBeatmap
@@ -3725,7 +3732,36 @@ async function getOsuBeatmapFunction(input) {
 								bpm = parseFloat(beatmaps[0].bpm) * 1.5;
 								drainLength = parseFloat(beatmaps[0].length.drain) / 1.5;
 								totalLength = parseFloat(beatmaps[0].length.total) / 1.5;
+								let ms;
+								if (ar > 5) {
+									ms = 200 + (11 - ar) * 100;
+								} else ms = 800 + (5 - ar) * 80;
+
+								if (ms < 300) {
+									ar = 11;
+								} else if (ms < 1200) {
+									ar = Math.round((11 - (ms - 300) / 150) * 100) / 100;
+								} else ar = Math.round((5 - (ms - 1200) / 120) * 100) / 100;
 							} else if (getModsFunction(modBits).includes('HT')) {
+								let speed = 0.75;
+								let ar_ms;
+								let ar0_ms = 1800;
+								let ar5_ms = 1200;
+								let ar_ms_step1 = 120;
+								let ar_ms_step2 = 150;
+								let ar10_ms = 450;
+
+								if (ar <= 5) ar_ms = ar0_ms - ar_ms_step1 * ar;
+								else ar_ms = ar5_ms - ar_ms_step2 * (ar - 5);
+
+								if (ar_ms < ar10_ms) ar_ms = ar10_ms;
+								if (ar_ms > ar0_ms) ar_ms = ar0_ms;
+
+								ar_ms /= speed;
+
+								if (ar <= 5) ar = (ar0_ms - ar_ms) / ar_ms_step1;
+								else ar = 5 + (ar5_ms - ar_ms) / ar_ms_step2;
+
 								bpm = parseFloat(beatmaps[0].bpm) * 0.75;
 								drainLength = parseFloat(beatmaps[0].length.drain) / 0.75;
 								totalLength = parseFloat(beatmaps[0].length.total) / 0.75;
@@ -3748,7 +3784,7 @@ async function getOsuBeatmapFunction(input) {
 							}
 
 							cs = Math.min(Math.round(cs * 100) / 100, 10);
-							ar = Math.min(Math.round(ar * 100) / 100, 10);
+							ar = Math.min(Math.round(ar * 100) / 100, 11);
 							od = Math.min(Math.round(od * 100) / 100, 10);
 							hpDrain = Math.min(Math.round(hpDrain * 100) / 100, 10);
 
