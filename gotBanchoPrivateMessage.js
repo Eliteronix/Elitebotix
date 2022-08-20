@@ -1,13 +1,17 @@
-const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, getScoreModpool, humanReadable, adjustHDStarRating, getBeatmapModeId } = require('./utils');
-const { DBOsuMultiScores, DBOsuBeatmaps, DBDiscordUsers } = require('./dbObjects');
+const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, getScoreModpool, humanReadable, adjustHDStarRating, getBeatmapModeId, getUserDuelStarRating, updateQueueChannels } = require('./utils');
+const { DBOsuMultiScores, DBOsuBeatmaps, DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const osu = require('node-osu');
 
-module.exports = async function (message) {
-
-	//Listen to now playing / now listening and send pp info
-	if (message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)) {
+module.exports = async function (client, bancho, message) {
+	if (message.message === '!help') {
+		await message.user.sendMessage('/ /np - Get the pp values for the current beatmap with the current mods');
+		await message.user.sendMessage('!play / !play1v1 / !queue1v1 - Queue up for 1v1 matches');
+		await message.user.sendMessage('!leave / !leave1v1 / !queue1v1-leave - Leave the queue for 1v1 matches');
+		let TODO; //Add a help explanation for the recommendations
+		//Listen to now playing / now listening and send pp info
+	} else if (message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)) {
 		let beatmapId = message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)[0].replace(/.+\//gm, '');
 
 		let modBits = 0;
@@ -62,6 +66,90 @@ module.exports = async function (message) {
 		mods = mods.join('');
 
 		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] [${mods}] | 95%: ${Math.round(firstPP)}pp | 98%: ${Math.round(secondPP)}pp | 99%: ${Math.round(thirdPP)}pp | 100%: ${Math.round(fourthPP)}pp`);
+	} else if (message.message === '!queue1v1' || message.message === '!play1v1' || message.message === '!play') {
+		await message.user.fetchFromAPI();
+		let discordUser = await DBDiscordUsers.findOne({
+			where: {
+				osuUserId: message.user.id,
+				osuVerified: true
+			}
+		});
+
+		if (!discordUser) {
+			return message.user.sendMessage(`Please connect and verify your account with the bot on discord as a backup by using: '/osu-link connect username:${message.user.username}' [https://discord.gg/Asz5Gfe Discord]`);
+		}
+
+		let existingQueueTasks = await DBProcessQueue.findAll({
+			where: {
+				task: 'duelQueue1v1',
+			},
+		});
+
+		for (let i = 0; i < existingQueueTasks.length; i++) {
+			const osuUserId = existingQueueTasks[i].additions.split(';')[0];
+
+			if (osuUserId === discordUser.osuUserId) {
+				return message.user.sendMessage('You are already in the queue for a 1v1 duel.');
+			}
+		}
+
+		let ownStarRating = 5;
+		try {
+			message.user.sendMessage('Processing duel rating...');
+			ownStarRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: client });
+
+			ownStarRating = ownStarRating.total;
+		} catch (e) {
+			if (e !== 'No standard plays') {
+				console.log(e);
+			}
+		}
+
+		//Check again in case the user spammed the command
+		existingQueueTasks = await DBProcessQueue.findAll({
+			where: {
+				task: 'duelQueue1v1',
+			},
+		});
+
+		for (let i = 0; i < existingQueueTasks.length; i++) {
+			const osuUserId = existingQueueTasks[i].additions.split(';')[0];
+
+			if (osuUserId === discordUser.osuUserId) {
+				return message.user.sendMessage('You are already in the queue for a 1v1 duel.');
+			}
+		}
+
+		await DBProcessQueue.create({
+			guildId: 'none',
+			task: 'duelQueue1v1',
+			additions: `${discordUser.osuUserId};${ownStarRating};0.125`,
+			date: new Date(),
+			priority: 9
+		});
+
+		updateQueueChannels(client);
+
+		return await message.user.sendMessage('You are now queued up for a 1v1 duel.');
+	} else if (message.message === '!queue1v1-leave' || message.message === '!leave1v1' || message.message === '!leave') {
+		await message.user.fetchFromAPI();
+		let existingQueueTasks = await DBProcessQueue.findAll({
+			where: {
+				task: 'duelQueue1v1',
+			},
+		});
+
+		for (let i = 0; i < existingQueueTasks.length; i++) {
+			const osuUserId = existingQueueTasks[i].additions.split(';')[0];
+
+			if (osuUserId == message.user.id) {
+				await existingQueueTasks[i].destroy();
+				updateQueueChannels(client);
+				return message.user.sendMessage('You have been removed from the queue for a 1v1 duel.');
+			}
+		}
+
+		return message.user.sendMessage('You are not in the queue for a 1v1 duel.');
 		// message starts with '!r'
 	} else if (message.message.toLowerCase().startsWith('!r')) {
 		let args = message.message.slice(2).trim().split(/ +/);
@@ -69,7 +157,9 @@ module.exports = async function (message) {
 		// set default values
 		let mod = 'NM';
 		let userStarRating;
-		
+
+
+		let TODO; //Is the - actually needed? What else would you add anyway after the !r?
 		for (let i = 0; i < args.length; i++) {
 			if (args[i] == '-Hidden' || args[i] == '-HD') {
 				mod = 'HD';
@@ -94,6 +184,7 @@ module.exports = async function (message) {
 			}
 		}
 
+		let TODO; // Do "await message.user.fetchFromAPI();" here and check by osuUserId instead of osuName
 		logDatabaseQueries(4, 'commands/osu-beatmap.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: {
@@ -141,6 +232,8 @@ module.exports = async function (message) {
 		// Tourney map with the correct mod
 		// Check if the beatmap is within the user's star rating and haven't been played before
 		for (let i = 0; i < beatmaps.length; i = Math.floor(Math.random() * beatmaps.length)) {
+			let TODO; //Refresh the beatmap just like I do it in the duel match creation (function: getOsuBeatmap)
+			let TODO; //Please check for the osuUserId here instead of osuName for beatmapPlayed aswell
 			if (beatmaps[i].noModMap === true && mod == 'NM') {
 				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], message.user.banchojs.username)) {
 					beatmap = beatmaps[i];
@@ -170,14 +263,14 @@ module.exports = async function (message) {
 				beatmaps.splice(i, 1);
 				i++;
 			}
-		} 
-		
+		}
+
 		const totalLengthSeconds = (beatmap.totalLength % 60) + '';
 		const totalLengthMinutes = (beatmap.totalLength - beatmap.totalLength % 60) / 60;
 		const totalLength = totalLengthMinutes + ':' + Math.round(totalLengthSeconds).toString().padStart(2, '0');
-		
+
 		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] + ${mod} | Beatmap ★: ${Math.floor(beatmap.starRating * 100) / 100} | Your ${mod} duel ★: ${Math.floor(userStarRating * 100) / 100} | ${totalLength}  ♫${beatmap.bpm}  AR${beatmap.approachRate}  OD${beatmap.overallDifficulty}`);
-		
+
 		logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
 		const mapScores = await DBOsuMultiScores.findAll({
 			where: {
@@ -219,6 +312,7 @@ module.exports = async function (message) {
 			let date = mapScores[i].matchStartDate;
 			let dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
 
+			let TODO; //What do you fill this array for?
 			matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`);
 		}
 
@@ -227,7 +321,7 @@ module.exports = async function (message) {
 		if (tournaments.length === 0) {
 			tournamentOccurences = 'The map was never played in any tournaments.';
 		}
-		
+
 		message.user.sendMessage(tournamentOccurences);
 	}
 };
@@ -244,10 +338,10 @@ function validSrRange(beatmap, userStarRating, mod) {
 		return true;
 }
 
-// returns true if the user has already played the map, so we should skip it
+// returns true if the user has already played the map in the last 60 days, so we should skip it
 function beatmapPlayed(beatmap, osuName) {
 	let now = new Date();
-	
+
 	// eslint-disable-next-line no-undef
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -276,6 +370,5 @@ function beatmapPlayed(beatmap, osuName) {
 			// eslint-disable-next-line no-unused-vars
 		}).catch(err => {
 			return true;
-		}
-		);
+		});
 }
