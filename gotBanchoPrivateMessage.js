@@ -1,4 +1,4 @@
-const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, getScoreModpool, humanReadable, adjustHDStarRating, getBeatmapModeId, getUserDuelStarRating, updateQueueChannels } = require('./utils');
+const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, adjustHDStarRating, getBeatmapModeId, getUserDuelStarRating, updateQueueChannels } = require('./utils');
 const { DBOsuMultiScores, DBOsuBeatmaps, DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
@@ -9,7 +9,7 @@ module.exports = async function (client, bancho, message) {
 		await message.user.sendMessage('/ /np - Get the pp values for the current beatmap with the current mods');
 		await message.user.sendMessage('!play / !play1v1 / !queue1v1 - Queue up for 1v1 matches');
 		await message.user.sendMessage('!leave / !leave1v1 / !queue1v1-leave - Leave the queue for 1v1 matches');
-		let TODO; //Add a help explanation for the recommendations
+		await message.user.sendMessage('!r [mod] [StarRating] - Get a beatmap recommendation for your current duel StarRating. If you don\'t have your account connected to the bot (can be done by using /osu-link command in discord) nor didn\'t specify desired Star Rating, it will use default value of 4.5*');
 		//Listen to now playing / now listening and send pp info
 	} else if (message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)) {
 		let beatmapId = message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)[0].replace(/.+\//gm, '');
@@ -155,25 +155,24 @@ module.exports = async function (client, bancho, message) {
 		let args = message.message.slice(2).trim().split(/ +/);
 
 		// set default values
-		let mod = 'NM';
+		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
+		let mod = modPools[Math.floor(Math.random() * modPools.length)];
 		let userStarRating;
 
-
-		let TODO; //Is the - actually needed? What else would you add anyway after the !r?
 		for (let i = 0; i < args.length; i++) {
-			if (args[i] == '-Hidden' || args[i] == '-HD') {
+			if (args[i].toLowerCase() == 'hidden' || args[i].toLowerCase() == 'hd') {
 				mod = 'HD';
 				args.splice(i, 1);
 				i--;
-			} else if (args[i] == ('-HardRock') || args[i] == ('-HR')) {
+			} else if (args[i].toLowerCase() == ('hardrock') || args[i] == ('hr')) {
 				mod = 'HR';
 				args.splice(i, 1);
 				i--;
-			} else if (args[i] == ('-DoubleTime') || args[i] == ('-DT')) {
+			} else if (args[i].toLowerCase() == ('doubletime') || args[i] == ('dt')) {
 				mod = 'DT';
 				args.splice(i, 1);
 				i--;
-			} else if (args[i] == ('-FreeMod') || args[i] == ('-FM')) {
+			} else if (args[i].toLowerCase() == ('freemod') || args[i].toLowerCase() == ('fm')) {
 				mod = 'FM';
 				args.splice(i, 1);
 				i--;
@@ -184,11 +183,17 @@ module.exports = async function (client, bancho, message) {
 			}
 		}
 
-		let TODO; // Do "await message.user.fetchFromAPI();" here and check by osuUserId instead of osuName
+		let osuUserId = await message.user.fetchFromAPI()
+			.then((user) => {
+				return user.id;
+				// eslint-disable-next-line no-unused-vars
+			}).catch((e) => {
+				//
+			});
 		logDatabaseQueries(4, 'commands/osu-beatmap.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: {
-				osuName: message.user.banchojs.username
+				osuUserId: osuUserId
 			},
 		});
 
@@ -205,7 +210,7 @@ module.exports = async function (client, bancho, message) {
 			},
 			order: Sequelize.fn('RANDOM'),
 			// because it gets random beatmaps each time, 500 limit is fine for quick reply
-			limit: 500,
+			limit: 150,
 		});
 
 		if (!discordUser && !userStarRating) {
@@ -232,30 +237,33 @@ module.exports = async function (client, bancho, message) {
 		// Tourney map with the correct mod
 		// Check if the beatmap is within the user's star rating and haven't been played before
 		for (let i = 0; i < beatmaps.length; i = Math.floor(Math.random() * beatmaps.length)) {
-			let TODO; //Refresh the beatmap just like I do it in the duel match creation (function: getOsuBeatmap)
-			let TODO; //Please check for the osuUserId here instead of osuName for beatmapPlayed aswell
 			if (beatmaps[i].noModMap === true && mod == 'NM') {
-				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], message.user.banchojs.username)) {
+				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 0});
+				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].hiddenMap === true && mod == 'HD') {
-				if (validSrRange(beatmaps[i], userStarRating, true) && !beatmapPlayed(beatmaps[i], message.user.banchojs.username)) {
+				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 0});
+				if (validSrRange(beatmaps[i], userStarRating, true) && !beatmapPlayed(beatmaps[i], osuUserId)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].hardRockMap === true && mod == 'HR') {
-				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], message.user.banchojs.username)) {
+				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 16});
+				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].doubleTimeMap === true && mod == 'DT') {
-				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], message.user.banchojs.username)) {
+				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 64});
+				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].freeModMap === true && mod == 'FM') {
-				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], message.user.banchojs.username)) {
+				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 0});
+				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
 					beatmap = beatmaps[i];
 					break;
 				}
@@ -269,7 +277,7 @@ module.exports = async function (client, bancho, message) {
 		const totalLengthMinutes = (beatmap.totalLength - beatmap.totalLength % 60) / 60;
 		const totalLength = totalLengthMinutes + ':' + Math.round(totalLengthSeconds).toString().padStart(2, '0');
 
-		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] + ${mod} | Beatmap ★: ${Math.floor(beatmap.starRating * 100) / 100} | Your ${mod} duel ★: ${Math.floor(userStarRating * 100) / 100} | ${totalLength}  ♫${beatmap.bpm}  AR${beatmap.approachRate}  OD${beatmap.overallDifficulty}`);
+		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] + ${mod} | Beatmap ★: ${Math.floor(beatmap.starRating * 100) / 100} (with Elitebotix HD buff) | Your ${mod} duel ★: ${Math.floor(userStarRating * 100) / 100} | ${totalLength}  ♫${beatmap.bpm}  AR${beatmap.approachRate}  OD${beatmap.overallDifficulty}`);
 
 		logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
 		const mapScores = await DBOsuMultiScores.findAll({
@@ -298,7 +306,6 @@ module.exports = async function (client, bancho, message) {
 		});
 
 		let tournaments = [];
-		let matches = [];
 
 		for (let i = 0; i < mapScores.length; i++) {
 			let acronym = mapScores[i].matchName.replace(/:.+/gm, '').replace(/`/g, '');
@@ -306,14 +313,6 @@ module.exports = async function (client, bancho, message) {
 			if (tournaments.indexOf(acronym) === -1) {
 				tournaments.push(acronym);
 			}
-
-			let modPool = getScoreModpool(mapScores[i]);
-
-			let date = mapScores[i].matchStartDate;
-			let dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
-
-			let TODO; //What do you fill this array for?
-			matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`);
 		}
 
 		let tournamentOccurences = `The map was played ${mapScores.length} times with any mods in these tournaments (new -> old): ${tournaments.join(', ')}`;
@@ -332,14 +331,14 @@ function validSrRange(beatmap, userStarRating, mod) {
 	if (mod) {
 		beatmap.starRating = adjustHDStarRating(beatmap.starRating, beatmap.approachRate);
 	}
-	if (Number(beatmap.starRating) < lowerBound || Number(beatmap.starRating) > upperBound) {
+	if (parseFloat(beatmap.starRating) < lowerBound || parseFloat(beatmap.starRating) > upperBound) {
 		return false;
 	} else
 		return true;
 }
 
 // returns true if the user has already played the map in the last 60 days, so we should skip it
-function beatmapPlayed(beatmap, osuName) {
+function beatmapPlayed(beatmap, osuUserId) {
 	let now = new Date();
 
 	// eslint-disable-next-line no-undef
@@ -352,21 +351,22 @@ function beatmapPlayed(beatmap, osuName) {
 
 	let mode = getBeatmapModeId(beatmap);
 
-	osuApi.getScores({ b: beatmap.beatmapId, u: osuName, m: mode })
+	osuApi.getScores({ b: beatmap.beatmapId, u: osuUserId, m: mode })
 		.then(async (scores) => {
 			if (!scores[0]) {
 				return false;
 			} else {
-				let TODO; //Also check that the person didn't already S rank the map (with the mod)
 				let score = scores[0];
 				let date = new Date(score.raw_date);
 				let timeDiff = Math.abs(now.getTime() - date.getTime());
 				let diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
 				if (diffDays < 60) {
 					return true;
+				} else if (score.rank === 'S') {
+					return true;
 				} else {
 					return false;
-				}
+				} 	
 			}
 			// eslint-disable-next-line no-unused-vars
 		}).catch(err => {
