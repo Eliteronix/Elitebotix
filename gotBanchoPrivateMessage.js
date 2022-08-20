@@ -240,6 +240,24 @@ module.exports = async function (client, bancho, message) {
 		// Tourney map with the correct mod
 		// Check if the beatmap is within the user's star rating and haven't been played before
 		for (let i = 0; i < beatmaps.length; i = Math.floor(Math.random() * beatmaps.length)) {
+			const mapScoreAmount = await DBOsuMultiScores.count({
+				where: {
+					beatmapId: beatmaps[i].beatmapId,
+					matchName: {
+						[Op.notLike]: 'MOTD:%',
+					},
+					[Op.or]: [
+						{ warmup: false },
+						{ warmup: null }
+					],
+				}
+			});
+
+			if (mapScoreAmount < 25 ) {
+				beatmaps.splice(i, 1);
+				i++;
+			}
+			
 			if (beatmaps[i].noModMap === true && mod == 'NM') {
 				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 0});
 				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
