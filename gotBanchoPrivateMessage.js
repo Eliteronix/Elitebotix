@@ -154,6 +154,8 @@ module.exports = async function (client, bancho, message) {
 	} else if (message.message.toLowerCase().startsWith('!r')) {
 		let args = message.message.slice(2).trim().split(/ +/);
 
+		let specifiedRating = false;
+
 		// set default values
 		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
 		let mod = modPools[Math.floor(Math.random() * modPools.length)];
@@ -180,6 +182,7 @@ module.exports = async function (client, bancho, message) {
 				userStarRating = parseFloat(args[i]);
 				args.splice(i, 1);
 				i--;
+				specifiedRating = true;
 			}
 		}
 
@@ -282,7 +285,7 @@ module.exports = async function (client, bancho, message) {
 			hdBuff = ' (with Elitebotix HD buff) ';
 		}
 
-		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] + ${mod} | Beatmap ★: ${Math.floor(beatmap.starRating * 100) / 100}${hdBuff}| Your ${mod} duel ★: ${Math.floor(userStarRating * 100) / 100} | ${totalLength}  ♫${beatmap.bpm}  AR${beatmap.approachRate}  OD${beatmap.overallDifficulty}`);
+		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] + ${mod} | Beatmap ★: ${Math.floor(beatmap.starRating * 100) / 100}${hdBuff}| Your ${specifiedRating ? 'specified' : '' } ${mod} duel ★: ${Math.floor(userStarRating * 100) / 100} | ${totalLength}  ♫${beatmap.bpm}  AR${beatmap.approachRate}  OD${beatmap.overallDifficulty}`);
 
 		logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
 		const mapScores = await DBOsuMultiScores.findAll({
