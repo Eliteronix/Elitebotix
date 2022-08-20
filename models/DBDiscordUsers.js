@@ -131,6 +131,10 @@ module.exports = (sequelize, DataTypes) => {
 		weatherDegreeType: {
 			type: DataTypes.STRING,
 		},
+		tournamentPings: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		paranoid: true,
 	});
 };

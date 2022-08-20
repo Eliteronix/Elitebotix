@@ -1,5 +1,5 @@
 const { developers } = require('../config.json');
-const { DBOsuForumPosts } = require('../dbObjects');
+const { DBOsuForumPosts, DBDiscordUsers } = require('../dbObjects');
 const { populateMsgFromInteraction } = require('../utils.js');
 const Discord = require('discord.js');
 
@@ -95,6 +95,79 @@ module.exports = {
 				interaction.followUp({ embeds: [embed] });
 			}
 		} else if (interaction.options._subcommand === 'ping') {
+			let forumPost = await DBOsuForumPosts.findOne({
+				where: {
+					forumPost: `https://osu.ppy.sh/community/forums/topics/${interaction.options._hoistedOptions[0].value}`
+				}
+			});
+
+			if (!forumPost) {
+				return interaction.editReply('Could not find forum post.');
+			}
+
+			//Create embed
+			const embed = new Discord.MessageEmbed()
+				.setTitle(forumPost.title);
+
+			embed.addField('Forum Post', forumPost.forumPost);
+
+			if (forumPost.discord) {
+				embed.addField('Discord', forumPost.discord);
+			}
+
+			if (forumPost.host) {
+				embed.addField('Host', forumPost.host);
+			}
+
+			if (forumPost.format) {
+				embed.addField('Format', forumPost.format);
+			} else {
+				embed.addField('Format', 'No format specified');
+			}
+
+			if (forumPost.rankRange) {
+				embed.addField('Rank Range', forumPost.rankRange);
+			} else {
+				embed.addField('Rank Range', 'No rank range specified');
+			}
+
+			if (forumPost.gamemode) {
+				embed.addField('Gamemode', forumPost.gamemode);
+			} else {
+				embed.addField('Gamemode', 'No gamemode specified');
+			}
+
+			if (forumPost.bws) {
+				embed.addField('BWS', 'Yes');
+			} else {
+				embed.addField('BWS', 'No');
+			}
+
+			if (forumPost.notes) {
+				embed.addField('Notes', forumPost.notes);
+			}
+
+			// eslint-disable-next-line no-undef
+			if (process.env.SERVER === 'Live') {
+				let channel = await interaction.client.channels.fetch('1010602094694244362');
+				await channel.send({ embeds: [embed] });
+			}
+
+			let pingUsers = await DBDiscordUsers.findAll({
+				where: {
+					tournamentPings: true
+				}
+			});
+
+			for (let i = 0; i < pingUsers.length; i++) {
+				try {
+					let user = pingUsers[i];
+					let userDM = await interaction.client.users.fetch(user.userId);
+					await userDM.send({ embeds: [embed] });
+				} catch (err) {
+					console.log(err);
+				}
+			}
 
 		} else if (interaction.options._subcommand === 'update') {
 			let id = null;
