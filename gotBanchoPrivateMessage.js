@@ -1,11 +1,15 @@
-const { DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
-const { getOsuPP, getOsuBeatmap, getMods, getUserDuelStarRating, updateQueueChannels } = require('./utils');
+const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, adjustHDStarRating, getBeatmapModeId, getUserDuelStarRating, updateQueueChannels } = require('./utils');
+const { DBOsuMultiScores, DBOsuBeatmaps, DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+const osu = require('node-osu');
 
 module.exports = async function (client, bancho, message) {
 	if (message.message === '!help') {
 		await message.user.sendMessage('/ /np - Get the pp values for the current beatmap with the current mods');
 		await message.user.sendMessage('!play / !play1v1 / !queue1v1 - Queue up for 1v1 matches');
 		await message.user.sendMessage('!leave / !leave1v1 / !queue1v1-leave - Leave the queue for 1v1 matches');
+		await message.user.sendMessage('!r [mod] [StarRating] - Get a beatmap recommendation for your current duel StarRating. If you don\'t have your account connected to the bot (can be done by using /osu-link command in discord) nor didn\'t specify desired Star Rating, it will use default value of 4.5*');
 		//Listen to now playing / now listening and send pp info
 	} else if (message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)) {
 		let beatmapId = message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)[0].replace(/.+\//gm, '');
@@ -146,5 +150,234 @@ module.exports = async function (client, bancho, message) {
 		}
 
 		return message.user.sendMessage('You are not in the queue for a 1v1 duel.');
+		// message starts with '!r'
+	} else if (message.message.toLowerCase().startsWith('!r')) {
+		let args = message.message.slice(2).trim().split(/ +/);
+
+		let specifiedRating = false;
+
+		// set default values
+		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
+		let mod = modPools[Math.floor(Math.random() * modPools.length)];
+		let userStarRating;
+
+		for (let i = 0; i < args.length; i++) {
+			if (args[i].toLowerCase() == 'hidden' || args[i].toLowerCase() == 'hd') {
+				mod = 'HD';
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase() == ('hardrock') || args[i] == ('hr')) {
+				mod = 'HR';
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase() == ('doubletime') || args[i] == ('dt')) {
+				mod = 'DT';
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase() == ('freemod') || args[i].toLowerCase() == ('fm')) {
+				mod = 'FM';
+				args.splice(i, 1);
+				i--;
+			} else if (parseFloat(args[i]) > 3 && parseFloat(args[i]) < 15) {
+				userStarRating = parseFloat(args[i]);
+				args.splice(i, 1);
+				i--;
+				specifiedRating = true;
+			}
+		}
+
+		let osuUserId = await message.user.fetchFromAPI()
+			.then((user) => {
+				return user.id;
+				// eslint-disable-next-line no-unused-vars
+			}).catch((e) => {
+				//
+			});
+		logDatabaseQueries(4, 'commands/osu-beatmap.js DBDiscordUsers');
+		const discordUser = await DBDiscordUsers.findOne({
+			where: {
+				osuUserId: osuUserId
+			},
+		});
+
+		let beatmaps;
+		beatmaps = await DBOsuBeatmaps.findAll({
+			where: {
+				approvalStatus: {
+					[Op.not]: 'Not found',
+				},
+				BeatmapSetID: {
+					[Op.not]: null,
+				},
+				tourneyMap: true,
+			},
+			order: Sequelize.fn('RANDOM'),
+			// because it gets random beatmaps each time, 150 limit is fine for quick reply
+			limit: 150,
+		});
+
+		if (!discordUser && !userStarRating) {
+			userStarRating = 4.5;
+		}
+
+		// check if the user has account connected, duel star rating not provisioanl and did not specify SR
+		if (discordUser && discordUser.osuDuelProvisional && !userStarRating) {
+			userStarRating = parseFloat(discordUser.osuDuelStarRating);
+		} else if (mod == 'NM' && discordUser && discordUser.osuNoModDuelStarRating != null && !userStarRating) {
+			userStarRating = parseFloat(discordUser.osuNoModDuelStarRating);
+		} else if (mod == 'HD' && discordUser && discordUser.osuHiddenDuelStarRating != null && !userStarRating) {
+			userStarRating = parseFloat(discordUser.osuHiddenDuelStarRating);
+		} else if (mod == 'HR' && discordUser && discordUser.osuHardRockDuelStarRating != null && !userStarRating) {
+			userStarRating = parseFloat(discordUser.osuHardRockDuelStarRating);
+		} else if (mod == 'DT' && discordUser && discordUser.osuDoubleTimeDuelStarRating != null && !userStarRating) {
+			userStarRating = parseFloat(discordUser.osuDoubleTimeDuelStarRating);
+		} else if (mod == 'FM' && discordUser && discordUser.osuFreeModDuelStarRating != null && !userStarRating) {
+			userStarRating = parseFloat(discordUser.osuFreeModDuelStarRating);
+		}
+
+		let beatmap;
+		// loop through beatmaps until we find one that meets the criteria =>
+		// Tourney map with the correct mod
+		// Check if the beatmap is within the user's star rating and haven't been played before
+		for (let i = 0; i < beatmaps.length; i = Math.floor(Math.random() * beatmaps.length)) {
+			if (beatmaps[i].noModMap === true && mod == 'NM') {
+				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 0});
+				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
+					beatmap = beatmaps[i];
+					break;
+				}
+			} else if (beatmaps[i].hiddenMap === true && mod == 'HD') {
+				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 0});
+				if (validSrRange(beatmaps[i], userStarRating, true) && !beatmapPlayed(beatmaps[i], osuUserId)) {
+					beatmap = beatmaps[i];
+					break;
+				}
+			} else if (beatmaps[i].hardRockMap === true && mod == 'HR') {
+				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 16});
+				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
+					beatmap = beatmaps[i];
+					break;
+				}
+			} else if (beatmaps[i].doubleTimeMap === true && mod == 'DT') {
+				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 64});
+				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
+					beatmap = beatmaps[i];
+					break;
+				}
+			} else if (beatmaps[i].freeModMap === true && mod == 'FM') {
+				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 0});
+				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
+					beatmap = beatmaps[i];
+					break;
+				}
+			} else {
+				beatmaps.splice(i, 1);
+				i++;
+			}
+		}
+
+		const totalLengthSeconds = (beatmap.totalLength % 60) + '';
+		const totalLengthMinutes = (beatmap.totalLength - beatmap.totalLength % 60) / 60;
+		const totalLength = totalLengthMinutes + ':' + Math.round(totalLengthSeconds).toString().padStart(2, '0');
+
+		let hdBuff = ' ';
+		if (mod == 'HD') {
+			hdBuff = ' (with Elitebotix HD buff) ';
+		}
+
+		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] + ${mod} | Beatmap ★: ${Math.floor(beatmap.starRating * 100) / 100}${hdBuff}| Your ${specifiedRating ? 'specified' : '' } ${mod} duel ★: ${Math.floor(userStarRating * 100) / 100} | ${totalLength}  ♫${beatmap.bpm}  AR${beatmap.approachRate}  OD${beatmap.overallDifficulty}`);
+
+		logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
+		const mapScores = await DBOsuMultiScores.findAll({
+			where: {
+				beatmapId: beatmap.beatmapId,
+				tourneyMatch: true,
+				matchName: {
+					[Op.notLike]: 'MOTD:%',
+				},
+				[Op.or]: [
+					{ warmup: false },
+					{ warmup: null }
+				],
+			}
+		});
+
+		//Bubblesort mapScores by matchId property descending
+		mapScores.sort((a, b) => {
+			if (parseInt(a.matchId) > parseInt(b.matchId)) {
+				return -1;
+			}
+			if (parseInt(a.matchId) < parseInt(b.matchId)) {
+				return 1;
+			}
+			return 0;
+		});
+
+		let tournaments = [];
+
+		for (let i = 0; i < mapScores.length; i++) {
+			let acronym = mapScores[i].matchName.replace(/:.+/gm, '').replace(/`/g, '');
+
+			if (tournaments.indexOf(acronym) === -1) {
+				tournaments.push(acronym);
+			}
+		}
+
+		let tournamentOccurences = `The map was played ${mapScores.length} times with any mods in these tournaments (new -> old): ${tournaments.join(', ')}`;
+
+		if (tournaments.length === 0) {
+			tournamentOccurences = 'The map was never played in any tournaments.';
+		}
+
+		message.user.sendMessage(tournamentOccurences);
 	}
 };
+
+function validSrRange(beatmap, userStarRating, mod) {
+	let lowerBound = userStarRating - 0.125;
+	let upperBound = userStarRating + 0.125;
+	if (mod) {
+		beatmap.starRating = adjustHDStarRating(beatmap.starRating, beatmap.approachRate);
+	}
+	if (parseFloat(beatmap.starRating) < lowerBound || parseFloat(beatmap.starRating) > upperBound) {
+		return false;
+	} else
+		return true;
+}
+
+// returns true if the user has already played the map in the last 60 days, so we should skip it
+function beatmapPlayed(beatmap, osuUserId) {
+	let now = new Date();
+
+	// eslint-disable-next-line no-undef
+	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+	});
+
+	let mode = getBeatmapModeId(beatmap);
+
+	osuApi.getScores({ b: beatmap.beatmapId, u: osuUserId, m: mode })
+		.then(async (scores) => {
+			if (!scores[0]) {
+				return false;
+			} else {
+				let score = scores[0];
+				let date = new Date(score.raw_date);
+				let timeDiff = Math.abs(now.getTime() - date.getTime());
+				let diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+				if (diffDays < 60) {
+					return true;
+				} else if (score.rank === 'S') {
+					return true;
+				} else {
+					return false;
+				} 	
+			}
+			// eslint-disable-next-line no-unused-vars
+		}).catch(err => {
+			return true;
+		});
+}
