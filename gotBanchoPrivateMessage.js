@@ -357,6 +357,7 @@ function beatmapPlayed(beatmap, osuName) {
 			if (!scores[0]) {
 				return false;
 			} else {
+				let TODO; //Also check that the person didn't already S rank the map (with the mod)
 				let score = scores[0];
 				let date = new Date(score.raw_date);
 				let timeDiff = Math.abs(now.getTime() - date.getTime());
