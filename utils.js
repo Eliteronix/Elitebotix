@@ -2667,7 +2667,7 @@ module.exports = {
 								}
 
 								const rankRangeRegex = /\d*[,.]?\d+k?\s?-\s?\d*k?∞?[,.]?\d*/gm;
-								const rankRangeMatch = title.toLowerCase().replace('infinity', '∞').match(rankRangeRegex);
+								const rankRangeMatch = title.toLowerCase().replace('infinity', '∞').replace(/#/gm, '').match(rankRangeRegex);
 
 								if (rankRangeMatch) {
 									rankRange = rankRangeMatch.join(' | ');

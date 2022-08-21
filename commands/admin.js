@@ -1,4 +1,4 @@
-const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBOsuForumPosts } = require('../dbObjects');
 const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries, saveOsuMultiScores } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
@@ -7221,6 +7221,11 @@ module.exports = {
 					]
 				},
 			});
+		} else if (args[0] === 'clearForumPosts') {
+			let forumPosts = await DBOsuForumPosts.findAll();
+			for (let i = 0; i < forumPosts.length; i++) {
+				await forumPosts[i].destroy();
+			}
 		} else {
 			msg.reply('Invalid command');
 		}

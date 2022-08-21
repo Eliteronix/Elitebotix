@@ -152,13 +152,14 @@ module.exports = {
 			}
 
 			if (forumPost.posted) {
-				embed.setFooter(forumPost.posted);
+				embed.setFooter(`Posted: ${forumPost.posted.getUTCDate()}.${forumPost.posted.getUTCMonth()}.${forumPost.posted.getUTCFullYear()} by ${forumPost.host}`);
 			}
 
 			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Live') {
 				let channel = await interaction.client.channels.fetch('1010602094694244362');
-				await channel.send({ embeds: [embed] });
+				let sentMessage = await channel.send({ embeds: [embed] });
+				sentMessage.crosspost();
 			}
 
 			let pingUsers = await DBDiscordUsers.findAll({
@@ -167,19 +168,75 @@ module.exports = {
 				}
 			});
 
+			let pingedUsers = 0;
+
 			for (let i = 0; i < pingUsers.length; i++) {
 				try {
 					let user = pingUsers[i];
 					if (user.userId) {
-						console.log(user, forumPost.rankRange);
-						let rankRange
-						// 	let userDM = await interaction.client.users.fetch(user.userId);
-						// 	await userDM.send({ embeds: [embed] });
+						//Check the rank range
+						let validRank = false;
+						let rankRange = forumPost.rankRange.split('|');
+						for (let j = 0; j < rankRange.length; j++) {
+							if (rankRange[j].toLowerCase().includes('open rank')) {
+								rankRange[j] = '1-∞';
+							}
+							rankRange[j] = rankRange[j].split('-');
+
+							// Standardize rank range
+							for (let k = 0; k < rankRange[j].length; k++) {
+								rankRange[j][k] = rankRange[j][k].trim();
+								rankRange[j][k] = rankRange[j][k].replace('∞', '999999999');
+								rankRange[j][k] = rankRange[j][k].replace('.', '');
+								rankRange[j][k] = rankRange[j][k].replace(',', '');
+								rankRange[j][k] = rankRange[j][k].replace(/ /gm, '');
+								rankRange[j][k] = rankRange[j][k].replace('k', '000');
+								rankRange[j][k] = parseInt(rankRange[j][k]);
+							}
+
+							// Get the correct rank
+							let osuRank = parseInt(user.osuRank);
+
+							if (forumPost.gamemode === 'Taiko') {
+								osuRank = parseInt(user.taikoRank);
+							} else if (forumPost.gamemode === 'Catch the Beat') {
+								osuRank = parseInt(user.catchRank);
+							} else if (forumPost.gamemode === 'Mania') {
+								osuRank = parseInt(user.maniaRank);
+							}
+
+							// adapt the rank to bws rank if bws is enabled
+							if (forumPost.bws) {
+								osuRank = Math.round(Math.pow(osuRank, Math.pow(0.9937, Math.pow(parseInt(user.osuBadges), 2))));
+							}
+
+							//Swap the rank range if it's backwards
+							if (rankRange[j][0] > rankRange[j][1]) {
+								let temp = rankRange[j][0];
+								rankRange[j][0] = rankRange[j][1];
+								rankRange[j][1] = temp;
+							}
+
+							console.log(osuRank, rankRange[j]);
+							if (osuRank >= rankRange[j][0] && osuRank <= rankRange[j][1]) {
+								validRank = true;
+								break;
+							}
+						}
+
+						if (validRank) {
+							console.log('Valid range');
+							// 	let userDM = await interaction.client.users.fetch(user.userId);
+							// 	await userDM.send({ embeds: [embed] });
+							pingedUsers++;
+						}
 					}
 				} catch (err) {
 					console.log(err);
 				}
 			}
+
+			interaction.editReply(`Ping sent. (Pinged ${pingedUsers} users)`);
 
 		} else if (interaction.options._subcommand === 'update') {
 			let id = null;
@@ -310,7 +367,7 @@ module.exports = {
 			}
 
 			if (forumPost.posted) {
-				embed.setFooter(forumPost.posted);
+				embed.setFooter(`Posted: ${forumPost.posted.getUTCDate()}.${forumPost.posted.getUTCMonth()}.${forumPost.posted.getUTCFullYear()} by ${forumPost.host}`);
 			}
 
 			interaction.editReply({ embeds: [embed] });
