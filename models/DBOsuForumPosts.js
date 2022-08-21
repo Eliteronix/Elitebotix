@@ -30,10 +30,17 @@ module.exports = (sequelize, DataTypes) => {
 		notes: {
 			type: DataTypes.STRING,
 		},
+		region: {
+			type: DataTypes.STRING,
+		},
 		posted: {
 			type: DataTypes.DATE,
 		},
 		bws: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
+		badged: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},

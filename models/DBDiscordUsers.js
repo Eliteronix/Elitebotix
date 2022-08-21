@@ -135,6 +135,13 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		tournamentPingsBadged: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
+		tournamentPingsMode: {
+			type: DataTypes.STRING,
+		},
 		paranoid: true,
 	});
 };

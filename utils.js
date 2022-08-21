@@ -2640,6 +2640,15 @@ module.exports = {
 								host = hostMatch[0].replace('data-post-username="', '').replace('"', '');
 							}
 
+							const postedRegex = /<time class='js-timeago' datetime='.+'>.+<\/time>/gm;
+							const postedMatch = topicHtmlCode.match(postedRegex);
+
+							let posted = null;
+							if (postedMatch.length) {
+								posted = postedMatch[0].replace(/<\/time>/gm, '').replace(/<time class='js-timeago' datetime='.+'>/gm, '');
+								posted = new Date(posted);
+							}
+
 							const titleRegex = /<h1 class="forum-topic-title__title forum-topic-title__title--display">\n.+/gm;
 							const titleMatch = titleRegex.exec(topicHtmlCode);
 
@@ -2699,6 +2708,7 @@ module.exports = {
 								format: format,
 								rankRange: rankRange,
 								gamemode: gamemode,
+								posted: posted,
 							});
 
 							const eliteronixUser = await client.users.fetch('138273136285057025');

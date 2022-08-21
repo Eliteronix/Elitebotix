@@ -3291,6 +3291,13 @@ module.exports = {
 			// 	}
 			// });
 
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'tournament-feed',
+					description: 'Toggles receiving new tournament notifications',
+				}
+			});
+
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'user-profile',

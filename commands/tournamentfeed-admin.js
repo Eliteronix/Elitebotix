@@ -92,6 +92,10 @@ module.exports = {
 					embed.addField('BWS', 'No');
 				}
 
+				if (post.posted) {
+					embed.setFooter(`Posted: ${post.posted.getUTCDate()}.${post.posted.getUTCMonth()}.${post.posted.getUTCFullYear()} by ${post.host}`);
+				}
+
 				interaction.followUp({ embeds: [embed] });
 			}
 		} else if (interaction.options._subcommand === 'ping') {
@@ -147,6 +151,10 @@ module.exports = {
 				embed.addField('Notes', forumPost.notes);
 			}
 
+			if (forumPost.posted) {
+				embed.setFooter(forumPost.posted);
+			}
+
 			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Live') {
 				let channel = await interaction.client.channels.fetch('1010602094694244362');
@@ -162,8 +170,12 @@ module.exports = {
 			for (let i = 0; i < pingUsers.length; i++) {
 				try {
 					let user = pingUsers[i];
-					let userDM = await interaction.client.users.fetch(user.userId);
-					await userDM.send({ embeds: [embed] });
+					if (user.userId) {
+						console.log(user, forumPost.rankRange);
+						let rankRange
+						// 	let userDM = await interaction.client.users.fetch(user.userId);
+						// 	await userDM.send({ embeds: [embed] });
+					}
 				} catch (err) {
 					console.log(err);
 				}
@@ -295,6 +307,10 @@ module.exports = {
 
 			if (forumPost.noTournament) {
 				embed.addField('Not a tournament', 'Yes');
+			}
+
+			if (forumPost.posted) {
+				embed.setFooter(forumPost.posted);
 			}
 
 			interaction.editReply({ embeds: [embed] });
