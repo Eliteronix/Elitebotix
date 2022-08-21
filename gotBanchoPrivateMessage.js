@@ -160,6 +160,7 @@ module.exports = async function (client, bancho, message) {
 		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
 		let mod = modPools[Math.floor(Math.random() * modPools.length)];
 		let userStarRating;
+		let mode = 'Standard';
 
 		for (let i = 0; i < args.length; i++) {
 			if (args[i].toLowerCase() == 'hidden' || args[i].toLowerCase() == 'hd') {
@@ -176,6 +177,18 @@ module.exports = async function (client, bancho, message) {
 				i--;
 			} else if (args[i].toLowerCase() == ('freemod') || args[i].toLowerCase() == ('fm')) {
 				mod = 'FM';
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase() == 'mania' || args[i].toLowerCase() == 'm') {
+				mode = 'Mania';
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase() == 'taiko' || args[i].toLowerCase() == 't') {
+				mode = 'Taiko';
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase() == 'catch the beat' || args[i].toLowerCase() == 'ctb') {
+				mode = 'Catch the Beat';
 				args.splice(i, 1);
 				i--;
 			} else if (parseFloat(args[i]) > 3 && parseFloat(args[i]) < 15) {
@@ -203,6 +216,7 @@ module.exports = async function (client, bancho, message) {
 		let beatmaps;
 		beatmaps = await DBOsuBeatmaps.findAll({
 			where: {
+				mode: mode,
 				approvalStatus: {
 					[Op.not]: 'Not found',
 				},
@@ -284,8 +298,17 @@ module.exports = async function (client, bancho, message) {
 		if (mod == 'HD') {
 			hdBuff = ' (with Elitebotix HD buff) ';
 		}
+		let modeText = '';
+		if (mode == 'Mania') {
+			modeText = ' [Mania]';
+		} else if (mode == 'Catch the Beat') {
+			modeText = ' [Catch the Beat]';
+		} else if (mode == 'Taiko') {
+			modeText = ' [Taiko]';
+		}
 
-		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] + ${mod} | Beatmap ★: ${Math.floor(beatmap.starRating * 100) / 100}${hdBuff}| Your ${specifiedRating ? 'specified' : '' } ${mod} duel ★: ${Math.floor(userStarRating * 100) / 100} | ${totalLength}  ♫${beatmap.bpm}  AR${beatmap.approachRate}  OD${beatmap.overallDifficulty}`);
+
+		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]]${modeText} + ${mod} | Beatmap ★: ${Math.floor(beatmap.starRating * 100) / 100}${hdBuff}| Your ${specifiedRating ? 'specified' : '' } ${mod} duel ★: ${Math.floor(userStarRating * 100) / 100} | ${totalLength}  ♫${beatmap.bpm}  AR${beatmap.approachRate}  OD${beatmap.overallDifficulty}`);
 
 		logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
 		const mapScores = await DBOsuMultiScores.findAll({
