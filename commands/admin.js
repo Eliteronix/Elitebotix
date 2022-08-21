@@ -3295,6 +3295,45 @@ module.exports = {
 				data: {
 					name: 'tournament-feed',
 					description: 'Toggles receiving new tournament notifications',
+					options: [
+						{
+							'name': 'togglenotifications',
+							'description': 'Toggles receiving notifications',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'settings',
+							'description': 'Update your settings with this command',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'gamemode',
+									'description': 'Set to "All" for all gamemodes use "s/t/c/m" or a combination of them for modes',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'badged',
+									'description': 'Should you only get notifications for badged tournaments',
+									'type': 5, // 5 is type BOOLEAN
+									'required': false
+								},
+							]
+						},
+						{
+							'name': 'ping',
+							'description': 'Shares a new tournament',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'id',
+									'description': 'The forum post id',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+					]
 				}
 			});
 
@@ -7183,6 +7222,12 @@ module.exports = {
 								{
 									'name': 'bws',
 									'description': 'Is the rank range bws',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'badged',
+									'description': 'Is the tourney going for badged',
 									'type': 3,
 									'required': false
 								},

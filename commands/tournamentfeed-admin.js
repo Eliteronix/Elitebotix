@@ -147,6 +147,12 @@ module.exports = {
 				embed.addField('BWS', 'No');
 			}
 
+			if (forumPost.badged) {
+				embed.addField('Badged', 'Yes');
+			} else {
+				embed.addField('Badged', 'No');
+			}
+
 			if (forumPost.notes) {
 				embed.addField('Notes', forumPost.notes);
 			}
@@ -217,7 +223,6 @@ module.exports = {
 								rankRange[j][1] = temp;
 							}
 
-							console.log(osuRank, rankRange[j]);
 							if (osuRank >= rankRange[j][0] && osuRank <= rankRange[j][1]) {
 								validRank = true;
 								break;
@@ -226,8 +231,17 @@ module.exports = {
 
 						if (validRank) {
 							console.log('Valid range');
-							// 	let userDM = await interaction.client.users.fetch(user.userId);
-							// 	await userDM.send({ embeds: [embed] });
+							if (user.tournamentPingsBadged && !forumPost.badged) {
+								continue;
+							}
+							console.log('Not filtered for badge requirement');
+
+							let TODO; //Filter for mode
+
+							console.log(user);
+
+							let userDM = await interaction.client.users.fetch(user.userId);
+							await userDM.send({ embeds: [embed] });
 							pingedUsers++;
 						}
 					}
@@ -245,6 +259,7 @@ module.exports = {
 			let gamemode = null;
 			let notes = null;
 			let bws = null;
+			let badged = null;
 			let outdated = null;
 			let notournament = null;
 
@@ -264,6 +279,12 @@ module.exports = {
 						bws = true;
 					} else {
 						bws = false;
+					}
+				} else if (interaction.options._hoistedOptions[i].name === 'badged') {
+					if (interaction.options._hoistedOptions[i].value === true) {
+						badged = true;
+					} else {
+						badged = false;
 					}
 				} else if (interaction.options._hoistedOptions[i].name === 'outdated') {
 					if (interaction.options._hoistedOptions[i].value === true) {
@@ -302,13 +323,16 @@ module.exports = {
 			if (notes) {
 				forumPost.notes = notes;
 			}
-			if (bws) {
+			if (bws !== null) {
 				forumPost.bws = bws;
 			}
-			if (outdated) {
+			if (badged !== null) {
+				forumPost.badged = badged;
+			}
+			if (outdated !== null) {
 				forumPost.outdated = outdated;
 			}
-			if (notournament) {
+			if (notournament !== null) {
 				forumPost.noTournament = notournament;
 			}
 
@@ -356,6 +380,12 @@ module.exports = {
 				embed.addField('BWS', 'Yes');
 			} else {
 				embed.addField('BWS', 'No');
+			}
+
+			if (forumPost.badged) {
+				embed.addField('Badged', 'Yes');
+			} else {
+				embed.addField('Badged', 'No');
 			}
 
 			if (forumPost.outdated) {
