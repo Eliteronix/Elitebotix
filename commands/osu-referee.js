@@ -88,8 +88,6 @@ module.exports = {
 						});
 						let players = interaction.options._hoistedOptions[i].value.split(',');
 
-						console.log(interaction.options._hoistedOptions[i].value, players);
-
 						for (let j = 0; j < players.length; j++) {
 							const response = await osuApi.getUser({ u: getIDFromPotentialOsuLink(players[j]), m: 0 })
 								.then(async (user) => {
@@ -101,7 +99,7 @@ module.exports = {
 											userId: {
 												[Op.not]: null
 											},
-											osuUserId: players[i].id
+											osuUserId: user.id
 										},
 									});
 
