@@ -113,6 +113,7 @@ module.exports = {
 									if (err.message === 'Not found') {
 										return interaction.followUp(`Could not find user \`${getIDFromPotentialOsuLink(players[j]).replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
 									} else {
+										console.log(err);
 										return interaction.followUp(`The bot ran into an error processing the user ${getIDFromPotentialOsuLink(players[j])}. Please try again.`);
 									}
 								});
