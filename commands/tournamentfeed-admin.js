@@ -230,18 +230,31 @@ module.exports = {
 						}
 
 						if (validRank) {
-							console.log('Valid range');
 							if (user.tournamentPingsBadged && !forumPost.badged) {
 								continue;
 							}
-							console.log('Not filtered for badge requirement');
 
-							let TODO; //Filter for mode
-
-							console.log(user);
+							//Check for mode restrictions
+							if (forumPost.gamemode === 'Standard') {
+								if (user.tournamentPingsMode && user.tournamentPingsMode !== 'all' && !user.tournamentPingsMode.includes('s')) {
+									continue;
+								}
+							} else if (forumPost.gamemode === 'Taiko') {
+								if (user.tournamentPingsMode !== 'all' && !user.tournamentPingsMode.includes('t')) {
+									continue;
+								}
+							} else if (forumPost.gamemode === 'Catch the Beat') {
+								if (user.tournamentPingsMode !== 'all' && !user.tournamentPingsMode.includes('c')) {
+									continue;
+								}
+							} else if (forumPost.gamemode === 'Mania') {
+								if (user.tournamentPingsMode !== 'all' && !user.tournamentPingsMode.includes('m')) {
+									continue;
+								}
+							}
 
 							let userDM = await interaction.client.users.fetch(user.userId);
-							await userDM.send({ embeds: [embed] });
+							await userDM.send({ content: 'A new tournament has been announced.', embeds: [embed] });
 							pingedUsers++;
 						}
 					}

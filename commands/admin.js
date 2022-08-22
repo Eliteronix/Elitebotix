@@ -3320,19 +3320,6 @@ module.exports = {
 								},
 							]
 						},
-						{
-							'name': 'ping',
-							'description': 'Shares a new tournament',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'id',
-									'description': 'The forum post id',
-									'type': 3,
-									'required': true
-								}
-							]
-						},
 					]
 				}
 			});

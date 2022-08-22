@@ -2673,13 +2673,13 @@ module.exports = {
 									rankRange = rankRangeMatch.join(' | ');
 								}
 
-								if (title.includes('std')) {
+								if (title.toLowerCase().includes('std')) {
 									gamemode = 'Standard';
-								} else if (title.includes('taiko')) {
+								} else if (title.toLowerCase().includes('taiko')) {
 									gamemode = 'Taiko';
-								} else if (title.includes('ctb') || title.includes('catch')) {
+								} else if (title.toLowerCase().includes('ctb') || title.toLowerCase().includes('catch')) {
 									gamemode = 'Catch the Beat';
-								} else if (title.includes('mania')) {
+								} else if (title.toLowerCase().includes('mania')) {
 									gamemode = 'Mania';
 								}
 							}
