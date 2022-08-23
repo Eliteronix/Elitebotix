@@ -240,6 +240,7 @@ module.exports = async function (client, bancho, message) {
 		// Tourney map with the correct mod
 		// Check if the beatmap is within the user's star rating and haven't been played before
 		for (let i = 0; i < beatmaps.length; i = Math.floor(Math.random() * beatmaps.length)) {
+			console.log(i);
 			const mapScoreAmount = await DBOsuMultiScores.count({
 				where: {
 					beatmapId: beatmaps[i].beatmapId,
@@ -253,45 +254,45 @@ module.exports = async function (client, bancho, message) {
 				}
 			});
 
-			if (mapScoreAmount < 25 ) {
+			if (mapScoreAmount < 25) {
 				beatmaps.splice(i, 1);
-				i++;
+				continue;
 			}
-			
+
 			if (beatmaps[i].noModMap === true && mod == 'NM') {
-				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 0});
+				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 0 });
 				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].hiddenMap === true && mod == 'HD') {
-				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 0});
+				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 0 });
 				if (validSrRange(beatmaps[i], userStarRating, true) && !beatmapPlayed(beatmaps[i], osuUserId)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].hardRockMap === true && mod == 'HR') {
-				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 16});
+				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 16 });
 				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].doubleTimeMap === true && mod == 'DT') {
-				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 64});
+				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 64 });
 				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else if (beatmaps[i].freeModMap === true && mod == 'FM') {
-				beatmaps[i] = await getOsuBeatmap({beatmapId: beatmaps[i].beatmapId, modBits: 0});
+				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 0 });
 				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
 					beatmap = beatmaps[i];
 					break;
 				}
 			} else {
 				beatmaps.splice(i, 1);
-				i++;
 			}
+			continue;
 		}
 
 		const totalLengthSeconds = (beatmap.totalLength % 60) + '';
@@ -303,7 +304,7 @@ module.exports = async function (client, bancho, message) {
 			hdBuff = ' (with Elitebotix HD buff) ';
 		}
 
-		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] + ${mod} | Beatmap ★: ${Math.floor(beatmap.starRating * 100) / 100}${hdBuff}| Your ${specifiedRating ? 'specified' : '' } ${mod} duel ★: ${Math.floor(userStarRating * 100) / 100} | ${totalLength}  ♫${beatmap.bpm}  AR${beatmap.approachRate}  OD${beatmap.overallDifficulty}`);
+		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] + ${mod} | Beatmap ★: ${Math.floor(beatmap.starRating * 100) / 100}${hdBuff}| Your ${specifiedRating ? 'specified' : ''} ${mod} duel ★: ${Math.floor(userStarRating * 100) / 100} | ${totalLength}  ♫${beatmap.bpm}  AR${beatmap.approachRate}  OD${beatmap.overallDifficulty}`);
 
 		logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
 		const mapScores = await DBOsuMultiScores.findAll({
@@ -392,7 +393,7 @@ function beatmapPlayed(beatmap, osuUserId) {
 					return true;
 				} else {
 					return false;
-				} 	
+				}
 			}
 			// eslint-disable-next-line no-unused-vars
 		}).catch(err => {
