@@ -2963,7 +2963,7 @@ async function getUserDuelStarRatingFunction(input) {
 			let weightedStarRating = totalWeightedStarRating / totalWeight;
 
 			for (let i = 0; i < relevantMaps.length; i++) {
-				weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, relevantMaps[i % relevantMaps.length], Math.round((1 - (i * 1 / relevantMaps.length)) * 100) / 100);
+				weightedStarRating = applyOsuDuelStarratingCorrection(weightedStarRating, relevantMaps[relevantMaps.length - 1 - i], Math.round((1 - (i * 1 / relevantMaps.length)) * 100) / 100);
 			}
 
 			if (modIndex === 0) {
