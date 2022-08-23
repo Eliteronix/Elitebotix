@@ -258,6 +258,61 @@ module.exports = async function (client, bancho, message) {
 		// Tourney map with the correct mod
 		// Check if the beatmap is within the user's star rating and haven't been played before
 		for (let i = 0; i < beatmaps.length; i = Math.floor(Math.random() * beatmaps.length)) {
+			let adaptHDStarRating = false;
+			// Check if its not valid for it's slot and refresh if it fits
+			if (mod == 'NM') {
+				if (!beatmaps[i].noModMap) {
+					beatmaps.splice(i, 1);
+					continue;
+				}
+
+				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 0 });
+			} else if (mod == 'HD') {
+				if (!beatmaps[i].hiddenMap) {
+					beatmaps.splice(i, 1);
+					continue;
+				}
+
+				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 0 });
+
+				adaptHDStarRating = true;
+			} else if (mod == 'HR') {
+				if (!beatmaps[i].hardRockMap) {
+					beatmaps.splice(i, 1);
+					continue;
+				}
+
+				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 16 });
+			} else if (mod == 'DT') {
+				if (!beatmaps[i].doubleTimeMap) {
+					beatmaps.splice(i, 1);
+					continue;
+				}
+
+				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 64 });
+			} else if (mod == 'FM') {
+				if (!beatmaps[i].freeModMap) {
+					beatmaps.splice(i, 1);
+					continue;
+				}
+
+				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 0 });
+			} else {
+				console.log('Something about the mods in !r fucked up if you see this');
+				beatmaps.splice(i, 1);
+				continue;
+			}
+
+			if (!validSrRange(beatmaps[i], userStarRating, adaptHDStarRating)) {
+				beatmaps.splice(i, 1);
+				continue;
+			}
+
+			if (beatmapPlayed(beatmaps[i], osuUserId)) {
+				beatmaps.splice(i, 1);
+				continue;
+			}
+
 			const mapScoreAmount = await DBOsuMultiScores.count({
 				where: {
 					beatmapId: beatmaps[i].beatmapId,
@@ -276,40 +331,8 @@ module.exports = async function (client, bancho, message) {
 				continue;
 			}
 
-			if (beatmaps[i].noModMap === true && mod == 'NM') {
-				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 0 });
-				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
-					beatmap = beatmaps[i];
-					break;
-				}
-			} else if (beatmaps[i].hiddenMap === true && mod == 'HD') {
-				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 0 });
-				if (validSrRange(beatmaps[i], userStarRating, true) && !beatmapPlayed(beatmaps[i], osuUserId)) {
-					beatmap = beatmaps[i];
-					break;
-				}
-			} else if (beatmaps[i].hardRockMap === true && mod == 'HR') {
-				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 16 });
-				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
-					beatmap = beatmaps[i];
-					break;
-				}
-			} else if (beatmaps[i].doubleTimeMap === true && mod == 'DT') {
-				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 64 });
-				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
-					beatmap = beatmaps[i];
-					break;
-				}
-			} else if (beatmaps[i].freeModMap === true && mod == 'FM') {
-				beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 0 });
-				if (validSrRange(beatmaps[i], userStarRating) && !beatmapPlayed(beatmaps[i], osuUserId)) {
-					beatmap = beatmaps[i];
-					break;
-				}
-			} else {
-				beatmaps.splice(i, 1);
-			}
-			continue;
+			beatmap = beatmaps[i];
+			break;
 		}
 
 		const totalLengthSeconds = (beatmap.totalLength % 60) + '';
