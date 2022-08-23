@@ -163,7 +163,11 @@ module.exports = async function (client, bancho, message) {
 		let mode = 'Standard';
 
 		for (let i = 0; i < args.length; i++) {
-			if (args[i].toLowerCase() == 'hidden' || args[i].toLowerCase() == 'hd') {
+			if (args[i].toLowerCase() == 'nomod' || args[i].toLowerCase() == 'nm') {
+				mod = 'NM';
+				args.splice(i, 1);
+				i--;
+			} else if (args[i].toLowerCase() == 'hidden' || args[i].toLowerCase() == 'hd') {
 				mod = 'HD';
 				args.splice(i, 1);
 				i--;
