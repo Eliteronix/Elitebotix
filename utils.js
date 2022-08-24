@@ -3424,11 +3424,11 @@ function wrongClusterFunction(id) {
 	// Allow cluster 0 if no id is provided
 	// eslint-disable-next-line no-undef
 	if (!id && process.env.pm_id === '0') {
-		return true;
+		return false;
 	}
 
 	// Else its the wrong cluster
-	return false;
+	return true;
 }
 
 async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, depth) {
