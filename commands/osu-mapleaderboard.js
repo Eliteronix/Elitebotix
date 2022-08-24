@@ -95,11 +95,6 @@ module.exports = {
 				processingMessage = await msg.reply('Processing...');
 			}
 
-			let offset = 36.6;
-			if (limit > 5) {
-				offset = 45;
-			}
-
 			let mode = beatmap.mode;
 
 			if (mode == 'Standard') {
@@ -175,21 +170,17 @@ module.exports = {
 				}
 			}
 
-			let lookHere;
-			// canvas is too big with some limits and i aint fcuking with it
-
 			if (limit > scoresArray.length) {
 				limit = scoresArray.length;
 			}
 
-			const canvasWidth = 900;
-			let canvasHeight = 160;
+			let userScoreHeight = 0;
+			if (userScore) {
+				userScoreHeight = 90;
+			}
 
-			//Map display, 145
-			// TopScore
-			// potential own score
-			// per score
-			// footer 15
+			const canvasWidth = 900;
+			let canvasHeight = 275 + userScoreHeight + limit * 30;
 
 			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
 
@@ -413,9 +404,8 @@ module.exports = {
 
 			let globalOffset = 0;
 
-			// check if the user has account linked
-			// if so, try to find and add user's score
-			if (userScore.score && limit >= 10) {
+			// try to add user's score
+			if (userScore.score) {
 				globalOffset = 90;
 				let topScore = userScore.score;
 				roundedRect(ctx, 50, 255, 800, 80, 500 / 70, '70', '57', '63', 0.75);
@@ -614,7 +604,7 @@ module.exports = {
 			ctx.font = '12px comfortaa, sans-serif';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'right';
-			ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
+			ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 10, canvas.height - 10);
 
 			return [canvas, ctx, beatmap];
 		}
