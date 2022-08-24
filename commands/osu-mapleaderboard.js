@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, multiToBanchoScore } = require('../utils');
+const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -100,30 +100,6 @@ module.exports = {
 				offset = 45;
 			}
 
-
-			let lookHere;
-			// canvas is too big with some limits and i aint fcuking with it
-
-			const canvasWidth = 900;
-			let canvasHeight = 230 + (limit * offset);
-
-			if (canvasHeight > 1860) {
-				canvasHeight = 1860;
-			}
-
-			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
-
-			//Create Canvas
-			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
-
-			//Get context and load the image
-			const ctx = canvas.getContext('2d');
-			const background = await Canvas.loadImage('./other/osu-background.png');
-			for (let i = 0; i < canvas.height / background.height; i++) {
-				for (let j = 0; j < canvas.width / background.width; j++) {
-					ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
-				}
-			}
 			let mode = beatmap.mode;
 
 			if (mode == 'Standard') {
@@ -137,7 +113,7 @@ module.exports = {
 			}
 
 			let scoresArray = [];
-			let userScore = {};
+			let userScore = null;
 
 			const user = await DBDiscordUsers.findOne({
 				where: {
@@ -182,6 +158,9 @@ module.exports = {
 				let addedUserScores = [];
 
 				for (let i = 0; i < multiScores.length; i++) {
+					if (parseInt(multiScores[i].score) < 10000) {
+						break;
+					}
 					if (!addedUserScores.includes(multiScores[i].osuUserId)) {
 						addedUserScores.push(multiScores[i].osuUserId);
 
@@ -190,13 +169,41 @@ module.exports = {
 						scoresArray.push(banchoScore);
 
 						if (user && multiScores[i].osuUserId === user.osuUserId) {
-							userScore = banchoScore;
+							userScore = { score: banchoScore, rank: scoresArray.length };
 						}
 					}
 				}
 			}
 
-			console.log(scoresArray, userScore);
+			let lookHere;
+			// canvas is too big with some limits and i aint fcuking with it
+
+			if (limit > scoresArray.length) {
+				limit = scoresArray.length;
+			}
+
+			const canvasWidth = 900;
+			let canvasHeight = 160;
+
+			//Map display, 145
+			// TopScore
+			// potential own score
+			// per score
+			// footer 15
+
+			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+			//Create Canvas
+			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+			//Get context and load the image
+			const ctx = canvas.getContext('2d');
+			const background = await Canvas.loadImage('./other/osu-background.png');
+			for (let i = 0; i < canvas.height / background.height; i++) {
+				for (let j = 0; j < canvas.width / background.width; j++) {
+					ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+				}
+			}
 
 			let elements = [canvas, ctx, beatmap];
 
@@ -338,6 +345,9 @@ module.exports = {
 				ctx.drawImage(gradeD, 60, 210, 32, 16);
 			}
 
+			if (!topScore.user.name) {
+				topScore.user.name = await getOsuPlayerName(topScore.user.id);
+			}
 			// nickname
 			ctx.font = 'bold 20px comfortaa, sans-serif';
 			ctx.fillStyle = '#ffffff';
@@ -472,6 +482,9 @@ module.exports = {
 					ctx.drawImage(gradeD, 60, 200 + 90 + gradeOffset, 32, 16);
 				}
 
+				if (!topScore.user.name) {
+					topScore.user.name = await getOsuPlayerName(topScore.user.id);
+				}
 				// nickname
 				ctx.font = 'bold 20px comfortaa, sans-serif';
 				ctx.fillStyle = '#ffffff';
@@ -559,6 +572,9 @@ module.exports = {
 				let accuracy = Math.floor(getAccuracy(scoresArray[i], mode) * 100 * 100) / 100;
 				ctx.fillText(`${accuracy}%`, 160, 235.5 + globalOffset + localOffset);
 				// nickname
+				if (!scoresArray[i].user.name) {
+					scoresArray[i].user.name = await getOsuPlayerName(scoresArray[i].user.id);
+				}
 				ctx.fillText(`${scoresArray[i].user.name}`, 215, 235.5 + globalOffset + localOffset);
 				// maxCombo
 				ctx.fillText(`${scoresArray[i].maxCombo}`, 380, 235.5 + globalOffset + localOffset);

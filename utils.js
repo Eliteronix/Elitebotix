@@ -1107,7 +1107,7 @@ module.exports = {
 			},
 			maxCombo: inputScore.maxCombo,
 			perfect: inputScore.perfect,
-			raw_date: inputScore.gameStartDate,
+			raw_date: `${inputScore.gameStartDate.getUTCFullYear()}-${(inputScore.gameStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${(inputScore.gameStartDate.getUTCDate()).toString().padStart(2, '0')} ${(inputScore.gameStartDate.getUTCHours()).toString().padStart(2, '0')}:${(inputScore.gameStartDate.getUTCMinutes()).toString().padStart(2, '0')}:${(inputScore.gameStartDate.getUTCSeconds()).toString().padStart(2, '0')}`,
 			rank: inputScore.rank,
 			pp: inputScore.pp,
 			hasReplay: false,
