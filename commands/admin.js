@@ -4525,11 +4525,11 @@ module.exports = {
 							'choices': [
 								{
 									'name': 'Bancho',
-									'value': '--b'
+									'value': 'bancho'
 								},
 								{
 									'name': 'Tournaments',
-									'value': '--tournaments'
+									'value': 'tournaments'
 								},
 							]
 						},

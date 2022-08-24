@@ -1,8 +1,8 @@
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getModBits, getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
+const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, multiToBanchoScore } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -21,6 +21,7 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		let server = 'bancho';
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -35,7 +36,7 @@ module.exports = {
 					} else if (interaction.options._hoistedOptions[i].name === 'mode') {
 						args.push(`--${interaction.options._hoistedOptions[i].value}`);
 					} else if (interaction.options._hoistedOptions[i].name === 'server') {
-						args.push(`--${interaction.options._hoistedOptions[i].value}`);
+						server = interaction.options._hoistedOptions[i].value;
 					} else if (interaction.options._hoistedOptions[i].name === 'amount') {
 						args.push(`--${interaction.options._hoistedOptions[i].value}`);
 					} else {
@@ -144,20 +145,22 @@ module.exports = {
 				}
 			});
 
-			let lookHere2;
+			if (server === 'bancho') {
+				await osuApi.getScores({ b: beatmap.beatmapId, m: mode })
+					.then(async (mapScores) => {
+						scoresArray = mapScores;
+					});
 
-			await osuApi.getScores({ b: beatmap.beatmapId, m: mode })
-				.then(async (mapScores) => {
-					scoresArray = mapScores;
-				});
+				for (let i = 0; i < scoresArray.length; i++) {
+					if (user && scoresArray[i].user.id === user.osuUserId) {
+						userScore = {
+							score: scoresArray[i],
+							rank: i
+						}; break;
+					}
+				}
 
-			for (let i = 0; i < scoresArray.length; i++) {
-				if (user && scoresArray[i].user.id === user.osuUserId) {
-					userScore = {
-						score: scoresArray[i],
-						rank: i
-					}; break;
-				} else {
+				if (user && !userScore) {
 					try {
 						await osuApi.getScores({ b: beatmap.beatmapId, u: user.osuName, m: mode })
 							.then(async scores => {
@@ -165,6 +168,30 @@ module.exports = {
 							});
 					} catch (error) {
 						// nothing
+					}
+				}
+			} else if (server === 'tournaments') {
+				let multiScores = await DBOsuMultiScores.findAll({
+					where: {
+						beatmapId: beatmap.beatmapId
+					}
+				});
+
+				quicksort(multiScores);
+
+				let addedUserScores = [];
+
+				for (let i = 0; i < multiScores.length; i++) {
+					if (!addedUserScores.includes(multiScores[i].osuUserId)) {
+						addedUserScores.push(multiScores[i].osuUserId);
+
+						let banchoScore = await multiToBanchoScore(multiScores[i]);
+
+						scoresArray.push(banchoScore);
+
+						if (user && multiScores[i].osuUserId === user.osuUserId) {
+							userScore = banchoScore;
+						}
 					}
 				}
 			}
@@ -609,4 +636,29 @@ function getDate(topScore) {
 	const formattedSubmitDate = `${topScore.raw_date.substring(8, 10)} ${month} ${topScore.raw_date.substring(0, 4)} ${topScore.raw_date.substring(11, 16)}`;
 
 	return formattedSubmitDate;
+}
+
+function partition(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].score) >= parseFloat(pivot.score)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
+
+function quicksort(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partition(list, start, end);
+		quicksort(list, start, p - 1);
+		quicksort(list, p + 1, end);
+	}
+	return list;
 }
