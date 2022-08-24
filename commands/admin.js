@@ -1002,6 +1002,67 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'osu-mapleaderboard',
+			// 		description: 'Sends an info card about the leaderboard on the specified beatmap',
+			// 		options: [
+			// 			{
+			// 				'name': 'id',
+			// 				'description': 'beatmap ID',
+			// 				'type': 3,
+			// 				'required': true
+			// 			},
+			// 			{
+			// 				'name': 'server',
+			// 				'description': 'The server you want to get the leaderboard from',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Bancho',
+			// 						'value': '--b'
+			// 					},
+			// 					{
+			// 						'name': 'Tournaments',
+			// 						'value': '--tournaments'
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'mode',
+			// 				'description': 'The gamemode you want to get the leaderboard from',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'osu',
+			// 						'value': '--osu'
+			// 					},
+			// 					{
+			// 						'name': 'taiko',
+			// 						'value': '--taiko'
+			// 					},
+			// 					{
+			// 						'name': 'catch',
+			// 						'value': '--catch'
+			// 					},
+			// 					{
+			// 						'name': 'mania',
+			// 						'value': '--mania'
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'amount',
+			// 				'description': 'The amount of scores you want to get',
+			// 				'type': 4,
+			// 			}
+			// 		]
+			// 	}
+			// });
+
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'osu-matchscore',
 			// 		description: 'Sends an evaluation of how valuable all the players in the match were',
 			// 		options: [
@@ -4444,6 +4505,67 @@ module.exports = {
 					]
 				}
 			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-mapleaderboard',
+					description: 'Sends an info card about the leaderboard on the specified beatmap',
+					options: [
+						{
+							'name': 'id',
+							'description': 'beatmap ID',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'server',
+							'description': 'The server you want to get the leaderboard from',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'Bancho',
+									'value': 'bancho'
+								},
+								{
+									'name': 'Tournaments',
+									'value': 'tournaments'
+								},
+							]
+						},
+						{
+							'name': 'mode',
+							'description': 'The gamemode you want to get the leaderboard from',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'osu',
+									'value': '--osu'
+								},
+								{
+									'name': 'taiko',
+									'value': '--taiko'
+								},
+								{
+									'name': 'catch',
+									'value': '--catch'
+								},
+								{
+									'name': 'mania',
+									'value': '--mania'
+								},
+							]
+						},
+						{
+							'name': 'amount',
+							'description': 'The amount of scores you want to get',
+							'type': 4,
+						}
+					]
+				}
+			});
+
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

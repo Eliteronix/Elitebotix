@@ -354,7 +354,6 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 		for (let i = 0; i < userScores.length; i++) {
 			userScores[i] = await multiToBanchoScore(userScores[i]);
-			userScores[i].raw_date = `${userScores[i].raw_date.getUTCFullYear()}-${userScores[i].raw_date.getUTCMonth().toString().padStart(2, '0')}-${userScores[i].raw_date.getUTCDate().toString().padStart(2, '0')} ${userScores[i].raw_date.getUTCHours().toString().padStart(2, '0')}:${userScores[i].raw_date.getUTCMinutes().toString().padStart(2, '0')}:${userScores[i].raw_date.getUTCSeconds().toString().padStart(2, '0')}`;
 			userScores[i].mapRank = `${userScores[i].mapRank}/${beatmapScores.length - userScoreAmount + 1}`;
 
 			updateOsuDetailsforUser(osuUser, mode);
