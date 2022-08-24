@@ -45,25 +45,7 @@ module.exports = {
 			}
 		}
 
-		let mods = 0;
-		// for (let i = 0; i < args.length; i++) {
-		// 	if (args[i].startsWith('--NM') || args[i].startsWith('--NF') || args[i].startsWith('--HT') || args[i].startsWith('--EZ')
-		// 		|| args[i].startsWith('--HR') || args[i].startsWith('--HD') || args[i].startsWith('--SD') || args[i].startsWith('--DT')
-		// 		|| args[i].startsWith('--NC') || args[i].startsWith('--FL') || args[i].startsWith('--SO') || args[i].startsWith('--PF')
-		// 		|| args[i].startsWith('--K4') || args[i].startsWith('--K5') || args[i].startsWith('--K6') || args[i].startsWith('--K7')
-		// 		|| args[i].startsWith('--K8') || args[i].startsWith('--FI') || args[i].startsWith('--RD') || args[i].startsWith('--K9')
-		// 		|| args[i].startsWith('--KC') || args[i].startsWith('--K1') || args[i].startsWith('--K2') || args[i].startsWith('--K3')
-		// 		|| args[i].startsWith('--MR')) {
-		// 		mods = args[i].substring(2);
-		// 		args.splice(i, 1);
-		// 		i--;
-		// 	} else if (args[i].startsWith('--FM')) {
-		// 		args.splice(i, 1);
-		// 		i--;
-		// 	}
-		// }
-
-		let modBits = getModBits(mods);
+		let modBits = 0;
 		let limit = 10;
 
 		for (let i = 0; i < args.length; i++) {
@@ -168,7 +150,7 @@ module.exports = {
 				.then(async (mapScores) => {
 					scoresArray = mapScores;
 				});
-			
+
 			for (let i = 0; i < scoresArray.length; i++) {
 				if (user && scoresArray[i].user.id === user.osuUserId) {
 					userScore = {
@@ -177,16 +159,18 @@ module.exports = {
 					}; break;
 				} else {
 					try {
-						await osuApi.getScores({ b: beatmap.beatmapId, u: user.osuName, m: mode})
+						await osuApi.getScores({ b: beatmap.beatmapId, u: user.osuName, m: mode })
 							.then(async scores => {
-								userScore = {score: scores[0]};
+								userScore = { score: scores[0] };
 							});
 					} catch (error) {
 						// nothing
 					}
 				}
 			}
-			
+
+			console.log(scoresArray, userScore);
+
 			let elements = [canvas, ctx, beatmap];
 
 			elements = await drawTitle(elements);
@@ -435,7 +419,7 @@ module.exports = {
 				let gradeD = await Canvas.loadImage('other/rank_pictures/D_Rank.png');
 
 				let gradeOffset = 0;
-				if (userScore.rank) { 
+				if (userScore.rank) {
 					gradeOffset += 10;
 					ctx.font = 'bold 20px comfortaa, sans-serif';
 					ctx.fillStyle = '#ffffff';
