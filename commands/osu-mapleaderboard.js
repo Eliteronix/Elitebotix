@@ -405,7 +405,7 @@ module.exports = {
 			let globalOffset = 0;
 
 			// try to add user's score
-			if (userScore.score) {
+			if (userScore) {
 				globalOffset = 90;
 				let topScore = userScore.score;
 				roundedRect(ctx, 50, 255, 800, 80, 500 / 70, '70', '57', '63', 0.75);
