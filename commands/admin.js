@@ -618,6 +618,69 @@ module.exports = {
 			// 	},
 			// });
 
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'osu-autohost',
+					description: 'Hosts an automated lobby ingame',
+					options: [
+						{
+							'name': 'password',
+							'description': 'Leave empty for a public room',
+							'type': 3,
+						},
+						{
+							'name': 'condition',
+							'description': 'What is the winning condition of the match?',
+							'type': 3,
+							'choices': [
+								{
+									'name': 'Score v1',
+									'value': '0'
+								},
+								{
+									'name': 'Score v2',
+									'value': '3'
+								},
+								{
+									'name': 'Accuracy',
+									'value': '1'
+								}
+							]
+						},
+						{
+							'name': 'mods',
+							'description': 'The active modpools to be chosen from (Ex: "NM,HR,DT")',
+							'type': 3,
+						},
+						{
+							'name': 'nmstarrating',
+							'description': 'A custom difficulty for NM maps',
+							'type': 10, // 10 is type NUMBER
+						},
+						{
+							'name': 'hdstarrating',
+							'description': 'A custom difficulty for HD maps',
+							'type': 10, // 10 is type NUMBER
+						},
+						{
+							'name': 'hrstarrating',
+							'description': 'A custom difficulty for HR maps',
+							'type': 10, // 10 is type NUMBER
+						},
+						{
+							'name': 'dtstarrating',
+							'description': 'A custom difficulty for DT maps',
+							'type': 10, // 10 is type NUMBER
+						},
+						{
+							'name': 'fmstarrating',
+							'description': 'A custom difficulty for FM maps',
+							'type': 10, // 10 is type NUMBER
+						},
+					]
+				},
+			});
+
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'osu-beatmap',
