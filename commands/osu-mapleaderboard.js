@@ -144,7 +144,8 @@ module.exports = {
 			} else if (server === 'tournaments') {
 				let multiScores = await DBOsuMultiScores.findAll({
 					where: {
-						beatmapId: beatmap.beatmapId
+						beatmapId: beatmap.beatmapId,
+						scoringType: 'Score v2'
 					}
 				});
 
