@@ -1,4 +1,4 @@
-const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBOsuForumPosts } = require('../dbObjects');
 const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries, saveOsuMultiScores } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
@@ -3286,6 +3286,39 @@ module.exports = {
 			// 				'description': 'The location of which you want to find out the time',
 			// 				'type': 3,
 			// 				'required': true
+			// 			},
+			// 		]
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'tournament-feed',
+			// 		description: 'Toggles receiving new tournament notifications',
+			// 		options: [
+			// 			{
+			// 				'name': 'togglenotifications',
+			// 				'description': 'Toggles receiving notifications',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'settings',
+			// 				'description': 'Update your settings with this command',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'gamemode',
+			// 						'description': 'Set to "All" for all gamemodes use "s/t/c/m" or a combination of them for modes',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'badged',
+			// 						'description': 'Should you only get notifications for badged tournaments',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 						'required': false
+			// 					},
+			// 				]
 			// 			},
 			// 		]
 			// 	}
@@ -6668,6 +6701,39 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
+					name: 'tournament-feed',
+					description: 'Toggles receiving new tournament notifications',
+					options: [
+						{
+							'name': 'togglenotifications',
+							'description': 'Toggles receiving notifications',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'settings',
+							'description': 'Update your settings with this command',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'gamemode',
+									'description': 'Set to "All" for all gamemodes use "s/t/c/m" or a combination of them for modes',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'badged',
+									'description': 'Should you only get notifications for badged tournaments',
+									'type': 5, // 5 is type BOOLEAN
+									'required': false
+								},
+							]
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
 					name: 'user-profile',
 					description: 'Sends an info card about the specified user',
 					options: [
@@ -7132,6 +7198,99 @@ module.exports = {
 						return processingMessage.edit(`Error reimporting match ${args[1]}`);
 					}
 				});
+		} else if (args[0] === 'tournamentFeedCommand') {
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'tournamentfeed-admin',
+					description: 'Allows for managing the tournament feed',
+					options: [
+						{
+							'name': 'update',
+							'description': 'Allows for updating the tournament feed',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'id',
+									'description': 'The forum post id',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'format',
+									'description': 'The format of the tournament',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'rankrange',
+									'description': 'The rankrange of the tournament',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'gamemode',
+									'description': 'The gamemode of the tournament',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'notes',
+									'description': 'Additional information about the tournament',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'bws',
+									'description': 'Is the rank range bws',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'badged',
+									'description': 'Is the tourney going for badged',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'outdated',
+									'description': 'Is the tournament post outdated',
+									'type': 5, // 5 is type BOOLEAN
+									'required': false
+								},
+								{
+									'name': 'notournament',
+									'description': 'Is the post not a tournament',
+									'type': 5, // 5 is type BOOLEAN
+									'required': false
+								},
+							]
+						},
+						{
+							'name': 'ping',
+							'description': 'Shares a new tournament',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'id',
+									'description': 'The forum post id',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'list',
+							'description': 'Show open forum posts',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+					]
+				},
+			});
+		} else if (args[0] === 'clearForumPosts') {
+			let forumPosts = await DBOsuForumPosts.findAll();
+			for (let i = 0; i < forumPosts.length; i++) {
+				await forumPosts[i].destroy();
+			}
 		} else {
 			msg.reply('Invalid command');
 		}

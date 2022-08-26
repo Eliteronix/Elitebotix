@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -2595,6 +2595,127 @@ module.exports = {
 		}
 
 		await channel.edit({ name: `1v1 Queue: ${existingQueueTasks.length} user${multipleString}` });
+	},
+	async createNewForumPostRecords(client) {
+		// eslint-disable-next-line no-undef
+		if (wrongClusterFunction()) {
+			return;
+		}
+		await fetch('https://osu.ppy.sh/community/forums/55')
+			.then(async (res) => {
+				let htmlCode = await res.text();
+				htmlCode = htmlCode.replace(/&quot;/gm, '"');
+				const topicRegex = /https:\/\/osu\.ppy\.sh\/community\/forums\/topics\/\d+/gm;
+				const topicMatches = htmlCode.match(topicRegex);
+
+				let uniqueTopics = [];
+				for (let i = 0; i < topicMatches.length; i++) {
+					if (!uniqueTopics.includes(topicMatches[i])) {
+						uniqueTopics.push(topicMatches[i]);
+					}
+				}
+
+				for (let i = 0; i < uniqueTopics.length; i++) {
+					let existingForumPost = await DBOsuForumPosts.findOne({
+						where: {
+							forumPost: uniqueTopics[i]
+						}
+					});
+
+					if (existingForumPost) {
+						continue;
+					}
+
+					await new Promise(resolve => setTimeout(resolve, 60000));
+					await fetch(uniqueTopics[i] + '?n=1')
+						.then(async (topicRes) => {
+							let topicHtmlCode = await topicRes.text();
+							topicHtmlCode = topicHtmlCode.replace(/&quot;/gm, '"');
+
+							const hostRegex = /data-post-username=".+"/gm;
+							const hostMatch = topicHtmlCode.match(hostRegex);
+
+							let host = null;
+							if (hostMatch.length) {
+								host = hostMatch[0].replace('data-post-username="', '').replace('"', '');
+							}
+
+							const postedRegex = /<time class='js-timeago' datetime='.+'>.+<\/time>/gm;
+							const postedMatch = topicHtmlCode.match(postedRegex);
+
+							let posted = null;
+							if (postedMatch.length) {
+								posted = postedMatch[0].replace(/<\/time>/gm, '').replace(/<time class='js-timeago' datetime='.+'>/gm, '');
+								posted = new Date(posted);
+							}
+
+							const titleRegex = /<h1 class="forum-topic-title__title forum-topic-title__title--display">\n.+/gm;
+							const titleMatch = titleRegex.exec(topicHtmlCode);
+
+							let title = null;
+							let format = null;
+							let rankRange = null;
+							let gamemode = null;
+							if (titleMatch) {
+								title = titleMatch[0].replace('<h1 class="forum-topic-title__title forum-topic-title__title--display">\n', '').trim();
+
+								const formatRegex = /\dv\d/gm;
+								const formatMatch = title.match(formatRegex);
+
+								if (formatMatch) {
+									format = formatMatch[0];
+								}
+
+								const rankRangeRegex = /\d*[,.]?\d+k?\s?-\s?\d*k?∞?[,.]?\d*/gm;
+								const rankRangeMatch = title.toLowerCase().replace('infinity', '∞').replace(/#/gm, '').match(rankRangeRegex);
+
+								if (rankRangeMatch) {
+									rankRange = rankRangeMatch.join(' | ');
+								}
+
+								if (title.toLowerCase().includes('std')) {
+									gamemode = 'Standard';
+								} else if (title.toLowerCase().includes('taiko')) {
+									gamemode = 'Taiko';
+								} else if (title.toLowerCase().includes('ctb') || title.toLowerCase().includes('catch')) {
+									gamemode = 'Catch the Beat';
+								} else if (title.toLowerCase().includes('mania')) {
+									gamemode = 'Mania';
+								}
+							}
+
+							const bbCodeRegex = /<div class='bbcode'>.+/gm;
+							const bbCodeMatch = bbCodeRegex.exec(topicHtmlCode);
+
+							let body = null;
+							let discord = null;
+							if (bbCodeMatch) {
+								body = bbCodeMatch[0].replace('<div class=\'bbcode\'>', '').substring(0, bbCodeMatch[0].length - '</div>'.length);
+
+								const discordRegex = /https:\/\/discord\.gg\/\w+/gm;
+								let discordMatches = body.match(discordRegex);
+
+								if (discordMatches) {
+									discord = discordMatches[0];
+								}
+							}
+
+							await DBOsuForumPosts.create({
+								forumPost: uniqueTopics[i],
+								discord: discord,
+								host: host,
+								title: title,
+								format: format,
+								rankRange: rankRange,
+								gamemode: gamemode,
+								posted: posted,
+							});
+
+							const eliteronixUser = await client.users.fetch('138273136285057025');
+							eliteronixUser.send(`There is a new tournament post: ${uniqueTopics[i]}`);
+						});
+				}
+			});
 	}
 };
 
