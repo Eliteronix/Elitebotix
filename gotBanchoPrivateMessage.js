@@ -217,8 +217,7 @@ module.exports = async function (client, bancho, message) {
 			},
 		});
 
-		let beatmaps;
-		beatmaps = await DBOsuBeatmaps.findAll({
+		let beatmaps = await DBOsuBeatmaps.findAll({
 			where: {
 				mode: mode,
 				approvalStatus: {
@@ -398,6 +397,11 @@ module.exports = async function (client, bancho, message) {
 		}
 
 		message.user.sendMessage(tournamentOccurences);
+	} else if (message.message.toLowerCase().startsWith('!autohost')) {
+		let args = message.message.slice(9).trim().split(/ +/);
+
+		const command = require('./commands/osu-autohost.js');
+		command.execute(message, args, null, [client, bancho]);
 	}
 };
 
