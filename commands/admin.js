@@ -7242,13 +7242,13 @@ module.exports = {
 								{
 									'name': 'bws',
 									'description': 'Is the rank range bws',
-									'type': 3,
+									'type': 5, // 5 is type BOOLEAN
 									'required': false
 								},
 								{
 									'name': 'badged',
 									'description': 'Is the tourney going for badged',
-									'type': 3,
+									'type': 5, // 5 is type BOOLEAN
 									'required': false
 								},
 								{
