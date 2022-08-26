@@ -263,6 +263,9 @@ module.exports = {
 				}
 			}
 
+			forumPost.pinged = true;
+			await forumPost.save();
+
 			interaction.editReply(`Ping sent. (Pinged ${pingedUsers} users)`);
 
 		} else if (interaction.options._subcommand === 'update') {
