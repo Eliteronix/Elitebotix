@@ -207,16 +207,46 @@ module.exports = {
 
 		channel.on('message', async (msg) => {
 			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
-
+				await channel.sendMessage('!mp start 10');
 			} else if (msg.user._id == commandUser.osuUserId) {
-				console.log('Host');
+				//If it is the creator
+				if (msg.message === '!help') {
+					await channel.sendMessage('!abort - Aborts the currently playing map.');
+					await channel.sendMessage('!skip - Skips the currently selected map.');
+				} else if (msg.message === '!skip') {
+					let nextModPool = getNextModPool(true);
+					let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, commandUser);
+
+					while (lobby._beatmapId != beatmap.beatmapId) {
+						await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
+						await new Promise(resolve => setTimeout(resolve, 5000));
+					}
+
+					while (nextModPool === 'FM' && !lobby.freemod //There is no FreeMod combination otherwise
+						|| nextModPool === 'NM' && lobby.mods.length !== 0 //Only NM has only one mod
+						|| nextModPool === 'HD' && lobby.mods.length < 1
+						|| nextModPool === 'HD' && lobby.mods[0].shortMod !== 'hd'
+						|| nextModPool === 'HR' && lobby.mods.length < 1
+						|| nextModPool === 'HR' && lobby.mods[0].shortMod !== 'hr'
+						|| nextModPool === 'DT' && lobby.mods.length < 1
+						|| nextModPool === 'DT' && lobby.mods[0].shortMod !== 'dt'
+					) {
+						await channel.sendMessage(`!mp mods ${nextModPool}`);
+						await new Promise(resolve => setTimeout(resolve, 5000));
+					}
+
+					await channel.sendMessage('!mp timer 120');
+				} else if (msg.message === '!abort') {
+					await channel.sendMessage('!mp abort');
+					await new Promise(resolve => setTimeout(resolve, 5000));
+					await channel.sendMessage('!mp timer 120');
+				}
 			}
 		});
 
 		lobby.on('playerJoined', async (obj) => {
 			if (commandUser.osuUserId === obj.player.user.id.toString()) {
 				let nextModPool = getNextModPool(true);
-				console.log(nextModPool);
 				let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, commandUser);
 
 				while (lobby._beatmapId != beatmap.beatmapId) {
@@ -224,17 +254,50 @@ module.exports = {
 					await new Promise(resolve => setTimeout(resolve, 5000));
 				}
 
-				channel.sendMessage('!mp timer 120');
+				while (nextModPool === 'FM' && !lobby.freemod //There is no FreeMod combination otherwise
+					|| nextModPool === 'NM' && lobby.mods.length !== 0 //Only NM has only one mod
+					|| nextModPool === 'HD' && lobby.mods.length < 1
+					|| nextModPool === 'HD' && lobby.mods[0].shortMod !== 'hd'
+					|| nextModPool === 'HR' && lobby.mods.length < 1
+					|| nextModPool === 'HR' && lobby.mods[0].shortMod !== 'hr'
+					|| nextModPool === 'DT' && lobby.mods.length < 1
+					|| nextModPool === 'DT' && lobby.mods[0].shortMod !== 'dt'
+				) {
+					await channel.sendMessage(`!mp mods ${nextModPool}`);
+					await new Promise(resolve => setTimeout(resolve, 5000));
+				}
+
+				await channel.sendMessage('!mp timer 120');
 			}
 		});
 
 		lobby.on('allPlayersReady', async () => {
-			await lobby.updateSettings();
 			await channel.sendMessage('!mp start 5');
 		});
 
 		lobby.on('matchFinished', async () => {
+			let nextModPool = getNextModPool(true);
+			let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, commandUser);
 
+			while (lobby._beatmapId != beatmap.beatmapId) {
+				await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
+				await new Promise(resolve => setTimeout(resolve, 5000));
+			}
+
+			while (nextModPool === 'FM' && !lobby.freemod //There is no FreeMod combination otherwise
+				|| nextModPool === 'NM' && lobby.mods.length !== 0 //Only NM has only one mod
+				|| nextModPool === 'HD' && lobby.mods.length < 1
+				|| nextModPool === 'HD' && lobby.mods[0].shortMod !== 'hd'
+				|| nextModPool === 'HR' && lobby.mods.length < 1
+				|| nextModPool === 'HR' && lobby.mods[0].shortMod !== 'hr'
+				|| nextModPool === 'DT' && lobby.mods.length < 1
+				|| nextModPool === 'DT' && lobby.mods[0].shortMod !== 'dt'
+			) {
+				await channel.sendMessage(`!mp mods ${nextModPool}`);
+				await new Promise(resolve => setTimeout(resolve, 5000));
+			}
+
+			await channel.sendMessage('!mp timer 120');
 		});
 
 		function getNextModPool(remove) {
