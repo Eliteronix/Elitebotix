@@ -3525,7 +3525,9 @@ async function getDerankStatsFunction(discordUser) {
 		duelUsersLength: duelDiscordUsers.length,
 		expectedPpRank: expectedPpRank,
 		expectedPpRankPercentageDifference: expectedPpRankPercentageDifference,
-		expectedPpRankOsu: expectedPpRankOsu
+		expectedPpRankOsu: expectedPpRankOsu,
+		expectedDuelRating: duelDiscordUsers[duelRank - 1].osuDuelStarRating,
+		expectedCurrentDuelRating: duelDiscordUsers[ppRank - 1].osuDuelStarRating
 	};
 }
 
