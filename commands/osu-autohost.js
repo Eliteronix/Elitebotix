@@ -209,11 +209,23 @@ module.exports = {
 			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
 				await channel.sendMessage('!mp start 10');
 			} else if (msg.user._id == commandUser.osuUserId) {
+				let modUpdate = false;
 				//If it is the creator
 				if (msg.message === '!help') {
 					await channel.sendMessage('!abort - Aborts the currently playing map.');
+					await channel.sendMessage('!condition - Allows you to change the win condition. (Score/Scorev2/Accuracy)');
+					await channel.sendMessage('!password - Allows you to change the password.');
 					await channel.sendMessage('!skip - Skips the currently selected map.');
+					await channel.sendMessage('!timeout - Increases the timer to 5 minutes.');
+					await channel.sendMessage('!mods - Allows you to change the played mods. (Ex: "NM,HR,DT")');
+					await channel.sendMessage('!nm - Allows you to change the NM SR (Ex: "!nm 5.6")');
+					await channel.sendMessage('!hd - Allows you to change the HD SR (Ex: "!hd 5.6")');
+					await channel.sendMessage('!hr - Allows you to change the HR SR (Ex: "!hr 5.6")');
+					await channel.sendMessage('!dt - Allows you to change the DT SR (Ex: "!dt 5.6")');
+					await channel.sendMessage('!fm - Allows you to change the FM SR (Ex: "!fm 5.6")');
 				} else if (msg.message === '!skip') {
+					await channel.sendMessage('!mp aborttimer');
+					await channel.sendMessage('Looking for new map...');
 					let nextModPool = getNextModPool(true);
 					let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, commandUser);
 
@@ -223,14 +235,21 @@ module.exports = {
 					}
 
 					while (nextModPool === 'FM' && !lobby.freemod //There is no FreeMod combination otherwise
-						|| nextModPool === 'NM' && lobby.mods.length !== 0 //Only NM has only one mod
-						|| nextModPool === 'HD' && lobby.mods.length < 1
-						|| nextModPool === 'HD' && lobby.mods[0].shortMod !== 'hd'
-						|| nextModPool === 'HR' && lobby.mods.length < 1
-						|| nextModPool === 'HR' && lobby.mods[0].shortMod !== 'hr'
-						|| nextModPool === 'DT' && lobby.mods.length < 1
-						|| nextModPool === 'DT' && lobby.mods[0].shortMod !== 'dt'
+						|| nextModPool !== 'FM' && lobby.freemod
+						|| nextModPool !== 'NM' && nextModPool !== 'FM' && !lobby.mods
+						|| nextModPool === 'NM' && lobby.mods && lobby.mods.length //Only NM has only one mod
+						|| nextModPool === 'HD' && lobby.mods && lobby.mods.length < 1
+						|| nextModPool === 'HD' && lobby.mods && lobby.mods[0].shortMod !== 'hd'
+						|| nextModPool === 'HR' && lobby.mods && lobby.mods.length < 1
+						|| nextModPool === 'HR' && lobby.mods && lobby.mods[0].shortMod !== 'hr'
+						|| nextModPool === 'DT' && lobby.mods && lobby.mods.length < 1
+						|| nextModPool === 'DT' && lobby.mods && lobby.mods[0].shortMod !== 'dt'
 					) {
+						if (nextModPool === 'FM') {
+							await channel.sendMessage('!mp mods FreeMod');
+						} else {
+							await channel.sendMessage(`!mp mods ${nextModPool}`);
+						}
 						await channel.sendMessage(`!mp mods ${nextModPool}`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
 					}
@@ -240,6 +259,159 @@ module.exports = {
 					await channel.sendMessage('!mp abort');
 					await new Promise(resolve => setTimeout(resolve, 5000));
 					await channel.sendMessage('!mp timer 120');
+				} else if (msg.message === '!timeout') {
+					await channel.sendMessage('!mp timer 300');
+				} else if (msg.message.toLowerCase().startsWith('!mods')) {
+					let matchName = 'ETX Autohost';
+
+					//Get the mods that should be played
+					let mods = [];
+
+					if (msg.message.toLowerCase().includes('nm')) {
+						mods.push('NM');
+						matchName = matchName + ` | ${nmStarRating.toFixed(1)} NM`;
+					}
+					if (msg.message.toLowerCase().includes('hd')) {
+						mods.push('HD');
+						matchName = matchName + ` | ${hdStarRating.toFixed(1)} HD`;
+					}
+					if (msg.message.toLowerCase().includes('hr')) {
+						mods.push('HR');
+						matchName = matchName + ` | ${hrStarRating.toFixed(1)} HR`;
+					}
+					if (msg.message.toLowerCase().includes('dt')) {
+						mods.push('DT');
+						matchName = matchName + ` | ${dtStarRating.toFixed(1)} DT`;
+					}
+					if (msg.message.toLowerCase().includes('fm')) {
+						mods.push('FM');
+						matchName = matchName + ` | ${fmStarRating.toFixed(1)} FM`;
+					}
+
+					if (!mods.length) {
+						mods.push('NM');
+						matchName = matchName + ` | ${nmStarRating.toFixed(1)} NM`;
+
+						mods.push('HD');
+						matchName = matchName + ` | ${hdStarRating.toFixed(1)} HD`;
+
+						mods.push('HR');
+						matchName = matchName + ` | ${hrStarRating.toFixed(1)} HR`;
+
+						mods.push('DT');
+						matchName = matchName + ` | ${dtStarRating.toFixed(1)} DT`;
+
+						mods.push('FM');
+						matchName = matchName + ` | ${fmStarRating.toFixed(1)} FM`;
+					}
+
+					await channel.sendMessage(`!mp name ${matchName}`);
+					await channel.sendMessage('Adapted the played mods. The changes will take place next map. Use !skip to update now.');
+				} else if (msg.message.toLowerCase().startsWith('!nm')) {
+					let args = msg.message.slice(3).trim().split(/ +/);
+					if (!args.length) {
+						await channel.sendMessage('You didn\'t specify a star rating');
+					} else if (isNaN(parseFloat(args[0]))) {
+						await channel.sendMessage(`"${args[0]}" is not a valid star rating`);
+					} else if (parseFloat(args[0]) > 10 || parseFloat(args[0]) < 3.5) {
+						await channel.sendMessage('The star rating should not be higher than 10 or lower than 3.5');
+					} else {
+						nmStarRating = parseFloat(args[0]);
+						modUpdate = true;
+					}
+				} else if (msg.message.toLowerCase().startsWith('!hd')) {
+					let args = msg.message.slice(3).trim().split(/ +/);
+					if (!args.length) {
+						await channel.sendMessage('You didn\'t specify a star rating');
+					} else if (isNaN(parseFloat(args[0]))) {
+						await channel.sendMessage(`"${args[0]}" is not a valid star rating`);
+					} else if (parseFloat(args[0]) > 10 || parseFloat(args[0]) < 3.5) {
+						await channel.sendMessage('The star rating should not be higher than 10 or lower than 3.5');
+					} else {
+						hdStarRating = parseFloat(args[0]);
+						modUpdate = true;
+					}
+				} else if (msg.message.toLowerCase().startsWith('!hr')) {
+					let args = msg.message.slice(3).trim().split(/ +/);
+					if (!args.length) {
+						await channel.sendMessage('You didn\'t specify a star rating');
+					} else if (isNaN(parseFloat(args[0]))) {
+						await channel.sendMessage(`"${args[0]}" is not a valid star rating`);
+					} else if (parseFloat(args[0]) > 10 || parseFloat(args[0]) < 3.5) {
+						await channel.sendMessage('The star rating should not be higher than 10 or lower than 3.5');
+					} else {
+						hrStarRating = parseFloat(args[0]);
+						modUpdate = true;
+					}
+				} else if (msg.message.toLowerCase().startsWith('!dt')) {
+					let args = msg.message.slice(3).trim().split(/ +/);
+					if (!args.length) {
+						await channel.sendMessage('You didn\'t specify a star rating');
+					} else if (isNaN(parseFloat(args[0]))) {
+						await channel.sendMessage(`"${args[0]}" is not a valid star rating`);
+					} else if (parseFloat(args[0]) > 10 || parseFloat(args[0]) < 3.5) {
+						await channel.sendMessage('The star rating should not be higher than 10 or lower than 3.5');
+					} else {
+						dtStarRating = parseFloat(args[0]);
+						modUpdate = true;
+					}
+				} else if (msg.message.toLowerCase().startsWith('!fm')) {
+					let args = msg.message.slice(3).trim().split(/ +/);
+					if (!args.length) {
+						await channel.sendMessage('You didn\'t specify a star rating');
+					} else if (isNaN(parseFloat(args[0]))) {
+						await channel.sendMessage(`"${args[0]}" is not a valid star rating`);
+					} else if (parseFloat(args[0]) > 10 || parseFloat(args[0]) < 3.5) {
+						await channel.sendMessage('The star rating should not be higher than 10 or lower than 3.5');
+					} else {
+						fmStarRating = parseFloat(args[0]);
+						modUpdate = true;
+					}
+				} else if (msg.message.toLowerCase().startsWith('!password')) {
+					let args = msg.message.slice(9).trim().split(/ +/);
+
+					if (args[0]) {
+						lobby.setPassword(args[0]);
+						await channel.sendMessage(`Updated the password to ${args[0]}`);
+					} else {
+						await channel.sendMessage('You didn\'t specify a password');
+					}
+				} else if (msg.message.toLowerCase().startsWith('!condition')) {
+					let condition = '0';
+
+					if (msg.message.toLowerCase().includes('v2')) {
+						condition = '3';
+					} else if (msg.message.toLowerCase().includes('acc')) {
+						condition = '1';
+					}
+
+					await channel.sendMessage(`!mp set 0 ${condition}`);
+					await channel.sendMessage('The condition has been adapted.');
+				}
+
+				if (modUpdate) {
+					let matchName = 'ETX Autohost';
+
+					//Get the mods that should be played
+
+					if (mods.includes('NM')) {
+						matchName = matchName + ` | ${nmStarRating.toFixed(1)} NM`;
+					}
+					if (mods.includes('HD')) {
+						matchName = matchName + ` | ${hdStarRating.toFixed(1)} HD`;
+					}
+					if (mods.includes('HR')) {
+						matchName = matchName + ` | ${hrStarRating.toFixed(1)} HR`;
+					}
+					if (mods.includes('DT')) {
+						matchName = matchName + ` | ${dtStarRating.toFixed(1)} DT`;
+					}
+					if (mods.includes('FM')) {
+						matchName = matchName + ` | ${fmStarRating.toFixed(1)} FM`;
+					}
+
+					await channel.sendMessage(`!mp name ${matchName}`);
+					await channel.sendMessage('Adapted the star rating. The changes will take place next map. Use !skip to update now.');
 				}
 			}
 		});
@@ -255,14 +427,21 @@ module.exports = {
 				}
 
 				while (nextModPool === 'FM' && !lobby.freemod //There is no FreeMod combination otherwise
-					|| nextModPool === 'NM' && lobby.mods.length !== 0 //Only NM has only one mod
-					|| nextModPool === 'HD' && lobby.mods.length < 1
-					|| nextModPool === 'HD' && lobby.mods[0].shortMod !== 'hd'
-					|| nextModPool === 'HR' && lobby.mods.length < 1
-					|| nextModPool === 'HR' && lobby.mods[0].shortMod !== 'hr'
-					|| nextModPool === 'DT' && lobby.mods.length < 1
-					|| nextModPool === 'DT' && lobby.mods[0].shortMod !== 'dt'
+					|| nextModPool !== 'FM' && lobby.freemod
+					|| nextModPool !== 'NM' && nextModPool !== 'FM' && !lobby.mods
+					|| nextModPool === 'NM' && lobby.mods && lobby.mods.length //Only NM has only one mod
+					|| nextModPool === 'HD' && lobby.mods && lobby.mods.length < 1
+					|| nextModPool === 'HD' && lobby.mods && lobby.mods[0].shortMod !== 'hd'
+					|| nextModPool === 'HR' && lobby.mods && lobby.mods.length < 1
+					|| nextModPool === 'HR' && lobby.mods && lobby.mods[0].shortMod !== 'hr'
+					|| nextModPool === 'DT' && lobby.mods && lobby.mods.length < 1
+					|| nextModPool === 'DT' && lobby.mods && lobby.mods[0].shortMod !== 'dt'
 				) {
+					if (nextModPool === 'FM') {
+						await channel.sendMessage('!mp mods FreeMod');
+					} else {
+						await channel.sendMessage(`!mp mods ${nextModPool}`);
+					}
 					await channel.sendMessage(`!mp mods ${nextModPool}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
 				}
@@ -285,15 +464,21 @@ module.exports = {
 			}
 
 			while (nextModPool === 'FM' && !lobby.freemod //There is no FreeMod combination otherwise
-				|| nextModPool === 'NM' && lobby.mods.length !== 0 //Only NM has only one mod
-				|| nextModPool === 'HD' && lobby.mods.length < 1
-				|| nextModPool === 'HD' && lobby.mods[0].shortMod !== 'hd'
-				|| nextModPool === 'HR' && lobby.mods.length < 1
-				|| nextModPool === 'HR' && lobby.mods[0].shortMod !== 'hr'
-				|| nextModPool === 'DT' && lobby.mods.length < 1
-				|| nextModPool === 'DT' && lobby.mods[0].shortMod !== 'dt'
+				|| nextModPool !== 'FM' && lobby.freemod
+				|| nextModPool !== 'NM' && nextModPool !== 'FM' && !lobby.mods
+				|| nextModPool === 'NM' && lobby.mods && lobby.mods.length //Only NM has only one mod
+				|| nextModPool === 'HD' && lobby.mods && lobby.mods.length < 1
+				|| nextModPool === 'HD' && lobby.mods && lobby.mods[0].shortMod !== 'hd'
+				|| nextModPool === 'HR' && lobby.mods && lobby.mods.length < 1
+				|| nextModPool === 'HR' && lobby.mods && lobby.mods[0].shortMod !== 'hr'
+				|| nextModPool === 'DT' && lobby.mods && lobby.mods.length < 1
+				|| nextModPool === 'DT' && lobby.mods && lobby.mods[0].shortMod !== 'dt'
 			) {
-				await channel.sendMessage(`!mp mods ${nextModPool}`);
+				if (nextModPool === 'FM') {
+					await channel.sendMessage('!mp mods FreeMod');
+				} else {
+					await channel.sendMessage(`!mp mods ${nextModPool}`);
+				}
 				await new Promise(resolve => setTimeout(resolve, 5000));
 			}
 
@@ -409,8 +594,6 @@ async function getPoolBeatmap(modPool, nmStarRating, hdStarRating, hrStarRating,
 		});
 	}
 
-	console.log('got maps');
-
 	// loop through beatmaps until we find one that meets the criteria =>
 	// Tourney map with the correct mod
 	// Check if the beatmap is within the user's star rating and haven't been played before
@@ -427,21 +610,16 @@ async function getPoolBeatmap(modPool, nmStarRating, hdStarRating, hrStarRating,
 		} else if (modPool == 'FM') {
 			beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 0 });
 		}
-		console.log('Refreshed map');
 
 		if (!validSrRange(beatmaps[i], starRating, adaptHDStarRating)) {
 			beatmaps.splice(i, 1);
 			continue;
 		}
 
-		console.log('Valid SR');
-
 		if (beatmapPlayed(beatmaps[i], commandUser.osuUserId)) {
 			beatmaps.splice(i, 1);
 			continue;
 		}
-
-		console.log('Not played');
 
 		const mapScoreAmount = await DBOsuMultiScores.count({
 			where: {
@@ -461,8 +639,6 @@ async function getPoolBeatmap(modPool, nmStarRating, hdStarRating, hrStarRating,
 			beatmaps.splice(i, 1);
 			continue;
 		}
-
-		console.log('Returning', beatmaps[i]);
 
 		return beatmaps[i];
 	}
