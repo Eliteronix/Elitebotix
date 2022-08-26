@@ -36,7 +36,7 @@ module.exports = async function (client, bancho, interaction) {
 	}
 
 	//Check permissions of the user
-	if (command.permissions) {
+	if (command.permissions && interaction.guildId) {
 		const authorPerms = interaction.channel.permissionsFor(interaction.member);
 		if (!authorPerms || !authorPerms.has(command.permissions)) {
 			return interaction.reply({ content: `You need the ${command.permissionsTranslated} permission to do this!`, ephemeral: true });
