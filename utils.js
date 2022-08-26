@@ -3802,8 +3802,8 @@ async function getOsuBeatmapFunction(input) {
 					where: { beatmapId: beatmapId, mods: modBits }
 				});
 
-				//Date of reworked EZ and HR values
-				if (getModsFunction(modBits).includes('EZ') || getModsFunction(modBits).includes('HR')) {
+				//Date of reworked EZ values
+				if (getModsFunction(modBits).includes('EZ')) {
 					lastRework.setUTCFullYear(2022);
 					lastRework.setUTCMonth(2);
 					lastRework.setUTCDate(19);
@@ -3814,6 +3814,13 @@ async function getOsuBeatmapFunction(input) {
 					lastRework.setUTCFullYear(2022);
 					lastRework.setUTCMonth(7);
 					lastRework.setUTCDate(21);
+				}
+
+				//Date of reworked HR values
+				if (getModsFunction(modBits).includes('HR')) {
+					lastRework.setUTCFullYear(2022);
+					lastRework.setUTCMonth(7);
+					lastRework.setUTCDate(28);
 				}
 
 				if (!dbBeatmap
@@ -3894,6 +3901,11 @@ async function getOsuBeatmapFunction(input) {
 								ar = parseFloat(beatmaps[0].difficulty.approach) * 1.4;
 								od = parseFloat(beatmaps[0].difficulty.overall) * 1.4;
 								hpDrain = parseFloat(beatmaps[0].difficulty.drain) * 1.4;
+							}
+
+							//Limit AR to 10 if not DT or NC
+							if (ar > 10 && !getModsFunction(modBits).includes('DT') && !getModsFunction(modBits).includes('NC')) {
+								ar = 10;
 							}
 
 							//EZ
