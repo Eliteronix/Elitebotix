@@ -43,7 +43,7 @@ module.exports = {
 				return interaction.editReply('No tournament posts open to ping.');
 			}
 
-			interaction.editReply(`${forumPosts.length} tournament posts open to ping.`);
+			await interaction.editReply(`${forumPosts.length} tournament posts open to ping.`);
 
 			for (let i = 0; i < forumPosts.length; i++) {
 				let post = forumPosts[i];
@@ -90,6 +90,12 @@ module.exports = {
 					embed.addField('BWS', 'Yes');
 				} else {
 					embed.addField('BWS', 'No');
+				}
+
+				if (post.badged) {
+					embed.addField('Badged', 'Yes');
+				} else {
+					embed.addField('Badged', 'No');
 				}
 
 				if (post.posted) {
