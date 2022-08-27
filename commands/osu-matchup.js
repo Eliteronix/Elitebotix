@@ -586,6 +586,7 @@ module.exports = {
 			rounds.push({
 				mod: getScoreModpool(team1MapScores[0]),
 				winner: winner,
+				score: team1Score / team2Score,
 				matchId: matchId,
 				date: date,
 				dateReadable: dateReadable,
@@ -809,14 +810,23 @@ module.exports = {
 			let DTWinrates = [];
 			let FMWinrates = [];
 			let totalWinrates = [];
+
+			//Get cumulated scores out of rounds array for each label
+			let NMScores = [];
+			let HDScores = [];
+			let HRScores = [];
+			let DTScores = [];
+			let FMScores = [];
+			let totalScores = [];
+
 			for (let i = 0; i < labels.length; i++) {
-				//[Wins, Rounds played]
-				let NMRounds = [0, 0];
-				let HDRounds = [0, 0];
-				let HRRounds = [0, 0];
-				let DTRounds = [0, 0];
-				let FMRounds = [0, 0];
-				let totalRounds = [0, 0];
+				//[Wins, Rounds played, Score against opponent]
+				let NMRounds = [0, 0, 0];
+				let HDRounds = [0, 0, 0];
+				let HRRounds = [0, 0, 0];
+				let DTRounds = [0, 0, 0];
+				let FMRounds = [0, 0, 0];
+				let totalRounds = [0, 0, 0];
 
 				//Loop through all rounds
 				for (let j = 0; j < rounds.length; j++) {
@@ -824,6 +834,7 @@ module.exports = {
 					if (totalRounds[1] > 0 || rounds[j].dateReadable === labels[i]) {
 						//Increase total amounts
 						totalRounds[1]++;
+						totalRounds[2] += rounds[j].score;
 						if (rounds[j].winner === 0) {
 							totalRounds[0]++;
 						}
@@ -831,26 +842,31 @@ module.exports = {
 						//Increase amounts for the modPool
 						if (rounds[j].mod === 'NM') {
 							NMRounds[1]++;
+							NMRounds[2] += rounds[j].score;
 							if (rounds[j].winner === 0) {
 								NMRounds[0]++;
 							}
 						} else if (rounds[j].mod === 'HD') {
 							HDRounds[1]++;
+							HDRounds[2] += rounds[j].score;
 							if (rounds[j].winner === 0) {
 								HDRounds[0]++;
 							}
 						} else if (rounds[j].mod === 'HR') {
 							HRRounds[1]++;
+							HRRounds[2] += rounds[j].score;
 							if (rounds[j].winner === 0) {
 								HRRounds[0]++;
 							}
 						} else if (rounds[j].mod === 'DT') {
 							DTRounds[1]++;
+							DTRounds[2] += rounds[j].score;
 							if (rounds[j].winner === 0) {
 								DTRounds[0]++;
 							}
 						} else if (rounds[j].mod === 'FM') {
 							FMRounds[1]++;
+							FMRounds[2] += rounds[j].score;
 							if (rounds[j].winner === 0) {
 								FMRounds[0]++;
 							}
@@ -858,42 +874,60 @@ module.exports = {
 					}
 				}
 
-				//Calculate winrates
+				//Calculate winrates and scores
 				let NMWinrate = null;
+				let NMScore = null;
 				if (NMRounds[1] > 0) {
 					NMWinrate = (NMRounds[0] / NMRounds[1]) * 100;
+					NMScore = (NMRounds[2] / NMRounds[1]);
 				}
 				NMWinrates.push(NMWinrate);
+				NMScores.push(NMScore);
 
 				let HDWinrate = null;
+				let HDScore = null;
 				if (HDRounds[1] > 0) {
 					HDWinrate = (HDRounds[0] / HDRounds[1]) * 100;
+					HDScore = (HDRounds[2] / HDRounds[1]);
 				}
 				HDWinrates.push(HDWinrate);
+				HDScores.push(HDScore);
 
 				let HRWinrate = null;
+				let HRScore = null;
 				if (HRRounds[1] > 0) {
 					HRWinrate = (HRRounds[0] / HRRounds[1]) * 100;
+					HRScore = (HRRounds[2] / HRRounds[1]);
 				}
 				HRWinrates.push(HRWinrate);
+				HRScores.push(HRScore);
 
 				let DTWinrate = null;
+				let DTScore = null;
 				if (DTRounds[1] > 0) {
 					DTWinrate = (DTRounds[0] / DTRounds[1]) * 100;
+					DTScore = (DTRounds[2] / DTRounds[1]);
 				}
 				DTWinrates.push(DTWinrate);
+				DTScores.push(DTScore);
 
 				let FMWinrate = null;
+				let FMScore = null;
 				if (FMRounds[1] > 0) {
 					FMWinrate = (FMRounds[0] / FMRounds[1]) * 100;
+					FMScore = (FMRounds[2] / FMRounds[1]);
 				}
 				FMWinrates.push(FMWinrate);
+				FMScores.push(FMScore);
 
 				let totalWinrate = null;
+				let totalScore = null;
 				if (totalRounds[1] > 0) {
 					totalWinrate = (totalRounds[0] / totalRounds[1]) * 100;
+					totalScore = (totalRounds[2] / totalRounds[1]);
 				}
 				totalWinrates.push(totalWinrate);
+				totalScores.push(totalScore);
 			}
 
 			if (labels.length === 1) {
@@ -904,6 +938,12 @@ module.exports = {
 				HRWinrates.push(HRWinrates[0]);
 				DTWinrates.push(DTWinrates[0]);
 				FMWinrates.push(FMWinrates[0]);
+				totalScores.push(totalScores[0]);
+				NMScores.push(NMScores[0]);
+				HDScores.push(HDScores[0]);
+				HRScores.push(HRScores[0]);
+				DTScores.push(DTScores[0]);
+				FMScores.push(FMScores[0]);
 			}
 
 			const width = 1500; //px
@@ -1014,6 +1054,111 @@ module.exports = {
 			const matchupWinrateChart = new Discord.MessageAttachment(imageBuffer, `osu-matchup-${team1.join('-')}-vs-${team2.join('-')}.png`);
 
 			files.push(matchupWinrateChart);
+
+			const scoresData = {
+				labels: labels,
+				datasets: [
+					{
+						label: 'Cumulated Scores (All Mods)',
+						data: totalScores,
+						borderColor: 'rgb(201, 203, 207)',
+						fill: false,
+						tension: 0.4
+					}, {
+						label: 'Cumulated Scores (NM only)',
+						data: NMScores,
+						borderColor: 'rgb(54, 162, 235)',
+						fill: false,
+						tension: 0.4
+					}, {
+						label: 'Cumulated Scores (HD only)',
+						data: HDScores,
+						borderColor: 'rgb(255, 205, 86)',
+						fill: false,
+						tension: 0.4
+					}, {
+						label: 'Cumulated Scores (HR only)',
+						data: HRScores,
+						borderColor: 'rgb(255, 99, 132)',
+						fill: false,
+						tension: 0.4
+					}, {
+						label: 'Cumulated Scores (DT only)',
+						data: DTScores,
+						borderColor: 'rgb(153, 102, 255)',
+						fill: false,
+						tension: 0.4
+					}, {
+						label: 'Cumulated Scores (FM only)',
+						data: FMScores,
+						borderColor: 'rgb(75, 192, 192)',
+						fill: false,
+						tension: 0.4
+					}
+				]
+			};
+
+			const scoresConfiguration = {
+				type: 'line',
+				data: scoresData,
+				options: {
+					spanGaps: true,
+					responsive: true,
+					plugins: {
+						title: {
+							display: true,
+							text: 'Cumulated scores for indirect matchups',
+							color: '#FFFFFF',
+						},
+						legend: {
+							labels: {
+								color: '#FFFFFF',
+							}
+						},
+					},
+					interaction: {
+						intersect: false,
+					},
+					scales: {
+						x: {
+							display: true,
+							title: {
+								display: true,
+								text: 'Month',
+								color: '#FFFFFF'
+							},
+							grid: {
+								color: '#8F8F8F'
+							},
+							ticks: {
+								color: '#FFFFFF',
+							},
+						},
+						y: {
+							display: true,
+							title: {
+								display: true,
+								text: `Scores for ${team1Names.join(' | ')}`,
+								color: '#FFFFFF'
+							},
+							grid: {
+								color: '#8F8F8F'
+							},
+							ticks: {
+								color: '#FFFFFF',
+							},
+							suggestedMin: 0,
+							suggestedMax: 1
+						}
+					}
+				},
+			};
+
+			const scoresImageBuffer = await canvasRenderService.renderToBuffer(scoresConfiguration);
+
+			const scoresMatchupWinrateChart = new Discord.MessageAttachment(scoresImageBuffer, `osu-matchup-${team1.join('-')}-vs-${team2.join('-')}.png`);
+
+			files.push(scoresMatchupWinrateChart);
 
 			//Convert modpool arrays into strings
 			for (let i = 0; i < mapsPlayedReadable.length; i++) {
