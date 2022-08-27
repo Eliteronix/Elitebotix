@@ -265,7 +265,7 @@ module.exports = {
 					let matchName = 'ETX Autohost';
 
 					//Get the mods that should be played
-					let mods = [];
+					mods = [];
 
 					if (msg.message.toLowerCase().includes('nm')) {
 						mods.push('NM');
@@ -303,6 +303,12 @@ module.exports = {
 
 						mods.push('FM');
 						matchName = matchName + ` | ${fmStarRating.toFixed(1)} FM`;
+					}
+
+					currentPotentialMods = [];
+
+					for (let i = 0; i < 10; i++) {
+						getNextModPool();
 					}
 
 					await channel.sendMessage(`!mp name ${matchName}`);
