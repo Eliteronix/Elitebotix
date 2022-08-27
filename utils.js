@@ -1516,7 +1516,7 @@ module.exports = {
 			let beatmaps = null;
 
 			if (i === 6) {
-				console.log('Duel Match: Get all TB Beatmaps');
+				// console.log('Duel Match: Get all TB Beatmaps');
 				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps TB');
 				if (!thirdUser) {
 					beatmaps = await DBOsuBeatmaps.findAll({
@@ -1609,9 +1609,9 @@ module.exports = {
 						}
 					});
 				}
-				console.log('Duel Match: Grabbed all TB Beatmaps');
+				// console.log('Duel Match: Grabbed all TB Beatmaps');
 			} else if (modPools[i] === 'NM') {
-				console.log('Duel Match: Get all NM Beatmaps');
+				// console.log('Duel Match: Get all NM Beatmaps');
 				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps NM');
 				if (!thirdUser) {
 					beatmaps = await DBOsuBeatmaps.findAll({
@@ -1686,9 +1686,9 @@ module.exports = {
 						}
 					});
 				}
-				console.log('Duel Match: Grabbed all NM Beatmaps');
+				// console.log('Duel Match: Grabbed all NM Beatmaps');
 			} else if (modPools[i] === 'HD') {
-				console.log('Duel Match: Get all HD Beatmaps');
+				// console.log('Duel Match: Get all HD Beatmaps');
 				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps HD');
 				let HDLowerBound = lowerBound - 0.8;
 				let HDUpperBound = upperBound - 0.15;
@@ -1765,9 +1765,9 @@ module.exports = {
 						}
 					});
 				}
-				console.log('Duel Match: Grabbed all HD Beatmaps');
+				// console.log('Duel Match: Grabbed all HD Beatmaps');
 			} else if (modPools[i] === 'HR') {
-				console.log('Duel Match: Get all HR Beatmaps');
+				// console.log('Duel Match: Get all HR Beatmaps');
 				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps HR');
 				if (!thirdUser) {
 					beatmaps = await DBOsuBeatmaps.findAll({
@@ -1842,9 +1842,9 @@ module.exports = {
 						}
 					});
 				}
-				console.log('Duel Match: Grabbed all HR Beatmaps');
+				// console.log('Duel Match: Grabbed all HR Beatmaps');
 			} else if (modPools[i] === 'DT') {
-				console.log('Duel Match: Get all DT Beatmaps');
+				// console.log('Duel Match: Get all DT Beatmaps');
 				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps DT');
 				if (!thirdUser) {
 					beatmaps = await DBOsuBeatmaps.findAll({
@@ -1919,9 +1919,9 @@ module.exports = {
 						}
 					});
 				}
-				console.log('Duel Match: Grabbed all DT Beatmaps');
+				// console.log('Duel Match: Grabbed all DT Beatmaps');
 			} else if (modPools[i] === 'FM') {
-				console.log('Duel Match: Get all FM Beatmaps');
+				// console.log('Duel Match: Get all FM Beatmaps');
 				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps FM');
 				if (!thirdUser) {
 					beatmaps = await DBOsuBeatmaps.findAll({
@@ -1996,7 +1996,7 @@ module.exports = {
 						}
 					});
 				}
-				console.log('Duel Match: Grabbed all FM Beatmaps');
+				// console.log('Duel Match: Grabbed all FM Beatmaps');
 			}
 
 			if (interaction) {
@@ -2011,7 +2011,7 @@ module.exports = {
 				const index = Math.floor(Math.random() * beatmaps.length);
 
 				if (!beatmaps.length) {
-					console.log('Duel Match: No more maps left to choose from');
+					// console.log('Duel Match: No more maps left to choose from');
 					if (!thirdUser) {
 						if (interaction) {
 							return await interaction.editReply(`<@${firstUser.userId}>, <@${secondUser.userId}> the bot could not find enough viable maps with this criteria. (SR: ${Math.round(averageStarRating * 100) / 100}*)`);
@@ -2029,49 +2029,49 @@ module.exports = {
 
 				if (!beatmaps[index]) {
 					beatmaps.splice(index, 1);
-					console.log('Duel Match: Beatmap was null, removed from array');
+					// console.log('Duel Match: Beatmap was null, removed from array');
 					continue;
 				}
 
 				if (parseInt(beatmaps[index].drainLength) < 100 || parseInt(beatmaps[index].drainLength) > 405) {
 					beatmaps.splice(index, 1);
-					console.log('Duel Match: Beatmap drain length was out of bounds, removed from array');
+					// console.log('Duel Match: Beatmap drain length was out of bounds, removed from array');
 					continue;
 				}
 
 				if (modPools[i] === 'HD') {
-					console.log('Duel Match: Refresh the HD Beatmap');
+					// console.log('Duel Match: Refresh the HD Beatmap');
 					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
 
 					if (!beatmaps[index]) {
 						beatmaps.splice(index, 1);
-						console.log('Duel Match: Beatmap was null, removed from array');
+						// console.log('Duel Match: Beatmap was null, removed from array');
 						continue;
 					}
 
 					beatmaps[index].starRating = adjustHDStarRatingFunction(beatmaps[index].starRating, beatmaps[index].approachRate);
-					console.log('Duel Match: Refreshed the HD Beatmap');
+					// console.log('Duel Match: Refreshed the HD Beatmap');
 				} else if (modPools[i] === 'HR') {
-					console.log('Duel Match: Refresh the HR Beatmap');
+					// console.log('Duel Match: Refresh the HR Beatmap');
 					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 16 });
-					console.log('Duel Match: Refreshed the HR Beatmap');
+					// console.log('Duel Match: Refreshed the HR Beatmap');
 				} else if (modPools[i] === 'DT') {
-					console.log('Duel Match: Refresh the DT Beatmap');
+					// console.log('Duel Match: Refresh the DT Beatmap');
 					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 64 });
-					console.log('Duel Match: Refreshed the DT Beatmap');
+					// console.log('Duel Match: Refreshed the DT Beatmap');
 				} else {
-					console.log('Duel Match: Refresh the NM/FM Beatmap');
+					// console.log('Duel Match: Refresh the NM/FM Beatmap');
 					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
-					console.log('Duel Match: Refreshed the NM/FM Beatmap');
+					// console.log('Duel Match: Refreshed the NM/FM Beatmap');
 				}
 
 				if (!beatmaps[index] || onlyRanked && beatmaps[index].approvalStatus !== 'Ranked') {
 					beatmaps.splice(index, 1);
-					console.log('Beatmap was null or not ranked, removing from pool');
+					// console.log('Beatmap was null or not ranked, removing from pool');
 					continue;
 				}
 
-				console.log('Duel Match: Get beatmap score count');
+				// console.log('Duel Match: Get beatmap score count');
 				const mapScoreAmount = await DBOsuMultiScores.count({
 					where: {
 						beatmapId: beatmaps[index].beatmapId,
@@ -2084,17 +2084,17 @@ module.exports = {
 						],
 					}
 				});
-				console.log('Duel Match: Grabbed beatmap score count');
+				// console.log('Duel Match: Grabbed beatmap score count');
 
 				// eslint-disable-next-line no-undef
 				if (!beatmaps[index] || parseFloat(beatmaps[index].starRating) < lowerBound || parseFloat(beatmaps[index].starRating) > upperBound || mapScoreAmount < 25 && process.env.SERVER !== 'Dev') {
 					beatmaps.splice(index, 1);
-					console.log('Beatmap was null, lower bound, or upper bound, or score count was less than 25, removing from pool');
+					// console.log('Beatmap was null, lower bound, or upper bound, or score count was less than 25, removing from pool');
 				} else if (!dbMapIds.includes(beatmaps[index].beatmapsetId)) {
 					dbBeatmap = beatmaps[index];
 					dbMapIds.push(beatmaps[index].beatmapsetId);
 					dbMaps.push(beatmaps[index]);
-					console.log('Duel Match: Beatmap is valid, adding to pool');
+					// console.log('Duel Match: Beatmap is valid, adding to pool');
 				}
 			}
 		}
@@ -2119,21 +2119,21 @@ module.exports = {
 		for (let i = 0; i < 5; i++) {
 			try {
 				try {
-					console.log('Duel Match: Connecting to Bancho');
+					// console.log('Duel Match: Connecting to Bancho');
 					await bancho.connect();
 				} catch (error) {
-					console.log(`Duel Match: Error connecting to Bancho: ${error}`);
+					// console.log(`Duel Match: Error connecting to Bancho: ${error}`);
 					if (!error.message === 'Already connected/connecting') {
 						throw (error);
 					}
 				}
-				console.log('Duel Match: Creating match');
+				// console.log('Duel Match: Creating match');
 				if (!thirdUser) {
 					channel = await bancho.createLobby(`ETX: (${teamname1}) vs (${teamname2})`);
 				} else {
 					channel = await bancho.createLobby(`ETX Teams: (${teamname1}) vs (${teamname2})`);
 				}
-				console.log('Duel Match: Created match');
+				// console.log('Duel Match: Created match');
 				break;
 			} catch (error) {
 				if (i === 4) {
@@ -2302,9 +2302,7 @@ module.exports = {
 					if (results[i].player.mods) {
 						for (let j = 0; j < results[i].player.mods.length; j++) {
 							if (results[i].player.mods[j].enumValue === 2) {
-								console.log(results[i].score);
 								results[i].score = results[i].score * 1.7;
-								console.log(results[i].score);
 							}
 						}
 					}
