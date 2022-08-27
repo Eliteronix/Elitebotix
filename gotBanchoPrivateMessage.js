@@ -173,11 +173,11 @@ module.exports = async function (client, bancho, message) {
 				mod = 'HD';
 				args.splice(i, 1);
 				i--;
-			} else if (args[i].toLowerCase() == ('hardrock') || args[i] == ('hr')) {
+			} else if (args[i].toLowerCase() == ('hardrock') || args[i].toLowerCase() == ('hr')) {
 				mod = 'HR';
 				args.splice(i, 1);
 				i--;
-			} else if (args[i].toLowerCase() == ('doubletime') || args[i] == ('dt')) {
+			} else if (args[i].toLowerCase() == ('doubletime') || args[i].toLowerCase() == ('dt')) {
 				mod = 'DT';
 				args.splice(i, 1);
 				i--;
