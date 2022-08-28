@@ -50,7 +50,7 @@ module.exports = async function (oldRole, newRole) {
 				{ name: 'Role Updated', value: `<@&${newRole.id}>` },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: roleupdate');
+			.setFooter({ text: 'Eventname: roleupdate' });
 
 		if (oldRole.name !== newRole.name) {
 			changeEmbed.addField('Name', `\`${oldRole.name}\` -> \`${newRole.name}\``);

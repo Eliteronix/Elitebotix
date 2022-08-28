@@ -43,7 +43,7 @@ module.exports = async function (invite) {
 				{ name: 'Max Uses', value: invite.maxUses },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: invitecreate');
+			.setFooter({ text: 'Eventname: invitecreate' });
 
 		channel.send({ embeds: [changeEmbed] });
 	}

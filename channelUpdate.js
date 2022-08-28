@@ -42,7 +42,7 @@ module.exports = async function (oldChannel, newChannel) {
 				{ name: 'Channel Updated', value: `<#${newChannel.id}>` },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: channelupdate');
+			.setFooter({ text: 'Eventname: channelupdate' });
 
 		if (oldChannel.name !== newChannel.name) {
 			changeEmbed.addField('Name', `\`${oldChannel.name}\` -> \`${newChannel.name}\``);

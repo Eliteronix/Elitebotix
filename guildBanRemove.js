@@ -41,7 +41,7 @@ module.exports = async function (guildBan) {
 				{ name: 'Unbanned from the server', value: `<@${guildBan.user.id}>` },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: banremove');
+			.setFooter({ text: 'Eventname: banremove' });
 
 		channel.send({ embeds: [changeEmbed] });
 	}

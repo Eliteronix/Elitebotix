@@ -44,7 +44,7 @@ module.exports = async function (channel) {
 				{ name: 'Name', value: channel.name },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: channelcreate');
+			.setFooter({ text: 'Eventname: channelcreate' });
 
 		if (channel.type === 'voice') {
 			changeEmbed.addField('Bitrate', channel.bitrate);

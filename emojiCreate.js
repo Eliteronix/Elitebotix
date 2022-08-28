@@ -40,7 +40,7 @@ module.exports = async function (emoji) {
 				{ name: 'Animated', value: emoji.animated },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: emojicreate');
+			.setFooter({ text: 'Eventname: emojicreate' });
 
 		channel.send({ embeds: [changeEmbed] });
 	}

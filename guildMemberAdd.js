@@ -63,7 +63,7 @@ module.exports = async function (member) {
 					{ name: 'Joined the server', value: `<@${member.user.id}>` },
 				)
 				.setTimestamp()
-				.setFooter('Eventname: userjoining');
+				.setFooter({ text: 'Eventname: userjoining' });
 
 			channel.send({ embeds: [changeEmbed] });
 		}

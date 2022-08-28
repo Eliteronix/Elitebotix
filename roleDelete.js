@@ -50,7 +50,7 @@ module.exports = async function (role) {
 				{ name: 'Permissions', value: permissionsReadable },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: roledelete');
+			.setFooter({ text: 'Eventname: roledelete' });
 
 		channel.send({ embeds: [changeEmbed] });
 	}

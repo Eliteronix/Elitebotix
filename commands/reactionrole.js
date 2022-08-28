@@ -65,7 +65,7 @@ module.exports = {
 					const reactionRoleEmbed = new Discord.MessageEmbed()
 						.setColor('#0099ff')
 						.setTitle(embedName)
-						.setFooter(`Reactionrole - EmbedId: ${embedId}`);
+						.setFooter({ text: `Reactionrole - EmbedId: ${embedId}` });
 
 					if (!msg.id) {
 						interaction.editReply({ content: 'Embed will be created', ephemeral: true });
@@ -483,7 +483,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		.setColor(reactionRolesHeader.reactionColor)
 		.setTitle(reactionRolesHeader.reactionTitle)
 		.setThumbnail(reactionRolesHeader.reactionImage)
-		.setFooter(`Reactionrole - EmbedId: ${reactionRolesHeader.id}`);
+		.setFooter({ text: `Reactionrole - EmbedId: ${reactionRolesHeader.id}` });
 
 	//Set description if available
 	if (reactionRolesHeader.reactionDescription) {

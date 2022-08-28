@@ -51,7 +51,7 @@ module.exports = async function (msg) {
 				{ name: 'Content', value: content },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: messagedelete');
+			.setFooter({ text: 'Eventname: messagedelete' });
 
 		if (msg.attachments.array().length > 0) {
 			msg.attachments.forEach(attachment => {

@@ -55,7 +55,7 @@ async function sendUserEmbed(msg, interaction, user) {
 	if (discordUser && discordUser.patreon) {
 		customEmoji = '<:patreon:959660462222503937> ';
 	}
-	
+
 	if (developers.includes(user.id)) {
 		customEmoji = '<:devLogo:960689809419010090> ';
 	}
@@ -137,7 +137,7 @@ async function sendUserEmbed(msg, interaction, user) {
 					minute: 'numeric',
 				})}`
 			}
-		).setFooter(`Created by ${msg.client.user.username}`, `${msg.client.user.displayAvatarURL({ format: 'png', dynamic: true })}`);
+		).setFooter({ text: `Created by ${msg.client.user.username}`, iconURL: `${msg.client.user.displayAvatarURL({ format: 'png', dynamic: true })}` });
 		// add field which shows when the user joined the server
 		if (member.joinedAt) {
 			userInfoEmbed.addFields(
@@ -168,7 +168,7 @@ async function sendUserEmbed(msg, interaction, user) {
 		const osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
 		if (discordUser.osuVerified) {
 			userInfoEmbed.addFields(
-			// link to osu profile page
+				// link to osu profile page
 				{ name: 'osu! Account', value: `☑️ [${osuUser.name}](https://osu.ppy.sh/users/${discordUser.osuUserId})` }
 			);
 		} else {

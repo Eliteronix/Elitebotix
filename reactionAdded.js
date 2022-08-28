@@ -1028,7 +1028,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		.setColor(reactionRolesHeader.reactionColor)
 		.setTitle(reactionRolesHeader.reactionTitle)
 		.setThumbnail(reactionRolesHeader.reactionImage)
-		.setFooter(`Reactionrole - EmbedId: ${reactionRolesHeader.id}`);
+		.setFooter({ text: `Reactionrole - EmbedId: ${reactionRolesHeader.id}` });
 
 	//Set description if available
 	if (reactionRolesHeader.reactionDescription) {
