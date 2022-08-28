@@ -45,7 +45,7 @@ module.exports = async function (oldMsg, newMsg) {
 				{ name: 'Author', value: `<@${newMsg.author.id}>` },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: messageupdate');
+			.setFooter({ text: 'Eventname: messageupdate' });
 
 		if (oldMsg.content !== newMsg.content) {
 			changeEmbed.addField('Content', `\`${oldMsg.content}\` -> \`${newMsg.content}\``);

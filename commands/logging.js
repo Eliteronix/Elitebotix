@@ -210,7 +210,7 @@ module.exports = {
 					{ name: 'messagedelete', value: messagedelete, inline: true },
 				)
 				.setTimestamp()
-				.setFooter(`To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\``);
+				.setFooter({ text: `To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\`` });
 
 			if (msg.id) {
 				msg.reply({ embeds: [loggingEmbed] });
@@ -227,7 +227,7 @@ module.exports = {
 					{ name: 'emojidelete', value: emojidelete, inline: true },
 				)
 				.setTimestamp()
-				.setFooter(`To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\``);
+				.setFooter({ text: `To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\`` });
 
 			if (msg.id) {
 				msg.reply({ embeds: [loggingEmbed2] });

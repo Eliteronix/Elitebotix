@@ -1331,7 +1331,7 @@ module.exports = {
 			const issueEmbed = new Discord.MessageEmbed()
 				.setColor(color)
 				.setTitle(issues[i].fields.summary)
-				.setFooter(`Last updated: ${issues[i].fields.updated}`);
+				.setFooter({ text: `Last updated: ${issues[i].fields.updated}` });
 
 			if (issues[i].fields.assignee) {
 				issueEmbed.setAuthor({ name: `Assigned to: ${issues[i].fields.assignee.displayName}`, iconURL: issues[i].fields.assignee.avatarUrls['48x48'] });

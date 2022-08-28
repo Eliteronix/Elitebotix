@@ -131,7 +131,7 @@ module.exports = {
 			}
 
 			if (msg.channel.type !== 'DM') {
-				submissionsEmbed.setFooter(`This embed will automatically get deleted in 30 seconds to avoid leaking maps.\nYou can use '${guildPrefix}${this.name} list' in my DMs to send the embed without a timer.`);
+				submissionsEmbed.setFooter({ text: `This embed will automatically get deleted in 30 seconds to avoid leaking maps.\nYou can use '${guildPrefix}${this.name} list' in my DMs to send the embed without a timer.` });
 			}
 
 			if (msg.id) {
@@ -214,7 +214,7 @@ module.exports = {
 					.setColor('#00FF00')
 					.setTitle(`You have submitted the beatmap for the tournament (${bracket} bracket)`)
 					.setDescription(`To look at your submitted maps use \`${guildPrefix}${this.name} list\``)
-					.setFooter(`ID: ${beatmaps[0].id}; Checked by ${msg.author.username}#${msg.author.discriminator}`);
+					.setFooter({ text: `ID: ${beatmaps[0].id}; Checked by ${msg.author.username}#${msg.author.discriminator}` });
 
 				if (existingMap) {
 					viabilityEmbed

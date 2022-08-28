@@ -51,7 +51,7 @@ module.exports = async function (oldMember, newMember) {
 					{ name: 'Server Mute', value: `\`${oldMember.serverMute}\` -> \`${newMember.serverMute}\`` },
 				)
 				.setTimestamp()
-				.setFooter('Eventname: servermute');
+				.setFooter({ text: 'Eventname: servermute' });
 
 			channel.send({ embeds: [changeEmbed] });
 		}
@@ -97,7 +97,7 @@ module.exports = async function (oldMember, newMember) {
 					{ name: 'Server Deaf', value: `\`${oldMember.serverDeaf}\` -> \`${newMember.serverDeaf}\`` },
 				)
 				.setTimestamp()
-				.setFooter('Eventname: serverdeaf');
+				.setFooter({ text: 'Eventname: serverdeaf' });
 
 			channel.send({ embeds: [changeEmbed] });
 		}
@@ -143,7 +143,7 @@ module.exports = async function (oldMember, newMember) {
 					{ name: 'Joined Voice Channel', value: `<#${newMember.channelId}>` },
 				)
 				.setTimestamp()
-				.setFooter('Eventname: joinvoice');
+				.setFooter({ text: 'Eventname: joinvoice' });
 
 			channel.send({ embeds: [changeEmbed] });
 		}
@@ -182,7 +182,7 @@ module.exports = async function (oldMember, newMember) {
 					{ name: 'Left Voice Channel', value: `<#${oldMember.channelId}>` },
 				)
 				.setTimestamp()
-				.setFooter('Eventname: leavevoice');
+				.setFooter({ text: 'Eventname: leavevoice' });
 
 			channel.send({ embeds: [changeEmbed] });
 		}

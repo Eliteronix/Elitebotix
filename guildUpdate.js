@@ -41,7 +41,7 @@ module.exports = async function (oldGuild, newGuild) {
 				{ name: 'The server has been updated', value: newGuild.name },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: guildupdate');
+			.setFooter({ text: 'Eventname: guildupdate' });
 
 		if (oldGuild.name !== newGuild.name) {
 			changeEmbed.addField('Name', `\`${oldGuild.name}\` -> \`${newGuild.name}\``);

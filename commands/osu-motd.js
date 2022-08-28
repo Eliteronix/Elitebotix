@@ -712,7 +712,7 @@ module.exports = {
 			const mappoolEmbed = new Discord.MessageEmbed()
 				.setColor('#C45686')
 				.setTitle('Custom MOTD settings')
-				.setFooter(`Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`);
+				.setFooter({ text: `Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}` });
 
 			for (let i = 0; i < players.length; i++) {
 				mappoolEmbed.addField(`Player #${i + 1}`, `${players[i].name} | #${players[i].pp.rank}`, true);
@@ -1030,7 +1030,7 @@ module.exports = {
 				.setColor('#C45686')
 				.setTitle('Custom MOTD settings')
 				.setDescription('Sign up by reacting with ✅ in the next 2 minutes')
-				.setFooter(`Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`);
+				.setFooter({ text: `Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}` });
 
 			for (let i = 1; i < mappoolInOrder.length; i++) {
 				let mapPrefix = '';
@@ -1072,7 +1072,7 @@ module.exports = {
 						.setColor('#C45686')
 						.setTitle('Custom MOTD settings')
 						.setDescription('Sign up by reacting with ✅ in the next 2 minutes')
-						.setFooter(`Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`);
+						.setFooter({ text: `Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}` });
 
 					for (let i = 0; i < discordUsers.length; i++) {
 						mappoolEmbed.addField(`Player #${i + 1}`, `${discordUsers[i].osuName} | #${discordUsers[i].osuRank}`, true);
@@ -1109,7 +1109,7 @@ module.exports = {
 				const mappoolEmbed = new Discord.MessageEmbed()
 					.setColor('#C45686')
 					.setTitle('Custom MOTD settings [In Progress]')
-					.setFooter(`Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`);
+					.setFooter({ text: `Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}` });
 
 				for (let i = 0; i < discordUsers.length; i++) {
 					mappoolEmbed.addField(`Player #${i + 1}`, `${discordUsers[i].osuName} | #${discordUsers[i].osuRank}`, true);

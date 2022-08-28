@@ -52,7 +52,7 @@ module.exports = async function (oldMember, newMember) {
 					{ name: 'Nickname', value: `\`${oldUserDisplayName}\` -> \`${newUserDisplayName}\`` },
 				)
 				.setTimestamp()
-				.setFooter('Eventname: nicknames');
+				.setFooter({ text: 'Eventname: nicknames' });
 
 			channel.send({ embeds: [changeEmbed] });
 		}
@@ -114,7 +114,7 @@ module.exports = async function (oldMember, newMember) {
 				.setDescription(`<@${newMember.user.id}> roles have changed!`)
 				.setThumbnail(newMember.user.displayAvatarURL())
 				.setTimestamp()
-				.setFooter('Eventname: userroles');
+				.setFooter({ text: 'Eventname: userroles' });
 
 			if (removedRoles) {
 				changeEmbed.addFields(
