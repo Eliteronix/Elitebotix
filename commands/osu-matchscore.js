@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getGuildPrefix, createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { getGuildPrefix, createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, populateMsgFromInteraction, logDatabaseQueries, getMods } = require('../utils');
 const { DBDiscordUsers } = require('../dbObjects');
 const { Permissions } = require('discord.js');
 
@@ -83,12 +83,23 @@ module.exports = {
 					warmupsReason = `${warmups} warmups were specified.`;
 				}
 
+
+				//Remove warmups from the list
 				for (let i = 0; i < match.games.length && i < warmups; i++) {
 					match.games.splice(0, 1);
 				}
 
+				//Remove last game if specified
+				let skiplastReason = '';
+				if (skiplast) {
+					for (let i = 0; i < skiplast && match.games.length > 0; i++) {
+						match.games.splice(match.games.length - 1, 1);
+					}
+					skiplastReason = `Removed the last ${skiplast} maps.\n`;
+				}
+
 				if (match.games.length === 0) {
-					return msg.channel.send(`${warmupsReason}\nThere seems to be no maps left after removing the warmups.`);
+					return msg.channel.send(`${warmupsReason}\n${skiplastReason}There seems to be no maps left after removing the warmups.`);
 				}
 
 				let playerMatchResults = [];
@@ -97,6 +108,14 @@ module.exports = {
 					let gameScores = match.games[i].scores;
 
 					if (gameScores.length > 1) {
+						//Apply ez multiplier if necessary
+						for (let i = 0; i < gameScores.length; i++) {
+							//Only individual mods have to be checked because the matchscore is relative anyway so it won't matter if everyone plays ez or not
+							if (getMods(gameScores[i].raw_mods).includes('EZ')) {
+								gameScores[i].score *= ezmultiplier;
+							}
+						}
+
 						quicksort(gameScores);
 
 						for (let j = 0; j < gameScores.length; j++) {
@@ -142,7 +161,7 @@ module.exports = {
 					}
 				}
 
-				let valueType = 'accumulated';
+				let valueType = 'summed';
 				let valueHint = 'Players were judged across the whole match making players that play more often more valuable. (Favors all-rounders)';
 
 				if (calculation === 'avg') {
@@ -154,11 +173,13 @@ module.exports = {
 					valueHint = 'Players were judged across only the maps they played making players that play less often more valuable. (Favors niche players)';
 				} else if (calculation === 'mixed') {
 					for (let i = 0; i < playerMatchResults.length; i++) {
-						playerMatchResults[i].score = playerMatchResults[i].score / playerMatchResults[i].playedRounds * 0.75;
+						playerMatchResults[i].score = playerMatchResults[i].score / playerMatchResults[i].playedRounds;
+
+						playerMatchResults[i].score = playerMatchResults[i].score * (0.8 + 0.2 * playerMatchResults[i].playedRounds);
 					}
 
 					valueType = 'mixed';
-					valueHint = 'Players were judged across the whole match making players that play more often more valuable.';
+					valueHint = 'Players were judged across the whole match making players that play more often more valuable. (Middle ground between all-rounders and niche players)';
 				}
 
 				if (playerMatchResults.length === 0) {
@@ -212,7 +233,7 @@ module.exports = {
 				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${match.name}`, `osu-match-${match.name}.png`);
 
 				//Send attachment
-				await msg.channel.send({ content: `The leaderboard shows the evaluation of the players that participated in the match.\n${warmupsReason}\n${valueHint}\n<https://osu.ppy.sh/community/matches/${match.id}>`, files: [attachment] });
+				await msg.channel.send({ content: `The leaderboard shows the evaluation of the players that participated in the match.\n${warmupsReason}\n${skiplastReason}${valueHint}\n<https://osu.ppy.sh/community/matches/${match.id}>`, files: [attachment] });
 				processingMessage.delete();
 			})
 			.catch(err => {
