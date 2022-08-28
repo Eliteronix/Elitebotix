@@ -99,7 +99,7 @@ module.exports = {
 				}
 
 				if (post.posted) {
-					embed.setFooter(`Posted: ${post.posted.getUTCDate()}.${post.posted.getUTCMonth()}.${post.posted.getUTCFullYear()} by ${post.host}`);
+					embed.setFooter(`Posted: ${post.posted.getUTCDate()}.${post.posted.getUTCMonth() + 1}.${post.posted.getUTCFullYear()} by ${post.host}`);
 				}
 
 				interaction.followUp({ embeds: [embed] });
@@ -164,7 +164,7 @@ module.exports = {
 			}
 
 			if (forumPost.posted) {
-				embed.setFooter(`Posted: ${forumPost.posted.getUTCDate()}.${forumPost.posted.getUTCMonth()}.${forumPost.posted.getUTCFullYear()} by ${forumPost.host}`);
+				embed.setFooter(`Posted: ${forumPost.posted.getUTCDate()}.${forumPost.posted.getUTCMonth() + 1}.${forumPost.posted.getUTCFullYear()} by ${forumPost.host}`);
 			}
 
 			// eslint-disable-next-line no-undef
@@ -419,7 +419,7 @@ module.exports = {
 			}
 
 			if (forumPost.posted) {
-				embed.setFooter(`Posted: ${forumPost.posted.getUTCDate()}.${forumPost.posted.getUTCMonth()}.${forumPost.posted.getUTCFullYear()} by ${forumPost.host}`);
+				embed.setFooter(`Posted: ${forumPost.posted.getUTCDate()}.${forumPost.posted.getUTCMonth() + 1}.${forumPost.posted.getUTCFullYear()} by ${forumPost.host}`);
 			}
 
 			interaction.editReply({ embeds: [embed] });
