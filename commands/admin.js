@@ -1124,30 +1124,54 @@ module.exports = {
 			// });
 
 
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'osu-matchscore',
-			// 		description: 'Sends an evaluation of how valuable all the players in the match were',
-			// 		options: [
-			// 			{
-			// 				'name': 'match',
-			// 				'description': 'Match ID or link',
-			// 				'type': 3,
-			// 				'required': true
-			// 			},
-			// 			{
-			// 				'name': 'warmups',
-			// 				'description': 'The amount of warmups played',
-			// 				'type': 4,
-			// 			},
-			// 			{
-			// 				'name': 'average',
-			// 				'description': 'True means unplayed maps will be ignored',
-			// 				'type': 5,
-			// 			},
-			// 		]
-			// 	}
-			// });
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'osu-matchscore',
+					description: 'Sends an evaluation of how valuable all the players in the match were',
+					options: [
+						{
+							'name': 'match',
+							'description': 'Match ID or link',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'warmups',
+							'description': 'The amount of warmups played',
+							'type': 4,
+						},
+						{
+							'name': 'calculation',
+							'description': 'How the matchscore should be calculated',
+							'type': 3,
+							'choices': [
+								{
+									'name': 'Mixed (Default)',
+									'value': 'mixed'
+								},
+								{
+									'name': 'Sum (favors all-rounders)',
+									'value': 'sum'
+								},
+								{
+									'name': 'Average (favors niche players)',
+									'value': 'avg'
+								},
+							]
+						},
+						{
+							'name': 'skiplast',
+							'description': 'The amount of maps to ignore from the end of the match',
+							'type': 4,
+						},
+						{
+							'name': 'ezmultiplier',
+							'description': 'The EZ multiplier for the match (Default: 1.7)',
+							'type': 4,
+						},
+					]
+				}
+			});
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
