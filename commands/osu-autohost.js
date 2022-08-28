@@ -250,7 +250,7 @@ module.exports = {
 						} else {
 							await channel.sendMessage(`!mp mods ${nextModPool}`);
 						}
-						await channel.sendMessage(`!mp mods ${nextModPool}`);
+
 						await new Promise(resolve => setTimeout(resolve, 5000));
 					}
 
@@ -448,7 +448,7 @@ module.exports = {
 					} else {
 						await channel.sendMessage(`!mp mods ${nextModPool}`);
 					}
-					await channel.sendMessage(`!mp mods ${nextModPool}`);
+
 					await new Promise(resolve => setTimeout(resolve, 5000));
 				}
 
