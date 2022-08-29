@@ -7463,6 +7463,16 @@ module.exports = {
 			for (let i = 0; i < forumPosts.length; i++) {
 				await forumPosts[i].destroy();
 			}
+		} else if (args[0] === 'runningMatches') {
+			let importMatchTasks = await DBProcessQueue.findAll({
+				where: {
+					task: 'importMatch',
+				}
+			});
+
+			for (let i = 0; i < importMatchTasks.length; i++) {
+				await msg.reply(`https://osu.ppy.sh/mp/${importMatchTasks[i].additions}`);
+			}
 		} else {
 			msg.reply('Invalid command');
 		}

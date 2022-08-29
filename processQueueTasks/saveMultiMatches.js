@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { DBOsuMultiScores } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { saveOsuMultiScores, logDatabaseQueries } = require('../utils');
 
 //Archiving started around 40000000
@@ -43,8 +43,10 @@ module.exports = {
 			.then(async (match) => {
 				let sixHoursAgo = new Date();
 				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
+
+				let fifteenMinutesAgo = new Date();
+				fifteenMinutesAgo.setUTCMinutes(fifteenMinutesAgo.getUTCMinutes() - 15);
 				if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
-					let date = new Date();
 					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 						await saveOsuMultiScores(match);
 						let now = new Date();
@@ -55,20 +57,43 @@ module.exports = {
 						// eslint-disable-next-line no-undef
 						if (process.env.SERVER === 'Live') {
 							channel = await client.channels.fetch('891314445559676928');
-						} else {
+							// eslint-disable-next-line no-undef
+						} else if (process.env.SERVER === 'QA') {
 							channel = await client.channels.fetch('892873577479692358');
+						} else {
+							channel = await client.channels.fetch('1013789721014571090');
 						}
 						await channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done`);
 					}
 					//Go next if match found and ended / too long going already
 					// eslint-disable-next-line no-undef
-					if (process.env.SERVER === 'Live') {
+					if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
 						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
 					} else {
 						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
 					}
 
+					let date = new Date();
 					processQueueEntry.date = date;
+					processQueueEntry.beingExecuted = false;
+					return await processQueueEntry.save();
+				} else if (Date.parse(match.raw_start) < fifteenMinutesAgo) {
+					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
+						await saveOsuMultiScores(match);
+						let date = new Date();
+						date.setUTCMinutes(date.getUTCMinutes() + 5);
+						DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: date });
+					}
+
+					// eslint-disable-next-line no-undef
+					if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
+						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
+					} else {
+						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
+					}
+
+					let now = new Date();
+					processQueueEntry.date = now;
 					processQueueEntry.beingExecuted = false;
 					return await processQueueEntry.save();
 				}
@@ -79,7 +104,7 @@ module.exports = {
 				if (err.message === 'Not found') {
 					//Go next if match not found
 					// eslint-disable-next-line no-undef
-					if (process.env.SERVER === 'Live') {
+					if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
 						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
 					} else {
 						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
@@ -99,7 +124,7 @@ module.exports = {
 						if (Date.parse(json.events[json.events.length - 1].timestamp) - Date.parse(json.match.start_time) > 86400000) {
 							//Go next if over 24 hours long game
 							// eslint-disable-next-line no-undef
-							if (process.env.SERVER === 'Live') {
+							if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
 								processQueueEntry.additions = `${parseInt(matchID) + 1}`;
 							} else {
 								processQueueEntry.additions = `${parseInt(matchID) - 1}`;
