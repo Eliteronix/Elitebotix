@@ -11,8 +11,6 @@ module.exports = {
 
 		let matchID = args[0];
 
-		console.log('saveMultiMatches', matchID);
-
 		// eslint-disable-next-line no-undef
 		let APItoken = process.env.OSUTOKENSV1.split('-')[parseInt(matchID) % process.env.OSUTOKENSV1.split('-').length];
 
@@ -38,7 +36,7 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
-			//return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 60);
+			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 60);
 		}
 
 		await osuApi.getMatch({ mp: matchID })
@@ -46,8 +44,8 @@ module.exports = {
 				let sixHoursAgo = new Date();
 				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
 
-				let tenMinutesAgo = new Date();
-				tenMinutesAgo.setUTCMinutes(tenMinutesAgo.getUTCMinutes() - 10);
+				let fifteenMinutesAgo = new Date();
+				fifteenMinutesAgo.setUTCMinutes(fifteenMinutesAgo.getUTCMinutes() - 15);
 				if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
 					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 						await saveOsuMultiScores(match);
@@ -66,7 +64,6 @@ module.exports = {
 							channel = await client.channels.fetch('1013789721014571090');
 						}
 						await channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done`);
-						console.log('imported match right away', matchID);
 					}
 					//Go next if match found and ended / too long going already
 					// eslint-disable-next-line no-undef
@@ -80,13 +77,12 @@ module.exports = {
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
 					return await processQueueEntry.save();
-				} else if (Date.parse(match.raw_start) < tenMinutesAgo) {
+				} else if (Date.parse(match.raw_start) < fifteenMinutesAgo) {
 					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 						await saveOsuMultiScores(match);
 						let date = new Date();
 						date.setUTCMinutes(date.getUTCMinutes() + 5);
 						DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: date });
-						console.log('importMatch Task created', matchID);
 					}
 
 					// eslint-disable-next-line no-undef

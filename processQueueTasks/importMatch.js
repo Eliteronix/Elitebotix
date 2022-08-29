@@ -3,7 +3,7 @@ const osu = require('node-osu');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
-		// console.log('remind');
+		// console.log('importMatch');
 		let args = processQueueEntry.additions.split(';');
 
 		let matchId = args[0];
@@ -42,17 +42,15 @@ module.exports = {
 					}
 					await channel.send(`<https://osu.ppy.sh/mp/${matchId}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done`);
 
-					console.log('Imported match due to importMatch task', matchId);
-
 					return await processQueueEntry.destroy();
 				}
 
 				//Match has not been completed yet / 6 hours didn't pass
+				await saveOsuMultiScores(match);
 				let date = new Date();
 				date.setUTCMinutes(date.getUTCMinutes() + 5);
 				processQueueEntry.date = date;
 				processQueueEntry.beingExecuted = false;
-				console.log('importMatch trying again in 5 minutes', matchId);
 				return await processQueueEntry.save();
 			})
 			.catch(async (error) => {
