@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { DBOsuMultiScores } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { saveOsuMultiScores, logDatabaseQueries } = require('../utils');
 
 //Archiving started around 40000000
@@ -10,6 +10,8 @@ module.exports = {
 		let args = processQueueEntry.additions.split(';');
 
 		let matchID = args[0];
+
+		console.log('saveMultiMatches', matchID);
 
 		// eslint-disable-next-line no-undef
 		let APItoken = process.env.OSUTOKENSV1.split('-')[parseInt(matchID) % process.env.OSUTOKENSV1.split('-').length];
@@ -36,15 +38,17 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
-			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 60);
+			//return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 60);
 		}
 
 		await osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
 				let sixHoursAgo = new Date();
 				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
+
+				let tenMinutesAgo = new Date();
+				tenMinutesAgo.setUTCMinutes(tenMinutesAgo.getUTCMinutes() - 10);
 				if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
-					let date = new Date();
 					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 						await saveOsuMultiScores(match);
 						let now = new Date();
@@ -55,20 +59,45 @@ module.exports = {
 						// eslint-disable-next-line no-undef
 						if (process.env.SERVER === 'Live') {
 							channel = await client.channels.fetch('891314445559676928');
-						} else {
+							// eslint-disable-next-line no-undef
+						} else if (process.env.SERVER === 'QA') {
 							channel = await client.channels.fetch('892873577479692358');
+						} else {
+							channel = await client.channels.fetch('1013789721014571090');
 						}
 						await channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done`);
+						console.log('imported match right away', matchID);
 					}
 					//Go next if match found and ended / too long going already
 					// eslint-disable-next-line no-undef
-					if (process.env.SERVER === 'Live') {
+					if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
 						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
 					} else {
 						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
 					}
 
+					let date = new Date();
 					processQueueEntry.date = date;
+					processQueueEntry.beingExecuted = false;
+					return await processQueueEntry.save();
+				} else if (Date.parse(match.raw_start) < tenMinutesAgo) {
+					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
+						await saveOsuMultiScores(match);
+						let date = new Date();
+						date.setUTCMinutes(date.getUTCMinutes() + 5);
+						DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: date });
+						console.log('importMatch Task created', matchID);
+					}
+
+					// eslint-disable-next-line no-undef
+					if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
+						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
+					} else {
+						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
+					}
+
+					let now = new Date();
+					processQueueEntry.date = now;
 					processQueueEntry.beingExecuted = false;
 					return await processQueueEntry.save();
 				}
@@ -79,7 +108,7 @@ module.exports = {
 				if (err.message === 'Not found') {
 					//Go next if match not found
 					// eslint-disable-next-line no-undef
-					if (process.env.SERVER === 'Live') {
+					if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
 						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
 					} else {
 						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
@@ -99,7 +128,7 @@ module.exports = {
 						if (Date.parse(json.events[json.events.length - 1].timestamp) - Date.parse(json.match.start_time) > 86400000) {
 							//Go next if over 24 hours long game
 							// eslint-disable-next-line no-undef
-							if (process.env.SERVER === 'Live') {
+							if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
 								processQueueEntry.additions = `${parseInt(matchID) + 1}`;
 							} else {
 								processQueueEntry.additions = `${parseInt(matchID) - 1}`;
