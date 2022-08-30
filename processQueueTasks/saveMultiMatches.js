@@ -44,8 +44,8 @@ module.exports = {
 				let sixHoursAgo = new Date();
 				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
 
-				let fifteenMinutesAgo = new Date();
-				fifteenMinutesAgo.setUTCMinutes(fifteenMinutesAgo.getUTCMinutes() - 15);
+				let tenMinutesAgo = new Date();
+				tenMinutesAgo.setUTCMinutes(tenMinutesAgo.getUTCMinutes() - 10);
 				if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
 					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 						await saveOsuMultiScores(match);
@@ -77,7 +77,7 @@ module.exports = {
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
 					return await processQueueEntry.save();
-				} else if (Date.parse(match.raw_start) < fifteenMinutesAgo) {
+				} else if (Date.parse(match.raw_start) < tenMinutesAgo) {
 					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 						await saveOsuMultiScores(match);
 						let date = new Date();
