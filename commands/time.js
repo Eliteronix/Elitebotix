@@ -65,7 +65,7 @@ module.exports = {
 			timeEmbed.setColor('#7289DA')
 				.addFields(
 					// eslint-disable-next-line indent
-					//return locations without e!time		||replace '_' in timezoneId with an empty string			
+					//return locations without /time		||replace '_' in timezoneId with an empty string			
 					{
 						name: `Current date and time for ${json2.timezoneId.replace('_', ' ')} timezone`, value: `${time.toLocaleString('en-UK', {
 							// some settings for the formatting. Note: seconds CAN NOT be displayed due to limits of api

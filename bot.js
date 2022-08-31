@@ -149,7 +149,7 @@ function readyDiscord() {
 	client.user.setPresence({
 		status: 'online',  //You can show online, idle....
 		activities: [{
-			name: 'with e!help',  //The message shown
+			name: 'with /help',  //The message shown
 			type: 'PLAYING' //PLAYING: WATCHING: LISTENING: STREAMING:
 		}]
 	});

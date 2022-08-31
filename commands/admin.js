@@ -3007,7 +3007,7 @@ module.exports = {
 			// 		options: [
 			// 			{
 			// 				'name': 'id',
-			// 				'description': 'Id of the reminder (can be found by using e!reminders command)',
+			// 				'description': 'Id of the reminder (can be found by using /reminders command)',
 			// 				'type': 4,
 			// 				'required': true
 			// 			}
@@ -3022,7 +3022,7 @@ module.exports = {
 			// 		options: [
 			// 			{
 			// 				'name': 'id',
-			// 				'description': 'Id of the reminder (can be found by using e!reminders command)',
+			// 				'description': 'Id of the reminder (can be found by using /reminders command)',
 			// 				'type': 4,
 			// 				'required': true
 			// 			},
@@ -6501,7 +6501,7 @@ module.exports = {
 					options: [
 						{
 							'name': 'id',
-							'description': 'Id of the reminder (can be found by using e!reminders command)',
+							'description': 'Id of the reminder (can be found by using /reminders command)',
 							'type': 4,
 							'required': true
 						}
@@ -6516,7 +6516,7 @@ module.exports = {
 					options: [
 						{
 							'name': 'id',
-							'description': 'Id of the reminder (can be found by using e!reminders command)',
+							'description': 'Id of the reminder (can be found by using /reminders command)',
 							'type': 4,
 							'required': true
 						},

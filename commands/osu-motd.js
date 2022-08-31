@@ -195,12 +195,12 @@ module.exports = {
 				discordUser.osuMOTDRegistered = false;
 				discordUser.save();
 				if (msg.id) {
-					return sendMessage(msg, 'You have been unregistered from the `Maps of the Day` competition.\nStill thank you for showing interest!\nYou can always register again by using `e!osu-motd register`!');
+					return sendMessage(msg, 'You have been unregistered from the `Maps of the Day` competition.\nStill thank you for showing interest!\nYou can always register again by using `/osu-motd register`!');
 				}
 				return interaction.reply({ content: 'You have been unregistered from the `Maps of the Day` competition.\nStill thank you for showing interest!\nYou can always register again by using `/osu-motd register`!', ephemeral: true });
 			} else {
 				if (msg.id) {
-					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `e!osu-motd register`!');
+					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!');
 				}
 				return interaction.reply({ content: 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!', ephemeral: true });
 			}
@@ -251,7 +251,7 @@ module.exports = {
 						}
 					}
 					if (msg.id) {
-						return sendMessage(msg, 'The `Maps of the Day` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use `e!osu-motd unmute`.');
+						return sendMessage(msg, 'The `Maps of the Day` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use `/osu-motd unmute`.');
 					}
 					return interaction.reply({ content: 'The `Maps of the Day` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use `/osu-motd unmute`.', ephemeral: true });
 				} else {
@@ -305,13 +305,13 @@ module.exports = {
 					discordUser.osuMOTDMuted = true;
 					discordUser.save();
 					if (msg.id) {
-						return sendMessage(msg, 'The `Maps of the Day` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use `e!osu-motd unmute`.');
+						return sendMessage(msg, 'The `Maps of the Day` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use `/osu-motd unmute`.');
 					}
 					return interaction.reply({ content: 'The `Maps of the Day` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use `/osu-motd unmute`.', ephemeral: true });
 				}
 			} else {
 				if (msg.id) {
-					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `e!osu-motd register`!');
+					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!');
 				}
 				return interaction.reply({ content: 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!', ephemeral: true });
 			}
@@ -339,7 +339,7 @@ module.exports = {
 				}
 			} else {
 				if (msg.id) {
-					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `e!osu-motd register`!');
+					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!');
 				}
 				return interaction.reply({ content: 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!', ephemeral: true });
 			}
