@@ -34,7 +34,7 @@ module.exports = async function (oldGuild, newGuild) {
 
 		const changeEmbed = new Discord.MessageEmbed()
 			.setColor('#0099ff')
-			.setAuthor(newGuild.name, oldGuild.iconURL())
+			.setAuthor({ name: newGuild.name, iconURL: oldGuild.iconURL() })
 			.setDescription('The server has been updated!')
 			.setThumbnail(newGuild.iconURL())
 			.addFields(

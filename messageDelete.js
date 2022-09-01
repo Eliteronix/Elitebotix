@@ -42,7 +42,7 @@ module.exports = async function (msg) {
 
 		const changeEmbed = new Discord.MessageEmbed()
 			.setColor('#0099ff')
-			.setAuthor(`${msg.author.username}#${msg.author.discriminator}`, msg.author.displayAvatarURL())
+			.setAuthor({ name: `${msg.author.username}#${msg.author.discriminator}`, iconURL: msg.author.displayAvatarURL() })
 			.setDescription('A message has been deleted')
 			.setThumbnail(msg.author.displayAvatarURL())
 			.addFields(

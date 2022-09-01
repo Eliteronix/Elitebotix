@@ -37,7 +37,7 @@ module.exports = async function (oldMsg, newMsg) {
 
 		const changeEmbed = new Discord.MessageEmbed()
 			.setColor('#0099ff')
-			.setAuthor(`${newMsg.author.username}#${newMsg.author.discriminator}`, newMsg.author.displayAvatarURL())
+			.setAuthor({ name: `${newMsg.author.username}#${newMsg.author.discriminator}`, iconURL: newMsg.author.displayAvatarURL() })
 			.setDescription('A message has been updated')
 			.setThumbnail(newMsg.author.displayAvatarURL())
 			.addFields(
