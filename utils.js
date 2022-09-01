@@ -924,6 +924,7 @@ module.exports = {
 		if (wrongClusterFunction()) {
 			return;
 		}
+		bancho.sentRequests = [];
 		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers twitchConnect');
 		let twitchSyncUsers = await DBDiscordUsers.findAll({
 			where: {
@@ -1022,9 +1023,14 @@ module.exports = {
 
 						let dbBeatmap = await getOsuBeatmapFunction({ beatmapId: map, modBits: 0 });
 
-						await IRCUser.sendMessage(`${prefix}${context['display-name']} -> [${dbBeatmap.approvalStatus}] [https://osu.ppy.sh/b/${dbBeatmap.beatmapId} ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}]] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);
+						let mainMessage = `${prefix}${context['display-name']} -> [${dbBeatmap.approvalStatus}] [https://osu.ppy.sh/b/${dbBeatmap.beatmapId} ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}]] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`;
+						await IRCUser.sendMessage(mainMessage);
 						if (message) {
-							await IRCUser.sendMessage(`${prefix}${context['display-name']} -> Comment: ${message}`);
+							let comment = `${prefix}${context['display-name']} -> Comment: ${message}`;
+							await IRCUser.sendMessage(comment);
+							bancho.sentRequests.push({ osuUserId: discordUser.osuUserId, main: mainMessage, comment: comment });
+						} else {
+							bancho.sentRequests.push({ osuUserId: discordUser.osuUserId, main: mainMessage });
 						}
 
 						twitchClient.say(target.substring(1), `${context['display-name']} -> [${dbBeatmap.approvalStatus}] ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);

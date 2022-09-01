@@ -10,8 +10,10 @@ module.exports = async function (client, bancho, message) {
 		await message.user.sendMessage('!autohost <password> - Autohosts a lobby with tournament maps');
 		await message.user.sendMessage('!discord - Sends a link to the main Elitebotix discord');
 		await message.user.sendMessage('!play / !play1v1 / !queue1v1 - Queue up for 1v1 matches');
+		await message.user.sendMessage('!lastrequests - Shows the last 5 twitch requests again');
 		await message.user.sendMessage('!leave / !leave1v1 / !queue1v1-leave - Leave the queue for 1v1 matches');
 		await message.user.sendMessage('!r [mod] [StarRating] - Get a beatmap recommendation for your current duel StarRating. If you don\'t have your account connected to the bot (can be done by using /osu-link command in discord) nor didn\'t specify desired Star Rating, it will use default value of 4.5*');
+
 		//Listen to now playing / now listening and send pp info
 	} else if (message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)) {
 		let beatmapId = message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)[0].replace(/.+\//gm, '');
@@ -406,6 +408,33 @@ module.exports = async function (client, bancho, message) {
 		command.execute(message, args, null, [client, bancho]);
 	} else if (message.message === '!discord') {
 		message.user.sendMessage('Feel free to join the [https://discord.gg/Asz5Gfe Discord]');
+	} else if (message.message === '!lastrequests') {
+		await message.user.fetchFromAPI();
+		let userRequests = [];
+
+		for (let i = 0; i < bancho.sentRequests.length; i++) {
+			if (bancho.sentRequests[i].osuUserId == message.user.id) {
+				userRequests.push(bancho.sentRequests[i]);
+			}
+		}
+
+		if (userRequests.length === 0) {
+			return message.user.sendMessage('You have no requests since the last Elitebotix restart.');
+		}
+
+		//Remove everything but the last 5 requests
+		while (userRequests.length > 5) {
+			userRequests.shift();
+		}
+
+		//Resend the messages
+		await message.user.sendMessage(`Here are your last ${userRequests.length} twitch requests:`);
+		for (let i = 0; i < userRequests.length; i++) {
+			await message.user.sendMessage(userRequests[i].main);
+			if (userRequests[i].comment) {
+				await message.user.sendMessage(userRequests[i].comment);
+			}
+		}
 	}
 };
 
