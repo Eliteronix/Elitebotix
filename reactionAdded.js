@@ -63,7 +63,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 					//Check that the message was sent from itself (Avoiding migration issues from legacy messages)
 					if (message && message.author.id === reaction.client.user.id) {
 						const starBoardMessageEmbed = new Discord.MessageEmbed()
-							.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
+							.setAuthor({ name: reaction.message.author.username, iconURL: reaction.message.author.displayAvatarURL() })
 							.setColor('#d9b51c')
 							.setDescription(reaction.message.content)
 							.addFields(
@@ -89,7 +89,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				//Try to resend the message
 				const starBoardMessageEmbed = new Discord.MessageEmbed()
-					.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
+					.setAuthor({ name: reaction.message.author.username, iconURL: reaction.message.author.displayAvatarURL() })
 					.setColor('#d9b51c')
 					.setDescription(reaction.message.content)
 					.addFields(
@@ -121,7 +121,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				starBoardedMessage.save();
 			} else {
 				const starBoardMessageEmbed = new Discord.MessageEmbed()
-					.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
+					.setAuthor({ name: reaction.message.author.username, iconURL: reaction.message.author.displayAvatarURL() })
 					.setColor('#d9b51c')
 					.setDescription(reaction.message.content)
 					.addFields(

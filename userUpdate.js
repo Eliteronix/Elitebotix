@@ -52,7 +52,7 @@ module.exports = async function (oldUser, newUser) {
 
 				const changeEmbed = new Discord.MessageEmbed()
 					.setColor('#0099ff')
-					.setAuthor(`${newUser.username}#${newUser.discriminator}`, newUser.displayAvatarURL())
+					.setAuthor({ name: `${newUser.username}#${newUser.discriminator}`, iconURL: newUser.displayAvatarURL() })
 					.setDescription(`<@${newUser.id}> has updated their profile!`)
 					.setThumbnail(newUser.displayAvatarURL())
 					.addFields(
@@ -111,7 +111,7 @@ module.exports = async function (oldUser, newUser) {
 
 				const changeEmbed = new Discord.MessageEmbed()
 					.setColor('#0099ff')
-					.setAuthor(`${newUser.username}#${newUser.discriminator}`, newUser.displayAvatarURL())
+					.setAuthor({ name: `${newUser.username}#${newUser.discriminator}`, iconURL: newUser.displayAvatarURL() })
 					.setDescription(`<@${newUser.id}> has updated their profile!`)
 					.setThumbnail(newUser.displayAvatarURL())
 					.addFields(
@@ -170,7 +170,7 @@ module.exports = async function (oldUser, newUser) {
 
 				const changeEmbed = new Discord.MessageEmbed()
 					.setColor('#0099ff')
-					.setAuthor(`${newUser.username}#${newUser.discriminator}`, oldUser.displayAvatarURL())
+					.setAuthor({ name: `${newUser.username}#${newUser.discriminator}`, iconURL: oldUser.displayAvatarURL() })
 					.setDescription(`<@${newUser.id}> has updated their profile!`)
 					.setThumbnail(newUser.displayAvatarURL())
 					.addFields(

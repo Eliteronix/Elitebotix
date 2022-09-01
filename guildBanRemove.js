@@ -34,7 +34,7 @@ module.exports = async function (guildBan) {
 
 		const changeEmbed = new Discord.MessageEmbed()
 			.setColor('#0099ff')
-			.setAuthor(`${guildBan.user.username}#${guildBan.user.discriminator}`, guildBan.user.displayAvatarURL())
+			.setAuthor({ name: `${guildBan.user.username}#${guildBan.user.discriminator}`, iconURL: guildBan.user.displayAvatarURL() })
 			.setDescription(`<@${guildBan.user.id}> was unbanned from the server!`)
 			.setThumbnail(guildBan.user.displayAvatarURL())
 			.addFields(
