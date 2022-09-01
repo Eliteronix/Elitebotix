@@ -18,7 +18,7 @@ module.exports = {
 	//noCooldownMessage: true,
 	tags: 'server-admin',
 	prefixCommand: true,
-	async execute(msg, args, interaction) {
+	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -148,7 +148,7 @@ module.exports = {
 							args.shift();
 							reactionRolesHeader.reactionTitle = args.join(' ');
 							reactionRolesHeader.save().then(
-								editEmbed(msg, reactionRolesHeader)
+								editEmbed(msg, reactionRolesHeader, additionalObjects[0])
 							);
 
 							if (msg.id) {
@@ -176,7 +176,7 @@ module.exports = {
 							args.shift();
 							reactionRolesHeader.reactionDescription = args.join(' ');
 							reactionRolesHeader.save().then(
-								editEmbed(msg, reactionRolesHeader)
+								editEmbed(msg, reactionRolesHeader, additionalObjects[0])
 							);
 
 							if (msg.id) {
@@ -208,7 +208,7 @@ module.exports = {
 								args.shift();
 								reactionRolesHeader.reactionColor = embedColor;
 								reactionRolesHeader.save().then(
-									editEmbed(msg, reactionRolesHeader)
+									editEmbed(msg, reactionRolesHeader, additionalObjects[0])
 								);
 
 								if (msg.id) {
@@ -245,7 +245,7 @@ module.exports = {
 							args.shift();
 							reactionRolesHeader.reactionImage = embedImage;
 							reactionRolesHeader.save().then(
-								editEmbed(msg, reactionRolesHeader)
+								editEmbed(msg, reactionRolesHeader, additionalObjects[0])
 							);
 
 							if (msg.id) {
@@ -338,7 +338,7 @@ module.exports = {
 									}
 
 									//Edit embed
-									editEmbed(msg, reactionRolesHeader);
+									editEmbed(msg, reactionRolesHeader, additionalObjects[0]);
 								}
 							} else {
 								if (msg.id) {
@@ -381,7 +381,7 @@ module.exports = {
 
 							if (rowCount > 0) {
 								//Edit embed
-								editEmbed(msg, reactionRolesHeader);
+								editEmbed(msg, reactionRolesHeader, additionalObjects[0]);
 
 								if (interaction) {
 									interaction.editReply({ content: 'The role has been removed', ephemeral: true });
@@ -426,7 +426,7 @@ module.exports = {
 							if (args[4].toLowerCase() === 'emoji') {
 								reactionRolesEmoji.emoji = args[5];
 								reactionRolesEmoji.save()
-									.then(editEmbed(msg, reactionRolesHeader));
+									.then(editEmbed(msg, reactionRolesHeader, additionalObjects[0]));
 								if (interaction) {
 									interaction.editReply({ content: 'The emoji has been changed', ephemeral: true });
 								}
@@ -438,7 +438,7 @@ module.exports = {
 								args.shift();
 								reactionRolesEmoji.description = args.join(' ');
 								reactionRolesEmoji.save()
-									.then(editEmbed(msg, reactionRolesHeader));
+									.then(editEmbed(msg, reactionRolesHeader, additionalObjects[0]));
 								if (interaction) {
 									interaction.editReply({ content: 'The description has been changed', ephemeral: true });
 								}
@@ -477,7 +477,7 @@ module.exports = {
 	},
 };
 
-async function editEmbed(msg, reactionRolesHeader) {
+async function editEmbed(msg, reactionRolesHeader, client) {
 	//Create embed
 	const reactionRoleEmbed = new Discord.MessageEmbed()
 		.setColor(reactionRolesHeader.reactionColor)
@@ -520,10 +520,10 @@ async function editEmbed(msg, reactionRolesHeader) {
 		return console.log(e);
 	}
 	//Get the message object
-	const embedMessage = await embedChannel.messages.fetch(embedMessageId);
+	let embedMessage = await embedChannel.messages.fetch(embedMessageId);
 
 	//Check if its a message from the old bot to handle legacy embeds
-	if (embedMessage.author.id === msg.author.id) {
+	if (embedMessage.author.id === client.user.id) {
 		//Edit the message if same user
 		embedMessage.edit({ embeds: [reactionRoleEmbed] });
 	} else {
@@ -533,7 +533,9 @@ async function editEmbed(msg, reactionRolesHeader) {
 		} catch (e) {
 			await embedChannel.send('Couldn\'t delete the old embed, please do so manually. (Can\'t be edited anymore due to the migration to the new account)');
 		}
-		embedChannel.send({ embeds: [reactionRoleEmbed] });
+		embedMessage = await embedChannel.send({ embeds: [reactionRoleEmbed] });
+		reactionRolesHeader.reactionHeaderId = embedMessage.id;
+		reactionRolesHeader.save();
 	}
 
 	//Remove all reactions from the embed
