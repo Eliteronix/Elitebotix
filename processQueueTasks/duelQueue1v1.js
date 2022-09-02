@@ -84,7 +84,7 @@ module.exports = {
 
 			processQueueEntry.beingExecuted = false;
 
-			let newDifficultyArea = difficultyArea + 0.01;
+			let newDifficultyArea = difficultyArea + 0.025;
 			if (newDifficultyArea > 0.5) {
 				newDifficultyArea = 0.5;
 			}
