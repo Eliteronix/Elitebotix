@@ -2233,6 +2233,8 @@ module.exports = {
 					return await channel.leave();
 				} else if (lobbyStatus === 'Waiting for start') {
 					await channel.sendMessage('!mp start 5');
+					await new Promise(resolve => setTimeout(resolve, 30000));
+					await channel.sendMessage('!mp aborttimer');
 
 					lobbyStatus === 'Map being played';
 				}
@@ -2298,6 +2300,8 @@ module.exports = {
 			}
 			if (lobbyStatus === 'Waiting for start' && playersInLobby === dbPlayers.length) {
 				await channel.sendMessage('!mp start 5');
+				await new Promise(resolve => setTimeout(resolve, 30000));
+				await channel.sendMessage('!mp aborttimer');
 
 				lobbyStatus === 'Map being played';
 			}
