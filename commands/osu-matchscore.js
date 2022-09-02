@@ -78,7 +78,7 @@ module.exports = {
 				let processingMessage = await msg.channel.send('Processing osu! match leaderboard...');
 				let warmups = 2;
 				let warmupsReason = `Assumed ${warmups} warmups.`;
-				if (customWarmups) {
+				if (customWarmups !== null) {
 					warmups = customWarmups;
 					warmupsReason = `${warmups} warmups were specified.`;
 				}
