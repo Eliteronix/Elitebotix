@@ -2252,6 +2252,8 @@ module.exports = {
 				if (allPlayersJoined) {
 					lobbyStatus = 'Waiting for start';
 
+					await channel.sendMessage(`Average star rating of all players: ${Math.round(averageStarRating * 100) / 100}`);
+
 					while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
 						await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
