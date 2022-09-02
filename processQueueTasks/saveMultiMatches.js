@@ -54,16 +54,18 @@ module.exports = {
 						let hoursBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60) % 24;
 						let daysBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60 / 24);
 						let channel;
+						let ping = '';
 						// eslint-disable-next-line no-undef
 						if (process.env.SERVER === 'Live') {
 							channel = await client.channels.fetch('891314445559676928');
 							// eslint-disable-next-line no-undef
 						} else if (process.env.SERVER === 'QA') {
 							channel = await client.channels.fetch('892873577479692358');
+							ping = ' <@981205694340546571>';
 						} else {
 							channel = await client.channels.fetch('1013789721014571090');
 						}
-						await channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done`);
+						await channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done${ping}`);
 					}
 					//Go next if match found and ended / too long going already
 					// eslint-disable-next-line no-undef
