@@ -141,12 +141,71 @@ module.exports = {
 
 								if (json.latest_event_id > latestEventId) {
 									let playerUpdates = [];
+									let redScore = 0; //Score on the left side / first slots
+									let blueScore = 0; //Score on the right side / last slots
 									for (let i = 0; i < json.events.length; i++) {
 										if (json.events[i].detail.type === 'other') {
+											//Reset player updates
 											playerUpdates = [];
+
+											//Get the scores of the teams
+											let blueScores = json.events[i].game.scores.filter(score => score.match.team === 'blue');
+											let redScores = json.events[i].game.scores.filter(score => score.match.team === 'red');
+
+											if (blueScores.length || redScores.length) {
+												//Team vs
+												quicksort(blueScores);
+												quicksort(redScores);
+
+												let blueTotalScore = 0;
+												for (let i = 0; i < blueScores.length; i++) {
+													blueTotalScore += blueScores[i].score;
+												}
+
+												let redTotalScore = 0;
+												for (let i = 0; i < redScores.length; i++) {
+													redTotalScore += redScores[i].score;
+												}
+
+												if (blueTotalScore > redTotalScore) {
+													blueScore++;
+												} else {
+													redScore++;
+												}
+											} else if (json.events[i].game.scores.length === 2) {
+												//Head to head
+												let playerNames = match.name.split(/\) ?vs.? ?\(/gm);
+												let redPlayer = playerNames[0].replace(/.+\(/gm, '');
+												let bluePlayer = playerNames[1].replace(')', '');
+
+												let redTotal = null;
+												let blueTotal = null;
+
+												for (let j = 0; j < json.events[i].game.scores.length; j++) {
+													json.events[i].game.scores[j].username = await getOsuPlayerName(json.events[i].game.scores[j].user_id);
+													if (json.events[i].game.scores[j].username === redPlayer) {
+														redTotal = json.events[i].game.scores[j].score;
+													}
+
+													if (json.events[i].game.scores[j].username === bluePlayer) {
+														blueTotal = json.events[i].game.scores[j].score;
+													}
+												}
+
+												if (blueTotal > redTotal) {
+													blueScore++;
+												} else {
+													redScore++;
+												}
+											}
 										} else if (json.events[i].detail.type === 'host-changed') {
 											let playerName = await getOsuPlayerName(json.events[i].user_id);
 											playerUpdates.push(`<:exchangealtsolid:1005141205069344859> ${playerName} became the host.`);
+
+											if (json.events[i].user_id === 0) {
+												redScore = 0;
+												blueScore = 0;
+											}
 										} else if (json.events[i].detail.type === 'player-joined') {
 											let playerName = await getOsuPlayerName(json.events[i].user_id);
 											playerUpdates.push(`<:arrowrightsolid:1005141207879536761> ${playerName} joined the game.`);
@@ -176,7 +235,12 @@ module.exports = {
 												lastMessage = await msg.channel.send({ embeds: [embed] });
 											} else if (json.events[i].detail.type === 'other') {
 												let attachment = await getResultImage(json.events[i], json.users);
-												lastMessage = await msg.channel.send({ files: [attachment] });
+												let currentScore = '';
+												if (redScore + blueScore > 0) {
+													currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
+												}
+
+												lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] });
 											} else if (json.events[i].detail.type !== 'other') {
 												let embed = new Discord.MessageEmbed()
 													.setColor(0x0099FF)
