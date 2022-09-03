@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, fitTextOnLeftCanvas, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage } = require('../utils');
+const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, fitTextOnLeftCanvas, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap } = require('../utils');
 const { Permissions } = require('discord.js');
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
@@ -118,7 +118,7 @@ module.exports = {
 							let htmlCode = await res.text();
 							htmlCode = htmlCode.replace(/&quot;/gm, '"');
 							// console.log(htmlCode);
-							const matchRunningRegex = /{"match".+,"current_game_id":d+}/gm;
+							const matchRunningRegex = /{"match".+,"current_game_id":\d+}/gm;
 							const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
 							const matchesRunning = matchRunningRegex.exec(htmlCode);
 							const matchesPaused = matchPausedRegex.exec(htmlCode);
@@ -233,14 +233,34 @@ module.exports = {
 													.setURL(`https://osu.ppy.sh/mp/${match.id}`);
 
 												lastMessage = await msg.channel.send({ embeds: [embed] });
-											} else if (json.events[i].detail.type === 'other') {
+											} else if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
 												let attachment = await getResultImage(json.events[i], json.users);
 												let currentScore = '';
 												if (redScore + blueScore > 0) {
 													currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
 												}
 
-												lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] });
+												if (lastMessageType === 'playing') {
+													lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] });
+												} else {
+													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] });
+												}
+											} else if (json.events[i].detail.type === 'other') {
+												if (lastMessageType !== 'playing') {
+													let attachment = await getPlayingImage(json.events[i], json.users);
+													let currentScore = '';
+													if (redScore + blueScore > 0) {
+														currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
+													}
+
+													let beatmap = await getOsuBeatmap({ beatmapId: json.events[i].game.beatmap.id });
+
+													let startDate = new Date(json.events[i].game.start_time);
+
+													startDate.setUTCSeconds(startDate.getUTCSeconds() + parseInt(beatmap.totalLength) + 30);
+
+													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment] });
+												}
 											} else if (json.events[i].detail.type !== 'other') {
 												let embed = new Discord.MessageEmbed()
 													.setColor(0x0099FF)
@@ -252,8 +272,11 @@ module.exports = {
 											}
 
 
-											if (json.events[i].detail.type === 'other') {
+											if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
 												lastMessageType = 'mapresult';
+											} else if (json.events[i].detail.type === 'other') {
+												lastMessageType = 'playing';
+												break;
 											} else {
 												lastMessageType = 'updates';
 											}
@@ -261,6 +284,9 @@ module.exports = {
 									}
 
 									latestEventId = json.latest_event_id;
+									if (lastMessageType === 'playing') {
+										latestEventId--;
+									}
 								}
 							}
 						});
@@ -560,6 +586,64 @@ async function getResultImage(event, users) {
 			ctx.fillText(`Blue Team Wins by ${humanReadable(blueScore - redScore)}`, 500, 342 + scores.length * 75);
 		}
 	}
+
+	//Create as an attachment
+	return new Discord.MessageAttachment(canvas.toBuffer(), `osu-game-${event.game.id}.png`);
+}
+
+async function getPlayingImage(event) {
+	const canvasWidth = 1000;
+	const canvasHeight = 300 + 15;
+
+	Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+	//Create Canvas
+	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+	//Get context and load the image
+	const ctx = canvas.getContext('2d');
+	const background = await Canvas.loadImage('./other/osu-background.png');
+	for (let i = 0; i < canvas.height / background.height; i++) {
+		for (let j = 0; j < canvas.width / background.width; j++) {
+			ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+		}
+	}
+
+	//Draw beatmap cover
+	ctx.save();
+	ctx.beginPath();
+	ctx.moveTo(25, 25 + 10);
+	ctx.lineTo(25, 25 + 178 - 10);
+	ctx.arcTo(25, 25 + 178, 25 + 10, 25 + 178, 10);
+	ctx.lineTo(25 + 950 - 10, 25 + 178);
+	ctx.arcTo(25 + 950, 25 + 178, 25 + 950, 25 + 178 - 10, 10);
+	ctx.lineTo(25 + 950, 25 + 10);
+	ctx.arcTo(25 + 950, 25, 25 + 950 - 10, 25, 10);
+	ctx.lineTo(25 + 10, 25);
+	ctx.arcTo(25, 25, 25, 25 + 10, 10);
+	ctx.clip();
+
+	try {
+		const beatmapCover = await Canvas.loadImage(event.game.beatmap.beatmapset.covers.slimcover);
+
+		ctx.drawImage(beatmapCover, 25, 25, 950, 178);
+	} catch (e) {
+		//Nothing
+	}
+
+	ctx.restore();
+
+	//Draw mods
+	for (let i = 0; i < event.game.mods.length; i++) {
+		event.game.mods[i] = getModImage(event.game.mods[i]);
+		const modImage = await Canvas.loadImage(event.game.mods[i]);
+		ctx.drawImage(modImage, 960 - ((event.game.mods.length - i) * 48), 35, 45, 32);
+	}
+
+	//Write Title and Artist
+	ctx.fillStyle = '#ffffff';
+	fitTextOnLeftCanvas(ctx, `${event.game.beatmap.beatmapset.title} [${event.game.beatmap.version}]`, 30, 'comfortaa, sans-serif', 240, 940, 30);
+	fitTextOnLeftCanvas(ctx, `${event.game.beatmap.beatmapset.artist}`, 30, 'comfortaa, sans-serif', 280, 940, 30);
 
 	//Create as an attachment
 	return new Discord.MessageAttachment(canvas.toBuffer(), `osu-game-${event.game.id}.png`);
