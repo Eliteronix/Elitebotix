@@ -40,7 +40,8 @@ module.exports = {
 				where: {
 					[Op.or]: {
 						osuUserId: username,
-						osuName: username
+						osuName: username,
+						userId: username.replace('<@', '').replace('>', '').replace('!', ''),
 					}
 				}
 			});
