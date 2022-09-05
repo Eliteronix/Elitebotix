@@ -5,6 +5,7 @@ const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
+const Sequelize = require('sequelize');
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -195,17 +196,7 @@ module.exports = {
 		ctx.drawImage(image, x, y, width, height);
 	},
 	getBeatmapModeId: function (beatmap) {
-		let gameMode;
-		if (beatmap.mode === 'Standard') {
-			gameMode = 0;
-		} else if (beatmap.mode === 'Taiko') {
-			gameMode = 1;
-		} else if (beatmap.mode === 'Mania') {
-			gameMode = 3;
-		} else if (beatmap.mode === 'Catch the Beat') {
-			gameMode = 2;
-		}
-		return gameMode;
+		return getBeatmapModeIdFunction(beatmap);
 	},
 	rippleToBanchoScore: function (inputScore) {
 		let outputScore = {
@@ -1522,6 +1513,10 @@ module.exports = {
 			let beatmaps = null;
 
 			if (i === 6) {
+				let TODOSetDbBeatmap;
+				let TODOAddCS;
+				let TODOAddAR;
+				await getValidTournamentBeatmapFunction({ modPool: 'FM', lowerBound: lowerBound, upperBound: upperBound, mode: 'Standard', upperDrain: 360, lowerDrain: 270 });
 				// console.log('Duel Match: Get all TB Beatmaps');
 				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps TB');
 				if (!thirdUser) {
@@ -2726,6 +2721,9 @@ module.exports = {
 						});
 				}
 			});
+	},
+	async getValidTournamentBeatmap(input) {
+		return await getValidTournamentBeatmapFunction(input);
 	}
 };
 
@@ -5191,4 +5189,299 @@ async function saveOsuMultiScoresFunction(match) {
 			await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')}`, date: now });
 		}
 	}
+}
+
+async function getValidTournamentBeatmapFunction(input) {
+	//Set the mode
+	let mode = 'Standard';
+
+	//Get the mode from the input
+	if (input.mode) {
+		mode = input.mode;
+	}
+
+	//Set to a random modPool by default
+	let modPool = ['NM', 'HD', 'HR', 'DT', 'FM'][Math.floor(Math.random() * 5)];
+
+	//Get the modPool from the input
+	if (input.modPool) {
+		modPool = input.modPool;
+	}
+
+	//Set the difficulty range
+	let lowerBound = 3.5;
+	let upperBound = 10;
+
+	if (input.lowerBound) {
+		lowerBound = input.lowerBound;
+	}
+
+	if (input.upperBound) {
+		upperBound = input.upperBound;
+	}
+
+	//Set the length
+	let lowerDrain = 0;
+	let upperDrain = 600;
+
+	if (input.lowerDrain) {
+		lowerDrain = input.lowerDrain;
+	}
+
+	if (input.upperDrain) {
+		upperDrain = input.upperDrain;
+	}
+
+	//Set the maps to avoid
+	let avoidMaps = [];
+
+	if (input.avoidMaps) {
+		avoidMaps = input.avoidMaps;
+	}
+
+	//Set the osuUserId
+	let osuUserId = null;
+
+	if (input.osuUserId) {
+		osuUserId = input.osuUserId;
+	}
+
+	//Set if it should be checked if the map got played recently
+	let checkPlayed = false;
+
+	if (input.checkPlayed) {
+		checkPlayed = input.checkPlayed;
+	}
+
+	let beatmaps = null;
+	if (modPool === 'NM') {
+		beatmaps = await DBOsuBeatmaps.findAll({
+			where: {
+				noModMap: true,
+				mode: mode,
+				approvalStatus: {
+					[Op.not]: 'Not found',
+				},
+				starRating: {
+					[Op.and]: {
+						[Op.gte]: lowerBound,
+						[Op.lte]: upperBound,
+					}
+				},
+				beatmapId: {
+					[Op.notIn]: avoidMaps,
+				},
+			},
+			order: Sequelize.fn('RANDOM'),
+			// because it gets random beatmaps each time, 150 limit is fine for quick reply
+			limit: 150,
+		});
+	} else if (modPool === 'HD') {
+		beatmaps = await DBOsuBeatmaps.findAll({
+			where: {
+				hiddenMap: true,
+				mode: mode,
+				approvalStatus: {
+					[Op.not]: 'Not found',
+				},
+				starRating: {
+					[Op.and]: {
+						[Op.gte]: lowerBound,
+						[Op.lte]: upperBound,
+					}
+				},
+				beatmapId: {
+					[Op.notIn]: avoidMaps,
+				},
+			},
+			order: Sequelize.fn('RANDOM'),
+			// because it gets random beatmaps each time, 150 limit is fine for quick reply
+			limit: 150,
+		});
+	} else if (modPool === 'HR') {
+		beatmaps = await DBOsuBeatmaps.findAll({
+			where: {
+				hardRockMap: true,
+				mode: mode,
+				approvalStatus: {
+					[Op.not]: 'Not found',
+				},
+				starRating: {
+					[Op.and]: {
+						[Op.gte]: lowerBound,
+						[Op.lte]: upperBound,
+					}
+				},
+				beatmapId: {
+					[Op.notIn]: avoidMaps,
+				},
+			},
+			order: Sequelize.fn('RANDOM'),
+			// because it gets random beatmaps each time, 150 limit is fine for quick reply
+			limit: 150,
+		});
+	} else if (modPool === 'DT') {
+		beatmaps = await DBOsuBeatmaps.findAll({
+			where: {
+				doubleTimeMap: true,
+				mode: mode,
+				approvalStatus: {
+					[Op.not]: 'Not found',
+				},
+				starRating: {
+					[Op.and]: {
+						[Op.gte]: lowerBound,
+						[Op.lte]: upperBound,
+					}
+				},
+				beatmapId: {
+					[Op.notIn]: avoidMaps,
+				},
+			},
+			order: Sequelize.fn('RANDOM'),
+			// because it gets random beatmaps each time, 150 limit is fine for quick reply
+			limit: 150,
+		});
+	} else if (modPool === 'FM') {
+		beatmaps = await DBOsuBeatmaps.findAll({
+			where: {
+				freeModMap: true,
+				mode: mode,
+				approvalStatus: {
+					[Op.not]: 'Not found',
+				},
+				starRating: {
+					[Op.and]: {
+						[Op.gte]: lowerBound,
+						[Op.lte]: upperBound,
+					}
+				},
+				beatmapId: {
+					[Op.notIn]: avoidMaps,
+				},
+			},
+			order: Sequelize.fn('RANDOM'),
+			// because it gets random beatmaps each time, 150 limit is fine for quick reply
+			limit: 150,
+		});
+	}
+
+	//Loop through the beatmaps until a fitting one is found
+	while (beatmaps.length) {
+		const index = Math.floor(Math.random() * beatmaps.length);
+		let randomBeatmap = beatmaps[index];
+
+		// refresh the map
+		if (modPool == 'NM') {
+			randomBeatmap = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 0 });
+		} else if (modPool == 'HD') {
+			randomBeatmap = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 0 });
+			randomBeatmap.starRating = adjustHDStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate);
+		} else if (modPool == 'HR') {
+			randomBeatmap = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 16 });
+		} else if (modPool == 'DT') {
+			randomBeatmap = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 64 });
+		} else if (modPool == 'FM') {
+			randomBeatmap = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 0 });
+		}
+
+		if (randomBeatmap.starRating > upperBound || randomBeatmap.starRating < lowerBound) {
+			beatmaps.splice(index, 1);
+			continue;
+		}
+
+		if (parseInt(randomBeatmap.drainLength) > upperDrain || parseInt(randomBeatmap.starRating) < lowerDrain) {
+			beatmaps.splice(index, 1);
+			continue;
+		}
+
+		if (checkPlayed && beatmapPlayed(randomBeatmap, osuUserId)) {
+			beatmaps.splice(index, 1);
+			continue;
+		}
+
+		if (randomBeatmap.usedOften) {
+			console.log('Used often');
+			return randomBeatmap;
+		}
+
+		const mapScoreAmount = await DBOsuMultiScores.count({
+			where: {
+				beatmapId: randomBeatmap.beatmapId,
+				matchName: {
+					[Op.notLike]: 'MOTD:%',
+				},
+				[Op.or]: [
+					{ warmup: false },
+					{ warmup: null }
+				],
+			},
+			limit: 51,
+		});
+
+		if (mapScoreAmount < 50) {
+			console.log('Not used often');
+			beatmaps.splice(index, 1);
+			continue;
+		}
+
+		console.log('Now used often');
+		randomBeatmap.usedOften = true;
+		await randomBeatmap.save();
+		return randomBeatmap;
+	}
+
+	//Return null
+	return;
+}
+
+// returns true if the user has already played the map in the last 60 days, so we should skip it
+function beatmapPlayed(beatmap, osuUserId) {
+	let now = new Date();
+
+	// eslint-disable-next-line no-undef
+	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+	});
+
+	let mode = getBeatmapModeIdFunction(beatmap);
+
+	osuApi.getScores({ b: beatmap.beatmapId, u: osuUserId, m: mode })
+		.then(async (scores) => {
+			if (!scores[0]) {
+				return false;
+			} else {
+				let score = scores[0];
+				let date = new Date(score.raw_date);
+				let timeDiff = Math.abs(now.getTime() - date.getTime());
+				let diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+				if (diffDays < 60) {
+					return true;
+				} else if (score.rank === 'S') {
+					return true;
+				} else {
+					return false;
+				}
+			}
+			// eslint-disable-next-line no-unused-vars
+		}).catch(err => {
+			return true;
+		});
+}
+
+function getBeatmapModeIdFunction(beatmap) {
+	let gameMode;
+	if (beatmap.mode === 'Standard') {
+		gameMode = 0;
+	} else if (beatmap.mode === 'Taiko') {
+		gameMode = 1;
+	} else if (beatmap.mode === 'Mania') {
+		gameMode = 3;
+	} else if (beatmap.mode === 'Catch the Beat') {
+		gameMode = 2;
+	}
+	return gameMode;
 }

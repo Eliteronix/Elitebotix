@@ -95,14 +95,17 @@ module.exports = (sequelize, DataTypes) => {
 		freeModMap: {
 			type: DataTypes.BOOLEAN,
 		},
+		usedOften: {
+			type: DataTypes.BOOLEAN,
+		},
 		paranoid: true,
 	},
-	{
-		indexes: [
-			{
-				unique: false,
-				fields: ['beatmapId', 'mods']
-			}
-		]
-	});
+		{
+			indexes: [
+				{
+					unique: false,
+					fields: ['beatmapId', 'mods']
+				}
+			]
+		});
 };
