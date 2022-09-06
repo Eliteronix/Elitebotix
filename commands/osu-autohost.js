@@ -1,9 +1,6 @@
-const { populateMsgFromInteraction, logMatchCreation, getOsuUserServerMode, getOsuBeatmap, getBeatmapModeId, adjustHDStarRating } = require('../utils');
+const { populateMsgFromInteraction, logMatchCreation, getOsuUserServerMode, getValidTournamentBeatmap } = require('../utils');
 const { Permissions } = require('discord.js');
-const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiScores } = require('../dbObjects');
-const Sequelize = require('sequelize');
-const { Op } = require('sequelize');
-const osu = require('node-osu');
+const { DBDiscordUsers, } = require('../dbObjects');
 
 module.exports = {
 	name: 'osu-autohost',
@@ -509,192 +506,16 @@ module.exports = {
 };
 
 async function getPoolBeatmap(modPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, commandUser) {
-	let beatmaps = null;
-	let starRating = null;
-	let adaptHDStarRating = false;
-	if (modPool === 'NM') {
-		starRating = nmStarRating;
-		beatmaps = await DBOsuBeatmaps.findAll({
-			where: {
-				mode: 'Standard',
-				approvalStatus: {
-					[Op.not]: 'Not found',
-				},
-				BeatmapSetID: {
-					[Op.not]: null,
-				},
-				noModMap: true
-			},
-			order: Sequelize.fn('RANDOM'),
-			// because it gets random beatmaps each time, 150 limit is fine for quick reply
-			limit: 150,
-		});
-	} else if (modPool === 'HD') {
-		adaptHDStarRating = true;
-		starRating = hdStarRating;
-		beatmaps = await DBOsuBeatmaps.findAll({
-			where: {
-				mode: 'Standard',
-				approvalStatus: {
-					[Op.not]: 'Not found',
-				},
-				BeatmapSetID: {
-					[Op.not]: null,
-				},
-				hiddenMap: true
-			},
-			order: Sequelize.fn('RANDOM'),
-			// because it gets random beatmaps each time, 150 limit is fine for quick reply
-			limit: 150,
-		});
+	let userStarRating = nmStarRating;
+	if (modPool === 'HD') {
+		userStarRating = hdStarRating;
 	} else if (modPool === 'HR') {
-		starRating = hrStarRating;
-		beatmaps = await DBOsuBeatmaps.findAll({
-			where: {
-				mode: 'Standard',
-				approvalStatus: {
-					[Op.not]: 'Not found',
-				},
-				BeatmapSetID: {
-					[Op.not]: null,
-				},
-				hardRockMap: true
-			},
-			order: Sequelize.fn('RANDOM'),
-			// because it gets random beatmaps each time, 150 limit is fine for quick reply
-			limit: 150,
-		});
+		userStarRating = hrStarRating;
 	} else if (modPool === 'DT') {
-		starRating = dtStarRating;
-		beatmaps = await DBOsuBeatmaps.findAll({
-			where: {
-				mode: 'Standard',
-				approvalStatus: {
-					[Op.not]: 'Not found',
-				},
-				BeatmapSetID: {
-					[Op.not]: null,
-				},
-				doubleTimeMap: true
-			},
-			order: Sequelize.fn('RANDOM'),
-			// because it gets random beatmaps each time, 150 limit is fine for quick reply
-			limit: 150,
-		});
+		userStarRating = dtStarRating;
 	} else if (modPool === 'FM') {
-		starRating = fmStarRating;
-		beatmaps = await DBOsuBeatmaps.findAll({
-			where: {
-				mode: 'Standard',
-				approvalStatus: {
-					[Op.not]: 'Not found',
-				},
-				BeatmapSetID: {
-					[Op.not]: null,
-				},
-				freeModMap: true
-			},
-			order: Sequelize.fn('RANDOM'),
-			// because it gets random beatmaps each time, 150 limit is fine for quick reply
-			limit: 150,
-		});
+		userStarRating = fmStarRating;
 	}
 
-	// loop through beatmaps until we find one that meets the criteria =>
-	// Tourney map with the correct mod
-	// Check if the beatmap is within the user's star rating and haven't been played before
-	for (let i = 0; i < beatmaps.length; i = Math.floor(Math.random() * beatmaps.length)) {
-		// refresh the map
-		if (modPool == 'NM') {
-			beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 0 });
-		} else if (modPool == 'HD') {
-			beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 0 });
-		} else if (modPool == 'HR') {
-			beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 16 });
-		} else if (modPool == 'DT') {
-			beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 64 });
-		} else if (modPool == 'FM') {
-			beatmaps[i] = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, modBits: 0 });
-		}
-
-		if (!validSrRange(beatmaps[i], starRating, adaptHDStarRating)) {
-			beatmaps.splice(i, 1);
-			continue;
-		}
-
-		if (beatmapPlayed(beatmaps[i], commandUser.osuUserId)) {
-			beatmaps.splice(i, 1);
-			continue;
-		}
-
-		const mapScoreAmount = await DBOsuMultiScores.count({
-			where: {
-				beatmapId: beatmaps[i].beatmapId,
-				matchName: {
-					[Op.notLike]: 'MOTD:%',
-				},
-				[Op.or]: [
-					{ warmup: false },
-					{ warmup: null }
-				],
-			},
-			limit: 26,
-		});
-
-		if (mapScoreAmount < 25) {
-			beatmaps.splice(i, 1);
-			continue;
-		}
-
-		return beatmaps[i];
-	}
-}
-
-function validSrRange(beatmap, userStarRating, mod) {
-	let lowerBound = userStarRating - 0.125;
-	let upperBound = userStarRating + 0.125;
-	if (mod) {
-		beatmap.starRating = adjustHDStarRating(beatmap.starRating, beatmap.approachRate);
-	}
-	if (parseFloat(beatmap.starRating) < lowerBound || parseFloat(beatmap.starRating) > upperBound) {
-		return false;
-	} else
-		return true;
-}
-
-// returns true if the user has already played the map in the last 60 days, so we should skip it
-function beatmapPlayed(beatmap, osuUserId) {
-	let now = new Date();
-
-	// eslint-disable-next-line no-undef
-	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-	});
-
-	let mode = getBeatmapModeId(beatmap);
-
-	osuApi.getScores({ b: beatmap.beatmapId, u: osuUserId, m: mode })
-		.then(async (scores) => {
-			if (!scores[0]) {
-				return false;
-			} else {
-				let score = scores[0];
-				let date = new Date(score.raw_date);
-				let timeDiff = Math.abs(now.getTime() - date.getTime());
-				let diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-				if (diffDays < 60) {
-					return true;
-				} else if (score.rank === 'S') {
-					return true;
-				} else {
-					return false;
-				}
-			}
-			// eslint-disable-next-line no-unused-vars
-		}).catch(err => {
-			return true;
-		});
+	return await getValidTournamentBeatmap({ modPool: modPool, lowerBound: userStarRating - 0.125, upperBound: userStarRating + 0.125, mode: 'Standard', osuUserId: commandUser.osuUserId, checkPlayed: true });
 }
