@@ -1410,16 +1410,8 @@ module.exports = {
 	},
 	async createDuelMatch(client, bancho, interaction, averageStarRating, lowerBound, upperBound, onlyRanked, firstUser, secondUser, thirdUser, fourthUser) {
 		if (interaction) {
-			await interaction.editReply('Duel has been accepted. Creating pool and lobby...');
+			await interaction.editReply('Duel has been accepted. Getting necessary data...');
 		}
-
-		//Set up the mappools
-		let dbMaps = [];
-
-		// Set up the modpools
-		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
-		shuffle(modPools);
-		modPools.push('NM', 'FM');
 
 		logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 1 scores');
 		const player1Scores = await DBOsuMultiScores.findAll({
@@ -1583,139 +1575,10 @@ module.exports = {
 			}
 		}
 
-		//Get the map for each modpool; limited by drain time, star rating and both players either having played or not played it
-		for (let i = 0; i < modPools.length; i++) {
-			let dbBeatmap = null;
-
-			if (i === 6) {
-				//TieBreaker
-				dbBeatmap = await getValidTournamentBeatmapFunction({
-					modPool: 'FM',
-					lowerBound: lowerBound,
-					upperBound: upperBound,
-					mode: 'Standard',
-					upperDrain: 360,
-					lowerDrain: 270,
-					upperCircleSize: 5,
-					lowerApproach: 8,
-					avoidMaps: avoidMaps,
-					onlyRanked: onlyRanked,
-				});
-			} else if (modPools[i] === 'NM') {
-				dbBeatmap = await getValidTournamentBeatmapFunction({
-					modPool: 'NM',
-					lowerBound: lowerBound,
-					upperBound: upperBound,
-					mode: 'Standard',
-					upperDrain: 270,
-					lowerDrain: 100,
-					avoidMaps: avoidMaps,
-					onlyRanked: onlyRanked,
-				});
-			} else if (modPools[i] === 'HD') {
-				if (Math.random() > 0.3) {
-					//70% not HD2
-					dbBeatmap = await getValidTournamentBeatmapFunction({
-						modPool: 'HD',
-						lowerBound: lowerBound,
-						upperBound: upperBound,
-						mode: 'Standard',
-						upperDrain: 270,
-						lowerDrain: 100,
-						lowerApproach: 8.5,
-						avoidMaps: avoidMaps,
-						onlyRanked: onlyRanked,
-					});
-				} else {
-					//30% HD2
-					dbBeatmap = await getValidTournamentBeatmapFunction({
-						modPool: 'HD',
-						lowerBound: lowerBound,
-						upperBound: upperBound,
-						mode: 'Standard',
-						upperDrain: 270,
-						lowerDrain: 100,
-						upperApproach: 8,
-						avoidMaps: avoidMaps,
-						onlyRanked: onlyRanked,
-					});
-				}
-			} else if (modPools[i] === 'HR') {
-				if (Math.random() > 0.3) {
-					//70% not HR2
-					dbBeatmap = await getValidTournamentBeatmapFunction({
-						modPool: 'HR',
-						lowerBound: lowerBound,
-						upperBound: upperBound,
-						mode: 'Standard',
-						upperDrain: 270,
-						lowerDrain: 100,
-						upperCircleSize: 4.6,
-						avoidMaps: avoidMaps,
-						onlyRanked: onlyRanked,
-					});
-				} else {
-					//30% HR2
-					dbBeatmap = await getValidTournamentBeatmapFunction({
-						modPool: 'HR',
-						lowerBound: lowerBound,
-						upperBound: upperBound,
-						mode: 'Standard',
-						upperDrain: 270,
-						lowerDrain: 100,
-						lowerCircleSize: 5,
-						avoidMaps: avoidMaps,
-						onlyRanked: onlyRanked,
-					});
-				}
-			} else if (modPools[i] === 'DT') {
-				dbBeatmap = await getValidTournamentBeatmapFunction({
-					modPool: 'DT',
-					lowerBound: lowerBound,
-					upperBound: upperBound,
-					mode: 'Standard',
-					upperDrain: 405,
-					lowerDrain: 120,
-					avoidMaps: avoidMaps,
-					onlyRanked: onlyRanked,
-				});
-			} else if (modPools[i] === 'FM') {
-				if (Math.random() > 0.5) {
-					//50% FM2
-					dbBeatmap = await getValidTournamentBeatmapFunction({
-						modPool: 'FM',
-						lowerBound: lowerBound,
-						upperBound: upperBound,
-						mode: 'Standard',
-						upperDrain: 270,
-						lowerDrain: 100,
-						lowerCircleSize: 5,
-						upperApproach: 8,
-						avoidMaps: avoidMaps,
-						onlyRanked: onlyRanked,
-					});
-				} else {
-					//50% not FM2 (and not too low cs only, AR can go for whatever)
-					dbBeatmap = await getValidTournamentBeatmapFunction({
-						modPool: 'FM',
-						lowerBound: lowerBound,
-						upperBound: upperBound,
-						mode: 'Standard',
-						upperDrain: 270,
-						lowerDrain: 100,
-						upperCircleSize: 4.5,
-						avoidMaps: avoidMaps,
-						onlyRanked: onlyRanked,
-					});
-				}
-			}
-
-			dbMaps.push(dbBeatmap);
-			avoidMaps.push(dbBeatmap.beatmapId);
-		}
-
-		modPools[6] = 'FreeMod';
-		modPools[modPools.indexOf('FM')] = 'FreeMod';
+		// Set up the modpools
+		let modPools = ['NM', 'HD', 'HR', 'DT', 'FreeMod'];
+		shuffle(modPools);
+		modPools.push('NM', 'FreeMod');
 
 		//Set up the lobby
 		let channel = null;
@@ -1865,8 +1728,11 @@ module.exports = {
 
 					await channel.sendMessage(`Average star rating of all players: ${Math.round(averageStarRating * 100) / 100}`);
 
-					while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
-						await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+					let nextMap = await getNextMap(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
+					avoidMaps.push(nextMap.beatmapId);
+
+					while (lobby._beatmapId != nextMap.beatmapId) {
+						await channel.sendMessage(`!mp map ${nextMap.beatmapId}`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
 					}
 
@@ -1887,14 +1753,13 @@ module.exports = {
 						await new Promise(resolve => setTimeout(resolve, 5000));
 					}
 
-					let mapInfo = await getOsuMapInfo(dbMaps[mapIndex]);
+					let mapInfo = await getOsuMapInfo(nextMap);
 					await channel.sendMessage(mapInfo);
 					if (modPools[mapIndex] === 'FreeMod') {
 						await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
 					}
 					await channel.sendMessage('Everyone please ready up!');
 					await channel.sendMessage('!mp timer 120');
-					mapIndex++;
 				}
 			}
 		});
@@ -1917,7 +1782,7 @@ module.exports = {
 		});
 
 		lobby.on('matchFinished', async (results) => {
-			if (modPools[mapIndex - 1] === 'FreeMod') {
+			if (modPools[mapIndex] === 'FreeMod') {
 				for (let i = 0; i < results.length; i++) {
 					//Increase the score by 1.7 if EZ was played
 					if (results[i].player.mods) {
@@ -1929,7 +1794,7 @@ module.exports = {
 					}
 				}
 			}
-			if (modPools[mapIndex - 1] === 'FreeMod' && mapIndex - 1 < 6) {
+			if (modPools[mapIndex] === 'FreeMod' && mapIndex < 6) {
 				for (let i = 0; i < results.length; i++) {
 					//Reduce the score by 0.5 if it was FreeMod and no mods / only nofail was picked
 					if (!results[i].player.mods || results[i].player.mods.length === 0 || results[i].player.mods.length === 1 && results[i].player.mods[0].enumValue === 1) {
@@ -2010,11 +1875,21 @@ module.exports = {
 			}
 			await channel.sendMessage(`Score: ${teamname1} | ${scores[0]} - ${scores[1]} | ${teamname2}`);
 
-			if (mapIndex < dbMaps.length && scores[0] < 4 && scores[1] < 4) {
+			if (scores[0] < 4 && scores[1] < 4) {
+				mapIndex++;
 				lobbyStatus = 'Waiting for start';
 
-				while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
-					await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
+				let nextMap = null;
+				if (scores[0] + scores[1] === 6) {
+					nextMap = await getNextMap('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
+				} else {
+					nextMap = await getNextMap(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
+				}
+				avoidMaps.push(nextMap.beatmapId);
+
+
+				while (lobby._beatmapId != nextMap.beatmapId) {
+					await channel.sendMessage(`!mp map ${nextMap.beatmapId}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
 				}
 
@@ -2035,7 +1910,7 @@ module.exports = {
 					await new Promise(resolve => setTimeout(resolve, 5000));
 				}
 
-				let mapInfo = await getOsuMapInfo(dbMaps[mapIndex]);
+				let mapInfo = await getOsuMapInfo(nextMap);
 				await channel.sendMessage(mapInfo);
 				await channel.sendMessage('Everyone please ready up!');
 				if (modPools[mapIndex] === 'FreeMod' && mapIndex < 6) {
@@ -2044,7 +1919,6 @@ module.exports = {
 					await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
 				}
 				await channel.sendMessage('!mp timer 120');
-				mapIndex++;
 			} else {
 				lobbyStatus = 'Lobby finished';
 
@@ -5169,4 +5043,138 @@ function getBeatmapModeIdFunction(beatmap) {
 		gameMode = 2;
 	}
 	return gameMode;
+}
+
+async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps) {
+	if (modPool === 'NM') {
+		return await getValidTournamentBeatmapFunction({
+			modPool: 'NM',
+			lowerBound: lowerBound,
+			upperBound: upperBound,
+			mode: 'Standard',
+			upperDrain: 270,
+			lowerDrain: 100,
+			avoidMaps: avoidMaps,
+			onlyRanked: onlyRanked,
+		});
+	}
+
+	if (modPool === 'HD') {
+		if (Math.random() > 0.3) {
+			//70% not HD2
+			return await getValidTournamentBeatmapFunction({
+				modPool: 'HD',
+				lowerBound: lowerBound,
+				upperBound: upperBound,
+				mode: 'Standard',
+				upperDrain: 270,
+				lowerDrain: 100,
+				lowerApproach: 8.5,
+				avoidMaps: avoidMaps,
+				onlyRanked: onlyRanked,
+			});
+		}
+
+		//30% HD2
+		return await getValidTournamentBeatmapFunction({
+			modPool: 'HD',
+			lowerBound: lowerBound,
+			upperBound: upperBound,
+			mode: 'Standard',
+			upperDrain: 270,
+			lowerDrain: 100,
+			upperApproach: 8,
+			avoidMaps: avoidMaps,
+			onlyRanked: onlyRanked,
+		});
+	}
+
+	if (modPool === 'HR') {
+		if (Math.random() > 0.3) {
+			//70% not HR2
+			return await getValidTournamentBeatmapFunction({
+				modPool: 'HR',
+				lowerBound: lowerBound,
+				upperBound: upperBound,
+				mode: 'Standard',
+				upperDrain: 270,
+				lowerDrain: 100,
+				upperCircleSize: 4.6,
+				avoidMaps: avoidMaps,
+				onlyRanked: onlyRanked,
+			});
+		}
+
+		//30% HR2
+		return await getValidTournamentBeatmapFunction({
+			modPool: 'HR',
+			lowerBound: lowerBound,
+			upperBound: upperBound,
+			mode: 'Standard',
+			upperDrain: 270,
+			lowerDrain: 100,
+			lowerCircleSize: 5,
+			avoidMaps: avoidMaps,
+			onlyRanked: onlyRanked,
+		});
+	}
+
+	if (modPool === 'DT') {
+		return await getValidTournamentBeatmapFunction({
+			modPool: 'DT',
+			lowerBound: lowerBound,
+			upperBound: upperBound,
+			mode: 'Standard',
+			upperDrain: 405,
+			lowerDrain: 120,
+			avoidMaps: avoidMaps,
+			onlyRanked: onlyRanked,
+		});
+	}
+
+	if (modPool === 'FreeMod') {
+		if (Math.random() > 0.5) {
+			//50% FM2
+			return await getValidTournamentBeatmapFunction({
+				modPool: 'FM',
+				lowerBound: lowerBound,
+				upperBound: upperBound,
+				mode: 'Standard',
+				upperDrain: 270,
+				lowerDrain: 100,
+				lowerCircleSize: 5,
+				upperApproach: 8,
+				avoidMaps: avoidMaps,
+				onlyRanked: onlyRanked,
+			});
+		}
+
+		//50% not FM2 (and not too low cs only, AR can go for whatever)
+		return await getValidTournamentBeatmapFunction({
+			modPool: 'FM',
+			lowerBound: lowerBound,
+			upperBound: upperBound,
+			mode: 'Standard',
+			upperDrain: 270,
+			lowerDrain: 100,
+			upperCircleSize: 4.5,
+			avoidMaps: avoidMaps,
+			onlyRanked: onlyRanked,
+		});
+	}
+
+	if (modPool === 'TieBreaker') {
+		return await getValidTournamentBeatmapFunction({
+			modPool: 'FM',
+			lowerBound: lowerBound,
+			upperBound: upperBound,
+			mode: 'Standard',
+			upperDrain: 360,
+			lowerDrain: 270,
+			upperCircleSize: 5,
+			lowerApproach: 8,
+			avoidMaps: avoidMaps,
+			onlyRanked: onlyRanked,
+		});
+	}
 }
