@@ -1714,8 +1714,6 @@ module.exports = {
 			avoidMaps.push(dbBeatmap.beatmapId);
 		}
 
-		console.log(modPools, dbMaps);
-
 		modPools[6] = 'FreeMod';
 		modPools[modPools.indexOf('FM')] = 'FreeMod';
 
