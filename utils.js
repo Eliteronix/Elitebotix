@@ -1885,7 +1885,11 @@ module.exports = {
 				} else {
 					nextMap = await getNextMap(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
 				}
-				avoidMaps.push(nextMap.beatmapId);
+				try {
+					avoidMaps.push(nextMap.beatmapId);
+				} catch (err) {
+					console.log(mapIndex, modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps, err);
+				}
 
 
 				while (lobby._beatmapId != nextMap.beatmapId) {
