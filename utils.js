@@ -1415,7 +1415,6 @@ module.exports = {
 
 		//Set up the mappools
 		let dbMaps = [];
-		let dbMapIds = [];
 
 		// Set up the modpools
 		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
@@ -1507,598 +1506,215 @@ module.exports = {
 			}
 		}
 
-		//Get the map for each modpool; limited by drain time, star rating and both players either having played or not played it
-		for (let i = 0; i < modPools.length; i++) {
-			let dbBeatmap = null;
-			let beatmaps = null;
+		let avoidMaps = [];
 
-			if (i === 6) {
-				let TODOSetDbBeatmap;
-				let TODOAddCS;
-				let TODOAddAR;
-				await getValidTournamentBeatmapFunction({ modPool: 'FM', lowerBound: lowerBound, upperBound: upperBound, mode: 'Standard', upperDrain: 360, lowerDrain: 270 });
-				// console.log('Duel Match: Get all TB Beatmaps');
-				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps TB');
-				if (!thirdUser) {
-					beatmaps = await DBOsuBeatmaps.findAll({
-						where: {
-							mode: 'Standard',
-							approvalStatus: {
-								[Op.not]: 'Not found',
-							},
-							[Op.or]: {
-								noModMap: true,
-								freeModMap: true,
-							},
-							drainLength: {
-								[Op.and]: {
-									[Op.gte]: 270,
-									[Op.lte]: 360,
-								}
-							},
-							starRating: {
-								[Op.and]: {
-									[Op.gte]: lowerBound,
-									[Op.lte]: upperBound,
-								}
-							},
-							beatmapId: {
-								[Op.or]: {
-									[Op.and]: {
-										[Op.in]: player1Scores,
-										[Op.in]: player2Scores,
-									},
-									[Op.and]: {
-										[Op.notIn]: player1Scores,
-										[Op.notIn]: player2Scores,
-									},
-								}
-							},
-							circleSize: {
-								[Op.lte]: 5,
-							},
-							approachRate: {
-								[Op.gte]: 8,
-							},
-						}
-					});
-				} else {
-					beatmaps = await DBOsuBeatmaps.findAll({
-						where: {
-							mode: 'Standard',
-							approvalStatus: {
-								[Op.not]: 'Not found',
-							},
-							[Op.or]: {
-								noModMap: true,
-								freeModMap: true,
-							},
-							drainLength: {
-								[Op.and]: {
-									[Op.gte]: 270,
-									[Op.lte]: 360,
-								}
-							},
-							starRating: {
-								[Op.and]: {
-									[Op.gte]: lowerBound,
-									[Op.lte]: upperBound,
-								}
-							},
-							beatmapId: {
-								[Op.or]: {
-									[Op.and]: {
-										[Op.in]: player1Scores,
-										[Op.in]: player2Scores,
-										[Op.in]: player3Scores,
-										[Op.in]: player4Scores,
-									},
-									[Op.and]: {
-										[Op.notIn]: player1Scores,
-										[Op.notIn]: player2Scores,
-										[Op.notIn]: player3Scores,
-										[Op.notIn]: player4Scores,
-									},
-								}
-							},
-							circleSize: {
-								[Op.lte]: 5,
-							},
-							approachRate: {
-								[Op.gte]: 8,
-							},
-						}
-					});
-				}
-				// console.log('Duel Match: Grabbed all TB Beatmaps');
-			} else if (modPools[i] === 'NM') {
-				// console.log('Duel Match: Get all NM Beatmaps');
-				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps NM');
-				if (!thirdUser) {
-					beatmaps = await DBOsuBeatmaps.findAll({
-						where: {
-							mode: 'Standard',
-							approvalStatus: {
-								[Op.not]: 'Not found',
-							},
-							noModMap: true,
-							drainLength: {
-								[Op.and]: {
-									[Op.gte]: 100,
-									[Op.lte]: 270,
-								}
-							},
-							starRating: {
-								[Op.and]: {
-									[Op.gte]: lowerBound,
-									[Op.lte]: upperBound,
-								}
-							},
-							beatmapId: {
-								[Op.or]: {
-									[Op.and]: {
-										[Op.in]: player1Scores,
-										[Op.in]: player2Scores,
-									},
-									[Op.and]: {
-										[Op.notIn]: player1Scores,
-										[Op.notIn]: player2Scores,
-									},
-								}
-							},
-						}
-					});
-				} else {
-					beatmaps = await DBOsuBeatmaps.findAll({
-						where: {
-							mode: 'Standard',
-							approvalStatus: {
-								[Op.not]: 'Not found',
-							},
-							noModMap: true,
-							drainLength: {
-								[Op.and]: {
-									[Op.gte]: 100,
-									[Op.lte]: 270,
-								}
-							},
-							starRating: {
-								[Op.and]: {
-									[Op.gte]: lowerBound,
-									[Op.lte]: upperBound,
-								}
-							},
-							beatmapId: {
-								[Op.or]: {
-									[Op.and]: {
-										[Op.in]: player1Scores,
-										[Op.in]: player2Scores,
-										[Op.in]: player3Scores,
-										[Op.in]: player4Scores,
-									},
-									[Op.and]: {
-										[Op.notIn]: player1Scores,
-										[Op.notIn]: player2Scores,
-										[Op.notIn]: player3Scores,
-										[Op.notIn]: player4Scores,
-									},
-								}
-							},
-						}
-					});
-				}
-				// console.log('Duel Match: Grabbed all NM Beatmaps');
-			} else if (modPools[i] === 'HD') {
-				// console.log('Duel Match: Get all HD Beatmaps');
-				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps HD');
-				let HDLowerBound = lowerBound - 0.8;
-				let HDUpperBound = upperBound - 0.15;
-				if (!thirdUser) {
-					beatmaps = await DBOsuBeatmaps.findAll({
-						where: {
-							mode: 'Standard',
-							approvalStatus: {
-								[Op.not]: 'Not found',
-							},
-							hiddenMap: true,
-							drainLength: {
-								[Op.and]: {
-									[Op.gte]: 100,
-									[Op.lte]: 270,
-								}
-							},
-							starRating: {
-								[Op.and]: {
-									[Op.gte]: HDLowerBound,
-									[Op.lte]: HDUpperBound,
-								}
-							},
-							beatmapId: {
-								[Op.or]: {
-									[Op.and]: {
-										[Op.in]: player1Scores,
-										[Op.in]: player2Scores,
-									},
-									[Op.and]: {
-										[Op.notIn]: player1Scores,
-										[Op.notIn]: player2Scores,
-									},
-								}
-							},
-						}
-					});
-				} else {
-					beatmaps = await DBOsuBeatmaps.findAll({
-						where: {
-							mode: 'Standard',
-							approvalStatus: {
-								[Op.not]: 'Not found',
-							},
-							hiddenMap: true,
-							drainLength: {
-								[Op.and]: {
-									[Op.gte]: 100,
-									[Op.lte]: 270,
-								}
-							},
-							starRating: {
-								[Op.and]: {
-									[Op.gte]: HDLowerBound,
-									[Op.lte]: HDUpperBound,
-								}
-							},
-							beatmapId: {
-								[Op.or]: {
-									[Op.and]: {
-										[Op.in]: player1Scores,
-										[Op.in]: player2Scores,
-										[Op.in]: player3Scores,
-										[Op.in]: player4Scores,
-									},
-									[Op.and]: {
-										[Op.notIn]: player1Scores,
-										[Op.notIn]: player2Scores,
-										[Op.notIn]: player3Scores,
-										[Op.notIn]: player4Scores,
-									},
-								}
-							},
-						}
-					});
-				}
-				// console.log('Duel Match: Grabbed all HD Beatmaps');
-			} else if (modPools[i] === 'HR') {
-				// console.log('Duel Match: Get all HR Beatmaps');
-				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps HR');
-				if (!thirdUser) {
-					beatmaps = await DBOsuBeatmaps.findAll({
-						where: {
-							mode: 'Standard',
-							approvalStatus: {
-								[Op.not]: 'Not found',
-							},
-							hardRockMap: true,
-							drainLength: {
-								[Op.and]: {
-									[Op.gte]: 100,
-									[Op.lte]: 270,
-								}
-							},
-							starRating: {
-								[Op.and]: {
-									[Op.gte]: lowerBound,
-									[Op.lte]: upperBound,
-								}
-							},
-							beatmapId: {
-								[Op.or]: {
-									[Op.and]: {
-										[Op.in]: player1Scores,
-										[Op.in]: player2Scores,
-									},
-									[Op.and]: {
-										[Op.notIn]: player1Scores,
-										[Op.notIn]: player2Scores,
-									},
-								}
-							},
-						}
-					});
-				} else {
-					beatmaps = await DBOsuBeatmaps.findAll({
-						where: {
-							mode: 'Standard',
-							approvalStatus: {
-								[Op.not]: 'Not found',
-							},
-							hardRockMap: true,
-							drainLength: {
-								[Op.and]: {
-									[Op.gte]: 100,
-									[Op.lte]: 270,
-								}
-							},
-							starRating: {
-								[Op.and]: {
-									[Op.gte]: lowerBound,
-									[Op.lte]: upperBound,
-								}
-							},
-							beatmapId: {
-								[Op.or]: {
-									[Op.and]: {
-										[Op.in]: player1Scores,
-										[Op.in]: player2Scores,
-										[Op.in]: player3Scores,
-										[Op.in]: player4Scores,
-									},
-									[Op.and]: {
-										[Op.notIn]: player1Scores,
-										[Op.notIn]: player2Scores,
-										[Op.notIn]: player3Scores,
-										[Op.notIn]: player4Scores,
-									},
-								}
-							},
-						}
-					});
-				}
-				// console.log('Duel Match: Grabbed all HR Beatmaps');
-			} else if (modPools[i] === 'DT') {
-				// console.log('Duel Match: Get all DT Beatmaps');
-				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps DT');
-				if (!thirdUser) {
-					beatmaps = await DBOsuBeatmaps.findAll({
-						where: {
-							mode: 'Standard',
-							approvalStatus: {
-								[Op.not]: 'Not found',
-							},
-							doubleTimeMap: true,
-							drainLength: {
-								[Op.and]: {
-									[Op.gte]: 120,
-									[Op.lte]: 405,
-								}
-							},
-							starRating: {
-								[Op.and]: {
-									[Op.gte]: lowerBound,
-									[Op.lte]: upperBound,
-								}
-							},
-							beatmapId: {
-								[Op.or]: {
-									[Op.and]: {
-										[Op.in]: player1Scores,
-										[Op.in]: player2Scores,
-									},
-									[Op.and]: {
-										[Op.notIn]: player1Scores,
-										[Op.notIn]: player2Scores,
-									},
-								}
-							},
-						}
-					});
-				} else {
-					beatmaps = await DBOsuBeatmaps.findAll({
-						where: {
-							mode: 'Standard',
-							approvalStatus: {
-								[Op.not]: 'Not found',
-							},
-							doubleTimeMap: true,
-							drainLength: {
-								[Op.and]: {
-									[Op.gte]: 120,
-									[Op.lte]: 405,
-								}
-							},
-							starRating: {
-								[Op.and]: {
-									[Op.gte]: lowerBound,
-									[Op.lte]: upperBound,
-								}
-							},
-							beatmapId: {
-								[Op.or]: {
-									[Op.and]: {
-										[Op.in]: player1Scores,
-										[Op.in]: player2Scores,
-										[Op.in]: player3Scores,
-										[Op.in]: player4Scores,
-									},
-									[Op.and]: {
-										[Op.notIn]: player1Scores,
-										[Op.notIn]: player2Scores,
-										[Op.notIn]: player3Scores,
-										[Op.notIn]: player4Scores,
-									},
-								}
-							},
-						}
-					});
-				}
-				// console.log('Duel Match: Grabbed all DT Beatmaps');
-			} else if (modPools[i] === 'FM') {
-				// console.log('Duel Match: Get all FM Beatmaps');
-				logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuBeatmaps FM');
-				if (!thirdUser) {
-					beatmaps = await DBOsuBeatmaps.findAll({
-						where: {
-							mode: 'Standard',
-							approvalStatus: {
-								[Op.not]: 'Not found',
-							},
-							freeModMap: true,
-							drainLength: {
-								[Op.and]: {
-									[Op.gte]: 100,
-									[Op.lte]: 270,
-								}
-							},
-							starRating: {
-								[Op.and]: {
-									[Op.gte]: lowerBound,
-									[Op.lte]: upperBound,
-								}
-							},
-							beatmapId: {
-								[Op.or]: {
-									[Op.and]: {
-										[Op.in]: player1Scores,
-										[Op.in]: player2Scores,
-									},
-									[Op.and]: {
-										[Op.notIn]: player1Scores,
-										[Op.notIn]: player2Scores,
-									},
-								}
-							},
-						}
-					});
-				} else {
-					beatmaps = await DBOsuBeatmaps.findAll({
-						where: {
-							mode: 'Standard',
-							approvalStatus: {
-								[Op.not]: 'Not found',
-							},
-							freeModMap: true,
-							drainLength: {
-								[Op.and]: {
-									[Op.gte]: 100,
-									[Op.lte]: 270,
-								}
-							},
-							starRating: {
-								[Op.and]: {
-									[Op.gte]: lowerBound,
-									[Op.lte]: upperBound,
-								}
-							},
-							beatmapId: {
-								[Op.or]: {
-									[Op.and]: {
-										[Op.in]: player1Scores,
-										[Op.in]: player2Scores,
-										[Op.in]: player3Scores,
-										[Op.in]: player4Scores,
-									},
-									[Op.and]: {
-										[Op.notIn]: player1Scores,
-										[Op.notIn]: player2Scores,
-										[Op.notIn]: player3Scores,
-										[Op.notIn]: player4Scores,
-									},
-								}
-							},
-						}
-					});
-				}
-				// console.log('Duel Match: Grabbed all FM Beatmaps');
+		//Add all maps that have not been played by everyone to avoidMaps
+		for (let i = 0; i < player1Scores.length; i++) {
+			if (!player2Scores.includes(player1Scores[i]) && !avoidMaps.includes(player1Scores[i])) {
+				avoidMaps.push(player1Scores[i]);
+				continue;
 			}
 
-			if (interaction) {
-				await interaction.editReply(`Finding a ${modPools[i]} map out of ${beatmaps.length} possible maps...`);
-			}
-
-			while (dbBeatmap === null) {
-				if (interaction && beatmaps.length && beatmaps.length % 5 === 0) {
-					await interaction.editReply(`Finding a ${modPools[i]} map out of ${beatmaps.length} possible maps...`);
-				}
-
-				const index = Math.floor(Math.random() * beatmaps.length);
-
-				if (!beatmaps.length) {
-					// console.log('Duel Match: No more maps left to choose from');
-					if (!thirdUser) {
-						if (interaction) {
-							return await interaction.editReply(`<@${firstUser.userId}>, <@${secondUser.userId}> the bot could not find enough viable maps with this criteria. (SR: ${Math.round(averageStarRating * 100) / 100}*)`);
-						} else {
-							return console.log(`Queued Duel Match: No more maps left to choose from (SR: ${Math.round(averageStarRating * 100) / 100}*)`);
-						}
-					} else {
-						if (interaction) {
-							return await interaction.editReply(`<@${firstUser.userId}>, <@${secondUser.userId}>, <@${thirdUser.userId}>, <@${fourthUser.userId}> the bot could not find enough viable maps with this criteria. (SR: ${Math.round(averageStarRating * 100) / 100}*)`);
-						} else {
-							return console.log(`Queued Duel Match: No more maps left to choose from (SR: ${Math.round(averageStarRating * 100) / 100}*)`);
-						}
-					}
-				}
-
-				if (!beatmaps[index]) {
-					beatmaps.splice(index, 1);
-					// console.log('Duel Match: Beatmap was null, removed from array');
+			if (thirdUser) {
+				if (!player3Scores.includes(player1Scores[i]) && !avoidMaps.includes(player1Scores[i])) {
+					avoidMaps.push(player1Scores[i]);
 					continue;
 				}
 
-				if (parseInt(beatmaps[index].drainLength) < 100 || parseInt(beatmaps[index].drainLength) > 405) {
-					beatmaps.splice(index, 1);
-					// console.log('Duel Match: Beatmap drain length was out of bounds, removed from array');
+				if (!player4Scores.includes(player1Scores[i]) && !avoidMaps.includes(player1Scores[i])) {
+					avoidMaps.push(player1Scores[i]);
 					continue;
-				}
-
-				if (modPools[i] === 'HD') {
-					// console.log('Duel Match: Refresh the HD Beatmap');
-					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
-
-					if (!beatmaps[index]) {
-						beatmaps.splice(index, 1);
-						// console.log('Duel Match: Beatmap was null, removed from array');
-						continue;
-					}
-
-					beatmaps[index].starRating = adjustHDStarRatingFunction(beatmaps[index].starRating, beatmaps[index].approachRate);
-					// console.log('Duel Match: Refreshed the HD Beatmap');
-				} else if (modPools[i] === 'HR') {
-					// console.log('Duel Match: Refresh the HR Beatmap');
-					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 16 });
-					// console.log('Duel Match: Refreshed the HR Beatmap');
-				} else if (modPools[i] === 'DT') {
-					// console.log('Duel Match: Refresh the DT Beatmap');
-					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 64 });
-					// console.log('Duel Match: Refreshed the DT Beatmap');
-				} else {
-					// console.log('Duel Match: Refresh the NM/FM Beatmap');
-					beatmaps[index] = await getOsuBeatmapFunction({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
-					// console.log('Duel Match: Refreshed the NM/FM Beatmap');
-				}
-
-				if (!beatmaps[index] || onlyRanked && beatmaps[index].approvalStatus !== 'Ranked') {
-					beatmaps.splice(index, 1);
-					// console.log('Beatmap was null or not ranked, removing from pool');
-					continue;
-				}
-
-				// console.log('Duel Match: Get beatmap score count');
-				const mapScoreAmount = await DBOsuMultiScores.count({
-					where: {
-						beatmapId: beatmaps[index].beatmapId,
-						matchName: {
-							[Op.notLike]: 'MOTD:%',
-						},
-						[Op.or]: [
-							{ warmup: false },
-							{ warmup: null }
-						],
-					}
-				});
-				// console.log('Duel Match: Grabbed beatmap score count');
-
-				// eslint-disable-next-line no-undef
-				if (!beatmaps[index] || parseFloat(beatmaps[index].starRating) < lowerBound || parseFloat(beatmaps[index].starRating) > upperBound || mapScoreAmount < 25 && process.env.SERVER !== 'Dev') {
-					beatmaps.splice(index, 1);
-					// console.log('Beatmap was null, lower bound, or upper bound, or score count was less than 25, removing from pool');
-				} else if (!dbMapIds.includes(beatmaps[index].beatmapsetId)) {
-					dbBeatmap = beatmaps[index];
-					dbMapIds.push(beatmaps[index].beatmapsetId);
-					dbMaps.push(beatmaps[index]);
-					// console.log('Duel Match: Beatmap is valid, adding to pool');
 				}
 			}
 		}
+
+		for (let i = 0; i < player2Scores.length; i++) {
+			if (!player1Scores.includes(player2Scores[i]) && !avoidMaps.includes(player2Scores[i])) {
+				avoidMaps.push(player2Scores[i]);
+				continue;
+			}
+
+			if (thirdUser) {
+				if (!player3Scores.includes(player2Scores[i]) && !avoidMaps.includes(player2Scores[i])) {
+					avoidMaps.push(player2Scores[i]);
+					continue;
+				}
+
+				if (!player4Scores.includes(player2Scores[i]) && !avoidMaps.includes(player2Scores[i])) {
+					avoidMaps.push(player2Scores[i]);
+					continue;
+				}
+			}
+		}
+
+		if (thirdUser) {
+			for (let i = 0; i < player3Scores.length; i++) {
+				if (!player1Scores.includes(player3Scores[i]) && !avoidMaps.includes(player3Scores[i])) {
+					avoidMaps.push(player3Scores[i]);
+					continue;
+				}
+
+				if (!player2Scores.includes(player3Scores[i]) && !avoidMaps.includes(player3Scores[i])) {
+					avoidMaps.push(player3Scores[i]);
+					continue;
+				}
+
+				if (!player4Scores.includes(player3Scores[i]) && !avoidMaps.includes(player3Scores[i])) {
+					avoidMaps.push(player3Scores[i]);
+					continue;
+				}
+			}
+
+			for (let i = 0; i < player4Scores.length; i++) {
+				if (!player1Scores.includes(player4Scores[i]) && !avoidMaps.includes(player4Scores[i])) {
+					avoidMaps.push(player4Scores[i]);
+					continue;
+				}
+
+				if (!player2Scores.includes(player4Scores[i]) && !avoidMaps.includes(player4Scores[i])) {
+					avoidMaps.push(player4Scores[i]);
+					continue;
+				}
+
+				if (!player3Scores.includes(player4Scores[i]) && !avoidMaps.includes(player4Scores[i])) {
+					avoidMaps.push(player4Scores[i]);
+					continue;
+				}
+			}
+		}
+
+		//Get the map for each modpool; limited by drain time, star rating and both players either having played or not played it
+		for (let i = 0; i < modPools.length; i++) {
+			let dbBeatmap = null;
+
+			if (i === 6) {
+				//TieBreaker
+				dbBeatmap = await getValidTournamentBeatmapFunction({
+					modPool: 'FM',
+					lowerBound: lowerBound,
+					upperBound: upperBound,
+					mode: 'Standard',
+					upperDrain: 360,
+					lowerDrain: 270,
+					upperCircleSize: 5,
+					lowerApproach: 8,
+					avoidMaps: avoidMaps,
+					onlyRanked: onlyRanked,
+				});
+			} else if (modPools[i] === 'NM') {
+				dbBeatmap = await getValidTournamentBeatmapFunction({
+					modPool: 'NM',
+					lowerBound: lowerBound,
+					upperBound: upperBound,
+					mode: 'Standard',
+					upperDrain: 270,
+					lowerDrain: 100,
+					avoidMaps: avoidMaps,
+					onlyRanked: onlyRanked,
+				});
+			} else if (modPools[i] === 'HD') {
+				if (Math.random() > 0.3) {
+					//70% not HD2
+					dbBeatmap = await getValidTournamentBeatmapFunction({
+						modPool: 'HD',
+						lowerBound: lowerBound,
+						upperBound: upperBound,
+						mode: 'Standard',
+						upperDrain: 270,
+						lowerDrain: 100,
+						lowerApproach: 8.5,
+						avoidMaps: avoidMaps,
+						onlyRanked: onlyRanked,
+					});
+				} else {
+					//30% HD2
+					dbBeatmap = await getValidTournamentBeatmapFunction({
+						modPool: 'HD',
+						lowerBound: lowerBound,
+						upperBound: upperBound,
+						mode: 'Standard',
+						upperDrain: 270,
+						lowerDrain: 100,
+						upperApproach: 8,
+						avoidMaps: avoidMaps,
+						onlyRanked: onlyRanked,
+					});
+				}
+			} else if (modPools[i] === 'HR') {
+				if (Math.random() > 0.3) {
+					//70% not HR2
+					dbBeatmap = await getValidTournamentBeatmapFunction({
+						modPool: 'HR',
+						lowerBound: lowerBound,
+						upperBound: upperBound,
+						mode: 'Standard',
+						upperDrain: 270,
+						lowerDrain: 100,
+						upperCircleSize: 4.6,
+						avoidMaps: avoidMaps,
+						onlyRanked: onlyRanked,
+					});
+				} else {
+					//30% HR2
+					dbBeatmap = await getValidTournamentBeatmapFunction({
+						modPool: 'HR',
+						lowerBound: lowerBound,
+						upperBound: upperBound,
+						mode: 'Standard',
+						upperDrain: 270,
+						lowerDrain: 100,
+						lowerCircleSize: 5,
+						avoidMaps: avoidMaps,
+						onlyRanked: onlyRanked,
+					});
+				}
+			} else if (modPools[i] === 'DT') {
+				dbBeatmap = await getValidTournamentBeatmapFunction({
+					modPool: 'DT',
+					lowerBound: lowerBound,
+					upperBound: upperBound,
+					mode: 'Standard',
+					upperDrain: 405,
+					lowerDrain: 120,
+					avoidMaps: avoidMaps,
+					onlyRanked: onlyRanked,
+				});
+			} else if (modPools[i] === 'FM') {
+				if (Math.random() > 0.5) {
+					//50% FM2
+					dbBeatmap = await getValidTournamentBeatmapFunction({
+						modPool: 'FM',
+						lowerBound: lowerBound,
+						upperBound: upperBound,
+						mode: 'Standard',
+						upperDrain: 270,
+						lowerDrain: 100,
+						lowerCircleSize: 5,
+						upperApproach: 8,
+						avoidMaps: avoidMaps,
+						onlyRanked: onlyRanked,
+					});
+				} else {
+					//50% not FM2 (and not too low cs only, AR can go for whatever)
+					dbBeatmap = await getValidTournamentBeatmapFunction({
+						modPool: 'FM',
+						lowerBound: lowerBound,
+						upperBound: upperBound,
+						mode: 'Standard',
+						upperDrain: 270,
+						lowerDrain: 100,
+						upperCircleSize: 4.5,
+						avoidMaps: avoidMaps,
+						onlyRanked: onlyRanked,
+					});
+				}
+			}
+
+			dbMaps.push(dbBeatmap);
+			avoidMaps.push(dbBeatmap.beatmapId);
+		}
+
+		console.log(modPools, dbMaps);
 
 		modPools[6] = 'FreeMod';
 		modPools[modPools.indexOf('FM')] = 'FreeMod';
@@ -5232,6 +4848,30 @@ async function getValidTournamentBeatmapFunction(input) {
 		upperDrain = input.upperDrain;
 	}
 
+	//Set the approach Rate
+	let lowerApproach = 0;
+	let upperApproach = 10;
+
+	if (input.lowerApproach) {
+		lowerApproach = input.lowerApproach;
+	}
+
+	if (input.upperApproach) {
+		upperApproach = input.upperApproach;
+	}
+
+	//Set the circle size
+	let lowerCircleSize = 0;
+	let upperCircleSize = 10;
+
+	if (input.lowerCircleSize) {
+		lowerCircleSize = input.lowerCircleSize;
+	}
+
+	if (input.upperCircleSize) {
+		upperCircleSize = input.upperCircleSize;
+	}
+
 	//Set the maps to avoid
 	let avoidMaps = [];
 
@@ -5251,6 +4891,13 @@ async function getValidTournamentBeatmapFunction(input) {
 
 	if (input.checkPlayed) {
 		checkPlayed = input.checkPlayed;
+	}
+
+	//Set if it should only be ranked maps
+	let onlyRanked = false;
+
+	if (input.onlyRanked) {
+		onlyRanked = input.onlyRanked;
 	}
 
 	let beatmaps = null;
@@ -5277,6 +4924,8 @@ async function getValidTournamentBeatmapFunction(input) {
 			limit: 150,
 		});
 	} else if (modPool === 'HD') {
+		let HDLowerBound = lowerBound - 0.8;
+		let HDUpperBound = upperBound - 0.1;
 		beatmaps = await DBOsuBeatmaps.findAll({
 			where: {
 				hiddenMap: true,
@@ -5286,8 +4935,8 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 				starRating: {
 					[Op.and]: {
-						[Op.gte]: lowerBound,
-						[Op.lte]: upperBound,
+						[Op.gte]: HDLowerBound,
+						[Op.lte]: HDUpperBound,
 					}
 				},
 				beatmapId: {
@@ -5371,11 +5020,22 @@ async function getValidTournamentBeatmapFunction(input) {
 		const index = Math.floor(Math.random() * beatmaps.length);
 		let randomBeatmap = beatmaps[index];
 
+		if (!randomBeatmap) {
+			beatmaps.splice(index, 1);
+			continue;
+		}
+
 		// refresh the map
 		if (modPool == 'NM') {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 0 });
 		} else if (modPool == 'HD') {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 0 });
+
+			if (!randomBeatmap) {
+				beatmaps.splice(index, 1);
+				continue;
+			}
+
 			randomBeatmap.starRating = adjustHDStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate);
 		} else if (modPool == 'HR') {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 16 });
@@ -5385,21 +5045,48 @@ async function getValidTournamentBeatmapFunction(input) {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 0 });
 		}
 
+		if (!randomBeatmap) {
+			beatmaps.splice(index, 1);
+			continue;
+		}
+
+		//Check star rating
 		if (randomBeatmap.starRating > upperBound || randomBeatmap.starRating < lowerBound) {
 			beatmaps.splice(index, 1);
 			continue;
 		}
 
-		if (parseInt(randomBeatmap.drainLength) > upperDrain || parseInt(randomBeatmap.starRating) < lowerDrain) {
+		//Check drain length
+		if (parseInt(randomBeatmap.drainLength) > upperDrain || parseInt(randomBeatmap.drainLength) < lowerDrain) {
 			beatmaps.splice(index, 1);
 			continue;
 		}
 
+		//Check the approach rate
+		if (parseFloat(randomBeatmap.approachRate) > upperApproach || parseFloat(randomBeatmap.approachRate) < lowerApproach) {
+			beatmaps.splice(index, 1);
+			continue;
+		}
+
+		//Check the circle size
+		if (parseFloat(randomBeatmap.circleSize) > upperCircleSize || parseFloat(randomBeatmap.circleSize) < lowerCircleSize) {
+			beatmaps.splice(index, 1);
+			continue;
+		}
+
+		//Check ranked status
+		if (onlyRanked && randomBeatmap.approvalStatus !== 'Ranked') {
+			beatmaps.splice(index, 1);
+			continue;
+		}
+
+		//Check played status
 		if (checkPlayed && beatmapPlayed(randomBeatmap, osuUserId)) {
 			beatmaps.splice(index, 1);
 			continue;
 		}
 
+		//Check usage
 		if (randomBeatmap.usedOften) {
 			console.log('Used often');
 			return randomBeatmap;
