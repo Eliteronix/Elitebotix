@@ -358,27 +358,21 @@ module.exports = {
 				});
 
 				if (serverUserActivity && serverUserActivity.updatedAt < now) {
-					await msg.channel.messages.fetch({ limit: 100 })
-						.then(async (messages) => {
-							const lastMessage = messages.filter(m => m.author.id === msg.author.id && m.content === msg.content).last();
-							if (lastMessage && msg.id === lastMessage.id) {
-								serverUserActivity.points = serverUserActivity.points + 1;
-								await serverUserActivity.save();
-								logDatabaseQueriesFunction(3, 'utils.js old updateServerUserActivity activityRoles');
-								const activityRoles = await DBActivityRoles.findAll({
-									where: { guildId: msg.guildId }
-								});
-								if (activityRoles.length) {
-									logDatabaseQueriesFunction(3, 'utils.js old updateServerUserActivity DBProcessQueue');
-									const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
-									if (!existingTask) {
-										let date = new Date();
-										date.setUTCMinutes(date.getUTCMinutes() + 5);
-										await DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
-									}
-								}
-							}
-						});
+					serverUserActivity.points = serverUserActivity.points + 1;
+					await serverUserActivity.save();
+					logDatabaseQueriesFunction(3, 'utils.js old updateServerUserActivity activityRoles');
+					const activityRoles = await DBActivityRoles.findAll({
+						where: { guildId: msg.guildId }
+					});
+					if (activityRoles.length) {
+						logDatabaseQueriesFunction(3, 'utils.js old updateServerUserActivity DBProcessQueue');
+						const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
+						if (!existingTask) {
+							let date = new Date();
+							date.setUTCMinutes(date.getUTCMinutes() + 5);
+							await DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
+						}
+					}
 				}
 
 				if (!serverUserActivity) {
