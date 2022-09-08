@@ -175,27 +175,30 @@ module.exports = {
 											} else if (json.events[i].game.scores.length === 2) {
 												//Head to head
 												let playerNames = match.name.split(/\) ?vs.? ?\(/gm);
-												let redPlayer = playerNames[0].replace(/.+\(/gm, '');
-												let bluePlayer = playerNames[1].replace(')', '');
+												//basically a check if its a tourney match (basically)
+												if (playerNames[1]) {
+													let redPlayer = playerNames[0].replace(/.+\(/gm, '');
+													let bluePlayer = playerNames[1].replace(')', '');
 
-												let redTotal = null;
-												let blueTotal = null;
+													let redTotal = null;
+													let blueTotal = null;
 
-												for (let j = 0; j < json.events[i].game.scores.length; j++) {
-													json.events[i].game.scores[j].username = await getOsuPlayerName(json.events[i].game.scores[j].user_id);
-													if (json.events[i].game.scores[j].username === redPlayer) {
-														redTotal = json.events[i].game.scores[j].score;
+													for (let j = 0; j < json.events[i].game.scores.length; j++) {
+														json.events[i].game.scores[j].username = await getOsuPlayerName(json.events[i].game.scores[j].user_id);
+														if (json.events[i].game.scores[j].username === redPlayer) {
+															redTotal = json.events[i].game.scores[j].score;
+														}
+
+														if (json.events[i].game.scores[j].username === bluePlayer) {
+															blueTotal = json.events[i].game.scores[j].score;
+														}
 													}
 
-													if (json.events[i].game.scores[j].username === bluePlayer) {
-														blueTotal = json.events[i].game.scores[j].score;
+													if (blueTotal > redTotal) {
+														blueScore++;
+													} else {
+														redScore++;
 													}
-												}
-
-												if (blueTotal > redTotal) {
-													blueScore++;
-												} else {
-													redScore++;
 												}
 											}
 										} else if (json.events[i].detail.type === 'host-changed') {
