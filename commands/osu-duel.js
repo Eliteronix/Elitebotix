@@ -40,6 +40,7 @@ module.exports = {
 				let secondOpponentId = null;
 				let averageStarRating = null;
 				let onlyRanked = false;
+				let bestOf = 7;
 
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					if (interaction.options._hoistedOptions[i].name === 'opponent') {
@@ -60,6 +61,8 @@ module.exports = {
 						firstOpponentId = interaction.options._hoistedOptions[i].value;
 					} else if (interaction.options._hoistedOptions[i].name === 'secondopponent') {
 						secondOpponentId = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'bestof') {
+						bestOf = interaction.options._hoistedOptions[i].value;
 					}
 				}
 
@@ -310,7 +313,7 @@ module.exports = {
 
 				updateQueueChannels(interaction.client);
 
-				createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, onlyRanked, commandUser, secondUser, thirdUser, fourthUser);
+				createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, commandUser, secondUser, thirdUser, fourthUser);
 			} else if (interaction.options._subcommand === 'rating') {
 				let processingMessage = null;
 				if (interaction.id) {

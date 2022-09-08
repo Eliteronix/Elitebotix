@@ -847,6 +847,41 @@ module.exports = {
 			// 						'type': 10, // 10 is type NUMBER
 			// 					},
 			// 					{
+			// 						'name': 'bestof',
+			// 						'description': 'The best of for the match.',
+			// 						'type': 10, // 10 is type NUMBER
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Best of 13',
+			// 								'value': 13
+			// 							},
+			// 							{
+			// 								'name': 'Best of 11',
+			// 								'value': 11
+			// 							},
+			// 							{
+			// 								'name': 'Best of 9',
+			// 								'value': 9
+			// 							},
+			// 							{
+			// 								'name': 'Best of 7 (Default)',
+			// 								'value': 7
+			// 							},
+			// 							{
+			// 								'name': 'Best of 5',
+			// 								'value': 5
+			// 							},
+			// 							{
+			// 								'name': 'Best of 3',
+			// 								'value': 3
+			// 							},
+			// 							{
+			// 								'name': 'Best of 1',
+			// 								'value': 1
+			// 							}
+			// 						]
+			// 					},
+			// 					{
 			// 						'name': 'ranked',
 			// 						'description': 'Should only ranked maps be played?',
 			// 						'type': 5, // 5 is type BOOLEAN
@@ -890,6 +925,41 @@ module.exports = {
 			// 						'name': 'starrating',
 			// 						'description': 'The star rating you wanna play on. For example: 6.25',
 			// 						'type': 10, // 10 is type NUMBER
+			// 					},
+			// 					{
+			// 						'name': 'bestof',
+			// 						'description': 'The best of for the match.',
+			// 						'type': 10, // 10 is type NUMBER
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Best of 13',
+			// 								'value': 13
+			// 							},
+			// 							{
+			// 								'name': 'Best of 11',
+			// 								'value': 11
+			// 							},
+			// 							{
+			// 								'name': 'Best of 9',
+			// 								'value': 9
+			// 							},
+			// 							{
+			// 								'name': 'Best of 7 (Default)',
+			// 								'value': 7
+			// 							},
+			// 							{
+			// 								'name': 'Best of 5',
+			// 								'value': 5
+			// 							},
+			// 							{
+			// 								'name': 'Best of 3',
+			// 								'value': 3
+			// 							},
+			// 							{
+			// 								'name': 'Best of 1',
+			// 								'value': 1
+			// 							}
+			// 						]
 			// 					},
 			// 					{
 			// 						'name': 'ranked',
@@ -4472,6 +4542,41 @@ module.exports = {
 									'type': 10, // 10 is type NUMBER
 								},
 								{
+									'name': 'bestof',
+									'description': 'The best of for the match.',
+									'type': 10, // 10 is type NUMBER
+									'choices': [
+										{
+											'name': 'Best of 13',
+											'value': 13
+										},
+										{
+											'name': 'Best of 11',
+											'value': 11
+										},
+										{
+											'name': 'Best of 9',
+											'value': 9
+										},
+										{
+											'name': 'Best of 7 (Default)',
+											'value': 7
+										},
+										{
+											'name': 'Best of 5',
+											'value': 5
+										},
+										{
+											'name': 'Best of 3',
+											'value': 3
+										},
+										{
+											'name': 'Best of 1',
+											'value': 1
+										}
+									]
+								},
+								{
 									'name': 'ranked',
 									'description': 'Should only ranked maps be played?',
 									'type': 5, // 5 is type BOOLEAN
@@ -4515,6 +4620,41 @@ module.exports = {
 									'name': 'starrating',
 									'description': 'The star rating you wanna play on. For example: 6.25',
 									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'bestof',
+									'description': 'The best of for the match.',
+									'type': 10, // 10 is type NUMBER
+									'choices': [
+										{
+											'name': 'Best of 13',
+											'value': 13
+										},
+										{
+											'name': 'Best of 11',
+											'value': 11
+										},
+										{
+											'name': 'Best of 9',
+											'value': 9
+										},
+										{
+											'name': 'Best of 7 (Default)',
+											'value': 7
+										},
+										{
+											'name': 'Best of 5',
+											'value': 5
+										},
+										{
+											'name': 'Best of 3',
+											'value': 3
+										},
+										{
+											'name': 'Best of 1',
+											'value': 1
+										}
+									]
 								},
 								{
 									'name': 'ranked',

@@ -1402,7 +1402,7 @@ module.exports = {
 	calculateGrade(mode, counts, modBits) {
 		return calculateGradeFunction(mode, counts, modBits);
 	},
-	async createDuelMatch(client, bancho, interaction, averageStarRating, lowerBound, upperBound, onlyRanked, firstUser, secondUser, thirdUser, fourthUser) {
+	async createDuelMatch(client, bancho, interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, firstUser, secondUser, thirdUser, fourthUser) {
 		if (interaction) {
 			await interaction.editReply('Duel has been accepted. Getting necessary data...');
 		}
@@ -1570,9 +1570,26 @@ module.exports = {
 		}
 
 		// Set up the modpools
-		let modPools = ['NM', 'HD', 'HR', 'DT', 'FreeMod'];
-		shuffle(modPools);
-		modPools.push('NM', 'FreeMod');
+		let modPools = [];
+
+		//Fill as much as needed in groups
+		while (modPools.length < bestOf - 1) {
+			let modsToAdd = ['NM', 'HD', 'HR', 'DT', 'FreeMod'];
+			shuffle(modsToAdd);
+			modsToAdd.push('NM');
+
+			while (modsToAdd.length) {
+				modPools.push(modsToAdd.shift());
+			}
+		}
+
+		//Remove everything that is too much
+		while (modPools.length > bestOf - 1) {
+			modPools.splice(modPools.length - 1, 1);
+		}
+
+		//Add TieBreaker
+		modPools.push('FreeMod');
 
 		//Set up the lobby
 		let channel = null;
@@ -1684,7 +1701,7 @@ module.exports = {
 			dbPlayers.push(thirdUser);
 			dbPlayers.push(fourthUser);
 		}
-		let scores = [0, 0];
+		let scores = [0, 1];
 
 		//Add discord messages and also ingame invites for the timers
 		channel.on('message', async (msg) => {
@@ -1722,7 +1739,12 @@ module.exports = {
 
 					await channel.sendMessage(`Average star rating of all players: ${Math.round(averageStarRating * 100) / 100}`);
 
-					let nextMap = await getNextMap(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
+					let nextMap = null;
+					if (bestOf === 1) {
+						nextMap = await getNextMap('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
+					} else {
+						nextMap = await getNextMap(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
+					}
 					avoidMaps.push(nextMap.beatmapId);
 
 					while (lobby._beatmapId != nextMap.beatmapId) {
@@ -1749,7 +1771,9 @@ module.exports = {
 
 					let mapInfo = await getOsuMapInfo(nextMap);
 					await channel.sendMessage(mapInfo);
-					if (modPools[mapIndex] === 'FreeMod') {
+					if (bestOf === 1) {
+						await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
+					} else if (modPools[mapIndex] === 'FreeMod') {
 						await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
 					}
 					await channel.sendMessage('Everyone please ready up!');
@@ -1788,7 +1812,7 @@ module.exports = {
 					}
 				}
 			}
-			if (modPools[mapIndex] === 'FreeMod' && mapIndex < 6) {
+			if (modPools[mapIndex] === 'FreeMod' && mapIndex < bestOf - 1) {
 				for (let i = 0; i < results.length; i++) {
 					//Reduce the score by 0.5 if it was FreeMod and no mods / only nofail was picked
 					if (!results[i].player.mods || results[i].player.mods.length === 0 || results[i].player.mods.length === 1 && results[i].player.mods[0].enumValue === 1) {
@@ -1839,7 +1863,7 @@ module.exports = {
 				scoreTeam1 = Math.round(scoreTeam1);
 				scoreTeam2 = Math.round(scoreTeam2);
 
-				await channel.sendMessage(`Bo7 | ${teamname1}: ${humanReadableFunction(scoreTeam1)} | ${teamname2}: ${humanReadableFunction(scoreTeam2)} | Difference: ${humanReadableFunction(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
+				await channel.sendMessage(`Bo${bestOf} | ${teamname1}: ${humanReadableFunction(scoreTeam1)} | ${teamname2}: ${humanReadableFunction(scoreTeam2)} | Difference: ${humanReadableFunction(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
 			} else {
 				await channel.sendMessage('!mp close');
 				// eslint-disable-next-line no-undef
@@ -1869,12 +1893,12 @@ module.exports = {
 			}
 			await channel.sendMessage(`Score: ${teamname1} | ${scores[0]} - ${scores[1]} | ${teamname2}`);
 
-			if (scores[0] < 4 && scores[1] < 4) {
+			if (scores[0] < (bestOf + 1) / 2 && scores[1] < (bestOf + 1) / 2) {
 				mapIndex++;
 				lobbyStatus = 'Waiting for start';
 
 				let nextMap = null;
-				if (scores[0] + scores[1] === 6) {
+				if (scores[0] + scores[1] === bestOf - 1) {
 					nextMap = await getNextMap('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
 				} else {
 					nextMap = await getNextMap(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
@@ -1911,16 +1935,16 @@ module.exports = {
 				let mapInfo = await getOsuMapInfo(nextMap);
 				await channel.sendMessage(mapInfo);
 				await channel.sendMessage('Everyone please ready up!');
-				if (modPools[mapIndex] === 'FreeMod' && mapIndex < 6) {
+				if (modPools[mapIndex] === 'FreeMod' && mapIndex < bestOf - 1) {
 					await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
-				} else if (modPools[mapIndex] === 'FreeMod' && mapIndex === 6) {
+				} else if (modPools[mapIndex] === 'FreeMod' && mapIndex === bestOf - 1) {
 					await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
 				}
 				await channel.sendMessage('!mp timer 120');
 			} else {
 				lobbyStatus = 'Lobby finished';
 
-				if (scores[0] === 4) {
+				if (scores[0] === (bestOf + 1) / 2) {
 					await channel.sendMessage(`Congratulations ${teamname1} for winning the match!`);
 				} else {
 					await channel.sendMessage(`Congratulations ${teamname2} for winning the match!`);
