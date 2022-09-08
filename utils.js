@@ -4965,6 +4965,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		const mapScoreAmount = await DBOsuMultiScores.count({
 			where: {
 				beatmapId: randomBeatmap.beatmapId,
+				tourneyMatch: true,
 				matchName: {
 					[Op.notLike]: 'MOTD:%',
 				},
