@@ -109,7 +109,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 						do {
 							i++;
 						} while (scores[i] && scores[i].rank == 'F');
-						if (scores[i].rank == 'F') {
+						if (!scores[i] || scores[i].rank == 'F') {
 							return msg.channel.send(`Couldn't find any recent passes for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; \`--r\` for ripple; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
 						}
 					}
