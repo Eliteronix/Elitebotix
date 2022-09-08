@@ -246,15 +246,15 @@ module.exports = {
 									continue;
 								}
 							} else if (forumPost.gamemode === 'Taiko') {
-								if (user.tournamentPingsMode !== 'all' && !user.tournamentPingsMode.includes('t')) {
+								if (!user.tournamentPingsMode || user.tournamentPingsMode !== 'all' && !user.tournamentPingsMode.includes('t')) {
 									continue;
 								}
 							} else if (forumPost.gamemode === 'Catch the Beat') {
-								if (user.tournamentPingsMode !== 'all' && !user.tournamentPingsMode.includes('c')) {
+								if (!user.tournamentPingsMode || user.tournamentPingsMode !== 'all' && !user.tournamentPingsMode.includes('c')) {
 									continue;
 								}
 							} else if (forumPost.gamemode === 'Mania') {
-								if (user.tournamentPingsMode !== 'all' && !user.tournamentPingsMode.includes('m')) {
+								if (!user.tournamentPingsMode || user.tournamentPingsMode !== 'all' && !user.tournamentPingsMode.includes('m')) {
 									continue;
 								}
 							}
