@@ -1707,7 +1707,7 @@ module.exports = {
 			dbPlayers.push(thirdUser);
 			dbPlayers.push(fourthUser);
 		}
-		let scores = [0, 0];
+		let scores = [0, 1];
 
 		//Add discord messages and also ingame invites for the timers
 		channel.on('message', async (msg) => {
@@ -1745,7 +1745,12 @@ module.exports = {
 
 					await channel.sendMessage(`Average star rating of all players: ${Math.round(averageStarRating * 100) / 100}`);
 
-					let nextMap = await getNextMap(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
+					let nextMap = null;
+					if (bestOf === 1) {
+						nextMap = await getNextMap('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
+					} else {
+						nextMap = await getNextMap(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
+					}
 					avoidMaps.push(nextMap.beatmapId);
 
 					while (lobby._beatmapId != nextMap.beatmapId) {
@@ -1772,7 +1777,9 @@ module.exports = {
 
 					let mapInfo = await getOsuMapInfo(nextMap);
 					await channel.sendMessage(mapInfo);
-					if (modPools[mapIndex] === 'FreeMod') {
+					if (bestOf === 1) {
+						await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
+					} else if (modPools[mapIndex] === 'FreeMod') {
 						await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
 					}
 					await channel.sendMessage('Everyone please ready up!');
