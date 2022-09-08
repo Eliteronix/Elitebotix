@@ -5044,8 +5044,9 @@ function getBeatmapModeIdFunction(beatmap) {
 }
 
 async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps) {
+	let nextMap = null;
 	if (modPool === 'NM') {
-		return await getValidTournamentBeatmapFunction({
+		nextMap = await getValidTournamentBeatmapFunction({
 			modPool: 'NM',
 			lowerBound: lowerBound,
 			upperBound: upperBound,
@@ -5060,7 +5061,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 	if (modPool === 'HD') {
 		if (Math.random() > 0.3) {
 			//70% not HD2
-			return await getValidTournamentBeatmapFunction({
+			nextMap = await getValidTournamentBeatmapFunction({
 				modPool: 'HD',
 				lowerBound: lowerBound,
 				upperBound: upperBound,
@@ -5074,7 +5075,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 		}
 
 		//30% HD2
-		return await getValidTournamentBeatmapFunction({
+		nextMap = await getValidTournamentBeatmapFunction({
 			modPool: 'HD',
 			lowerBound: lowerBound,
 			upperBound: upperBound,
@@ -5090,7 +5091,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 	if (modPool === 'HR') {
 		if (Math.random() > 0.3) {
 			//70% not HR2
-			return await getValidTournamentBeatmapFunction({
+			nextMap = await getValidTournamentBeatmapFunction({
 				modPool: 'HR',
 				lowerBound: lowerBound,
 				upperBound: upperBound,
@@ -5104,7 +5105,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 		}
 
 		//30% HR2
-		return await getValidTournamentBeatmapFunction({
+		nextMap = await getValidTournamentBeatmapFunction({
 			modPool: 'HR',
 			lowerBound: lowerBound,
 			upperBound: upperBound,
@@ -5118,7 +5119,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 	}
 
 	if (modPool === 'DT') {
-		return await getValidTournamentBeatmapFunction({
+		nextMap = await getValidTournamentBeatmapFunction({
 			modPool: 'DT',
 			lowerBound: lowerBound,
 			upperBound: upperBound,
@@ -5133,7 +5134,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 	if (modPool === 'FreeMod') {
 		if (Math.random() > 0.5) {
 			//50% FM2
-			return await getValidTournamentBeatmapFunction({
+			nextMap = await getValidTournamentBeatmapFunction({
 				modPool: 'FM',
 				lowerBound: lowerBound,
 				upperBound: upperBound,
@@ -5148,7 +5149,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 		}
 
 		//50% not FM2 (and not too low cs only, AR can go for whatever)
-		return await getValidTournamentBeatmapFunction({
+		nextMap = await getValidTournamentBeatmapFunction({
 			modPool: 'FM',
 			lowerBound: lowerBound,
 			upperBound: upperBound,
@@ -5162,7 +5163,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 	}
 
 	if (modPool === 'TieBreaker') {
-		return await getValidTournamentBeatmapFunction({
+		nextMap = await getValidTournamentBeatmapFunction({
 			modPool: 'FM',
 			lowerBound: lowerBound,
 			upperBound: upperBound,
@@ -5175,4 +5176,12 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 			onlyRanked: onlyRanked,
 		});
 	}
+
+	//Retry if no map
+	console.log(nextMap);
+	if (!nextMap) {
+		nextMap = await getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps);
+	}
+
+	return nextMap;
 }
