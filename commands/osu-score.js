@@ -416,7 +416,10 @@ async function drawTitle(input, mode) {
 	let beatmap = input[3];
 	let user = input[4];
 
-	const gameMode = getGameMode(beatmap);
+	let gameMode = getGameMode(beatmap);
+	if (gameMode === 'fruits') {
+		gameMode = 'catch';
+	}
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
 	const beatmapStatusIcon = await Canvas.loadImage(getBeatmapApprovalStatusImage(beatmap));
 	const starImage = await Canvas.loadImage('./other/overall-difficulty.png');
