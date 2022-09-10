@@ -1701,7 +1701,7 @@ module.exports = {
 			dbPlayers.push(thirdUser);
 			dbPlayers.push(fourthUser);
 		}
-		let scores = [0, 1];
+		let scores = [0, 0];
 
 		//Add discord messages and also ingame invites for the timers
 		channel.on('message', async (msg) => {
