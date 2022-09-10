@@ -7613,6 +7613,19 @@ module.exports = {
 			for (let i = 0; i < importMatchTasks.length; i++) {
 				await msg.reply(`https://osu.ppy.sh/mp/${importMatchTasks[i].additions}`);
 			}
+		} else if (args[0] === 'deleteDiscordUser') {
+			let discordUser = await DBDiscordUsers.findOne({
+				where: {
+					userId: args[1]
+				}
+			});
+
+			if (discordUser) {
+				await discordUser.destroy();
+				return await msg.reply('Deleted discord user');
+			}
+
+			return await msg.reply('Could not find discord user');
 		} else {
 			msg.reply('Invalid command');
 		}
