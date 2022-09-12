@@ -19,7 +19,6 @@ module.exports = {
 	tags: 'server-admin',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
-		console.log('logging');
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -213,9 +212,9 @@ module.exports = {
 				.setFooter({ text: `To toggle any of these events use: \`${guildPrefix}${this.name} <eventname>\`` });
 
 			if (msg.id) {
-				msg.reply({ embeds: [loggingEmbed] });
+				await msg.reply({ embeds: [loggingEmbed] });
 			} else {
-				interaction.reply({ embeds: [loggingEmbed] });
+				await interaction.reply({ embeds: [loggingEmbed] });
 			}
 
 			const loggingEmbed2 = new Discord.MessageEmbed()
