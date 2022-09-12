@@ -37,7 +37,6 @@ module.exports = async function (role) {
 			permissionsReadable = role.permissions.toArray().join(', ');
 		}
 
-		console.log(role);
 		const changeEmbed = new Discord.MessageEmbed()
 			.setColor('#0099ff')
 			.setDescription(`<@&${role.id}> has been created`)
