@@ -44,10 +44,10 @@ module.exports = async function (role) {
 			.addFields(
 				{ name: 'Role Created', value: `<@&${role.id}>` },
 				{ name: 'Colour', value: role.hexColor },
-				{ name: 'Show seperate', value: role.hoist },
-				{ name: 'Managed by bot, etc.', value: role.managed },
-				{ name: 'Can be mentioned', value: role.mentionable },
-				{ name: 'Position', value: role.position },
+				{ name: 'Show seperate', value: role.hoist.toString() },
+				{ name: 'Managed by bot, etc.', value: role.managed.toString() },
+				{ name: 'Can be mentioned', value: role.mentionable.toString() },
+				{ name: 'Position', value: role.rawPosition.toString() },
 				{ name: 'Permissions', value: permissionsReadable },
 			)
 			.setTimestamp()
