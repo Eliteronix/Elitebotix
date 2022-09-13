@@ -5013,8 +5013,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		return randomBeatmap;
 	}
 
+	console.log('Returning null');
 	//Return null
-	return;
+	return null;
 }
 
 // returns true if the user has already played the map in the last 60 days, so we should skip it
@@ -5097,20 +5098,20 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
 			});
+		} else {
+			//30% HD2
+			nextMap = await getValidTournamentBeatmapFunction({
+				modPool: 'HD',
+				lowerBound: lowerBound,
+				upperBound: upperBound,
+				mode: 'Standard',
+				upperDrain: 270,
+				lowerDrain: 100,
+				upperApproach: 8,
+				avoidMaps: avoidMaps,
+				onlyRanked: onlyRanked,
+			});
 		}
-
-		//30% HD2
-		nextMap = await getValidTournamentBeatmapFunction({
-			modPool: 'HD',
-			lowerBound: lowerBound,
-			upperBound: upperBound,
-			mode: 'Standard',
-			upperDrain: 270,
-			lowerDrain: 100,
-			upperApproach: 8,
-			avoidMaps: avoidMaps,
-			onlyRanked: onlyRanked,
-		});
 	}
 
 	if (modPool === 'HR') {
@@ -5127,20 +5128,20 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
 			});
+		} else {
+			//30% HR2
+			nextMap = await getValidTournamentBeatmapFunction({
+				modPool: 'HR',
+				lowerBound: lowerBound,
+				upperBound: upperBound,
+				mode: 'Standard',
+				upperDrain: 270,
+				lowerDrain: 100,
+				lowerCircleSize: 5,
+				avoidMaps: avoidMaps,
+				onlyRanked: onlyRanked,
+			});
 		}
-
-		//30% HR2
-		nextMap = await getValidTournamentBeatmapFunction({
-			modPool: 'HR',
-			lowerBound: lowerBound,
-			upperBound: upperBound,
-			mode: 'Standard',
-			upperDrain: 270,
-			lowerDrain: 100,
-			lowerCircleSize: 5,
-			avoidMaps: avoidMaps,
-			onlyRanked: onlyRanked,
-		});
 	}
 
 	if (modPool === 'DT') {
@@ -5171,20 +5172,20 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
 			});
+		} else {
+			//50% not FM2 (and not too low cs only, AR can go for whatever)
+			nextMap = await getValidTournamentBeatmapFunction({
+				modPool: 'FM',
+				lowerBound: lowerBound,
+				upperBound: upperBound,
+				mode: 'Standard',
+				upperDrain: 270,
+				lowerDrain: 100,
+				upperCircleSize: 4.5,
+				avoidMaps: avoidMaps,
+				onlyRanked: onlyRanked,
+			});
 		}
-
-		//50% not FM2 (and not too low cs only, AR can go for whatever)
-		nextMap = await getValidTournamentBeatmapFunction({
-			modPool: 'FM',
-			lowerBound: lowerBound,
-			upperBound: upperBound,
-			mode: 'Standard',
-			upperDrain: 270,
-			lowerDrain: 100,
-			upperCircleSize: 4.5,
-			avoidMaps: avoidMaps,
-			onlyRanked: onlyRanked,
-		});
 	}
 
 	if (modPool === 'TieBreaker') {
