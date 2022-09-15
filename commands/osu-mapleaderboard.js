@@ -117,17 +117,26 @@ module.exports = {
 			});
 
 			if (server === 'bancho') {
-				await osuApi.getScores({ b: beatmap.beatmapId, m: mode })
-					.then(async (mapScores) => {
-						scoresArray = mapScores;
-					});
+				try {
+					await osuApi.getScores({ b: beatmap.beatmapId, m: mode })
+						.then(async (mapScores) => {
+							scoresArray = mapScores;
+						});
+				} catch (error) {
+					if (error.message === 'Not found') {
+						return interaction.followUp({ content: 'The map doesn\'t have any submitted scores.' });
+					}
+
+					console.log(error);
+				}
 
 				for (let i = 0; i < scoresArray.length; i++) {
 					if (user && scoresArray[i].user.id === user.osuUserId) {
 						userScore = {
 							score: scoresArray[i],
 							rank: i
-						}; break;
+						};
+						break;
 					}
 				}
 
@@ -168,6 +177,10 @@ module.exports = {
 							userScore = { score: banchoScore, rank: scoresArray.length };
 						}
 					}
+				}
+
+				if (!scoresArray.length) {
+					return interaction.followUp({ content: 'The map doesn\'t have any submitted scores.' });
 				}
 			}
 
