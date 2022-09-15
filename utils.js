@@ -4352,7 +4352,7 @@ async function saveOsuMultiScoresFunction(match) {
 	// });
 
 	let tourneyMatchPlayers = [];
-	let newTourneyMatch = true;
+	let newMatchPlayers = [];
 
 	let tourneyMatch = false;
 	if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
@@ -4494,6 +4494,10 @@ async function saveOsuMultiScoresFunction(match) {
 				}
 
 				if (!existingScore) {
+					if (!newMatchPlayers.includes(match.games[gameIndex].scores[scoreIndex].userId)) {
+						newMatchPlayers.push(match.games[gameIndex].scores[scoreIndex].userId);
+					}
+
 					let score = await DBOsuMultiScores.create({
 						osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
 						matchId: match.id,
@@ -4575,8 +4579,6 @@ async function saveOsuMultiScoresFunction(match) {
 						}
 					}
 				} else if (existingScore.warmup === null) {
-					newTourneyMatch = false;
-
 					existingScore.osuUserId = match.games[gameIndex].scores[scoreIndex].userId;
 					existingScore.matchId = match.id;
 					existingScore.matchName = match.name;
@@ -4643,8 +4645,6 @@ async function saveOsuMultiScoresFunction(match) {
 							}
 						}
 					}
-				} else {
-					newTourneyMatch = false;
 				}
 			} catch (error) {
 				scoreIndex--;
@@ -4670,12 +4670,12 @@ async function saveOsuMultiScoresFunction(match) {
 		}
 	}
 
-	if (newTourneyMatch) {
+	if (newMatchPlayers.length) {
 		//Get all follows for the players in the match
 		let follows = await DBOsuTourneyFollows.findAll({
 			where: {
 				osuUserId: {
-					[Op.in]: tourneyMatchPlayers
+					[Op.in]: newMatchPlayers
 				}
 			}
 		});
