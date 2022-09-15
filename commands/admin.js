@@ -222,7 +222,7 @@ module.exports = {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'creator',
-			// 		description: 'Sends an info card about the developer'
+			// 		description: 'Sends an info card about the developers'
 			// 	}
 			// });
 
@@ -3917,7 +3917,7 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'creator',
-					description: 'Sends an info card about the developer'
+					description: 'Sends an info card about the developers'
 				}
 			});
 
