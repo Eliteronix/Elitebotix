@@ -6,6 +6,7 @@ const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-matchup',
@@ -30,7 +31,14 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Matchup is being processed');
+			try {
+				await interaction.reply('Matchup is being processed');
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
 			args = [];
 

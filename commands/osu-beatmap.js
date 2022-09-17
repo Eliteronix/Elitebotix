@@ -4,6 +4,7 @@ const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getO
 const { Permissions } = require('discord.js');
 const { DBOsuMultiScores } = require('../dbObjects');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-beatmap',
@@ -26,7 +27,14 @@ module.exports = {
 			msg = await populateMsgFromInteraction(interaction);
 
 			if (interaction.commandName === 'osu-beatmap') {
-				await interaction.reply('Beatmaps are being processed');
+				try {
+					await interaction.reply('Beatmaps are being processed');
+				} catch (error) {
+					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+						console.error(error);
+					}
+					return;
+				}
 			}
 
 			args = [];

@@ -8,6 +8,7 @@ const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-duel',
@@ -317,7 +318,14 @@ module.exports = {
 			} else if (interaction.options._subcommand === 'rating') {
 				let processingMessage = null;
 				if (interaction.id) {
-					await interaction.deferReply();
+					try {
+						await interaction.deferReply();
+					} catch (error) {
+						if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+							console.error(error);
+						}
+						return;
+					}
 				} else {
 					processingMessage = await interaction.channel.send('Processing league ratings...');
 				}
