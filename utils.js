@@ -5204,7 +5204,6 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 	}
 
 	//Retry if no map
-	console.log(nextMap);
 	if (!nextMap) {
 		nextMap = await getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps);
 	}
