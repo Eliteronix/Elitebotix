@@ -295,7 +295,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 				const canvasWidth = 1000;
-				const canvasHeight = 83 + limit * 41.66666;
+				const canvasHeight = 83 + limit * 41.66666 + 50;
 
 				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
 
@@ -444,6 +444,9 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		limit = 100;
 	}
 
+	let totalRankedPP = 0;
+	let totalUnrankedPP = 0;
+
 	if (server === 'bancho') {
 		scores = await osuApi.getUserBest({ u: user.name, m: mode, limit: limit });
 	} else if (server === 'ripple') {
@@ -506,18 +509,20 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 			await pause(5000);
 		}
 
-		//Get all scores from tournaments
-		logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores2');
-		multiScores = await DBOsuMultiScores.findAll({
-			where: {
-				osuUserId: user.id,
-				mode: modeName,
-				tourneyMatch: true,
-				score: {
-					[Op.gte]: 10000
+		if (multisToUpdate.length) {
+			//Get all scores from tournaments
+			logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores2');
+			multiScores = await DBOsuMultiScores.findAll({
+				where: {
+					osuUserId: user.id,
+					mode: modeName,
+					tourneyMatch: true,
+					score: {
+						[Op.gte]: 10000
+					}
 				}
-			}
-		});
+			});
+		}
 
 		for (let i = 0; i < multiScores.length; i++) {
 			if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].teamType === 'Tag Team vs' || multiScores[i].teamType === 'Tag Co-op') {
@@ -549,6 +554,41 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 				}
 			}
 		}
+
+		//Calculate total pp values
+		let beatmapSets = [];
+		let rankedBeatmapSets = [];
+		let unrankedPP = 0;
+		let rankedPP = 0;
+		let unrankedPlayCounter = 1;
+		let rankedPlayCounter = 1;
+		for (let i = 0; i < multiScores.length; i++) {
+			multiScores[i].beatmap = await getOsuBeatmap({ beatmapId: multiScores[i].beatmapId });
+
+			if (multiScores[i].beatmap && !beatmapSets.includes(multiScores[i].beatmap.beatmapsetId)) {
+				beatmapSets.push(multiScores[i].beatmap.beatmapsetId);
+
+				if (multiScores[i].beatmap.approvalStatus === 'Approved' || multiScores[i].beatmap.approvalStatus === 'Ranked') {
+					rankedBeatmapSets.push(multiScores[i].beatmap.beatmapsetId);
+				}
+			}
+
+			if (multiScores[i].pp) {
+				unrankedPP += parseFloat(multiScores[i].pp) * Math.pow(0.95, (unrankedPlayCounter - 1));
+				unrankedPlayCounter++;
+
+				if (multiScores[i].beatmap && (multiScores[i].beatmap.approvalStatus === 'Approved' || multiScores[i].beatmap.approvalStatus === 'Ranked')) {
+					rankedPP += parseFloat(multiScores[i].pp) * Math.pow(0.95, (rankedPlayCounter - 1));
+					rankedPlayCounter++;
+				}
+			}
+		}
+
+		let unrankedBonusPP = 416.6667 * (1 - (Math.pow(0.9994, beatmapSets.length)));
+		let rankedBonusPP = 416.6667 * (1 - (Math.pow(0.9994, rankedBeatmapSets.length)));
+
+		totalRankedPP = rankedPP + rankedBonusPP;
+		totalUnrankedPP = unrankedPP + unrankedBonusPP;
 
 		//Feed the scores into the array
 		for (let i = 0; i < multiScores.length && i < 100; i++) {
@@ -754,6 +794,50 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 			const modImage = await Canvas.loadImage(getModImage(mods[mods.length - j - 1]));
 			ctx.drawImage(modImage, (canvas.width / 28) * 24.75 - (canvas.width / 1000 * 23) * (j + 1), 500 / 8 + (500 / 12) * i + (500 / 12) / 5, canvas.width / 1000 * 23, 500 / 125 * 4);
 		}
+	}
+
+	//Write the tournament pp
+	if (server === 'tournaments') {
+		let discordUsers = await DBDiscordUsers.findAll();
+
+		//Find the closest users to the PP values
+		let closestUnrankedPPUser = discordUsers[0];
+		let closestRankedPPUser = discordUsers[0];
+		for (let i = 0; i < discordUsers.length; i++) {
+			let currentDiscordUserPP = discordUsers[i].osuPP;
+			let closestUnrankedPP = closestUnrankedPPUser.osuPP;
+			let closestRankedPP = closestRankedPPUser.osuPP;
+
+			if (mode === 1) {
+				currentDiscordUserPP = discordUsers[i].taikoPP;
+				closestUnrankedPP = closestUnrankedPPUser.taikoPP;
+				closestRankedPP = closestRankedPPUser.taikoPP;
+			} else if (mode === 2) {
+				currentDiscordUserPP = discordUsers[i].catchPP;
+				closestUnrankedPP = closestUnrankedPPUser.catchPP;
+				closestRankedPP = closestRankedPPUser.catchPP;
+			} else if (mode === 3) {
+				currentDiscordUserPP = discordUsers[i].maniaPP;
+				closestUnrankedPP = closestUnrankedPPUser.maniaPP;
+				closestRankedPP = closestRankedPPUser.maniaPP;
+			}
+
+			if (Math.abs(currentDiscordUserPP - totalUnrankedPP) < Math.abs(closestUnrankedPP - totalUnrankedPP)) {
+				closestUnrankedPPUser = discordUsers[i];
+			}
+
+			if (Math.abs(currentDiscordUserPP - totalRankedPP) < Math.abs(closestRankedPP - totalRankedPP)) {
+				closestRankedPPUser = discordUsers[i];
+			}
+		}
+
+		// console.log(closestRankedPPUser, closestUnrankedPPUser);
+
+		ctx.font = '15px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'left';
+		ctx.fillText(`Total pp from tournaments (including unranked): ${humanReadable(Math.round(totalUnrankedPP))}pp -> ~#${closestUnrankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 50);
+		ctx.fillText(`Total pp from tournaments (only ranked): ${humanReadable(Math.round(totalRankedPP))}pp -> ~#${closestRankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 25);
 	}
 
 	const output = [canvas, ctx, user];
