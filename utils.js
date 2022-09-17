@@ -4662,6 +4662,10 @@ async function saveOsuMultiScoresFunction(match) {
 							}
 						}
 					}
+				} else {
+					if (!existingMatchPlayers.includes(match.games[gameIndex].scores[scoreIndex].userId)) {
+						existingMatchPlayers.push(match.games[gameIndex].scores[scoreIndex].userId);
+					}
 				}
 			} catch (error) {
 				scoreIndex--;
