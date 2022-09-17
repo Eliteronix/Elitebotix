@@ -2,6 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const { getUserDuelStarRating, populateMsgFromInteraction, getOsuUserServerMode, getMessageUserDisplayname, getDerankStats } = require('../utils');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-derank',
@@ -24,8 +25,14 @@ module.exports = {
 			return msg.reply(`Please use the / command \`${this.name}\``);
 		}
 
-
-		await interaction.deferReply();
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
+		}
 
 		let username = null;
 

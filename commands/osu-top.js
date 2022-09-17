@@ -6,6 +6,7 @@ const { fitTextOnMiddleCanvas, getGuildPrefix, humanReadable, roundedRect, getRa
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-top',
@@ -26,7 +27,14 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Players are being processed');
+			try {
+				await interaction.reply('Players are being processed');
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
 			args = [];
 
