@@ -4353,6 +4353,7 @@ async function saveOsuMultiScoresFunction(match) {
 
 	let tourneyMatchPlayers = [];
 	let newMatchPlayers = [];
+	let existingMatchPlayers = [];
 
 	let tourneyMatch = false;
 	if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
@@ -4579,6 +4580,10 @@ async function saveOsuMultiScoresFunction(match) {
 						}
 					}
 				} else if (existingScore.warmup === null) {
+					if (!existingMatchPlayers.includes(match.games[gameIndex].scores[scoreIndex].userId)) {
+						existingMatchPlayers.push(match.games[gameIndex].scores[scoreIndex].userId);
+					}
+
 					existingScore.osuUserId = match.games[gameIndex].scores[scoreIndex].userId;
 					existingScore.matchId = match.id;
 					existingScore.matchName = match.name;
@@ -4667,6 +4672,13 @@ async function saveOsuMultiScoresFunction(match) {
 
 		for (let i = 0; i < outdatedDuelRatings.length; i++) {
 			await outdatedDuelRatings[i].destroy();
+		}
+	}
+
+	for (let i = 0; i < newMatchPlayers.length; i++) {
+		if (existingMatchPlayers.includes(newMatchPlayers[i])) {
+			newMatchPlayers.splice(i, 1);
+			i--;
 		}
 	}
 
