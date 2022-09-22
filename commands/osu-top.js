@@ -445,7 +445,9 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 	}
 
 	let totalRankedPP = 0;
+	let rankedBonusPP = 0;
 	let totalUnrankedPP = 0;
+	let unrankedBonusPP = 0;
 
 	if (server === 'bancho') {
 		scores = await osuApi.getUserBest({ u: user.name, m: mode, limit: limit });
@@ -584,8 +586,8 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 			}
 		}
 
-		let unrankedBonusPP = 416.6667 * (1 - (Math.pow(0.9994, beatmapSets.length)));
-		let rankedBonusPP = 416.6667 * (1 - (Math.pow(0.9994, rankedBeatmapSets.length)));
+		unrankedBonusPP = 416.6667 * (1 - (Math.pow(0.9994, beatmapSets.length)));
+		rankedBonusPP = 416.6667 * (1 - (Math.pow(0.9994, rankedBeatmapSets.length)));
 
 		totalRankedPP = rankedPP + rankedBonusPP;
 		totalUnrankedPP = unrankedPP + unrankedBonusPP;
@@ -836,8 +838,8 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		ctx.font = '15px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'left';
-		ctx.fillText(`Total pp from tournaments (including unranked): ${humanReadable(Math.round(totalUnrankedPP))}pp -> ~#${closestUnrankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 50);
-		ctx.fillText(`Total pp from tournaments (only ranked): ${humanReadable(Math.round(totalRankedPP))}pp -> ~#${closestRankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 25);
+		ctx.fillText(`Total pp from tournaments (including unranked): ${humanReadable(Math.round(totalUnrankedPP))}pp (Bonus pp: ${humanReadable(Math.round(unrankedBonusPP))}) -> ~#${closestUnrankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 50);
+		ctx.fillText(`Total pp from tournaments (only ranked): ${humanReadable(Math.round(totalRankedPP))}pp (Bonus pp: ${humanReadable(Math.round(rankedBonusPP))}) -> ~#${closestRankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 25);
 	}
 
 	const output = [canvas, ctx, user];
