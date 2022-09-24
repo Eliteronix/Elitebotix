@@ -277,18 +277,16 @@ module.exports = {
 
 											if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
 												lastMessageType = 'mapresult';
+												latestEventId = json.events[i].id;
 											} else if (json.events[i].detail.type === 'other') {
 												lastMessageType = 'playing';
+												latestEventId = json.events[i].id - 1;
 												break;
 											} else {
 												lastMessageType = 'updates';
+												latestEventId = json.events[i].id;
 											}
 										}
-									}
-
-									latestEventId = json.latest_event_id;
-									if (lastMessageType === 'playing') {
-										latestEventId--;
 									}
 								}
 							}
