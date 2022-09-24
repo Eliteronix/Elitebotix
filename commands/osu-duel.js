@@ -1048,7 +1048,12 @@ module.exports = {
 				quicksortMatchId(multiMatches);
 
 				for (let i = 0; i < multiMatches.length; i++) {
-					multiMatches[i] = `${(multiMatches[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${multiMatches[i].matchStartDate.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiMatches[i].matchId}`;
+					try {
+						multiMatches[i] = `${(multiMatches[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${multiMatches[i].matchStartDate.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiMatches[i].matchId}`;
+					} catch (e) {
+						multiMatches[i] = 'Error';
+						console.log(e, multiMatches[i]);
+					}
 				}
 
 				let scores = [
