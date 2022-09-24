@@ -14,7 +14,7 @@ module.exports = {
 	//args: true,
 	cooldown: 15,
 	//noCooldownMessage: true,
-	tags: 'general',
+	tags: 'osu',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
