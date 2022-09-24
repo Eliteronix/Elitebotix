@@ -539,7 +539,11 @@ module.exports = {
 						if (!matchId || parseInt(matchId) < parseInt(scoresTeam2[j][k].matchId)) {
 							matchId = scoresTeam2[j][k].matchId;
 							date = scoresTeam2[j][k].matchStartDate;
-							dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
+							try {
+								dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
+							} catch (err) {
+								console.log(err, scoresTeam2[j][k]);
+							}
 						}
 						break;
 					}
