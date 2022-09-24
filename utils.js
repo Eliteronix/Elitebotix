@@ -4842,8 +4842,6 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
-			// because it gets random beatmaps each time, 150 limit is fine for quick reply
-			limit: 150,
 		});
 	} else if (modPool === 'HD') {
 		let HDLowerBound = lowerBound - 0.8;
@@ -4866,8 +4864,6 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
-			// because it gets random beatmaps each time, 150 limit is fine for quick reply
-			limit: 150,
 		});
 	} else if (modPool === 'HR') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -4888,8 +4884,6 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
-			// because it gets random beatmaps each time, 150 limit is fine for quick reply
-			limit: 150,
 		});
 	} else if (modPool === 'DT') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -4910,8 +4904,6 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
-			// because it gets random beatmaps each time, 150 limit is fine for quick reply
-			limit: 150,
 		});
 	} else if (modPool === 'FM') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -4932,8 +4924,6 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
-			// because it gets random beatmaps each time, 150 limit is fine for quick reply
-			limit: 150,
 		});
 	}
 
