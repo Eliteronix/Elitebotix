@@ -1768,10 +1768,11 @@ module.exports = {
 						await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
 					}
-					async () => {
+
+					(async () => {
 						let mapInfo = await getOsuMapInfo(nextMap);
 						await channel.sendMessage(mapInfo);
-					};
+					})();
 
 					if (bestOf === 1) {
 						await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
@@ -1933,10 +1934,12 @@ module.exports = {
 					await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
 				}
-				async () => {
+
+				(async () => {
 					let mapInfo = await getOsuMapInfo(nextMap);
 					await channel.sendMessage(mapInfo);
-				};
+				})();
+
 				await channel.sendMessage('Everyone please ready up!');
 				if (modPools[mapIndex] === 'FreeMod' && mapIndex < bestOf - 1) {
 					await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');

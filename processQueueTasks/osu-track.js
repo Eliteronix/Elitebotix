@@ -1,4 +1,6 @@
 const osu = require('node-osu');
+const fetch = require('node-fetch');
+const { pause } = require('../utils.js');
 
 //Events have to say the global rank on the map
 //Text has to be different
@@ -24,6 +26,17 @@ module.exports = {
 
 			await osuApi.getUser({ u: args[0] })
 				.then(async (user) => {
+					//Update stats on ameobea.me
+					(async () => {
+						await fetch(`https://osutrack-api.ameo.dev/update?user=${user.id}&mode=0`, { method: 'POST', body: 'a=1' });
+						await pause(5000);
+						await fetch(`https://osutrack-api.ameo.dev/update?user=${user.id}&mode=1`, { method: 'POST', body: 'a=1' });
+						await pause(5000);
+						await fetch(`https://osutrack-api.ameo.dev/update?user=${user.id}&mode=2`, { method: 'POST', body: 'a=1' });
+						await pause(5000);
+						await fetch(`https://osutrack-api.ameo.dev/update?user=${user.id}&mode=3`, { method: 'POST', body: 'a=1' });
+					})();
+
 					let recentActivity = false;
 					//Grab recent events and send it in
 					if (user.events.length > 0) {
