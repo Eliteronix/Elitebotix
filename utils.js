@@ -1737,7 +1737,7 @@ module.exports = {
 				if (allPlayersJoined) {
 					lobbyStatus = 'Waiting for start';
 
-					await channel.sendMessage(`Average star rating of all players: ${Math.round(averageStarRating * 100) / 100}`);
+					await channel.sendMessage(`Average star rating of the mappool: ${Math.round(averageStarRating * 100) / 100}`);
 
 					let nextMap = null;
 					if (bestOf === 1) {
