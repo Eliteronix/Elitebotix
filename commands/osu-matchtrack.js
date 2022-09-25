@@ -544,19 +544,19 @@ async function getResultImage(event, users) {
 		ctx.fillStyle = '#F0DBE4';
 		ctx.fillText('300', 730, 350 + i * 75);
 		ctx.fillStyle = '#FFFFFF';
-		ctx.fillText(humanReadable(scores[i].statistics.count_300), 750, 350 + i * 75);
+		ctx.fillText(humanReadable(scores[i].statistics.count_300.toString()), 750, 350 + i * 75);
 		ctx.fillStyle = '#F0DBE4';
 		ctx.fillText('100', 781, 350 + i * 75);
 		ctx.fillStyle = '#FFFFFF';
-		ctx.fillText(humanReadable(scores[i].statistics.count_100), 800, 350 + i * 75);
+		ctx.fillText(humanReadable(scores[i].statistics.count_100.toString()), 800, 350 + i * 75);
 		ctx.fillStyle = '#F0DBE4';
 		ctx.fillText('50', 830, 350 + i * 75);
 		ctx.fillStyle = '#FFFFFF';
-		ctx.fillText(humanReadable(scores[i].statistics.count_50), 845, 350 + i * 75);
+		ctx.fillText(humanReadable(scores[i].statistics.count_50.toString()), 845, 350 + i * 75);
 		ctx.fillStyle = '#F0DBE4';
 		ctx.fillText('Miss', 873, 350 + i * 75);
 		ctx.fillStyle = '#FFFFFF';
-		ctx.fillText(humanReadable(scores[i].statistics.count_miss), 900, 350 + i * 75);
+		ctx.fillText(humanReadable(scores[i].statistics.count_miss.toString()), 900, 350 + i * 75);
 	}
 
 	if (teamModeHeight) {
