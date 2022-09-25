@@ -4966,48 +4966,55 @@ async function getValidTournamentBeatmapFunction(input) {
 
 		if (!randomBeatmap) {
 			beatmaps.splice(index, 1);
+			console.log('Map Selection: Not available');
 			continue;
 		}
 
 		//Check star rating
 		if (randomBeatmap.starRating > upperBound || randomBeatmap.starRating < lowerBound) {
 			beatmaps.splice(index, 1);
+			console.log('Map Selection: Star rating out of bounds');
 			continue;
 		}
 
 		//Check drain length
 		if (parseInt(randomBeatmap.drainLength) > upperDrain || parseInt(randomBeatmap.drainLength) < lowerDrain) {
 			beatmaps.splice(index, 1);
+			console.log('Map Selection: Drain length out of bounds');
 			continue;
 		}
 
 		//Check the approach rate
 		if (parseFloat(randomBeatmap.approachRate) > upperApproach || parseFloat(randomBeatmap.approachRate) < lowerApproach) {
 			beatmaps.splice(index, 1);
+			console.log('Map Selection: Approach rate out of bounds');
 			continue;
 		}
 
 		//Check the circle size
 		if (parseFloat(randomBeatmap.circleSize) > upperCircleSize || parseFloat(randomBeatmap.circleSize) < lowerCircleSize) {
 			beatmaps.splice(index, 1);
+			console.log('Map Selection: Circle size out of bounds');
 			continue;
 		}
 
 		//Check ranked status
 		if (onlyRanked && randomBeatmap.approvalStatus !== 'Ranked') {
 			beatmaps.splice(index, 1);
+			console.log('Map Selection: Not ranked');
 			continue;
 		}
 
 		//Check played status
 		if (checkPlayed && beatmapPlayed(randomBeatmap, osuUserId)) {
 			beatmaps.splice(index, 1);
+			console.log('Map Selection: Played doesn\'t fit');
 			continue;
 		}
 
 		//Check usage
 		if (randomBeatmap.usedOften) {
-			console.log('Used often');
+			console.log('Map Selection: Used often');
 			return randomBeatmap;
 		}
 
@@ -5027,18 +5034,18 @@ async function getValidTournamentBeatmapFunction(input) {
 		});
 
 		if (mapScoreAmount < 50) {
-			console.log('Not used often');
+			console.log('Map Selection: Not used often');
 			beatmaps.splice(index, 1);
 			continue;
 		}
 
-		console.log('Now used often');
+		console.log('Map Selection: Now used often');
 		randomBeatmap.usedOften = true;
 		await randomBeatmap.save();
 		return randomBeatmap;
 	}
 
-	console.log('Returning null');
+	console.log('Map Selection: Returning null');
 	//Return null
 	return null;
 }
