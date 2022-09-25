@@ -1133,6 +1133,12 @@ module.exports = {
 			}
 		}
 
+		//Only clean up during the night
+		let date = new Date();
+		if (date.getUTCHours() > 6 && !manually) {
+			return;
+		}
+
 		const Sequelize = require('sequelize');
 
 		const sequelize = new Sequelize('database', 'username', 'password', {
@@ -1210,11 +1216,6 @@ module.exports = {
 
 		// console.log(`Cleaned up ${deleted} duplicate duel rating histories`);
 
-		//Only clean up multi scores during the night
-		let date = new Date();
-		if (date.getUTCHours() > 6 && !manually) {
-			return;
-		}
 		duplicates = true;
 		deleted = 0;
 		let iterations = 0;
