@@ -24,12 +24,17 @@ module.exports = {
 			return;
 		}
 
-		if (args[0] === 'guildCommands') {
+		let manageChannels = (1 << 4).toString();
+		let manageGuild = (1 << 5).toString();
+		let manageMessages = (1 << 13).toString();
+		let manageRoles = (1 << 28).toString();
 
+		if (args[0] === 'guildCommands') {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: '8ball',
 			// 		description: 'Answers with a random 8-Ball message',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'question',
@@ -45,6 +50,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'activityrole',
 			// 		description: 'Lets you set up roles which will be assigned based on useractivity',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageRoles,
 			// 		options: [
 			// 			{
 			// 				'name': 'add',
@@ -103,6 +110,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'autorole',
 			// 		description: 'Lets you set up roles that will be automatically assigned on joining',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageRoles,
 			// 		options: [
 			// 			{
 			// 				'name': 'add',
@@ -143,6 +152,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'birthday',
 			// 		description: 'Sets your birthday',
+			// 		dm_permission: true,
 			// 		type: 1,
 			// 		required: true,
 			// 		options: [
@@ -186,6 +196,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'birthday-admin',
 			// 		description: 'Manage birthday announcements on your server',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		type: 1,
 			// 		required: true,
 			// 		options: [
@@ -223,6 +235,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'creator',
 			// 		description: 'Sends an info card about the developers'
+			// 		dm_permission: true,
 			// 	}
 			// });
 
@@ -230,6 +243,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'cuddle',
 			// 		description: 'Lets you send a gif to cuddle a user',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -269,6 +283,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'feedback',
 			// 		description: 'Sends feedback to the devs',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'type',
@@ -308,6 +323,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'goodbye-message',
 			// 		description: 'Lets you set up a message to be sent when someone leaves the server',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'current',
@@ -340,6 +357,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'guild-leaderboard',
 			// 		description: 'Sends a leaderboard of the top users in the guild',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'page',
@@ -355,6 +373,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'help',
 			// 		description: 'List all commands or get info about a specific command',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'list',
@@ -413,6 +432,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'hug',
 			// 		description: 'Lets you send a gif to hug a user',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -452,6 +472,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'kiss',
 			// 		description: 'Lets you send a gif to kiss a user',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -491,6 +512,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'leaderboard',
 			// 		description: 'Sends a leaderboard of the top users in the guild',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'type',
@@ -546,6 +568,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'link',
 			// 		description: 'Sends a link to add the bot to a server'
+			// 		dm_permission: true,
 			// 	}
 			// });
 
@@ -553,6 +576,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'logging',
 			// 		description: 'Lets you set up a message to be sent when someone leaves the server',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'list',
@@ -593,6 +618,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'name-sync',
 			// 		description: 'Allows you to sync discord player names to ingame names (and ranks)',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'setting',
@@ -622,6 +649,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-autohost',
 			// 		description: 'Hosts an automated lobby ingame',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'password',
@@ -685,6 +713,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-beatmap',
 			// 		description: 'Sends an info card about the specified beatmap',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'id',
@@ -736,6 +765,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-bws',
 			// 		description: 'Sends info about the BWS rank of the specified player',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'username',
@@ -775,6 +805,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-compare',
 			// 		description: 'Sends an info card about the score of the specified player on the last map sent into the channel',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'username',
@@ -814,6 +845,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-derank',
 			// 		description: 'Reranks players based on their duel rating compared to others',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'username',
@@ -829,6 +861,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-duel',
 			// 		description: 'Lets you play matches which are being reffed by the bot',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'match1v1',
@@ -1053,6 +1086,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-leaderboard',
 			// 		description: 'Sends a leaderboard of all the players in the guild that have their account connected',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'page',
@@ -1092,6 +1126,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-link',
 			// 		description: 'Allows you to link your Discord Account to your osu! Account',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'connect',
@@ -1137,6 +1172,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-mapleaderboard',
 			// 		description: 'Sends an info card about the leaderboard on the specified beatmap',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'id',
@@ -1197,6 +1233,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-matchscore',
 			// 		description: 'Sends an evaluation of how valuable all the players in the match were',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'match',
@@ -1246,6 +1283,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-matchtrack',
 			// 		description: 'Tracks the progress of a match',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'match',
@@ -1261,6 +1299,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-matchup',
 			// 		description: 'Sends an info card about the matchups between the specified players',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': '1v1',
@@ -1433,6 +1472,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-motd',
 			// 		description: 'Manage your Maps of the Day registration and create custom rounds',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'register',
@@ -1677,45 +1717,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-profile',
 			// 		description: 'Sends an info card about the specified player',
-			// 		options: [
-			// 			{
-			// 				'name': 'username',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username2',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username3',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username4',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username5',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			}
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'o-p',
-			// 		description: 'Sends an info card about the specified player',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'username',
@@ -1755,6 +1757,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-recent',
 			// 		description: 'Sends an info card about the specified player',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'pass',
@@ -1807,6 +1810,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'ors',
 			// 		description: 'Sends an info card about the last score of the specified player',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'pass',
@@ -1859,6 +1863,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-referee',
 			// 		description: 'Lets you schedule matches which are being reffed by the bot',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'soloqualifiers',
@@ -2104,6 +2110,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-schedule',
 			// 		description: 'Sends an info graph about the schedules of the players',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'weekday',
@@ -2229,6 +2236,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-score',
 			// 		description: 'Sends an info card about the score of the specified player on the map',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'beatmap',
@@ -2323,6 +2331,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-set',
 			// 		description: 'Allows you to set your main mode and server',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'mode',
@@ -2386,6 +2395,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-skills',
 			// 		description: 'Sends an info card about the skills of the specified player',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'username',
@@ -2463,6 +2473,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-top',
 			// 		description: 'Sends an info card about the topplays of the specified player',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'sorting',
@@ -2502,7 +2513,7 @@ module.exports = {
 			// 						'name': 'Star Rating',
 			// 						'value': '--sr',
 			// 					},
-			// 	]
+			// 				]
 			// 			},
 			// 			{
 			// 				'name': 'ascending',
@@ -2514,7 +2525,6 @@ module.exports = {
 			// 						'name': 'True',
 			// 						'value': '--asc'
 			// 					},
-
 			// 				]
 			// 			},
 			// 			{
@@ -2604,6 +2614,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-mostplayed',
 			// 		description: 'Sends an info card about the most played maps of the specified player',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'amount',
@@ -2669,6 +2680,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-tournament',
 			// 		description: 'Sends a .txt file with all the data for the tournament matches with this acronym',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'acronym',
@@ -2684,6 +2696,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-track',
 			// 		description: 'Tracks new scores set by the specified users',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'add',
@@ -2724,6 +2738,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'pat',
 			// 		description: 'Lets you send a gif to pat a user',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -2763,6 +2778,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'poll',
 			// 		description: 'Start a vote / poll',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'months',
@@ -2866,23 +2882,10 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'prefix',
-			// 		description: 'Change the bot\'s prefix on the server for chat commands',
-			// 		options: [
-			// 			{
-			// 				'name': 'prefix',
-			// 				'description': 'The new bot prefix',
-			// 				'type': 3,
-			// 				'required': true
-			// 			},
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'prune',
 			// 		description: 'Delete recent messages',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageMessages,
 			// 		options: [
 			// 			{
 			// 				'name': 'amount',
@@ -2898,6 +2901,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'reactionrole',
 			// 		description: 'Set up roles that users can assign themselves',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageRoles,
 			// 		options: [
 			// 			{
 			// 				'name': 'embedadd',
@@ -3067,6 +3072,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'reminders',
 			// 		description: 'Sends your set reminders',
+			// 		dm_permission: true,
 			// 	}
 			// });
 
@@ -3074,6 +3080,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'reminders-delete',
 			// 		description: 'Delete a selected reminder',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'id',
@@ -3089,6 +3096,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'reminders-edit',
 			// 		description: 'Edit your reminders',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'id',
@@ -3146,6 +3154,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'remindme',
 			// 		description: 'Sends a reminder at the specified time',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'message',
@@ -3191,6 +3200,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'roll',
 			// 		description: 'Rolls a number between 1 and 100 or 1 and the number specified',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'maximum',
@@ -3206,6 +3216,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'rollgame',
 			// 		description: 'Start a round of rollgame'
+			// 		dm_permission: true,
 			// 	}
 			// });
 
@@ -3213,6 +3224,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'server-info',
 			// 		description: 'Sends an info card about the server'
+			// 		dm_permission: false,
 			// 	}
 			// });
 
@@ -3220,6 +3232,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'settings',
 			// 		description: 'Sends an info card about the settings of the bot for the server'
+			// 		dm_permission: false,
 			// 	}
 			// });
 
@@ -3227,6 +3240,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'ship',
 			// 		description: 'Lets you check how compatible two users are.',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -3248,6 +3262,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'slap',
 			// 		description: 'Lets you send a gif to slap a user',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -3287,6 +3302,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'starboard',
 			// 		description: 'Highlight favourite messages with a star emoji!',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'enable',
@@ -3332,6 +3349,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'tempvoice',
 			// 		description: 'Create temporary voice- and textchannels',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageChannels,
 			// 		options: [
 			// 			{
 			// 				'name': 'enablevoice',
@@ -3361,6 +3380,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'ticket',
 			// 		description: 'Create and manage tickets',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'create',
@@ -3436,6 +3457,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'time',
 			// 		description: 'Sends current time of the given location',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'location',
@@ -3451,6 +3473,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'tournament-feed',
 			// 		description: 'Toggles receiving new tournament notifications',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'togglenotifications',
@@ -3484,6 +3507,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'user-profile',
 			// 		description: 'Sends an info card about the specified user',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -3523,6 +3547,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'weather-set',
 			// 		description: 'Allows you to set the default degree type/location for the weather command',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'location',
@@ -3568,6 +3593,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'weather-track',
 			// 		description: 'Get hourly/daily weather updates for a specified location',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'list',
@@ -3656,6 +3683,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'weather',
 			// 		description: 'Sends info about the weather of the given location',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'unit',
@@ -3687,6 +3715,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'welcome-message',
 			// 		description: 'Lets you set up a message to be sent when someone joins the server',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'current',
@@ -3725,6 +3755,7 @@ module.exports = {
 				data: {
 					name: '8ball',
 					description: 'Answers with a random 8-Ball message',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'question',
@@ -3740,6 +3771,8 @@ module.exports = {
 				data: {
 					name: 'activityrole',
 					description: 'Lets you set up roles which will be assigned based on useractivity',
+					default_member_permissions: manageRoles,
+					dm_permission: false,
 					options: [
 						{
 							'name': 'add',
@@ -3798,6 +3831,8 @@ module.exports = {
 				data: {
 					name: 'autorole',
 					description: 'Lets you set up roles that will be automatically assigned on joining',
+					default_member_permissions: manageRoles,
+					dm_permission: false,
 					options: [
 						{
 							'name': 'add',
@@ -3838,6 +3873,7 @@ module.exports = {
 				data: {
 					name: 'birthday',
 					description: 'Sets your birthday',
+					dm_permission: true,
 					type: 1,
 					required: true,
 					options: [
@@ -3881,6 +3917,8 @@ module.exports = {
 				data: {
 					name: 'birthday-admin',
 					description: 'Manage birthday announcements on your server',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					type: 1,
 					required: true,
 					options: [
@@ -3917,7 +3955,8 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'creator',
-					description: 'Sends an info card about the developers'
+					description: 'Sends an info card about the developers',
+					dm_permission: true,
 				}
 			});
 
@@ -3925,6 +3964,7 @@ module.exports = {
 				data: {
 					name: 'cuddle',
 					description: 'Lets you send a gif to cuddle a user',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'user',
@@ -3964,6 +4004,7 @@ module.exports = {
 				data: {
 					name: 'feedback',
 					description: 'Sends feedback to the devs',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'type',
@@ -4003,6 +4044,8 @@ module.exports = {
 				data: {
 					name: 'goodbye-message',
 					description: 'Lets you set up a message to be sent when someone leaves the server',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'current',
@@ -4035,6 +4078,7 @@ module.exports = {
 				data: {
 					name: 'guild-leaderboard',
 					description: 'Sends a leaderboard of the top users in the guild',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'page',
@@ -4050,6 +4094,7 @@ module.exports = {
 				data: {
 					name: 'help',
 					description: 'List all commands or get info about a specific command',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'list',
@@ -4108,6 +4153,7 @@ module.exports = {
 				data: {
 					name: 'hug',
 					description: 'Lets you send a gif to hug a user',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'user',
@@ -4147,6 +4193,7 @@ module.exports = {
 				data: {
 					name: 'kiss',
 					description: 'Lets you send a gif to kiss a user',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'user',
@@ -4186,6 +4233,7 @@ module.exports = {
 				data: {
 					name: 'leaderboard',
 					description: 'Sends a leaderboard of the top users in the guild',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'type',
@@ -4240,7 +4288,8 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'link',
-					description: 'Sends a link to add the bot to a server'
+					description: 'Sends a link to add the bot to a server',
+					dm_permission: true,
 				}
 			});
 
@@ -4248,6 +4297,8 @@ module.exports = {
 				data: {
 					name: 'logging',
 					description: 'Lets you set up a message to be sent when someone leaves the server',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'list',
@@ -4288,6 +4339,8 @@ module.exports = {
 				data: {
 					name: 'name-sync',
 					description: 'Allows you to sync discord player names to ingame names (and ranks)',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'setting',
@@ -4317,6 +4370,7 @@ module.exports = {
 				data: {
 					name: 'osu-autohost',
 					description: 'Hosts an automated lobby ingame',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'password',
@@ -4380,6 +4434,7 @@ module.exports = {
 				data: {
 					name: 'osu-beatmap',
 					description: 'Sends an info card about the specified beatmap',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'id',
@@ -4431,6 +4486,7 @@ module.exports = {
 				data: {
 					name: 'osu-bws',
 					description: 'Sends info about the BWS rank of the specified player',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'username',
@@ -4470,6 +4526,7 @@ module.exports = {
 				data: {
 					name: 'osu-compare',
 					description: 'Sends an info card about the score of the specified player on the last map sent into the channel',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'username',
@@ -4509,6 +4566,7 @@ module.exports = {
 				data: {
 					name: 'osu-derank',
 					description: 'Reranks players based on their duel rating compared to others',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'username',
@@ -4524,6 +4582,7 @@ module.exports = {
 				data: {
 					name: 'osu-duel',
 					description: 'Lets you play matches which are being reffed by the bot',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'match1v1',
@@ -4748,6 +4807,7 @@ module.exports = {
 				data: {
 					name: 'osu-leaderboard',
 					description: 'Sends a leaderboard of all the players in the guild that have their account connected',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'page',
@@ -4787,6 +4847,7 @@ module.exports = {
 				data: {
 					name: 'osu-link',
 					description: 'Allows you to link your Discord Account to your osu! Account',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'connect',
@@ -4832,6 +4893,7 @@ module.exports = {
 				data: {
 					name: 'osu-mapleaderboard',
 					description: 'Sends an info card about the leaderboard on the specified beatmap',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'id',
@@ -4892,6 +4954,7 @@ module.exports = {
 				data: {
 					name: 'osu-matchscore',
 					description: 'Sends an evaluation of how valuable all the players in the match were',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'match',
@@ -4941,6 +5004,7 @@ module.exports = {
 				data: {
 					name: 'osu-matchtrack',
 					description: 'Tracks the progress of a match',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'match',
@@ -4956,6 +5020,7 @@ module.exports = {
 				data: {
 					name: 'osu-matchup',
 					description: 'Sends an info card about the matchups between the specified players',
+					dm_permission: true,
 					options: [
 						{
 							'name': '1v1',
@@ -5128,6 +5193,7 @@ module.exports = {
 				data: {
 					name: 'osu-motd',
 					description: 'Manage your Maps of the Day registration and create custom rounds',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'register',
@@ -5372,45 +5438,7 @@ module.exports = {
 				data: {
 					name: 'osu-profile',
 					description: 'Sends an info card about the specified player',
-					options: [
-						{
-							'name': 'username',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username2',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username3',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username4',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username5',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						}
-					]
-				},
-			});
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'o-p',
-					description: 'Sends an info card about the specified player',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'username',
@@ -5450,6 +5478,7 @@ module.exports = {
 				data: {
 					name: 'osu-recent',
 					description: 'Sends an info card about the specified player',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'pass',
@@ -5502,6 +5531,7 @@ module.exports = {
 				data: {
 					name: 'ors',
 					description: 'Sends an info card about the last score of the specified player',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'pass',
@@ -5554,6 +5584,8 @@ module.exports = {
 				data: {
 					name: 'osu-referee',
 					description: 'Lets you schedule matches which are being reffed by the bot',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'soloqualifiers',
@@ -5668,6 +5700,7 @@ module.exports = {
 				data: {
 					name: 'osu-schedule',
 					description: 'Sends an info graph about the schedules of the players',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'weekday',
@@ -5793,6 +5826,7 @@ module.exports = {
 				data: {
 					name: 'osu-score',
 					description: 'Sends an info card about the score of the specified player on the map',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'beatmap',
@@ -5887,6 +5921,7 @@ module.exports = {
 				data: {
 					name: 'osu-set',
 					description: 'Allows you to set your main mode and server',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'mode',
@@ -5950,6 +5985,7 @@ module.exports = {
 				data: {
 					name: 'osu-skills',
 					description: 'Sends an info card about the skills of the specified player',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'username',
@@ -6027,6 +6063,7 @@ module.exports = {
 				data: {
 					name: 'osu-top',
 					description: 'Sends an info card about the topplays of the specified player',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'sorting',
@@ -6168,6 +6205,7 @@ module.exports = {
 				data: {
 					name: 'osu-mostplayed',
 					description: 'Sends an info card about the most played maps of the specified player',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'amount',
@@ -6233,6 +6271,7 @@ module.exports = {
 				data: {
 					name: 'osu-tournament',
 					description: 'Sends a .txt file with all the data for the tournament matches with this acronym',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'acronym',
@@ -6248,6 +6287,8 @@ module.exports = {
 				data: {
 					name: 'osu-track',
 					description: 'Tracks new scores set by the specified users',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'add',
@@ -6288,6 +6329,7 @@ module.exports = {
 				data: {
 					name: 'pat',
 					description: 'Lets you send a gif to pat a user',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'user',
@@ -6327,6 +6369,7 @@ module.exports = {
 				data: {
 					name: 'poll',
 					description: 'Start a vote / poll',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'months',
@@ -6430,23 +6473,10 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
-					name: 'prefix',
-					description: 'Change the bot\'s prefix on the server for chat commands',
-					options: [
-						{
-							'name': 'prefix',
-							'description': 'The new bot prefix',
-							'type': 3,
-							'required': true
-						},
-					]
-				},
-			});
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
 					name: 'prune',
 					description: 'Delete recent messages',
+					dm_permission: false,
+					default_member_permissions: manageMessages,
 					options: [
 						{
 							'name': 'amount',
@@ -6462,6 +6492,8 @@ module.exports = {
 				data: {
 					name: 'reactionrole',
 					description: 'Set up roles that users can assign themselves',
+					dm_permission: false,
+					default_member_permissions: manageRoles,
 					options: [
 						{
 							'name': 'embedadd',
@@ -6631,6 +6663,7 @@ module.exports = {
 				data: {
 					name: 'reminders',
 					description: 'Sends your set reminders',
+					dm_permission: true,
 				}
 			});
 
@@ -6638,6 +6671,7 @@ module.exports = {
 				data: {
 					name: 'reminders-delete',
 					description: 'Delete a selected reminder',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'id',
@@ -6653,6 +6687,7 @@ module.exports = {
 				data: {
 					name: 'reminders-edit',
 					description: 'Edit your reminders',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'id',
@@ -6710,6 +6745,7 @@ module.exports = {
 				data: {
 					name: 'remindme',
 					description: 'Sends a reminder at the specified time',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'message',
@@ -6755,6 +6791,7 @@ module.exports = {
 				data: {
 					name: 'roll',
 					description: 'Rolls a number between 1 and 100 or 1 and the number specified',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'maximum',
@@ -6769,21 +6806,24 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'rollgame',
-					description: 'Start a round of rollgame'
+					description: 'Start a round of rollgame',
+					dm_permission: true,
 				}
 			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'server-info',
-					description: 'Sends an info card about the server'
+					description: 'Sends an info card about the server',
+					dm_permission: false,
 				}
 			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'settings',
-					description: 'Sends an info card about the settings of the bot for the server'
+					description: 'Sends an info card about the settings of the bot for the server',
+					dm_permission: false,
 				}
 			});
 
@@ -6791,6 +6831,7 @@ module.exports = {
 				data: {
 					name: 'ship',
 					description: 'Lets you check how compatible two users are.',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'user',
@@ -6812,6 +6853,7 @@ module.exports = {
 				data: {
 					name: 'slap',
 					description: 'Lets you send a gif to slap a user',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'user',
@@ -6851,6 +6893,8 @@ module.exports = {
 				data: {
 					name: 'starboard',
 					description: 'Highlight favourite messages with a star emoji!',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'enable',
@@ -6896,6 +6940,8 @@ module.exports = {
 				data: {
 					name: 'tempvoice',
 					description: 'Create temporary voice- and textchannels',
+					dm_permission: false,
+					default_member_permissions: manageChannels,
 					options: [
 						{
 							'name': 'enablevoice',
@@ -6925,6 +6971,8 @@ module.exports = {
 				data: {
 					name: 'ticket',
 					description: 'Create and manage tickets',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'create',
@@ -7000,6 +7048,7 @@ module.exports = {
 				data: {
 					name: 'time',
 					description: 'Sends current time of the given location',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'location',
@@ -7015,6 +7064,7 @@ module.exports = {
 				data: {
 					name: 'tournament-feed',
 					description: 'Toggles receiving new tournament notifications',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'togglenotifications',
@@ -7048,6 +7098,7 @@ module.exports = {
 				data: {
 					name: 'user-profile',
 					description: 'Sends an info card about the specified user',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'user',
@@ -7087,6 +7138,7 @@ module.exports = {
 				data: {
 					name: 'weather-set',
 					description: 'Allows you to set the default degree type/location for the weather command',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'location',
@@ -7132,6 +7184,8 @@ module.exports = {
 				data: {
 					name: 'weather-track',
 					description: 'Get hourly/daily weather updates for a specified location',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'list',
@@ -7220,6 +7274,7 @@ module.exports = {
 				data: {
 					name: 'weather',
 					description: 'Sends info about the weather of the given location',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'unit',
@@ -7251,6 +7306,8 @@ module.exports = {
 				data: {
 					name: 'welcome-message',
 					description: 'Lets you set up a message to be sent when someone joins the server',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'current',
@@ -7515,6 +7572,7 @@ module.exports = {
 				data: {
 					name: 'tournamentfeed-admin',
 					description: 'Allows for managing the tournament feed',
+					default_member_permissions: '0',
 					options: [
 						{
 							'name': 'update',
