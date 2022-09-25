@@ -31,7 +31,14 @@ module.exports = {
 		}
 		if (interaction) {
 			if (interaction.options._subcommand === 'match1v1' || interaction.options._subcommand === 'match2v2') {
-				await interaction.deferReply();
+				try {
+					await interaction.deferReply();
+				} catch (error) {
+					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+						console.error(error);
+					}
+					return;
+				}
 				//Get the star ratings for both users
 				msg = await populateMsgFromInteraction(interaction);
 
