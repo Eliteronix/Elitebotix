@@ -5,6 +5,7 @@ const Canvas = require('canvas');
 const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getBeatmapApprovalStatusImage, logDatabaseQueries, getGameModeName, getOsuPP } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-recent',
@@ -25,7 +26,14 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Players are being processed');
+			try {
+				await interaction.reply('Players are being processed');
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
 			args = [];
 

@@ -5,6 +5,7 @@ const Canvas = require('canvas');
 const { getGuildPrefix, humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getBeatmapApprovalStatusImage, logDatabaseQueries, getBeatmapModeId, getGameModeName, getOsuPP, getModBits, multiToBanchoScore } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-score',
@@ -26,7 +27,14 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Players are being processed');
+			try {
+				await interaction.reply('Players are being processed');
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
 			args = [];
 
@@ -209,11 +217,16 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						} else {
 							sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 						}
-						if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
-							await sentMessage.react('<:COMPARE:827974793365159997>');
+
+						try {
+							if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
+								await sentMessage.react('<:COMPARE:827974793365159997>');
+							}
+							await sentMessage.react('🗺️');
+							await sentMessage.react('👤');
+						} catch (err) {
+							//Nothing
 						}
-						await sentMessage.react('🗺️');
-						await sentMessage.react('👤');
 
 						processingMessage.delete();
 						//Reset maprank in case of multiple scores displayed
