@@ -3010,7 +3010,7 @@ async function getDerankStatsFunction(discordUser) {
 	}
 
 	if (!ppRank) {
-		ppRank = ppDiscordUsers.length + 1;
+		ppRank = ppDiscordUsers.length;
 	}
 
 	let duelRank = null;
