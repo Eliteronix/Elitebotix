@@ -122,6 +122,8 @@ const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, passwo
 if (!wrongCluster() && process.env.SERVER !== 'QA') {
 	bancho.connect();
 
+	bancho.lastUserMaps = new Discord.Collection();
+
 	//Listen to messages
 	bancho.on('PM', async (message) => {
 		gotBanchoPrivateMessage(client, bancho, message);
