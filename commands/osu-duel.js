@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels } = require('../utils');
+const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
@@ -727,19 +727,33 @@ module.exports = {
 					ctx.drawImage(badge, 10, 60 + i * 44 + yOffset, 86, 40);
 				}
 
+				//Draw the Player derank rank
+				let discordUser = await DBDiscordUsers.findOne({
+					where: {
+						osuUserId: osuUser.id
+					}
+				});
+
+				if (discordUser) {
+					let derankStats = await getDerankStats(discordUser);
+
+					ctx.font = 'bold 25px comfortaa, sans-serif';
+					ctx.fillText(`Rank: #${humanReadable(derankStats.expectedPpRankOsu)}`, 190, 287);
+				}
+
 				//Get a circle for inserting the player avatar
 				ctx.beginPath();
-				ctx.arc(190, 180, 80, 0, Math.PI * 2, true);
+				ctx.arc(190, 170, 80, 0, Math.PI * 2, true);
 				ctx.closePath();
 				ctx.clip();
 
 				//Draw a shape onto the main canvas
 				try {
 					const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.id}`);
-					ctx.drawImage(avatar, 110, 100, 160, 160);
+					ctx.drawImage(avatar, 110, 90, 160, 160);
 				} catch (error) {
 					const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-					ctx.drawImage(avatar, 110, 100, 160, 160);
+					ctx.drawImage(avatar, 110, 90, 160, 160);
 				}
 
 				//Create as an attachment
