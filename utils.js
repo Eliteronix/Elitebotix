@@ -1319,11 +1319,13 @@ module.exports = {
 				color = '#0ecf00';
 			}
 
+			let updatedDate = new Date(issues[i].fields.updated);
+
 			//Create embed
 			const issueEmbed = new Discord.MessageEmbed()
 				.setColor(color)
 				.setTitle(issues[i].fields.summary)
-				.setFooter({ text: `Last updated: ${issues[i].fields.updated}` });
+				.setFooter({ text: `Last updated: ${updatedDate.getUTCHours().toString().padStart(2, '0')}:${updatedDate.getUTCMinutes().toString().padStart(2, '0')} ${updatedDate.getUTCDate().toString().padStart(2, '0')}.${(updatedDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${updatedDate.getUTCFullYear()}` });
 
 			if (issues[i].fields.assignee) {
 				issueEmbed.setAuthor({ name: `Assigned to: ${issues[i].fields.assignee.displayName}`, iconURL: issues[i].fields.assignee.avatarUrls['48x48'] });
