@@ -1,11 +1,11 @@
-const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, getUserDuelStarRating, updateQueueChannels, getValidTournamentBeatmap } = require('./utils');
-const { DBOsuMultiScores, DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
-const Sequelize = require('sequelize');
-const Op = Sequelize.Op;
+const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, getUserDuelStarRating, updateQueueChannels, getValidTournamentBeatmap, getModBits } = require('./utils');
+const { DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
 
 module.exports = async function (client, bancho, message) {
 	if (message.message === '!help') {
 		await message.user.sendMessage('/ /np - Get the pp values for the current beatmap with the current mods');
+		await message.user.sendMessage('!acc - Get the last map\'s pp value with the given accuracy');
+		await message.user.sendMessage('!with - Get the pp values for the last map with the given mods');
 		await message.user.sendMessage('!autohost <password> - Autohosts a lobby with tournament maps');
 		await message.user.sendMessage('!discord - Sends a link to the main Elitebotix discord');
 		await message.user.sendMessage('!play / !play1v1 / !queue1v1 - Queue up for 1v1 matches');
@@ -54,6 +54,9 @@ module.exports = async function (client, bancho, message) {
 		}
 
 		let beatmap = await getOsuBeatmap({ beatmapId: beatmapId, modBits: modBits });
+
+		await message.user.fetchFromAPI();
+		bancho.lastUserMaps.set(message.user.id.toString(), { beatmapId: beatmapId, modBits: modBits });
 
 		let firstPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 95.00, 0, beatmap.maxCombo);
 		let secondPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 98.00, 0, beatmap.maxCombo);
@@ -260,51 +263,6 @@ module.exports = async function (client, bancho, message) {
 		}
 
 		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]]${modeText} + ${mod} | Beatmap ★: ${Math.floor(beatmap.starRating * 100) / 100}${hdBuff}| Your${specifiedRating ? ' specified' : ''} ${mod} duel ★: ${Math.floor(userStarRating * 100) / 100} | ${totalLength}  ♫${beatmap.bpm}  AR${beatmap.approachRate}  OD${beatmap.overallDifficulty}`);
-
-
-		logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
-		const mapScores = await DBOsuMultiScores.findAll({
-			where: {
-				beatmapId: beatmap.beatmapId,
-				tourneyMatch: true,
-				matchName: {
-					[Op.notLike]: 'MOTD:%',
-				},
-				[Op.or]: [
-					{ warmup: false },
-					{ warmup: null }
-				],
-			}
-		});
-
-		//Bubblesort mapScores by matchId property descending
-		mapScores.sort((a, b) => {
-			if (parseInt(a.matchId) > parseInt(b.matchId)) {
-				return -1;
-			}
-			if (parseInt(a.matchId) < parseInt(b.matchId)) {
-				return 1;
-			}
-			return 0;
-		});
-
-		let tournaments = [];
-
-		for (let i = 0; i < mapScores.length; i++) {
-			let acronym = mapScores[i].matchName.replace(/:.+/gm, '').replace(/`/g, '');
-
-			if (tournaments.indexOf(acronym) === -1) {
-				tournaments.push(acronym);
-			}
-		}
-
-		let tournamentOccurences = `The map was played ${mapScores.length} times with any mods in these tournaments (new -> old): ${tournaments.join(', ')}`;
-
-		if (tournaments.length === 0) {
-			tournamentOccurences = 'The map was never played in any tournaments.';
-		}
-
-		message.user.sendMessage(tournamentOccurences);
 	} else if (message.message.toLowerCase().startsWith('!autohost')) {
 		let args = message.message.slice(9).trim().split(/ +/);
 
@@ -339,5 +297,64 @@ module.exports = async function (client, bancho, message) {
 				await message.user.sendMessage(userRequests[i].comment);
 			}
 		}
+	} else if (message.message.toLowerCase().startsWith('!with')) {
+		let args = message.message.slice(5).trim().split(/ +/);
+		let mods = args.join('').toUpperCase();
+		let modBits = getModBits(mods);
+
+		await message.user.fetchFromAPI();
+		let oldBeatmap = bancho.lastUserMaps.get(message.user.id.toString());
+
+		if (!oldBeatmap) {
+			return message.user.sendMessage('Please /np a map first.');
+		}
+
+		let beatmap = await getOsuBeatmap({ beatmapId: oldBeatmap.beatmapId, modBits: modBits });
+
+		bancho.lastUserMaps.set(message.user.id.toString(), { beatmapId: oldBeatmap.beatmapId, modBits: modBits });
+
+		let firstPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 95.00, 0, beatmap.maxCombo);
+		let secondPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 98.00, 0, beatmap.maxCombo);
+		let thirdPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 99.00, 0, beatmap.maxCombo);
+		let fourthPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 100.00, 0, beatmap.maxCombo);
+
+		mods = getMods(beatmap.mods);
+
+		if (!mods[0]) {
+			mods = ['NM'];
+		}
+
+		mods = mods.join('');
+
+		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] [${mods}] | 95%: ${Math.round(firstPP)}pp | 98%: ${Math.round(secondPP)}pp | 99%: ${Math.round(thirdPP)}pp | 100%: ${Math.round(fourthPP)}pp`);
+	} else if (message.message.toLowerCase().startsWith('!acc')) {
+		let args = message.message.slice(5).trim().split(/ +/);
+
+		if (!args[0]) {
+			return message.user.sendMessage('Please specify an accuracy.');
+		}
+
+		let acc = parseFloat(args[0].replace(',', '.'));
+
+		await message.user.fetchFromAPI();
+		let oldBeatmap = bancho.lastUserMaps.get(message.user.id.toString());
+
+		if (!oldBeatmap) {
+			return message.user.sendMessage('Please /np a map first.');
+		}
+
+		let beatmap = await getOsuBeatmap({ beatmapId: oldBeatmap.beatmapId, modBits: oldBeatmap.modBits });
+
+		let accPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, acc, 0, beatmap.maxCombo);
+
+		let mods = getMods(beatmap.mods);
+
+		if (!mods[0]) {
+			mods = ['NM'];
+		}
+
+		mods = mods.join('');
+
+		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] [${mods}] | ${acc}%: ${Math.round(accPP)}pp`);
 	}
 };
