@@ -3,6 +3,7 @@ const { DBOsuMultiScores } = require('../dbObjects');
 const { populateMsgFromInteraction, getOsuBeatmap, pause, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-tournament',
@@ -23,7 +24,14 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Data is being processed');
+			try {
+				await interaction.reply('Data is being processed');
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
 			args = [interaction.options._hoistedOptions[0].value];
 		}
