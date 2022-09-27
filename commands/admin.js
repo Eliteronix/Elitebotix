@@ -2692,47 +2692,313 @@ module.exports = {
 			// 	},
 			// });
 
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'osu-track',
-			// 		description: 'Tracks new scores set by the specified users',
-			// 		dm_permission: false,
-			// 		default_member_permissions: manageGuild,
-			// 		options: [
-			// 			{
-			// 				'name': 'add',
-			// 				'description': 'Lets you add a new user to track',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'username',
-			// 						'description': 'The user to track',
-			// 						'type': 3,
-			// 						'required': true
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'remove',
-			// 				'description': 'Stop tracking a user',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'username',
-			// 						'description': 'The user to stop tracking',
-			// 						'type': 3,
-			// 						'required': true
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'list',
-			// 				'description': 'Show which users are being tracked in the channel',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 		]
-			// 	},
-			// });
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'osu-track',
+					description: 'Tracks new scores set by the specified users',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
+					options: [
+						{
+							'name': 'enable',
+							'description': 'Lets you add a new user to track',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'usernames',
+									'description': 'The user(s) to track (separate them with a \',\')',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'topplays',
+									'description': 'Which modes should be tracked',
+									'type': 3,
+									'choices': [
+										{
+											'name': 'osu! only',
+											'value': 'o',
+										},
+										{
+											'name': 'taiko only',
+											'value': 't',
+										},
+										{
+											'name': 'catch only',
+											'value': 'c',
+										},
+										{
+											'name': 'mania only',
+											'value': 'm',
+										},
+										{
+											'name': 'osu! & taiko',
+											'value': 'ot',
+										},
+										{
+											'name': 'osu! & catch',
+											'value': 'oc',
+										},
+										{
+											'name': 'osu! & mania',
+											'value': 'om',
+										},
+										{
+											'name': 'taiko & catch',
+											'value': 'tc',
+										},
+										{
+											'name': 'taiko & mania',
+											'value': 'tm',
+										},
+										{
+											'name': 'catch & mania',
+											'value': 'cm',
+										},
+										{
+											'name': 'osu!, taiko & catch',
+											'value': 'otc',
+										},
+										{
+											'name': 'osu!, taiko & mania',
+											'value': 'otm',
+										},
+										{
+											'name': 'osu!, catch & mania',
+											'value': 'ocm',
+										},
+										{
+											'name': 'taiko, catch & mania',
+											'value': 'tcm',
+										},
+										{
+											'name': 'osu!, taiko, catch & mania',
+											'value': 'otcm',
+										},
+									]
+								},
+								{
+									'name': 'leaderboardplays',
+									'description': 'Which modes should be tracked',
+									'type': 3,
+									'choices': [
+										{
+											'name': 'osu! only',
+											'value': 'o',
+										},
+										{
+											'name': 'taiko only',
+											'value': 't',
+										},
+										{
+											'name': 'catch only',
+											'value': 'c',
+										},
+										{
+											'name': 'mania only',
+											'value': 'm',
+										},
+										{
+											'name': 'osu! & taiko',
+											'value': 'ot',
+										},
+										{
+											'name': 'osu! & catch',
+											'value': 'oc',
+										},
+										{
+											'name': 'osu! & mania',
+											'value': 'om',
+										},
+										{
+											'name': 'taiko & catch',
+											'value': 'tc',
+										},
+										{
+											'name': 'taiko & mania',
+											'value': 'tm',
+										},
+										{
+											'name': 'catch & mania',
+											'value': 'cm',
+										},
+										{
+											'name': 'osu!, taiko & catch',
+											'value': 'otc',
+										},
+										{
+											'name': 'osu!, taiko & mania',
+											'value': 'otm',
+										},
+										{
+											'name': 'osu!, catch & mania',
+											'value': 'ocm',
+										},
+										{
+											'name': 'taiko, catch & mania',
+											'value': 'tcm',
+										},
+										{
+											'name': 'osu!, taiko, catch & mania',
+											'value': 'otcm',
+										},
+									]
+								},
+								{
+									'name': 'ameobea',
+									'description': 'Which modes should be updated for ameobea.me/osutrack/',
+									'type': 3,
+									'choices': [
+										{
+											'name': 'osu! only',
+											'value': 'o',
+										},
+										{
+											'name': 'taiko only',
+											'value': 't',
+										},
+										{
+											'name': 'catch only',
+											'value': 'c',
+										},
+										{
+											'name': 'mania only',
+											'value': 'm',
+										},
+										{
+											'name': 'osu! & taiko',
+											'value': 'ot',
+										},
+										{
+											'name': 'osu! & catch',
+											'value': 'oc',
+										},
+										{
+											'name': 'osu! & mania',
+											'value': 'om',
+										},
+										{
+											'name': 'taiko & catch',
+											'value': 'tc',
+										},
+										{
+											'name': 'taiko & mania',
+											'value': 'tm',
+										},
+										{
+											'name': 'catch & mania',
+											'value': 'cm',
+										},
+										{
+											'name': 'osu!, taiko & catch',
+											'value': 'otc',
+										},
+										{
+											'name': 'osu!, taiko & mania',
+											'value': 'otm',
+										},
+										{
+											'name': 'osu!, catch & mania',
+											'value': 'ocm',
+										},
+										{
+											'name': 'taiko, catch & mania',
+											'value': 'tcm',
+										},
+										{
+											'name': 'osu!, taiko, catch & mania',
+											'value': 'otcm',
+										},
+									]
+								},
+								{
+									'name': 'showameobeaupdate',
+									'description': 'Should messages be sent when ameobea is updated',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'medals',
+									'description': 'Should achieved medals be tracked',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'duelrating',
+									'description': 'Should duel rating changes be tracked',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'matchactivity',
+									'description': 'Should achieved medals be tracked',
+									'type': 3,
+									'choices': [
+										{
+											'name': 'Notify on matches',
+											'value': 'matches',
+										},
+										{
+											'name': 'Notify on matches and auto matchtrack',
+											'value': 'matchtes (auto matchtrack)',
+										},
+									]
+								},
+							]
+						},
+						{
+							'name': 'disable',
+							'description': 'Stop tracking a user',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'usernames',
+									'description': 'The user(s) to stop tracking (separate them with a \',\')',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'topplays',
+									'description': 'Stop tracking top plays',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'leaderboardplays',
+									'description': 'Stop tracking leaderboard plays',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'ameobea',
+									'description': 'Stop tracking ameobea updates',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'showameobeaupdates',
+									'description': 'Stop tracking showing ameobea updates',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'medals',
+									'description': 'Stop tracking medals',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'duelrating',
+									'description': 'Stop tracking duel rating changes',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'matchactivity',
+									'description': 'Stop tracking match activity',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
+						},
+						{
+							'name': 'list',
+							'description': 'Show which users are being tracked in the channel',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+					]
+				},
+			});
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {

@@ -62,11 +62,11 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
-		medals: {
+		showAmeobeaUpdates: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
-		showAmeobeaUpdates: {
+		medals: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
