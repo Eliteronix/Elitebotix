@@ -1008,7 +1008,7 @@ module.exports = {
 
 						let dbBeatmap = await getOsuBeatmapFunction({ beatmapId: map, modBits: 0 });
 
-						bancho.lastUserMaps.set(message.user.id, { beatmapId: map, modBits: 0 });
+						bancho.lastUserMaps.set(discordUser.osuUserId, { beatmapId: map, modBits: 0 });
 
 						let mainMessage = `${prefix}${context['display-name']} -> [${dbBeatmap.approvalStatus}] [https://osu.ppy.sh/b/${dbBeatmap.beatmapId} ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}]] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`;
 						await IRCUser.sendMessage(mainMessage);
