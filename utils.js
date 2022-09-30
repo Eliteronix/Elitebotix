@@ -3315,12 +3315,40 @@ async function getOsuBeatmapFunction(input) {
 	}
 
 	let lastRework = new Date();
-	lastRework.setUTCFullYear(2021);
-	lastRework.setUTCMonth(10);
-	lastRework.setUTCDate(13);
-	lastRework.setUTCHours(17);
+	lastRework.setUTCFullYear(2022);
+	lastRework.setUTCMonth(9);
+	lastRework.setUTCDate(1);
+	lastRework.setUTCHours(0);
 	let lastWeek = new Date();
 	lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
+
+	// //Date of reworked EZ values
+	// if (getModsFunction(modBits).includes('EZ')) {
+	// 	lastRework.setUTCFullYear(2022);
+	// 	lastRework.setUTCMonth(2);
+	// 	lastRework.setUTCDate(19);
+	// }
+
+	// //Date of reworked DT values
+	// if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('HT')) {
+	// 	lastRework.setUTCFullYear(2022);
+	// 	lastRework.setUTCMonth(7);
+	// 	lastRework.setUTCDate(21);
+	// }
+
+	// //Date of reworked HR values
+	// if (getModsFunction(modBits).includes('HR')) {
+	// 	lastRework.setUTCFullYear(2022);
+	// 	lastRework.setUTCMonth(7);
+	// 	lastRework.setUTCDate(28);
+	// }
+
+	// //Date of reworked FL values
+	// if (getModsFunction(modBits).includes('FL')) {
+	// 	lastRework.setUTCFullYear(2022);
+	// 	lastRework.setUTCMonth(7);
+	// 	lastRework.setUTCDate(29);
+	// }
 
 	let dbBeatmap = null;
 
@@ -3332,34 +3360,6 @@ async function getOsuBeatmapFunction(input) {
 				dbBeatmap = await DBOsuBeatmaps.findOne({
 					where: { beatmapId: beatmapId, mods: modBits }
 				});
-
-				//Date of reworked EZ values
-				if (getModsFunction(modBits).includes('EZ')) {
-					lastRework.setUTCFullYear(2022);
-					lastRework.setUTCMonth(2);
-					lastRework.setUTCDate(19);
-				}
-
-				//Date of reworked DT values
-				if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('HT')) {
-					lastRework.setUTCFullYear(2022);
-					lastRework.setUTCMonth(7);
-					lastRework.setUTCDate(21);
-				}
-
-				//Date of reworked HR values
-				if (getModsFunction(modBits).includes('HR')) {
-					lastRework.setUTCFullYear(2022);
-					lastRework.setUTCMonth(7);
-					lastRework.setUTCDate(28);
-				}
-
-				//Date of reworked FL values
-				if (getModsFunction(modBits).includes('FL')) {
-					lastRework.setUTCFullYear(2022);
-					lastRework.setUTCMonth(7);
-					lastRework.setUTCDate(29);
-				}
 
 				if (!dbBeatmap
 					|| forceUpdate
