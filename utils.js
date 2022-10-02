@@ -4853,7 +4853,6 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
-			limit: 250,
 		});
 	} else if (modPool === 'HD') {
 		let HDLowerBound = lowerBound - 0.8;
@@ -4876,7 +4875,6 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
-			limit: 250,
 		});
 	} else if (modPool === 'HR') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -4897,7 +4895,6 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
-			limit: 250,
 		});
 	} else if (modPool === 'DT') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -4918,7 +4915,6 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
-			limit: 250,
 		});
 	} else if (modPool === 'FM') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -4939,7 +4935,6 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
-			limit: 250,
 		});
 	}
 
@@ -5024,7 +5019,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		//Check usage
 		if (randomBeatmap.usedOften) {
 			console.log('Map Selection: Used often');
-			return randomBeatmap;
+
+			//Deep clone beatmap, use proper library if you ever need dates or functions of the beatmap or just refetch from the database
+			return JSON.parse(JSON.stringify(randomBeatmap));
 		}
 
 		const mapScoreAmount = await DBOsuMultiScores.count({
@@ -5051,7 +5048,8 @@ async function getValidTournamentBeatmapFunction(input) {
 		console.log('Map Selection: Now used often');
 		randomBeatmap.usedOften = true;
 		await randomBeatmap.save();
-		return randomBeatmap;
+		//Deep clone beatmap, use proper library if you ever need dates or functions of the beatmap or just refetch from the database
+		return JSON.parse(JSON.stringify(randomBeatmap));
 	}
 
 	console.log('Map Selection: Returning null');
