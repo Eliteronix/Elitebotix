@@ -5021,7 +5021,9 @@ async function getValidTournamentBeatmapFunction(input) {
 			console.log('Map Selection: Used often');
 
 			//Deep clone beatmap, use proper library if you ever need dates or functions of the beatmap or just refetch from the database
-			return JSON.parse(JSON.stringify(randomBeatmap));
+			let clone = JSON.parse(JSON.stringify(randomBeatmap));
+			beatmaps = null;
+			return clone;
 		}
 
 		const mapScoreAmount = await DBOsuMultiScores.count({
@@ -5049,7 +5051,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		randomBeatmap.usedOften = true;
 		await randomBeatmap.save();
 		//Deep clone beatmap, use proper library if you ever need dates or functions of the beatmap or just refetch from the database
-		return JSON.parse(JSON.stringify(randomBeatmap));
+		let clone = JSON.parse(JSON.stringify(randomBeatmap));
+		beatmaps = null;
+		return clone;
 	}
 
 	console.log('Map Selection: Returning null');
