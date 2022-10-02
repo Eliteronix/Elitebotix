@@ -4853,6 +4853,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
+			limit: 250,
 		});
 	} else if (modPool === 'HD') {
 		let HDLowerBound = lowerBound - 0.8;
@@ -4875,6 +4876,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
+			limit: 250,
 		});
 	} else if (modPool === 'HR') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -4895,6 +4897,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
+			limit: 250,
 		});
 	} else if (modPool === 'DT') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -4915,6 +4918,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
+			limit: 250,
 		});
 	} else if (modPool === 'FM') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -4935,6 +4939,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 			},
 			order: Sequelize.fn('RANDOM'),
+			limit: 250,
 		});
 	}
 
