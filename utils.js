@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -1129,12 +1129,6 @@ module.exports = {
 		return outputScore;
 	},
 	async cleanUpDuplicateEntries(manually) {
-		if (wrongClusterFunction()) {
-			if (!manually) {
-				return;
-			}
-		}
-
 		//Only clean up during the night
 		let date = new Date();
 		if (date.getUTCHours() > 6 && !manually) {
@@ -2123,10 +2117,6 @@ module.exports = {
 		await channel.edit({ name: `1v1 Queue: ${existingQueueTasks.length} user${multipleString}` });
 	},
 	async createNewForumPostRecords(client) {
-		// eslint-disable-next-line no-undef
-		if (wrongClusterFunction()) {
-			return;
-		}
 		await fetch('https://osu.ppy.sh/community/forums/55')
 			.then(async (res) => {
 				let htmlCode = await res.text();
@@ -2245,6 +2235,38 @@ module.exports = {
 	},
 	async getValidTournamentBeatmap(input) {
 		return await getValidTournamentBeatmapFunction(input);
+	},
+	async processOsuTrack(client) {
+		console.log('YEP');
+		let now = new Date();
+		let osuTracker = await DBOsuTrackingUsers.findOne({
+			where: {
+				nextCheck: {
+					[Op.lte]: now,
+				},
+			},
+			order: [
+				['nextCheck', 'ASC'],
+			],
+		});
+
+		if (osuTracker) {
+			console.log(osuTracker);
+
+			let guildTrackers = await DBOsuGuildTrackers.findAll({
+				where: {
+					osuUserId: osuTracker.osuUserId,
+				},
+			});
+
+			//Fetch the guild
+			let guild = client.guilds.fetch(guildTrackers[0].guildId);
+
+			//Fetch the channel
+			let channel = guild.channels.fetch(guildTrackers[0].channelId);
+
+			console.log(guildTrackers);
+		}
 	}
 };
 

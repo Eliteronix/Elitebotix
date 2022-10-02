@@ -2937,7 +2937,7 @@ module.exports = {
 			// 							},
 			// 							{
 			// 								'name': 'Notify on matches and auto matchtrack',
-			// 								'value': 'matchtes (auto matchtrack)',
+			// 								'value': 'matches (auto matchtrack)',
 			// 							},
 			// 						]
 			// 					},
@@ -6794,7 +6794,7 @@ module.exports = {
 										},
 										{
 											'name': 'Notify on matches and auto matchtrack',
-											'value': 'matchtes (auto matchtrack)',
+											'value': 'matches (auto matchtrack)',
 										},
 									]
 								},
