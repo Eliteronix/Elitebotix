@@ -1,6 +1,6 @@
 {
 	"script": "bot.js",
-	"instances": 4,
+	"instances": 6,
 	"exec_mode": "cluster",
 	"watch": true,
 	"ignore_watch": [
