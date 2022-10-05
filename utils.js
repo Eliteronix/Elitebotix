@@ -2253,19 +2253,73 @@ module.exports = {
 		if (osuTracker) {
 			console.log(osuTracker);
 
+			// eslint-disable-next-line no-undef
+			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+			});
+
+			let osuUser = { osuUserId: osuTracker.osuUserId };
+
 			let guildTrackers = await DBOsuGuildTrackers.findAll({
 				where: {
 					osuUserId: osuTracker.osuUserId,
 				},
 			});
 
-			//Fetch the guild
-			let guild = client.guilds.fetch(guildTrackers[0].guildId);
+			for (let i = 0; i < guildTrackers.length; i++) {
+				if (guildTrackers[i].osuLeaderboard) {
+					if (fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+						guildTrackers.splice(i, 1);
+						i--;
+						continue;
+					}
 
-			//Fetch the channel
-			let channel = guild.channels.fetch(guildTrackers[0].channelId);
+					if (!osuUser.osuUser) {
+						//Redo this
+						await osuApi.getUser({ u: osuUser.osuUserId })
+							.then(async (user) => {
+								osuUser.osuUser = user;
+							})
+							.catch(async (err) => {
+								console.log(err);
+								if (err.message === 'Not found') {
+									await guildTrackers[i].channel.send(`Could not find user \`${osuUser.osuUserId}\` anymore and I will therefore stop tracking them.`);
+									guildTrackers.splice(i, 1);
+									i--;
+									continue;
+								}
+							});
+					}
+				}
 
-			console.log(guildTrackers);
+				console.log(guildTrackers[i]);
+			}
+		}
+
+		async function fetchChannelIfNeededOrDeleteAndReturnTrue(guildTracker) {
+			if (guildTracker.channel) {
+				return;
+			}
+
+			try {
+				//Fetch the guild
+				guildTracker.guild = client.guilds.fetch(guildTracker.guildId);
+
+				//Fetch the channel
+				guildTracker.channel = guildTracker.guild.channels.fetch(guildTracker.channelId);
+				return;
+			} catch (err) {
+				if (err.message === 'Missing Access') {
+					await guildTracker.destroy();
+					return true;
+				}
+
+				return;
+			}
+
 		}
 	}
 };
