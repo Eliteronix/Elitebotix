@@ -2273,7 +2273,7 @@ module.exports = {
 
 			for (let i = 0; i < guildTrackers.length; i++) {
 				if (guildTrackers[i].osuLeaderboard || guildTrackers[i].taikoLeaderboard || guildTrackers[i].catchLeaderboard || guildTrackers[i].maniaLeaderboard) {
-					if (fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+					if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
 						guildTrackers.splice(i, 1);
 						i--;
 						continue;
@@ -2306,6 +2306,30 @@ module.exports = {
 									k--;
 								}
 							}
+
+							// [
+							// 0|Elitebotix  |   Event {
+							// 0|Elitebotix  |     html: `<b><a href='/users/31497191'>frurmur</a></b> unlocked the "<b>Totality</b>" medal!`,
+							// 0|Elitebotix  |     beatmapId: null,
+							// 0|Elitebotix  |     beatmapsetId: null,
+							// 0|Elitebotix  |     raw_date: '2022-10-06 11:22:28',
+							// 0|Elitebotix  |     epicFactor: '4'
+							// 0|Elitebotix  |   },
+							// 0|Elitebotix  |   Event {
+							// 0|Elitebotix  |     html: `<b><a href='/users/31497191'>frurmur</a></b> unlocked the "<b>Finality</b>" medal!`,
+							// 0|Elitebotix  |     beatmapId: null,
+							// 0|Elitebotix  |     beatmapsetId: null,
+							// 0|Elitebotix  |     raw_date: '2022-10-05 15:13:26',
+							// 0|Elitebotix  |     epicFactor: '4'
+							// 0|Elitebotix  |   },
+							// 0|Elitebotix  |   Event {
+							// 0|Elitebotix  |     html: `<b><a href='/users/31497191'>frurmur</a></b> unlocked the "<b>500 Combo</b>" medal!`,
+							// 0|Elitebotix  |     beatmapId: null,
+							// 0|Elitebotix  |     beatmapsetId: null,
+							// 0|Elitebotix  |     raw_date: '2022-10-05 14:49:11',
+							// 0|Elitebotix  |     epicFactor: '4'
+							// 0|Elitebotix  |   }
+							// 0|Elitebotix  | ]
 
 							//This only works if the local timezone is UTC
 							let mapRank = osuUser.osuUser.events[j].html.replace(/.+<\/a><\/b> achieved rank #/gm, '').replace(/.+<\/a><\/b> achieved .+rank #/gm, '').replace(/ on <a href='\/b\/.+/gm, '').replace('</b>', '');
@@ -2343,7 +2367,7 @@ module.exports = {
 				}
 
 				if (guildTrackers[i].osuTopPlays) {
-					if (fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+					if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
 						guildTrackers.splice(i, 1);
 						i--;
 						continue;
@@ -2391,7 +2415,7 @@ module.exports = {
 				}
 
 				if (guildTrackers[i].taikoTopPlays) {
-					if (fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+					if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
 						guildTrackers.splice(i, 1);
 						i--;
 						continue;
@@ -2439,7 +2463,7 @@ module.exports = {
 				}
 
 				if (guildTrackers[i].catchTopPlays) {
-					if (fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+					if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
 						guildTrackers.splice(i, 1);
 						i--;
 						continue;
@@ -2487,7 +2511,7 @@ module.exports = {
 				}
 
 				if (guildTrackers[i].maniaTopPlays) {
-					if (fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+					if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
 						guildTrackers.splice(i, 1);
 						i--;
 						continue;
@@ -2534,10 +2558,21 @@ module.exports = {
 					}
 				}
 
-				let TODOAmeobeaMedalsUpdating;
+				let TODOAmeobeaMedals;
 
 				console.log(guildTrackers[i]);
 			}
+
+			if (recentActivity) {
+				osuTracker.minutesBetweenChecks = 15;
+			} else {
+				osuTracker.minutesBetweenChecks = osuTracker.minutesBetweenChecks + 5;
+			}
+
+			let date = new Date();
+			date.setMinutes(date.getMinutes() + osuTracker.minutesBetweenChecks);
+			osuTracker.nextCheck = date;
+			await osuTracker.save();
 		}
 
 		async function fetchChannelIfNeededOrDeleteAndReturnTrue(guildTracker) {
