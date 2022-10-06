@@ -2261,6 +2261,8 @@ module.exports = {
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
 
+			let recentActivity = false;
+
 			let osuUser = { osuUserId: osuTracker.osuUserId };
 
 			let guildTrackers = await DBOsuGuildTrackers.findAll({
@@ -2270,7 +2272,7 @@ module.exports = {
 			});
 
 			for (let i = 0; i < guildTrackers.length; i++) {
-				if (guildTrackers[i].osuLeaderboard) {
+				if (guildTrackers[i].osuLeaderboard || guildTrackers[i].taikoLeaderboard || guildTrackers[i].catchLeaderboard || guildTrackers[i].maniaLeaderboard) {
 					if (fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
 						guildTrackers.splice(i, 1);
 						i--;
@@ -2278,22 +2280,261 @@ module.exports = {
 					}
 
 					if (!osuUser.osuUser) {
-						//Redo this
-						await osuApi.getUser({ u: osuUser.osuUserId })
-							.then(async (user) => {
-								osuUser.osuUser = user;
-							})
-							.catch(async (err) => {
-								console.log(err);
-								if (err.message === 'Not found') {
-									await guildTrackers[i].channel.send(`Could not find user \`${osuUser.osuUserId}\` anymore and I will therefore stop tracking them.`);
-									guildTrackers.splice(i, 1);
-									i--;
-									continue;
+						try {
+							let osuUserResult = await osuApi.getUser({ u: osuTracker.osuUserId });
+							osuUser.osuUser = osuUserResult;
+							console.log(osuUser.osuUser.events);
+						} catch (err) {
+							if (err.message === 'Not found') {
+								await guildTrackers[i].channel.send(`Could not find user \`${osuUser.osuUserId}\` anymore and I will therefore stop tracking them.`);
+								await guildTrackers[i].destroy();
+								guildTrackers.splice(i, 1);
+								i--;
+								continue;
+							}
+						}
+					}
+
+					//Grab recent events and send it in
+					if (osuUser.osuUser.events.length > 0) {
+						let scoreCommand = require('./commands/osu-score.js');
+						for (let j = 0; j < osuUser.osuUser.events.length; j++) {
+							//Remove older scores on the map to avoid duplicates
+							for (let k = i + 1; k < osuUser.osuUser.events.length; k++) {
+								if (osuUser.osuUser.events[j].beatmapId === osuUser.osuUser.events[k].beatmapId) {
+									osuUser.osuUser.events.splice(k, 1);
+									k--;
 								}
-							});
+							}
+
+							//This only works if the local timezone is UTC
+							let mapRank = osuUser.osuUser.events[j].html.replace(/.+<\/a><\/b> achieved rank #/gm, '').replace(/.+<\/a><\/b> achieved .+rank #/gm, '').replace(/ on <a href='\/b\/.+/gm, '').replace('</b>', '');
+							let modeName = osuUser.osuUser.events[j].html.replace(/.+<\/a> \(osu!/gm, '');
+							modeName = modeName.substring(0, modeName.length - 1);
+							if (modeName.length === 0) {
+								modeName = 'osu!';
+							}
+
+							if (modeName === 'osu!' && !guildTrackers[i].osuLeaderboard ||
+								modeName.toLowerCase() === 'taiko' && !guildTrackers[i].taikoLeaderboard ||
+								modeName.toLowerCase() === 'catch' && !guildTrackers[i].catchLeaderboard ||
+								modeName.toLowerCase() === 'mania' && !guildTrackers[i].maniaLeaderboard) {
+								continue;
+							}
+
+							if (parseInt(mapRank) <= 50 && Date.parse(osuTracker.updatedAt) <= Date.parse(osuUser.osuUser.events[j].raw_date)) {
+								recentActivity = true;
+								let msg = {
+									guild: guildTrackers[i].guild,
+									channel: guildTrackers[i].channel,
+									guildId: guildTrackers[i].guild.id,
+									author: {
+										id: 0
+									}
+								};
+								let newArgs = [osuUser.osuUser.events[j].beatmapId, osuUser.osuUser.name, `--event${mapRank}`];
+								if (modeName !== 'osu!') {
+									newArgs.push(`--${modeName.substring(0, 1)}`);
+								}
+								scoreCommand.execute(msg, newArgs);
+							}
+						}
 					}
 				}
+
+				if (guildTrackers[i].osuTopPlays) {
+					if (fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+						guildTrackers.splice(i, 1);
+						i--;
+						continue;
+					}
+
+					if (guildTrackers[i].osuNumberTopPlays === undefined) {
+						guildTrackers[i].osuNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 0 })
+							.then(scores => {
+								let recentPlaysAmount = 0;
+								for (let j = 0; j < scores.length; j++) {
+									//This only works if the local timezone is UTC
+									if (Date.parse(osuTracker.updatedAt) <= Date.parse(scores[j].raw_date)) {
+										recentPlaysAmount++;
+									}
+								}
+								return recentPlaysAmount;
+							})
+							// eslint-disable-next-line no-unused-vars
+							.catch(err => {
+								return err.message;
+							});
+
+						if (guildTrackers[i].osuNumberTopPlays === 'Not found') {
+							await guildTrackers[i].channel.send(`Could not find user \`${osuUser.osuUserId}\` anymore and I will therefore stop tracking them.`);
+							await guildTrackers[i].destroy();
+							guildTrackers.splice(i, 1);
+							i--;
+							continue;
+						}
+					}
+
+					if (!isNaN(guildTrackers[i].osuNumberTopPlays) && guildTrackers[i].osuNumberTopPlays > 0) {
+						recentActivity = true;
+						let msg = {
+							guild: guildTrackers[i].guild,
+							channel: guildTrackers[i].channel,
+							guildId: guildTrackers[i].guild.id,
+							author: {
+								id: 0
+							}
+						};
+						let topCommand = require('../commands/osu-top.js');
+						topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].osuNumberTopPlays}`, '--tracking']);
+					}
+				}
+
+				if (guildTrackers[i].taikoTopPlays) {
+					if (fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+						guildTrackers.splice(i, 1);
+						i--;
+						continue;
+					}
+
+					if (guildTrackers[i].taikoNumberTopPlays === undefined) {
+						guildTrackers[i].taikoNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 1 })
+							.then(scores => {
+								let recentPlaysAmount = 0;
+								for (let j = 0; j < scores.length; j++) {
+									//This only works if the local timezone is UTC
+									if (Date.parse(osuTracker.updatedAt) <= Date.parse(scores[j].raw_date)) {
+										recentPlaysAmount++;
+									}
+								}
+								return recentPlaysAmount;
+							})
+							// eslint-disable-next-line no-unused-vars
+							.catch(err => {
+								return err.message;
+							});
+
+						if (guildTrackers[i].taikoNumberTopPlays === 'Not found') {
+							await guildTrackers[i].channel.send(`Could not find user \`${osuUser.osuUserId}\` anymore and I will therefore stop tracking them.`);
+							await guildTrackers[i].destroy();
+							guildTrackers.splice(i, 1);
+							i--;
+							continue;
+						}
+					}
+
+					if (!isNaN(guildTrackers[i].taikoNumberTopPlays) && guildTrackers[i].taikoNumberTopPlays > 0) {
+						recentActivity = true;
+						let msg = {
+							guild: guildTrackers[i].guild,
+							channel: guildTrackers[i].channel,
+							guildId: guildTrackers[i].guild.id,
+							author: {
+								id: 0
+							}
+						};
+						let topCommand = require('../commands/osu-top.js');
+						topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].taikoNumberTopPlays}`, '--tracking', '--t']);
+					}
+				}
+
+				if (guildTrackers[i].catchTopPlays) {
+					if (fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+						guildTrackers.splice(i, 1);
+						i--;
+						continue;
+					}
+
+					if (guildTrackers[i].catchNumberTopPlays === undefined) {
+						guildTrackers[i].catchNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 2 })
+							.then(scores => {
+								let recentPlaysAmount = 0;
+								for (let j = 0; j < scores.length; j++) {
+									//This only works if the local timezone is UTC
+									if (Date.parse(osuTracker.updatedAt) <= Date.parse(scores[j].raw_date)) {
+										recentPlaysAmount++;
+									}
+								}
+								return recentPlaysAmount;
+							})
+							// eslint-disable-next-line no-unused-vars
+							.catch(err => {
+								return err.message;
+							});
+
+						if (guildTrackers[i].catchNumberTopPlays === 'Not found') {
+							await guildTrackers[i].channel.send(`Could not find user \`${osuUser.osuUserId}\` anymore and I will therefore stop tracking them.`);
+							await guildTrackers[i].destroy();
+							guildTrackers.splice(i, 1);
+							i--;
+							continue;
+						}
+					}
+
+					if (!isNaN(guildTrackers[i].catchNumberTopPlays) && guildTrackers[i].catchNumberTopPlays > 0) {
+						recentActivity = true;
+						let msg = {
+							guild: guildTrackers[i].guild,
+							channel: guildTrackers[i].channel,
+							guildId: guildTrackers[i].guild.id,
+							author: {
+								id: 0
+							}
+						};
+						let topCommand = require('../commands/osu-top.js');
+						topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].catchNumberTopPlays}`, '--tracking', '--c']);
+					}
+				}
+
+				if (guildTrackers[i].maniaTopPlays) {
+					if (fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+						guildTrackers.splice(i, 1);
+						i--;
+						continue;
+					}
+
+					if (guildTrackers[i].maniaNumberTopPlays === undefined) {
+						guildTrackers[i].maniaNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 3 })
+							.then(scores => {
+								let recentPlaysAmount = 0;
+								for (let j = 0; j < scores.length; j++) {
+									//This only works if the local timezone is UTC
+									if (Date.parse(osuTracker.updatedAt) <= Date.parse(scores[j].raw_date)) {
+										recentPlaysAmount++;
+									}
+								}
+								return recentPlaysAmount;
+							})
+							// eslint-disable-next-line no-unused-vars
+							.catch(err => {
+								return err.message;
+							});
+
+						if (guildTrackers[i].maniaNumberTopPlays === 'Not found') {
+							await guildTrackers[i].channel.send(`Could not find user \`${osuUser.osuUserId}\` anymore and I will therefore stop tracking them.`);
+							await guildTrackers[i].destroy();
+							guildTrackers.splice(i, 1);
+							i--;
+							continue;
+						}
+					}
+
+					if (!isNaN(guildTrackers[i].maniaNumberTopPlays) && guildTrackers[i].maniaNumberTopPlays > 0) {
+						recentActivity = true;
+						let msg = {
+							guild: guildTrackers[i].guild,
+							channel: guildTrackers[i].channel,
+							guildId: guildTrackers[i].guild.id,
+							author: {
+								id: 0
+							}
+						};
+						let topCommand = require('../commands/osu-top.js');
+						topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].maniaNumberTopPlays}`, '--tracking', '--m']);
+					}
+				}
+
+				let TODOAmeobeaMedalsUpdating;
 
 				console.log(guildTrackers[i]);
 			}
