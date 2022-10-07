@@ -2211,11 +2211,11 @@ module.exports = {
 		console.log('YEP');
 		let now = new Date();
 		let osuTracker = await DBOsuTrackingUsers.findOne({
-			// where: {
-			// 	nextCheck: {
-			// 		[Op.lte]: now,
-			// 	},
-			// },
+			where: {
+				nextCheck: {
+					[Op.lte]: now,
+				},
+			},
 			order: [
 				['nextCheck', 'ASC'],
 			],
@@ -2275,7 +2275,7 @@ module.exports = {
 								}
 							}
 
-							if (!osuUser.medalsData) {
+							if (guildTrackers[i].medals && !osuUser.medalsData) {
 								// Fetch https://osekai.net/medals/api/medals_nogrouping.php
 								let medalsData = await fetch('https://osekai.net/medals/api/medals_nogrouping.php');
 								medalsData = await medalsData.json();
@@ -2283,6 +2283,15 @@ module.exports = {
 							}
 
 							if (osuUser.osuUser.events[j].html.includes('medal')) {
+								if (!guildTrackers[i].medals) {
+									continue;
+								}
+
+								//This only works if the local timezone is UTC
+								if (new Date(osuUser.osuUser.events[j].raw_date) < osuTracker.updatedAt) {
+									continue;
+								}
+
 								let medalName = osuUser.osuUser.events[j].html.replace('</b>" medal!', '').replace(/.+<b>/gm, '');
 
 								//Find the medal in osuUser.medalsData with the same name
@@ -2300,9 +2309,8 @@ module.exports = {
 									.addField('Medal requirements', medal.instructions.replace('<b>', '**').replace('</b>', '**'))
 									.addField('Medal Group', medal.grouping);
 
-								guildTrackers[i].channel.send({ embeds: [medalEmbed] });
+								await guildTrackers[i].channel.send({ embeds: [medalEmbed] });
 							} else {
-								//This only works if the local timezone is UTC
 								let mapRank = osuUser.osuUser.events[j].html.replace(/.+<\/a><\/b> achieved rank #/gm, '').replace(/.+<\/a><\/b> achieved .+rank #/gm, '').replace(/ on <a href='\/b\/.+/gm, '').replace('</b>', '');
 								let modeName = osuUser.osuUser.events[j].html.replace(/.+<\/a> \(osu!/gm, '');
 								modeName = modeName.substring(0, modeName.length - 1);
@@ -2317,7 +2325,8 @@ module.exports = {
 									continue;
 								}
 
-								if (parseInt(mapRank) <= 50 && Date.parse(osuTracker.updatedAt) <= Date.parse(osuUser.osuUser.events[j].raw_date)) {
+								//This only works if the local timezone is UTC
+								if (parseInt(mapRank) <= 50 && osuTracker.updatedAt <= new Date(osuUser.osuUser.events[j].raw_date)) {
 									recentActivity = true;
 									let msg = {
 										guild: guildTrackers[i].guild,
@@ -2351,7 +2360,7 @@ module.exports = {
 								let recentPlaysAmount = 0;
 								for (let j = 0; j < scores.length; j++) {
 									//This only works if the local timezone is UTC
-									if (Date.parse(osuTracker.updatedAt) <= Date.parse(scores[j].raw_date)) {
+									if (osuTracker.updatedAt <= new Date(scores[j].raw_date)) {
 										recentPlaysAmount++;
 									}
 								}
@@ -2399,7 +2408,7 @@ module.exports = {
 								let recentPlaysAmount = 0;
 								for (let j = 0; j < scores.length; j++) {
 									//This only works if the local timezone is UTC
-									if (Date.parse(osuTracker.updatedAt) <= Date.parse(scores[j].raw_date)) {
+									if (osuTracker.updatedAt <= new Date(scores[j].raw_date)) {
 										recentPlaysAmount++;
 									}
 								}
@@ -2447,7 +2456,7 @@ module.exports = {
 								let recentPlaysAmount = 0;
 								for (let j = 0; j < scores.length; j++) {
 									//This only works if the local timezone is UTC
-									if (Date.parse(osuTracker.updatedAt) <= Date.parse(scores[j].raw_date)) {
+									if (osuTracker.updatedAt <= new Date(scores[j].raw_date)) {
 										recentPlaysAmount++;
 									}
 								}
@@ -2495,7 +2504,7 @@ module.exports = {
 								let recentPlaysAmount = 0;
 								for (let j = 0; j < scores.length; j++) {
 									//This only works if the local timezone is UTC
-									if (Date.parse(osuTracker.updatedAt) <= Date.parse(scores[j].raw_date)) {
+									if (osuTracker.updatedAt <= new Date(scores[j].raw_date)) {
 										recentPlaysAmount++;
 									}
 								}
