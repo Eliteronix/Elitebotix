@@ -2208,7 +2208,6 @@ module.exports = {
 		return await getValidTournamentBeatmapFunction(input);
 	},
 	async processOsuTrack(client) {
-		console.log('YEP');
 		let now = new Date();
 		let osuTracker = await DBOsuTrackingUsers.findOne({
 			where: {
@@ -2265,10 +2264,9 @@ module.exports = {
 
 					//Grab recent events and send it in
 					if (osuUser.osuUser.events.length > 0) {
-						let scoreCommand = require('./commands/osu-score.js');
 						for (let j = 0; j < osuUser.osuUser.events.length; j++) {
 							//Remove older scores on the map to avoid duplicates
-							for (let k = i + 1; k < osuUser.osuUser.events.length; k++) {
+							for (let k = j + 1; k < osuUser.osuUser.events.length; k++) {
 								if (osuUser.osuUser.events[j].beatmapId === osuUser.osuUser.events[k].beatmapId) {
 									osuUser.osuUser.events.splice(k, 1);
 									k--;
@@ -2340,6 +2338,7 @@ module.exports = {
 									if (modeName !== 'osu!') {
 										newArgs.push(`--${modeName.substring(0, 1)}`);
 									}
+									let scoreCommand = require('./commands/osu-score.js');
 									scoreCommand.execute(msg, newArgs);
 								}
 							}
@@ -2539,7 +2538,101 @@ module.exports = {
 					}
 				}
 
-				let TODOAmeobeaMedals;
+				if (guildTrackers[i].osuAmeobea && !guildTrackers[i].osuAmeobeaUpdated) {
+					try {
+						await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=0`, { method: 'POST', body: 'a=1' });
+						guildTrackers[i].osuAmeobeaUpdated = true;
+						await new Promise(resolve => setTimeout(resolve, 5000));
+
+						if (guildTrackers[i].showAmeobeaUpdates) {
+							if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+								guildTrackers.splice(i, 1);
+								i--;
+								continue;
+							}
+
+							if (!osuUser.osuName) {
+								osuUser.osuName = await getOsuPlayerNameFunction(osuUser.osuUserId);
+							}
+
+							await guildTrackers[i].channel.send(`Ameobea has updated the standard osu!track profile for \`${osuUser.osuName}\`!`);
+						}
+					} catch (err) {
+						//Nothing
+					}
+				}
+
+				if (guildTrackers[i].taikoAmeobea && !guildTrackers[i].taikoAmeobeaUpdated) {
+					try {
+						await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=1`, { method: 'POST', body: 'a=1' });
+						guildTrackers[i].taikoAmeobeaUpdated = true;
+						await new Promise(resolve => setTimeout(resolve, 5000));
+
+						if (guildTrackers[i].showAmeobeaUpdates) {
+							if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+								guildTrackers.splice(i, 1);
+								i--;
+								continue;
+							}
+
+							if (!osuUser.osuName) {
+								osuUser.osuName = await getOsuPlayerNameFunction(osuUser.osuUserId);
+							}
+
+							await guildTrackers[i].channel.send(`Ameobea has updated the taiko osu!track profile for \`${osuUser.osuName}\`!`);
+						}
+					} catch (err) {
+						//Nothing
+					}
+				}
+
+				if (guildTrackers[i].catchAmeobea && !guildTrackers[i].catchAmeobeaUpdated) {
+					try {
+						await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=2`, { method: 'POST', body: 'a=1' });
+						guildTrackers[i].catchAmeobeaUpdated = true;
+						await new Promise(resolve => setTimeout(resolve, 5000));
+
+						if (guildTrackers[i].showAmeobeaUpdates) {
+							if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+								guildTrackers.splice(i, 1);
+								i--;
+								continue;
+							}
+
+							if (!osuUser.osuName) {
+								osuUser.osuName = await getOsuPlayerNameFunction(osuUser.osuUserId);
+							}
+
+							await guildTrackers[i].channel.send(`Ameobea has updated the catch osu!track profile for \`${osuUser.osuName}\`!`);
+						}
+					} catch (err) {
+						//Nothing
+					}
+				}
+
+				if (guildTrackers[i].maniaAmeobea && !guildTrackers[i].maniaAmeobeaUpdated) {
+					try {
+						await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=3`, { method: 'POST', body: 'a=1' });
+						guildTrackers[i].maniaAmeobeaUpdated = true;
+						await new Promise(resolve => setTimeout(resolve, 5000));
+
+						if (guildTrackers[i].showAmeobeaUpdates) {
+							if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
+								guildTrackers.splice(i, 1);
+								i--;
+								continue;
+							}
+
+							if (!osuUser.osuName) {
+								osuUser.osuName = await getOsuPlayerNameFunction(osuUser.osuUserId);
+							}
+
+							await guildTrackers[i].channel.send(`Ameobea has updated the mania osu!track profile for \`${osuUser.osuName}\`!`);
+						}
+					} catch (err) {
+						//Nothing
+					}
+				}
 			}
 
 			if (recentActivity) {
