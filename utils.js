@@ -3276,6 +3276,27 @@ async function getUserDuelStarRatingFunction(input) {
 								user.send(`Your duel ratings have been updated.\`\`\`${message.join('\n')}\`\`\``);
 							}
 						}
+
+						let guildTrackers = await DBOsuGuildTrackers.findAll({
+							where: {
+								osuUserId: discordUser.osuUserId,
+								duelRating: true,
+							},
+						});
+
+						for (let i = 0; i < guildTrackers.length; i++) {
+							try {
+								let guild = await input.client.guilds.fetch(guildTrackers[i].guildId);
+								let channel = await guild.channels.fetch(guildTrackers[i].channelId);
+								channel.send(`\`\`\`${message.join('\n')}\`\`\``);
+							} catch (err) {
+								if (err.message === 'Missing Access') {
+									await guildTrackers[i].destroy();
+								} else {
+									console.log(err);
+								}
+							}
+						}
 					}
 				} catch (e) {
 					console.log(e);
