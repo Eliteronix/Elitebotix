@@ -2538,11 +2538,13 @@ module.exports = {
 					}
 				}
 
-				if (guildTrackers[i].osuAmeobea && !guildTrackers[i].osuAmeobeaUpdated) {
+				if (guildTrackers[i].osuAmeobea) {
 					try {
-						await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=0`, { method: 'POST', body: 'a=1' });
-						guildTrackers[i].osuAmeobeaUpdated = true;
-						await new Promise(resolve => setTimeout(resolve, 5000));
+						if (!guildTrackers[i].osuAmeobeaUpdated) {
+							await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=0`, { method: 'POST', body: 'a=1' });
+							guildTrackers[i].osuAmeobeaUpdated = true;
+							await new Promise(resolve => setTimeout(resolve, 5000));
+						}
 
 						if (guildTrackers[i].showAmeobeaUpdates) {
 							if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
@@ -2562,11 +2564,13 @@ module.exports = {
 					}
 				}
 
-				if (guildTrackers[i].taikoAmeobea && !guildTrackers[i].taikoAmeobeaUpdated) {
+				if (guildTrackers[i].taikoAmeobea) {
 					try {
-						await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=1`, { method: 'POST', body: 'a=1' });
-						guildTrackers[i].taikoAmeobeaUpdated = true;
-						await new Promise(resolve => setTimeout(resolve, 5000));
+						if (!guildTrackers[i].taikoAmeobeaUpdated) {
+							await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=1`, { method: 'POST', body: 'a=1' });
+							guildTrackers[i].taikoAmeobeaUpdated = true;
+							await new Promise(resolve => setTimeout(resolve, 5000));
+						}
 
 						if (guildTrackers[i].showAmeobeaUpdates) {
 							if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
@@ -2586,11 +2590,13 @@ module.exports = {
 					}
 				}
 
-				if (guildTrackers[i].catchAmeobea && !guildTrackers[i].catchAmeobeaUpdated) {
+				if (guildTrackers[i].catchAmeobea) {
 					try {
-						await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=2`, { method: 'POST', body: 'a=1' });
-						guildTrackers[i].catchAmeobeaUpdated = true;
-						await new Promise(resolve => setTimeout(resolve, 5000));
+						if (!guildTrackers[i].catchAmeobeaUpdated) {
+							await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=2`, { method: 'POST', body: 'a=1' });
+							guildTrackers[i].catchAmeobeaUpdated = true;
+							await new Promise(resolve => setTimeout(resolve, 5000));
+						}
 
 						if (guildTrackers[i].showAmeobeaUpdates) {
 							if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
@@ -2610,11 +2616,13 @@ module.exports = {
 					}
 				}
 
-				if (guildTrackers[i].maniaAmeobea && !guildTrackers[i].maniaAmeobeaUpdated) {
+				if (guildTrackers[i].maniaAmeobea) {
 					try {
-						await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=3`, { method: 'POST', body: 'a=1' });
-						guildTrackers[i].maniaAmeobeaUpdated = true;
-						await new Promise(resolve => setTimeout(resolve, 5000));
+						if (!guildTrackers[i].maniaAmeobeaUpdated) {
+							await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=3`, { method: 'POST', body: 'a=1' });
+							guildTrackers[i].maniaAmeobeaUpdated = true;
+							await new Promise(resolve => setTimeout(resolve, 5000));
+						}
 
 						if (guildTrackers[i].showAmeobeaUpdates) {
 							if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
