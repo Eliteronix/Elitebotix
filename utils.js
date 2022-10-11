@@ -5190,6 +5190,26 @@ async function saveOsuMultiScoresFunction(match) {
 			await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')}`, date: now });
 		}
 	}
+
+	//Manage osu-track follows for guilds
+	if (newMatchPlayers.length) {
+		//Get all follows for the players in the match
+		let guildTrackers = await DBOsuGuildTrackers.findAll({
+			where: {
+				osuUserId: {
+					[Op.in]: newMatchPlayers
+				},
+				matchActivity: true
+			}
+		});
+
+		//Collect the follows per user
+		let channelsToNotify = [];
+
+		for (let i = 0; i < guildTrackers.length; i++) {
+			await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')}`, date: now });
+		}
+	}
 }
 
 async function getValidTournamentBeatmapFunction(input) {
