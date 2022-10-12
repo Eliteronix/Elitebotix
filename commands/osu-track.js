@@ -530,19 +530,60 @@ module.exports = {
 					topPlayTrackings.push('Not tracked');
 				}
 
-				// guildTracker.osuLeaderboard ||
-				// guildTracker.taikoLeaderboard ||
-				// guildTracker.catchLeaderboard ||
-				// guildTracker.maniaLeaderboard ||
-				// guildTracker.osuAmeobea ||
-				// guildTracker.taikoAmeobea ||
-				// guildTracker.catchAmeobea ||
-				// guildTracker.maniaAmeobea ||
-				// guildTracker.medals ||
-				// guildTracker.duelRating ||
+				let leaderboardTrackings = [];
+
+				if (guildTrackers[i].osuLeaderboard) {
+					leaderboardTrackings.push('osu!');
+				}
+
+				if (guildTrackers[i].taikoLeaderboard) {
+					leaderboardTrackings.push('Taiko');
+				}
+
+				if (guildTrackers[i].catchLeaderboard) {
+					leaderboardTrackings.push('Catch');
+				}
+
+				if (guildTrackers[i].maniaLeaderboard) {
+					leaderboardTrackings.push('Mania');
+				}
+
+				if (!leaderboardTrackings.length) {
+					leaderboardTrackings.push('Not tracked');
+				}
+
+				let ameobeaTrackings = [];
+
+				if (guildTrackers[i].osuAmeobea) {
+					ameobeaTrackings.push('osu!');
+				}
+
+				if (guildTrackers[i].taikoAmeobea) {
+					ameobeaTrackings.push('Taiko');
+				}
+
+				if (guildTrackers[i].catchAmeobea) {
+					ameobeaTrackings.push('Catch');
+				}
+
+				if (guildTrackers[i].maniaAmeobea) {
+					ameobeaTrackings.push('Mania');
+				}
+
+				if (!ameobeaTrackings.length) {
+					ameobeaTrackings.push('Not tracked');
+				}
+
+				let showAmeobeaUpdates = guildTrackers[i].showAmeobeaUpdates ? ' - Showing ameobea updates' : '';
+
+				let medals = guildTrackers[i].medals ? ' - Showing medals' : ' - Not showing medals';
+
+				let duelRating = guildTrackers[i].duelRating ? ' - Showing duel rating updates' : ' - Not showing duel rating updates';
+
+
 				// guildTracker.matchActivity) {
 
-				output.push({ osuName: osuUser.osuName, content: `${osuUser.osuName} - Top Plays: ${topPlayTrackings.join(', ')}` });
+				output.push({ osuName: osuUser.osuName, content: `${osuUser.osuName} - Top Plays: ${topPlayTrackings.join(', ')} - Leaderboard Scores: ${leaderboardTrackings.join(', ')} - Ameobea updates: ${ameobeaTrackings.join(', ')}${showAmeobeaUpdates}${medals}${duelRating}` });
 			}
 		}
 	},
