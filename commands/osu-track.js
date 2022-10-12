@@ -574,17 +574,36 @@ module.exports = {
 					ameobeaTrackings.push('Not tracked');
 				}
 
-				let showAmeobeaUpdates = guildTrackers[i].showAmeobeaUpdates ? ' - Showing ameobea updates' : '';
+				let showAmeobeaUpdates = guildTrackers[i].showAmeobeaUpdates ? ' \n- Showing ameobea updates' : '';
 
-				let medals = guildTrackers[i].medals ? ' - Showing medals' : ' - Not showing medals';
+				let medals = guildTrackers[i].medals ? ' \n- Showing medals' : '';
 
-				let duelRating = guildTrackers[i].duelRating ? ' - Showing duel rating updates' : ' - Not showing duel rating updates';
+				let duelRating = guildTrackers[i].duelRating ? ' \n- Showing duel rating updates' : '';
 
+				let matchActivity = '';
 
-				// guildTracker.matchActivity) {
+				if (guildTrackers[i].matchActivity) {
+					matchActivity = ' \n- Showing match activity';
+					if (guildTrackers[i].matchActivityAutoTrack) {
+						matchActivity += ' (auto-track)';
+					}
+				}
 
-				output.push({ osuName: osuUser.osuName, content: `${osuUser.osuName} - Top Plays: ${topPlayTrackings.join(', ')} - Leaderboard Scores: ${leaderboardTrackings.join(', ')} - Ameobea updates: ${ameobeaTrackings.join(', ')}${showAmeobeaUpdates}${medals}${duelRating}` });
+				output.push({ osuName: osuUser.osuName, content: `\`${osuUser.osuName}\`\n- Top Plays: ${topPlayTrackings.join(', ')}\n- Leaderboard Scores: ${leaderboardTrackings.join(', ')}\n- Ameobea updates: ${ameobeaTrackings.join(', ')}${showAmeobeaUpdates}${medals}${duelRating}${matchActivity}` });
 			}
+
+			//Sort by osu name
+			output.sort((a, b) => {
+				if (a.osuName < b.osuName) {
+					return -1;
+				}
+				if (a.osuName > b.osuName) {
+					return 1;
+				}
+				return 0;
+			});
+
+			interaction.editReply({ content: output.map(x => x.content).join('\n\n') });
 		}
 	},
 };
