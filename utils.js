@@ -5205,9 +5205,21 @@ async function saveOsuMultiScoresFunction(match) {
 
 		//Collect the follows per user
 		let channelsToNotify = [];
+		let channelsToNotifyIds = [];
 
 		for (let i = 0; i < guildTrackers.length; i++) {
-			await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')}`, date: now });
+			if (channelsToNotifyIds.indexOf(guildTrackers[i].channelId) === -1) {
+				channelsToNotifyIds.push(guildTrackers[i].channelId);
+				channelsToNotify.push({ guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, osuUserIds: [guildTrackers[i].osuUserId] });
+			} else {
+				channelsToNotify[channelsToNotifyIds.indexOf(guildTrackers[i].channelId)].osuUserIds.push(guildTrackers[i].osuUserId);
+			}
+		}
+
+		//Create a notification for each channel
+		let now = new Date();
+		for (let i = 0; i < channelsToNotify.length; i++) {
+			await DBProcessQueue.create({ task: 'guildTourneyFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${channelsToNotify[i].osuUserIds.join(',')}`, date: now });
 		}
 	}
 }

@@ -1,4 +1,5 @@
 const { DBDiscordUsers, DBOsuGuildTrackers } = require('../dbObjects');
+const osu = require('node-osu');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -27,7 +28,7 @@ module.exports = {
 						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 					});
 
-					const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
+					const osuUser = await osuApi.getUser({ u: players[i], m: 0 });
 
 					discordUser = await DBDiscordUsers.create({ osuUserId: osuUser.id, osuName: osuUser.name });
 				}
