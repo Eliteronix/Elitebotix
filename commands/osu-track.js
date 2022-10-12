@@ -267,6 +267,283 @@ module.exports = {
 			}
 
 			return interaction.editReply({ content: 'Finished processing.', ephemeral: true });
+		} else if (interaction.options._subcommand === 'disable') {
+			try {
+				await interaction.reply({ content: 'Processing...', ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
+
+			let usernames = interaction.options.getString('usernames');
+
+			usernames = usernames.split(',');
+			usernames = usernames.map(username => username.trim());
+
+			for (let i = 0; i < usernames.length; i++) {
+				let username = usernames[i];
+
+				//Get the user from the database if possible
+				let discordUser = await DBDiscordUsers.findOne({
+					where: {
+						[Op.or]: {
+							osuUserId: username,
+							osuName: username,
+							userId: username.replace('<@', '').replace('>', '').replace('!', ''),
+						}
+					}
+				});
+
+				let osuUser = {
+					osuUserId: null,
+					osuName: null
+				};
+
+				if (discordUser) {
+					osuUser.osuUserId = discordUser.osuUserId;
+					osuUser.osuName = discordUser.osuName;
+				}
+
+				//Get the user from the API if needed
+				if (!osuUser.osuUserId) {
+					// eslint-disable-next-line no-undef
+					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+					});
+
+					try {
+						const user = await osuApi.getUser({ u: username });
+						osuUser.osuUserId = user.id;
+						osuUser.osuName = user.name;
+					} catch (error) {
+						console.error(error);
+						await interaction.followUp({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`, ephemeral: true });
+						continue;
+					}
+				}
+
+				//Create the timer for checking the user if needed
+				let userTimer = await DBOsuTrackingUsers.findOne({
+					where: {
+						osuUserId: osuUser.osuUserId,
+					}
+				});
+
+				if (!userTimer) {
+					await interaction.editReply({ content: `Currently not tracking \`${osuUser.osuName.replace(/`/g, '')}\` in <#${interaction.channel.id}>.`, ephemeral: true });
+					continue;
+				}
+
+				//Create or update the guild tracker
+				let guildTracker = await DBOsuGuildTrackers.findOne({
+					where: {
+						guildId: interaction.guild.id,
+						channelId: interaction.channel.id,
+						osuUserId: osuUser.osuUserId,
+					}
+				});
+
+				if (!guildTracker) {
+					await interaction.editReply({ content: `Currently not tracking \`${osuUser.osuName.replace(/`/g, '')}\` in <#${interaction.channel.id}>.`, ephemeral: true });
+					continue;
+				}
+
+				let topPlays = interaction.options.getBoolean('topplays');
+
+				if (topPlays) {
+					guildTracker.osuTopPlays = false;
+					guildTracker.taikoTopPlays = false;
+					guildTracker.catchTopPlays = false;
+					guildTracker.maniaTopPlays = false;
+				}
+
+				let leaderboardPlays = interaction.options.getBoolean('leaderboardplays');
+
+				if (leaderboardPlays) {
+					guildTracker.osuLeaderboard = false;
+					guildTracker.taikoLeaderboard = false;
+					guildTracker.catchLeaderboard = false;
+					guildTracker.maniaLeaderboard = false;
+				}
+
+				let ameobea = interaction.options.getBoolean('ameobea');
+
+				if (ameobea) {
+					guildTracker.osuAmeobea = false;
+					guildTracker.taikoAmeobea = false;
+					guildTracker.catchAmeobea = false;
+					guildTracker.maniaAmeobea = false;
+					guildTracker.showAmeobeaUpdates = false;
+				}
+
+				let showAmeobeaUpdates = interaction.options.getBoolean('showameobeaupdate');
+
+				if (showAmeobeaUpdates) {
+					guildTracker.showAmeobeaUpdates = false;
+				}
+
+				let medals = interaction.options.getBoolean('medals');
+
+				if (medals) {
+					guildTracker.medals = false;
+				}
+
+				let duelrating = interaction.options.getBoolean('duelrating');
+
+				if (duelrating) {
+					guildTracker.duelRating = false;
+				}
+
+				let matchactivity = interaction.options.getBoolean('matchactivity');
+
+				if (matchactivity) {
+					guildTracker.matchActivity = false;
+					guildTracker.matchActivityAutoTrack = false;
+				}
+
+				if (guildTracker.osuTopPlays ||
+					guildTracker.taikoTopPlays ||
+					guildTracker.catchTopPlays ||
+					guildTracker.maniaTopPlays ||
+					guildTracker.osuLeaderboard ||
+					guildTracker.taikoLeaderboard ||
+					guildTracker.catchLeaderboard ||
+					guildTracker.maniaLeaderboard ||
+					guildTracker.osuAmeobea ||
+					guildTracker.taikoAmeobea ||
+					guildTracker.catchAmeobea ||
+					guildTracker.maniaAmeobea ||
+					guildTracker.medals ||
+					guildTracker.duelRating ||
+					guildTracker.matchActivity) {
+					await guildTracker.save();
+
+					await interaction.followUp({ content: `Updated tracking \`${osuUser.osuName.replace(/`/g, '')}\` in <#${interaction.channel.id}>.`, ephemeral: true });
+
+					continue;
+				}
+
+				// If nothing is tracked, delete the tracker
+				await guildTracker.destroy();
+
+				// Find other guild trackers, if none exsist, delete the user tracker
+				const guildTrackers = await DBOsuGuildTrackers.findAll({
+					where: {
+						osuUserId: osuUser.osuUserId,
+					},
+				});
+
+				if (guildTrackers.length === 0) {
+					await userTimer.destroy();
+				}
+
+				await interaction.followUp({ content: `Removed tracking \`${osuUser.osuName.replace(/`/g, '')}\` because no attributes are going to be tracked.`, ephemeral: true });
+			}
+
+			return interaction.editReply({ content: 'Finished processing.', ephemeral: true });
+		} else if (interaction.options._subcommand === 'list') {
+			try {
+				await interaction.reply({ content: 'Processing...', ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
+
+			const guildTrackers = await DBOsuGuildTrackers.findAll({
+				where: {
+					channelId: interaction.channel.id,
+				},
+			});
+
+			if (guildTrackers.length === 0) {
+				return await interaction.editReply({ content: 'There are currently no users tracked in this channel.', ephemeral: true });
+			}
+
+			let output = [];
+			for (let i = 0; i < guildTrackers.length; i++) {
+				let username = guildTrackers[i].osuUserId;
+
+				//Get the user from the database if possible
+				let discordUser = await DBDiscordUsers.findOne({
+					where: {
+						osuUserId: username,
+					}
+				});
+
+				let osuUser = {
+					osuUserId: null,
+					osuName: null
+				};
+
+				if (discordUser) {
+					osuUser.osuUserId = discordUser.osuUserId;
+					osuUser.osuName = discordUser.osuName;
+				}
+
+				//Get the user from the API if needed
+				if (!osuUser.osuUserId) {
+					// eslint-disable-next-line no-undef
+					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+					});
+
+					try {
+						const user = await osuApi.getUser({ u: username });
+						osuUser.osuUserId = user.id;
+						osuUser.osuName = user.name;
+					} catch (error) {
+						console.error(error);
+						await interaction.followUp({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\` anymore.`, ephemeral: true });
+						continue;
+					}
+				}
+
+				let topPlayTrackings = [];
+
+				if (guildTrackers[i].osuTopPlays) {
+					topPlayTrackings.push('osu!');
+				}
+
+				if (guildTrackers[i].taikoTopPlays) {
+					topPlayTrackings.push('Taiko');
+				}
+
+				if (guildTrackers[i].catchTopPlays) {
+					topPlayTrackings.push('Catch');
+				}
+
+				if (guildTrackers[i].maniaTopPlays) {
+					topPlayTrackings.push('Mania');
+				}
+
+				if (!topPlayTrackings.length) {
+					topPlayTrackings.push('Not tracked');
+				}
+
+				// guildTracker.osuLeaderboard ||
+				// guildTracker.taikoLeaderboard ||
+				// guildTracker.catchLeaderboard ||
+				// guildTracker.maniaLeaderboard ||
+				// guildTracker.osuAmeobea ||
+				// guildTracker.taikoAmeobea ||
+				// guildTracker.catchAmeobea ||
+				// guildTracker.maniaAmeobea ||
+				// guildTracker.medals ||
+				// guildTracker.duelRating ||
+				// guildTracker.matchActivity) {
+
+				output.push({ osuName: osuUser.osuName, content: `${osuUser.osuName} - Top Plays: ${topPlayTrackings.join(', ')}` });
+			}
 		}
 	},
 };
