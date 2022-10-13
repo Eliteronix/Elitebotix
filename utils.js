@@ -5203,6 +5203,22 @@ async function saveOsuMultiScoresFunction(match) {
 			}
 		});
 
+		let existingMatchPlayerTrackers = await DBOsuGuildTrackers.findAll({
+			where: {
+				osuUserId: {
+					[Op.in]: existingMatchPlayers
+				},
+				matchActivity: true,
+				matchActivityAutoTrack: true,
+			}
+		});
+
+		let existingMatchPlayerChannelIds = [];
+
+		for (let i = 0; i < existingMatchPlayerTrackers.length; i++) {
+			existingMatchPlayerChannelIds.push(existingMatchPlayerTrackers[i].channelId);
+		}
+
 		//Collect the follows per user
 		let channelsToNotify = [];
 		let channelsToNotifyIds = [];
@@ -5210,7 +5226,11 @@ async function saveOsuMultiScoresFunction(match) {
 		for (let i = 0; i < guildTrackers.length; i++) {
 			if (channelsToNotifyIds.indexOf(guildTrackers[i].channelId) === -1) {
 				channelsToNotifyIds.push(guildTrackers[i].channelId);
-				channelsToNotify.push({ guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, osuUserIds: [guildTrackers[i].osuUserId] });
+				let trackMatch = guildTrackers[i].matchActivityAutoTrack;
+				if (existingMatchPlayerChannelIds.includes(guildTrackers[i].channelId)) {
+					trackMatch = false;
+				}
+				channelsToNotify.push({ guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, osuUserIds: [guildTrackers[i].osuUserId], trackMatch: trackMatch });
 			} else {
 				channelsToNotify[channelsToNotifyIds.indexOf(guildTrackers[i].channelId)].osuUserIds.push(guildTrackers[i].osuUserId);
 			}
@@ -5219,7 +5239,7 @@ async function saveOsuMultiScoresFunction(match) {
 		//Create a notification for each channel
 		let now = new Date();
 		for (let i = 0; i < channelsToNotify.length; i++) {
-			await DBProcessQueue.create({ task: 'guildTourneyFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${channelsToNotify[i].osuUserIds.join(',')}`, date: now });
+			await DBProcessQueue.create({ task: 'guildTourneyFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${channelsToNotify[i].osuUserIds.join(',')};${channelsToNotify[i].trackMatch}`, date: now });
 		}
 	}
 }

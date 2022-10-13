@@ -37,16 +37,22 @@ module.exports = {
 			}
 
 			await channel.send(`Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[2]}`);
-
+			if (args[4]) {
+				let scoreCommand = require('../commands/osu-matchtrack.js');
+				scoreCommand.execute({ id: 1, channel: channel, author: { id: 1 } }, [args[2]]);
+			}
 			processQueueEntry.destroy();
 		} catch (err) {
 			if (err.message === 'Missing Access') {
-				let guildTracker = await DBOsuGuildTrackers.findAll({
+				let guildTrackers = await DBOsuGuildTrackers.findAll({
 					where: {
-						id: args[4]
+						channelId: args[1]
 					}
 				});
-				await guildTracker.destroy();
+
+				for (let i = 0; i < guildTrackers.length; i++) {
+					guildTrackers[i].destroy();
+				}
 			} else {
 				console.log(err);
 			}
