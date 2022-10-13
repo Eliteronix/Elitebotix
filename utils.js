@@ -2371,11 +2371,8 @@ module.exports = {
 							});
 
 						if (guildTrackers[i].osuNumberTopPlays === 'Not found') {
-							await guildTrackers[i].channel.send(`Could not find user \`${osuUser.osuUserId}\` anymore and I will therefore stop tracking them.`);
-							await guildTrackers[i].destroy();
-							guildTrackers.splice(i, 1);
-							i--;
-							continue;
+							guildTrackers[i].osuTopPlays = false;
+							await guildTrackers[i].save();
 						}
 					}
 
@@ -2419,11 +2416,8 @@ module.exports = {
 							});
 
 						if (guildTrackers[i].taikoNumberTopPlays === 'Not found') {
-							await guildTrackers[i].channel.send(`Could not find user \`${osuUser.osuUserId}\` anymore and I will therefore stop tracking them.`);
-							await guildTrackers[i].destroy();
-							guildTrackers.splice(i, 1);
-							i--;
-							continue;
+							guildTrackers[i].taikoTopPlays = false;
+							await guildTrackers[i].save();
 						}
 					}
 
@@ -2467,11 +2461,8 @@ module.exports = {
 							});
 
 						if (guildTrackers[i].catchNumberTopPlays === 'Not found') {
-							await guildTrackers[i].channel.send(`Could not find user \`${osuUser.osuUserId}\` anymore and I will therefore stop tracking them.`);
-							await guildTrackers[i].destroy();
-							guildTrackers.splice(i, 1);
-							i--;
-							continue;
+							guildTrackers[i].catchTopPlays = false;
+							await guildTrackers[i].save();
 						}
 					}
 
@@ -2515,11 +2506,8 @@ module.exports = {
 							});
 
 						if (guildTrackers[i].maniaNumberTopPlays === 'Not found') {
-							await guildTrackers[i].channel.send(`Could not find user \`${osuUser.osuUserId}\` anymore and I will therefore stop tracking them.`);
-							await guildTrackers[i].destroy();
-							guildTrackers.splice(i, 1);
-							i--;
-							continue;
+							guildTrackers[i].maniaTopPlays = false;
+							await guildTrackers[i].save();
 						}
 					}
 
