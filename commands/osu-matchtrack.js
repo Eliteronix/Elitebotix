@@ -48,7 +48,7 @@ module.exports = {
 			} else {
 				const guildPrefix = await getGuildPrefix(msg);
 				if (msg.id) {
-					return msg.reply(`You didn't provide a valid match ID or URL.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);
+					return msg.channel.send(`You didn't provide a valid match ID or URL.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);
 				} else {
 					return interaction.editReply(`You didn't provide a valid match ID or URL.\nUsage: \`/${this.name} ${this.usage}\``);
 				}
@@ -59,7 +59,7 @@ module.exports = {
 			.then(async (match) => {
 				if (match.raw_end) {
 					if (msg.id) {
-						return msg.reply(`Match \`${match.name.replace(/`/g, '')}\` has already ended.`);
+						return msg.channel.send(`Match \`${match.name.replace(/`/g, '')}\` has already ended.`);
 					} else {
 						return interaction.editReply(`Match \`${match.name.replace(/`/g, '')}\` has already ended.`);
 					}
@@ -68,7 +68,7 @@ module.exports = {
 				let initialMessage = null;
 
 				if (msg.id) {
-					initialMessage = msg.reply(`Tracking match \`${match.name.replace(/`/g, '')}\`\nReact to this message with :octagonal_sign: to stop tracking`);
+					initialMessage = await msg.channel.send(`Tracking match \`${match.name.replace(/`/g, '')}\`\nReact to this message with :octagonal_sign: to stop tracking`);
 				} else {
 					initialMessage = await interaction.editReply(`Tracking match \`${match.name.replace(/`/g, '')}\`\nReact to this message with :octagonal_sign: to stop tracking`);
 				}
@@ -87,7 +87,7 @@ module.exports = {
 					stop = true;
 					initialMessage.reactions.removeAll().catch(() => { });
 					if (msg.id) {
-						msg.reply(`Stopped tracking match \`${match.name.replace(/`/g, '')}\``);
+						msg.channel.send(`Stopped tracking match \`${match.name.replace(/`/g, '')}\``);
 					} else {
 						interaction.editReply(`Stopped tracking match \`${match.name.replace(/`/g, '')}\``);
 					}
@@ -298,7 +298,7 @@ module.exports = {
 			.catch(err => {
 				if (err.message === 'Not found') {
 					if (msg.id) {
-						return msg.reply(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
+						return msg.channel.send(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
 					} else {
 						return interaction.editReply(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
 					}

@@ -35,6 +35,8 @@ require('./models/DBBirthdayGuilds')(sequelize, Sequelize.DataTypes);
 require('./models/DBOsuTourneyFollows')(sequelize, Sequelize.DataTypes);
 require('./models/DBDuelRatingHistory')(sequelize, Sequelize.DataTypes);
 require('./models/DBOsuForumPosts')(sequelize, Sequelize.DataTypes);
+require('./models/DBOsuTrackingUsers')(sequelize, Sequelize.DataTypes);
+require('./models/DBOsuGuildTrackers')(sequelize, Sequelize.DataTypes);
 sequelize.sync({ alter: true })
 	.then(async () => {
 		console.log('Database synced');

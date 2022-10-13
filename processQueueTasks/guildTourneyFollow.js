@@ -1,4 +1,4 @@
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuGuildTrackers } = require('../dbObjects');
 const osu = require('node-osu');
 
 module.exports = {
@@ -6,12 +6,11 @@ module.exports = {
 		// console.log('tourneyFollow');
 		let args = processQueueEntry.additions.split(';');
 
-		const user = await client.users.fetch(args[0]).catch(async () => {
-			//Nothing
-		});
+		try {
+			const guild = await client.guilds.fetch(args[0]);
+			const channel = await guild.channels.fetch(args[1]);
 
-		if (user) {
-			let players = args[2].split(',');
+			let players = args[3].split(',');
 
 			for (let i = 0; i < players.length; i++) {
 				let discordUser = await DBDiscordUsers.findOne({
@@ -37,8 +36,26 @@ module.exports = {
 				players[i] = discordUser.osuName;
 			}
 
-			await user.send(`Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[1]}`);
+			await channel.send(`Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[2]}`);
+			if (args[4]) {
+				let scoreCommand = require('../commands/osu-matchtrack.js');
+				scoreCommand.execute({ id: 1, channel: channel, author: { id: 1 } }, [args[2]]);
+			}
+			processQueueEntry.destroy();
+		} catch (err) {
+			if (err.message === 'Missing Access') {
+				let guildTrackers = await DBOsuGuildTrackers.findAll({
+					where: {
+						channelId: args[1]
+					}
+				});
+
+				for (let i = 0; i < guildTrackers.length; i++) {
+					guildTrackers[i].destroy();
+				}
+			} else {
+				console.log(err);
+			}
 		}
-		processQueueEntry.destroy();
 	},
 };

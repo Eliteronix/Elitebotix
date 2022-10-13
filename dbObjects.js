@@ -34,5 +34,32 @@ const DBBirthdayGuilds = require('./models/DBBirthdayGuilds')(sequelize, Sequeli
 const DBOsuTourneyFollows = require('./models/DBOsuTourneyFollows')(sequelize, Sequelize.DataTypes);
 const DBDuelRatingHistory = require('./models/DBDuelRatingHistory')(sequelize, Sequelize.DataTypes);
 const DBOsuForumPosts = require('./models/DBOsuForumPosts')(sequelize, Sequelize.DataTypes);
+const DBOsuTrackingUsers = require('./models/DBOsuTrackingUsers')(sequelize, Sequelize.DataTypes);
+const DBOsuGuildTrackers = require('./models/DBOsuGuildTrackers')(sequelize, Sequelize.DataTypes);
 
-module.exports = { DBGuilds, DBReactionRoles, DBReactionRolesHeader, DBAutoRoles, DBTemporaryVoices, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBMOTDPoints, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBStarBoardMessages, DBTickets, DBOsuMultiScores, DBOsuBeatmaps, DBElitiriCupLobbies, DBElitiriCupStaff, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts };
+module.exports = {
+	DBGuilds,
+	DBReactionRoles,
+	DBReactionRolesHeader,
+	DBAutoRoles,
+	DBTemporaryVoices,
+	DBDiscordUsers,
+	DBServerUserActivity,
+	DBProcessQueue,
+	DBActivityRoles,
+	DBMOTDPoints,
+	DBElitiriCupSignUp,
+	DBElitiriCupSubmissions,
+	DBStarBoardMessages,
+	DBTickets,
+	DBOsuMultiScores,
+	DBOsuBeatmaps,
+	DBElitiriCupLobbies,
+	DBElitiriCupStaff,
+	DBBirthdayGuilds,
+	DBOsuTourneyFollows,
+	DBDuelRatingHistory,
+	DBOsuForumPosts,
+	DBOsuTrackingUsers,
+	DBOsuGuildTrackers
+};

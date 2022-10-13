@@ -1,6 +1,6 @@
 //Log message upon starting the bot
 console.log('Bot is starting...');
-const { twitchConnect, wrongCluster, syncJiraCards, createNewForumPostRecords } = require('./utils');
+const { twitchConnect, wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack } = require('./utils');
 
 //require the dotenv node module
 require('dotenv').config();
@@ -227,8 +227,13 @@ setInterval(() => checkForBirthdays(client), 300000);
 setInterval(() => refreshOsuRank(), 60000);
 
 setTimeout(() => {
+	// eslint-disable-next-line no-undef
+	if (wrongCluster()) {
+		return;
+	}
 	cleanUpDuplicates();
 	getForumPosts(client);
+	checkOsuTracks(client);
 }, 60000);
 
 client.on('interactionCreate', interaction => {
@@ -284,4 +289,16 @@ async function getForumPosts(client) {
 	setTimeout(() => {
 		getForumPosts(client);
 	}, 3600000);
+}
+
+async function checkOsuTracks(client) {
+	try {
+		await processOsuTrack(client);
+	} catch (e) {
+		console.log(e);
+	}
+
+	setTimeout(() => {
+		checkOsuTracks(client);
+	}, 10000);
 }
