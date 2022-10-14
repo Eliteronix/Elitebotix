@@ -381,7 +381,7 @@ module.exports = {
 					guildTracker.showAmeobeaUpdates = false;
 				}
 
-				let showAmeobeaUpdates = interaction.options.getBoolean('showameobeaupdate');
+				let showAmeobeaUpdates = interaction.options.getBoolean('showameobeaupdates');
 
 				if (showAmeobeaUpdates) {
 					guildTracker.showAmeobeaUpdates = false;
