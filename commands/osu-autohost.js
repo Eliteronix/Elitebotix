@@ -378,6 +378,7 @@ module.exports = {
 						await channel.sendMessage(`Updated the password to ${args[0]}`);
 					} else {
 						await channel.sendMessage('!mp password');
+						await channel.sendMessage('Removed the password');
 					}
 				} else if (msg.message.toLowerCase().startsWith('!condition')) {
 					let condition = '0';
