@@ -377,7 +377,7 @@ module.exports = {
 						lobby.setPassword(args[0]);
 						await channel.sendMessage(`Updated the password to ${args[0]}`);
 					} else {
-						await channel.sendMessage('You didn\'t specify a password');
+						await channel.sendMessage('!mp password');
 					}
 				} else if (msg.message.toLowerCase().startsWith('!condition')) {
 					let condition = '0';
