@@ -1,6 +1,7 @@
 const osu = require('node-osu');
 const fetch = require('node-fetch');
 const { pause } = require('../utils.js');
+const { DBOsuTrackingUsers, DBOsuGuildTrackers } = require('../dbObjects.js');
 
 //Events have to say the global rank on the map
 //Text has to be different
@@ -97,15 +98,67 @@ module.exports = {
 					}
 
 					//Retry later because there was no activity
-					let date = new Date();
-					processQueueEntry.additions = `${channel.id};${args[0]};${args[1]};${date.getTime()}`;
-					date.setTime(date.getTime() + (date.getTime() - args[2]));
+					// let date = new Date();
+					// processQueueEntry.additions = `${channel.id};${args[0]};${args[1]};${date.getTime()}`;
+					// date.setTime(date.getTime() + (date.getTime() - args[2]));
 
-					date.setUTCMinutes(date.getUTCMinutes() + 5);
+					// date.setUTCMinutes(date.getUTCMinutes() + 5);
 
-					processQueueEntry.date = date;
-					processQueueEntry.beingExecuted = false;
-					return await processQueueEntry.save();
+					// processQueueEntry.date = date;
+					// processQueueEntry.beingExecuted = false;
+					// return await processQueueEntry.save();
+
+					//Migrate to new system
+					//Create the timer for checking the user if needed
+					let userTimer = await DBOsuTrackingUsers.findOne({
+						where: {
+							osuUserId: user.id,
+						}
+					});
+
+					if (!userTimer) {
+						let nextCheck = new Date();
+						nextCheck.setMinutes(nextCheck.getMinutes() + 15);
+
+						await DBOsuTrackingUsers.create({
+							osuUserId: user.id,
+							nextCheck: nextCheck,
+						});
+					}
+
+					//Create or update the guild tracker
+					let guildTracker = await DBOsuGuildTrackers.findOne({
+						where: {
+							guildId: channel.guild.id,
+							channelId: channel.id,
+							osuUserId: user.id,
+						}
+					});
+
+					if (!guildTracker) {
+						guildTracker = await DBOsuGuildTrackers.create({
+							guildId: channel.guild.id,
+							channelId: channel.id,
+							osuUserId: user.id,
+						});
+					}
+
+					guildTracker.osuLeaderboard = true;
+					guildTracker.osuTopPlays = true;
+					guildTracker.osuAmeobea = true;
+					guildTracker.taikoLeaderboard = true;
+					guildTracker.taikoTopPlays = true;
+					guildTracker.taikoAmeobea = true;
+					guildTracker.catchLeaderboard = true;
+					guildTracker.catchTopPlays = true;
+					guildTracker.catchAmeobea = true;
+					guildTracker.maniaLeaderboard = true;
+					guildTracker.maniaTopPlays = true;
+					guildTracker.maniaAmeobea = true;
+					await guildTracker.save();
+					await channel.send(`The user ${user.name} has been migrated to the new tracking system. You can now use the tracking commands to change what is tracked.\nTry \`/osu-track enable\` to enable new settings.`);
+					await processQueueEntry.destroy();
+					return;
 				})
 				.catch(async (err) => {
 					console.log(err);

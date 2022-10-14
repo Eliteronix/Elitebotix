@@ -7,8 +7,7 @@ module.exports = {
 		let args = processQueueEntry.additions.split(';');
 
 		try {
-			const guild = await client.guilds.fetch(args[0]);
-			const channel = await guild.channels.fetch(args[1]);
+			const channel = await client.channels.fetch(args[1]);
 
 			let players = args[3].split(',');
 
