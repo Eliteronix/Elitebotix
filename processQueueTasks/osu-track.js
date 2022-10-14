@@ -156,7 +156,11 @@ module.exports = {
 					guildTracker.maniaTopPlays = true;
 					guildTracker.maniaAmeobea = true;
 					await guildTracker.save();
-					await channel.send(`The user ${user.name} has been migrated to the new tracking system. You can now use the tracking commands to change what is tracked.\nTry \`/osu-track enable\` to enable new settings.`);
+					try {
+						await channel.send(`The user ${user.name} has been migrated to the new tracking system. You can now use the tracking commands to change what is tracked.\nTry \`/osu-track enable\` to enable new settings.`);
+					} catch (err) {
+						//Nothing
+					}
 					await processQueueEntry.destroy();
 					return;
 				})
