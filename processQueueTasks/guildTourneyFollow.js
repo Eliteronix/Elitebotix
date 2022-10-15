@@ -37,8 +37,8 @@ module.exports = {
 
 			await channel.send(`Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[2]}`);
 			if (args[4]) {
-				let scoreCommand = require('../commands/osu-matchtrack.js');
-				scoreCommand.execute({ id: 1, channel: channel, author: { id: 1 } }, [args[2]]);
+				let trackCommand = require('../commands/osu-matchtrack.js');
+				trackCommand.execute({ id: 1, channel: channel, author: { id: 1 } }, [args[2], '--tracking']);
 			}
 			processQueueEntry.destroy();
 		} catch (err) {

@@ -42,9 +42,15 @@ module.exports = {
 
 		let matchID = args[0];
 
+		let showStart = false;
+
+		if (args[1] === '--tracking') {
+			showStart = true;
+		}
+
 		if (isNaN(matchID)) {
-			if (args[0].startsWith('https://osu.ppy.sh/community/matches/') || args[0].startsWith('https://osu.ppy.sh/mp/')) {
-				matchID = getIDFromPotentialOsuLink(args[0]);
+			if (matchID.startsWith('https://osu.ppy.sh/community/matches/') || matchID.startsWith('https://osu.ppy.sh/mp/')) {
+				matchID = getIDFromPotentialOsuLink(matchID);
 			} else {
 				const guildPrefix = await getGuildPrefix(msg);
 				if (msg.id) {
@@ -108,6 +114,10 @@ module.exports = {
 				initialMessage.react('🛑');
 
 				let latestEventId = null;
+
+				if (showStart) {
+					latestEventId = 1;
+				}
 
 				let lastMessage = null;
 				let lastMessageType = 'mapresult';
@@ -298,9 +308,9 @@ module.exports = {
 			.catch(err => {
 				if (err.message === 'Not found') {
 					if (msg.id) {
-						return msg.channel.send(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
+						return msg.channel.send(`Could not find match \`${matchID.replace(/`/g, '')}\`.`);
 					} else {
-						return interaction.editReply(`Could not find match \`${args[0].replace(/`/g, '')}\`.`);
+						return interaction.editReply(`Could not find match \`${matchID.replace(/`/g, '')}\`.`);
 					}
 				} else {
 					console.log(err);
