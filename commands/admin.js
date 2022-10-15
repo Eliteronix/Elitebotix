@@ -2928,7 +2928,7 @@ module.exports = {
 			// 					},
 			// 					{
 			// 						'name': 'matchactivity',
-			// 						'description': 'Should achieved medals be tracked',
+			// 						'description': 'Should matches be tracked',
 			// 						'type': 3,
 			// 						'choices': [
 			// 							{
@@ -6785,7 +6785,7 @@ module.exports = {
 								},
 								{
 									'name': 'matchactivity',
-									'description': 'Should achieved medals be tracked',
+									'description': 'Should matches be tracked',
 									'type': 3,
 									'choices': [
 										{
