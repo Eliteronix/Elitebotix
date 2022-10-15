@@ -2304,8 +2304,11 @@ module.exports = {
 									.setTitle(`${osuUser.osuName} unlocked the medal ${medalName}`)
 									.setThumbnail(medal.link)
 									.setDescription(medal.description)
-									.addField('Medal requirements', medal.instructions.replace('<b>', '**').replace('</b>', '**'))
 									.addField('Medal Group', medal.grouping);
+
+								if (medal.instructions) {
+									medalEmbed.addField('Medal requirements', medal.instructions.replace('<b>', '**').replace('</b>', '**'));
+								}
 
 								await guildTrackers[i].channel.send({ embeds: [medalEmbed] });
 							} else {
