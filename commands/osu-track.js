@@ -3,6 +3,7 @@ const osu = require('node-osu');
 const { Permissions } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'osu-track',
@@ -40,6 +41,7 @@ module.exports = {
 				let username = usernames[i];
 
 				//Get the user from the database if possible
+				logDatabaseQueries(4, 'commands/osu-track.js enable DBDiscordUsers');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						[Op.or]: {
@@ -82,6 +84,7 @@ module.exports = {
 				}
 
 				//Create the timer for checking the user if needed
+				logDatabaseQueries(4, 'commands/osu-track.js enable DBOsuTrackingUsers');
 				let userTimer = await DBOsuTrackingUsers.findOne({
 					where: {
 						osuUserId: osuUser.osuUserId,
@@ -99,6 +102,7 @@ module.exports = {
 				}
 
 				//Create or update the guild tracker
+				logDatabaseQueries(4, 'commands/osu-track.js enable DBOsuGuildTrackers 1');
 				let guildTracker = await DBOsuGuildTrackers.findOne({
 					where: {
 						guildId: interaction.guild.id,
@@ -253,6 +257,7 @@ module.exports = {
 				await guildTracker.destroy();
 
 				// Find other guild trackers, if none exsist, delete the user tracker
+				logDatabaseQueries(4, 'commands/osu-track.js enable DBOsuGuildTrackers 2');
 				const guildTrackers = await DBOsuGuildTrackers.findAll({
 					where: {
 						osuUserId: osuUser.osuUserId,
@@ -286,6 +291,7 @@ module.exports = {
 				let username = usernames[i];
 
 				//Get the user from the database if possible
+				logDatabaseQueries(4, 'commands/osu-track.js disable DBDiscordUsers');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						[Op.or]: {
@@ -328,6 +334,7 @@ module.exports = {
 				}
 
 				//Create the timer for checking the user if needed
+				logDatabaseQueries(4, 'commands/osu-track.js disable DBOsuTrackingUsers');
 				let userTimer = await DBOsuTrackingUsers.findOne({
 					where: {
 						osuUserId: osuUser.osuUserId,
@@ -340,6 +347,7 @@ module.exports = {
 				}
 
 				//Create or update the guild tracker
+				logDatabaseQueries(4, 'commands/osu-track.js disable DBOsuGuildTrackers 1');
 				let guildTracker = await DBOsuGuildTrackers.findOne({
 					where: {
 						guildId: interaction.guild.id,
@@ -432,6 +440,7 @@ module.exports = {
 				await guildTracker.destroy();
 
 				// Find other guild trackers, if none exsist, delete the user tracker
+				logDatabaseQueries(4, 'commands/osu-track.js disable DBOsuGuildTrackers 2');
 				const guildTrackers = await DBOsuGuildTrackers.findAll({
 					where: {
 						osuUserId: osuUser.osuUserId,
@@ -456,6 +465,7 @@ module.exports = {
 				return;
 			}
 
+			logDatabaseQueries(4, 'commands/osu-track.js list DBOsuGuildTrackers');
 			const guildTrackers = await DBOsuGuildTrackers.findAll({
 				where: {
 					channelId: interaction.channel.id,
@@ -471,6 +481,7 @@ module.exports = {
 				let username = guildTrackers[i].osuUserId;
 
 				//Get the user from the database if possible
+				logDatabaseQueries(4, 'commands/osu-track.js list DBDiscordUsers');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						osuUserId: username,
