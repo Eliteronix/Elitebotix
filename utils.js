@@ -4274,7 +4274,16 @@ function logDatabaseQueriesFunction(level, output) {
 	//Level 2: Log constant periodic queries
 	//Level 1: Log all queries
 	if (traceDatabaseQueries <= level) {
-		console.log('traceDatabaseQueries: ', output);
+		console.log('traceDatabaseQueries: ', new Date(), output);
+
+		// Requiring module
+		var process = require('process');
+
+		// An example displaying the respective memory
+		// usages in megabytes(MB)
+		for (const [key, value] of Object.entries(process.memoryUsage())) {
+			console.log(`Memory usage by ${key}, ${value / 1000000}MB `);
+		}
 	}
 }
 

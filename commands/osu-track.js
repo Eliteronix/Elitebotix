@@ -448,7 +448,7 @@ module.exports = {
 			return interaction.editReply({ content: 'Finished processing.', ephemeral: true });
 		} else if (interaction.options._subcommand === 'list') {
 			try {
-				await interaction.reply({ content: 'Processing...', ephemeral: true });
+				await interaction.deferReply({ ephemeral: true });
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -603,7 +603,16 @@ module.exports = {
 				return 0;
 			});
 
-			interaction.editReply({ content: output.map(x => x.content).join('\n\n') });
+			let currentOutput = [];
+
+			while (output.length) {
+				while (currentOutput.length < 10 && output.length) {
+					currentOutput.push(output.shift().content);
+				}
+
+				await interaction.followUp({ content: currentOutput.join('\n\n') });
+				currentOutput = [];
+			}
 		}
 	},
 };
