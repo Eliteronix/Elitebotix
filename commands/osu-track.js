@@ -621,7 +621,7 @@ module.exports = {
 					currentOutput.push(output.shift().content);
 				}
 
-				await interaction.followUp({ content: currentOutput.join('\n\n') });
+				await interaction.followUp({ content: currentOutput.join('\n\n'), ephemeral: true });
 				currentOutput = [];
 			}
 		}
