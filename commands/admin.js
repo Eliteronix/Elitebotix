@@ -1726,6 +1726,12 @@ module.exports = {
 			// 				'required': false
 			// 			},
 			// 			{
+			// 				'name': 'showgraph',
+			// 				'description': 'Show the rank graph',
+			// 				'type': 5, // 5 is type BOOLEAN
+			// 				'required': false
+			// 			},
+			// 			{
 			// 				'name': 'username2',
 			// 				'description': 'The username, id or link of the player',
 			// 				'type': 3,
@@ -5710,6 +5716,12 @@ module.exports = {
 							'name': 'username',
 							'description': 'The username, id or link of the player',
 							'type': 3,
+							'required': false
+						},
+						{
+							'name': 'showgraph',
+							'description': 'Show the rank graph',
+							'type': 5, // 5 is type BOOLEAN
 							'required': false
 						},
 						{
