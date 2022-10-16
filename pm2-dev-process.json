@@ -13,5 +13,6 @@
 	"watch_options": {
 		"followSymlinks": false
 	},
-	"name": "Elitebotix"
+	"name": "Elitebotix",
+	"nodeArgs": "--use_strict"
 }
