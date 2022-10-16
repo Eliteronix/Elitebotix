@@ -691,9 +691,9 @@ async function getRankHistoryGraph(osuUserId, mode) {
 			{
 				label: 'Rank history',
 				data: history,
-				borderColor: 'rgb(255, 99, 132)',
+				borderColor: 'rgb(96, 183, 202)',
 				fill: 'start',
-				backgroundColor: 'rgba(255, 99, 132, 0.8)',
+				backgroundColor: 'rgba(96, 183, 202, 0.6)',
 				tension: 0.4
 			},
 		]
