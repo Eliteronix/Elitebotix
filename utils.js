@@ -5447,6 +5447,8 @@ async function getValidTournamentBeatmapFunction(input) {
 		});
 	}
 
+	console.log('Found', beatmaps.length, 'maps');
+
 	//Loop through the beatmaps until a fitting one is found
 	while (beatmaps.length) {
 		const index = Math.floor(Math.random() * beatmaps.length);
