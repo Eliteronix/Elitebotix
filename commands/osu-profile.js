@@ -156,7 +156,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				await sentMessage.react('📈');
 
 				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores');
-				const userScores = await DBOsuMultiScores.findAll({
+				let userScores = await DBOsuMultiScores.findAll({
 					where: {
 						osuUserId: user.id,
 						score: {
@@ -181,6 +181,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 					await sentMessage.react('🆚');
 					await sentMessage.react('📊');
 				}
+				userScores = null;
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
@@ -240,7 +241,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				await sentMessage.react('📈');
 
 				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores');
-				const userScores = await DBOsuMultiScores.findAll({
+				let userScores = await DBOsuMultiScores.findAll({
 					where: {
 						osuUserId: user.id,
 						score: {
@@ -265,6 +266,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 					await sentMessage.react('🆚');
 					await sentMessage.react('📊');
 				}
+				userScores = null;
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
