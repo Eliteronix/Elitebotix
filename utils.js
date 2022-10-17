@@ -5,7 +5,6 @@ const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
-const Sequelize = require('sequelize');
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -5356,7 +5355,6 @@ async function getValidTournamentBeatmapFunction(input) {
 					[Op.notIn]: avoidMaps,
 				},
 			},
-			order: Sequelize.fn('RANDOM'),
 			limit: 250,
 		});
 	} else if (modPool === 'HD') {
@@ -5379,7 +5377,6 @@ async function getValidTournamentBeatmapFunction(input) {
 					[Op.notIn]: avoidMaps,
 				},
 			},
-			order: Sequelize.fn('RANDOM'),
 			limit: 250,
 		});
 	} else if (modPool === 'HR') {
@@ -5400,7 +5397,6 @@ async function getValidTournamentBeatmapFunction(input) {
 					[Op.notIn]: avoidMaps,
 				},
 			},
-			order: Sequelize.fn('RANDOM'),
 			limit: 250,
 		});
 	} else if (modPool === 'DT') {
@@ -5421,7 +5417,6 @@ async function getValidTournamentBeatmapFunction(input) {
 					[Op.notIn]: avoidMaps,
 				},
 			},
-			order: Sequelize.fn('RANDOM'),
 			limit: 250,
 		});
 	} else if (modPool === 'FM') {
@@ -5442,7 +5437,6 @@ async function getValidTournamentBeatmapFunction(input) {
 					[Op.notIn]: avoidMaps,
 				},
 			},
-			order: Sequelize.fn('RANDOM'),
 			limit: 250,
 		});
 	}
