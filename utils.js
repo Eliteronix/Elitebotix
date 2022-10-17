@@ -1376,6 +1376,10 @@ module.exports = {
 			await interaction.editReply('Duel has been accepted. Getting necessary data...');
 		}
 
+		let avoidMaps = [];
+		let threeMonthsAgo = new Date();
+		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
 		logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 1 scores');
 		const player1Scores = await DBOsuMultiScores.findAll({
 			where: {
@@ -1393,6 +1397,9 @@ module.exports = {
 		});
 
 		for (let i = 0; i < player1Scores.length; i++) {
+			if (player1Scores[i].gameStartDate > threeMonthsAgo && !avoidMaps.includes(player1Scores[i].beatmapId)) {
+				avoidMaps.push(player1Scores[i].beatmapId);
+			}
 			player1Scores[i] = player1Scores[i].beatmapId;
 		}
 
@@ -1413,6 +1420,9 @@ module.exports = {
 		});
 
 		for (let i = 0; i < player2Scores.length; i++) {
+			if (player2Scores[i].gameStartDate > threeMonthsAgo && !avoidMaps.includes(player2Scores[i].beatmapId)) {
+				avoidMaps.push(player2Scores[i].beatmapId);
+			}
 			player2Scores[i] = player2Scores[i].beatmapId;
 		}
 
@@ -1437,6 +1447,9 @@ module.exports = {
 			});
 
 			for (let i = 0; i < player3Scores.length; i++) {
+				if (player3Scores[i].gameStartDate > threeMonthsAgo && !avoidMaps.includes(player3Scores[i].beatmapId)) {
+					avoidMaps.push(player3Scores[i].beatmapId);
+				}
 				player3Scores[i] = player3Scores[i].beatmapId;
 			}
 
@@ -1457,11 +1470,12 @@ module.exports = {
 			});
 
 			for (let i = 0; i < player4Scores.length; i++) {
+				if (player4Scores[i].gameStartDate > threeMonthsAgo && !avoidMaps.includes(player4Scores[i].beatmapId)) {
+					avoidMaps.push(player4Scores[i].beatmapId);
+				}
 				player4Scores[i] = player4Scores[i].beatmapId;
 			}
 		}
-
-		let avoidMaps = [];
 
 		//Add all maps that have not been played by everyone to avoidMaps
 		for (let i = 0; i < player1Scores.length; i++) {
