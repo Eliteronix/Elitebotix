@@ -5329,6 +5329,19 @@ async function getValidTournamentBeatmapFunction(input) {
 		avoidMaps = input.avoidMaps;
 	}
 
+	let finalAvoidList = [];
+	for (let i = 0; i < avoidMaps.length; i++) {
+		if (!finalAvoidList.includes(avoidMaps[i])) {
+			finalAvoidList.push(avoidMaps[i]);
+		}
+	}
+
+	for (let i = 0; i < input.alreadyChecked.length; i++) {
+		if (!finalAvoidList.includes(input.alreadyChecked[i])) {
+			finalAvoidList.push(input.alreadyChecked[i]);
+		}
+	}
+
 	//Set the osuUserId
 	let osuUserId = null;
 
@@ -5366,10 +5379,7 @@ async function getValidTournamentBeatmapFunction(input) {
 					}
 				},
 				beatmapId: {
-					[Op.and]: {
-						[Op.notIn]: avoidMaps,
-						[Op.notIn]: input.alreadyChecked,
-					}
+					[Op.notIn]: finalAvoidList,
 				},
 			},
 			limit: 250,
@@ -5391,10 +5401,7 @@ async function getValidTournamentBeatmapFunction(input) {
 					}
 				},
 				beatmapId: {
-					[Op.and]: {
-						[Op.notIn]: avoidMaps,
-						[Op.notIn]: input.alreadyChecked,
-					}
+					[Op.notIn]: finalAvoidList,
 				},
 			},
 			limit: 250,
@@ -5414,10 +5421,7 @@ async function getValidTournamentBeatmapFunction(input) {
 					}
 				},
 				beatmapId: {
-					[Op.and]: {
-						[Op.notIn]: avoidMaps,
-						[Op.notIn]: input.alreadyChecked,
-					}
+					[Op.notIn]: finalAvoidList,
 				},
 			},
 			limit: 250,
@@ -5437,10 +5441,7 @@ async function getValidTournamentBeatmapFunction(input) {
 					}
 				},
 				beatmapId: {
-					[Op.and]: {
-						[Op.notIn]: avoidMaps,
-						[Op.notIn]: input.alreadyChecked,
-					}
+					[Op.notIn]: finalAvoidList,
 				},
 			},
 			limit: 250,
@@ -5460,10 +5461,7 @@ async function getValidTournamentBeatmapFunction(input) {
 					}
 				},
 				beatmapId: {
-					[Op.and]: {
-						[Op.notIn]: avoidMaps,
-						[Op.notIn]: input.alreadyChecked,
-					}
+					[Op.notIn]: finalAvoidList,
 				},
 			},
 			limit: 250,
