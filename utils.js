@@ -5686,6 +5686,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				mode: 'Standard',
 				upperDrain: 270,
 				lowerDrain: 100,
+				lowerCircleSize: 3.8,
 				upperCircleSize: 4.6,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
