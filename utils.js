@@ -5366,10 +5366,13 @@ async function getValidTournamentBeatmapFunction(input) {
 					}
 				},
 				beatmapId: {
-					[Op.notIn]: avoidMaps,
+					[Op.and]: {
+						[Op.notIn]: avoidMaps,
+						[Op.notIn]: input.alreadyChecked,
+					}
 				},
 			},
-			limit: 1000,
+			limit: 250,
 		});
 	} else if (modPool === 'HD') {
 		let HDLowerBound = lowerBound - 0.8;
@@ -5388,10 +5391,13 @@ async function getValidTournamentBeatmapFunction(input) {
 					}
 				},
 				beatmapId: {
-					[Op.notIn]: avoidMaps,
+					[Op.and]: {
+						[Op.notIn]: avoidMaps,
+						[Op.notIn]: input.alreadyChecked,
+					}
 				},
 			},
-			limit: 1000,
+			limit: 250,
 		});
 	} else if (modPool === 'HR') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -5408,10 +5414,13 @@ async function getValidTournamentBeatmapFunction(input) {
 					}
 				},
 				beatmapId: {
-					[Op.notIn]: avoidMaps,
+					[Op.and]: {
+						[Op.notIn]: avoidMaps,
+						[Op.notIn]: input.alreadyChecked,
+					}
 				},
 			},
-			limit: 1000,
+			limit: 250,
 		});
 	} else if (modPool === 'DT') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -5428,10 +5437,13 @@ async function getValidTournamentBeatmapFunction(input) {
 					}
 				},
 				beatmapId: {
-					[Op.notIn]: avoidMaps,
+					[Op.and]: {
+						[Op.notIn]: avoidMaps,
+						[Op.notIn]: input.alreadyChecked,
+					}
 				},
 			},
-			limit: 1000,
+			limit: 250,
 		});
 	} else if (modPool === 'FM') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -5448,14 +5460,30 @@ async function getValidTournamentBeatmapFunction(input) {
 					}
 				},
 				beatmapId: {
-					[Op.notIn]: avoidMaps,
+					[Op.and]: {
+						[Op.notIn]: avoidMaps,
+						[Op.notIn]: input.alreadyChecked,
+					}
 				},
 			},
-			limit: 1000,
+			limit: 250,
 		});
 	}
 
 	console.log('Found', beatmaps.length, 'maps');
+
+	if (beatmaps.length === 0) {
+		input.alreadyChecked = [];
+		input.lowerBound = lowerBound - 0.1;
+		if (input.lowerBound < 3.5) {
+			input.lowerBound = 3.5;
+		}
+		input.upperBound = upperBound + 0.1;
+		if (input.upperBound > 9.9) {
+			input.upperBound = 9.9;
+		}
+		console.log('Increased SR range to', input.lowerBound, '-', input.upperBound);
+	}
 
 	//Loop through the beatmaps until a fitting one is found
 	while (beatmaps.length) {
@@ -5466,6 +5494,8 @@ async function getValidTournamentBeatmapFunction(input) {
 			beatmaps.splice(index, 1);
 			continue;
 		}
+
+		input.alreadyChecked.push(randomBeatmap.beatmapId);
 
 		// refresh the map
 		if (modPool == 'NM') {
@@ -5575,9 +5605,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		return clone;
 	}
 
-	console.log('Map Selection: Returning null');
+	console.log('Map Selection: None found - Going again');
 	//Return null
-	return null;
+	return await getValidTournamentBeatmapFunction(input);
 }
 
 // returns true if the user has already played the map in the last 60 days, so we should skip it
@@ -5643,6 +5673,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 			lowerDrain: 100,
 			avoidMaps: avoidMaps,
 			onlyRanked: onlyRanked,
+			alreadyChecked: [],
 		});
 	}
 
@@ -5659,6 +5690,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				lowerApproach: 8.5,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
+				alreadyChecked: [],
 			});
 		} else {
 			//30% HD2
@@ -5672,6 +5704,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				upperApproach: 8,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
+				alreadyChecked: [],
 			});
 		}
 	}
@@ -5690,6 +5723,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				upperCircleSize: 4.6,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
+				alreadyChecked: [],
 			});
 		} else {
 			//30% HR2
@@ -5703,6 +5737,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				lowerCircleSize: 5,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
+				alreadyChecked: [],
 			});
 		}
 	}
@@ -5717,6 +5752,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 			lowerDrain: 120,
 			avoidMaps: avoidMaps,
 			onlyRanked: onlyRanked,
+			alreadyChecked: [],
 		});
 	}
 
@@ -5734,6 +5770,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				upperApproach: 8,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
+				alreadyChecked: [],
 			});
 		} else {
 			//50% not FM2 (and not too low cs only, AR can go for whatever)
@@ -5747,6 +5784,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				upperCircleSize: 4.5,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
+				alreadyChecked: [],
 			});
 		}
 	}
@@ -5763,6 +5801,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 			lowerApproach: 8,
 			avoidMaps: avoidMaps,
 			onlyRanked: onlyRanked,
+			alreadyChecked: [],
 		});
 	}
 
