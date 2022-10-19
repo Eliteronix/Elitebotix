@@ -182,9 +182,7 @@ module.exports = {
 		const lobby = channel.lobby;
 		logMatchCreation(additionalObjects[0], lobby.name, lobby.id);
 
-		if (password) {
-			await lobby.setPassword(password);
-		}
+		await channel.sendMessage(`!mp password ${password}`);
 
 		await channel.sendMessage('!mp addref Eliteronix');
 		await channel.sendMessage(`!mp set 0 ${winCondition}`);
