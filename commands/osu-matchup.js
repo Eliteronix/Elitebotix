@@ -519,7 +519,7 @@ module.exports = {
 						team1MapScores.push(scoresTeam1[j][k]);
 						if (!matchId || matchId < scoresTeam1[j][k].matchId) {
 							matchId = scoresTeam1[j][k].matchId;
-							date = scoresTeam1[j][k].matchStartDate;
+							date = new Date(scoresTeam1[j][k].matchStartDate);
 							dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
 						}
 						break;
@@ -538,12 +538,8 @@ module.exports = {
 						team2MapScores.push(scoresTeam2[j][k]);
 						if (!matchId || parseInt(matchId) < parseInt(scoresTeam2[j][k].matchId)) {
 							matchId = scoresTeam2[j][k].matchId;
-							date = scoresTeam2[j][k].matchStartDate;
-							try {
-								dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
-							} catch (err) {
-								console.log(err, scoresTeam2[j][k]);
-							}
+							date = new Date(scoresTeam2[j][k].matchStartDate);
+							dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
 						}
 						break;
 					}
