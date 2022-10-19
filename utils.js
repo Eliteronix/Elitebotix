@@ -5336,9 +5336,15 @@ async function getValidTournamentBeatmapFunction(input) {
 		}
 	}
 
-	for (let i = 0; i < input.alreadyChecked.length; i++) {
-		if (!finalAvoidList.includes(input.alreadyChecked[i])) {
-			finalAvoidList.push(input.alreadyChecked[i]);
+	for (let i = 0; i < input.alreadyCheckedSR.length; i++) {
+		if (!finalAvoidList.includes(input.alreadyCheckedSR[i])) {
+			finalAvoidList.push(input.alreadyCheckedSR[i]);
+		}
+	}
+
+	for (let i = 0; i < input.alreadyCheckedOther.length; i++) {
+		if (!finalAvoidList.includes(input.alreadyCheckedOther[i])) {
+			finalAvoidList.push(input.alreadyCheckedOther[i]);
 		}
 	}
 
@@ -5471,7 +5477,7 @@ async function getValidTournamentBeatmapFunction(input) {
 	console.log('Found', beatmaps.length, 'maps');
 
 	if (beatmaps.length === 0) {
-		input.alreadyChecked = [];
+		input.alreadyCheckedSR = [];
 		input.lowerBound = lowerBound - 0.1;
 		if (input.lowerBound < 3.5) {
 			input.lowerBound = 3.5;
@@ -5493,7 +5499,7 @@ async function getValidTournamentBeatmapFunction(input) {
 			continue;
 		}
 
-		input.alreadyChecked.push(randomBeatmap.beatmapId);
+		input.alreadyCheckedSR.push(randomBeatmap.beatmapId);
 
 		// refresh the map
 		if (modPool == 'NM') {
@@ -5518,6 +5524,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (!randomBeatmap) {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Not available');
+			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
 
@@ -5525,6 +5532,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (randomBeatmap.starRating > upperBound || randomBeatmap.starRating < lowerBound) {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Star rating out of bounds');
+			input.alreadyCheckedSR.push(randomBeatmap.beatmapId);
 			continue;
 		}
 
@@ -5532,6 +5540,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (parseInt(randomBeatmap.drainLength) > upperDrain || parseInt(randomBeatmap.drainLength) < lowerDrain) {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Drain length out of bounds');
+			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
 
@@ -5539,6 +5548,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (parseFloat(randomBeatmap.approachRate) > upperApproach || parseFloat(randomBeatmap.approachRate) < lowerApproach) {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Approach rate out of bounds');
+			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
 
@@ -5546,6 +5556,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (parseFloat(randomBeatmap.circleSize) > upperCircleSize || parseFloat(randomBeatmap.circleSize) < lowerCircleSize) {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Circle size out of bounds');
+			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
 
@@ -5553,6 +5564,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (onlyRanked && randomBeatmap.approvalStatus !== 'Ranked') {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Not ranked');
+			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
 
@@ -5560,6 +5572,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (checkPlayed && beatmapPlayed(randomBeatmap, osuUserId)) {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Played doesn\'t fit');
+			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
 
@@ -5591,6 +5604,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (mapScoreAmount < 50) {
 			console.log('Map Selection: Not used often');
 			beatmaps.splice(index, 1);
+			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
 
@@ -5671,7 +5685,8 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 			lowerDrain: 100,
 			avoidMaps: avoidMaps,
 			onlyRanked: onlyRanked,
-			alreadyChecked: [],
+			alreadyCheckedSR: [],
+			alreadyCheckedOther: [],
 		});
 	}
 
@@ -5688,7 +5703,8 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				lowerApproach: 8.5,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
-				alreadyChecked: [],
+				alreadyCheckedSR: [],
+				alreadyCheckedOther: [],
 			});
 		} else {
 			//30% HD2
@@ -5702,7 +5718,8 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				upperApproach: 8,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
-				alreadyChecked: [],
+				alreadyCheckedSR: [],
+				alreadyCheckedOther: [],
 			});
 		}
 	}
@@ -5721,7 +5738,8 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				upperCircleSize: 4.6,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
-				alreadyChecked: [],
+				alreadyCheckedSR: [],
+				alreadyCheckedOther: [],
 			});
 		} else {
 			//30% HR2
@@ -5735,7 +5753,8 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				lowerCircleSize: 5,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
-				alreadyChecked: [],
+				alreadyCheckedSR: [],
+				alreadyCheckedOther: [],
 			});
 		}
 	}
@@ -5750,7 +5769,8 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 			lowerDrain: 120,
 			avoidMaps: avoidMaps,
 			onlyRanked: onlyRanked,
-			alreadyChecked: [],
+			alreadyCheckedSR: [],
+			alreadyCheckedOther: [],
 		});
 	}
 
@@ -5768,7 +5788,8 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				upperApproach: 8,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
-				alreadyChecked: [],
+				alreadyCheckedSR: [],
+				alreadyCheckedOther: [],
 			});
 		} else {
 			//50% not FM2 (and not too low cs only, AR can go for whatever)
@@ -5782,7 +5803,8 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 				upperCircleSize: 4.5,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
-				alreadyChecked: [],
+				alreadyCheckedSR: [],
+				alreadyCheckedOther: [],
 			});
 		}
 	}
@@ -5799,7 +5821,8 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 			lowerApproach: 8,
 			avoidMaps: avoidMaps,
 			onlyRanked: onlyRanked,
-			alreadyChecked: [],
+			alreadyCheckedSR: [],
+			alreadyCheckedOther: [],
 		});
 	}
 
