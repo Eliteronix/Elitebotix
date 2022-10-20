@@ -5509,6 +5509,8 @@ async function getValidTournamentBeatmapFunction(input) {
 
 		input.alreadyCheckedSR.push(randomBeatmap.beatmapId);
 
+		let beatmapId = randomBeatmap.beatmapId;
+
 		// refresh the map
 		if (modPool == 'NM') {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 0 });
@@ -5532,7 +5534,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (!randomBeatmap) {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Not available');
-			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
+			input.alreadyCheckedOther.push(beatmapId);
 			continue;
 		}
 
