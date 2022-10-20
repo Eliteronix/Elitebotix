@@ -221,10 +221,13 @@ module.exports = {
 											}
 										} else if (json.events[i].detail.type === 'player-joined') {
 											let playerName = await getOsuPlayerName(json.events[i].user_id);
-											playerUpdates.push(`<:arrowrightsolid:1005141207879536761> ${playerName} joined the game.`);
+											playerUpdates.push(`<:arrowrightsolid:1005141207879536761> ${playerName} joined the match.`);
 										} else if (json.events[i].detail.type === 'player-left') {
 											let playerName = await getOsuPlayerName(json.events[i].user_id);
-											playerUpdates.push(`<:arrowleftsolid:1005141359008682024> ${playerName} left the game.`);
+											playerUpdates.push(`<:arrowleftsolid:1005141359008682024> ${playerName} left the match.`);
+										} else if (json.events[i].detail.type === 'player-kicked') {
+											let playerName = await getOsuPlayerName(json.events[i].user_id);
+											playerUpdates.push(`<:bansolid:1032747189941829683> ${playerName} has been kicked from the match.`);
 										} else if (json.events[i].detail.type === 'match-disbanded') {
 											playerUpdates.push('<:timessolid:1005141203819434104> The match has been closed.');
 										} else if (json.events[i].detail.type === 'match-created') {
