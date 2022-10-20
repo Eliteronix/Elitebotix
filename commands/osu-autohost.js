@@ -1,6 +1,7 @@
-const { populateMsgFromInteraction, logMatchCreation, getOsuUserServerMode, getValidTournamentBeatmap } = require('../utils');
+const { populateMsgFromInteraction, logMatchCreation, getOsuUserServerMode, logDatabaseQueries, getNextMap } = require('../utils');
 const { Permissions } = require('discord.js');
-const { DBDiscordUsers, } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores, DBProcessQueue, } = require('../dbObjects');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-autohost',
@@ -18,7 +19,7 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
-		let password = null;
+		let password = '';
 		let winCondition = '0';
 		let modsInput = null;
 		let nmStarRating = null;
@@ -200,6 +201,32 @@ module.exports = {
 			getNextModPool();
 		}
 
+		let avoidMaps = [];
+		let threeMonthsAgo = new Date();
+		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+		logDatabaseQueries(4, 'commands/osu-autohost.js DBOsuMultiScores');
+		const player1Scores = await DBOsuMultiScores.findAll({
+			where: {
+				osuUserId: commandUser.osuUserId,
+				matchName: {
+					[Op.notLike]: 'MOTD:%',
+				},
+				mode: 'Standard',
+				gameStartDate: {
+					[Op.gte]: threeMonthsAgo,
+				}
+			}
+		});
+
+		for (let i = 0; i < player1Scores.length; i++) {
+			avoidMaps.push(player1Scores[i].beatmapId);
+		}
+
+		let date = new Date();
+		date.setUTCMinutes(date.getUTCMinutes() + 5);
+		DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: lobby.id, priority: 1, date: date });
+
 		channel.on('message', async (msg) => {
 			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
 				await channel.sendMessage('!mp start 10');
@@ -222,7 +249,7 @@ module.exports = {
 					await channel.sendMessage('!mp aborttimer');
 					await channel.sendMessage('Looking for new map...');
 					let nextModPool = getNextModPool(true);
-					let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, commandUser);
+					let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 
 					while (lobby._beatmapId != beatmap.beatmapId) {
 						await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
@@ -421,7 +448,7 @@ module.exports = {
 		lobby.on('playerJoined', async (obj) => {
 			if (commandUser.osuUserId === obj.player.user.id.toString()) {
 				let nextModPool = getNextModPool(true);
-				let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, commandUser);
+				let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 
 				while (lobby._beatmapId != beatmap.beatmapId) {
 					await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
@@ -458,7 +485,7 @@ module.exports = {
 
 		lobby.on('matchFinished', async () => {
 			let nextModPool = getNextModPool(true);
-			let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, commandUser);
+			let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 
 			while (lobby._beatmapId != beatmap.beatmapId) {
 				await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
@@ -504,7 +531,7 @@ module.exports = {
 	},
 };
 
-async function getPoolBeatmap(modPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, commandUser) {
+async function getPoolBeatmap(modPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps) {
 	let userStarRating = nmStarRating;
 	if (modPool === 'HD') {
 		userStarRating = hdStarRating;
@@ -516,5 +543,5 @@ async function getPoolBeatmap(modPool, nmStarRating, hdStarRating, hrStarRating,
 		userStarRating = fmStarRating;
 	}
 
-	return await getValidTournamentBeatmap({ modPool: modPool, lowerBound: userStarRating - 0.125, upperBound: userStarRating + 0.125, mode: 'Standard', osuUserId: commandUser.osuUserId, checkPlayed: true });
+	return await getNextMap(modPool, userStarRating - 0.125, userStarRating + 0.125, false, avoidMaps);
 }

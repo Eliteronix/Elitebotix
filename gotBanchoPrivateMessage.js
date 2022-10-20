@@ -243,7 +243,7 @@ module.exports = async function (client, bancho, message) {
 			userStarRating = parseFloat(discordUser.osuFreeModDuelStarRating);
 		}
 
-		let beatmap = await getValidTournamentBeatmap({ modPool: mod, lowerBound: userStarRating - 0.125, upperBound: userStarRating + 0.125, mode: mode, osuUserId: osuUserId, checkPlayed: true });
+		let beatmap = await getValidTournamentBeatmap({ modPool: mod, lowerBound: userStarRating - 0.125, upperBound: userStarRating + 0.125, mode: mode });
 
 		const totalLengthSeconds = (beatmap.totalLength % 60) + '';
 		const totalLengthMinutes = (beatmap.totalLength - beatmap.totalLength % 60) / 60;

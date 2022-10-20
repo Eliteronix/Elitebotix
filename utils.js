@@ -1724,9 +1724,9 @@ module.exports = {
 
 					let nextMap = null;
 					if (bestOf === 1) {
-						nextMap = await getNextMap('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
+						nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
 					} else {
-						nextMap = await getNextMap(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
+						nextMap = await getNextMapFunction(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
 					}
 					avoidMaps.push(nextMap.beatmapId);
 
@@ -1885,9 +1885,9 @@ module.exports = {
 
 				let nextMap = null;
 				if (scores[0] + scores[1] === bestOf - 1) {
-					nextMap = await getNextMap('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
+					nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
 				} else {
-					nextMap = await getNextMap(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
+					nextMap = await getNextMapFunction(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
 				}
 				try {
 					avoidMaps.push(nextMap.beatmapId);
@@ -2680,6 +2680,9 @@ module.exports = {
 			}
 
 		}
+	},
+	async getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps) {
+		return await getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, avoidMaps);
 	}
 };
 
@@ -5356,20 +5359,6 @@ async function getValidTournamentBeatmapFunction(input) {
 		}
 	}
 
-	//Set the osuUserId
-	let osuUserId = null;
-
-	if (input.osuUserId) {
-		osuUserId = input.osuUserId;
-	}
-
-	//Set if it should be checked if the map got played recently
-	let checkPlayed = false;
-
-	if (input.checkPlayed) {
-		checkPlayed = input.checkPlayed;
-	}
-
 	//Set if it should only be ranked maps
 	let onlyRanked = false;
 
@@ -5578,14 +5567,6 @@ async function getValidTournamentBeatmapFunction(input) {
 			continue;
 		}
 
-		//Check played status
-		if (checkPlayed && beatmapPlayed(randomBeatmap, osuUserId)) {
-			beatmaps.splice(index, 1);
-			console.log('Map Selection: Played doesn\'t fit');
-			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
-			continue;
-		}
-
 		//Check usage
 		if (randomBeatmap.usedOften) {
 			console.log('Map Selection: Used often');
@@ -5632,43 +5613,6 @@ async function getValidTournamentBeatmapFunction(input) {
 	return await getValidTournamentBeatmapFunction(input);
 }
 
-// returns true if the user has already played the map in the last 60 days, so we should skip it
-function beatmapPlayed(beatmap, osuUserId) {
-	let now = new Date();
-
-	// eslint-disable-next-line no-undef
-	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-	});
-
-	let mode = getBeatmapModeIdFunction(beatmap);
-
-	osuApi.getScores({ b: beatmap.beatmapId, u: osuUserId, m: mode })
-		.then(async (scores) => {
-			if (!scores[0]) {
-				return false;
-			} else {
-				let score = scores[0];
-				let date = new Date(score.raw_date);
-				let timeDiff = Math.abs(now.getTime() - date.getTime());
-				let diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-				if (diffDays < 60) {
-					return true;
-				} else if (score.rank === 'S') {
-					return true;
-				} else {
-					return false;
-				}
-			}
-			// eslint-disable-next-line no-unused-vars
-		}).catch(err => {
-			return true;
-		});
-}
-
 function getBeatmapModeIdFunction(beatmap) {
 	let gameMode;
 	if (beatmap.mode === 'Standard') {
@@ -5683,7 +5627,7 @@ function getBeatmapModeIdFunction(beatmap) {
 	return gameMode;
 }
 
-async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps) {
+async function getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, avoidMaps) {
 	let nextMap = null;
 	if (modPool === 'NM') {
 		nextMap = await getValidTournamentBeatmapFunction({
@@ -5820,7 +5764,7 @@ async function getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps
 
 	//Retry if no map
 	if (!nextMap) {
-		nextMap = await getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps);
+		nextMap = await getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, avoidMaps);
 	}
 
 	return nextMap;
