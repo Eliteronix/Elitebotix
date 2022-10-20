@@ -5527,14 +5527,6 @@ async function getValidTournamentBeatmapFunction(input) {
 			continue;
 		}
 
-		//Check star rating
-		if (randomBeatmap.starRating > upperBound || randomBeatmap.starRating < lowerBound) {
-			beatmaps.splice(index, 1);
-			console.log('Map Selection: Star rating out of bounds');
-			input.alreadyCheckedSR.push(randomBeatmap.beatmapId);
-			continue;
-		}
-
 		//Check drain length
 		if (parseInt(randomBeatmap.drainLength) > upperDrain || parseInt(randomBeatmap.drainLength) < lowerDrain) {
 			beatmaps.splice(index, 1);
@@ -5564,6 +5556,14 @@ async function getValidTournamentBeatmapFunction(input) {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Not ranked');
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
+			continue;
+		}
+
+		//Check star rating
+		if (randomBeatmap.starRating > upperBound || randomBeatmap.starRating < lowerBound) {
+			beatmaps.splice(index, 1);
+			console.log('Map Selection: Star rating out of bounds');
+			input.alreadyCheckedSR.push(randomBeatmap.beatmapId);
 			continue;
 		}
 
