@@ -293,8 +293,20 @@ module.exports = {
 												latestEventId = json.events[i].id;
 											} else if (json.events[i].detail.type === 'other') {
 												lastMessageType = 'playing';
-												latestEventId = json.events[i].id - 1;
-												break;
+												let notLastMap = false;
+
+												for (let j = i + 1; j < json.events.length; j++) {
+													if (json.events[j].detail.type === 'other') {
+														notLastMap = true;
+													}
+												}
+
+												if (notLastMap) {
+													latestEventId = json.events[i].id;
+												} else {
+													latestEventId = json.events[i].id - 1;
+													break;
+												}
 											} else {
 												lastMessageType = 'updates';
 												latestEventId = json.events[i].id;
