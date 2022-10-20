@@ -543,5 +543,9 @@ async function getPoolBeatmap(modPool, nmStarRating, hdStarRating, hrStarRating,
 		userStarRating = fmStarRating;
 	}
 
-	return await getNextMap(modPool, userStarRating - 0.125, userStarRating + 0.125, false, avoidMaps);
+	let beatmap = await getNextMap(modPool, userStarRating - 0.125, userStarRating + 0.125, false, avoidMaps);
+
+	avoidMaps.push(beatmap.beatmapId);
+
+	return beatmap;
 }
