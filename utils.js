@@ -5716,7 +5716,7 @@ async function getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, a
 		});
 	}
 
-	if (modPool === 'FreeMod') {
+	if (modPool === 'FreeMod' || modPool === 'FM') {
 		if (Math.random() > 0.5) {
 			//50% FM2
 			nextMap = await getValidTournamentBeatmapFunction({
