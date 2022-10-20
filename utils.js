@@ -5562,7 +5562,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		//Check star rating
 		if (randomBeatmap.starRating > upperBound || randomBeatmap.starRating < lowerBound) {
 			beatmaps.splice(index, 1);
-			console.log('Map Selection: Star rating out of bounds');
+			console.log('Map Selection: Star rating out of bounds', randomBeatmap.starRating);
 			input.alreadyCheckedSR.push(randomBeatmap.beatmapId);
 			continue;
 		}
