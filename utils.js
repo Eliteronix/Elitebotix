@@ -5396,7 +5396,7 @@ async function getValidTournamentBeatmapFunction(input) {
 					[Op.notIn]: finalAvoidList,
 				},
 			},
-			limit: 1000,
+			limit: 2500,
 		});
 	} else if (modPool === 'HD') {
 		let HDLowerBound = lowerBound - 0.8;
@@ -5418,7 +5418,7 @@ async function getValidTournamentBeatmapFunction(input) {
 					[Op.notIn]: finalAvoidList,
 				},
 			},
-			limit: 1000,
+			limit: 2500,
 		});
 	} else if (modPool === 'HR') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -5438,7 +5438,7 @@ async function getValidTournamentBeatmapFunction(input) {
 					[Op.notIn]: finalAvoidList,
 				},
 			},
-			limit: 1000,
+			limit: 2500,
 		});
 	} else if (modPool === 'DT') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -5458,7 +5458,7 @@ async function getValidTournamentBeatmapFunction(input) {
 					[Op.notIn]: finalAvoidList,
 				},
 			},
-			limit: 1000,
+			limit: 2500,
 		});
 	} else if (modPool === 'FM') {
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -5478,7 +5478,7 @@ async function getValidTournamentBeatmapFunction(input) {
 					[Op.notIn]: finalAvoidList,
 				},
 			},
-			limit: 1000,
+			limit: 2500,
 		});
 	}
 
