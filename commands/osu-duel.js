@@ -30,7 +30,7 @@ module.exports = {
 			return msg.reply('Please use the / command `/osu-duel`');
 		}
 		if (interaction) {
-			if (interaction.options._subcommand === 'match1v1' || interaction.options._subcommand === 'match2v2') {
+			if (interaction.options._subcommand === 'match1v1' || interaction.options._subcommand === 'match2v2' || interaction.options._subcommand === 'match3v3') {
 				try {
 					await interaction.deferReply();
 				} catch (error) {
@@ -43,9 +43,13 @@ module.exports = {
 				msg = await populateMsgFromInteraction(interaction);
 
 				let opponentId = null;
-				let teammateId = null;
+				let firstTeammateId = null;
+				let secondTeammateId = null;
+				let thirdTeammateId = null;
 				let firstOpponentId = null;
 				let secondOpponentId = null;
+				let thirdOpponentId = null;
+				let fourthOpponentId = null;
 				let averageStarRating = null;
 				let onlyRanked = false;
 				let bestOf = 7;
@@ -63,12 +67,20 @@ module.exports = {
 						}
 					} else if (interaction.options._hoistedOptions[i].name === 'ranked' && interaction.options._hoistedOptions[i].value === true) {
 						onlyRanked = true;
-					} else if (interaction.options._hoistedOptions[i].name === 'teammate') {
-						teammateId = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'teammate' || interaction.options._hoistedOptions[i].name === 'firstteammate') {
+						firstTeammateId = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'secondteammate') {
+						secondTeammateId = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'thirdteammate') {
+						thirdTeammateId = interaction.options._hoistedOptions[i].value;
 					} else if (interaction.options._hoistedOptions[i].name === 'firstopponent') {
 						firstOpponentId = interaction.options._hoistedOptions[i].value;
 					} else if (interaction.options._hoistedOptions[i].name === 'secondopponent') {
 						secondOpponentId = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'thirdopponent') {
+						thirdOpponentId = interaction.options._hoistedOptions[i].value;
+					} else if (interaction.options._hoistedOptions[i].name === 'fourthopponent') {
+						fourthOpponentId = interaction.options._hoistedOptions[i].value;
 					} else if (interaction.options._hoistedOptions[i].name === 'bestof') {
 						bestOf = interaction.options._hoistedOptions[i].value;
 					}
@@ -81,7 +93,7 @@ module.exports = {
 					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect <username>`.');
 				}
 
-				if (opponentId && commandUser.userId === opponentId || firstOpponentId && commandUser.userId === firstOpponentId || secondOpponentId && commandUser.userId === secondOpponentId) {
+				if (opponentId && commandUser.userId === opponentId || firstOpponentId && commandUser.userId === firstOpponentId || secondOpponentId && commandUser.userId === secondOpponentId || thirdOpponentId && commandUser.userId === thirdOpponentId || fourthOpponentId && commandUser.userId === fourthOpponentId) {
 					return await interaction.editReply('You cannot play against yourself.');
 				}
 
