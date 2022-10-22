@@ -4283,7 +4283,7 @@ function getModsFunction(input) {
 	return mods.reverse();
 }
 
-function logDatabaseQueriesFunction(level, output) {
+async function logDatabaseQueriesFunction(level, output) {
 	//Level 5: Log rarely used queries
 	//Level 4: Log queries used in commands
 	//Level 3: Log queries used in (all) messages
@@ -4291,14 +4291,20 @@ function logDatabaseQueriesFunction(level, output) {
 	//Level 1: Log all queries
 	if (traceDatabaseQueries <= level) {
 		console.log('traceDatabaseQueries: ', new Date(), output);
+	}
 
-		// Requiring module
-		var process = require('process');
+	// Requiring module
+	var process = require('process');
 
-		// An example displaying the respective memory
-		// usages in megabytes(MB)
-		for (const [key, value] of Object.entries(process.memoryUsage())) {
-			console.log(`Memory usage by ${key}, ${value / 1000000}MB `);
+	let startTotal = process.memoryUsage().heapTotal / 1000000;
+
+	for (let i = 0; i < 10; i++) {
+		await new Promise(resolve => setTimeout(resolve, 1000));
+
+		//if 50MB increase, log it
+		if (startTotal > (process.memoryUsage().heapTotal / 1000000) + 50) {
+			console.log('traceDatabaseQueries: ', output, 'Memory usage increased by 50MB', new Date(), process.memoryUsage().heapTotal / 1000000, 'MiB in use right now');
+			break;
 		}
 	}
 }
