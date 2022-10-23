@@ -30,7 +30,7 @@ module.exports = {
 			return msg.reply('Please use the / command `/osu-duel`');
 		}
 		if (interaction) {
-			if (interaction.options._subcommand === 'match1v1' || interaction.options._subcommand === 'match2v2' || interaction.options._subcommand === 'match3v3') {
+			if (interaction.options._subcommand === 'match1v1' || interaction.options._subcommand === 'match2v2' || interaction.options._subcommand === 'match3v3' || interaction.options._subcommand === 'match4v4') {
 				try {
 					await interaction.deferReply();
 				} catch (error) {
@@ -176,86 +176,53 @@ module.exports = {
 				let lowerBound = averageStarRating - 0.125;
 				let upperBound = averageStarRating + 0.125;
 
-				if (opponentId) {
-					let sentMessage = await interaction.editReply(`<@${secondUser.userId}>, you were challenged to a duel by <@${commandUser.userId}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`);
+				let sentMessage = await interaction.editReply(`<@${commandUser.userId}> wants to play a match with <@${teammates.join('>, <@')}> against <@${opponents.join('>, <@')}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`);
 
-					let pingMessage = await interaction.channel.send(`<@${secondUser.userId}>`);
-					await sentMessage.react('✅');
-					await sentMessage.react('❌');
-					pingMessage.delete();
-					//Await for the user to react with a checkmark
-					const filter = (reaction, user) => {
-						return ['✅', '❌'].includes(reaction.emoji.name) && user.id === secondUser.userId;
-					};
+				let pingMessage = await interaction.channel.send(`<@${teammates.join('>, <@')}>, <@${opponents.join('>, <@')}>`);
+				await sentMessage.react('✅');
+				await sentMessage.react('❌');
+				pingMessage.delete();
 
-					let responded = await sentMessage.awaitReactions({ filter, max: 1, time: 120000, errors: ['time'] })
-						.then(collected => {
-							const reaction = collected.first();
+				let responded = false;
+				let accepted = [];
+				let declined = false;
+				let decliner = null;
 
-							if (reaction.emoji.name === '✅') {
-								return true;
-							} else {
-								return false;
+				const collector = sentMessage.createReactionCollector({ time: 120000 });
+
+				collector.on('collect', (reaction, user) => {
+					if (reaction.emoji.name === '✅' && [...teammates, ...opponents].includes(user.id)) {
+						if (!accepted.includes(user.id)) {
+							accepted.push(user.id);
+
+							if (accepted.length === teammates.length + opponents.length) {
+								collector.stop();
 							}
-						})
-						.catch(() => {
-							return false;
-						});
-
-					sentMessage.reactions.removeAll().catch(() => { });
-
-					if (!responded) {
-						return await interaction.editReply(`<@${secondUser.userId}> declined or didn't respond in time.`);
+						}
+					} else if (reaction.emoji.name === '❌' && [...teammates, ...opponents].includes(user.id)) {
+						decliner = user.id;
+						collector.stop();
 					}
-				} else {
-					let sentMessage = await interaction.editReply(`<@${commandUser.userId}> wants to play a match with <@${secondUser.userId}> against <@${thirdUser.userId}> and <@${fourthUser.userId}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`);
+				});
 
-					let pingMessage = await interaction.channel.send(`<@${secondUser.userId}>, <@${thirdUser.userId}>, <@${fourthUser.userId}>`);
-					await sentMessage.react('✅');
-					await sentMessage.react('❌');
-					pingMessage.delete();
-
-					let responded = false;
-					let accepted = [];
-					let declined = false;
-					let decliner = null;
-
-					const collector = sentMessage.createReactionCollector({ time: 120000 });
-
-					collector.on('collect', (reaction, user) => {
-						if (reaction.emoji.name === '✅' && [secondUser.userId, thirdUser.userId, fourthUser.userId].includes(user.id)) {
-							if (!accepted.includes(user.id)) {
-								accepted.push(user.id);
-
-								if (accepted.length === 3) {
-									collector.stop();
-								}
-							}
-						} else if (reaction.emoji.name === '❌' && [secondUser.userId, thirdUser.userId, fourthUser.userId].includes(user.id)) {
-							decliner = user.id;
-							collector.stop();
-						}
-					});
-
-					collector.on('end', () => {
-						if (accepted.length < 3) {
-							declined = true;
-						}
-						responded = true;
-					});
-
-					while (!responded) {
-						await pause(1000);
+				collector.on('end', () => {
+					if (accepted.length < teammates.length + opponents.length) {
+						declined = true;
 					}
+					responded = true;
+				});
 
-					sentMessage.reactions.removeAll().catch(() => { });
+				while (!responded) {
+					await pause(1000);
+				}
 
-					if (declined) {
-						if (decliner) {
-							return await interaction.editReply(`<@${decliner}> declined.`);
-						} else {
-							return await interaction.editReply('Someone didn\'t respond in time.');
-						}
+				sentMessage.reactions.removeAll().catch(() => { });
+
+				if (declined) {
+					if (decliner) {
+						return await interaction.editReply(`<@${decliner}> declined.`);
+					} else {
+						return await interaction.editReply('Someone didn\'t respond in time.');
 					}
 				}
 
@@ -269,24 +236,18 @@ module.exports = {
 				for (let i = 0; i < existingQueueTasks.length; i++) {
 					const osuUserId = existingQueueTasks[i].additions.split(';')[0];
 
-					if (commandUser && osuUserId === commandUser.osuUserId) {
-						await existingQueueTasks[i].destroy();
-						await interaction.followUp(`<@${commandUser.userId}> you have been removed from the queue for a 1v1 duel.`);
-					} else if (secondUser && osuUserId === secondUser.osuUserId) {
-						await existingQueueTasks[i].destroy();
-						await interaction.followUp(`<@${secondUser.userId}> you have been removed from the queue for a 1v1 duel.`);
-					} else if (thirdUser && osuUserId === thirdUser.osuUserId) {
-						await existingQueueTasks[i].destroy();
-						await interaction.followUp(`<@${thirdUser.userId}> you have been removed from the queue for a 1v1 duel.`);
-					} else if (fourthUser && osuUserId === fourthUser.osuUserId) {
-						await existingQueueTasks[i].destroy();
-						await interaction.followUp(`<@${fourthUser.userId}> you have been removed from the queue for a 1v1 duel.`);
+					for (let j = 0; j < everyUser.length; j++) {
+						if (everyUser[j].osuUserId === osuUserId) {
+							await existingQueueTasks[i].destroy();
+							await interaction.followUp(`<@${everyUser[j].userId}> you have been removed from the queue for a 1v1 duel.`);
+							break;
+						}
 					}
 				}
 
 				updateQueueChannels(interaction.client);
 
-				createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, commandUser, secondUser, thirdUser, fourthUser);
+				createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, everyUser);
 			} else if (interaction.options._subcommand === 'rating') {
 				let processingMessage = null;
 				if (interaction.id) {

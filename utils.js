@@ -1371,7 +1371,7 @@ module.exports = {
 	calculateGrade(mode, counts, modBits) {
 		return calculateGradeFunction(mode, counts, modBits);
 	},
-	async createDuelMatch(client, bancho, interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, firstUser, secondUser, thirdUser, fourthUser) {
+	async createDuelMatch(client, bancho, interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, users) {
 		if (interaction) {
 			await interaction.editReply('Duel has been accepted. Getting necessary data...');
 		}
