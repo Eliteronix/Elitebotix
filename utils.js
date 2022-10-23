@@ -4301,9 +4301,9 @@ async function logDatabaseQueriesFunction(level, output) {
 	for (let i = 0; i < 10; i++) {
 		await new Promise(resolve => setTimeout(resolve, 1000));
 
-		//if 50MB increase, log it
-		if (startTotal > (process.memoryUsage().heapTotal / 1000000) + 50) {
-			console.log('traceDatabaseQueries: ', output, 'Memory usage increased by 50MB', new Date(), process.memoryUsage().heapTotal / 1000000, 'MiB in use right now');
+		//if 50MiB increase, log it
+		if (startTotal > (process.memoryUsage().heapTotal / 1000000) + 250) {
+			console.log('traceDatabaseQueries: ', output, 'Memory usage increased by 250MB', new Date(), process.memoryUsage().heapTotal / 1000000, 'MiB in use right now');
 			break;
 		}
 	}
