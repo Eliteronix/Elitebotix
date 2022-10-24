@@ -1376,6 +1376,12 @@ module.exports = {
 			await interaction.editReply('Duel has been accepted. Getting necessary data...');
 		}
 
+		// Get the maps to avoid
+		// Remove all maps played in the last 3 months
+		// Remove all maps that have been played but not by all players
+		let beatmapIds = [];
+		let beatmaps = [];
+
 		let avoidMaps = [];
 		let threeMonthsAgo = new Date();
 		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
@@ -1398,88 +1404,24 @@ module.exports = {
 				}
 			});
 
-			users[i].playedBeatmapIds = [];
-
 			for (let j = 0; j < playerScores.length; j++) {
 				if (playerScores[j].gameStartDate > threeMonthsAgo && !avoidMaps.includes(playerScores[j].beatmapId)) {
 					avoidMaps.push(playerScores[j].beatmapId);
 				}
-				users[i].playedBeatmapIds.push(playerScores[j].beatmapId);
-			}
-		}
 
-		//Add all maps that have not been played by everyone to avoidMaps
-		for (let i = 0; i < player1Scores.length; i++) {
-			if (!player2Scores.includes(player1Scores[i]) && !avoidMaps.includes(player1Scores[i])) {
-				avoidMaps.push(player1Scores[i]);
-				continue;
-			}
-
-			if (thirdUser) {
-				if (!player3Scores.includes(player1Scores[i]) && !avoidMaps.includes(player1Scores[i])) {
-					avoidMaps.push(player1Scores[i]);
-					continue;
-				}
-
-				if (!player4Scores.includes(player1Scores[i]) && !avoidMaps.includes(player1Scores[i])) {
-					avoidMaps.push(player1Scores[i]);
-					continue;
+				if (beatmapIds.includes(playerScores[j].beatmapId)) {
+					beatmaps[beatmapIds.indexOf(playerScores[j].beatmapId)].count++;
+				} else {
+					beatmapIds.push(playerScores[j].beatmapId);
+					beatmaps.push({ beatmapId: playerScores[j].beatmapId, count: 1 });
 				}
 			}
 		}
 
-		for (let i = 0; i < player2Scores.length; i++) {
-			if (!player1Scores.includes(player2Scores[i]) && !avoidMaps.includes(player2Scores[i])) {
-				avoidMaps.push(player2Scores[i]);
-				continue;
-			}
-
-			if (thirdUser) {
-				if (!player3Scores.includes(player2Scores[i]) && !avoidMaps.includes(player2Scores[i])) {
-					avoidMaps.push(player2Scores[i]);
-					continue;
-				}
-
-				if (!player4Scores.includes(player2Scores[i]) && !avoidMaps.includes(player2Scores[i])) {
-					avoidMaps.push(player2Scores[i]);
-					continue;
-				}
-			}
-		}
-
-		if (thirdUser) {
-			for (let i = 0; i < player3Scores.length; i++) {
-				if (!player1Scores.includes(player3Scores[i]) && !avoidMaps.includes(player3Scores[i])) {
-					avoidMaps.push(player3Scores[i]);
-					continue;
-				}
-
-				if (!player2Scores.includes(player3Scores[i]) && !avoidMaps.includes(player3Scores[i])) {
-					avoidMaps.push(player3Scores[i]);
-					continue;
-				}
-
-				if (!player4Scores.includes(player3Scores[i]) && !avoidMaps.includes(player3Scores[i])) {
-					avoidMaps.push(player3Scores[i]);
-					continue;
-				}
-			}
-
-			for (let i = 0; i < player4Scores.length; i++) {
-				if (!player1Scores.includes(player4Scores[i]) && !avoidMaps.includes(player4Scores[i])) {
-					avoidMaps.push(player4Scores[i]);
-					continue;
-				}
-
-				if (!player2Scores.includes(player4Scores[i]) && !avoidMaps.includes(player4Scores[i])) {
-					avoidMaps.push(player4Scores[i]);
-					continue;
-				}
-
-				if (!player3Scores.includes(player4Scores[i]) && !avoidMaps.includes(player4Scores[i])) {
-					avoidMaps.push(player4Scores[i]);
-					continue;
-				}
+		// Remove all maps that have not been played by all players
+		for (let i = 0; i < beatmaps.length; i++) {
+			if (beatmaps[i].count < users.length && !avoidMaps.includes(beatmaps[i].beatmapId)) {
+				avoidMaps.push(beatmaps[i].beatmapId);
 			}
 		}
 
