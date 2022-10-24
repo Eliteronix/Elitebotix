@@ -61,8 +61,8 @@ module.exports = {
 				// Get the star rating
 				let averageStarRating = null;
 
-				if (interaction.options.getFloat('starrating')) {
-					averageStarRating = interaction.options.getFloat('starrating');
+				if (interaction.options.getNumber('starrating')) {
+					averageStarRating = interaction.options.getNumber('starrating');
 
 					if (averageStarRating < 3) {
 						return await interaction.editReply('You can\'t play a match with a star rating lower than 3');
