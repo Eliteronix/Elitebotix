@@ -1662,23 +1662,22 @@ module.exports = {
 
 			let scoreTeam1 = 0;
 			let scoreTeam2 = 0;
-			if (!thirdUser) {
-				for (let i = 0; i < results.length; i++) {
-					if (playerIds[0] == results[i].player.user.id) {
-						scoreTeam1 = + parseFloat(results[i].score);
-					} else if (playerIds[1] == results[i].player.user.id) {
-						scoreTeam2 = + parseFloat(results[i].score);
-					}
-				}
-			} else {
-				for (let i = 0; i < results.length; i++) {
-					if (playerIds[0] == results[i].player.user.id || playerIds[1] == results[i].player.user.id) {
-						scoreTeam1 = scoreTeam1 + parseFloat(results[i].score);
-					} else if (playerIds[2] == results[i].player.user.id || playerIds[3] == results[i].player.user.id) {
-						scoreTeam2 = scoreTeam2 + parseFloat(results[i].score);
-					}
+
+			//If the player is in the first team add to team 1, otherwise add to team 2
+			//Create a helper array with the first half of the players
+			let firstTeam = [];
+			for (let i = 0; i < playerIds.length / 2; i++) {
+				firstTeam.push(playerIds[i]);
+			}
+
+			for (let i = 0; i < results.length; i++) {
+				if (firstTeam.includes(results[i].player.user.id.toString())) {
+					scoreTeam1 = + parseFloat(results[i].score);
+				} else {
+					scoreTeam2 = + parseFloat(results[i].score);
 				}
 			}
+
 			if (results.length) {
 				let winner = teamname1;
 
