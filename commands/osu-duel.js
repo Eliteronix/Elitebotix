@@ -152,19 +152,16 @@ module.exports = {
 							}
 						}
 						everyUser.push(discordUser);
-						starRatings.push(starRating);
+						starRatings.push(starRating.total);
 					} else {
 						return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
 					}
 				}
 
-				console.log(starRatings);
-
 				if (!averageStarRating) {
 					let totalStarRating = 0;
 					for (let i = 0; i < starRatings.length; i++) {
 						totalStarRating += starRatings[i];
-						console.log(totalStarRating);
 					}
 					averageStarRating = totalStarRating / starRatings.length;
 				}
