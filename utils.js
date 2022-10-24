@@ -1523,15 +1523,7 @@ module.exports = {
 		//Start the timer to close the lobby if not everyone joined by then
 		await channel.sendMessage('!mp timer 300');
 
-		let playerIds = [firstUser.osuUserId, secondUser.osuUserId];
-		let dbPlayers = [firstUser, secondUser];
-		if (thirdUser) {
-			//Push the other 2 users aswell
-			playerIds.push(thirdUser.osuUserId);
-			playerIds.push(fourthUser.osuUserId);
-			dbPlayers.push(thirdUser);
-			dbPlayers.push(fourthUser);
-		}
+		let playerIds = users.map(user => user.osuUserId);
 		let scores = [0, 0];
 
 		//Add discord messages and also ingame invites for the timers
@@ -1560,8 +1552,8 @@ module.exports = {
 				channel.sendMessage(`!mp kick #${obj.player.user.id}`);
 			} else if (lobbyStatus === 'Joining phase') {
 				let allPlayersJoined = true;
-				for (let i = 0; i < dbPlayers.length && allPlayersJoined; i++) {
-					if (!lobby.playersById[dbPlayers[i].osuUserId.toString()]) {
+				for (let i = 0; i < users.length && allPlayersJoined; i++) {
+					if (!lobby.playersById[users[i].osuUserId.toString()]) {
 						allPlayersJoined = false;
 					}
 				}
@@ -1624,7 +1616,7 @@ module.exports = {
 					playersInLobby++;
 				}
 			}
-			if (lobbyStatus === 'Waiting for start' && playersInLobby === dbPlayers.length) {
+			if (lobbyStatus === 'Waiting for start' && playersInLobby === users.length) {
 				await channel.sendMessage('!mp start 5');
 				await new Promise(resolve => setTimeout(resolve, 30000));
 				await channel.sendMessage('!mp aborttimer');
@@ -1803,110 +1795,29 @@ module.exports = {
 
 						await new Promise(resolve => setTimeout(resolve, 15000));
 
-						let userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: firstUser.osuUserId, client: client });
-						let messages = ['Your SR has been updated!'];
-						if (Math.round(firstUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
-							messages.push(`SR: ${Math.round(firstUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
-						}
-						if (Math.round(firstUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
-							messages.push(`NM: ${Math.round(firstUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
-						}
-						if (Math.round(firstUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
-							messages.push(`HD: ${Math.round(firstUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
-						}
-						if (Math.round(firstUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
-							messages.push(`HR: ${Math.round(firstUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
-						}
-						if (Math.round(firstUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
-							messages.push(`DT: ${Math.round(firstUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
-						}
-						if (Math.round(firstUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
-							messages.push(`FM: ${Math.round(firstUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
-						}
-						if (messages.length > 1) {
-							const IRCUser = await bancho.getUser(firstUser.osuName);
-							for (let i = 0; i < messages.length; i++) {
-								await IRCUser.sendMessage(messages[i]);
+						for (let i = 0; i < users.length; i++) {
+							let userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: users[i].osuUserId, client: client });
+							let messages = ['Your SR has been updated!'];
+							if (Math.round(users[i].osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
+								messages.push(`SR: ${Math.round(users[i].osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
 							}
-						}
-
-						userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: secondUser.osuUserId, client: client });
-						messages = ['Your SR has been updated!'];
-						if (Math.round(secondUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
-							messages.push(`SR: ${Math.round(secondUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
-						}
-						if (Math.round(secondUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
-							messages.push(`NM: ${Math.round(secondUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
-						}
-						if (Math.round(secondUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
-							messages.push(`HD: ${Math.round(secondUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
-						}
-						if (Math.round(secondUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
-							messages.push(`HR: ${Math.round(secondUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
-						}
-						if (Math.round(secondUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
-							messages.push(`DT: ${Math.round(secondUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
-						}
-						if (Math.round(secondUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
-							messages.push(`FM: ${Math.round(secondUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
-						}
-						if (messages.length > 1) {
-							const IRCUser = await bancho.getUser(secondUser.osuName);
-							for (let i = 0; i < messages.length; i++) {
-								await IRCUser.sendMessage(messages[i]);
+							if (Math.round(users[i].osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
+								messages.push(`NM: ${Math.round(users[i].osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
 							}
-						}
-
-						if (thirdUser) {
-							userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: thirdUser.osuUserId, client: client });
-							messages = ['Your SR has been updated!'];
-							if (Math.round(thirdUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
-								messages.push(`SR: ${Math.round(thirdUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
+							if (Math.round(users[i].osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
+								messages.push(`HD: ${Math.round(users[i].osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
 							}
-							if (Math.round(thirdUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
-								messages.push(`NM: ${Math.round(thirdUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
+							if (Math.round(users[i].osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
+								messages.push(`HR: ${Math.round(users[i].osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
 							}
-							if (Math.round(thirdUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
-								messages.push(`HD: ${Math.round(thirdUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
+							if (Math.round(users[i].osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
+								messages.push(`DT: ${Math.round(users[i].osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
 							}
-							if (Math.round(thirdUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
-								messages.push(`HR: ${Math.round(thirdUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
-							}
-							if (Math.round(thirdUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
-								messages.push(`DT: ${Math.round(thirdUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
-							}
-							if (Math.round(thirdUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
-								messages.push(`FM: ${Math.round(thirdUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
+							if (Math.round(users[i].osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
+								messages.push(`FM: ${Math.round(users[i].osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
 							}
 							if (messages.length > 1) {
-								const IRCUser = await bancho.getUser(thirdUser.osuName);
-								for (let i = 0; i < messages.length; i++) {
-									await IRCUser.sendMessage(messages[i]);
-								}
-							}
-
-							userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: fourthUser.osuUserId, client: client });
-							messages = ['Your SR has been updated!'];
-							if (Math.round(fourthUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
-								messages.push(`SR: ${Math.round(fourthUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
-							}
-							if (Math.round(fourthUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
-								messages.push(`NM: ${Math.round(fourthUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
-							}
-							if (Math.round(fourthUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
-								messages.push(`HD: ${Math.round(fourthUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
-							}
-							if (Math.round(fourthUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
-								messages.push(`HR: ${Math.round(fourthUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
-							}
-							if (Math.round(fourthUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
-								messages.push(`DT: ${Math.round(fourthUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
-							}
-							if (Math.round(fourthUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
-								messages.push(`FM: ${Math.round(fourthUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
-							}
-							if (messages.length > 1) {
-								const IRCUser = await bancho.getUser(fourthUser.osuName);
+								const IRCUser = await bancho.getUser(users[i].osuName);
 								for (let i = 0; i < messages.length; i++) {
 									await IRCUser.sendMessage(messages[i]);
 								}
