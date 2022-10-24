@@ -1473,7 +1473,7 @@ module.exports = {
 					}
 				}
 				// console.log('Duel Match: Creating match');
-				if (!thirdUser) {
+				if (users.length === 2) {
 					channel = await bancho.createLobby(`ETX: (${teamname1}) vs (${teamname2})`);
 				} else {
 					channel = await bancho.createLobby(`ETX Teams: (${teamname1}) vs (${teamname2})`);
