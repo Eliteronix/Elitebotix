@@ -1501,11 +1501,8 @@ module.exports = {
 		await lobby.setPassword(password);
 		await channel.sendMessage('!mp addref Eliteronix');
 		await channel.sendMessage('!mp map 975342 0');
-		if (!thirdUser) {
-			await channel.sendMessage('!mp set 0 3 2');
-		} else {
-			await channel.sendMessage('!mp set 0 3 4');
-		}
+		await channel.sendMessage(`!mp set 0 3 ${users.length}`);
+
 
 		let lobbyStatus = 'Joining phase';
 		let mapIndex = 0;
