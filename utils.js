@@ -1450,12 +1450,22 @@ module.exports = {
 		//Set up the lobby
 		let channel = null;
 
-		let teamname1 = firstUser.osuName;
-		let teamname2 = secondUser.osuName;
+		let team1 = [];
+		let team2 = [];
+		let teamname1 = '';
+		let teamname2 = '';
 
-		if (thirdUser) {
-			teamname1 = `${firstUser.osuName.substring(0, firstUser.osuName.length / 2)}${secondUser.osuName.substring(secondUser.osuName.length / 2, secondUser.osuName.length)}`;
-			teamname2 = `${thirdUser.osuName.substring(0, thirdUser.osuName.length / 2)}${fourthUser.osuName.substring(fourthUser.osuName.length / 2, fourthUser.osuName.length)}`;
+		for (let i = 0; i < users.length; i++) {
+			let perTeamIterator = i % users.length;
+			let teamSize = users.length / 2;
+
+			if (i < teamSize) {
+				team1.push(users[i]);
+				teamname1 += users[i].osuUsername.substring(Math.floor(users[i].osuUsername.length / teamSize * perTeamIterator), Math.floor(users[i].osuUsername.length / teamSize));
+			} else {
+				team2.push(users[i]);
+				teamname2 += users[i].osuUsername.substring(Math.floor(users[i].osuUsername.length / teamSize * perTeamIterator), Math.floor(users[i].osuUsername.length / teamSize));
+			}
 		}
 
 		if (interaction) {
@@ -1665,10 +1675,7 @@ module.exports = {
 
 			//If the player is in the first team add to team 1, otherwise add to team 2
 			//Create a helper array with the first half of the players
-			let firstTeam = [];
-			for (let i = 0; i < playerIds.length / 2; i++) {
-				firstTeam.push(playerIds[i]);
-			}
+			let firstTeam = team1.map(user => user.osuUserId);
 
 			for (let i = 0; i < results.length; i++) {
 				if (firstTeam.includes(results[i].player.user.id.toString())) {
