@@ -1507,21 +1507,9 @@ module.exports = {
 		let lobbyStatus = 'Joining phase';
 		let mapIndex = 0;
 
-		await channel.sendMessage(`!mp invite #${firstUser.osuUserId}`);
-		let user = await client.users.fetch(firstUser.userId);
-		await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
-
-		await channel.sendMessage(`!mp invite #${secondUser.osuUserId}`);
-		user = await client.users.fetch(secondUser.userId);
-		await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
-
-		if (thirdUser) {
-			await channel.sendMessage(`!mp invite #${thirdUser.osuUserId}`);
-			let user = await client.users.fetch(thirdUser.userId);
-			await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
-
-			await channel.sendMessage(`!mp invite #${fourthUser.osuUserId}`);
-			user = await client.users.fetch(fourthUser.userId);
+		for (let i = 0; i < users.length; i++) {
+			await channel.sendMessage(`!mp invite #${users[i].osuUserId}`);
+			let user = await client.users.fetch(users[i].userId);
 			await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 		}
 
