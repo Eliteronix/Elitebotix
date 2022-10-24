@@ -75,44 +75,44 @@ module.exports = {
 				// Get the teammates
 				let teammates = [];
 
-				if (interaction.options.getString('teammate')) {
-					teammates.push(interaction.options.getString('teammate'));
+				if (interaction.options.getUser('teammate')) {
+					teammates.push(interaction.options.getUser('teammate').userId);
 				}
 
-				if (interaction.options.getString('firstteammate')) {
-					teammates.push(interaction.options.getString('firstteammate'));
+				if (interaction.options.getUser('firstteammate')) {
+					teammates.push(interaction.options.getUser('firstteammate').userId);
 				}
 
-				if (interaction.options.getString('secondteammate')) {
-					teammates.push(interaction.options.getString('secondteammate'));
+				if (interaction.options.getUser('secondteammate')) {
+					teammates.push(interaction.options.getUser('secondteammate').userId);
 				}
 
-				if (interaction.options.getString('thirdteammate')) {
-					teammates.push(interaction.options.getString('thirdteammate'));
+				if (interaction.options.getUser('thirdteammate')) {
+					teammates.push(interaction.options.getUser('thirdteammate').userId);
 				}
 				console.log(teammates);
 
 				// Get the opponents
 				let opponents = [];
 
-				if (interaction.options.getString('opponent')) {
-					opponents.push(interaction.options.getString('opponent'));
+				if (interaction.options.getUser('opponent')) {
+					opponents.push(interaction.options.getUser('opponent').userId);
 				}
 
-				if (interaction.options.getString('firstopponent')) {
-					opponents.push(interaction.options.getString('firstopponent'));
+				if (interaction.options.getUser('firstopponent')) {
+					opponents.push(interaction.options.getUser('firstopponent').userId);
 				}
 
-				if (interaction.options.getString('secondopponent')) {
-					opponents.push(interaction.options.getString('secondopponent'));
+				if (interaction.options.getUser('secondopponent')) {
+					opponents.push(interaction.options.getUser('secondopponent').userId);
 				}
 
-				if (interaction.options.getString('thirdopponent')) {
-					opponents.push(interaction.options.getString('thirdopponent'));
+				if (interaction.options.getUser('thirdopponent')) {
+					opponents.push(interaction.options.getUser('thirdopponent').userId);
 				}
 
-				if (interaction.options.getString('fourthopponent')) {
-					opponents.push(interaction.options.getString('fourthopponent'));
+				if (interaction.options.getUser('fourthopponent')) {
+					opponents.push(interaction.options.getUser('fourthopponent').userId);
 				}
 				console.log(opponents);
 
