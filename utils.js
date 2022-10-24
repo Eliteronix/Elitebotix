@@ -1456,8 +1456,8 @@ module.exports = {
 		let teamname2 = '';
 
 		for (let i = 0; i < users.length; i++) {
-			let perTeamIterator = i % users.length;
 			let teamSize = users.length / 2;
+			let perTeamIterator = i % teamSize;
 
 			if (i < teamSize) {
 				team1.push(users[i]);
