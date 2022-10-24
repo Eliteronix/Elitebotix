@@ -882,7 +882,7 @@ module.exports = {
 			// 					{
 			// 						'name': 'bestof',
 			// 						'description': 'The best of for the match.',
-			// 						'type': 10, // 10 is type NUMBER
+			// 						'type': 4, // 4 is type INTEGER
 			// 						'choices': [
 			// 							{
 			// 								'name': 'Best of 13',
@@ -962,7 +962,7 @@ module.exports = {
 			// 					{
 			// 						'name': 'bestof',
 			// 						'description': 'The best of for the match.',
-			// 						'type': 10, // 10 is type NUMBER
+			// 						'type': 4, // 4 is type INTEGER
 			// 						'choices': [
 			// 							{
 			// 								'name': 'Best of 13',
@@ -1044,7 +1044,7 @@ module.exports = {
 			// 					{
 			// 						'name': 'bestof',
 			// 						'description': 'The best of for the match.',
-			// 						'type': 10, // 10 is type NUMBER
+			// 						'type': 4, // 4 is type INTEGER
 			// 						'choices': [
 			// 							{
 			// 								'name': 'Best of 13',
@@ -4957,7 +4957,7 @@ module.exports = {
 								{
 									'name': 'bestof',
 									'description': 'The best of for the match.',
-									'type': 10, // 10 is type NUMBER
+									'type': 4, // 4 is type INTEGER
 									'choices': [
 										{
 											'name': 'Best of 13',
@@ -5037,7 +5037,7 @@ module.exports = {
 								{
 									'name': 'bestof',
 									'description': 'The best of for the match.',
-									'type': 10, // 10 is type NUMBER
+									'type': 4, // 4 is type INTEGER
 									'choices': [
 										{
 											'name': 'Best of 13',
@@ -5119,7 +5119,7 @@ module.exports = {
 								{
 									'name': 'bestof',
 									'description': 'The best of for the match.',
-									'type': 10, // 10 is type NUMBER
+									'type': 4, // 4 is type INTEGER
 									'choices': [
 										{
 											'name': 'Best of 13',
