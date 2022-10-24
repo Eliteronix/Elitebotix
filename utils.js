@@ -1380,60 +1380,12 @@ module.exports = {
 		let threeMonthsAgo = new Date();
 		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-		logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 1 scores');
-		const player1Scores = await DBOsuMultiScores.findAll({
-			where: {
-				osuUserId: firstUser.osuUserId,
-				tourneyMatch: true,
-				matchName: {
-					[Op.notLike]: 'MOTD:%',
-				},
-				mode: 'Standard',
-				[Op.or]: [
-					{ warmup: false },
-					{ warmup: null }
-				],
-			}
-		});
+		for (let i = 0; i < users.length; i++) {
+			logDatabaseQueriesFunction(4, 'utils.js createDuelMatch DBOsuMultiScores player scores');
 
-		for (let i = 0; i < player1Scores.length; i++) {
-			if (player1Scores[i].gameStartDate > threeMonthsAgo && !avoidMaps.includes(player1Scores[i].beatmapId)) {
-				avoidMaps.push(player1Scores[i].beatmapId);
-			}
-			player1Scores[i] = player1Scores[i].beatmapId;
-		}
-
-		logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 2 scores');
-		const player2Scores = await DBOsuMultiScores.findAll({
-			where: {
-				osuUserId: secondUser.osuUserId,
-				tourneyMatch: true,
-				matchName: {
-					[Op.notLike]: 'MOTD:%',
-				},
-				mode: 'Standard',
-				[Op.or]: [
-					{ warmup: false },
-					{ warmup: null }
-				],
-			}
-		});
-
-		for (let i = 0; i < player2Scores.length; i++) {
-			if (player2Scores[i].gameStartDate > threeMonthsAgo && !avoidMaps.includes(player2Scores[i].beatmapId)) {
-				avoidMaps.push(player2Scores[i].beatmapId);
-			}
-			player2Scores[i] = player2Scores[i].beatmapId;
-		}
-
-		let player3Scores = null;
-		let player4Scores = null;
-
-		if (thirdUser) {
-			logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 2 scores');
-			player3Scores = await DBOsuMultiScores.findAll({
+			const playerScores = await DBOsuMultiScores.findAll({
 				where: {
-					osuUserId: thirdUser.osuUserId,
+					osuUserId: users[i].osuUserId,
 					tourneyMatch: true,
 					matchName: {
 						[Op.notLike]: 'MOTD:%',
@@ -1446,34 +1398,13 @@ module.exports = {
 				}
 			});
 
-			for (let i = 0; i < player3Scores.length; i++) {
-				if (player3Scores[i].gameStartDate > threeMonthsAgo && !avoidMaps.includes(player3Scores[i].beatmapId)) {
-					avoidMaps.push(player3Scores[i].beatmapId);
-				}
-				player3Scores[i] = player3Scores[i].beatmapId;
-			}
+			users[i].playedBeatmapIds = [];
 
-			logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 2 scores');
-			player4Scores = await DBOsuMultiScores.findAll({
-				where: {
-					osuUserId: fourthUser.osuUserId,
-					tourneyMatch: true,
-					matchName: {
-						[Op.notLike]: 'MOTD:%',
-					},
-					mode: 'Standard',
-					[Op.or]: [
-						{ warmup: false },
-						{ warmup: null }
-					],
+			for (let j = 0; j < playerScores.length; j++) {
+				if (playerScores[j].gameStartDate > threeMonthsAgo && !avoidMaps.includes(playerScores[j].beatmapId)) {
+					avoidMaps.push(playerScores[j].beatmapId);
 				}
-			});
-
-			for (let i = 0; i < player4Scores.length; i++) {
-				if (player4Scores[i].gameStartDate > threeMonthsAgo && !avoidMaps.includes(player4Scores[i].beatmapId)) {
-					avoidMaps.push(player4Scores[i].beatmapId);
-				}
-				player4Scores[i] = player4Scores[i].beatmapId;
+				users[i].playedBeatmapIds.push(playerScores[j].beatmapId);
 			}
 		}
 
