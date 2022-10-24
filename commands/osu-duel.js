@@ -48,7 +48,6 @@ module.exports = {
 				if (interaction.options.getInteger('bestof')) {
 					bestOf = interaction.options.getInteger('bestof');
 				}
-				console.log(bestOf);
 
 				// Get the ranked flag
 				let onlyRanked = false;
@@ -56,7 +55,6 @@ module.exports = {
 				if (interaction.options.getBoolean('ranked')) {
 					onlyRanked = interaction.options.getBoolean('ranked');
 				}
-				console.log(onlyRanked);
 
 				// Get the star rating
 				let averageStarRating = null;
@@ -70,7 +68,6 @@ module.exports = {
 						return await interaction.editReply('You can\'t play a match with a star rating higher than 10');
 					}
 				}
-				console.log(averageStarRating);
 
 				// Get the teammates
 				let teammates = [];
@@ -90,7 +87,6 @@ module.exports = {
 				if (interaction.options.getUser('thirdteammate')) {
 					teammates.push(interaction.options.getUser('thirdteammate').id);
 				}
-				console.log(teammates);
 
 				// Get the opponents
 				let opponents = [];
@@ -114,7 +110,6 @@ module.exports = {
 				if (interaction.options.getUser('fourthopponent')) {
 					opponents.push(interaction.options.getUser('fourthopponent').id);
 				}
-				console.log(opponents);
 
 				const commandConfig = await getOsuUserServerMode(msg, []);
 				const commandUser = commandConfig[0];
@@ -127,8 +122,6 @@ module.exports = {
 				const allUsers = [commandUser.userId, ...teammates, ...opponents];
 				const uniqueUsers = [...new Set(allUsers)];
 				const everyUser = [];
-
-				console.log(uniqueUsers);
 
 				if (allUsers.length !== uniqueUsers.length) {
 					return await interaction.editReply('You can\'t play a match with the same user twice');
@@ -165,10 +158,13 @@ module.exports = {
 					}
 				}
 
+				console.log(starRatings);
+
 				if (!averageStarRating) {
 					let totalStarRating = 0;
 					for (let i = 0; i < starRatings.length; i++) {
 						totalStarRating += starRatings[i];
+						console.log(totalStarRating);
 					}
 					averageStarRating = totalStarRating / starRatings.length;
 				}
