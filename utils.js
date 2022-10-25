@@ -1648,6 +1648,7 @@ module.exports = {
 					}
 				}
 			}
+
 			if (modPools[mapIndex] === 'FreeMod' && mapIndex < bestOf - 1) {
 				for (let i = 0; i < results.length; i++) {
 					//Reduce the score by 0.5 if it was FreeMod and no mods / only nofail was picked
@@ -1678,10 +1679,11 @@ module.exports = {
 			let firstTeam = team1.map(user => user.osuUserId);
 
 			for (let i = 0; i < results.length; i++) {
+				console.log(i);
 				if (firstTeam.includes(results[i].player.user.id.toString())) {
-					scoreTeam1 = + parseFloat(results[i].score);
+					scoreTeam1 += parseFloat(results[i].score);
 				} else {
-					scoreTeam2 = + parseFloat(results[i].score);
+					scoreTeam2 += parseFloat(results[i].score);
 				}
 			}
 
