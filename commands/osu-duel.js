@@ -30,7 +30,7 @@ module.exports = {
 			return msg.reply('Please use the / command `/osu-duel`');
 		}
 		if (interaction) {
-			if (interaction.options._subcommand === 'match1v1' || interaction.options._subcommand === 'match2v2') {
+			if (interaction.options._subcommand === 'match1v1' || interaction.options._subcommand === 'match2v2' || interaction.options._subcommand === 'match3v3' || interaction.options._subcommand === 'match4v4') {
 				try {
 					await interaction.deferReply();
 				} catch (error) {
@@ -39,39 +39,76 @@ module.exports = {
 					}
 					return;
 				}
-				//Get the star ratings for both users
+
 				msg = await populateMsgFromInteraction(interaction);
 
-				let opponentId = null;
-				let teammateId = null;
-				let firstOpponentId = null;
-				let secondOpponentId = null;
-				let averageStarRating = null;
-				let onlyRanked = false;
+				// Get the best of
 				let bestOf = 7;
 
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					if (interaction.options._hoistedOptions[i].name === 'opponent') {
-						opponentId = interaction.options._hoistedOptions[i].value;
-					} else if (interaction.options._hoistedOptions[i].name === 'starrating') {
-						averageStarRating = interaction.options._hoistedOptions[i].value;
+				if (interaction.options.getInteger('bestof')) {
+					bestOf = interaction.options.getInteger('bestof');
+				}
 
-						if (averageStarRating < 3) {
-							return await interaction.editReply('You can\'t play a match with a star rating lower than 3');
-						} else if (averageStarRating > 10) {
-							return await interaction.editReply('You can\'t play a match with a star rating higher than 10');
-						}
-					} else if (interaction.options._hoistedOptions[i].name === 'ranked' && interaction.options._hoistedOptions[i].value === true) {
-						onlyRanked = true;
-					} else if (interaction.options._hoistedOptions[i].name === 'teammate') {
-						teammateId = interaction.options._hoistedOptions[i].value;
-					} else if (interaction.options._hoistedOptions[i].name === 'firstopponent') {
-						firstOpponentId = interaction.options._hoistedOptions[i].value;
-					} else if (interaction.options._hoistedOptions[i].name === 'secondopponent') {
-						secondOpponentId = interaction.options._hoistedOptions[i].value;
-					} else if (interaction.options._hoistedOptions[i].name === 'bestof') {
-						bestOf = interaction.options._hoistedOptions[i].value;
+				// Get the ranked flag
+				let onlyRanked = false;
+
+				if (interaction.options.getBoolean('ranked')) {
+					onlyRanked = interaction.options.getBoolean('ranked');
+				}
+
+				// Get the star rating
+				let averageStarRating = null;
+
+				if (interaction.options.getNumber('starrating')) {
+					averageStarRating = interaction.options.getNumber('starrating');
+
+					if (averageStarRating < 3) {
+						return await interaction.editReply('You can\'t play a match with a star rating lower than 3');
+					} else if (averageStarRating > 10) {
+						return await interaction.editReply('You can\'t play a match with a star rating higher than 10');
 					}
+				}
+
+				// Get the teammates
+				let teammates = [];
+
+				if (interaction.options.getUser('teammate')) {
+					teammates.push(interaction.options.getUser('teammate').id);
+				}
+
+				if (interaction.options.getUser('firstteammate')) {
+					teammates.push(interaction.options.getUser('firstteammate').id);
+				}
+
+				if (interaction.options.getUser('secondteammate')) {
+					teammates.push(interaction.options.getUser('secondteammate').id);
+				}
+
+				if (interaction.options.getUser('thirdteammate')) {
+					teammates.push(interaction.options.getUser('thirdteammate').id);
+				}
+
+				// Get the opponents
+				let opponents = [];
+
+				if (interaction.options.getUser('opponent')) {
+					opponents.push(interaction.options.getUser('opponent').id);
+				}
+
+				if (interaction.options.getUser('firstopponent')) {
+					opponents.push(interaction.options.getUser('firstopponent').id);
+				}
+
+				if (interaction.options.getUser('secondopponent')) {
+					opponents.push(interaction.options.getUser('secondopponent').id);
+				}
+
+				if (interaction.options.getUser('thirdopponent')) {
+					opponents.push(interaction.options.getUser('thirdopponent').id);
+				}
+
+				if (interaction.options.getUser('fourthopponent')) {
+					opponents.push(interaction.options.getUser('fourthopponent').id);
 				}
 
 				const commandConfig = await getOsuUserServerMode(msg, []);
@@ -81,216 +118,104 @@ module.exports = {
 					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect <username>`.');
 				}
 
-				if (opponentId && commandUser.userId === opponentId || firstOpponentId && commandUser.userId === firstOpponentId || secondOpponentId && commandUser.userId === secondOpponentId) {
-					return await interaction.editReply('You cannot play against yourself.');
+				//Cross check that commandUser.userId, teammates and opponents are all unique
+				const allUsers = [commandUser.userId, ...teammates, ...opponents];
+				const uniqueUsers = [...new Set(allUsers)];
+				const everyUser = [];
+
+				if (allUsers.length !== uniqueUsers.length) {
+					return await interaction.editReply('You can\'t play a match with the same user twice');
 				}
 
-				if (teammateId && commandUser.userId === teammateId) {
-					return await interaction.editReply('You cannot team up with yourself.');
-				}
+				// Collect the star ratings to calculate the average & update the duel ratings for the users
+				const starRatings = [];
 
-				if (teammateId && firstOpponentId && teammateId === firstOpponentId || teammateId && secondOpponentId && teammateId === secondOpponentId) {
-					return await interaction.editReply('Your teammate can\t also be an opponent.');
-				}
+				for (let i = 0; i < allUsers.length; i++) {
+					let starRating = 4;
+					let discordUser = null;
 
-				if (firstOpponentId && secondOpponentId && firstOpponentId === secondOpponentId) {
-					return await interaction.editReply('You have to choose two different opponents.');
-				}
-
-				let ownStarRating = 4;
-				try {
-					await interaction.editReply(`Processing Duel Rating for ${commandUser.osuName}...`);
-					ownStarRating = await getUserDuelStarRating({ osuUserId: commandUser.osuUserId, client: interaction.client });
-				} catch (e) {
-					if (e !== 'No standard plays') {
-						console.log(e);
-					}
-				}
-
-				let secondStarRating = 4;
-				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers');
-				let secondUser = null;
-				if (opponentId) {
-					secondUser = await DBDiscordUsers.findOne({
+					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers');
+					discordUser = await DBDiscordUsers.findOne({
 						where: {
-							userId: opponentId,
+							userId: allUsers[i],
 							osuVerified: true
 						}
 					});
 
-					if (secondUser && secondUser.osuUserId) {
+					if (discordUser && discordUser.osuUserId) {
 						try {
-							await interaction.editReply(`Processing Duel Rating for ${secondUser.osuName}...`);
-							secondStarRating = await getUserDuelStarRating({ osuUserId: secondUser.osuUserId, client: interaction.client });
+							await interaction.editReply(`Processing Duel Rating for ${discordUser.osuName}...`);
+							starRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
 						} catch (e) {
 							if (e !== 'No standard plays') {
 								console.log(e);
 							}
 						}
+						everyUser.push(discordUser);
+						starRatings.push(starRating.total);
 					} else {
-						return await interaction.editReply(`<@${opponentId}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
-					}
-				} else {
-					secondUser = await DBDiscordUsers.findOne({
-						where: {
-							userId: teammateId,
-							osuVerified: true
-						}
-					});
-
-					if (secondUser && secondUser.osuUserId) {
-						try {
-							await interaction.editReply(`Processing Duel Rating for ${secondUser.osuName}...`);
-							secondStarRating = await getUserDuelStarRating({ osuUserId: secondUser.osuUserId, client: interaction.client });
-						} catch (e) {
-							if (e !== 'No standard plays') {
-								console.log(e);
-							}
-						}
-					} else {
-						return await interaction.editReply(`<@${teammateId}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
-					}
-				}
-
-				let thirdUser = null;
-				let thirdStarRating = 4;
-				if (firstOpponentId) {
-					thirdUser = await DBDiscordUsers.findOne({
-						where: {
-							userId: firstOpponentId,
-							osuVerified: true
-						}
-					});
-
-					if (thirdUser && thirdUser.osuUserId) {
-						try {
-							await interaction.editReply(`Processing Duel Rating for ${thirdUser.osuName}...`);
-							thirdStarRating = await getUserDuelStarRating({ osuUserId: thirdUser.osuUserId, client: interaction.client });
-						} catch (e) {
-							if (e !== 'No standard plays') {
-								console.log(e);
-							}
-						}
-					} else {
-						return await interaction.editReply(`<@${firstOpponentId}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
-					}
-				}
-
-				let fourthUser = null;
-				let fourthStarRating = 4;
-				if (secondOpponentId) {
-					fourthUser = await DBDiscordUsers.findOne({
-						where: {
-							userId: secondOpponentId,
-							osuVerified: true
-						}
-					});
-
-					if (fourthUser && fourthUser.osuUserId) {
-						try {
-							await interaction.editReply(`Processing Duel Rating for ${fourthUser.osuName}...`);
-							fourthStarRating = await getUserDuelStarRating({ osuUserId: fourthUser.osuUserId, client: interaction.client });
-						} catch (e) {
-							if (e !== 'No standard plays') {
-								console.log(e);
-							}
-						}
-					} else {
-						return await interaction.editReply(`<@${secondOpponentId}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
+						return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
 					}
 				}
 
 				if (!averageStarRating) {
-					if (opponentId) {
-						averageStarRating = (ownStarRating.total + secondStarRating.total) / 2;
-					} else {
-						averageStarRating = (ownStarRating.total + secondStarRating.total + thirdStarRating.total + fourthStarRating.total) / 4;
+					let totalStarRating = 0;
+					for (let i = 0; i < starRatings.length; i++) {
+						totalStarRating += starRatings[i];
 					}
+					averageStarRating = totalStarRating / starRatings.length;
 				}
 
 				let lowerBound = averageStarRating - 0.125;
 				let upperBound = averageStarRating + 0.125;
 
-				if (opponentId) {
-					let sentMessage = await interaction.editReply(`<@${secondUser.userId}>, you were challenged to a duel by <@${commandUser.userId}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`);
+				let sentMessage = await interaction.editReply(`<@${commandUser.userId}> wants to play a match with <@${teammates.join('>, <@')}> against <@${opponents.join('>, <@')}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`.replace('with <@> ', ''));
 
-					let pingMessage = await interaction.channel.send(`<@${secondUser.userId}>`);
-					await sentMessage.react('✅');
-					await sentMessage.react('❌');
-					pingMessage.delete();
-					//Await for the user to react with a checkmark
-					const filter = (reaction, user) => {
-						return ['✅', '❌'].includes(reaction.emoji.name) && user.id === secondUser.userId;
-					};
+				let pingMessage = await interaction.channel.send(`<@${teammates.join('>, <@')}>, <@${opponents.join('>, <@')}>`.replace('<@>, ', ''));
+				await sentMessage.react('✅');
+				await sentMessage.react('❌');
+				pingMessage.delete();
 
-					let responded = await sentMessage.awaitReactions({ filter, max: 1, time: 120000, errors: ['time'] })
-						.then(collected => {
-							const reaction = collected.first();
+				let responded = false;
+				let accepted = [];
+				let declined = false;
+				let decliner = null;
 
-							if (reaction.emoji.name === '✅') {
-								return true;
-							} else {
-								return false;
+				const collector = sentMessage.createReactionCollector({ time: 120000 });
+
+				collector.on('collect', (reaction, user) => {
+					if (reaction.emoji.name === '✅' && [...teammates, ...opponents].includes(user.id)) {
+						if (!accepted.includes(user.id)) {
+							accepted.push(user.id);
+
+							if (accepted.length === teammates.length + opponents.length) {
+								collector.stop();
 							}
-						})
-						.catch(() => {
-							return false;
-						});
-
-					sentMessage.reactions.removeAll().catch(() => { });
-
-					if (!responded) {
-						return await interaction.editReply(`<@${secondUser.userId}> declined or didn't respond in time.`);
+						}
+					} else if (reaction.emoji.name === '❌' && [...teammates, ...opponents].includes(user.id)) {
+						decliner = user.id;
+						collector.stop();
 					}
-				} else {
-					let sentMessage = await interaction.editReply(`<@${commandUser.userId}> wants to play a match with <@${secondUser.userId}> against <@${thirdUser.userId}> and <@${fourthUser.userId}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`);
+				});
 
-					let pingMessage = await interaction.channel.send(`<@${secondUser.userId}>, <@${thirdUser.userId}>, <@${fourthUser.userId}>`);
-					await sentMessage.react('✅');
-					await sentMessage.react('❌');
-					pingMessage.delete();
-
-					let responded = false;
-					let accepted = [];
-					let declined = false;
-					let decliner = null;
-
-					const collector = sentMessage.createReactionCollector({ time: 120000 });
-
-					collector.on('collect', (reaction, user) => {
-						if (reaction.emoji.name === '✅' && [secondUser.userId, thirdUser.userId, fourthUser.userId].includes(user.id)) {
-							if (!accepted.includes(user.id)) {
-								accepted.push(user.id);
-
-								if (accepted.length === 3) {
-									collector.stop();
-								}
-							}
-						} else if (reaction.emoji.name === '❌' && [secondUser.userId, thirdUser.userId, fourthUser.userId].includes(user.id)) {
-							decliner = user.id;
-							collector.stop();
-						}
-					});
-
-					collector.on('end', () => {
-						if (accepted.length < 3) {
-							declined = true;
-						}
-						responded = true;
-					});
-
-					while (!responded) {
-						await pause(1000);
+				collector.on('end', () => {
+					if (accepted.length < teammates.length + opponents.length) {
+						declined = true;
 					}
+					responded = true;
+				});
 
-					sentMessage.reactions.removeAll().catch(() => { });
+				while (!responded) {
+					await pause(1000);
+				}
 
-					if (declined) {
-						if (decliner) {
-							return await interaction.editReply(`<@${decliner}> declined.`);
-						} else {
-							return await interaction.editReply('Someone didn\'t respond in time.');
-						}
+				sentMessage.reactions.removeAll().catch(() => { });
+
+				if (declined) {
+					if (decliner) {
+						return await interaction.editReply(`<@${decliner}> declined.`);
+					} else {
+						return await interaction.editReply('Someone didn\'t respond in time.');
 					}
 				}
 
@@ -304,24 +229,18 @@ module.exports = {
 				for (let i = 0; i < existingQueueTasks.length; i++) {
 					const osuUserId = existingQueueTasks[i].additions.split(';')[0];
 
-					if (commandUser && osuUserId === commandUser.osuUserId) {
-						await existingQueueTasks[i].destroy();
-						await interaction.followUp(`<@${commandUser.userId}> you have been removed from the queue for a 1v1 duel.`);
-					} else if (secondUser && osuUserId === secondUser.osuUserId) {
-						await existingQueueTasks[i].destroy();
-						await interaction.followUp(`<@${secondUser.userId}> you have been removed from the queue for a 1v1 duel.`);
-					} else if (thirdUser && osuUserId === thirdUser.osuUserId) {
-						await existingQueueTasks[i].destroy();
-						await interaction.followUp(`<@${thirdUser.userId}> you have been removed from the queue for a 1v1 duel.`);
-					} else if (fourthUser && osuUserId === fourthUser.osuUserId) {
-						await existingQueueTasks[i].destroy();
-						await interaction.followUp(`<@${fourthUser.userId}> you have been removed from the queue for a 1v1 duel.`);
+					for (let j = 0; j < everyUser.length; j++) {
+						if (everyUser[j].osuUserId === osuUserId) {
+							await existingQueueTasks[i].destroy();
+							await interaction.followUp(`<@${everyUser[j].userId}> you have been removed from the queue for a 1v1 duel.`);
+							break;
+						}
 					}
 				}
 
 				updateQueueChannels(interaction.client);
 
-				createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, commandUser, secondUser, thirdUser, fourthUser);
+				createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, everyUser);
 			} else if (interaction.options._subcommand === 'rating') {
 				let processingMessage = null;
 				if (interaction.id) {

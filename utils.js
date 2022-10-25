@@ -1371,69 +1371,27 @@ module.exports = {
 	calculateGrade(mode, counts, modBits) {
 		return calculateGradeFunction(mode, counts, modBits);
 	},
-	async createDuelMatch(client, bancho, interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, firstUser, secondUser, thirdUser, fourthUser) {
+	async createDuelMatch(client, bancho, interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, users) {
 		if (interaction) {
 			await interaction.editReply('Duel has been accepted. Getting necessary data...');
 		}
+
+		// Get the maps to avoid
+		// Remove all maps played in the last 3 months
+		// Remove all maps that have been played but not by all players
+		let beatmapIds = [];
+		let beatmaps = [];
 
 		let avoidMaps = [];
 		let threeMonthsAgo = new Date();
 		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-		logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 1 scores');
-		const player1Scores = await DBOsuMultiScores.findAll({
-			where: {
-				osuUserId: firstUser.osuUserId,
-				tourneyMatch: true,
-				matchName: {
-					[Op.notLike]: 'MOTD:%',
-				},
-				mode: 'Standard',
-				[Op.or]: [
-					{ warmup: false },
-					{ warmup: null }
-				],
-			}
-		});
+		for (let i = 0; i < users.length; i++) {
+			logDatabaseQueriesFunction(4, 'utils.js createDuelMatch DBOsuMultiScores player scores');
 
-		for (let i = 0; i < player1Scores.length; i++) {
-			if (player1Scores[i].gameStartDate > threeMonthsAgo && !avoidMaps.includes(player1Scores[i].beatmapId)) {
-				avoidMaps.push(player1Scores[i].beatmapId);
-			}
-			player1Scores[i] = player1Scores[i].beatmapId;
-		}
-
-		logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 2 scores');
-		const player2Scores = await DBOsuMultiScores.findAll({
-			where: {
-				osuUserId: secondUser.osuUserId,
-				tourneyMatch: true,
-				matchName: {
-					[Op.notLike]: 'MOTD:%',
-				},
-				mode: 'Standard',
-				[Op.or]: [
-					{ warmup: false },
-					{ warmup: null }
-				],
-			}
-		});
-
-		for (let i = 0; i < player2Scores.length; i++) {
-			if (player2Scores[i].gameStartDate > threeMonthsAgo && !avoidMaps.includes(player2Scores[i].beatmapId)) {
-				avoidMaps.push(player2Scores[i].beatmapId);
-			}
-			player2Scores[i] = player2Scores[i].beatmapId;
-		}
-
-		let player3Scores = null;
-		let player4Scores = null;
-
-		if (thirdUser) {
-			logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 2 scores');
-			player3Scores = await DBOsuMultiScores.findAll({
+			const playerScores = await DBOsuMultiScores.findAll({
 				where: {
-					osuUserId: thirdUser.osuUserId,
+					osuUserId: users[i].osuUserId,
 					tourneyMatch: true,
 					matchName: {
 						[Op.notLike]: 'MOTD:%',
@@ -1446,109 +1404,24 @@ module.exports = {
 				}
 			});
 
-			for (let i = 0; i < player3Scores.length; i++) {
-				if (player3Scores[i].gameStartDate > threeMonthsAgo && !avoidMaps.includes(player3Scores[i].beatmapId)) {
-					avoidMaps.push(player3Scores[i].beatmapId);
-				}
-				player3Scores[i] = player3Scores[i].beatmapId;
-			}
-
-			logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Match player 2 scores');
-			player4Scores = await DBOsuMultiScores.findAll({
-				where: {
-					osuUserId: fourthUser.osuUserId,
-					tourneyMatch: true,
-					matchName: {
-						[Op.notLike]: 'MOTD:%',
-					},
-					mode: 'Standard',
-					[Op.or]: [
-						{ warmup: false },
-						{ warmup: null }
-					],
-				}
-			});
-
-			for (let i = 0; i < player4Scores.length; i++) {
-				if (player4Scores[i].gameStartDate > threeMonthsAgo && !avoidMaps.includes(player4Scores[i].beatmapId)) {
-					avoidMaps.push(player4Scores[i].beatmapId);
-				}
-				player4Scores[i] = player4Scores[i].beatmapId;
-			}
-		}
-
-		//Add all maps that have not been played by everyone to avoidMaps
-		for (let i = 0; i < player1Scores.length; i++) {
-			if (!player2Scores.includes(player1Scores[i]) && !avoidMaps.includes(player1Scores[i])) {
-				avoidMaps.push(player1Scores[i]);
-				continue;
-			}
-
-			if (thirdUser) {
-				if (!player3Scores.includes(player1Scores[i]) && !avoidMaps.includes(player1Scores[i])) {
-					avoidMaps.push(player1Scores[i]);
-					continue;
+			for (let j = 0; j < playerScores.length; j++) {
+				if (playerScores[j].gameStartDate > threeMonthsAgo && !avoidMaps.includes(playerScores[j].beatmapId)) {
+					avoidMaps.push(playerScores[j].beatmapId);
 				}
 
-				if (!player4Scores.includes(player1Scores[i]) && !avoidMaps.includes(player1Scores[i])) {
-					avoidMaps.push(player1Scores[i]);
-					continue;
+				if (beatmapIds.includes(playerScores[j].beatmapId)) {
+					beatmaps[beatmapIds.indexOf(playerScores[j].beatmapId)].count++;
+				} else {
+					beatmapIds.push(playerScores[j].beatmapId);
+					beatmaps.push({ beatmapId: playerScores[j].beatmapId, count: 1 });
 				}
 			}
 		}
 
-		for (let i = 0; i < player2Scores.length; i++) {
-			if (!player1Scores.includes(player2Scores[i]) && !avoidMaps.includes(player2Scores[i])) {
-				avoidMaps.push(player2Scores[i]);
-				continue;
-			}
-
-			if (thirdUser) {
-				if (!player3Scores.includes(player2Scores[i]) && !avoidMaps.includes(player2Scores[i])) {
-					avoidMaps.push(player2Scores[i]);
-					continue;
-				}
-
-				if (!player4Scores.includes(player2Scores[i]) && !avoidMaps.includes(player2Scores[i])) {
-					avoidMaps.push(player2Scores[i]);
-					continue;
-				}
-			}
-		}
-
-		if (thirdUser) {
-			for (let i = 0; i < player3Scores.length; i++) {
-				if (!player1Scores.includes(player3Scores[i]) && !avoidMaps.includes(player3Scores[i])) {
-					avoidMaps.push(player3Scores[i]);
-					continue;
-				}
-
-				if (!player2Scores.includes(player3Scores[i]) && !avoidMaps.includes(player3Scores[i])) {
-					avoidMaps.push(player3Scores[i]);
-					continue;
-				}
-
-				if (!player4Scores.includes(player3Scores[i]) && !avoidMaps.includes(player3Scores[i])) {
-					avoidMaps.push(player3Scores[i]);
-					continue;
-				}
-			}
-
-			for (let i = 0; i < player4Scores.length; i++) {
-				if (!player1Scores.includes(player4Scores[i]) && !avoidMaps.includes(player4Scores[i])) {
-					avoidMaps.push(player4Scores[i]);
-					continue;
-				}
-
-				if (!player2Scores.includes(player4Scores[i]) && !avoidMaps.includes(player4Scores[i])) {
-					avoidMaps.push(player4Scores[i]);
-					continue;
-				}
-
-				if (!player3Scores.includes(player4Scores[i]) && !avoidMaps.includes(player4Scores[i])) {
-					avoidMaps.push(player4Scores[i]);
-					continue;
-				}
+		// Remove all maps that have not been played by all players
+		for (let i = 0; i < beatmaps.length; i++) {
+			if (beatmaps[i].count < users.length && !avoidMaps.includes(beatmaps[i].beatmapId)) {
+				avoidMaps.push(beatmaps[i].beatmapId);
 			}
 		}
 
@@ -1577,12 +1450,22 @@ module.exports = {
 		//Set up the lobby
 		let channel = null;
 
-		let teamname1 = firstUser.osuName;
-		let teamname2 = secondUser.osuName;
+		let team1 = [];
+		let team2 = [];
+		let teamname1 = '';
+		let teamname2 = '';
 
-		if (thirdUser) {
-			teamname1 = `${firstUser.osuName.substring(0, firstUser.osuName.length / 2)}${secondUser.osuName.substring(secondUser.osuName.length / 2, secondUser.osuName.length)}`;
-			teamname2 = `${thirdUser.osuName.substring(0, thirdUser.osuName.length / 2)}${fourthUser.osuName.substring(fourthUser.osuName.length / 2, fourthUser.osuName.length)}`;
+		for (let i = 0; i < users.length; i++) {
+			let teamSize = users.length / 2;
+			let perTeamIterator = i % teamSize;
+
+			if (i < teamSize) {
+				team1.push(users[i]);
+				teamname1 += users[i].osuName.substring(Math.floor(users[i].osuName.length / teamSize * perTeamIterator), Math.floor(users[i].osuName.length / teamSize) + 2);
+			} else {
+				team2.push(users[i]);
+				teamname2 += users[i].osuName.substring(Math.floor(users[i].osuName.length / teamSize * perTeamIterator), Math.floor(users[i].osuName.length / teamSize) + 2);
+			}
 		}
 
 		if (interaction) {
@@ -1600,7 +1483,7 @@ module.exports = {
 					}
 				}
 				// console.log('Duel Match: Creating match');
-				if (!thirdUser) {
+				if (users.length === 2) {
 					channel = await bancho.createLobby(`ETX: (${teamname1}) vs (${teamname2})`);
 				} else {
 					channel = await bancho.createLobby(`ETX Teams: (${teamname1}) vs (${teamname2})`);
@@ -1628,62 +1511,29 @@ module.exports = {
 		await lobby.setPassword(password);
 		await channel.sendMessage('!mp addref Eliteronix');
 		await channel.sendMessage('!mp map 975342 0');
-		if (!thirdUser) {
-			await channel.sendMessage('!mp set 0 3 2');
-		} else {
-			await channel.sendMessage('!mp set 0 3 4');
-		}
+		await channel.sendMessage(`!mp set 0 3 ${users.length}`);
+
 
 		let lobbyStatus = 'Joining phase';
 		let mapIndex = 0;
 
-		await channel.sendMessage(`!mp invite #${firstUser.osuUserId}`);
-		let user = await client.users.fetch(firstUser.userId);
-		await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
-
-		await channel.sendMessage(`!mp invite #${secondUser.osuUserId}`);
-		user = await client.users.fetch(secondUser.userId);
-		await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
-
-		if (thirdUser) {
-			await channel.sendMessage(`!mp invite #${thirdUser.osuUserId}`);
-			let user = await client.users.fetch(thirdUser.userId);
-			await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
-
-			await channel.sendMessage(`!mp invite #${fourthUser.osuUserId}`);
-			user = await client.users.fetch(fourthUser.userId);
+		for (let i = 0; i < users.length; i++) {
+			await channel.sendMessage(`!mp invite #${users[i].osuUserId}`);
+			let user = await client.users.fetch(users[i].userId);
 			await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 		}
 
 		let pingMessage = null;
-		if (!thirdUser) {
-			if (interaction) {
-				// eslint-disable-next-line no-undef
-				await interaction.editReply(`<@${firstUser.userId}> <@${secondUser.userId}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup. <https://osu.ppy.sh/mp/${lobby.id}>`);
-				pingMessage = await interaction.channel.send(`<@${firstUser.userId}> <@${secondUser.userId}>`);
-			}
-		} else {
-			if (interaction) {
-				// eslint-disable-next-line no-undef
-				await interaction.editReply(`<@${firstUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup. <https://osu.ppy.sh/mp/${lobby.id}>`);
-				pingMessage = await interaction.channel.send(`<@${firstUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}>`);
-			}
-		}
 		if (interaction) {
+			// eslint-disable-next-line no-undef
+			await interaction.editReply(`<@${users.map(user => user.userId).join('>, <@')}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup. <https://osu.ppy.sh/mp/${lobby.id}>`);
+			pingMessage = await interaction.channel.send(`<@${users.map(user => user.userId).join('>, <@')}>`);
 			pingMessage.delete();
 		}
 		//Start the timer to close the lobby if not everyone joined by then
 		await channel.sendMessage('!mp timer 300');
 
-		let playerIds = [firstUser.osuUserId, secondUser.osuUserId];
-		let dbPlayers = [firstUser, secondUser];
-		if (thirdUser) {
-			//Push the other 2 users aswell
-			playerIds.push(thirdUser.osuUserId);
-			playerIds.push(fourthUser.osuUserId);
-			dbPlayers.push(thirdUser);
-			dbPlayers.push(fourthUser);
-		}
+		let playerIds = users.map(user => user.osuUserId);
 		let scores = [0, 0];
 
 		//Add discord messages and also ingame invites for the timers
@@ -1712,8 +1562,8 @@ module.exports = {
 				channel.sendMessage(`!mp kick #${obj.player.user.id}`);
 			} else if (lobbyStatus === 'Joining phase') {
 				let allPlayersJoined = true;
-				for (let i = 0; i < dbPlayers.length && allPlayersJoined; i++) {
-					if (!lobby.playersById[dbPlayers[i].osuUserId.toString()]) {
+				for (let i = 0; i < users.length && allPlayersJoined; i++) {
+					if (!lobby.playersById[users[i].osuUserId.toString()]) {
 						allPlayersJoined = false;
 					}
 				}
@@ -1722,6 +1572,7 @@ module.exports = {
 
 					await channel.sendMessage(`Average star rating of the mappool: ${Math.round(averageStarRating * 100) / 100}`);
 
+					await channel.sendMessage('Looking for a map...');
 					let nextMap = null;
 					if (bestOf === 1) {
 						nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
@@ -1776,7 +1627,7 @@ module.exports = {
 					playersInLobby++;
 				}
 			}
-			if (lobbyStatus === 'Waiting for start' && playersInLobby === dbPlayers.length) {
+			if (lobbyStatus === 'Waiting for start' && playersInLobby === users.length) {
 				await channel.sendMessage('!mp start 5');
 				await new Promise(resolve => setTimeout(resolve, 30000));
 				await channel.sendMessage('!mp aborttimer');
@@ -1798,6 +1649,7 @@ module.exports = {
 					}
 				}
 			}
+
 			if (modPools[mapIndex] === 'FreeMod' && mapIndex < bestOf - 1) {
 				for (let i = 0; i < results.length; i++) {
 					//Reduce the score by 0.5 if it was FreeMod and no mods / only nofail was picked
@@ -1822,23 +1674,20 @@ module.exports = {
 
 			let scoreTeam1 = 0;
 			let scoreTeam2 = 0;
-			if (!thirdUser) {
-				for (let i = 0; i < results.length; i++) {
-					if (playerIds[0] == results[i].player.user.id) {
-						scoreTeam1 = + parseFloat(results[i].score);
-					} else if (playerIds[1] == results[i].player.user.id) {
-						scoreTeam2 = + parseFloat(results[i].score);
-					}
-				}
-			} else {
-				for (let i = 0; i < results.length; i++) {
-					if (playerIds[0] == results[i].player.user.id || playerIds[1] == results[i].player.user.id) {
-						scoreTeam1 = scoreTeam1 + parseFloat(results[i].score);
-					} else if (playerIds[2] == results[i].player.user.id || playerIds[3] == results[i].player.user.id) {
-						scoreTeam2 = scoreTeam2 + parseFloat(results[i].score);
-					}
+
+			//If the player is in the first team add to team 1, otherwise add to team 2
+			//Create a helper array with the first half of the players
+			let firstTeam = team1.map(user => user.osuUserId);
+
+			for (let i = 0; i < results.length; i++) {
+				console.log(results[i]);
+				if (firstTeam.includes(results[i].player.user.id.toString())) {
+					scoreTeam1 += parseFloat(results[i].score);
+				} else {
+					scoreTeam2 += parseFloat(results[i].score);
 				}
 			}
+
 			if (results.length) {
 				let winner = teamname1;
 
@@ -1883,6 +1732,7 @@ module.exports = {
 				mapIndex++;
 				lobbyStatus = 'Waiting for start';
 
+				await channel.sendMessage('Looking for a map...');
 				let nextMap = null;
 				if (scores[0] + scores[1] === bestOf - 1) {
 					nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
@@ -1955,110 +1805,29 @@ module.exports = {
 
 						await new Promise(resolve => setTimeout(resolve, 15000));
 
-						let userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: firstUser.osuUserId, client: client });
-						let messages = ['Your SR has been updated!'];
-						if (Math.round(firstUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
-							messages.push(`SR: ${Math.round(firstUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
-						}
-						if (Math.round(firstUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
-							messages.push(`NM: ${Math.round(firstUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
-						}
-						if (Math.round(firstUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
-							messages.push(`HD: ${Math.round(firstUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
-						}
-						if (Math.round(firstUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
-							messages.push(`HR: ${Math.round(firstUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
-						}
-						if (Math.round(firstUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
-							messages.push(`DT: ${Math.round(firstUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
-						}
-						if (Math.round(firstUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
-							messages.push(`FM: ${Math.round(firstUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
-						}
-						if (messages.length > 1) {
-							const IRCUser = await bancho.getUser(firstUser.osuName);
-							for (let i = 0; i < messages.length; i++) {
-								await IRCUser.sendMessage(messages[i]);
+						for (let i = 0; i < users.length; i++) {
+							let userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: users[i].osuUserId, client: client });
+							let messages = ['Your SR has been updated!'];
+							if (Math.round(users[i].osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
+								messages.push(`SR: ${Math.round(users[i].osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
 							}
-						}
-
-						userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: secondUser.osuUserId, client: client });
-						messages = ['Your SR has been updated!'];
-						if (Math.round(secondUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
-							messages.push(`SR: ${Math.round(secondUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
-						}
-						if (Math.round(secondUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
-							messages.push(`NM: ${Math.round(secondUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
-						}
-						if (Math.round(secondUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
-							messages.push(`HD: ${Math.round(secondUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
-						}
-						if (Math.round(secondUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
-							messages.push(`HR: ${Math.round(secondUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
-						}
-						if (Math.round(secondUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
-							messages.push(`DT: ${Math.round(secondUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
-						}
-						if (Math.round(secondUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
-							messages.push(`FM: ${Math.round(secondUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
-						}
-						if (messages.length > 1) {
-							const IRCUser = await bancho.getUser(secondUser.osuName);
-							for (let i = 0; i < messages.length; i++) {
-								await IRCUser.sendMessage(messages[i]);
+							if (Math.round(users[i].osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
+								messages.push(`NM: ${Math.round(users[i].osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
 							}
-						}
-
-						if (thirdUser) {
-							userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: thirdUser.osuUserId, client: client });
-							messages = ['Your SR has been updated!'];
-							if (Math.round(thirdUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
-								messages.push(`SR: ${Math.round(thirdUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
+							if (Math.round(users[i].osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
+								messages.push(`HD: ${Math.round(users[i].osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
 							}
-							if (Math.round(thirdUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
-								messages.push(`NM: ${Math.round(thirdUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
+							if (Math.round(users[i].osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
+								messages.push(`HR: ${Math.round(users[i].osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
 							}
-							if (Math.round(thirdUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
-								messages.push(`HD: ${Math.round(thirdUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
+							if (Math.round(users[i].osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
+								messages.push(`DT: ${Math.round(users[i].osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
 							}
-							if (Math.round(thirdUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
-								messages.push(`HR: ${Math.round(thirdUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
-							}
-							if (Math.round(thirdUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
-								messages.push(`DT: ${Math.round(thirdUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
-							}
-							if (Math.round(thirdUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
-								messages.push(`FM: ${Math.round(thirdUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
+							if (Math.round(users[i].osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
+								messages.push(`FM: ${Math.round(users[i].osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
 							}
 							if (messages.length > 1) {
-								const IRCUser = await bancho.getUser(thirdUser.osuName);
-								for (let i = 0; i < messages.length; i++) {
-									await IRCUser.sendMessage(messages[i]);
-								}
-							}
-
-							userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: fourthUser.osuUserId, client: client });
-							messages = ['Your SR has been updated!'];
-							if (Math.round(fourthUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
-								messages.push(`SR: ${Math.round(fourthUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
-							}
-							if (Math.round(fourthUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
-								messages.push(`NM: ${Math.round(fourthUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
-							}
-							if (Math.round(fourthUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
-								messages.push(`HD: ${Math.round(fourthUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
-							}
-							if (Math.round(fourthUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
-								messages.push(`HR: ${Math.round(fourthUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
-							}
-							if (Math.round(fourthUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
-								messages.push(`DT: ${Math.round(fourthUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
-							}
-							if (Math.round(fourthUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
-								messages.push(`FM: ${Math.round(fourthUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
-							}
-							if (messages.length > 1) {
-								const IRCUser = await bancho.getUser(fourthUser.osuName);
+								const IRCUser = await bancho.getUser(users[i].osuName);
 								for (let i = 0; i < messages.length; i++) {
 									await IRCUser.sendMessage(messages[i]);
 								}
