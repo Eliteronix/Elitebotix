@@ -1508,6 +1508,8 @@ module.exports = {
 
 		const password = Math.random().toString(36).substring(8);
 
+		let matchMessages = [];
+
 		await lobby.setPassword(password);
 		await channel.sendMessage('!mp addref Eliteronix');
 		await channel.sendMessage('!mp map 975342 0');
@@ -5575,4 +5577,9 @@ async function getOsuPlayerNameFunction(osuUserId) {
 	}
 
 	return playerName;
+}
+
+function addMatchMessageFunction(array, user, message) {
+	let now = new Date();
+	array.push(`${now.getUTCHours()}:${now.getUTCMinutes()}:${now.getUTCSeconds()} [${user}]: ${message}`);
 }
