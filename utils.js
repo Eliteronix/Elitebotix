@@ -1430,9 +1430,9 @@ module.exports = {
 
 		//Fill as much as needed in groups
 		while (modPools.length < bestOf - 1) {
-			let modsToAdd = ['FreeMod', 'FreeMod', 'FreeMod', 'FreeMod', 'FreeMod'];
+			let modsToAdd = ['NM', 'HD', 'HR', 'DT', 'FreeMod'];
 			shuffle(modsToAdd);
-			modsToAdd.push('FreeMod');
+			modsToAdd.push('NM');
 
 			while (modsToAdd.length) {
 				modPools.push(modsToAdd.shift());
