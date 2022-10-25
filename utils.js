@@ -1572,6 +1572,7 @@ module.exports = {
 
 					await channel.sendMessage(`Average star rating of the mappool: ${Math.round(averageStarRating * 100) / 100}`);
 
+					await channel.sendMessage('Looking for a map...');
 					let nextMap = null;
 					if (bestOf === 1) {
 						nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
@@ -1731,6 +1732,7 @@ module.exports = {
 				mapIndex++;
 				lobbyStatus = 'Waiting for start';
 
+				await channel.sendMessage('Looking for a map...');
 				let nextMap = null;
 				if (scores[0] + scores[1] === bestOf - 1) {
 					nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
