@@ -1679,7 +1679,7 @@ module.exports = {
 			let firstTeam = team1.map(user => user.osuUserId);
 
 			for (let i = 0; i < results.length; i++) {
-				console.log(i);
+				console.log(results[i]);
 				if (firstTeam.includes(results[i].player.user.id.toString())) {
 					scoreTeam1 += parseFloat(results[i].score);
 				} else {
