@@ -169,9 +169,9 @@ module.exports = {
 				let lowerBound = averageStarRating - 0.125;
 				let upperBound = averageStarRating + 0.125;
 
-				let sentMessage = await interaction.editReply(`<@${commandUser.userId}> wants to play a match with <@${teammates.join('>, <@')}> against <@${opponents.join('>, <@')}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`);
+				let sentMessage = await interaction.editReply(`<@${commandUser.userId}> wants to play a match with <@${teammates.join('>, <@')}> against <@${opponents.join('>, <@')}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`.replace('with <@> ', ''));
 
-				let pingMessage = await interaction.channel.send(`<@${teammates.join('>, <@')}>, <@${opponents.join('>, <@')}>`);
+				let pingMessage = await interaction.channel.send(`<@${teammates.join('>, <@')}>, <@${opponents.join('>, <@')}>`.replace('<@>, ', ''));
 				await sentMessage.react('✅');
 				await sentMessage.react('❌');
 				pingMessage.delete();
