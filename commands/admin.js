@@ -1085,7 +1085,7 @@ module.exports = {
 			// 			},
 			// 			{
 			// 				'name': 'match4v4',
-			// 				'description': 'Lets you instantly create a match with 5 other players',
+			// 				'description': 'Lets you instantly create a match with 7 other players',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
@@ -5254,7 +5254,7 @@ module.exports = {
 						},
 						{
 							'name': 'match4v4',
-							'description': 'Lets you instantly create a match with 5 other players',
+							'description': 'Lets you instantly create a match with 7 other players',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
