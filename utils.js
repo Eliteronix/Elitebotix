@@ -1508,9 +1508,14 @@ module.exports = {
 
 		const password = Math.random().toString(36).substring(8);
 
+		let matchMessages = [];
+		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', `!mp password ${password}`);
 		await lobby.setPassword(password);
+		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', '!mp addref Eliteronix');
 		await channel.sendMessage('!mp addref Eliteronix');
+		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', '!mp map 975342 0');
 		await channel.sendMessage('!mp map 975342 0');
+		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', `!mp set 0 3 ${users.length}`);
 		await channel.sendMessage(`!mp set 0 3 ${users.length}`);
 
 
@@ -1518,6 +1523,7 @@ module.exports = {
 		let mapIndex = 0;
 
 		for (let i = 0; i < users.length; i++) {
+			addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', `!mp invite #${users[i].osuUserId}`);
 			await channel.sendMessage(`!mp invite #${users[i].osuUserId}`);
 			let user = await client.users.fetch(users[i].userId);
 			await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
@@ -1531,6 +1537,7 @@ module.exports = {
 			pingMessage.delete();
 		}
 		//Start the timer to close the lobby if not everyone joined by then
+		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', '!mp timer 300');
 		await channel.sendMessage('!mp timer 300');
 
 		let playerIds = users.map(user => user.osuUserId);
@@ -1538,6 +1545,7 @@ module.exports = {
 
 		//Add discord messages and also ingame invites for the timers
 		channel.on('message', async (msg) => {
+			addMatchMessageFunction(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
 			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
 				//Banchobot countdown finished
 				if (lobbyStatus === 'Joining phase') {
@@ -2451,6 +2459,9 @@ module.exports = {
 	},
 	async getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps) {
 		return await getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, avoidMaps);
+	},
+	async addMatchMessage(matchId, array, user, message) {
+		addMatchMessageFunction(matchId, array, user, message);
 	}
 };
 
@@ -5575,4 +5586,24 @@ async function getOsuPlayerNameFunction(osuUserId) {
 	}
 
 	return playerName;
+}
+
+async function addMatchMessageFunction(matchId, array, user, message) {
+	let now = new Date();
+	array.push(`${now.getUTCHours().toString().padStart(2, '0')}:${now.getUTCMinutes().toString().padStart(2, '0')}:${now.getUTCSeconds().toString().padStart(2, '0')} [${user}]: ${message}`);
+
+	//write the array to a .txt with the name of the matchId in the folder matchLogs
+	let matchLog = array.join('\n');
+	const fs = require('fs');
+
+	//Check if the matchLogs folder exists and create it if necessary
+	if (!fs.existsSync('./matchLogs')) {
+		fs.mkdirSync('./matchLogs');
+	}
+
+	fs.writeFile(`./matchLogs/${matchId}.txt`, matchLog, function (err) {
+		if (err) {
+			return console.log(err);
+		}
+	});
 }

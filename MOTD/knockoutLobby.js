@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause, saveOsuMultiScores, logMatchCreation } = require('../utils.js');
+const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause, saveOsuMultiScores, logMatchCreation, addMatchMessage } = require('../utils.js');
 const { assignKnockoutPoints } = require('./givePointsToPlayers.js');
 
 module.exports = {
@@ -89,12 +89,18 @@ module.exports = {
 
 		const password = Math.random().toString(36).substring(8);
 
+		let matchMessages = [];
+		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', `!mp password ${password}`);
 		await lobby.setPassword(password);
+		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', '!mp addref Eliteronix');
 		await channel.sendMessage('!mp addref Eliteronix');
+		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', '!mp lock');
 		await channel.sendMessage('!mp lock');
+		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', `!mp set 0 ${scoreversion} ${players.length}`);
 		await channel.sendMessage(`!mp set 0 ${scoreversion} ${players.length}`);
 		await pause(60000);
 		while (lobby._beatmapId != mappool[mapIndex].id) {
+			addMatchMessage(lobby.id, matchMessages, 'Elitebotix', `!mp map ${mappool[mapIndex].id} 0`);
 			await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 			await pause(5000);
 		}
@@ -102,11 +108,13 @@ module.exports = {
 		//Check mods and set them if needed
 		if (mapIndex === 4 || mapIndex === 8) {
 			while (!lobby.mods || lobby.mods && lobby.mods.length === 0 || lobby.mods && lobby.mods[0].shortMod !== 'dt') {
+				addMatchMessage(lobby.id, matchMessages, 'Elitebotix', `!mp mods FreeMod${doubleTime}`);
 				await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
 				await pause(5000);
 			}
 		} else {
 			while (lobby.mods || lobby.mods && lobby.mods.length !== 0) {
+				addMatchMessage(lobby.id, matchMessages, 'Elitebotix', `!mp mods FreeMod${doubleTime}`);
 				await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
 				await pause(5000);
 			}
@@ -123,10 +131,12 @@ module.exports = {
 		}
 
 		for (let i = 0; i < users.length; i++) {
+			addMatchMessage(lobby.id, matchMessages, 'Elitebotix', `!mp invite #${players[i].osuUserId}`);
 			await channel.sendMessage(`!mp invite #${players[i].osuUserId}`);
 			await messageUserWithRetries(client, users[i], `Your Knockoutlobby has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 		}
 
+		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', '!mp timer 180');
 		await channel.sendMessage('!mp timer 180');
 		let timer = new Date();
 		timer.setMinutes(timer.getMinutes() + 4);
@@ -134,6 +144,7 @@ module.exports = {
 		let waitedForMapdownload = false;
 
 		channel.on('message', async (msg) => {
+			addMatchMessage(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
 			let now = new Date();
 			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
 				//Banchobot countdown finished

@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBOsuBeatmaps } = require('../dbObjects');
-const { pause, saveOsuMultiScores, logDatabaseQueries, logMatchCreation } = require('../utils');
+const { pause, saveOsuMultiScores, logDatabaseQueries, logMatchCreation, addMatchMessage } = require('../utils');
 const osu = require('node-osu');
 
 module.exports = {
@@ -64,9 +64,14 @@ module.exports = {
 
 		const password = Math.random().toString(36).substring(8);
 
+		let matchMessages = [];
+		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', `!mp password ${password}`);
 		await lobby.setPassword(password);
+		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', '!mp addref Eliteronix');
 		await channel.sendMessage('!mp addref Eliteronix');
+		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', '!mp map 975342 0');
 		await channel.sendMessage('!mp map 975342 0');
+		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', `!mp set 0 ${args[7]} ${dbPlayers.length}`);
 		await channel.sendMessage(`!mp set 0 ${args[7]} ${dbPlayers.length}`);
 		let lobbyStatus = 'Joining phase';
 		let mapIndex = 0;
@@ -98,6 +103,7 @@ module.exports = {
 		}
 
 		for (let i = 0; i < users.length; i++) {
+			addMatchMessage(lobby.id, matchMessages, 'Elitebotix', `!mp invite #${dbPlayers[i].osuUserId}`);
 			await channel.sendMessage(`!mp invite #${dbPlayers[i].osuUserId}`);
 			await messageUserWithRetries(client, users[i], args[1], `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 		}
@@ -125,6 +131,7 @@ module.exports = {
 		forfeitTimer.setUTCMinutes(processQueueEntry.date.getUTCMinutes() + 20);
 		let currentTime = new Date();
 		let secondsUntilForfeit = Math.round((forfeitTimer - currentTime) / 1000) + 30;
+		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', `!mp timer ${secondsUntilForfeit}`);
 		await channel.sendMessage(`!mp timer ${secondsUntilForfeit}`);
 		let noFail = 0;
 		if (args[4] === 'true') {
@@ -135,6 +142,7 @@ module.exports = {
 
 		//Add discord messages and also ingame invites for the timers
 		channel.on('message', async (msg) => {
+			addMatchMessage(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
 			let now = new Date();
 			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
 				//Banchobot countdown finished
