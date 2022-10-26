@@ -8,7 +8,8 @@
 		"database.sqlite-journal",
 		".git",
 		"maps",
-		"package-lock.json"
+		"package-lock.json",
+		"matchLogs"
 	],
 	"watch_options": {
 		"followSymlinks": false
