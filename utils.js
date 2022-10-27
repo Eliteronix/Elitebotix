@@ -1516,8 +1516,10 @@ module.exports = {
 		await channel.sendMessage('!mp addref Eliteronix');
 		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', '!mp map 975342 0');
 		await channel.sendMessage('!mp map 975342 0');
-		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', `!mp set 0 3 ${users.length}`);
-		await channel.sendMessage(`!mp set 0 3 ${users.length}`);
+		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', `!mp set 2 3 ${users.length + 1}`);
+		await channel.sendMessage(`!mp set 2 3 ${users.length + 1}`);
+		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', '!mp lock');
+		await channel.sendMessage('!mp lock');
 
 
 		let lobbyStatus = 'Joining phase';
@@ -1567,6 +1569,7 @@ module.exports = {
 		});
 
 		lobby.on('playerJoined', async (obj) => {
+			orderMatchPlayers(lobby, channel, users);
 			if (!playerIds.includes(obj.player.user.id.toString())) {
 				channel.sendMessage(`!mp kick #${obj.player.user.id}`);
 			} else if (lobbyStatus === 'Joining phase') {
@@ -5607,4 +5610,21 @@ async function addMatchMessageFunction(matchId, array, user, message) {
 			return console.log(err);
 		}
 	});
+}
+
+async function orderMatchPlayers(lobby, channel, players) {
+	for (let i = 0; i < players.length; i++) {
+		//Check if the players are in the correct teams
+		let slot = lobby._slots.find(slot => slot.user._id.toString() === players[i].osuUserId);
+
+		let expectedTeam = 'Red';
+
+		if (i >= players.length / 2) {
+			expectedTeam = 'Blue';
+		}
+
+		if (slot && slot.team !== expectedTeam) {
+			channel.sendMessage(`!mp team #${players[i].osuUserId} ${expectedTeam}`);
+		}
+	}
 }
