@@ -1,7 +1,8 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBOsuForumPosts } = require('../dbObjects');
-const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries, saveOsuMultiScores } = require('../utils');
+const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries, saveOsuMultiScores, humanReadable } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'admin',
@@ -8580,6 +8581,20 @@ module.exports = {
 			}
 
 			return await msg.reply('Could not find discord user');
+		} else if (args[0] === 'resetSavedPPValues') {
+			// Reset saved pp values in DBOsuMultiScores using an update statement
+			await msg.reply('Resetting...');
+			let count = await DBOsuMultiScores.update({
+				pp: null,
+			}, {
+				where: {
+					pp: {
+						[Op.ne]: null
+					}
+				}
+			});
+
+			return msg.reply(`Reset ${humanReadable(count)} scores' pp values`);
 		} else {
 			msg.reply('Invalid command');
 		}

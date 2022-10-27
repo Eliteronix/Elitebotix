@@ -5,6 +5,7 @@ const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
+const { Beatmap, Calculator } = require('rosu-pp');
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -3322,7 +3323,6 @@ function wrongClusterFunction(id) {
 }
 
 async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, depth) {
-	const rosu = require('rosu-pp');
 	const fs = require('fs');
 
 	if (!depth) {
@@ -3375,15 +3375,16 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, dep
 	}
 
 	let arg = {
-		path: `./maps/${beatmapId}.osu`,
 		mods: parseInt(modBits),
 		acc: parseFloat(accuracy),
 		nMisses: parseInt(misses),
 		combo: parseInt(combo),
 	};
 
+	let map = new Beatmap({ path: `./maps/${beatmapId}.osu` });
+
 	try {
-		return rosu.calculate(arg)[0].pp;
+		return new Calculator(arg).performance(map).pp;
 	} catch (e) {
 		if (depth < 3) {
 			const path = `./maps/${beatmapId}.osu`;
