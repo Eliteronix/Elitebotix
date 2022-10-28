@@ -115,7 +115,7 @@ const { initializeMOTD } = require('./MOTD/initializeMOTD');
 
 const Banchojs = require('bancho.js');
 // eslint-disable-next-line no-undef
-const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterTimespan: 60000, limiterPrivate: 67, limiterPublic: 13 });
+const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterTimespan: 60000, limiterPrivate: 45, limiterPublic: 9 });
 
 //Connect for the first worker
 // eslint-disable-next-line no-undef

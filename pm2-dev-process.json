@@ -9,7 +9,8 @@
 		".git",
 		"maps",
 		"package-lock.json",
-		"matchLogs"
+		"matchLogs",
+		"node_modules"
 	],
 	"watch_options": {
 		"followSymlinks": false
