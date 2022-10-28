@@ -1569,7 +1569,7 @@ module.exports = {
 		});
 
 		lobby.on('playerJoined', async (obj) => {
-			orderMatchPlayers(lobby, channel, users);
+			orderMatchPlayers(lobby, channel, [...users]);
 			if (!playerIds.includes(obj.player.user.id.toString())) {
 				channel.sendMessage(`!mp kick #${obj.player.user.id}`);
 			} else if (lobbyStatus === 'Joining phase') {
@@ -5614,8 +5614,15 @@ async function addMatchMessageFunction(matchId, array, user, message) {
 
 async function orderMatchPlayers(lobby, channel, players) {
 	for (let i = 0; i < players.length; i++) {
+		players[i].slot = i;
 		//Check if the players are in the correct teams
 		let slot = lobby._slots.find(slot => slot.user._id.toString() === players[i].osuUserId);
+
+		if (!slot) {
+			players.splice(i, 1);
+			i--;
+			continue;
+		}
 
 		let expectedTeam = 'Red';
 
@@ -5625,6 +5632,44 @@ async function orderMatchPlayers(lobby, channel, players) {
 
 		if (slot && slot.team !== expectedTeam) {
 			channel.sendMessage(`!mp team #${players[i].osuUserId} ${expectedTeam}`);
+		}
+	}
+
+	//Move players to their slots
+
+	let movedSomeone = false;
+	while (players.length) {
+		if (!movedSomeone) {
+			//Move someone to last slot if that is empty
+			let TODO;
+		}
+		//Collect a list of empty slots
+		let emptySlots = [];
+		for (let i = 0; i < players.length + 1; i++) {
+			if (lobby._slots[i] === null) {
+				emptySlots.push(i);
+			}
+		}
+
+		//Move players to the correct slots
+		for (let i = 0; i < players.length; i++) {
+			let slotIndex = null;
+			for (let j = 0; j < players.length + 1; j++) {
+				if (lobby._slots[j] && lobby._slots[j].user._id.toString() === players[i].osuUserId) {
+					slotIndex = j;
+				}
+			}
+
+			if (players[i].slot !== slotIndex && emptySlots.includes(players[i].slot)) {
+				await channel.sendMessage(`!mp move #${players[i].osuUserId} ${players[i].slot}`);
+				emptySlots.splice(emptySlots.indexOf(players[i].slot), 1);
+				emptySlots.push(slotIndex);
+				movedSomeone = true;
+			} else if (players[i].slot === slotIndex) {
+				players.splice(i, 1);
+				i--;
+				continue;
+			}
 		}
 	}
 }
