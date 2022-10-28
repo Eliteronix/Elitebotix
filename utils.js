@@ -1462,10 +1462,10 @@ module.exports = {
 
 			if (i < teamSize) {
 				team1.push(users[i]);
-				teamname1 += users[i].osuName.substring(Math.floor(users[i].osuName.length / teamSize * perTeamIterator), Math.floor(users[i].osuName.length / teamSize) + 2);
+				teamname1 += users[i].osuName.substring(Math.floor(users[i].osuName.length / teamSize * perTeamIterator), Math.floor(users[i].osuName.length / teamSize * perTeamIterator) + Math.floor(users[i].osuName.length / teamSize) + 1);
 			} else {
 				team2.push(users[i]);
-				teamname2 += users[i].osuName.substring(Math.floor(users[i].osuName.length / teamSize * perTeamIterator), Math.floor(users[i].osuName.length / teamSize) + 2);
+				teamname2 += users[i].osuName.substring(Math.floor(users[i].osuName.length / teamSize * perTeamIterator), Math.floor(users[i].osuName.length / teamSize * perTeamIterator) + Math.floor(users[i].osuName.length / teamSize) + 1);
 			}
 		}
 
