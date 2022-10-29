@@ -5269,11 +5269,11 @@ async function getValidTournamentBeatmapFunction(input) {
 
 	if (beatmaps.length === 0) {
 		input.alreadyCheckedSR = [];
-		input.lowerBound = lowerBound - 0.1;
+		input.lowerBound = lowerBound - 0.25;
 		if (input.lowerBound < 3.5) {
 			input.lowerBound = 3.5;
 		}
-		input.upperBound = upperBound + 0.1;
+		input.upperBound = upperBound + 0.25;
 		if (input.upperBound > 9.9) {
 			input.upperBound = 9.9;
 		}
