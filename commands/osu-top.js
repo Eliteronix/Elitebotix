@@ -542,6 +542,11 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 				multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
 			}
 			multiScores[i] = await multiToBanchoScore(multiScores[i]);
+			if (!multiScores[i].pp || multiScores[i].pp > 2000) {
+				multiScores.splice(i, 1);
+				i--;
+				continue;
+			}
 		}
 
 		//Sort scores by pp
@@ -832,8 +837,6 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 				closestRankedPPUser = discordUsers[i];
 			}
 		}
-
-		// console.log(closestRankedPPUser, closestUnrankedPPUser);
 
 		ctx.font = '15px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
