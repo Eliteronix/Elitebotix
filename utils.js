@@ -5167,6 +5167,7 @@ async function getValidTournamentBeatmapFunction(input) {
 			where: {
 				noModMap: true,
 				mode: mode,
+				modBits: 0,
 				approvalStatus: {
 					[Op.not]: 'Not found',
 				},
@@ -5189,6 +5190,7 @@ async function getValidTournamentBeatmapFunction(input) {
 			where: {
 				hiddenMap: true,
 				mode: mode,
+				modBits: 0,
 				approvalStatus: {
 					[Op.not]: 'Not found',
 				},
@@ -5209,6 +5211,7 @@ async function getValidTournamentBeatmapFunction(input) {
 			where: {
 				hardRockMap: true,
 				mode: mode,
+				modBits: 16,
 				approvalStatus: {
 					[Op.not]: 'Not found',
 				},
@@ -5229,6 +5232,7 @@ async function getValidTournamentBeatmapFunction(input) {
 			where: {
 				doubleTimeMap: true,
 				mode: mode,
+				modBits: 64,
 				approvalStatus: {
 					[Op.not]: 'Not found',
 				},
@@ -5249,6 +5253,7 @@ async function getValidTournamentBeatmapFunction(input) {
 			where: {
 				freeModMap: true,
 				mode: mode,
+				modBits: 0,
 				approvalStatus: {
 					[Op.not]: 'Not found',
 				},
