@@ -548,6 +548,8 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 				i--;
 				continue;
 			}
+
+			console.log(multiScores[i].pp);
 		}
 
 		//Sort scores by pp
