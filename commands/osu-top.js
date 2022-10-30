@@ -543,13 +543,13 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 			}
 			multiScores[i] = await multiToBanchoScore(multiScores[i]);
 
-			if (!multiScores[i].pp || multiScores[i].pp > 2000 || multiScores.pp == 'Inf') {
+			if (!multiScores[i].pp || multiScores[i].pp > 2000 || multiScores.pp === Infinity) {
 				multiScores.splice(i, 1);
 				i--;
 				continue;
 			}
 
-			console.log(multiScores[i].pp);
+			console.log(multiScores[i].pp, typeof multiScores[i].pp);
 		}
 
 		//Sort scores by pp
