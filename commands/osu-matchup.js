@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap } = require('../utils');
+const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
@@ -74,8 +74,6 @@ module.exports = {
 				}
 			}
 		}
-
-		const guildPrefix = await getGuildPrefix(msg);
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
@@ -156,7 +154,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						team1[i] = discordUser.osuUserId;
 					} else {
-						msg.channel.send(`\`${team1[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						msg.channel.send(`\`${team1[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect:<username>\`.`);
 						team1.splice(i, 1);
 						i--;
 						continue;
@@ -194,7 +192,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						team2[i] = discordUser.osuUserId;
 					} else {
-						msg.channel.send(`\`${team2[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						msg.channel.send(`\`${team2[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect:<username>\`.`);
 						team2.splice(i, 1);
 						i--;
 						continue;

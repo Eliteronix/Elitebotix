@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap } = require('../utils');
+const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 
@@ -39,8 +39,6 @@ module.exports = {
 				}
 			}
 		}
-
-		const guildPrefix = await getGuildPrefix(msg);
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
@@ -81,7 +79,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getMostPlayed(msg, discordUser.osuUserId, server, false, limit);
 					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect:<username>\`.`);
 						getMostPlayed(msg, args[i], server, false, limit);
 					}
 				} else {
@@ -142,12 +140,10 @@ async function getMostPlayed(msg, username, server, noLinkedAccount, limit) {
 				//Create as an attachment
 				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-mostplayed-${user.id}.png`);
 
-				let guildPrefix = await getGuildPrefix(msg);
-
 				//Send attachment
 				let sentMessage;
 				if (noLinkedAccount) {
-					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nFeel free to use \`/osu-link connect:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 				} else {
 					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>`, files: [attachment] });
 				}

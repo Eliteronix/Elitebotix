@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { fitTextOnMiddleCanvas, getGuildPrefix, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, saveOsuMultiScores, pause } = require('../utils');
+const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, saveOsuMultiScores, pause } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
@@ -56,7 +56,6 @@ module.exports = {
 				}
 			}
 		}
-		const guildPrefix = await getGuildPrefix(msg);
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
@@ -141,7 +140,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getTopPlays(msg, discordUser.osuUserId, server, mode, false, sorting, limit, tracking, order);
 					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect:<username>\`.`);
 						getTopPlays(msg, args[i], server, mode, false, sorting, limit, tracking, order);
 					}
 				} else {
@@ -209,13 +208,10 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				if (tracking) {
 					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: [attachment] });
 				} else {
-					//Define prefix command
-					let guildPrefix = await getGuildPrefix(msg);
-
 					//Send attachment
 					let sentMessage;
 					if (noLinkedAccount) {
-						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`/osu-link connect:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 					} else {
 						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
 					}

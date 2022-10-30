@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas } = require('../utils');
+const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 const { Op } = require('sequelize');
@@ -56,7 +56,6 @@ module.exports = {
 				}
 			}
 		}
-		const guildPrefix = await getGuildPrefix(msg);
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
@@ -124,7 +123,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getOsuSkills(msg, args, discordUser.osuUserId, scaled, scoringType, tourneyMatch, runningAverage);
 					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect:<username>\`.`);
 						getOsuSkills(msg, args, args[i], scaled, scoringType, tourneyMatch, runningAverage);
 					}
 				} else {

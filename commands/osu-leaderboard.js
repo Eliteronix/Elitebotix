@@ -1,5 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, humanReadable, createLeaderboard, populateMsgFromInteraction, logDatabaseQueries, getOsuUserServerMode, getGameModeName } = require('../utils');
+const { humanReadable, createLeaderboard, populateMsgFromInteraction, logDatabaseQueries, getOsuUserServerMode, getGameModeName } = require('../utils');
 const { leaderboardEntriesPerPage } = require('../config.json');
 const { Permissions } = require('discord.js');
 
@@ -153,16 +153,14 @@ module.exports = {
 
 				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${msg.guild.name}'s osu! ${getGameModeName(mode)} leaderboard`, filename, page);
 
-				const guildPrefix = await getGuildPrefix(msg);
-
 				//Send attachment
 				let leaderboardMessage;
 				if (msg.id) {
-					leaderboardMessage = await msg.reply({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`${guildPrefix}osu-link <username>\` to connect your osu! account.\nData is being updated once a day or when \`${guildPrefix}osu-profile <username>\` is being used.`, files: [attachment] });
+					leaderboardMessage = await msg.reply({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect:<username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-profile username:<username>\` is being used.`, files: [attachment] });
 				} else if (interaction) {
-					leaderboardMessage = await interaction.followUp({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`${guildPrefix}osu-link <username>\` to connect your osu! account.\nData is being updated once a day or when \`${guildPrefix}osu-profile <username>\` is being used.`, files: [attachment] });
+					leaderboardMessage = await interaction.followUp({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect:<username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-profile username:<username>\` is being used.`, files: [attachment] });
 				} else {
-					leaderboardMessage = await msg.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`${guildPrefix}osu-link <username>\` to connect your osu! account.\nData is being updated once a day or when \`${guildPrefix}osu-profile <username>\` is being used.`, files: [attachment] });
+					leaderboardMessage = await msg.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect:<username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-profile username:<username>\` is being used.`, files: [attachment] });
 				}
 
 				if (page) {

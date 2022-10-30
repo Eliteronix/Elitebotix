@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague } = require('../utils');
+const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
@@ -51,8 +51,6 @@ module.exports = {
 			}
 		}
 
-		const guildPrefix = await getGuildPrefix(msg);
-
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
 		const server = commandConfig[1];
@@ -78,7 +76,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getProfile(msg, discordUser.osuUserId, server, mode, showGraph);
 					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect:<username>\`.`);
 						getProfile(msg, args[i], server, mode, showGraph);
 					}
 				} else {
@@ -155,12 +153,10 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 					}
 				}
 
-				let guildPrefix = await getGuildPrefix(msg);
-
 				//Send attachment
 				let sentMessage = null;
 				if (noLinkedAccount) {
-					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: files });
+					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`/osu-link content:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: files });
 				} else {
 					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: files });
 				}
