@@ -546,10 +546,10 @@ async function drawBadges(input, server) {
 			.then(async (res) => {
 				let htmlCode = await res.text();
 				htmlCode = htmlCode.replace(/&quot;/gm, '"');
-				const badgesRegex = /,"badges".+,"beatmap_playcounts_count":/gm;
+				const badgesRegex = /,"badges".+,"comments_count":/gm;
 				const matches = badgesRegex.exec(htmlCode);
 				if (matches && matches[0]) {
-					const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"beatmap_playcounts_count":', '');
+					const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"comments_count":', '');
 					const rawBadgesArray = cleanedMatch.split('},{');
 					for (let i = 0; i < rawBadgesArray.length; i++) {
 						if (rawBadgesArray[i] !== '') {
