@@ -5163,6 +5163,7 @@ async function getValidTournamentBeatmapFunction(input) {
 
 	let beatmaps = null;
 	if (modPool === 'NM') {
+		logDatabaseQueriesFunction(4, 'utils.js getValidTournamentBeatmapFunction NM');
 		beatmaps = await DBOsuBeatmaps.findAll({
 			where: {
 				noModMap: true,
@@ -5184,6 +5185,7 @@ async function getValidTournamentBeatmapFunction(input) {
 			limit: 2500,
 		});
 	} else if (modPool === 'HD') {
+		logDatabaseQueriesFunction(4, 'utils.js getValidTournamentBeatmapFunction HD');
 		let HDLowerBound = lowerBound - 0.8;
 		let HDUpperBound = upperBound - 0.1;
 		beatmaps = await DBOsuBeatmaps.findAll({
@@ -5207,6 +5209,7 @@ async function getValidTournamentBeatmapFunction(input) {
 			limit: 2500,
 		});
 	} else if (modPool === 'HR') {
+		logDatabaseQueriesFunction(4, 'utils.js getValidTournamentBeatmapFunction HR');
 		beatmaps = await DBOsuBeatmaps.findAll({
 			where: {
 				hardRockMap: true,
@@ -5228,6 +5231,7 @@ async function getValidTournamentBeatmapFunction(input) {
 			limit: 2500,
 		});
 	} else if (modPool === 'DT') {
+		logDatabaseQueriesFunction(4, 'utils.js getValidTournamentBeatmapFunction DT');
 		beatmaps = await DBOsuBeatmaps.findAll({
 			where: {
 				doubleTimeMap: true,
@@ -5249,6 +5253,7 @@ async function getValidTournamentBeatmapFunction(input) {
 			limit: 2500,
 		});
 	} else if (modPool === 'FM') {
+		logDatabaseQueriesFunction(4, 'utils.js getValidTournamentBeatmapFunction FM');
 		beatmaps = await DBOsuBeatmaps.findAll({
 			where: {
 				freeModMap: true,
