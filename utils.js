@@ -2938,7 +2938,12 @@ async function getUserDuelStarRatingFunction(input) {
 		//Get ratio of modPools played maps
 		const modPoolAmounts = [0, 0, 0, 0, 0];
 		for (let i = 0; i < userScores.length && i < 100; i++) {
-			modPoolAmounts[modPools.indexOf(getScoreModpoolFunction(userScores[i]))]++;
+			if (parseInt(userScores[i].score) > 10000) {
+				modPoolAmounts[modPools.indexOf(getScoreModpoolFunction(userScores[i]))]++;
+			} else {
+				userScores.splice(i, 1);
+				i--;
+			}
 		}
 
 		if (duelRatings.noMod === null) {
