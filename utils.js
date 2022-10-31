@@ -2494,6 +2494,8 @@ module.exports = {
 				if (err.message === 'Missing Access') {
 					await guildTracker.destroy();
 					return true;
+				} else {
+					console.log(err.message);
 				}
 				return;
 			}
