@@ -1372,7 +1372,7 @@ module.exports = {
 	calculateGrade(mode, counts, modBits) {
 		return calculateGradeFunction(mode, counts, modBits);
 	},
-	async createDuelMatch(client, bancho, interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, users) {
+	async createDuelMatch(client, bancho, interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, users, queued) {
 		if (interaction) {
 			await interaction.editReply('Duel has been accepted. Getting necessary data...');
 		}
@@ -1504,34 +1504,74 @@ module.exports = {
 			}
 		}
 
+		let lobbyStatus = 'Checking online status';
+
+		let usersToCheck = [];
+		let usersNotOnline = [];
+		let usersOnline = [];
+
+		channel.on('message', async (msg) => {
+			addMatchMessageFunction(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
+
+			if (usersToCheck.length && msg.user.ircUsername === 'BanchoBot') {
+				console.log(msg.message);
+
+				if (msg.message === 'The user is currently not online.') {
+					usersNotOnline.push(usersToCheck.shift());
+				} else {
+					usersOnline.push(usersToCheck.shift());
+				}
+
+				console.log(usersNotOnline, usersOnline);
+			}
+		});
+
 		const lobby = channel.lobby;
 		logMatchCreationFunction(client, lobby.name, lobby.id);
 
 		const password = Math.random().toString(36).substring(8);
 
 		let matchMessages = [];
-		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', `!mp password ${password}`);
 		await lobby.setPassword(password);
-		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', '!mp addref Eliteronix');
 		await channel.sendMessage('!mp addref Eliteronix');
-		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', '!mp map 975342 0');
 		await channel.sendMessage('!mp map 975342 0');
 		if (users.length > 2) {
-			addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', `!mp set 2 3 ${users.length + 1}`);
 			await channel.sendMessage(`!mp set 2 3 ${users.length + 1}`);
 		} else {
-			addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', `!mp set 0 3 ${users.length + 1}`);
 			await channel.sendMessage(`!mp set 0 3 ${users.length + 1}`);
 		}
-		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', '!mp lock');
 		await channel.sendMessage('!mp lock');
 
+		if (queued) {
+			for (let i = 0; i < users.length; i++) {
+				usersToCheck.push(users[i]);
+			}
+		}
 
-		let lobbyStatus = 'Joining phase';
+		while (usersToCheck.length) {
+			await channel.sendMessage(`!where ${usersToCheck[0].osuName}`);
+			await new Promise(resolve => setTimeout(resolve, 5000));
+		}
+
+		if (usersNotOnline.length) {
+			lobby.closeLobby();
+
+			for (let i = 0; i < usersOnline.length; i++) {
+				await DBProcessQueue.create({
+					guildId: 'none',
+					task: 'duelQueue1v1',
+					additions: `${usersOnline[i].osuUserId};${usersOnline[i].osuDuelStarRating};0.5`,
+					date: new Date(),
+					priority: 9
+				});
+			}
+			return;
+		}
+
+		lobbyStatus = 'Joining phase';
 		let mapIndex = 0;
 
 		for (let i = 0; i < users.length; i++) {
-			addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', `!mp invite #${users[i].osuUserId}`);
 			await channel.sendMessage(`!mp invite #${users[i].osuUserId}`);
 			let user = await client.users.fetch(users[i].userId);
 			await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
@@ -1545,7 +1585,6 @@ module.exports = {
 			pingMessage.delete();
 		}
 		//Start the timer to close the lobby if not everyone joined by then
-		addMatchMessageFunction(lobby.id, matchMessages, 'Elitebotix', '!mp timer 300');
 		await channel.sendMessage('!mp timer 300');
 
 		let playerIds = users.map(user => user.osuUserId);
@@ -1553,7 +1592,6 @@ module.exports = {
 
 		//Add discord messages and also ingame invites for the timers
 		channel.on('message', async (msg) => {
-			addMatchMessageFunction(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
 			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
 				//Banchobot countdown finished
 				if (lobbyStatus === 'Joining phase') {

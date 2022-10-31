@@ -180,19 +180,17 @@ module.exports = {
 			}
 		}
 
+		channel.on('message', async (msg) => {
+			addMatchMessage(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
+		});
+
 		const lobby = channel.lobby;
 		logMatchCreation(additionalObjects[0], lobby.name, lobby.id);
 
 		let matchMessages = [];
-		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', `!mp password ${password}`);
 		await channel.sendMessage(`!mp password ${password}`);
-
-		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', '!mp addref Eliteronix');
 		await channel.sendMessage('!mp addref Eliteronix');
-		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', `!mp set 0 ${winCondition}`);
 		await channel.sendMessage(`!mp set 0 ${winCondition}`);
-
-		addMatchMessage(lobby.id, matchMessages, 'Elitebotix', `!mp invite #${commandUser.osuUserId}`);
 		await channel.sendMessage(`!mp invite #${commandUser.osuUserId}`);
 
 		if (interaction) {
@@ -233,7 +231,6 @@ module.exports = {
 		DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: lobby.id, priority: 1, date: date });
 
 		channel.on('message', async (msg) => {
-			addMatchMessage(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
 			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
 				await channel.sendMessage('!mp start 10');
 			} else if (msg.user._id == commandUser.osuUserId) {
