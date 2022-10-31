@@ -2486,9 +2486,7 @@ module.exports = {
 				guildTracker.guild = await client.guilds.fetch(guildTracker.guildId);
 
 				//Fetch the channel
-				console.log(guildTracker.channelId);
 				guildTracker.channel = await guildTracker.guild.channels.fetch(guildTracker.channelId);
-				console.log(guildTracker.channel);
 				return;
 			} catch (err) {
 				if (err.message === 'Missing Access' || err.message === 'Unknown Channel') {
