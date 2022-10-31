@@ -92,11 +92,7 @@ module.exports = {
 				reactionCollector.on('end', () => {
 					stop = true;
 					initialMessage.reactions.removeAll().catch(() => { });
-					if (msg.id) {
-						msg.channel.send(`Stopped tracking match \`${match.name.replace(/`/g, '')}\``);
-					} else {
-						interaction.editReply(`Stopped tracking match \`${match.name.replace(/`/g, '')}\``);
-					}
+					msg.channel.send(`Stopped tracking match \`${match.name.replace(/`/g, '')}\``);
 
 					osuApi.getMatch({ mp: matchID })
 						.then(async (match) => {
