@@ -211,9 +211,11 @@ module.exports = {
 													}
 												}
 											}
-										} else if (json.events[i].detail.type === 'host-changed') {
+										} else if (json.events[i].detail.type === 'host-changed' && json.events[i].user_id) {
 											let playerName = await getOsuPlayerName(json.events[i].user_id);
 											playerUpdates.push(`<:exchangealtsolid:1005141205069344859> ${playerName} became the host.`);
+										} else if (json.events[i].detail.type === 'host-changed') {
+											playerUpdates.push('<:exchangealtsolid:1005141205069344859> The host has been reset.');
 
 											if (json.events[i].user_id === 0) {
 												redScore = 0;
