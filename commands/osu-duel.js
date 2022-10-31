@@ -317,7 +317,7 @@ module.exports = {
 						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 					});
 
-					const user = await osuApi.getUser({ u: osuUser.id, m: 0 })
+					const user = await osuApi.getUser({ u: osuUser.name, m: 0 })
 						.catch(err => {
 							if (err.message !== 'Not found') {
 								console.log(err);
