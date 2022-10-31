@@ -658,7 +658,7 @@ module.exports = {
 					let derankStats = await getDerankStats(discordUser);
 
 					ctx.font = 'bold 25px comfortaa, sans-serif';
-					ctx.fillText(`Rank: #${humanReadable(derankStats.expectedPpRankOsu)}`, 190, 287);
+					ctx.fillText(`Duel Rank: #${humanReadable(derankStats.expectedPpRankOsu)}`, 190, 287);
 				}
 
 				//Get a circle for inserting the player avatar
