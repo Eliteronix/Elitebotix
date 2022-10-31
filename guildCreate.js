@@ -19,7 +19,9 @@ module.exports = async function (guild) {
 				generalChannel.send('Thanks for adding me to the server!\nUse `/help` to get a list of commands!\nTo provide feedback please use `/feedback`');
 			} else {
 				const otherChannel = guild.channels.cache.find(channel => channel.type === 'text' && channel.permissionsFor(guild.me).has('SEND_MESSAGES'));
-				otherChannel.send('Thanks for adding me to the server!\nUse `/help` to get a list of commands!\nTo provide feedback please use `/feedback`');
+				if (otherChannel) {
+					otherChannel.send('Thanks for adding me to the server!\nUse `/help` to get a list of commands!\nTo provide feedback please use `/feedback`');
+				}
 			}
 		}
 	} catch (error) {
