@@ -2491,11 +2491,9 @@ module.exports = {
 				console.log(guildTracker.channel);
 				return;
 			} catch (err) {
-				if (err.message === 'Missing Access') {
+				if (err.message === 'Missing Access' || err.message === 'Unknown Channel') {
 					await guildTracker.destroy();
 					return true;
-				} else {
-					console.log(err.message);
 				}
 				return;
 			}
