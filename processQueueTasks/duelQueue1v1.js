@@ -72,7 +72,7 @@ module.exports = {
 			let lowerBound = averageStarRating - 0.125;
 			let upperBound = averageStarRating + 0.125;
 
-			createDuelMatch(client, bancho, null, averageStarRating, lowerBound, upperBound, 7, false, [firstUser, secondUser]);
+			createDuelMatch(client, bancho, null, averageStarRating, lowerBound, upperBound, 7, false, [firstUser, secondUser], true);
 
 			await processQueueEntry.destroy();
 			await otherQueueTask.destroy();
