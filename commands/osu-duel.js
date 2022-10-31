@@ -308,7 +308,7 @@ module.exports = {
 					}
 				}
 
-				if (!osuUser.name) {
+				if (!osuUser.id) {
 					// eslint-disable-next-line no-undef
 					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -326,9 +326,9 @@ module.exports = {
 
 					if (!user) {
 						if (interaction.id) {
-							return await interaction.editReply({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`, ephemeral: true });
+							return await interaction.editReply({ content: `Could not find user \`${osuUser.name.replace(/`/g, '')}\`.`, ephemeral: true });
 						} else {
-							return processingMessage.edit(`Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`);
+							return processingMessage.edit(`Could not find user \`${osuUser.name.replace(/`/g, '')}\`.`);
 						}
 					}
 
