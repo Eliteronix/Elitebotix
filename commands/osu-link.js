@@ -2,6 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const { getGuildPrefix, getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-link',
@@ -28,7 +29,14 @@ module.exports = {
 				args = [interaction.options._subcommand];
 			}
 
-			await interaction.deferReply();
+			try {
+				await interaction.deferReply();
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 		}
 
 		const bancho = additionalObjects[1];
