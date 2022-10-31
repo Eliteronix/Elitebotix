@@ -291,7 +291,7 @@ module.exports = {
 							return await interaction.editReply({ content: `\`${username.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect:<username>\`.`, ephemeral: true });
 						}
 					} else {
-						osuUser.id = getIDFromPotentialOsuLink(username);
+						osuUser.name = getIDFromPotentialOsuLink(username);
 					}
 				} else {
 					//Try to get the user by the message if no argument given
