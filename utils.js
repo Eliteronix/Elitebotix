@@ -3293,18 +3293,22 @@ async function getDerankStatsFunction(discordUser) {
 	let expectedPpRankPercentageDifference = Math.round((100 / ppDiscordUsers.length * ppRank - 100 / ppDiscordUsers.length * expectedPpRank) * 100) / 100;
 
 	let expectedPpRankOsu = ppDiscordUsers[expectedPpRank - 1 - rankOffset].osuRank;
-
-	return {
-		ppRank: ppRank,
-		ppUsersLength: ppDiscordUsers.length,
-		duelRank: duelRank,
-		duelUsersLength: duelDiscordUsers.length,
-		expectedPpRank: expectedPpRank,
-		expectedPpRankPercentageDifference: expectedPpRankPercentageDifference,
-		expectedPpRankOsu: expectedPpRankOsu,
-		expectedDuelRating: duelDiscordUsers[duelRank - 1 - rankOffset].osuDuelStarRating,
-		expectedCurrentDuelRating: duelDiscordUsers[ppRank - 1 - rankOffset].osuDuelStarRating
-	};
+	try {
+		return {
+			ppRank: ppRank,
+			ppUsersLength: ppDiscordUsers.length,
+			duelRank: duelRank,
+			duelUsersLength: duelDiscordUsers.length,
+			expectedPpRank: expectedPpRank,
+			expectedPpRankPercentageDifference: expectedPpRankPercentageDifference,
+			expectedPpRankOsu: expectedPpRankOsu,
+			expectedDuelRating: duelDiscordUsers[duelRank - 1 - rankOffset].osuDuelStarRating,
+			expectedCurrentDuelRating: duelDiscordUsers[ppRank - 1 - rankOffset].osuDuelStarRating
+		};
+	} catch (error) {
+		console.log(duelDiscordUsers.length, ppRank - 1 - rankOffset);
+		throw error;
+	}
 }
 
 function wrongClusterFunction(id) {
