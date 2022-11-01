@@ -1603,6 +1603,8 @@ module.exports = {
 					return await channel.leave();
 				} else if (lobbyStatus === 'Waiting for start') {
 					await channel.sendMessage('!mp start 5');
+					await new Promise(resolve => setTimeout(resolve, 3000));
+					await lobby.updateSettings();
 					lobbyStatus === 'Map being played';
 				}
 			}
@@ -1681,6 +1683,8 @@ module.exports = {
 			}
 			if (lobbyStatus === 'Waiting for start' && playersInLobby === users.length) {
 				await channel.sendMessage('!mp start 5');
+				await new Promise(resolve => setTimeout(resolve, 3000));
+				await lobby.updateSettings();
 				lobbyStatus === 'Map being played';
 			}
 		});
