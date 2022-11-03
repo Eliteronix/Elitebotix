@@ -951,6 +951,8 @@ module.exports = {
 		async function onMessageHandler(target, context, msg, self) {
 			if (self) { return; } // Ignore messages from the bot
 
+			if (msg.startsWith('!')) { return; } // Ignore messages starting with !
+
 			const longRegex = /https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm;
 			const shortRegex = /https?:\/\/osu\.ppy\.sh\/b\/\d+/gm;
 			const longMatches = longRegex.exec(msg);
