@@ -1547,7 +1547,7 @@ module.exports = {
 		}
 
 		while (usersToCheck.length) {
-			await channel.sendMessage(`!where ${usersToCheck[0].osuName}`);
+			await channel.sendMessage(`!where ${usersToCheck[0].osuName.replaceAll(' ', '_')}`);
 			await new Promise(resolve => setTimeout(resolve, 5000));
 		}
 
