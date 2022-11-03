@@ -1516,15 +1516,11 @@ module.exports = {
 			addMatchMessageFunction(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
 
 			if (usersToCheck.length && msg.user.ircUsername === 'BanchoBot') {
-				console.log(msg.message);
-
 				if (msg.message === 'The user is currently not online.') {
 					usersNotOnline.push(usersToCheck.shift());
-				} else {
+				} else if (msg.message.includes('is in')) {
 					usersOnline.push(usersToCheck.shift());
 				}
-
-				console.log(usersNotOnline, usersOnline);
 			}
 		});
 
