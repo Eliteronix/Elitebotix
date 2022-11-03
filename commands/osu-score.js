@@ -208,6 +208,15 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						let sentMessage;
 
+						logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers Bancho linkedUser');
+						const linkedUser = await DBDiscordUsers.findOne({
+							where: { osuUserId: user.id }
+						});
+
+						if (linkedUser && linkedUser.userId) {
+							noLinkedAccount = false;
+						}
+
 						//Send attachment
 						if (noLinkedAccount) {
 							sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`/osu-link connect:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
@@ -399,6 +408,15 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-score-${osuUser.id}-${beatmap.beatmapId}-${userScores[i].raw_mods}.png`);
 
 			let sentMessage;
+
+			logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers Tournaments linkedUser');
+			const linkedUser = await DBDiscordUsers.findOne({
+				where: { osuUserId: osuUser.id }
+			});
+
+			if (linkedUser && linkedUser.userId) {
+				noLinkedAccount = false;
+			}
 
 			//Send attachment
 			if (noLinkedAccount) {

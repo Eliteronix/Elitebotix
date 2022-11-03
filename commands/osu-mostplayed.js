@@ -140,6 +140,15 @@ async function getMostPlayed(msg, username, server, noLinkedAccount, limit) {
 				//Create as an attachment
 				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-mostplayed-${user.id}.png`);
 
+				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBDiscordUsers Bancho linkedUser');
+				const linkedUser = await DBDiscordUsers.findOne({
+					where: { osuUserId: user.id }
+				});
+
+				if (linkedUser && linkedUser.userId) {
+					noLinkedAccount = false;
+				}
+
 				//Send attachment
 				let sentMessage;
 				if (noLinkedAccount) {

@@ -153,6 +153,15 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 					}
 				}
 
+				logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers Bancho linkedUser');
+				const linkedUser = await DBDiscordUsers.findOne({
+					where: { osuUserId: user.id }
+				});
+
+				if (linkedUser && linkedUser.userId) {
+					noLinkedAccount = false;
+				}
+
 				//Send attachment
 				let sentMessage = null;
 				if (noLinkedAccount) {

@@ -117,6 +117,16 @@ async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 			} else {
 				data.push(`${user.name} has ${badgeAmount} badges and their rank will therefore stay the same using BWS.`);
 			}
+
+			logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers linkedUser');
+			const linkedUser = await DBDiscordUsers.findOne({
+				where: { osuUserId: user.id }
+			});
+
+			if (linkedUser && linkedUser.userId) {
+				noLinkedAccount = false;
+			}
+
 			if (noLinkedAccount) {
 				data.push(`Feel free to use \`/osu-link connect:${user.name}\` to connect your account.`);
 			}

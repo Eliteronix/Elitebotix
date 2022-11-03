@@ -187,6 +187,15 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 
 				let sentMessage;
 
+				logDatabaseQueries(4, 'commands/osu-recent.js DBDiscordUsers Bancho linkedUser');
+				const linkedUser = await DBDiscordUsers.findOne({
+					where: { osuUserId: user.id }
+				});
+
+				if (linkedUser && linkedUser.userId) {
+					noLinkedAccount = false;
+				}
+
 				//Send attachment
 				if (noLinkedAccount) {
 					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nosu! direct: <osu://b/${dbBeatmap.beatmapId}>\nFeel free to use \`/osu-link connect:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
