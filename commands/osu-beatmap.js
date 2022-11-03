@@ -267,7 +267,11 @@ async function drawMode(input) {
 	let ctx = input[1];
 	let beatmap = input[2];
 
-	const gameMode = getGameMode(beatmap);
+	let gameMode = getGameMode(beatmap);
+	if (gameMode === 'fruits') {
+		gameMode = 'catch';
+	}
+
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
 	ctx.drawImage(modePic, (canvas.height / 3 - canvas.height / 3 / 4 * 3) / 2, canvas.height / 3 * 2 + (canvas.height / 3 - canvas.height / 3 / 4 * 3) / 4, canvas.height / 3 / 4 * 3, canvas.height / 3 / 4 * 3);
 
