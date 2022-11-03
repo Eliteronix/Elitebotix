@@ -208,6 +208,15 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				if (tracking) {
 					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: [attachment] });
 				} else {
+					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers Bancho linkedUser');
+					const linkedUser = await DBDiscordUsers.findOne({
+						where: { osuUserId: user.id }
+					});
+
+					if (linkedUser && linkedUser.userId) {
+						noLinkedAccount = false;
+					}
+
 					//Send attachment
 					let sentMessage;
 					if (noLinkedAccount) {
@@ -322,6 +331,15 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				if (tracking) {
 					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: [attachment] });
 				} else {
+					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers Tournaments linkedUser');
+					const linkedUser = await DBDiscordUsers.findOne({
+						where: { osuUserId: user.id }
+					});
+
+					if (linkedUser && linkedUser.userId) {
+						noLinkedAccount = false;
+					}
+
 					//Send attachment
 					let sentMessage;
 					if (noLinkedAccount) {
