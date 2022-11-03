@@ -3654,6 +3654,13 @@ async function getOsuBeatmapFunction(input) {
 					where: { beatmapId: beatmapId, mods: modBits }
 				});
 
+				//Date of reworked mania values
+				if (dbBeatmap && dbBeatmap.mode === 'Mania') {
+					lastRework.setUTCFullYear(2022);
+					lastRework.setUTCMonth(9);
+					lastRework.setUTCDate(12);
+				}
+
 				if (!dbBeatmap
 					|| forceUpdate
 					|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
