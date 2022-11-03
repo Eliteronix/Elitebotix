@@ -84,7 +84,7 @@ module.exports = {
 				const reactionCollector = initialMessage.createReactionCollector();
 
 				reactionCollector.on('collect', (reaction, user) => {
-					if (reaction.emoji.name === '🛑' && user.id === msg.author.id) {
+					if (reaction.emoji.name === '🛑' && (user.id === msg.author.id || user.id === msg.guild.ownerId)) {
 						reactionCollector.stop();
 					}
 				});
