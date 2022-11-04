@@ -1593,6 +1593,22 @@ module.exports = {
 			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
 				//Banchobot countdown finished
 				if (lobbyStatus === 'Joining phase') {
+					if (queued) {
+						//Requeue everyone who joined automatically
+						let TODO;
+						for (let i = 0; i < lobby.playersById.length; i++) {
+							console.log(lobby.playersById[i]);
+
+							// await DBProcessQueue.create({
+							// 	guildId: 'none',
+							// 	task: 'duelQueue1v1',
+							// 	additions: `${usersOnline[i].osuUserId};${usersOnline[i].osuDuelStarRating};0.5`,
+							// 	date: new Date(),
+							// 	priority: 9
+							// });
+						}
+					}
+
 					//Not everyone joined and the lobby will be closed
 					await channel.sendMessage('The lobby will be closed as not everyone joined.');
 					await new Promise(resolve => setTimeout(resolve, 60000));
