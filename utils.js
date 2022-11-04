@@ -1588,17 +1588,37 @@ module.exports = {
 		let playerIds = users.map(user => user.osuUserId);
 		let scores = [0, 0];
 
+		let joinedUsers = [];
+
 		//Add discord messages and also ingame invites for the timers
 		channel.on('message', async (msg) => {
 			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
 				//Banchobot countdown finished
 				if (lobbyStatus === 'Joining phase') {
+					if (queued) {
+						//Requeue everyone who joined automatically
+						joinedUsers.forEach(async (joinedUser) => {
+							let user = users.find(user => user.osuUserId === joinedUser);
+
+							//Requeue
+							await DBProcessQueue.create({
+								guildId: 'none',
+								task: 'duelQueue1v1',
+								additions: `${user.osuUserId};${user.osuDuelStarRating};0.5`,
+								date: new Date(),
+								priority: 9
+							});
+
+							//Message about requeueing
+							const IRCUser = bancho.getUser(user.osuName);
+							IRCUser.sendMessage('You have automatically been requeued for a 1v1 duel. You will be notified when a match is found.');
+						});
+					}
+
 					//Not everyone joined and the lobby will be closed
 					await channel.sendMessage('The lobby will be closed as not everyone joined.');
 					await new Promise(resolve => setTimeout(resolve, 60000));
-					await channel.sendMessage('!mp close');
-
-					return await channel.leave();
+					return await lobby.closeLobby();
 				} else if (lobbyStatus === 'Waiting for start') {
 					await channel.sendMessage('!mp start 5');
 					await new Promise(resolve => setTimeout(resolve, 3000));
@@ -1610,6 +1630,12 @@ module.exports = {
 
 		lobby.on('playerJoined', async (obj) => {
 			orderMatchPlayers(lobby, channel, [...users]);
+
+			//Add to an array of joined users for requeueing
+			if (!joinedUsers.includes(obj.player.user.id.toString())) {
+				joinedUsers.push(obj.player.user.id.toString());
+			}
+
 			if (!playerIds.includes(obj.player.user.id.toString())) {
 				channel.sendMessage(`!mp kick #${obj.player.user.id}`);
 			} else if (lobbyStatus === 'Joining phase') {
@@ -1750,7 +1776,7 @@ module.exports = {
 
 				await channel.sendMessage(`Bo${bestOf} | ${teamname1}: ${humanReadableFunction(scoreTeam1)} | ${teamname2}: ${humanReadableFunction(scoreTeam2)} | Difference: ${humanReadableFunction(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
 			} else {
-				await channel.sendMessage('!mp close');
+				await lobby.closeLobby();
 				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -1767,7 +1793,7 @@ module.exports = {
 						//Nothing
 					});
 
-				return await channel.leave();
+				return;
 			}
 
 			//Increase the score of the player at the top of the list
@@ -1889,9 +1915,7 @@ module.exports = {
 					});
 
 				await new Promise(resolve => setTimeout(resolve, 55000));
-				await channel.sendMessage('!mp close');
-
-				return await channel.leave();
+				return await lobby.closeLobby();
 			}
 		});
 	},
