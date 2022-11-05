@@ -1042,8 +1042,6 @@ module.exports = {
 				files.push(multiMatches);
 
 				let explaination = [];
-				explaination.push('**Disclaimer: Everything is heavily Work in Progress**');
-				explaination.push('');
 				explaination.push('**Hello!**');
 				explaination.push('You will likely be overwhelmed by all the info that just popped up.');
 				explaination.push('If you are just here to get a rough explaination of how the calculation works, here is a tldr:');
