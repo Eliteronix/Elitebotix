@@ -20,7 +20,7 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			if (interaction.options._subcommand === 'createduel') {
+			if (interaction.options._subcommand === 'createduel1v1' || interaction.options._subcommand === 'createduel2v2') {
 				try {
 					await interaction.deferReply();
 				} catch (error) {
