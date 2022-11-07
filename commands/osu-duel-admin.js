@@ -98,16 +98,20 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						try {
-							await interaction.editReply(`Processing Duel Rating for ${discordUser.osuName}...`);
-							starRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
-						} catch (e) {
-							if (e !== 'No standard plays') {
-								console.log(e);
-							}
-						}
 						everyUser.push(discordUser);
-						starRatings.push(starRating.total);
+						if (!averageStarRating) {
+							try {
+								await interaction.editReply(`Processing Duel Rating for ${discordUser.osuName}...`);
+								starRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
+							} catch (e) {
+								if (e !== 'No standard plays') {
+									console.log(e);
+								}
+							}
+							starRatings.push(starRating.total);
+						} else {
+							getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
+						}
 					} else {
 						return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect:<username>\`.`);
 					}
