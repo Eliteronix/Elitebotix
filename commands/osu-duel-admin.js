@@ -60,21 +60,26 @@ module.exports = {
 				}
 
 				// Get the firstTeam
-				let firstTeam = [];
+				let team = [];
 
 				if (interaction.options.getUser('firstplayer')) {
-					firstTeam.push(interaction.options.getUser('firstplayer').id);
+					team.push(interaction.options.getUser('firstplayer').id);
 				}
 
-				// Get the secondTeam
-				let secondTeam = [];
-
 				if (interaction.options.getUser('secondplayer')) {
-					secondTeam.push(interaction.options.getUser('secondplayer').id);
+					team.push(interaction.options.getUser('secondplayer').id);
+				}
+
+				if (interaction.options.getUser('thirdplayer')) {
+					team.push(interaction.options.getUser('thirdplayer').id);
+				}
+
+				if (interaction.options.getUser('fourthplayer')) {
+					team.push(interaction.options.getUser('fourthplayer').id);
 				}
 
 				//Cross check that commandUser.userId, teammates and opponents are all unique
-				const allUsers = [...firstTeam, ...secondTeam];
+				const allUsers = [...team];
 				const everyUser = [];
 
 				// Collect the star ratings to calculate the average & update the duel ratings for the users

@@ -8603,7 +8603,7 @@ module.exports = {
 					default_member_permissions: '0',
 					options: [
 						{
-							'name': 'createduel',
+							'name': 'createduel1v1',
 							'description': 'Creates a duel match',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
@@ -8616,6 +8616,82 @@ module.exports = {
 								{
 									'name': 'secondplayer',
 									'description': 'The second player',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'starrating',
+									'description': 'The star rating to play on. For example: 6.25',
+									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'bestof',
+									'description': 'The best of for the match.',
+									'type': 4, // 4 is type INTEGER
+									'choices': [
+										{
+											'name': 'Best of 13',
+											'value': 13
+										},
+										{
+											'name': 'Best of 11',
+											'value': 11
+										},
+										{
+											'name': 'Best of 9',
+											'value': 9
+										},
+										{
+											'name': 'Best of 7 (Default)',
+											'value': 7
+										},
+										{
+											'name': 'Best of 5',
+											'value': 5
+										},
+										{
+											'name': 'Best of 3',
+											'value': 3
+										},
+										{
+											'name': 'Best of 1',
+											'value': 1
+										}
+									]
+								},
+								{
+									'name': 'ranked',
+									'description': 'Should only ranked maps be played?',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
+						},
+						{
+							'name': 'createduel2v2',
+							'description': 'Creates a duel match',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'firstplayer',
+									'description': 'The first player',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondplayer',
+									'description': 'The second player',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'thirdplayer',
+									'description': 'The third player',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fourthplayer',
+									'description': 'The fourth player',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
