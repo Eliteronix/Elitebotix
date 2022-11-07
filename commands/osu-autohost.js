@@ -236,7 +236,7 @@ module.exports = {
 			} else if (msg.user._id == commandUser.osuUserId) {
 				let modUpdate = false;
 				//If it is the creator
-				if (msg.message === '!help') {
+				if (msg.message === '!commands') {
 					await channel.sendMessage('!abort - Aborts the currently playing map.');
 					await channel.sendMessage('!condition - Allows you to change the win condition. (Score/Scorev2/Accuracy)');
 					await channel.sendMessage('!password - Allows you to change the password.');
@@ -450,6 +450,18 @@ module.exports = {
 
 		lobby.on('playerJoined', async (obj) => {
 			if (commandUser.osuUserId === obj.player.user.id.toString()) {
+				await channel.sendMessage('!commands - Sends the list of commands.');
+				await channel.sendMessage('!abort - Aborts the currently playing map.');
+				await channel.sendMessage('!condition - Allows you to change the win condition. (Score/Scorev2/Accuracy)');
+				await channel.sendMessage('!password - Allows you to change the password.');
+				await channel.sendMessage('!skip - Skips the currently selected map.');
+				await channel.sendMessage('!timeout - Increases the timer to 5 minutes.');
+				await channel.sendMessage('!mods - Allows you to change the played mods. (Ex: "NM,HR,DT")');
+				await channel.sendMessage('!nm - Allows you to change the NM SR (Ex: "!nm 5.6")');
+				await channel.sendMessage('!hd - Allows you to change the HD SR (Ex: "!hd 5.6")');
+				await channel.sendMessage('!hr - Allows you to change the HR SR (Ex: "!hr 5.6")');
+				await channel.sendMessage('!dt - Allows you to change the DT SR (Ex: "!dt 5.6")');
+				await channel.sendMessage('!fm - Allows you to change the FM SR (Ex: "!fm 5.6")');
 				let nextModPool = getNextModPool(true);
 				let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 
