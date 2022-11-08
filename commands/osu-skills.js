@@ -123,7 +123,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getOsuSkills(msg, args, discordUser.osuUserId, scaled, scoringType, tourneyMatch, runningAverage);
 					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect:<username>\`.`);
+						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						getOsuSkills(msg, args, args[i], scaled, scoringType, tourneyMatch, runningAverage);
 					}
 				} else {

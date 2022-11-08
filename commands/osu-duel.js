@@ -115,7 +115,7 @@ module.exports = {
 				const commandUser = commandConfig[0];
 
 				if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
-					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect:<username>`.');
+					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect username:<username>`.');
 				}
 
 				//Cross check that commandUser.userId, teammates and opponents are all unique
@@ -158,7 +158,7 @@ module.exports = {
 							getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
 						}
 					} else {
-						return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect:<username>\`.`);
+						return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect username:<username>\`.`);
 					}
 				}
 
@@ -293,7 +293,7 @@ module.exports = {
 							osuUser.id = discordUser.osuUserId;
 							osuUser.name = discordUser.osuName;
 						} else {
-							return await interaction.editReply({ content: `\`${username.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect:<username>\`.`, ephemeral: true });
+							return await interaction.editReply({ content: `\`${username.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`, ephemeral: true });
 						}
 					} else {
 						osuUser.name = getIDFromPotentialOsuLink(username);
@@ -847,7 +847,7 @@ module.exports = {
 				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${guildName} osu! Duel Star Rating leaderboard`, filename, page);
 
 				//Send attachment
-				let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect:<username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-duel rating username:[username]\` is being used.`, files: [attachment] });
+				let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect username:<username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-duel rating username:[username]\` is being used.`, files: [attachment] });
 
 				if (page) {
 					if (page > 1) {
@@ -877,7 +877,7 @@ module.exports = {
 							osuUser.id = discordUser.osuUserId;
 							osuUser.name = discordUser.osuName;
 						} else {
-							return await interaction.editReply({ content: `\`${interaction.options._hoistedOptions[0].value.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect:<username>\`.`, ephemeral: true });
+							return await interaction.editReply({ content: `\`${interaction.options._hoistedOptions[0].value.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`, ephemeral: true });
 						}
 					} else {
 						osuUser.id = getIDFromPotentialOsuLink(interaction.options._hoistedOptions[0].value);
@@ -924,7 +924,7 @@ module.exports = {
 				let userDuelStarRating = null;
 				for (let i = 0; i < 5 && !userDuelStarRating; i++) {
 					try {
-						userDuelStarRating = await getUserDuelStarRating({ osuUserId: osuUser.id, client: interaction.client });
+						userDuelStarRating = await getUserDuelStarRating({ osuUserId: osuUser.id, client: interaction.client, forceUpdate: true });
 					} catch (e) {
 						if (i === 4) {
 							if (e === 'No standard plays') {
@@ -1298,7 +1298,7 @@ module.exports = {
 				const commandUser = commandConfig[0];
 
 				if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
-					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect:<username>`.');
+					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect username:<username>`.');
 				}
 
 				let existingQueueTasks = await DBProcessQueue.findAll({
@@ -1362,7 +1362,7 @@ module.exports = {
 				const commandUser = commandConfig[0];
 
 				if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
-					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect:<username>`.');
+					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect username:<username>`.');
 				}
 
 				let existingQueueTasks = await DBProcessQueue.findAll({

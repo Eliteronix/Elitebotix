@@ -2614,6 +2614,26 @@ async function getUserDuelStarRatingFunction(input) {
 		return duelRatings;
 	}
 
+	let discordUser = await DBDiscordUsers.findOne({
+		where: {
+			osuUserId: input.osuUserId
+		}
+	});
+
+	let weeksAgo = new Date();
+	weeksAgo.setUTCDate(weeksAgo.getUTCDate() - 21);
+	if (discordUser && discordUser.lastDuelRatingUpdate && discordUser.lastDuelRatingUpdate > weeksAgo && !completeYear && !input.forceUpdate) {
+		duelRatings.total = parseFloat(discordUser.osuDuelStarRating);
+		duelRatings.noMod = parseFloat(discordUser.osuNoModDuelStarRating);
+		duelRatings.hidden = parseFloat(discordUser.osuHiddenDuelStarRating);
+		duelRatings.hardRock = parseFloat(discordUser.osuHardRockDuelStarRating);
+		duelRatings.doubleTime = parseFloat(discordUser.osuDoubleTimeDuelStarRating);
+		duelRatings.freeMod = parseFloat(discordUser.osuFreeModDuelStarRating);
+		duelRatings.provisional = discordUser.osuDuelProvisional;
+		duelRatings.outdated = discordUser.osuDuelOutdated;
+		return duelRatings;
+	}
+
 	//Get the tournament data either limited by the date
 	logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores getUserDuelStarRating');
 	userScores = await DBOsuMultiScores.findAll({
@@ -3169,6 +3189,7 @@ async function getUserDuelStarRatingFunction(input) {
 			discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
 			discordUser.osuDuelProvisional = duelRatings.provisional;
 			discordUser.osuDuelOutdated = duelRatings.outdated;
+			discordUser.lastDuelRatingUpdate = new Date();
 			await discordUser.save();
 		}
 
@@ -3233,7 +3254,7 @@ async function getUserDuelStarRatingFunction(input) {
 	duelRatings.freeMod = null;
 
 	logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getUserDuelRatings backup');
-	let discordUser = await DBDiscordUsers.findOne({
+	discordUser = await DBDiscordUsers.findOne({
 		where: {
 			osuUserId: input.osuUserId
 		}
@@ -3250,6 +3271,7 @@ async function getUserDuelStarRatingFunction(input) {
 		discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
 		discordUser.osuDoubleTimeDuelStarRating = duelRatings.doubleTime;
 		discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
+		discordUser.lastDuelRatingUpdate = new Date();
 		await discordUser.save();
 	}
 
@@ -4714,6 +4736,7 @@ async function saveOsuMultiScoresFunction(match) {
 	let tourneyMatchPlayers = [];
 	let newMatchPlayers = [];
 	let existingMatchPlayers = [];
+	let playersToUpdate = [];
 
 	let tourneyMatch = false;
 	if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
@@ -4859,6 +4882,10 @@ async function saveOsuMultiScoresFunction(match) {
 						newMatchPlayers.push(match.games[gameIndex].scores[scoreIndex].userId);
 					}
 
+					if (!playersToUpdate.includes(match.games[gameIndex].scores[scoreIndex].userId)) {
+						playersToUpdate.push(match.games[gameIndex].scores[scoreIndex].userId);
+					}
+
 					let score = await DBOsuMultiScores.create({
 						osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
 						matchId: match.id,
@@ -4942,6 +4969,10 @@ async function saveOsuMultiScoresFunction(match) {
 				} else if (existingScore.warmup === null) {
 					if (!existingMatchPlayers.includes(match.games[gameIndex].scores[scoreIndex].userId)) {
 						existingMatchPlayers.push(match.games[gameIndex].scores[scoreIndex].userId);
+					}
+
+					if (!playersToUpdate.includes(match.games[gameIndex].scores[scoreIndex].userId)) {
+						playersToUpdate.push(match.games[gameIndex].scores[scoreIndex].userId);
 					}
 
 					existingScore.osuUserId = match.games[gameIndex].scores[scoreIndex].userId;
@@ -5036,6 +5067,18 @@ async function saveOsuMultiScoresFunction(match) {
 
 		for (let i = 0; i < outdatedDuelRatings.length; i++) {
 			await outdatedDuelRatings[i].destroy();
+		}
+
+		if (playersToUpdate.length) {
+			await DBDiscordUsers.update({
+				lastDuelRatingUpdate: null,
+			}, {
+				where: {
+					osuUserId: {
+						[Op.in]: playersToUpdate
+					}
+				}
+			});
 		}
 	}
 
@@ -5252,6 +5295,24 @@ async function getValidTournamentBeatmapFunction(input) {
 						[Op.lte]: upperBound,
 					}
 				},
+				circleSize: {
+					[Op.and]: {
+						[Op.gte]: lowerCircleSize,
+						[Op.lte]: upperCircleSize,
+					}
+				},
+				approachRate: {
+					[Op.and]: {
+						[Op.gte]: lowerApproach,
+						[Op.lte]: upperApproach,
+					}
+				},
+				drainLength: {
+					[Op.and]: {
+						[Op.gte]: lowerDrain,
+						[Op.lte]: upperDrain,
+					}
+				},
 				beatmapId: {
 					[Op.notIn]: finalAvoidList,
 				},
@@ -5276,6 +5337,24 @@ async function getValidTournamentBeatmapFunction(input) {
 						[Op.lte]: HDUpperBound,
 					}
 				},
+				circleSize: {
+					[Op.and]: {
+						[Op.gte]: lowerCircleSize,
+						[Op.lte]: upperCircleSize,
+					}
+				},
+				approachRate: {
+					[Op.and]: {
+						[Op.gte]: lowerApproach,
+						[Op.lte]: upperApproach,
+					}
+				},
+				drainLength: {
+					[Op.and]: {
+						[Op.gte]: lowerDrain,
+						[Op.lte]: upperDrain,
+					}
+				},
 				beatmapId: {
 					[Op.notIn]: finalAvoidList,
 				},
@@ -5296,6 +5375,24 @@ async function getValidTournamentBeatmapFunction(input) {
 					[Op.and]: {
 						[Op.gte]: lowerBound,
 						[Op.lte]: upperBound,
+					}
+				},
+				circleSize: {
+					[Op.and]: {
+						[Op.gte]: lowerCircleSize,
+						[Op.lte]: upperCircleSize,
+					}
+				},
+				approachRate: {
+					[Op.and]: {
+						[Op.gte]: lowerApproach,
+						[Op.lte]: upperApproach,
+					}
+				},
+				drainLength: {
+					[Op.and]: {
+						[Op.gte]: lowerDrain,
+						[Op.lte]: upperDrain,
 					}
 				},
 				beatmapId: {
@@ -5320,6 +5417,24 @@ async function getValidTournamentBeatmapFunction(input) {
 						[Op.lte]: upperBound,
 					}
 				},
+				circleSize: {
+					[Op.and]: {
+						[Op.gte]: lowerCircleSize,
+						[Op.lte]: upperCircleSize,
+					}
+				},
+				approachRate: {
+					[Op.and]: {
+						[Op.gte]: lowerApproach,
+						[Op.lte]: upperApproach,
+					}
+				},
+				drainLength: {
+					[Op.and]: {
+						[Op.gte]: lowerDrain,
+						[Op.lte]: upperDrain,
+					}
+				},
 				beatmapId: {
 					[Op.notIn]: finalAvoidList,
 				},
@@ -5340,6 +5455,24 @@ async function getValidTournamentBeatmapFunction(input) {
 					[Op.and]: {
 						[Op.gte]: lowerBound,
 						[Op.lte]: upperBound,
+					}
+				},
+				circleSize: {
+					[Op.and]: {
+						[Op.gte]: lowerCircleSize,
+						[Op.lte]: upperCircleSize,
+					}
+				},
+				approachRate: {
+					[Op.and]: {
+						[Op.gte]: lowerApproach,
+						[Op.lte]: upperApproach,
+					}
+				},
+				drainLength: {
+					[Op.and]: {
+						[Op.gte]: lowerDrain,
+						[Op.lte]: upperDrain,
 					}
 				},
 				beatmapId: {
@@ -5397,6 +5530,15 @@ async function getValidTournamentBeatmapFunction(input) {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 64 });
 		} else if (modPool == 'FM') {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 0 });
+
+			if (!randomBeatmap) {
+				beatmaps.splice(index, 1);
+				continue;
+			}
+
+			let HDStarRating = adjustHDStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate);
+			let randomBeatmapHR = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 16 });
+			randomBeatmap.starRating = (HDStarRating + randomBeatmapHR.starRating) / 2;
 		}
 
 		if (!randomBeatmap) {
