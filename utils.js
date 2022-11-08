@@ -5080,94 +5080,95 @@ async function saveOsuMultiScoresFunction(match) {
 				}
 			});
 		}
-	}
 
-	for (let i = 0; i < newMatchPlayers.length; i++) {
-		if (existingMatchPlayers.includes(newMatchPlayers[i])) {
-			newMatchPlayers.splice(i, 1);
-			i--;
+
+		for (let i = 0; i < newMatchPlayers.length; i++) {
+			if (existingMatchPlayers.includes(newMatchPlayers[i])) {
+				newMatchPlayers.splice(i, 1);
+				i--;
+			}
 		}
-	}
 
-	if (newMatchPlayers.length) {
-		//Get all follows for the players in the match
-		let follows = await DBOsuTourneyFollows.findAll({
-			where: {
-				osuUserId: {
-					[Op.in]: newMatchPlayers
+		if (newMatchPlayers.length) {
+			//Get all follows for the players in the match
+			let follows = await DBOsuTourneyFollows.findAll({
+				where: {
+					osuUserId: {
+						[Op.in]: newMatchPlayers
+					}
+				}
+			});
+
+			//Collect the follows per user
+			let usersToNotify = [];
+			let usersToNotifyIds = [];
+
+			for (let i = 0; i < follows.length; i++) {
+				if (usersToNotifyIds.indexOf(follows[i].userId) === -1) {
+					usersToNotifyIds.push(follows[i].userId);
+					usersToNotify.push({ userId: follows[i].userId, osuUserIds: [follows[i].osuUserId] });
+				} else {
+					usersToNotify[usersToNotifyIds.indexOf(follows[i].userId)].osuUserIds.push(follows[i].osuUserId);
 				}
 			}
-		});
 
-		//Collect the follows per user
-		let usersToNotify = [];
-		let usersToNotifyIds = [];
-
-		for (let i = 0; i < follows.length; i++) {
-			if (usersToNotifyIds.indexOf(follows[i].userId) === -1) {
-				usersToNotifyIds.push(follows[i].userId);
-				usersToNotify.push({ userId: follows[i].userId, osuUserIds: [follows[i].osuUserId] });
-			} else {
-				usersToNotify[usersToNotifyIds.indexOf(follows[i].userId)].osuUserIds.push(follows[i].osuUserId);
+			//Create a notification for each user
+			let now = new Date();
+			for (let i = 0; i < usersToNotify.length; i++) {
+				await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')}`, date: now });
 			}
 		}
 
-		//Create a notification for each user
-		let now = new Date();
-		for (let i = 0; i < usersToNotify.length; i++) {
-			await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')}`, date: now });
-		}
-	}
-
-	//Manage osu-track follows for guilds
-	if (newMatchPlayers.length) {
-		//Get all follows for the players in the match
-		let guildTrackers = await DBOsuGuildTrackers.findAll({
-			where: {
-				osuUserId: {
-					[Op.in]: newMatchPlayers
-				},
-				matchActivity: true
-			}
-		});
-
-		let existingMatchPlayerTrackers = await DBOsuGuildTrackers.findAll({
-			where: {
-				osuUserId: {
-					[Op.in]: existingMatchPlayers
-				},
-				matchActivity: true,
-				matchActivityAutoTrack: true,
-			}
-		});
-
-		let existingMatchPlayerChannelIds = [];
-
-		for (let i = 0; i < existingMatchPlayerTrackers.length; i++) {
-			existingMatchPlayerChannelIds.push(existingMatchPlayerTrackers[i].channelId);
-		}
-
-		//Collect the follows per user
-		let channelsToNotify = [];
-		let channelsToNotifyIds = [];
-
-		for (let i = 0; i < guildTrackers.length; i++) {
-			if (channelsToNotifyIds.indexOf(guildTrackers[i].channelId) === -1) {
-				channelsToNotifyIds.push(guildTrackers[i].channelId);
-				let trackMatch = guildTrackers[i].matchActivityAutoTrack;
-				if (existingMatchPlayerChannelIds.includes(guildTrackers[i].channelId)) {
-					trackMatch = false;
+		//Manage osu-track follows for guilds
+		if (newMatchPlayers.length) {
+			//Get all follows for the players in the match
+			let guildTrackers = await DBOsuGuildTrackers.findAll({
+				where: {
+					osuUserId: {
+						[Op.in]: newMatchPlayers
+					},
+					matchActivity: true
 				}
-				channelsToNotify.push({ guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, osuUserIds: [guildTrackers[i].osuUserId], trackMatch: trackMatch });
-			} else {
-				channelsToNotify[channelsToNotifyIds.indexOf(guildTrackers[i].channelId)].osuUserIds.push(guildTrackers[i].osuUserId);
-			}
-		}
+			});
 
-		//Create a notification for each channel
-		let now = new Date();
-		for (let i = 0; i < channelsToNotify.length; i++) {
-			await DBProcessQueue.create({ task: 'guildTourneyFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${channelsToNotify[i].osuUserIds.join(',')};${channelsToNotify[i].trackMatch}`, date: now });
+			let existingMatchPlayerTrackers = await DBOsuGuildTrackers.findAll({
+				where: {
+					osuUserId: {
+						[Op.in]: existingMatchPlayers
+					},
+					matchActivity: true,
+					matchActivityAutoTrack: true,
+				}
+			});
+
+			let existingMatchPlayerChannelIds = [];
+
+			for (let i = 0; i < existingMatchPlayerTrackers.length; i++) {
+				existingMatchPlayerChannelIds.push(existingMatchPlayerTrackers[i].channelId);
+			}
+
+			//Collect the follows per user
+			let channelsToNotify = [];
+			let channelsToNotifyIds = [];
+
+			for (let i = 0; i < guildTrackers.length; i++) {
+				if (channelsToNotifyIds.indexOf(guildTrackers[i].channelId) === -1) {
+					channelsToNotifyIds.push(guildTrackers[i].channelId);
+					let trackMatch = guildTrackers[i].matchActivityAutoTrack;
+					if (existingMatchPlayerChannelIds.includes(guildTrackers[i].channelId)) {
+						trackMatch = false;
+					}
+					channelsToNotify.push({ guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, osuUserIds: [guildTrackers[i].osuUserId], trackMatch: trackMatch });
+				} else {
+					channelsToNotify[channelsToNotifyIds.indexOf(guildTrackers[i].channelId)].osuUserIds.push(guildTrackers[i].osuUserId);
+				}
+			}
+
+			//Create a notification for each channel
+			let now = new Date();
+			for (let i = 0; i < channelsToNotify.length; i++) {
+				await DBProcessQueue.create({ task: 'guildTourneyFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${channelsToNotify[i].osuUserIds.join(',')};${channelsToNotify[i].trackMatch}`, date: now });
+			}
 		}
 	}
 }
