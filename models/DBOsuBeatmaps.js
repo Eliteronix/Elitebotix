@@ -15,31 +15,31 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 		},
 		starRating: {
-			type: DataTypes.STRING,
+			type: DataTypes.DECIMAL(10, 5),
 		},
 		aimRating: {
-			type: DataTypes.STRING,
+			type: DataTypes.DECIMAL(10, 5),
 		},
 		speedRating: {
-			type: DataTypes.STRING,
+			type: DataTypes.DECIMAL(10, 5),
 		},
 		drainLength: {
-			type: DataTypes.STRING,
+			type: DataTypes.INTEGER,
 		},
 		totalLength: {
-			type: DataTypes.STRING,
+			type: DataTypes.INTEGER,
 		},
 		circleSize: {
-			type: DataTypes.STRING,
+			type: DataTypes.DECIMAL(10, 2),
 		},
 		approachRate: {
-			type: DataTypes.STRING,
+			type: DataTypes.DECIMAL(10, 2),
 		},
 		overallDifficulty: {
-			type: DataTypes.STRING,
+			type: DataTypes.DECIMAL(10, 2),
 		},
 		hpDrain: {
-			type: DataTypes.STRING,
+			type: DataTypes.DECIMAL(10, 2),
 		},
 		mapper: {
 			type: DataTypes.STRING,
@@ -99,13 +99,12 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 		},
 		paranoid: true,
-	},
-		{
-			indexes: [
-				{
-					unique: false,
-					fields: ['beatmapId', 'mods']
-				}
-			]
-		});
+	}, {
+		indexes: [
+			{
+				unique: false,
+				fields: ['beatmapId', 'mods']
+			}
+		]
+	});
 };

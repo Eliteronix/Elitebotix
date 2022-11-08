@@ -77,7 +77,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						teams[i][j] = discordUser.osuUserId;
 					} else {
-						msg.channel.send(`\`${teams[i][j].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect:<username>\`.`);
+						msg.channel.send(`\`${teams[i][j].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						teams[i].splice(j, 1);
 						j--;
 					}

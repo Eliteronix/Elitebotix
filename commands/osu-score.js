@@ -109,7 +109,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getScore(msg, dbBeatmap, discordUser.osuUserId, server, mode, false, mapRank, mods);
 					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect:<username>\`.`);
+						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						getScore(msg, dbBeatmap, args[i], server, mode, false, mapRank, mods);
 					}
 				} else {
@@ -219,7 +219,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						//Send attachment
 						if (noLinkedAccount) {
-							sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`/osu-link connect:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+							sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`/osu-link connect username:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 						} else {
 							sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 						}
@@ -420,7 +420,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 			//Send attachment
 			if (noLinkedAccount) {
-				sentMessage = await msg.channel.send({ content: `${osuUser.name}: <https://osu.ppy.sh/users/${osuUser.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${osuUser.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`/osu-link connect:${osuUser.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+				sentMessage = await msg.channel.send({ content: `${osuUser.name}: <https://osu.ppy.sh/users/${osuUser.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${osuUser.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`/osu-link connect username:${osuUser.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 			} else {
 				sentMessage = await msg.channel.send({ content: `${osuUser.name}: <https://osu.ppy.sh/users/${osuUser.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${osuUser.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
 			}

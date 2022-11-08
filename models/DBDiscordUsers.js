@@ -55,6 +55,9 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		lastDuelRatingUpdate: {
+			type: DataTypes.DATE,
+		},
 		osuDuelRatingUpdates: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
