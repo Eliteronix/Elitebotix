@@ -5609,6 +5609,7 @@ async function getValidTournamentBeatmapFunction(input) {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Checked too many maps for usage');
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
+			input.notUsedOftenCount++;
 			continue;
 		}
 
