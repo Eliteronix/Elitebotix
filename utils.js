@@ -4187,7 +4187,7 @@ async function logDatabaseQueriesFunction(level, output) {
 		await new Promise(resolve => setTimeout(resolve, 1000));
 
 		//if 400MiB increase, log it
-		if (startTotal > (process.memoryUsage().heapTotal / 1000000) + 400) {
+		if (startTotal + 400 < (process.memoryUsage().heapTotal / 1000000)) {
 			console.log('traceDatabaseQueries: ', output, 'Memory usage increased by 400MB', new Date(), process.memoryUsage().heapTotal / 1000000, 'MiB in use right now');
 			break;
 		}
@@ -5279,6 +5279,11 @@ async function getValidTournamentBeatmapFunction(input) {
 		onlyRanked = input.onlyRanked;
 	}
 
+	//initialize count of Not used often
+	if (!input.notUsedOftenCount) {
+		input.notUsedOftenCount = 0;
+	}
+
 	let beatmaps = null;
 	if (modPool === 'NM') {
 		logDatabaseQueriesFunction(4, 'utils.js getValidTournamentBeatmapFunction NM');
@@ -5597,6 +5602,14 @@ async function getValidTournamentBeatmapFunction(input) {
 			let clone = JSON.parse(JSON.stringify(randomBeatmap));
 			beatmaps = null;
 			return clone;
+		}
+
+		//If map has to be checked but the count is already reached, skip it
+		if (input.notUsedOftenCount >= 5) {
+			beatmaps.splice(index, 1);
+			console.log('Map Selection: Checked too many maps for usage');
+			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
+			continue;
 		}
 
 		const mapScoreAmount = await DBOsuMultiScores.count({
