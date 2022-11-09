@@ -5609,7 +5609,6 @@ async function getValidTournamentBeatmapFunction(input) {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Checked too many maps for usage');
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
-			input.notUsedOftenCount++;
 			continue;
 		}
 
@@ -5632,6 +5631,7 @@ async function getValidTournamentBeatmapFunction(input) {
 			console.log('Map Selection: Not used often');
 			beatmaps.splice(index, 1);
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
+			input.notUsedOftenCount++;
 			continue;
 		}
 
