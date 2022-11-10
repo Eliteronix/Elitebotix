@@ -5555,7 +5555,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		}
 
 		//Check drain length
-		if (parseInt(randomBeatmap.drainLength) > upperDrain || parseInt(randomBeatmap.drainLength) < lowerDrain) {
+		if (randomBeatmap.drainLength > upperDrain || randomBeatmap.drainLength < lowerDrain) {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Drain length out of bounds');
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
@@ -5563,7 +5563,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		}
 
 		//Check the approach rate
-		if (parseFloat(randomBeatmap.approachRate) > upperApproach || parseFloat(randomBeatmap.approachRate) < lowerApproach) {
+		if (randomBeatmap.approachRate > upperApproach || randomBeatmap.approachRate < lowerApproach) {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Approach rate out of bounds');
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
@@ -5571,7 +5571,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		}
 
 		//Check the circle size
-		if (parseFloat(randomBeatmap.circleSize) > upperCircleSize || parseFloat(randomBeatmap.circleSize) < lowerCircleSize) {
+		if (randomBeatmap.circleSize > upperCircleSize || randomBeatmap.circleSize < lowerCircleSize) {
 			beatmaps.splice(index, 1);
 			console.log('Map Selection: Circle size out of bounds');
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
