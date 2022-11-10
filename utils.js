@@ -3478,9 +3478,9 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, dep
 		combo: parseInt(combo),
 	};
 
-	let map = new Beatmap({ path: `./maps/${beatmapId}.osu` });
-
 	try {
+		let map = new Beatmap({ path: `./maps/${beatmapId}.osu` });
+
 		return new Calculator(arg).performance(map).pp;
 	} catch (e) {
 		if (depth < 3) {
@@ -3495,7 +3495,7 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, dep
 			depth++;
 
 			return await getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, depth);
-		} else if (e.message !== 'Error: Failed to parse beatmap: expected `osu file format v` at file begin') {
+		} else if (e.message !== 'Failed to parse beatmap: expected `osu file format v` at file begin') {
 			console.log(`error with map ${beatmapId}`, e);
 			return null;
 		}
