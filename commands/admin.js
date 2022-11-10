@@ -1222,6 +1222,11 @@ module.exports = {
 			// 						'type': 4,
 			// 						'required': false
 			// 					},
+			//					{
+			// 						'name': 'csv',
+			// 						'description': 'Should a csv file be attached',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
 			// 				]
 			// 			},
 			// 			{
@@ -5390,6 +5395,11 @@ module.exports = {
 									'description': 'The page of the leaderboard to display',
 									'type': 4,
 									'required': false
+								},
+								{
+									'name': 'csv',
+									'description': 'Should a csv file be attached',
+									'type': 5, // 5 is type BOOLEAN
 								},
 							]
 						},

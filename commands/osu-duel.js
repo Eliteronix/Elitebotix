@@ -9,6 +9,7 @@ const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { showUnknownInteractionError } = require('../config.json');
+const ObjectsToCsv = require('objects-to-csv');
 
 module.exports = {
 	name: 'osu-duel',
@@ -714,30 +715,31 @@ module.exports = {
 					await interaction.guild.members.fetch()
 						.then(async (guildMembers) => {
 							const members = [];
-							guildMembers.each(member => members.push(member));
-							for (let i = 0; i < members.length; i++) {
-								logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard');
-								const discordUser = await DBDiscordUsers.findOne({
-									where: {
-										userId: members[i].id,
-										osuUserId: {
-											[Op.not]: null,
-										},
-										osuDuelStarRating: {
-											[Op.not]: null,
-										}
-									},
-								});
+							guildMembers.each(member => members.push(member.id));
 
-								if (discordUser) {
-									osuAccounts.push({
-										userId: discordUser.userId,
-										osuUserId: discordUser.osuUserId,
-										osuName: discordUser.osuName,
-										osuVerified: discordUser.osuVerified,
-										osuDuelStarRating: parseFloat(discordUser.osuDuelStarRating),
-									});
-								}
+							logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard');
+							const discordUsers = await DBDiscordUsers.findAll({
+								where: {
+									userId: {
+										[Op.in]: members
+									},
+									osuUserId: {
+										[Op.not]: null,
+									},
+									osuDuelStarRating: {
+										[Op.not]: null,
+									}
+								},
+							});
+
+							for (let i = 0; i < discordUsers.length; i++) {
+								osuAccounts.push({
+									userId: discordUsers[i].userId,
+									osuUserId: discordUsers[i].osuUserId,
+									osuName: discordUsers[i].osuName,
+									osuVerified: discordUsers[i].osuVerified,
+									osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
+								});
 							}
 						})
 						.catch(err => {
@@ -799,6 +801,10 @@ module.exports = {
 							name: userDisplayName,
 							value: `${Math.round(osuAccounts[i].osuDuelStarRating * 1000) / 1000}* | ${verified} ${osuAccounts[i].osuName}`,
 							color: getOsuDuelLeague(osuAccounts[i].osuDuelStarRating).color,
+							osuName: osuAccounts[i].osuName,
+							osuUserId: osuAccounts[i].osuUserId,
+							duelRating: osuAccounts[i].osuDuelStarRating,
+							verified: osuAccounts[i].osuVerified,
 						};
 
 						leaderboardData.push(dataset);
@@ -807,6 +813,10 @@ module.exports = {
 							name: osuAccounts[i].osuName,
 							value: `${Math.round(osuAccounts[i].osuDuelStarRating * 1000) / 1000}*`,
 							color: getOsuDuelLeague(osuAccounts[i].osuDuelStarRating).color,
+							osuName: osuAccounts[i].osuName,
+							osuUserId: osuAccounts[i].osuUserId,
+							duelRating: osuAccounts[i].osuDuelStarRating,
+							verified: osuAccounts[i].osuVerified,
 						};
 
 						leaderboardData.push(dataset);
@@ -846,8 +856,36 @@ module.exports = {
 
 				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${guildName} osu! Duel Star Rating leaderboard`, filename, page);
 
+				let files = [attachment];
+
+				if (interaction.options.getBoolean('csv')) {
+					let csvData = [];
+
+					for (let i = 0; i < leaderboardData.length; i++) {
+						csvData.push({ rank: i + 1, osuName: leaderboardData[i].osuName, duelRating: leaderboardData[i].duelRating, osuUserId: leaderboardData[i].osuUserId, verified: leaderboardData[i].verified });
+					}
+
+
+					let data = [];
+					for (let i = 0; i < csvData.length; i++) {
+						data.push(csvData[i]);
+
+						if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
+							let csv = new ObjectsToCsv(data);
+							csv = await csv.toString();
+							// eslint-disable-next-line no-undef
+							const buffer = Buffer.from(csv);
+							//Create as an attachment
+							// eslint-disable-next-line no-undef
+							files.push(new Discord.MessageAttachment(buffer, `duelRatings${files.length.toString().padStart(2, '0')}.csv`));
+
+							data = [];
+						}
+					}
+				}
+
 				//Send attachment
-				let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect username:<username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-duel rating username:[username]\` is being used.`, files: [attachment] });
+				let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect username:<username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-duel rating username:[username]\` is being used.`, files: files });
 
 				if (page) {
 					if (page > 1) {
