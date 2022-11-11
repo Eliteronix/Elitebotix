@@ -706,7 +706,7 @@ module.exports = {
 				return;
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
 				if (interaction.id) {
-					interaction.reply('Processing leaderboard...');
+					await interaction.reply('Processing leaderboard...');
 				}
 
 				let osuAccounts = [];
@@ -858,7 +858,7 @@ module.exports = {
 
 				let files = [attachment];
 
-				if (interaction && interaction.options && interaction.options._hoistedOptions && interaction.options.getBoolean('csv')) {
+				if (interaction.id && interaction.options.getBoolean('csv')) {
 					let csvData = [];
 
 					for (let i = 0; i < leaderboardData.length; i++) {
