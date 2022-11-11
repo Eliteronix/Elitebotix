@@ -858,7 +858,7 @@ module.exports = {
 
 				let files = [attachment];
 
-				if (interaction.options.getBoolean('csv')) {
+				if (interaction && interaction.options && interaction.options.getBoolean('csv')) {
 					let csvData = [];
 
 					for (let i = 0; i < leaderboardData.length; i++) {
