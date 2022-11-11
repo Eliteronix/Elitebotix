@@ -118,6 +118,8 @@ module.exports = {
 			URL = 'https://osu.ppy.sh/assets/images/mod_8K.13caafe8.png';
 		} else if (mod === '9K') {
 			URL = 'https://osu.ppy.sh/assets/images/mod_9K.ffde81fe.png';
+		} else if (mod === 'RX') {
+			URL = 'https://osu.ppy.sh/assets/images/mod_relax.dbcfb8d8.png';
 		}
 
 		return URL;
