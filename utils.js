@@ -2112,17 +2112,21 @@ module.exports = {
 								}
 							}
 
-							if (guildTrackers[i].medals && !osuUser.medalsData) {
-								// Fetch https://osekai.net/medals/api/medals_nogrouping.php
-								let medalsData = await fetch('https://osekai.net/medals/api/medals_nogrouping.php');
-								medalsData = await medalsData.json();
-								osuUser.medalsData = medalsData;
-							}
-
 							if (osuUser.osuUser.events[j].html.includes('medal')) {
 								if (!guildTrackers[i].medals) {
 									continue;
 								}
+
+								console.log('osutrack', osuUser.osuUser.events[j]);
+
+								if (!osuUser.medalsData) {
+									// Fetch https://osekai.net/medals/api/medals_nogrouping.php
+									let medalsData = await fetch('https://osekai.net/medals/api/medals_nogrouping.php');
+									medalsData = await medalsData.json();
+									osuUser.medalsData = medalsData;
+								}
+
+								console.log('osutrack', new Date(osuUser.osuUser.events[j].raw_date), osuTracker.updatedAt);
 
 								//This only works if the local timezone is UTC
 								if (new Date(osuUser.osuUser.events[j].raw_date) < osuTracker.updatedAt) {
@@ -2134,9 +2138,13 @@ module.exports = {
 								//Find the medal in osuUser.medalsData with the same name
 								let medal = osuUser.medalsData.find(medal => medal.name === medalName);
 
+								console.log('osutrack', medal);
+
 								if (!osuUser.osuName) {
 									osuUser.osuName = await getOsuPlayerNameFunction(osuUser.osuUserId);
 								}
+
+								console.log('osutrack', osuUser.osuName);
 
 								let medalEmbed = new Discord.MessageEmbed()
 									.setColor('#583DA9')
