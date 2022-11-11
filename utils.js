@@ -2163,7 +2163,7 @@ module.exports = {
 									.addField('Medal Group', medal.grouping);
 
 								if (medal.instructions) {
-									medalEmbed.addField('Medal requirements', medal.instructions.replace('<b>', '**').replace('</b>', '**'));
+									medalEmbed.addField('Medal requirements', medal.instructions.replace('<b>', '**').replace('</b>', '**').replace('<i>', '*').replace('</i>', '*'));
 								}
 
 								await guildTrackers[i].channel.send({ embeds: [medalEmbed] });
