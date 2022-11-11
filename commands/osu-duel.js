@@ -831,7 +831,7 @@ module.exports = {
 					page = Math.abs(parseInt(interaction.options._hoistedOptions[0].value));
 				}
 
-				if (!page && leaderboardData.length > 300) {
+				if (!page && leaderboardData.length > 150) {
 					page = 1;
 					if (authorPlacement) {
 						page = Math.floor(authorPlacement / leaderboardEntriesPerPage) + 1;

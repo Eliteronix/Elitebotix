@@ -100,7 +100,7 @@ module.exports = {
 					page = Math.abs(parseInt(args[0]));
 				}
 
-				if (!page && leaderboardData.length > 300) {
+				if (!page && leaderboardData.length > 150) {
 					page = 1;
 					if (authorPlacement) {
 						page = Math.floor(authorPlacement / leaderboardEntriesPerPage) + 1;
