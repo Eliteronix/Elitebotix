@@ -2622,7 +2622,7 @@ async function getUserDuelStarRatingFunction(input) {
 
 	let weeksAgo = new Date();
 	weeksAgo.setUTCDate(weeksAgo.getUTCDate() - 21);
-	if (discordUser && discordUser.lastDuelRatingUpdate && discordUser.lastDuelRatingUpdate > weeksAgo && !completeYear && !input.forceUpdate) {
+	if (discordUser && discordUser.lastDuelRatingUpdate && discordUser.lastDuelRatingUpdate > weeksAgo && !input.date && !input.forceUpdate) {
 		duelRatings.total = parseFloat(discordUser.osuDuelStarRating);
 		duelRatings.noMod = parseFloat(discordUser.osuNoModDuelStarRating);
 		duelRatings.hidden = parseFloat(discordUser.osuHiddenDuelStarRating);
