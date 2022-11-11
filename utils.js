@@ -1563,6 +1563,8 @@ module.exports = {
 					priority: 9
 				});
 			}
+
+			updateQueueChannelsFunction(client);
 			return;
 		}
 
@@ -1608,6 +1610,8 @@ module.exports = {
 								date: new Date(),
 								priority: 9
 							});
+
+							updateQueueChannelsFunction(client);
 
 							//Message about requeueing
 							const IRCUser = bancho.getUser(user.osuName);
@@ -1920,28 +1924,7 @@ module.exports = {
 		});
 	},
 	async updateQueueChannels(client) {
-		let existingQueueTasks = await DBProcessQueue.findAll({
-			where: {
-				task: 'duelQueue1v1',
-			},
-		});
-
-		let channelId = '1010093794714189865';
-		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'Dev') {
-			channelId = '1010092736155762818';
-			// eslint-disable-next-line no-undef
-		} else if (process.env.SERVER === 'QA') {
-			channelId = '1010093409840660510';
-		}
-
-		let channel = await client.channels.fetch(channelId);
-		let multipleString = 's';
-		if (existingQueueTasks.length === 1) {
-			multipleString = '';
-		}
-
-		await channel.edit({ name: `1v1 Queue: ${existingQueueTasks.length} user${multipleString}` });
+		await updateQueueChannelsFunction(client);
 	},
 	async createNewForumPostRecords(client) {
 		await fetch('https://osu.ppy.sh/community/forums/55')
@@ -5926,4 +5909,29 @@ async function orderMatchPlayers(lobby, channel, players) {
 			}
 		}
 	}
+}
+
+async function updateQueueChannelsFunction(client) {
+	let existingQueueTasks = await DBProcessQueue.findAll({
+		where: {
+			task: 'duelQueue1v1',
+		},
+	});
+
+	let channelId = '1010093794714189865';
+	// eslint-disable-next-line no-undef
+	if (process.env.SERVER === 'Dev') {
+		channelId = '1010092736155762818';
+		// eslint-disable-next-line no-undef
+	} else if (process.env.SERVER === 'QA') {
+		channelId = '1010093409840660510';
+	}
+
+	let channel = await client.channels.fetch(channelId);
+	let multipleString = 's';
+	if (existingQueueTasks.length === 1) {
+		multipleString = '';
+	}
+
+	await channel.edit({ name: `1v1 Queue: ${existingQueueTasks.length} user${multipleString}` });
 }
