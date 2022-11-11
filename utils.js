@@ -1594,6 +1594,8 @@ module.exports = {
 
 		let currentMapSelected = false;
 
+		let waitedForMapdownload = false;
+
 		//Add discord messages and also ingame invites for the timers
 		channel.on('message', async (msg) => {
 			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
@@ -1626,10 +1628,26 @@ module.exports = {
 					await new Promise(resolve => setTimeout(resolve, 60000));
 					return await lobby.closeLobby();
 				} else if (lobbyStatus === 'Waiting for start') {
-					await channel.sendMessage('!mp start 5');
-					await new Promise(resolve => setTimeout(resolve, 3000));
-					await lobby.updateSettings();
-					lobbyStatus === 'Map being played';
+					let playerHasNoMap = false;
+					for (let i = 0; i < 16; i++) {
+						let player = lobby.slots[i];
+						if (player && player.state === require('bancho.js').BanchoLobbyPlayerStates.NoMap) {
+							playerHasNoMap = true;
+						}
+					}
+
+					if (waitedForMapdownload || !playerHasNoMap) {
+						//just start; we waited another minute already
+						waitedForMapdownload = false;
+						await channel.sendMessage('!mp start 5');
+						await new Promise(resolve => setTimeout(resolve, 3000));
+						await lobby.updateSettings();
+						lobbyStatus === 'Map being played';
+					} else {
+						waitedForMapdownload = true;
+						await channel.sendMessage('A player is missing the map. Waiting only 1 minute longer.');
+						await channel.sendMessage('!mp timer 60');
+					}
 				}
 			}
 		});
