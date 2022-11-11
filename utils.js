@@ -1592,6 +1592,8 @@ module.exports = {
 
 		let joinedUsers = [];
 
+		let currentMapSelected = false;
+
 		//Add discord messages and also ingame invites for the timers
 		channel.on('message', async (msg) => {
 			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
@@ -1654,7 +1656,7 @@ module.exports = {
 
 					await channel.sendMessage(`Average star rating of the mappool: ${Math.round(averageStarRating * 100) / 100}`);
 
-					await channel.sendMessage('Looking for a map... (HD2 and FM2 might take a minute or two for higher SR; I am still looking into improving it - Eliteronix, The Dev)');
+					await channel.sendMessage('Looking for a map...');
 					let nextMap = null;
 					if (bestOf === 1) {
 						nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
@@ -1685,6 +1687,8 @@ module.exports = {
 						await new Promise(resolve => setTimeout(resolve, 5000));
 					}
 
+					currentMapSelected = true;
+
 					(async () => {
 						let mapInfo = await getOsuMapInfo(nextMap);
 						await channel.sendMessage(mapInfo);
@@ -1709,15 +1713,18 @@ module.exports = {
 					playersInLobby++;
 				}
 			}
-			if (lobbyStatus === 'Waiting for start' && playersInLobby === users.length) {
+			if (currentMapSelected && lobbyStatus === 'Waiting for start' && playersInLobby === users.length) {
 				await channel.sendMessage('!mp start 5');
 				await new Promise(resolve => setTimeout(resolve, 3000));
 				await lobby.updateSettings();
 				lobbyStatus === 'Map being played';
+			} else if (!currentMapSelected && lobbyStatus === 'Waiting for start' && playersInLobby === users.length) {
+				await channel.sendMessage('Give me a moment, I am still searching for the best map ;w;');
 			}
 		});
 
 		lobby.on('matchFinished', async (results) => {
+			currentMapSelected = false;
 			if (modPools[mapIndex] === 'FreeMod') {
 				for (let i = 0; i < results.length; i++) {
 					//Increase the score by 1.7 if EZ was played
@@ -1812,18 +1819,15 @@ module.exports = {
 				mapIndex++;
 				lobbyStatus = 'Waiting for start';
 
-				await channel.sendMessage('Looking for a map... (HD2 and FM2 might take a minute or two for higher SR; I am still looking into improving it - Eliteronix, The Dev)');
+				await channel.sendMessage('Looking for a map...');
 				let nextMap = null;
 				if (scores[0] + scores[1] === bestOf - 1) {
 					nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
 				} else {
 					nextMap = await getNextMapFunction(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
 				}
-				try {
-					avoidMaps.push(nextMap.beatmapId);
-				} catch (err) {
-					console.log(mapIndex, modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps, err);
-				}
+
+				avoidMaps.push(nextMap.beatmapId);
 
 
 				while (lobby._beatmapId != nextMap.beatmapId) {
@@ -1847,6 +1851,8 @@ module.exports = {
 					await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
 				}
+
+				currentMapSelected = true;
 
 				(async () => {
 					let mapInfo = await getOsuMapInfo(nextMap);
