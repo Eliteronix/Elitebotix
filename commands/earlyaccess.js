@@ -1,6 +1,10 @@
-const { DBDiscordUsers, DBOsuTourneyFollows } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuTourneyFollows, DBOsuMultiScores } = require('../dbObjects');
 const osu = require('node-osu');
 const { developers } = require('../config.json');
+const { Op } = require('sequelize');
+const { getUserDuelStarRating } = require('../utils');
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const Discord = require('discord.js');
 
 module.exports = {
 	name: 'earlyaccess',
@@ -205,6 +209,221 @@ module.exports = {
 
 			return msg.reply(`You have ${followers.length} followers: \`${followerList.join('`, `')}\``);
 
+		} else if (args[0] === 'duelRatingDevelopment') {
+			let discordUser = await DBDiscordUsers.findOne({
+				where: {
+					userId: msg.author.id,
+					osuUserId: {
+						[Op.ne]: null
+					}
+				}
+			});
+
+			if (!discordUser) {
+				return msg.reply('You have not connected your osu! account');
+			}
+
+			let processingMessage = await msg.reply('Processing...');
+
+			let oldestScore = await DBOsuMultiScores.findOne({
+				where: {
+					osuUserId: discordUser.osuUserId
+				},
+				order: [
+					['gameEndDate', 'ASC']
+				]
+			});
+
+			let duelRatings = [await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: msg.client })];
+
+			//Set the date to the beginning of the week
+			let date = new Date();
+			date.setUTCDate(date.getUTCDate() - date.getUTCDay() + 1);
+			date.setUTCHours(0, 0, 0, 0);
+
+			let iterator = 0;
+			while (date > oldestScore.gameEndDate) {
+				iterator++;
+				await processingMessage.edit(`Processing... (${iterator} weeks deep)`);
+				console.log(date - oldestScore.gameEndDate);
+				let duelRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: msg.client, date: date });
+				duelRatings.push(duelRating);
+				date.setUTCDate(date.getUTCDate() - 7);
+			}
+
+			let labels = [];
+
+			for (let i = 0; i < duelRatings.length; i++) {
+				if (i === 0) {
+					labels.push('Today');
+				} else if (i === 1) {
+					labels.push(`${i} week ago`);
+				} else {
+					labels.push(`${i} weeks ago`);
+				}
+			}
+
+			labels.reverse();
+
+			let history = [];
+
+			for (let i = 0; i < duelRatings.length; i++) {
+				history.push(duelRatings[i].total);
+			}
+
+			history.reverse();
+
+			let masterHistory = [];
+			let diamondHistory = [];
+			let platinumHistory = [];
+			let goldHistory = [];
+			let silverHistory = [];
+			let bronzeHistory = [];
+
+			for (let i = 0; i < history.length; i++) {
+				let masterRating = null;
+				let diamondRating = null;
+				let platinumRating = null;
+				let goldRating = null;
+				let silverRating = null;
+				let bronzeRating = null;
+
+				if (history[i] > 7) {
+					masterRating = history[i];
+				} else if (history[i] > 6.4) {
+					diamondRating = history[i];
+				} else if (history[i] > 5.8) {
+					platinumRating = history[i];
+				} else if (history[i] > 5.2) {
+					goldRating = history[i];
+				} else if (history[i] > 4.6) {
+					silverRating = history[i];
+				} else {
+					bronzeRating = history[i];
+				}
+
+				masterHistory.push(masterRating);
+				diamondHistory.push(diamondRating);
+				platinumHistory.push(platinumRating);
+				goldHistory.push(goldRating);
+				silverHistory.push(silverRating);
+				bronzeHistory.push(bronzeRating);
+			}
+
+			const width = 1500; //px
+			const height = 750; //px
+			const canvasRenderService = new ChartJSNodeCanvas({ width, height });
+
+			const data = {
+				labels: labels,
+				datasets: [
+					{
+						label: 'Master',
+						data: masterHistory,
+						borderColor: 'rgb(255, 174, 251)',
+						fill: true,
+						backgroundColor: 'rgba(255, 174, 251, 0.6)',
+						tension: 0.4
+					},
+					{
+						label: 'Diamond',
+						data: diamondHistory,
+						borderColor: 'rgb(73, 176, 255)',
+						fill: true,
+						backgroundColor: 'rgba(73, 176, 255, 0.6)',
+						tension: 0.4
+					},
+					{
+						label: 'Platinum',
+						data: platinumHistory,
+						borderColor: 'rgb(29, 217, 165)',
+						fill: true,
+						backgroundColor: 'rgba(29, 217, 165, 0.6)',
+						tension: 0.4
+					},
+					{
+						label: 'Gold',
+						data: goldHistory,
+						borderColor: 'rgb(255, 235, 71)',
+						fill: true,
+						backgroundColor: 'rgba(255, 235, 71, 0.6)',
+						tension: 0.4
+					},
+					{
+						label: 'Silver',
+						data: silverHistory,
+						borderColor: 'rgb(181, 181, 181)',
+						fill: true,
+						backgroundColor: 'rgba(181, 181, 181, 0.6)',
+						tension: 0.4
+					},
+					{
+						label: 'Bronze',
+						data: bronzeHistory,
+						borderColor: 'rgb(240, 121, 0)',
+						fill: true,
+						backgroundColor: 'rgba(240, 121, 0, 0.6)',
+						tension: 0.4
+					},
+				]
+			};
+
+			const configuration = {
+				type: 'line',
+				data: data,
+				options: {
+					spanGaps: true,
+					responsive: true,
+					plugins: {
+						title: {
+							display: true,
+							text: 'Duel Rating History',
+							color: '#FFFFFF',
+						},
+						legend: {
+							labels: {
+								color: '#FFFFFF',
+							}
+						},
+					},
+					interaction: {
+						intersect: false,
+					},
+					scales: {
+						x: {
+							display: true,
+							title: {
+								display: true,
+								color: '#FFFFFF'
+							},
+							grid: {
+								color: '#8F8F8F'
+							},
+							ticks: {
+								color: '#FFFFFF',
+							},
+						},
+						y: {
+							display: true,
+							title: {
+								display: true,
+								text: 'Duel Rating',
+								color: '#FFFFFF'
+							},
+							grid: {
+								color: '#8F8F8F'
+							},
+							ticks: {
+								color: '#FFFFFF',
+							},
+						}
+					}
+				},
+			};
+
+			const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+			processingMessage.delete();
+			msg.reply({ content: `Duel Rating History for ${discordUser.osuName}`, files: [new Discord.MessageAttachment(imageBuffer, `duelRatingHistory-${discordUser.osuUserId}.png`)] });
 		} else {
 			msg.reply('Invalid command');
 		}
