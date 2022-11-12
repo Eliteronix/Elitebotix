@@ -372,7 +372,6 @@ module.exports = {
 				type: 'line',
 				data: data,
 				options: {
-					spanGaps: true,
 					responsive: true,
 					plugins: {
 						title: {
