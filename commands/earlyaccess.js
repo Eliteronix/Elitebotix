@@ -210,24 +210,47 @@ module.exports = {
 			return msg.reply(`You have ${followers.length} followers: \`${followerList.join('`, `')}\``);
 
 		} else if (args[0] === 'duelRatingDevelopment') {
-			let discordUser = await DBDiscordUsers.findOne({
-				where: {
-					userId: msg.author.id,
-					osuUserId: {
-						[Op.ne]: null
+			let discordUser = null;
+			if (args[1]) {
+				discordUser = await DBDiscordUsers.findOne({
+					where: {
+						osuUserId: {
+							[Op.ne]: null
+						},
+						[Op.or]: {
+							osuUserId: args[1],
+							osuName: args[1],
+							userId: args[1].replace('<@', '').replace('>', '').replace('!', ''),
+						}
 					}
-				}
-			});
+				});
 
-			if (!discordUser) {
-				return msg.reply('You have not connected your osu! account');
+				if (!discordUser) {
+					return msg.reply('Could not find the user.');
+				}
+			} else {
+				discordUser = await DBDiscordUsers.findOne({
+					where: {
+						userId: msg.author.id,
+						osuUserId: {
+							[Op.ne]: null
+						},
+					}
+				});
+
+				if (!discordUser) {
+					return msg.reply('You have not connected your osu! account');
+				}
 			}
 
 			let processingMessage = await msg.reply('Processing...');
 
 			let oldestScore = await DBOsuMultiScores.findOne({
 				where: {
-					osuUserId: discordUser.osuUserId
+					osuUserId: discordUser.osuUserId,
+					tourneyMatch: true,
+					scoringType: 'Score v2',
+					mode: 'Standard',
 				},
 				order: [
 					['gameEndDate', 'ASC']
@@ -238,14 +261,19 @@ module.exports = {
 
 			//Set the date to the beginning of the week
 			let date = new Date();
-			date.setUTCDate(date.getUTCDate() - date.getUTCDay() + 1);
-			date.setUTCHours(0, 0, 0, 0);
+			date.setUTCDate(date.getUTCDate() - date.getUTCDay());
+			date.setUTCHours(23, 59, 59, 999);
 
 			let iterator = 0;
+			let startTime = date - oldestScore.gameEndDate;
+			let lastUpdate = new Date();
+
 			while (date > oldestScore.gameEndDate) {
 				iterator++;
-				await processingMessage.edit(`Processing... (${iterator} weeks deep)`);
-				console.log(date - oldestScore.gameEndDate);
+				if (new Date() - lastUpdate > 15000) {
+					processingMessage.edit(`Processing... (${iterator} weeks deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
+					lastUpdate = new Date();
+				}
 				let duelRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: msg.client, date: date });
 				duelRatings.push(duelRating);
 				date.setUTCDate(date.getUTCDate() - 7);
@@ -265,164 +293,187 @@ module.exports = {
 
 			labels.reverse();
 
-			let history = [];
+			for (let i = 0; i < 6; i++) {
+				let history = [];
+				let type = null;
 
-			for (let i = 0; i < duelRatings.length; i++) {
-				history.push(duelRatings[i].total);
-			}
-
-			history.reverse();
-
-			let masterHistory = [];
-			let diamondHistory = [];
-			let platinumHistory = [];
-			let goldHistory = [];
-			let silverHistory = [];
-			let bronzeHistory = [];
-
-			for (let i = 0; i < history.length; i++) {
-				let masterRating = null;
-				let diamondRating = null;
-				let platinumRating = null;
-				let goldRating = null;
-				let silverRating = null;
-				let bronzeRating = null;
-
-				if (history[i] > 7) {
-					masterRating = history[i];
-				} else if (history[i] > 6.4) {
-					diamondRating = history[i];
-				} else if (history[i] > 5.8) {
-					platinumRating = history[i];
-				} else if (history[i] > 5.2) {
-					goldRating = history[i];
-				} else if (history[i] > 4.6) {
-					silverRating = history[i];
-				} else {
-					bronzeRating = history[i];
+				for (let j = 0; j < duelRatings.length; j++) {
+					if (i === 0) {
+						history.push(duelRatings[j].total);
+						type = 'Total';
+					} else if (i === 1) {
+						history.push(duelRatings[j].noMod);
+						type = 'No Mod';
+					} else if (i === 2) {
+						history.push(duelRatings[j].hidden);
+						type = 'Hidden';
+					} else if (i === 3) {
+						history.push(duelRatings[j].hardRock);
+						type = 'Hard Rock';
+					} else if (i === 4) {
+						history.push(duelRatings[j].doubleTime);
+						type = 'Double Time';
+					} else if (i === 5) {
+						history.push(duelRatings[j].freeMod);
+						type = 'Free Mod';
+					}
 				}
 
-				masterHistory.push(masterRating);
-				diamondHistory.push(diamondRating);
-				platinumHistory.push(platinumRating);
-				goldHistory.push(goldRating);
-				silverHistory.push(silverRating);
-				bronzeHistory.push(bronzeRating);
-			}
+				history.reverse();
 
-			const width = 1500; //px
-			const height = 750; //px
-			const canvasRenderService = new ChartJSNodeCanvas({ width, height });
+				let masterHistory = [];
+				let diamondHistory = [];
+				let platinumHistory = [];
+				let goldHistory = [];
+				let silverHistory = [];
+				let bronzeHistory = [];
 
-			const data = {
-				labels: labels,
-				datasets: [
-					{
-						label: 'Master',
-						data: masterHistory,
-						borderColor: 'rgb(255, 174, 251)',
-						fill: true,
-						backgroundColor: 'rgba(255, 174, 251, 0.6)',
-						tension: 0.4
-					},
-					{
-						label: 'Diamond',
-						data: diamondHistory,
-						borderColor: 'rgb(73, 176, 255)',
-						fill: true,
-						backgroundColor: 'rgba(73, 176, 255, 0.6)',
-						tension: 0.4
-					},
-					{
-						label: 'Platinum',
-						data: platinumHistory,
-						borderColor: 'rgb(29, 217, 165)',
-						fill: true,
-						backgroundColor: 'rgba(29, 217, 165, 0.6)',
-						tension: 0.4
-					},
-					{
-						label: 'Gold',
-						data: goldHistory,
-						borderColor: 'rgb(255, 235, 71)',
-						fill: true,
-						backgroundColor: 'rgba(255, 235, 71, 0.6)',
-						tension: 0.4
-					},
-					{
-						label: 'Silver',
-						data: silverHistory,
-						borderColor: 'rgb(181, 181, 181)',
-						fill: true,
-						backgroundColor: 'rgba(181, 181, 181, 0.6)',
-						tension: 0.4
-					},
-					{
-						label: 'Bronze',
-						data: bronzeHistory,
-						borderColor: 'rgb(240, 121, 0)',
-						fill: true,
-						backgroundColor: 'rgba(240, 121, 0, 0.6)',
-						tension: 0.4
-					},
-				]
-			};
+				for (let j = 0; j < history.length; j++) {
+					let masterRating = null;
+					let diamondRating = null;
+					let platinumRating = null;
+					let goldRating = null;
+					let silverRating = null;
+					let bronzeRating = null;
 
-			const configuration = {
-				type: 'line',
-				data: data,
-				options: {
-					responsive: true,
-					plugins: {
-						title: {
-							display: true,
-							text: 'Duel Rating History',
-							color: '#FFFFFF',
-						},
-						legend: {
-							labels: {
-								color: '#FFFFFF',
-							}
-						},
-					},
-					interaction: {
-						intersect: false,
-					},
-					scales: {
-						x: {
-							display: true,
-							title: {
-								display: true,
-								color: '#FFFFFF'
-							},
-							grid: {
-								color: '#8F8F8F'
-							},
-							ticks: {
-								color: '#FFFFFF',
-							},
-						},
-						y: {
-							display: true,
-							title: {
-								display: true,
-								text: 'Duel Rating',
-								color: '#FFFFFF'
-							},
-							grid: {
-								color: '#8F8F8F'
-							},
-							ticks: {
-								color: '#FFFFFF',
-							},
-						}
+					if (history[j] > 7) {
+						masterRating = history[j];
+					} else if (history[j] > 6.4) {
+						diamondRating = history[j];
+					} else if (history[j] > 5.8) {
+						platinumRating = history[j];
+					} else if (history[j] > 5.2) {
+						goldRating = history[j];
+					} else if (history[j] > 4.6) {
+						silverRating = history[j];
+					} else {
+						bronzeRating = history[j];
 					}
-				},
-			};
 
-			const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
-			processingMessage.delete();
-			msg.reply({ content: `Duel Rating History for ${discordUser.osuName}`, files: [new Discord.MessageAttachment(imageBuffer, `duelRatingHistory-${discordUser.osuUserId}.png`)] });
+					masterHistory.push(masterRating);
+					diamondHistory.push(diamondRating);
+					platinumHistory.push(platinumRating);
+					goldHistory.push(goldRating);
+					silverHistory.push(silverRating);
+					bronzeHistory.push(bronzeRating);
+				}
+
+				const width = 1500; //px
+				const height = 750; //px
+				const canvasRenderService = new ChartJSNodeCanvas({ width, height });
+
+				const data = {
+					labels: labels,
+					datasets: [
+						{
+							label: 'Master',
+							data: masterHistory,
+							borderColor: 'rgb(255, 174, 251)',
+							fill: true,
+							backgroundColor: 'rgba(255, 174, 251, 0.6)',
+							tension: 0.4
+						},
+						{
+							label: 'Diamond',
+							data: diamondHistory,
+							borderColor: 'rgb(73, 176, 255)',
+							fill: true,
+							backgroundColor: 'rgba(73, 176, 255, 0.6)',
+							tension: 0.4
+						},
+						{
+							label: 'Platinum',
+							data: platinumHistory,
+							borderColor: 'rgb(29, 217, 165)',
+							fill: true,
+							backgroundColor: 'rgba(29, 217, 165, 0.6)',
+							tension: 0.4
+						},
+						{
+							label: 'Gold',
+							data: goldHistory,
+							borderColor: 'rgb(255, 235, 71)',
+							fill: true,
+							backgroundColor: 'rgba(255, 235, 71, 0.6)',
+							tension: 0.4
+						},
+						{
+							label: 'Silver',
+							data: silverHistory,
+							borderColor: 'rgb(181, 181, 181)',
+							fill: true,
+							backgroundColor: 'rgba(181, 181, 181, 0.6)',
+							tension: 0.4
+						},
+						{
+							label: 'Bronze',
+							data: bronzeHistory,
+							borderColor: 'rgb(240, 121, 0)',
+							fill: true,
+							backgroundColor: 'rgba(240, 121, 0, 0.6)',
+							tension: 0.4
+						},
+					]
+				};
+
+				const configuration = {
+					type: 'line',
+					data: data,
+					options: {
+						responsive: true,
+						plugins: {
+							title: {
+								display: true,
+								text: `Duel Rating History (${type})`,
+								color: '#FFFFFF',
+							},
+							legend: {
+								labels: {
+									color: '#FFFFFF',
+								}
+							},
+						},
+						interaction: {
+							intersect: false,
+						},
+						scales: {
+							x: {
+								display: true,
+								title: {
+									display: true,
+									color: '#FFFFFF'
+								},
+								grid: {
+									color: '#8F8F8F'
+								},
+								ticks: {
+									color: '#FFFFFF',
+								},
+							},
+							y: {
+								display: true,
+								title: {
+									display: true,
+									text: 'Duel Rating',
+									color: '#FFFFFF'
+								},
+								grid: {
+									color: '#8F8F8F'
+								},
+								ticks: {
+									color: '#FFFFFF',
+								},
+							}
+						}
+					},
+				};
+
+				const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+				if (i === 0) {
+					processingMessage.delete();
+				}
+				await msg.reply({ content: `${type} Duel Rating History for ${discordUser.osuName}`, files: [new Discord.MessageAttachment(imageBuffer, `duelRatingHistory-${discordUser.osuUserId}.png`)] });
+			}
 		} else {
 			msg.reply('Invalid command');
 		}

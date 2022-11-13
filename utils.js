@@ -2566,6 +2566,16 @@ async function getUserDuelStarRatingFunction(input) {
 		completeYear = true;
 	}
 
+	//Check if it is the last moment of a week
+	let completeWeek = false;
+	if (endDate.getUTCDay() === 0
+		&& endDate.getUTCHours() === 23
+		&& endDate.getUTCMinutes() === 59
+		&& endDate.getUTCSeconds() === 59
+		&& endDate.getUTCMilliseconds() === 999) {
+		completeWeek = true;
+	}
+
 	let duelRatings = {
 		total: null,
 		noMod: null,
@@ -2591,36 +2601,36 @@ async function getUserDuelStarRatingFunction(input) {
 		outdated: false
 	};
 
-	let yearStats = null;
-	if (completeYear) {
+	let savedStats = null;
+	if (completeYear || completeWeek) {
 		logDatabaseQueriesFunction(4, 'utils.js getUserDuelStarRatingFunction DuelRatingHistory');
-		yearStats = await DBDuelRatingHistory.findOne({
+		savedStats = await DBDuelRatingHistory.findOne({
 			where: {
 				osuUserId: input.osuUserId,
 				year: endDate.getUTCFullYear(),
-				month: 12,
-				date: 31
+				month: endDate.getUTCMonth() + 1,
+				date: endDate.getUTCDate()
 			}
 		});
 
 		let halfAYearAgo = new Date();
 		halfAYearAgo.setUTCMonth(halfAYearAgo.getUTCMonth() - 6);
 
-		if (yearStats && yearStats.updatedAt < halfAYearAgo) {
-			await yearStats.destroy();
-			yearStats = null;
+		if (savedStats && savedStats.updatedAt < halfAYearAgo) {
+			await savedStats.destroy();
+			savedStats = null;
 		}
 	}
 
-	if (yearStats) {
-		duelRatings.total = yearStats.osuDuelStarRating;
-		duelRatings.noMod = yearStats.osuNoModDuelStarRating;
-		duelRatings.hidden = yearStats.osuHiddenDuelStarRating;
-		duelRatings.hardRock = yearStats.osuHardRockDuelStarRating;
-		duelRatings.doubleTime = yearStats.osuDoubleTimeDuelStarRating;
-		duelRatings.freeMod = yearStats.osuFreeModDuelStarRating;
-		duelRatings.provisional = yearStats.osuDuelProvisional;
-		duelRatings.outdated = yearStats.osuDuelOutdated;
+	if (savedStats) {
+		duelRatings.total = savedStats.osuDuelStarRating;
+		duelRatings.noMod = savedStats.osuNoModDuelStarRating;
+		duelRatings.hidden = savedStats.osuHiddenDuelStarRating;
+		duelRatings.hardRock = savedStats.osuHardRockDuelStarRating;
+		duelRatings.doubleTime = savedStats.osuDoubleTimeDuelStarRating;
+		duelRatings.freeMod = savedStats.osuFreeModDuelStarRating;
+		duelRatings.provisional = savedStats.osuDuelProvisional;
+		duelRatings.outdated = savedStats.osuDuelOutdated;
 
 		return duelRatings;
 	}
@@ -3054,7 +3064,7 @@ async function getUserDuelStarRatingFunction(input) {
 		//Set total star rating based on the spread
 		duelRatings.total = (duelRatings.noMod * modPoolAmounts[0] + duelRatings.hidden * modPoolAmounts[1] + duelRatings.hardRock * modPoolAmounts[2] + duelRatings.doubleTime * modPoolAmounts[3] + duelRatings.freeMod * modPoolAmounts[4]) / (modPoolAmounts[0] + modPoolAmounts[1] + modPoolAmounts[2] + modPoolAmounts[3] + modPoolAmounts[4]);
 
-		if (completeYear && !yearStats) {
+		if (completeYear || completeWeek) {
 			//Create the yearStats if they don't exist
 			await DBDuelRatingHistory.create({
 				osuUserId: input.osuUserId,
@@ -3071,17 +3081,21 @@ async function getUserDuelStarRatingFunction(input) {
 				osuDuelOutdated: duelRatings.outdated,
 			});
 
-			let futurePossiblyAffectedDuelRatings = await DBDuelRatingHistory.findAll({
-				where: {
-					osuUserId: input.osuUserId,
-					year: {
-						[Op.gt]: endDate.getUTCFullYear()
+			if (completeYear) {
+				let futurePossiblyAffectedDuelRatings = await DBDuelRatingHistory.findAll({
+					where: {
+						osuUserId: input.osuUserId,
+						year: {
+							[Op.gt]: endDate.getUTCFullYear(),
+						},
+						month: 12,
+						date: 31,
 					}
-				}
-			});
+				});
 
-			for (let i = 0; i < futurePossiblyAffectedDuelRatings.length; i++) {
-				await futurePossiblyAffectedDuelRatings[i].destroy();
+				for (let i = 0; i < futurePossiblyAffectedDuelRatings.length; i++) {
+					await futurePossiblyAffectedDuelRatings[i].destroy();
+				}
 			}
 		}
 
