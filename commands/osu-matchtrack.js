@@ -261,13 +261,14 @@ module.exports = {
 												}
 											} else if (json.events[i].detail.type === 'other') {
 												if (lastMessageType !== 'playing') {
+													let modBits = getModBits(json.events[i].game.mods.join(''));
 													let attachment = await getPlayingImage(json.events[i], json.users);
 													let currentScore = '';
 													if (redScore + blueScore > 0) {
 														currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
 													}
 
-													let beatmap = await getOsuBeatmap({ beatmapId: json.events[i].game.beatmap.id });
+													let beatmap = await getOsuBeatmap({ beatmapId: json.events[i].game.beatmap.id, modBits: modBits });
 
 													let startDate = new Date(json.events[i].game.start_time);
 
