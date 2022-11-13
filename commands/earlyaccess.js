@@ -210,6 +210,10 @@ module.exports = {
 			return msg.reply(`You have ${followers.length} followers: \`${followerList.join('`, `')}\``);
 
 		} else if (args[0] === 'duelRatingDevelopment') {
+			if (!developers.includes(msg.author.id)) {
+				return msg.reply('This feature is currently restricted to developers');
+			}
+
 			let discordUser = null;
 			let username = null;
 			if (args[1]) {
