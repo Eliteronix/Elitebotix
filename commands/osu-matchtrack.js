@@ -202,7 +202,7 @@ module.exports = {
 
 													if (blueTotal > redTotal) {
 														blueScore++;
-													} else {
+													} else if (blueTotal < redTotal) {
 														redScore++;
 													}
 												}
