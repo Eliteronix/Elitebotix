@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuTourneyFollows, DBOsuMultiScores } = require('../db
 const osu = require('node-osu');
 const { developers } = require('../config.json');
 const { Op } = require('sequelize');
-const { getUserDuelStarRating } = require('../utils');
+const { getUserDuelStarRating, getMessageUserDisplayname } = require('../utils');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const Discord = require('discord.js');
 
@@ -211,23 +211,21 @@ module.exports = {
 
 		} else if (args[0] === 'duelRatingDevelopment') {
 			let discordUser = null;
+			let username = null;
 			if (args[1]) {
+				username = args[1];
 				discordUser = await DBDiscordUsers.findOne({
 					where: {
 						osuUserId: {
 							[Op.ne]: null
 						},
 						[Op.or]: {
-							osuUserId: args[1],
-							osuName: args[1],
-							userId: args[1].replace('<@', '').replace('>', '').replace('!', ''),
+							osuUserId: username,
+							osuName: username,
+							userId: username.replace('<@', '').replace('>', '').replace('!', ''),
 						}
 					}
 				});
-
-				if (!discordUser) {
-					return msg.reply('Could not find the user.');
-				}
 			} else {
 				discordUser = await DBDiscordUsers.findOne({
 					where: {
@@ -239,7 +237,34 @@ module.exports = {
 				});
 
 				if (!discordUser) {
-					return msg.reply('You have not connected your osu! account');
+					username = msg.author.username;
+					username = await getMessageUserDisplayname(msg);
+				}
+			}
+
+			let osuUser = { osuUserId: null, osuName: null };
+
+			if (discordUser) {
+				osuUser.osuUserId = discordUser.osuUserId;
+				osuUser.osuName = discordUser.osuName;
+			}
+
+			//Get the user from the API if needed
+			if (!osuUser.osuUserId) {
+				// eslint-disable-next-line no-undef
+				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+				});
+
+				try {
+					const user = await osuApi.getUser({ u: username });
+					osuUser.osuUserId = user.id;
+					osuUser.osuName = user.name;
+				} catch (error) {
+					return await msg.reply({ content: `Could not find user \`${username.replace(/`/g, '')}\`.`, ephemeral: true });
 				}
 			}
 
@@ -247,7 +272,7 @@ module.exports = {
 
 			let oldestScore = await DBOsuMultiScores.findOne({
 				where: {
-					osuUserId: discordUser.osuUserId,
+					osuUserId: osuUser.osuUserId,
 					tourneyMatch: true,
 					scoringType: 'Score v2',
 					mode: 'Standard',
@@ -257,7 +282,7 @@ module.exports = {
 				]
 			});
 
-			let duelRatings = [await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: msg.client })];
+			let duelRatings = [await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: msg.client })];
 
 			//Set the date to the beginning of the week
 			let date = new Date();
@@ -274,7 +299,7 @@ module.exports = {
 					processingMessage.edit(`Processing... (${iterator} weeks deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
 					lastUpdate = new Date();
 				}
-				let duelRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: msg.client, date: date });
+				let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: msg.client, date: date });
 				duelRatings.push(duelRating);
 				date.setUTCDate(date.getUTCDate() - 7);
 			}
@@ -472,7 +497,7 @@ module.exports = {
 				if (i === 0) {
 					processingMessage.delete();
 				}
-				await msg.reply({ content: `${type} Duel Rating History for ${discordUser.osuName}`, files: [new Discord.MessageAttachment(imageBuffer, `duelRatingHistory-${discordUser.osuUserId}.png`)] });
+				await msg.reply({ content: `${type} Duel Rating History for ${osuUser.osuName}`, files: [new Discord.MessageAttachment(imageBuffer, `duelRatingHistory-${osuUser.osuUserId}.png`)] });
 			}
 		} else {
 			msg.reply('Invalid command');
