@@ -361,9 +361,21 @@ module.exports = {
 					continue;
 				}
 
+				let disableEverything = true;
+
+				if (interaction.options.getBoolean('topplays')
+					|| interaction.options.getBoolean('leaderboardplays')
+					|| interaction.options.getBoolean('ameobea')
+					|| interaction.options.getBoolean('showameobeaupdates')
+					|| interaction.options.getBoolean('medals')
+					|| interaction.options.getBoolean('duelrating')
+					|| interaction.options.getBoolean('matchactivity')) {
+					disableEverything = false;
+				}
+
 				let topPlays = interaction.options.getBoolean('topplays');
 
-				if (topPlays) {
+				if (topPlays || disableEverything) {
 					guildTracker.osuTopPlays = false;
 					guildTracker.taikoTopPlays = false;
 					guildTracker.catchTopPlays = false;
@@ -372,7 +384,7 @@ module.exports = {
 
 				let leaderboardPlays = interaction.options.getBoolean('leaderboardplays');
 
-				if (leaderboardPlays) {
+				if (leaderboardPlays || disableEverything) {
 					guildTracker.osuLeaderboard = false;
 					guildTracker.taikoLeaderboard = false;
 					guildTracker.catchLeaderboard = false;
@@ -381,7 +393,7 @@ module.exports = {
 
 				let ameobea = interaction.options.getBoolean('ameobea');
 
-				if (ameobea) {
+				if (ameobea || disableEverything) {
 					guildTracker.osuAmeobea = false;
 					guildTracker.taikoAmeobea = false;
 					guildTracker.catchAmeobea = false;
@@ -391,25 +403,25 @@ module.exports = {
 
 				let showAmeobeaUpdates = interaction.options.getBoolean('showameobeaupdates');
 
-				if (showAmeobeaUpdates) {
+				if (showAmeobeaUpdates || disableEverything) {
 					guildTracker.showAmeobeaUpdates = false;
 				}
 
 				let medals = interaction.options.getBoolean('medals');
 
-				if (medals) {
+				if (medals || disableEverything) {
 					guildTracker.medals = false;
 				}
 
 				let duelrating = interaction.options.getBoolean('duelrating');
 
-				if (duelrating) {
+				if (duelrating || disableEverything) {
 					guildTracker.duelRating = false;
 				}
 
 				let matchactivity = interaction.options.getBoolean('matchactivity');
 
-				if (matchactivity) {
+				if (matchactivity || disableEverything) {
 					guildTracker.matchActivity = false;
 					guildTracker.matchActivityAutoTrack = false;
 				}
