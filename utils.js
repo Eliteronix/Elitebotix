@@ -3758,7 +3758,7 @@ async function getOsuBeatmapFunction(input) {
 					await osuApi.getBeatmaps({ b: beatmapId, mods: modBits })
 						.then(async (beatmaps) => {
 							let noVisualModBeatmap = beatmaps[0];
-							if (getModsFunction(modBits).includes('MI') || getModsFunction(modBits).includes('HD') || getModsFunction(modBits).includes('FI') || getModsFunction(modBits).includes('NF') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('PF') || getModsFunction(modBits).includes('SD')) {
+							if (getModsFunction(modBits).includes('MI') || getModsFunction(modBits).includes('HD') && !getModsFunction(modBits).includes('FL') || getModsFunction(modBits).includes('FI') || getModsFunction(modBits).includes('NF') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('PF') || getModsFunction(modBits).includes('SD')) {
 								let realNoVisualModBeatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: getModBitsFunction(getModsFunction(modBits).join(''), true) });
 								noVisualModBeatmap.difficulty.rating = realNoVisualModBeatmap.starRating;
 								noVisualModBeatmap.difficulty.aim = realNoVisualModBeatmap.aimRating;
@@ -4040,7 +4040,7 @@ function getModBitsFunction(input, noVisualMods) {
 			modBits += 32;
 		} else if (input.substring(i, i + 2) === 'HR') {
 			modBits += 16;
-		} else if (input.substring(i, i + 2) === 'HD' && !noVisualMods) {
+		} else if (input.substring(i, i + 2) === 'HD' && (input.includes('FL') || !input.includes('FL') && !noVisualMods)) {
 			modBits += 8;
 		} else if (input.substring(i, i + 2) === 'TD') {
 			modBits += 4;
