@@ -5298,10 +5298,10 @@ async function getValidTournamentBeatmapFunction(input) {
 	}
 
 	//Set if it should only be ranked maps
-	let onlyRanked = false;
+	let rankedStatus = ['Ranked', 'Approved', 'Qualified', 'Loved', 'Pending', 'Graveyard', 'WIP'];
 
 	if (input.onlyRanked) {
-		onlyRanked = input.onlyRanked;
+		rankedStatus = ['Ranked', 'Approved'];
 	}
 
 	//initialize count of Not used often
@@ -5318,7 +5318,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				mode: mode,
 				mods: 0,
 				approvalStatus: {
-					[Op.not]: 'Not found',
+					[Op.in]: rankedStatus,
 				},
 				starRating: {
 					[Op.and]: {
@@ -5360,7 +5360,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				mode: mode,
 				mods: 0,
 				approvalStatus: {
-					[Op.not]: 'Not found',
+					[Op.in]: rankedStatus,
 				},
 				starRating: {
 					[Op.and]: {
@@ -5400,7 +5400,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				mode: mode,
 				mods: 16,
 				approvalStatus: {
-					[Op.not]: 'Not found',
+					[Op.in]: rankedStatus,
 				},
 				starRating: {
 					[Op.and]: {
@@ -5440,7 +5440,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				mode: mode,
 				mods: 64,
 				approvalStatus: {
-					[Op.not]: 'Not found',
+					[Op.in]: rankedStatus,
 				},
 				starRating: {
 					[Op.and]: {
@@ -5480,7 +5480,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				mode: mode,
 				mods: 0,
 				approvalStatus: {
-					[Op.not]: 'Not found',
+					[Op.in]: rankedStatus,
 				},
 				starRating: {
 					[Op.and]: {
@@ -5536,6 +5536,14 @@ async function getValidTournamentBeatmapFunction(input) {
 
 		if (!randomBeatmap) {
 			beatmaps.splice(index, 1);
+			continue;
+		}
+
+		//If map has to be checked but the count is already reached, skip it
+		if (!randomBeatmap.usedOften && input.notUsedOftenCount >= 5) {
+			beatmaps.splice(index, 1);
+			console.log('Map Selection: Checked too many maps for usage');
+			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
 
@@ -5603,14 +5611,6 @@ async function getValidTournamentBeatmapFunction(input) {
 			continue;
 		}
 
-		//Check ranked status
-		if (onlyRanked && randomBeatmap.approvalStatus !== 'Ranked') {
-			beatmaps.splice(index, 1);
-			console.log('Map Selection: Not ranked');
-			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
-			continue;
-		}
-
 		//Check star rating
 		if (randomBeatmap.starRating > upperBound || randomBeatmap.starRating < lowerBound) {
 			beatmaps.splice(index, 1);
@@ -5627,14 +5627,6 @@ async function getValidTournamentBeatmapFunction(input) {
 			let clone = JSON.parse(JSON.stringify(randomBeatmap));
 			beatmaps = null;
 			return clone;
-		}
-
-		//If map has to be checked but the count is already reached, skip it
-		if (input.notUsedOftenCount >= 5) {
-			beatmaps.splice(index, 1);
-			console.log('Map Selection: Checked too many maps for usage');
-			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
-			continue;
 		}
 
 		const mapScoreAmount = await DBOsuMultiScores.count({
