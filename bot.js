@@ -1,8 +1,6 @@
 //Log message upon starting the bot
 console.log('Bot is starting...');
 const { twitchConnect, wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack } = require('./utils');
-
-//require the dotenv node module
 require('dotenv').config();
 
 //require the discord.js module
