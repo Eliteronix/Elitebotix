@@ -1,10 +1,6 @@
-const { isWrongSystem, wrongCluster } = require('./utils');
+const { isWrongSystem } = require('./utils');
 
 module.exports = async function (guild) {
-	if (wrongCluster(guild.id)) {
-		return;
-	}
-
 	if (isWrongSystem(guild.id, false)) {
 		return;
 	}

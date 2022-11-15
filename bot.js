@@ -115,6 +115,7 @@ const Banchojs = require('bancho.js');
 // eslint-disable-next-line no-undef
 const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterTimespan: 60000, limiterPrivate: 45, limiterPublic: 9 });
 
+let TODOTwitchMapSync;
 //Connect for the first worker
 // eslint-disable-next-line no-undef
 if (!wrongCluster() && process.env.SERVER !== 'QA') {
@@ -182,9 +183,6 @@ client.on('guildBanRemove', guildBanRemove);
 client.on('userUpdate', userUpdate);
 
 client.on('messageReactionAdd', (reaction, user) => {
-	if (wrongCluster(user.id)) {
-		return;
-	}
 	reactionAdded(reaction, user, [client, bancho]);
 });
 
@@ -235,9 +233,6 @@ setTimeout(() => {
 }, 60000);
 
 client.on('interactionCreate', interaction => {
-	if (wrongCluster(interaction.id)) {
-		return;
-	}
 	interactionCreate(client, bancho, interaction);
 });
 
