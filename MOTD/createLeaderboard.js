@@ -3,6 +3,7 @@ const { createLeaderboard, humanReadable, logDatabaseQueries } = require('../uti
 
 module.exports = {
 	createLeaderboard: async function (client, since, topAmount, title, channelId) {
+		// TODO: Change to broadcast
 		const channel = await client.channels.fetch(channelId);
 		channel.messages.fetch({ limit: 100 })
 			.then(async (messages) => {

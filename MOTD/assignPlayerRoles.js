@@ -9,6 +9,7 @@ module.exports = {
 		}
 
 		//Fetch server
+		// TODO: Change to broadcast
 		const guild = await client.guilds.fetch('727407178499096597');
 
 		//Fetch all members

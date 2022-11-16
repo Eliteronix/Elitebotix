@@ -8,6 +8,7 @@ module.exports = {
 		let args = processQueueEntry.additions.split(';');
 
 		let channel;
+		// TODO: Change to broadcast
 		let discordChannel = await client.channels.fetch(args[1]);
 
 		for (let i = 0; i < 5; i++) {
@@ -382,6 +383,7 @@ async function messageUserWithRetries(client, user, channelId, content) {
 		} catch (error) {
 			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
 				if (i === 2) {
+					// TODO: Change to broadcast
 					const channel = await client.channels.fetch(channelId);
 					channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 				} else {

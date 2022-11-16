@@ -165,6 +165,7 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (ecs2021SignUp && process.env.SERVER === 'Live') {
+			// TODO: Change to broadcast
 			const guild = await client.guilds.fetch('727407178499096597');
 			try {
 				const member = await guild.members.fetch(discordUserId);
@@ -216,6 +217,7 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (ecw2022SignUp && process.env.SERVER === 'Live') {
+			// TODO: Change to broadcast
 			const guild = await client.guilds.fetch('727407178499096597');
 			try {
 				const member = await guild.members.fetch(discordUserId);

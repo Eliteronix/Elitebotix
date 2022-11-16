@@ -13,6 +13,7 @@ module.exports = async function (oldUser, newUser) {
 			if (guild.loggingChannel && correctEnvironment(guild)) {
 				let discordGuild;
 				try {
+					// TODO: Change to broadcast
 					discordGuild = await newUser.client.guilds.fetch(guild.guildId);
 				} catch (error) {
 					guild.loggingChannel = null;
@@ -33,6 +34,7 @@ module.exports = async function (oldUser, newUser) {
 
 				let channel;
 				try {
+					// TODO: Change to broadcast
 					channel = await newUser.client.channels.fetch(guild.loggingChannel);
 				} catch (error) {
 					if (error.message === 'Unknown Channel') {
@@ -72,6 +74,7 @@ module.exports = async function (oldUser, newUser) {
 			if (guild.loggingChannel && correctEnvironment(guild)) {
 				let discordGuild;
 				try {
+					// TODO: Change to broadcast
 					discordGuild = await newUser.client.guilds.fetch(guild.guildId);
 				} catch (error) {
 					guild.loggingChannel = null;
@@ -92,6 +95,7 @@ module.exports = async function (oldUser, newUser) {
 
 				let channel;
 				try {
+					// TODO: Change to broadcast
 					channel = await newUser.client.channels.fetch(guild.loggingChannel);
 				} catch (error) {
 					if (error.message === 'Unknown Channel') {
@@ -131,6 +135,7 @@ module.exports = async function (oldUser, newUser) {
 			if (guild.loggingChannel && correctEnvironment(guild)) {
 				let discordGuild;
 				try {
+					// TODO: Change to broadcast
 					discordGuild = await newUser.client.guilds.fetch(guild.guildId);
 				} catch (error) {
 					guild.loggingChannel = null;
@@ -151,6 +156,7 @@ module.exports = async function (oldUser, newUser) {
 
 				let channel;
 				try {
+					// TODO: Change to broadcast
 					channel = await newUser.client.channels.fetch(guild.loggingChannel);
 				} catch (error) {
 					if (error.message === 'Unknown Channel') {

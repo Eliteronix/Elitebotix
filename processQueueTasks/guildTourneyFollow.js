@@ -7,6 +7,7 @@ module.exports = {
 		let args = processQueueEntry.additions.split(';');
 
 		try {
+			// TODO: Change to broadcast
 			const channel = await client.channels.fetch(args[1]);
 
 			let players = args[3].split(',');

@@ -1291,6 +1291,7 @@ module.exports = {
 
 		let issues = responseJson.issues;
 
+		// TODO: Change to broadcast
 		const backlogChannel = await client.channels.fetch('1000372560552276028');
 		const selectedForDevChannel = await client.channels.fetch('1000372600251351070');
 		const inProgressChannel = await client.channels.fetch('1000372630060281856');
@@ -2520,9 +2521,11 @@ module.exports = {
 
 			try {
 				//Fetch the guild
+				// TODO: Change to broadcast
 				guildTracker.guild = await client.guilds.fetch(guildTracker.guildId);
 
 				//Fetch the channel
+				// TODO: Change to broadcast
 				guildTracker.channel = await guildTracker.guild.channels.fetch(guildTracker.channelId);
 				return;
 			} catch (err) {
@@ -3125,6 +3128,7 @@ async function getUserDuelStarRatingFunction(input) {
 						guildId = '800641367083974667';
 						channelId = '946190678189293569';
 					}
+					// TODO: Change to broadcast
 					const guild = await input.client.guilds.fetch(guildId);
 					const channel = await guild.channels.fetch(channelId);
 					let message = [`${discordUser.osuName} / ${discordUser.osuUserId}:`];
@@ -3189,6 +3193,7 @@ async function getUserDuelStarRatingFunction(input) {
 
 						for (let i = 0; i < guildTrackers.length; i++) {
 							try {
+								// TODO: Change to broadcast
 								let guild = await input.client.guilds.fetch(guildTrackers[i].guildId);
 								let channel = await guild.channels.fetch(guildTrackers[i].channelId);
 								channel.send(`\`\`\`${message.join('\n')}\`\`\``);
@@ -3319,6 +3324,7 @@ async function logMatchCreationFunction(client, name, matchId) {
 		channelId = '980119218047549470';
 	}
 
+	// TODO: Change to broadcast
 	const guild = await client.guilds.fetch(guildId);
 	const channel = await guild.channels.fetch(channelId);
 
@@ -3622,6 +3628,7 @@ async function checkForBirthdaysFunction(client) {
 
 		if (dbGuild && dbGuild.birthdayEnabled) {
 			//Fetch the channel
+			// TODO: Change to broadcast
 			const birthdayMessageChannel = await client.channels.fetch(dbGuild.birthdayMessageChannel);
 
 			if (birthdayMessageChannel) {
@@ -5967,6 +5974,7 @@ async function updateQueueChannelsFunction(client) {
 		channelId = '1010093409840660510';
 	}
 
+	// TODO: Change to broadcast
 	let channel = await client.channels.fetch(channelId);
 	let multipleString = 's';
 	if (existingQueueTasks.length === 1) {

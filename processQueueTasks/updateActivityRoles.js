@@ -17,6 +17,7 @@ module.exports = {
 		let guild;
 
 		try {
+			// TODO: Change to broadcast
 			guild = await client.guilds.fetch(processQueueEntry.guildId);
 		} catch (e) {
 			if (e.message === 'Missing Access') {

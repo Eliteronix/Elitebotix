@@ -5,6 +5,7 @@ module.exports = {
 		// console.log('periodic-weather');
 		let args = processQueueEntry.additions.split(';');
 
+		// TODO: Change to broadcast
 		const channel = await client.channels.fetch(args[0]).catch(async () => {
 			//Nothing
 		});

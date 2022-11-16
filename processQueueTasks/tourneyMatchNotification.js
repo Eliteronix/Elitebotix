@@ -6,6 +6,7 @@ module.exports = {
 		// console.log('tourneyMatchNotification');
 		let args = processQueueEntry.additions.split(';');
 
+		// TODO: Change to broadcast
 		let channel = await client.channels.fetch(args[1]);
 		if (channel) {
 			let players = args[3].split(',');

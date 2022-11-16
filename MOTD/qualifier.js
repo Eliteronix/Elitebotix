@@ -289,6 +289,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 						discordUser.osuMOTDerrorFirstOccurence = now;
 						discordUser.save();
 
+						// TODO: Change to broadcast
 						const channel = await client.channels.fetch('833803740162949191');
 						channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 					} else if (discordUser && discordUser.osuMOTDerrorFirstOccurence && weekAgo > discordUser.osuMOTDerrorFirstOccurence) {
@@ -299,6 +300,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 						discordUser.osuMOTDmutedUntil = null;
 						discordUser.save();
 					} else {
+						// TODO: Change to broadcast
 						const channel = await client.channels.fetch('833803740162949191');
 						channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
 					}

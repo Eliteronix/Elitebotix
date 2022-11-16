@@ -10,12 +10,14 @@ module.exports = {
 		});
 
 		if (ticket && ticket.statusId === 100) {
+			// TODO: Change to broadcast
 			const channel = await client.channels.fetch(processQueueEntry.additions).catch(async () => {
 				//Nothing
 			});
 
 			await channel.delete();
 
+			// TODO: Change to broadcast
 			const guild = await client.guilds.fetch(channel.guild.id);
 
 			let openCategory = guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Open');

@@ -400,6 +400,7 @@ module.exports = {
 		}
 
 		//Send official message into the correct channel
+		// TODO: Change to broadcast
 		const mapsOfTheDayChannel = await client.channels.fetch(channelId);
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER !== 'Dev') {
