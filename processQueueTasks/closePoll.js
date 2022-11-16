@@ -3,7 +3,7 @@ const Canvas = require('canvas');
 const { fitTextOnLeftCanvas } = require('../utils');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, bancho, twitchClient, processQueueEntry) {
 		// console.log('closePoll');
 		let args = processQueueEntry.additions.split(';');
 

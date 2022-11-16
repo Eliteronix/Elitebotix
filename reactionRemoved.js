@@ -3,14 +3,10 @@ const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } 
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user) {
-	if (wrongCluster(user.id)) {
-		return;
-	}
-
 	if (reaction.message.guild && isWrongSystem(reaction.message.guild.id, reaction.message.channel.type === 'DM')) {
 		return;
 	}

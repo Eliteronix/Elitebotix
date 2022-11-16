@@ -4,7 +4,7 @@ const osu = require('node-osu');
 const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.json');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, bancho, twitchClient, processQueueEntry) {
 		// console.log('updateOsuRank');
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {

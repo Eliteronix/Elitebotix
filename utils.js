@@ -410,7 +410,7 @@ module.exports = {
 
 		return userDisplayName;
 	},
-	executeNextProcessQueueTask: async function (client, bancho) {
+	executeNextProcessQueueTask: async function (client, bancho, twitchClient) {
 		let now = new Date();
 		logDatabaseQueriesFunction(1, 'utils.js DBProcessQueue nextTask');
 		let nextTasks = await DBProcessQueue.findAll({
@@ -427,17 +427,17 @@ module.exports = {
 		});
 
 		for (let i = 0; i < nextTasks.length; i++) {
-			if (!wrongClusterFunction(nextTasks[i].id)) {
+			if (!wrongClusterFunction(client, nextTasks[i].id)) {
 				nextTasks[i].beingExecuted = true;
 				await nextTasks[i].save();
 
-				executeFoundTask(client, bancho, nextTasks[i]);
+				executeFoundTask(client, bancho, twitchClient, nextTasks[i]);
 				break;
 			}
 		}
 	},
-	refreshOsuRank: async function () {
-		if (wrongClusterFunction()) {
+	refreshOsuRank: async function (client) {
+		if (wrongClusterFunction(client)) {
 			return;
 		}
 
@@ -907,8 +907,8 @@ module.exports = {
 	adjustHDStarRating(starRating, approachRate) {
 		return adjustHDStarRatingFunction(starRating, approachRate);
 	},
-	async twitchConnect(bancho) {
-		if (wrongClusterFunction()) {
+	async twitchConnect(client, bancho) {
+		if (wrongClusterFunction(client)) {
 			return;
 		}
 		bancho.sentRequests = [];
@@ -1258,8 +1258,8 @@ module.exports = {
 
 		console.log(`Cleaned up ${deleted} duplicate scores`);
 	},
-	wrongCluster(id) {
-		return wrongClusterFunction(id);
+	wrongCluster(client, id) {
+		return wrongClusterFunction(client, id);
 	},
 	async getDerankStats(discordUser) {
 		return await getDerankStatsFunction(discordUser);
@@ -1269,7 +1269,7 @@ module.exports = {
 	},
 	async syncJiraCards(client) {
 		// eslint-disable-next-line no-undef
-		if (wrongClusterFunction() || process.env.SERVER !== 'Live') {
+		if (wrongClusterFunction(client) || process.env.SERVER !== 'Live') {
 			return;
 		}
 
@@ -3427,24 +3427,24 @@ async function getDerankStatsFunction(discordUser) {
 	}
 }
 
-function wrongClusterFunction(id) {
-	let clusterAmount = require('os').cpus().length;
-	// eslint-disable-next-line no-undef
-	if (process.env.SERVER === 'Dev') {
-		clusterAmount = 4;
+function wrongClusterFunction(client, id) {
+	let clusterAmount = client.totalShards;
+
+	// console.log(clusterAmount, 'clusterAmount');
+
+	// Allow cluster 0 if no id is provided
+	if (!id && client.shardId === 0) {
+		// console.log('Not wrong cluster because no Id and zero', clusterAmount, id);
+		return false;
 	}
 
 	//Allow the modulo cluster to execute
-	// eslint-disable-next-line no-undef
-	if (id && id.toString().substring(id.toString().length - 3) % clusterAmount === parseInt(process.env.pm_id)) {
+	if (id && id.toString().substring(id.toString().length - 3) % clusterAmount === parseInt(client.shardId)) {
+		// console.log('Not wrong cluster because of modulo', clusterAmount, id);
 		return false;
 	}
 
-	// Allow cluster 0 if no id is provided
-	// eslint-disable-next-line no-undef
-	if (!id && process.env.pm_id === '0') {
-		return false;
-	}
+	// console.log('Wrong cluster', clusterAmount, id);
 
 	// Else its the wrong cluster
 	return true;
@@ -3594,7 +3594,7 @@ async function checkForBirthdaysFunction(client) {
 	//get current date
 	const currentDate = new Date();
 
-	if (wrongClusterFunction()) {
+	if (wrongClusterFunction(client)) {
 		return;
 	}
 
@@ -4437,12 +4437,12 @@ function calculateGradeFunction(mode, counts, modBits) {
 	}
 }
 
-async function executeFoundTask(client, bancho, nextTask) {
+async function executeFoundTask(client, bancho, twitchClient, nextTask) {
 	try {
-		if (nextTask && !wrongClusterFunction(nextTask.id)) {
+		if (nextTask && !wrongClusterFunction(client, nextTask.id)) {
 			const task = require(`./processQueueTasks/${nextTask.task}.js`);
 
-			await task.execute(client, bancho, nextTask);
+			await task.execute(client, bancho, twitchClient, nextTask);
 		}
 	} catch (e) {
 		console.log('Error executing process queue task', e);

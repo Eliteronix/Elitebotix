@@ -1,8 +1,6 @@
 //Log message upon starting the bot
 console.log('Bot is starting...');
 const { twitchConnect, wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack } = require('./utils');
-
-//require the dotenv node module
 require('dotenv').config();
 
 //require the discord.js module
@@ -117,28 +115,45 @@ const Banchojs = require('bancho.js');
 // eslint-disable-next-line no-undef
 const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterTimespan: 60000, limiterPrivate: 45, limiterPublic: 9 });
 
-//Connect for the first worker
-// eslint-disable-next-line no-undef
-if (!wrongCluster() && process.env.SERVER !== 'QA') {
-	bancho.connect();
-
-	bancho.lastUserMaps = new Discord.Collection();
-
-	//Listen to messages
-	bancho.on('PM', async (message) => {
-		gotBanchoPrivateMessage(client, bancho, message);
-	});
-}
-
-let twitchClient = null;
-twitchConnect(bancho).then(twitch => {
-	twitchClient = twitch;
-	return;
-});
-
 //login with the Discord client using the Token from the .env file
 // eslint-disable-next-line no-undef
 client.login(process.env.BOTTOKEN);
+let twitchClient = { client: null };
+
+//Get manager messages
+// eslint-disable-next-line no-undef
+process.on('message', message => {
+	if (!message.type) return false;
+
+	if (message.type == 'shardId') {
+		console.log(`The shard id is: ${message.data.shardId}`);
+		client.shardId = message.data.shardId;
+
+		if (!wrongCluster(client, client.shardId)) {
+			restartProcessQueueTask();
+		}
+
+		twitchConnect(client, bancho).then(twitch => {
+			twitchClient.client = twitch;
+		});
+
+		//Connect for the first shard
+		// eslint-disable-next-line no-undef
+		if (!wrongCluster(client, client.shardId) && process.env.SERVER !== 'QA') {
+			bancho.connect();
+
+			bancho.lastUserMaps = new Discord.Collection();
+
+			//Listen to messages
+			bancho.on('PM', async (message) => {
+				gotBanchoPrivateMessage(client, bancho, message);
+			});
+		}
+	} else if (message.type == 'totalShards') {
+		console.log(`[${client.shardId}] The total amount of shards is: ${message.data.totalShards}`);
+		client.totalShards = message.data.totalShards;
+	}
+});
 
 //declare what the discord client should do when it's ready
 client.on('ready', readyDiscord);
@@ -156,11 +171,7 @@ function readyDiscord() {
 		}]
 	});
 
-	if (!wrongCluster()) {
-		restartProcessQueueTask();
-	}
-
-	executeProcessQueue(client, bancho);
+	executeProcessQueue(client, bancho, twitchClient);
 
 	startJiraCardSync(client);
 }
@@ -184,9 +195,6 @@ client.on('guildBanRemove', guildBanRemove);
 client.on('userUpdate', userUpdate);
 
 client.on('messageReactionAdd', (reaction, user) => {
-	if (wrongCluster(user.id)) {
-		return;
-	}
 	reactionAdded(reaction, user, [client, bancho]);
 });
 
@@ -220,38 +228,35 @@ client.on('emojiUpdate', emojiUpdate);
 
 client.on('emojiDelete', emojiDelete);
 
-setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
-
-setInterval(() => checkForBirthdays(client), 300000);
-
-setInterval(() => refreshOsuRank(), 60000);
-
 setTimeout(() => {
 	// eslint-disable-next-line no-undef
-	if (wrongCluster()) {
+	if (wrongCluster(client, client.shardId)) {
 		return;
 	}
 	cleanUpDuplicates();
 	getForumPosts(client);
 	checkOsuTracks(client);
+
+	setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
+
+	setInterval(() => checkForBirthdays(client), 300000);
+
+	setInterval(() => refreshOsuRank(client), 60000);
 }, 60000);
 
 client.on('interactionCreate', interaction => {
-	if (wrongCluster(interaction.id)) {
-		return;
-	}
 	interactionCreate(client, bancho, interaction);
 });
 
-async function executeProcessQueue(client, bancho) {
+async function executeProcessQueue(client, bancho, twitchClient) {
 	try {
-		await executeNextProcessQueueTask(client, bancho);
+		await executeNextProcessQueueTask(client, bancho, twitchClient.client);
 	} catch (e) {
 		console.log(e);
 	}
 
 	setTimeout(() => {
-		executeProcessQueue(client, bancho);
+		executeProcessQueue(client, bancho, twitchClient);
 	}, 650);
 }
 

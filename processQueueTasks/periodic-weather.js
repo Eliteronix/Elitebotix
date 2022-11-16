@@ -1,7 +1,7 @@
 const { getGuildPrefix, pause } = require('../utils');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, bancho, twitchClient, processQueueEntry) {
 		// console.log('periodic-weather');
 		let args = processQueueEntry.additions.split(';');
 
