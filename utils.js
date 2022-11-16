@@ -410,7 +410,7 @@ module.exports = {
 
 		return userDisplayName;
 	},
-	executeNextProcessQueueTask: async function (client, bancho) {
+	executeNextProcessQueueTask: async function (client, bancho, twitchClient) {
 		let now = new Date();
 		logDatabaseQueriesFunction(1, 'utils.js DBProcessQueue nextTask');
 		let nextTasks = await DBProcessQueue.findAll({
@@ -431,7 +431,7 @@ module.exports = {
 				nextTasks[i].beingExecuted = true;
 				await nextTasks[i].save();
 
-				executeFoundTask(client, bancho, nextTasks[i]);
+				executeFoundTask(client, bancho, twitchClient, nextTasks[i]);
 				break;
 			}
 		}
@@ -3422,23 +3422,23 @@ async function getDerankStatsFunction(discordUser) {
 }
 
 function wrongClusterFunction(client, id) {
-	let clusterAmount = client.shard.ids.length;
+	let clusterAmount = client.totalShards;
 
-	console.log(clusterAmount, 'clusterAmount');
-
-	//Allow the modulo cluster to execute
-	if (id && id.toString().substring(id.toString().length - 3) % clusterAmount === parseInt(client.shardId)) {
-		console.log('Not wrong cluster because of modulo', clusterAmount, id);
-		return false;
-	}
+	// console.log(clusterAmount, 'clusterAmount');
 
 	// Allow cluster 0 if no id is provided
 	if (!id && client.shardId === 0) {
-		console.log('Not wrong cluster because no Id and zero', clusterAmount, id);
+		// console.log('Not wrong cluster because no Id and zero', clusterAmount, id);
 		return false;
 	}
 
-	console.log('Wrong cluster', clusterAmount, id);
+	//Allow the modulo cluster to execute
+	if (id && id.toString().substring(id.toString().length - 3) % clusterAmount === parseInt(client.shardId)) {
+		// console.log('Not wrong cluster because of modulo', clusterAmount, id);
+		return false;
+	}
+
+	// console.log('Wrong cluster', clusterAmount, id);
 
 	// Else its the wrong cluster
 	return true;
@@ -4431,12 +4431,12 @@ function calculateGradeFunction(mode, counts, modBits) {
 	}
 }
 
-async function executeFoundTask(client, bancho, nextTask) {
+async function executeFoundTask(client, bancho, twitchClient, nextTask) {
 	try {
 		if (nextTask && !wrongClusterFunction(client, nextTask.id)) {
 			const task = require(`./processQueueTasks/${nextTask.task}.js`);
 
-			await task.execute(client, bancho, nextTask);
+			await task.execute(client, bancho, twitchClient, nextTask);
 		}
 	} catch (e) {
 		console.log('Error executing process queue task', e);

@@ -1,4 +1,5 @@
 const { Permissions } = require('discord.js');
+const { DBProcessQueue } = require('../dbObjects');
 const { getOsuUserServerMode } = require('../utils');
 
 module.exports = {
@@ -35,7 +36,7 @@ module.exports = {
 		} else {
 			commandUser.twitchOsuMapSync = true;
 			msg.reply('Twitch-Mapsync is now enabled.');
-			additionalObjects[2].join(commandUser.twitchName);
+			await DBProcessQueue.create({ task: 'joinTwitchChannel', priority: 15, additions: commandUser.twitchName, date: new Date() });
 		}
 		commandUser.save();
 	},

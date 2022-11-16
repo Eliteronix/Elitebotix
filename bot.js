@@ -118,9 +118,7 @@ const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, passwo
 //login with the Discord client using the Token from the .env file
 // eslint-disable-next-line no-undef
 client.login(process.env.BOTTOKEN);
-let twitchClient = {};
-
-let TODOTwitchMapSync;
+let twitchClient = { client: null };
 
 //Get manager messages
 // eslint-disable-next-line no-undef
@@ -136,8 +134,7 @@ process.on('message', message => {
 		}
 
 		twitchConnect(client, bancho).then(twitch => {
-			twitchClient = twitch;
-			return;
+			twitchClient.client = twitch;
 		});
 
 		//Connect for the first shard
@@ -152,6 +149,9 @@ process.on('message', message => {
 				gotBanchoPrivateMessage(client, bancho, message);
 			});
 		}
+	} else if (message.type == 'totalShards') {
+		console.log(`[${client.shardId}] The total amount of shards is: ${message.data.totalShards}`);
+		client.totalShards = message.data.totalShards;
 	}
 });
 
@@ -171,7 +171,7 @@ function readyDiscord() {
 		}]
 	});
 
-	executeProcessQueue(client, bancho);
+	executeProcessQueue(client, bancho, twitchClient);
 
 	startJiraCardSync(client);
 }
@@ -248,15 +248,15 @@ client.on('interactionCreate', interaction => {
 	interactionCreate(client, bancho, interaction);
 });
 
-async function executeProcessQueue(client, bancho) {
+async function executeProcessQueue(client, bancho, twitchClient) {
 	try {
-		await executeNextProcessQueueTask(client, bancho);
+		await executeNextProcessQueueTask(client, bancho, twitchClient.client);
 	} catch (e) {
 		console.log(e);
 	}
 
 	setTimeout(() => {
-		executeProcessQueue(client, bancho);
+		executeProcessQueue(client, bancho, twitchClient);
 	}, 650);
 }
 

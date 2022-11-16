@@ -15,9 +15,14 @@ manager.on('shardCreate', shard => {
 
 	// Listeing for the ready event on shard.
 	shard.on('ready', () => {
-		console.log(`[DEBUG/SHARD] Shard ${shard.id} connected to Discord's Gateway.`);
+		// console.log(`[DEBUG/SHARD] Shard ${shard.id} connected to Discord's Gateway.`);
 		// Sending the data to the shard.
 		shard.send({ type: 'shardId', data: { shardId: shard.id } });
+
+		// Send the total amount of shards to all shards.
+		manager.shards.forEach(shard => {
+			shard.send({ type: 'totalShards', data: { totalShards: manager.shards.size } });
+		});
 	});
 });
 

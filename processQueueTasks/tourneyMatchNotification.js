@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, bancho, twitchClient, processQueueEntry) {
 		// console.log('tourneyMatchNotification');
 		let args = processQueueEntry.additions.split(';');
 
