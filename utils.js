@@ -427,7 +427,7 @@ module.exports = {
 		});
 
 		for (let i = 0; i < nextTasks.length; i++) {
-			if (!wrongClusterFunction(nextTasks[i].id)) {
+			if (!wrongClusterFunction(client, nextTasks[i].id)) {
 				nextTasks[i].beingExecuted = true;
 				await nextTasks[i].save();
 
@@ -436,8 +436,8 @@ module.exports = {
 			}
 		}
 	},
-	refreshOsuRank: async function () {
-		if (wrongClusterFunction()) {
+	refreshOsuRank: async function (client) {
+		if (wrongClusterFunction(client)) {
 			return;
 		}
 
@@ -907,8 +907,8 @@ module.exports = {
 	adjustHDStarRating(starRating, approachRate) {
 		return adjustHDStarRatingFunction(starRating, approachRate);
 	},
-	async twitchConnect(bancho) {
-		if (wrongClusterFunction()) {
+	async twitchConnect(client, bancho) {
+		if (wrongClusterFunction(client)) {
 			return;
 		}
 		bancho.sentRequests = [];

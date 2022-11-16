@@ -9,7 +9,7 @@ module.exports = {
 	initializeMOTD: async function (client, bancho, manualStart, manualLeaderboard) {
 		//Start everything in that minute
 		const today = new Date();
-		if (!manualStart && !manualLeaderboard && wrongCluster()) {
+		if (!manualStart && !manualLeaderboard && wrongCluster(client, client.shardId)) {
 			return;
 		}
 
