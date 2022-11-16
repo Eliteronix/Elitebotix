@@ -283,9 +283,14 @@ module.exports = {
 
 			// eslint-disable-next-line no-undef
 			if (elitiriSignUp.osuName !== discordUser.osuName && !elitiriSignUp.rankAchieved && process.env.SERVER === 'Live') {
-				const guild = await client.guilds.fetch('727407178499096597');
-				const channel = await guild.channels.fetch('830534251757174824');
-				channel.send(`<@&851356668415311963> The player \`${elitiriSignUp.osuName}\` from \`${elitiriSignUp.bracketName}\` changed their osu! name to \`${discordUser.osuName}\`.`);
+				client.shard.broadcastEval(async (c, { message }) => {
+					const guild = await c.guilds.fetch('727407178499096597');
+					const channel = await guild.channels.fetch('830534251757174824');
+					if (channel) {
+						channel.send(message);
+					}
+				}, { context: { message: `<@&851356668415311963> The player \`${elitiriSignUp.osuName}\` from \`${elitiriSignUp.bracketName}\` changed their osu! name to \`${discordUser.osuName}\`.` } });
+
 			}
 
 			elitiriSignUp.osuName = discordUser.osuName;

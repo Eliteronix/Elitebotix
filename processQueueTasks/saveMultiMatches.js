@@ -53,19 +53,22 @@ module.exports = {
 						let minutesBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60) % 60;
 						let hoursBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60) % 24;
 						let daysBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60 / 24);
-						let channel;
-						let ping = '';
-						// eslint-disable-next-line no-undef
-						if (process.env.SERVER === 'Live') {
-							channel = await client.channels.fetch('891314445559676928');
+						client.shard.broadcastEval(async (c, { message }) => {
+							let channel;
 							// eslint-disable-next-line no-undef
-						} else if (process.env.SERVER === 'QA') {
-							channel = await client.channels.fetch('892873577479692358');
-							ping = ' <@981205694340546571>';
-						} else {
-							channel = await client.channels.fetch('1013789721014571090');
-						}
-						await channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done${ping}`);
+							if (process.env.SERVER === 'Live') {
+								channel = await c.channels.fetch('891314445559676928');
+								// eslint-disable-next-line no-undef
+							} else if (process.env.SERVER === 'QA') {
+								channel = await c.channels.fetch('892873577479692358');
+							} else {
+								channel = await c.channels.fetch('1013789721014571090');
+							}
+
+							if (channel) {
+								await channel.send(message);
+							}
+						}, { context: { message: `<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done` } });
 					}
 					//Go next if match found and ended / too long going already
 					// eslint-disable-next-line no-undef
@@ -174,8 +177,12 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 	if (incompleteMatchScore) {
 		await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
 			.then(async (match) => {
-				let channel = await client.channels.fetch(channelId);
-				await channel.send(`<https://osu.ppy.sh/mp/${match.id}> | ${incompleteMatchScore.updatedAt.getUTCHours().toString().padStart(2, 0)}:${incompleteMatchScore.updatedAt.getUTCMinutes().toString().padStart(2, 0)} ${incompleteMatchScore.updatedAt.getUTCDate().toString().padStart(2, 0)}.${(incompleteMatchScore.updatedAt.getUTCMonth() + 1).toString().padStart(2, 0)}.${incompleteMatchScore.updatedAt.getUTCFullYear()} | \`${match.name}\``);
+				client.shard.broadcastEval(async (c, { channelId, message }) => {
+					let channel = await c.channels.fetch(channelId);
+					if (channel) {
+						await channel.send(message);
+					}
+				}, { context: { channelId: channelId, message: `<https://osu.ppy.sh/mp/${match.id}> | ${incompleteMatchScore.updatedAt.getUTCHours().toString().padStart(2, 0)}:${incompleteMatchScore.updatedAt.getUTCMinutes().toString().padStart(2, 0)} ${incompleteMatchScore.updatedAt.getUTCDate().toString().padStart(2, 0)}.${(incompleteMatchScore.updatedAt.getUTCMonth() + 1).toString().padStart(2, 0)}.${incompleteMatchScore.updatedAt.getUTCFullYear()} | \`${match.name}\`` } });
 
 				incompleteMatchScore.changed('updatedAt', true);
 				await incompleteMatchScore.save();
