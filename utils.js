@@ -3336,6 +3336,9 @@ async function getDerankStatsFunction(discordUser) {
 			},
 			osuDuelStarRating: {
 				[Op.gt]: 0
+			},
+			osuDuelProvisional: {
+				[Op.not]: true,
 			}
 		},
 		order: [
@@ -3355,6 +3358,9 @@ async function getDerankStatsFunction(discordUser) {
 			},
 			osuDuelStarRating: {
 				[Op.gt]: 0
+			},
+			osuDuelProvisional: {
+				[Op.not]: true,
 			}
 		},
 		order: [

@@ -754,6 +754,9 @@ module.exports = {
 							},
 							osuDuelStarRating: {
 								[Op.not]: null,
+							},
+							osuDuelProvisional: {
+								[Op.not]: true,
 							}
 						},
 					});
