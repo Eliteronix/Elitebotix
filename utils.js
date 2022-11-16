@@ -1258,8 +1258,8 @@ module.exports = {
 
 		console.log(`Cleaned up ${deleted} duplicate scores`);
 	},
-	wrongCluster(id) {
-		return wrongClusterFunction(id);
+	wrongCluster(client, id) {
+		return wrongClusterFunction(client, id);
 	},
 	async getDerankStats(discordUser) {
 		return await getDerankStatsFunction(discordUser);
@@ -1269,7 +1269,7 @@ module.exports = {
 	},
 	async syncJiraCards(client) {
 		// eslint-disable-next-line no-undef
-		if (wrongClusterFunction() || process.env.SERVER !== 'Live') {
+		if (wrongClusterFunction(client) || process.env.SERVER !== 'Live') {
 			return;
 		}
 
@@ -3421,24 +3421,24 @@ async function getDerankStatsFunction(discordUser) {
 	}
 }
 
-function wrongClusterFunction(id) {
-	let clusterAmount = require('os').cpus().length;
-	// eslint-disable-next-line no-undef
-	if (process.env.SERVER === 'Dev') {
-		clusterAmount = 4;
-	}
+function wrongClusterFunction(client, id) {
+	let clusterAmount = client.shard.ids.length;
+
+	console.log(clusterAmount, 'clusterAmount');
 
 	//Allow the modulo cluster to execute
-	// eslint-disable-next-line no-undef
-	if (id && id.toString().substring(id.toString().length - 3) % clusterAmount === parseInt(process.env.pm_id)) {
+	if (id && id.toString().substring(id.toString().length - 3) % clusterAmount === parseInt(client.shardId)) {
+		console.log('Not wrong cluster because of modulo', clusterAmount, id);
 		return false;
 	}
 
 	// Allow cluster 0 if no id is provided
-	// eslint-disable-next-line no-undef
-	if (!id && process.env.pm_id === '0') {
+	if (!id && client.shardId === 0) {
+		console.log('Not wrong cluster because no Id and zero', clusterAmount, id);
 		return false;
 	}
+
+	console.log('Wrong cluster', clusterAmount, id);
 
 	// Else its the wrong cluster
 	return true;
@@ -3588,7 +3588,7 @@ async function checkForBirthdaysFunction(client) {
 	//get current date
 	const currentDate = new Date();
 
-	if (wrongClusterFunction()) {
+	if (wrongClusterFunction(client)) {
 		return;
 	}
 
@@ -4433,7 +4433,7 @@ function calculateGradeFunction(mode, counts, modBits) {
 
 async function executeFoundTask(client, bancho, nextTask) {
 	try {
-		if (nextTask && !wrongClusterFunction(nextTask.id)) {
+		if (nextTask && !wrongClusterFunction(client, nextTask.id)) {
 			const task = require(`./processQueueTasks/${nextTask.task}.js`);
 
 			await task.execute(client, bancho, nextTask);

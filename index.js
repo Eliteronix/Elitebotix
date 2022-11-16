@@ -2,7 +2,13 @@ const { ShardingManager } = require('discord.js');
 require('dotenv').config();
 
 // eslint-disable-next-line no-undef
-const manager = new ShardingManager('./bot.js', { token: process.env.BOTTOKEN });
+let manager = new ShardingManager('./bot.js', { token: process.env.BOTTOKEN });
+
+// eslint-disable-next-line no-undef
+if (process.env.SERVER === 'Dev') {
+	// eslint-disable-next-line no-undef
+	manager = new ShardingManager('./bot.js', { token: process.env.BOTTOKEN, totalShards: 2 });
+}
 
 manager.on('shardCreate', shard => {
 	console.log(`Launched shard ${shard.id}`);
