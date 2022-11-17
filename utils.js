@@ -1291,85 +1291,89 @@ module.exports = {
 
 		let issues = responseJson.issues;
 
-		// TODO: Change to broadcast
-		const backlogChannel = await client.channels.fetch('1000372560552276028');
-		const selectedForDevChannel = await client.channels.fetch('1000372600251351070');
-		const inProgressChannel = await client.channels.fetch('1000372630060281856');
-		const doneChannel = await client.channels.fetch('1000372653762285708');
+		client.shard.broadcastEval(async (c, { issues }) => {
+			const backlogChannel = await c.channels.fetch('1000372560552276028');
+			if (backlogChannel) {
+				const selectedForDevChannel = await c.channels.fetch('1000372600251351070');
+				const inProgressChannel = await c.channels.fetch('1000372630060281856');
+				const doneChannel = await c.channels.fetch('1000372653762285708');
 
-		for (let i = 0; i < issues.length; i++) {
-			let channel = backlogChannel;
+				for (let i = 0; i < issues.length; i++) {
+					let channel = backlogChannel;
 
-			if (issues[i].fields.status.name === 'Selected for Development') {
-				channel = selectedForDevChannel;
-			} else if (issues[i].fields.status.name === 'In Progress') {
-				channel = inProgressChannel;
-			} else if (issues[i].fields.status.name === 'Done') {
-				channel = doneChannel;
+					if (issues[i].fields.status.name === 'Selected for Development') {
+						channel = selectedForDevChannel;
+					} else if (issues[i].fields.status.name === 'In Progress') {
+						channel = inProgressChannel;
+					} else if (issues[i].fields.status.name === 'Done') {
+						channel = doneChannel;
+					}
+
+					let color = '#000000';
+
+					if (issues[i].fields.priority.name === 'Highest') {
+						color = '#ff1500';
+					} else if (issues[i].fields.priority.name === 'High') {
+						color = '#f0655d';
+					} else if (issues[i].fields.priority.name === 'Medium') {
+						color = '#f59536';
+					} else if (issues[i].fields.priority.name === 'Low') {
+						color = '#0ecf00';
+					}
+
+					let updatedDate = new Date(issues[i].fields.updated);
+
+					//Create embed
+					const Discord = require('discord.js');
+					const issueEmbed = new Discord.MessageEmbed()
+						.setColor(color)
+						.setTitle(issues[i].fields.summary)
+						.setFooter({ text: `Last updated: ${updatedDate.getUTCHours().toString().padStart(2, '0')}:${updatedDate.getUTCMinutes().toString().padStart(2, '0')} ${updatedDate.getUTCDate().toString().padStart(2, '0')}.${(updatedDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${updatedDate.getUTCFullYear()}` });
+
+					if (issues[i].fields.assignee) {
+						issueEmbed.setAuthor({ name: `Assigned to: ${issues[i].fields.assignee.displayName}`, iconURL: issues[i].fields.assignee.avatarUrls['48x48'] });
+					}
+
+					if (issues[i].fields.parent) {
+						issueEmbed.addField('Parent', `${issues[i].fields.parent.key} - ${issues[i].fields.parent.fields.summary}`);
+					}
+
+					await backlogChannel.messages.fetch({ limit: 100 })
+						.then(async (messages) => {
+							const issueMessages = messages.filter(m => m.content === issues[i].key);
+							issueMessages.forEach(async (message) => {
+								await message.delete();
+							});
+						});
+
+					await selectedForDevChannel.messages.fetch({ limit: 100 })
+						.then(async (messages) => {
+							const issueMessages = messages.filter(m => m.content === issues[i].key);
+							issueMessages.forEach(async (message) => {
+								await message.delete();
+							});
+						});
+
+					await inProgressChannel.messages.fetch({ limit: 100 })
+						.then(async (messages) => {
+							const issueMessages = messages.filter(m => m.content === issues[i].key);
+							issueMessages.forEach(async (message) => {
+								await message.delete();
+							});
+						});
+
+					await doneChannel.messages.fetch({ limit: 100 })
+						.then(async (messages) => {
+							const issueMessages = messages.filter(m => m.content === issues[i].key);
+							issueMessages.forEach(async (message) => {
+								await message.delete();
+							});
+						});
+
+					channel.send({ content: issues[i].key, embeds: [issueEmbed] });
+				}
 			}
-
-			let color = '#000000';
-
-			if (issues[i].fields.priority.name === 'Highest') {
-				color = '#ff1500';
-			} else if (issues[i].fields.priority.name === 'High') {
-				color = '#f0655d';
-			} else if (issues[i].fields.priority.name === 'Medium') {
-				color = '#f59536';
-			} else if (issues[i].fields.priority.name === 'Low') {
-				color = '#0ecf00';
-			}
-
-			let updatedDate = new Date(issues[i].fields.updated);
-
-			//Create embed
-			const issueEmbed = new Discord.MessageEmbed()
-				.setColor(color)
-				.setTitle(issues[i].fields.summary)
-				.setFooter({ text: `Last updated: ${updatedDate.getUTCHours().toString().padStart(2, '0')}:${updatedDate.getUTCMinutes().toString().padStart(2, '0')} ${updatedDate.getUTCDate().toString().padStart(2, '0')}.${(updatedDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${updatedDate.getUTCFullYear()}` });
-
-			if (issues[i].fields.assignee) {
-				issueEmbed.setAuthor({ name: `Assigned to: ${issues[i].fields.assignee.displayName}`, iconURL: issues[i].fields.assignee.avatarUrls['48x48'] });
-			}
-
-			if (issues[i].fields.parent) {
-				issueEmbed.addField('Parent', `${issues[i].fields.parent.key} - ${issues[i].fields.parent.fields.summary}`);
-			}
-
-			await backlogChannel.messages.fetch({ limit: 100 })
-				.then(async (messages) => {
-					const issueMessages = messages.filter(m => m.content === issues[i].key);
-					issueMessages.forEach(async (message) => {
-						await message.delete();
-					});
-				});
-
-			await selectedForDevChannel.messages.fetch({ limit: 100 })
-				.then(async (messages) => {
-					const issueMessages = messages.filter(m => m.content === issues[i].key);
-					issueMessages.forEach(async (message) => {
-						await message.delete();
-					});
-				});
-
-			await inProgressChannel.messages.fetch({ limit: 100 })
-				.then(async (messages) => {
-					const issueMessages = messages.filter(m => m.content === issues[i].key);
-					issueMessages.forEach(async (message) => {
-						await message.delete();
-					});
-				});
-
-			await doneChannel.messages.fetch({ limit: 100 })
-				.then(async (messages) => {
-					const issueMessages = messages.filter(m => m.content === issues[i].key);
-					issueMessages.forEach(async (message) => {
-						await message.delete();
-					});
-				});
-
-			channel.send({ content: issues[i].key, embeds: [issueEmbed] });
-		}
+		}, { context: { issues: issues } });
 	},
 	async getOsuPlayerName(osuUserId) {
 		return await getOsuPlayerNameFunction(osuUserId);
@@ -2099,20 +2103,33 @@ module.exports = {
 
 			let osuUser = { osuUserId: osuTracker.osuUserId };
 
+			// client.shard.broadcastEval(async (c, { osuUser }) => {
+
+			// }, { context: { osuUser: osuUser } });
+
 			let guildTrackers = await DBOsuGuildTrackers.findAll({
 				where: {
-					osuUserId: osuTracker.osuUserId,
+					osuUserId: osuUser.osuUserId,
 				},
 			});
 
 			for (let i = 0; i < guildTrackers.length; i++) {
-				if (guildTrackers[i].osuLeaderboard || guildTrackers[i].taikoLeaderboard || guildTrackers[i].catchLeaderboard || guildTrackers[i].maniaLeaderboard) {
-					if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
-						guildTrackers.splice(i, 1);
-						i--;
+				try {
+					//Fetch the guild
+					// TODO: Change to broadcast
+					guildTrackers[i].guild = await client.guilds.fetch(guildTrackers[i].guildId);
+
+					//Fetch the channel
+					// TODO: Change to broadcast
+					guildTrackers[i].channel = await guildTrackers[i].guild.channels.fetch(guildTrackers[i].channelId);
+				} catch (err) {
+					if (err.message === 'Missing Access' || err.message === 'Unknown Channel') {
+						await guildTrackers[i].destroy();
 						continue;
 					}
+				}
 
+				if (guildTrackers[i].osuLeaderboard || guildTrackers[i].taikoLeaderboard || guildTrackers[i].catchLeaderboard || guildTrackers[i].maniaLeaderboard) {
 					if (!osuUser.osuUser) {
 						try {
 							let osuUserResult = await osuApi.getUser({ u: osuTracker.osuUserId });
@@ -2218,12 +2235,6 @@ module.exports = {
 				}
 
 				if (guildTrackers[i].osuTopPlays) {
-					if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
-						guildTrackers.splice(i, 1);
-						i--;
-						continue;
-					}
-
 					if (guildTrackers[i].osuNumberTopPlays === undefined) {
 						guildTrackers[i].osuNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 0 })
 							.then(scores => {
@@ -2263,12 +2274,6 @@ module.exports = {
 				}
 
 				if (guildTrackers[i].taikoTopPlays) {
-					if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
-						guildTrackers.splice(i, 1);
-						i--;
-						continue;
-					}
-
 					if (guildTrackers[i].taikoNumberTopPlays === undefined) {
 						guildTrackers[i].taikoNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 1 })
 							.then(scores => {
@@ -2308,12 +2313,6 @@ module.exports = {
 				}
 
 				if (guildTrackers[i].catchTopPlays) {
-					if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
-						guildTrackers.splice(i, 1);
-						i--;
-						continue;
-					}
-
 					if (guildTrackers[i].catchNumberTopPlays === undefined) {
 						guildTrackers[i].catchNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 2 })
 							.then(scores => {
@@ -2353,12 +2352,6 @@ module.exports = {
 				}
 
 				if (guildTrackers[i].maniaTopPlays) {
-					if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
-						guildTrackers.splice(i, 1);
-						i--;
-						continue;
-					}
-
 					if (guildTrackers[i].maniaNumberTopPlays === undefined) {
 						guildTrackers[i].maniaNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 3 })
 							.then(scores => {
@@ -2406,12 +2399,6 @@ module.exports = {
 						}
 
 						if (guildTrackers[i].showAmeobeaUpdates) {
-							if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
-								guildTrackers.splice(i, 1);
-								i--;
-								continue;
-							}
-
 							if (!osuUser.osuName) {
 								osuUser.osuName = await getOsuPlayerNameFunction(osuUser.osuUserId);
 							}
@@ -2432,12 +2419,6 @@ module.exports = {
 						}
 
 						if (guildTrackers[i].showAmeobeaUpdates) {
-							if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
-								guildTrackers.splice(i, 1);
-								i--;
-								continue;
-							}
-
 							if (!osuUser.osuName) {
 								osuUser.osuName = await getOsuPlayerNameFunction(osuUser.osuUserId);
 							}
@@ -2458,12 +2439,6 @@ module.exports = {
 						}
 
 						if (guildTrackers[i].showAmeobeaUpdates) {
-							if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
-								guildTrackers.splice(i, 1);
-								i--;
-								continue;
-							}
-
 							if (!osuUser.osuName) {
 								osuUser.osuName = await getOsuPlayerNameFunction(osuUser.osuUserId);
 							}
@@ -2484,12 +2459,6 @@ module.exports = {
 						}
 
 						if (guildTrackers[i].showAmeobeaUpdates) {
-							if (await fetchChannelIfNeededOrDeleteAndReturnTrue(guildTrackers[i])) {
-								guildTrackers.splice(i, 1);
-								i--;
-								continue;
-							}
-
 							if (!osuUser.osuName) {
 								osuUser.osuName = await getOsuPlayerNameFunction(osuUser.osuUserId);
 							}
@@ -2512,30 +2481,6 @@ module.exports = {
 			date.setMinutes(date.getMinutes() + osuTracker.minutesBetweenChecks);
 			osuTracker.nextCheck = date;
 			await osuTracker.save();
-		}
-
-		async function fetchChannelIfNeededOrDeleteAndReturnTrue(guildTracker) {
-			if (guildTracker.channel) {
-				return;
-			}
-
-			try {
-				//Fetch the guild
-				// TODO: Change to broadcast
-				guildTracker.guild = await client.guilds.fetch(guildTracker.guildId);
-
-				//Fetch the channel
-				// TODO: Change to broadcast
-				guildTracker.channel = await guildTracker.guild.channels.fetch(guildTracker.channelId);
-				return;
-			} catch (err) {
-				if (err.message === 'Missing Access' || err.message === 'Unknown Channel') {
-					await guildTracker.destroy();
-					return true;
-				}
-				return;
-			}
-
 		}
 	},
 	async getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps) {
