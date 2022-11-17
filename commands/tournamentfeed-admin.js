@@ -169,7 +169,6 @@ module.exports = {
 
 			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Live') {
-				// TODO: Change to broadcast
 				let channel = await interaction.client.channels.fetch('1010602094694244362');
 				let sentMessage = await channel.send({ embeds: [embed] });
 				sentMessage.crosspost();

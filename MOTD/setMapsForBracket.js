@@ -1,4 +1,3 @@
-const Discord = require('discord.js');
 const { humanReadable, getOsuBeatmap, logDatabaseQueries } = require('../utils.js');
 const { qualifier } = require('./qualifier.js');
 const { DBOsuBeatmaps, DBOsuMultiScores } = require('../dbObjects.js');
@@ -377,35 +376,48 @@ module.exports = {
 		const todayYear = today.getUTCFullYear();
 		const todayMonth = (today.getUTCMonth() + 1).toString().padStart(2, '0');
 		const todayDay = (today.getUTCDate()).toString().padStart(2, '0');
-		const mappoolEmbed = new Discord.MessageEmbed()
-			.setColor('#C45686')
-			.setTitle(`Mappool from ${todayDay}.${todayMonth}.${todayYear} for ${humanReadable(upperRank)} - ${humanReadable(lowerRank)} BWS`)
-			.setDescription(`Mappool for ${humanReadable(upperRank)} - ${humanReadable(lowerRank)} on ${todayDay}.${todayMonth}.${todayYear}`)
-			.setFooter({ text: `Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}` });
 
-		for (let i = 0; i < mappoolInOrder.length; i++) {
-			if (!(i === 0 && players.length < 17)) {
-				let mapPrefix = '';
-				if (i === 0) {
-					mapPrefix = 'Qualifier:';
-				} else if (i === 4 || i === 8) {
-					mapPrefix = `Knockout #${i} (DT):`;
-				} else {
-					mapPrefix = `Knockout #${i}:`;
-				}
-				const embedName = `${mapPrefix} ${mappoolInOrder[i].artist} - ${mappoolInOrder[i].title} | [${mappoolInOrder[i].version}]`;
-				const embedValue = `${Math.round(mappoolInOrder[i].difficulty.rating * 100) / 100}* | ${Math.floor(mappoolInOrder[i].length.total / 60)}:${(mappoolInOrder[i].length.total % 60).toString().padStart(2, '0')} | [Website](<https://osu.ppy.sh/b/${mappoolInOrder[i].id}>) | osu! direct: <osu://b/${mappoolInOrder[i].id}>`;
-				mappoolEmbed.addField(embedName, embedValue);
-			}
-		}
-
-		//Send official message into the correct channel
-		// TODO: Change to broadcast
-		const mapsOfTheDayChannel = await client.channels.fetch(channelId);
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER !== 'Dev') {
-			mapsOfTheDayChannel.send('The new mappool is out!\nThe bot will send you a DM in a moment. Please follow the instructions given.');
-			mapsOfTheDayChannel.send({ embeds: [mappoolEmbed] });
+			client.shard.broadcastEval(async (c, { channelId, title, description, footer, mappoolInOrder, playerAmount }) => {
+				//Send official message into the correct channel
+				const mapsOfTheDayChannel = await c.channels.fetch(channelId);
+				if (mapsOfTheDayChannel) {
+					const Discord = require('discord.js');
+					const mappoolEmbed = new Discord.MessageEmbed()
+						.setColor('#C45686')
+						.setTitle(title)
+						.setDescription(description)
+						.setFooter({ text: footer });
+
+					for (let i = 0; i < mappoolInOrder.length; i++) {
+						if (!(i === 0 && playerAmount < 17)) {
+							let mapPrefix = '';
+							if (i === 0) {
+								mapPrefix = 'Qualifier:';
+							} else if (i === 4 || i === 8) {
+								mapPrefix = `Knockout #${i} (DT):`;
+							} else {
+								mapPrefix = `Knockout #${i}:`;
+							}
+							const embedName = `${mapPrefix} ${mappoolInOrder[i].artist} - ${mappoolInOrder[i].title} | [${mappoolInOrder[i].version}]`;
+							const embedValue = `${Math.round(mappoolInOrder[i].difficulty.rating * 100) / 100}* | ${Math.floor(mappoolInOrder[i].length.total / 60)}:${(mappoolInOrder[i].length.total % 60).toString().padStart(2, '0')} | [Website](<https://osu.ppy.sh/b/${mappoolInOrder[i].id}>) | osu! direct: <osu://b/${mappoolInOrder[i].id}>`;
+							mappoolEmbed.addField(embedName, embedValue);
+						}
+					}
+					mapsOfTheDayChannel.send('The new mappool is out!\nThe bot will send you a DM in a moment. Please follow the instructions given.');
+					mapsOfTheDayChannel.send({ embeds: [mappoolEmbed] });
+				}
+			}, {
+				context: {
+					channelId: channelId,
+					title: `Mappool from ${todayDay}.${todayMonth}.${todayYear} for ${humanReadable(upperRank)} - ${humanReadable(lowerRank)} BWS`,
+					description: `Mappool for ${humanReadable(upperRank)} - ${humanReadable(lowerRank)} on ${todayDay}.${todayMonth}.${todayYear}`,
+					footer: `Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`,
+					mappoolInOrder: mappoolInOrder,
+					playerAmount: players.length
+				}
+			});
 		}
 
 		//Start qualifier process

@@ -230,7 +230,7 @@ client.on('emojiDelete', emojiDelete);
 
 setTimeout(() => {
 	// eslint-disable-next-line no-undef
-	if (wrongCluster(client, client.shardId)) {
+	if (wrongCluster(client)) {
 		return;
 	}
 	cleanUpDuplicates();

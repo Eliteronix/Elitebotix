@@ -383,9 +383,10 @@ async function messageUserWithRetries(client, user, channelId, content) {
 		} catch (error) {
 			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
 				if (i === 2) {
-					// TODO: Change to broadcast
-					const channel = await client.channels.fetch(channelId);
-					channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+					client.shard.broadcastEval(async (c, { channelId, message }) => {
+						const channel = await c.channels.fetch(channelId);
+						channel.send(message);
+					}, { context: { channelId: channelId, message: `<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!` } });
 				} else {
 					await pause(2500);
 				}

@@ -69,10 +69,58 @@ module.exports = {
 				msg.reply({ content: '**Elitebotix has been updated** - Please report any bugs by using `/feedback`.', files: [attachment] });
 				// eslint-disable-next-line no-undef
 			} else if (process.env.SERVER === 'Live') {
-				// TODO: Change to broadcast
-				const changelogChannel = await msg.client.channels.fetch('804658828883787784');
-				let sentMessage = await changelogChannel.send({ content: '**Elitebotix has been updated** - Please report any bugs by using `/feedback`.', files: [attachment] });
-				sentMessage.crosspost();
+				msg.client.shard.broadcastEval(async (c, { args }) => {
+					const changelogChannel = await c.channels.fetch('804658828883787784');
+					if (changelogChannel) {
+						const argString = args.join(' ');
+						let argArray = argString.split('<|>');
+						const canvasHeight = parseInt(argArray.shift());
+						const title = argArray.shift();
+
+						const canvasWidth = 1000;
+
+						//Create Canvas
+						const Canvas = require('canvas');
+						const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+						Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+						//Get context and load the image
+						const ctx = canvas.getContext('2d');
+
+						const background = await Canvas.loadImage('./other/discord-background.png');
+
+						for (let i = 0; i < canvas.height / background.height; i++) {
+							for (let j = 0; j < canvas.width / background.width; j++) {
+								ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+							}
+						}
+
+						// Write the title of the changelog
+						ctx.font = 'bold 35px comfortaa, sans-serif';
+						ctx.fillStyle = '#ffffff';
+						ctx.textAlign = 'center';
+						ctx.fillText(title, canvas.width / 2, 50);
+
+						let today = new Date().toLocaleDateString();
+
+						ctx.font = '12px comfortaa, sans-serif';
+						ctx.fillStyle = '#ffffff';
+						ctx.textAlign = 'right';
+						ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 5, canvas.height - 5);
+
+						ctx.font = 'bold 25px comfortaa, sans-serif';
+						ctx.textAlign = 'left';
+						ctx.fillText(argArray[0], 100, 150);
+
+						//Create as an attachment
+						const Discord = require('discord.js');
+						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'elitebotix-changelog.png');
+
+						let sentMessage = await changelogChannel.send({ content: '**Elitebotix has been updated** - Please report any bugs by using `/feedback`.', files: [attachment] });
+						sentMessage.crosspost();
+					}
+				}, { context: { args: args } });
 			}
 		}
 	},

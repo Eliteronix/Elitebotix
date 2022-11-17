@@ -119,9 +119,12 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER !== 'Dev' && lobbyNumber !== 'custom') {
 			try {
-				// TODO: Change to broadcast
-				const announceChannel = await client.channels.fetch('893215604503351386');
-				announceChannel.send(`Lobby #${lobbyNumber}: <https://osu.ppy.sh/mp/${lobby.id}>`);
+				client.shard.broadcastEval(async (c, { message }) => {
+					const announceChannel = await c.channels.fetch('893215604503351386');
+					if (announceChannel) {
+						announceChannel.send(message);
+					}
+				}, { context: { message: `Lobby #${lobbyNumber}: <https://osu.ppy.sh/mp/${lobby.id}>` } });
 			} catch (error) {
 				console.log('MOTD/knockoutLobby.js', error);
 			}
@@ -775,9 +778,12 @@ async function messageUserWithRetries(client, user, content, attachment) {
 		} catch (error) {
 			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
 				if (i === 2) {
-					// TODO: Change to broadcast
-					const channel = await client.channels.fetch('833803740162949191');
-					channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+					client.shard.broadcastEval(async (c, { message }) => {
+						const channel = await c.channels.fetch('833803740162949191');
+						if (channel) {
+							channel.send(message);
+						}
+					}, { context: { message: `<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!` } });
 				} else {
 					await pause(2500);
 				}

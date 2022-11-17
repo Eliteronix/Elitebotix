@@ -3193,10 +3193,13 @@ async function getUserDuelStarRatingFunction(input) {
 
 						for (let i = 0; i < guildTrackers.length; i++) {
 							try {
-								// TODO: Change to broadcast
-								let guild = await input.client.guilds.fetch(guildTrackers[i].guildId);
-								let channel = await guild.channels.fetch(guildTrackers[i].channelId);
-								channel.send(`\`\`\`${message.join('\n')}\`\`\``);
+								input.client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
+									let guild = await c.guilds.fetch(guildId);
+									if (guild) {
+										let channel = await guild.channels.fetch(channelId);
+										channel.send(message);
+									}
+								}, { context: { guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, message: `\`\`\`${message.join('\n')}\`\`\`` } });
 							} catch (err) {
 								if (err.message === 'Missing Access') {
 									await guildTrackers[i].destroy();
@@ -3309,26 +3312,29 @@ async function getUserDuelStarRatingFunction(input) {
 }
 
 async function logMatchCreationFunction(client, name, matchId) {
-	let guildId = null;
-	let channelId = null;
-	// eslint-disable-next-line no-undef
-	if (process.env.SERVER === 'Dev') {
-		guildId = '800641468321759242';
-		channelId = '980119563381383228';
+	client.shard.broadcastEval(async (c, { message }) => {
+		let guildId = null;
+		let channelId = null;
 		// eslint-disable-next-line no-undef
-	} else if (process.env.SERVER === 'QA') {
-		guildId = '800641367083974667';
-		channelId = '980119465998037084';
-	} else {
-		guildId = '727407178499096597';
-		channelId = '980119218047549470';
-	}
+		if (process.env.SERVER === 'Dev') {
+			guildId = '800641468321759242';
+			channelId = '980119563381383228';
+			// eslint-disable-next-line no-undef
+		} else if (process.env.SERVER === 'QA') {
+			guildId = '800641367083974667';
+			channelId = '980119465998037084';
+		} else {
+			guildId = '727407178499096597';
+			channelId = '980119218047549470';
+		}
 
-	// TODO: Change to broadcast
-	const guild = await client.guilds.fetch(guildId);
-	const channel = await guild.channels.fetch(channelId);
+		const guild = await c.guilds.fetch(guildId);
+		if (guild) {
+			const channel = await guild.channels.fetch(channelId);
 
-	channel.send(`https://osu.ppy.sh/mp/${matchId}`);
+			channel.send(message);
+		}
+	}, { context: { message: `https://osu.ppy.sh/mp/${matchId}` } });
 }
 
 async function getDerankStatsFunction(discordUser) {
@@ -5965,21 +5971,24 @@ async function updateQueueChannelsFunction(client) {
 		},
 	});
 
-	let channelId = '1010093794714189865';
-	// eslint-disable-next-line no-undef
-	if (process.env.SERVER === 'Dev') {
-		channelId = '1010092736155762818';
+	client.shard.broadcastEval(async (c, { userAmount }) => {
+		let channelId = '1010093794714189865';
 		// eslint-disable-next-line no-undef
-	} else if (process.env.SERVER === 'QA') {
-		channelId = '1010093409840660510';
-	}
+		if (process.env.SERVER === 'Dev') {
+			channelId = '1010092736155762818';
+			// eslint-disable-next-line no-undef
+		} else if (process.env.SERVER === 'QA') {
+			channelId = '1010093409840660510';
+		}
 
-	// TODO: Change to broadcast
-	let channel = await client.channels.fetch(channelId);
-	let multipleString = 's';
-	if (existingQueueTasks.length === 1) {
-		multipleString = '';
-	}
+		let channel = await c.channels.fetch(channelId);
+		if (channel) {
+			let multipleString = 's';
+			if (existingQueueTasks.length === 1) {
+				multipleString = '';
+			}
 
-	await channel.edit({ name: `1v1 Queue: ${existingQueueTasks.length} user${multipleString}` });
+			await channel.edit({ name: `1v1 Queue: ${userAmount} user${multipleString}` });
+		}
+	}, { context: { userAmount: existingQueueTasks.length } });
 }

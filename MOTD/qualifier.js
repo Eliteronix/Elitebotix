@@ -289,9 +289,12 @@ async function messageUserWithRetries(client, user, content, attachment) {
 						discordUser.osuMOTDerrorFirstOccurence = now;
 						discordUser.save();
 
-						// TODO: Change to broadcast
-						const channel = await client.channels.fetch('833803740162949191');
-						channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+						client.shard.broadcastEval(async (c, { message }) => {
+							const channel = await c.channels.fetch('833803740162949191');
+							if (channel) {
+								channel.send(message);
+							}
+						}, { context: { message: `<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!` } });
 					} else if (discordUser && discordUser.osuMOTDerrorFirstOccurence && weekAgo > discordUser.osuMOTDerrorFirstOccurence) {
 						discordUser.osuMOTDRegistered = false;
 						discordUser.osuMOTDlastRoundPlayed = null;
@@ -300,9 +303,12 @@ async function messageUserWithRetries(client, user, content, attachment) {
 						discordUser.osuMOTDmutedUntil = null;
 						discordUser.save();
 					} else {
-						// TODO: Change to broadcast
-						const channel = await client.channels.fetch('833803740162949191');
-						channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+						client.shard.broadcastEval(async (c, { message }) => {
+							const channel = await c.channels.fetch('833803740162949191');
+							if (channel) {
+								channel.send(message);
+							}
+						}, { context: { message: `<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!` } });
 					}
 				} else {
 					await pause(2500);
