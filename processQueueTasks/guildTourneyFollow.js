@@ -7,9 +7,6 @@ module.exports = {
 		let args = processQueueEntry.additions.split(';');
 
 		try {
-			// TODO: Change to broadcast
-			const channel = await client.channels.fetch(args[1]);
-
 			let players = args[3].split(',');
 
 			for (let i = 0; i < players.length; i++) {
@@ -36,12 +33,25 @@ module.exports = {
 				players[i] = discordUser.osuName;
 			}
 
-			await channel.send(`Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[2]}`);
+			client.shard.broadcastEval(async (c, { channelId, message, autoTrack, matchId }) => {
+				const channel = await c.channels.fetch(channelId);
 
-			if (args[4] === 'true') {
-				let trackCommand = require('../commands/osu-matchtrack.js');
-				trackCommand.execute({ id: 1, channel: channel, author: { id: 1 } }, [args[2], '--tracking']);
-			}
+				if (channel) {
+					await channel.send(message);
+
+					if (autoTrack === 'true') {
+						let trackCommand = require('../commands/osu-matchtrack.js');
+						trackCommand.execute({ id: 1, channel: channel, author: { id: 1 } }, [matchId, '--tracking']);
+					}
+				}
+			}, {
+				context: {
+					channelId: args[1],
+					message: `Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[2]}`,
+					autoTrack: args[4],
+					matchId: args[2]
+				}
+			});
 			processQueueEntry.destroy();
 		} catch (err) {
 			if (err.message === 'Missing Access') {
