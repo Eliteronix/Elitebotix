@@ -3285,6 +3285,7 @@ async function getUserDuelStarRatingFunction(input) {
 	duelRatings.hardRock = null;
 	duelRatings.doubleTime = null;
 	duelRatings.freeMod = null;
+	duelRatings.provisional = true;
 
 	logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getUserDuelRatings backup');
 	discordUser = await DBDiscordUsers.findOne({
@@ -3304,7 +3305,7 @@ async function getUserDuelStarRatingFunction(input) {
 		discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
 		discordUser.osuDoubleTimeDuelStarRating = duelRatings.doubleTime;
 		discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
-		duelRatings.provisional = true;
+		discordUser.osuDuelProvisional = duelRatings.provisional;
 		discordUser.lastDuelRatingUpdate = new Date();
 		await discordUser.save();
 	}
