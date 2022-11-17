@@ -165,50 +165,53 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (ecs2021SignUp && process.env.SERVER === 'Live') {
-			// TODO: Change to broadcast
-			const guild = await client.guilds.fetch('727407178499096597');
-			try {
-				const member = await guild.members.fetch(discordUserId);
-
-				const ecs2021ParticipantRoleId = '875031092921532416';
-				const ecs2021ParticipantRole = await guild.roles.fetch(ecs2021ParticipantRoleId);
-
-				if (ecs2021SignUp.rankAchieved !== 'Forfeit') {
+			client.shard.broadcastEval(async (c, { discordUserId, rankAchieved }) => {
+				const guild = await c.guilds.fetch('727407178499096597');
+				if (guild) {
 					try {
-						if (!member.roles.cache.has(ecs2021ParticipantRole)) {
-							//Assign role if not there yet
-							await member.roles.add(ecs2021ParticipantRole);
+						const member = await guild.members.fetch(discordUserId);
+
+						const ecs2021ParticipantRoleId = '875031092921532416';
+						const ecs2021ParticipantRole = await guild.roles.fetch(ecs2021ParticipantRoleId);
+
+						if (rankAchieved !== 'Forfeit') {
+							try {
+								if (!member.roles.cache.has(ecs2021ParticipantRole)) {
+									//Assign role if not there yet
+									await member.roles.add(ecs2021ParticipantRole);
+								}
+							} catch (e) {
+								console.log(e);
+							}
+						} else {
+							try {
+								if (member.roles.cache.has(ecs2021ParticipantRole)) {
+									//Remove role if not removed yet
+									await member.roles.remove(ecs2021ParticipantRole);
+								}
+							} catch (e) {
+								console.log(e);
+							}
 						}
-					} catch (e) {
-						console.log(e);
-					}
-				} else {
-					try {
-						if (member.roles.cache.has(ecs2021ParticipantRole)) {
-							//Remove role if not removed yet
-							await member.roles.remove(ecs2021ParticipantRole);
+
+						if (rankAchieved === 'Winner') {
+							const ecs2021WinnerRoleId = '875031510288306267';
+							const ecs2021WinnerRole = await guild.roles.fetch(ecs2021WinnerRoleId);
+
+							try {
+								if (!member.roles.cache.has(ecs2021WinnerRole)) {
+									//Assign role if not there yet
+									await member.roles.add(ecs2021WinnerRole);
+								}
+							} catch (e) {
+								console.log(e);
+							}
 						}
-					} catch (e) {
-						console.log(e);
+					} catch (error) {
+						//nothing
 					}
 				}
-
-				if (ecs2021SignUp.rankAchieved === 'Winner') {
-					const ecs2021WinnerRoleId = '875031510288306267';
-					const ecs2021WinnerRole = await guild.roles.fetch(ecs2021WinnerRoleId);
-
-					try {
-						if (!member.roles.cache.has(ecs2021WinnerRole)) {
-							//Assign role if not there yet
-							await member.roles.add(ecs2021WinnerRole);
-						}
-					} catch (e) {
-						console.log(e);
-					}
-				}
-			} catch (error) {
-				//nothing
-			}
+			}, { context: { discordUserId: discordUserId, rankAchieved: ecs2021SignUp.rankAchieved } });
 		}
 
 		const ecw2022SignUp = await DBElitiriCupSignUp.findOne({
@@ -217,51 +220,53 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (ecw2022SignUp && process.env.SERVER === 'Live') {
-			// TODO: Change to broadcast
-			const guild = await client.guilds.fetch('727407178499096597');
-			try {
-				const member = await guild.members.fetch(discordUserId);
-
-				const ecw2022ParticipantRoleId = '922203822313586748';
-				const ecw2022ParticipantRole = await guild.roles.fetch(ecw2022ParticipantRoleId);
-
-				if (ecw2022SignUp.rankAchieved !== 'Forfeit') {
+			client.shard.broadcastEval(async (c, { discordUserId, rankAchieved }) => {
+				const guild = await client.guilds.fetch('727407178499096597');
+				if (guild) {
 					try {
-						if (!member.roles.cache.has(ecw2022ParticipantRole)) {
-							//Assign role if not there yet
-							await member.roles.add(ecw2022ParticipantRole);
+						const member = await guild.members.fetch(discordUserId);
+
+						const ecw2022ParticipantRoleId = '922203822313586748';
+						const ecw2022ParticipantRole = await guild.roles.fetch(ecw2022ParticipantRoleId);
+
+						if (rankAchieved !== 'Forfeit') {
+							try {
+								if (!member.roles.cache.has(ecw2022ParticipantRole)) {
+									//Assign role if not there yet
+									await member.roles.add(ecw2022ParticipantRole);
+								}
+							} catch (e) {
+								console.log(e);
+							}
+						} else {
+							try {
+								if (member.roles.cache.has(ecw2022ParticipantRole)) {
+									//Remove role if not removed yet
+									await member.roles.remove(ecw2022ParticipantRole);
+								}
+							} catch (e) {
+								console.log(e);
+							}
 						}
-					} catch (e) {
-						console.log(e);
-					}
-				} else {
-					try {
-						if (member.roles.cache.has(ecw2022ParticipantRole)) {
-							//Remove role if not removed yet
-							await member.roles.remove(ecw2022ParticipantRole);
+
+						if (rankAchieved === 'Winner') {
+							const ecw2022WinnerRoleId = '922202798110691329';
+							const ecw2022WinnerRole = await guild.roles.fetch(ecw2022WinnerRoleId);
+
+							try {
+								if (!member.roles.cache.has(ecw2022WinnerRole)) {
+									//Assign role if not there yet
+									await member.roles.add(ecw2022WinnerRole);
+								}
+							} catch (e) {
+								console.log(e);
+							}
 						}
-					} catch (e) {
-						console.log(e);
+					} catch (error) {
+						//nothing
 					}
 				}
-
-				if (ecw2022SignUp.rankAchieved === 'Winner') {
-					const ecw2022WinnerRoleId = '922202798110691329';
-					const ecw2022WinnerRole = await guild.roles.fetch(ecw2022WinnerRoleId);
-
-					try {
-						if (!member.roles.cache.has(ecw2022WinnerRole)) {
-							//Assign role if not there yet
-							await member.roles.add(ecw2022WinnerRole);
-						}
-					} catch (e) {
-						console.log(e);
-					}
-				}
-			} catch (error) {
-				//nothing
-			}
-			// eslint-disable-next-line no-undef
+			}, { context: { discordUserId: discordUserId, rankAchieved: ecw2022SignUp.rankAchieved } });
 		}
 
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({

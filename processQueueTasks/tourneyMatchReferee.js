@@ -385,7 +385,9 @@ async function messageUserWithRetries(client, user, channelId, content) {
 				if (i === 2) {
 					client.shard.broadcastEval(async (c, { channelId, message }) => {
 						const channel = await c.channels.fetch(channelId);
-						channel.send(message);
+						if (channel) {
+							channel.send(message);
+						}
 					}, { context: { channelId: channelId, message: `<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!` } });
 				} else {
 					await pause(2500);

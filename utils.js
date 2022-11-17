@@ -3079,20 +3079,6 @@ async function getUserDuelStarRatingFunction(input) {
 		if (discordUser && !input.date) {
 			if (input.client) {
 				try {
-					let guildId = '727407178499096597';
-					let channelId = '946150632128135239';
-					// eslint-disable-next-line no-undef
-					if (process.env.SERVER === 'Dev') {
-						guildId = '800641468321759242';
-						channelId = '946190123677126666';
-						// eslint-disable-next-line no-undef
-					} else if (process.env.SERVER === 'QA') {
-						guildId = '800641367083974667';
-						channelId = '946190678189293569';
-					}
-					// TODO: Change to broadcast
-					const guild = await input.client.guilds.fetch(guildId);
-					const channel = await guild.channels.fetch(channelId);
 					let message = [`${discordUser.osuName} / ${discordUser.osuUserId}:`];
 					if (Math.round(discordUser.osuDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.total * 1000) / 1000) {
 						message.push(`SR: ${Math.round(discordUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.total * 1000) / 1000}`);
@@ -3137,7 +3123,25 @@ async function getUserDuelStarRatingFunction(input) {
 					}
 
 					if (message.length > 1) {
-						channel.send(`\`\`\`${message.join('\n')}\`\`\``);
+						input.client.shard.broadcastEval(async (c, { message }) => {
+							let guildId = '727407178499096597';
+							let channelId = '946150632128135239';
+							// eslint-disable-next-line no-undef
+							if (process.env.SERVER === 'Dev') {
+								guildId = '800641468321759242';
+								channelId = '946190123677126666';
+								// eslint-disable-next-line no-undef
+							} else if (process.env.SERVER === 'QA') {
+								guildId = '800641367083974667';
+								channelId = '946190678189293569';
+							}
+
+							const guild = await c.guilds.fetch(guildId);
+							if (guild) {
+								const channel = await guild.channels.fetch(channelId);
+								channel.send(message);
+							}
+						}, { context: { message: `\`\`\`${message.join('\n')}\`\`\`` } });
 
 						if (discordUser.osuDuelRatingUpdates) {
 							const user = await input.client.users.fetch(discordUser.userId);
