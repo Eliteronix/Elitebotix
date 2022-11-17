@@ -5986,7 +5986,7 @@ async function updateQueueChannelsFunction(client) {
 		let channel = await c.channels.fetch(channelId);
 		if (channel) {
 			let multipleString = 's';
-			if (existingQueueTasks.length === 1) {
+			if (userAmount === 1) {
 				multipleString = '';
 			}
 
