@@ -3,8 +3,10 @@ module.exports = {
 		client.shard.broadcastEval(async (c, { channelId, since, topAmount, title }) => {
 			const channel = await c.channels.fetch(channelId);
 			if (channel) {
-				const { DBMOTDPoints } = require('./dbObjects');
-				const { createLeaderboard, humanReadable, logDatabaseQueries } = require('./utils.js');
+				// eslint-disable-next-line no-undef
+				const { DBMOTDPoints } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+				// eslint-disable-next-line no-undef
+				const { createLeaderboard, humanReadable, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 				channel.messages.fetch({ limit: 100 })
 					.then(async (messages) => {
 						const messagesArray = [];
@@ -149,9 +151,11 @@ module.exports = {
 			}
 
 			async function getPlayers(c) {
-				const { logDatabaseQueries } = require('../utils.js');
+				// eslint-disable-next-line no-undef
+				const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 				logDatabaseQueries(2, 'MOTD/createLeaderboard.js DBDiscordUsers');
-				const { DBDiscordUsers } = require('../dbObjects');
+				// eslint-disable-next-line no-undef
+				const { DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 				const registeredUsers = await DBDiscordUsers.findAll({
 					where: { osuMOTDRegistered: 1 }
 				});

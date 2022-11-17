@@ -6,7 +6,8 @@ module.exports = {
 		client.shard.broadcastEval(async (c, { args }) => {
 			const Discord = require('discord.js');
 			const Canvas = require('canvas');
-			const { fitTextOnLeftCanvas } = require('./utils');
+			// eslint-disable-next-line no-undef
+			const { fitTextOnLeftCanvas } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 			const channel = await c.channels.fetch(args[0]).catch(async () => {
 				//Nothing

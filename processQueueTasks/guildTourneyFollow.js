@@ -40,7 +40,8 @@ module.exports = {
 					await channel.send(message);
 
 					if (autoTrack === 'true') {
-						let trackCommand = require('./commands/osu-matchtrack.js');
+						// eslint-disable-next-line no-undef
+						let trackCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-matchtrack.js`);
 						trackCommand.execute({ id: 1, channel: channel, author: { id: 1 } }, [matchId, '--tracking']);
 					}
 				}
