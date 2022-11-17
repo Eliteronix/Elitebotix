@@ -11,8 +11,8 @@ module.exports = {
 			const guild = await c.guilds.fetch('727407178499096597');
 
 			if (guild) {
-				const { DBDiscordUsers } = require('../dbObjects');
-				const { logDatabaseQueries } = require('../utils');
+				const { DBDiscordUsers } = require('./dbObjects');
+				const { logDatabaseQueries } = require('./utils');
 				//Fetch all members
 				await guild.members.fetch()
 					.then(async (guildMembers) => {
