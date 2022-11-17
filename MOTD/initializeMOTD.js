@@ -195,7 +195,6 @@ module.exports = {
 			// eslint-disable-next-line no-undef
 		} else if (process.env.SERVER === 'Live' && today.getUTCMinutes() % 10 === 0) {
 			//Assign roles to all players currently registered and remove unneeded roles
-			console.log('assigning roles');
 			await assignPlayerRoles(client);
 		}
 	}
