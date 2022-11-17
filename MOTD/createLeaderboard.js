@@ -3,8 +3,8 @@ module.exports = {
 		client.shard.broadcastEval(async (c, { channelId, since, topAmount, title }) => {
 			const channel = await c.channels.fetch(channelId);
 			if (channel) {
-				const { DBMOTDPoints } = require('../dbObjects');
-				const { createLeaderboard, humanReadable, logDatabaseQueries } = require('../utils.js');
+				const { DBMOTDPoints } = require('./dbObjects');
+				const { createLeaderboard, humanReadable, logDatabaseQueries } = require('./utils.js');
 				channel.messages.fetch({ limit: 100 })
 					.then(async (messages) => {
 						const messagesArray = [];

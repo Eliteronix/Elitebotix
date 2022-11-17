@@ -6,7 +6,7 @@ module.exports = {
 		client.shard.broadcastEval(async (c, { args }) => {
 			const Discord = require('discord.js');
 			const Canvas = require('canvas');
-			const { fitTextOnLeftCanvas } = require('../utils');
+			const { fitTextOnLeftCanvas } = require('./utils');
 
 			const channel = await c.channels.fetch(args[0]).catch(async () => {
 				//Nothing

@@ -14,9 +14,9 @@ module.exports = {
 			const guild = await c.guilds.fetch('727407178499096597');
 
 			if (guild) {
-				const { DBElitiriCupSignUp, DBDiscordUsers, DBElitiriCupStaff } = require('../dbObjects');
-				const { logDatabaseQueries } = require('../utils');
-				const { currentElitiriCup } = require('../config.json');
+				const { DBElitiriCupSignUp, DBDiscordUsers, DBElitiriCupStaff } = require('./dbObjects');
+				const { logDatabaseQueries } = require('./utils');
+				const { currentElitiriCup } = require('./config.json');
 
 				//Fetch all members
 				await guild.members.fetch()
