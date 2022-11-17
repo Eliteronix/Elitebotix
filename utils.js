@@ -2119,7 +2119,6 @@ module.exports = {
 				for (let i = 0; i < guildTrackers.length; i++) {
 					try {
 						//Fetch the guild
-						// TODO: Change to broadcast
 						guildTrackers[i].guild = await c.guilds.fetch(guildTrackers[i].guildId);
 
 						if (!guildTrackers[i].guild) {
@@ -2127,7 +2126,6 @@ module.exports = {
 						}
 
 						//Fetch the channel
-						// TODO: Change to broadcast
 						guildTrackers[i].channel = await guildTrackers[i].guild.channels.fetch(guildTrackers[i].channelId);
 					} catch (err) {
 						if (err.message === 'Missing Access' || err.message === 'Unknown Channel') {
@@ -2137,15 +2135,11 @@ module.exports = {
 					}
 
 					if (guildTrackers[i].osuLeaderboard || guildTrackers[i].taikoLeaderboard || guildTrackers[i].catchLeaderboard || guildTrackers[i].maniaLeaderboard) {
-						console.log(osuUser);
 						if (!osuUser.osuUser) {
-							console.log('Getting user');
 							try {
 								let osuUserResult = await osuApi.getUser({ u: osuUser.osuUserId });
-								console.log(osuUserResult);
 								osuUser.osuUser = osuUserResult;
 							} catch (err) {
-								console.log(err);
 								if (err.message === 'Not found') {
 									await guildTrackers[i].channel.send(`Could not find user \`${osuUser.osuUserId}\` anymore and I will therefore stop tracking them.`);
 									await guildTrackers[i].destroy();
