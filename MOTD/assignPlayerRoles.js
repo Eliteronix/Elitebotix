@@ -5,14 +5,18 @@ module.exports = {
 			return;
 		}
 
+		console.log('assignPlayerRoles');
 		// eslint-disable-next-line no-empty-pattern
 		client.shard.broadcastEval(async (c, { }) => {
+			console.log('assignPlayerRoles broadcastEval');
 			//Fetch server
 			const guild = await c.guilds.fetch('727407178499096597');
 
 			if (guild) {
+				console.log('assignPlayerRoles guild found');
 				// eslint-disable-next-line no-undef
 				const { DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+				console.log('assignPlayerRoles required DBObjects');
 				// eslint-disable-next-line no-undef
 				const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 				//Fetch all members
