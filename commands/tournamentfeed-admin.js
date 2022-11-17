@@ -423,6 +423,19 @@ module.exports = {
 			}
 
 			interaction.editReply({ embeds: [embed] });
+		} else if (interaction.options._subcommand === 'delete') {
+			let forumPost = await DBOsuForumPosts.findOne({
+				where: {
+					forumPost: `https://osu.ppy.sh/community/forums/topics/${interaction.options._hoistedOptions[0].value}`
+				}
+			});
+
+			if (!forumPost) {
+				return interaction.editReply('Could not find forum post.');
+			}
+
+			await forumPost.destroy();
+			return interaction.editReply('Deleted forum post.');
 		}
 	}
 };

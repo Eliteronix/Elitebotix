@@ -8556,6 +8556,19 @@ module.exports = {
 							]
 						},
 						{
+							'name': 'delete',
+							'description': 'Deletes a saved tournament record',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'id',
+									'description': 'The forum post id',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+						{
 							'name': 'list',
 							'description': 'Show open forum posts',
 							'type': 1, // 1 is type SUB_COMMAND
