@@ -2095,6 +2095,7 @@ module.exports = {
 
 			let recentActivities = await client.shard.broadcastEval(async (c, { osuUser, lastUpdated }) => {
 				const osu = require('node-osu');
+				const fetch = require('node-fetch');
 				// eslint-disable-next-line no-undef
 				const { DBOsuGuildTrackers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 				// eslint-disable-next-line no-undef
