@@ -3279,7 +3279,7 @@ async function getUserDuelStarRatingFunction(input) {
 		averageStars += parseFloat(stars[i]);
 	}
 
-	duelRatings.total = (averageStars / stars.length) * 0.9;
+	duelRatings.total = (averageStars / stars.length) * 0.85;
 	duelRatings.noMod = null;
 	duelRatings.hidden = null;
 	duelRatings.hardRock = null;
@@ -3304,6 +3304,7 @@ async function getUserDuelStarRatingFunction(input) {
 		discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
 		discordUser.osuDoubleTimeDuelStarRating = duelRatings.doubleTime;
 		discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
+		duelRatings.provisional = true;
 		discordUser.lastDuelRatingUpdate = new Date();
 		await discordUser.save();
 	}
