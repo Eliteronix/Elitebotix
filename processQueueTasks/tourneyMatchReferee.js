@@ -8,8 +8,6 @@ module.exports = {
 		let args = processQueueEntry.additions.split(';');
 
 		let channel;
-		// TODO: Change to broadcast
-		let discordChannel = await client.channels.fetch(args[1]);
 
 		for (let i = 0; i < 5; i++) {
 			try {
@@ -36,7 +34,13 @@ module.exports = {
 					processQueueEntry.destroy();
 					let user = await client.users.fetch(args[0]);
 					user.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[6]}`);
-					return discordChannel.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[6]}`);
+					client.shard.broadcastEval(async (c, { channelId, message }) => {
+						let channel = await c.channels.fetch(channelId);
+						if (channel) {
+							channel.send(message);
+						}
+					}, { context: { channelId: args[1], message: `I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[6]}` } });
+					return;
 				} else {
 					await pause(10000);
 				}
@@ -229,7 +233,13 @@ module.exports = {
 					if (!lobby.playersById[dbPlayers[i].osuUserId.toString()]) {
 						await channel.sendMessage(`!mp invite #${dbPlayers[i].osuUserId}`);
 						await messageUserWithRetries(client, users[i], args[1], `Your match is about to start. Please join as soon as possible. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
-						discordChannel.send(`<@${dbPlayers[i].userId}> The lobby is about to start. I've sent you another invite.`);
+
+						client.shard.broadcastEval(async (c, { channelId, message }) => {
+							let channel = await c.channels.fetch(channelId);
+							if (channel) {
+								channel.send(message);
+							}
+						}, { context: { channelId: args[1], message: `<@${dbPlayers[i].userId}> The lobby is about to start. I've sent you another invite.` } });
 					}
 				}
 			}

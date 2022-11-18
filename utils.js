@@ -3602,23 +3602,30 @@ async function checkForBirthdaysFunction(client) {
 
 		if (dbGuild && dbGuild.birthdayEnabled) {
 			//Fetch the channel
-			// TODO: Change to broadcast
-			const birthdayMessageChannel = await client.channels.fetch(dbGuild.birthdayMessageChannel);
+			let channelFound = await client.shard.broadcastEval(async (c, { channelId, userId }) => {
+				const birthdayMessageChannel = await c.channels.fetch(channelId);
 
-			if (birthdayMessageChannel) {
-				// send a birthday gif from tenor 
-				let index;
-				// eslint-disable-next-line no-undef
-				const birthdayGif = await fetch(`https://api.tenor.com/v1/search?q=anime_birthday&key=${process.env.TENORTOKEN}&limit=30&contentfilter=medium`)
-					.then(async (res) => {
-						let gifs = await res.json();
-						index = Math.floor(Math.random() * gifs.results.length);
-						return gifs.results[index].media[0].gif.url;
-					});
+				if (birthdayMessageChannel) {
+					// send a birthday gif from tenor 
+					let index;
+					const fetch = require('node-fetch');
+					// eslint-disable-next-line no-undef
+					const birthdayGif = await fetch(`https://api.tenor.com/v1/search?q=anime_birthday&key=${process.env.TENORTOKEN}&limit=30&contentfilter=medium`)
+						.then(async (res) => {
+							let gifs = await res.json();
+							index = Math.floor(Math.random() * gifs.results.length);
+							return gifs.results[index].media[0].gif.url;
+						});
 
-				// send the birthday message
-				birthdayMessageChannel.send(`<@${birthdayAnnouncements[i].userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
+					// send the birthday message
+					birthdayMessageChannel.send(`<@${userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
+					return true;
+				}
+				return false;
+			}, { context: { channelId: dbGuild.birthdayMessageChannel, userId: birthdayAnnouncements[i].userId } });
 
+			channelFound = channelFound.some(channel => channel);
+			if (channelFound) {
 				let date = new Date(birthdayAnnouncements[i].birthdayTime);
 				date.setUTCFullYear(date.getUTCFullYear() + 1);
 				date.setUTCHours(0);
