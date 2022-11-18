@@ -5797,8 +5797,8 @@ async function getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, a
 	if (modPool === 'TieBreaker') {
 		nextMap = await getValidTournamentBeatmapFunction({
 			modPool: 'FM',
-			lowerBound: lowerBound,
-			upperBound: upperBound,
+			lowerBound: lowerBound + 0.25,
+			upperBound: upperBound + 0.25,
 			mode: 'Standard',
 			upperDrain: 360,
 			lowerDrain: 270,
