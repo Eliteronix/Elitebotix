@@ -40,6 +40,10 @@ module.exports = async function (oldUser, newUser) {
 						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
 					}
 
+					if (!channel) {
+						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
+					}
+
 					const Discord = require('discord.js');
 					const changeEmbed = new Discord.MessageEmbed()
 						.setColor('#0099ff')
@@ -109,6 +113,10 @@ module.exports = async function (oldUser, newUser) {
 						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
 					}
 
+					if (!channel) {
+						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
+					}
+
 					const Discord = require('discord.js');
 					const changeEmbed = new Discord.MessageEmbed()
 						.setColor('#0099ff')
@@ -175,6 +183,10 @@ module.exports = async function (oldUser, newUser) {
 					try {
 						channel = await c.channels.fetch(guild.loggingChannel);
 					} catch (error) {
+						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
+					}
+
+					if (!channel) {
 						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
 					}
 
