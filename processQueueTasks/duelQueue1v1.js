@@ -84,9 +84,9 @@ module.exports = {
 
 			processQueueEntry.beingExecuted = false;
 
-			let newDifficultyArea = difficultyArea + 0.025;
-			if (newDifficultyArea > 0.5) {
-				newDifficultyArea = 0.5;
+			let newDifficultyArea = difficultyArea + 0.05;
+			if (newDifficultyArea > 0.6) {
+				newDifficultyArea = 0.6;
 			}
 
 			processQueueEntry.additions = `${currentUser};${starRating};${newDifficultyArea}`;

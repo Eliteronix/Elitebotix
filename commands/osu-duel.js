@@ -1386,7 +1386,7 @@ module.exports = {
 				await DBProcessQueue.create({
 					guildId: 'none',
 					task: 'duelQueue1v1',
-					additions: `${commandUser.osuUserId};${ownStarRating};0.125`,
+					additions: `${commandUser.osuUserId};${ownStarRating};0.25`,
 					date: new Date(),
 					priority: 9
 				});
