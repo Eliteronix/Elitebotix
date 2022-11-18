@@ -14,7 +14,8 @@ module.exports = {
 		}
 
 		client.shard.broadcastEval(async (c, { guildId, activityRoles }) => {
-			const { logDatabaseQueries } = require('../utils');
+			// eslint-disable-next-line no-undef
+			const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 			let guild;
 
