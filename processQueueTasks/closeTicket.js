@@ -18,7 +18,7 @@ module.exports = {
 				if (channel) {
 					await channel.delete();
 
-					const guild = await client.guilds.fetch(channel.guild.id);
+					const guild = await c.guilds.fetch(channel.guild.id);
 
 					let openCategory = guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Open');
 					if (openCategory && !openCategory.children.first()) {

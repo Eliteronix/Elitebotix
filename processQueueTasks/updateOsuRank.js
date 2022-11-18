@@ -221,7 +221,7 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		if (ecw2022SignUp && process.env.SERVER === 'Live') {
 			client.shard.broadcastEval(async (c, { discordUserId, rankAchieved }) => {
-				const guild = await client.guilds.fetch('727407178499096597');
+				const guild = await c.guilds.fetch('727407178499096597');
 				if (guild) {
 					try {
 						const member = await guild.members.fetch(discordUserId);
