@@ -34,7 +34,7 @@ module.exports = {
 			}
 
 			client.shard.broadcastEval(async (c, { channelId, message, autoTrack, matchId }) => {
-				const channel = await c.channels.fetch(channelId);
+				const channel = await c.channels.cache.get(channelId);
 
 				if (channel) {
 					await channel.send(message);

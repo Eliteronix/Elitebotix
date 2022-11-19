@@ -13,7 +13,7 @@ module.exports = async function (oldUser, newUser) {
 				let found = await newUser.client.shard.broadcastEval(async (c, { guildId, newUser, oldUser }) => {
 					let discordGuild;
 					try {
-						discordGuild = await c.guilds.fetch(guildId);
+						discordGuild = await c.guilds.cache.get(guildId);
 					} catch (error) {
 						return null;
 					}
@@ -24,7 +24,7 @@ module.exports = async function (oldUser, newUser) {
 
 					let member;
 					try {
-						member = await discordGuild.members.fetch(newUser.id);
+						member = await discordGuild.members.cache.get(newUser.id);
 					} catch (error) {
 						//nothing
 					}
@@ -35,7 +35,7 @@ module.exports = async function (oldUser, newUser) {
 
 					let channel;
 					try {
-						channel = await c.channels.fetch(guild.loggingChannel);
+						channel = await c.channels.cache.get(guild.loggingChannel);
 					} catch (error) {
 						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
 					}
@@ -68,7 +68,7 @@ module.exports = async function (oldUser, newUser) {
 				} else if (found.startsWith('guild')) {
 					guild.loggingChannel = null;
 					guild.save();
-					const owner = await newUser.client.users.fetch(found.split(';')[1]);
+					const owner = await newUser.client.users.cache.get(found.split(';')[1]);
 					return owner.send(`It seems like the logging channel on the guild \`${found.split(';')[2]}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 			}
@@ -86,7 +86,7 @@ module.exports = async function (oldUser, newUser) {
 				let found = await newUser.client.shard.broadcastEval(async (c, { guildId, newUser, oldUser }) => {
 					let discordGuild;
 					try {
-						discordGuild = await c.guilds.fetch(guildId);
+						discordGuild = await c.guilds.cache.get(guildId);
 					} catch (error) {
 						return null;
 					}
@@ -97,7 +97,7 @@ module.exports = async function (oldUser, newUser) {
 
 					let member;
 					try {
-						member = await discordGuild.members.fetch(newUser.id);
+						member = await discordGuild.members.cache.get(newUser.id);
 					} catch (error) {
 						//nothing
 					}
@@ -108,7 +108,7 @@ module.exports = async function (oldUser, newUser) {
 
 					let channel;
 					try {
-						channel = await c.channels.fetch(guild.loggingChannel);
+						channel = await c.channels.cache.get(guild.loggingChannel);
 					} catch (error) {
 						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
 					}
@@ -141,7 +141,7 @@ module.exports = async function (oldUser, newUser) {
 				} else if (found.startsWith('guild')) {
 					guild.loggingChannel = null;
 					guild.save();
-					const owner = await newUser.client.users.fetch(found.split(';')[1]);
+					const owner = await newUser.client.users.cache.get(found.split(';')[1]);
 					return owner.send(`It seems like the logging channel on the guild \`${found.split(';')[2]}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 			}
@@ -159,7 +159,7 @@ module.exports = async function (oldUser, newUser) {
 				let found = await newUser.client.shard.broadcastEval(async (c, { guildId, newUser, oldUser }) => {
 					let discordGuild;
 					try {
-						discordGuild = await c.guilds.fetch(guildId);
+						discordGuild = await c.guilds.cache.get(guildId);
 					} catch (error) {
 						return null;
 					}
@@ -170,7 +170,7 @@ module.exports = async function (oldUser, newUser) {
 
 					let member;
 					try {
-						member = await discordGuild.members.fetch(newUser.id);
+						member = await discordGuild.members.cache.get(newUser.id);
 					} catch (error) {
 						//nothing
 					}
@@ -181,7 +181,7 @@ module.exports = async function (oldUser, newUser) {
 
 					let channel;
 					try {
-						channel = await c.channels.fetch(guild.loggingChannel);
+						channel = await c.channels.cache.get(guild.loggingChannel);
 					} catch (error) {
 						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
 					}
@@ -214,7 +214,7 @@ module.exports = async function (oldUser, newUser) {
 				} else if (found.startsWith('guild')) {
 					guild.loggingChannel = null;
 					guild.save();
-					const owner = await newUser.client.users.fetch(found.split(';')[1]);
+					const owner = await newUser.client.users.cache.get(found.split(';')[1]);
 					return owner.send(`It seems like the logging channel on the guild \`${found.split(';')[2]}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 			}

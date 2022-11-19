@@ -35,7 +35,7 @@ module.exports = {
 					let user = await client.users.fetch(args[0]);
 					user.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[6]}`);
 					client.shard.broadcastEval(async (c, { channelId, message }) => {
-						let channel = await c.channels.fetch(channelId);
+						let channel = await c.channels.cache.get(channelId);
 						if (channel) {
 							channel.send(message);
 						}
@@ -235,7 +235,7 @@ module.exports = {
 						await messageUserWithRetries(client, users[i], args[1], `Your match is about to start. Please join as soon as possible. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 
 						client.shard.broadcastEval(async (c, { channelId, message }) => {
-							let channel = await c.channels.fetch(channelId);
+							let channel = await c.channels.cache.get(channelId);
 							if (channel) {
 								channel.send(message);
 							}
@@ -394,7 +394,7 @@ async function messageUserWithRetries(client, user, channelId, content) {
 			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
 				if (i === 2) {
 					client.shard.broadcastEval(async (c, { channelId, message }) => {
-						const channel = await c.channels.fetch(channelId);
+						const channel = await c.channels.cache.get(channelId);
 						if (channel) {
 							channel.send(message);
 						}

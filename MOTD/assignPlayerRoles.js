@@ -8,7 +8,7 @@ module.exports = {
 		// eslint-disable-next-line no-empty-pattern
 		client.shard.broadcastEval(async (c, { }) => {
 			//Fetch server
-			const guild = await c.guilds.fetch('727407178499096597');
+			const guild = await c.guilds.cache.get('727407178499096597');
 
 			if (guild) {
 				// eslint-disable-next-line no-undef

@@ -1292,11 +1292,11 @@ module.exports = {
 		let issues = responseJson.issues;
 
 		client.shard.broadcastEval(async (c, { issues }) => {
-			const backlogChannel = await c.channels.fetch('1000372560552276028');
+			const backlogChannel = await c.channels.cache.get('1000372560552276028');
 			if (backlogChannel) {
-				const selectedForDevChannel = await c.channels.fetch('1000372600251351070');
-				const inProgressChannel = await c.channels.fetch('1000372630060281856');
-				const doneChannel = await c.channels.fetch('1000372653762285708');
+				const selectedForDevChannel = await c.channels.cache.get('1000372600251351070');
+				const inProgressChannel = await c.channels.cache.get('1000372630060281856');
+				const doneChannel = await c.channels.cache.get('1000372653762285708');
 
 				for (let i = 0; i < issues.length; i++) {
 					let channel = backlogChannel;
@@ -2120,14 +2120,14 @@ module.exports = {
 				for (let i = 0; i < guildTrackers.length; i++) {
 					try {
 						//Fetch the guild
-						guildTrackers[i].guild = await c.guilds.fetch(guildTrackers[i].guildId);
+						guildTrackers[i].guild = await c.guilds.cache.get(guildTrackers[i].guildId);
 
 						if (!guildTrackers[i].guild) {
 							continue;
 						}
 
 						//Fetch the channel
-						guildTrackers[i].channel = await guildTrackers[i].guild.channels.fetch(guildTrackers[i].channelId);
+						guildTrackers[i].channel = await guildTrackers[i].guild.channels.cache.get(guildTrackers[i].channelId);
 					} catch (err) {
 						if (err.message === 'Missing Access' || err.message === 'Unknown Channel') {
 							await guildTrackers[i].destroy();
@@ -3136,15 +3136,15 @@ async function getUserDuelStarRatingFunction(input) {
 								channelId = '946190678189293569';
 							}
 
-							const guild = await c.guilds.fetch(guildId);
+							const guild = await c.guilds.cache.get(guildId);
 							if (guild) {
-								const channel = await guild.channels.fetch(channelId);
+								const channel = await guild.channels.cache.get(channelId);
 								channel.send(message);
 							}
 						}, { context: { message: `\`\`\`${message.join('\n')}\`\`\`` } });
 
 						if (discordUser.osuDuelRatingUpdates) {
-							const user = await input.client.users.fetch(discordUser.userId);
+							const user = await input.client.users.cache.get(discordUser.userId);
 							if (user) {
 								user.send(`Your duel ratings have been updated.\`\`\`${message.join('\n')}\`\`\``);
 							}
@@ -3160,9 +3160,9 @@ async function getUserDuelStarRatingFunction(input) {
 						for (let i = 0; i < guildTrackers.length; i++) {
 							try {
 								input.client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-									let guild = await c.guilds.fetch(guildId);
+									let guild = await c.guilds.cache.get(guildId);
 									if (guild) {
-										let channel = await guild.channels.fetch(channelId);
+										let channel = await guild.channels.cache.get(channelId);
 										channel.send(message);
 									}
 								}, { context: { guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, message: `\`\`\`${message.join('\n')}\`\`\`` } });
@@ -3296,9 +3296,9 @@ async function logMatchCreationFunction(client, name, matchId) {
 			channelId = '980119218047549470';
 		}
 
-		const guild = await c.guilds.fetch(guildId);
+		const guild = await c.guilds.cache.get(guildId);
 		if (guild) {
-			const channel = await guild.channels.fetch(channelId);
+			const channel = await guild.channels.cache.get(channelId);
 
 			channel.send(message);
 		}
@@ -3603,7 +3603,7 @@ async function checkForBirthdaysFunction(client) {
 		if (dbGuild && dbGuild.birthdayEnabled) {
 			//Fetch the channel
 			let channelFound = await client.shard.broadcastEval(async (c, { channelId, userId }) => {
-				const birthdayMessageChannel = await c.channels.fetch(channelId);
+				const birthdayMessageChannel = await c.channels.cache.get(channelId);
 
 				if (birthdayMessageChannel) {
 					// send a birthday gif from tenor 
@@ -5956,7 +5956,7 @@ async function updateQueueChannelsFunction(client) {
 			channelId = '1010093409840660510';
 		}
 
-		let channel = await c.channels.fetch(channelId);
+		let channel = await c.channels.cache.get(channelId);
 		if (channel) {
 			let multipleString = 's';
 			if (userAmount === 1) {

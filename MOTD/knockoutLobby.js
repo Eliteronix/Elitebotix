@@ -120,7 +120,7 @@ module.exports = {
 		if (process.env.SERVER !== 'Dev' && lobbyNumber !== 'custom') {
 			try {
 				client.shard.broadcastEval(async (c, { message }) => {
-					const announceChannel = await c.channels.fetch('893215604503351386');
+					const announceChannel = await c.channels.cache.get('893215604503351386');
 					if (announceChannel) {
 						announceChannel.send(message);
 					}
@@ -779,7 +779,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
 				if (i === 2) {
 					client.shard.broadcastEval(async (c, { message }) => {
-						const channel = await c.channels.fetch('833803740162949191');
+						const channel = await c.channels.cache.get('833803740162949191');
 						if (channel) {
 							channel.send(message);
 						}

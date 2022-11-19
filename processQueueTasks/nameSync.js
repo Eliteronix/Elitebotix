@@ -10,7 +10,7 @@ module.exports = {
 
 			let guild;
 			try {
-				guild = await c.guilds.fetch(guildId);
+				guild = await c.guilds.cache.get(guildId);
 			} catch (e) {
 				if (e.message === 'Missing Access') {
 					await DBProcessQueue.destroy({ where: { id: processQueueEntryId } });

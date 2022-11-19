@@ -4,7 +4,7 @@ module.exports = {
 		let args = processQueueEntry.additions.split(';');
 
 		let channelFound = await client.shard.broadcastEval(async (c, { channelId, processQueueEntryId }) => {
-			const channel = await c.channels.fetch(channelId).catch(async () => {
+			const channel = await c.channels.cache.get(channelId).catch(async () => {
 				//Nothing
 			});
 

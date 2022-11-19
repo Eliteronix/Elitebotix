@@ -9,7 +9,7 @@ module.exports = {
 			// eslint-disable-next-line no-undef
 			const { fitTextOnLeftCanvas } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
-			const channel = await c.channels.fetch(args[0]).catch(async () => {
+			const channel = await c.channels.cache.get(args[0]).catch(async () => {
 				//Nothing
 			});
 

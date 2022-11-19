@@ -11,14 +11,14 @@ module.exports = {
 
 		if (ticket && ticket.statusId === 100) {
 			client.shard.broadcastEval(async (c, { channelId }) => {
-				const channel = await c.channels.fetch(channelId).catch(async () => {
+				const channel = await c.channels.cache.get(channelId).catch(async () => {
 					//Nothing
 				});
 
 				if (channel) {
 					await channel.delete();
 
-					const guild = await c.guilds.fetch(channel.guild.id);
+					const guild = await c.guilds.cache.get(channel.guild.id);
 
 					let openCategory = guild.channels.cache.find(c => c.type === 'category' && c.name === 'Tickets - Open');
 					if (openCategory && !openCategory.children.first()) {

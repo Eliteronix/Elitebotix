@@ -57,12 +57,12 @@ module.exports = {
 							let channel;
 							// eslint-disable-next-line no-undef
 							if (process.env.SERVER === 'Live') {
-								channel = await c.channels.fetch('891314445559676928');
+								channel = await c.channels.cache.get('891314445559676928');
 								// eslint-disable-next-line no-undef
 							} else if (process.env.SERVER === 'QA') {
-								channel = await c.channels.fetch('892873577479692358');
+								channel = await c.channels.cache.get('892873577479692358');
 							} else {
-								channel = await c.channels.fetch('1013789721014571090');
+								channel = await c.channels.cache.get('1013789721014571090');
 							}
 
 							if (channel) {
@@ -178,7 +178,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 		await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
 			.then(async (match) => {
 				client.shard.broadcastEval(async (c, { channelId, message }) => {
-					let channel = await c.channels.fetch(channelId);
+					let channel = await c.channels.cache.get(channelId);
 					if (channel) {
 						await channel.send(message);
 					}

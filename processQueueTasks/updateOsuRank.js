@@ -166,7 +166,7 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		if (ecs2021SignUp && process.env.SERVER === 'Live') {
 			client.shard.broadcastEval(async (c, { discordUserId, rankAchieved }) => {
-				const guild = await c.guilds.fetch('727407178499096597');
+				const guild = await c.guilds.cache.get('727407178499096597');
 				if (guild) {
 					try {
 						const member = await guild.members.fetch(discordUserId);
@@ -221,7 +221,7 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		if (ecw2022SignUp && process.env.SERVER === 'Live') {
 			client.shard.broadcastEval(async (c, { discordUserId, rankAchieved }) => {
-				const guild = await c.guilds.fetch('727407178499096597');
+				const guild = await c.guilds.cache.get('727407178499096597');
 				if (guild) {
 					try {
 						const member = await guild.members.fetch(discordUserId);
@@ -291,8 +291,8 @@ module.exports = {
 			// eslint-disable-next-line no-undef
 			if (elitiriSignUp.osuName !== discordUser.osuName && !elitiriSignUp.rankAchieved && process.env.SERVER === 'Live') {
 				client.shard.broadcastEval(async (c, { message }) => {
-					const guild = await c.guilds.fetch('727407178499096597');
-					const channel = await guild.channels.fetch('830534251757174824');
+					const guild = await c.guilds.cache.get('727407178499096597');
+					const channel = await guild.channels.cache.get('830534251757174824');
 					if (channel) {
 						channel.send(message);
 					}

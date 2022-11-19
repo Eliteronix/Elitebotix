@@ -20,7 +20,7 @@ module.exports = {
 			let guild;
 
 			try {
-				guild = await c.guilds.fetch(guildId);
+				guild = await c.guilds.cache.get(guildId);
 
 				if (!guild) {
 					return;

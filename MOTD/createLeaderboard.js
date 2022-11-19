@@ -1,7 +1,7 @@
 module.exports = {
 	createLeaderboard: async function (client, since, topAmount, title, channelId) {
 		client.shard.broadcastEval(async (c, { channelId, since, topAmount, title }) => {
-			const channel = await c.channels.fetch(channelId);
+			const channel = await c.channels.cache.get(channelId);
 			if (channel) {
 				// eslint-disable-next-line no-undef
 				const { DBMOTDPoints } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);

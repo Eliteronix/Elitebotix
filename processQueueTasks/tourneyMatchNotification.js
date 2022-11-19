@@ -14,7 +14,7 @@ module.exports = {
 			let processQueueEntry = await DBProcessQueue.findOne({ where: { id: processQueueEntryId } });
 			let args = processQueueEntry.additions.split(';');
 
-			let channel = await c.channels.fetch(channelId);
+			let channel = await c.channels.cache.get(channelId);
 			if (channel) {
 				let players = args[3].split(',');
 				let dbPlayers = [];
