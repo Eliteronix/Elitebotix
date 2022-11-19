@@ -5,7 +5,7 @@ let manager = new ShardingManager('./bot.js', {
 	// eslint-disable-next-line no-undef
 	token: process.env.BOTTOKEN,
 	execArgv: ['--use_strict', '--unhandled-rejections=warn'],
-	totalShards: 6
+	totalShards: 1
 });
 
 // eslint-disable-next-line no-undef
