@@ -18,46 +18,46 @@ module.exports = async function (oldUser, newUser) {
 						return null;
 					}
 
-					if (!discordGuild) {
+					if (discordGuild) {
+						let member;
+						try {
+							member = await discordGuild.members.cache.get(newUser.id);
+						} catch (error) {
+							//nothing
+						}
+
+						if (!member) {
+							return;
+						}
+
+						let channel;
+						try {
+							channel = await c.channels.cache.get(guild.loggingChannel);
+						} catch (error) {
+							return `guild;${discordGuild.ownerId};${discordGuild.name}`;
+						}
+
+						if (!channel) {
+							return `guild;${discordGuild.ownerId};${discordGuild.name}`;
+						}
+
+						const Discord = require('discord.js');
+						const changeEmbed = new Discord.MessageEmbed()
+							.setColor('#0099ff')
+							.setAuthor({ name: `${newUser.username}#${newUser.discriminator}`, iconURL: newUser.displayAvatarURL() })
+							.setDescription(`<@${newUser.id}> has updated their profile!`)
+							.setThumbnail(newUser.displayAvatarURL())
+							.addFields(
+								{ name: 'Username', value: `\`${oldUser.username}\` -> \`${newUser.username}\`` },
+							)
+							.setTimestamp()
+							.setFooter({ text: 'Eventname: usernames' });
+
+						channel.send({ embeds: [changeEmbed] });
+						return 'channel';
+					} else {
 						return null;
 					}
-
-					let member;
-					try {
-						member = await discordGuild.members.cache.get(newUser.id);
-					} catch (error) {
-						//nothing
-					}
-
-					if (!member) {
-						return;
-					}
-
-					let channel;
-					try {
-						channel = await c.channels.cache.get(guild.loggingChannel);
-					} catch (error) {
-						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
-					}
-
-					if (!channel) {
-						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
-					}
-
-					const Discord = require('discord.js');
-					const changeEmbed = new Discord.MessageEmbed()
-						.setColor('#0099ff')
-						.setAuthor({ name: `${newUser.username}#${newUser.discriminator}`, iconURL: newUser.displayAvatarURL() })
-						.setDescription(`<@${newUser.id}> has updated their profile!`)
-						.setThumbnail(newUser.displayAvatarURL())
-						.addFields(
-							{ name: 'Username', value: `\`${oldUser.username}\` -> \`${newUser.username}\`` },
-						)
-						.setTimestamp()
-						.setFooter({ text: 'Eventname: usernames' });
-
-					channel.send({ embeds: [changeEmbed] });
-					return 'channel';
 				}, { context: { guildId: guild.guildId, newUser: newUser, oldUser: oldUser } });
 
 				found = found.some(f => f);
@@ -91,46 +91,46 @@ module.exports = async function (oldUser, newUser) {
 						return null;
 					}
 
-					if (!discordGuild) {
+					if (discordGuild) {
+						let member;
+						try {
+							member = await discordGuild.members.cache.get(newUser.id);
+						} catch (error) {
+							//nothing
+						}
+
+						if (!member) {
+							return;
+						}
+
+						let channel;
+						try {
+							channel = await c.channels.cache.get(guild.loggingChannel);
+						} catch (error) {
+							return `guild;${discordGuild.ownerId};${discordGuild.name}`;
+						}
+
+						if (!channel) {
+							return `guild;${discordGuild.ownerId};${discordGuild.name}`;
+						}
+
+						const Discord = require('discord.js');
+						const changeEmbed = new Discord.MessageEmbed()
+							.setColor('#0099ff')
+							.setAuthor({ name: `${newUser.username}#${newUser.discriminator}`, iconURL: newUser.displayAvatarURL() })
+							.setDescription(`<@${newUser.id}> has updated their profile!`)
+							.setThumbnail(newUser.displayAvatarURL())
+							.addFields(
+								{ name: 'Discriminator', value: `\`${oldUser.discriminator}\` -> \`${newUser.discriminator}\`` },
+							)
+							.setTimestamp()
+							.setFooter({ text: 'Eventname: userdiscriminators' });
+
+						channel.send({ embeds: [changeEmbed] });
+						return 'channel';
+					} else {
 						return null;
 					}
-
-					let member;
-					try {
-						member = await discordGuild.members.cache.get(newUser.id);
-					} catch (error) {
-						//nothing
-					}
-
-					if (!member) {
-						return;
-					}
-
-					let channel;
-					try {
-						channel = await c.channels.cache.get(guild.loggingChannel);
-					} catch (error) {
-						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
-					}
-
-					if (!channel) {
-						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
-					}
-
-					const Discord = require('discord.js');
-					const changeEmbed = new Discord.MessageEmbed()
-						.setColor('#0099ff')
-						.setAuthor({ name: `${newUser.username}#${newUser.discriminator}`, iconURL: newUser.displayAvatarURL() })
-						.setDescription(`<@${newUser.id}> has updated their profile!`)
-						.setThumbnail(newUser.displayAvatarURL())
-						.addFields(
-							{ name: 'Discriminator', value: `\`${oldUser.discriminator}\` -> \`${newUser.discriminator}\`` },
-						)
-						.setTimestamp()
-						.setFooter({ text: 'Eventname: userdiscriminators' });
-
-					channel.send({ embeds: [changeEmbed] });
-					return 'channel';
 				}, { context: { guildId: guild.guildId, newUser: newUser, oldUser: oldUser } });
 
 				found = found.some(f => f);
@@ -164,46 +164,46 @@ module.exports = async function (oldUser, newUser) {
 						return null;
 					}
 
-					if (!discordGuild) {
+					if (discordGuild) {
+						let member;
+						try {
+							member = await discordGuild.members.cache.get(newUser.id);
+						} catch (error) {
+							//nothing
+						}
+
+						if (!member) {
+							return;
+						}
+
+						let channel;
+						try {
+							channel = await c.channels.cache.get(guild.loggingChannel);
+						} catch (error) {
+							return `guild;${discordGuild.ownerId};${discordGuild.name}`;
+						}
+
+						if (!channel) {
+							return `guild;${discordGuild.ownerId};${discordGuild.name}`;
+						}
+
+						const Discord = require('discord.js');
+						const changeEmbed = new Discord.MessageEmbed()
+							.setColor('#0099ff')
+							.setAuthor({ name: `${newUser.username}#${newUser.discriminator}`, iconURL: oldUser.displayAvatarURL() })
+							.setDescription(`<@${newUser.id}> has updated their profile!`)
+							.setThumbnail(newUser.displayAvatarURL())
+							.addFields(
+								{ name: 'Avatar', value: `[Old Avatar](${oldUser.displayAvatarURL()}) -> [New Avatar](${newUser.displayAvatarURL()})` },
+							)
+							.setTimestamp()
+							.setFooter({ text: 'Eventname: useravatars' });
+
+						channel.send({ embeds: [changeEmbed] });
+						return 'channel';
+					} else {
 						return null;
 					}
-
-					let member;
-					try {
-						member = await discordGuild.members.cache.get(newUser.id);
-					} catch (error) {
-						//nothing
-					}
-
-					if (!member) {
-						return;
-					}
-
-					let channel;
-					try {
-						channel = await c.channels.cache.get(guild.loggingChannel);
-					} catch (error) {
-						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
-					}
-
-					if (!channel) {
-						return `guild;${discordGuild.ownerId};${discordGuild.name}`;
-					}
-
-					const Discord = require('discord.js');
-					const changeEmbed = new Discord.MessageEmbed()
-						.setColor('#0099ff')
-						.setAuthor({ name: `${newUser.username}#${newUser.discriminator}`, iconURL: oldUser.displayAvatarURL() })
-						.setDescription(`<@${newUser.id}> has updated their profile!`)
-						.setThumbnail(newUser.displayAvatarURL())
-						.addFields(
-							{ name: 'Avatar', value: `[Old Avatar](${oldUser.displayAvatarURL()}) -> [New Avatar](${newUser.displayAvatarURL()})` },
-						)
-						.setTimestamp()
-						.setFooter({ text: 'Eventname: useravatars' });
-
-					channel.send({ embeds: [changeEmbed] });
-					return 'channel';
 				}, { context: { guildId: guild.guildId, newUser: newUser, oldUser: oldUser } });
 
 				found = found.some(f => f);
