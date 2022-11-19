@@ -1184,37 +1184,28 @@ module.exports = {
 
 		console.log(`Cleaned up ${deleted} duplicate users`);
 
-		// // Remove duplicate discorduser entries
-		// duplicates = true;
-		// deleted = 0;
+		// Remove entries over half a year old
+		duplicates = true;
+		deleted = 0;
 
-		// while (duplicates && deleted < 25) {
-		// 	console.log(1);
-		// 	let result = await sequelize.query(
-		// 		'SELECT * FROM DBDuelRatingHistory WHERE 0 < (SELECT COUNT(1) FROM DBDuelRatingHistory as a WHERE a.osuUserId = DBDuelRatingHistory.osuUserId AND a.year = DBDuelRatingHistory.year AND a.month = DBDuelRatingHistory.month AND a.date = DBDuelRatingHistory.date AND a.id <> DBDuelRatingHistory.id) ORDER BY userId ASC LIMIT 1',
-		// 	);
+		let dateLimit = new Date();
+		dateLimit.setMonth(dateLimit.getMonth() - 6);
 
-		// 	duplicates = result[0].length;
+		let oldData = await DBDuelRatingHistory.findAll({
+			where: {
+				updatedAt: {
+					[Op.lt]: dateLimit
+				}
+			}
+		});
 
-		// 	if (result[0].length) {
-		// 		await new Promise(resolve => setTimeout(resolve, 2000));
-		// 		logDatabaseQueriesFunction(2, 'utils.js DBDuelRatingHistory cleanUpDuplicateEntries');
-		// 		let duplicate = await DBDiscordUsers.findOne({
-		// 			where: {
-		// 				id: result[0][0].id
-		// 			}
-		// 		});
+		for (let i = 0; i < oldData.length; i++) {
+			await new Promise(resolve => setTimeout(resolve, 2000));
+			await oldData[i].destroy();
+			deleted++;
+		}
 
-		// 		console.log(duplicate.osuUserId, duplicate.date, duplicate.month, duplicate.year, duplicate.updatedAt);
-
-		// 		deleted++;
-		// 		await new Promise(resolve => setTimeout(resolve, 2000));
-		// 		await duplicate.destroy();
-		// 	}
-		// 	await new Promise(resolve => setTimeout(resolve, 10000));
-		// }
-
-		// console.log(`Cleaned up ${deleted} duplicate duel rating histories`);
+		console.log(`Cleaned up ${deleted} old duel rating histories`);
 
 		duplicates = true;
 		deleted = 0;
@@ -1257,6 +1248,39 @@ module.exports = {
 		}
 
 		console.log(`Cleaned up ${deleted} duplicate scores`);
+
+		// Automatically add missing players to the database
+		let existingUsers = await DBDiscordUsers.findAll({
+			attributes: ['osuUserId']
+		});
+
+		existingUsers = existingUsers.map(user => user.osuUserId);
+
+		let missingUsers = await DBOsuMultiScores.findAll({
+			attributes: ['osuUserId'],
+			where: {
+				osuUserId: {
+					[Op.notIn]: existingUsers
+				}
+			},
+			group: ['osuUserId']
+		});
+
+		missingUsers = missingUsers.map(user => user.osuUserId);
+
+		let iterator = 0;
+		while (iterator < 50 && missingUsers.length) {
+			await new Promise(resolve => setTimeout(resolve, 2000));
+			let randomIndex = Math.floor(Math.random() * missingUsers.length);
+			await DBDiscordUsers.create({
+				osuUserId: missingUsers[randomIndex]
+			});
+			console.log('Created ' + missingUsers[randomIndex]);
+			missingUsers.splice(randomIndex, 1);
+			iterator++;
+		}
+
+		console.log(`Created ${iterator} missing users`);
 	},
 	wrongCluster(client, id) {
 		return wrongClusterFunction(client, id);
