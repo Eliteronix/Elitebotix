@@ -294,8 +294,8 @@ module.exports = {
 			if (elitiriSignUp.osuName !== discordUser.osuName && !elitiriSignUp.rankAchieved && process.env.SERVER === 'Live') {
 				client.shard.broadcastEval(async (c, { message }) => {
 					const guild = await c.guilds.cache.get('727407178499096597');
-					const channel = await guild.channels.cache.get('830534251757174824');
-					if (channel) {
+					if (guild) {
+						const channel = await guild.channels.cache.get('830534251757174824');
 						channel.send(message);
 					}
 				}, { context: { message: `<@&851356668415311963> The player \`${elitiriSignUp.osuName}\` from \`${elitiriSignUp.bracketName}\` changed their osu! name to \`${discordUser.osuName}\`.` } });
