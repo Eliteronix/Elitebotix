@@ -2608,14 +2608,6 @@ async function getUserDuelStarRatingFunction(input) {
 				date: endDate.getUTCDate()
 			}
 		});
-
-		let halfAYearAgo = new Date();
-		halfAYearAgo.setUTCMonth(halfAYearAgo.getUTCMonth() - 6);
-
-		if (savedStats && savedStats.updatedAt < halfAYearAgo) {
-			await savedStats.destroy();
-			savedStats = null;
-		}
 	}
 
 	if (savedStats) {
