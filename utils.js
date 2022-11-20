@@ -1256,6 +1256,9 @@ module.exports = {
 
 		existingUsers = existingUsers.map(user => user.osuUserId);
 
+		// Remove null values
+		existingUsers = existingUsers.filter(user => user !== null);
+
 		console.log(existingUsers, existingUsers.length);
 
 		let missingUsers = await DBOsuMultiScores.findAll({
