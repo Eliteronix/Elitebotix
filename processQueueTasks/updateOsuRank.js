@@ -51,6 +51,8 @@ module.exports = {
 				discordUser.osuBadges = badges;
 			}
 
+			await discordUser.save();
+
 			try {
 				await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: client });
 			} catch (e) {
