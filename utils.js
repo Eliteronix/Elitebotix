@@ -2546,6 +2546,8 @@ module.exports = {
 };
 
 async function getUserDuelStarRatingFunction(input) {
+	// console.log('-------------------------------------------------------------------------------------------------------------------');
+	let startTime = new Date();
 	//Try to get it from tournament data if available
 	let userScores;
 
@@ -2616,6 +2618,8 @@ async function getUserDuelStarRatingFunction(input) {
 		});
 	}
 
+	// console.log(`getUserDuelStarRatingFunction: completeYear/Week: ${new Date() - startTime}ms`);
+
 	if (savedStats) {
 		duelRatings.total = savedStats.osuDuelStarRating;
 		duelRatings.noMod = savedStats.osuNoModDuelStarRating;
@@ -2634,6 +2638,8 @@ async function getUserDuelStarRatingFunction(input) {
 			osuUserId: input.osuUserId
 		}
 	});
+
+	// console.log(`getUserDuelStarRatingFunction: discordUser: ${new Date() - startTime}ms`);
 
 	let weeksAgo = new Date();
 	weeksAgo.setUTCDate(weeksAgo.getUTCDate() - 21);
@@ -2676,6 +2682,8 @@ async function getUserDuelStarRatingFunction(input) {
 		}
 	});
 
+	// console.log(`getUserDuelStarRatingFunction: userScores: ${new Date() - startTime}ms`);
+
 	//Check for scores from the past half a year
 	const lastHalfYear = new Date();
 	lastHalfYear.setUTCMonth(lastHalfYear.getUTCMonth() - 6);
@@ -2692,6 +2700,8 @@ async function getUserDuelStarRatingFunction(input) {
 		}
 	});
 
+	// console.log(`getUserDuelStarRatingFunction: pastHalfYearScoreCount: ${new Date() - startTime}ms`);
+
 	let outdated = false;
 
 	if (pastHalfYearScoreCount < 5) {
@@ -2702,6 +2712,8 @@ async function getUserDuelStarRatingFunction(input) {
 
 	//Sort it by game ID
 	quicksortGameId(userScores);
+
+	// console.log(`getUserDuelStarRatingFunction: quicksort: ${new Date() - startTime}ms`);
 
 	let scoresPerMod = 35;
 	let outliersPerMod = 3;
@@ -2726,6 +2738,8 @@ async function getUserDuelStarRatingFunction(input) {
 				}
 			}
 		}
+
+		// console.log(`----------getUserDuelStarRatingFunction: modpool collected ${modIndex}: ${new Date() - startTime}ms`);
 
 		// Get all the maps and fill in their data
 		let relevantMaps = [];
@@ -2753,6 +2767,8 @@ async function getUserDuelStarRatingFunction(input) {
 			} else {
 				dbBeatmap = await getOsuBeatmapFunction({ beatmapId: userMaps[i].beatmapId, modBits: 0 });
 			}
+
+			// console.log(`--------------------getUserDuelStarRatingFunction: modpool collected ${modIndex} map ${i}: ${new Date() - startTime}ms`);
 
 			//Filter by ranked maps > 4*
 			if (dbBeatmap && parseFloat(dbBeatmap.starRating) > 3.5 && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved')) {
@@ -2820,6 +2836,8 @@ async function getUserDuelStarRatingFunction(input) {
 			}
 		}
 
+		// console.log(`----------getUserDuelRatingFunction: Got the relevant maps for ${modIndex} - ${Date.now() - startTime}ms`);
+
 		//Get rid of the outliersPerMod best maps by expectedRating
 		if (relevantMaps.length < 10) {
 			outliersPerMod = 0;
@@ -2864,6 +2882,8 @@ async function getUserDuelStarRatingFunction(input) {
 			relevantMaps.splice(relevantMaps.indexOf(worstBeatmap), 1);
 			relevantMaps.splice(relevantMaps.indexOf(bestBeatmap), 1);
 		}
+
+		// console.log(`----------getUserDuelRatingFunction: Got the outliers for ${modIndex} - ${Date.now() - startTime}ms`);
 
 		//Group the maps into steps of 0.1 of difficulty
 		const steps = [];
@@ -2913,6 +2933,8 @@ async function getUserDuelStarRatingFunction(input) {
 			}
 		}
 
+		// console.log(`----------getUserDuelRatingFunction: Got the steps for ${modIndex} - ${Date.now() - startTime}ms`);
+
 		//Calculate the starrating for the modpool
 		let totalWeight = 0;
 		let totalWeightedStarRating = 0;
@@ -2922,6 +2944,8 @@ async function getUserDuelStarRatingFunction(input) {
 				totalWeightedStarRating += stepData[i].weightedStarRating;
 			}
 		}
+
+		// console.log(`----------getUserDuelRatingFunction: Calculated the totalWeight and totalWeightedStarRating for ${modIndex} - ${Date.now() - startTime}ms`);
 
 		if (relevantMaps.length < 5) {
 			duelRatings.provisional = true;
@@ -2952,7 +2976,11 @@ async function getUserDuelStarRatingFunction(input) {
 				duelRatings.stepData.FM = stepData;
 			}
 		}
+
+		// console.log(`----------getUserDuelStarRatingFunction: finished ${modIndex} - ${Date.now() - startTime}ms`);
 	}
+
+	// console.log(`getUserDuelStarRatingFunction: getting Mod Maps and steps: ${new Date() - startTime}ms`);
 
 	//Check the past year for individual ratings and limit a potential drop to .2
 	let lastYearStats = await DBDuelRatingHistory.findOne({
@@ -2964,13 +2992,7 @@ async function getUserDuelStarRatingFunction(input) {
 		}
 	});
 
-	let halfAYearAgo = new Date();
-	halfAYearAgo.setUTCMonth(halfAYearAgo.getUTCMonth() - 6);
-
-	if (lastYearStats && lastYearStats.updatedAt < halfAYearAgo) {
-		await lastYearStats.destroy();
-		lastYearStats = null;
-	}
+	// console.log(`getUserDuelStarRatingFunction: got last year stats: ${new Date() - startTime}ms`);
 
 	if (!lastYearStats && (duelRatings.noMod > 0 || duelRatings.hidden > 0 || duelRatings.hardRock > 0 || duelRatings.doubleTime > 0 || duelRatings.freeMod > 0)) {
 		let newEndDate = new Date(endDate);
@@ -2983,6 +3005,8 @@ async function getUserDuelStarRatingFunction(input) {
 		newEndDate.setUTCMilliseconds(999);
 
 		let lastYearDuelRating = await getUserDuelStarRatingFunction({ osuUserId: input.osuUserId, client: input.client, date: newEndDate });
+
+		// console.log(`getUserDuelStarRatingFunction: got last year rating: ${new Date() - startTime}ms`);
 
 		lastYearStats = {
 			osuUserId: input.osuUserId,
@@ -3004,6 +3028,8 @@ async function getUserDuelStarRatingFunction(input) {
 			osuFreeModDuelStarRating: null,
 		};
 	}
+
+	// console.log(`getUserDuelStarRatingFunction: got last year stats completely: ${new Date() - startTime}ms`);
 
 	//Get the modpool spread out of the past 100 user scores for the total value
 	if (duelRatings.noMod || duelRatings.hidden || duelRatings.hardRock || duelRatings.doubleTime || duelRatings.freeMod) {
@@ -3039,6 +3065,8 @@ async function getUserDuelStarRatingFunction(input) {
 			}
 		}
 
+		// console.log(`getUserDuelStarRatingFunction: got modpool amounts: ${new Date() - startTime}ms`);
+
 		if (duelRatings.noMod === null) {
 			modPoolAmounts[0] = 0;
 		}
@@ -3058,8 +3086,10 @@ async function getUserDuelStarRatingFunction(input) {
 		//Set total star rating based on the spread
 		duelRatings.total = (duelRatings.noMod * modPoolAmounts[0] + duelRatings.hidden * modPoolAmounts[1] + duelRatings.hardRock * modPoolAmounts[2] + duelRatings.doubleTime * modPoolAmounts[3] + duelRatings.freeMod * modPoolAmounts[4]) / (modPoolAmounts[0] + modPoolAmounts[1] + modPoolAmounts[2] + modPoolAmounts[3] + modPoolAmounts[4]);
 
+		// console.log(`getUserDuelStarRatingFunction: got total star rating: ${new Date() - startTime}ms`);
+
 		if (completeYear || completeWeek) {
-			//Create the yearStats if they don't exist
+			//Create the stats if they don't exist
 			await DBDuelRatingHistory.create({
 				osuUserId: input.osuUserId,
 				year: endDate.getUTCFullYear(),
@@ -3075,8 +3105,10 @@ async function getUserDuelStarRatingFunction(input) {
 				osuDuelOutdated: duelRatings.outdated,
 			});
 
+			// console.log(`getUserDuelStarRatingFunction: created new stats: ${new Date() - startTime}ms`);
+
 			if (completeYear) {
-				let futurePossiblyAffectedDuelRatings = await DBDuelRatingHistory.findAll({
+				DBDuelRatingHistory.destroy({
 					where: {
 						osuUserId: input.osuUserId,
 						year: {
@@ -3087,9 +3119,7 @@ async function getUserDuelStarRatingFunction(input) {
 					}
 				});
 
-				for (let i = 0; i < futurePossiblyAffectedDuelRatings.length; i++) {
-					await futurePossiblyAffectedDuelRatings[i].destroy();
-				}
+				// console.log(`getUserDuelStarRatingFunction: deleted old stats: ${new Date() - startTime}ms`);
 			}
 		}
 
@@ -3101,9 +3131,13 @@ async function getUserDuelStarRatingFunction(input) {
 			}
 		});
 
+		// console.log(`getUserDuelStarRatingFunction: got discord user second time: ${new Date() - startTime}ms`);
+
 		if (!discordUser) {
 			discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId });
 		}
+
+		// console.log(`getUserDuelStarRatingFunction: created discord user: ${new Date() - startTime}ms`);
 
 		if (discordUser && !input.date) {
 			if (input.client) {
@@ -3136,6 +3170,7 @@ async function getUserDuelStarRatingFunction(input) {
 					}
 
 					let oldDerankStats = await getDerankStatsFunction(discordUser);
+					// console.log(`getUserDuelStarRatingFunction: got old derank stats: ${new Date() - startTime}ms`);
 					//Setting the new values even tho it does that later just to get the new derank values
 					discordUser.osuDuelStarRating = Math.round(duelRatings.total * 100000000000000) / 100000000000000;
 					discordUser.osuNoModDuelStarRating = duelRatings.noMod;
@@ -3146,6 +3181,7 @@ async function getUserDuelStarRatingFunction(input) {
 					discordUser.osuDuelProvisional = duelRatings.provisional;
 					discordUser.osuDuelOutdated = duelRatings.outdated;
 					let newDerankStats = await getDerankStatsFunction(discordUser);
+					// console.log(`getUserDuelStarRatingFunction: got new derank stats: ${new Date() - startTime}ms`);
 
 					if (oldDerankStats.expectedPpRankOsu !== newDerankStats.expectedPpRankOsu) {
 						message.push(`Deranked Rank change: #${oldDerankStats.expectedPpRankOsu} -> #${newDerankStats.expectedPpRankOsu} (${newDerankStats.expectedPpRankOsu - oldDerankStats.expectedPpRankOsu})`);
@@ -3169,6 +3205,7 @@ async function getUserDuelStarRatingFunction(input) {
 							if (guild) {
 								const channel = await guild.channels.cache.get(channelId);
 								channel.send(message);
+								// console.log(`getUserDuelStarRatingFunction: Sent message to ${channel.name} in ${guild.name}`);
 							}
 						}, { context: { message: `\`\`\`${message.join('\n')}\`\`\`` } });
 
@@ -3176,6 +3213,7 @@ async function getUserDuelStarRatingFunction(input) {
 							const user = await input.client.users.cache.get(discordUser.userId);
 							if (user) {
 								user.send(`Your duel ratings have been updated.\`\`\`${message.join('\n')}\`\`\``);
+								// console.log(`getUserDuelStarRatingFunction: Sent message to ${user.username}`);
 							}
 						}
 
@@ -3186,6 +3224,8 @@ async function getUserDuelStarRatingFunction(input) {
 							},
 						});
 
+						// console.log(`getUserDuelStarRatingFunction: got guild trackers: ${new Date() - startTime}ms`);
+
 						for (let i = 0; i < guildTrackers.length; i++) {
 							try {
 								input.client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
@@ -3193,6 +3233,8 @@ async function getUserDuelStarRatingFunction(input) {
 									if (guild) {
 										let channel = await guild.channels.cache.get(channelId);
 										channel.send(message);
+
+										// console.log(`getUserDuelStarRatingFunction: Sent message to ${channel.name} in ${guild.name}`);
 									}
 								}, { context: { guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, message: `\`\`\`${message.join('\n')}\`\`\`` } });
 							} catch (err) {
@@ -3219,7 +3261,11 @@ async function getUserDuelStarRatingFunction(input) {
 			discordUser.osuDuelOutdated = duelRatings.outdated;
 			discordUser.lastDuelRatingUpdate = new Date();
 			await discordUser.save();
+
+			// console.log(`getUserDuelStarRatingFunction: saved user: ${new Date() - startTime}ms`);
 		}
+
+		console.log(`getUserDuelStarRatingFunction: finished ${input.osuUserId}: ${new Date() - startTime}ms`);
 
 		return duelRatings;
 	}
@@ -3888,6 +3934,7 @@ async function getOsuBeatmapFunction(input) {
 								dbBeatmap.spinners = beatmaps[0].objects.spinner;
 								dbBeatmap.mods = modBits;
 								dbBeatmap.userRating = beatmaps[0].rating;
+								dbBeatmap.changed('updatedAt', true);
 								await dbBeatmap.save();
 							} else { // Map has to be added new
 								//Get the tourney map flags
@@ -3970,6 +4017,7 @@ async function getOsuBeatmapFunction(input) {
 							//Map is already saved; Delay next check until 7 days
 							if (dbBeatmap) {
 								dbBeatmap.approvalStatus = 'Not found';
+								dbBeatmap.changed('updatedAt', true);
 								await dbBeatmap.save();
 							} else if (error.message === 'Not found') { // Map has to be added new
 								dbBeatmap = await DBOsuBeatmaps.create({
