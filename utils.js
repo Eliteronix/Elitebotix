@@ -1256,6 +1256,8 @@ module.exports = {
 
 		existingUsers = existingUsers.map(user => user.osuUserId);
 
+		console.log(existingUsers, existingUsers.length);
+
 		let missingUsers = await DBOsuMultiScores.findAll({
 			attributes: ['osuUserId'],
 			where: {
@@ -1267,6 +1269,8 @@ module.exports = {
 		});
 
 		missingUsers = missingUsers.map(user => user.osuUserId);
+
+		console.log(missingUsers, missingUsers.length);
 
 		let iterator = 0;
 		while (iterator < 50 && missingUsers.length) {
@@ -3426,7 +3430,7 @@ async function getDerankStatsFunction(discordUser) {
 			expectedCurrentDuelRating: duelDiscordUsers[ppRank - 1 - rankOffset].osuDuelStarRating
 		};
 	} catch (error) {
-		console.log(duelDiscordUsers.length, ppRank - 1 - rankOffset);
+		console.log(duelDiscordUsers.length, ppRank - 1 - rankOffset, discordUser.osuUserId, discordUser.osuName);
 		throw error;
 	}
 }
