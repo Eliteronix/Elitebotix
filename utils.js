@@ -1259,8 +1259,6 @@ module.exports = {
 		// Remove null values
 		existingUsers = existingUsers.filter(user => user !== null);
 
-		console.log(existingUsers, existingUsers.length);
-
 		let missingUsers = await DBOsuMultiScores.findAll({
 			attributes: ['osuUserId'],
 			where: {
@@ -1272,8 +1270,6 @@ module.exports = {
 		});
 
 		missingUsers = missingUsers.map(user => user.osuUserId);
-
-		console.log(missingUsers, missingUsers.length);
 
 		let iterator = 0;
 		while (iterator < 50 && missingUsers.length) {
