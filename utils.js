@@ -5527,7 +5527,8 @@ async function getValidTournamentBeatmapFunction(input) {
 		});
 	}
 
-	console.log('Found', beatmaps.length, 'maps');
+	// console.log('Found', beatmaps.length, 'maps');
+
 
 	if (beatmaps.length === 0) {
 		input.alreadyCheckedSR = [];
@@ -5539,7 +5540,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (input.upperBound > 9.9) {
 			input.upperBound = 9.9;
 		}
-		console.log('Increased SR range to', input.lowerBound, '-', input.upperBound);
+		// console.log('Increased SR range to', input.lowerBound, '-', input.upperBound);
 	}
 
 	//Loop through the beatmaps until a fitting one is found
@@ -5555,7 +5556,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		//If map has to be checked but the count is already reached, skip it
 		if (!randomBeatmap.usedOften && input.notUsedOftenCount >= 5) {
 			beatmaps.splice(index, 1);
-			console.log('Map Selection: Checked too many maps for usage');
+			// console.log('Map Selection: Checked too many maps for usage');
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
@@ -5595,7 +5596,7 @@ async function getValidTournamentBeatmapFunction(input) {
 
 		if (!randomBeatmap) {
 			beatmaps.splice(index, 1);
-			console.log('Map Selection: Not available');
+			// console.log('Map Selection: Not available');
 			input.alreadyCheckedOther.push(beatmapId);
 			continue;
 		}
@@ -5603,7 +5604,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		//Check drain length
 		if (randomBeatmap.drainLength > upperDrain || randomBeatmap.drainLength < lowerDrain) {
 			beatmaps.splice(index, 1);
-			console.log('Map Selection: Drain length out of bounds');
+			// console.log('Map Selection: Drain length out of bounds');
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
@@ -5611,7 +5612,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		//Check the approach rate
 		if (randomBeatmap.approachRate > upperApproach || randomBeatmap.approachRate < lowerApproach) {
 			beatmaps.splice(index, 1);
-			console.log('Map Selection: Approach rate out of bounds');
+			// console.log('Map Selection: Approach rate out of bounds');
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
@@ -5619,7 +5620,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		//Check the circle size
 		if (randomBeatmap.circleSize > upperCircleSize || randomBeatmap.circleSize < lowerCircleSize) {
 			beatmaps.splice(index, 1);
-			console.log('Map Selection: Circle size out of bounds');
+			// console.log('Map Selection: Circle size out of bounds');
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
@@ -5627,14 +5628,14 @@ async function getValidTournamentBeatmapFunction(input) {
 		//Check star rating
 		if (randomBeatmap.starRating > upperBound || randomBeatmap.starRating < lowerBound) {
 			beatmaps.splice(index, 1);
-			console.log('Map Selection: Star rating out of bounds', randomBeatmap.starRating);
+			// console.log('Map Selection: Star rating out of bounds', randomBeatmap.starRating);
 			input.alreadyCheckedSR.push(randomBeatmap.beatmapId);
 			continue;
 		}
 
 		//Check usage
 		if (randomBeatmap.usedOften) {
-			console.log('Map Selection: Used often');
+			// console.log('Map Selection: Used often');
 
 			//Deep clone beatmap, use proper library if you ever need dates or functions of the beatmap or just refetch from the database
 			let clone = JSON.parse(JSON.stringify(randomBeatmap));
@@ -5658,14 +5659,14 @@ async function getValidTournamentBeatmapFunction(input) {
 		});
 
 		if (mapScoreAmount < 50) {
-			console.log('Map Selection: Not used often');
+			// console.log('Map Selection: Not used often');
 			beatmaps.splice(index, 1);
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			input.notUsedOftenCount++;
 			continue;
 		}
 
-		console.log('Map Selection: Now used often');
+		// console.log('Map Selection: Now used often');
 		randomBeatmap.usedOften = true;
 		await randomBeatmap.save();
 		//Deep clone beatmap, use proper library if you ever need dates or functions of the beatmap or just refetch from the database
@@ -5674,7 +5675,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		return clone;
 	}
 
-	console.log('Map Selection: None found - Going again');
+	// console.log('Map Selection: None found - Going again');
 	//Return null
 	return await getValidTournamentBeatmapFunction(input);
 }
