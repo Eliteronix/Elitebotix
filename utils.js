@@ -2512,19 +2512,29 @@ module.exports = {
 				return recentActivity;
 			}, { context: { osuUser: osuUser, lastUpdated: osuTracker.updatedAt } });
 
-			// set variable recentActivity true if any of the recentActivities are true
-			const recentActivity = recentActivities.some(activity => activity);
+			let guildTrackers = await DBOsuGuildTrackers.findAll({
+				where: {
+					osuUserId: osuUser.osuUserId,
+				},
+			});
 
-			if (recentActivity) {
-				osuTracker.minutesBetweenChecks = 15;
+			if (guildTrackers.length) {
+				// set variable recentActivity true if any of the recentActivities are true
+				const recentActivity = recentActivities.some(activity => activity);
+
+				if (recentActivity) {
+					osuTracker.minutesBetweenChecks = 15;
+				} else {
+					osuTracker.minutesBetweenChecks = osuTracker.minutesBetweenChecks + 5;
+				}
+
+				let date = new Date();
+				date.setMinutes(date.getMinutes() + osuTracker.minutesBetweenChecks);
+				osuTracker.nextCheck = date;
+				await osuTracker.save();
 			} else {
-				osuTracker.minutesBetweenChecks = osuTracker.minutesBetweenChecks + 5;
+				await osuTracker.destroy();
 			}
-
-			let date = new Date();
-			date.setMinutes(date.getMinutes() + osuTracker.minutesBetweenChecks);
-			osuTracker.nextCheck = date;
-			await osuTracker.save();
 		}
 	},
 	async getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps) {
