@@ -8768,6 +8768,39 @@ module.exports = {
 					]
 				},
 			});
+		} else if (args[0] === 'averageRating') {
+			let discordUsers = await DBDiscordUsers.findAll({
+				where: {
+					osuUserId: {
+						[Op.gt]: 0
+					},
+					osuPP: {
+						[Op.gt]: 0
+					},
+					osuDuelStarRating: {
+						[Op.gt]: 0
+					},
+					osuDuelProvisional: {
+						[Op.not]: true,
+					}
+				}
+			});
+
+			let totalRating = 0;
+			let totalPlayers = 0;
+
+			for (let i = 0; i < discordUsers.length; i++) {
+				let discordUser = discordUsers[i];
+
+				if (discordUser.osuRank && parseInt(discordUser.osuRank) >= parseInt(args[1]) && parseInt(discordUser.osuRank) <= parseInt(args[2])) {
+					totalRating += parseFloat(discordUser.osuDuelStarRating);
+					totalPlayers++;
+				}
+			}
+
+			let averageRating = totalRating / totalPlayers;
+
+			return msg.reply(`The average rating for players ranked ${args[1]} to ${args[2]} is ${averageRating.toFixed(2)}`);
 		} else {
 			msg.reply('Invalid command');
 		}

@@ -706,7 +706,14 @@ module.exports = {
 				return;
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
 				if (interaction.id) {
-					await interaction.reply('Processing leaderboard...');
+					try {
+						await interaction.reply('Processing leaderboard...');
+					} catch (error) {
+						if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+							console.error(error);
+						}
+						return;
+					}
 				}
 
 				let osuAccounts = [];
