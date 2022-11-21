@@ -5304,7 +5304,7 @@ async function getValidTournamentBeatmapFunction(input) {
 
 	//Set the approach Rate
 	let lowerApproach = 0;
-	let upperApproach = 10;
+	let upperApproach = 11;
 
 	if (input.lowerApproach) {
 		lowerApproach = input.lowerApproach;
@@ -5826,8 +5826,8 @@ async function getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, a
 			lowerBound: lowerBound,
 			upperBound: upperBound,
 			mode: 'Standard',
-			upperDrain: 405,
-			lowerDrain: 120,
+			upperDrain: 270,
+			lowerDrain: 100,
 			avoidMaps: avoidMaps,
 			onlyRanked: onlyRanked,
 		});
