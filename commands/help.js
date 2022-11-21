@@ -111,6 +111,10 @@ module.exports = {
 
 		//Send message if no valid command
 		if (!command) {
+			if (interaction) {
+				return interaction.reply({ content: 'That\'s not a valid command!', ephemeral: true });
+			}
+
 			return msg.reply('that\'s not a valid command!');
 		}
 
