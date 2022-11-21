@@ -2547,7 +2547,7 @@ module.exports = {
 
 async function getUserDuelStarRatingFunction(input) {
 	// console.log('-------------------------------------------------------------------------------------------------------------------');
-	let startTime = new Date();
+	// let startTime = new Date();
 	//Try to get it from tournament data if available
 	let userScores;
 
@@ -3265,7 +3265,7 @@ async function getUserDuelStarRatingFunction(input) {
 			// console.log(`getUserDuelStarRatingFunction: saved user: ${new Date() - startTime}ms`);
 		}
 
-		console.log(`getUserDuelStarRatingFunction: finished ${input.osuUserId}: ${new Date() - startTime}ms`);
+		// console.log(`getUserDuelStarRatingFunction: finished ${input.osuUserId}: ${new Date() - startTime}ms`);
 
 		return duelRatings;
 	}
