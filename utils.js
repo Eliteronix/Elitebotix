@@ -3423,47 +3423,39 @@ async function getDerankStatsFunction(discordUser) {
 		]
 	});
 
+	//Get the user's position in the list
 	let ppRank = null;
 
 	for (let i = 0; i < ppDiscordUsers.length && !ppRank; i++) {
 		if (parseFloat(discordUser.osuPP) >= parseFloat(ppDiscordUsers[i].osuPP)) {
-			ppRank = i + 1;
+			ppRank = i;
 		}
 	}
 
 	if (!ppRank) {
-		ppRank = ppDiscordUsers.length;
+		ppRank = ppDiscordUsers.length - 1;
 	}
 
+	//Get the user's position in the list
 	let duelRank = null;
 
 	for (let i = 0; i < duelDiscordUsers.length && !duelRank; i++) {
 		if (parseFloat(discordUser.osuDuelStarRating) >= parseFloat(duelDiscordUsers[i].osuDuelStarRating)) {
-			duelRank = i + 1;
+			duelRank = i;
 		}
 	}
 
 	if (!duelRank) {
-		duelRank = duelDiscordUsers.length + 1;
+		duelRank = duelDiscordUsers.length - 1;
 	}
 
-	if (!discordUser.userId) {
-		ppDiscordUsers.length = ppDiscordUsers.length + 1;
-		duelDiscordUsers.length = duelDiscordUsers.length + 1;
-	}
-
+	//Get expected pp rank
 	let expectedPpRank = Math.round(duelRank / duelDiscordUsers.length * ppDiscordUsers.length);
-
-
-	let rankOffset = 0;
-
-	if (!discordUser.userId && expectedPpRank > 1) {
-		rankOffset = 1;
-	}
 
 	let expectedPpRankPercentageDifference = Math.round((100 / ppDiscordUsers.length * ppRank - 100 / ppDiscordUsers.length * expectedPpRank) * 100) / 100;
 
-	let expectedPpRankOsu = ppDiscordUsers[expectedPpRank - 1 - rankOffset].osuRank;
+	let expectedPpRankOsu = ppDiscordUsers[expectedPpRank].osuRank;
+
 	try {
 		return {
 			ppRank: ppRank,
@@ -3473,11 +3465,11 @@ async function getDerankStatsFunction(discordUser) {
 			expectedPpRank: expectedPpRank,
 			expectedPpRankPercentageDifference: expectedPpRankPercentageDifference,
 			expectedPpRankOsu: expectedPpRankOsu,
-			expectedDuelRating: duelDiscordUsers[duelRank - 1 - rankOffset].osuDuelStarRating,
-			expectedCurrentDuelRating: duelDiscordUsers[ppRank - 1 - rankOffset].osuDuelStarRating
+			expectedDuelRating: duelDiscordUsers[duelRank].osuDuelStarRating,
+			expectedCurrentDuelRating: duelDiscordUsers[ppRank].osuDuelStarRating
 		};
 	} catch (error) {
-		console.log(duelDiscordUsers.length, ppRank - 1 - rankOffset, discordUser.osuUserId, discordUser.osuName);
+		console.log(duelDiscordUsers.length, ppRank, discordUser.osuUserId, discordUser.osuName);
 		throw error;
 	}
 }
