@@ -198,6 +198,7 @@ module.exports = {
 							// Standardize rank range
 							for (let k = 0; k < rankRange[j].length; k++) {
 								rankRange[j][k] = rankRange[j][k].trim();
+								rankRange[j][k] = rankRange[j][k].toLowerCase().replace('infinity', '999999999');
 								rankRange[j][k] = rankRange[j][k].replace('∞', '999999999');
 								rankRange[j][k] = rankRange[j][k].replace('.', '');
 								rankRange[j][k] = rankRange[j][k].replace(',', '');
@@ -265,7 +266,12 @@ module.exports = {
 						}
 					}
 				} catch (err) {
-					console.log(err);
+					if (err.message === 'Cannot send messages to this user') {
+						pingUsers[i].tournamentPings = false;
+						await pingUsers[i].save();
+					} else {
+						console.log(err);
+					}
 				}
 			}
 
