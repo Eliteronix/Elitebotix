@@ -413,8 +413,9 @@ module.exports = {
 			}
 
 			//Push matches for the history txt
-			if (!matchesPlayed.includes(`${(team1GameScores[0].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${team1GameScores[0].matchStartDate.getUTCFullYear()} - ${team1GameScores[0].matchName} ----- https://osu.ppy.sh/community/matches/${team1GameScores[0].matchId}`)) {
-				matchesPlayed.push(`${(team1GameScores[0].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${team1GameScores[0].matchStartDate.getUTCFullYear()} - ${team1GameScores[0].matchName} ----- https://osu.ppy.sh/community/matches/${team1GameScores[0].matchId}`);
+			let date = new Date(team1GameScores[0].matchStartDate);
+			if (!matchesPlayed.includes(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${team1GameScores[0].matchName} ----- https://osu.ppy.sh/community/matches/${team1GameScores[0].matchId}`)) {
+				matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${team1GameScores[0].matchName} ----- https://osu.ppy.sh/community/matches/${team1GameScores[0].matchId}`);
 			}
 		}
 

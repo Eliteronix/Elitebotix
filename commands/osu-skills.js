@@ -528,12 +528,13 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					let runningAverageAmount = 150; //All mods together
 					for (let i = 0; i < userScores.length; i++) {
 						//Push matches for the history txt
-						if (!matchesPlayed.includes(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`)) {
-							matchesPlayed.push(`${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`);
+						let date = new Date(userScores[i].matchStartDate);
+						if (!matchesPlayed.includes(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`)) {
+							matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`);
 						}
 
 						for (let j = 0; j < rawModsData.length; j++) {
-							if (rawModsData[j].label === `${(userScores[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${userScores[i].matchStartDate.getUTCFullYear()}`) {
+							if (rawModsData[j].label === `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`) {
 								rawModsData[j].totalEvaluation += parseFloat(userScores[i].evaluation);
 								rawModsData[j].totalCount++;
 
