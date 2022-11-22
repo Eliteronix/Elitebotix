@@ -2217,6 +2217,7 @@ module.exports = {
 										osuUser.osuName = await getOsuPlayerName(osuUser.osuUserId);
 									}
 
+									const Discord = require('discord.js');
 									let medalEmbed = new Discord.MessageEmbed()
 										.setColor('#583DA9')
 										.setTitle(`${osuUser.osuName} unlocked the medal ${medalName}`)
