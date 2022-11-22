@@ -2214,7 +2214,7 @@ module.exports = {
 									let medal = osuUser.medalsData.find(medal => medal.name === medalName);
 
 									if (!osuUser.osuName) {
-										osuUser.osuName = await getOsuPlayerNameFunction(osuUser.osuUserId);
+										osuUser.osuName = await getOsuPlayerName(osuUser.osuUserId);
 									}
 
 									let medalEmbed = new Discord.MessageEmbed()
