@@ -22,7 +22,7 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	// guildOnly: true,
 	//args: true,
-	cooldown: 60,
+	cooldown: 15,
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
