@@ -5963,7 +5963,8 @@ async function orderMatchPlayers(lobby, channel, players) {
 	//Move players to their slots
 	let initialPlayerAmount = players.length;
 	let movedSomeone = true;
-	while (players.length) {
+	let hasEmptySlots = true;
+	while (players.length && hasEmptySlots) {
 		if (!movedSomeone) {
 			//Move someone to last slot if that is empty
 			await channel.sendMessage(`!mp move #${players[0].osuUserId} ${initialPlayerAmount + 1}`);
@@ -5978,6 +5979,11 @@ async function orderMatchPlayers(lobby, channel, players) {
 			if (lobby._slots[i] === null) {
 				emptySlots.push(i);
 			}
+		}
+
+		if (emptySlots.length === 0) {
+			hasEmptySlots = false;
+			continue;
 		}
 
 		//Move players to the correct slots

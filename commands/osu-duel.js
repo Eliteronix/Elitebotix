@@ -89,6 +89,22 @@ module.exports = {
 					teammates.push(interaction.options.getUser('thirdteammate').id);
 				}
 
+				if (interaction.options.getUser('fourthteammate')) {
+					teammates.push(interaction.options.getUser('fourthteammate').id);
+				}
+
+				if (interaction.options.getUser('fifthteammate')) {
+					teammates.push(interaction.options.getUser('fifthteammate').id);
+				}
+
+				if (interaction.options.getUser('sixthteammate')) {
+					teammates.push(interaction.options.getUser('sixthteammate').id);
+				}
+
+				if (interaction.options.getUser('seventhteammate')) {
+					teammates.push(interaction.options.getUser('seventhteammate').id);
+				}
+
 				// Get the opponents
 				let opponents = [];
 
@@ -110,6 +126,22 @@ module.exports = {
 
 				if (interaction.options.getUser('fourthopponent')) {
 					opponents.push(interaction.options.getUser('fourthopponent').id);
+				}
+
+				if (interaction.options.getUser('fifthopponent')) {
+					opponents.push(interaction.options.getUser('fifthopponent').id);
+				}
+
+				if (interaction.options.getUser('sixthopponent')) {
+					opponents.push(interaction.options.getUser('sixthopponent').id);
+				}
+
+				if (interaction.options.getUser('seventhopponent')) {
+					opponents.push(interaction.options.getUser('seventhopponent').id);
+				}
+
+				if (interaction.options.getUser('eigthopponent')) {
+					opponents.push(interaction.options.getUser('eigthopponent').id);
 				}
 
 				const commandConfig = await getOsuUserServerMode(msg, []);
