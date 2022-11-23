@@ -1410,7 +1410,14 @@ module.exports = {
 
 				return await interaction.editReply('You are now queued up for a 1v1 duel.');
 			} else if (interaction.options._subcommand === 'queue1v1-leave') {
-				await interaction.deferReply({ ephemeral: true });
+				try {
+					await interaction.deferReply({ ephemeral: true });
+				} catch (error) {
+					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+						console.error(error);
+					}
+					return;
+				}
 
 				msg = await populateMsgFromInteraction(interaction);
 
