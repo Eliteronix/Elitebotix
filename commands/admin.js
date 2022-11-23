@@ -866,23 +866,23 @@ module.exports = {
 			// 		options: [
 			// 			{
 			// 				'name': 'match1v1',
-			// 				'description': 'Lets you instantly create a match against an opponent',
+			// 				'description': 'Create a 1v1 match',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'opponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'starrating',
-			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'description': 'The star rating you wanna play on',
 			// 						'type': 10, // 10 is type NUMBER
 			// 					},
 			// 					{
 			// 						'name': 'bestof',
-			// 						'description': 'The best of for the match.',
+			// 						'description': 'The best of',
 			// 						'type': 4, // 4 is type INTEGER
 			// 						'choices': [
 			// 							{
@@ -934,35 +934,35 @@ module.exports = {
 			// 			},
 			// 			{
 			// 				'name': 'match2v2',
-			// 				'description': 'Lets you instantly create a match with 3 other players',
+			// 				'description': 'Create a 2v2 match',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'teammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'firstopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'starrating',
-			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'description': 'The star rating you wanna play on',
 			// 						'type': 10, // 10 is type NUMBER
 			// 					},
 			// 					{
 			// 						'name': 'bestof',
-			// 						'description': 'The best of for the match.',
+			// 						'description': 'The best of',
 			// 						'type': 4, // 4 is type INTEGER
 			// 						'choices': [
 			// 							{
@@ -1004,47 +1004,47 @@ module.exports = {
 			// 			},
 			// 			{
 			// 				'name': 'match3v3',
-			// 				'description': 'Lets you instantly create a match with 5 other players',
+			// 				'description': 'Create a 3v3 match',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'firstteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'firstopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'thirdopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'starrating',
-			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'description': 'The star rating you wanna play on',
 			// 						'type': 10, // 10 is type NUMBER
 			// 					},
 			// 					{
 			// 						'name': 'bestof',
-			// 						'description': 'The best of for the match.',
+			// 						'description': 'The best of',
 			// 						'type': 4, // 4 is type INTEGER
 			// 						'choices': [
 			// 							{
@@ -1086,59 +1086,59 @@ module.exports = {
 			// 			},
 			// 			{
 			// 				'name': 'match4v4',
-			// 				'description': 'Lets you instantly create a match with 7 other players',
+			// 				'description': 'Create a 4v4 match',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'firstteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'thirdteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'firstopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'thirdopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fourthopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'starrating',
-			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'description': 'The star rating you wanna play on',
 			// 						'type': 10, // 10 is type NUMBER
 			// 					},
 			// 					{
 			// 						'name': 'bestof',
-			// 						'description': 'The best of for the match.',
+			// 						'description': 'The best of',
 			// 						'type': 4, // 4 is type INTEGER
 			// 						'choices': [
 			// 							{
@@ -1180,71 +1180,71 @@ module.exports = {
 			// 			},
 			// 			{
 			// 				'name': 'match5v5',
-			// 				'description': 'Lets you instantly create a match with 9 other players',
+			// 				'description': 'Create a 5v5 match',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'firstteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'thirdteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fourthteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'firstopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'thirdopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fourthopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fifthopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'starrating',
-			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'description': 'The star rating you wanna play on',
 			// 						'type': 10, // 10 is type NUMBER
 			// 					},
 			// 					{
 			// 						'name': 'bestof',
-			// 						'description': 'The best of for the match.',
+			// 						'description': 'The best of',
 			// 						'type': 4, // 4 is type INTEGER
 			// 						'choices': [
 			// 							{
@@ -1286,83 +1286,83 @@ module.exports = {
 			// 			},
 			// 			{
 			// 				'name': 'match6v6',
-			// 				'description': 'Lets you instantly create a match with 11 other players',
+			// 				'description': 'Create a 6v6 match.',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'firstteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'thirdteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fourthteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fifthteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'firstopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'thirdopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fourthopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fifthopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'sixthopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'starrating',
-			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'description': 'The star rating you wanna play on',
 			// 						'type': 10, // 10 is type NUMBER
 			// 					},
 			// 					{
 			// 						'name': 'bestof',
-			// 						'description': 'The best of for the match.',
+			// 						'description': 'The best of',
 			// 						'type': 4, // 4 is type INTEGER
 			// 						'choices': [
 			// 							{
@@ -1404,95 +1404,95 @@ module.exports = {
 			// 			},
 			// 			{
 			// 				'name': 'match7v7',
-			// 				'description': 'Lets you instantly create a match with 13 other players',
+			// 				'description': 'Create a 7v7 match',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'firstteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'thirdteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fourthteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fifthteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'sixthteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'firstopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'thirdopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fourthopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fifthopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'sixthopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'seventhopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'starrating',
-			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'description': 'The star rating you wanna play on',
 			// 						'type': 10, // 10 is type NUMBER
 			// 					},
 			// 					{
 			// 						'name': 'bestof',
-			// 						'description': 'The best of for the match.',
+			// 						'description': 'The best of',
 			// 						'type': 4, // 4 is type INTEGER
 			// 						'choices': [
 			// 							{
@@ -1534,107 +1534,107 @@ module.exports = {
 			// 			},
 			// 			{
 			// 				'name': 'match8v8',
-			// 				'description': 'Lets you instantly create a match with 15 other players',
+			// 				'description': 'Create a 8v8 match',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'firstteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'thirdteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fourthteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fifthteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'sixthteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'seventhteammate',
-			// 						'description': 'The teammate you want to play with',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'firstopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'thirdopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fourthopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'fifthopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'sixthopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'seventhopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'eigthopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'starrating',
-			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'description': 'The star rating you wanna play on',
 			// 						'type': 10, // 10 is type NUMBER
 			// 					},
 			// 					{
 			// 						'name': 'bestof',
-			// 						'description': 'The best of for the match.',
+			// 						'description': 'The best of',
 			// 						'type': 4, // 4 is type INTEGER
 			// 						'choices': [
 			// 							{
@@ -2692,7 +2692,7 @@ module.exports = {
 			// 					},
 			// 					{
 			// 						'name': 'bestof',
-			// 						'description': 'The best of for the match.',
+			// 						'description': 'The best of',
 			// 						'type': 4,
 			// 						'required': true
 			// 					},
@@ -5536,23 +5536,23 @@ module.exports = {
 					options: [
 						{
 							'name': 'match1v1',
-							'description': 'Lets you instantly create a match against an opponent',
+							'description': 'Create a 1v1 match',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'opponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'starrating',
-									'description': 'The star rating you wanna play on. For example: 6.25',
+									'description': 'The star rating you wanna play on',
 									'type': 10, // 10 is type NUMBER
 								},
 								{
 									'name': 'bestof',
-									'description': 'The best of for the match.',
+									'description': 'The best of',
 									'type': 4, // 4 is type INTEGER
 									'choices': [
 										{
@@ -5604,35 +5604,35 @@ module.exports = {
 						},
 						{
 							'name': 'match2v2',
-							'description': 'Lets you instantly create a match with 3 other players',
+							'description': 'Create a 2v2 match',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'teammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'firstopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'starrating',
-									'description': 'The star rating you wanna play on. For example: 6.25',
+									'description': 'The star rating you wanna play on',
 									'type': 10, // 10 is type NUMBER
 								},
 								{
 									'name': 'bestof',
-									'description': 'The best of for the match.',
+									'description': 'The best of',
 									'type': 4, // 4 is type INTEGER
 									'choices': [
 										{
@@ -5674,47 +5674,47 @@ module.exports = {
 						},
 						{
 							'name': 'match3v3',
-							'description': 'Lets you instantly create a match with 5 other players',
+							'description': 'Create a 3v3 match',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'firstteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'firstopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'thirdopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'starrating',
-									'description': 'The star rating you wanna play on. For example: 6.25',
+									'description': 'The star rating you wanna play on',
 									'type': 10, // 10 is type NUMBER
 								},
 								{
 									'name': 'bestof',
-									'description': 'The best of for the match.',
+									'description': 'The best of',
 									'type': 4, // 4 is type INTEGER
 									'choices': [
 										{
@@ -5756,59 +5756,59 @@ module.exports = {
 						},
 						{
 							'name': 'match4v4',
-							'description': 'Lets you instantly create a match with 7 other players',
+							'description': 'Create a 4v4 match',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'firstteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'thirdteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'firstopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'thirdopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fourthopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'starrating',
-									'description': 'The star rating you wanna play on. For example: 6.25',
+									'description': 'The star rating you wanna play on',
 									'type': 10, // 10 is type NUMBER
 								},
 								{
 									'name': 'bestof',
-									'description': 'The best of for the match.',
+									'description': 'The best of',
 									'type': 4, // 4 is type INTEGER
 									'choices': [
 										{
@@ -5850,71 +5850,71 @@ module.exports = {
 						},
 						{
 							'name': 'match5v5',
-							'description': 'Lets you instantly create a match with 9 other players',
+							'description': 'Create a 5v5 match',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'firstteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'thirdteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fourthteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'firstopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'thirdopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fourthopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fifthopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'starrating',
-									'description': 'The star rating you wanna play on. For example: 6.25',
+									'description': 'The star rating you wanna play on',
 									'type': 10, // 10 is type NUMBER
 								},
 								{
 									'name': 'bestof',
-									'description': 'The best of for the match.',
+									'description': 'The best of',
 									'type': 4, // 4 is type INTEGER
 									'choices': [
 										{
@@ -5956,83 +5956,83 @@ module.exports = {
 						},
 						{
 							'name': 'match6v6',
-							'description': 'Lets you instantly create a match with 11 other players',
+							'description': 'Create a 6v6 match.',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'firstteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'thirdteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fourthteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fifthteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'firstopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'thirdopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fourthopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fifthopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'sixthopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'starrating',
-									'description': 'The star rating you wanna play on. For example: 6.25',
+									'description': 'The star rating you wanna play on',
 									'type': 10, // 10 is type NUMBER
 								},
 								{
 									'name': 'bestof',
-									'description': 'The best of for the match.',
+									'description': 'The best of',
 									'type': 4, // 4 is type INTEGER
 									'choices': [
 										{
@@ -6074,95 +6074,95 @@ module.exports = {
 						},
 						{
 							'name': 'match7v7',
-							'description': 'Lets you instantly create a match with 13 other players',
+							'description': 'Create a 7v7 match',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'firstteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'thirdteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fourthteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fifthteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'sixthteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'firstopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'thirdopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fourthopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fifthopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'sixthopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'seventhopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'starrating',
-									'description': 'The star rating you wanna play on. For example: 6.25',
+									'description': 'The star rating you wanna play on',
 									'type': 10, // 10 is type NUMBER
 								},
 								{
 									'name': 'bestof',
-									'description': 'The best of for the match.',
+									'description': 'The best of',
 									'type': 4, // 4 is type INTEGER
 									'choices': [
 										{
@@ -6204,107 +6204,107 @@ module.exports = {
 						},
 						{
 							'name': 'match8v8',
-							'description': 'Lets you instantly create a match with 15 other players',
+							'description': 'Create a 8v8 match',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'firstteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'thirdteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fourthteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fifthteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'sixthteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'seventhteammate',
-									'description': 'The teammate you want to play with',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'firstopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'thirdopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fourthopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'fifthopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'sixthopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'seventhopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'eigthopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'starrating',
-									'description': 'The star rating you wanna play on. For example: 6.25',
+									'description': 'The star rating you wanna play on',
 									'type': 10, // 10 is type NUMBER
 								},
 								{
 									'name': 'bestof',
-									'description': 'The best of for the match.',
+									'description': 'The best of',
 									'type': 4, // 4 is type INTEGER
 									'choices': [
 										{
@@ -9636,12 +9636,12 @@ module.exports = {
 								},
 								{
 									'name': 'starrating',
-									'description': 'The star rating to play on. For example: 6.25',
+									'description': 'The star rating to play on',
 									'type': 10, // 10 is type NUMBER
 								},
 								{
 									'name': 'bestof',
-									'description': 'The best of for the match.',
+									'description': 'The best of',
 									'type': 4, // 4 is type INTEGER
 									'choices': [
 										{
@@ -9712,12 +9712,12 @@ module.exports = {
 								},
 								{
 									'name': 'starrating',
-									'description': 'The star rating to play on. For example: 6.25',
+									'description': 'The star rating to play on',
 									'type': 10, // 10 is type NUMBER
 								},
 								{
 									'name': 'bestof',
-									'description': 'The best of for the match.',
+									'description': 'The best of',
 									'type': 4, // 4 is type INTEGER
 									'choices': [
 										{
