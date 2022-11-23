@@ -3428,7 +3428,7 @@ async function getDerankStatsFunction(discordUser) {
 	let ppRank = null;
 
 	for (let i = 0; i < ppDiscordUsers.length && !ppRank; i++) {
-		if (parseFloat(discordUser.osuPP) >= parseFloat(ppDiscordUsers[i].osuPP)) {
+		if (Number(discordUser.osuPP) >= Number(ppDiscordUsers[i].osuPP)) {
 			ppRank = i;
 		}
 	}
@@ -3441,7 +3441,7 @@ async function getDerankStatsFunction(discordUser) {
 	let duelRank = null;
 
 	for (let i = 0; i < duelDiscordUsers.length && !duelRank; i++) {
-		if (parseFloat(discordUser.osuDuelStarRating) >= parseFloat(duelDiscordUsers[i].osuDuelStarRating)) {
+		if (Number(discordUser.osuDuelStarRating).toFixed(4) >= Number(duelDiscordUsers[i].osuDuelStarRating).toFixed(4)) {
 			duelRank = i;
 		}
 	}
