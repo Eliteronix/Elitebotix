@@ -3427,26 +3427,28 @@ async function getDerankStatsFunction(discordUser) {
 	//Get the user's position in the list
 	let ppRank = null;
 
-	for (let i = 0; i < ppDiscordUsers.length && !ppRank; i++) {
+	for (let i = 0; i < ppDiscordUsers.length; i++) {
 		if (Number(discordUser.osuPP) >= Number(ppDiscordUsers[i].osuPP)) {
 			ppRank = i;
+			break;
 		}
 	}
 
-	if (!ppRank) {
+	if (ppRank === null) {
 		ppRank = ppDiscordUsers.length - 1;
 	}
 
 	//Get the user's position in the list
 	let duelRank = null;
 
-	for (let i = 0; i < duelDiscordUsers.length && !duelRank; i++) {
+	for (let i = 0; i < duelDiscordUsers.length; i++) {
 		if (Number(discordUser.osuDuelStarRating).toFixed(4) >= Number(duelDiscordUsers[i].osuDuelStarRating).toFixed(4)) {
 			duelRank = i;
+			break;
 		}
 	}
 
-	if (!duelRank) {
+	if (duelRank === null) {
 		duelRank = duelDiscordUsers.length - 1;
 	}
 
