@@ -31,7 +31,14 @@ module.exports = {
 			return msg.reply('Please use the / command `/osu-duel`');
 		}
 		if (interaction) {
-			if (interaction.options._subcommand === 'match1v1' || interaction.options._subcommand === 'match2v2' || interaction.options._subcommand === 'match3v3' || interaction.options._subcommand === 'match4v4') {
+			if (interaction.options._subcommand === 'match1v1' ||
+				interaction.options._subcommand === 'match2v2' ||
+				interaction.options._subcommand === 'match3v3' ||
+				interaction.options._subcommand === 'match4v4' ||
+				interaction.options._subcommand === 'match5v5' ||
+				interaction.options._subcommand === 'match6v6' ||
+				interaction.options._subcommand === 'match7v7' ||
+				interaction.options._subcommand === 'match8v8') {
 				try {
 					await interaction.deferReply();
 				} catch (error) {
