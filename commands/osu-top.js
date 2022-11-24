@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores, DBOsuGuildTrackers } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
@@ -233,6 +233,12 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 			.catch(err => {
 				if (err.message === 'Not found') {
 					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--r\` for ripple; \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes; \`--n\` / \`--new\` / \`--recent\` for recent scores; \`--25\` for top 25...)`);
+				} else if (err.message === 'Missing Permissions') {
+					DBOsuGuildTrackers.destroy({
+						where: {
+							channelId: msg.channel.id
+						}
+					});
 				} else {
 					console.log(err);
 				}

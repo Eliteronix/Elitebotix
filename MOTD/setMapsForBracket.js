@@ -381,7 +381,7 @@ module.exports = {
 		if (process.env.SERVER !== 'Dev') {
 			client.shard.broadcastEval(async (c, { channelId, title, description, footer, mappoolInOrder, playerAmount }) => {
 				//Send official message into the correct channel
-				const mapsOfTheDayChannel = await c.channels.fetch(channelId);
+				const mapsOfTheDayChannel = await c.channels.cache.get(channelId);
 				if (mapsOfTheDayChannel) {
 					const Discord = require('discord.js');
 					const mappoolEmbed = new Discord.MessageEmbed()

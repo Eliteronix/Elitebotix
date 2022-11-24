@@ -95,7 +95,7 @@ module.exports = {
 					let nextCheck = new Date();
 					nextCheck.setMinutes(nextCheck.getMinutes() + 15);
 
-					await DBOsuTrackingUsers.create({
+					userTimer = await DBOsuTrackingUsers.create({
 						osuUserId: osuUser.osuUserId,
 						nextCheck: nextCheck,
 					});

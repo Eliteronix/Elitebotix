@@ -2,6 +2,7 @@ const osu = require('node-osu');
 const { getGuildPrefix, createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, populateMsgFromInteraction, logDatabaseQueries, getMods } = require('../utils');
 const { DBDiscordUsers } = require('../dbObjects');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-matchscore',
@@ -73,7 +74,14 @@ module.exports = {
 			.then(async (match) => {
 				saveOsuMultiScores(match);
 				if (interaction) {
-					await interaction.reply('Matchscores are getting calculated');
+					try {
+						await interaction.reply('Matchscores are getting calculated');
+					} catch (error) {
+						if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+							console.error(error);
+						}
+						return;
+					}
 				}
 				let processingMessage = await msg.channel.send('Processing osu! match leaderboard...');
 				let warmups = 2;

@@ -70,7 +70,7 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 			} else if (process.env.SERVER === 'Live') {
 				msg.client.shard.broadcastEval(async (c, { args }) => {
-					const changelogChannel = await c.channels.fetch('804658828883787784');
+					const changelogChannel = await c.channels.cache.get('804658828883787784');
 					if (changelogChannel) {
 						const argString = args.join(' ');
 						let argArray = argString.split('<|>');

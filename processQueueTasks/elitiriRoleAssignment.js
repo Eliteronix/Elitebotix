@@ -9,14 +9,16 @@ module.exports = {
 
 		// eslint-disable-next-line no-empty-pattern
 		client.shard.broadcastEval(async (c, { }) => {
-
 			//Fetch server
-			const guild = await c.guilds.fetch('727407178499096597');
+			const guild = await c.guilds.cache.get('727407178499096597');
 
 			if (guild) {
-				const { DBElitiriCupSignUp, DBDiscordUsers, DBElitiriCupStaff } = require('./dbObjects');
-				const { logDatabaseQueries } = require('./utils');
-				const { currentElitiriCup } = require('./config.json');
+				// eslint-disable-next-line no-undef
+				const { DBElitiriCupSignUp, DBDiscordUsers, DBElitiriCupStaff } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+				// eslint-disable-next-line no-undef
+				const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+				// eslint-disable-next-line no-undef
+				const { currentElitiriCup } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\config.json`);
 
 				//Fetch all members
 				await guild.members.fetch()

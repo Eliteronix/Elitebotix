@@ -22,7 +22,7 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	// guildOnly: true,
 	//args: true,
-	cooldown: 60,
+	cooldown: 15,
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
@@ -96,6 +96,22 @@ module.exports = {
 					teammates.push(interaction.options.getUser('thirdteammate').id);
 				}
 
+				if (interaction.options.getUser('fourthteammate')) {
+					teammates.push(interaction.options.getUser('fourthteammate').id);
+				}
+
+				if (interaction.options.getUser('fifthteammate')) {
+					teammates.push(interaction.options.getUser('fifthteammate').id);
+				}
+
+				if (interaction.options.getUser('sixthteammate')) {
+					teammates.push(interaction.options.getUser('sixthteammate').id);
+				}
+
+				if (interaction.options.getUser('seventhteammate')) {
+					teammates.push(interaction.options.getUser('seventhteammate').id);
+				}
+
 				// Get the opponents
 				let opponents = [];
 
@@ -117,6 +133,22 @@ module.exports = {
 
 				if (interaction.options.getUser('fourthopponent')) {
 					opponents.push(interaction.options.getUser('fourthopponent').id);
+				}
+
+				if (interaction.options.getUser('fifthopponent')) {
+					opponents.push(interaction.options.getUser('fifthopponent').id);
+				}
+
+				if (interaction.options.getUser('sixthopponent')) {
+					opponents.push(interaction.options.getUser('sixthopponent').id);
+				}
+
+				if (interaction.options.getUser('seventhopponent')) {
+					opponents.push(interaction.options.getUser('seventhopponent').id);
+				}
+
+				if (interaction.options.getUser('eigthopponent')) {
+					opponents.push(interaction.options.getUser('eigthopponent').id);
 				}
 
 				const commandConfig = await getOsuUserServerMode(msg, []);
@@ -713,7 +745,14 @@ module.exports = {
 				return;
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
 				if (interaction.id) {
-					await interaction.reply('Processing leaderboard...');
+					try {
+						await interaction.reply('Processing leaderboard...');
+					} catch (error) {
+						if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+							console.error(error);
+						}
+						return;
+					}
 				}
 
 				let osuAccounts = [];
@@ -907,7 +946,15 @@ module.exports = {
 					}
 				}
 			} else if (interaction.options._subcommand === 'data') {
-				await interaction.deferReply({ ephemeral: true });
+				try {
+					await interaction.deferReply({ ephemeral: true });
+				} catch (error) {
+					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+						console.error(error);
+					}
+					return;
+				}
+
 				let osuUser = {
 					id: null,
 					name: null,
@@ -1056,6 +1103,125 @@ module.exports = {
 					userDuelStarRating.scores.DT,
 					userDuelStarRating.scores.FM
 				];
+
+				// Add all expected scores to an array
+				let expectedScores = [];
+				let labels = [];
+				for (let i = 0; i < scores.length; i++) {
+					let expectedScoresArray = [];
+					for (let j = 0; j < scores[i].length; j++) {
+						if (!labels.includes(j + 1)) {
+							labels.push(j + 1);
+						}
+						expectedScoresArray.push(scores[i][j].expectedRating);
+					}
+
+					// Sort the array
+					expectedScoresArray.sort((a, b) => b - a);
+
+					expectedScores.push(expectedScoresArray);
+				}
+
+				const data = {
+					labels: labels,
+					datasets: [
+						{
+							label: 'Expected Rating (NM only)',
+							data: expectedScores[0],
+							borderColor: 'rgb(54, 162, 235)',
+							fill: false,
+							tension: 0.4
+						}, {
+							label: 'Expected Rating (HD only)',
+							data: expectedScores[1],
+							borderColor: 'rgb(255, 205, 86)',
+							fill: false,
+							tension: 0.4
+						}, {
+							label: 'Expected Rating (HR only)',
+							data: expectedScores[2],
+							borderColor: 'rgb(255, 99, 132)',
+							fill: false,
+							tension: 0.4
+						}, {
+							label: 'Expected Rating (DT only)',
+							data: expectedScores[3],
+							borderColor: 'rgb(153, 102, 255)',
+							fill: false,
+							tension: 0.4
+						}, {
+							label: 'Expected Rating (FM only)',
+							data: expectedScores[4],
+							borderColor: 'rgb(75, 192, 192)',
+							fill: false,
+							tension: 0.4
+						}
+					]
+				};
+
+				const configuration = {
+					type: 'line',
+					data: data,
+					options: {
+						spanGaps: true,
+						responsive: true,
+						plugins: {
+							title: {
+								display: true,
+								text: 'Expected Rating for each score',
+								color: '#FFFFFF',
+							},
+							legend: {
+								labels: {
+									color: '#FFFFFF',
+								}
+							},
+						},
+						interaction: {
+							intersect: false,
+						},
+						scales: {
+							x: {
+								display: true,
+								title: {
+									display: true,
+									text: '# best',
+									color: '#FFFFFF'
+								},
+								grid: {
+									color: '#8F8F8F'
+								},
+								ticks: {
+									color: '#FFFFFF',
+								},
+							},
+							y: {
+								display: true,
+								title: {
+									display: true,
+									text: 'Expected rating',
+									color: '#FFFFFF'
+								},
+								grid: {
+									color: '#8F8F8F'
+								},
+								ticks: {
+									color: '#FFFFFF',
+								},
+							}
+						}
+					},
+				};
+
+				const width = 1500; //px
+				const height = 750; //px
+				const canvasRenderService = new ChartJSNodeCanvas({ width, height });
+
+				const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+
+				const attachment = new Discord.MessageAttachment(imageBuffer, 'expectedScores.png');
+
+				files.push(attachment);
 
 				for (let i = 0; i < scores.length; i++) {
 					quicksortScore(scores[i]);
@@ -1393,7 +1559,7 @@ module.exports = {
 				await DBProcessQueue.create({
 					guildId: 'none',
 					task: 'duelQueue1v1',
-					additions: `${commandUser.osuUserId};${ownStarRating};0.125`,
+					additions: `${commandUser.osuUserId};${ownStarRating};0.25`,
 					date: new Date(),
 					priority: 9
 				});
@@ -1402,7 +1568,14 @@ module.exports = {
 
 				return await interaction.editReply('You are now queued up for a 1v1 duel.');
 			} else if (interaction.options._subcommand === 'queue1v1-leave') {
-				await interaction.deferReply({ ephemeral: true });
+				try {
+					await interaction.deferReply({ ephemeral: true });
+				} catch (error) {
+					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+						console.error(error);
+					}
+					return;
+				}
 
 				msg = await populateMsgFromInteraction(interaction);
 

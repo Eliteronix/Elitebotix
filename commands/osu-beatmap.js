@@ -181,7 +181,7 @@ async function getBeatmap(msg, interaction, beatmap, tournament) {
 
 		let modPool = getScoreModpool(mapScores[i]);
 
-		let date = mapScores[i].matchStartDate;
+		let date = new Date(mapScores[i].matchStartDate);
 		let dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
 
 		matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`);

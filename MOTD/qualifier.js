@@ -290,7 +290,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 						discordUser.save();
 
 						client.shard.broadcastEval(async (c, { message }) => {
-							const channel = await c.channels.fetch('833803740162949191');
+							const channel = await c.channels.cache.get('833803740162949191');
 							if (channel) {
 								channel.send(message);
 							}
@@ -304,7 +304,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 						discordUser.save();
 					} else {
 						client.shard.broadcastEval(async (c, { message }) => {
-							const channel = await c.channels.fetch('833803740162949191');
+							const channel = await c.channels.cache.get('833803740162949191');
 							if (channel) {
 								channel.send(message);
 							}

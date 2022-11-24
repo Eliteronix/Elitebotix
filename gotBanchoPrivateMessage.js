@@ -137,7 +137,7 @@ module.exports = async function (client, bancho, message) {
 		updateQueueChannels(client);
 
 		return await message.user.sendMessage('You are now queued up for a 1v1 duel.');
-	} else if (message.message === '!queue1v1-leave' || message.message === '!leave1v1' || message.message === '!leave') {
+	} else if (message.message === '!queue1v1-leave' || message.message === '!leave1v1' || message.message === '!leave' || message.message === '!quit' || message.message === '!exit' || message.message === '!stop' || message.message === '!cancel') {
 		await message.user.fetchFromAPI();
 		let existingQueueTasks = await DBProcessQueue.findAll({
 			where: {
