@@ -6019,30 +6019,66 @@ async function orderMatchPlayers(lobby, channel, players) {
 }
 
 async function updateQueueChannelsFunction(client) {
-	let existingQueueTasks = await DBProcessQueue.findAll({
-		where: {
-			task: 'duelQueue1v1',
-		},
-	});
-
-	client.shard.broadcastEval(async (c, { userAmount }) => {
-		let channelId = '1010093794714189865';
+	// eslint-disable-next-line no-empty-pattern
+	client.shard.broadcastEval(async (c, { }) => {
+		let voiceChannelId = '1010093794714189865';
+		let textChannelId = '1045505232576184470';
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
-			channelId = '1010092736155762818';
-			// eslint-disable-next-line no-undef
-		} else if (process.env.SERVER === 'QA') {
-			channelId = '1010093409840660510';
+			voiceChannelId = '1010092736155762818';
+			textChannelId = '1045483219555983381';
 		}
 
-		let channel = await c.channels.cache.get(channelId);
-		if (channel) {
+		let textChannel = await c.channels.cache.get(textChannelId);
+		if (textChannel && textChannel.guildId) {
+			// eslint-disable-next-line no-undef
+			const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+			// eslint-disable-next-line no-undef
+			const { getOsuPlayerName } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+			let existingQueueTasks = await DBProcessQueue.findAll({
+				where: {
+					task: 'duelQueue1v1',
+				},
+			});
+
+			let voiceChannel = await c.channels.cache.get(voiceChannelId);
+
 			let multipleString = 's';
-			if (userAmount === 1) {
+			let verb = 'are';
+			if (existingQueueTasks.length === 1) {
 				multipleString = '';
+				verb = 'is';
 			}
 
-			await channel.edit({ name: `1v1 Queue: ${userAmount} user${multipleString}` });
+			voiceChannel.edit({ name: `1v1 queue | ${existingQueueTasks.length} user${multipleString}` });
+
+			// Get all messages and delete
+			let messages = await textChannel.messages.fetch({ limit: 100 });
+
+			await textChannel.bulkDelete(messages);
+
+			// Send new message
+			let players = [];
+
+			for (let i = 0; i < existingQueueTasks.length; i++) {
+				let args = existingQueueTasks[i].additions.split(';');
+
+				let currentUser = args[0];
+				let playername = await getOsuPlayerName(currentUser);
+				let starRating = parseFloat(args[1]);
+
+				players.push({ text: `${playername} - ${starRating.toFixed(2)}*`, starRating: starRating });
+			}
+
+			players.sort((a, b) => {
+				return b.starRating - a.starRating;
+			});
+
+			players.reverse();
+
+			players = players.map(player => player.text);
+
+			textChannel.send(`There ${verb} currently ${existingQueueTasks.length} user${multipleString} in the 1v1 queue!\n\n${players.join('\n')}`);
 		}
-	}, { context: { userAmount: existingQueueTasks.length } });
+	}, { context: {} });
 }
