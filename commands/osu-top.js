@@ -7,6 +7,7 @@ const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
+const ObjectsToCsv = require('objects-to-csv');
 
 module.exports = {
 	name: 'osu-top',
@@ -24,6 +25,7 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		let csv = false;
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -34,6 +36,10 @@ module.exports = {
 					console.error(error);
 				}
 				return;
+			}
+
+			if (interaction.options.get('csv')) {
+				csv = true;
 			}
 
 			args = [];
@@ -50,7 +56,7 @@ module.exports = {
 						args.push(`--${interaction.options._hoistedOptions[i].value}`);
 					} else if (interaction.options._hoistedOptions[i].name === 'server') {
 						args.push(`--${interaction.options._hoistedOptions[i].value}`);
-					} else {
+					} else if (interaction.options._hoistedOptions[i].name !== 'csv') {
 						args.push(interaction.options._hoistedOptions[i].value);
 					}
 				}
@@ -123,10 +129,10 @@ module.exports = {
 		if (!args[0]) {
 			//Get profile by author if no argument
 			if (commandUser && commandUser.osuUserId) {
-				getTopPlays(msg, commandUser.osuUserId, server, mode, false, sorting, limit, tracking, order);
+				getTopPlays(msg, commandUser.osuUserId, server, mode, false, sorting, limit, tracking, order, csv);
 			} else {
 				const userDisplayName = await getMessageUserDisplayname(msg);
-				getTopPlays(msg, userDisplayName, server, mode, false, sorting, limit, tracking, order);
+				getTopPlays(msg, userDisplayName, server, mode, false, sorting, limit, tracking, order, csv);
 			}
 		} else {
 			//Get profiles by arguments
@@ -138,21 +144,21 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getTopPlays(msg, discordUser.osuUserId, server, mode, false, sorting, limit, tracking, order);
+						getTopPlays(msg, discordUser.osuUserId, server, mode, false, sorting, limit, tracking, order, csv);
 					} else {
 						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
-						getTopPlays(msg, args[i], server, mode, false, sorting, limit, tracking, order);
+						getTopPlays(msg, args[i], server, mode, false, sorting, limit, tracking, order, csv);
 					}
 				} else {
 
 					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, true, sorting, limit, tracking, order);
+							getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, true, sorting, limit, tracking, order, csv);
 						} else {
-							getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, sorting, limit, tracking, order);
+							getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, sorting, limit, tracking, order, csv);
 						}
 					} else {
-						getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, sorting, limit, tracking, order);
+						getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, sorting, limit, tracking, order, csv);
 					}
 				}
 			}
@@ -160,7 +166,7 @@ module.exports = {
 	}
 };
 
-async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting, limit, tracking, order) {
+async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting, limit, tracking, order, csv) {
 	if (server === 'bancho') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -199,14 +205,25 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order);
 
+				let scores = elements[3];
+
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}-mode${mode}.png`);
+				const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}-mode${mode}.png`)];
+
+				if (csv) {
+					let csv = new ObjectsToCsv(scores);
+					csv = await csv.toString();
+					// eslint-disable-next-line no-undef
+					const buffer = Buffer.from(csv);
+					//Create as an attachment
+					files.push(new Discord.MessageAttachment(buffer, `osu-top-${user.id}-mode${mode}.csv`));
+				}
 
 				//If created by osu-tracking
 				if (tracking) {
-					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: [attachment] });
+					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
 				} else {
 					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers Bancho linkedUser');
 					const linkedUser = await DBDiscordUsers.findOne({
@@ -220,9 +237,9 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 					//Send attachment
 					let sentMessage;
 					if (noLinkedAccount) {
-						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`/osu-link connect username:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`/osu-link connect username:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: files });
 					} else {
-						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
+						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: files });
 					}
 					await sentMessage.react('👤');
 					await sentMessage.react('📈');
@@ -273,13 +290,24 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order);
 
+				let scores = elements[3];
+
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}-mode${mode}.png`);
+				const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}-mode${mode}.png`)];
+
+				if (csv) {
+					let csv = new ObjectsToCsv(scores);
+					csv = await csv.toString();
+					// eslint-disable-next-line no-undef
+					const buffer = Buffer.from(csv);
+					//Create as an attachment
+					files.push(new Discord.MessageAttachment(buffer, `osu-top-${user.id}-mode${mode}.csv`));
+				}
 
 				//Send attachment
-				await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
+				await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: files });
 				processingMessage.delete();
 			})
 			.catch(err => {
@@ -328,14 +356,25 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order);
 
+				let scores = elements[3];
+
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}-mode${mode}.png`);
+				const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}-mode${mode}.png`)];
+
+				if (csv) {
+					let csv = new ObjectsToCsv(scores);
+					csv = await csv.toString();
+					// eslint-disable-next-line no-undef
+					const buffer = Buffer.from(csv);
+					//Create as an attachment
+					files.push(new Discord.MessageAttachment(buffer, `osu-top-${user.id}-mode${mode}.csv`));
+				}
 
 				//If created by osu-tracking
 				if (tracking) {
-					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: [attachment] });
+					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
 				} else {
 					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers Tournaments linkedUser');
 					const linkedUser = await DBDiscordUsers.findOne({
@@ -349,9 +388,9 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 					//Send attachment
 					let sentMessage;
 					if (noLinkedAccount) {
-						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`/osu-link connect username:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`/osu-link connect username:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: files });
 					} else {
-						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
+						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: files });
 					}
 					await sentMessage.react('👤');
 					await sentMessage.react('📈');
@@ -708,7 +747,35 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		beatmaps.reverse();
 	}
 
+	let exportScores = [];
+
 	for (let i = 0; i < sortedScores.length && i < showLimit; i++) {
+		if (server === 'tournaments') {
+			exportScores.push({
+				score: sortedScores[i].score,
+				osuUserId: sortedScores[i].user.id,
+				beatmapId: sortedScores[i].beatmapId,
+				raw_date: sortedScores[i].raw_date,
+				rank: sortedScores[i].rank,
+				pp: sortedScores[i].pp,
+				raw_mods: sortedScores[i].raw_mods,
+				title: sortedScores[i].beatmap.title,
+				artist: sortedScores[i].beatmap.artist,
+				difficulty: sortedScores[i].beatmap.difficulty,
+				mode: sortedScores[i].beatmap.mode,
+				approvalStatus: sortedScores[i].beatmap.approvalStatus,
+			});
+		} else {
+			exportScores.push({
+				score: sortedScores[i].score,
+				osuUserId: sortedScores[i].user.id,
+				beatmapId: sortedScores[i].beatmapId,
+				raw_date: sortedScores[i].raw_date,
+				rank: sortedScores[i].rank,
+				pp: sortedScores[i].pp,
+				raw_mods: sortedScores[i].raw_mods,
+			});
+		}
 		roundedRect(ctx, canvas.width / 70, 500 / 8 + (500 / 12) * i, canvas.width - canvas.width / 35, 500 / 13, 500 / 70, '70', '57', '63', 0.75);
 
 		const rankImage = await Canvas.loadImage(getRankImage(sortedScores[i].rank));
@@ -866,7 +933,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		ctx.fillText(`Total pp from tournaments (only ranked): ${humanReadable(Math.round(totalRankedPP))}pp (Bonus pp: ${humanReadable(Math.round(rankedBonusPP))}) -> ~#${closestRankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 25);
 	}
 
-	const output = [canvas, ctx, user];
+	const output = [canvas, ctx, user, exportScores];
 	return output;
 }
 

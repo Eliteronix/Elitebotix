@@ -3290,6 +3290,11 @@ module.exports = {
 			// 				'type': 3,
 			// 				'required': false
 			// 			},
+			// 			{
+			// 				'name': 'csv',
+			// 				'description': 'Should a csv file be attached',
+			// 				'type': 5, // 5 is type BOOLEAN
+			// 			},
 			// 		]
 			// 	},
 			// });
@@ -7735,7 +7740,7 @@ module.exports = {
 								{
 									'name': 'Star Rating',
 									'value': '--sr',
-								}
+								},
 							]
 						},
 						{
@@ -7748,7 +7753,6 @@ module.exports = {
 									'name': 'True',
 									'value': '--asc'
 								},
-
 							]
 						},
 						{
@@ -7829,6 +7833,11 @@ module.exports = {
 							'description': 'The username, id or link of the player',
 							'type': 3,
 							'required': false
+						},
+						{
+							'name': 'csv',
+							'description': 'Should a csv file be attached',
+							'type': 5, // 5 is type BOOLEAN
 						},
 					]
 				},
