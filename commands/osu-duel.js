@@ -225,7 +225,7 @@ module.exports = {
 				let declined = false;
 				let decliner = null;
 
-				const collector = sentMessage.createReactionCollector({ time: 120000 });
+				const collector = sentMessage.createReactionCollector({ time: 300000 });
 
 				collector.on('collect', (reaction, user) => {
 					if (reaction.emoji.name === '✅' && [...teammates, ...opponents].includes(user.id)) {
