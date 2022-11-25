@@ -5,6 +5,7 @@ const Canvas = require('canvas');
 const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-mostplayed',
@@ -25,7 +26,14 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Players are being processed');
+			try {
+				await interaction.reply('Players are being processed');
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 			args = [];
 			if (interaction.options._hoistedOptions) {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
@@ -236,8 +244,12 @@ async function drawMostPlayed(input, server, limit) {
 			roundedRect(ctx, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38, 500 / 70, '70', '57', '63', 0.75);
 			ctx.save();
 			ctx.clip();
-			let beatmapImage = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${link[i].beatmapset.id}/covers/list@2x.jpg`);
-			ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
+			try {
+				let beatmapImage = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${link[i].beatmapset.id}/covers/list@2x.jpg`);
+				ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
+			} catch (err) {
+				// Nothing
+			}
 			ctx.restore();
 			ctx.font = 'bold 18px comfortaa, sans-serif';
 			ctx.fillStyle = '#FF66AB';
@@ -283,8 +295,12 @@ async function drawMostPlayed(input, server, limit) {
 				roundedRect(ctx, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38, 500 / 70, '70', '57', '63', 0.75);
 				ctx.save();
 				ctx.clip();
-				let beatmapImage = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmaps[j].beatmapsetId}/covers/list.jpg`);
-				ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
+				try {
+					let beatmapImage = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmaps[j].beatmapsetId}/covers/list.jpg`);
+					ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
+				} catch (err) {
+					// Nothing
+				}
 				ctx.restore();
 				ctx.font = 'bold 18px comfortaa, sans-serif';
 				ctx.fillStyle = '#FF66AB';
