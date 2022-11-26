@@ -1,5 +1,5 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBOsuForumPosts } = require('../dbObjects');
-const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries, saveOsuMultiScores, humanReadable } = require('../utils');
+const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries, saveOsuMultiScores, humanReadable, multiToBanchoScore, getOsuBeatmap } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 const { Op } = require('sequelize');
@@ -9802,6 +9802,157 @@ module.exports = {
 			let averageRating = totalRating / totalPlayers;
 
 			return msg.reply(`The average rating for players ranked ${args[1]} to ${args[2]} is ${averageRating.toFixed(2)}`);
+		} else if (args[0] === 'serverTourneyTops') {
+			let amountPerPlayer = args[1];
+			let onlyRanked = args[2];
+
+			let osuAccounts = [];
+			await msg.guild.members.fetch()
+				.then(async (guildMembers) => {
+					const members = [];
+					guildMembers.each(member => members.push(member.id));
+
+					logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers serverTourneyTops');
+					const discordUsers = await DBDiscordUsers.findAll({
+						where: {
+							userId: {
+								[Op.in]: members
+							},
+							osuUserId: {
+								[Op.not]: null,
+							}
+						},
+					});
+
+					for (let i = 0; i < discordUsers.length; i++) {
+						osuAccounts.push({
+							userId: discordUsers[i].userId,
+							osuUserId: discordUsers[i].osuUserId,
+							osuName: discordUsers[i].osuName,
+						});
+					}
+				})
+				.catch(err => {
+					console.log(err);
+				});
+
+			let tourneyTops = [];
+
+			for (let i = 0; i < osuAccounts.length; i++) {
+				//Get all scores from tournaments
+				logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores');
+				let multiScores = await DBOsuMultiScores.findAll({
+					where: {
+						osuUserId: osuAccounts[i].osuUserId,
+						mode: 'Standard',
+						tourneyMatch: true,
+						score: {
+							[Op.gte]: 10000
+						}
+					}
+				});
+
+				for (let i = 0; i < multiScores.length; i++) {
+					//TODO: Remove Relax
+					if (parseInt(multiScores[i].score) <= 10000) {
+						multiScores.splice(i, 1);
+						i--;
+					}
+				}
+
+				let multisToUpdate = [];
+				for (let i = 0; i < multiScores.length; i++) {
+					if (!multiScores[i].maxCombo && !multisToUpdate.includes(multiScores[i].matchId)) {
+						multisToUpdate.push(multiScores[i].matchId);
+					}
+				}
+
+				for (let i = 0; i < multisToUpdate.length; i++) {
+					// eslint-disable-next-line no-undef
+					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+					});
+
+					await osuApi.getMatch({ mp: multisToUpdate[i] })
+						.then(async (match) => {
+							await saveOsuMultiScores(match);
+						})
+						.catch(() => {
+							//Nothing
+						});
+					await pause(5000);
+				}
+
+				if (multisToUpdate.length) {
+					//Get all scores from tournaments
+					logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores2');
+					multiScores = await DBOsuMultiScores.findAll({
+						where: {
+							osuUserId: osuAccounts[i].osuUserId,
+							mode: 'Standard',
+							tourneyMatch: true,
+							score: {
+								[Op.gte]: 10000
+							}
+						}
+					});
+				}
+
+				for (let i = 0; i < multiScores.length; i++) {
+					if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].teamType === 'Tag Team vs' || multiScores[i].teamType === 'Tag Co-op') {
+						multiScores.splice(i, 1);
+						i--;
+					}
+				}
+
+				//Translate the scores to bancho scores
+				for (let i = 0; i < multiScores.length; i++) {
+					if (parseInt(multiScores[i].gameRawMods) % 2 === 1) {
+						multiScores[i].gameRawMods = parseInt(multiScores[i].gameRawMods) - 1;
+					}
+					if (parseInt(multiScores[i].rawMods) % 2 === 1) {
+						multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
+					}
+					multiScores[i] = await multiToBanchoScore(multiScores[i]);
+
+					if (!multiScores[i].pp || parseFloat(multiScores[i].pp) > 2000 || !parseFloat(multiScores[i].pp)) {
+						multiScores.splice(i, 1);
+						i--;
+						continue;
+					}
+				}
+
+				//Sort scores by pp
+				quicksortPP(multiScores);
+
+				//Remove duplicates by beatmapId
+				for (let i = 0; i < multiScores.length; i++) {
+					for (let j = i + 1; j < multiScores.length; j++) {
+						if (multiScores[i].beatmapId === multiScores[j].beatmapId) {
+							multiScores.splice(j, 1);
+							j--;
+						}
+					}
+				}
+
+				//Feed the scores into the array
+				for (let i = 0; i < multiScores.length && i < amountPerPlayer; i++) {
+					if (onlyRanked) {
+						multiScores[i].beatmap = await getOsuBeatmap({ beatmapId: multiScores[i].beatmapId });
+						if (multiScores[i].beatmap.approvalStatus !== 'Approved' && multiScores[i].beatmap.approvalStatus !== 'Ranked') {
+							continue;
+						}
+					}
+					if (multiScores[i].pp) {
+						tourneyTops.push(multiScores[i]);
+					}
+				}
+			}
+
+
 		} else {
 			msg.reply('Invalid command');
 		}
@@ -9809,3 +9960,28 @@ module.exports = {
 		msg.reply('Done.');
 	},
 };
+
+function quicksortPP(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionPP(list, start, end);
+		quicksortPP(list, start, p - 1);
+		quicksortPP(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionPP(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].pp) >= parseFloat(pivot.pp)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
