@@ -5824,6 +5824,12 @@ async function getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, a
 	}
 
 	if (modPool === 'DT') {
+		let upperApproach = 11;
+		if (Math.random() > 0.4) {
+			// 60% not over AR10
+			upperApproach = 10;
+		}
+
 		nextMap = await getValidTournamentBeatmapFunction({
 			modPool: 'DT',
 			lowerBound: lowerBound,
@@ -5833,6 +5839,7 @@ async function getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, a
 			lowerDrain: 100,
 			avoidMaps: avoidMaps,
 			onlyRanked: onlyRanked,
+			upperApproach: upperApproach,
 		});
 	}
 
