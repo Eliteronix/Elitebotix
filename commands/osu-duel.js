@@ -1326,30 +1326,34 @@ module.exports = {
 					await interaction.guild.members.fetch()
 						.then(async (guildMembers) => {
 							const members = [];
-							guildMembers.each(member => members.push(member));
-							for (let i = 0; i < members.length; i++) {
-								logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread');
-								const discordUser = await DBDiscordUsers.findOne({
-									where: {
-										userId: members[i].id,
-										osuUserId: {
-											[Op.not]: null,
-										},
-										osuDuelStarRating: {
-											[Op.not]: null,
-										}
-									},
-								});
+							guildMembers.each(member => members.push(member.id));
 
-								if (discordUser) {
-									osuAccounts.push({
-										userId: discordUser.userId,
-										osuUserId: discordUser.osuUserId,
-										osuName: discordUser.osuName,
-										osuVerified: discordUser.osuVerified,
-										osuDuelStarRating: parseFloat(discordUser.osuDuelStarRating),
-									});
-								}
+							logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread');
+							const discordUsers = await DBDiscordUsers.findAll({
+								where: {
+									userId: {
+										[Op.in]: members
+									},
+									osuUserId: {
+										[Op.not]: null,
+									},
+									osuDuelStarRating: {
+										[Op.not]: null,
+									},
+									osuDuelProvisional: {
+										[Op.not]: true,
+									}
+								},
+							});
+
+							for (let i = 0; i < discordUsers.length; i++) {
+								osuAccounts.push({
+									userId: discordUsers[i].userId,
+									osuUserId: discordUsers[i].osuUserId,
+									osuName: discordUsers[i].osuName,
+									osuVerified: discordUsers[i].osuVerified,
+									osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
+								});
 							}
 						})
 						.catch(err => {
@@ -1364,6 +1368,9 @@ module.exports = {
 							},
 							osuDuelStarRating: {
 								[Op.not]: null,
+							},
+							osuDuelProvisional: {
+								[Op.not]: true,
 							}
 						},
 					});
