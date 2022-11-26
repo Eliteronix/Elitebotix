@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBOsuTourneyFollows, DBOsuMultiScores } = require('../dbObjects');
 const osu = require('node-osu');
-const { developers } = require('../config.json');
+const { developers, salesmen } = require('../config.json');
 const { Op } = require('sequelize');
 const { getUserDuelStarRating, getMessageUserDisplayname } = require('../utils');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
@@ -30,7 +30,7 @@ module.exports = {
 			}
 		});
 
-		if (!developers.includes(msg.author.id) && !discordUser) {
+		if (!developers.includes(msg.author.id) && !salesmen.includes(msg.author.id) && !discordUser) {
 			return msg.reply('Earlyaccess commands are reserved for developers and patreons. As soon as they are up to standard for release you will be able to use them.');
 		}
 
