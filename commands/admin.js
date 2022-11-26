@@ -1,8 +1,10 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBOsuForumPosts } = require('../dbObjects');
-const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries, saveOsuMultiScores, humanReadable } = require('../utils');
+const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries, saveOsuMultiScores, humanReadable, multiToBanchoScore, getOsuBeatmap, getMods } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
 const { Op } = require('sequelize');
+const Discord = require('discord.js');
+const ObjectsToCsv = require('objects-to-csv');
 
 module.exports = {
 	name: 'admin',
@@ -9802,6 +9804,238 @@ module.exports = {
 			let averageRating = totalRating / totalPlayers;
 
 			return msg.reply(`The average rating for players ranked ${args[1]} to ${args[2]} is ${averageRating.toFixed(2)}`);
+		} else if (args[0] === 'serverTourneyTops') {
+			if (args.length < 3) {
+				return msg.reply('Correct usage: `e!admin serverTourneyTops amountPerPlayer <onlyRanked: true/false> [@Elitebotix]`');
+			}
+
+			let amountPerPlayer = parseInt(args[1]);
+			let onlyRanked = false;
+
+			if (args[2] === 'true') {
+				onlyRanked = true;
+			}
+
+			let processingMessage = await msg.reply('Processing...');
+
+			let osuAccounts = [];
+			await msg.guild.members.fetch()
+				.then(async (guildMembers) => {
+					const members = [];
+					guildMembers.each(member => members.push(member.id));
+
+					logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers serverTourneyTops');
+					const discordUsers = await DBDiscordUsers.findAll({
+						where: {
+							userId: {
+								[Op.in]: members
+							},
+							osuUserId: {
+								[Op.not]: null,
+							}
+						},
+					});
+
+					for (let i = 0; i < discordUsers.length; i++) {
+						osuAccounts.push({
+							userId: discordUsers[i].userId,
+							osuUserId: discordUsers[i].osuUserId,
+							osuName: discordUsers[i].osuName,
+						});
+					}
+				})
+				.catch(err => {
+					console.log(err);
+				});
+
+			let tourneyTops = [];
+
+			for (let i = 0; i < osuAccounts.length; i++) {
+				await processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Account ${i + 1}/${osuAccounts.length})...`);
+
+				let lastUpdate = new Date();
+				//Get all scores from tournaments
+				logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores');
+				let multiScores = await DBOsuMultiScores.findAll({
+					where: {
+						osuUserId: osuAccounts[i].osuUserId,
+						mode: 'Standard',
+						tourneyMatch: true,
+						score: {
+							[Op.gte]: 10000
+						}
+					}
+				});
+
+				if (new Date() - lastUpdate > 15000) {
+					processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Found ${multiScores.length} scores) (Account ${i + 1}/${osuAccounts.length})...`);
+					lastUpdate = new Date();
+				}
+
+				for (let j = 0; j < multiScores.length; j++) {
+					if (new Date() - lastUpdate > 15000) {
+						processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Removing irrelevant scores from ${multiScores.length} found scores) (Account ${i + 1}/${osuAccounts.length})...`);
+						lastUpdate = new Date();
+					}
+
+					if (parseInt(multiScores[j].score) <= 10000 && getMods(parseInt(multiScores[j].gameRawMods) + parseInt(multiScores[j].rawMods)).includes('RX')) {
+						multiScores.splice(j, 1);
+						j--;
+					}
+				}
+
+				let multisToUpdate = [];
+				for (let j = 0; j < multiScores.length; j++) {
+					if (!multiScores[j].maxCombo && !multisToUpdate.includes(multiScores[j].matchId)) {
+						multisToUpdate.push(multiScores[j].matchId);
+					}
+				}
+
+				for (let j = 0; j < multisToUpdate.length; j++) {
+					if (new Date() - lastUpdate > 15000) {
+						processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Updating legacy matches ${j + 1}/${multisToUpdate.length}) (Account ${i + 1}/${osuAccounts.length})...`);
+						lastUpdate = new Date();
+					}
+					// eslint-disable-next-line no-undef
+					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+					});
+
+					await osuApi.getMatch({ mp: multisToUpdate[j] })
+						.then(async (match) => {
+							await saveOsuMultiScores(match);
+						})
+						.catch(() => {
+							//Nothing
+						});
+					await pause(5000);
+				}
+
+				if (multisToUpdate.length) {
+					//Get all scores from tournaments
+					logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores2');
+					multiScores = await DBOsuMultiScores.findAll({
+						where: {
+							osuUserId: osuAccounts[i].osuUserId,
+							mode: 'Standard',
+							tourneyMatch: true,
+							score: {
+								[Op.gte]: 10000
+							}
+						}
+					});
+				}
+
+				if (new Date() - lastUpdate > 15000) {
+					processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Found ${multiScores.length} scores after legacy match update) (Account ${i + 1}/${osuAccounts.length})...`);
+					lastUpdate = new Date();
+				}
+
+				for (let j = 0; j < multiScores.length; j++) {
+					if (new Date() - lastUpdate > 15000) {
+						processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Removing irrelevant data from ${multiScores.length} found scores after legacy match update) (Account ${i + 1}/${osuAccounts.length})...`);
+						lastUpdate = new Date();
+					}
+					if (parseInt(multiScores[j].score) <= 10000 || multiScores[j].teamType === 'Tag Team vs' || multiScores[j].teamType === 'Tag Co-op') {
+						multiScores.splice(j, 1);
+						j--;
+					}
+				}
+
+				//Translate the scores to bancho scores
+				for (let j = 0; j < multiScores.length; j++) {
+					if (new Date() - lastUpdate > 15000) {
+						processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Score ${j + 1}/${multiScores.length}) (Account ${i + 1}/${osuAccounts.length})...`);
+						lastUpdate = new Date();
+					}
+					if (parseInt(multiScores[j].gameRawMods) % 2 === 1) {
+						multiScores[j].gameRawMods = parseInt(multiScores[j].gameRawMods) - 1;
+					}
+					if (parseInt(multiScores[j].rawMods) % 2 === 1) {
+						multiScores[j].rawMods = parseInt(multiScores[j].rawMods) - 1;
+					}
+					multiScores[j] = await multiToBanchoScore(multiScores[j]);
+
+					if (!multiScores[j].pp || parseFloat(multiScores[j].pp) > 2000 || !parseFloat(multiScores[j].pp)) {
+						multiScores.splice(j, 1);
+						j--;
+						continue;
+					}
+				}
+
+				//Sort scores by pp
+				quicksortPP(multiScores);
+
+				//Remove duplicates by beatmapId
+				for (let j = 0; j < multiScores.length; j++) {
+					for (let k = j + 1; k < multiScores.length; k++) {
+						if (multiScores[j].beatmapId === multiScores[k].beatmapId) {
+							multiScores.splice(k, 1);
+							k--;
+						}
+					}
+				}
+
+				//Feed the scores into the array
+				let scoreCount = 0;
+				for (let j = 0; j < multiScores.length && scoreCount < amountPerPlayer; j++) {
+					if (new Date() - lastUpdate > 15000) {
+						processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Adding score ${j + 1}/${amountPerPlayer} to the output) (Account ${i + 1}/${osuAccounts.length})...`);
+						lastUpdate = new Date();
+					}
+					multiScores[j].beatmap = await getOsuBeatmap({ beatmapId: multiScores[j].beatmapId });
+					if (onlyRanked) {
+						if (multiScores[j].beatmap.approvalStatus !== 'Approved' && multiScores[j].beatmap.approvalStatus !== 'Ranked') {
+							continue;
+						}
+					}
+					if (multiScores[j].pp) {
+						tourneyTops.push(multiScores[j]);
+						scoreCount++;
+					}
+				}
+			}
+
+			let exportScores = [];
+
+			for (let i = 0; i < tourneyTops.length; i++) {
+				exportScores.push({
+					osuUserId: tourneyTops[i].user.id,
+					pp: tourneyTops[i].pp,
+					approvalStatus: tourneyTops[i].beatmap.approvalStatus,
+					beatmapId: tourneyTops[i].beatmapId,
+					score: tourneyTops[i].score,
+					raw_date: tourneyTops[i].raw_date,
+					rank: tourneyTops[i].rank,
+					raw_mods: tourneyTops[i].raw_mods,
+					title: tourneyTops[i].beatmap.title,
+					artist: tourneyTops[i].beatmap.artist,
+					difficulty: tourneyTops[i].beatmap.difficulty,
+					mode: tourneyTops[i].beatmap.mode,
+				});
+			}
+
+			processingMessage.delete();
+
+			let data = [];
+			for (let i = 0; i < exportScores.length; i++) {
+				data.push(exportScores[i]);
+
+				if (i % 10000 === 0 && i > 0 || exportScores.length - 1 === i) {
+					let csv = new ObjectsToCsv(data);
+					csv = await csv.toString();
+					// eslint-disable-next-line no-undef
+					const buffer = Buffer.from(csv);
+					//Create as an attachment
+					const attachment = new Discord.MessageAttachment(buffer, `${msg.guild.name}-tournament-topplays.csv`);
+
+					await msg.reply({ content: `${msg.guild.name} - Tournament Top Plays`, files: [attachment] });
+					data = [];
+				}
+			}
 		} else {
 			msg.reply('Invalid command');
 		}
@@ -9809,3 +10043,28 @@ module.exports = {
 		msg.reply('Done.');
 	},
 };
+
+function quicksortPP(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionPP(list, start, end);
+		quicksortPP(list, start, p - 1);
+		quicksortPP(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionPP(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].pp) >= parseFloat(pivot.pp)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}
