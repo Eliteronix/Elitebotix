@@ -726,10 +726,10 @@ module.exports = {
 				let sentMessage = null;
 
 				if (interaction.id) {
-					sentMessage = await interaction.editReply({ content: 'The data is based on matches played using `/osu-duel match` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
+					sentMessage = await interaction.editReply({ content: 'The data is based on matches played using `/osu-duel queue` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
 				} else {
 					processingMessage.delete();
-					sentMessage = await interaction.channel.send({ content: 'The data is based on matches played using `/osu-duel match` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
+					sentMessage = await interaction.channel.send({ content: 'The data is based on matches played using `/osu-duel queue` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
 				}
 				await sentMessage.react('👤');
 				await sentMessage.react('🥇');
