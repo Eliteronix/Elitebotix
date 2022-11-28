@@ -10002,20 +10002,37 @@ module.exports = {
 			let exportScores = [];
 
 			for (let i = 0; i < tourneyTops.length; i++) {
-				exportScores.push({
-					osuUserId: tourneyTops[i].user.id,
-					pp: tourneyTops[i].pp,
-					approvalStatus: tourneyTops[i].beatmap.approvalStatus,
-					beatmapId: tourneyTops[i].beatmapId,
-					score: tourneyTops[i].score,
-					raw_date: tourneyTops[i].raw_date,
-					rank: tourneyTops[i].rank,
-					raw_mods: tourneyTops[i].raw_mods,
-					title: tourneyTops[i].beatmap.title,
-					artist: tourneyTops[i].beatmap.artist,
-					difficulty: tourneyTops[i].beatmap.difficulty,
-					mode: tourneyTops[i].beatmap.mode,
-				});
+				if (tourneyTops[i].beatmap) {
+					exportScores.push({
+						osuUserId: tourneyTops[i].user.id,
+						pp: tourneyTops[i].pp,
+						approvalStatus: tourneyTops[i].beatmap.approvalStatus,
+						beatmapId: tourneyTops[i].beatmapId,
+						score: tourneyTops[i].score,
+						raw_date: tourneyTops[i].raw_date,
+						rank: tourneyTops[i].rank,
+						raw_mods: tourneyTops[i].raw_mods,
+						title: tourneyTops[i].beatmap.title,
+						artist: tourneyTops[i].beatmap.artist,
+						difficulty: tourneyTops[i].beatmap.difficulty,
+						mode: tourneyTops[i].beatmap.mode,
+					});
+				} else {
+					exportScores.push({
+						osuUserId: tourneyTops[i].user.id,
+						pp: tourneyTops[i].pp,
+						approvalStatus: 'Deleted',
+						beatmapId: tourneyTops[i].beatmapId,
+						score: tourneyTops[i].score,
+						raw_date: tourneyTops[i].raw_date,
+						rank: tourneyTops[i].rank,
+						raw_mods: tourneyTops[i].raw_mods,
+						title: 'Unavailable',
+						artist: 'Unavailable',
+						difficulty: 'Unavailable',
+						mode: 'Unavailable',
+					});
+				}
 			}
 
 			processingMessage.delete();
