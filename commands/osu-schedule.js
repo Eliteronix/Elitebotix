@@ -188,7 +188,7 @@ module.exports = {
 
 			for (let j = 0; j < allMatches.length; j++) {
 				if (parseInt(allMatches[j].score) <= 10000
-					|| weekday != 7 && allMatches[j].gameStartDate.getUTCDay() != weekday) {
+					|| weekday != 7 && new Date(allMatches[j].gameStartDate).getUTCDay() != weekday) {
 					allMatches.splice(j, 1);
 					j--;
 				}
@@ -197,7 +197,7 @@ module.exports = {
 			for (let j = 0; j < 24; j++) {
 				let count = 0;
 				for (let k = 0; k < allMatches.length; k++) {
-					if (allMatches[k].gameStartDate.getUTCHours() === j) {
+					if (new Date(allMatches[k].gameStartDate).getUTCHours() === j) {
 						count++;
 						allMatches.splice(k, 1);
 						k--;

@@ -392,8 +392,12 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 					} else {
 						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: files });
 					}
-					await sentMessage.react('👤');
-					await sentMessage.react('📈');
+					try {
+						await sentMessage.react('👤');
+						await sentMessage.react('📈');
+					} catch (err) {
+						//Nothing
+					}
 				}
 
 				processingMessage.delete();

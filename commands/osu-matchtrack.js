@@ -4,6 +4,7 @@ const { Permissions } = require('discord.js');
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
 const Canvas = require('canvas');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-matchtrack',
@@ -23,7 +24,14 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
-			await interaction.deferReply();
+			try {
+				await interaction.deferReply();
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
 			msg = await populateMsgFromInteraction(interaction);
 
