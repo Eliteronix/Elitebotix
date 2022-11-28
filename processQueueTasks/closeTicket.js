@@ -11,9 +11,7 @@ module.exports = {
 
 		if (ticket && ticket.statusId === 100) {
 			client.shard.broadcastEval(async (c, { channelId }) => {
-				const channel = await c.channels.cache.get(channelId).catch(async () => {
-					//Nothing
-				});
+				const channel = await c.channels.cache.get(channelId);
 
 				if (channel) {
 					await channel.delete();

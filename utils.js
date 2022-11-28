@@ -1087,6 +1087,7 @@ module.exports = {
 		return await getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo);
 	},
 	async multiToBanchoScore(inputScore) {
+		let date = new Date(inputScore.gameStartDate);
 		let outputScore = {
 			score: inputScore.score,
 			user: {
@@ -1104,7 +1105,7 @@ module.exports = {
 			},
 			maxCombo: inputScore.maxCombo,
 			perfect: inputScore.perfect,
-			raw_date: `${inputScore.gameStartDate.getUTCFullYear()}-${(inputScore.gameStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${(inputScore.gameStartDate.getUTCDate()).toString().padStart(2, '0')} ${(inputScore.gameStartDate.getUTCHours()).toString().padStart(2, '0')}:${(inputScore.gameStartDate.getUTCMinutes()).toString().padStart(2, '0')}:${(inputScore.gameStartDate.getUTCSeconds()).toString().padStart(2, '0')}`,
+			raw_date: `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${(date.getUTCDate()).toString().padStart(2, '0')} ${(date.getUTCHours()).toString().padStart(2, '0')}:${(date.getUTCMinutes()).toString().padStart(2, '0')}:${(date.getUTCSeconds()).toString().padStart(2, '0')}`,
 			rank: inputScore.rank,
 			pp: inputScore.pp,
 			hasReplay: false,
