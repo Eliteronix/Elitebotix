@@ -3577,8 +3577,8 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, dep
 			depth++;
 
 			return await getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, depth);
-		} else if (e.message !== 'Failed to parse beatmap: expected `osu file format v` at file begin' ||
-			e.message !== 'internal error in Neon module: index out of bounds: the len is 299 but the index is 299' ||
+		} else if (e.message !== 'Failed to parse beatmap: expected `osu file format v` at file begin' &&
+			e.message !== 'internal error in Neon module: index out of bounds: the len is 299 but the index is 299' &&
 			parseInt(beatmapId) === 2568364) {
 			console.log(`error with map ${beatmapId}`, e);
 			return null;
