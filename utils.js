@@ -5147,22 +5147,6 @@ async function saveOsuMultiScoresFunction(match) {
 	}
 
 	if (tourneyMatch) {
-		//Delete duel rating history entries for the players in the match
-		let outdatedDuelRatings = await DBDuelRatingHistory.findAll({
-			where: {
-				osuUserId: {
-					[Op.in]: tourneyMatchPlayers
-				},
-				year: {
-					[Op.gte]: new Date(match.raw_end).getUTCFullYear()
-				}
-			}
-		});
-
-		for (let i = 0; i < outdatedDuelRatings.length; i++) {
-			await outdatedDuelRatings[i].destroy();
-		}
-
 		if (playersToUpdate.length) {
 			await DBDiscordUsers.update({
 				lastDuelRatingUpdate: null,
@@ -5174,7 +5158,6 @@ async function saveOsuMultiScoresFunction(match) {
 				}
 			});
 		}
-
 
 		for (let i = 0; i < newMatchPlayers.length; i++) {
 			if (existingMatchPlayers.includes(newMatchPlayers[i])) {
