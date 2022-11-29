@@ -9338,7 +9338,7 @@ module.exports = {
 					guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
 
 					for (let i = 0; i < members.length; i++) {
-						await sentMessage.edit(`${i} out of ${members.length} done`);
+						sentMessage.edit(`${i} out of ${members.length} done`);
 						logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: {
@@ -9349,7 +9349,7 @@ module.exports = {
 						if (discordUser) {
 							await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: msg.client });
 
-							await pause(10000);
+							await pause(1000);
 						}
 					}
 
