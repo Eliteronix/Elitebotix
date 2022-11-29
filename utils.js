@@ -1272,6 +1272,8 @@ module.exports = {
 
 		missingUsers = missingUsers.map(user => user.osuUserId);
 
+		console.log(`${missingUsers.length} missing users found`);
+
 		let iterator = 0;
 		while (iterator < 50 && missingUsers.length) {
 			await new Promise(resolve => setTimeout(resolve, 2000));
