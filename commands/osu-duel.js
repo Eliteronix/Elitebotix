@@ -903,9 +903,7 @@ module.exports = {
 					filename = `osu-duelrating-leaderboard-${interaction.user.id}-${guildName}-page${page}.png`;
 				}
 
-				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${guildName} osu! Duel Star Rating leaderboard`, filename, page);
-
-				let files = [attachment];
+				let csvFiles = [];
 
 				if (interaction.id && interaction.options.getBoolean('csv')) {
 					let csvData = [];
@@ -926,11 +924,19 @@ module.exports = {
 							const buffer = Buffer.from(csv);
 							//Create as an attachment
 							// eslint-disable-next-line no-undef
-							files.push(new Discord.MessageAttachment(buffer, `duelRatings${files.length.toString().padStart(2, '0')}.csv`));
+							csvFiles.push(new Discord.MessageAttachment(buffer, `duelRatings${csvFiles.length.toString().padStart(2, '0')}.csv`));
 
 							data = [];
 						}
 					}
+				}
+
+				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${guildName} osu! Duel Star Rating leaderboard`, filename, page);
+
+				let files = [attachment];
+
+				if (csvFiles.length > 0) {
+					files = files.concat(csvFiles);
 				}
 
 				//Send attachment
