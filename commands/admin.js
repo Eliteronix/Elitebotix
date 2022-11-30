@@ -9338,7 +9338,7 @@ module.exports = {
 					guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
 
 					for (let i = 0; i < members.length; i++) {
-						await sentMessage.edit(`${i} out of ${members.length} done`);
+						sentMessage.edit(`${i} out of ${members.length} done`);
 						logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: {
@@ -9349,7 +9349,7 @@ module.exports = {
 						if (discordUser) {
 							await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: msg.client });
 
-							await pause(10000);
+							await pause(1000);
 						}
 					}
 
@@ -9988,7 +9988,7 @@ module.exports = {
 					}
 					multiScores[j].beatmap = await getOsuBeatmap({ beatmapId: multiScores[j].beatmapId });
 					if (onlyRanked) {
-						if (multiScores[j].beatmap.approvalStatus !== 'Approved' && multiScores[j].beatmap.approvalStatus !== 'Ranked') {
+						if (!multiScores[j].beatmap || multiScores[j].beatmap && multiScores[j].beatmap.approvalStatus !== 'Approved' && multiScores[j].beatmap.approvalStatus !== 'Ranked') {
 							continue;
 						}
 					}
@@ -10002,20 +10002,37 @@ module.exports = {
 			let exportScores = [];
 
 			for (let i = 0; i < tourneyTops.length; i++) {
-				exportScores.push({
-					osuUserId: tourneyTops[i].user.id,
-					pp: tourneyTops[i].pp,
-					approvalStatus: tourneyTops[i].beatmap.approvalStatus,
-					beatmapId: tourneyTops[i].beatmapId,
-					score: tourneyTops[i].score,
-					raw_date: tourneyTops[i].raw_date,
-					rank: tourneyTops[i].rank,
-					raw_mods: tourneyTops[i].raw_mods,
-					title: tourneyTops[i].beatmap.title,
-					artist: tourneyTops[i].beatmap.artist,
-					difficulty: tourneyTops[i].beatmap.difficulty,
-					mode: tourneyTops[i].beatmap.mode,
-				});
+				if (tourneyTops[i].beatmap) {
+					exportScores.push({
+						osuUserId: tourneyTops[i].user.id,
+						pp: tourneyTops[i].pp,
+						approvalStatus: tourneyTops[i].beatmap.approvalStatus,
+						beatmapId: tourneyTops[i].beatmapId,
+						score: tourneyTops[i].score,
+						raw_date: tourneyTops[i].raw_date,
+						rank: tourneyTops[i].rank,
+						raw_mods: tourneyTops[i].raw_mods,
+						title: tourneyTops[i].beatmap.title,
+						artist: tourneyTops[i].beatmap.artist,
+						difficulty: tourneyTops[i].beatmap.difficulty,
+						mode: tourneyTops[i].beatmap.mode,
+					});
+				} else {
+					exportScores.push({
+						osuUserId: tourneyTops[i].user.id,
+						pp: tourneyTops[i].pp,
+						approvalStatus: 'Deleted',
+						beatmapId: tourneyTops[i].beatmapId,
+						score: tourneyTops[i].score,
+						raw_date: tourneyTops[i].raw_date,
+						rank: tourneyTops[i].rank,
+						raw_mods: tourneyTops[i].raw_mods,
+						title: 'Unavailable',
+						artist: 'Unavailable',
+						difficulty: 'Unavailable',
+						mode: 'Unavailable',
+					});
+				}
 			}
 
 			processingMessage.delete();
