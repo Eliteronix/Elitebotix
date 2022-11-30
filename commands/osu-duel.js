@@ -880,6 +880,10 @@ module.exports = {
 					page = Math.abs(parseInt(interaction.options._hoistedOptions[0].value));
 				}
 
+				if (page && page > totalPages) {
+					page = totalPages;
+				}
+
 				if (!page && leaderboardData.length > 150) {
 					page = 1;
 					if (authorPlacement) {
