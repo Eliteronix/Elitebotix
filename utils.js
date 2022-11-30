@@ -1555,7 +1555,7 @@ module.exports = {
 			if (usersToCheck.length && msg.user.ircUsername === 'BanchoBot') {
 				if (msg.message === 'The user is currently not online.') {
 					usersNotOnline.push(usersToCheck.shift());
-				} else if (msg.message.includes('is in')) {
+				} else if (msg.message.includes('is in') || msg.message === 'The user\'s location could not be determined.') {
 					usersOnline.push(usersToCheck.shift());
 				}
 			}
