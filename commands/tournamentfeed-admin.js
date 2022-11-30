@@ -2,6 +2,7 @@ const { developers } = require('../config.json');
 const { DBOsuForumPosts, DBDiscordUsers } = require('../dbObjects');
 const { populateMsgFromInteraction } = require('../utils.js');
 const Discord = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'tournamentfeed-admin',
@@ -28,7 +29,14 @@ module.exports = {
 			return msg.reply('Please use the / command `/tournamentfeed-admin`');
 		}
 
-		await interaction.deferReply();
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
+		}
 
 		if (interaction.options._subcommand === 'list') {
 			let forumPosts = await DBOsuForumPosts.findAll({
