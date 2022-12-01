@@ -141,6 +141,9 @@ module.exports = {
 
 			let mostplayed = await DBOsuMultiScores.findAll({
 				attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
+				where: {
+					warmup: false,
+				},
 				group: ['beatmapId'],
 				order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
 			});
