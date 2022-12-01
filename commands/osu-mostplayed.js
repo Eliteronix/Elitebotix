@@ -6,6 +6,8 @@ const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDis
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
+const Sequelize = require('sequelize');
+const ObjectsToCsv = require('objects-to-csv');
 
 module.exports = {
 	name: 'osu-mostplayed',
@@ -23,7 +25,11 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
-		if (interaction) {
+		if (!interaction) {
+			return;
+		}
+
+		if (interaction.options._subcommand === 'user') {
 			msg = await populateMsgFromInteraction(interaction);
 
 			try {
@@ -46,62 +52,177 @@ module.exports = {
 					}
 				}
 			}
-		}
 
-		const commandConfig = await getOsuUserServerMode(msg, args);
-		const commandUser = commandConfig[0];
-		const server = commandConfig[1];
+			const commandConfig = await getOsuUserServerMode(msg, args);
+			const commandUser = commandConfig[0];
+			const server = commandConfig[1];
 
-		let limit = 10;
+			let limit = 10;
 
-		for (let i = 0; i < args.length; i++) {
-			if (args[i].startsWith('--') && !isNaN(args[i].replace('--', ''))) {
-				limit = parseInt(args[i].replace('--', ''));
-				if (limit > 100) {
-					limit = 100;
-				} else if (limit < 1) {
-					limit = 1;
-				}
-				args.splice(i, 1);
-				i--;
-			}
-		}
-
-		if (!args[0]) {
-			//Get profile by author if no argument
-			if (commandUser && commandUser.osuUserId) {
-				getMostPlayed(msg, commandUser.osuUserId, server, false, limit);
-			} else {
-				const userDisplayName = await getMessageUserDisplayname(msg);
-				getMostPlayed(msg, userDisplayName, server, false, limit);
-			}
-		} else {
-			//Get profiles by arguments
 			for (let i = 0; i < args.length; i++) {
-				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
-					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers');
-					const discordUser = await DBDiscordUsers.findOne({
-						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
-					});
-
-					if (discordUser && discordUser.osuUserId) {
-						getMostPlayed(msg, discordUser.osuUserId, server, false, limit);
-					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
-						getMostPlayed(msg, args[i], server, false, limit);
+				if (args[i].startsWith('--') && !isNaN(args[i].replace('--', ''))) {
+					limit = parseInt(args[i].replace('--', ''));
+					if (limit > 100) {
+						limit = 100;
+					} else if (limit < 1) {
+						limit = 1;
 					}
+					args.splice(i, 1);
+					i--;
+				}
+			}
+
+			if (!args[0]) {
+				//Get profile by author if no argument
+				if (commandUser && commandUser.osuUserId) {
+					getMostPlayed(msg, commandUser.osuUserId, server, false, limit);
 				} else {
-					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
-						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getMostPlayed(msg, getIDFromPotentialOsuLink(args[i]), server, true, limit);
+					const userDisplayName = await getMessageUserDisplayname(msg);
+					getMostPlayed(msg, userDisplayName, server, false, limit);
+				}
+			} else {
+				//Get profiles by arguments
+				for (let i = 0; i < args.length; i++) {
+					if (args[i].startsWith('<@') && args[i].endsWith('>')) {
+						logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers');
+						const discordUser = await DBDiscordUsers.findOne({
+							where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
+						});
+
+						if (discordUser && discordUser.osuUserId) {
+							getMostPlayed(msg, discordUser.osuUserId, server, false, limit);
+						} else {
+							msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
+							getMostPlayed(msg, args[i], server, false, limit);
+						}
+					} else {
+						if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
+							if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
+								getMostPlayed(msg, getIDFromPotentialOsuLink(args[i]), server, true, limit);
+							} else {
+								getMostPlayed(msg, getIDFromPotentialOsuLink(args[i]), server, false, limit);
+							}
 						} else {
 							getMostPlayed(msg, getIDFromPotentialOsuLink(args[i]), server, false, limit);
 						}
-					} else {
-						getMostPlayed(msg, getIDFromPotentialOsuLink(args[i]), server, false, limit);
 					}
 				}
 			}
+		} else if (interaction.options._subcommand === 'tourneybeatmaps') {
+			try {
+				await interaction.deferReply();
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
+
+			let amount = 10;
+			if (interaction.options.getInteger('amount')) {
+				amount = interaction.options.getInteger('amount');
+			}
+
+			let page = 1;
+			if (interaction.options.getInteger('page')) {
+				page = interaction.options.getInteger('page');
+			}
+
+			let csv = false;
+			if (interaction.options.getBoolean('csv')) {
+				csv = interaction.options.getBoolean('csv');
+			}
+
+			let mostplayed = await DBOsuMultiScores.findAll({
+				attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
+				group: ['beatmapId'],
+				order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
+			});
+
+			let data = [];
+			for (let i = 0; i < mostplayed.length; i++) {
+				data.push({
+					beatmapId: mostplayed[i].beatmapId,
+					playcount: mostplayed[i].dataValues.playcount,
+				});
+			}
+
+			let totalPages = Math.ceil(data.length / amount);
+
+			if (page > totalPages) {
+				page = totalPages;
+			}
+
+			let dataOnPage = data.slice((page - 1) * amount, page * amount);
+
+			const canvasWidth = 1000;
+			const canvasHeight = 83 + dataOnPage.length * 41.66666;
+
+			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+			//Create Canvas
+			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+			//Get context and load the image
+			const ctx = canvas.getContext('2d');
+			const background = await Canvas.loadImage('./other/osu-background.png');
+			for (let i = 0; i < canvas.height / background.height; i++) {
+				for (let j = 0; j < canvas.width / background.width; j++) {
+					ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+				}
+			}
+
+			console.log(data);
+
+			let elements = [canvas, ctx, dataOnPage];
+
+			// elements = await drawTitle(elements, dataOnPage);
+
+			// elements = await drawMostPlayed(elements, dataOnPage, limit);
+
+			await drawFooter(elements);
+
+			//Create as an attachment
+			const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-mostplayed-maps-${amount}-${page}.png`)];
+
+			//Send the attachment
+			if (csv) {
+				let csvData = [];
+
+				for (let i = 0; i < dataOnPage.length; i++) {
+					let beatmap = await getOsuBeatmap(dataOnPage[i].beatmapId);
+					csvData.push({
+						rank: i + 1 + amount * (page - 1),
+						beatmapId: dataOnPage[i].beatmapId,
+						playcount: dataOnPage[i].playcount,
+						noModMap: beatmap.noModMap,
+						hiddenMap: beatmap.hiddenMap,
+						hardRockMap: beatmap.hardRockMap,
+						doubleTimeMap: beatmap.doubleTimeMap,
+						freeModMap: beatmap.freeModMap,
+					});
+				}
+
+
+				let data = [];
+				for (let i = 0; i < csvData.length; i++) {
+					data.push(csvData[i]);
+
+					if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
+						let csv = new ObjectsToCsv(data);
+						csv = await csv.toString();
+						// eslint-disable-next-line no-undef
+						const buffer = Buffer.from(csv);
+						//Create as an attachment
+						// eslint-disable-next-line no-undef
+						csvFiles.push(new Discord.MessageAttachment(buffer, `osu-mostplayed-maps-${amount * page}.csv`));
+
+						data = [];
+					}
+				}
+			}
+
+			await interaction.editReply({ files: files });
 		}
 	}
 };
