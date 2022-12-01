@@ -123,6 +123,12 @@ module.exports = {
 				amount = interaction.options.getInteger('amount');
 			}
 
+			if (amount < 5) {
+				amount = 5;
+			} else if (amount > 100) {
+				amount = 100;
+			}
+
 			let page = 1;
 			if (interaction.options.getInteger('page')) {
 				page = interaction.options.getInteger('page');
@@ -155,6 +161,21 @@ module.exports = {
 
 			let dataOnPage = data.slice((page - 1) * amount, page * amount);
 
+			for (let i = 0; i < dataOnPage.length; i++) {
+				let beatmap = await getOsuBeatmap({ beatmapId: dataOnPage[i].beatmapId });
+				dataOnPage[i].title = beatmap.title;
+				dataOnPage[i].artist = beatmap.artist;
+				dataOnPage[i].mapper = beatmap.mapper;
+				dataOnPage[i].difficulty = beatmap.difficulty;
+				dataOnPage[i].beatmapsetId = beatmap.beatmapsetId;
+				dataOnPage[i].noModMap = beatmap.noModMap;
+				dataOnPage[i].hiddenMap = beatmap.hiddenMap;
+				dataOnPage[i].hardRockMap = beatmap.hardRockMap;
+				dataOnPage[i].doubleTimeMap = beatmap.doubleTimeMap;
+				dataOnPage[i].freeModMap = beatmap.freeModMap;
+				dataOnPage[i].approvalStatus = beatmap.approvalStatus;
+			}
+
 			const canvasWidth = 1000;
 			const canvasHeight = 83 + dataOnPage.length * 41.66666;
 
@@ -172,15 +193,54 @@ module.exports = {
 				}
 			}
 
-			console.log(data);
-
 			let elements = [canvas, ctx, dataOnPage];
 
-			// elements = await drawTitle(elements, dataOnPage);
+			elements = await drawTitle(elements, 'tourneybeatmaps', dataOnPage);
 
-			// elements = await drawMostPlayed(elements, dataOnPage, limit);
+			for (let i = 0; i < dataOnPage.length; i++) {
+				// Draw the rectangle
+				roundedRect(ctx, canvas.width / 13, 500 / 8 + (500 / 12) * i, canvas.width - canvas.width / 10, 500 / 13, 500 / 70, '70', '57', '63', 0.75);
 
-			await drawFooter(elements);
+				// draw another rectangle for the image
+				roundedRect(ctx, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38, 500 / 70, '70', '57', '63', 0.75);
+				ctx.save();
+				ctx.clip();
+				try {
+					let beatmapImage = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${dataOnPage[i].beatmapsetId}/covers/list@2x.jpg`);
+					ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
+				} catch (err) {
+					// Nothing
+				}
+				ctx.restore();
+				ctx.font = 'bold 18px comfortaa, sans-serif';
+				ctx.fillStyle = '#FF66AB';
+				ctx.textAlign = 'right';
+
+				// Draw title and difficutly per beatmap
+				let beatmapTitle = `${dataOnPage[i].title} [${dataOnPage[i].difficulty}] by ${dataOnPage[i].artist}`;
+				const maxSize = canvas.width / 250 * 19;
+				if (beatmapTitle.length > maxSize) {
+					beatmapTitle = beatmapTitle.substring(0, maxSize - 3) + '...';
+				}
+				ctx.font = 'bold 15px comfortaa, sans-serif';
+				ctx.fillStyle = '#FFFFFF';
+				ctx.textAlign = 'left';
+				ctx.fillText(beatmapTitle, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2);
+
+				// Draw playcount per beatmap
+				ctx.font = 'bold 18px comfortaa, sans-serif';
+				ctx.fillStyle = '#FFCC22';
+				ctx.textAlign = 'right';
+				ctx.fillText('➤ ' + dataOnPage[i].playcount, (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
+
+				//Write mapper per map
+				ctx.font = 'bold 10px comfortaa, sans-serif';
+				ctx.fillStyle = '#98838C';
+				ctx.textAlign = 'left';
+				ctx.fillText(`Mapped by ${dataOnPage[i].mapper}`, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+			}
+
+			await drawFooter(elements, totalPages, page);
 
 			//Create as an attachment
 			const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-mostplayed-maps-${amount}-${page}.png`)];
@@ -190,16 +250,21 @@ module.exports = {
 				let csvData = [];
 
 				for (let i = 0; i < dataOnPage.length; i++) {
-					let beatmap = await getOsuBeatmap(dataOnPage[i].beatmapId);
 					csvData.push({
 						rank: i + 1 + amount * (page - 1),
 						beatmapId: dataOnPage[i].beatmapId,
 						playcount: dataOnPage[i].playcount,
-						noModMap: beatmap.noModMap,
-						hiddenMap: beatmap.hiddenMap,
-						hardRockMap: beatmap.hardRockMap,
-						doubleTimeMap: beatmap.doubleTimeMap,
-						freeModMap: beatmap.freeModMap,
+						noModMap: dataOnPage[i].noModMap,
+						hiddenMap: dataOnPage[i].hiddenMap,
+						hardRockMap: dataOnPage[i].hardRockMap,
+						doubleTimeMap: dataOnPage[i].doubleTimeMap,
+						freeModMap: dataOnPage[i].freeModMap,
+						title: dataOnPage[i].title,
+						artist: dataOnPage[i].artist,
+						difficulty: dataOnPage[i].difficulty,
+						mapper: dataOnPage[i].mapper,
+						beatmapsetId: dataOnPage[i].beatmapsetId,
+						approvalStatus: dataOnPage[i].approvalStatus,
 					});
 				}
 
@@ -214,8 +279,7 @@ module.exports = {
 						// eslint-disable-next-line no-undef
 						const buffer = Buffer.from(csv);
 						//Create as an attachment
-						// eslint-disable-next-line no-undef
-						csvFiles.push(new Discord.MessageAttachment(buffer, `osu-mostplayed-maps-${amount * page}.csv`));
+						files.push(new Discord.MessageAttachment(buffer, `osu-mostplayed-maps-${amount * page}.csv`));
 
 						data = [];
 					}
@@ -553,9 +617,13 @@ async function drawTitle(input, server) {
 	}
 	let title;
 
-	title = `✰ ${serverDisplay}${user.name}'s most played maps ✰`;
-	if (user.name.endsWith('s') || user.name.endsWith('x')) {
-		title = `✰ ${serverDisplay}${user.name}' most played maps ✰`;
+	if (server !== 'tourneybeatmaps') {
+		title = `✰ ${serverDisplay}${user.name}'s most played maps ✰`;
+		if (user.name.endsWith('s') || user.name.endsWith('x')) {
+			title = `✰ ${serverDisplay}${user.name}' most played maps ✰`;
+		}
+	} else {
+		title = '✰ Most played beatmaps in tournaments ✰';
 	}
 
 	roundedRect(ctx, canvas.width / 2 - title.length * 8.5, 500 / 50, title.length * 17, 500 / 12, 5, '28', '28', '28', 0.75);
@@ -569,7 +637,7 @@ async function drawTitle(input, server) {
 	return [canvas, ctx, user];
 }
 
-async function drawFooter(input) {
+async function drawFooter(input, totalPages, page) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -580,6 +648,9 @@ async function drawFooter(input) {
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'right';
 	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 5);
+
+	ctx.textAlign = 'left';
+	ctx.fillText(`Page ${page} of ${totalPages}`, canvas.width / 140, canvas.height - 5);
 
 	return [canvas, ctx, user];
 }
