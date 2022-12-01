@@ -785,6 +785,13 @@ module.exports = {
 									osuName: discordUsers[i].osuName,
 									osuVerified: discordUsers[i].osuVerified,
 									osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
+									osuNoModDuelStarRating: parseFloat(discordUsers[i].osuNoModDuelStarRating),
+									osuHiddenDuelStarRating: parseFloat(discordUsers[i].osuHiddenDuelStarRating),
+									osuHardRockDuelStarRating: parseFloat(discordUsers[i].osuHardRockDuelStarRating),
+									osuDoubleTimeDuelStarRating: parseFloat(discordUsers[i].osuDoubleTimeDuelStarRating),
+									osuFreeModDuelStarRating: parseFloat(discordUsers[i].osuFreeModDuelStarRating),
+									osuDuelProvisional: discordUsers[i].osuDuelProvisional,
+									osuDuelOutdated: discordUsers[i].osuDuelOutdated,
 								});
 							}
 						})
@@ -814,6 +821,13 @@ module.exports = {
 							osuName: discordUsers[i].osuName,
 							osuVerified: discordUsers[i].osuVerified,
 							osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
+							osuNoModDuelStarRating: parseFloat(discordUsers[i].osuNoModDuelStarRating),
+							osuHiddenDuelStarRating: parseFloat(discordUsers[i].osuHiddenDuelStarRating),
+							osuHardRockDuelStarRating: parseFloat(discordUsers[i].osuHardRockDuelStarRating),
+							osuDoubleTimeDuelStarRating: parseFloat(discordUsers[i].osuDoubleTimeDuelStarRating),
+							osuFreeModDuelStarRating: parseFloat(discordUsers[i].osuFreeModDuelStarRating),
+							osuDuelProvisional: discordUsers[i].osuDuelProvisional,
+							osuDuelOutdated: discordUsers[i].osuDuelOutdated,
 						});
 					}
 				}
@@ -853,6 +867,13 @@ module.exports = {
 							osuName: osuAccounts[i].osuName,
 							osuUserId: osuAccounts[i].osuUserId,
 							duelRating: osuAccounts[i].osuDuelStarRating,
+							noModDuelStarRating: osuAccounts[i].osuNoModDuelStarRating,
+							hiddenDuelStarRating: osuAccounts[i].osuHiddenDuelStarRating,
+							hardRockDuelStarRating: osuAccounts[i].osuHardRockDuelStarRating,
+							doubleTimeDuelStarRating: osuAccounts[i].osuDoubleTimeDuelStarRating,
+							freeModDuelStarRating: osuAccounts[i].osuFreeModDuelStarRating,
+							duelProvisional: osuAccounts[i].osuDuelProvisional,
+							duelOutdated: osuAccounts[i].osuDuelOutdated,
 							verified: osuAccounts[i].osuVerified,
 						};
 
@@ -865,6 +886,13 @@ module.exports = {
 							osuName: osuAccounts[i].osuName,
 							osuUserId: osuAccounts[i].osuUserId,
 							duelRating: osuAccounts[i].osuDuelStarRating,
+							noModDuelStarRating: osuAccounts[i].osuNoModDuelStarRating,
+							hiddenDuelStarRating: osuAccounts[i].osuHiddenDuelStarRating,
+							hardRockDuelStarRating: osuAccounts[i].osuHardRockDuelStarRating,
+							doubleTimeDuelStarRating: osuAccounts[i].osuDoubleTimeDuelStarRating,
+							freeModDuelStarRating: osuAccounts[i].osuFreeModDuelStarRating,
+							duelProvisional: osuAccounts[i].osuDuelProvisional,
+							duelOutdated: osuAccounts[i].osuDuelOutdated,
 							verified: osuAccounts[i].osuVerified,
 						};
 
@@ -913,9 +941,21 @@ module.exports = {
 					let csvData = [];
 
 					for (let i = 0; i < leaderboardData.length; i++) {
-						csvData.push({ rank: i + 1, osuName: leaderboardData[i].osuName, duelRating: leaderboardData[i].duelRating, osuUserId: leaderboardData[i].osuUserId, verified: leaderboardData[i].verified });
+						csvData.push({
+							rank: i + 1,
+							osuUserId: leaderboardData[i].osuUserId,
+							osuName: leaderboardData[i].osuName,
+							duelRating: leaderboardData[i].duelRating,
+							noModDuelStarRating: leaderboardData[i].noModDuelStarRating,
+							hiddenDuelStarRating: leaderboardData[i].hiddenDuelStarRating,
+							hardRockDuelStarRating: leaderboardData[i].hardRockDuelStarRating,
+							doubleTimeDuelStarRating: leaderboardData[i].doubleTimeDuelStarRating,
+							freeModDuelStarRating: leaderboardData[i].freeModDuelStarRating,
+							duelProvisional: leaderboardData[i].duelProvisional,
+							duelOutdated: leaderboardData[i].duelOutdated,
+							verified: leaderboardData[i].verified,
+						});
 					}
-
 
 					let data = [];
 					for (let i = 0; i < csvData.length; i++) {
