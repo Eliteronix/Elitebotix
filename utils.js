@@ -4289,17 +4289,16 @@ async function logDatabaseQueriesFunction(level, output) {
 		console.log('traceDatabaseQueries: ', new Date(), output);
 	}
 
-	// Requiring module
-	var process = require('process');
+	var os = require('os');
 
-	let startTotal = process.memoryUsage().heapTotal / 1000000;
+	let startTotal = os.freemem() / 1000000;
 
 	for (let i = 0; i < 10; i++) {
 		await new Promise(resolve => setTimeout(resolve, 1000));
 
-		//if 400MiB increase, log it
-		if (startTotal + 400 < (process.memoryUsage().heapTotal / 1000000)) {
-			console.log('traceDatabaseQueries: ', output, 'Memory usage increased by 400MB', new Date(), process.memoryUsage().heapTotal / 1000000, 'MiB in use right now');
+		//if 400MiB descrease, log it
+		if (startTotal - 400 > (os.freemem() / 1000000)) {
+			console.log('traceDatabaseQueries: ', output, 'Memory usage increased by 400MB', new Date(), os.freemem() / 1000000, 'MiB in use right now');
 			break;
 		}
 	}
