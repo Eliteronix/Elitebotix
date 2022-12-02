@@ -9456,7 +9456,7 @@ module.exports = {
 					guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
 
 					for (let i = 0; i < members.length; i++) {
-						if (i % 5 === 0) {
+						if (i % 25 === 0) {
 							sentMessage.edit(`${i} out of ${members.length} done`);
 						}
 						logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers');
