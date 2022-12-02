@@ -140,17 +140,39 @@ module.exports = {
 				csv = interaction.options.getBoolean('csv');
 			}
 
-			let mostplayed = await DBOsuMultiScores.findAll({
-				attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
-				where: {
-					warmup: false,
-					beatmapId: {
-						[Op.gt]: 0,
-					}
-				},
-				group: ['beatmapId'],
-				order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
-			});
+			let mostplayed = null;
+
+			if (interaction.options.getBoolean('dontfiltermm')) {
+				mostplayed = await DBOsuMultiScores.findAll({
+					attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
+					where: {
+						warmup: false,
+						beatmapId: {
+							[Op.gt]: 0,
+						},
+					},
+					group: ['beatmapId'],
+					order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
+				});
+			} else {
+				mostplayed = await DBOsuMultiScores.findAll({
+					attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
+					where: {
+						warmup: false,
+						beatmapId: {
+							[Op.gt]: 0,
+						},
+						matchName: {
+							[Op.and]: {
+								[Op.notLike]: 'ETX%:%',
+								[Op.notLike]: 'o!mm%:%',
+							}
+						},
+					},
+					group: ['beatmapId'],
+					order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
+				});
+			}
 
 			let data = [];
 			for (let i = 0; i < mostplayed.length; i++) {

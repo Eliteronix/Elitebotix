@@ -3387,6 +3387,12 @@ module.exports = {
 			// 						'type': 4,
 			// 						'required': false
 			// 					},
+			// 					{
+			// 						'name': 'dontfiltermm',
+			// 						'description': 'Should matchmaking (ETX/o!mm) matches not be filtered out',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 						'required': false
+			// 					},
 			// 					// {
 			// 					// 	'name': 'modpool',
 			// 					// 	'description': 'The modpool the maps appeared in',
@@ -7988,6 +7994,12 @@ module.exports = {
 									'name': 'page',
 									'description': 'The page of the results',
 									'type': 4,
+									'required': false
+								},
+								{
+									'name': 'dontfiltermm',
+									'description': 'Should matchmaking (ETX/o!mm) matches not be filtered out',
+									'type': 5, // 5 is type BOOLEAN
 									'required': false
 								},
 								// {
