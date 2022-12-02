@@ -8,6 +8,7 @@ const { Permissions } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const Sequelize = require('sequelize');
 const ObjectsToCsv = require('objects-to-csv');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-mostplayed',
@@ -143,6 +144,9 @@ module.exports = {
 				attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
 				where: {
 					warmup: false,
+					beatmapId: {
+						[Op.gt]: 0,
+					}
 				},
 				group: ['beatmapId'],
 				order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
