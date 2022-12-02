@@ -4296,9 +4296,9 @@ async function logDatabaseQueriesFunction(level, output) {
 	for (let i = 0; i < 10; i++) {
 		await new Promise(resolve => setTimeout(resolve, 1000));
 
-		//if 400MiB descrease, log it
-		if (startTotal - 400 > (os.freemem() / 1000000)) {
-			console.log('traceDatabaseQueries: ', output, 'Memory usage increased by 400MB', new Date(), os.freemem() / 1000000, 'MiB in use right now');
+		//if 750MiB descrease, log it
+		if (startTotal - 750 > (os.freemem() / 1000000)) {
+			console.log('traceDatabaseQueries: ', output, 'Memory usage increased by 750MB', new Date(), os.freemem() / 1000000, 'MiB in use right now');
 			break;
 		}
 	}
