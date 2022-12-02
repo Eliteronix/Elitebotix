@@ -166,17 +166,31 @@ module.exports = {
 
 			for (let i = 0; i < dataOnPage.length; i++) {
 				let beatmap = await getOsuBeatmap({ beatmapId: dataOnPage[i].beatmapId });
-				dataOnPage[i].title = beatmap.title;
-				dataOnPage[i].artist = beatmap.artist;
-				dataOnPage[i].mapper = beatmap.mapper;
-				dataOnPage[i].difficulty = beatmap.difficulty;
-				dataOnPage[i].beatmapsetId = beatmap.beatmapsetId;
-				dataOnPage[i].noModMap = beatmap.noModMap;
-				dataOnPage[i].hiddenMap = beatmap.hiddenMap;
-				dataOnPage[i].hardRockMap = beatmap.hardRockMap;
-				dataOnPage[i].doubleTimeMap = beatmap.doubleTimeMap;
-				dataOnPage[i].freeModMap = beatmap.freeModMap;
-				dataOnPage[i].approvalStatus = beatmap.approvalStatus;
+				if (beatmap) {
+					dataOnPage[i].title = beatmap.title;
+					dataOnPage[i].artist = beatmap.artist;
+					dataOnPage[i].mapper = beatmap.mapper;
+					dataOnPage[i].difficulty = beatmap.difficulty;
+					dataOnPage[i].beatmapsetId = beatmap.beatmapsetId;
+					dataOnPage[i].noModMap = beatmap.noModMap;
+					dataOnPage[i].hiddenMap = beatmap.hiddenMap;
+					dataOnPage[i].hardRockMap = beatmap.hardRockMap;
+					dataOnPage[i].doubleTimeMap = beatmap.doubleTimeMap;
+					dataOnPage[i].freeModMap = beatmap.freeModMap;
+					dataOnPage[i].approvalStatus = beatmap.approvalStatus;
+				} else {
+					dataOnPage[i].title = 'Unavailable';
+					dataOnPage[i].artist = 'Unavailable';
+					dataOnPage[i].mapper = 'Unavailable';
+					dataOnPage[i].difficulty = 'Unavailable';
+					dataOnPage[i].beatmapsetId = 'Unavailable';
+					dataOnPage[i].noModMap = false;
+					dataOnPage[i].hiddenMap = false;
+					dataOnPage[i].hardRockMap = false;
+					dataOnPage[i].doubleTimeMap = false;
+					dataOnPage[i].freeModMap = false;
+					dataOnPage[i].approvalStatus = 'Unavailable';
+				}
 			}
 
 			const canvasWidth = 1000;

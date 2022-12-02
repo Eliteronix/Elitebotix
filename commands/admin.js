@@ -9456,7 +9456,9 @@ module.exports = {
 					guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
 
 					for (let i = 0; i < members.length; i++) {
-						sentMessage.edit(`${i} out of ${members.length} done`);
+						if (i % 5 === 0) {
+							sentMessage.edit(`${i} out of ${members.length} done`);
+						}
 						logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: {
@@ -9466,8 +9468,6 @@ module.exports = {
 
 						if (discordUser) {
 							await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: msg.client });
-
-							await pause(1000);
 						}
 					}
 
@@ -9548,53 +9548,6 @@ module.exports = {
 			}
 		} else if (args[0] === 'cleanUp') {
 			cleanUpDuplicateEntries(true);
-		} else if (args[0] === 'disconnectBancho') {
-			try {
-				await additionalObjects[1].disconnect();
-				// eslint-disable-next-line no-undef
-				return msg.reply(`Worker ${process.env.pm_id} disconnected`);
-			} catch (e) {
-				console.log(e);
-				// eslint-disable-next-line no-undef
-				return msg.reply(`Worker ${process.env.pm_id} errored disconnecting`);
-			}
-		} else if (args[0] === 'reimportMatch') {
-			let matchScores = await DBOsuMultiScores.findAll({
-				where: {
-					matchId: args[1]
-				}
-			});
-
-			let processingMessage = await msg.channel.send(`Deleting match scores for match ${args[1]} [0/${matchScores.length}]`);
-			for (let i = 0; i < matchScores.length; i++) {
-				await matchScores[i].destroy();
-				if (i % 25 === 0) {
-					await processingMessage.edit(`Deleting match scores for match ${args[1]} [${i + 1}/${matchScores.length}]`);
-				}
-			}
-
-			await processingMessage.edit(`Reimporting match scores for match ${args[1]}`);
-
-			// eslint-disable-next-line no-undef
-			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-			});
-
-			return osuApi.getMatch({ mp: args[1] })
-				.then(async (match) => {
-					await saveOsuMultiScores(match);
-					return processingMessage.edit(`Reimported match ${args[1]}`);
-				})
-				.catch(async (err) => {
-					if (err.message === 'Not found') {
-						return processingMessage.edit(`Match ${args[1]} not found`);
-					} else {
-						return processingMessage.edit(`Error reimporting match ${args[1]}`);
-					}
-				});
 		} else if (args[0] === 'tournamentFeedCommand') {
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
