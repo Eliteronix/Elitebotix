@@ -3301,130 +3301,130 @@ module.exports = {
 			// 	},
 			// });
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'osu-mostplayed',
-					description: 'Sends an info card about the most played maps',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'user',
-							'description': 'Get the stats for a user',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'amount',
-									'description': 'The amount of most played maps to be displayed',
-									'type': 4,
-									'required': false
-								},
-								{
-									'name': 'server',
-									'description': 'The server from which the results will be displayed',
-									'type': 3,
-									'required': false,
-									'choices': [
-										{
-											'name': 'Bancho',
-											'value': 'b',
-										},
-										{
-											'name': 'Ripple',
-											'value': 'r',
-										},
-										{
-											'name': 'Tournaments',
-											'value': 'tournaments',
-										},
-									]
-								},
-								{
-									'name': 'username',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username2',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username3',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username4',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'username5',
-									'description': 'The username, id or link of the player',
-									'type': 3,
-									'required': false
-								},
-							]
-						},
-						{
-							'name': 'tourneybeatmaps',
-							'description': 'Get the stats for a beatmap',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'amount',
-									'description': 'The amount of most played maps to be displayed',
-									'type': 4,
-									'required': false
-								},
-								{
-									'name': 'page',
-									'description': 'The page of the results',
-									'type': 4,
-									'required': false
-								},
-								// {
-								// 	'name': 'modpool',
-								// 	'description': 'The modpool the maps appeared in',
-								// 	'type': 3,
-								// 	'required': false,
-								// 	'choices': [
-								// 		{
-								// 			'name': 'NM',
-								// 			'value': 'NM',
-								// 		},
-								// 		{
-								// 			'name': 'HD',
-								// 			'value': 'HD',
-								// 		},
-								// 		{
-								// 			'name': 'HR',
-								// 			'value': 'HR',
-								// 		},
-								// 		{
-								// 			'name': 'DT',
-								// 			'value': 'DT',
-								// 		},
-								// 		{
-								// 			'name': 'FM',
-								// 			'value': 'FM',
-								// 		}
-								// 	]
-								// },
-								{
-									'name': 'csv',
-									'description': 'Should a csv file be attached',
-									'type': 5, // 5 is type BOOLEAN
-								},
-							]
-						},
-					]
-				}
-			});
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'osu-mostplayed',
+			// 		description: 'Sends an info card about the most played maps',
+			// 		dm_permission: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'user',
+			// 				'description': 'Get the stats for a user',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'amount',
+			// 						'description': 'The amount of most played maps to be displayed',
+			// 						'type': 4,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'server',
+			// 						'description': 'The server from which the results will be displayed',
+			// 						'type': 3,
+			// 						'required': false,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Bancho',
+			// 								'value': 'b',
+			// 							},
+			// 							{
+			// 								'name': 'Ripple',
+			// 								'value': 'r',
+			// 							},
+			// 							{
+			// 								'name': 'Tournaments',
+			// 								'value': 'tournaments',
+			// 							},
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username2',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username3',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username4',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username5',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'tourneybeatmaps',
+			// 				'description': 'Get the stats for a beatmap',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'amount',
+			// 						'description': 'The amount of most played maps to be displayed',
+			// 						'type': 4,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'page',
+			// 						'description': 'The page of the results',
+			// 						'type': 4,
+			// 						'required': false
+			// 					},
+			// 					// {
+			// 					// 	'name': 'modpool',
+			// 					// 	'description': 'The modpool the maps appeared in',
+			// 					// 	'type': 3,
+			// 					// 	'required': false,
+			// 					// 	'choices': [
+			// 					// 		{
+			// 					// 			'name': 'NM',
+			// 					// 			'value': 'NM',
+			// 					// 		},
+			// 					// 		{
+			// 					// 			'name': 'HD',
+			// 					// 			'value': 'HD',
+			// 					// 		},
+			// 					// 		{
+			// 					// 			'name': 'HR',
+			// 					// 			'value': 'HR',
+			// 					// 		},
+			// 					// 		{
+			// 					// 			'name': 'DT',
+			// 					// 			'value': 'DT',
+			// 					// 		},
+			// 					// 		{
+			// 					// 			'name': 'FM',
+			// 					// 			'value': 'FM',
+			// 					// 		}
+			// 					// 	]
+			// 					// },
+			// 					{
+			// 						'name': 'csv',
+			// 						'description': 'Should a csv file be attached',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 				]
+			// 			},
+			// 		]
+			// 	}
+			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -7907,67 +7907,126 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'osu-mostplayed',
-					description: 'Sends an info card about the most played maps of the specified player',
+					description: 'Sends an info card about the most played maps',
 					dm_permission: true,
 					options: [
 						{
-							'name': 'amount',
-							'description': 'The amount of most played maps to be displayed',
-							'type': 4,
-							'required': false
-						},
-						{
-							'name': 'server',
-							'description': 'The server from which the results will be displayed',
-							'type': 3,
-							'required': false,
-							'choices': [
+							'name': 'user',
+							'description': 'Get the stats for a user',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
 								{
-									'name': 'Bancho',
-									'value': 'b',
+									'name': 'amount',
+									'description': 'The amount of most played maps to be displayed',
+									'type': 4,
+									'required': false
 								},
 								{
-									'name': 'Ripple',
-									'value': 'r',
+									'name': 'server',
+									'description': 'The server from which the results will be displayed',
+									'type': 3,
+									'required': false,
+									'choices': [
+										{
+											'name': 'Bancho',
+											'value': 'b',
+										},
+										{
+											'name': 'Ripple',
+											'value': 'r',
+										},
+										{
+											'name': 'Tournaments',
+											'value': 'tournaments',
+										},
+									]
 								},
 								{
-									'name': 'Tournaments',
-									'value': 'tournaments',
+									'name': 'username',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username2',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username3',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username4',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username5',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
 								},
 							]
 						},
 						{
-							'name': 'username',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username2',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username3',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username4',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username5',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
+							'name': 'tourneybeatmaps',
+							'description': 'Get the stats for a beatmap',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'amount',
+									'description': 'The amount of most played maps to be displayed',
+									'type': 4,
+									'required': false
+								},
+								{
+									'name': 'page',
+									'description': 'The page of the results',
+									'type': 4,
+									'required': false
+								},
+								// {
+								// 	'name': 'modpool',
+								// 	'description': 'The modpool the maps appeared in',
+								// 	'type': 3,
+								// 	'required': false,
+								// 	'choices': [
+								// 		{
+								// 			'name': 'NM',
+								// 			'value': 'NM',
+								// 		},
+								// 		{
+								// 			'name': 'HD',
+								// 			'value': 'HD',
+								// 		},
+								// 		{
+								// 			'name': 'HR',
+								// 			'value': 'HR',
+								// 		},
+								// 		{
+								// 			'name': 'DT',
+								// 			'value': 'DT',
+								// 		},
+								// 		{
+								// 			'name': 'FM',
+								// 			'value': 'FM',
+								// 		}
+								// 	]
+								// },
+								{
+									'name': 'csv',
+									'description': 'Should a csv file be attached',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
 						},
 					]
-				},
+				}
 			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
