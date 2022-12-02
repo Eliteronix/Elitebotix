@@ -286,6 +286,10 @@ module.exports = {
 				]
 			});
 
+			if (!oldestScore) {
+				return await processingMessage.edit({ content: 'No scores found for this user', ephemeral: true });
+			}
+
 			let duelRatings = [await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: msg.client })];
 
 			//Set the date to the beginning of the week
