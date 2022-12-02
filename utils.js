@@ -1458,10 +1458,12 @@ module.exports = {
 			}
 		}
 
-		// Remove all maps that have not been played by all players
-		for (let i = 0; i < beatmaps.length; i++) {
-			if (beatmaps[i].count < users.length && !avoidMaps.includes(beatmaps[i].beatmapId)) {
-				avoidMaps.push(beatmaps[i].beatmapId);
+		if (users.length === 2) {
+			// Remove all maps that have not been played by all players
+			for (let i = 0; i < beatmaps.length; i++) {
+				if (beatmaps[i].count < users.length && !avoidMaps.includes(beatmaps[i].beatmapId)) {
+					avoidMaps.push(beatmaps[i].beatmapId);
+				}
 			}
 		}
 
