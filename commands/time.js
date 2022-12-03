@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
 const { populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');

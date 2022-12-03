@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
 const { humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getBeatmapApprovalStatusImage, logDatabaseQueries, getBeatmapModeId, getGameModeName, getOsuPP, getModBits, multiToBanchoScore } = require('../utils');
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { Permissions } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 

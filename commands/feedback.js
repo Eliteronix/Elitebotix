@@ -1,5 +1,5 @@
 const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { Permissions } = require('discord.js');
 
 module.exports = {
