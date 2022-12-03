@@ -6,7 +6,7 @@ const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { showUnknownInteractionError } = require('../config.json');
 const ObjectsToCsv = require('objects-to-csv');

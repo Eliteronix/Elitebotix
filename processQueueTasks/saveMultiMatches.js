@@ -121,7 +121,7 @@ module.exports = {
 				} else {
 					try {
 						// Check using node fetch
-						const fetch = require('node-fetch');
+						const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 						let response = await fetch(`https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
 						let htmlCode = await response.text();
 						let isolatedContent = htmlCode.replace(/[\s\S]+<script id="json-events" type="application\/json">/gm, '').replace(/<\/script>[\s\S]+/gm, '');

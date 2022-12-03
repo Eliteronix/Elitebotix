@@ -21,6 +21,8 @@ export interface ScriptableContext<TType extends ChartType> {
   dataIndex: number;
   dataset: UnionToIntersection<ChartDataset<TType>>;
   datasetIndex: number;
+  type: string;
+  mode: string;
   parsed: UnionToIntersection<ParsedDataType<TType>>;
   raw: unknown;
 }
@@ -34,8 +36,9 @@ export interface ScriptableLineSegmentContext {
   datasetIndex: number
 }
 
-export type Scriptable<T, TContext> = T | ((ctx: TContext, options: AnyObject) => T);
+export type Scriptable<T, TContext> = T | ((ctx: TContext, options: AnyObject) => T | undefined);
 export type ScriptableOptions<T, TContext> = { [P in keyof T]: Scriptable<T[P], TContext> };
+export type ScriptableAndScriptableOptions<T, TContext> = Scriptable<T, TContext> | ScriptableOptions<T, TContext>;
 export type ScriptableAndArray<T, TContext> = readonly T[] | Scriptable<T, TContext>;
 export type ScriptableAndArrayOptions<T, TContext> = { [P in keyof T]: ScriptableAndArray<T[P], TContext> };
 
@@ -64,7 +67,7 @@ export interface ControllerDatasetOptions extends ParsingOptions {
   /**
    * How to clip relative to chartArea. Positive value allows overflow, negative value clips that many pixels inside chartArea. 0 = clip at chartArea. Clipping can also be configured per side: clip: {left: 5, top: false, right: -2, bottom: 0}
    */
-  clip: number | ChartArea;
+  clip: number | ChartArea | false;
   /**
    * The label for the dataset which appears in the legend and tooltips.
    */
@@ -87,9 +90,9 @@ export interface ControllerDatasetOptions extends ParsingOptions {
 
 export interface BarControllerDatasetOptions
   extends ControllerDatasetOptions,
-    ScriptableAndArrayOptions<BarOptions, ScriptableContext<'bar'>>,
-    ScriptableAndArrayOptions<CommonHoverOptions, ScriptableContext<'bar'>>,
-    AnimationOptions<'bar'> {
+  ScriptableAndArrayOptions<BarOptions, ScriptableContext<'bar'>>,
+  ScriptableAndArrayOptions<CommonHoverOptions, ScriptableContext<'bar'>>,
+  AnimationOptions<'bar'> {
   /**
    * The ID of the x axis to plot this dataset on.
    */
@@ -147,8 +150,8 @@ export const BarController: ChartComponent & {
 
 export interface BubbleControllerDatasetOptions
   extends ControllerDatasetOptions,
-    ScriptableAndArrayOptions<PointOptions, ScriptableContext<'bubble'>>,
-    ScriptableAndArrayOptions<PointHoverOptions, ScriptableContext<'bubble'>> {}
+  ScriptableAndArrayOptions<PointOptions, ScriptableContext<'bubble'>>,
+  ScriptableAndArrayOptions<PointHoverOptions, ScriptableContext<'bubble'>> {}
 
 export interface BubbleDataPoint {
   /**
@@ -175,11 +178,13 @@ export const BubbleController: ChartComponent & {
 
 export interface LineControllerDatasetOptions
   extends ControllerDatasetOptions,
-    ScriptableAndArrayOptions<PointPrefixedOptions, ScriptableContext<'line'>>,
-    ScriptableAndArrayOptions<PointPrefixedHoverOptions, ScriptableContext<'line'>>,
-    ScriptableOptions<LineOptions, ScriptableContext<'line'>>,
-    ScriptableOptions<LineHoverOptions, ScriptableContext<'line'>>,
-    AnimationOptions<'line'> {
+  ScriptableAndArrayOptions<PointPrefixedOptions, ScriptableContext<'line'>>,
+  ScriptableAndArrayOptions<PointPrefixedHoverOptions, ScriptableContext<'line'>>,
+  ScriptableOptions<Omit<LineOptions, keyof CommonElementOptions>, ScriptableContext<'line'>>,
+  ScriptableAndArrayOptions<CommonElementOptions, ScriptableContext<'line'>>,
+  ScriptableOptions<Omit<LineHoverOptions, keyof CommonHoverOptions>, ScriptableContext<'line'>>,
+  ScriptableAndArrayOptions<CommonHoverOptions, ScriptableContext<'line'>>,
+  AnimationOptions<'line'> {
   /**
    * The ID of the x axis to plot this dataset on.
    */
@@ -234,15 +239,20 @@ export const ScatterController: ChartComponent & {
 
 export interface DoughnutControllerDatasetOptions
   extends ControllerDatasetOptions,
-    ScriptableAndArrayOptions<ArcOptions, ScriptableContext<'doughnut'>>,
-    ScriptableAndArrayOptions<ArcHoverOptions, ScriptableContext<'doughnut'>>,
-    AnimationOptions<'doughnut'> {
+  ScriptableAndArrayOptions<ArcOptions, ScriptableContext<'doughnut'>>,
+  ScriptableAndArrayOptions<ArcHoverOptions, ScriptableContext<'doughnut'>>,
+  AnimationOptions<'doughnut'> {
 
   /**
    * Sweep to allow arcs to cover.
    * @default 360
    */
   circumference: number;
+
+  /**
+   * Arc offset (in pixels).
+   */
+  offset: number;
 
   /**
    * Starting angle to draw this dataset from.
@@ -293,6 +303,11 @@ export interface DoughnutControllerChartOptions {
   cutout: Scriptable<number | string, ScriptableContext<'doughnut'>>;
 
   /**
+   * Arc offset (in pixels).
+   */
+  offset: number;
+
+  /**
    * The outer radius of the chart. String ending with '%' means percentage of maximum radius, number means pixels.
    * @default '100%'
    */
@@ -310,7 +325,7 @@ export interface DoughnutControllerChartOptions {
    */
   spacing: number;
 
-  animation: DoughnutAnimationOptions;
+  animation: false | DoughnutAnimationOptions;
 }
 
 export type DoughnutDataPoint = number;
@@ -364,7 +379,7 @@ export interface PolarAreaControllerChartOptions {
    */
   startAngle: number;
 
-  animation: PolarAreaAnimationOptions;
+  animation: false | PolarAreaAnimationOptions;
 }
 
 export interface PolarAreaController extends DoughnutController {
@@ -377,10 +392,10 @@ export const PolarAreaController: ChartComponent & {
 
 export interface RadarControllerDatasetOptions
   extends ControllerDatasetOptions,
-    ScriptableAndArrayOptions<PointOptions & PointHoverOptions & PointPrefixedOptions & PointPrefixedHoverOptions, ScriptableContext<'radar'>>,
-    ScriptableAndArrayOptions<LineOptions & LineHoverOptions, ScriptableContext<'radar'>>,
-    AnimationOptions<'radar'> {
-        /**
+  ScriptableAndArrayOptions<PointOptions & PointHoverOptions & PointPrefixedOptions & PointPrefixedHoverOptions, ScriptableContext<'radar'>>,
+  ScriptableAndArrayOptions<LineOptions & LineHoverOptions, ScriptableContext<'radar'>>,
+  AnimationOptions<'radar'> {
+  /**
    * The ID of the x axis to plot this dataset on.
    */
   xAxisID: string;
@@ -449,7 +464,7 @@ export type ChartMeta<
   // When this was introduced, doing so was a breaking change
   TType extends ChartType = ChartType,
 > = DeepPartial<
-  { [key in ChartType]: ChartTypeRegistry[key]['metaExtensions'] }[TType]
+{ [key in ChartType]: ChartTypeRegistry[key]['metaExtensions'] }[TType]
 > & ChartMetaCommon<TElement, TDatasetElement>;
 
 export interface ActiveDataPoint {
@@ -465,12 +480,12 @@ export declare class Chart<
   TType extends ChartType = ChartType,
   TData = DefaultDataPoint<TType>,
   TLabel = unknown
-  > {
+> {
   readonly platform: BasePlatform;
   readonly id: string;
   readonly canvas: HTMLCanvasElement;
   readonly ctx: CanvasRenderingContext2D;
-  readonly config: ChartConfiguration<TType, TData, TLabel>
+  readonly config: ChartConfiguration<TType, TData, TLabel> | ChartConfigurationCustomTypesPerDataset<TType, TData, TLabel>;
   readonly width: number;
   readonly height: number;
   readonly aspectRatio: number;
@@ -480,12 +495,13 @@ export declare class Chart<
   readonly scales: { [key: string]: Scale };
   readonly attached: boolean;
 
+  readonly legend?: LegendElement<TType>; // Only available if legend plugin is registered and enabled
   readonly tooltip?: TooltipModel<TType>; // Only available if tooltip plugin is registered and enabled
 
   data: ChartData<TType, TData, TLabel>;
   options: ChartOptions<TType>;
 
-  constructor(item: ChartItem, config: ChartConfiguration<TType, TData, TLabel>);
+  constructor(item: ChartItem, config: ChartConfiguration<TType, TData, TLabel> | ChartConfigurationCustomTypesPerDataset<TType, TData, TLabel>);
 
   clear(): this;
   stop(): this;
@@ -499,6 +515,7 @@ export declare class Chart<
   render(): void;
   draw(): void;
 
+  isPointInArea(point: Point): boolean;
   getElementsAtEventForMode(e: Event, mode: string, options: InteractionOptions, useFinalPosition: boolean): InteractionItem[];
 
   getSortedVisibleDatasetMetas(): ChartMeta[];
@@ -518,7 +535,7 @@ export declare class Chart<
   toBase64Image(type?: string, quality?: unknown): string;
   bindEvents(): void;
   unbindEvents(): void;
-  updateHoverStyle(items: Element, mode: 'dataset', enabled: boolean): void;
+  updateHoverStyle(items: InteractionItem[], mode: 'dataset', enabled: boolean): void;
 
   notifyPlugins(hook: string, args?: AnyObject): boolean | void;
 
@@ -537,11 +554,9 @@ export const registerables: readonly ChartComponentLike[];
 export declare type ChartItem =
   | string
   | CanvasRenderingContext2D
-  | OffscreenCanvasRenderingContext2D
   | HTMLCanvasElement
-  | OffscreenCanvas
-  | { canvas: HTMLCanvasElement | OffscreenCanvas }
-  | ArrayLike<CanvasRenderingContext2D | HTMLCanvasElement | OffscreenCanvas>;
+  | { canvas: HTMLCanvasElement }
+  | ArrayLike<CanvasRenderingContext2D | HTMLCanvasElement>;
 
 export declare enum UpdateModeEnum {
   resize = 'resize',
@@ -567,6 +582,10 @@ export class DatasetController<
   readonly index: number;
   readonly _cachedMeta: ChartMeta<TElement, TDatasetElement, TType>;
   enableOptionSharing: boolean;
+  // If true, the controller supports the decimation
+  // plugin. Defaults to `false` for all controllers
+  // except the LineController
+  supportsDecimation: boolean;
 
   linkScales(): void;
   getAllParsedValues(scale: Scale): number[];
@@ -671,18 +690,19 @@ export interface Defaults extends CoreChartOptions<ChartType>, ElementChartOptio
 
 export type Overrides = {
   [key in ChartType]:
-    CoreChartOptions<key> &
-    ElementChartOptions<key> &
-    PluginChartOptions<key> &
-    DatasetChartOptions<ChartType> &
-    ScaleChartOptions<key> &
-    ChartTypeRegistry[key]['chartOptions'];
+  CoreChartOptions<key> &
+  ElementChartOptions<key> &
+  PluginChartOptions<key> &
+  DatasetChartOptions<ChartType> &
+  ScaleChartOptions<key> &
+  ChartTypeRegistry[key]['chartOptions'];
 }
 
 export const defaults: Defaults;
 export interface InteractionOptions {
   axis?: string;
   intersect?: boolean;
+  includeInvisible?: boolean;
 }
 
 export interface InteractionItem {
@@ -733,6 +753,17 @@ export type InteractionMode = keyof InteractionModeMap;
 
 export const Interaction: {
   modes: InteractionModeMap;
+
+  /**
+   * Helper function to select candidate elements for interaction
+   */
+  evaluateInteractionItems(
+    chart: Chart,
+    axis: InteractionAxis,
+    position: Point,
+    handler: (element: Element & VisualElement, datasetIndex: number, index: number) => void,
+    intersect?: boolean
+  ): InteractionItem[];
 };
 
 export const layouts: {
@@ -919,7 +950,7 @@ export interface Plugin<TType extends ChartType = ChartType, O = AnyObject> exte
    */
   afterDataLimits?(chart: Chart, args: { scale: Scale }, options: O): void;
   /**
-   * @desc Called before scale bulds its ticks. This hook is called separately for each scale in the chart.
+   * @desc Called before scale builds its ticks. This hook is called separately for each scale in the chart.
    * @param {Chart} chart - The chart instance.
    * @param {object} args - The call arguments.
    * @param {Scale} args.scale - The scale.
@@ -1023,9 +1054,10 @@ export interface Plugin<TType extends ChartType = ChartType, O = AnyObject> exte
    * @param {object} args - The call arguments.
    * @param {ChartEvent} args.event - The event object.
    * @param {boolean} args.replay - True if this event is replayed from `Chart.update`
+   * @param {boolean} args.inChartArea - The event position is inside chartArea
    * @param {object} options - The plugin options.
    */
-  beforeEvent?(chart: Chart, args: { event: ChartEvent, replay: boolean, cancelable: true }, options: O): boolean | void;
+  beforeEvent?(chart: Chart, args: { event: ChartEvent, replay: boolean, cancelable: true, inChartArea: boolean }, options: O): boolean | void;
   /**
    * @desc Called after the `event` has been consumed. Note that this hook
    * will not be called if the `event` has been previously discarded.
@@ -1033,10 +1065,11 @@ export interface Plugin<TType extends ChartType = ChartType, O = AnyObject> exte
    * @param {object} args - The call arguments.
    * @param {ChartEvent} args.event - The event object.
    * @param {boolean} args.replay - True if this event is replayed from `Chart.update`
+   * @param {boolean} args.inChartArea - The event position is inside chartArea
    * @param {boolean} [args.changed] - Set to true if the plugin needs a render. Should only be changed to true, because this args object is passed through all plugins.
    * @param {object} options - The plugin options.
    */
-  afterEvent?(chart: Chart, args: { event: ChartEvent, replay: boolean, changed?: boolean, cancelable: false }, options: O): void;
+  afterEvent?(chart: Chart, args: { event: ChartEvent, replay: boolean, changed?: boolean, cancelable: false, inChartArea: boolean }, options: O): void;
   /**
    * @desc Called after the chart as been resized.
    * @param {Chart} chart - The chart instance.
@@ -1046,12 +1079,27 @@ export interface Plugin<TType extends ChartType = ChartType, O = AnyObject> exte
    */
   resize?(chart: Chart, args: { size: { width: number, height: number } }, options: O): void;
   /**
+   * Called before the chart is being destroyed.
+   * @param {Chart} chart - The chart instance.
+   * @param {object} args - The call arguments.
+   * @param {object} options - The plugin options.
+   */
+  beforeDestroy?(chart: Chart, args: EmptyObject, options: O): void;
+  /**
+   * Called after the chart has been destroyed.
+   * @param {Chart} chart - The chart instance.
+   * @param {object} args - The call arguments.
+   * @param {object} options - The plugin options.
+   * @deprecated since version 3.7.0 in favour of afterDestroy
+   */
+  destroy?(chart: Chart, args: EmptyObject, options: O): void;
+  /**
    * Called after the chart has been destroyed.
    * @param {Chart} chart - The chart instance.
    * @param {object} args - The call arguments.
    * @param {object} options - The plugin options.
    */
-  destroy?(chart: Chart, args: EmptyObject, options: O): void;
+  afterDestroy?(chart: Chart, args: EmptyObject, options: O): void;
   /**
    * Called after chart is destroyed on all plugins that were installed for that chart. This hook is also invoked for disabled plugins (options === false).
    * @param {Chart} chart - The chart instance.
@@ -1062,7 +1110,7 @@ export interface Plugin<TType extends ChartType = ChartType, O = AnyObject> exte
   uninstall?(chart: Chart, args: EmptyObject, options: O): void;
 }
 
-export declare type ChartComponentLike = ChartComponent | ChartComponent[] | { [key: string]: ChartComponent };
+export declare type ChartComponentLike = ChartComponent | ChartComponent[] | { [key: string]: ChartComponent } | Plugin | Plugin[];
 
 /**
  * Please use the module's default export which provides a singleton instance
@@ -1301,6 +1349,7 @@ export interface ScriptableScalePointLabelContext {
   scale: Scale;
   index: number;
   label: string;
+  type: string;
 }
 
 
@@ -1343,18 +1392,18 @@ export interface TypedRegistry<T> {
 
 export interface ChartEvent {
   type:
-    | 'contextmenu'
-    | 'mouseenter'
-    | 'mousedown'
-    | 'mousemove'
-    | 'mouseup'
-    | 'mouseout'
-    | 'click'
-    | 'dblclick'
-    | 'keydown'
-    | 'keypress'
-    | 'keyup'
-    | 'resize';
+  | 'contextmenu'
+  | 'mouseenter'
+  | 'mousedown'
+  | 'mousemove'
+  | 'mouseup'
+  | 'mouseout'
+  | 'click'
+  | 'dblclick'
+  | 'keydown'
+  | 'keypress'
+  | 'keyup'
+  | 'resize';
   native: Event | null;
   x: number | null;
   y: number | null;
@@ -1370,6 +1419,8 @@ export interface ChartComponent {
   afterUnregister?(): void;
 }
 
+export type InteractionAxis = 'x' | 'y' | 'xy' | 'r';
+
 export interface CoreInteractionOptions {
   /**
    * Sets which elements appear in the tooltip. See Interaction Modes for details.
@@ -1383,9 +1434,15 @@ export interface CoreInteractionOptions {
   intersect: boolean;
 
   /**
-   * Can be set to 'x', 'y', or 'xy' to define which directions are used in calculating distances. Defaults to 'x' for 'index' mode and 'xy' in dataset and 'nearest' modes.
+   * Defines which directions are used in calculating distances. Defaults to 'x' for 'index' mode and 'xy' in dataset and 'nearest' modes.
    */
-  axis: 'x' | 'y' | 'xy';
+  axis: InteractionAxis;
+
+  /**
+   * if true, the invisible points that are outside of the chart area will also be included when evaluating interactions.
+   * @default false
+   */
+  includeInvisible: boolean;
 }
 
 export interface CoreChartOptions<TType extends ChartType> extends ParsingOptions, AnimationOptions<TType> {
@@ -1401,25 +1458,30 @@ export interface CoreChartOptions<TType extends ChartType> extends ParsingOption
   indexAxis: 'x' | 'y';
 
   /**
+   * How to clip relative to chartArea. Positive value allows overflow, negative value clips that many pixels inside chartArea. 0 = clip at chartArea. Clipping can also be configured per side: clip: {left: 5, top: false, right: -2, bottom: 0}
+   */
+  clip: number | ChartArea | false;
+
+  /**
    * base color
    * @see Defaults.color
    */
-  color: Color;
+  color: Scriptable<Color, ScriptableContext<TType>>;
   /**
    * base background color
    * @see Defaults.backgroundColor
    */
-  backgroundColor: Color;
+  backgroundColor: Scriptable<Color, ScriptableContext<TType>>;
   /**
    * base border color
    * @see Defaults.borderColor
    */
-  borderColor: Color;
+  borderColor: Scriptable<Color, ScriptableContext<TType>>;
   /**
    * base font
    * @see Defaults.font
    */
-  font: FontSpec;
+  font: Partial<FontSpec>;
   /**
    * Resizes the chart canvas when its container does (important note...).
    * @default true
@@ -1467,20 +1529,7 @@ export interface CoreChartOptions<TType extends ChartType> extends ParsingOption
    * The events option defines the browser events that the chart should listen to for tooltips and hovering.
    * @default ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove']
    */
-  events: (
-    'mousemove' |
-    'mouseout' |
-    'click' |
-    'touchstart' |
-    'touchmove' |
-    'touchend' |
-    'pointerenter' |
-    'pointerdown' |
-    'pointermove' |
-    'pointerup' |
-    'pointerleave' |
-    'pointerout'
-  )[];
+  events: (keyof HTMLElementEventMap)[]
 
   /**
    * Called when any of the events fire. Passed the event, an array of active elements (bars, points, etc), and the chart.
@@ -1492,9 +1541,10 @@ export interface CoreChartOptions<TType extends ChartType> extends ParsingOption
    */
   onClick(event: ChartEvent, elements: ActiveElement[], chart: Chart): void;
 
-  layout: {
-    padding: Scriptable<number | ChartArea, ScriptableContext<TType>>;
-  };
+  layout: Partial<{
+    autoPadding: boolean;
+    padding: Scriptable<number | Partial<ChartArea>, ScriptableContext<TType>>;
+  }>;
 }
 
 export type EasingFunction =
@@ -1629,6 +1679,7 @@ export interface FontSpec {
 }
 
 export type TextAlign = 'left' | 'center' | 'right';
+export type Align = 'start' | 'center' | 'end';
 
 export interface VisualElement {
   draw(ctx: CanvasRenderingContext2D, area?: ChartArea): void;
@@ -1679,15 +1730,28 @@ export interface ArcOptions extends CommonElementOptions {
    * Arc stroke alignment.
    */
   borderAlign: 'center' | 'inner';
+
   /**
-   * Arc offset (in pixels).
+   * Line join style. See MDN. Default is 'round' when `borderAlign` is 'inner', else 'bevel'.
    */
-  offset: number;
+  borderJoinStyle: CanvasLineJoin;
+
   /**
    * Sets the border radius for arcs
    * @default 0
    */
   borderRadius: number | ArcBorderRadius;
+
+  /**
+   * Arc offset (in pixels).
+   */
+  offset: number;
+
+  /**
+   * If false, Arc will be flat.
+   * @default true
+   */
+  circular: boolean;
 }
 
 export interface ArcHoverOptions extends CommonHoverOptions {
@@ -1696,7 +1760,7 @@ export interface ArcHoverOptions extends CommonHoverOptions {
 
 export interface ArcElement<T extends ArcProps = ArcProps, O extends ArcOptions = ArcOptions>
   extends Element<T, O>,
-    VisualElement {}
+  VisualElement {}
 
 export const ArcElement: ChartComponent & {
   prototype: ArcElement;
@@ -1752,6 +1816,10 @@ export interface LineOptions extends CommonElementOptions {
    * Both line and radar charts support a fill option on the dataset object which can be used to create area between two datasets or a dataset and a boundary, i.e. the scale origin, start or end
    */
   fill: FillTarget | ComplexFillTarget;
+  /**
+   * If true, lines will be drawn between points with no or null data. If false, points with NaN data will create a break in the line. Can also be a number specifying the maximum gap length to span. The unit of the value depends on the scale used.
+   */
+  spanGaps: boolean | number;
 
   segment: {
     backgroundColor: Scriptable<Color|undefined, ScriptableLineSegmentContext>,
@@ -1773,7 +1841,7 @@ export interface LineHoverOptions extends CommonHoverOptions {
 
 export interface LineElement<T extends LineProps = LineProps, O extends LineOptions = LineOptions>
   extends Element<T, O>,
-    VisualElement {
+  VisualElement {
   updateControlPoints(chartArea: ChartArea, indexAxis?: 'x' | 'y'): void;
   points: Point[];
   readonly segments: Segment[];
@@ -1829,6 +1897,11 @@ export interface PointOptions extends CommonElementOptions {
    * @default 0
    */
   rotation: number;
+  /**
+   * Draw the active elements over the other elements of the dataset,
+   * @default true
+   */
+  drawActiveElementsOnTop: boolean;
 }
 
 export interface PointHoverOptions extends CommonHoverOptions {
@@ -1891,7 +1964,7 @@ export interface PointPrefixedHoverOptions {
 
 export interface PointElement<T extends PointProps = PointProps, O extends PointOptions = PointOptions>
   extends Element<T, O>,
-    VisualElement {
+  VisualElement {
   readonly skip: boolean;
   readonly parsed: CartesianParsedData;
 }
@@ -1910,23 +1983,36 @@ export interface BarProps {
   height: number;
 }
 
-export interface BarOptions extends CommonElementOptions {
+export interface BarOptions extends Omit<CommonElementOptions, 'borderWidth'> {
   /**
    * The base value for the bar in data units along the value axis.
    */
   base: number;
 
   /**
-   *   Skipped (excluded) border: 'start', 'end', 'left',  'right', 'bottom', 'top' or false (none).
+   * Skipped (excluded) border: 'start', 'end', 'left',  'right', 'bottom', 'top', 'middle', false (none) or true (all).
    * @default 'start'
    */
-  borderSkipped: 'start' | 'end' | 'left' | 'right' | 'bottom' | 'top' | false;
+  borderSkipped: 'start' | 'end' | 'left' | 'right' | 'bottom' | 'top' | 'middle' | boolean;
 
   /**
    * Border radius
    * @default 0
    */
   borderRadius: number | BorderRadius;
+
+  /**
+   * Amount to inflate the rectangle(s). This can be used to hide artifacts between bars.
+   * Unit is pixels. 'auto' translates to 0.33 pixels when barPercentage * categoryPercentage is 1, else 0.
+   * @default 'auto'
+   */
+  inflateAmount: number | 'auto';
+
+  /**
+   * Width of the border, number for all sides, object to specify width for each side specifically
+   * @default 0
+   */
+  borderWidth: number | { top?: number, right?: number, bottom?: number, left?: number };
 }
 
 export interface BorderRadius {
@@ -2011,6 +2097,11 @@ export class BasePlatform {
    * @returns {boolean} true if the canvas is attached to the platform, false if not.
    */
   isAttached(canvas: HTMLCanvasElement): boolean;
+  /**
+   * Updates config with platform specific requirements
+   * @param {ChartConfiguration | ChartConfigurationCustomTypes} config
+   */
+  updateConfig(config: ChartConfiguration | ChartConfigurationCustomTypesPerDataset): void;
 }
 
 export class BasicPlatform extends BasePlatform {}
@@ -2085,7 +2176,12 @@ export interface LegendItem {
   /**
    * Index of the associated dataset
    */
-  datasetIndex: number;
+  datasetIndex?: number;
+
+  /**
+   * Index the associated label in the labels array
+   */
+  index?: number
 
   /**
    * Fill style of the legend box
@@ -2175,7 +2271,7 @@ export interface LegendOptions<TType extends ChartType> {
    * Alignment of the legend.
    * @default 'center'
    */
-  align: 'start' | 'center' | 'end';
+  align: Align;
   /**
    * Maximum height of the legend, in pixels
    */
@@ -2219,6 +2315,11 @@ export interface LegendOptions<TType extends ChartType> {
      */
     boxHeight: number;
     /**
+     * Padding between the color box and the text
+     * @default 1
+     */
+    boxPadding: number;
+    /**
      * Color of label
      * @see Defaults.color
      */
@@ -2227,7 +2328,7 @@ export interface LegendOptions<TType extends ChartType> {
      * Font of label
      * @see Defaults.font
      */
-    font: FontSpec;
+    font: ScriptableAndScriptableOptions<Partial<FontSpec>, ScriptableChartContext>;
     /**
      * Padding between rows of colored boxes.
      * @default 10
@@ -2288,7 +2389,7 @@ export interface LegendOptions<TType extends ChartType> {
     /**
      * see Fonts
      */
-    font: FontSpec;
+    font: ScriptableAndScriptableOptions<Partial<FontSpec>, ScriptableChartContext>;
     position: 'center' | 'start' | 'end';
     padding?: number | ChartArea;
     /**
@@ -2306,7 +2407,7 @@ export interface TitleOptions {
    * Alignment of the title.
    * @default 'center'
    */
-  align: 'start' | 'center' | 'end';
+  align: Align;
   /**
    * Is the title shown?
    * @default false
@@ -2322,7 +2423,7 @@ export interface TitleOptions {
    * @see Defaults.color
    */
   color: Color;
-  font: FontSpec;
+  font: ScriptableAndScriptableOptions<Partial<FontSpec>, ScriptableChartContext>;
 
   /**
    * Marks that this box should take the full width/height of the canvas (moving other boxes). If set to `false`, places the box above/beside the
@@ -2370,7 +2471,9 @@ export interface TooltipLabelStyle {
    */
   borderRadius?: number | BorderRadius;
 }
-export interface TooltipModel<TType extends ChartType> {
+export interface TooltipModel<TType extends ChartType> extends Element<AnyObject, TooltipOptions<TType>> {
+  readonly chart: Chart<TType>;
+
   // The items that we are rendering in the tooltip. See Tooltip Item Interface section
   dataPoints: TooltipItem<TType>[];
 
@@ -2417,16 +2520,36 @@ export interface TooltipModel<TType extends ChartType> {
 
   // tooltip options
   options: TooltipOptions<TType>;
-}
-
-export const Tooltip: Plugin & {
-  readonly positioners: {
-    [key: string]: (items: readonly ActiveElement[], eventPosition: { x: number; y: number }) => { x: number; y: number } | false;
-  };
 
   getActiveElements(): ActiveElement[];
-  setActiveElements(active: ActiveDataPoint[], eventPosition: { x: number, y: number }): void;
-};
+  setActiveElements(active: ActiveDataPoint[], eventPosition: Point): void;
+}
+
+export interface TooltipPosition {
+  x: number;
+  y: number;
+  xAlign?: TooltipXAlignment;
+  yAlign?: TooltipYAlignment;
+}
+
+export type TooltipPositionerFunction<TType extends ChartType> = (
+  this: TooltipModel<TType>,
+  items: readonly ActiveElement[],
+  eventPosition: Point
+) => TooltipPosition | false;
+
+export interface TooltipPositionerMap {
+  average: TooltipPositionerFunction<ChartType>;
+  nearest: TooltipPositionerFunction<ChartType>;
+}
+
+export type TooltipPositioner = keyof TooltipPositionerMap;
+
+export interface Tooltip extends Plugin {
+  readonly positioners: TooltipPositionerMap;
+}
+
+export const Tooltip: Tooltip;
 
 export interface TooltipCallbacks<
   TType extends ChartType,
@@ -2497,7 +2620,7 @@ export interface TooltipOptions<TType extends ChartType = ChartType> extends Cor
   /**
    * The mode for positioning the tooltip
    */
-  position: Scriptable<'average' | 'nearest', ScriptableTooltipContext<TType>>
+  position: Scriptable<TooltipPositioner, ScriptableTooltipContext<TType>>
 
   /**
    * Override the tooltip alignment calculations
@@ -2518,6 +2641,11 @@ export interface TooltipOptions<TType extends ChartType = ChartType> extends Cor
    */
   backgroundColor: Scriptable<Color, ScriptableTooltipContext<TType>>;
   /**
+   * Padding between the color box and the text.
+   * @default 1
+   */
+  boxPadding: number;
+  /**
    * Color of title
    * @default '#fff'
    */
@@ -2526,7 +2654,7 @@ export interface TooltipOptions<TType extends ChartType = ChartType> extends Cor
    * See Fonts
    * @default {weight: 'bold'}
    */
-  titleFont: Scriptable<FontSpec, ScriptableTooltipContext<TType>>;
+  titleFont: ScriptableAndScriptableOptions<Partial<FontSpec>, ScriptableTooltipContext<TType>>;
   /**
    * Spacing to add to top and bottom of each title line.
    * @default 2
@@ -2553,10 +2681,10 @@ export interface TooltipOptions<TType extends ChartType = ChartType> extends Cor
    */
   bodyColor: Scriptable<Color, ScriptableTooltipContext<TType>>;
   /**
-   *   See Fonts.
+   * See Fonts.
    * @default {}
    */
-  bodyFont: Scriptable<FontSpec, ScriptableTooltipContext<TType>>;
+  bodyFont: ScriptableAndScriptableOptions<Partial<FontSpec>, ScriptableTooltipContext<TType>>;
   /**
    * Horizontal alignment of the body text lines.
    * @default 'left'
@@ -2581,7 +2709,7 @@ export interface TooltipOptions<TType extends ChartType = ChartType> extends Cor
    * See Fonts
    * @default {weight: 'bold'}
    */
-  footerFont: Scriptable<FontSpec, ScriptableTooltipContext<TType>>;
+  footerFont: ScriptableAndScriptableOptions<Partial<FontSpec>, ScriptableTooltipContext<TType>>;
   /**
    * Horizontal alignment of the footer text lines.
    * @default 'left'
@@ -2593,7 +2721,7 @@ export interface TooltipOptions<TType extends ChartType = ChartType> extends Cor
    */
   padding: Scriptable<number | ChartArea, ScriptableTooltipContext<TType>>;
   /**
-   *   Extra distance to move the end of the tooltip arrow away from the tooltip point.
+   * Extra distance to move the end of the tooltip arrow away from the tooltip point.
    * @default 2
    */
   caretPadding: Scriptable<number, ScriptableTooltipContext<TType>>;
@@ -2606,7 +2734,7 @@ export interface TooltipOptions<TType extends ChartType = ChartType> extends Cor
    * Radius of tooltip corner curves.
    * @default 6
    */
-  cornerRadius: Scriptable<number, ScriptableTooltipContext<TType>>;
+  cornerRadius: Scriptable<number | BorderRadius, ScriptableTooltipContext<TType>>;
   /**
    * Color to draw behind the colored boxes when multiple items are in the tooltip.
    * @default '#fff'
@@ -2731,11 +2859,11 @@ export interface GridLineOptions {
   /**
    * @default 'rgba(0, 0, 0, 0.1)'
    */
-  color: Scriptable<Color, ScriptableScaleContext> | readonly Color[];
+  color: ScriptableAndArray<Color, ScriptableScaleContext>;
   /**
    * @default []
    */
-  borderDash: number[];
+  borderDash: Scriptable<number[], ScriptableScaleContext>;
   /**
    * @default 0
    */
@@ -2743,7 +2871,7 @@ export interface GridLineOptions {
   /**
    * @default 1
    */
-  lineWidth: Scriptable<number, ScriptableScaleContext> | readonly number[];
+  lineWidth: ScriptableAndArray<number, ScriptableScaleContext>;
 
   /**
    * @default true
@@ -2768,7 +2896,7 @@ export interface GridLineOptions {
   /**
    * @default 'rgba(0, 0, 0, 0.1)'
    */
-  tickColor: Scriptable<Color, ScriptableScaleContext> | readonly Color[];
+  tickColor: ScriptableAndArray<Color, ScriptableScaleContext>;
   /**
    * @default 10
    */
@@ -2802,7 +2930,7 @@ export interface TickOptions {
   /**
    * Returns the string representation of the tick value as it should be displayed on the chart. See callback.
    */
-  callback: (tickValue: number | string, index: number, ticks: Tick[]) => string | number | null | undefined;
+  callback: (this: Scale, tickValue: number | string, index: number, ticks: Tick[]) => string | string[] | number | number[] | null | undefined;
   /**
    * If true, show tick labels.
    * @default true
@@ -2812,11 +2940,11 @@ export interface TickOptions {
    * Color of tick
    * @see Defaults.color
    */
-  color: Scriptable<Color, ScriptableScaleContext>;
+  color: ScriptableAndArray<Color, ScriptableScaleContext>;
   /**
    * see Fonts
    */
-  font: Scriptable<FontSpec, ScriptableScaleContext>;
+  font: ScriptableAndScriptableOptions<Partial<FontSpec>, ScriptableScaleContext>;
   /**
    * Sets the offset of the tick labels from the axis
    */
@@ -2849,6 +2977,84 @@ export interface TickOptions {
      */
     enabled: boolean;
   };
+}
+
+export type CartesianTickOptions = TickOptions & {
+  /**
+   * The number of ticks to examine when deciding how many labels will fit. Setting a smaller value will be faster, but may be less accurate when there is large variability in label length.
+   * @default ticks.length
+   */
+  sampleSize: number;
+  /**
+   * The label alignment
+   * @default 'center'
+   */
+  align: Align | 'inner';
+  /**
+   *   If true, automatically calculates how many labels can be shown and hides labels accordingly. Labels will be rotated up to maxRotation before skipping any. Turn autoSkip off to show all labels no matter what.
+   * @default true
+   */
+  autoSkip: boolean;
+  /**
+   * Padding between the ticks on the horizontal axis when autoSkip is enabled.
+   * @default 0
+   */
+  autoSkipPadding: number;
+
+  /**
+   * How is the label positioned perpendicular to the axis direction.
+   * This only applies when the rotation is 0 and the axis position is one of "top", "left", "right", or "bottom"
+   * @default 'near'
+   */
+  crossAlign: 'near' | 'center' | 'far';
+
+  /**
+   * Should the defined `min` and `max` values be presented as ticks even if they are not "nice".
+   * @default: true
+   */
+  includeBounds: boolean;
+
+  /**
+   * Distance in pixels to offset the label from the centre point of the tick (in the x direction for the x axis, and the y direction for the y axis). Note: this can cause labels at the edges to be cropped by the edge of the canvas
+   * @default 0
+   */
+  labelOffset: number;
+
+  /**
+   * Minimum rotation for tick labels. Note: Only applicable to horizontal scales.
+   * @default 0
+   */
+  minRotation: number;
+  /**
+   * Maximum rotation for tick labels when rotating to condense labels. Note: Rotation doesn't occur until necessary. Note: Only applicable to horizontal scales.
+   * @default 50
+   */
+  maxRotation: number;
+  /**
+   * Flips tick labels around axis, displaying the labels inside the chart instead of outside. Note: Only applicable to vertical scales.
+   * @default false
+   */
+  mirror: boolean;
+  /**
+   *   Padding between the tick label and the axis. When set on a vertical axis, this applies in the horizontal (X) direction. When set on a horizontal axis, this applies in the vertical (Y) direction.
+   * @default 0
+   */
+  padding: number;
+  /**
+   * Maximum number of ticks and gridlines to show.
+   * @default 11
+   */
+  maxTicksLimit: number;
+}
+
+export interface ScriptableCartesianScaleContext {
+  scale: keyof CartesianScaleTypeRegistry;
+  type: string;
+}
+
+export interface ScriptableChartContext {
+  chart: Chart;
+  type: string;
 }
 
 export interface CartesianScaleOptions extends CoreScaleOptions {
@@ -2900,14 +3106,26 @@ export interface CartesianScaleOptions extends CoreScaleOptions {
 
   grid: GridLineOptions;
 
+  /** Options for the scale title. */
   title: {
+    /** If true, displays the axis title. */
     display: boolean;
+    /** Alignment of the axis title. */
+    align: Align;
+    /** The text for the title, e.g. "# of People" or "Response Choices". */
     text: string | string[];
+    /** Color of the axis label. */
     color: Color;
-    font: FontSpec;
+    /** Information about the axis title font. */
+    font: ScriptableAndScriptableOptions<Partial<FontSpec>, ScriptableCartesianScaleContext>;
+    /** Padding to apply around scale labels. */
     padding: number | {
+      /** Padding on the (relative) top side of this axis label. */
       top: number;
+      /** Padding on the (relative) bottom side of this axis label. */
       bottom: number;
+      /** This is a shorthand for defining top/bottom to the same values. */
+      y: number;
     };
   };
 
@@ -2917,71 +3135,10 @@ export interface CartesianScaleOptions extends CoreScaleOptions {
    */
   stacked?: boolean | 'single';
 
-  ticks: TickOptions & {
-    /**
-     * The number of ticks to examine when deciding how many labels will fit. Setting a smaller value will be faster, but may be less accurate when there is large variability in label length.
-     * @default ticks.length
-     */
-    sampleSize: number;
-    /**
-     * The label alignment
-     * @default 'center'
-     */
-    align: 'start' | 'center' | 'end';
-    /**
-     *   If true, automatically calculates how many labels can be shown and hides labels accordingly. Labels will be rotated up to maxRotation before skipping any. Turn autoSkip off to show all labels no matter what.
-     * @default true
-     */
-    autoSkip: boolean;
-    /**
-     * Padding between the ticks on the horizontal axis when autoSkip is enabled.
-     * @default 0
-     */
-    autoSkipPadding: number;
-
-    /**
-     * How is the label positioned perpendicular to the axis direction.
-     * This only applies when the rotation is 0 and the axis position is one of "top", "left", "right", or "bottom"
-     * @default 'near'
-     */
-    crossAlign: 'near' | 'center' | 'far';
-
-    /**
-     * Should the defined `min` and `max` values be presented as ticks even if they are not "nice".
-     * @default: true
-     */
-    includeBounds: boolean;
-
-    /**
-     * Distance in pixels to offset the label from the centre point of the tick (in the x direction for the x axis, and the y direction for the y axis). Note: this can cause labels at the edges to be cropped by the edge of the canvas
-     * @default 0
-     */
-    labelOffset: number;
-
-    /**
-     * Minimum rotation for tick labels. Note: Only applicable to horizontal scales.
-     * @default 0
-     */
-    minRotation: number;
-    /**
-     * Maximum rotation for tick labels when rotating to condense labels. Note: Rotation doesn't occur until necessary. Note: Only applicable to horizontal scales.
-     * @default 50
-     */
-    maxRotation: number;
-    /**
-     * Flips tick labels around axis, displaying the labels inside the chart instead of outside. Note: Only applicable to vertical scales.
-     * @default false
-     */
-    mirror: boolean;
-    /**
-     *   Padding between the tick label and the axis. When set on a vertical axis, this applies in the horizontal (X) direction. When set on a horizontal axis, this applies in the vertical (Y) direction.
-     * @default 0
-     */
-    padding: number;
-  };
+  ticks: CartesianTickOptions;
 }
 
-export type CategoryScaleOptions = CartesianScaleOptions & {
+export type CategoryScaleOptions = Omit<CartesianScaleOptions, 'min' | 'max'> & {
   min: string | number;
   max: string | number;
   labels: string[] | string[][];
@@ -3000,7 +3157,6 @@ export type LinearScaleOptions = CartesianScaleOptions & {
    * @default true
    */
   beginAtZero: boolean;
-
   /**
    * Adjustment used when calculating the maximum data value.
    */
@@ -3020,11 +3176,6 @@ export type LinearScaleOptions = CartesianScaleOptions & {
      */
     format: Intl.NumberFormatOptions;
 
-    /**
-     * Maximum number of ticks and gridlines to show.
-     * @default 11
-     */
-    maxTicksLimit: number;
     /**
      * if defined and stepSize is not specified, the step size will be rounded to this many decimal places.
      */
@@ -3049,7 +3200,6 @@ export const LinearScale: ChartComponent & {
 };
 
 export type LogarithmicScaleOptions = CartesianScaleOptions & {
-
   /**
    * Adjustment used when calculating the maximum data value.
    */
@@ -3073,7 +3223,11 @@ export const LogarithmicScale: ChartComponent & {
   new <O extends LogarithmicScaleOptions = LogarithmicScaleOptions>(cfg: AnyObject): LogarithmicScale<O>;
 };
 
-export type TimeScaleOptions = CartesianScaleOptions & {
+export type TimeScaleOptions = Omit<CartesianScaleOptions, 'min' | 'max'> & {
+  min: string | number;
+  max: string | number;
+  suggestedMin: string | number;
+  suggestedMax: string | number;
   /**
    * Scale boundary strategy (bypassed by min/max time options)
    * - `data`: make sure data are fully visible, ticks outside are removed
@@ -3082,6 +3236,13 @@ export type TimeScaleOptions = CartesianScaleOptions & {
    * @default 'data'
    */
   bounds: 'ticks' | 'data';
+
+  /**
+   * If true, bar chart offsets are computed with skipped tick sizes
+   * @since 3.8.0
+   * @default false
+   */
+  offsetAfterAutoskip: boolean;
 
   /**
    * options for creating a new adapter instance
@@ -3164,8 +3325,38 @@ export const TimeSeriesScale: ChartComponent & {
   new <O extends TimeScaleOptions = TimeScaleOptions>(cfg: AnyObject): TimeSeriesScale<O>;
 };
 
+export type RadialTickOptions = TickOptions & {
+  /**
+   * The Intl.NumberFormat options used by the default label formatter
+   */
+  format: Intl.NumberFormatOptions;
+
+  /**
+   * Maximum number of ticks and gridlines to show.
+   * @default 11
+   */
+  maxTicksLimit: number;
+
+  /**
+   * if defined and stepSize is not specified, the step size will be rounded to this many decimal places.
+   */
+  precision: number;
+
+  /**
+   * User defined fixed step size for the scale.
+   */
+  stepSize: number;
+
+  /**
+   * User defined number of ticks
+   */
+  count: number;
+}
+
 export type RadialLinearScaleOptions = CoreScaleOptions & {
   animate: boolean;
+
+  startAngle: number;
 
   angleLines: {
     /**
@@ -3225,6 +3416,13 @@ export type RadialLinearScaleOptions = CoreScaleOptions & {
     backdropPadding: Scriptable<number | ChartArea, ScriptableScalePointLabelContext>;
 
     /**
+     * Border radius
+     * @default 0
+     * @since 3.8.0
+     */
+    borderRadius: Scriptable<number | BorderRadius, ScriptableScalePointLabelContext>;
+
+    /**
      * if true, point labels are shown.
      * @default true
      */
@@ -3236,12 +3434,24 @@ export type RadialLinearScaleOptions = CoreScaleOptions & {
     color: Scriptable<Color, ScriptableScalePointLabelContext>;
     /**
      */
-    font: Scriptable<FontSpec, ScriptableScalePointLabelContext>;
+    font: ScriptableAndScriptableOptions<Partial<FontSpec>, ScriptableScalePointLabelContext>;
 
     /**
      * Callback function to transform data labels to point labels. The default implementation simply returns the current string.
      */
-    callback: (label: string, index: number) => string;
+    callback: (label: string, index: number) => string | string[] | number | number[];
+
+    /**
+     * Padding around the pointLabels
+     * @default 5
+     */
+    padding: Scriptable<number, ScriptableScalePointLabelContext>;
+
+    /**
+     * if true, point labels are centered.
+     * @default false
+     */
+    centerPointLabels: boolean;
   };
 
   /**
@@ -3253,33 +3463,7 @@ export type RadialLinearScaleOptions = CoreScaleOptions & {
    */
   suggestedMin: number;
 
-  ticks: TickOptions & {
-    /**
-     * The Intl.NumberFormat options used by the default label formatter
-     */
-    format: Intl.NumberFormatOptions;
-
-    /**
-     * Maximum number of ticks and gridlines to show.
-     * @default 11
-     */
-    maxTicksLimit: number;
-
-    /**
-     * if defined and stepSize is not specified, the step size will be rounded to this many decimal places.
-     */
-    precision: number;
-
-    /**
-     * User defined fixed step size for the scale.
-     */
-    stepSize: number;
-
-    /**
-     * User defined number of ticks
-     */
-    count: number;
-  };
+  ticks: RadialTickOptions;
 };
 
 export interface RadialLinearScale<O extends RadialLinearScaleOptions = RadialLinearScaleOptions> extends Scale<O> {
@@ -3450,12 +3634,12 @@ export type ScaleChartOptions<TType extends ChartType = ChartType> = {
 };
 
 export type ChartOptions<TType extends ChartType = ChartType> = DeepPartial<
-  CoreChartOptions<TType> &
-  ElementChartOptions<TType> &
-  PluginChartOptions<TType> &
-  DatasetChartOptions<TType> &
-  ScaleChartOptions<TType> &
-  ChartTypeRegistry[TType]['chartOptions']
+CoreChartOptions<TType> &
+ElementChartOptions<TType> &
+PluginChartOptions<TType> &
+DatasetChartOptions<TType> &
+ScaleChartOptions<TType> &
+ChartTypeRegistry[TType]['chartOptions']
 >;
 
 export type DefaultDataPoint<TType extends ChartType> = DistributiveArray<ChartTypeRegistry[TType]['defaultDataPoint']>;
@@ -3467,13 +3651,30 @@ export interface ChartDatasetProperties<TType extends ChartType, TData> {
   data: TData;
 }
 
+export interface ChartDatasetPropertiesCustomTypesPerDataset<TType extends ChartType, TData> {
+  type: TType;
+  data: TData;
+}
+
 export type ChartDataset<
   TType extends ChartType = ChartType,
   TData = DefaultDataPoint<TType>
 > = DeepPartial<
-  { [key in ChartType]: { type: key } & ChartTypeRegistry[key]['datasetOptions'] }[TType]
+{ [key in ChartType]: { type: key } & ChartTypeRegistry[key]['datasetOptions'] }[TType]
 > & ChartDatasetProperties<TType, TData>;
 
+export type ChartDatasetCustomTypesPerDataset<
+  TType extends ChartType = ChartType,
+  TData = DefaultDataPoint<TType>
+> = DeepPartial<
+{ [key in ChartType]: { type: key } & ChartTypeRegistry[key]['datasetOptions'] }[TType]
+> & ChartDatasetPropertiesCustomTypesPerDataset<TType, TData>;
+
+/**
+ * TData represents the data point type. If unspecified, a default is provided
+ *   based on the chart type.
+ * TLabel represents the label type
+ */
 export interface ChartData<
   TType extends ChartType = ChartType,
   TData = DefaultDataPoint<TType>,
@@ -3483,6 +3684,15 @@ export interface ChartData<
   datasets: ChartDataset<TType, TData>[];
 }
 
+export interface ChartDataCustomTypesPerDataset<
+  TType extends ChartType = ChartType,
+  TData = DefaultDataPoint<TType>,
+  TLabel = unknown
+> {
+  labels?: TLabel[];
+  datasets: ChartDatasetCustomTypesPerDataset<TType, TData>[];
+}
+
 export interface ChartConfiguration<
   TType extends ChartType = ChartType,
   TData = DefaultDataPoint<TType>,
@@ -3490,6 +3700,16 @@ export interface ChartConfiguration<
 > {
   type: TType;
   data: ChartData<TType, TData, TLabel>;
+  options?: ChartOptions<TType>;
+  plugins?: Plugin<TType>[];
+}
+
+export interface ChartConfigurationCustomTypesPerDataset<
+  TType extends ChartType = ChartType,
+  TData = DefaultDataPoint<TType>,
+  TLabel = unknown
+> {
+  data: ChartDataCustomTypesPerDataset<TType, TData, TLabel>;
   options?: ChartOptions<TType>;
   plugins?: Plugin<TType>[];
 }

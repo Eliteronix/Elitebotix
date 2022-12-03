@@ -2,7 +2,7 @@ const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivi
 const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { Beatmap, Calculator } = require('rosu-pp');
@@ -2127,7 +2127,7 @@ module.exports = {
 
 			let recentActivities = await client.shard.broadcastEval(async (c, { osuUser, lastUpdated }) => {
 				const osu = require('node-osu');
-				const fetch = require('node-fetch');
+				const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 				// eslint-disable-next-line no-undef
 				const { DBOsuGuildTrackers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 				// eslint-disable-next-line no-undef
@@ -3695,7 +3695,7 @@ async function checkForBirthdaysFunction(client) {
 				if (birthdayMessageChannel) {
 					// send a birthday gif from tenor 
 					let index;
-					const fetch = require('node-fetch');
+					const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 					// eslint-disable-next-line no-undef
 					const birthdayGif = await fetch(`https://api.tenor.com/v1/search?q=anime_birthday&key=${process.env.TENORTOKEN}&limit=30&contentfilter=medium`)
 						.then(async (res) => {
