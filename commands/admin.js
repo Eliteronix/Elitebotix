@@ -1998,6 +1998,38 @@ module.exports = {
 			// 						'type': 3,
 			// 					},
 			// 					{
+			// 						'name': 'timeframe',
+			// 						'description': 'Since when should the scores be taken into account',
+			// 						'type': 3,
+			// 						'required': false,
+			// 						'choices': [
+			// 							{
+			// 								'name': '1 month',
+			// 								'value': '1m'
+			// 							},
+			// 							{
+			// 								'name': '3 months',
+			// 								'value': '3m'
+			// 							},
+			// 							{
+			// 								'name': '6 months',
+			// 								'value': '6m'
+			// 							},
+			// 							{
+			// 								'name': '1 year (default)',
+			// 								'value': '1y'
+			// 							},
+			// 							{
+			// 								'name': '2 years',
+			// 								'value': '2y'
+			// 							},
+			// 							{
+			// 								'name': 'All time',
+			// 								'value': 'all'
+			// 							},
+			// 						]
+			// 					},
+			// 					{
 			// 						'name': 'scores',
 			// 						'description': 'Which types of scores should the matchup evaluate?',
 			// 						'type': 3,
@@ -2115,6 +2147,38 @@ module.exports = {
 			// 						'name': 'team2player8',
 			// 						'description': 'The eighth user of the second team',
 			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'timeframe',
+			// 						'description': 'Since when should the scores be taken into account',
+			// 						'type': 3,
+			// 						'required': false,
+			// 						'choices': [
+			// 							{
+			// 								'name': '1 month',
+			// 								'value': '1m'
+			// 							},
+			// 							{
+			// 								'name': '3 months',
+			// 								'value': '3m'
+			// 							},
+			// 							{
+			// 								'name': '6 months',
+			// 								'value': '6m'
+			// 							},
+			// 							{
+			// 								'name': '1 year (default)',
+			// 								'value': '1y'
+			// 							},
+			// 							{
+			// 								'name': '2 years',
+			// 								'value': '2y'
+			// 							},
+			// 							{
+			// 								'name': 'All time',
+			// 								'value': 'all'
+			// 							},
+			// 						]
 			// 					},
 			// 					{
 			// 						'name': 'scores',
@@ -6738,6 +6802,38 @@ module.exports = {
 									'type': 3,
 								},
 								{
+									'name': 'timeframe',
+									'description': 'Since when should the scores be taken into account',
+									'type': 3,
+									'required': false,
+									'choices': [
+										{
+											'name': '1 month',
+											'value': '1m'
+										},
+										{
+											'name': '3 months',
+											'value': '3m'
+										},
+										{
+											'name': '6 months',
+											'value': '6m'
+										},
+										{
+											'name': '1 year (default)',
+											'value': '1y'
+										},
+										{
+											'name': '2 years',
+											'value': '2y'
+										},
+										{
+											'name': 'All time',
+											'value': 'all'
+										},
+									]
+								},
+								{
 									'name': 'scores',
 									'description': 'Which types of scores should the matchup evaluate?',
 									'type': 3,
@@ -6855,6 +6951,38 @@ module.exports = {
 									'name': 'team2player8',
 									'description': 'The eighth user of the second team',
 									'type': 3,
+								},
+								{
+									'name': 'timeframe',
+									'description': 'Since when should the scores be taken into account',
+									'type': 3,
+									'required': false,
+									'choices': [
+										{
+											'name': '1 month',
+											'value': '1m'
+										},
+										{
+											'name': '3 months',
+											'value': '3m'
+										},
+										{
+											'name': '6 months',
+											'value': '6m'
+										},
+										{
+											'name': '1 year (default)',
+											'value': '1y'
+										},
+										{
+											'name': '2 years',
+											'value': '2y'
+										},
+										{
+											'name': 'All time',
+											'value': 'all'
+										},
+									]
 								},
 								{
 									'name': 'scores',
