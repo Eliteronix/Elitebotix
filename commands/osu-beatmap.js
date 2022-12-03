@@ -193,6 +193,10 @@ async function getBeatmap(msg, interaction, beatmap, tournament) {
 		tournamentOccurences = 'The map was never played in any tournaments.';
 	}
 
+	if (tournamentOccurences.length > 2000) {
+		tournamentOccurences = tournamentOccurences.substring(0, 1897) + '...';
+	}
+
 	let files = [attachment];
 
 	if (tournament) {
