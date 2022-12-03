@@ -27,6 +27,9 @@ module.exports = {
 		let teamsize = 1;
 		let team1 = [];
 		let team2 = [];
+		let timeframe = new Date();
+		timeframe = timeframe.setFullYear(timeframe.getFullYear() - 1);
+		let timeframeText = 'last 1 year';
 
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
@@ -50,6 +53,31 @@ module.exports = {
 						} else {
 							args.push('--all');
 						}
+					} else if (interaction.options._hoistedOptions[i].name === 'timeframe') {
+						if (interaction.options._hoistedOptions[i].value === '1m') {
+							timeframe = new Date();
+							timeframe.setMonth(timeframe.getMonth() - 1);
+							timeframeText = 'last 1 month';
+						} else if (interaction.options._hoistedOptions[i].value === '3m') {
+							timeframe = new Date();
+							timeframe.setMonth(timeframe.getMonth() - 3);
+							timeframeText = 'last 3 months';
+						} else if (interaction.options._hoistedOptions[i].value === '6m') {
+							timeframe = new Date();
+							timeframe.setMonth(timeframe.getMonth() - 6);
+							timeframeText = 'last 6 months';
+						} else if (interaction.options._hoistedOptions[i].value === '1y') {
+							timeframe = new Date();
+							timeframe.setFullYear(timeframe.getFullYear() - 1);
+							timeframeText = 'last 1 year';
+						} else if (interaction.options._hoistedOptions[i].value === '2y') {
+							timeframe = new Date();
+							timeframe.setFullYear(timeframe.getFullYear() - 2);
+							timeframeText = 'last 2 years';
+						} else if (interaction.options._hoistedOptions[i].value === 'all') {
+							timeframe = new Date(0);
+							timeframeText = 'all time';
+						}
 					} else {
 						args.push(interaction.options._hoistedOptions[i].value);
 					}
@@ -68,12 +96,39 @@ module.exports = {
 						}
 					} else if (interaction.options._hoistedOptions[i].name === 'scores') {
 						args.push(interaction.options._hoistedOptions[i].value);
+					} else if (interaction.options._hoistedOptions[i].name === 'timeframe') {
+						if (interaction.options._hoistedOptions[i].value === '1m') {
+							timeframe = new Date();
+							timeframe.setMonth(timeframe.getMonth() - 1);
+							timeframeText = 'last 1 month';
+						} else if (interaction.options._hoistedOptions[i].value === '3m') {
+							timeframe = new Date();
+							timeframe.setMonth(timeframe.getMonth() - 3);
+							timeframeText = 'last 3 months';
+						} else if (interaction.options._hoistedOptions[i].value === '6m') {
+							timeframe = new Date();
+							timeframe.setMonth(timeframe.getMonth() - 6);
+							timeframeText = 'last 6 months';
+						} else if (interaction.options._hoistedOptions[i].value === '1y') {
+							timeframe = new Date();
+							timeframe.setFullYear(timeframe.getFullYear() - 1);
+							timeframeText = 'last 1 year';
+						} else if (interaction.options._hoistedOptions[i].value === '2y') {
+							timeframe = new Date();
+							timeframe.setFullYear(timeframe.getFullYear() - 2);
+							timeframeText = 'last 2 years';
+						} else if (interaction.options._hoistedOptions[i].value === 'all') {
+							timeframe = new Date(0);
+							timeframeText = 'all time';
+						}
 					} else {
 						team2.push(interaction.options._hoistedOptions[i].value);
 					}
 				}
 			}
 		}
+
+		console.log(timeframe);
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
@@ -242,6 +297,9 @@ module.exports = {
 						{ warmup: false },
 						{ warmup: null }
 					],
+					gameEndDate: {
+						[Op.gte]: timeframe
+					}
 				}
 			}));
 
@@ -273,6 +331,9 @@ module.exports = {
 						{ warmup: false },
 						{ warmup: null }
 					],
+					gameEndDate: {
+						[Op.gte]: timeframe
+					}
 				}
 			}));
 
@@ -797,7 +858,7 @@ module.exports = {
 			tourneyMatchText = '; Tourney matches only';
 		}
 
-		let content = `Matchup analysis for \`${team1Names.join(' | ')}\` vs \`${team2Names.join(' | ')}\` (Teamsize: ${teamsize}; Score ${scoringType}${tourneyMatchText})`;
+		let content = `Matchup analysis for \`${team1Names.join(' | ')}\` vs \`${team2Names.join(' | ')}\` (Teamsize: ${teamsize}; Score ${scoringType}${tourneyMatchText}; ${timeframeText})`;
 
 		if (mapsPlayed.length) {
 			content += `\nWinrate chart for \`${team1Names.join(' | ')}\` against \`${team2Names.join(' | ')}\` (Teamsize: ${teamsize}) attached.`;
@@ -1213,7 +1274,7 @@ module.exports = {
 				sentMessage = await msg.reply({ content: content, files: files });
 			}
 		} else {
-			sentMessage = await interaction.followUp({ content: content, files: files });
+			sentMessage = await interaction.editReply({ content: content, files: files });
 		}
 
 		if (!interaction || interaction && interaction.options._subcommand !== 'teamvs') {
