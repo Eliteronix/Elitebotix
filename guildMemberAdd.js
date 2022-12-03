@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBAutoRoles } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (member) {
-	if (wrongCluster(member.id)) {
-		return;
-	}
-
 	if (isWrongSystem(member.guild.id, false)) {
 		return;
 	}
@@ -56,14 +52,14 @@ module.exports = async function (member) {
 
 			const changeEmbed = new Discord.MessageEmbed()
 				.setColor('#0099ff')
-				.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
+				.setAuthor({ name: `${member.user.username}#${member.user.discriminator}`, iconURL: member.user.displayAvatarURL() })
 				.setDescription(`<@${member.user.id}> joined the server!`)
 				.setThumbnail(member.user.displayAvatarURL())
 				.addFields(
 					{ name: 'Joined the server', value: `<@${member.user.id}>` },
 				)
 				.setTimestamp()
-				.setFooter('Eventname: userjoining');
+				.setFooter({ text: 'Eventname: userjoining' });
 
 			channel.send({ embeds: [changeEmbed] });
 		}

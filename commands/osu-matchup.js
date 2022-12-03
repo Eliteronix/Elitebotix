@@ -1,11 +1,12 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap } = require('../utils');
+const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap } = require('../utils');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-matchup',
@@ -26,11 +27,21 @@ module.exports = {
 		let teamsize = 1;
 		let team1 = [];
 		let team2 = [];
+		let timeframe = new Date();
+		timeframe = timeframe.setFullYear(timeframe.getFullYear() - 1);
+		let timeframeText = 'last 1 year';
 
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Matchup is being processed');
+			try {
+				await interaction.reply('Matchup is being processed');
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
 			args = [];
 
@@ -41,6 +52,31 @@ module.exports = {
 							args.push('--tourney');
 						} else {
 							args.push('--all');
+						}
+					} else if (interaction.options._hoistedOptions[i].name === 'timeframe') {
+						if (interaction.options._hoistedOptions[i].value === '1m') {
+							timeframe = new Date();
+							timeframe.setMonth(timeframe.getMonth() - 1);
+							timeframeText = 'last 1 month';
+						} else if (interaction.options._hoistedOptions[i].value === '3m') {
+							timeframe = new Date();
+							timeframe.setMonth(timeframe.getMonth() - 3);
+							timeframeText = 'last 3 months';
+						} else if (interaction.options._hoistedOptions[i].value === '6m') {
+							timeframe = new Date();
+							timeframe.setMonth(timeframe.getMonth() - 6);
+							timeframeText = 'last 6 months';
+						} else if (interaction.options._hoistedOptions[i].value === '1y') {
+							timeframe = new Date();
+							timeframe.setFullYear(timeframe.getFullYear() - 1);
+							timeframeText = 'last 1 year';
+						} else if (interaction.options._hoistedOptions[i].value === '2y') {
+							timeframe = new Date();
+							timeframe.setFullYear(timeframe.getFullYear() - 2);
+							timeframeText = 'last 2 years';
+						} else if (interaction.options._hoistedOptions[i].value === 'all') {
+							timeframe = new Date(0);
+							timeframeText = 'all time';
 						}
 					} else {
 						args.push(interaction.options._hoistedOptions[i].value);
@@ -60,6 +96,31 @@ module.exports = {
 						}
 					} else if (interaction.options._hoistedOptions[i].name === 'scores') {
 						args.push(interaction.options._hoistedOptions[i].value);
+					} else if (interaction.options._hoistedOptions[i].name === 'timeframe') {
+						if (interaction.options._hoistedOptions[i].value === '1m') {
+							timeframe = new Date();
+							timeframe.setMonth(timeframe.getMonth() - 1);
+							timeframeText = 'last 1 month';
+						} else if (interaction.options._hoistedOptions[i].value === '3m') {
+							timeframe = new Date();
+							timeframe.setMonth(timeframe.getMonth() - 3);
+							timeframeText = 'last 3 months';
+						} else if (interaction.options._hoistedOptions[i].value === '6m') {
+							timeframe = new Date();
+							timeframe.setMonth(timeframe.getMonth() - 6);
+							timeframeText = 'last 6 months';
+						} else if (interaction.options._hoistedOptions[i].value === '1y') {
+							timeframe = new Date();
+							timeframe.setFullYear(timeframe.getFullYear() - 1);
+							timeframeText = 'last 1 year';
+						} else if (interaction.options._hoistedOptions[i].value === '2y') {
+							timeframe = new Date();
+							timeframe.setFullYear(timeframe.getFullYear() - 2);
+							timeframeText = 'last 2 years';
+						} else if (interaction.options._hoistedOptions[i].value === 'all') {
+							timeframe = new Date(0);
+							timeframeText = 'all time';
+						}
 					} else {
 						team2.push(interaction.options._hoistedOptions[i].value);
 					}
@@ -67,7 +128,7 @@ module.exports = {
 			}
 		}
 
-		const guildPrefix = await getGuildPrefix(msg);
+		console.log(timeframe);
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
@@ -148,7 +209,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						team1[i] = discordUser.osuUserId;
 					} else {
-						msg.channel.send(`\`${team1[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						msg.channel.send(`\`${team1[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						team1.splice(i, 1);
 						i--;
 						continue;
@@ -186,7 +247,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						team2[i] = discordUser.osuUserId;
 					} else {
-						msg.channel.send(`\`${team2[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						msg.channel.send(`\`${team2[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						team2.splice(i, 1);
 						i--;
 						continue;
@@ -236,6 +297,9 @@ module.exports = {
 						{ warmup: false },
 						{ warmup: null }
 					],
+					gameEndDate: {
+						[Op.gte]: timeframe
+					}
 				}
 			}));
 
@@ -267,6 +331,9 @@ module.exports = {
 						{ warmup: false },
 						{ warmup: null }
 					],
+					gameEndDate: {
+						[Op.gte]: timeframe
+					}
 				}
 			}));
 
@@ -407,8 +474,9 @@ module.exports = {
 			}
 
 			//Push matches for the history txt
-			if (!matchesPlayed.includes(`${(team1GameScores[0].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${team1GameScores[0].matchStartDate.getUTCFullYear()} - ${team1GameScores[0].matchName} ----- https://osu.ppy.sh/community/matches/${team1GameScores[0].matchId}`)) {
-				matchesPlayed.push(`${(team1GameScores[0].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${team1GameScores[0].matchStartDate.getUTCFullYear()} - ${team1GameScores[0].matchName} ----- https://osu.ppy.sh/community/matches/${team1GameScores[0].matchId}`);
+			let date = new Date(team1GameScores[0].matchStartDate);
+			if (!matchesPlayed.includes(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${team1GameScores[0].matchName} ----- https://osu.ppy.sh/community/matches/${team1GameScores[0].matchId}`)) {
+				matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${team1GameScores[0].matchName} ----- https://osu.ppy.sh/community/matches/${team1GameScores[0].matchId}`);
 			}
 		}
 
@@ -511,7 +579,7 @@ module.exports = {
 						team1MapScores.push(scoresTeam1[j][k]);
 						if (!matchId || matchId < scoresTeam1[j][k].matchId) {
 							matchId = scoresTeam1[j][k].matchId;
-							date = scoresTeam1[j][k].matchStartDate;
+							date = new Date(scoresTeam1[j][k].matchStartDate);
 							dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
 						}
 						break;
@@ -530,7 +598,7 @@ module.exports = {
 						team2MapScores.push(scoresTeam2[j][k]);
 						if (!matchId || parseInt(matchId) < parseInt(scoresTeam2[j][k].matchId)) {
 							matchId = scoresTeam2[j][k].matchId;
-							date = scoresTeam2[j][k].matchStartDate;
+							date = new Date(scoresTeam2[j][k].matchStartDate);
 							dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
 						}
 						break;
@@ -586,6 +654,7 @@ module.exports = {
 			rounds.push({
 				mod: getScoreModpool(team1MapScores[0]),
 				winner: winner,
+				score: team1Score / team2Score,
 				matchId: matchId,
 				date: date,
 				dateReadable: dateReadable,
@@ -789,7 +858,7 @@ module.exports = {
 			tourneyMatchText = '; Tourney matches only';
 		}
 
-		let content = `Matchup analysis for \`${team1Names.join(' | ')}\` vs \`${team2Names.join(' | ')}\` (Teamsize: ${teamsize}; Score ${scoringType}${tourneyMatchText})`;
+		let content = `Matchup analysis for \`${team1Names.join(' | ')}\` vs \`${team2Names.join(' | ')}\` (Teamsize: ${teamsize}; Score ${scoringType}${tourneyMatchText}; ${timeframeText})`;
 
 		if (mapsPlayed.length) {
 			content += `\nWinrate chart for \`${team1Names.join(' | ')}\` against \`${team2Names.join(' | ')}\` (Teamsize: ${teamsize}) attached.`;
@@ -809,14 +878,23 @@ module.exports = {
 			let DTWinrates = [];
 			let FMWinrates = [];
 			let totalWinrates = [];
+
+			//Get cumulated scores out of rounds array for each label
+			let NMScores = [];
+			let HDScores = [];
+			let HRScores = [];
+			let DTScores = [];
+			let FMScores = [];
+			let totalScores = [];
+
 			for (let i = 0; i < labels.length; i++) {
-				//[Wins, Rounds played]
-				let NMRounds = [0, 0];
-				let HDRounds = [0, 0];
-				let HRRounds = [0, 0];
-				let DTRounds = [0, 0];
-				let FMRounds = [0, 0];
-				let totalRounds = [0, 0];
+				//[Wins, Rounds played, Score against opponent]
+				let NMRounds = [0, 0, 0];
+				let HDRounds = [0, 0, 0];
+				let HRRounds = [0, 0, 0];
+				let DTRounds = [0, 0, 0];
+				let FMRounds = [0, 0, 0];
+				let totalRounds = [0, 0, 0];
 
 				//Loop through all rounds
 				for (let j = 0; j < rounds.length; j++) {
@@ -824,6 +902,7 @@ module.exports = {
 					if (totalRounds[1] > 0 || rounds[j].dateReadable === labels[i]) {
 						//Increase total amounts
 						totalRounds[1]++;
+						totalRounds[2] += rounds[j].score;
 						if (rounds[j].winner === 0) {
 							totalRounds[0]++;
 						}
@@ -831,26 +910,31 @@ module.exports = {
 						//Increase amounts for the modPool
 						if (rounds[j].mod === 'NM') {
 							NMRounds[1]++;
+							NMRounds[2] += rounds[j].score;
 							if (rounds[j].winner === 0) {
 								NMRounds[0]++;
 							}
 						} else if (rounds[j].mod === 'HD') {
 							HDRounds[1]++;
+							HDRounds[2] += rounds[j].score;
 							if (rounds[j].winner === 0) {
 								HDRounds[0]++;
 							}
 						} else if (rounds[j].mod === 'HR') {
 							HRRounds[1]++;
+							HRRounds[2] += rounds[j].score;
 							if (rounds[j].winner === 0) {
 								HRRounds[0]++;
 							}
 						} else if (rounds[j].mod === 'DT') {
 							DTRounds[1]++;
+							DTRounds[2] += rounds[j].score;
 							if (rounds[j].winner === 0) {
 								DTRounds[0]++;
 							}
 						} else if (rounds[j].mod === 'FM') {
 							FMRounds[1]++;
+							FMRounds[2] += rounds[j].score;
 							if (rounds[j].winner === 0) {
 								FMRounds[0]++;
 							}
@@ -858,42 +942,60 @@ module.exports = {
 					}
 				}
 
-				//Calculate winrates
+				//Calculate winrates and scores
 				let NMWinrate = null;
+				let NMScore = null;
 				if (NMRounds[1] > 0) {
 					NMWinrate = (NMRounds[0] / NMRounds[1]) * 100;
+					NMScore = (NMRounds[2] / NMRounds[1]);
 				}
 				NMWinrates.push(NMWinrate);
+				NMScores.push(NMScore);
 
 				let HDWinrate = null;
+				let HDScore = null;
 				if (HDRounds[1] > 0) {
 					HDWinrate = (HDRounds[0] / HDRounds[1]) * 100;
+					HDScore = (HDRounds[2] / HDRounds[1]);
 				}
 				HDWinrates.push(HDWinrate);
+				HDScores.push(HDScore);
 
 				let HRWinrate = null;
+				let HRScore = null;
 				if (HRRounds[1] > 0) {
 					HRWinrate = (HRRounds[0] / HRRounds[1]) * 100;
+					HRScore = (HRRounds[2] / HRRounds[1]);
 				}
 				HRWinrates.push(HRWinrate);
+				HRScores.push(HRScore);
 
 				let DTWinrate = null;
+				let DTScore = null;
 				if (DTRounds[1] > 0) {
 					DTWinrate = (DTRounds[0] / DTRounds[1]) * 100;
+					DTScore = (DTRounds[2] / DTRounds[1]);
 				}
 				DTWinrates.push(DTWinrate);
+				DTScores.push(DTScore);
 
 				let FMWinrate = null;
+				let FMScore = null;
 				if (FMRounds[1] > 0) {
 					FMWinrate = (FMRounds[0] / FMRounds[1]) * 100;
+					FMScore = (FMRounds[2] / FMRounds[1]);
 				}
 				FMWinrates.push(FMWinrate);
+				FMScores.push(FMScore);
 
 				let totalWinrate = null;
+				let totalScore = null;
 				if (totalRounds[1] > 0) {
 					totalWinrate = (totalRounds[0] / totalRounds[1]) * 100;
+					totalScore = (totalRounds[2] / totalRounds[1]);
 				}
 				totalWinrates.push(totalWinrate);
+				totalScores.push(totalScore);
 			}
 
 			if (labels.length === 1) {
@@ -904,6 +1006,12 @@ module.exports = {
 				HRWinrates.push(HRWinrates[0]);
 				DTWinrates.push(DTWinrates[0]);
 				FMWinrates.push(FMWinrates[0]);
+				totalScores.push(totalScores[0]);
+				NMScores.push(NMScores[0]);
+				HDScores.push(HDScores[0]);
+				HRScores.push(HRScores[0]);
+				DTScores.push(DTScores[0]);
+				FMScores.push(FMScores[0]);
 			}
 
 			const width = 1500; //px
@@ -1015,6 +1123,111 @@ module.exports = {
 
 			files.push(matchupWinrateChart);
 
+			const scoresData = {
+				labels: labels,
+				datasets: [
+					{
+						label: 'Cumulated Scores (All Mods)',
+						data: totalScores,
+						borderColor: 'rgb(201, 203, 207)',
+						fill: false,
+						tension: 0.4
+					}, {
+						label: 'Cumulated Scores (NM only)',
+						data: NMScores,
+						borderColor: 'rgb(54, 162, 235)',
+						fill: false,
+						tension: 0.4
+					}, {
+						label: 'Cumulated Scores (HD only)',
+						data: HDScores,
+						borderColor: 'rgb(255, 205, 86)',
+						fill: false,
+						tension: 0.4
+					}, {
+						label: 'Cumulated Scores (HR only)',
+						data: HRScores,
+						borderColor: 'rgb(255, 99, 132)',
+						fill: false,
+						tension: 0.4
+					}, {
+						label: 'Cumulated Scores (DT only)',
+						data: DTScores,
+						borderColor: 'rgb(153, 102, 255)',
+						fill: false,
+						tension: 0.4
+					}, {
+						label: 'Cumulated Scores (FM only)',
+						data: FMScores,
+						borderColor: 'rgb(75, 192, 192)',
+						fill: false,
+						tension: 0.4
+					}
+				]
+			};
+
+			const scoresConfiguration = {
+				type: 'line',
+				data: scoresData,
+				options: {
+					spanGaps: true,
+					responsive: true,
+					plugins: {
+						title: {
+							display: true,
+							text: 'Cumulated scores for indirect matchups',
+							color: '#FFFFFF',
+						},
+						legend: {
+							labels: {
+								color: '#FFFFFF',
+							}
+						},
+					},
+					interaction: {
+						intersect: false,
+					},
+					scales: {
+						x: {
+							display: true,
+							title: {
+								display: true,
+								text: 'Month',
+								color: '#FFFFFF'
+							},
+							grid: {
+								color: '#8F8F8F'
+							},
+							ticks: {
+								color: '#FFFFFF',
+							},
+						},
+						y: {
+							display: true,
+							title: {
+								display: true,
+								text: `Scores for ${team1Names.join(' | ')}`,
+								color: '#FFFFFF'
+							},
+							grid: {
+								color: '#8F8F8F'
+							},
+							ticks: {
+								color: '#FFFFFF',
+							},
+							suggestedMin: 0,
+							suggestedMax: 1
+						}
+					}
+				},
+			};
+
+			const scoresImageBuffer = await canvasRenderService.renderToBuffer(scoresConfiguration);
+
+			const scoresMatchupWinrateChart = new Discord.MessageAttachment(scoresImageBuffer, `osu-matchup-${team1.join('-')}-vs-${team2.join('-')}.png`);
+
+			files.push(scoresMatchupWinrateChart);
+
 			//Convert modpool arrays into strings
 			for (let i = 0; i < mapsPlayedReadable.length; i++) {
 				for (let j = 0; j < mapsPlayedReadable[i].length; j++) {
@@ -1061,7 +1274,7 @@ module.exports = {
 				sentMessage = await msg.reply({ content: content, files: files });
 			}
 		} else {
-			sentMessage = await interaction.followUp({ content: content, files: files });
+			sentMessage = await interaction.editReply({ content: content, files: files });
 		}
 
 		if (!interaction || interaction && interaction.options._subcommand !== 'teamvs') {

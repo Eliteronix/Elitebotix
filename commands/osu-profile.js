@@ -2,11 +2,12 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getGuildPrefix, humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague } = require('../utils');
+const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague } = require('../utils');
 const fetch = require('node-fetch');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
-const { developers } = require('../config.json');
+const { developers, showUnknownInteractionError } = require('../config.json');
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
 module.exports = {
 	name: 'osu-profile',
@@ -24,21 +25,31 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		let showGraph = false;
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Players are being processed');
+			try {
+				await interaction.reply('Players are being processed');
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
 			args = [];
 
 			if (interaction.options._hoistedOptions) {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					args.push(interaction.options._hoistedOptions[i].value);
+					if (interaction.options._hoistedOptions[i].name === 'showgraph') {
+						showGraph = interaction.options._hoistedOptions[i].value;
+					} else {
+						args.push(interaction.options._hoistedOptions[i].value);
+					}
 				}
 			}
 		}
-
-		const guildPrefix = await getGuildPrefix(msg);
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
@@ -48,10 +59,10 @@ module.exports = {
 		if (!args[0]) {//Get profile by author if no argument
 
 			if (commandUser && commandUser.osuUserId) {
-				getProfile(msg, commandUser.osuUserId, server, mode);
+				getProfile(msg, commandUser.osuUserId, server, mode, showGraph);
 			} else {
 				const userDisplayName = await getMessageUserDisplayname(msg);
-				getProfile(msg, userDisplayName, server, mode);
+				getProfile(msg, userDisplayName, server, mode, showGraph);
 			}
 		} else {
 			//Get profiles by arguments
@@ -63,21 +74,21 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getProfile(msg, discordUser.osuUserId, server, mode);
+						getProfile(msg, discordUser.osuUserId, server, mode, showGraph);
 					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
-						getProfile(msg, args[i], server, mode);
+						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
+						getProfile(msg, args[i], server, mode, showGraph);
 					}
 				} else {
 
 					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode, true);
+							getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode, showGraph, true);
 						} else {
-							getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode);
+							getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode, showGraph);
 						}
 					} else {
-						getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode);
+						getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode, showGraph);
 					}
 				}
 			}
@@ -85,7 +96,7 @@ module.exports = {
 	},
 };
 
-async function getProfile(msg, username, server, mode, noLinkedAccount) {
+async function getProfile(msg, username, server, mode, showGraph, noLinkedAccount) {
 	if (server === 'bancho') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -133,23 +144,37 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				await drawAvatar(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-profile-${getGameModeName(mode)}-${user.id}.png`);
+				const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-profile-${getGameModeName(mode)}-${user.id}.png`)];
 
-				let guildPrefix = await getGuildPrefix(msg);
+				if (showGraph) {
+					let graph = await getRankHistoryGraph(user.id, mode);
+					if (graph) {
+						files.push(graph);
+					}
+				}
+
+				logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers Bancho linkedUser');
+				const linkedUser = await DBDiscordUsers.findOne({
+					where: { osuUserId: user.id }
+				});
+
+				if (linkedUser && linkedUser.userId) {
+					noLinkedAccount = false;
+				}
 
 				//Send attachment
 				let sentMessage = null;
 				if (noLinkedAccount) {
-					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`${guildPrefix}osu-link ${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`/osu-link connect username:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: files });
 				} else {
-					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: files });
 				}
 				processingMessage.delete();
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
 
 				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores');
-				const userScores = await DBOsuMultiScores.findAll({
+				let userScores = await DBOsuMultiScores.findAll({
 					where: {
 						osuUserId: user.id,
 						score: {
@@ -174,6 +199,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 					await sentMessage.react('🆚');
 					await sentMessage.react('📊');
 				}
+				userScores = null;
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
@@ -233,7 +259,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 				await sentMessage.react('📈');
 
 				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores');
-				const userScores = await DBOsuMultiScores.findAll({
+				let userScores = await DBOsuMultiScores.findAll({
 					where: {
 						osuUserId: user.id,
 						score: {
@@ -258,6 +284,7 @@ async function getProfile(msg, username, server, mode, noLinkedAccount) {
 					await sentMessage.react('🆚');
 					await sentMessage.react('📊');
 				}
+				userScores = null;
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
@@ -524,10 +551,10 @@ async function drawBadges(input, server) {
 			.then(async (res) => {
 				let htmlCode = await res.text();
 				htmlCode = htmlCode.replace(/&quot;/gm, '"');
-				const badgesRegex = /,"badges".+,"beatmap_playcounts_count":/gm;
+				const badgesRegex = /,"badges".+,"comments_count":/gm;
 				const matches = badgesRegex.exec(htmlCode);
 				if (matches && matches[0]) {
-					const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"beatmap_playcounts_count":', '');
+					const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"comments_count":', '');
 					const rawBadgesArray = cleanedMatch.split('},{');
 					for (let i = 0; i < rawBadgesArray.length; i++) {
 						if (rawBadgesArray[i] !== '') {
@@ -627,4 +654,112 @@ async function drawAvatar(input) {
 	}
 	const output = [canvas, ctx, user];
 	return output;
+}
+
+async function getRankHistoryGraph(osuUserId, mode) {
+	mode = getGameModeName(mode);
+
+	if (mode === 'standard') {
+		mode = 'osu';
+	} else if (mode === 'catch') {
+		mode = 'fruits';
+	}
+
+	let history = await fetch(`https://osu.ppy.sh/users/${osuUserId}/${mode}`)
+		.then(async (res) => {
+			let htmlCode = await res.text();
+			htmlCode = htmlCode.replace(/&quot;/gm, '"');
+			const rankHistoryRegex = /,"rankHistory":{"mode":"(osu|taiko|fruits|mania)","data":\[.+]},/gm;
+			const matches = rankHistoryRegex.exec(htmlCode);
+			if (matches && matches[0]) {
+				return matches[0].replace(`,"rankHistory":{"mode":"${mode}","data":[`, '').replace(/].+/gm, '').split(',');
+			}
+		});
+
+	if (!history) {
+		return;
+	}
+
+	let labels = [];
+
+	for (let i = 0; i < history.length; i++) {
+		labels.push(`${history.length - i} days ago`);
+	}
+
+	const width = 1500; //px
+	const height = 750; //px
+	const canvasRenderService = new ChartJSNodeCanvas({ width, height });
+
+	const data = {
+		labels: labels,
+		datasets: [
+			{
+				label: 'Rank history',
+				data: history,
+				borderColor: 'rgb(96, 183, 202)',
+				fill: 'start',
+				backgroundColor: 'rgba(96, 183, 202, 0.6)',
+				tension: 0.4
+			},
+		]
+	};
+
+	const configuration = {
+		type: 'line',
+		data: data,
+		options: {
+			spanGaps: true,
+			responsive: true,
+			plugins: {
+				title: {
+					display: true,
+					text: 'Rank History',
+					color: '#FFFFFF',
+				},
+				legend: {
+					labels: {
+						color: '#FFFFFF',
+					}
+				},
+			},
+			interaction: {
+				intersect: false,
+			},
+			scales: {
+				x: {
+					display: true,
+					title: {
+						display: true,
+						text: 'Month',
+						color: '#FFFFFF'
+					},
+					grid: {
+						color: '#8F8F8F'
+					},
+					ticks: {
+						color: '#FFFFFF',
+					},
+				},
+				y: {
+					display: true,
+					title: {
+						display: true,
+						text: 'Rank',
+						color: '#FFFFFF'
+					},
+					grid: {
+						color: '#8F8F8F'
+					},
+					ticks: {
+						color: '#FFFFFF',
+					},
+					reverse: true,
+				}
+			}
+		},
+	};
+
+	const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+
+	return new Discord.MessageAttachment(imageBuffer, `rankHistory-osu-${osuUserId}.png`);
 }

@@ -1,6 +1,6 @@
 const { DBServerUserActivity } = require('../dbObjects');
 const { createLeaderboard, humanReadable, populateMsgFromInteraction, logDatabaseQueries } = require('../utils.js');
-const { leaderboardEntriesPerPage } = require('../config.json');
+const { leaderboardEntriesPerPage, showUnknownInteractionError } = require('../config.json');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -23,7 +23,14 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Processing guild leaderboard...');
+			try {
+				await interaction.reply('Processing guild leaderboard...');
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
 			if (interaction.options._hoistedOptions[1]) {
 				args = [interaction.options._hoistedOptions[1].value];
@@ -93,7 +100,7 @@ module.exports = {
 					page = Math.abs(parseInt(args[0]));
 				}
 
-				if (!page && leaderboardData.length > 300) {
+				if (!page && leaderboardData.length > 150) {
 					page = 1;
 					if (authorPlacement) {
 						page = Math.floor(authorPlacement / leaderboardEntriesPerPage) + 1;

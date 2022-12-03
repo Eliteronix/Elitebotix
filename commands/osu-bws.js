@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const { Permissions } = require('discord.js');
-const { getGuildPrefix, humanReadable, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { humanReadable, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'osu-bws',
@@ -33,8 +33,6 @@ module.exports = {
 			}
 		}
 
-		const guildPrefix = await getGuildPrefix(msg);
-
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
 		const mode = commandConfig[2];
@@ -60,10 +58,10 @@ module.exports = {
 						getProfile(msg, interaction, discordUser.osuUserId, mode);
 					} else {
 						if (msg.id) {
-							return msg.reply(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+							return msg.reply(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						}
 
-						return interaction.followUp(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						return interaction.followUp(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 					}
 				} else {
 
@@ -95,8 +93,6 @@ async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 		.then(async (user) => {
 			updateOsuDetailsforUser(user, mode);
 
-			const guildPrefix = await getGuildPrefix(msg);
-
 			let badgeAmount = await getOsuBadgeNumberById(user.id);
 
 			logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers 2');
@@ -121,8 +117,18 @@ async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 			} else {
 				data.push(`${user.name} has ${badgeAmount} badges and their rank will therefore stay the same using BWS.`);
 			}
+
+			logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers linkedUser');
+			const linkedUser = await DBDiscordUsers.findOne({
+				where: { osuUserId: user.id }
+			});
+
+			if (linkedUser && linkedUser.userId) {
+				noLinkedAccount = false;
+			}
+
 			if (noLinkedAccount) {
-				data.push(`Feel free to use \`${guildPrefix}osu-link ${user.name}\` to connect your account.`);
+				data.push(`Feel free to use \`/osu-link connect username:${user.name}\` to connect your account.`);
 			}
 			if (msg.id) {
 				return msg.reply(data.join('\n'), { split: true });

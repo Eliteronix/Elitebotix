@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBTemporaryVoices } = require('./dbObjects');
-const { isWrongSystem, pause, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, pause, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (channel) {
-	if (wrongCluster(channel.id)) {
-		return;
-	}
-
 	if (channel.type === 'DM') {
 		return;
 	}
@@ -44,7 +40,7 @@ module.exports = async function (channel) {
 				{ name: 'Name', value: channel.name },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: channeldelete');
+			.setFooter({ text: 'Eventname: channeldelete' });
 
 		if (channel.type === 'voice') {
 			changeEmbed.addField('Bitrate', channel.bitrate);

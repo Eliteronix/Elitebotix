@@ -1,69 +1,82 @@
-const { getGuildPrefix, pause } = require('../utils');
-
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, bancho, twitchClient, processQueueEntry) {
+		// console.log('periodic-weather');
 		let args = processQueueEntry.additions.split(';');
 
-		const channel = await client.channels.fetch(args[0]).catch(async () => {
-			//Nothing
-		});
+		let channelFound = await client.shard.broadcastEval(async (c, { channelId, processQueueEntryId }) => {
+			const channel = await c.channels.cache.get(channelId);
 
-		if (channel) {
-			let command = require('../commands/weather.js');
+			if (channel) {
+				// eslint-disable-next-line no-undef
+				const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+				// eslint-disable-next-line no-undef
+				const { getGuildPrefix, pause } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+				// eslint-disable-next-line no-undef
+				let command = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\weather.js`);
 
-			await channel.messages.fetch({ limit: 100 }).then(async (messages) => {
-				const messagesArray = [];
-				messages.filter(m => m.content === `Weather for ${args[3]}`).each(message => messagesArray.push(message));
+				let processQueueEntry = await DBProcessQueue.findOne({ where: { id: processQueueEntryId } });
+				let args = processQueueEntry.additions.split(';');
 
-				if (messagesArray.length === 0) {
-					const placeHolderMessage = await channel.send('Placeholder message for weather tracking.');
-					messagesArray.push(placeHolderMessage);
-				}
+				await channel.messages.fetch({ limit: 100 }).then(async (messages) => {
+					const messagesArray = [];
+					messages.filter(m => m.content === `Weather for ${args[3]}`).each(message => messagesArray.push(message));
 
-				const guildPrefix = getGuildPrefix(messagesArray[messagesArray.length - 1]);
+					if (messagesArray.length === 0) {
+						const placeHolderMessage = await channel.send('Placeholder message for weather tracking.');
+						messagesArray.push(placeHolderMessage);
+					}
 
-				let degreeType = 'C';
-				if (args[2] === 'F') {
-					degreeType = 'F ';
-				}
+					const guildPrefix = getGuildPrefix(messagesArray[messagesArray.length - 1]);
 
-				messagesArray[messagesArray.length - 1].content = `${guildPrefix}weather ${degreeType}${args[3]}`;
+					let degreeType = 'C';
+					if (args[2] === 'F') {
+						degreeType = 'F ';
+					}
 
-				let locationArguments = args[3].split(' ');
-				let newArgs = [degreeType];
+					messagesArray[messagesArray.length - 1].content = `${guildPrefix}weather ${degreeType}${args[3]}`;
 
-				for (let i = 0; i < locationArguments.length; i++) {
-					newArgs.push(locationArguments[i]);
-				}
+					let locationArguments = args[3].split(' ');
+					let newArgs = [degreeType];
 
-				command.execute(messagesArray[messagesArray.length - 1], newArgs, null, [client, null]);
+					for (let i = 0; i < locationArguments.length; i++) {
+						newArgs.push(locationArguments[i]);
+					}
 
-				await pause(60000);
+					command.execute(messagesArray[messagesArray.length - 1], newArgs, null, [c, null]);
 
-				try {
-					await messagesArray[messagesArray.length - 1].delete();
-				} catch (err) {
-					//Nothing
-					//Probably no permissions
-				}
+					await pause(60000);
 
-				let date = new Date();
+					try {
+						await messagesArray[messagesArray.length - 1].delete();
+					} catch (err) {
+						//Nothing
+						//Probably no permissions
+					}
 
-				date.setUTCMinutes(0);
-				date.setUTCSeconds(0);
-				date.setUTCMilliseconds(0);
-				date.setUTCHours(date.getUTCHours() + 1);
+					let date = new Date();
 
-				if (args[1] === 'daily') {
-					date.setUTCHours(0);
-					date.setUTCDate(date.getUTCDate() + 1);
-				}
+					date.setUTCMinutes(0);
+					date.setUTCSeconds(0);
+					date.setUTCMilliseconds(0);
+					date.setUTCHours(date.getUTCHours() + 1);
 
-				processQueueEntry.date = date;
-				processQueueEntry.beingExecuted = false;
-				await processQueueEntry.save();
-			});
-		} else {
+					if (args[1] === 'daily') {
+						date.setUTCHours(0);
+						date.setUTCDate(date.getUTCDate() + 1);
+					}
+
+					processQueueEntry.date = date;
+					processQueueEntry.beingExecuted = false;
+					await processQueueEntry.save();
+				});
+				return true;
+			}
+			return false;
+		}, { context: { channelId: args[0], processQueueEntryId: processQueueEntry.id } });
+
+		channelFound = channelFound.some(channel => channel);
+
+		if (!channelFound) {
 			processQueueEntry.destroy();
 		}
 	},

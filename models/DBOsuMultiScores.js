@@ -41,12 +41,12 @@ module.exports = (sequelize, DataTypes) => {
 		pp: DataTypes.STRING,
 		paranoid: true,
 	},
-		{
-			indexes: [
-				{
-					unique: false,
-					fields: ['osuUserId', 'matchId', 'gameId', 'beatmapId', 'tourneyMatch', 'mode', 'score', 'matchName', 'gameStartDate', 'gameEndDate', 'warmup', 'warmupDecidedByAmount']
-				}
-			]
-		});
+	{
+		indexes: [
+			{
+				unique: false,
+				fields: ['osuUserId', 'matchId', 'gameId', 'beatmapId', 'tourneyMatch', 'mode', 'score', 'matchName', 'gameStartDate', 'gameEndDate', 'warmup', 'warmupDecidedByAmount']
+			}
+		]
+	});
 };

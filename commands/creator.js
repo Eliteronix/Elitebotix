@@ -6,7 +6,7 @@ const Canvas = require('canvas');
 module.exports = {
 	name: 'creator',
 	aliases: ['developer', 'donate', 'support', 'creators', 'developers', 'devs'],
-	description: 'Sends an info card about the developer',
+	description: 'Sends an info card about the developers',
 	//usage: '<bug/feature/request> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',

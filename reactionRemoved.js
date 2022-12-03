@@ -3,14 +3,10 @@ const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } 
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user) {
-	if (wrongCluster(user.id)) {
-		return;
-	}
-
 	if (reaction.message.guild && isWrongSystem(reaction.message.guild.id, reaction.message.channel.type === 'DM')) {
 		return;
 	}
@@ -139,7 +135,7 @@ module.exports = async function (reaction, user) {
 					}
 					if (message) {
 						const starBoardMessageEmbed = new Discord.MessageEmbed()
-							.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
+							.setAuthor({ name: reaction.message.author.username, iconURL: reaction.message.author.displayAvatarURL() })
 							.setColor('#d9b51c')
 							.setDescription(reaction.message.content)
 							.addFields(
@@ -174,7 +170,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		.setColor(reactionRolesHeader.reactionColor)
 		.setTitle(reactionRolesHeader.reactionTitle)
 		.setThumbnail(reactionRolesHeader.reactionImage)
-		.setFooter(`Reactionrole - EmbedId: ${reactionRolesHeader.id}`);
+		.setFooter({ text: `Reactionrole - EmbedId: ${reactionRolesHeader.id}` });
 
 	//Set description if available
 	if (reactionRolesHeader.reactionDescription) {

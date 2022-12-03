@@ -1,11 +1,12 @@
 const osu = require('node-osu');
-const { DBOsuMultiScores } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { saveOsuMultiScores, logDatabaseQueries } = require('../utils');
 
 //Archiving started around 40000000
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, bancho, twitchClient, processQueueEntry) {
+		// console.log('saveMultiMatches');
 		let args = processQueueEntry.additions.split(';');
 
 		let matchID = args[0];
@@ -35,39 +36,69 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
-			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 60);
+			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 10);
 		}
 
 		await osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
 				let sixHoursAgo = new Date();
 				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
+
+				let fiveMinutesAgo = new Date();
+				fiveMinutesAgo.setUTCMinutes(fiveMinutesAgo.getUTCMinutes() - 5);
 				if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
-					let date = new Date();
 					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
 						await saveOsuMultiScores(match);
 						let now = new Date();
 						let minutesBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60) % 60;
 						let hoursBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60) % 24;
 						let daysBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60 / 24);
-						let channel;
-						// eslint-disable-next-line no-undef
-						if (process.env.SERVER === 'Live') {
-							channel = await client.channels.fetch('891314445559676928');
-						} else {
-							channel = await client.channels.fetch('892873577479692358');
-						}
-						await channel.send(`<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done`);
+						client.shard.broadcastEval(async (c, { message }) => {
+							let channel;
+							// eslint-disable-next-line no-undef
+							if (process.env.SERVER === 'Live') {
+								channel = await c.channels.cache.get('891314445559676928');
+								// eslint-disable-next-line no-undef
+							} else if (process.env.SERVER === 'QA') {
+								channel = await c.channels.cache.get('892873577479692358');
+							} else {
+								channel = await c.channels.cache.get('1013789721014571090');
+							}
+
+							if (channel) {
+								await channel.send(message);
+							}
+						}, { context: { message: `<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done` } });
 					}
 					//Go next if match found and ended / too long going already
 					// eslint-disable-next-line no-undef
-					if (process.env.SERVER === 'Live') {
+					if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
 						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
 					} else {
 						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
 					}
 
+					let date = new Date();
 					processQueueEntry.date = date;
+					processQueueEntry.beingExecuted = false;
+					return await processQueueEntry.save();
+				} else if (Date.parse(match.raw_start) < fiveMinutesAgo) {
+					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
+						await saveOsuMultiScores(match);
+						let date = new Date();
+						date.setUTCMinutes(date.getUTCMinutes() + 5);
+						DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: date });
+					}
+
+					// eslint-disable-next-line no-undef
+					if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
+						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
+					} else {
+						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
+					}
+
+					let now = new Date();
+					processQueueEntry.date = now;
 					processQueueEntry.beingExecuted = false;
 					return await processQueueEntry.save();
 				}
@@ -78,7 +109,7 @@ module.exports = {
 				if (err.message === 'Not found') {
 					//Go next if match not found
 					// eslint-disable-next-line no-undef
-					if (process.env.SERVER === 'Live') {
+					if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
 						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
 					} else {
 						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
@@ -98,7 +129,7 @@ module.exports = {
 						if (Date.parse(json.events[json.events.length - 1].timestamp) - Date.parse(json.match.start_time) > 86400000) {
 							//Go next if over 24 hours long game
 							// eslint-disable-next-line no-undef
-							if (process.env.SERVER === 'Live') {
+							if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
 								processQueueEntry.additions = `${parseInt(matchID) + 1}`;
 							} else {
 								processQueueEntry.additions = `${parseInt(matchID) - 1}`;
@@ -146,8 +177,12 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 	if (incompleteMatchScore) {
 		await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
 			.then(async (match) => {
-				let channel = await client.channels.fetch(channelId);
-				await channel.send(`<https://osu.ppy.sh/mp/${match.id}> | ${incompleteMatchScore.updatedAt.getUTCHours().toString().padStart(2, 0)}:${incompleteMatchScore.updatedAt.getUTCMinutes().toString().padStart(2, 0)} ${incompleteMatchScore.updatedAt.getUTCDate().toString().padStart(2, 0)}.${(incompleteMatchScore.updatedAt.getUTCMonth() + 1).toString().padStart(2, 0)}.${incompleteMatchScore.updatedAt.getUTCFullYear()} | \`${match.name}\``);
+				client.shard.broadcastEval(async (c, { channelId, message }) => {
+					let channel = await c.channels.cache.get(channelId);
+					if (channel) {
+						await channel.send(message);
+					}
+				}, { context: { channelId: channelId, message: `<https://osu.ppy.sh/mp/${match.id}> | ${incompleteMatchScore.updatedAt.getUTCHours().toString().padStart(2, 0)}:${incompleteMatchScore.updatedAt.getUTCMinutes().toString().padStart(2, 0)} ${incompleteMatchScore.updatedAt.getUTCDate().toString().padStart(2, 0)}.${(incompleteMatchScore.updatedAt.getUTCMonth() + 1).toString().padStart(2, 0)}.${incompleteMatchScore.updatedAt.getUTCFullYear()} | \`${match.name}\`` } });
 
 				incompleteMatchScore.changed('updatedAt', true);
 				await incompleteMatchScore.save();
@@ -175,6 +210,8 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					}
 				}
 			});
+	} else {
+		secondsToWait = secondsToWait + 60;
 	}
 
 	let date = new Date();

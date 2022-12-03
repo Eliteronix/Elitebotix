@@ -55,6 +55,9 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		lastDuelRatingUpdate: {
+			type: DataTypes.DATE,
+		},
 		osuDuelRatingUpdates: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
@@ -129,6 +132,17 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 		},
 		weatherDegreeType: {
+			type: DataTypes.STRING,
+		},
+		tournamentPings: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
+		tournamentPingsBadged: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
+		tournamentPingsMode: {
 			type: DataTypes.STRING,
 		},
 		paranoid: true,

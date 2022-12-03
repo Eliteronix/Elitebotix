@@ -1,10 +1,6 @@
-const { isWrongSystem, wrongCluster } = require('./utils');
+const { isWrongSystem } = require('./utils');
 
 module.exports = async function (guild) {
-	if (wrongCluster(guild.id)) {
-		return;
-	}
-
 	if (isWrongSystem(guild.id, false)) {
 		return;
 	}
@@ -12,14 +8,16 @@ module.exports = async function (guild) {
 	try {
 		const systemChannel = await guild.channels.cache.get(guild.systemChannelId);
 		if (systemChannel) {
-			systemChannel.send('Thanks for adding me to the server!\nUse `e!help` to get a list of commands!\nTo provide feedback please use `e!feedback` or `/feedback`');
+			systemChannel.send('Thanks for adding me to the server!\nUse `/help` to get a list of commands!\nTo provide feedback please use `/feedback`');
 		} else {
 			const generalChannel = await guild.channels.cache.find(channel => channel.name === 'general');
 			if (generalChannel) {
-				generalChannel.send('Thanks for adding me to the server!\nUse `e!help` to get a list of commands!\nTo provide feedback please use `e!feedback` or `/feedback`');
+				generalChannel.send('Thanks for adding me to the server!\nUse `/help` to get a list of commands!\nTo provide feedback please use `/feedback`');
 			} else {
 				const otherChannel = guild.channels.cache.find(channel => channel.type === 'text' && channel.permissionsFor(guild.me).has('SEND_MESSAGES'));
-				otherChannel.send('Thanks for adding me to the server!\nUse `e!help` to get a list of commands!\nTo provide feedback please use `e!feedback` or `/feedback`');
+				if (otherChannel) {
+					otherChannel.send('Thanks for adding me to the server!\nUse `/help` to get a list of commands!\nTo provide feedback please use `/feedback`');
+				}
 			}
 		}
 	} catch (error) {

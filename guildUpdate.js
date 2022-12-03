@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (oldGuild, newGuild) {
-	if (wrongCluster(newGuild.id)) {
-		return;
-	}
-
 	if (isWrongSystem(newGuild.id, false)) {
 		return;
 	}
@@ -34,14 +30,14 @@ module.exports = async function (oldGuild, newGuild) {
 
 		const changeEmbed = new Discord.MessageEmbed()
 			.setColor('#0099ff')
-			.setAuthor(newGuild.name, oldGuild.iconURL())
+			.setAuthor({ name: newGuild.name, iconURL: oldGuild.iconURL() })
 			.setDescription('The server has been updated!')
 			.setThumbnail(newGuild.iconURL())
 			.addFields(
 				{ name: 'The server has been updated', value: newGuild.name },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: guildupdate');
+			.setFooter({ text: 'Eventname: guildupdate' });
 
 		if (oldGuild.name !== newGuild.name) {
 			changeEmbed.addField('Name', `\`${oldGuild.name}\` -> \`${newGuild.name}\``);

@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (invite) {
-	if (wrongCluster(invite.guild.id)) {
-		return;
-	}
-
 	if (isWrongSystem(invite.guild.id, false)) {
 		return;
 	}
@@ -41,7 +37,7 @@ module.exports = async function (invite) {
 				{ name: 'Uses', value: invite.uses },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: invitedelete');
+			.setFooter({ text: 'Eventname: invitedelete' });
 
 		channel.send({ embeds: [changeEmbed] });
 	}

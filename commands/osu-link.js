@@ -1,7 +1,8 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-const { getGuildPrefix, getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-link',
@@ -28,7 +29,14 @@ module.exports = {
 				args = [interaction.options._subcommand];
 			}
 
-			await interaction.deferReply();
+			try {
+				await interaction.deferReply();
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 		}
 
 		const bancho = additionalObjects[1];
@@ -47,31 +55,28 @@ module.exports = {
 			where: { userId: msg.author.id },
 		});
 
-		let guildPrefix = await getGuildPrefix(msg);
-
 		//Check for people that already have their discord account linked to that osu! account
-
 		if (args[0] === 'connect') {
 			args.shift();
-			connect(msg, args, interaction, additionalObjects, osuApi, bancho, discordUser, guildPrefix);
+			connect(msg, args, interaction, additionalObjects, osuApi, bancho, discordUser);
 		} else if (args[0] === 'current') {
-			current(msg, osuApi, interaction, additionalObjects, discordUser, guildPrefix);
+			current(msg, osuApi, interaction, additionalObjects, discordUser);
 		} else if (args[0] === 'disconnect') {
-			disconnect(msg, interaction, additionalObjects, discordUser, guildPrefix);
+			disconnect(msg, interaction, additionalObjects, discordUser);
 		} else if (args[0] === 'verify') {
-			verify(msg, args, interaction, additionalObjects, osuApi, bancho, discordUser, guildPrefix);
+			verify(msg, args, interaction, additionalObjects, osuApi, bancho, discordUser);
 		} else {
-			connect(msg, args, interaction, additionalObjects, osuApi, bancho, discordUser, guildPrefix);
+			connect(msg, args, interaction, additionalObjects, osuApi, bancho, discordUser);
 		}
 	},
 };
 
-async function connect(msg, args, interaction, additionalObjects, osuApi, bancho, discordUser, guildPrefix) {
+async function connect(msg, args, interaction, additionalObjects, osuApi, bancho, discordUser) {
 	if (discordUser && discordUser.osuVerified) {
 		if (msg.id) {
-			return msg.reply(`You already connected and verified your connection of your discord account to the osu! account \`${discordUser.osuName}\`.\nIf you want to disconnect it please use \`${guildPrefix}osu-link disconnect\`.`);
+			return msg.reply(`You already connected and verified your connection of your discord account to the osu! account \`${discordUser.osuName}\`.\nIf you want to disconnect it please use \`/osu-link disconnect\`.`);
 		}
-		return interaction.editReply(`You already connected and verified your connection of your discord account to the osu! account \`${discordUser.osuName}\`.\nIf you want to disconnect it please use \`${guildPrefix}osu-link disconnect\`.`);
+		return interaction.editReply(`You already connected and verified your connection of your discord account to the osu! account \`${discordUser.osuName}\`.\nIf you want to disconnect it please use \`/osu-link disconnect\`.`);
 	}
 
 	if (args[0]) {
@@ -146,7 +151,7 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 					}
 
 					const IRCUser = bancho.getUser(osuUser.name);
-					IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
+					IRCUser.sendMessage(`The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 					if (msg.id) {
 						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 					} else {
@@ -188,7 +193,7 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 					}
 
 					const IRCUser = bancho.getUser(osuUser.name);
-					IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
+					IRCUser.sendMessage(`The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 					if (msg.id) {
 						processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 					} else {
@@ -209,14 +214,14 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 			});
 	} else {
 		if (msg.id) {
-			return msg.reply(`Please specify to which osu! account you want to connect.\nUsage: \`${guildPrefix}osu-link connect <osu! username ("_" for " ")>\``);
+			return msg.reply('Please specify to which osu! account you want to connect.\nUsage: `/osu-link connect username:<osu! username ("_" for " ")>`');
 		} else {
-			return interaction.editReply('Please specify to which osu! account you want to connect.\nUsage: `/osu-link connect <osu! username ("_" for " ")>`');
+			return interaction.editReply('Please specify to which osu! account you want to connect.\nUsage: `/osu-link connect username:<osu! username ("_" for " ")>`');
 		}
 	}
 }
 
-async function current(msg, osuApi, interaction, additionalObjects, discordUser, guildPrefix) {
+async function current(msg, osuApi, interaction, additionalObjects, discordUser) {
 	if (discordUser && discordUser.osuUserId) {
 		osuApi.getUser({ u: discordUser.osuUserId })
 			.then(async (osuUser) => {
@@ -250,11 +255,11 @@ async function current(msg, osuApi, interaction, additionalObjects, discordUser,
 				}
 			});
 	} else {
-		linkAccountMessage(msg, interaction, additionalObjects, guildPrefix);
+		linkAccountMessage(msg, interaction);
 	}
 }
 
-async function disconnect(msg, interaction, additionalObjects, discordUser, guildPrefix) {
+async function disconnect(msg, interaction, additionalObjects, discordUser) {
 	if (discordUser && discordUser.osuUserId) {
 		discordUser.osuUserId = null;
 		discordUser.osuVerificationCode = null;
@@ -272,16 +277,16 @@ async function disconnect(msg, interaction, additionalObjects, discordUser, guil
 		discordUser.save();
 
 		if (msg.id) {
-			return msg.reply(`There is no longer an osu! account linked to your discord account.\nUse \`${guildPrefix}osu-link <connect> <osu! username ("_" for " ")>\` to link an osu! account to your discord account.`);
+			return msg.reply('There is no longer an osu! account linked to your discord account.\nUse `/osu-link connect username:<osu! username ("_" for " ")>` to link an osu! account to your discord account.');
 		} else {
 			return interaction.editReply('There is no longer an osu! account linked to your discord account.\nUse `/osu-link connect <osu! username ("_" for " ")>` to link an osu! account to your discord account.');
 		}
 	} else {
-		linkAccountMessage(msg, interaction, additionalObjects, guildPrefix);
+		linkAccountMessage(msg, interaction);
 	}
 }
 
-async function verify(msg, args, interaction, additionalObjects, osuApi, bancho, discordUser, guildPrefix) {
+async function verify(msg, args, interaction, additionalObjects, osuApi, bancho, discordUser) {
 	if (!args[1]) {
 		if (discordUser) {
 			if (discordUser.osuVerified) {
@@ -293,7 +298,7 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 						discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 						discordUser.save();
 						if (msg.id) {
-							return msg.reply(`Your osu! account \`${osuUser.name}\` is already verified\nIf you need to connect a different account use \`${guildPrefix}osu-link <disconnect>\` first.`);
+							return msg.reply(`Your osu! account \`${osuUser.name}\` is already verified\nIf you need to connect a different account use \`/osu-link disconnect\` first.`);
 						} else {
 							return interaction.editReply(`Your osu! account \`${osuUser.name}\` is already verified\nIf you need to connect a different account use \`/osu-link disconnect\` first.`);
 						}
@@ -337,7 +342,7 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 							}
 
 							const IRCUser = bancho.getUser(osuUser.name);
-							IRCUser.sendMessage(`[Elitebotix]: The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send 'e!osu-link verify ${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
+							IRCUser.sendMessage(`The Discord account ${msg.author.username}#${msg.author.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
 							if (msg.id) {
 								processingMessage.edit(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 							} else {
@@ -356,11 +361,11 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 							}
 						});
 				} else {
-					linkAccountMessage(msg, interaction, additionalObjects, guildPrefix);
+					linkAccountMessage(msg, interaction);
 				}
 			}
 		} else {
-			linkAccountMessage(msg, interaction, additionalObjects, guildPrefix);
+			linkAccountMessage(msg, interaction);
 		}
 	} else {
 		if (discordUser && discordUser.osuUserId) {
@@ -399,7 +404,7 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 						discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 						discordUser.save();
 						if (msg.id) {
-							return msg.reply(`The sent code \`${args[1].replace(/`/g, '')}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse \`${guildPrefix}osu-link verify\` to resend the code.`);
+							return msg.reply(`The sent code \`${args[1].replace(/`/g, '')}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse \`/osu-link verify\` to resend the code.`);
 						} else {
 							return interaction.editReply(`The sent code \`${args[1].replace(/`/g, '')}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse \`/osu-link verify\` to resend the code.`);
 						}
@@ -417,14 +422,14 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 					});
 			}
 		} else {
-			linkAccountMessage(msg, interaction, additionalObjects, guildPrefix);
+			linkAccountMessage(msg, interaction);
 		}
 	}
 }
 
-function linkAccountMessage(msg, interaction, additionalObjects, guildPrefix) {
+function linkAccountMessage(msg, interaction) {
 	if (msg.id) {
-		return msg.reply(`There is currently no osu! account linked to your discord account.\nPlease use \`${guildPrefix}osu-link <connect> <username ("_" for " ")>\``);
+		return msg.reply('There is currently no osu! account linked to your discord account.\nPlease use `/osu-link connect username:<username ("_" for " ")>`');
 	} else {
 		return interaction.editReply('There is currently no osu! account linked to your discord account.\nPlease use `/osu-link connect <username ("_" for " ")>`');
 	}

@@ -1,7 +1,9 @@
 const { DBDiscordUsers } = require('../dbObjects');
+const osu = require('node-osu');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, bancho, twitchClient, processQueueEntry) {
+		// console.log('tourneyFollow');
 		let args = processQueueEntry.additions.split(';');
 
 		const user = await client.users.fetch(args[0]).catch(async () => {
@@ -27,7 +29,7 @@ module.exports = {
 						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 					});
 
-					const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
+					const osuUser = await osuApi.getUser({ u: players[i], m: 0 });
 
 					discordUser = await DBDiscordUsers.create({ osuUserId: osuUser.id, osuName: osuUser.name });
 				}
@@ -35,7 +37,7 @@ module.exports = {
 				players[i] = discordUser.osuName;
 			}
 
-			user.send(`Follow Notification:\n\`${players.join('`, `')}\` played a match.\nhttps://osu.ppy.sh/community/matches/${args[1]}`);
+			await user.send(`Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[1]}`);
 		}
 		processQueueEntry.destroy();
 	},

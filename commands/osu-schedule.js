@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getGuildPrefix, getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
 
@@ -51,8 +51,6 @@ module.exports = {
 			}
 		}
 
-		const guildPrefix = await getGuildPrefix(msg);
-
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
 
@@ -79,7 +77,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						teams[i][j] = discordUser.osuUserId;
 					} else {
-						msg.channel.send(`\`${teams[i][j].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`${guildPrefix}osu-link <username>\`.`);
+						msg.channel.send(`\`${teams[i][j].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						teams[i].splice(j, 1);
 						j--;
 					}
@@ -190,7 +188,7 @@ module.exports = {
 
 			for (let j = 0; j < allMatches.length; j++) {
 				if (parseInt(allMatches[j].score) <= 10000
-					|| weekday != 7 && allMatches[j].gameStartDate.getUTCDay() != weekday) {
+					|| weekday != 7 && new Date(allMatches[j].gameStartDate).getUTCDay() != weekday) {
 					allMatches.splice(j, 1);
 					j--;
 				}
@@ -199,7 +197,7 @@ module.exports = {
 			for (let j = 0; j < 24; j++) {
 				let count = 0;
 				for (let k = 0; k < allMatches.length; k++) {
-					if (allMatches[k].gameStartDate.getUTCHours() === j) {
+					if (new Date(allMatches[k].gameStartDate).getUTCHours() === j) {
 						count++;
 						allMatches.splice(k, 1);
 						k--;

@@ -2,6 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const { getUserDuelStarRating, populateMsgFromInteraction, getOsuUserServerMode, getMessageUserDisplayname, getDerankStats } = require('../utils');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-derank',
@@ -24,8 +25,14 @@ module.exports = {
 			return msg.reply(`Please use the / command \`${this.name}\``);
 		}
 
-
-		await interaction.deferReply();
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
+		}
 
 		let username = null;
 
@@ -40,7 +47,8 @@ module.exports = {
 				where: {
 					[Op.or]: {
 						osuUserId: username,
-						osuName: username
+						osuName: username,
+						userId: username.replace('<@', '').replace('>', '').replace('!', ''),
 					}
 				}
 			});
@@ -127,7 +135,7 @@ module.exports = {
 		message.push(`Elitebotix users Duel-Rating-Rank ${derankStats.duelRank} out of ${derankStats.duelUsersLength}`);
 		message.push('');
 		message.push('The expected osu! rank change for that duel rating would be:');
-		message.push(`#${discordUser.osuRank} -> ~#${derankStats.expectedPpRankOsu} (Difference: ${discordUser.osuRank - derankStats.expectedPpRankOsu} ranks)\`\`\``);
+		message.push(`#${discordUser.osuRank} (${derankStats.expectedCurrentDuelRating.substring(0, 5)}*) -> ~#${derankStats.expectedPpRankOsu} (${derankStats.expectedDuelRating.substring(0, 5)}*) (Difference: ${discordUser.osuRank - derankStats.expectedPpRankOsu} ranks / ${(derankStats.expectedDuelRating - derankStats.expectedCurrentDuelRating).toFixed(3)}*)\`\`\``);
 
 		interaction.editReply(message.join('\n'));
 	},

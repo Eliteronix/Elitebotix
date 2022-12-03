@@ -1,6 +1,5 @@
 const osu = require('node-osu');
-const { DBProcessQueue } = require('../dbObjects.js');
-const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause, saveOsuMultiScores, getMatchesPlanned, logMatchCreation } = require('../utils.js');
+const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause, saveOsuMultiScores, logMatchCreation, addMatchMessage } = require('../utils.js');
 const { assignKnockoutPoints } = require('./givePointsToPlayers.js');
 
 module.exports = {
@@ -59,162 +58,108 @@ module.exports = {
 		plannedEndDate.setUTCSeconds(0);
 		plannedEndDate.setUTCSeconds(gameLength);
 
-		let matchesPlanned = await getMatchesPlanned(plannedStartDate, plannedEndDate);
+		let lobbyStatus = 'Joining phase';
 
-		if (matchesPlanned < 4 && lobbyNumber === 'custom') {
-			//Create processqueue task to block potential osu-referee schedules
-			DBProcessQueue.create({ guildId: 'None', task: 'customMOTD', priority: 10, additions: gameLength, date: plannedStartDate });
+		let channel;
+
+		for (let i = 0; i < 5; i++) {
+			try {
+				try {
+					await bancho.connect();
+				} catch (error) {
+					if (!error.message === 'Already connected/connecting') {
+						throw (error);
+					}
+				}
+				channel = await bancho.createLobby(`MOTD: (${bracketName}) vs (Lobby #${lobbyNumber})`);
+				break;
+			} catch (error) {
+				if (i === 2) {
+					//Start the first knockout map in solo as a fallback
+					return knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, 1, isFirstRound);
+				} else {
+					await pause(10000);
+				}
+			}
 		}
 
-		//Host multi only if lobbyNumber is below 5 or custom lobby with less than 4 matches planned
-		if (lobbyNumber < 5 || lobbyNumber === 'custom' && matchesPlanned < 4) {
+		channel.on('message', async (msg) => {
+			addMatchMessage(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
+		});
 
-			let lobbyStatus = 'Joining phase';
+		const lobby = channel.lobby;
+		logMatchCreation(client, lobby.name, lobby.id);
 
-			let channel;
+		const password = Math.random().toString(36).substring(8);
 
-			for (let i = 0; i < 5; i++) {
-				try {
-					try {
-						await bancho.connect();
-					} catch (error) {
-						if (!error.message === 'Already connected/connecting') {
-							throw (error);
-						}
-					}
-					channel = await bancho.createLobby(`MOTD: (${bracketName}) vs (Lobby #${lobbyNumber})`);
-					break;
-				} catch (error) {
-					if (i === 2) {
-						//Start the first knockout map in solo as a fallback
-						return knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, 1, isFirstRound);
-					} else {
-						await pause(10000);
-					}
-				}
-			}
+		let matchMessages = [];
+		await lobby.setPassword(password);
+		await channel.sendMessage('!mp addref Eliteronix');
+		await channel.sendMessage('!mp lock');
+		await channel.sendMessage(`!mp set 0 ${scoreversion} ${players.length}`);
+		await pause(60000);
+		while (lobby._beatmapId != mappool[mapIndex].id) {
+			await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
+			await pause(5000);
+		}
 
-
-			const lobby = channel.lobby;
-			logMatchCreation(client, lobby.name, lobby.id);
-
-			const password = Math.random().toString(36).substring(8);
-
-			await lobby.setPassword(password);
-			await channel.sendMessage('!mp lock');
-			await channel.sendMessage(`!mp set 0 ${scoreversion} ${players.length}`);
-			await pause(60000);
-			while (lobby._beatmapId != mappool[mapIndex].id) {
-				await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
+		//Check mods and set them if needed
+		if (mapIndex === 4 || mapIndex === 8) {
+			while (!lobby.mods || lobby.mods && lobby.mods.length === 0 || lobby.mods && lobby.mods[0].shortMod !== 'dt') {
+				await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
 				await pause(5000);
 			}
-
-			//Check mods and set them if needed
-			if (mapIndex === 4 || mapIndex === 8) {
-				while (!lobby.mods || lobby.mods && lobby.mods.length === 0 || lobby.mods && lobby.mods[0].shortMod !== 'dt') {
-					await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
-					await pause(5000);
-				}
-			} else {
-				while (lobby.mods || lobby.mods && lobby.mods.length !== 0) {
-					await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
-					await pause(5000);
-				}
+		} else {
+			while (lobby.mods || lobby.mods && lobby.mods.length !== 0) {
+				await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
+				await pause(5000);
 			}
+		}
 
-			// eslint-disable-next-line no-undef
-			if (process.env.SERVER !== 'Dev' && lobbyNumber !== 'custom') {
-				try {
-					const announceChannel = await client.channels.fetch('893215604503351386');
-					announceChannel.send(`Lobby #${lobbyNumber}: <https://osu.ppy.sh/mp/${lobby.id}>`);
-				} catch (error) {
-					console.log('MOTD/knockoutLobby.js', error);
-				}
-			}
-
-			for (let i = 0; i < users.length; i++) {
-				await channel.sendMessage(`!mp invite #${players[i].osuUserId}`);
-				await messageUserWithRetries(client, users[i], `Your Knockoutlobby has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
-			}
-
-			await channel.sendMessage('!mp timer 180');
-			let timer = new Date();
-			timer.setMinutes(timer.getMinutes() + 4);
-
-			let waitedForMapdownload = false;
-
-			channel.on('message', async (msg) => {
-				let now = new Date();
-				if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
-					//Banchobot countdown finished
-					if (lobbyStatus === 'Joining phase') {
-						await lobby.updateSettings();
-						let allPlayersReady = true;
-						for (let i = 0; i < 16; i++) {
-							let player = lobby.slots[i];
-							if (player && player.state !== require('bancho.js').BanchoLobbyPlayerStates.Ready) {
-								allPlayersReady = false;
-							}
-						}
-
-						if (allPlayersReady) {
-							await channel.sendMessage('!mp start 10');
-
-							lobbyStatus === 'Map being played';
-						} else {
-							lobbyStatus = 'Waiting for start';
-
-							await channel.sendMessage('Everyone please ready up!');
-							//Calculate the amount of knockouts needed
-							let knockoutNumber = calculateKnockoutNumber(players, mapIndex);
-							await channel.sendMessage(`${knockoutNumber} player(s) will be knocked out.`);
-							await channel.sendMessage('!mp timer 60');
-						}
-					} else if (lobbyStatus === 'Waiting for start') {
-						await lobby.updateSettings();
-
-						let playerHasNoMap = false;
-						for (let i = 0; i < 16; i++) {
-							let player = lobby.slots[i];
-							if (player && player.state === require('bancho.js').BanchoLobbyPlayerStates.NoMap) {
-								playerHasNoMap = true;
-							}
-						}
-
-						if (waitedForMapdownload || !playerHasNoMap) {
-							//just start; we waited another minute already
-							waitedForMapdownload = false;
-							await channel.sendMessage('!mp start 10');
-							lobbyStatus === 'Map being played';
-						} else {
-							waitedForMapdownload = true;
-							await channel.sendMessage('A player is missing the map. Waiting only 1 minute longer.');
-							await channel.sendMessage('!mp timer 60');
-						}
-
+		// eslint-disable-next-line no-undef
+		if (process.env.SERVER !== 'Dev' && lobbyNumber !== 'custom') {
+			try {
+				client.shard.broadcastEval(async (c, { message }) => {
+					const announceChannel = await c.channels.cache.get('893215604503351386');
+					if (announceChannel) {
+						announceChannel.send(message);
 					}
-				} else if (timer < now && lobbyStatus === 'Joining phase') {
-					lobbyStatus = 'Waiting for start';
+				}, { context: { message: `Lobby #${lobbyNumber}: <https://osu.ppy.sh/mp/${lobby.id}>` } });
+			} catch (error) {
+				console.log('MOTD/knockoutLobby.js', error);
+			}
+		}
 
-					await channel.sendMessage('Everyone please ready up!');
-					//Calculate the amount of knockouts needed
-					let knockoutNumber = calculateKnockoutNumber(players, mapIndex);
-					await channel.sendMessage(`${knockoutNumber} player(s) will be knocked out.`);
-					await channel.sendMessage('!mp timer 60');
-				}
-			});
+		for (let i = 0; i < users.length; i++) {
+			await channel.sendMessage(`!mp invite #${players[i].osuUserId}`);
+			await messageUserWithRetries(client, users[i], `Your Knockoutlobby has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+		}
 
-			lobby.on('playerJoined', async (obj) => {
-				if (!playerIds.includes(obj.player.user.id.toString())) {
-					channel.sendMessage(`!mp kick #${obj.player.user.id}`);
-				} else if (lobbyStatus === 'Joining phase') {
-					let allPlayersJoined = true;
-					for (let i = 0; i < players.length && allPlayersJoined; i++) {
-						if (!lobby.playersById[players[i].osuUserId.toString()]) {
-							allPlayersJoined = false;
+		await channel.sendMessage('!mp timer 180');
+		let timer = new Date();
+		timer.setMinutes(timer.getMinutes() + 4);
+
+		let waitedForMapdownload = false;
+
+		channel.on('message', async (msg) => {
+			let now = new Date();
+			if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
+				//Banchobot countdown finished
+				if (lobbyStatus === 'Joining phase') {
+					await lobby.updateSettings();
+					let allPlayersReady = true;
+					for (let i = 0; i < 16; i++) {
+						let player = lobby.slots[i];
+						if (player && player.state !== require('bancho.js').BanchoLobbyPlayerStates.Ready) {
+							allPlayersReady = false;
 						}
 					}
-					if (allPlayersJoined) {
+
+					if (allPlayersReady) {
+						await channel.sendMessage('!mp start 10');
+
+						lobbyStatus === 'Map being played';
+					} else {
 						lobbyStatus = 'Waiting for start';
 
 						await channel.sendMessage('Everyone please ready up!');
@@ -223,195 +168,246 @@ module.exports = {
 						await channel.sendMessage(`${knockoutNumber} player(s) will be knocked out.`);
 						await channel.sendMessage('!mp timer 60');
 					}
-				}
-			});
-			lobby.on('allPlayersReady', async () => {
-				await lobby.updateSettings();
-				let playersInLobby = 0;
-				for (let i = 0; i < 16; i++) {
-					if (lobby.slots[i]) {
-						playersInLobby++;
-					}
-				}
-				if (lobbyStatus === 'Waiting for start' && playersInLobby === players.length) {
-					await channel.sendMessage('!mp start 10');
+				} else if (lobbyStatus === 'Waiting for start') {
+					await lobby.updateSettings();
 
-					lobbyStatus === 'Map being played';
+					let playerHasNoMap = false;
+					for (let i = 0; i < 16; i++) {
+						let player = lobby.slots[i];
+						if (player && player.state === require('bancho.js').BanchoLobbyPlayerStates.NoMap) {
+							playerHasNoMap = true;
+						}
+					}
+
+					if (waitedForMapdownload || !playerHasNoMap) {
+						//just start; we waited another minute already
+						waitedForMapdownload = false;
+						await channel.sendMessage('!mp start 10');
+						lobbyStatus === 'Map being played';
+					} else {
+						waitedForMapdownload = true;
+						await channel.sendMessage('A player is missing the map. Waiting only 1 minute longer.');
+						await channel.sendMessage('!mp timer 60');
+					}
+
 				}
-			});
-			lobby.on('matchFinished', async (results) => {
+			} else if (timer < now && lobbyStatus === 'Joining phase') {
+				lobbyStatus = 'Waiting for start';
+
+				await channel.sendMessage('Everyone please ready up!');
 				//Calculate the amount of knockouts needed
 				let knockoutNumber = calculateKnockoutNumber(players, mapIndex);
+				await channel.sendMessage(`${knockoutNumber} player(s) will be knocked out.`);
+				await channel.sendMessage('!mp timer 60');
+			}
+		});
 
-				let knockedOutPlayers = 0;
-				let knockedOutPlayerNames = '';
-				let knockedOutPlayerIds = [];
-				//Remove players that didn't play
-				for (let i = 0; i < players.length; i++) {
-					let submittedScore = false;
-					for (let j = 0; j < results.length; j++) {
-						if (results[j].player.user.id.toString() === players[i].osuUserId) {
-							submittedScore = true;
-						}
-					}
-
-					if (!submittedScore) {
-						knockedOutPlayers++;
-						knockedOutPlayerIds.push(players[i].osuUserId);
-						if (knockedOutPlayerNames === '') {
-							knockedOutPlayerNames = `${players[i].osuName}`;
-						} else {
-							knockedOutPlayerNames = `${knockedOutPlayerNames}, ${players[i].osuName}`;
-						}
-
-						if (!isFirstRound && lobbyNumber !== 'custom') {
-							assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
-						}
-						players.splice(i, 1);
-						users.splice(i, 1);
-						i--;
+		lobby.on('playerJoined', async (obj) => {
+			if (!playerIds.includes(obj.player.user.id.toString())) {
+				channel.sendMessage(`!mp kick #${obj.player.user.id}`);
+			} else if (lobbyStatus === 'Joining phase') {
+				let allPlayersJoined = true;
+				for (let i = 0; i < players.length && allPlayersJoined; i++) {
+					if (!lobby.playersById[players[i].osuUserId.toString()]) {
+						allPlayersJoined = false;
 					}
 				}
-
-				quicksort(results);
-
-				const playersUsers = sortPlayersByResultsBanchojs(results, players, users);
-
-				players = playersUsers[0];
-				users = playersUsers[1];
-
-				playerIds = [];
-				for (let i = 0; i < players.length; i++) {
-					playerIds.push(players[i].osuUserId);
-				}
-
-				//Remove as many players as needed if there weren't enough players inactive
-				if (knockedOutPlayers < knockoutNumber) {
-					for (let i = 0; i < players.length && knockedOutPlayers < knockoutNumber; i++) {
-						if (lobbyNumber !== 'custom') {
-							assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
-						}
-						if (knockedOutPlayerNames === '') {
-							knockedOutPlayerNames = `\`${players[i].osuName}\``;
-						} else {
-							knockedOutPlayerNames = `${knockedOutPlayerNames}, \`${players[i].osuName}\``;
-						}
-						knockedOutPlayers++;
-						knockedOutPlayerIds.push(players[i].osuUserId);
-						results.splice(i, 1);
-						players.splice(i, 1);
-						users.splice(i, 1);
-						i--;
-					}
-				}
-
-				await channel.sendMessage(`Knocked out players this round: ${knockedOutPlayerNames}`);
-				await pause(15000);
-
-				for (let i = 0; i < knockedOutPlayerIds.length; i++) {
-					await channel.sendMessage(`!mp kick #${knockedOutPlayerIds[i]}`);
-				}
-
-				if (players.length === 1) {
-					lobbyStatus = 'Lobby finished';
-
-					if (lobbyNumber === 'custom') {
-						await channel.sendMessage(`Congratulations ${players[0].osuName}! You won the knockout lobby. Feel free to sign up for another round!`);
-					} else {
-						await channel.sendMessage(`Congratulations ${players[0].osuName}! You won todays knockout lobby. Come back tomorrow for another round!`);
-						assignKnockoutPoints(client, players[0], startingPlayers, players.length, mapIndex + 1);
-					}
-					await pause(15000);
-					await channel.sendMessage('!mp close');
-					// eslint-disable-next-line no-undef
-					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-					});
-
-					osuApi.getMatch({ mp: lobby.id })
-						.then(async (match) => {
-							saveOsuMultiScores(match);
-						})
-						.catch(() => {
-							//Nothing
-						});
-					return await channel.leave();
-
-				} else if (players.length === 0) {
-					lobbyStatus = 'Lobby finished';
-					await channel.sendMessage('!mp close');
-					// eslint-disable-next-line no-undef
-					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-					});
-
-					osuApi.getMatch({ mp: lobby.id })
-						.then(async (match) => {
-							saveOsuMultiScores(match);
-						})
-						.catch(() => {
-							//Nothing
-						});
-					return await channel.leave();
-				} else {
-					movePlayersIntoFirstSlots(channel, lobby, players, scoreversion);
-					mapIndex++;
-
-					if (lobbyNumber === 1 || lobbyNumber === 'custom') {
-						let skipped = false;
-						//Increases knockoutmap number to start/continue with harder maps and give more points
-						while (12 - players.length > mapIndex) {
-							mapIndex++;
-							skipped = true;
-						}
-
-						if (skipped) {
-							await channel.sendMessage('One or more maps have been skipped due to a lower amount of players.');
-						}
-					}
-
-					doubleTime = '';
-					if (mapIndex === 4 || mapIndex === 8) {
-						doubleTime = ' DT';
-					}
-
-					while (lobby._beatmapId != mappool[mapIndex].id) {
-						await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
-						await pause(5000);
-					}
-
-					//Check mods and set them if needed
-					if (mapIndex === 4 || mapIndex === 8) {
-						while (!lobby.mods || lobby.mods && lobby.mods.length === 0 || lobby.mods && lobby.mods[0].shortMod !== 'dt') {
-							await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
-							await pause(5000);
-						}
-					} else {
-						while (lobby.mods || lobby.mods && lobby.mods.length !== 0) {
-							await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
-							await pause(5000);
-						}
-					}
-
+				if (allPlayersJoined) {
 					lobbyStatus = 'Waiting for start';
+
+					await channel.sendMessage('Everyone please ready up!');
 					//Calculate the amount of knockouts needed
 					let knockoutNumber = calculateKnockoutNumber(players, mapIndex);
 					await channel.sendMessage(`${knockoutNumber} player(s) will be knocked out.`);
 					await channel.sendMessage('!mp timer 60');
-
-					isFirstRound = false;
 				}
-			});
-		} else {
-			//Start the first knockout map
-			knockoutMap(client, mappool, lobbyNumber, startingPlayers, players, users, 1, isFirstRound);
-		}
+			}
+		});
+		lobby.on('allPlayersReady', async () => {
+			await lobby.updateSettings();
+			let playersInLobby = 0;
+			for (let i = 0; i < 16; i++) {
+				if (lobby.slots[i]) {
+					playersInLobby++;
+				}
+			}
+			if (lobbyStatus === 'Waiting for start' && playersInLobby === players.length) {
+				await channel.sendMessage('!mp start 10');
+
+				lobbyStatus === 'Map being played';
+			}
+		});
+		lobby.on('matchFinished', async (results) => {
+			//Calculate the amount of knockouts needed
+			let knockoutNumber = calculateKnockoutNumber(players, mapIndex);
+
+			let knockedOutPlayers = 0;
+			let knockedOutPlayerNames = '';
+			let knockedOutPlayerIds = [];
+			//Remove players that didn't play
+			for (let i = 0; i < players.length; i++) {
+				let submittedScore = false;
+				for (let j = 0; j < results.length; j++) {
+					if (results[j].player.user.id.toString() === players[i].osuUserId) {
+						submittedScore = true;
+					}
+				}
+
+				if (!submittedScore) {
+					knockedOutPlayers++;
+					knockedOutPlayerIds.push(players[i].osuUserId);
+					if (knockedOutPlayerNames === '') {
+						knockedOutPlayerNames = `${players[i].osuName}`;
+					} else {
+						knockedOutPlayerNames = `${knockedOutPlayerNames}, ${players[i].osuName}`;
+					}
+
+					if (!isFirstRound && lobbyNumber !== 'custom') {
+						assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
+					}
+					players.splice(i, 1);
+					users.splice(i, 1);
+					i--;
+				}
+			}
+
+			quicksort(results);
+
+			const playersUsers = sortPlayersByResultsBanchojs(results, players, users);
+
+			players = playersUsers[0];
+			users = playersUsers[1];
+
+			playerIds = [];
+			for (let i = 0; i < players.length; i++) {
+				playerIds.push(players[i].osuUserId);
+			}
+
+			//Remove as many players as needed if there weren't enough players inactive
+			if (knockedOutPlayers < knockoutNumber) {
+				for (let i = 0; i < players.length && knockedOutPlayers < knockoutNumber; i++) {
+					if (lobbyNumber !== 'custom') {
+						assignKnockoutPoints(client, players[i], startingPlayers, players.length, mapIndex);
+					}
+					if (knockedOutPlayerNames === '') {
+						knockedOutPlayerNames = `\`${players[i].osuName}\``;
+					} else {
+						knockedOutPlayerNames = `${knockedOutPlayerNames}, \`${players[i].osuName}\``;
+					}
+					knockedOutPlayers++;
+					knockedOutPlayerIds.push(players[i].osuUserId);
+					results.splice(i, 1);
+					players.splice(i, 1);
+					users.splice(i, 1);
+					i--;
+				}
+			}
+
+			await channel.sendMessage(`Knocked out players this round: ${knockedOutPlayerNames}`);
+			await pause(15000);
+
+			for (let i = 0; i < knockedOutPlayerIds.length; i++) {
+				await channel.sendMessage(`!mp kick #${knockedOutPlayerIds[i]}`);
+			}
+
+			if (players.length === 1) {
+				lobbyStatus = 'Lobby finished';
+
+				if (lobbyNumber === 'custom') {
+					await channel.sendMessage(`Congratulations ${players[0].osuName}! You won the knockout lobby. Feel free to sign up for another round!`);
+				} else {
+					await channel.sendMessage(`Congratulations ${players[0].osuName}! You won todays knockout lobby. Come back tomorrow for another round!`);
+					assignKnockoutPoints(client, players[0], startingPlayers, players.length, mapIndex + 1);
+				}
+				await pause(15000);
+				await channel.sendMessage('!mp close');
+
+				// eslint-disable-next-line no-undef
+				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+				});
+
+				osuApi.getMatch({ mp: lobby.id })
+					.then(async (match) => {
+						saveOsuMultiScores(match);
+					})
+					.catch(() => {
+						//Nothing
+					});
+				return await channel.leave();
+
+			} else if (players.length === 0) {
+				lobbyStatus = 'Lobby finished';
+				await channel.sendMessage('!mp close');
+
+				// eslint-disable-next-line no-undef
+				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+				});
+
+				osuApi.getMatch({ mp: lobby.id })
+					.then(async (match) => {
+						saveOsuMultiScores(match);
+					})
+					.catch(() => {
+						//Nothing
+					});
+				return await channel.leave();
+			} else {
+				movePlayersIntoFirstSlots(channel, lobby, players, scoreversion);
+				mapIndex++;
+
+				if (lobbyNumber === 1 || lobbyNumber === 'custom') {
+					let skipped = false;
+					//Increases knockoutmap number to start/continue with harder maps and give more points
+					while (12 - players.length > mapIndex) {
+						mapIndex++;
+						skipped = true;
+					}
+
+					if (skipped) {
+						await channel.sendMessage('One or more maps have been skipped due to a lower amount of players.');
+					}
+				}
+
+				doubleTime = '';
+				if (mapIndex === 4 || mapIndex === 8) {
+					doubleTime = ' DT';
+				}
+
+				while (lobby._beatmapId != mappool[mapIndex].id) {
+					await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
+					await pause(5000);
+				}
+
+				//Check mods and set them if needed
+				if (mapIndex === 4 || mapIndex === 8) {
+					while (!lobby.mods || lobby.mods && lobby.mods.length === 0 || lobby.mods && lobby.mods[0].shortMod !== 'dt') {
+						await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
+						await pause(5000);
+					}
+				} else {
+					while (lobby.mods || lobby.mods && lobby.mods.length !== 0) {
+						await channel.sendMessage(`!mp mods FreeMod${doubleTime}`);
+						await pause(5000);
+					}
+				}
+
+				lobbyStatus = 'Waiting for start';
+				//Calculate the amount of knockouts needed
+				let knockoutNumber = calculateKnockoutNumber(players, mapIndex);
+				await channel.sendMessage(`${knockoutNumber} player(s) will be knocked out.`);
+				await channel.sendMessage('!mp timer 60');
+
+				isFirstRound = false;
+			}
+		});
 	}
 };
 
@@ -782,8 +778,12 @@ async function messageUserWithRetries(client, user, content, attachment) {
 		} catch (error) {
 			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
 				if (i === 2) {
-					const channel = await client.channels.fetch('833803740162949191');
-					channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+					client.shard.broadcastEval(async (c, { message }) => {
+						const channel = await c.channels.cache.get('833803740162949191');
+						if (channel) {
+							channel.send(message);
+						}
+					}, { context: { message: `<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!` } });
 				} else {
 					await pause(2500);
 				}

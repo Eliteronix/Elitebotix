@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (oldChannel, newChannel) {
-	if (wrongCluster(newChannel.id)) {
-		return;
-	}
-
 	if (newChannel.type === 'DM') {
 		return;
 	}
@@ -42,7 +38,7 @@ module.exports = async function (oldChannel, newChannel) {
 				{ name: 'Channel Updated', value: `<#${newChannel.id}>` },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: channelupdate');
+			.setFooter({ text: 'Eventname: channelupdate' });
 
 		if (oldChannel.name !== newChannel.name) {
 			changeEmbed.addField('Name', `\`${oldChannel.name}\` -> \`${newChannel.name}\``);

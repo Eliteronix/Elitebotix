@@ -1,7 +1,5 @@
 {
-	"script": "bot.js",
-	"instances": 0,
-	"exec_mode": "cluster",
+	"script": "index.js",
 	"watch": false,
 	"ignore_watch": [
 		"database.sqlite",
@@ -9,10 +7,12 @@
 		".git",
 		"maps",
 		"package-lock.json",
-		".env"
+		".env",
+		"matchLogs"
 	],
 	"watch_options": {
 		"followSymlinks": false
 	},
-	"name": "Elitebotix"
+	"name": "Elitebotix",
+	"nodeArgs": "--use_strict"
 }

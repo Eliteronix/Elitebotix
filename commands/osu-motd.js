@@ -195,12 +195,12 @@ module.exports = {
 				discordUser.osuMOTDRegistered = false;
 				discordUser.save();
 				if (msg.id) {
-					return sendMessage(msg, 'You have been unregistered from the `Maps of the Day` competition.\nStill thank you for showing interest!\nYou can always register again by using `e!osu-motd register`!');
+					return sendMessage(msg, 'You have been unregistered from the `Maps of the Day` competition.\nStill thank you for showing interest!\nYou can always register again by using `/osu-motd register`!');
 				}
 				return interaction.reply({ content: 'You have been unregistered from the `Maps of the Day` competition.\nStill thank you for showing interest!\nYou can always register again by using `/osu-motd register`!', ephemeral: true });
 			} else {
 				if (msg.id) {
-					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `e!osu-motd register`!');
+					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!');
 				}
 				return interaction.reply({ content: 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!', ephemeral: true });
 			}
@@ -251,7 +251,7 @@ module.exports = {
 						}
 					}
 					if (msg.id) {
-						return sendMessage(msg, 'The `Maps of the Day` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use `e!osu-motd unmute`.');
+						return sendMessage(msg, 'The `Maps of the Day` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use `/osu-motd unmute`.');
 					}
 					return interaction.reply({ content: 'The `Maps of the Day` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use `/osu-motd unmute`.', ephemeral: true });
 				} else {
@@ -305,13 +305,13 @@ module.exports = {
 					discordUser.osuMOTDMuted = true;
 					discordUser.save();
 					if (msg.id) {
-						return sendMessage(msg, 'The `Maps of the Day` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use `e!osu-motd unmute`.');
+						return sendMessage(msg, 'The `Maps of the Day` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use `/osu-motd unmute`.');
 					}
 					return interaction.reply({ content: 'The `Maps of the Day` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use `/osu-motd unmute`.', ephemeral: true });
 				}
 			} else {
 				if (msg.id) {
-					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `e!osu-motd register`!');
+					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!');
 				}
 				return interaction.reply({ content: 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!', ephemeral: true });
 			}
@@ -339,7 +339,7 @@ module.exports = {
 				}
 			} else {
 				if (msg.id) {
-					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `e!osu-motd register`!');
+					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!');
 				}
 				return interaction.reply({ content: 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!', ephemeral: true });
 			}
@@ -712,7 +712,7 @@ module.exports = {
 			const mappoolEmbed = new Discord.MessageEmbed()
 				.setColor('#C45686')
 				.setTitle('Custom MOTD settings')
-				.setFooter(`Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`);
+				.setFooter({ text: `Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}` });
 
 			for (let i = 0; i < players.length; i++) {
 				mappoolEmbed.addField(`Player #${i + 1}`, `${players[i].name} | #${players[i].pp.rank}`, true);
@@ -1030,7 +1030,7 @@ module.exports = {
 				.setColor('#C45686')
 				.setTitle('Custom MOTD settings')
 				.setDescription('Sign up by reacting with ✅ in the next 2 minutes')
-				.setFooter(`Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`);
+				.setFooter({ text: `Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}` });
 
 			for (let i = 1; i < mappoolInOrder.length; i++) {
 				let mapPrefix = '';
@@ -1072,7 +1072,7 @@ module.exports = {
 						.setColor('#C45686')
 						.setTitle('Custom MOTD settings')
 						.setDescription('Sign up by reacting with ✅ in the next 2 minutes')
-						.setFooter(`Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`);
+						.setFooter({ text: `Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}` });
 
 					for (let i = 0; i < discordUsers.length; i++) {
 						mappoolEmbed.addField(`Player #${i + 1}`, `${discordUsers[i].osuName} | #${discordUsers[i].osuRank}`, true);
@@ -1109,7 +1109,7 @@ module.exports = {
 				const mappoolEmbed = new Discord.MessageEmbed()
 					.setColor('#C45686')
 					.setTitle('Custom MOTD settings [In Progress]')
-					.setFooter(`Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}`);
+					.setFooter({ text: `Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}` });
 
 				for (let i = 0; i < discordUsers.length; i++) {
 					mappoolEmbed.addField(`Player #${i + 1}`, `${discordUsers[i].osuName} | #${discordUsers[i].osuRank}`, true);

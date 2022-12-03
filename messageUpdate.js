@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (oldMsg, newMsg) {
-	if (wrongCluster(newMsg.id)) {
-		return;
-	}
-
 	if (isWrongSystem(newMsg.guildId, newMsg.channel.type === 'DM')) {
 		return;
 	}
@@ -37,7 +33,7 @@ module.exports = async function (oldMsg, newMsg) {
 
 		const changeEmbed = new Discord.MessageEmbed()
 			.setColor('#0099ff')
-			.setAuthor(`${newMsg.author.username}#${newMsg.author.discriminator}`, newMsg.author.displayAvatarURL())
+			.setAuthor({ name: `${newMsg.author.username}#${newMsg.author.discriminator}`, iconURL: newMsg.author.displayAvatarURL() })
 			.setDescription('A message has been updated')
 			.setThumbnail(newMsg.author.displayAvatarURL())
 			.addFields(
@@ -45,7 +41,7 @@ module.exports = async function (oldMsg, newMsg) {
 				{ name: 'Author', value: `<@${newMsg.author.id}>` },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: messageupdate');
+			.setFooter({ text: 'Eventname: messageupdate' });
 
 		if (oldMsg.content !== newMsg.content) {
 			changeEmbed.addField('Content', `\`${oldMsg.content}\` -> \`${newMsg.content}\``);

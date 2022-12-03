@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBTemporaryVoices } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (oldMember, newMember) {
-	if (wrongCluster(newMember.id)) {
-		return;
-	}
-
 	if (isWrongSystem(newMember.guild.id, false)) {
 		return;
 	}
@@ -44,14 +40,14 @@ module.exports = async function (oldMember, newMember) {
 
 			const changeEmbed = new Discord.MessageEmbed()
 				.setColor('#0099ff')
-				.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
+				.setAuthor({ name: `${member.user.username}#${member.user.discriminator}`, iconURL: member.user.displayAvatarURL() })
 				.setDescription(`<@${member.user.id}> has been updated!`)
 				.setThumbnail(member.user.displayAvatarURL())
 				.addFields(
 					{ name: 'Server Mute', value: `\`${oldMember.serverMute}\` -> \`${newMember.serverMute}\`` },
 				)
 				.setTimestamp()
-				.setFooter('Eventname: servermute');
+				.setFooter({ text: 'Eventname: servermute' });
 
 			channel.send({ embeds: [changeEmbed] });
 		}
@@ -90,14 +86,14 @@ module.exports = async function (oldMember, newMember) {
 
 			const changeEmbed = new Discord.MessageEmbed()
 				.setColor('#0099ff')
-				.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
+				.setAuthor({ name: `${member.user.username}#${member.user.discriminator}`, iconURL: member.user.displayAvatarURL() })
 				.setDescription(`<@${member.user.id}> has been updated!`)
 				.setThumbnail(member.user.displayAvatarURL())
 				.addFields(
 					{ name: 'Server Deaf', value: `\`${oldMember.serverDeaf}\` -> \`${newMember.serverDeaf}\`` },
 				)
 				.setTimestamp()
-				.setFooter('Eventname: serverdeaf');
+				.setFooter({ text: 'Eventname: serverdeaf' });
 
 			channel.send({ embeds: [changeEmbed] });
 		}
@@ -136,14 +132,14 @@ module.exports = async function (oldMember, newMember) {
 
 			const changeEmbed = new Discord.MessageEmbed()
 				.setColor('#0099ff')
-				.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
+				.setAuthor({ name: `${member.user.username}#${member.user.discriminator}`, iconURL: member.user.displayAvatarURL() })
 				.setDescription(`<@${member.user.id}> has joined a voice channel!`)
 				.setThumbnail(member.user.displayAvatarURL())
 				.addFields(
 					{ name: 'Joined Voice Channel', value: `<#${newMember.channelId}>` },
 				)
 				.setTimestamp()
-				.setFooter('Eventname: joinvoice');
+				.setFooter({ text: 'Eventname: joinvoice' });
 
 			channel.send({ embeds: [changeEmbed] });
 		}
@@ -175,14 +171,14 @@ module.exports = async function (oldMember, newMember) {
 
 			const changeEmbed = new Discord.MessageEmbed()
 				.setColor('#0099ff')
-				.setAuthor(`${member.user.username}#${member.user.discriminator}`, member.user.displayAvatarURL())
+				.setAuthor({ name: `${member.user.username}#${member.user.discriminator}`, iconURL: member.user.displayAvatarURL() })
 				.setDescription(`<@${member.user.id}> has left a voice channel!`)
 				.setThumbnail(member.user.displayAvatarURL())
 				.addFields(
 					{ name: 'Left Voice Channel', value: `<#${oldMember.channelId}>` },
 				)
 				.setTimestamp()
-				.setFooter('Eventname: leavevoice');
+				.setFooter({ text: 'Eventname: leavevoice' });
 
 			channel.send({ embeds: [changeEmbed] });
 		}

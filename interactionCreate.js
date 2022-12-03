@@ -3,7 +3,7 @@ const fs = require('fs');
 const { isWrongSystem } = require('./utils');
 const cooldowns = new Discord.Collection();
 const { Permissions } = require('discord.js');
-const { developers } = require('./config.json');
+const { developers, salesmen } = require('./config.json');
 
 module.exports = async function (client, bancho, interaction) {
 	if (!interaction.isCommand()) return;
@@ -36,7 +36,7 @@ module.exports = async function (client, bancho, interaction) {
 	}
 
 	//Check permissions of the user
-	if (command.permissions) {
+	if (command.permissions && interaction.guildId) {
 		const authorPerms = interaction.channel.permissionsFor(interaction.member);
 		if (!authorPerms || !authorPerms.has(command.permissions)) {
 			return interaction.reply({ content: `You need the ${command.permissionsTranslated} permission to do this!`, ephemeral: true });
@@ -85,7 +85,7 @@ module.exports = async function (client, bancho, interaction) {
 	}
 
 	//Set timestamp for the used command
-	if (!developers.includes(interaction.user.id)) {
+	if (!developers.includes(interaction.user.id) && !salesmen.includes(interaction.user.id)) {
 		timestamps.set(interaction.user.id, now);
 	}
 	//Automatically delete the timestamp after the cooldown

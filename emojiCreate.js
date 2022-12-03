@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (emoji) {
-	if (wrongCluster(emoji.id)) {
-		return;
-	}
-
 	if (isWrongSystem(emoji.guild.id, false)) {
 		return;
 	}
@@ -40,7 +36,7 @@ module.exports = async function (emoji) {
 				{ name: 'Animated', value: emoji.animated },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: emojicreate');
+			.setFooter({ text: 'Eventname: emojicreate' });
 
 		channel.send({ embeds: [changeEmbed] });
 	}

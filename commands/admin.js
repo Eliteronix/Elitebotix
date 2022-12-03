@@ -1,7 +1,10 @@
-const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries } = require('../utils');
+const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBOsuForumPosts } = require('../dbObjects');
+const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries, saveOsuMultiScores, humanReadable, multiToBanchoScore, getOsuBeatmap, getMods } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
+const { Op } = require('sequelize');
+const Discord = require('discord.js');
+const ObjectsToCsv = require('objects-to-csv');
 
 module.exports = {
 	name: 'admin',
@@ -24,12 +27,17 @@ module.exports = {
 			return;
 		}
 
-		if (args[0] === 'guildCommands') {
+		let manageChannels = (1 << 4).toString();
+		let manageGuild = (1 << 5).toString();
+		let manageMessages = (1 << 13).toString();
+		let manageRoles = (1 << 28).toString();
 
+		if (args[0] === 'guildCommands') {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: '8ball',
 			// 		description: 'Answers with a random 8-Ball message',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'question',
@@ -45,6 +53,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'activityrole',
 			// 		description: 'Lets you set up roles which will be assigned based on useractivity',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageRoles,
 			// 		options: [
 			// 			{
 			// 				'name': 'add',
@@ -103,6 +113,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'autorole',
 			// 		description: 'Lets you set up roles that will be automatically assigned on joining',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageRoles,
 			// 		options: [
 			// 			{
 			// 				'name': 'add',
@@ -143,6 +155,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'birthday',
 			// 		description: 'Sets your birthday',
+			// 		dm_permission: true,
 			// 		type: 1,
 			// 		required: true,
 			// 		options: [
@@ -186,6 +199,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'birthday-admin',
 			// 		description: 'Manage birthday announcements on your server',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		type: 1,
 			// 		required: true,
 			// 		options: [
@@ -222,7 +237,8 @@ module.exports = {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'creator',
-			// 		description: 'Sends an info card about the developer'
+			// 		description: 'Sends an info card about the developers'
+			// 		dm_permission: true,
 			// 	}
 			// });
 
@@ -230,6 +246,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'cuddle',
 			// 		description: 'Lets you send a gif to cuddle a user',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -269,6 +286,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'feedback',
 			// 		description: 'Sends feedback to the devs',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'type',
@@ -308,6 +326,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'goodbye-message',
 			// 		description: 'Lets you set up a message to be sent when someone leaves the server',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'current',
@@ -340,6 +360,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'guild-leaderboard',
 			// 		description: 'Sends a leaderboard of the top users in the guild',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'page',
@@ -355,6 +376,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'help',
 			// 		description: 'List all commands or get info about a specific command',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'list',
@@ -413,6 +435,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'hug',
 			// 		description: 'Lets you send a gif to hug a user',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -452,6 +475,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'kiss',
 			// 		description: 'Lets you send a gif to kiss a user',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -491,6 +515,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'leaderboard',
 			// 		description: 'Sends a leaderboard of the top users in the guild',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'type',
@@ -546,6 +571,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'link',
 			// 		description: 'Sends a link to add the bot to a server'
+			// 		dm_permission: true,
 			// 	}
 			// });
 
@@ -553,6 +579,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'logging',
 			// 		description: 'Lets you set up a message to be sent when someone leaves the server',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'list',
@@ -593,6 +621,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'name-sync',
 			// 		description: 'Allows you to sync discord player names to ingame names (and ranks)',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'setting',
@@ -620,8 +650,73 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'osu-autohost',
+			// 		description: 'Hosts an automated lobby ingame',
+			// 		dm_permission: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'password',
+			// 				'description': 'Leave empty for a public room',
+			// 				'type': 3,
+			// 			},
+			// 			{
+			// 				'name': 'condition',
+			// 				'description': 'What is the winning condition of the match?',
+			// 				'type': 3,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Score v1',
+			// 						'value': '0'
+			// 					},
+			// 					{
+			// 						'name': 'Score v2',
+			// 						'value': '3'
+			// 					},
+			// 					{
+			// 						'name': 'Accuracy',
+			// 						'value': '1'
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'mods',
+			// 				'description': 'The active modpools to be chosen from (Ex: "NM,HR,DT")',
+			// 				'type': 3,
+			// 			},
+			// 			{
+			// 				'name': 'nmstarrating',
+			// 				'description': 'A custom difficulty for NM maps',
+			// 				'type': 10, // 10 is type NUMBER
+			// 			},
+			// 			{
+			// 				'name': 'hdstarrating',
+			// 				'description': 'A custom difficulty for HD maps',
+			// 				'type': 10, // 10 is type NUMBER
+			// 			},
+			// 			{
+			// 				'name': 'hrstarrating',
+			// 				'description': 'A custom difficulty for HR maps',
+			// 				'type': 10, // 10 is type NUMBER
+			// 			},
+			// 			{
+			// 				'name': 'dtstarrating',
+			// 				'description': 'A custom difficulty for DT maps',
+			// 				'type': 10, // 10 is type NUMBER
+			// 			},
+			// 			{
+			// 				'name': 'fmstarrating',
+			// 				'description': 'A custom difficulty for FM maps',
+			// 				'type': 10, // 10 is type NUMBER
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'osu-beatmap',
 			// 		description: 'Sends an info card about the specified beatmap',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'id',
@@ -673,6 +768,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-bws',
 			// 		description: 'Sends info about the BWS rank of the specified player',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'username',
@@ -712,6 +808,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-compare',
 			// 		description: 'Sends an info card about the score of the specified player on the last map sent into the channel',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'username',
@@ -751,6 +848,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-derank',
 			// 		description: 'Reranks players based on their duel rating compared to others',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'username',
@@ -766,22 +864,58 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-duel',
 			// 		description: 'Lets you play matches which are being reffed by the bot',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'match1v1',
-			// 				'description': 'Lets you instantly create a Bo7 match against an opponent',
+			// 				'description': 'Create a 1v1 match',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'opponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'starrating',
-			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'description': 'The star rating you wanna play on',
 			// 						'type': 10, // 10 is type NUMBER
+			// 					},
+			// 					{
+			// 						'name': 'bestof',
+			// 						'description': 'The best of',
+			// 						'type': 4, // 4 is type INTEGER
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Best of 13',
+			// 								'value': 13
+			// 							},
+			// 							{
+			// 								'name': 'Best of 11',
+			// 								'value': 11
+			// 							},
+			// 							{
+			// 								'name': 'Best of 9',
+			// 								'value': 9
+			// 							},
+			// 							{
+			// 								'name': 'Best of 7 (Default)',
+			// 								'value': 7
+			// 							},
+			// 							{
+			// 								'name': 'Best of 5',
+			// 								'value': 5
+			// 							},
+			// 							{
+			// 								'name': 'Best of 3',
+			// 								'value': 3
+			// 							},
+			// 							{
+			// 								'name': 'Best of 1',
+			// 								'value': 1
+			// 							}
+			// 						]
 			// 					},
 			// 					{
 			// 						'name': 'ranked',
@@ -791,32 +925,749 @@ module.exports = {
 			// 				]
 			// 			},
 			// 			{
+			// 				'name': 'queue1v1',
+			// 				'description': 'Lets you queue up for a Bo7 match against an opponent',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'queue1v1-leave',
+			// 				'description': 'Lets you leave the queue for Bo7 matches',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
 			// 				'name': 'match2v2',
-			// 				'description': 'Lets you instantly create a Bo7 match with 3 other players',
+			// 				'description': 'Create a 2v2 match',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
 			// 						'name': 'teammate',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'A teammate',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'firstopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'secondopponent',
-			// 						'description': 'The opponent you want to play against',
+			// 						'description': 'An opponent',
 			// 						'type': 6, // 6 is type USER
 			// 						'required': true
 			// 					},
 			// 					{
 			// 						'name': 'starrating',
-			// 						'description': 'The star rating you wanna play on. For example: 6.25',
+			// 						'description': 'The star rating you wanna play on',
 			// 						'type': 10, // 10 is type NUMBER
+			// 					},
+			// 					{
+			// 						'name': 'bestof',
+			// 						'description': 'The best of',
+			// 						'type': 4, // 4 is type INTEGER
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Best of 13',
+			// 								'value': 13
+			// 							},
+			// 							{
+			// 								'name': 'Best of 11',
+			// 								'value': 11
+			// 							},
+			// 							{
+			// 								'name': 'Best of 9',
+			// 								'value': 9
+			// 							},
+			// 							{
+			// 								'name': 'Best of 7 (Default)',
+			// 								'value': 7
+			// 							},
+			// 							{
+			// 								'name': 'Best of 5',
+			// 								'value': 5
+			// 							},
+			// 							{
+			// 								'name': 'Best of 3',
+			// 								'value': 3
+			// 							},
+			// 							{
+			// 								'name': 'Best of 1',
+			// 								'value': 1
+			// 							}
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'ranked',
+			// 						'description': 'Should only ranked maps be played?',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'match3v3',
+			// 				'description': 'Create a 3v3 match',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'firstteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'firstopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'thirdopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'starrating',
+			// 						'description': 'The star rating you wanna play on',
+			// 						'type': 10, // 10 is type NUMBER
+			// 					},
+			// 					{
+			// 						'name': 'bestof',
+			// 						'description': 'The best of',
+			// 						'type': 4, // 4 is type INTEGER
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Best of 13',
+			// 								'value': 13
+			// 							},
+			// 							{
+			// 								'name': 'Best of 11',
+			// 								'value': 11
+			// 							},
+			// 							{
+			// 								'name': 'Best of 9',
+			// 								'value': 9
+			// 							},
+			// 							{
+			// 								'name': 'Best of 7 (Default)',
+			// 								'value': 7
+			// 							},
+			// 							{
+			// 								'name': 'Best of 5',
+			// 								'value': 5
+			// 							},
+			// 							{
+			// 								'name': 'Best of 3',
+			// 								'value': 3
+			// 							},
+			// 							{
+			// 								'name': 'Best of 1',
+			// 								'value': 1
+			// 							}
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'ranked',
+			// 						'description': 'Should only ranked maps be played?',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'match4v4',
+			// 				'description': 'Create a 4v4 match',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'firstteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'thirdteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'firstopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'thirdopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fourthopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'starrating',
+			// 						'description': 'The star rating you wanna play on',
+			// 						'type': 10, // 10 is type NUMBER
+			// 					},
+			// 					{
+			// 						'name': 'bestof',
+			// 						'description': 'The best of',
+			// 						'type': 4, // 4 is type INTEGER
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Best of 13',
+			// 								'value': 13
+			// 							},
+			// 							{
+			// 								'name': 'Best of 11',
+			// 								'value': 11
+			// 							},
+			// 							{
+			// 								'name': 'Best of 9',
+			// 								'value': 9
+			// 							},
+			// 							{
+			// 								'name': 'Best of 7 (Default)',
+			// 								'value': 7
+			// 							},
+			// 							{
+			// 								'name': 'Best of 5',
+			// 								'value': 5
+			// 							},
+			// 							{
+			// 								'name': 'Best of 3',
+			// 								'value': 3
+			// 							},
+			// 							{
+			// 								'name': 'Best of 1',
+			// 								'value': 1
+			// 							}
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'ranked',
+			// 						'description': 'Should only ranked maps be played?',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'match5v5',
+			// 				'description': 'Create a 5v5 match',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'firstteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'thirdteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fourthteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'firstopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'thirdopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fourthopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fifthopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'starrating',
+			// 						'description': 'The star rating you wanna play on',
+			// 						'type': 10, // 10 is type NUMBER
+			// 					},
+			// 					{
+			// 						'name': 'bestof',
+			// 						'description': 'The best of',
+			// 						'type': 4, // 4 is type INTEGER
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Best of 13',
+			// 								'value': 13
+			// 							},
+			// 							{
+			// 								'name': 'Best of 11',
+			// 								'value': 11
+			// 							},
+			// 							{
+			// 								'name': 'Best of 9',
+			// 								'value': 9
+			// 							},
+			// 							{
+			// 								'name': 'Best of 7 (Default)',
+			// 								'value': 7
+			// 							},
+			// 							{
+			// 								'name': 'Best of 5',
+			// 								'value': 5
+			// 							},
+			// 							{
+			// 								'name': 'Best of 3',
+			// 								'value': 3
+			// 							},
+			// 							{
+			// 								'name': 'Best of 1',
+			// 								'value': 1
+			// 							}
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'ranked',
+			// 						'description': 'Should only ranked maps be played?',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'match6v6',
+			// 				'description': 'Create a 6v6 match.',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'firstteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'thirdteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fourthteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fifthteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'firstopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'thirdopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fourthopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fifthopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'sixthopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'starrating',
+			// 						'description': 'The star rating you wanna play on',
+			// 						'type': 10, // 10 is type NUMBER
+			// 					},
+			// 					{
+			// 						'name': 'bestof',
+			// 						'description': 'The best of',
+			// 						'type': 4, // 4 is type INTEGER
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Best of 13',
+			// 								'value': 13
+			// 							},
+			// 							{
+			// 								'name': 'Best of 11',
+			// 								'value': 11
+			// 							},
+			// 							{
+			// 								'name': 'Best of 9',
+			// 								'value': 9
+			// 							},
+			// 							{
+			// 								'name': 'Best of 7 (Default)',
+			// 								'value': 7
+			// 							},
+			// 							{
+			// 								'name': 'Best of 5',
+			// 								'value': 5
+			// 							},
+			// 							{
+			// 								'name': 'Best of 3',
+			// 								'value': 3
+			// 							},
+			// 							{
+			// 								'name': 'Best of 1',
+			// 								'value': 1
+			// 							}
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'ranked',
+			// 						'description': 'Should only ranked maps be played?',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'match7v7',
+			// 				'description': 'Create a 7v7 match',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'firstteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'thirdteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fourthteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fifthteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'sixthteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'firstopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'thirdopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fourthopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fifthopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'sixthopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'seventhopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'starrating',
+			// 						'description': 'The star rating you wanna play on',
+			// 						'type': 10, // 10 is type NUMBER
+			// 					},
+			// 					{
+			// 						'name': 'bestof',
+			// 						'description': 'The best of',
+			// 						'type': 4, // 4 is type INTEGER
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Best of 13',
+			// 								'value': 13
+			// 							},
+			// 							{
+			// 								'name': 'Best of 11',
+			// 								'value': 11
+			// 							},
+			// 							{
+			// 								'name': 'Best of 9',
+			// 								'value': 9
+			// 							},
+			// 							{
+			// 								'name': 'Best of 7 (Default)',
+			// 								'value': 7
+			// 							},
+			// 							{
+			// 								'name': 'Best of 5',
+			// 								'value': 5
+			// 							},
+			// 							{
+			// 								'name': 'Best of 3',
+			// 								'value': 3
+			// 							},
+			// 							{
+			// 								'name': 'Best of 1',
+			// 								'value': 1
+			// 							}
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'ranked',
+			// 						'description': 'Should only ranked maps be played?',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'match8v8',
+			// 				'description': 'Create a 8v8 match',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'firstteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'thirdteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fourthteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fifthteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'sixthteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'seventhteammate',
+			// 						'description': 'A teammate',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'firstopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'secondopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'thirdopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fourthopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'fifthopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'sixthopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'seventhopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'eigthopponent',
+			// 						'description': 'An opponent',
+			// 						'type': 6, // 6 is type USER
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'starrating',
+			// 						'description': 'The star rating you wanna play on',
+			// 						'type': 10, // 10 is type NUMBER
+			// 					},
+			// 					{
+			// 						'name': 'bestof',
+			// 						'description': 'The best of',
+			// 						'type': 4, // 4 is type INTEGER
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Best of 13',
+			// 								'value': 13
+			// 							},
+			// 							{
+			// 								'name': 'Best of 11',
+			// 								'value': 11
+			// 							},
+			// 							{
+			// 								'name': 'Best of 9',
+			// 								'value': 9
+			// 							},
+			// 							{
+			// 								'name': 'Best of 7 (Default)',
+			// 								'value': 7
+			// 							},
+			// 							{
+			// 								'name': 'Best of 5',
+			// 								'value': 5
+			// 							},
+			// 							{
+			// 								'name': 'Best of 3',
+			// 								'value': 3
+			// 							},
+			// 							{
+			// 								'name': 'Best of 1',
+			// 								'value': 1
+			// 							}
+			// 						]
 			// 					},
 			// 					{
 			// 						'name': 'ranked',
@@ -869,6 +1720,11 @@ module.exports = {
 			// 						'type': 4,
 			// 						'required': false
 			// 					},
+			// 					{
+			// 						'name': 'csv',
+			// 						'description': 'Should a csv file be attached',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
 			// 				]
 			// 			},
 			// 			{
@@ -910,6 +1766,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-leaderboard',
 			// 		description: 'Sends a leaderboard of all the players in the guild that have their account connected',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'page',
@@ -949,6 +1806,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-link',
 			// 		description: 'Allows you to link your Discord Account to your osu! Account',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'connect',
@@ -992,8 +1850,70 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'osu-mapleaderboard',
+			// 		description: 'Sends an info card about the leaderboard on the specified beatmap',
+			// 		dm_permission: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'id',
+			// 				'description': 'beatmap ID',
+			// 				'type': 3,
+			// 				'required': true
+			// 			},
+			// 			{
+			// 				'name': 'server',
+			// 				'description': 'The server you want to get the leaderboard from',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Bancho',
+			// 						'value': '--b'
+			// 					},
+			// 					{
+			// 						'name': 'Tournaments',
+			// 						'value': '--tournaments'
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'mode',
+			// 				'description': 'The gamemode you want to get the leaderboard from',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'osu',
+			// 						'value': '--osu'
+			// 					},
+			// 					{
+			// 						'name': 'taiko',
+			// 						'value': '--taiko'
+			// 					},
+			// 					{
+			// 						'name': 'catch',
+			// 						'value': '--catch'
+			// 					},
+			// 					{
+			// 						'name': 'mania',
+			// 						'value': '--mania'
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'amount',
+			// 				'description': 'The amount of scores you want to get',
+			// 				'type': 4,
+			// 			}
+			// 		]
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'osu-matchscore',
 			// 		description: 'Sends an evaluation of how valuable all the players in the match were',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'match',
@@ -1007,9 +1927,49 @@ module.exports = {
 			// 				'type': 4,
 			// 			},
 			// 			{
-			// 				'name': 'average',
-			// 				'description': 'True means unplayed maps will be ignored',
-			// 				'type': 5,
+			// 				'name': 'calculation',
+			// 				'description': 'How the matchscore should be calculated',
+			// 				'type': 3,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Mixed (Default)',
+			// 						'value': 'mixed'
+			// 					},
+			// 					{
+			// 						'name': 'Sum (favors all-rounders)',
+			// 						'value': 'sum'
+			// 					},
+			// 					{
+			// 						'name': 'Average (favors niche players)',
+			// 						'value': 'avg'
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'skiplast',
+			// 				'description': 'The amount of maps to ignore from the end of the match',
+			// 				'type': 4,
+			// 			},
+			// 			{
+			// 				'name': 'ezmultiplier',
+			// 				'description': 'The EZ multiplier for the match (Default: 1.7)',
+			// 				'type': 4,
+			// 			},
+			// 		]
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'osu-matchtrack',
+			// 		description: 'Tracks the progress of a match',
+			// 		dm_permission: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'match',
+			// 				'description': 'Match ID or link',
+			// 				'type': 3,
+			// 				'required': true
 			// 			},
 			// 		]
 			// 	}
@@ -1019,6 +1979,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-matchup',
 			// 		description: 'Sends an info card about the matchups between the specified players',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': '1v1',
@@ -1035,6 +1996,38 @@ module.exports = {
 			// 						'name': 'username2',
 			// 						'description': 'The name of a player to compare with',
 			// 						'type': 3,
+			// 					},
+			// 					{
+			// 						'name': 'timeframe',
+			// 						'description': 'Since when should the scores be taken into account',
+			// 						'type': 3,
+			// 						'required': false,
+			// 						'choices': [
+			// 							{
+			// 								'name': '1 month',
+			// 								'value': '1m'
+			// 							},
+			// 							{
+			// 								'name': '3 months',
+			// 								'value': '3m'
+			// 							},
+			// 							{
+			// 								'name': '6 months',
+			// 								'value': '6m'
+			// 							},
+			// 							{
+			// 								'name': '1 year (default)',
+			// 								'value': '1y'
+			// 							},
+			// 							{
+			// 								'name': '2 years',
+			// 								'value': '2y'
+			// 							},
+			// 							{
+			// 								'name': 'All time',
+			// 								'value': 'all'
+			// 							},
+			// 						]
 			// 					},
 			// 					{
 			// 						'name': 'scores',
@@ -1156,6 +2149,38 @@ module.exports = {
 			// 						'type': 3,
 			// 					},
 			// 					{
+			// 						'name': 'timeframe',
+			// 						'description': 'Since when should the scores be taken into account',
+			// 						'type': 3,
+			// 						'required': false,
+			// 						'choices': [
+			// 							{
+			// 								'name': '1 month',
+			// 								'value': '1m'
+			// 							},
+			// 							{
+			// 								'name': '3 months',
+			// 								'value': '3m'
+			// 							},
+			// 							{
+			// 								'name': '6 months',
+			// 								'value': '6m'
+			// 							},
+			// 							{
+			// 								'name': '1 year (default)',
+			// 								'value': '1y'
+			// 							},
+			// 							{
+			// 								'name': '2 years',
+			// 								'value': '2y'
+			// 							},
+			// 							{
+			// 								'name': 'All time',
+			// 								'value': 'all'
+			// 							},
+			// 						]
+			// 					},
+			// 					{
 			// 						'name': 'scores',
 			// 						'description': 'Which types of scores should the matchup evaluate?',
 			// 						'type': 3,
@@ -1191,6 +2216,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-motd',
 			// 		description: 'Manage your Maps of the Day registration and create custom rounds',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'register',
@@ -1435,6 +2461,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-profile',
 			// 		description: 'Sends an info card about the specified player',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'username',
@@ -1443,42 +2470,9 @@ module.exports = {
 			// 				'required': false
 			// 			},
 			// 			{
-			// 				'name': 'username2',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username3',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username4',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username5',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			}
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'o-p',
-			// 		description: 'Sends an info card about the specified player',
-			// 		options: [
-			// 			{
-			// 				'name': 'username',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
+			// 				'name': 'showgraph',
+			// 				'description': 'Show the rank graph',
+			// 				'type': 5, // 5 is type BOOLEAN
 			// 				'required': false
 			// 			},
 			// 			{
@@ -1513,6 +2507,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-recent',
 			// 		description: 'Sends an info card about the specified player',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'pass',
@@ -1565,6 +2560,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'ors',
 			// 		description: 'Sends an info card about the last score of the specified player',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'pass',
@@ -1617,6 +2613,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-referee',
 			// 		description: 'Lets you schedule matches which are being reffed by the bot',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'soloqualifiers',
@@ -1760,7 +2758,7 @@ module.exports = {
 			// 					},
 			// 					{
 			// 						'name': 'bestof',
-			// 						'description': 'The best of for the match.',
+			// 						'description': 'The best of',
 			// 						'type': 4,
 			// 						'required': true
 			// 					},
@@ -1862,6 +2860,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-schedule',
 			// 		description: 'Sends an info graph about the schedules of the players',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'weekday',
@@ -1987,6 +2986,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-score',
 			// 		description: 'Sends an info card about the score of the specified player on the map',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'beatmap',
@@ -2081,6 +3081,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-set',
 			// 		description: 'Allows you to set your main mode and server',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'mode',
@@ -2144,6 +3145,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-skills',
 			// 		description: 'Sends an info card about the skills of the specified player',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'username',
@@ -2221,6 +3223,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-top',
 			// 		description: 'Sends an info card about the topplays of the specified player',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'sorting',
@@ -2260,7 +3263,7 @@ module.exports = {
 			// 						'name': 'Star Rating',
 			// 						'value': '--sr',
 			// 					},
-			// 	]
+			// 				]
 			// 			},
 			// 			{
 			// 				'name': 'ascending',
@@ -2272,7 +3275,6 @@ module.exports = {
 			// 						'name': 'True',
 			// 						'value': '--asc'
 			// 					},
-
 			// 				]
 			// 			},
 			// 			{
@@ -2354,6 +3356,11 @@ module.exports = {
 			// 				'type': 3,
 			// 				'required': false
 			// 			},
+			// 			{
+			// 				'name': 'csv',
+			// 				'description': 'Should a csv file be attached',
+			// 				'type': 5, // 5 is type BOOLEAN
+			// 			},
 			// 		]
 			// 	},
 			// });
@@ -2361,72 +3368,139 @@ module.exports = {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'osu-mostplayed',
-			// 		description: 'Sends an info card about the most played maps of the specified player',
+			// 		description: 'Sends an info card about the most played maps',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
-			// 				'name': 'amount',
-			// 				'description': 'The amount of most played maps to be displayed',
-			// 				'type': 4,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'server',
-			// 				'description': 'The server from which the results will be displayed',
-			// 				'type': 3,
-			// 				'required': false,
-			// 				'choices': [
+			// 				'name': 'user',
+			// 				'description': 'Get the stats for a user',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
 			// 					{
-			// 						'name': 'Bancho',
-			// 						'value': 'b',
+			// 						'name': 'amount',
+			// 						'description': 'The amount of most played maps to be displayed',
+			// 						'type': 4,
+			// 						'required': false
 			// 					},
 			// 					{
-			// 						'name': 'Ripple',
-			// 						'value': 'r',
+			// 						'name': 'server',
+			// 						'description': 'The server from which the results will be displayed',
+			// 						'type': 3,
+			// 						'required': false,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Bancho',
+			// 								'value': 'b',
+			// 							},
+			// 							{
+			// 								'name': 'Ripple',
+			// 								'value': 'r',
+			// 							},
+			// 							{
+			// 								'name': 'Tournaments',
+			// 								'value': 'tournaments',
+			// 							},
+			// 						]
 			// 					},
 			// 					{
-			// 						'name': 'Tournaments',
-			// 						'value': 'tournaments',
+			// 						'name': 'username',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username2',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username3',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username4',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'username5',
+			// 						'description': 'The username, id or link of the player',
+			// 						'type': 3,
+			// 						'required': false
 			// 					},
 			// 				]
 			// 			},
 			// 			{
-			// 				'name': 'username',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username2',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username3',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username4',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'username5',
-			// 				'description': 'The username, id or link of the player',
-			// 				'type': 3,
-			// 				'required': false
+			// 				'name': 'tourneybeatmaps',
+			// 				'description': 'Get the stats for a beatmap',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'amount',
+			// 						'description': 'The amount of most played maps to be displayed',
+			// 						'type': 4,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'page',
+			// 						'description': 'The page of the results',
+			// 						'type': 4,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'dontfiltermm',
+			// 						'description': 'Should matchmaking (ETX/o!mm) matches not be filtered out',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 						'required': false
+			// 					},
+			// 					// {
+			// 					// 	'name': 'modpool',
+			// 					// 	'description': 'The modpool the maps appeared in',
+			// 					// 	'type': 3,
+			// 					// 	'required': false,
+			// 					// 	'choices': [
+			// 					// 		{
+			// 					// 			'name': 'NM',
+			// 					// 			'value': 'NM',
+			// 					// 		},
+			// 					// 		{
+			// 					// 			'name': 'HD',
+			// 					// 			'value': 'HD',
+			// 					// 		},
+			// 					// 		{
+			// 					// 			'name': 'HR',
+			// 					// 			'value': 'HR',
+			// 					// 		},
+			// 					// 		{
+			// 					// 			'name': 'DT',
+			// 					// 			'value': 'DT',
+			// 					// 		},
+			// 					// 		{
+			// 					// 			'name': 'FM',
+			// 					// 			'value': 'FM',
+			// 					// 		}
+			// 					// 	]
+			// 					// },
+			// 					{
+			// 						'name': 'csv',
+			// 						'description': 'Should a csv file be attached',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 				]
 			// 			},
 			// 		]
-			// 	},
+			// 	}
 			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'osu-tournament',
 			// 		description: 'Sends a .txt file with all the data for the tournament matches with this acronym',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'acronym',
@@ -2442,31 +3516,299 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-track',
 			// 		description: 'Tracks new scores set by the specified users',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
-			// 				'name': 'add',
+			// 				'name': 'enable',
 			// 				'description': 'Lets you add a new user to track',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
-			// 						'name': 'username',
-			// 						'description': 'The user to track',
+			// 						'name': 'usernames',
+			// 						'description': 'The user(s) to track (separate them with a \',\')',
 			// 						'type': 3,
 			// 						'required': true
-			// 					}
+			// 					},
+			// 					{
+			// 						'name': 'topplays',
+			// 						'description': 'Which modes should be tracked',
+			// 						'type': 3,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'osu! only',
+			// 								'value': 'o',
+			// 							},
+			// 							{
+			// 								'name': 'taiko only',
+			// 								'value': 't',
+			// 							},
+			// 							{
+			// 								'name': 'catch only',
+			// 								'value': 'c',
+			// 							},
+			// 							{
+			// 								'name': 'mania only',
+			// 								'value': 'm',
+			// 							},
+			// 							{
+			// 								'name': 'osu! & taiko',
+			// 								'value': 'ot',
+			// 							},
+			// 							{
+			// 								'name': 'osu! & catch',
+			// 								'value': 'oc',
+			// 							},
+			// 							{
+			// 								'name': 'osu! & mania',
+			// 								'value': 'om',
+			// 							},
+			// 							{
+			// 								'name': 'taiko & catch',
+			// 								'value': 'tc',
+			// 							},
+			// 							{
+			// 								'name': 'taiko & mania',
+			// 								'value': 'tm',
+			// 							},
+			// 							{
+			// 								'name': 'catch & mania',
+			// 								'value': 'cm',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, taiko & catch',
+			// 								'value': 'otc',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, taiko & mania',
+			// 								'value': 'otm',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, catch & mania',
+			// 								'value': 'ocm',
+			// 							},
+			// 							{
+			// 								'name': 'taiko, catch & mania',
+			// 								'value': 'tcm',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, taiko, catch & mania',
+			// 								'value': 'otcm',
+			// 							},
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'leaderboardplays',
+			// 						'description': 'Which modes should be tracked',
+			// 						'type': 3,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'osu! only',
+			// 								'value': 'o',
+			// 							},
+			// 							{
+			// 								'name': 'taiko only',
+			// 								'value': 't',
+			// 							},
+			// 							{
+			// 								'name': 'catch only',
+			// 								'value': 'c',
+			// 							},
+			// 							{
+			// 								'name': 'mania only',
+			// 								'value': 'm',
+			// 							},
+			// 							{
+			// 								'name': 'osu! & taiko',
+			// 								'value': 'ot',
+			// 							},
+			// 							{
+			// 								'name': 'osu! & catch',
+			// 								'value': 'oc',
+			// 							},
+			// 							{
+			// 								'name': 'osu! & mania',
+			// 								'value': 'om',
+			// 							},
+			// 							{
+			// 								'name': 'taiko & catch',
+			// 								'value': 'tc',
+			// 							},
+			// 							{
+			// 								'name': 'taiko & mania',
+			// 								'value': 'tm',
+			// 							},
+			// 							{
+			// 								'name': 'catch & mania',
+			// 								'value': 'cm',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, taiko & catch',
+			// 								'value': 'otc',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, taiko & mania',
+			// 								'value': 'otm',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, catch & mania',
+			// 								'value': 'ocm',
+			// 							},
+			// 							{
+			// 								'name': 'taiko, catch & mania',
+			// 								'value': 'tcm',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, taiko, catch & mania',
+			// 								'value': 'otcm',
+			// 							},
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'ameobea',
+			// 						'description': 'Which modes should be updated for ameobea.me/osutrack/',
+			// 						'type': 3,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'osu! only',
+			// 								'value': 'o',
+			// 							},
+			// 							{
+			// 								'name': 'taiko only',
+			// 								'value': 't',
+			// 							},
+			// 							{
+			// 								'name': 'catch only',
+			// 								'value': 'c',
+			// 							},
+			// 							{
+			// 								'name': 'mania only',
+			// 								'value': 'm',
+			// 							},
+			// 							{
+			// 								'name': 'osu! & taiko',
+			// 								'value': 'ot',
+			// 							},
+			// 							{
+			// 								'name': 'osu! & catch',
+			// 								'value': 'oc',
+			// 							},
+			// 							{
+			// 								'name': 'osu! & mania',
+			// 								'value': 'om',
+			// 							},
+			// 							{
+			// 								'name': 'taiko & catch',
+			// 								'value': 'tc',
+			// 							},
+			// 							{
+			// 								'name': 'taiko & mania',
+			// 								'value': 'tm',
+			// 							},
+			// 							{
+			// 								'name': 'catch & mania',
+			// 								'value': 'cm',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, taiko & catch',
+			// 								'value': 'otc',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, taiko & mania',
+			// 								'value': 'otm',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, catch & mania',
+			// 								'value': 'ocm',
+			// 							},
+			// 							{
+			// 								'name': 'taiko, catch & mania',
+			// 								'value': 'tcm',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, taiko, catch & mania',
+			// 								'value': 'otcm',
+			// 							},
+			// 						]
+			// 					},
+			// 					{
+			// 						'name': 'showameobeaupdate',
+			// 						'description': 'Should messages be sent when ameobea is updated',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 					{
+			// 						'name': 'medals',
+			// 						'description': 'Should achieved medals be tracked',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 					{
+			// 						'name': 'duelrating',
+			// 						'description': 'Should duel rating changes be tracked',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 					{
+			// 						'name': 'matchactivity',
+			// 						'description': 'Should matches be tracked',
+			// 						'type': 3,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Notify on matches',
+			// 								'value': 'matches',
+			// 							},
+			// 							{
+			// 								'name': 'Notify on matches and auto matchtrack',
+			// 								'value': 'matches (auto matchtrack)',
+			// 							},
+			// 						]
+			// 					},
 			// 				]
 			// 			},
 			// 			{
-			// 				'name': 'remove',
+			// 				'name': 'disable',
 			// 				'description': 'Stop tracking a user',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 				'options': [
 			// 					{
-			// 						'name': 'username',
-			// 						'description': 'The user to stop tracking',
+			// 						'name': 'usernames',
+			// 						'description': 'The user(s) to stop tracking (separate them with a \',\')',
 			// 						'type': 3,
 			// 						'required': true
-			// 					}
+			// 					},
+			// 					{
+			// 						'name': 'topplays',
+			// 						'description': 'Stop tracking top plays',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 					{
+			// 						'name': 'leaderboardplays',
+			// 						'description': 'Stop tracking leaderboard plays',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 					{
+			// 						'name': 'ameobea',
+			// 						'description': 'Stop tracking ameobea updates',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 					{
+			// 						'name': 'showameobeaupdates',
+			// 						'description': 'Stop tracking showing ameobea updates',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 					{
+			// 						'name': 'medals',
+			// 						'description': 'Stop tracking medals',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 					{
+			// 						'name': 'duelrating',
+			// 						'description': 'Stop tracking duel rating changes',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 					{
+			// 						'name': 'matchactivity',
+			// 						'description': 'Stop tracking match activity',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
 			// 				]
 			// 			},
 			// 			{
@@ -2482,6 +3824,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'pat',
 			// 		description: 'Lets you send a gif to pat a user',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -2521,6 +3864,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'poll',
 			// 		description: 'Start a vote / poll',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'months',
@@ -2624,23 +3968,10 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'prefix',
-			// 		description: 'Change the bot\'s prefix on the server for chat commands',
-			// 		options: [
-			// 			{
-			// 				'name': 'prefix',
-			// 				'description': 'The new bot prefix',
-			// 				'type': 3,
-			// 				'required': true
-			// 			},
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'prune',
 			// 		description: 'Delete recent messages',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageMessages,
 			// 		options: [
 			// 			{
 			// 				'name': 'amount',
@@ -2656,6 +3987,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'reactionrole',
 			// 		description: 'Set up roles that users can assign themselves',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageRoles,
 			// 		options: [
 			// 			{
 			// 				'name': 'embedadd',
@@ -2825,6 +4158,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'reminders',
 			// 		description: 'Sends your set reminders',
+			// 		dm_permission: true,
 			// 	}
 			// });
 
@@ -2832,10 +4166,11 @@ module.exports = {
 			// 	data: {
 			// 		name: 'reminders-delete',
 			// 		description: 'Delete a selected reminder',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'id',
-			// 				'description': 'Id of the reminder (can be found by using e!reminders command)',
+			// 				'description': 'Id of the reminder (can be found by using /reminders command)',
 			// 				'type': 4,
 			// 				'required': true
 			// 			}
@@ -2847,10 +4182,11 @@ module.exports = {
 			// 	data: {
 			// 		name: 'reminders-edit',
 			// 		description: 'Edit your reminders',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'id',
-			// 				'description': 'Id of the reminder (can be found by using e!reminders command)',
+			// 				'description': 'Id of the reminder (can be found by using /reminders command)',
 			// 				'type': 4,
 			// 				'required': true
 			// 			},
@@ -2904,6 +4240,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'remindme',
 			// 		description: 'Sends a reminder at the specified time',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'message',
@@ -2949,6 +4286,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'roll',
 			// 		description: 'Rolls a number between 1 and 100 or 1 and the number specified',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'maximum',
@@ -2964,6 +4302,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'rollgame',
 			// 		description: 'Start a round of rollgame'
+			// 		dm_permission: true,
 			// 	}
 			// });
 
@@ -2971,6 +4310,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'server-info',
 			// 		description: 'Sends an info card about the server'
+			// 		dm_permission: false,
 			// 	}
 			// });
 
@@ -2978,6 +4318,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'settings',
 			// 		description: 'Sends an info card about the settings of the bot for the server'
+			// 		dm_permission: false,
 			// 	}
 			// });
 
@@ -2985,6 +4326,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'ship',
 			// 		description: 'Lets you check how compatible two users are.',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -3006,6 +4348,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'slap',
 			// 		description: 'Lets you send a gif to slap a user',
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -3045,6 +4388,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'starboard',
 			// 		description: 'Highlight favourite messages with a star emoji!',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'enable',
@@ -3090,6 +4435,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'tempvoice',
 			// 		description: 'Create temporary voice- and textchannels',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageChannels,
 			// 		options: [
 			// 			{
 			// 				'name': 'enablevoice',
@@ -3119,6 +4466,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'ticket',
 			// 		description: 'Create and manage tickets',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'create',
@@ -3194,6 +4543,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'time',
 			// 		description: 'Sends current time of the given location',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'location',
@@ -3207,8 +4557,43 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'tournament-feed',
+			// 		description: 'Toggles receiving new tournament notifications',
+			// 		dm_permission: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'togglenotifications',
+			// 				'description': 'Toggles receiving notifications',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'settings',
+			// 				'description': 'Update your settings with this command',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'gamemode',
+			// 						'description': 'Set to "All" for all gamemodes use "s/t/c/m" or a combination of them for modes',
+			// 						'type': 3,
+			// 						'required': false
+			// 					},
+			// 					{
+			// 						'name': 'badged',
+			// 						'description': 'Should you only get notifications for badged tournaments',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 						'required': false
+			// 					},
+			// 				]
+			// 			},
+			// 		]
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'user-profile',
 			// 		description: 'Sends an info card about the specified user',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'user',
@@ -3248,6 +4633,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'weather-set',
 			// 		description: 'Allows you to set the default degree type/location for the weather command',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'location',
@@ -3293,6 +4679,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'weather-track',
 			// 		description: 'Get hourly/daily weather updates for a specified location',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'list',
@@ -3381,6 +4769,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'weather',
 			// 		description: 'Sends info about the weather of the given location',
+			// 		dm_permission: true,
 			// 		options: [
 			// 			{
 			// 				'name': 'unit',
@@ -3412,6 +4801,8 @@ module.exports = {
 			// 	data: {
 			// 		name: 'welcome-message',
 			// 		description: 'Lets you set up a message to be sent when someone joins the server',
+			// 		dm_permission: false,
+			// 		default_member_permissions: manageGuild,
 			// 		options: [
 			// 			{
 			// 				'name': 'current',
@@ -3450,6 +4841,7 @@ module.exports = {
 				data: {
 					name: '8ball',
 					description: 'Answers with a random 8-Ball message',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'question',
@@ -3465,6 +4857,8 @@ module.exports = {
 				data: {
 					name: 'activityrole',
 					description: 'Lets you set up roles which will be assigned based on useractivity',
+					default_member_permissions: manageRoles,
+					dm_permission: false,
 					options: [
 						{
 							'name': 'add',
@@ -3523,6 +4917,8 @@ module.exports = {
 				data: {
 					name: 'autorole',
 					description: 'Lets you set up roles that will be automatically assigned on joining',
+					default_member_permissions: manageRoles,
+					dm_permission: false,
 					options: [
 						{
 							'name': 'add',
@@ -3563,6 +4959,7 @@ module.exports = {
 				data: {
 					name: 'birthday',
 					description: 'Sets your birthday',
+					dm_permission: true,
 					type: 1,
 					required: true,
 					options: [
@@ -3606,6 +5003,8 @@ module.exports = {
 				data: {
 					name: 'birthday-admin',
 					description: 'Manage birthday announcements on your server',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					type: 1,
 					required: true,
 					options: [
@@ -3642,7 +5041,8 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'creator',
-					description: 'Sends an info card about the developer'
+					description: 'Sends an info card about the developers',
+					dm_permission: true,
 				}
 			});
 
@@ -3650,6 +5050,7 @@ module.exports = {
 				data: {
 					name: 'cuddle',
 					description: 'Lets you send a gif to cuddle a user',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'user',
@@ -3689,6 +5090,7 @@ module.exports = {
 				data: {
 					name: 'feedback',
 					description: 'Sends feedback to the devs',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'type',
@@ -3728,6 +5130,8 @@ module.exports = {
 				data: {
 					name: 'goodbye-message',
 					description: 'Lets you set up a message to be sent when someone leaves the server',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'current',
@@ -3760,6 +5164,7 @@ module.exports = {
 				data: {
 					name: 'guild-leaderboard',
 					description: 'Sends a leaderboard of the top users in the guild',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'page',
@@ -3775,6 +5180,7 @@ module.exports = {
 				data: {
 					name: 'help',
 					description: 'List all commands or get info about a specific command',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'list',
@@ -3833,6 +5239,7 @@ module.exports = {
 				data: {
 					name: 'hug',
 					description: 'Lets you send a gif to hug a user',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'user',
@@ -3872,6 +5279,7 @@ module.exports = {
 				data: {
 					name: 'kiss',
 					description: 'Lets you send a gif to kiss a user',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'user',
@@ -3911,6 +5319,7 @@ module.exports = {
 				data: {
 					name: 'leaderboard',
 					description: 'Sends a leaderboard of the top users in the guild',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'type',
@@ -3965,7 +5374,8 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'link',
-					description: 'Sends a link to add the bot to a server'
+					description: 'Sends a link to add the bot to a server',
+					dm_permission: true,
 				}
 			});
 
@@ -3973,6 +5383,8 @@ module.exports = {
 				data: {
 					name: 'logging',
 					description: 'Lets you set up a message to be sent when someone leaves the server',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'list',
@@ -4013,6 +5425,8 @@ module.exports = {
 				data: {
 					name: 'name-sync',
 					description: 'Allows you to sync discord player names to ingame names (and ranks)',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'setting',
@@ -4040,8 +5454,73 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
+					name: 'osu-autohost',
+					description: 'Hosts an automated lobby ingame',
+					dm_permission: true,
+					options: [
+						{
+							'name': 'password',
+							'description': 'Leave empty for a public room',
+							'type': 3,
+						},
+						{
+							'name': 'condition',
+							'description': 'What is the winning condition of the match?',
+							'type': 3,
+							'choices': [
+								{
+									'name': 'Score v1',
+									'value': '0'
+								},
+								{
+									'name': 'Score v2',
+									'value': '3'
+								},
+								{
+									'name': 'Accuracy',
+									'value': '1'
+								}
+							]
+						},
+						{
+							'name': 'mods',
+							'description': 'The active modpools to be chosen from (Ex: "NM,HR,DT")',
+							'type': 3,
+						},
+						{
+							'name': 'nmstarrating',
+							'description': 'A custom difficulty for NM maps',
+							'type': 10, // 10 is type NUMBER
+						},
+						{
+							'name': 'hdstarrating',
+							'description': 'A custom difficulty for HD maps',
+							'type': 10, // 10 is type NUMBER
+						},
+						{
+							'name': 'hrstarrating',
+							'description': 'A custom difficulty for HR maps',
+							'type': 10, // 10 is type NUMBER
+						},
+						{
+							'name': 'dtstarrating',
+							'description': 'A custom difficulty for DT maps',
+							'type': 10, // 10 is type NUMBER
+						},
+						{
+							'name': 'fmstarrating',
+							'description': 'A custom difficulty for FM maps',
+							'type': 10, // 10 is type NUMBER
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
 					name: 'osu-beatmap',
 					description: 'Sends an info card about the specified beatmap',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'id',
@@ -4093,6 +5572,7 @@ module.exports = {
 				data: {
 					name: 'osu-bws',
 					description: 'Sends info about the BWS rank of the specified player',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'username',
@@ -4132,6 +5612,7 @@ module.exports = {
 				data: {
 					name: 'osu-compare',
 					description: 'Sends an info card about the score of the specified player on the last map sent into the channel',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'username',
@@ -4171,6 +5652,7 @@ module.exports = {
 				data: {
 					name: 'osu-derank',
 					description: 'Reranks players based on their duel rating compared to others',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'username',
@@ -4186,22 +5668,58 @@ module.exports = {
 				data: {
 					name: 'osu-duel',
 					description: 'Lets you play matches which are being reffed by the bot',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'match1v1',
-							'description': 'Lets you instantly create a Bo7 match against an opponent',
+							'description': 'Create a 1v1 match',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'opponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'starrating',
-									'description': 'The star rating you wanna play on. For example: 6.25',
+									'description': 'The star rating you wanna play on',
 									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'bestof',
+									'description': 'The best of',
+									'type': 4, // 4 is type INTEGER
+									'choices': [
+										{
+											'name': 'Best of 13',
+											'value': 13
+										},
+										{
+											'name': 'Best of 11',
+											'value': 11
+										},
+										{
+											'name': 'Best of 9',
+											'value': 9
+										},
+										{
+											'name': 'Best of 7 (Default)',
+											'value': 7
+										},
+										{
+											'name': 'Best of 5',
+											'value': 5
+										},
+										{
+											'name': 'Best of 3',
+											'value': 3
+										},
+										{
+											'name': 'Best of 1',
+											'value': 1
+										}
+									]
 								},
 								{
 									'name': 'ranked',
@@ -4211,32 +5729,749 @@ module.exports = {
 							]
 						},
 						{
+							'name': 'queue1v1',
+							'description': 'Lets you queue up for a Bo7 match against an opponent',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'queue1v1-leave',
+							'description': 'Lets you leave the queue for Bo7 matches',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
 							'name': 'match2v2',
-							'description': 'Lets you instantly create a Bo7 match with 3 other players',
+							'description': 'Create a 2v2 match',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
 									'name': 'teammate',
-									'description': 'The opponent you want to play against',
+									'description': 'A teammate',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'firstopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'secondopponent',
-									'description': 'The opponent you want to play against',
+									'description': 'An opponent',
 									'type': 6, // 6 is type USER
 									'required': true
 								},
 								{
 									'name': 'starrating',
-									'description': 'The star rating you wanna play on. For example: 6.25',
+									'description': 'The star rating you wanna play on',
 									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'bestof',
+									'description': 'The best of',
+									'type': 4, // 4 is type INTEGER
+									'choices': [
+										{
+											'name': 'Best of 13',
+											'value': 13
+										},
+										{
+											'name': 'Best of 11',
+											'value': 11
+										},
+										{
+											'name': 'Best of 9',
+											'value': 9
+										},
+										{
+											'name': 'Best of 7 (Default)',
+											'value': 7
+										},
+										{
+											'name': 'Best of 5',
+											'value': 5
+										},
+										{
+											'name': 'Best of 3',
+											'value': 3
+										},
+										{
+											'name': 'Best of 1',
+											'value': 1
+										}
+									]
+								},
+								{
+									'name': 'ranked',
+									'description': 'Should only ranked maps be played?',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
+						},
+						{
+							'name': 'match3v3',
+							'description': 'Create a 3v3 match',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'firstteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'firstopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'thirdopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'starrating',
+									'description': 'The star rating you wanna play on',
+									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'bestof',
+									'description': 'The best of',
+									'type': 4, // 4 is type INTEGER
+									'choices': [
+										{
+											'name': 'Best of 13',
+											'value': 13
+										},
+										{
+											'name': 'Best of 11',
+											'value': 11
+										},
+										{
+											'name': 'Best of 9',
+											'value': 9
+										},
+										{
+											'name': 'Best of 7 (Default)',
+											'value': 7
+										},
+										{
+											'name': 'Best of 5',
+											'value': 5
+										},
+										{
+											'name': 'Best of 3',
+											'value': 3
+										},
+										{
+											'name': 'Best of 1',
+											'value': 1
+										}
+									]
+								},
+								{
+									'name': 'ranked',
+									'description': 'Should only ranked maps be played?',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
+						},
+						{
+							'name': 'match4v4',
+							'description': 'Create a 4v4 match',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'firstteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'thirdteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'firstopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'thirdopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fourthopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'starrating',
+									'description': 'The star rating you wanna play on',
+									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'bestof',
+									'description': 'The best of',
+									'type': 4, // 4 is type INTEGER
+									'choices': [
+										{
+											'name': 'Best of 13',
+											'value': 13
+										},
+										{
+											'name': 'Best of 11',
+											'value': 11
+										},
+										{
+											'name': 'Best of 9',
+											'value': 9
+										},
+										{
+											'name': 'Best of 7 (Default)',
+											'value': 7
+										},
+										{
+											'name': 'Best of 5',
+											'value': 5
+										},
+										{
+											'name': 'Best of 3',
+											'value': 3
+										},
+										{
+											'name': 'Best of 1',
+											'value': 1
+										}
+									]
+								},
+								{
+									'name': 'ranked',
+									'description': 'Should only ranked maps be played?',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
+						},
+						{
+							'name': 'match5v5',
+							'description': 'Create a 5v5 match',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'firstteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'thirdteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fourthteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'firstopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'thirdopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fourthopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fifthopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'starrating',
+									'description': 'The star rating you wanna play on',
+									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'bestof',
+									'description': 'The best of',
+									'type': 4, // 4 is type INTEGER
+									'choices': [
+										{
+											'name': 'Best of 13',
+											'value': 13
+										},
+										{
+											'name': 'Best of 11',
+											'value': 11
+										},
+										{
+											'name': 'Best of 9',
+											'value': 9
+										},
+										{
+											'name': 'Best of 7 (Default)',
+											'value': 7
+										},
+										{
+											'name': 'Best of 5',
+											'value': 5
+										},
+										{
+											'name': 'Best of 3',
+											'value': 3
+										},
+										{
+											'name': 'Best of 1',
+											'value': 1
+										}
+									]
+								},
+								{
+									'name': 'ranked',
+									'description': 'Should only ranked maps be played?',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
+						},
+						{
+							'name': 'match6v6',
+							'description': 'Create a 6v6 match.',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'firstteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'thirdteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fourthteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fifthteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'firstopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'thirdopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fourthopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fifthopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'sixthopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'starrating',
+									'description': 'The star rating you wanna play on',
+									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'bestof',
+									'description': 'The best of',
+									'type': 4, // 4 is type INTEGER
+									'choices': [
+										{
+											'name': 'Best of 13',
+											'value': 13
+										},
+										{
+											'name': 'Best of 11',
+											'value': 11
+										},
+										{
+											'name': 'Best of 9',
+											'value': 9
+										},
+										{
+											'name': 'Best of 7 (Default)',
+											'value': 7
+										},
+										{
+											'name': 'Best of 5',
+											'value': 5
+										},
+										{
+											'name': 'Best of 3',
+											'value': 3
+										},
+										{
+											'name': 'Best of 1',
+											'value': 1
+										}
+									]
+								},
+								{
+									'name': 'ranked',
+									'description': 'Should only ranked maps be played?',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
+						},
+						{
+							'name': 'match7v7',
+							'description': 'Create a 7v7 match',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'firstteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'thirdteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fourthteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fifthteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'sixthteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'firstopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'thirdopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fourthopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fifthopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'sixthopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'seventhopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'starrating',
+									'description': 'The star rating you wanna play on',
+									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'bestof',
+									'description': 'The best of',
+									'type': 4, // 4 is type INTEGER
+									'choices': [
+										{
+											'name': 'Best of 13',
+											'value': 13
+										},
+										{
+											'name': 'Best of 11',
+											'value': 11
+										},
+										{
+											'name': 'Best of 9',
+											'value': 9
+										},
+										{
+											'name': 'Best of 7 (Default)',
+											'value': 7
+										},
+										{
+											'name': 'Best of 5',
+											'value': 5
+										},
+										{
+											'name': 'Best of 3',
+											'value': 3
+										},
+										{
+											'name': 'Best of 1',
+											'value': 1
+										}
+									]
+								},
+								{
+									'name': 'ranked',
+									'description': 'Should only ranked maps be played?',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
+						},
+						{
+							'name': 'match8v8',
+							'description': 'Create a 8v8 match',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'firstteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'thirdteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fourthteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fifthteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'sixthteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'seventhteammate',
+									'description': 'A teammate',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'firstopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'thirdopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fourthopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fifthopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'sixthopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'seventhopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'eigthopponent',
+									'description': 'An opponent',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'starrating',
+									'description': 'The star rating you wanna play on',
+									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'bestof',
+									'description': 'The best of',
+									'type': 4, // 4 is type INTEGER
+									'choices': [
+										{
+											'name': 'Best of 13',
+											'value': 13
+										},
+										{
+											'name': 'Best of 11',
+											'value': 11
+										},
+										{
+											'name': 'Best of 9',
+											'value': 9
+										},
+										{
+											'name': 'Best of 7 (Default)',
+											'value': 7
+										},
+										{
+											'name': 'Best of 5',
+											'value': 5
+										},
+										{
+											'name': 'Best of 3',
+											'value': 3
+										},
+										{
+											'name': 'Best of 1',
+											'value': 1
+										}
+									]
 								},
 								{
 									'name': 'ranked',
@@ -4289,6 +6524,11 @@ module.exports = {
 									'type': 4,
 									'required': false
 								},
+								{
+									'name': 'csv',
+									'description': 'Should a csv file be attached',
+									'type': 5, // 5 is type BOOLEAN
+								},
 							]
 						},
 						{
@@ -4330,6 +6570,7 @@ module.exports = {
 				data: {
 					name: 'osu-leaderboard',
 					description: 'Sends a leaderboard of all the players in the guild that have their account connected',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'page',
@@ -4369,6 +6610,7 @@ module.exports = {
 				data: {
 					name: 'osu-link',
 					description: 'Allows you to link your Discord Account to your osu! Account',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'connect',
@@ -4412,8 +6654,70 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
+					name: 'osu-mapleaderboard',
+					description: 'Sends an info card about the leaderboard on the specified beatmap',
+					dm_permission: true,
+					options: [
+						{
+							'name': 'id',
+							'description': 'beatmap ID',
+							'type': 3,
+							'required': true
+						},
+						{
+							'name': 'server',
+							'description': 'The server you want to get the leaderboard from',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'Bancho',
+									'value': 'bancho'
+								},
+								{
+									'name': 'Tournaments',
+									'value': 'tournaments'
+								},
+							]
+						},
+						{
+							'name': 'mode',
+							'description': 'The gamemode you want to get the leaderboard from',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'osu',
+									'value': '--osu'
+								},
+								{
+									'name': 'taiko',
+									'value': '--taiko'
+								},
+								{
+									'name': 'catch',
+									'value': '--catch'
+								},
+								{
+									'name': 'mania',
+									'value': '--mania'
+								},
+							]
+						},
+						{
+							'name': 'amount',
+							'description': 'The amount of scores you want to get',
+							'type': 4,
+						}
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
 					name: 'osu-matchscore',
 					description: 'Sends an evaluation of how valuable all the players in the match were',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'match',
@@ -4427,9 +6731,49 @@ module.exports = {
 							'type': 4,
 						},
 						{
-							'name': 'average',
-							'description': 'True means unplayed maps will be ignored',
-							'type': 5,
+							'name': 'calculation',
+							'description': 'How the matchscore should be calculated',
+							'type': 3,
+							'choices': [
+								{
+									'name': 'Mixed (Default)',
+									'value': 'mixed'
+								},
+								{
+									'name': 'Sum (favors all-rounders)',
+									'value': 'sum'
+								},
+								{
+									'name': 'Average (favors niche players)',
+									'value': 'avg'
+								},
+							]
+						},
+						{
+							'name': 'skiplast',
+							'description': 'The amount of maps to ignore from the end of the match',
+							'type': 4,
+						},
+						{
+							'name': 'ezmultiplier',
+							'description': 'The EZ multiplier for the match (Default: 1.7)',
+							'type': 4,
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-matchtrack',
+					description: 'Tracks the progress of a match',
+					dm_permission: true,
+					options: [
+						{
+							'name': 'match',
+							'description': 'Match ID or link',
+							'type': 3,
+							'required': true
 						},
 					]
 				}
@@ -4439,6 +6783,7 @@ module.exports = {
 				data: {
 					name: 'osu-matchup',
 					description: 'Sends an info card about the matchups between the specified players',
+					dm_permission: true,
 					options: [
 						{
 							'name': '1v1',
@@ -4455,6 +6800,38 @@ module.exports = {
 									'name': 'username2',
 									'description': 'The name of a player to compare with',
 									'type': 3,
+								},
+								{
+									'name': 'timeframe',
+									'description': 'Since when should the scores be taken into account',
+									'type': 3,
+									'required': false,
+									'choices': [
+										{
+											'name': '1 month',
+											'value': '1m'
+										},
+										{
+											'name': '3 months',
+											'value': '3m'
+										},
+										{
+											'name': '6 months',
+											'value': '6m'
+										},
+										{
+											'name': '1 year (default)',
+											'value': '1y'
+										},
+										{
+											'name': '2 years',
+											'value': '2y'
+										},
+										{
+											'name': 'All time',
+											'value': 'all'
+										},
+									]
 								},
 								{
 									'name': 'scores',
@@ -4576,6 +6953,38 @@ module.exports = {
 									'type': 3,
 								},
 								{
+									'name': 'timeframe',
+									'description': 'Since when should the scores be taken into account',
+									'type': 3,
+									'required': false,
+									'choices': [
+										{
+											'name': '1 month',
+											'value': '1m'
+										},
+										{
+											'name': '3 months',
+											'value': '3m'
+										},
+										{
+											'name': '6 months',
+											'value': '6m'
+										},
+										{
+											'name': '1 year (default)',
+											'value': '1y'
+										},
+										{
+											'name': '2 years',
+											'value': '2y'
+										},
+										{
+											'name': 'All time',
+											'value': 'all'
+										},
+									]
+								},
+								{
 									'name': 'scores',
 									'description': 'Which types of scores should the matchup evaluate?',
 									'type': 3,
@@ -4611,6 +7020,7 @@ module.exports = {
 				data: {
 					name: 'osu-motd',
 					description: 'Manage your Maps of the Day registration and create custom rounds',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'register',
@@ -4855,6 +7265,7 @@ module.exports = {
 				data: {
 					name: 'osu-profile',
 					description: 'Sends an info card about the specified player',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'username',
@@ -4863,42 +7274,9 @@ module.exports = {
 							'required': false
 						},
 						{
-							'name': 'username2',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username3',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username4',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username5',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						}
-					]
-				},
-			});
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'o-p',
-					description: 'Sends an info card about the specified player',
-					options: [
-						{
-							'name': 'username',
-							'description': 'The username, id or link of the player',
-							'type': 3,
+							'name': 'showgraph',
+							'description': 'Show the rank graph',
+							'type': 5, // 5 is type BOOLEAN
 							'required': false
 						},
 						{
@@ -4933,6 +7311,7 @@ module.exports = {
 				data: {
 					name: 'osu-recent',
 					description: 'Sends an info card about the specified player',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'pass',
@@ -4985,6 +7364,7 @@ module.exports = {
 				data: {
 					name: 'ors',
 					description: 'Sends an info card about the last score of the specified player',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'pass',
@@ -5037,6 +7417,8 @@ module.exports = {
 				data: {
 					name: 'osu-referee',
 					description: 'Lets you schedule matches which are being reffed by the bot',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'soloqualifiers',
@@ -5151,6 +7533,7 @@ module.exports = {
 				data: {
 					name: 'osu-schedule',
 					description: 'Sends an info graph about the schedules of the players',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'weekday',
@@ -5276,6 +7659,7 @@ module.exports = {
 				data: {
 					name: 'osu-score',
 					description: 'Sends an info card about the score of the specified player on the map',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'beatmap',
@@ -5370,6 +7754,7 @@ module.exports = {
 				data: {
 					name: 'osu-set',
 					description: 'Allows you to set your main mode and server',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'mode',
@@ -5433,6 +7818,7 @@ module.exports = {
 				data: {
 					name: 'osu-skills',
 					description: 'Sends an info card about the skills of the specified player',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'username',
@@ -5510,6 +7896,7 @@ module.exports = {
 				data: {
 					name: 'osu-top',
 					description: 'Sends an info card about the topplays of the specified player',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'sorting',
@@ -5548,7 +7935,7 @@ module.exports = {
 								{
 									'name': 'Star Rating',
 									'value': '--sr',
-								}
+								},
 							]
 						},
 						{
@@ -5561,7 +7948,6 @@ module.exports = {
 									'name': 'True',
 									'value': '--asc'
 								},
-
 							]
 						},
 						{
@@ -5643,6 +8029,11 @@ module.exports = {
 							'type': 3,
 							'required': false
 						},
+						{
+							'name': 'csv',
+							'description': 'Should a csv file be attached',
+							'type': 5, // 5 is type BOOLEAN
+						},
 					]
 				},
 			});
@@ -5650,72 +8041,139 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'osu-mostplayed',
-					description: 'Sends an info card about the most played maps of the specified player',
+					description: 'Sends an info card about the most played maps',
+					dm_permission: true,
 					options: [
 						{
-							'name': 'amount',
-							'description': 'The amount of most played maps to be displayed',
-							'type': 4,
-							'required': false
-						},
-						{
-							'name': 'server',
-							'description': 'The server from which the results will be displayed',
-							'type': 3,
-							'required': false,
-							'choices': [
+							'name': 'user',
+							'description': 'Get the stats for a user',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
 								{
-									'name': 'Bancho',
-									'value': 'b',
+									'name': 'amount',
+									'description': 'The amount of most played maps to be displayed',
+									'type': 4,
+									'required': false
 								},
 								{
-									'name': 'Ripple',
-									'value': 'r',
+									'name': 'server',
+									'description': 'The server from which the results will be displayed',
+									'type': 3,
+									'required': false,
+									'choices': [
+										{
+											'name': 'Bancho',
+											'value': 'b',
+										},
+										{
+											'name': 'Ripple',
+											'value': 'r',
+										},
+										{
+											'name': 'Tournaments',
+											'value': 'tournaments',
+										},
+									]
 								},
 								{
-									'name': 'Tournaments',
-									'value': 'tournaments',
+									'name': 'username',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username2',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username3',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username4',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'username5',
+									'description': 'The username, id or link of the player',
+									'type': 3,
+									'required': false
 								},
 							]
 						},
 						{
-							'name': 'username',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username2',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username3',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username4',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username5',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
+							'name': 'tourneybeatmaps',
+							'description': 'Get the stats for a beatmap',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'amount',
+									'description': 'The amount of most played maps to be displayed',
+									'type': 4,
+									'required': false
+								},
+								{
+									'name': 'page',
+									'description': 'The page of the results',
+									'type': 4,
+									'required': false
+								},
+								{
+									'name': 'dontfiltermm',
+									'description': 'Should matchmaking (ETX/o!mm) matches not be filtered out',
+									'type': 5, // 5 is type BOOLEAN
+									'required': false
+								},
+								// {
+								// 	'name': 'modpool',
+								// 	'description': 'The modpool the maps appeared in',
+								// 	'type': 3,
+								// 	'required': false,
+								// 	'choices': [
+								// 		{
+								// 			'name': 'NM',
+								// 			'value': 'NM',
+								// 		},
+								// 		{
+								// 			'name': 'HD',
+								// 			'value': 'HD',
+								// 		},
+								// 		{
+								// 			'name': 'HR',
+								// 			'value': 'HR',
+								// 		},
+								// 		{
+								// 			'name': 'DT',
+								// 			'value': 'DT',
+								// 		},
+								// 		{
+								// 			'name': 'FM',
+								// 			'value': 'FM',
+								// 		}
+								// 	]
+								// },
+								{
+									'name': 'csv',
+									'description': 'Should a csv file be attached',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
 						},
 					]
-				},
+				}
 			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'osu-tournament',
 					description: 'Sends a .txt file with all the data for the tournament matches with this acronym',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'acronym',
@@ -5731,31 +8189,299 @@ module.exports = {
 				data: {
 					name: 'osu-track',
 					description: 'Tracks new scores set by the specified users',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
-							'name': 'add',
+							'name': 'enable',
 							'description': 'Lets you add a new user to track',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
-									'name': 'username',
-									'description': 'The user to track',
+									'name': 'usernames',
+									'description': 'The user(s) to track (separate them with a \',\')',
 									'type': 3,
 									'required': true
-								}
+								},
+								{
+									'name': 'topplays',
+									'description': 'Which modes should be tracked',
+									'type': 3,
+									'choices': [
+										{
+											'name': 'osu! only',
+											'value': 'o',
+										},
+										{
+											'name': 'taiko only',
+											'value': 't',
+										},
+										{
+											'name': 'catch only',
+											'value': 'c',
+										},
+										{
+											'name': 'mania only',
+											'value': 'm',
+										},
+										{
+											'name': 'osu! & taiko',
+											'value': 'ot',
+										},
+										{
+											'name': 'osu! & catch',
+											'value': 'oc',
+										},
+										{
+											'name': 'osu! & mania',
+											'value': 'om',
+										},
+										{
+											'name': 'taiko & catch',
+											'value': 'tc',
+										},
+										{
+											'name': 'taiko & mania',
+											'value': 'tm',
+										},
+										{
+											'name': 'catch & mania',
+											'value': 'cm',
+										},
+										{
+											'name': 'osu!, taiko & catch',
+											'value': 'otc',
+										},
+										{
+											'name': 'osu!, taiko & mania',
+											'value': 'otm',
+										},
+										{
+											'name': 'osu!, catch & mania',
+											'value': 'ocm',
+										},
+										{
+											'name': 'taiko, catch & mania',
+											'value': 'tcm',
+										},
+										{
+											'name': 'osu!, taiko, catch & mania',
+											'value': 'otcm',
+										},
+									]
+								},
+								{
+									'name': 'leaderboardplays',
+									'description': 'Which modes should be tracked',
+									'type': 3,
+									'choices': [
+										{
+											'name': 'osu! only',
+											'value': 'o',
+										},
+										{
+											'name': 'taiko only',
+											'value': 't',
+										},
+										{
+											'name': 'catch only',
+											'value': 'c',
+										},
+										{
+											'name': 'mania only',
+											'value': 'm',
+										},
+										{
+											'name': 'osu! & taiko',
+											'value': 'ot',
+										},
+										{
+											'name': 'osu! & catch',
+											'value': 'oc',
+										},
+										{
+											'name': 'osu! & mania',
+											'value': 'om',
+										},
+										{
+											'name': 'taiko & catch',
+											'value': 'tc',
+										},
+										{
+											'name': 'taiko & mania',
+											'value': 'tm',
+										},
+										{
+											'name': 'catch & mania',
+											'value': 'cm',
+										},
+										{
+											'name': 'osu!, taiko & catch',
+											'value': 'otc',
+										},
+										{
+											'name': 'osu!, taiko & mania',
+											'value': 'otm',
+										},
+										{
+											'name': 'osu!, catch & mania',
+											'value': 'ocm',
+										},
+										{
+											'name': 'taiko, catch & mania',
+											'value': 'tcm',
+										},
+										{
+											'name': 'osu!, taiko, catch & mania',
+											'value': 'otcm',
+										},
+									]
+								},
+								{
+									'name': 'ameobea',
+									'description': 'Which modes should be updated for ameobea.me/osutrack/',
+									'type': 3,
+									'choices': [
+										{
+											'name': 'osu! only',
+											'value': 'o',
+										},
+										{
+											'name': 'taiko only',
+											'value': 't',
+										},
+										{
+											'name': 'catch only',
+											'value': 'c',
+										},
+										{
+											'name': 'mania only',
+											'value': 'm',
+										},
+										{
+											'name': 'osu! & taiko',
+											'value': 'ot',
+										},
+										{
+											'name': 'osu! & catch',
+											'value': 'oc',
+										},
+										{
+											'name': 'osu! & mania',
+											'value': 'om',
+										},
+										{
+											'name': 'taiko & catch',
+											'value': 'tc',
+										},
+										{
+											'name': 'taiko & mania',
+											'value': 'tm',
+										},
+										{
+											'name': 'catch & mania',
+											'value': 'cm',
+										},
+										{
+											'name': 'osu!, taiko & catch',
+											'value': 'otc',
+										},
+										{
+											'name': 'osu!, taiko & mania',
+											'value': 'otm',
+										},
+										{
+											'name': 'osu!, catch & mania',
+											'value': 'ocm',
+										},
+										{
+											'name': 'taiko, catch & mania',
+											'value': 'tcm',
+										},
+										{
+											'name': 'osu!, taiko, catch & mania',
+											'value': 'otcm',
+										},
+									]
+								},
+								{
+									'name': 'showameobeaupdate',
+									'description': 'Should messages be sent when ameobea is updated',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'medals',
+									'description': 'Should achieved medals be tracked',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'duelrating',
+									'description': 'Should duel rating changes be tracked',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'matchactivity',
+									'description': 'Should matches be tracked',
+									'type': 3,
+									'choices': [
+										{
+											'name': 'Notify on matches',
+											'value': 'matches',
+										},
+										{
+											'name': 'Notify on matches and auto matchtrack',
+											'value': 'matches (auto matchtrack)',
+										},
+									]
+								},
 							]
 						},
 						{
-							'name': 'remove',
+							'name': 'disable',
 							'description': 'Stop tracking a user',
 							'type': 1, // 1 is type SUB_COMMAND
 							'options': [
 								{
-									'name': 'username',
-									'description': 'The user to stop tracking',
+									'name': 'usernames',
+									'description': 'The user(s) to stop tracking (separate them with a \',\')',
 									'type': 3,
 									'required': true
-								}
+								},
+								{
+									'name': 'topplays',
+									'description': 'Stop tracking top plays',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'leaderboardplays',
+									'description': 'Stop tracking leaderboard plays',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'ameobea',
+									'description': 'Stop tracking ameobea updates',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'showameobeaupdates',
+									'description': 'Stop tracking showing ameobea updates',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'medals',
+									'description': 'Stop tracking medals',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'duelrating',
+									'description': 'Stop tracking duel rating changes',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'matchactivity',
+									'description': 'Stop tracking match activity',
+									'type': 5, // 5 is type BOOLEAN
+								},
 							]
 						},
 						{
@@ -5771,6 +8497,7 @@ module.exports = {
 				data: {
 					name: 'pat',
 					description: 'Lets you send a gif to pat a user',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'user',
@@ -5810,6 +8537,7 @@ module.exports = {
 				data: {
 					name: 'poll',
 					description: 'Start a vote / poll',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'months',
@@ -5913,23 +8641,10 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
-					name: 'prefix',
-					description: 'Change the bot\'s prefix on the server for chat commands',
-					options: [
-						{
-							'name': 'prefix',
-							'description': 'The new bot prefix',
-							'type': 3,
-							'required': true
-						},
-					]
-				},
-			});
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
 					name: 'prune',
 					description: 'Delete recent messages',
+					dm_permission: false,
+					default_member_permissions: manageMessages,
 					options: [
 						{
 							'name': 'amount',
@@ -5945,6 +8660,8 @@ module.exports = {
 				data: {
 					name: 'reactionrole',
 					description: 'Set up roles that users can assign themselves',
+					dm_permission: false,
+					default_member_permissions: manageRoles,
 					options: [
 						{
 							'name': 'embedadd',
@@ -6114,6 +8831,7 @@ module.exports = {
 				data: {
 					name: 'reminders',
 					description: 'Sends your set reminders',
+					dm_permission: true,
 				}
 			});
 
@@ -6121,10 +8839,11 @@ module.exports = {
 				data: {
 					name: 'reminders-delete',
 					description: 'Delete a selected reminder',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'id',
-							'description': 'Id of the reminder (can be found by using e!reminders command)',
+							'description': 'Id of the reminder (can be found by using /reminders command)',
 							'type': 4,
 							'required': true
 						}
@@ -6136,10 +8855,11 @@ module.exports = {
 				data: {
 					name: 'reminders-edit',
 					description: 'Edit your reminders',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'id',
-							'description': 'Id of the reminder (can be found by using e!reminders command)',
+							'description': 'Id of the reminder (can be found by using /reminders command)',
 							'type': 4,
 							'required': true
 						},
@@ -6193,6 +8913,7 @@ module.exports = {
 				data: {
 					name: 'remindme',
 					description: 'Sends a reminder at the specified time',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'message',
@@ -6238,6 +8959,7 @@ module.exports = {
 				data: {
 					name: 'roll',
 					description: 'Rolls a number between 1 and 100 or 1 and the number specified',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'maximum',
@@ -6252,21 +8974,24 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'rollgame',
-					description: 'Start a round of rollgame'
+					description: 'Start a round of rollgame',
+					dm_permission: true,
 				}
 			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'server-info',
-					description: 'Sends an info card about the server'
+					description: 'Sends an info card about the server',
+					dm_permission: false,
 				}
 			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'settings',
-					description: 'Sends an info card about the settings of the bot for the server'
+					description: 'Sends an info card about the settings of the bot for the server',
+					dm_permission: false,
 				}
 			});
 
@@ -6274,6 +8999,7 @@ module.exports = {
 				data: {
 					name: 'ship',
 					description: 'Lets you check how compatible two users are.',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'user',
@@ -6295,6 +9021,7 @@ module.exports = {
 				data: {
 					name: 'slap',
 					description: 'Lets you send a gif to slap a user',
+					dm_permission: false,
 					options: [
 						{
 							'name': 'user',
@@ -6334,6 +9061,8 @@ module.exports = {
 				data: {
 					name: 'starboard',
 					description: 'Highlight favourite messages with a star emoji!',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'enable',
@@ -6379,6 +9108,8 @@ module.exports = {
 				data: {
 					name: 'tempvoice',
 					description: 'Create temporary voice- and textchannels',
+					dm_permission: false,
+					default_member_permissions: manageChannels,
 					options: [
 						{
 							'name': 'enablevoice',
@@ -6408,6 +9139,8 @@ module.exports = {
 				data: {
 					name: 'ticket',
 					description: 'Create and manage tickets',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'create',
@@ -6483,6 +9216,7 @@ module.exports = {
 				data: {
 					name: 'time',
 					description: 'Sends current time of the given location',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'location',
@@ -6496,8 +9230,43 @@ module.exports = {
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
+					name: 'tournament-feed',
+					description: 'Toggles receiving new tournament notifications',
+					dm_permission: true,
+					options: [
+						{
+							'name': 'togglenotifications',
+							'description': 'Toggles receiving notifications',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'settings',
+							'description': 'Update your settings with this command',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'gamemode',
+									'description': 'Set to "All" for all gamemodes use "s/t/c/m" or a combination of them for modes',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'badged',
+									'description': 'Should you only get notifications for badged tournaments',
+									'type': 5, // 5 is type BOOLEAN
+									'required': false
+								},
+							]
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
 					name: 'user-profile',
 					description: 'Sends an info card about the specified user',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'user',
@@ -6537,6 +9306,7 @@ module.exports = {
 				data: {
 					name: 'weather-set',
 					description: 'Allows you to set the default degree type/location for the weather command',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'location',
@@ -6582,6 +9352,8 @@ module.exports = {
 				data: {
 					name: 'weather-track',
 					description: 'Get hourly/daily weather updates for a specified location',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'list',
@@ -6670,6 +9442,7 @@ module.exports = {
 				data: {
 					name: 'weather',
 					description: 'Sends info about the weather of the given location',
+					dm_permission: true,
 					options: [
 						{
 							'name': 'unit',
@@ -6701,6 +9474,8 @@ module.exports = {
 				data: {
 					name: 'welcome-message',
 					description: 'Lets you set up a message to be sent when someone joins the server',
+					dm_permission: false,
+					default_member_permissions: manageGuild,
 					options: [
 						{
 							'name': 'current',
@@ -6821,7 +9596,9 @@ module.exports = {
 					guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
 
 					for (let i = 0; i < members.length; i++) {
-						await sentMessage.edit(`${i} out of ${members.length} done`);
+						if (i % 25 === 0) {
+							sentMessage.edit(`${i} out of ${members.length} done`);
+						}
 						logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: {
@@ -6831,8 +9608,6 @@ module.exports = {
 
 						if (discordUser) {
 							await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: msg.client });
-
-							await pause(10000);
 						}
 					}
 
@@ -6913,15 +9688,581 @@ module.exports = {
 			}
 		} else if (args[0] === 'cleanUp') {
 			cleanUpDuplicateEntries(true);
-		} else if (args[0] === 'disconnectBancho') {
-			try {
-				await additionalObjects[1].disconnect();
-				// eslint-disable-next-line no-undef
-				return msg.reply(`Worker ${process.env.pm_id} disconnected`);
-			} catch (e) {
-				console.log(e);
-				// eslint-disable-next-line no-undef
-				return msg.reply(`Worker ${process.env.pm_id} errored disconnecting`);
+		} else if (args[0] === 'tournamentFeedCommand') {
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'tournamentfeed-admin',
+					description: 'Allows for managing the tournament feed',
+					default_member_permissions: '0',
+					options: [
+						{
+							'name': 'update',
+							'description': 'Allows for updating the tournament feed',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'id',
+									'description': 'The forum post id',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'format',
+									'description': 'The format of the tournament',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'rankrange',
+									'description': 'The rankrange of the tournament',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'gamemode',
+									'description': 'The gamemode of the tournament',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'notes',
+									'description': 'Additional information about the tournament',
+									'type': 3,
+									'required': false
+								},
+								{
+									'name': 'bws',
+									'description': 'Is the rank range bws',
+									'type': 5, // 5 is type BOOLEAN
+									'required': false
+								},
+								{
+									'name': 'badged',
+									'description': 'Is the tourney going for badged',
+									'type': 5, // 5 is type BOOLEAN
+									'required': false
+								},
+								{
+									'name': 'outdated',
+									'description': 'Is the tournament post outdated',
+									'type': 5, // 5 is type BOOLEAN
+									'required': false
+								},
+								{
+									'name': 'notournament',
+									'description': 'Is the post not a tournament',
+									'type': 5, // 5 is type BOOLEAN
+									'required': false
+								},
+							]
+						},
+						{
+							'name': 'ping',
+							'description': 'Shares a new tournament',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'id',
+									'description': 'The forum post id',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'delete',
+							'description': 'Deletes a saved tournament record',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'id',
+									'description': 'The forum post id',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'list',
+							'description': 'Show open forum posts',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+					]
+				},
+			});
+		} else if (args[0] === 'clearForumPosts') {
+			let forumPosts = await DBOsuForumPosts.findAll();
+			for (let i = 0; i < forumPosts.length; i++) {
+				await forumPosts[i].destroy();
+			}
+		} else if (args[0] === 'runningMatches') {
+			let importMatchTasks = await DBProcessQueue.findAll({
+				where: {
+					task: 'importMatch',
+				}
+			});
+
+			for (let i = 0; i < importMatchTasks.length; i++) {
+				await msg.reply(`https://osu.ppy.sh/mp/${importMatchTasks[i].additions}`);
+			}
+		} else if (args[0] === 'deleteDiscordUser') {
+			let discordUser = await DBDiscordUsers.findOne({
+				where: {
+					userId: args[1]
+				}
+			});
+
+			if (discordUser) {
+				await discordUser.destroy();
+				return await msg.reply('Deleted discord user');
+			}
+
+			return await msg.reply('Could not find discord user');
+		} else if (args[0] === 'resetSavedPPValues') {
+			// Reset saved pp values in DBOsuMultiScores using an update statement
+			await msg.reply('Resetting...');
+			let count = await DBOsuMultiScores.update({
+				pp: null,
+			}, {
+				where: {
+					pp: {
+						[Op.ne]: null
+					}
+				}
+			});
+
+			return msg.reply(`Reset ${humanReadable(count)} scores' pp values`);
+		} else if (args[0] === 'duelAdminCommand') {
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'osu-duel-admin',
+					description: 'Duel admin commands',
+					default_member_permissions: '0',
+					options: [
+						{
+							'name': 'createduel1v1',
+							'description': 'Creates a duel match',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'firstplayer',
+									'description': 'The first player',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondplayer',
+									'description': 'The second player',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'starrating',
+									'description': 'The star rating to play on',
+									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'bestof',
+									'description': 'The best of',
+									'type': 4, // 4 is type INTEGER
+									'choices': [
+										{
+											'name': 'Best of 13',
+											'value': 13
+										},
+										{
+											'name': 'Best of 11',
+											'value': 11
+										},
+										{
+											'name': 'Best of 9',
+											'value': 9
+										},
+										{
+											'name': 'Best of 7 (Default)',
+											'value': 7
+										},
+										{
+											'name': 'Best of 5',
+											'value': 5
+										},
+										{
+											'name': 'Best of 3',
+											'value': 3
+										},
+										{
+											'name': 'Best of 1',
+											'value': 1
+										}
+									]
+								},
+								{
+									'name': 'ranked',
+									'description': 'Should only ranked maps be played?',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
+						},
+						{
+							'name': 'createduel2v2',
+							'description': 'Creates a duel match',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'firstplayer',
+									'description': 'The first player',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'secondplayer',
+									'description': 'The second player',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'thirdplayer',
+									'description': 'The third player',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'fourthplayer',
+									'description': 'The fourth player',
+									'type': 6, // 6 is type USER
+									'required': true
+								},
+								{
+									'name': 'starrating',
+									'description': 'The star rating to play on',
+									'type': 10, // 10 is type NUMBER
+								},
+								{
+									'name': 'bestof',
+									'description': 'The best of',
+									'type': 4, // 4 is type INTEGER
+									'choices': [
+										{
+											'name': 'Best of 13',
+											'value': 13
+										},
+										{
+											'name': 'Best of 11',
+											'value': 11
+										},
+										{
+											'name': 'Best of 9',
+											'value': 9
+										},
+										{
+											'name': 'Best of 7 (Default)',
+											'value': 7
+										},
+										{
+											'name': 'Best of 5',
+											'value': 5
+										},
+										{
+											'name': 'Best of 3',
+											'value': 3
+										},
+										{
+											'name': 'Best of 1',
+											'value': 1
+										}
+									]
+								},
+								{
+									'name': 'ranked',
+									'description': 'Should only ranked maps be played?',
+									'type': 5, // 5 is type BOOLEAN
+								},
+							]
+						},
+					]
+				},
+			});
+		} else if (args[0] === 'averageRating') {
+			let discordUsers = await DBDiscordUsers.findAll({
+				where: {
+					osuUserId: {
+						[Op.gt]: 0
+					},
+					osuPP: {
+						[Op.gt]: 0
+					},
+					osuDuelStarRating: {
+						[Op.gt]: 0
+					},
+					osuDuelProvisional: {
+						[Op.not]: true,
+					}
+				}
+			});
+
+			let totalRating = 0;
+			let totalPlayers = 0;
+
+			for (let i = 0; i < discordUsers.length; i++) {
+				let discordUser = discordUsers[i];
+
+				if (discordUser.osuRank && parseInt(discordUser.osuRank) >= parseInt(args[1]) && parseInt(discordUser.osuRank) <= parseInt(args[2])) {
+					totalRating += parseFloat(discordUser.osuDuelStarRating);
+					totalPlayers++;
+				}
+			}
+
+			let averageRating = totalRating / totalPlayers;
+
+			return msg.reply(`The average rating for players ranked ${args[1]} to ${args[2]} is ${averageRating.toFixed(2)}`);
+		} else if (args[0] === 'serverTourneyTops') {
+			if (args.length < 3) {
+				return msg.reply('Correct usage: `e!admin serverTourneyTops amountPerPlayer <onlyRanked: true/false> [@Elitebotix]`');
+			}
+
+			let amountPerPlayer = parseInt(args[1]);
+			let onlyRanked = false;
+
+			if (args[2] === 'true') {
+				onlyRanked = true;
+			}
+
+			let processingMessage = await msg.reply('Processing...');
+
+			let osuAccounts = [];
+			await msg.guild.members.fetch()
+				.then(async (guildMembers) => {
+					const members = [];
+					guildMembers.each(member => members.push(member.id));
+
+					logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers serverTourneyTops');
+					const discordUsers = await DBDiscordUsers.findAll({
+						where: {
+							userId: {
+								[Op.in]: members
+							},
+							osuUserId: {
+								[Op.not]: null,
+							}
+						},
+					});
+
+					for (let i = 0; i < discordUsers.length; i++) {
+						osuAccounts.push({
+							userId: discordUsers[i].userId,
+							osuUserId: discordUsers[i].osuUserId,
+							osuName: discordUsers[i].osuName,
+						});
+					}
+				})
+				.catch(err => {
+					console.log(err);
+				});
+
+			let tourneyTops = [];
+
+			for (let i = 0; i < osuAccounts.length; i++) {
+				await processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Account ${i + 1}/${osuAccounts.length})...`);
+
+				let lastUpdate = new Date();
+				//Get all scores from tournaments
+				logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores');
+				let multiScores = await DBOsuMultiScores.findAll({
+					where: {
+						osuUserId: osuAccounts[i].osuUserId,
+						mode: 'Standard',
+						tourneyMatch: true,
+						score: {
+							[Op.gte]: 10000
+						}
+					}
+				});
+
+				if (new Date() - lastUpdate > 15000) {
+					processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Found ${multiScores.length} scores) (Account ${i + 1}/${osuAccounts.length})...`);
+					lastUpdate = new Date();
+				}
+
+				for (let j = 0; j < multiScores.length; j++) {
+					if (new Date() - lastUpdate > 15000) {
+						processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Removing irrelevant scores from ${multiScores.length} found scores) (Account ${i + 1}/${osuAccounts.length})...`);
+						lastUpdate = new Date();
+					}
+
+					if (parseInt(multiScores[j].score) <= 10000 && getMods(parseInt(multiScores[j].gameRawMods) + parseInt(multiScores[j].rawMods)).includes('RX')) {
+						multiScores.splice(j, 1);
+						j--;
+					}
+				}
+
+				let multisToUpdate = [];
+				for (let j = 0; j < multiScores.length; j++) {
+					if (!multiScores[j].maxCombo && !multisToUpdate.includes(multiScores[j].matchId)) {
+						multisToUpdate.push(multiScores[j].matchId);
+					}
+				}
+
+				for (let j = 0; j < multisToUpdate.length; j++) {
+					if (new Date() - lastUpdate > 15000) {
+						processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Updating legacy matches ${j + 1}/${multisToUpdate.length}) (Account ${i + 1}/${osuAccounts.length})...`);
+						lastUpdate = new Date();
+					}
+					// eslint-disable-next-line no-undef
+					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+					});
+
+					await osuApi.getMatch({ mp: multisToUpdate[j] })
+						.then(async (match) => {
+							await saveOsuMultiScores(match);
+						})
+						.catch(() => {
+							//Nothing
+						});
+					await pause(5000);
+				}
+
+				if (multisToUpdate.length) {
+					//Get all scores from tournaments
+					logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores2');
+					multiScores = await DBOsuMultiScores.findAll({
+						where: {
+							osuUserId: osuAccounts[i].osuUserId,
+							mode: 'Standard',
+							tourneyMatch: true,
+							score: {
+								[Op.gte]: 10000
+							}
+						}
+					});
+				}
+
+				if (new Date() - lastUpdate > 15000) {
+					processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Found ${multiScores.length} scores after legacy match update) (Account ${i + 1}/${osuAccounts.length})...`);
+					lastUpdate = new Date();
+				}
+
+				for (let j = 0; j < multiScores.length; j++) {
+					if (new Date() - lastUpdate > 15000) {
+						processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Removing irrelevant data from ${multiScores.length} found scores after legacy match update) (Account ${i + 1}/${osuAccounts.length})...`);
+						lastUpdate = new Date();
+					}
+					if (parseInt(multiScores[j].score) <= 10000 || multiScores[j].teamType === 'Tag Team vs' || multiScores[j].teamType === 'Tag Co-op') {
+						multiScores.splice(j, 1);
+						j--;
+					}
+				}
+
+				//Translate the scores to bancho scores
+				for (let j = 0; j < multiScores.length; j++) {
+					if (new Date() - lastUpdate > 15000) {
+						processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Score ${j + 1}/${multiScores.length}) (Account ${i + 1}/${osuAccounts.length})...`);
+						lastUpdate = new Date();
+					}
+					if (parseInt(multiScores[j].gameRawMods) % 2 === 1) {
+						multiScores[j].gameRawMods = parseInt(multiScores[j].gameRawMods) - 1;
+					}
+					if (parseInt(multiScores[j].rawMods) % 2 === 1) {
+						multiScores[j].rawMods = parseInt(multiScores[j].rawMods) - 1;
+					}
+					multiScores[j] = await multiToBanchoScore(multiScores[j]);
+
+					if (!multiScores[j].pp || parseFloat(multiScores[j].pp) > 2000 || !parseFloat(multiScores[j].pp)) {
+						multiScores.splice(j, 1);
+						j--;
+						continue;
+					}
+				}
+
+				//Sort scores by pp
+				quicksortPP(multiScores);
+
+				//Remove duplicates by beatmapId
+				for (let j = 0; j < multiScores.length; j++) {
+					for (let k = j + 1; k < multiScores.length; k++) {
+						if (multiScores[j].beatmapId === multiScores[k].beatmapId) {
+							multiScores.splice(k, 1);
+							k--;
+						}
+					}
+				}
+
+				//Feed the scores into the array
+				let scoreCount = 0;
+				for (let j = 0; j < multiScores.length && scoreCount < amountPerPlayer; j++) {
+					if (new Date() - lastUpdate > 15000) {
+						processingMessage.edit(`Processing ${osuAccounts[i].osuName} (Adding score ${j + 1}/${amountPerPlayer} to the output) (Account ${i + 1}/${osuAccounts.length})...`);
+						lastUpdate = new Date();
+					}
+					multiScores[j].beatmap = await getOsuBeatmap({ beatmapId: multiScores[j].beatmapId });
+					if (onlyRanked) {
+						if (!multiScores[j].beatmap || multiScores[j].beatmap && multiScores[j].beatmap.approvalStatus !== 'Approved' && multiScores[j].beatmap.approvalStatus !== 'Ranked') {
+							continue;
+						}
+					}
+					if (multiScores[j].pp) {
+						tourneyTops.push(multiScores[j]);
+						scoreCount++;
+					}
+				}
+			}
+
+			let exportScores = [];
+
+			for (let i = 0; i < tourneyTops.length; i++) {
+				if (tourneyTops[i].beatmap) {
+					exportScores.push({
+						osuUserId: tourneyTops[i].user.id,
+						pp: tourneyTops[i].pp,
+						approvalStatus: tourneyTops[i].beatmap.approvalStatus,
+						beatmapId: tourneyTops[i].beatmapId,
+						score: tourneyTops[i].score,
+						raw_date: tourneyTops[i].raw_date,
+						rank: tourneyTops[i].rank,
+						raw_mods: tourneyTops[i].raw_mods,
+						title: tourneyTops[i].beatmap.title,
+						artist: tourneyTops[i].beatmap.artist,
+						difficulty: tourneyTops[i].beatmap.difficulty,
+						mode: tourneyTops[i].beatmap.mode,
+					});
+				} else {
+					exportScores.push({
+						osuUserId: tourneyTops[i].user.id,
+						pp: tourneyTops[i].pp,
+						approvalStatus: 'Deleted',
+						beatmapId: tourneyTops[i].beatmapId,
+						score: tourneyTops[i].score,
+						raw_date: tourneyTops[i].raw_date,
+						rank: tourneyTops[i].rank,
+						raw_mods: tourneyTops[i].raw_mods,
+						title: 'Unavailable',
+						artist: 'Unavailable',
+						difficulty: 'Unavailable',
+						mode: 'Unavailable',
+					});
+				}
+			}
+
+			processingMessage.delete();
+
+			let data = [];
+			for (let i = 0; i < exportScores.length; i++) {
+				data.push(exportScores[i]);
+
+				if (i % 10000 === 0 && i > 0 || exportScores.length - 1 === i) {
+					let csv = new ObjectsToCsv(data);
+					csv = await csv.toString();
+					// eslint-disable-next-line no-undef
+					const buffer = Buffer.from(csv);
+					//Create as an attachment
+					const attachment = new Discord.MessageAttachment(buffer, `${msg.guild.name}-tournament-topplays.csv`);
+
+					await msg.reply({ content: `${msg.guild.name} - Tournament Top Plays`, files: [attachment] });
+					data = [];
+				}
 			}
 		} else {
 			msg.reply('Invalid command');
@@ -6930,3 +10271,28 @@ module.exports = {
 		msg.reply('Done.');
 	},
 };
+
+function quicksortPP(list, start = 0, end = undefined) {
+	if (end === undefined) {
+		end = list.length - 1;
+	}
+	if (start < end) {
+		const p = partitionPP(list, start, end);
+		quicksortPP(list, start, p - 1);
+		quicksortPP(list, p + 1, end);
+	}
+	return list;
+}
+
+function partitionPP(list, start, end) {
+	const pivot = list[end];
+	let i = start;
+	for (let j = start; j < end; j += 1) {
+		if (parseFloat(list[j].pp) >= parseFloat(pivot.pp)) {
+			[list[j], list[i]] = [list[i], list[j]];
+			i++;
+		}
+	}
+	[list[i], list[end]] = [list[end], list[i]];
+	return i;
+}

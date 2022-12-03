@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (msg) {
-	if (wrongCluster(msg.id)) {
-		return;
-	}
-
 	if (isWrongSystem(msg.guildId, msg.channel.type === 'DM')) {
 		return;
 	}
@@ -42,7 +38,7 @@ module.exports = async function (msg) {
 
 		const changeEmbed = new Discord.MessageEmbed()
 			.setColor('#0099ff')
-			.setAuthor(`${msg.author.username}#${msg.author.discriminator}`, msg.author.displayAvatarURL())
+			.setAuthor({ name: `${msg.author.username}#${msg.author.discriminator}`, iconURL: msg.author.displayAvatarURL() })
 			.setDescription('A message has been deleted')
 			.setThumbnail(msg.author.displayAvatarURL())
 			.addFields(
@@ -51,7 +47,7 @@ module.exports = async function (msg) {
 				{ name: 'Content', value: content },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: messagedelete');
+			.setFooter({ text: 'Eventname: messagedelete' });
 
 		if (msg.attachments.array().length > 0) {
 			msg.attachments.forEach(attachment => {

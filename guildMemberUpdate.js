@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (oldMember, newMember) {
-	if (wrongCluster(newMember.id)) {
-		return;
-	}
-
 	if (isWrongSystem(newMember.guild.id, false)) {
 		return;
 	}
@@ -45,14 +41,14 @@ module.exports = async function (oldMember, newMember) {
 
 			const changeEmbed = new Discord.MessageEmbed()
 				.setColor('#0099ff')
-				.setAuthor(`${newMember.user.username}#${newMember.user.discriminator}`, newMember.user.displayAvatarURL())
+				.setAuthor({ name: `${newMember.user.username}#${newMember.user.discriminator}`, iconURL: newMember.user.displayAvatarURL() })
 				.setDescription(`<@${newMember.user.id}> has updated their profile!`)
 				.setThumbnail(newMember.user.displayAvatarURL())
 				.addFields(
 					{ name: 'Nickname', value: `\`${oldUserDisplayName}\` -> \`${newUserDisplayName}\`` },
 				)
 				.setTimestamp()
-				.setFooter('Eventname: nicknames');
+				.setFooter({ text: 'Eventname: nicknames' });
 
 			channel.send({ embeds: [changeEmbed] });
 		}
@@ -110,11 +106,11 @@ module.exports = async function (oldMember, newMember) {
 
 			const changeEmbed = new Discord.MessageEmbed()
 				.setColor('#0099ff')
-				.setAuthor(`${newMember.user.username}#${newMember.user.discriminator}`, oldMember.user.displayAvatarURL())
+				.setAuthor({ name: `${newMember.user.username}#${newMember.user.discriminator}`, iconURL: oldMember.user.displayAvatarURL() })
 				.setDescription(`<@${newMember.user.id}> roles have changed!`)
 				.setThumbnail(newMember.user.displayAvatarURL())
 				.setTimestamp()
-				.setFooter('Eventname: userroles');
+				.setFooter({ text: 'Eventname: userroles' });
 
 			if (removedRoles) {
 				changeEmbed.addFields(

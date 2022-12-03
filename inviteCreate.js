@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (invite) {
-	if (wrongCluster(invite.inviter.id)) {
-		return;
-	}
-
 	if (isWrongSystem(invite.guild.id, false)) {
 		return;
 	}
@@ -33,7 +29,7 @@ module.exports = async function (invite) {
 
 		const changeEmbed = new Discord.MessageEmbed()
 			.setColor('#0099ff')
-			.setAuthor(`${invite.inviter.username}#${invite.inviter.discriminator}`, invite.inviter.displayAvatarURL())
+			.setAuthor({ name: `${invite.inviter.username}#${invite.inviter.discriminator}`, iconURL: invite.inviter.displayAvatarURL() })
 			.setDescription('Invite has been created')
 			.setThumbnail(invite.inviter.displayAvatarURL())
 			.addFields(
@@ -43,7 +39,7 @@ module.exports = async function (invite) {
 				{ name: 'Max Uses', value: invite.maxUses },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: invitecreate');
+			.setFooter({ text: 'Eventname: invitecreate' });
 
 		channel.send({ embeds: [changeEmbed] });
 	}

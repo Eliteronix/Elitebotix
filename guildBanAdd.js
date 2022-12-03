@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries, wrongCluster } = require('./utils');
+const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (guildBan) {
-	if (wrongCluster(guildBan.guild.id)) {
-		return;
-	}
-
 	if (isWrongSystem(guildBan.guild.id, false)) {
 		return;
 	}
@@ -34,14 +30,14 @@ module.exports = async function (guildBan) {
 
 		const changeEmbed = new Discord.MessageEmbed()
 			.setColor('#0099ff')
-			.setAuthor(`${guildBan.user.username}#${guildBan.user.discriminator}`, guildBan.user.displayAvatarURL())
+			.setAuthor({ name: `${guildBan.user.username}#${guildBan.user.discriminator}`, iconURL: guildBan.user.displayAvatarURL() })
 			.setDescription(`<@${guildBan.user.id}> was banned from the server!`)
 			.setThumbnail(guildBan.user.displayAvatarURL())
 			.addFields(
 				{ name: 'Banned from the server', value: `<@${guildBan.user.id}>` },
 			)
 			.setTimestamp()
-			.setFooter('Eventname: banadd');
+			.setFooter({ text: 'Eventname: banadd' });
 
 		channel.send({ embeds: [changeEmbed] });
 	}

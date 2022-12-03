@@ -4,6 +4,7 @@ const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getO
 const { Permissions } = require('discord.js');
 const { DBOsuMultiScores } = require('../dbObjects');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-beatmap',
@@ -26,7 +27,14 @@ module.exports = {
 			msg = await populateMsgFromInteraction(interaction);
 
 			if (interaction.commandName === 'osu-beatmap') {
-				await interaction.reply('Beatmaps are being processed');
+				try {
+					await interaction.reply('Beatmaps are being processed');
+				} catch (error) {
+					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+						console.error(error);
+					}
+					return;
+				}
 			}
 
 			args = [];
@@ -173,7 +181,7 @@ async function getBeatmap(msg, interaction, beatmap, tournament) {
 
 		let modPool = getScoreModpool(mapScores[i]);
 
-		let date = mapScores[i].matchStartDate;
+		let date = new Date(mapScores[i].matchStartDate);
 		let dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
 
 		matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`);
@@ -183,6 +191,10 @@ async function getBeatmap(msg, interaction, beatmap, tournament) {
 
 	if (tournaments.length === 0) {
 		tournamentOccurences = 'The map was never played in any tournaments.';
+	}
+
+	if (tournamentOccurences.length > 2000) {
+		tournamentOccurences = tournamentOccurences.substring(0, 1897) + '...';
 	}
 
 	let files = [attachment];
@@ -259,7 +271,11 @@ async function drawMode(input) {
 	let ctx = input[1];
 	let beatmap = input[2];
 
-	const gameMode = getGameMode(beatmap);
+	let gameMode = getGameMode(beatmap);
+	if (gameMode === 'fruits') {
+		gameMode = 'catch';
+	}
+
 	const modePic = await Canvas.loadImage(`./other/mode-${gameMode}.png`);
 	ctx.drawImage(modePic, (canvas.height / 3 - canvas.height / 3 / 4 * 3) / 2, canvas.height / 3 * 2 + (canvas.height / 3 - canvas.height / 3 / 4 * 3) / 4, canvas.height / 3 / 4 * 3, canvas.height / 3 / 4 * 3);
 

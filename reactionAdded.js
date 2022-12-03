@@ -63,7 +63,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 					//Check that the message was sent from itself (Avoiding migration issues from legacy messages)
 					if (message && message.author.id === reaction.client.user.id) {
 						const starBoardMessageEmbed = new Discord.MessageEmbed()
-							.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
+							.setAuthor({ name: reaction.message.author.username, iconURL: reaction.message.author.displayAvatarURL() })
 							.setColor('#d9b51c')
 							.setDescription(reaction.message.content)
 							.addFields(
@@ -89,7 +89,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				//Try to resend the message
 				const starBoardMessageEmbed = new Discord.MessageEmbed()
-					.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
+					.setAuthor({ name: reaction.message.author.username, iconURL: reaction.message.author.displayAvatarURL() })
 					.setColor('#d9b51c')
 					.setDescription(reaction.message.content)
 					.addFields(
@@ -121,7 +121,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				starBoardedMessage.save();
 			} else {
 				const starBoardMessageEmbed = new Discord.MessageEmbed()
-					.setAuthor(reaction.message.author.username, reaction.message.author.displayAvatarURL())
+					.setAuthor({ name: reaction.message.author.username, iconURL: reaction.message.author.displayAvatarURL() })
 					.setColor('#d9b51c')
 					.setDescription(reaction.message.content)
 					.addFields(
@@ -258,7 +258,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const endingRegex = />\nosu! direct:.+/gm;
 			const beatmapId = reaction.message.content.replace(beginningRegex, '').replace(endingRegex, '');
 
-			let args = [beatmapId];
+			const beatmap = await getOsuBeatmap({ beatmapId: beatmapId });
+
+			let args = [beatmapId, `--${beatmap.mode}`];
 
 			const command = require('./commands/osu-score.js');
 
@@ -276,7 +278,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 			let tempMessage = {
 				guild: reaction.message.guild,
 				guildId: guildId,
-				content: `e!osu-score ${beatmapId}`,
+				content: `e!osu-score ${beatmapId} --${beatmap.mode}`,
 				author: user,
 				channel: reaction.message.channel,
 			};
@@ -385,7 +387,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for skills information
 	if (reaction._emoji.name === '📈') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-top') || reaction.message.attachments.first().name.startsWith('osu-league-rankings') || reaction.message.attachments.first().name.startsWith('osu-mostplayed')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-top') || reaction.message.attachments.first().name.startsWith('osu-league-ratings') || reaction.message.attachments.first().name.startsWith('osu-mostplayed')) {
 			//get the osuUserId used
 			let osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 			if (reaction.message.attachments.first().name.startsWith('osu-top')) {
@@ -430,9 +432,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for profile information
 	if (reaction._emoji.name === '👤') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-score') || reaction.message.attachments.first().name.startsWith('osu-recent') || reaction.message.attachments.first().name.startsWith('osu-league-rankings') || reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-mostplayed')) {
+		if (reaction.message.attachments.first().name.startsWith('osu-score') || reaction.message.attachments.first().name.startsWith('osu-recent') || reaction.message.attachments.first().name.startsWith('osu-league-ratings') || reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-mostplayed')) {
 			//get the osuUserId used
-			const osuUserId = reaction.message.attachments.first().name.replace('osu-recent-', '').replace('osu-score-', '').replace('osu-league-rankings-', '').replace('osu-topPlayStats-', '').replace('osu-mostplayed-', '').replace(/-.+.png/gm, '').replace('.png', '');
+			const osuUserId = reaction.message.attachments.first().name.replace('osu-recent-', '').replace('osu-score-', '').replace('osu-league-ratings-', '').replace('osu-topPlayStats-', '').replace('osu-mostplayed-', '').replace(/-.+.png/gm, '').replace('.png', '');
 
 			//Setup artificial arguments
 			let args = [osuUserId];
@@ -1026,7 +1028,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		.setColor(reactionRolesHeader.reactionColor)
 		.setTitle(reactionRolesHeader.reactionTitle)
 		.setThumbnail(reactionRolesHeader.reactionImage)
-		.setFooter(`Reactionrole - EmbedId: ${reactionRolesHeader.id}`);
+		.setFooter({ text: `Reactionrole - EmbedId: ${reactionRolesHeader.id}` });
 
 	//Set description if available
 	if (reactionRolesHeader.reactionDescription) {

@@ -1,6 +1,6 @@
-const { DBDiscordUsers, DBProcessQueue, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
+const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { getOsuBeatmap, getMatchesPlanned, logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, saveOsuMultiScores, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, adjustHDStarRating, logMatchCreation, humanReadable } = require('../utils');
+const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
@@ -8,6 +8,8 @@ const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const { showUnknownInteractionError } = require('../config.json');
+const ObjectsToCsv = require('objects-to-csv');
 
 module.exports = {
 	name: 'osu-duel',
@@ -20,7 +22,7 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	// guildOnly: true,
 	//args: true,
-	cooldown: 60,
+	cooldown: 15,
 	//noCooldownMessage: true,
 	tags: 'osu',
 	prefixCommand: true,
@@ -29,1411 +31,274 @@ module.exports = {
 			return msg.reply('Please use the / command `/osu-duel`');
 		}
 		if (interaction) {
-			if (interaction.options._subcommand === 'match1v1' || interaction.options._subcommand === 'match2v2') {
-				await interaction.deferReply();
-				//Get the star ratings for both users
+			if (interaction.options._subcommand === 'match1v1' ||
+				interaction.options._subcommand === 'match2v2' ||
+				interaction.options._subcommand === 'match3v3' ||
+				interaction.options._subcommand === 'match4v4' ||
+				interaction.options._subcommand === 'match5v5' ||
+				interaction.options._subcommand === 'match6v6' ||
+				interaction.options._subcommand === 'match7v7' ||
+				interaction.options._subcommand === 'match8v8') {
+				try {
+					await interaction.deferReply();
+				} catch (error) {
+					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+						console.error(error);
+					}
+					return;
+				}
+
 				msg = await populateMsgFromInteraction(interaction);
 
-				let opponentId = null;
-				let teammateId = null;
-				let firstOpponentId = null;
-				let secondOpponentId = null;
-				let averageStarRating = null;
+				// Get the best of
+				let bestOf = 7;
+
+				if (interaction.options.getInteger('bestof')) {
+					bestOf = interaction.options.getInteger('bestof');
+				}
+
+				// Get the ranked flag
 				let onlyRanked = false;
 
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					if (interaction.options._hoistedOptions[i].name === 'opponent') {
-						opponentId = interaction.options._hoistedOptions[i].value;
-					} else if (interaction.options._hoistedOptions[i].name === 'starrating') {
-						averageStarRating = interaction.options._hoistedOptions[i].value;
+				if (interaction.options.getBoolean('ranked')) {
+					onlyRanked = interaction.options.getBoolean('ranked');
+				}
 
-						if (averageStarRating < 3) {
-							return await interaction.editReply('You can\'t play a match with a star rating lower than 3');
-						} else if (averageStarRating > 10) {
-							return await interaction.editReply('You can\'t play a match with a star rating higher than 10');
-						}
-					} else if (interaction.options._hoistedOptions[i].name === 'ranked' && interaction.options._hoistedOptions[i].value === true) {
-						onlyRanked = true;
-					} else if (interaction.options._hoistedOptions[i].name === 'teammate') {
-						teammateId = interaction.options._hoistedOptions[i].value;
-					} else if (interaction.options._hoistedOptions[i].name === 'firstopponent') {
-						firstOpponentId = interaction.options._hoistedOptions[i].value;
-					} else if (interaction.options._hoistedOptions[i].name === 'secondopponent') {
-						secondOpponentId = interaction.options._hoistedOptions[i].value;
+				// Get the star rating
+				let averageStarRating = null;
+
+				if (interaction.options.getNumber('starrating')) {
+					averageStarRating = interaction.options.getNumber('starrating');
+
+					if (averageStarRating < 3) {
+						return await interaction.editReply('You can\'t play a match with a star rating lower than 3');
+					} else if (averageStarRating > 10) {
+						return await interaction.editReply('You can\'t play a match with a star rating higher than 10');
 					}
+				}
+
+				// Get the teammates
+				let teammates = [];
+
+				if (interaction.options.getUser('teammate')) {
+					teammates.push(interaction.options.getUser('teammate').id);
+				}
+
+				if (interaction.options.getUser('firstteammate')) {
+					teammates.push(interaction.options.getUser('firstteammate').id);
+				}
+
+				if (interaction.options.getUser('secondteammate')) {
+					teammates.push(interaction.options.getUser('secondteammate').id);
+				}
+
+				if (interaction.options.getUser('thirdteammate')) {
+					teammates.push(interaction.options.getUser('thirdteammate').id);
+				}
+
+				if (interaction.options.getUser('fourthteammate')) {
+					teammates.push(interaction.options.getUser('fourthteammate').id);
+				}
+
+				if (interaction.options.getUser('fifthteammate')) {
+					teammates.push(interaction.options.getUser('fifthteammate').id);
+				}
+
+				if (interaction.options.getUser('sixthteammate')) {
+					teammates.push(interaction.options.getUser('sixthteammate').id);
+				}
+
+				if (interaction.options.getUser('seventhteammate')) {
+					teammates.push(interaction.options.getUser('seventhteammate').id);
+				}
+
+				// Get the opponents
+				let opponents = [];
+
+				if (interaction.options.getUser('opponent')) {
+					opponents.push(interaction.options.getUser('opponent').id);
+				}
+
+				if (interaction.options.getUser('firstopponent')) {
+					opponents.push(interaction.options.getUser('firstopponent').id);
+				}
+
+				if (interaction.options.getUser('secondopponent')) {
+					opponents.push(interaction.options.getUser('secondopponent').id);
+				}
+
+				if (interaction.options.getUser('thirdopponent')) {
+					opponents.push(interaction.options.getUser('thirdopponent').id);
+				}
+
+				if (interaction.options.getUser('fourthopponent')) {
+					opponents.push(interaction.options.getUser('fourthopponent').id);
+				}
+
+				if (interaction.options.getUser('fifthopponent')) {
+					opponents.push(interaction.options.getUser('fifthopponent').id);
+				}
+
+				if (interaction.options.getUser('sixthopponent')) {
+					opponents.push(interaction.options.getUser('sixthopponent').id);
+				}
+
+				if (interaction.options.getUser('seventhopponent')) {
+					opponents.push(interaction.options.getUser('seventhopponent').id);
+				}
+
+				if (interaction.options.getUser('eigthopponent')) {
+					opponents.push(interaction.options.getUser('eigthopponent').id);
 				}
 
 				const commandConfig = await getOsuUserServerMode(msg, []);
 				const commandUser = commandConfig[0];
 
 				if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
-					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect <username>`.');
+					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect username:<username>`.');
 				}
 
-				if (opponentId && commandUser.userId === opponentId || firstOpponentId && commandUser.userId === firstOpponentId || secondOpponentId && commandUser.userId === secondOpponentId) {
-					return await interaction.editReply('You cannot play against yourself.');
+				//Cross check that commandUser.userId, teammates and opponents are all unique
+				const allUsers = [commandUser.userId, ...teammates, ...opponents];
+				const uniqueUsers = [...new Set(allUsers)];
+				const everyUser = [];
+
+				if (allUsers.length !== uniqueUsers.length) {
+					return await interaction.editReply('You can\'t play a match with the same user twice');
 				}
 
-				if (teammateId && commandUser.userId === teammateId) {
-					return await interaction.editReply('You cannot team up with yourself.');
-				}
+				// Collect the star ratings to calculate the average & update the duel ratings for the users
+				const starRatings = [];
 
-				if (teammateId && firstOpponentId && teammateId === firstOpponentId || teammateId && secondOpponentId && teammateId === secondOpponentId) {
-					return await interaction.editReply('Your teammate can\t also be an opponent.');
-				}
+				for (let i = 0; i < allUsers.length; i++) {
+					let starRating = 4;
+					let discordUser = null;
 
-				if (firstOpponentId && secondOpponentId && firstOpponentId === secondOpponentId) {
-					return await interaction.editReply('You have to choose two different opponents.');
-				}
-
-				let ownStarRating = 4;
-				try {
-					ownStarRating = await getUserDuelStarRating({ osuUserId: commandUser.osuUserId, client: interaction.client });
-				} catch (e) {
-					if (e !== 'No standard plays') {
-						console.log(e);
-					}
-				}
-
-				let secondStarRating = 4;
-				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers');
-				let secondUser = null;
-				if (opponentId) {
-					secondUser = await DBDiscordUsers.findOne({
+					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers');
+					discordUser = await DBDiscordUsers.findOne({
 						where: {
-							userId: opponentId,
+							userId: allUsers[i],
 							osuVerified: true
 						}
 					});
 
-					if (secondUser && secondUser.osuUserId) {
-						try {
-							secondStarRating = await getUserDuelStarRating({ osuUserId: secondUser.osuUserId, client: interaction.client });
-						} catch (e) {
-							if (e !== 'No standard plays') {
-								console.log(e);
+					if (discordUser && discordUser.osuUserId) {
+						everyUser.push(discordUser);
+						if (!averageStarRating) {
+							try {
+								await interaction.editReply(`Processing Duel Rating for ${discordUser.osuName}...`);
+								starRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
+							} catch (e) {
+								if (e !== 'No standard plays') {
+									console.log(e);
+								}
 							}
+							starRatings.push(starRating.total);
+						} else {
+							getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
 						}
 					} else {
-						return await interaction.editReply(`<@${opponentId}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
-					}
-				} else {
-					secondUser = await DBDiscordUsers.findOne({
-						where: {
-							userId: teammateId,
-							osuVerified: true
-						}
-					});
-
-					if (secondUser && secondUser.osuUserId) {
-						try {
-							secondStarRating = await getUserDuelStarRating({ osuUserId: secondUser.osuUserId, client: interaction.client });
-						} catch (e) {
-							if (e !== 'No standard plays') {
-								console.log(e);
-							}
-						}
-					} else {
-						return await interaction.editReply(`<@${teammateId}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
-					}
-				}
-
-				let thirdUser = null;
-				let thirdStarRating = 4;
-				if (firstOpponentId) {
-					thirdUser = await DBDiscordUsers.findOne({
-						where: {
-							userId: firstOpponentId,
-							osuVerified: true
-						}
-					});
-
-					if (thirdUser && thirdUser.osuUserId) {
-						try {
-							thirdStarRating = await getUserDuelStarRating({ osuUserId: thirdUser.osuUserId, client: interaction.client });
-						} catch (e) {
-							if (e !== 'No standard plays') {
-								console.log(e);
-							}
-						}
-					} else {
-						return await interaction.editReply(`<@${firstOpponentId}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
-					}
-				}
-
-				let fourthUser = null;
-				let fourthStarRating = 4;
-				if (secondOpponentId) {
-					fourthUser = await DBDiscordUsers.findOne({
-						where: {
-							userId: secondOpponentId,
-							osuVerified: true
-						}
-					});
-
-					if (fourthUser && fourthUser.osuUserId) {
-						try {
-							fourthStarRating = await getUserDuelStarRating({ osuUserId: fourthUser.osuUserId, client: interaction.client });
-						} catch (e) {
-							if (e !== 'No standard plays') {
-								console.log(e);
-							}
-						}
-					} else {
-						return await interaction.editReply(`<@${secondOpponentId}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect <username>\`.`);
+						return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect username:<username>\`.`);
 					}
 				}
 
 				if (!averageStarRating) {
-					if (opponentId) {
-						averageStarRating = (ownStarRating.total + secondStarRating.total) / 2;
-					} else {
-						averageStarRating = (ownStarRating.total + secondStarRating.total + thirdStarRating.total + fourthStarRating.total) / 4;
+					let totalStarRating = 0;
+					for (let i = 0; i < starRatings.length; i++) {
+						totalStarRating += starRatings[i];
 					}
+					averageStarRating = totalStarRating / starRatings.length;
 				}
 
 				let lowerBound = averageStarRating - 0.125;
 				let upperBound = averageStarRating + 0.125;
 
-				if (opponentId) {
-					let sentMessage = await interaction.editReply(`<@${secondUser.userId}>, you were challenged to a duel by <@${commandUser.userId}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`);
+				let sentMessage = await interaction.editReply(`<@${commandUser.userId}> wants to play a match with <@${teammates.join('>, <@')}> against <@${opponents.join('>, <@')}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`.replace('with <@> ', ''));
 
-					let pingMessage = await interaction.channel.send(`<@${secondUser.userId}>`);
-					await sentMessage.react('✅');
-					await sentMessage.react('❌');
-					pingMessage.delete();
-					//Await for the user to react with a checkmark
-					const filter = (reaction, user) => {
-						return ['✅', '❌'].includes(reaction.emoji.name) && user.id === secondUser.userId;
-					};
-
-					let responded = await sentMessage.awaitReactions({ filter, max: 1, time: 120000, errors: ['time'] })
-						.then(collected => {
-							const reaction = collected.first();
-
-							if (reaction.emoji.name === '✅') {
-								return true;
-							} else {
-								return false;
-							}
-						})
-						.catch(() => {
-							return false;
-						});
-
-					sentMessage.reactions.removeAll().catch(() => { });
-
-					if (!responded) {
-						return await interaction.editReply(`<@${secondUser.userId}> declined or didn't respond in time.`);
-					}
-				} else {
-					let sentMessage = await interaction.editReply(`<@${commandUser.userId}> wants to play a match with <@${secondUser.userId}> against <@${thirdUser.userId}> and <@${fourthUser.userId}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`);
-
-					let pingMessage = await interaction.channel.send(`<@${secondUser.userId}>, <@${thirdUser.userId}>, <@${fourthUser.userId}>`);
-					await sentMessage.react('✅');
-					await sentMessage.react('❌');
-					pingMessage.delete();
-
-					let responded = false;
-					let accepted = [];
-					let declined = false;
-					let decliner = null;
-
-					const collector = sentMessage.createReactionCollector({ time: 120000 });
-
-					collector.on('collect', (reaction, user) => {
-						if (reaction.emoji.name === '✅' && [secondUser.userId, thirdUser.userId, fourthUser.userId].includes(user.id)) {
-							if (!accepted.includes(user.id)) {
-								accepted.push(user.id);
-
-								if (accepted.length === 3) {
-									collector.stop();
-								}
-							}
-						} else if (reaction.emoji.name === '❌' && [secondUser.userId, thirdUser.userId, fourthUser.userId].includes(user.id)) {
-							decliner = user.id;
-							collector.stop();
-						}
-					});
-
-					collector.on('end', () => {
-						if (accepted.length < 3) {
-							declined = true;
-						}
-						responded = true;
-					});
-
-					while (!responded) {
-						await pause(1000);
-					}
-
-					sentMessage.reactions.removeAll().catch(() => { });
-
-					if (declined) {
-						if (decliner) {
-							return await interaction.editReply(`<@${decliner}> declined.`);
-						} else {
-							return await interaction.editReply('Someone didn\'t respond in time.');
-						}
-					}
-				}
-
-				await interaction.editReply('Duel has been accepted. Creating pool and lobby...');
-
-				//Set up the mappools
-				let dbMaps = [];
-				let dbMapIds = [];
-
-				// Set up the modpools
-				let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
-				shuffle(modPools);
-				modPools.push('NM', 'FM');
-
-				logDatabaseQueries(4, 'commands/osu-duel.js DBOsuMultiScores Match player 1 scores');
-				const player1Scores = await DBOsuMultiScores.findAll({
-					where: {
-						osuUserId: commandUser.osuUserId,
-						tourneyMatch: true,
-						matchName: {
-							[Op.notLike]: 'MOTD:%',
-						},
-						mode: 'Standard',
-						[Op.or]: [
-							{ warmup: false },
-							{ warmup: null }
-						],
-					}
-				});
-
-				for (let i = 0; i < player1Scores.length; i++) {
-					player1Scores[i] = player1Scores[i].beatmapId;
-				}
-
-				logDatabaseQueries(4, 'commands/osu-duel.js DBOsuMultiScores Match player 2 scores');
-				const player2Scores = await DBOsuMultiScores.findAll({
-					where: {
-						osuUserId: secondUser.osuUserId,
-						tourneyMatch: true,
-						matchName: {
-							[Op.notLike]: 'MOTD:%',
-						},
-						mode: 'Standard',
-						[Op.or]: [
-							{ warmup: false },
-							{ warmup: null }
-						],
-					}
-				});
-
-				for (let i = 0; i < player2Scores.length; i++) {
-					player2Scores[i] = player2Scores[i].beatmapId;
-				}
-
-				let player3Scores = null;
-				let player4Scores = null;
-
-				if (thirdUser) {
-					logDatabaseQueries(4, 'commands/osu-duel.js DBOsuMultiScores Match player 2 scores');
-					player3Scores = await DBOsuMultiScores.findAll({
-						where: {
-							osuUserId: thirdUser.osuUserId,
-							tourneyMatch: true,
-							matchName: {
-								[Op.notLike]: 'MOTD:%',
-							},
-							mode: 'Standard',
-							[Op.or]: [
-								{ warmup: false },
-								{ warmup: null }
-							],
-						}
-					});
-
-					for (let i = 0; i < player3Scores.length; i++) {
-						player3Scores[i] = player3Scores[i].beatmapId;
-					}
-
-					logDatabaseQueries(4, 'commands/osu-duel.js DBOsuMultiScores Match player 2 scores');
-					player4Scores = await DBOsuMultiScores.findAll({
-						where: {
-							osuUserId: fourthUser.osuUserId,
-							tourneyMatch: true,
-							matchName: {
-								[Op.notLike]: 'MOTD:%',
-							},
-							mode: 'Standard',
-							[Op.or]: [
-								{ warmup: false },
-								{ warmup: null }
-							],
-						}
-					});
-
-					for (let i = 0; i < player4Scores.length; i++) {
-						player4Scores[i] = player4Scores[i].beatmapId;
-					}
-				}
-
-				//Get the map for each modpool; limited by drain time, star rating and both players either having played or not played it
-				for (let i = 0; i < modPools.length; i++) {
-					let dbBeatmap = null;
-					let beatmaps = null;
-
-					if (i === 6) {
-						console.log('Duel Match: Get all TB Beatmaps');
-						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps TB');
-						if (opponentId) {
-							beatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									mode: 'Standard',
-									approvalStatus: {
-										[Op.not]: 'Not found',
-									},
-									[Op.or]: {
-										noModMap: true,
-										freeModMap: true,
-									},
-									drainLength: {
-										[Op.and]: {
-											[Op.gte]: 270,
-											[Op.lte]: 360,
-										}
-									},
-									starRating: {
-										[Op.and]: {
-											[Op.gte]: lowerBound,
-											[Op.lte]: upperBound,
-										}
-									},
-									beatmapId: {
-										[Op.or]: {
-											[Op.and]: {
-												[Op.in]: player1Scores,
-												[Op.in]: player2Scores,
-											},
-											[Op.and]: {
-												[Op.notIn]: player1Scores,
-												[Op.notIn]: player2Scores,
-											},
-										}
-									},
-									circleSize: {
-										[Op.lte]: 5,
-									},
-									approachRate: {
-										[Op.gte]: 8,
-									},
-								}
-							});
-						} else {
-							beatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									mode: 'Standard',
-									approvalStatus: {
-										[Op.not]: 'Not found',
-									},
-									[Op.or]: {
-										noModMap: true,
-										freeModMap: true,
-									},
-									drainLength: {
-										[Op.and]: {
-											[Op.gte]: 270,
-											[Op.lte]: 360,
-										}
-									},
-									starRating: {
-										[Op.and]: {
-											[Op.gte]: lowerBound,
-											[Op.lte]: upperBound,
-										}
-									},
-									beatmapId: {
-										[Op.or]: {
-											[Op.and]: {
-												[Op.in]: player1Scores,
-												[Op.in]: player2Scores,
-												[Op.in]: player3Scores,
-												[Op.in]: player4Scores,
-											},
-											[Op.and]: {
-												[Op.notIn]: player1Scores,
-												[Op.notIn]: player2Scores,
-												[Op.notIn]: player3Scores,
-												[Op.notIn]: player4Scores,
-											},
-										}
-									},
-									circleSize: {
-										[Op.lte]: 5,
-									},
-									approachRate: {
-										[Op.gte]: 8,
-									},
-								}
-							});
-						}
-						console.log('Duel Match: Grabbed all TB Beatmaps');
-					} else if (modPools[i] === 'NM') {
-						console.log('Duel Match: Get all NM Beatmaps');
-						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps NM');
-						if (opponentId) {
-							beatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									mode: 'Standard',
-									approvalStatus: {
-										[Op.not]: 'Not found',
-									},
-									noModMap: true,
-									drainLength: {
-										[Op.and]: {
-											[Op.gte]: 100,
-											[Op.lte]: 270,
-										}
-									},
-									starRating: {
-										[Op.and]: {
-											[Op.gte]: lowerBound,
-											[Op.lte]: upperBound,
-										}
-									},
-									beatmapId: {
-										[Op.or]: {
-											[Op.and]: {
-												[Op.in]: player1Scores,
-												[Op.in]: player2Scores,
-											},
-											[Op.and]: {
-												[Op.notIn]: player1Scores,
-												[Op.notIn]: player2Scores,
-											},
-										}
-									},
-								}
-							});
-						} else {
-							beatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									mode: 'Standard',
-									approvalStatus: {
-										[Op.not]: 'Not found',
-									},
-									noModMap: true,
-									drainLength: {
-										[Op.and]: {
-											[Op.gte]: 100,
-											[Op.lte]: 270,
-										}
-									},
-									starRating: {
-										[Op.and]: {
-											[Op.gte]: lowerBound,
-											[Op.lte]: upperBound,
-										}
-									},
-									beatmapId: {
-										[Op.or]: {
-											[Op.and]: {
-												[Op.in]: player1Scores,
-												[Op.in]: player2Scores,
-												[Op.in]: player3Scores,
-												[Op.in]: player4Scores,
-											},
-											[Op.and]: {
-												[Op.notIn]: player1Scores,
-												[Op.notIn]: player2Scores,
-												[Op.notIn]: player3Scores,
-												[Op.notIn]: player4Scores,
-											},
-										}
-									},
-								}
-							});
-						}
-						console.log('Duel Match: Grabbed all NM Beatmaps');
-					} else if (modPools[i] === 'HD') {
-						console.log('Duel Match: Get all HD Beatmaps');
-						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps HD');
-						let HDLowerBound = lowerBound - 0.8;
-						let HDUpperBound = upperBound - 0.15;
-						if (opponentId) {
-							beatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									mode: 'Standard',
-									approvalStatus: {
-										[Op.not]: 'Not found',
-									},
-									hiddenMap: true,
-									drainLength: {
-										[Op.and]: {
-											[Op.gte]: 100,
-											[Op.lte]: 270,
-										}
-									},
-									starRating: {
-										[Op.and]: {
-											[Op.gte]: HDLowerBound,
-											[Op.lte]: HDUpperBound,
-										}
-									},
-									beatmapId: {
-										[Op.or]: {
-											[Op.and]: {
-												[Op.in]: player1Scores,
-												[Op.in]: player2Scores,
-											},
-											[Op.and]: {
-												[Op.notIn]: player1Scores,
-												[Op.notIn]: player2Scores,
-											},
-										}
-									},
-								}
-							});
-						} else {
-							beatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									mode: 'Standard',
-									approvalStatus: {
-										[Op.not]: 'Not found',
-									},
-									hiddenMap: true,
-									drainLength: {
-										[Op.and]: {
-											[Op.gte]: 100,
-											[Op.lte]: 270,
-										}
-									},
-									starRating: {
-										[Op.and]: {
-											[Op.gte]: HDLowerBound,
-											[Op.lte]: HDUpperBound,
-										}
-									},
-									beatmapId: {
-										[Op.or]: {
-											[Op.and]: {
-												[Op.in]: player1Scores,
-												[Op.in]: player2Scores,
-												[Op.in]: player3Scores,
-												[Op.in]: player4Scores,
-											},
-											[Op.and]: {
-												[Op.notIn]: player1Scores,
-												[Op.notIn]: player2Scores,
-												[Op.notIn]: player3Scores,
-												[Op.notIn]: player4Scores,
-											},
-										}
-									},
-								}
-							});
-						}
-						console.log('Duel Match: Grabbed all HD Beatmaps');
-					} else if (modPools[i] === 'HR') {
-						console.log('Duel Match: Get all HR Beatmaps');
-						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps HR');
-						if (opponentId) {
-							beatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									mode: 'Standard',
-									approvalStatus: {
-										[Op.not]: 'Not found',
-									},
-									hardRockMap: true,
-									drainLength: {
-										[Op.and]: {
-											[Op.gte]: 100,
-											[Op.lte]: 270,
-										}
-									},
-									starRating: {
-										[Op.and]: {
-											[Op.gte]: lowerBound,
-											[Op.lte]: upperBound,
-										}
-									},
-									beatmapId: {
-										[Op.or]: {
-											[Op.and]: {
-												[Op.in]: player1Scores,
-												[Op.in]: player2Scores,
-											},
-											[Op.and]: {
-												[Op.notIn]: player1Scores,
-												[Op.notIn]: player2Scores,
-											},
-										}
-									},
-								}
-							});
-						} else {
-							beatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									mode: 'Standard',
-									approvalStatus: {
-										[Op.not]: 'Not found',
-									},
-									hardRockMap: true,
-									drainLength: {
-										[Op.and]: {
-											[Op.gte]: 100,
-											[Op.lte]: 270,
-										}
-									},
-									starRating: {
-										[Op.and]: {
-											[Op.gte]: lowerBound,
-											[Op.lte]: upperBound,
-										}
-									},
-									beatmapId: {
-										[Op.or]: {
-											[Op.and]: {
-												[Op.in]: player1Scores,
-												[Op.in]: player2Scores,
-												[Op.in]: player3Scores,
-												[Op.in]: player4Scores,
-											},
-											[Op.and]: {
-												[Op.notIn]: player1Scores,
-												[Op.notIn]: player2Scores,
-												[Op.notIn]: player3Scores,
-												[Op.notIn]: player4Scores,
-											},
-										}
-									},
-								}
-							});
-						}
-						console.log('Duel Match: Grabbed all HR Beatmaps');
-					} else if (modPools[i] === 'DT') {
-						console.log('Duel Match: Get all DT Beatmaps');
-						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps DT');
-						if (opponentId) {
-							beatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									mode: 'Standard',
-									approvalStatus: {
-										[Op.not]: 'Not found',
-									},
-									doubleTimeMap: true,
-									drainLength: {
-										[Op.and]: {
-											[Op.gte]: 120,
-											[Op.lte]: 405,
-										}
-									},
-									starRating: {
-										[Op.and]: {
-											[Op.gte]: lowerBound,
-											[Op.lte]: upperBound,
-										}
-									},
-									beatmapId: {
-										[Op.or]: {
-											[Op.and]: {
-												[Op.in]: player1Scores,
-												[Op.in]: player2Scores,
-											},
-											[Op.and]: {
-												[Op.notIn]: player1Scores,
-												[Op.notIn]: player2Scores,
-											},
-										}
-									},
-								}
-							});
-						} else {
-							beatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									mode: 'Standard',
-									approvalStatus: {
-										[Op.not]: 'Not found',
-									},
-									doubleTimeMap: true,
-									drainLength: {
-										[Op.and]: {
-											[Op.gte]: 120,
-											[Op.lte]: 405,
-										}
-									},
-									starRating: {
-										[Op.and]: {
-											[Op.gte]: lowerBound,
-											[Op.lte]: upperBound,
-										}
-									},
-									beatmapId: {
-										[Op.or]: {
-											[Op.and]: {
-												[Op.in]: player1Scores,
-												[Op.in]: player2Scores,
-												[Op.in]: player3Scores,
-												[Op.in]: player4Scores,
-											},
-											[Op.and]: {
-												[Op.notIn]: player1Scores,
-												[Op.notIn]: player2Scores,
-												[Op.notIn]: player3Scores,
-												[Op.notIn]: player4Scores,
-											},
-										}
-									},
-								}
-							});
-						}
-						console.log('Duel Match: Grabbed all DT Beatmaps');
-					} else if (modPools[i] === 'FM') {
-						console.log('Duel Match: Get all FM Beatmaps');
-						logDatabaseQueries(4, 'commands/osu-duel.js DBOsuBeatmaps FM');
-						if (opponentId) {
-							beatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									mode: 'Standard',
-									approvalStatus: {
-										[Op.not]: 'Not found',
-									},
-									freeModMap: true,
-									drainLength: {
-										[Op.and]: {
-											[Op.gte]: 100,
-											[Op.lte]: 270,
-										}
-									},
-									starRating: {
-										[Op.and]: {
-											[Op.gte]: lowerBound,
-											[Op.lte]: upperBound,
-										}
-									},
-									beatmapId: {
-										[Op.or]: {
-											[Op.and]: {
-												[Op.in]: player1Scores,
-												[Op.in]: player2Scores,
-											},
-											[Op.and]: {
-												[Op.notIn]: player1Scores,
-												[Op.notIn]: player2Scores,
-											},
-										}
-									},
-								}
-							});
-						} else {
-							beatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									mode: 'Standard',
-									approvalStatus: {
-										[Op.not]: 'Not found',
-									},
-									freeModMap: true,
-									drainLength: {
-										[Op.and]: {
-											[Op.gte]: 100,
-											[Op.lte]: 270,
-										}
-									},
-									starRating: {
-										[Op.and]: {
-											[Op.gte]: lowerBound,
-											[Op.lte]: upperBound,
-										}
-									},
-									beatmapId: {
-										[Op.or]: {
-											[Op.and]: {
-												[Op.in]: player1Scores,
-												[Op.in]: player2Scores,
-												[Op.in]: player3Scores,
-												[Op.in]: player4Scores,
-											},
-											[Op.and]: {
-												[Op.notIn]: player1Scores,
-												[Op.notIn]: player2Scores,
-												[Op.notIn]: player3Scores,
-												[Op.notIn]: player4Scores,
-											},
-										}
-									},
-								}
-							});
-						}
-						console.log('Duel Match: Grabbed all FM Beatmaps');
-					}
-
-					while (dbBeatmap === null) {
-						const index = Math.floor(Math.random() * beatmaps.length);
-
-						if (!beatmaps.length) {
-							console.log('Duel Match: No more maps left to choose from');
-							if (opponentId) {
-								return await interaction.editReply(`<@${commandUser.userId}>, <@${secondUser.userId}> the bot could not find enough viable maps with this criteria. (SR: ${Math.round(averageStarRating * 100) / 100}*)`);
-							} else {
-								return await interaction.editReply(`<@${commandUser.userId}>, <@${secondUser.userId}>, <@${thirdUser.userId}>, <@${fourthUser.userId}> the bot could not find enough viable maps with this criteria. (SR: ${Math.round(averageStarRating * 100) / 100}*)`);
-							}
-						}
-
-						if (!beatmaps[index]) {
-							beatmaps.splice(index, 1);
-							console.log('Duel Match: Beatmap was null, removed from array');
-							continue;
-						}
-
-						if (modPools[i] === 'HD') {
-							console.log('Duel Match: Refresh the HD Beatmap');
-							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
-							beatmaps[index].starRating = adjustHDStarRating(beatmaps[index].starRating, beatmaps[index].approachRate);
-							console.log('Duel Match: Refreshed the HD Beatmap');
-						} else if (modPools[i] === 'HR') {
-							console.log('Duel Match: Refresh the HR Beatmap');
-							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 16 });
-							console.log('Duel Match: Refreshed the HR Beatmap');
-						} else if (modPools[i] === 'DT') {
-							console.log('Duel Match: Refresh the DT Beatmap');
-							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 64 });
-							console.log('Duel Match: Refreshed the DT Beatmap');
-						} else {
-							console.log('Duel Match: Refresh the NM/FM Beatmap');
-							beatmaps[index] = await getOsuBeatmap({ beatmapId: beatmaps[index].beatmapId, modBits: 0 });
-							console.log('Duel Match: Refreshed the NM/FM Beatmap');
-						}
-
-						if (!beatmaps[index] || onlyRanked && beatmaps[index].approvalStatus !== 'Ranked') {
-							beatmaps.splice(index, 1);
-							console.log('Beatmap was null or not ranked, removing from pool');
-							continue;
-						}
-
-						console.log('Duel Match: Get beatmap score count');
-						const mapScoreAmount = await DBOsuMultiScores.count({
-							where: {
-								beatmapId: beatmaps[index].beatmapId,
-								matchName: {
-									[Op.notLike]: 'MOTD:%',
-								},
-								[Op.or]: [
-									{ warmup: false },
-									{ warmup: null }
-								],
-							}
-						});
-						console.log('Duel Match: Grabbed beatmap score count');
-
-						// eslint-disable-next-line no-undef
-						if (!beatmaps[index] || parseFloat(beatmaps[index].starRating) < lowerBound || parseFloat(beatmaps[index].starRating) > upperBound || mapScoreAmount < 25 && process.env.SERVER !== 'Dev') {
-							beatmaps.splice(index, 1);
-							console.log('Beatmap was null, lower bound, or upper bound, or score count was less than 25, removing from pool');
-						} else if (!dbMapIds.includes(beatmaps[index].beatmapsetId)) {
-							dbBeatmap = beatmaps[index];
-							dbMapIds.push(beatmaps[index].beatmapsetId);
-							dbMaps.push(beatmaps[index]);
-							console.log('Duel Match: Beatmap is valid, adding to pool');
-						}
-					}
-				}
-
-				modPools[6] = 'FreeMod';
-				modPools[modPools.indexOf('FM')] = 'FreeMod';
-
-
-				//Check if the game can be set up and set it up
-				let startDate = new Date();
-				let endDate = new Date();
-				let gameLength = 0;
-				//Add initial waiting time
-				endDate.setUTCMinutes(endDate.getUTCMinutes() + 5);
-				gameLength += 300;
-				//Add maximum waiting time between maps
-				endDate.setUTCMinutes(endDate.getUTCMinutes() + 2 * 7);
-				gameLength += 120 * 7;
-				//Add map times; 5 per map
-				endDate.setUTCMinutes(endDate.getUTCMinutes() + 5 * 7);
-				gameLength += 300 * 7;
-				//Add leaving time
-				endDate.setUTCMinutes(endDate.getUTCMinutes() + 1);
-				gameLength += 60;
-				console.log('Duel Match: Get matches planned');
-				let matchesPlanned = await getMatchesPlanned(startDate, endDate);
-				console.log('Duel Match: Got matches planned');
-
-				if (matchesPlanned > 3) {
-					return await interaction.editReply('The bot cannot host another match at the moment because there will already be 4 matches running. (Maximum limit is 4)');
-				}
-
-				let processQueueTask = await DBProcessQueue.create({ guildId: 'None', task: 'customMOTD', priority: 10, additions: gameLength, date: startDate });
-
-				console.log('Duel Match: Created customMOTD processqueue task');
-
-				//Set up the lobby
-				let bancho = additionalObjects[1];
-				let channel = null;
-
-				let teamname1 = commandUser.osuName;
-				let teamname2 = secondUser.osuName;
-
-				if (thirdUser) {
-					teamname1 = `${commandUser.osuName.substring(0, commandUser.osuName.length / 2)}${secondUser.osuName.substring(secondUser.osuName.length / 2, secondUser.osuName.length)}`;
-					teamname2 = `${thirdUser.osuName.substring(0, thirdUser.osuName.length / 2)}${fourthUser.osuName.substring(fourthUser.osuName.length / 2, fourthUser.osuName.length)}`;
-				}
-				for (let i = 0; i < 5; i++) {
-					try {
-						try {
-							console.log('Duel Match: Connecting to Bancho');
-							await bancho.connect();
-						} catch (error) {
-							if (!error.message === 'Already connected/connecting') {
-								throw (error);
-							}
-						}
-						console.log('Duel Match: Creating match');
-						if (opponentId) {
-							channel = await bancho.createLobby(`ETX: (${teamname1}) vs (${teamname2})`);
-						} else {
-							channel = await bancho.createLobby(`ETX Teams: (${teamname1}) vs (${teamname2})`);
-						}
-						console.log('Duel Match: Created match');
-						break;
-					} catch (error) {
-						if (i === 4) {
-							return await interaction.editReply('I am having issues creating the lobby and the match has been aborted.\nPlease try again later.');
-						} else {
-							await pause(10000);
-						}
-					}
-				}
-
-				const lobby = channel.lobby;
-				logMatchCreation(additionalObjects[0], lobby.name, lobby.id);
-
-				const password = Math.random().toString(36).substring(8);
-
-				await lobby.setPassword(password);
-				await channel.sendMessage('!mp map 975342 0');
-				if (opponentId) {
-					await channel.sendMessage('!mp set 0 3 2');
-				} else {
-					await channel.sendMessage('!mp set 0 3 4');
-				}
-
-				let lobbyStatus = 'Joining phase';
-				let mapIndex = 0;
-
-				await channel.sendMessage(`!mp invite #${commandUser.osuUserId}`);
-				let user = await additionalObjects[0].users.fetch(commandUser.userId);
-				await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
-
-				await channel.sendMessage(`!mp invite #${secondUser.osuUserId}`);
-				user = await additionalObjects[0].users.fetch(secondUser.userId);
-				await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
-
-				if (thirdUser) {
-					await channel.sendMessage(`!mp invite #${thirdUser.osuUserId}`);
-					let user = await additionalObjects[0].users.fetch(thirdUser.userId);
-					await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
-
-					await channel.sendMessage(`!mp invite #${fourthUser.osuUserId}`);
-					user = await additionalObjects[0].users.fetch(fourthUser.userId);
-					await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
-				}
-
-				let pingMessage = null;
-				if (opponentId) {
-					await interaction.editReply(`<@${commandUser.userId}> <@${secondUser.userId}> your match has been created. You have been invited ingame by \`Eliteronix\` and also got a DM as a backup.`);
-					pingMessage = await interaction.channel.send(`<@${commandUser.userId}> <@${secondUser.userId}>`);
-				} else {
-					await interaction.editReply(`<@${commandUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}> your match has been created. You have been invited ingame by \`Eliteronix\` and also got a DM as a backup.`);
-					pingMessage = await interaction.channel.send(`<@${commandUser.userId}> <@${secondUser.userId}> <@${thirdUser.userId}> <@${fourthUser.userId}>`);
-				}
+				let pingMessage = await interaction.channel.send(`<@${teammates.join('>, <@')}>, <@${opponents.join('>, <@')}>`.replace('<@>, ', ''));
+				await sentMessage.react('✅');
+				await sentMessage.react('❌');
 				pingMessage.delete();
-				//Start the timer to close the lobby if not everyone joined by then
-				await channel.sendMessage('!mp timer 300');
 
-				let playerIds = [commandUser.osuUserId, secondUser.osuUserId];
-				let dbPlayers = [commandUser, secondUser];
-				if (thirdUser) {
-					//Push the other 2 users aswell
-					playerIds.push(thirdUser.osuUserId);
-					playerIds.push(fourthUser.osuUserId);
-					dbPlayers.push(thirdUser);
-					dbPlayers.push(fourthUser);
+				let responded = false;
+				let accepted = [];
+				let declined = false;
+				let decliner = null;
+
+				const collector = sentMessage.createReactionCollector({ time: 300000 });
+
+				collector.on('collect', (reaction, user) => {
+					if (reaction.emoji.name === '✅' && [...teammates, ...opponents].includes(user.id)) {
+						if (!accepted.includes(user.id)) {
+							accepted.push(user.id);
+
+							if (accepted.length === teammates.length + opponents.length) {
+								collector.stop();
+							}
+						}
+					} else if (reaction.emoji.name === '❌' && [...teammates, ...opponents].includes(user.id)) {
+						decliner = user.id;
+						collector.stop();
+					}
+				});
+
+				collector.on('end', () => {
+					if (accepted.length < teammates.length + opponents.length) {
+						declined = true;
+					}
+					responded = true;
+				});
+
+				while (!responded) {
+					await pause(1000);
 				}
-				let scores = [0, 0];
 
-				//Add discord messages and also ingame invites for the timers
-				channel.on('message', async (msg) => {
-					if (msg.user.ircUsername === 'BanchoBot' && msg.message === 'Countdown finished') {
-						//Banchobot countdown finished
-						if (lobbyStatus === 'Joining phase') {
-							//Not everyone joined and the lobby will be closed
-							await channel.sendMessage('The lobby will be closed as not everyone joined.');
-							pause(60000);
-							await channel.sendMessage('!mp close');
-							try {
-								await processQueueTask.destroy();
-							} catch (error) {
-								//Nothing
-							}
-							return await channel.leave();
-						} else if (lobbyStatus === 'Waiting for start') {
-							await channel.sendMessage('!mp start 5');
+				sentMessage.reactions.removeAll().catch(() => { });
 
-							lobbyStatus === 'Map being played';
-						}
+				if (declined) {
+					if (decliner) {
+						return await interaction.editReply(`<@${decliner}> declined.`);
+					} else {
+						return await interaction.editReply('Someone didn\'t respond in time.');
 					}
+				}
+
+				//Remove the users from the queue
+				let existingQueueTasks = await DBProcessQueue.findAll({
+					where: {
+						task: 'duelQueue1v1',
+					},
 				});
 
-				lobby.on('playerJoined', async (obj) => {
-					if (!playerIds.includes(obj.player.user.id.toString())) {
-						channel.sendMessage(`!mp kick #${obj.player.user.id}`);
-					} else if (lobbyStatus === 'Joining phase') {
-						let allPlayersJoined = true;
-						for (let i = 0; i < dbPlayers.length && allPlayersJoined; i++) {
-							if (!lobby.playersById[dbPlayers[i].osuUserId.toString()]) {
-								allPlayersJoined = false;
-							}
-						}
-						if (allPlayersJoined) {
-							lobbyStatus = 'Waiting for start';
+				for (let i = 0; i < existingQueueTasks.length; i++) {
+					const osuUserId = existingQueueTasks[i].additions.split(';')[0];
 
-							while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
-								await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
-							}
-
-							let noFail = 'NF';
-							if (modPools[mapIndex] === 'FreeMod') {
-								noFail = '';
-							}
-
-							while (modPools[mapIndex] === 'FreeMod' && !lobby.freemod //There is no FreeMod combination otherwise
-								|| modPools[mapIndex] !== 'FreeMod' && !lobby.mods
-								|| modPools[mapIndex] === 'NM' && lobby.mods.length !== 1 //Only NM has only one mod
-								|| modPools[mapIndex] !== 'FreeMod' && modPools[mapIndex] !== 'NM' && lobby.mods.length !== 2 //Only FreeMod and NM don't have two mods
-								|| modPools[mapIndex] === 'HD' && !((lobby.mods[0].shortMod === 'hd' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'hd')) //Only HD has HD and NF
-								|| modPools[mapIndex] === 'HR' && !((lobby.mods[0].shortMod === 'hr' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'hr')) //Only HR has HR and NF
-								|| modPools[mapIndex] === 'DT' && !((lobby.mods[0].shortMod === 'dt' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'dt')) //Only DT has DT and NF
-							) {
-								await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
-								await pause(5000);
-							}
-
-							let mapInfo = await getOsuMapInfo(dbMaps[mapIndex]);
-							await channel.sendMessage(mapInfo);
-							if (modPools[mapIndex] === 'FreeMod') {
-								await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
-							}
-							await channel.sendMessage('Everyone please ready up!');
-							await channel.sendMessage('!mp timer 120');
-							mapIndex++;
+					for (let j = 0; j < everyUser.length; j++) {
+						if (everyUser[j].osuUserId === osuUserId) {
+							await existingQueueTasks[i].destroy();
+							await interaction.followUp(`<@${everyUser[j].userId}> you have been removed from the queue for a 1v1 duel.`);
+							break;
 						}
 					}
-				});
+				}
 
-				lobby.on('allPlayersReady', async () => {
-					await lobby.updateSettings();
-					let playersInLobby = 0;
-					for (let i = 0; i < 16; i++) {
-						if (lobby.slots[i]) {
-							playersInLobby++;
-						}
-					}
-					if (lobbyStatus === 'Waiting for start' && playersInLobby === dbPlayers.length) {
-						await channel.sendMessage('!mp start 5');
+				updateQueueChannels(interaction.client);
 
-						lobbyStatus === 'Map being played';
-					}
-				});
-
-				lobby.on('matchFinished', async (results) => {
-					if (modPools[mapIndex - 1] === 'FreeMod') {
-						for (let i = 0; i < results.length; i++) {
-							//Increase the score by 1.7 if EZ was played
-							if (results[i].player.mods) {
-								for (let j = 0; j < results[i].player.mods.length; j++) {
-									if (results[i].player.mods[j].enumValue === 2) {
-										console.log(results[i].score);
-										results[i].score = results[i].score * 1.7;
-										console.log(results[i].score);
-									}
-								}
-							}
-						}
-					}
-					if (modPools[mapIndex - 1] === 'FreeMod' && mapIndex - 1 < 6) {
-						for (let i = 0; i < results.length; i++) {
-							//Reduce the score by 0.5 if it was FreeMod and no mods / only nofail was picked
-							if (!results[i].player.mods || results[i].player.mods.length === 0 || results[i].player.mods.length === 1 && results[i].player.mods[0].enumValue === 1) {
-								results[i].score = results[i].score * 0.5;
-							} else {
-								let invalidModsPicked = false;
-								for (let j = 0; j < results[i].player.mods.length; j++) {
-									if (results[i].player.mods[j].enumValue !== 1 && results[i].player.mods[j].enumValue !== 2 && results[i].player.mods[j].enumValue !== 8 && results[i].player.mods[j].enumValue !== 16) {
-										invalidModsPicked = true;
-									}
-								}
-
-								if (invalidModsPicked) {
-									results[i].score = results[i].score / 100;
-								}
-							}
-						}
-					}
-
-					quicksort(results);
-
-					let scoreTeam1 = 0;
-					let scoreTeam2 = 0;
-					if (opponentId) {
-						for (let i = 0; i < results.length; i++) {
-							if (playerIds[0] == results[i].player.user.id) {
-								scoreTeam1 = + parseFloat(results[i].score);
-							} else if (playerIds[1] == results[i].player.user.id) {
-								scoreTeam2 = + parseFloat(results[i].score);
-							}
-						}
-					} else {
-						for (let i = 0; i < results.length; i++) {
-							if (playerIds[0] == results[i].player.user.id || playerIds[1] == results[i].player.user.id) {
-								scoreTeam1 = scoreTeam1 + parseFloat(results[i].score);
-							} else if (playerIds[2] == results[i].player.user.id || playerIds[3] == results[i].player.user.id) {
-								scoreTeam2 = scoreTeam2 + parseFloat(results[i].score);
-							}
-						}
-					}
-					if (results.length) {
-						let winner = teamname1;
-
-						if (scoreTeam1 < scoreTeam2) {
-							winner = teamname2;
-						}
-
-						await channel.sendMessage(`${teamname1}: ${humanReadable(scoreTeam1)} | ${teamname2}: ${humanReadable(scoreTeam2)} | Difference: ${humanReadable(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
-					} else {
-						await channel.sendMessage('!mp close');
-						// eslint-disable-next-line no-undef
-						const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-							// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-							notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-							completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-							parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-						});
-
-						osuApi.getMatch({ mp: lobby.id })
-							.then(async (match) => {
-								saveOsuMultiScores(match);
-							})
-							.catch(() => {
-								//Nothing
-							});
-
-						try {
-							await processQueueTask.destroy();
-						} catch (error) {
-							//Nothing
-						}
-						return await channel.leave();
-					}
-
-					//Increase the score of the player at the top of the list
-					if (scoreTeam1 > scoreTeam2) {
-						scores[0]++;
-					} else {
-						scores[1]++;
-					}
-					await channel.sendMessage(`Score: ${teamname1} | ${scores[0]} - ${scores[1]} | ${teamname2}`);
-
-					if (mapIndex < dbMaps.length && scores[0] < 4 && scores[1] < 4) {
-						lobbyStatus = 'Waiting for start';
-
-						while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
-							await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
-							await pause(5000);
-						}
-
-						let noFail = 'NF';
-						if (modPools[mapIndex] === 'FreeMod') {
-							noFail = '';
-						}
-
-						while (modPools[mapIndex] === 'FreeMod' && !lobby.freemod //There is no FreeMod combination otherwise
-							|| modPools[mapIndex] !== 'FreeMod' && !lobby.mods
-							|| modPools[mapIndex] === 'NM' && lobby.mods.length !== 1 //Only NM has only one mod
-							|| modPools[mapIndex] !== 'FreeMod' && modPools[mapIndex] !== 'NM' && lobby.mods.length !== 2 //Only FreeMod and NM don't have two mods
-							|| modPools[mapIndex] === 'HD' && !((lobby.mods[0].shortMod === 'hd' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'hd')) //Only HD has HD and NF
-							|| modPools[mapIndex] === 'HR' && !((lobby.mods[0].shortMod === 'hr' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'hr')) //Only HR has HR and NF
-							|| modPools[mapIndex] === 'DT' && !((lobby.mods[0].shortMod === 'dt' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'dt')) //Only DT has DT and NF
-						) {
-							await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
-							await pause(5000);
-						}
-
-						let mapInfo = await getOsuMapInfo(dbMaps[mapIndex]);
-						await channel.sendMessage(mapInfo);
-						await channel.sendMessage('Everyone please ready up!');
-						if (modPools[mapIndex] === 'FreeMod' && mapIndex < 6) {
-							await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
-						} else if (modPools[mapIndex] === 'FreeMod' && mapIndex === 6) {
-							await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
-						}
-						await channel.sendMessage('!mp timer 120');
-						mapIndex++;
-					} else {
-						lobbyStatus = 'Lobby finished';
-
-						if (scores[0] === 4) {
-							await channel.sendMessage(`Congratulations ${teamname1} for winning the match!`);
-						} else {
-							await channel.sendMessage(`Congratulations ${teamname2} for winning the match!`);
-						}
-						await channel.sendMessage('Thank you for playing! The lobby will automatically close in one minute.');
-						await pause(5000);
-
-						// eslint-disable-next-line no-undef
-						const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-							// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-							notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-							completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-							parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-						});
-
-						osuApi.getMatch({ mp: lobby.id })
-							.then(async (match) => {
-								saveOsuMultiScores(match);
-
-								await pause(15000);
-
-								let userDuelStarRating = await getUserDuelStarRating({ osuUserId: commandUser.osuUserId, client: interaction.client });
-								let messages = ['Your SR has been updated!'];
-								if (Math.round(commandUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
-									messages.push(`SR: ${Math.round(commandUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
-								}
-								if (Math.round(commandUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
-									messages.push(`NM: ${Math.round(commandUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
-								}
-								if (Math.round(commandUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
-									messages.push(`HD: ${Math.round(commandUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
-								}
-								if (Math.round(commandUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
-									messages.push(`HR: ${Math.round(commandUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
-								}
-								if (Math.round(commandUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
-									messages.push(`DT: ${Math.round(commandUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
-								}
-								if (Math.round(commandUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
-									messages.push(`FM: ${Math.round(commandUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
-								}
-								if (messages.length > 1) {
-									const IRCUser = await bancho.getUser(commandUser.osuName);
-									for (let i = 0; i < messages.length; i++) {
-										await IRCUser.sendMessage(messages[i]);
-									}
-								}
-
-								userDuelStarRating = await getUserDuelStarRating({ osuUserId: secondUser.osuUserId, client: interaction.client });
-								messages = ['Your SR has been updated!'];
-								if (Math.round(secondUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
-									messages.push(`SR: ${Math.round(secondUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
-								}
-								if (Math.round(secondUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
-									messages.push(`NM: ${Math.round(secondUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
-								}
-								if (Math.round(secondUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
-									messages.push(`HD: ${Math.round(secondUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
-								}
-								if (Math.round(secondUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
-									messages.push(`HR: ${Math.round(secondUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
-								}
-								if (Math.round(secondUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
-									messages.push(`DT: ${Math.round(secondUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
-								}
-								if (Math.round(secondUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
-									messages.push(`FM: ${Math.round(secondUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
-								}
-								if (messages.length > 1) {
-									const IRCUser = await bancho.getUser(secondUser.osuName);
-									for (let i = 0; i < messages.length; i++) {
-										await IRCUser.sendMessage(messages[i]);
-									}
-								}
-
-								if (thirdUser) {
-									userDuelStarRating = await getUserDuelStarRating({ osuUserId: thirdUser.osuUserId, client: interaction.client });
-									messages = ['Your SR has been updated!'];
-									if (Math.round(thirdUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
-										messages.push(`SR: ${Math.round(thirdUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
-									}
-									if (Math.round(thirdUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
-										messages.push(`NM: ${Math.round(thirdUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
-									}
-									if (Math.round(thirdUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
-										messages.push(`HD: ${Math.round(thirdUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
-									}
-									if (Math.round(thirdUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
-										messages.push(`HR: ${Math.round(thirdUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
-									}
-									if (Math.round(thirdUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
-										messages.push(`DT: ${Math.round(thirdUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
-									}
-									if (Math.round(thirdUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
-										messages.push(`FM: ${Math.round(thirdUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
-									}
-									if (messages.length > 1) {
-										const IRCUser = await bancho.getUser(thirdUser.osuName);
-										for (let i = 0; i < messages.length; i++) {
-											await IRCUser.sendMessage(messages[i]);
-										}
-									}
-
-									userDuelStarRating = await getUserDuelStarRating({ osuUserId: fourthUser.osuUserId, client: interaction.client });
-									messages = ['Your SR has been updated!'];
-									if (Math.round(fourthUser.osuDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.total * 1000) / 1000) {
-										messages.push(`SR: ${Math.round(fourthUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.total * 1000) / 1000}`);
-									}
-									if (Math.round(fourthUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.noMod * 1000) / 1000) {
-										messages.push(`NM: ${Math.round(fourthUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.noMod * 1000) / 1000}`);
-									}
-									if (Math.round(fourthUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hidden * 1000) / 1000) {
-										messages.push(`HD: ${Math.round(fourthUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hidden * 1000) / 1000}`);
-									}
-									if (Math.round(fourthUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.hardRock * 1000) / 1000) {
-										messages.push(`HR: ${Math.round(fourthUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.hardRock * 1000) / 1000}`);
-									}
-									if (Math.round(fourthUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.doubleTime * 1000) / 1000) {
-										messages.push(`DT: ${Math.round(fourthUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}`);
-									}
-									if (Math.round(fourthUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(userDuelStarRating.freeMod * 1000) / 1000) {
-										messages.push(`FM: ${Math.round(fourthUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(userDuelStarRating.freeMod * 1000) / 1000}`);
-									}
-									if (messages.length > 1) {
-										const IRCUser = await bancho.getUser(fourthUser.osuName);
-										for (let i = 0; i < messages.length; i++) {
-											await IRCUser.sendMessage(messages[i]);
-										}
-									}
-								}
-							})
-							.catch(() => {
-								//Nothing
-							});
-
-						await pause(55000);
-						await channel.sendMessage('!mp close');
-
-						try {
-							await processQueueTask.destroy();
-						} catch (error) {
-							//Nothing
-						}
-						return await channel.leave();
-					}
-				});
+				createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, everyUser);
 			} else if (interaction.options._subcommand === 'rating') {
 				let processingMessage = null;
 				if (interaction.id) {
-					await interaction.deferReply();
+					try {
+						await interaction.deferReply();
+					} catch (error) {
+						if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+							console.error(error);
+						}
+						return;
+					}
 				} else {
-					processingMessage = await interaction.channel.send('Processing league ratings...');
+					let playerName = await getOsuPlayerName(interaction.options._hoistedOptions[0].value);
+					processingMessage = await interaction.channel.send(`Processing league ratings for ${playerName}...`);
 				}
 
 				let osuUser = {
@@ -1468,10 +333,10 @@ module.exports = {
 							osuUser.id = discordUser.osuUserId;
 							osuUser.name = discordUser.osuName;
 						} else {
-							return await interaction.editReply({ content: `\`${username.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect <username>\`.`, ephemeral: true });
+							return await interaction.editReply({ content: `\`${username.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`, ephemeral: true });
 						}
 					} else {
-						osuUser.id = getIDFromPotentialOsuLink(username);
+						osuUser.name = getIDFromPotentialOsuLink(username);
 					}
 				} else {
 					//Try to get the user by the message if no argument given
@@ -1488,7 +353,7 @@ module.exports = {
 					}
 				}
 
-				if (!osuUser.name) {
+				if (!osuUser.id) {
 					// eslint-disable-next-line no-undef
 					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -1497,7 +362,7 @@ module.exports = {
 						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 					});
 
-					const user = await osuApi.getUser({ u: osuUser.id, m: 0 })
+					const user = await osuApi.getUser({ u: osuUser.name, m: 0 })
 						.catch(err => {
 							if (err.message !== 'Not found') {
 								console.log(err);
@@ -1506,9 +371,9 @@ module.exports = {
 
 					if (!user) {
 						if (interaction.id) {
-							return await interaction.editReply({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`, ephemeral: true });
+							return await interaction.editReply({ content: `Could not find user \`${osuUser.name.replace(/`/g, '')}\`.`, ephemeral: true });
 						} else {
-							return processingMessage.edit(`Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`);
+							return processingMessage.edit(`Could not find user \`${osuUser.name.replace(/`/g, '')}\`.`);
 						}
 					}
 
@@ -1803,10 +668,10 @@ module.exports = {
 					.then(async (res) => {
 						let htmlCode = await res.text();
 						htmlCode = htmlCode.replace(/&quot;/gm, '"');
-						const badgesRegex = /,"badges".+,"beatmap_playcounts_count":/gm;
+						const badgesRegex = /,"badges".+,"comments_count":/gm;
 						const matches = badgesRegex.exec(htmlCode);
 						if (matches && matches[0]) {
-							const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"beatmap_playcounts_count":', '');
+							const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"comments_count":', '');
 							const rawBadgesArray = cleanedMatch.split('},{');
 							for (let i = 0; i < rawBadgesArray.length; i++) {
 								if (rawBadgesArray[i] !== '') {
@@ -1826,19 +691,33 @@ module.exports = {
 					ctx.drawImage(badge, 10, 60 + i * 44 + yOffset, 86, 40);
 				}
 
+				//Draw the Player derank rank
+				let discordUser = await DBDiscordUsers.findOne({
+					where: {
+						osuUserId: osuUser.id
+					}
+				});
+
+				if (discordUser) {
+					let derankStats = await getDerankStats(discordUser);
+
+					ctx.font = 'bold 25px comfortaa, sans-serif';
+					ctx.fillText(`Duel Rank: #${humanReadable(derankStats.expectedPpRankOsu)}`, 190, 287);
+				}
+
 				//Get a circle for inserting the player avatar
 				ctx.beginPath();
-				ctx.arc(190, 180, 80, 0, Math.PI * 2, true);
+				ctx.arc(190, 170, 80, 0, Math.PI * 2, true);
 				ctx.closePath();
 				ctx.clip();
 
 				//Draw a shape onto the main canvas
 				try {
 					const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.id}`);
-					ctx.drawImage(avatar, 110, 100, 160, 160);
+					ctx.drawImage(avatar, 110, 90, 160, 160);
 				} catch (error) {
 					const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-					ctx.drawImage(avatar, 110, 100, 160, 160);
+					ctx.drawImage(avatar, 110, 90, 160, 160);
 				}
 
 				//Create as an attachment
@@ -1847,10 +726,10 @@ module.exports = {
 				let sentMessage = null;
 
 				if (interaction.id) {
-					sentMessage = await interaction.editReply({ content: 'The data is based on matches played using `/osu-duel match` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
+					sentMessage = await interaction.editReply({ content: 'The data is based on matches played using `/osu-duel queue` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
 				} else {
 					processingMessage.delete();
-					sentMessage = await interaction.channel.send({ content: 'The data is based on matches played using `/osu-duel match` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
+					sentMessage = await interaction.channel.send({ content: 'The data is based on matches played using `/osu-duel queue` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
 				}
 				await sentMessage.react('👤');
 				await sentMessage.react('🥇');
@@ -1866,7 +745,14 @@ module.exports = {
 				return;
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
 				if (interaction.id) {
-					interaction.reply('Processing leaderboard...');
+					try {
+						await interaction.reply('Processing leaderboard...');
+					} catch (error) {
+						if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+							console.error(error);
+						}
+						return;
+					}
 				}
 
 				let osuAccounts = [];
@@ -1875,30 +761,38 @@ module.exports = {
 					await interaction.guild.members.fetch()
 						.then(async (guildMembers) => {
 							const members = [];
-							guildMembers.each(member => members.push(member));
-							for (let i = 0; i < members.length; i++) {
-								logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard');
-								const discordUser = await DBDiscordUsers.findOne({
-									where: {
-										userId: members[i].id,
-										osuUserId: {
-											[Op.not]: null,
-										},
-										osuDuelStarRating: {
-											[Op.not]: null,
-										}
-									},
-								});
+							guildMembers.each(member => members.push(member.id));
 
-								if (discordUser) {
-									osuAccounts.push({
-										userId: discordUser.userId,
-										osuUserId: discordUser.osuUserId,
-										osuName: discordUser.osuName,
-										osuVerified: discordUser.osuVerified,
-										osuDuelStarRating: parseFloat(discordUser.osuDuelStarRating),
-									});
-								}
+							logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard');
+							const discordUsers = await DBDiscordUsers.findAll({
+								where: {
+									userId: {
+										[Op.in]: members
+									},
+									osuUserId: {
+										[Op.not]: null,
+									},
+									osuDuelStarRating: {
+										[Op.not]: null,
+									}
+								},
+							});
+
+							for (let i = 0; i < discordUsers.length; i++) {
+								osuAccounts.push({
+									userId: discordUsers[i].userId,
+									osuUserId: discordUsers[i].osuUserId,
+									osuName: discordUsers[i].osuName,
+									osuVerified: discordUsers[i].osuVerified,
+									osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
+									osuNoModDuelStarRating: parseFloat(discordUsers[i].osuNoModDuelStarRating),
+									osuHiddenDuelStarRating: parseFloat(discordUsers[i].osuHiddenDuelStarRating),
+									osuHardRockDuelStarRating: parseFloat(discordUsers[i].osuHardRockDuelStarRating),
+									osuDoubleTimeDuelStarRating: parseFloat(discordUsers[i].osuDoubleTimeDuelStarRating),
+									osuFreeModDuelStarRating: parseFloat(discordUsers[i].osuFreeModDuelStarRating),
+									osuDuelProvisional: discordUsers[i].osuDuelProvisional,
+									osuDuelOutdated: discordUsers[i].osuDuelOutdated,
+								});
 							}
 						})
 						.catch(err => {
@@ -1913,6 +807,9 @@ module.exports = {
 							},
 							osuDuelStarRating: {
 								[Op.not]: null,
+							},
+							osuDuelProvisional: {
+								[Op.not]: true,
 							}
 						},
 					});
@@ -1924,6 +821,13 @@ module.exports = {
 							osuName: discordUsers[i].osuName,
 							osuVerified: discordUsers[i].osuVerified,
 							osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
+							osuNoModDuelStarRating: parseFloat(discordUsers[i].osuNoModDuelStarRating),
+							osuHiddenDuelStarRating: parseFloat(discordUsers[i].osuHiddenDuelStarRating),
+							osuHardRockDuelStarRating: parseFloat(discordUsers[i].osuHardRockDuelStarRating),
+							osuDoubleTimeDuelStarRating: parseFloat(discordUsers[i].osuDoubleTimeDuelStarRating),
+							osuFreeModDuelStarRating: parseFloat(discordUsers[i].osuFreeModDuelStarRating),
+							osuDuelProvisional: discordUsers[i].osuDuelProvisional,
+							osuDuelOutdated: discordUsers[i].osuDuelOutdated,
 						});
 					}
 				}
@@ -1960,6 +864,17 @@ module.exports = {
 							name: userDisplayName,
 							value: `${Math.round(osuAccounts[i].osuDuelStarRating * 1000) / 1000}* | ${verified} ${osuAccounts[i].osuName}`,
 							color: getOsuDuelLeague(osuAccounts[i].osuDuelStarRating).color,
+							osuName: osuAccounts[i].osuName,
+							osuUserId: osuAccounts[i].osuUserId,
+							duelRating: osuAccounts[i].osuDuelStarRating,
+							noModDuelStarRating: osuAccounts[i].osuNoModDuelStarRating,
+							hiddenDuelStarRating: osuAccounts[i].osuHiddenDuelStarRating,
+							hardRockDuelStarRating: osuAccounts[i].osuHardRockDuelStarRating,
+							doubleTimeDuelStarRating: osuAccounts[i].osuDoubleTimeDuelStarRating,
+							freeModDuelStarRating: osuAccounts[i].osuFreeModDuelStarRating,
+							duelProvisional: osuAccounts[i].osuDuelProvisional,
+							duelOutdated: osuAccounts[i].osuDuelOutdated,
+							verified: osuAccounts[i].osuVerified,
 						};
 
 						leaderboardData.push(dataset);
@@ -1968,6 +883,17 @@ module.exports = {
 							name: osuAccounts[i].osuName,
 							value: `${Math.round(osuAccounts[i].osuDuelStarRating * 1000) / 1000}*`,
 							color: getOsuDuelLeague(osuAccounts[i].osuDuelStarRating).color,
+							osuName: osuAccounts[i].osuName,
+							osuUserId: osuAccounts[i].osuUserId,
+							duelRating: osuAccounts[i].osuDuelStarRating,
+							noModDuelStarRating: osuAccounts[i].osuNoModDuelStarRating,
+							hiddenDuelStarRating: osuAccounts[i].osuHiddenDuelStarRating,
+							hardRockDuelStarRating: osuAccounts[i].osuHardRockDuelStarRating,
+							doubleTimeDuelStarRating: osuAccounts[i].osuDoubleTimeDuelStarRating,
+							freeModDuelStarRating: osuAccounts[i].osuFreeModDuelStarRating,
+							duelProvisional: osuAccounts[i].osuDuelProvisional,
+							duelOutdated: osuAccounts[i].osuDuelOutdated,
+							verified: osuAccounts[i].osuVerified,
 						};
 
 						leaderboardData.push(dataset);
@@ -1982,7 +908,11 @@ module.exports = {
 					page = Math.abs(parseInt(interaction.options._hoistedOptions[0].value));
 				}
 
-				if (!page && leaderboardData.length > 300) {
+				if (page && page > totalPages) {
+					page = totalPages;
+				}
+
+				if (!page && leaderboardData.length > 150) {
 					page = 1;
 					if (authorPlacement) {
 						page = Math.floor(authorPlacement / leaderboardEntriesPerPage) + 1;
@@ -2005,10 +935,56 @@ module.exports = {
 					filename = `osu-duelrating-leaderboard-${interaction.user.id}-${guildName}-page${page}.png`;
 				}
 
+				let csvFiles = [];
+
+				if (interaction.id && interaction.options.getBoolean('csv')) {
+					let csvData = [];
+
+					for (let i = 0; i < leaderboardData.length; i++) {
+						csvData.push({
+							rank: i + 1,
+							osuUserId: leaderboardData[i].osuUserId,
+							osuName: leaderboardData[i].osuName,
+							duelRating: leaderboardData[i].duelRating,
+							noModDuelStarRating: leaderboardData[i].noModDuelStarRating,
+							hiddenDuelStarRating: leaderboardData[i].hiddenDuelStarRating,
+							hardRockDuelStarRating: leaderboardData[i].hardRockDuelStarRating,
+							doubleTimeDuelStarRating: leaderboardData[i].doubleTimeDuelStarRating,
+							freeModDuelStarRating: leaderboardData[i].freeModDuelStarRating,
+							duelProvisional: leaderboardData[i].duelProvisional,
+							duelOutdated: leaderboardData[i].duelOutdated,
+							verified: leaderboardData[i].verified,
+						});
+					}
+
+					let data = [];
+					for (let i = 0; i < csvData.length; i++) {
+						data.push(csvData[i]);
+
+						if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
+							let csv = new ObjectsToCsv(data);
+							csv = await csv.toString();
+							// eslint-disable-next-line no-undef
+							const buffer = Buffer.from(csv);
+							//Create as an attachment
+							// eslint-disable-next-line no-undef
+							csvFiles.push(new Discord.MessageAttachment(buffer, `duelRatings${csvFiles.length.toString().padStart(2, '0')}.csv`));
+
+							data = [];
+						}
+					}
+				}
+
 				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${guildName} osu! Duel Star Rating leaderboard`, filename, page);
 
+				let files = [attachment];
+
+				if (csvFiles.length > 0) {
+					files = files.concat(csvFiles);
+				}
+
 				//Send attachment
-				let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect <username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-duel starrating username:[username]\` is being used.`, files: [attachment] });
+				let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect username:<username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-duel rating username:[username]\` is being used.`, files: files });
 
 				if (page) {
 					if (page > 1) {
@@ -2020,7 +996,15 @@ module.exports = {
 					}
 				}
 			} else if (interaction.options._subcommand === 'data') {
-				await interaction.deferReply({ ephemeral: true });
+				try {
+					await interaction.deferReply({ ephemeral: true });
+				} catch (error) {
+					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+						console.error(error);
+					}
+					return;
+				}
+
 				let osuUser = {
 					id: null,
 					name: null,
@@ -2038,7 +1022,7 @@ module.exports = {
 							osuUser.id = discordUser.osuUserId;
 							osuUser.name = discordUser.osuName;
 						} else {
-							return await interaction.editReply({ content: `\`${interaction.options._hoistedOptions[0].value.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect <username>\`.`, ephemeral: true });
+							return await interaction.editReply({ content: `\`${interaction.options._hoistedOptions[0].value.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`, ephemeral: true });
 						}
 					} else {
 						osuUser.id = getIDFromPotentialOsuLink(interaction.options._hoistedOptions[0].value);
@@ -2085,7 +1069,7 @@ module.exports = {
 				let userDuelStarRating = null;
 				for (let i = 0; i < 5 && !userDuelStarRating; i++) {
 					try {
-						userDuelStarRating = await getUserDuelStarRating({ osuUserId: osuUser.id, client: interaction.client });
+						userDuelStarRating = await getUserDuelStarRating({ osuUserId: osuUser.id, client: interaction.client, forceUpdate: true });
 					} catch (e) {
 						if (i === 4) {
 							if (e === 'No standard plays') {
@@ -2154,7 +1138,13 @@ module.exports = {
 				quicksortMatchId(multiMatches);
 
 				for (let i = 0; i < multiMatches.length; i++) {
-					multiMatches[i] = `${(multiMatches[i].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${multiMatches[i].matchStartDate.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiMatches[i].matchId}`;
+					try {
+						let date = new Date(multiMatches[i].matchStartDate);
+						multiMatches[i] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiMatches[i].matchId}`;
+					} catch (e) {
+						multiMatches[i] = 'Error';
+						console.log(e, multiMatches[i]);
+					}
 				}
 
 				let scores = [
@@ -2165,11 +1155,135 @@ module.exports = {
 					userDuelStarRating.scores.FM
 				];
 
+				// Add all expected scores to an array
+				let expectedScores = [];
+				let labels = [];
+				for (let i = 0; i < scores.length; i++) {
+					let expectedScoresArray = [];
+					for (let j = 0; j < scores[i].length; j++) {
+						if (!labels.includes(j + 1)) {
+							labels.push(j + 1);
+						}
+						expectedScoresArray.push(scores[i][j].expectedRating);
+					}
+
+					// Sort the array
+					expectedScoresArray.sort((a, b) => b - a);
+
+					expectedScores.push(expectedScoresArray);
+				}
+
+				const data = {
+					labels: labels,
+					datasets: [
+						{
+							label: 'Expected Rating (NM only)',
+							data: expectedScores[0],
+							borderColor: 'rgb(54, 162, 235)',
+							fill: false,
+							tension: 0.4
+						}, {
+							label: 'Expected Rating (HD only)',
+							data: expectedScores[1],
+							borderColor: 'rgb(255, 205, 86)',
+							fill: false,
+							tension: 0.4
+						}, {
+							label: 'Expected Rating (HR only)',
+							data: expectedScores[2],
+							borderColor: 'rgb(255, 99, 132)',
+							fill: false,
+							tension: 0.4
+						}, {
+							label: 'Expected Rating (DT only)',
+							data: expectedScores[3],
+							borderColor: 'rgb(153, 102, 255)',
+							fill: false,
+							tension: 0.4
+						}, {
+							label: 'Expected Rating (FM only)',
+							data: expectedScores[4],
+							borderColor: 'rgb(75, 192, 192)',
+							fill: false,
+							tension: 0.4
+						}
+					]
+				};
+
+				const configuration = {
+					type: 'line',
+					data: data,
+					options: {
+						spanGaps: true,
+						responsive: true,
+						plugins: {
+							title: {
+								display: true,
+								text: 'Expected Rating for each score',
+								color: '#FFFFFF',
+							},
+							legend: {
+								labels: {
+									color: '#FFFFFF',
+								}
+							},
+						},
+						interaction: {
+							intersect: false,
+						},
+						scales: {
+							x: {
+								display: true,
+								title: {
+									display: true,
+									text: '# best',
+									color: '#FFFFFF'
+								},
+								grid: {
+									color: '#8F8F8F'
+								},
+								ticks: {
+									color: '#FFFFFF',
+								},
+							},
+							y: {
+								display: true,
+								title: {
+									display: true,
+									text: 'Expected rating',
+									color: '#FFFFFF'
+								},
+								grid: {
+									color: '#8F8F8F'
+								},
+								ticks: {
+									color: '#FFFFFF',
+								},
+							}
+						}
+					},
+				};
+
+				const width = 1500; //px
+				const height = 750; //px
+				const canvasRenderService = new ChartJSNodeCanvas({ width, height });
+
+				const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+
+				const attachment = new Discord.MessageAttachment(imageBuffer, 'expectedScores.png');
+
+				files.push(attachment);
+
 				for (let i = 0; i < scores.length; i++) {
 					quicksortScore(scores[i]);
 
 					for (let j = 0; j < scores[i].length; j++) {
-						scores[i][j] = `${(scores[i][j].matchStartDate.getUTCMonth() + 1).toString().padStart(2, '0')}-${scores[i][j].matchStartDate.getUTCFullYear()} - ${Math.round(scores[i][j].score)} points (${(Math.round(scores[i][j].weight * 1000) / 1000).toFixed(3)}): ${(Math.round(scores[i][j].starRating * 100) / 100).toFixed(2)}* | https://osu.ppy.sh/b/${scores[i][j].beatmapId}`;
+						let outlierText = '';
+						if (scores[i][j].outlier) {
+							outlierText = ' [outlier - not counted]';
+						}
+						let date = new Date(scores[i][j].matchStartDate);
+						scores[i][j] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${Math.round(scores[i][j].score)} points (${(Math.round(scores[i][j].weight * 1000) / 1000).toFixed(3)}): ${(Math.round(scores[i][j].starRating * 100) / 100).toFixed(2)}* | Expected SR: ${scores[i][j].expectedRating.toFixed(2)} | https://osu.ppy.sh/b/${scores[i][j].beatmapId}${outlierText}`;
 					}
 
 					if (i === 0) {
@@ -2198,8 +1312,6 @@ module.exports = {
 				files.push(multiMatches);
 
 				let explaination = [];
-				explaination.push('**Disclaimer: Everything is heavily Work in Progress**');
-				explaination.push('');
 				explaination.push('**Hello!**');
 				explaination.push('You will likely be overwhelmed by all the info that just popped up.');
 				explaination.push('If you are just here to get a rough explaination of how the calculation works, here is a tldr:');
@@ -2211,6 +1323,10 @@ module.exports = {
 				explaination.push('You can see the matches where the scores are from in the third file.');
 				explaination.push('');
 				explaination.push('**In Depth Explaination:**');
+				explaination.push('Relevant Star Rating Change:');
+				explaination.push('HD maps always get a star rating buff in the calculations. These depend on the AR of the map.');
+				explaination.push('AR7.5 HD will count as a +0.75 SR buff (maximum) and AR9 will count as a +0.2 SR buff (minimum). Everything in between is rising linearly.');
+				explaination.push('');
 				explaination.push('1. Step:');
 				explaination.push('The bot grabs the last 35 tournament score v2 scores for each modpool. (Limited to unique ranked maps)');
 				explaination.push('The limit exists to not evaluate the same maps twice, to limit the API calls to some extend and to get relatively recent data without losing accuracy due to limiting it to a timestamp.');
@@ -2262,30 +1378,34 @@ module.exports = {
 					await interaction.guild.members.fetch()
 						.then(async (guildMembers) => {
 							const members = [];
-							guildMembers.each(member => members.push(member));
-							for (let i = 0; i < members.length; i++) {
-								logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread');
-								const discordUser = await DBDiscordUsers.findOne({
-									where: {
-										userId: members[i].id,
-										osuUserId: {
-											[Op.not]: null,
-										},
-										osuDuelStarRating: {
-											[Op.not]: null,
-										}
-									},
-								});
+							guildMembers.each(member => members.push(member.id));
 
-								if (discordUser) {
-									osuAccounts.push({
-										userId: discordUser.userId,
-										osuUserId: discordUser.osuUserId,
-										osuName: discordUser.osuName,
-										osuVerified: discordUser.osuVerified,
-										osuDuelStarRating: parseFloat(discordUser.osuDuelStarRating),
-									});
-								}
+							logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread');
+							const discordUsers = await DBDiscordUsers.findAll({
+								where: {
+									userId: {
+										[Op.in]: members
+									},
+									osuUserId: {
+										[Op.not]: null,
+									},
+									osuDuelStarRating: {
+										[Op.not]: null,
+									},
+									osuDuelProvisional: {
+										[Op.not]: true,
+									}
+								},
+							});
+
+							for (let i = 0; i < discordUsers.length; i++) {
+								osuAccounts.push({
+									userId: discordUsers[i].userId,
+									osuUserId: discordUsers[i].osuUserId,
+									osuName: discordUsers[i].osuName,
+									osuVerified: discordUsers[i].osuVerified,
+									osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
+								});
 							}
 						})
 						.catch(err => {
@@ -2300,6 +1420,9 @@ module.exports = {
 							},
 							osuDuelStarRating: {
 								[Op.not]: null,
+							},
+							osuDuelProvisional: {
+								[Op.not]: true,
 							}
 						},
 					});
@@ -2439,78 +1562,110 @@ module.exports = {
 				await discordUser.save();
 
 				return interaction.editReply('You will no longer receive osu! Duel rating updates.');
+			} else if (interaction.options._subcommand === 'queue1v1') {
+				await interaction.deferReply({ ephemeral: true });
+
+				msg = await populateMsgFromInteraction(interaction);
+
+				const commandConfig = await getOsuUserServerMode(msg, []);
+				const commandUser = commandConfig[0];
+
+				if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
+					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect username:<username>`.');
+				}
+
+				let existingQueueTasks = await DBProcessQueue.findAll({
+					where: {
+						task: 'duelQueue1v1',
+					},
+				});
+
+				for (let i = 0; i < existingQueueTasks.length; i++) {
+					const osuUserId = existingQueueTasks[i].additions.split(';')[0];
+
+					if (osuUserId === commandUser.osuUserId) {
+						return await interaction.editReply('You are already in the queue for a 1v1 duel.');
+					}
+				}
+
+				let ownStarRating = 5;
+				try {
+					await interaction.editReply('Processing Duel Rating...');
+					ownStarRating = await getUserDuelStarRating({ osuUserId: commandUser.osuUserId, client: interaction.client });
+
+					ownStarRating = ownStarRating.total;
+				} catch (e) {
+					if (e !== 'No standard plays') {
+						console.log(e);
+					}
+				}
+
+				//Check again in case the cooldown had passed and it was triggered again
+				existingQueueTasks = await DBProcessQueue.findAll({
+					where: {
+						task: 'duelQueue1v1',
+					},
+				});
+
+				for (let i = 0; i < existingQueueTasks.length; i++) {
+					const osuUserId = existingQueueTasks[i].additions.split(';')[0];
+
+					if (osuUserId === commandUser.osuUserId) {
+						return await interaction.editReply('You are already in the queue for a 1v1 duel.');
+					}
+				}
+
+				await DBProcessQueue.create({
+					guildId: 'none',
+					task: 'duelQueue1v1',
+					additions: `${commandUser.osuUserId};${ownStarRating};0.25`,
+					date: new Date(),
+					priority: 9
+				});
+
+				updateQueueChannels(interaction.client);
+
+				return await interaction.editReply('You are now queued up for a 1v1 duel.');
+			} else if (interaction.options._subcommand === 'queue1v1-leave') {
+				try {
+					await interaction.deferReply({ ephemeral: true });
+				} catch (error) {
+					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+						console.error(error);
+					}
+					return;
+				}
+
+				msg = await populateMsgFromInteraction(interaction);
+
+				const commandConfig = await getOsuUserServerMode(msg, []);
+				const commandUser = commandConfig[0];
+
+				if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
+					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect username:<username>`.');
+				}
+
+				let existingQueueTasks = await DBProcessQueue.findAll({
+					where: {
+						task: 'duelQueue1v1',
+					},
+				});
+
+				for (let i = 0; i < existingQueueTasks.length; i++) {
+					const osuUserId = existingQueueTasks[i].additions.split(';')[0];
+
+					if (osuUserId === commandUser.osuUserId) {
+						await existingQueueTasks[i].destroy();
+						updateQueueChannels(interaction.client);
+						return await interaction.editReply('You have been removed from the queue for a 1v1 duel.');
+					}
+				}
+
+				return await interaction.editReply('You are not in the queue for a 1v1 duel.');
 			}
 		}
 	},
 };
-
-async function messageUserWithRetries(user, interaction, content) {
-	for (let i = 0; i < 3; i++) {
-		try {
-			await user.send(content)
-				.then(() => {
-					i = Infinity;
-				})
-				.catch(async (error) => {
-					throw (error);
-				});
-		} catch (error) {
-			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
-				if (i === 2) {
-					interaction.followUp(`[Duel] <@${user.id}>, it seems like I can't DM you in Discord. Please enable DMs so that I can keep you up to date with the match procedure!`);
-				} else {
-					await pause(2500);
-				}
-			} else {
-				i = Infinity;
-				console.log(error);
-			}
-		}
-	}
-}
-
-function shuffle(array) {
-	let currentIndex = array.length, randomIndex;
-
-	// While there remain elements to shuffle...
-	while (currentIndex != 0) {
-
-		// Pick a remaining element...
-		randomIndex = Math.floor(Math.random() * currentIndex);
-		currentIndex--;
-
-		// And swap it with the current element.
-		[array[currentIndex], array[randomIndex]] = [
-			array[randomIndex], array[currentIndex]];
-	}
-
-	return array;
-}
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseInt(list[j].score) >= parseInt(pivot.score)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
-}
 
 function partitionDuelStarRating(list, start, end) {
 	const pivot = list[end];
@@ -2610,33 +1765,4 @@ function quicksortMatchId(list, start = 0, end = undefined) {
 		quicksortMatchId(list, p + 1, end);
 	}
 	return list;
-}
-
-async function getOsuMapInfo(dbBeatmap) {
-	logDatabaseQueries(4, 'commands/osu-duel.js DBOsuMultiScores Mapinfo');
-	const mapScores = await DBOsuMultiScores.findAll({
-		where: {
-			beatmapId: dbBeatmap.beatmapId,
-			tourneyMatch: true,
-			matchName: {
-				[Op.notLike]: 'MOTD:%',
-			},
-			[Op.or]: [
-				{ warmup: false },
-				{ warmup: null }
-			],
-		}
-	});
-
-	let tournaments = [];
-
-	for (let i = 0; i < mapScores.length; i++) {
-		let acronym = mapScores[i].matchName.replace(/:.+/gm, '');
-
-		if (tournaments.indexOf(acronym) === -1) {
-			tournaments.push(acronym);
-		}
-	}
-
-	return `https://osu.ppy.sh/b/${dbBeatmap.beatmapId} | https://beatconnect.io/b/${dbBeatmap.beatmapsetId} | Map played ${mapScores.length} times in: ${tournaments.join(', ')}`;
 }

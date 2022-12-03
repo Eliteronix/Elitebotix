@@ -289,8 +289,12 @@ async function messageUserWithRetries(client, user, content, attachment) {
 						discordUser.osuMOTDerrorFirstOccurence = now;
 						discordUser.save();
 
-						const channel = await client.channels.fetch('833803740162949191');
-						channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+						client.shard.broadcastEval(async (c, { message }) => {
+							const channel = await c.channels.cache.get('833803740162949191');
+							if (channel) {
+								channel.send(message);
+							}
+						}, { context: { message: `<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!` } });
 					} else if (discordUser && discordUser.osuMOTDerrorFirstOccurence && weekAgo > discordUser.osuMOTDerrorFirstOccurence) {
 						discordUser.osuMOTDRegistered = false;
 						discordUser.osuMOTDlastRoundPlayed = null;
@@ -299,8 +303,12 @@ async function messageUserWithRetries(client, user, content, attachment) {
 						discordUser.osuMOTDmutedUntil = null;
 						discordUser.save();
 					} else {
-						const channel = await client.channels.fetch('833803740162949191');
-						channel.send(`<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!`);
+						client.shard.broadcastEval(async (c, { message }) => {
+							const channel = await c.channels.cache.get('833803740162949191');
+							if (channel) {
+								channel.send(message);
+							}
+						}, { context: { message: `<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!` } });
 					}
 				} else {
 					await pause(2500);
@@ -324,7 +332,7 @@ async function messageIngame(bancho, map, players) {
 	for (let i = 0; i < players.length; i++) {
 		try {
 			const IRCUser = await bancho.getUser(players[i].osuName);
-			await IRCUser.sendMessage(`[Elitebotix]: A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
+			await IRCUser.sendMessage(`A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
 		} catch (error) {
 			try {
 				await bancho.connect();
@@ -335,7 +343,7 @@ async function messageIngame(bancho, map, players) {
 			}
 			try {
 				const IRCUser = await bancho.getUser(players[i].osuName);
-				await IRCUser.sendMessage(`[Elitebotix]: A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
+				await IRCUser.sendMessage(`A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
 			} catch (error) {
 				if (error.message !== 'Currently disconnected!') {
 					console.log('MOTD/qualifier.js', error);
