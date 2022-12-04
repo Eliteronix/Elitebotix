@@ -128,8 +128,6 @@ module.exports = {
 			}
 		}
 
-		console.log(timeframe);
-
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
 
