@@ -441,6 +441,7 @@ module.exports = {
 			return;
 		}
 
+		let now = new Date();
 		let yesterday = new Date();
 		yesterday.setUTCHours(yesterday.getUTCHours() - 24);
 
@@ -455,7 +456,34 @@ module.exports = {
 				},
 				updatedAt: {
 					[Op.lt]: yesterday
-				}
+				},
+				[Op.or]: [
+					{
+						nextOsuPPUpdate: {
+							[Op.eq]: null
+						}
+					},
+					{
+						nextOsuPPUpdate: {
+							[Op.lt]: now
+						}
+					},
+					{
+						nextTaikoPPUpdate: {
+							[Op.lt]: now
+						}
+					},
+					{
+						nextCatchPPUpdate: {
+							[Op.lt]: now
+						}
+					},
+					{
+						nextManiaPPUpdate: {
+							[Op.lt]: now
+						}
+					}
+				]
 			},
 			order: [
 				['updatedAt', 'ASC'],
@@ -491,6 +519,33 @@ module.exports = {
 					},
 					{
 						osuRank: null
+					}
+				],
+				[Op.or]: [
+					{
+						nextOsuPPUpdate: {
+							[Op.eq]: null
+						}
+					},
+					{
+						nextOsuPPUpdate: {
+							[Op.lt]: now
+						}
+					},
+					{
+						nextTaikoPPUpdate: {
+							[Op.lt]: now
+						}
+					},
+					{
+						nextCatchPPUpdate: {
+							[Op.lt]: now
+						}
+					},
+					{
+						nextManiaPPUpdate: {
+							[Op.lt]: now
+						}
 					}
 				]
 			},

@@ -171,9 +171,12 @@ function readyDiscord() {
 		}]
 	});
 
-	executeProcessQueue(client, bancho, twitchClient);
+	setTimeout(() => {
+		executeProcessQueue(client, bancho, twitchClient);
 
-	startJiraCardSync(client);
+		startJiraCardSync(client);
+	}, 60000);
+
 }
 
 client.on('messageCreate', msg => gotMessage(msg, bancho, twitchClient));

@@ -24,26 +24,75 @@ module.exports = {
 		discordUser.changed('updatedAt', true);
 
 		try {
-			const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
+			if (!discordUser.nextOsuPPUpdate) {
+				discordUser.nextOsuPPUpdate = new Date();
+				discordUser.lastOsuPPChange = new Date();
 
-			discordUser.osuName = osuUser.name;
-			discordUser.osuPP = osuUser.pp.raw;
-			discordUser.osuRank = osuUser.pp.rank;
+				discordUser.nextTaikoPPUpdate = new Date();
+				discordUser.lastTaikoPPChange = new Date();
 
-			const taikoUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 1 });
+				discordUser.nextCatchPPUpdate = new Date();
+				discordUser.lastCatchPPChange = new Date();
 
-			discordUser.taikoPP = taikoUser.pp.raw;
-			discordUser.taikoRank = taikoUser.pp.rank;
+				discordUser.nextManiaPPUpdate = new Date();
+				discordUser.lastManiaPPChange = new Date();
+			}
 
-			const catchUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 2 });
+			if (discordUser.nextOsuPPUpdate <= new Date()) {
+				const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
 
-			discordUser.catchPP = catchUser.pp.raw;
-			discordUser.catchRank = catchUser.pp.rank;
+				discordUser.osuName = osuUser.name;
+				discordUser.osuRank = osuUser.pp.rank;
+				if (Number(discordUser.osuPP) != Number(osuUser.pp.raw)) {
+					discordUser.lastOsuPPChange = new Date();
+					discordUser.nextOsuPPUpdate = new Date();
+				} else {
+					discordUser.nextOsuPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastOsuPPChange));
+				}
+				discordUser.osuPP = osuUser.pp.raw;
+			}
 
-			const maniaUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 3 });
+			if (discordUser.nextTaikoPPUpdate <= new Date()) {
+				const taikoUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 1 });
 
-			discordUser.maniaPP = maniaUser.pp.raw;
-			discordUser.maniaRank = maniaUser.pp.rank;
+				discordUser.osuName = taikoUser.name;
+				discordUser.taikoRank = taikoUser.pp.rank;
+				if (Number(discordUser.taikoPP) != Number(taikoUser.pp.raw)) {
+					discordUser.lastTaikoPPChange = new Date();
+					discordUser.nextTaikoPPUpdate = new Date();
+				} else {
+					discordUser.nextTaikoPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastTaikoPPChange));
+				}
+				discordUser.taikoPP = taikoUser.pp.raw;
+			}
+
+			if (discordUser.nextCatchPPUpdate <= new Date()) {
+				const catchUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 2 });
+
+				discordUser.osuName = catchUser.name;
+				discordUser.catchRank = catchUser.pp.rank;
+				if (Number(discordUser.catchPP) != Number(catchUser.pp.raw)) {
+					discordUser.lastCatchPPChange = new Date();
+					discordUser.nextCatchPPUpdate = new Date();
+				} else {
+					discordUser.nextCatchPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastCatchPPChange));
+				}
+				discordUser.catchPP = catchUser.pp.raw;
+			}
+
+			if (discordUser.nextManiaPPUpdate <= new Date()) {
+				const maniaUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 3 });
+
+				discordUser.osuName = maniaUser.name;
+				discordUser.maniaRank = maniaUser.pp.rank;
+				if (Number(discordUser.maniaPP) != Number(maniaUser.pp.raw)) {
+					discordUser.lastManiaPPChange = new Date();
+					discordUser.nextManiaPPUpdate = new Date();
+				} else {
+					discordUser.nextManiaPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastManiaPPChange));
+				}
+				discordUser.maniaPP = maniaUser.pp.raw;
+			}
 
 			let badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 
