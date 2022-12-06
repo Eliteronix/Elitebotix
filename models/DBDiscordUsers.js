@@ -29,6 +29,12 @@ module.exports = (sequelize, DataTypes) => {
 		osuPP: {
 			type: DataTypes.STRING,
 		},
+		lastOsuPPChange: {
+			type: DataTypes.DATE,
+		},
+		nextOsuPPUpdate: {
+			type: DataTypes.DATE,
+		},
 		osuDuelStarRating: {
 			type: DataTypes.STRING,
 		},
@@ -68,17 +74,35 @@ module.exports = (sequelize, DataTypes) => {
 		taikoPP: {
 			type: DataTypes.STRING,
 		},
+		lastTaikoPPChange: {
+			type: DataTypes.DATE,
+		},
+		nextTaikoPPUpdate: {
+			type: DataTypes.DATE,
+		},
 		taikoRank: {
 			type: DataTypes.STRING,
 		},
 		catchPP: {
 			type: DataTypes.STRING,
 		},
+		lastCatchPPChange: {
+			type: DataTypes.DATE,
+		},
+		nextCatchPPUpdate: {
+			type: DataTypes.DATE,
+		},
 		catchRank: {
 			type: DataTypes.STRING,
 		},
 		maniaPP: {
 			type: DataTypes.STRING,
+		},
+		lastManiaPPChange: {
+			type: DataTypes.DATE,
+		},
+		nextManiaPPUpdate: {
+			type: DataTypes.DATE,
 		},
 		maniaRank: {
 			type: DataTypes.STRING,
