@@ -98,6 +98,9 @@ module.exports = (sequelize, DataTypes) => {
 		usedOften: {
 			type: DataTypes.BOOLEAN,
 		},
+		popular: {
+			type: DataTypes.BOOLEAN,
+		},
 		paranoid: true,
 	}, {
 		indexes: [

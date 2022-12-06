@@ -1154,6 +1154,86 @@ module.exports = {
 			},
 		});
 
+		// Automatically add missing players to the database
+		let existingUsers = await DBDiscordUsers.findAll({
+			attributes: ['osuUserId']
+		});
+
+		existingUsers = existingUsers.map(user => user.osuUserId);
+
+		// Remove null values
+		existingUsers = existingUsers.filter(user => user !== null);
+
+		let missingUsers = await DBOsuMultiScores.findAll({
+			attributes: ['osuUserId'],
+			where: {
+				osuUserId: {
+					[Op.notIn]: existingUsers
+				}
+			},
+			group: ['osuUserId']
+		});
+
+		missingUsers = missingUsers.map(user => user.osuUserId);
+
+		console.log(`${missingUsers.length} missing users found`);
+
+		let iterator = 0;
+		while (iterator < 50 && missingUsers.length) {
+			await new Promise(resolve => setTimeout(resolve, 2000));
+			let randomIndex = Math.floor(Math.random() * missingUsers.length);
+			await DBDiscordUsers.create({
+				osuUserId: missingUsers[randomIndex]
+			});
+			console.log('Created ' + missingUsers[randomIndex]);
+			missingUsers.splice(randomIndex, 1);
+			iterator++;
+		}
+
+		console.log(`Created ${iterator} missing users`);
+
+		let mostplayed = await DBOsuMultiScores.findAll({
+			attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
+			where: {
+				warmup: false,
+				beatmapId: {
+					[Op.gt]: 0,
+				},
+				matchName: {
+					[Op.and]: {
+						[Op.notLike]: 'ETX%:%',
+						[Op.notLike]: 'o!mm%:%',
+					}
+				},
+			},
+			group: ['beatmapId'],
+			order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
+		});
+
+		// Filter out maps that have less than 250 plays
+		mostplayed = mostplayed.filter(map => map.dataValues.playcount > 250);
+		mostplayed = mostplayed.map(map => map.dataValues.beatmapId);
+
+		// Update beatmap data
+		let update = await DBOsuBeatmaps.update({
+			popular: true
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: mostplayed
+				},
+				popular: {
+					[Op.not]: true
+				}
+			}
+		});
+
+		console.log(`Marked ${update[0]} new beatmaps as popular`);
+
+		if (date.getUTCHours() > 0 && !manually) {
+			return;
+		}
+
 		// Remove duplicate discorduser entries
 		let duplicates = true;
 		let deleted = 0;
@@ -1249,44 +1329,6 @@ module.exports = {
 		}
 
 		console.log(`Cleaned up ${deleted} duplicate scores`);
-
-		// Automatically add missing players to the database
-		let existingUsers = await DBDiscordUsers.findAll({
-			attributes: ['osuUserId']
-		});
-
-		existingUsers = existingUsers.map(user => user.osuUserId);
-
-		// Remove null values
-		existingUsers = existingUsers.filter(user => user !== null);
-
-		let missingUsers = await DBOsuMultiScores.findAll({
-			attributes: ['osuUserId'],
-			where: {
-				osuUserId: {
-					[Op.notIn]: existingUsers
-				}
-			},
-			group: ['osuUserId']
-		});
-
-		missingUsers = missingUsers.map(user => user.osuUserId);
-
-		console.log(`${missingUsers.length} missing users found`);
-
-		let iterator = 0;
-		while (iterator < 50 && missingUsers.length) {
-			await new Promise(resolve => setTimeout(resolve, 2000));
-			let randomIndex = Math.floor(Math.random() * missingUsers.length);
-			await DBDiscordUsers.create({
-				osuUserId: missingUsers[randomIndex]
-			});
-			console.log('Created ' + missingUsers[randomIndex]);
-			missingUsers.splice(randomIndex, 1);
-			iterator++;
-		}
-
-		console.log(`Created ${iterator} missing users`);
 	},
 	wrongCluster(client, id) {
 		return wrongClusterFunction(client, id);
@@ -2786,8 +2828,8 @@ async function getUserDuelStarRatingFunction(input) {
 
 			// console.log(`--------------------getUserDuelStarRatingFunction: modpool collected ${modIndex} map ${i}: ${new Date() - startTime}ms`);
 
-			//Filter by ranked maps > 4*
-			if (dbBeatmap && parseFloat(dbBeatmap.starRating) > 3.5 && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved')) {
+			//Filter by ranked / popular maps > 4*
+			if (dbBeatmap && parseFloat(dbBeatmap.starRating) > 3.5 && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved' || dbBeatmap.popular)) {
 				//Standardize the score from the mod multiplier
 				if (modPools[modIndex] === 'HD') {
 					userMaps[i].score = userMaps[i].score / 1.06;
