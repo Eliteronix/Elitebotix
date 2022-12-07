@@ -764,6 +764,57 @@ module.exports = {
 			// 	},
 			// });
 
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'osu-bingo',
+					description: 'Sends an info card about the specified beatmap',
+					dm_permission: true,
+					options: [
+						{
+							'name': 'opponent',
+							'description': 'An opponent',
+							'type': 6, // 6 is type USER
+							'required': true
+						},
+						{
+							'name': 'lowerstarrating',
+							'description': 'The lower star rating limit',
+							'type': 10, // 10 is type NUMBER
+							'required': false,
+						},
+						{
+							'name': 'higherstarrating',
+							'description': 'The higher star rating limit',
+							'type': 10, // 10 is type NUMBER
+							'required': false,
+						},
+						{
+							'name': 'requirement',
+							'description': 'The minimum requirement for the score',
+							'type': 3,
+							'choices': [
+								{
+									'name': 'S',
+									'value': 'S'
+								},
+								{
+									'name': 'A (Default)',
+									'value': 'A'
+								},
+								{
+									'name': 'B',
+									'value': 'B'
+								},
+								{
+									'name': 'Pass',
+									'value': 'Pass'
+								},
+							]
+						},
+					]
+				},
+			});
+
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'osu-bws',
