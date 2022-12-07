@@ -802,10 +802,6 @@ module.exports = {
 									'value': 'A'
 								},
 								{
-									'name': 'B',
-									'value': 'B'
-								},
-								{
 									'name': 'Pass',
 									'value': 'Pass'
 								},
