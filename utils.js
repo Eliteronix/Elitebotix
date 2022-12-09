@@ -2392,7 +2392,13 @@ module.exports = {
 										medalEmbed.addField('Medal requirements', medal.instructions.replace('<b>', '**').replace('</b>', '**').replace('<i>', '*').replace('</i>', '*'));
 									}
 
-									await guildTrackers[i].channel.send({ embeds: [medalEmbed] });
+									try {
+										await guildTrackers[i].channel.send({ embeds: [medalEmbed] });
+									} catch (err) {
+										if (err.message === 'Missing Permissions') {
+											await guildTrackers[i].destroy();
+										}
+									}
 								} else {
 									let mapRank = osuUser.osuUser.events[j].html.replace(/.+<\/a><\/b> achieved rank #/gm, '').replace(/.+<\/a><\/b> achieved .+rank #/gm, '').replace(/ on <a href='\/b\/.+/gm, '').replace('</b>', '');
 									let modeName = osuUser.osuUser.events[j].html.replace(/.+<\/a> \(osu!/gm, '');
@@ -2605,7 +2611,13 @@ module.exports = {
 									osuUser.osuName = await getOsuPlayerName(osuUser.osuUserId);
 								}
 
-								await guildTrackers[i].channel.send(`Ameobea has updated the standard osu!track profile for \`${osuUser.osuName}\`!`);
+								try {
+									await guildTrackers[i].channel.send(`Ameobea has updated the standard osu!track profile for \`${osuUser.osuName}\`!`);
+								} catch (err) {
+									if (err.message === 'Missing Permissions') {
+										await guildTrackers[i].destroy();
+									}
+								}
 							}
 						} catch (err) {
 							//Nothing
@@ -2625,7 +2637,13 @@ module.exports = {
 									osuUser.osuName = await getOsuPlayerName(osuUser.osuUserId);
 								}
 
-								await guildTrackers[i].channel.send(`Ameobea has updated the taiko osu!track profile for \`${osuUser.osuName}\`!`);
+								try {
+									await guildTrackers[i].channel.send(`Ameobea has updated the taiko osu!track profile for \`${osuUser.osuName}\`!`);
+								} catch (err) {
+									if (err.message === 'Missing Permissions') {
+										await guildTrackers[i].destroy();
+									}
+								}
 							}
 						} catch (err) {
 							//Nothing
@@ -2645,7 +2663,13 @@ module.exports = {
 									osuUser.osuName = await getOsuPlayerName(osuUser.osuUserId);
 								}
 
-								await guildTrackers[i].channel.send(`Ameobea has updated the catch osu!track profile for \`${osuUser.osuName}\`!`);
+								try {
+									await guildTrackers[i].channel.send(`Ameobea has updated the catch osu!track profile for \`${osuUser.osuName}\`!`);
+								} catch (err) {
+									if (err.message === 'Missing Permissions') {
+										await guildTrackers[i].destroy();
+									}
+								}
 							}
 						} catch (err) {
 							//Nothing
@@ -2665,7 +2689,13 @@ module.exports = {
 									osuUser.osuName = await getOsuPlayerName(osuUser.osuUserId);
 								}
 
-								await guildTrackers[i].channel.send(`Ameobea has updated the mania osu!track profile for \`${osuUser.osuName}\`!`);
+								try {
+									await guildTrackers[i].channel.send(`Ameobea has updated the mania osu!track profile for \`${osuUser.osuName}\`!`);
+								} catch (err) {
+									if (err.message === 'Missing Permissions') {
+										await guildTrackers[i].destroy();
+									}
+								}
 							}
 						} catch (err) {
 							//Nothing
