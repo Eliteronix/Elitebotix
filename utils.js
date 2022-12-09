@@ -1235,12 +1235,11 @@ module.exports = {
 
 		let iterator = 0;
 		while (iterator < 50 && missingUsers.length) {
-			await new Promise(resolve => setTimeout(resolve, 2000));
 			let randomIndex = Math.floor(Math.random() * missingUsers.length);
 			await DBDiscordUsers.create({
 				osuUserId: missingUsers[randomIndex]
 			});
-			console.log('Created ' + missingUsers[randomIndex]);
+
 			missingUsers.splice(randomIndex, 1);
 			iterator++;
 		}
@@ -1266,8 +1265,8 @@ module.exports = {
 		});
 
 		// Filter out maps that have less than 250 plays
-		mostplayed = mostplayed.filter(map => map.dataValues.playcount > 250);
-		mostplayed = mostplayed.map(map => map.dataValues.beatmapId);
+		let popular = mostplayed.filter(map => map.dataValues.playcount > 250);
+		popular = popular.map(map => map.dataValues.beatmapId);
 
 		// Update beatmap data
 		let update = await DBOsuBeatmaps.update({
@@ -1275,7 +1274,7 @@ module.exports = {
 		}, {
 			where: {
 				beatmapId: {
-					[Op.in]: mostplayed
+					[Op.in]: popular
 				},
 				popular: {
 					[Op.not]: true
@@ -1284,6 +1283,26 @@ module.exports = {
 		});
 
 		console.log(`Marked ${update[0]} new beatmaps as popular`);
+
+		// Filter out maps that have less than 250 plays
+		let usedOften = mostplayed.filter(map => map.dataValues.playcount > 50);
+		usedOften = usedOften.map(map => map.dataValues.beatmapId);
+
+		// Update beatmap data
+		update = await DBOsuBeatmaps.update({
+			usedOften: true
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: usedOften
+				},
+				usedOften: {
+					[Op.not]: true
+				}
+			}
+		});
+
+		console.log(`Marked ${update[0]} new beatmaps as used often`);
 
 		if (date.getUTCHours() > 0 && !manually) {
 			return;
@@ -1346,6 +1365,48 @@ module.exports = {
 		duplicates = true;
 		deleted = 0;
 		let iterations = 0;
+
+		while (duplicates && iterations < 10) {
+			let result = await sequelize.query(
+				'SELECT * FROM DBOsuBeatmaps WHERE 0 < (SELECT COUNT(1) FROM DBOsuBeatmaps as a WHERE a.beatmapId = DBOsuBeatmaps.beatmapId AND a.mods = DBOsuBeatmaps.mods AND a.id <> DBOsuBeatmaps.id)',
+			);
+
+			iterations++;
+
+			duplicates = result[0].length;
+
+			if (result[0].length) {
+				let beatmapIds = [];
+				for (let i = 0; i < result[0].length; i++) {
+					if (beatmapIds.indexOf(`${result[0][i].beatmapId}-${result[0][i].mods}`) === -1) {
+						beatmapIds.push(`${result[0][i].beatmapId}-${result[0][i].mods}`);
+
+						await new Promise(resolve => setTimeout(resolve, 2000));
+
+						logDatabaseQueriesFunction(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries');
+						let duplicate = await DBOsuBeatmaps.findOne({
+							where: {
+								id: result[0][i].id
+							}
+						});
+
+						deleted++;
+
+						console.log('#', deleted, 'iteration', iterations, 'beatmapId', duplicate.beatmapId, 'mods', duplicate.mods, 'updatedAt', duplicate.updatedAt);
+
+						await new Promise(resolve => setTimeout(resolve, 2000));
+						await duplicate.destroy();
+					}
+				}
+			}
+			await new Promise(resolve => setTimeout(resolve, 10000));
+		}
+
+		console.log(`Cleaned up ${deleted} duplicate beatmaps`);
+
+		duplicates = true;
+		deleted = 0;
+		iterations = 0;
 
 		while (duplicates && iterations < 10) {
 			let result = await sequelize.query(
@@ -5471,11 +5532,6 @@ async function getValidTournamentBeatmapFunction(input) {
 		rankedStatus = ['Ranked', 'Approved'];
 	}
 
-	//initialize count of Not used often
-	if (!input.notUsedOftenCount) {
-		input.notUsedOftenCount = 0;
-	}
-
 	let beatmaps = null;
 	if (modPool === 'NM') {
 		logDatabaseQueriesFunction(4, 'utils.js getValidTournamentBeatmapFunction NM');
@@ -5484,6 +5540,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				noModMap: true,
 				mode: mode,
 				mods: 0,
+				usedOften: true,
 				approvalStatus: {
 					[Op.in]: rankedStatus,
 				},
@@ -5526,6 +5583,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				hiddenMap: true,
 				mode: mode,
 				mods: 0,
+				usedOften: true,
 				approvalStatus: {
 					[Op.in]: rankedStatus,
 				},
@@ -5566,6 +5624,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				hardRockMap: true,
 				mode: mode,
 				mods: 16,
+				usedOften: true,
 				approvalStatus: {
 					[Op.in]: rankedStatus,
 				},
@@ -5606,6 +5665,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				doubleTimeMap: true,
 				mode: mode,
 				mods: 64,
+				usedOften: true,
 				approvalStatus: {
 					[Op.in]: rankedStatus,
 				},
@@ -5646,6 +5706,7 @@ async function getValidTournamentBeatmapFunction(input) {
 				freeModMap: true,
 				mode: mode,
 				mods: 0,
+				usedOften: true,
 				approvalStatus: {
 					[Op.in]: rankedStatus,
 				},
@@ -5683,7 +5744,6 @@ async function getValidTournamentBeatmapFunction(input) {
 
 	// console.log('Found', beatmaps.length, 'maps');
 
-
 	if (beatmaps.length === 0) {
 		input.alreadyCheckedSR = [];
 		input.lowerBound = lowerBound - 0.25;
@@ -5704,14 +5764,6 @@ async function getValidTournamentBeatmapFunction(input) {
 
 		if (!randomBeatmap) {
 			beatmaps.splice(index, 1);
-			continue;
-		}
-
-		//If map has to be checked but the count is already reached, skip it
-		if (!randomBeatmap.usedOften && input.notUsedOftenCount >= 5) {
-			beatmaps.splice(index, 1);
-			// console.log('Map Selection: Checked too many maps for usage');
-			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
 
@@ -5787,42 +5839,6 @@ async function getValidTournamentBeatmapFunction(input) {
 			continue;
 		}
 
-		//Check usage
-		if (randomBeatmap.usedOften) {
-			// console.log('Map Selection: Used often');
-
-			//Deep clone beatmap, use proper library if you ever need dates or functions of the beatmap or just refetch from the database
-			let clone = JSON.parse(JSON.stringify(randomBeatmap));
-			beatmaps = null;
-			return clone;
-		}
-
-		const mapScoreAmount = await DBOsuMultiScores.count({
-			where: {
-				beatmapId: randomBeatmap.beatmapId,
-				tourneyMatch: true,
-				matchName: {
-					[Op.notLike]: 'MOTD:%',
-				},
-				[Op.or]: [
-					{ warmup: false },
-					{ warmup: null }
-				],
-			},
-			limit: 51,
-		});
-
-		if (mapScoreAmount < 50) {
-			// console.log('Map Selection: Not used often');
-			beatmaps.splice(index, 1);
-			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
-			input.notUsedOftenCount++;
-			continue;
-		}
-
-		// console.log('Map Selection: Now used often');
-		randomBeatmap.usedOften = true;
-		await randomBeatmap.save();
 		//Deep clone beatmap, use proper library if you ever need dates or functions of the beatmap or just refetch from the database
 		let clone = JSON.parse(JSON.stringify(randomBeatmap));
 		beatmaps = null;
