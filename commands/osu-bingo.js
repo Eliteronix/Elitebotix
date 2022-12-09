@@ -1,4 +1,4 @@
-const { populateMsgFromInteraction, getOsuUserServerMode, pause, logDatabaseQueries } = require('../utils');
+const { populateMsgFromInteraction, getOsuUserServerMode, pause, logDatabaseQueries, getMods, humanReadable } = require('../utils');
 const { Permissions } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
@@ -134,11 +134,12 @@ module.exports = {
 			}
 		}
 
-		let requirement = 'A';
+		let requirement = 'Pass';
 
 		if (interaction.options.getString('requirement')) {
 			requirement = interaction.options.getString('requirement');
 		}
+
 
 		//Cross check that commandUser.userId, teammates and opponents are all unique
 		const allUsers = [...team1, ...team2, ...team3, ...team4, ...team5];
@@ -241,7 +242,7 @@ module.exports = {
 			}
 		}
 
-		let message = await interaction.editReply('Generating map pool...');
+		await interaction.editReply('Generating map pool...');
 
 		// Get the map pool
 		let mappool = [];
@@ -265,11 +266,12 @@ module.exports = {
 						[Op.lte]: 300,
 					}
 				},
+				usedOften: true,
 			},
 		});
 
 		// Add 25 random beatmaps to the mappool
-		for (let i = 0; i < 25; i++) {
+		for (let i = 0; i < 25 && beatmaps.length; i++) {
 			let index = Math.floor(Math.random() * beatmaps.length);
 			let randomBeatmap = beatmaps[index];
 			mappool.push(randomBeatmap);
@@ -278,7 +280,31 @@ module.exports = {
 
 		beatmaps = null;
 
-		await refreshMessage(interaction, mappool, teamsString);
+		let lastRefresh = { date: new Date() };
+
+		let reply = `The bingo match has started!\n\nPlay the maps without \`NF\`, \`Score v2\`, \`Relax\` and \`Autopilot\` to claim a map.\nThe minimum requirement to claim a map is: \`${requirement}\`\nYou can claim a map for your own team by beating the achieved score on the map!`;
+
+		reply = reply + teamsString;
+
+		await interaction.editReply(reply);
+
+		reply = '|------------------------------------------------------------------------|\n|';
+
+		for (let i = 0; i < mappool.length; i++) {
+			reply = reply + `  [${mappool[i].starRating.toFixed(2)}* - ${Math.floor(mappool[i].drainLength / 60).toString().padStart(1, '0')}:${(mappool[i].drainLength % 60).toString().padStart(2, '0')}](<https://osu.ppy.sh/b/${mappool[i].beatmapId}>)  |`;
+			if (i % 5 === 4) {
+				reply = reply + '\n|------------------------------------------------------------------------|\n| ';
+			}
+		}
+
+		// Remove the last |
+		reply = reply.slice(0, -2);
+
+		await interaction.followUp(reply);
+
+		let message = await interaction.channel.send('Creating the bingo card...');
+
+		await refreshMessage(message, mappool, lastRefresh);
 
 		let matchStart = new Date();
 
@@ -289,101 +315,42 @@ module.exports = {
 
 		refreshCollector.on('collect', async (reaction, user) => {
 			if (reaction.emoji.name === '🔄' && allUsers.includes(user.id)) {
-				// eslint-disable-next-line no-undef
-				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-				});
-
-				for (let i = 0; i < everyUser.length; i++) {
-					osuApi.getUserRecent({ u: everyUser[i].osuUserId, m: 0 })
-						.then(async (scores) => {
-							for (let j = 0; j < scores.length; j++) {
-								let scoreDate = new Date(scores[j].raw_date);
-								scoreDate.setUTCMinutes(scoreDate.getUTCMinutes() - new Date().getTimezoneOffset());
-
-								if (scoreDate > matchStart) {
-									for (let k = 0; k < mappool.length; k++) {
-										if (mappool[k].beatmapId === scores[j].beatmapId) {
-											if (requirement === 'S' && (scores[j].rank.startsWith('S') || scores[j].rank.startsWith('X'))
-												|| requirement === 'A' && (scores[j].rank === 'A' || scores[j].rank.startsWith('S') || scores[j].rank.startsWith('X'))
-												|| requirement === 'Pass' && scores[j].rank !== 'F') {
-
-												if (mappool[k].score) {
-													if (mappool[k].score < Number(scores[j].score)) {
-														mappool[k].score = scores[j].score;
-
-														// Get the players team
-														if (team1.includes(everyUser[i].userId)) {
-															mappool[k].team = 'Team 1';
-														} else if (team2.includes(everyUser[i].userId)) {
-															mappool[k].team = 'Team 2';
-														} else if (team3.includes(everyUser[i].userId)) {
-															mappool[k].team = 'Team 3';
-														} else if (team4.includes(everyUser[i].userId)) {
-															mappool[k].team = 'Team 4';
-														} else if (team5.includes(everyUser[i].userId)) {
-															mappool[k].team = 'Team 5';
-														}
-													}
-												} else {
-													mappool[k].score = scores[j].score;
-
-													// Get the players team
-													if (team1.includes(everyUser[i].userId)) {
-														mappool[k].team = 'Team 1';
-													} else if (team2.includes(everyUser[i].userId)) {
-														mappool[k].team = 'Team 2';
-													} else if (team3.includes(everyUser[i].userId)) {
-														mappool[k].team = 'Team 3';
-													} else if (team4.includes(everyUser[i].userId)) {
-														mappool[k].team = 'Team 4';
-													} else if (team5.includes(everyUser[i].userId)) {
-														mappool[k].team = 'Team 5';
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						})
-						.catch(err => {
-							if (err.message !== 'Not found') {
-								console.log(err);
-							}
-						});
-
-					await pause(1000);
-				}
-
-				refreshMessage(interaction, mappool, teamsString);
+				await refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh);
 			}
 
 			// Remove the reaction unless its the bot
 			if (user.id !== interaction.client.user.id) {
 				reaction.users.remove(user.id);
 			}
+
+			let winningTeam = await checkWin(mappool);
+			if (winningTeam) {
+				refreshCollector.stop();
+				message.reactions.removeAll().catch(() => { });
+			}
 		});
+
+		// Refresh the message every 30 seconds
+		let interval = setInterval(async () => {
+			if (lastRefresh.date.getTime() + 30000 < new Date().getTime()) {
+				await refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh);
+
+				let winningTeam = await checkWin(mappool);
+				if (winningTeam) {
+					refreshCollector.stop();
+					message.reactions.removeAll().catch(() => { });
+
+					//Stop the interval
+					clearInterval(interval);
+				}
+			}
+		}, 5000);
 	},
 };
 
-async function refreshMessage(interaction, mappool, teamsString) {
-	let reply = '|------------------------------------------------------------------------|\n|';
-
-	for (let i = 0; i < mappool.length; i++) {
-		reply = reply + `  [${mappool[i].starRating.toFixed(2)}* - ${Math.floor(mappool[i].drainLength / 60).toString().padStart(1, '0')}:${(mappool[i].drainLength % 60).toString().padStart(2, '0')}](<https://osu.ppy.sh/b/${mappool[i].beatmapId}>)  |`;
-		if (i % 5 === 4) {
-			reply = reply + '\n|------------------------------------------------------------------------|\n| ';
-		}
-	}
-
-	// Remove the last |
-	reply = reply.slice(0, -2);
-
-	reply = reply + teamsString;
+async function refreshMessage(message, mappool, lastRefresh) {
+	lastRefresh.date = new Date();
+	let reply = `\n\nLast updated: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:R>`;
 
 	const canvasWidth = 1280;
 	const canvasHeight = 1280;
@@ -433,7 +400,217 @@ async function refreshMessage(interaction, mappool, teamsString) {
 		}
 	}
 
-	const bingoCard = new Discord.MessageAttachment(canvas.toBuffer(), 'bingo.png');
+	let winningTeam = await checkWin(mappool);
+	if (winningTeam) {
+		reply = `**${winningTeam} has won!**\n\n Match finished: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:f>`;
+		// Draw the diagonals
+		if (mappool[0].team &&
+			mappool[0].team === mappool[6].team &&
+			mappool[0].team === mappool[12].team &&
+			mappool[0].team === mappool[18].team &&
+			mappool[0].team === mappool[24].team) {
 
-	return await interaction.editReply({ content: reply, files: [bingoCard] });
+			// Draw the line
+			ctx.strokeStyle = '#000000';
+			ctx.lineWidth = 30;
+			ctx.beginPath();
+			ctx.moveTo(130, 130);
+			ctx.lineTo(1280 - 130, 1280 - 130);
+			ctx.stroke();
+		}
+
+		if (mappool[4].team &&
+			mappool[4].team === mappool[8].team &&
+			mappool[4].team === mappool[12].team &&
+			mappool[4].team === mappool[16].team &&
+			mappool[4].team === mappool[20].team) {
+
+			// Draw the line
+			ctx.strokeStyle = '#000000';
+			ctx.lineWidth = 30;
+			ctx.beginPath();
+			ctx.moveTo(1280 - 130, 130);
+			ctx.lineTo(130, 1280 - 130);
+			ctx.stroke();
+		}
+
+		// Draw the verticals
+		for (let i = 0; i < 5; i++) {
+			if (mappool[i].team &&
+				mappool[i].team === mappool[i + 5].team &&
+				mappool[i].team === mappool[i + 10].team &&
+				mappool[i].team === mappool[i + 15].team &&
+				mappool[i].team === mappool[i + 20].team) {
+
+				// Draw the line
+				ctx.strokeStyle = '#000000';
+				ctx.lineWidth = 30;
+				ctx.beginPath();
+				ctx.moveTo(130 + i * 255, 130);
+				ctx.lineTo(130 + i * 255, 1280 - 130);
+				ctx.stroke();
+			}
+		}
+
+		// Draw the horizontals
+		for (let i = 0; i < 25; i += 5) {
+			if (mappool[i].team &&
+				mappool[i].team === mappool[i + 1].team &&
+				mappool[i].team === mappool[i + 2].team &&
+				mappool[i].team === mappool[i + 3].team &&
+				mappool[i].team === mappool[i + 4].team) {
+
+				// Draw the line
+				ctx.strokeStyle = '#000000';
+				ctx.lineWidth = 30;
+				ctx.beginPath();
+				ctx.moveTo(130, 130 + (i * 255) / 5);
+				ctx.lineTo(1280 - 130, 130 + (i * 255) / 5);
+				ctx.stroke();
+			}
+		}
+	}
+
+	const bingoCard = new Discord.MessageAttachment(canvas.toBuffer(), 'bingo.png');
+	await message.fetch();
+	await message.edit({ content: reply, files: [bingoCard] });
+}
+
+async function refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh) {
+
+	lastRefresh.date = new Date();
+
+	// eslint-disable-next-line no-undef
+	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+	});
+
+	let winningTeam = checkWin(mappool);
+
+	for (let i = 0; i < everyUser.length && !winningTeam; i++) {
+		await osuApi.getUserRecent({ u: everyUser[i].osuUserId, m: 0, limit: 10 })
+			.then(async (scores) => {
+				for (let j = 0; j < scores.length && !winningTeam; j++) {
+					let scoreDate = new Date(scores[j].raw_date);
+					scoreDate.setUTCMinutes(scoreDate.getUTCMinutes() - new Date().getTimezoneOffset());
+
+					if (scoreDate > matchStart) {
+						for (let k = 0; k < mappool.length && !winningTeam; k++) {
+							if (mappool[k].beatmapId === scores[j].beatmapId) {
+								if (requirement === 'S' && (scores[j].rank.startsWith('S') || scores[j].rank.startsWith('X'))
+									|| requirement === 'A' && (scores[j].rank === 'A' || scores[j].rank.startsWith('S') || scores[j].rank.startsWith('X'))
+									|| requirement === 'Pass' && scores[j].rank !== 'F') {
+									if (!getMods(scores[j].raw_mods).includes('NF') && !getMods(scores[j].raw_mods).includes('HT')) {
+										if (mappool[k].score) {
+											if (mappool[k].score < Number(scores[j].score)) {
+												mappool[k].score = Number(scores[j].score);
+
+												// Get the players team
+												if (team1.includes(everyUser[i].userId)) {
+													mappool[k].team = 'Team 1';
+												} else if (team2.includes(everyUser[i].userId)) {
+													mappool[k].team = 'Team 2';
+												} else if (team3.includes(everyUser[i].userId)) {
+													mappool[k].team = 'Team 3';
+												} else if (team4.includes(everyUser[i].userId)) {
+													mappool[k].team = 'Team 4';
+												} else if (team5.includes(everyUser[i].userId)) {
+													mappool[k].team = 'Team 5';
+												}
+
+												await mappool[k].message.fetch();
+												await mappool[k].message.delete();
+												mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just reclaimed map ${k + 1}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)}\` score!`);
+											}
+										} else {
+											mappool[k].score = Number(scores[j].score);
+
+											// Get the players team
+											if (team1.includes(everyUser[i].userId)) {
+												mappool[k].team = 'Team 1';
+											} else if (team2.includes(everyUser[i].userId)) {
+												mappool[k].team = 'Team 2';
+											} else if (team3.includes(everyUser[i].userId)) {
+												mappool[k].team = 'Team 3';
+											} else if (team4.includes(everyUser[i].userId)) {
+												mappool[k].team = 'Team 4';
+											} else if (team5.includes(everyUser[i].userId)) {
+												mappool[k].team = 'Team 5';
+											}
+
+											mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just claimed map ${k + 1}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)}\` score!`);
+										}
+
+										winningTeam = checkWin(mappool);
+										if (winningTeam) {
+											// End the game
+											await message.channel.send(`${winningTeam} has won the game!`);
+											break;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			})
+			.catch(err => {
+				if (err.message !== 'Not found') {
+					console.log(err);
+				}
+			});
+
+		await pause(1000);
+	}
+
+	await refreshMessage(message, mappool, lastRefresh);
+
+	lastRefresh.date = new Date();
+}
+
+function checkWin(mappool) {
+	// Check if a team has a line
+	// Check the diagonals
+	if (mappool[0].team &&
+		mappool[0].team === mappool[6].team &&
+		mappool[0].team === mappool[12].team &&
+		mappool[0].team === mappool[18].team &&
+		mappool[0].team === mappool[24].team) {
+		return mappool[0].team;
+	}
+
+	if (mappool[4].team &&
+		mappool[4].team === mappool[8].team &&
+		mappool[4].team === mappool[12].team &&
+		mappool[4].team === mappool[16].team &&
+		mappool[4].team === mappool[20].team) {
+		return mappool[4].team;
+	}
+
+	// Check the verticals
+	for (let i = 0; i < 5; i++) {
+		if (mappool[i].team &&
+			mappool[i].team === mappool[i + 5].team &&
+			mappool[i].team === mappool[i + 10].team &&
+			mappool[i].team === mappool[i + 15].team &&
+			mappool[i].team === mappool[i + 20].team) {
+			return mappool[i].team;
+		}
+	}
+
+	// Check the horizontals
+	for (let i = 0; i < 25; i += 5) {
+		if (mappool[i].team &&
+			mappool[i].team === mappool[i + 1].team &&
+			mappool[i].team === mappool[i + 2].team &&
+			mappool[i].team === mappool[i + 3].team &&
+			mappool[i].team === mappool[i + 4].team) {
+			return mappool[i].team;
+		}
+	}
+
+	return false;
 }

@@ -764,130 +764,130 @@ module.exports = {
 			// 	},
 			// });
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'osu-bingo',
-					description: 'Play a game of osu!bingo',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'player1team2',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': true
-						},
-						{
-							'name': 'lowerstarrating',
-							'description': 'The lower star rating limit',
-							'type': 10, // 10 is type NUMBER
-							'required': false,
-						},
-						{
-							'name': 'higherstarrating',
-							'description': 'The higher star rating limit',
-							'type': 10, // 10 is type NUMBER
-							'required': false,
-						},
-						{
-							'name': 'requirement',
-							'description': 'The minimum requirement for the score',
-							'type': 3,
-							'choices': [
-								{
-									'name': 'S',
-									'value': 'S'
-								},
-								{
-									'name': 'A (Default)',
-									'value': 'A'
-								},
-								{
-									'name': 'Pass',
-									'value': 'Pass'
-								},
-							]
-						},
-						{
-							'name': 'player1team3',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'player1team4',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'player1team5',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'player2team1',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'player2team2',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'player2team3',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'player2team4',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'player2team5',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'player3team1',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'player3team2',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'player3team3',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'player3team4',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'player3team5',
-							'description': 'A player',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-					]
-				},
-			});
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'osu-bingo',
+			// 		description: 'Play a game of osu!bingo',
+			// 		dm_permission: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'player1team2',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': true
+			// 			},
+			// 			{
+			// 				'name': 'lowerstarrating',
+			// 				'description': 'The lower star rating limit',
+			// 				'type': 10, // 10 is type NUMBER
+			// 				'required': false,
+			// 			},
+			// 			{
+			// 				'name': 'higherstarrating',
+			// 				'description': 'The higher star rating limit',
+			// 				'type': 10, // 10 is type NUMBER
+			// 				'required': false,
+			// 			},
+			// 			{
+			// 				'name': 'requirement',
+			// 				'description': 'The minimum requirement for the score',
+			// 				'type': 3,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'S',
+			// 						'value': 'S'
+			// 					},
+			// 					{
+			// 						'name': 'A',
+			// 						'value': 'A'
+			// 					},
+			// 					{
+			// 						'name': 'Pass (Default)',
+			// 						'value': 'Pass'
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'player1team3',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'player1team4',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'player1team5',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'player2team1',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'player2team2',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'player2team3',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'player2team4',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'player2team5',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'player3team1',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'player3team2',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'player3team3',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'player3team4',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'player3team5',
+			// 				'description': 'A player',
+			// 				'type': 6, // 6 is type USER
+			// 				'required': false
+			// 			},
+			// 		]
+			// 	},
+			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -5689,6 +5689,131 @@ module.exports = {
 							'type': 3,
 							'required': false
 						}
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-bingo',
+					description: 'Play a game of osu!bingo',
+					dm_permission: true,
+					options: [
+						{
+							'name': 'player1team2',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': true
+						},
+						{
+							'name': 'lowerstarrating',
+							'description': 'The lower star rating limit',
+							'type': 10, // 10 is type NUMBER
+							'required': false,
+						},
+						{
+							'name': 'higherstarrating',
+							'description': 'The higher star rating limit',
+							'type': 10, // 10 is type NUMBER
+							'required': false,
+						},
+						{
+							'name': 'requirement',
+							'description': 'The minimum requirement for the score',
+							'type': 3,
+							'choices': [
+								{
+									'name': 'S',
+									'value': 'S'
+								},
+								{
+									'name': 'A',
+									'value': 'A'
+								},
+								{
+									'name': 'Pass (Default)',
+									'value': 'Pass'
+								},
+							]
+						},
+						{
+							'name': 'player1team3',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player1team4',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player1team5',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player2team1',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player2team2',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player2team3',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player2team4',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player2team5',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player3team1',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player3team2',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player3team3',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player3team4',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player3team5',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
 					]
 				},
 			});
