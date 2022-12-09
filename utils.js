@@ -1235,7 +1235,6 @@ module.exports = {
 
 		let iterator = 0;
 		while (iterator < 50 && missingUsers.length) {
-			await new Promise(resolve => setTimeout(resolve, 2000));
 			let randomIndex = Math.floor(Math.random() * missingUsers.length);
 			await DBDiscordUsers.create({
 				osuUserId: missingUsers[randomIndex]

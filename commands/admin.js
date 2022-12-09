@@ -767,12 +767,12 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-bingo',
-					description: 'Sends an info card about the specified beatmap',
+					description: 'Play a game of osu!bingo',
 					dm_permission: true,
 					options: [
 						{
-							'name': 'opponent',
-							'description': 'An opponent',
+							'name': 'player1team2',
+							'description': 'A player',
 							'type': 6, // 6 is type USER
 							'required': true
 						},
@@ -806,6 +806,84 @@ module.exports = {
 									'value': 'Pass'
 								},
 							]
+						},
+						{
+							'name': 'player1team3',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player1team4',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player1team5',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player2team1',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player2team2',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player2team3',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player2team4',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player2team5',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player3team1',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player3team2',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player3team3',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player3team4',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
+						},
+						{
+							'name': 'player3team5',
+							'description': 'A player',
+							'type': 6, // 6 is type USER
+							'required': false
 						},
 					]
 				},

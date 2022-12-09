@@ -1,6 +1,11 @@
-const { populateMsgFromInteraction, getOsuUserServerMode } = require('../utils');
+const { populateMsgFromInteraction, getOsuUserServerMode, pause, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
+const { Op } = require('sequelize');
+const { DBOsuBeatmaps, DBDiscordUsers } = require('../dbObjects');
+const Canvas = require('canvas');
+const Discord = require('discord.js');
+const osu = require('node-osu');
 
 module.exports = {
 	name: 'osu-bingo',
@@ -27,10 +32,81 @@ module.exports = {
 			return;
 		}
 
-		let opponent = null;
+		let team1 = [];
 
-		if (interaction.options.getUser('opponent')) {
-			opponent = interaction.options.getUser('opponent').id;
+		msg = await populateMsgFromInteraction(interaction);
+
+		const commandConfig = await getOsuUserServerMode(msg, []);
+		const commandUser = commandConfig[0];
+
+		if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
+			return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect username:<username>`.');
+		}
+
+		team1.push(commandUser.userId);
+
+		if (interaction.options.getUser('player2team1')) {
+			team1.push(interaction.options.getUser('player2team1').id);
+		}
+
+		if (interaction.options.getUser('player3team1')) {
+			team1.push(interaction.options.getUser('player3team1').id);
+		}
+
+		let team2 = [];
+
+		if (interaction.options.getUser('player1team2')) {
+			team2.push(interaction.options.getUser('player1team2').id);
+		}
+
+		if (interaction.options.getUser('player2team2')) {
+			team2.push(interaction.options.getUser('player2team2').id);
+		}
+
+		if (interaction.options.getUser('player3team2')) {
+			team2.push(interaction.options.getUser('player3team2').id);
+		}
+
+		let team3 = [];
+
+		if (interaction.options.getUser('player1team3')) {
+			team3.push(interaction.options.getUser('player1team3').id);
+		}
+
+		if (interaction.options.getUser('player2team3')) {
+			team3.push(interaction.options.getUser('player2team3').id);
+		}
+
+		if (interaction.options.getUser('player3team3')) {
+			team3.push(interaction.options.getUser('player3team3').id);
+		}
+
+		let team4 = [];
+
+		if (interaction.options.getUser('player1team4')) {
+			team4.push(interaction.options.getUser('player1team4').id);
+		}
+
+		if (interaction.options.getUser('player2team4')) {
+			team4.push(interaction.options.getUser('player2team4').id);
+		}
+
+		if (interaction.options.getUser('player3team4')) {
+			team4.push(interaction.options.getUser('player3team4').id);
+		}
+
+		let team5 = [];
+
+		if (interaction.options.getUser('player1team5')) {
+			team5.push(interaction.options.getUser('player1team5').id);
+		}
+
+		if (interaction.options.getUser('player2team5')) {
+			team5.push(interaction.options.getUser('player2team5').id);
+		}
+
+		if (interaction.options.getUser('player3team5')) {
+			team5.push(interaction.options.getUser('player3team5').id);
 		}
 
 		// Get the star rating
@@ -64,21 +140,300 @@ module.exports = {
 			requirement = interaction.options.getString('requirement');
 		}
 
-		msg = await populateMsgFromInteraction(interaction);
-
-		const commandConfig = await getOsuUserServerMode(msg, []);
-		const commandUser = commandConfig[0];
-
-		if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
-			return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using `/osu-link connect username:<username>`.');
-		}
-
 		//Cross check that commandUser.userId, teammates and opponents are all unique
-		const allUsers = [commandUser.userId, opponent];
+		const allUsers = [...team1, ...team2, ...team3, ...team4, ...team5];
 		const uniqueUsers = [...new Set(allUsers)];
 
 		if (allUsers.length !== uniqueUsers.length) {
 			return await interaction.editReply('You can\'t play a bingo match with the same user twice');
 		}
+
+		if (allUsers.length < 2) {
+			return await interaction.editReply('You can\'t play a bingo match alone');
+		}
+
+		let everyUser = [];
+		for (let i = 0; i < allUsers.length; i++) {
+			logDatabaseQueries(4, 'commands/osu-bingo.js DBDiscordUsers');
+			let discordUser = await DBDiscordUsers.findOne({
+				where: {
+					userId: allUsers[i],
+					osuVerified: true
+				}
+			});
+
+			if (discordUser && discordUser.osuUserId) {
+				everyUser.push(discordUser);
+			} else {
+				return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect username:<username>\`.`);
+			}
+		}
+
+		let teamsString = '';
+
+		if (team1.length > 0) {
+			teamsString = `\nTeam 1: <@${team1.join('>, <@')}>`;
+		}
+
+		if (team2.length > 0) {
+			teamsString = teamsString + `\nTeam 2: <@${team2.join('>, <@')}>`;
+		}
+
+		if (team3.length > 0) {
+			teamsString = teamsString + `\nTeam 3: <@${team3.join('>, <@')}>`;
+		}
+
+		if (team4.length > 0) {
+			teamsString = teamsString + `\nTeam 4: <@${team4.join('>, <@')}>`;
+		}
+
+		if (team5.length > 0) {
+			teamsString = teamsString + `\nTeam 5: <@${team5.join('>, <@')}>`;
+		}
+
+		let sentMessage = await interaction.editReply(`<@${commandUser.userId}> wants to play a bingo match:${teamsString}. (SR: ${Math.round(lowerstarrating * 100) / 100}-${Math.round(higherstarrating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`);
+
+		let pingMessage = await interaction.channel.send(`<@${uniqueUsers.join('>, <@')}>`);
+		await sentMessage.react('✅');
+		await sentMessage.react('❌');
+		pingMessage.delete();
+
+		let responded = false;
+		let accepted = [];
+		let declined = false;
+		let decliner = null;
+
+		const collector = sentMessage.createReactionCollector({ time: 300000 });
+
+		collector.on('collect', (reaction, user) => {
+			if (reaction.emoji.name === '✅' && [...team1, ...team2, ...team3, ...team4, ...team5].includes(user.id)) {
+				if (!accepted.includes(user.id)) {
+					accepted.push(user.id);
+
+					if (accepted.length === team1.length + team2.length + team3.length + team4.length + team5.length) {
+						collector.stop();
+					}
+				}
+			} else if (reaction.emoji.name === '❌' && [...team1, ...team2, ...team3, ...team4, ...team5].includes(user.id)) {
+				decliner = user.id;
+				collector.stop();
+			}
+		});
+
+		collector.on('end', () => {
+			if (accepted.length < team1.length + team2.length + team3.length + team4.length + team5.length) {
+				declined = true;
+			}
+			responded = true;
+		});
+
+		while (!responded) {
+			await pause(1000);
+		}
+
+		sentMessage.reactions.removeAll().catch(() => { });
+
+		if (declined) {
+			if (decliner) {
+				return await interaction.editReply(`<@${decliner}> declined.`);
+			} else {
+				return await interaction.editReply('Someone didn\'t respond in time.');
+			}
+		}
+
+		let message = await interaction.editReply('Generating map pool...');
+
+		// Get the map pool
+		let mappool = [];
+
+		let beatmaps = await DBOsuBeatmaps.findAll({
+			where: {
+				mode: 'Standard',
+				mods: 0,
+				approvalStatus: {
+					[Op.not]: 'Not found',
+				},
+				starRating: {
+					[Op.and]: {
+						[Op.gte]: lowerstarrating,
+						[Op.lte]: higherstarrating,
+					}
+				},
+				drainLength: {
+					[Op.and]: {
+						[Op.gte]: 30,
+						[Op.lte]: 300,
+					}
+				},
+			},
+		});
+
+		// Add 25 random beatmaps to the mappool
+		for (let i = 0; i < 25; i++) {
+			let index = Math.floor(Math.random() * beatmaps.length);
+			let randomBeatmap = beatmaps[index];
+			mappool.push(randomBeatmap);
+			beatmaps.splice(index, 1);
+		}
+
+		beatmaps = null;
+
+		await refreshMessage(interaction, mappool, teamsString);
+
+		let matchStart = new Date();
+
+		await message.react('🔄');
+
+		// Refresh the message when the refresh button is pressed
+		const refreshCollector = message.createReactionCollector();
+
+		refreshCollector.on('collect', async (reaction, user) => {
+			if (reaction.emoji.name === '🔄' && allUsers.includes(user.id)) {
+				// eslint-disable-next-line no-undef
+				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+				});
+
+				for (let i = 0; i < everyUser.length; i++) {
+					osuApi.getUserRecent({ u: everyUser[i].osuUserId, m: 0 })
+						.then(async (scores) => {
+							for (let j = 0; j < scores.length; j++) {
+								let scoreDate = new Date(scores[j].raw_date);
+								scoreDate.setUTCMinutes(scoreDate.getUTCMinutes() - new Date().getTimezoneOffset());
+
+								if (scoreDate > matchStart) {
+									for (let k = 0; k < mappool.length; k++) {
+										if (mappool[k].beatmapId === scores[j].beatmapId) {
+											if (requirement === 'S' && (scores[j].rank.startsWith('S') || scores[j].rank.startsWith('X'))
+												|| requirement === 'A' && (scores[j].rank === 'A' || scores[j].rank.startsWith('S') || scores[j].rank.startsWith('X'))
+												|| requirement === 'Pass' && scores[j].rank !== 'F') {
+
+												if (mappool[k].score) {
+													if (mappool[k].score < Number(scores[j].score)) {
+														mappool[k].score = scores[j].score;
+
+														// Get the players team
+														if (team1.includes(everyUser[i].userId)) {
+															mappool[k].team = 'Team 1';
+														} else if (team2.includes(everyUser[i].userId)) {
+															mappool[k].team = 'Team 2';
+														} else if (team3.includes(everyUser[i].userId)) {
+															mappool[k].team = 'Team 3';
+														} else if (team4.includes(everyUser[i].userId)) {
+															mappool[k].team = 'Team 4';
+														} else if (team5.includes(everyUser[i].userId)) {
+															mappool[k].team = 'Team 5';
+														}
+													}
+												} else {
+													mappool[k].score = scores[j].score;
+
+													// Get the players team
+													if (team1.includes(everyUser[i].userId)) {
+														mappool[k].team = 'Team 1';
+													} else if (team2.includes(everyUser[i].userId)) {
+														mappool[k].team = 'Team 2';
+													} else if (team3.includes(everyUser[i].userId)) {
+														mappool[k].team = 'Team 3';
+													} else if (team4.includes(everyUser[i].userId)) {
+														mappool[k].team = 'Team 4';
+													} else if (team5.includes(everyUser[i].userId)) {
+														mappool[k].team = 'Team 5';
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						})
+						.catch(err => {
+							if (err.message !== 'Not found') {
+								console.log(err);
+							}
+						});
+
+					await pause(1000);
+				}
+
+				refreshMessage(interaction, mappool, teamsString);
+			}
+
+			// Remove the reaction unless its the bot
+			if (user.id !== interaction.client.user.id) {
+				reaction.users.remove(user.id);
+			}
+		});
 	},
 };
+
+async function refreshMessage(interaction, mappool, teamsString) {
+	let reply = '|------------------------------------------------------------------------|\n|';
+
+	for (let i = 0; i < mappool.length; i++) {
+		reply = reply + `  [${mappool[i].starRating.toFixed(2)}* - ${Math.floor(mappool[i].drainLength / 60).toString().padStart(1, '0')}:${(mappool[i].drainLength % 60).toString().padStart(2, '0')}](<https://osu.ppy.sh/b/${mappool[i].beatmapId}>)  |`;
+		if (i % 5 === 4) {
+			reply = reply + '\n|------------------------------------------------------------------------|\n| ';
+		}
+	}
+
+	// Remove the last |
+	reply = reply.slice(0, -2);
+
+	reply = reply + teamsString;
+
+	const canvasWidth = 1280;
+	const canvasHeight = 1280;
+
+	//Create Canvas
+	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+	Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+	//Get context and load the image
+	const ctx = canvas.getContext('2d');
+
+	const background = await Canvas.loadImage('./other/osu-background.png');
+
+	for (let i = 0; i < canvas.height / background.height; i++) {
+		for (let j = 0; j < canvas.width / background.width; j++) {
+			ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+		}
+	}
+
+	// Draw the grid of maps
+	for (let i = 0; i < 5; i++) {
+		for (let j = 0; j < 5; j++) {
+			try {
+				let beatmapImage = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${mappool[i * 5 + j].beatmapsetId}/covers/list@2x.jpg`);
+				ctx.drawImage(beatmapImage, 5 + (5 + 250) * j, 5 + (5 + 250) * i, 250, 250);
+			} catch (e) {
+				//Nothing
+			}
+
+			// Draw a border around the map
+			if (mappool[i * 5 + j].team) {
+				if (mappool[i * 5 + j].team === 'Team 1') {
+					ctx.strokeStyle = '#FF0000';
+				} else if (mappool[i * 5 + j].team === 'Team 2') {
+					ctx.strokeStyle = '#0000FF';
+				} else if (mappool[i * 5 + j].team === 'Team 3') {
+					ctx.strokeStyle = '#00FF00';
+				} else if (mappool[i * 5 + j].team === 'Team 4') {
+					ctx.strokeStyle = '#FFFF00';
+				} else if (mappool[i * 5 + j].team === 'Team 5') {
+					ctx.strokeStyle = '#FF00FF';
+				}
+				ctx.lineWidth = 30;
+				ctx.strokeRect(20 + (5 + 250) * j, 20 + (5 + 250) * i, 220, 220);
+			}
+		}
+	}
+
+	const bingoCard = new Discord.MessageAttachment(canvas.toBuffer(), 'bingo.png');
+
+	return await interaction.editReply({ content: reply, files: [bingoCard] });
+}
