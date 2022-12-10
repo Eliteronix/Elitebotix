@@ -1279,7 +1279,8 @@ module.exports = {
 				popular: {
 					[Op.not]: true
 				}
-			}
+			},
+			silent: true
 		});
 
 		console.log(`Marked ${update[0]} new beatmaps as popular`);
@@ -1299,7 +1300,8 @@ module.exports = {
 				usedOften: {
 					[Op.not]: true
 				}
-			}
+			},
+			silent: true
 		});
 
 		console.log(`Marked ${update[0]} new beatmaps as used often`);
@@ -4006,7 +4008,7 @@ async function getOsuBeatmapFunction(input) {
 	let lastRework = new Date();
 	lastRework.setUTCFullYear(2022);
 	lastRework.setUTCMonth(11);
-	lastRework.setUTCDate(12);
+	lastRework.setUTCDate(11);
 	lastRework.setUTCHours(0);
 	let lastWeek = new Date();
 	lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
@@ -4054,10 +4056,6 @@ async function getOsuBeatmapFunction(input) {
 				lastRework.setUTCFullYear(2022);
 				lastRework.setUTCMonth(9);
 				lastRework.setUTCDate(12);
-			}
-
-			if (dbBeatmap) {
-				console.log('Updated at', dbBeatmap.updatedAt, 'Last rework', lastRework, dbBeatmap.updatedAt < lastRework);
 			}
 
 			if (!dbBeatmap
