@@ -248,9 +248,7 @@ async function handleTicketStatus(msg) {
 		where: { channelId: msg.channel.id, creatorId: msg.author.id }
 	});
 
-	const guildPrefix = await getGuildPrefix(msg);
-
-	if (ticket && ticket.statusId !== 0 && ticket.statusId !== 75 && ticket.statusId !== 100 && !msg.content.startsWith(`${guildPrefix}ticket`)) {
+	if (ticket && ticket.statusId !== 0 && ticket.statusId !== 75 && ticket.statusId !== 100) {
 		ticket.statusId = 75;
 		ticket.statusName = 'Awaiting Response';
 		ticket.save();
