@@ -163,6 +163,11 @@ function readyDiscord() {
 	//log a message when ready
 	console.log('The Bot is ready.');
 
+	client.duels = [];
+	client.otherMatches = [];
+	client.matchTracks = 0;
+	client.bingoMatches = 0;
+
 	client.user.setPresence({
 		status: 'online',  //You can show online, idle....
 		activities: [{

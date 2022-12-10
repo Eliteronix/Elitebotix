@@ -302,11 +302,7 @@ module.exports = {
 
 		await interaction.followUp(reply);
 
-		if (!interaction.client.bingoMatches) {
-			interaction.client.bingoMatches = 1;
-		} else {
-			interaction.client.bingoMatches++;
-		}
+		interaction.client.bingoMatches++;
 
 		let message = await interaction.channel.send('Creating the bingo card...');
 
