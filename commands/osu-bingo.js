@@ -16,7 +16,7 @@ module.exports = {
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.ATTACH_FILES, Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	//guildOnly: true,
+	guildOnly: true,
 	args: true,
 	cooldown: 15,
 	//noCooldownMessage: true,
