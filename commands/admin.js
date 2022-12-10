@@ -10525,7 +10525,7 @@ module.exports = {
 			let output = `Options: \`all\`, \`free\`, \`shardId\`\n\`\`\`Cur.: ${msg.client.shardId} | Guilds | Duels | Other | Matchtrack | Bingo\n`;
 			for (let i = 0; i < guildSizes.length; i++) {
 				output = output + '--------|--------|-------|-------|------------|-------\n';
-				output = output + `Shard ${i} | ${guildSizes[i].toString().padStart(6, ' ')} | ${duels[i].length.toString().padStart(5, ' ')} | ${other[i].toString().padStart(5, ' ')} | ${matchtracks[i].toString().padStart(10, ' ')} | ${bingoMatches[i].toString().padStart(5, ' ')}\n`;
+				output = output + `Shard ${i} | ${guildSizes[i].toString().padStart(6, ' ')} | ${duels[i].length.toString().padStart(5, ' ')} | ${other[i].length.toString().padStart(5, ' ')} | ${matchtracks[i].toString().padStart(10, ' ')} | ${bingoMatches[i].toString().padStart(5, ' ')}\n`;
 			}
 			output = output + '```';
 			await msg.reply(output);

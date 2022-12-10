@@ -4005,8 +4005,8 @@ async function getOsuBeatmapFunction(input) {
 
 	let lastRework = new Date();
 	lastRework.setUTCFullYear(2022);
-	lastRework.setUTCMonth(9);
-	lastRework.setUTCDate(1);
+	lastRework.setUTCMonth(11);
+	lastRework.setUTCDate(12);
 	lastRework.setUTCHours(0);
 	let lastWeek = new Date();
 	lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
