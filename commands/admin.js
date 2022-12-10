@@ -768,7 +768,7 @@ module.exports = {
 			// 	data: {
 			// 		name: 'osu-bingo',
 			// 		description: 'Play a game of osu!bingo',
-			// 		dm_permission: true,
+			// 		dm_permission: false,
 			// 		options: [
 			// 			{
 			// 				'name': 'player1team2',
@@ -5697,7 +5697,7 @@ module.exports = {
 				data: {
 					name: 'osu-bingo',
 					description: 'Play a game of osu!bingo',
-					dm_permission: true,
+					dm_permission: false,
 					options: [
 						{
 							'name': 'player1team2',
