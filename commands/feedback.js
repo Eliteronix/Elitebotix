@@ -1,6 +1,6 @@
-const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'feedback',
@@ -18,115 +18,40 @@ module.exports = {
 	tags: 'general',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			args = [interaction.options._hoistedOptions[0].value];
-			interaction.options._hoistedOptions[1].value.split(/ +/).forEach(arg => {
-				args.push(arg);
-			});
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
 		}
-		//check for the first argument
-		if (args[0].toLowerCase() === 'bug') { //go to bug tree
-			if (!args[1]) { //check for second argument
-				msg.reply('Please add an explaination to your bug after the command.');
-			} else {
-				//get rid of the first argument
-				args.shift();
-				//join the bug in a variable
-				const bug = args.join(' ').replace(/"/g, '');
 
-				//Return if the bug is too long
-				if (bug.length > 200) {
-					if (msg.id) {
-						return msg.reply(`Your bug report is too long. Please shorten it. (Max: 200 characters, currently: ${bug.length})`);
-					}
-					return interaction.reply(`Your bug report is too long. Please shorten it. (Max: 200 characters, currently: ${bug.length})`);
-				}
-				//send the bug into the correct Channel
-				createJiraIssue('10006', `[BUG] ${bug} - ${msg.author.username}#${msg.author.discriminator}`);
-				//send a message to the user
-				if (msg.id) {
-					return msg.reply('Your bug report was sent to the developers.');
-				}
-				return interaction.reply('Your bug report was sent to the developers.');
-			}
-		} else if (args[0].toLowerCase() === 'feature') { //go to feature tree
-			if (!args[1]) { //check for second argument
-				msg.reply('Please add an explaination to your feature-request after the command.');
-			} else {
-				//get rid of the first argument
-				args.shift();
-				//join the feature in a variable
-				const feature = args.join(' ').replace(/"/g, '');
+		let type = interaction.options.getString('type');
 
-				//Return if the bug is too long
-				if (feature.length > 200) {
-					if (msg.id) {
-						return msg.reply(`Your feature request is too long. Please shorten it. (Max: 200 characters, currently: ${feature.length})`);
-					}
-					return interaction.reply(`Your feature request is too long. Please shorten it. (Max: 200 characters, currently: ${feature.length})`);
-				}
-				//send the feature into the correct Channel
-				createJiraIssue('10007', `[FEATURE] ${feature} - ${msg.author.username}#${msg.author.discriminator}`);
-				//send a message to the user
-				if (msg.id) {
-					return msg.reply('Your feature-request was sent to the developers.');
-				}
-				return interaction.reply('Your feature-request was sent to the developers.');
-			}
-		} else if (args[0].toLowerCase() === 'feedback') { //go to general tree
-			if (!args[1]) { //check for second argument
-				msg.reply('Please add some text to your feedback after the command.');
-			} else {
-				//get rid of the first argument
-				args.shift();
-				//join the feedback in a variable
-				const feedback = args.join(' ').replace(/"/g, '');
+		let message = interaction.options.getString('feedback');
 
-				//Return if the bug is too long
-				if (feedback.length > 200) {
-					if (msg.id) {
-						return msg.reply(`Your feedback is too long. Please shorten it. (Max: 200 characters, currently: ${feedback.length})`);
-					}
-					return interaction.reply(`Your feedback is too long. Please shorten it. (Max: 200 characters, currently: ${feedback.length})`);
-				}
-				//send the feedback into the correct Channel
-				createJiraIssue('10005', `[FEEDBACK] ${feedback} - ${msg.author.username}#${msg.author.discriminator}`);
-				//send a message to the user
-				if (msg.id) {
-					return msg.reply('Your feedback has been sent to the developers.');
-				}
-				return interaction.reply('Your feedback has been sent to the developers.');
-			}
-		} else if (args[0].toLowerCase() === 'question') { //go to questions tree
-			if (!args[1]) { //check for second argument
-				msg.reply('Please add some text to your feedback after the command.');
-			} else {
-				//get rid of the first argument
-				args.shift();
-				//join the feedback in a variable
-				const question = args.join(' ').replace(/"/g, '');
+		if (message.length > 200) {
+			return interaction.reply(`Your message is too long. Please shorten it. (Max: 200 characters, currently: ${message.length})`);
+		}
 
-				//Return if the bug is too long
-				if (question.length > 200) {
-					if (msg.id) {
-						return msg.reply(`Your question is too long. Please shorten it. (Max: 200 characters, currently: ${question.length})`);
-					}
-					return interaction.reply(`Your question is too long. Please shorten it. (Max: 200 characters, currently: ${question.length})`);
-				}
-				//send the question into the correct Channel
-				createJiraIssue('10008', `[QUESTION] ${question} - ${msg.author.username}#${msg.author.discriminator}`);
-				//send a message to the user
-				if (msg.id) {
-					return msg.reply('Your question has been sent to the developers. They will respond to you as soon as possible.');
-				}
-				return interaction.reply('Your question has been sent to the developers. They will respond to you as soon as possible.');
-			}
-		} else {
-			let guildPrefix = await getGuildPrefix(msg);
+		if (type === 'bug') {
+			//send the bug into the correct Channel
+			createJiraIssue('10006', `[BUG] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
 
-			msg.reply(`Please add what kind of feedback you want to give. Proper usage: \`${guildPrefix}${this.name} ${this.usage}\``);
+			return interaction.reply('Your bug report was sent to the developers.');
+		} else if (type === 'feature') {
+			createJiraIssue('10007', `[FEATURE] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
+
+			return interaction.reply('Your feature-request was sent to the developers.');
+		} else if (args[0].toLowerCase() === 'feedback') {
+			createJiraIssue('10005', `[FEEDBACK] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
+
+			return interaction.reply('Your feedback has been sent to the developers.');
+		} else if (args[0].toLowerCase() === 'question') {
+			createJiraIssue('10008', `[QUESTION] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
+
+			return interaction.reply('Your question has been sent to the developers. They will respond to you as soon as possible.');
 		}
 	},
 };
