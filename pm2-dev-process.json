@@ -8,7 +8,8 @@
 		"maps",
 		"package-lock.json",
 		"matchLogs",
-		"node_modules"
+		"node_modules",
+		"listcovers"
 	],
 	"watch_options": {
 		"followSymlinks": false
