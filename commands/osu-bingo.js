@@ -1,4 +1,4 @@
-const { populateMsgFromInteraction, getOsuUserServerMode, pause, logDatabaseQueries, getMods, humanReadable } = require('../utils');
+const { populateMsgFromInteraction, getOsuUserServerMode, pause, logDatabaseQueries, getMods, humanReadable, getMapListCover } = require('../utils');
 const { Permissions } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
@@ -390,7 +390,7 @@ async function refreshMessage(message, mappool, lastRefresh) {
 	for (let i = 0; i < 5; i++) {
 		for (let j = 0; j < 5; j++) {
 			try {
-				let beatmapImage = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${mappool[i * 5 + j].beatmapsetId}/covers/list@2x.jpg`);
+				let beatmapImage = await getMapListCover(mappool[i * 5 + j].beatmapsetId, mappool[i * 5 + j].beatmapId);
 				ctx.drawImage(beatmapImage, 5 + (5 + 250) * j, 5 + (5 + 250) * i, 250, 250);
 			} catch (e) {
 				//Nothing

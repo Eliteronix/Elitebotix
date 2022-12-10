@@ -2736,6 +2736,56 @@ module.exports = {
 	},
 	async addMatchMessage(matchId, array, user, message) {
 		addMatchMessageFunction(matchId, array, user, message);
+	},
+	async getMapListCover(beatmapsetId, beatmapId) {
+		const fs = require('fs');
+
+		//Check if the maps folder exists and create it if necessary
+		if (!fs.existsSync('./listcovers')) {
+			fs.mkdirSync('./listcovers');
+		}
+
+		//Check if the map is already downloaded and download if necessary
+		const path = `./listcovers/${beatmapsetId}.jpg`;
+
+		//Force download if the map is recently updated in the database and therefore probably updated
+		const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: 0 });
+
+		if (dbBeatmap.approvalStatus === 'Not found') {
+			return null;
+		}
+
+		const recent = new Date();
+		recent.setUTCMinutes(recent.getUTCMinutes() - 3);
+
+		let forceDownload = false;
+		if (recent < dbBeatmap.updatedAt) {
+			forceDownload = true;
+		}
+
+		try {
+			if (forceDownload || !fs.existsSync(path)) {
+				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`);
+				await new Promise((resolve, reject) => {
+					const fileStream = fs.createWriteStream(`./listcovers/${beatmapsetId}.jpg`);
+					res.body.pipe(fileStream);
+					res.body.on('error', (err) => {
+						reject(err);
+					});
+					fileStream.on('finish', function () {
+						resolve();
+					});
+				});
+			}
+		} catch (err) {
+			console.error(err);
+		}
+
+		try {
+			return Canvas.loadImage(path);
+		} catch (err) {
+			return null;
+		}
 	}
 };
 
