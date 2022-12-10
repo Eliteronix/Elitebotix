@@ -2,7 +2,7 @@ module.exports = {
 	async execute(client, bancho, twitchClient, processQueueEntry) {
 		// console.log('nameSync');
 
-		client.shard.broadcastEval(async (c, { guildId, processQueueEntryId }) => {
+		client.shard.broadcastEval(async (c, { guildId, processQueueEntryId, setting }) => {
 			// eslint-disable-next-line no-undef
 			const { DBProcessQueue, DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 			// eslint-disable-next-line no-undef
@@ -46,9 +46,9 @@ module.exports = {
 
 									//Set what the user's nickname should be
 									let nickname = '';
-									if (processQueueEntry.additions === 'osuname') {
+									if (setting === 'osuname') {
 										nickname = discordUser.osuName;
-									} else if (processQueueEntry.additions === 'osunameandrank') {
+									} else if (setting === 'osunameandrank') {
 										let rank = discordUser.osuRank;
 										if (rank.length > 4) {
 											rank = `${rank.substring(0, rank.length - 3)}k`;
@@ -56,7 +56,6 @@ module.exports = {
 
 										nickname = `${discordUser.osuName} [${rank}]`;
 									}
-
 									//Set nickname if needed
 									if (userDisplayName !== nickname) {
 										await members[i].setNickname(nickname);
@@ -70,7 +69,7 @@ module.exports = {
 						}
 					});
 			}
-		}, { context: { guildId: processQueueEntry.guildId, processQueueEntryId: processQueueEntry.id } });
+		}, { context: { guildId: processQueueEntry.guildId, processQueueEntryId: processQueueEntry.id, setting: processQueueEntry.additions } });
 
 		//Set the date and prepare for new execution
 		let date = new Date();
