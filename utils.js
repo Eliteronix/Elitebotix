@@ -2325,7 +2325,7 @@ module.exports = {
 						}
 					}
 
-					if (guildTrackers[i].osuLeaderboard || guildTrackers[i].taikoLeaderboard || guildTrackers[i].catchLeaderboard || guildTrackers[i].maniaLeaderboard) {
+					if (guildTrackers[i].medals || guildTrackers[i].osuLeaderboard || guildTrackers[i].taikoLeaderboard || guildTrackers[i].catchLeaderboard || guildTrackers[i].maniaLeaderboard) {
 						if (!osuUser.osuUser) {
 							try {
 								let osuUserResult = await osuApi.getUser({ u: osuUser.osuUserId });
@@ -2389,7 +2389,7 @@ module.exports = {
 										.addField('Medal Group', medal.grouping);
 
 									if (medal.instructions) {
-										medalEmbed.addField('Medal requirements', medal.instructions.replace('<b>', '**').replace('</b>', '**').replace('<i>', '*').replace('</i>', '*'));
+										medalEmbed.addField('Medal Hint', medal.instructions.replace('<b>', '**').replace('</b>', '**').replace('<i>', '*').replace('</i>', '*'));
 									}
 
 									try {
