@@ -4056,6 +4056,10 @@ async function getOsuBeatmapFunction(input) {
 				lastRework.setUTCDate(12);
 			}
 
+			if (dbBeatmap) {
+				console.log('Updated at', dbBeatmap.updatedAt, 'Last rework', lastRework, dbBeatmap.updatedAt < lastRework);
+			}
+
 			if (!dbBeatmap
 				|| forceUpdate
 				|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
