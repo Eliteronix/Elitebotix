@@ -280,7 +280,7 @@ module.exports = {
 
 		beatmaps = null;
 
-		let lastRefresh = { date: new Date() };
+		let lastRefresh = { date: new Date(), lastScore: new Date() };
 
 		let reply = `The bingo match has started!\n\nPlay the maps without \`NF\`, \`Score v2\`, \`Relax\` and \`Autopilot\` to claim a map.\nThe minimum requirement to claim a map is: \`${requirement}\`\nYou can claim a map for your own team by beating the achieved score on the map!`;
 
@@ -301,6 +301,12 @@ module.exports = {
 		reply = reply.slice(0, -2);
 
 		await interaction.followUp(reply);
+
+		if (!interaction.client.bingoMatches) {
+			interaction.client.bingoMatches = 1;
+		} else {
+			interaction.client.bingoMatches++;
+		}
 
 		let message = await interaction.channel.send('Creating the bingo card...');
 
@@ -342,6 +348,15 @@ module.exports = {
 
 					//Stop the interval
 					clearInterval(interval);
+					interaction.client.bingoMatches--;
+				} else if (lastRefresh.lastScore.getTime() + 1800000 < new Date().getTime()) {
+					// Stop the interval if the match has been going on for more than 30 minutes without scores
+					refreshCollector.stop();
+					message.reactions.removeAll().catch(() => { });
+
+					//Stop the interval
+					clearInterval(interval);
+					interaction.client.bingoMatches--;
 				}
 			}
 		}, 5000);
@@ -524,6 +539,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 												await mappool[k].message.fetch();
 												await mappool[k].message.delete();
 												mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just reclaimed map ${k + 1}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)}\` score!`);
+												lastRefresh.lastScore = new Date();
 											}
 										} else {
 											mappool[k].score = Number(scores[j].score);
@@ -542,6 +558,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 											}
 
 											mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just claimed map ${k + 1}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)}\` score!`);
+											lastRefresh.lastScore = new Date();
 										}
 
 										winningTeam = checkWin(mappool);

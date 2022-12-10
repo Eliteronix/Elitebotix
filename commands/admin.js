@@ -10514,6 +10514,10 @@ module.exports = {
 					data = [];
 				}
 			}
+		} else if (args[0] === 'shardGuildSizes') {
+			msg.client.shard.fetchClientValues('guilds.cache.size').then(console.log);
+		} else if (args[0] === 'runningBingoMatches') {
+			msg.client.shard.fetchClientValues('bingoMatches').then(console.log);
 		} else {
 			msg.reply('Invalid command');
 		}
