@@ -10516,8 +10516,30 @@ module.exports = {
 			}
 		} else if (args[0] === 'shardGuildSizes') {
 			msg.client.shard.fetchClientValues('guilds.cache.size').then(console.log);
-		} else if (args[0] === 'runningBingoMatches') {
-			msg.client.shard.fetchClientValues('bingoMatches').then(console.log);
+		} else if (args[0] === 'restart') {
+			let guildSizes = await msg.client.shard.fetchClientValues('guilds.cache.size');
+			let duels = await msg.client.shard.fetchClientValues('duels');
+			let other = await msg.client.shard.fetchClientValues('otherMatches');
+			let matchtracks = await msg.client.shard.fetchClientValues('matchTracks');
+			let bingoMatches = await msg.client.shard.fetchClientValues('bingoMatches');
+			let output = `Options: \`all\`, \`free\`, \`shardId\`\n\`\`\`Cur.: ${msg.client.shardId} | Guilds | Duels | Other | Matchtrack | Bingo\n`;
+			for (let i = 0; i < guildSizes.length; i++) {
+				output = output + '--------|--------|-------|-------|------------|-------\n';
+				output = output + `Shard ${i} | ${guildSizes[i].toString().padStart(6, ' ')} | ${duels[i].length.toString().padStart(5, ' ')} | ${other[i].toString().padStart(5, ' ')} | ${matchtracks[i].toString().padStart(10, ' ')} | ${bingoMatches[i].toString().padStart(5, ' ')}\n`;
+			}
+			output = output + '```';
+			await msg.reply(output);
+
+			// Restart relevant ones
+			await msg.client.shard.broadcastEval(async (c, { condition }) => {
+				if (condition === 'all' ||
+					condition === 'free' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches === 0 ||
+					!isNaN(condition) && c.shardId === parseInt(condition)) {
+					// eslint-disable-next-line no-undef
+					process.exit();
+				}
+			}, { context: { condition: args[1] } });
+			return;
 		} else {
 			msg.reply('Invalid command');
 		}

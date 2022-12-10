@@ -166,6 +166,7 @@ module.exports = {
 					}
 				}
 				channel = await bancho.createLobby(matchName);
+				additionalObjects[0].otherMatches.push(channel.lobby.id);
 				break;
 			} catch (error) {
 				if (i === 4) {

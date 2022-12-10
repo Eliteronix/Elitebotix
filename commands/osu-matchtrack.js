@@ -87,6 +87,8 @@ module.exports = {
 					initialMessage = await interaction.editReply(`Tracking match \`${match.name.replace(/`/g, '')}\`\nReact to this message with :octagonal_sign: to stop tracking`);
 				}
 
+				msg.client.matchTracks++;
+
 				let stop = false;
 
 				const reactionCollector = initialMessage.createReactionCollector();
@@ -101,6 +103,7 @@ module.exports = {
 					stop = true;
 					initialMessage.reactions.removeAll().catch(() => { });
 					msg.channel.send(`Stopped tracking match \`${match.name.replace(/`/g, '')}\``);
+					msg.client.matchTracks--;
 
 					osuApi.getMatch({ mp: matchID })
 						.then(async (match) => {
