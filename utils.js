@@ -5416,7 +5416,8 @@ async function saveOsuMultiScoresFunction(match) {
 					osuUserId: {
 						[Op.in]: playersToUpdate
 					}
-				}
+				},
+				silent: true
 			});
 		}
 
