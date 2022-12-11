@@ -163,6 +163,7 @@ function readyDiscord() {
 	//log a message when ready
 	console.log('The Bot is ready.');
 
+	client.startDate = new Date();
 	client.duels = [];
 	client.otherMatches = [];
 	client.matchTracks = 0;

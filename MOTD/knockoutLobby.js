@@ -72,7 +72,7 @@ module.exports = {
 					}
 				}
 				channel = await bancho.createLobby(`MOTD: (${bracketName}) vs (Lobby #${lobbyNumber})`);
-				client.otherMatches.push(channel.lobby.id);
+				client.otherMatches.push(parseInt(channel.lobby.id));
 				break;
 			} catch (error) {
 				if (i === 2) {

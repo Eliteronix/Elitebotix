@@ -10518,14 +10518,22 @@ module.exports = {
 			msg.client.shard.fetchClientValues('guilds.cache.size').then(console.log);
 		} else if (args[0] === 'restart') {
 			let guildSizes = await msg.client.shard.fetchClientValues('guilds.cache.size');
+			let startDates = await msg.client.shard.fetchClientValues('startDate');
 			let duels = await msg.client.shard.fetchClientValues('duels');
 			let other = await msg.client.shard.fetchClientValues('otherMatches');
 			let matchtracks = await msg.client.shard.fetchClientValues('matchTracks');
 			let bingoMatches = await msg.client.shard.fetchClientValues('bingoMatches');
-			let output = `Options: \`all\`, \`free\`, \`shardId\`\n\`\`\`Cur.: ${msg.client.shardId} | Guilds | Duels | Other | Matchtrack | Bingo\n`;
+			let output = `Options: \`all\`, \`free\`, \`shardId\`\n\`\`\`Cur.: ${msg.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo\n`;
 			for (let i = 0; i < guildSizes.length; i++) {
-				output = output + '--------|--------|-------|-------|------------|-------\n';
-				output = output + `Shard ${i} | ${guildSizes[i].toString().padStart(6, ' ')} | ${duels[i].length.toString().padStart(5, ' ')} | ${other[i].length.toString().padStart(5, ' ')} | ${matchtracks[i].toString().padStart(10, ' ')} | ${bingoMatches[i].toString().padStart(5, ' ')}\n`;
+				output = output + '--------|------------------|--------|-------|-------|------------|-------\n';
+				let startDate = new Date(startDates[i]);
+				let startedString = `${startDate.getUTCHours().toString().padStart(2, '0')}:${startDate.getUTCMinutes().toString().padStart(2, '0')} ${startDate.getUTCDate().toString().padStart(2, '0')}.${(startDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${startDate.getUTCFullYear()}`;
+				let guildSize = guildSizes[i].toString().padStart(6, ' ');
+				let duelSize = duels[i].length.toString().padStart(5, ' ');
+				let otherSize = other[i].length.toString().padStart(5, ' ');
+				let matchtrackSize = matchtracks[i].toString().padStart(10, ' ');
+				let bingoMatchSize = bingoMatches[i].toString().padStart(5, ' ');
+				output = output + `Shard ${i} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize}\n`;
 			}
 			output = output + '```';
 			await msg.reply(output);

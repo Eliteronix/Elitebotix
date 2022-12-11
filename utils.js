@@ -1690,7 +1690,7 @@ module.exports = {
 				} else {
 					channel = await bancho.createLobby(`ETX Teams: (${teamname1}) vs (${teamname2})`);
 				}
-				client.duels.push(channel.lobby.id);
+				client.duels.push(parseInt(channel.lobby.id));
 				// console.log('Duel Match: Created match');
 				break;
 			} catch (error) {

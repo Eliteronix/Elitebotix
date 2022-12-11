@@ -19,7 +19,7 @@ module.exports = {
 					}
 				}
 				channel = await bancho.createLobby(args[5]);
-				client.otherMatches.push(channel.lobby.id);
+				client.otherMatches.push(parseInt(channel.lobby.id));
 				break;
 			} catch (error) {
 				if (i === 4) {
