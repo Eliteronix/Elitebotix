@@ -10525,7 +10525,7 @@ module.exports = {
 			let matchtracks = await msg.client.shard.fetchClientValues('matchTracks');
 			let bingoMatches = await msg.client.shard.fetchClientValues('bingoMatches');
 			let update = await msg.client.shard.fetchClientValues('update');
-			let output = `Options: \`all\`, \`free\`, \`shardId\`, \`update\`\n\`\`\`Cur.: ${msg.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | Update\n`;
+			let output = `Options: \`all\`, \`free\`, \`shardId\`, \`update\`, \`free&update\`\n\`\`\`Cur.: ${msg.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | Update\n`;
 			for (let i = 0; i < guildSizes.length; i++) {
 				output = output + '--------|------------------|--------|-------|-------|------------|-------|--------\n';
 				let startDate = new Date(startDates[i]);
@@ -10545,7 +10545,8 @@ module.exports = {
 			await msg.client.shard.broadcastEval(async (c, { condition }) => {
 				if (condition === 'all' ||
 					condition === 'free' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches === 0 ||
-					!isNaN(condition) && c.shardId === parseInt(condition)) {
+					!isNaN(condition) && c.shardId === parseInt(condition) ||
+					condition === 'free&update' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches === 0 && c.update === 1) {
 					// eslint-disable-next-line no-undef
 					process.exit();
 				} else if (condition === 'update') {
