@@ -10517,6 +10517,18 @@ module.exports = {
 		} else if (args[0] === 'shardGuildSizes') {
 			msg.client.shard.fetchClientValues('guilds.cache.size').then(console.log);
 		} else if (args[0] === 'restart') {
+			// Restart relevant ones
+			await msg.client.shard.broadcastEval(async (c, { condition }) => {
+				if (condition === 'all' ||
+					condition === 'free' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches === 0 ||
+					!isNaN(condition) && c.shardId === parseInt(condition)) {
+					// eslint-disable-next-line no-undef
+					process.exit();
+				} else if (condition === 'update') {
+					c.update = 1;
+				}
+			}, { context: { condition: args[1] } });
+
 			let guildSizes = await msg.client.shard.fetchClientValues('guilds.cache.size');
 			let startDates = await msg.client.shard.fetchClientValues('startDate');
 			let duels = await msg.client.shard.fetchClientValues('duels');
@@ -10538,20 +10550,7 @@ module.exports = {
 				output = output + `Shard ${i} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize} | ${updateString}\n`;
 			}
 			output = output + '```';
-			await msg.reply(output);
-
-			// Restart relevant ones
-			await msg.client.shard.broadcastEval(async (c, { condition }) => {
-				if (condition === 'all' ||
-					condition === 'free' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches === 0 ||
-					!isNaN(condition) && c.shardId === parseInt(condition)) {
-					// eslint-disable-next-line no-undef
-					process.exit();
-				} else if (condition === 'update') {
-					c.update = 1;
-				}
-			}, { context: { condition: args[1] } });
-			return;
+			return await msg.reply(output);
 		} else {
 			msg.reply('Invalid command');
 		}
