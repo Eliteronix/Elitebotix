@@ -10523,9 +10523,10 @@ module.exports = {
 			let other = await msg.client.shard.fetchClientValues('otherMatches');
 			let matchtracks = await msg.client.shard.fetchClientValues('matchTracks');
 			let bingoMatches = await msg.client.shard.fetchClientValues('bingoMatches');
-			let output = `Options: \`all\`, \`free\`, \`shardId\`\n\`\`\`Cur.: ${msg.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo\n`;
+			let update = await msg.client.shard.fetchClientValues('update');
+			let output = `Options: \`all\`, \`free\`, \`shardId\`, \`update\`\n\`\`\`Cur.: ${msg.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | Update\n`;
 			for (let i = 0; i < guildSizes.length; i++) {
-				output = output + '--------|------------------|--------|-------|-------|------------|-------\n';
+				output = output + '--------|------------------|--------|-------|-------|------------|-------|--------\n';
 				let startDate = new Date(startDates[i]);
 				let startedString = `${startDate.getUTCHours().toString().padStart(2, '0')}:${startDate.getUTCMinutes().toString().padStart(2, '0')} ${startDate.getUTCDate().toString().padStart(2, '0')}.${(startDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${startDate.getUTCFullYear()}`;
 				let guildSize = guildSizes[i].toString().padStart(6, ' ');
@@ -10533,7 +10534,8 @@ module.exports = {
 				let otherSize = other[i].length.toString().padStart(5, ' ');
 				let matchtrackSize = matchtracks[i].toString().padStart(10, ' ');
 				let bingoMatchSize = bingoMatches[i].toString().padStart(5, ' ');
-				output = output + `Shard ${i} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize}\n`;
+				let updateString = update[i].toString().padStart(6, ' ');
+				output = output + `Shard ${i} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize} | ${updateString}\n`;
 			}
 			output = output + '```';
 			await msg.reply(output);
@@ -10545,6 +10547,8 @@ module.exports = {
 					!isNaN(condition) && c.shardId === parseInt(condition)) {
 					// eslint-disable-next-line no-undef
 					process.exit();
+				} else if (condition === 'update') {
+					c.update = 1;
 				}
 			}, { context: { condition: args[1] } });
 			return;

@@ -168,6 +168,7 @@ function readyDiscord() {
 	client.otherMatches = [];
 	client.matchTracks = 0;
 	client.bingoMatches = 0;
+	client.update = 0;
 
 	client.user.setPresence({
 		status: 'online',  //You can show online, idle....
