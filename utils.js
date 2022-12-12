@@ -5883,6 +5883,12 @@ async function getValidTournamentBeatmapFunction(input) {
 
 			let HDStarRating = adjustHDStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate);
 			let randomBeatmapHR = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 16 });
+
+			if (!randomBeatmapHR) {
+				beatmaps.splice(index, 1);
+				continue;
+			}
+
 			randomBeatmap.starRating = (HDStarRating + randomBeatmapHR.starRating) / 2;
 		}
 
