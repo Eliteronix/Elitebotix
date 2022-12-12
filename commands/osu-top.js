@@ -754,7 +754,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 	let exportScores = [];
 
 	for (let i = 0; i < sortedScores.length && i < showLimit; i++) {
-		if (server === 'tournaments') {
+		if (server === 'tournaments' && sortedScores[i].beatmap) {
 			exportScores.push({
 				score: sortedScores[i].score,
 				osuUserId: sortedScores[i].user.id,
