@@ -4057,6 +4057,13 @@ async function getOsuBeatmapFunction(input) {
 				lastRework.setUTCMonth(9);
 				lastRework.setUTCDate(12);
 			}
+			//Fucked up Not found partially, this should make the process faster
+			if (dbBeatmap && dbBeatmap.approvalStatus === 'Not found') {
+				lastRework.setUTCFullYear(2022);
+				lastRework.setUTCMonth(11);
+				lastRework.setUTCDate(12);
+				lastRework.setUTCHours(18);
+			}
 
 			if (!dbBeatmap
 				|| forceUpdate
