@@ -10547,7 +10547,7 @@ module.exports = {
 					condition === 'free' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches === 0 ||
 					!isNaN(condition) && c.shardId === parseInt(condition) ||
 					condition === 'free&update' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches === 0 && c.update === 1) {
-					await c.bancho.disconnect();
+
 					// eslint-disable-next-line no-undef
 					process.exit();
 				} else if (condition === 'update') {
