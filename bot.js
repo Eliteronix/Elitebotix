@@ -115,6 +115,8 @@ const Banchojs = require('bancho.js');
 // eslint-disable-next-line no-undef
 const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterTimespan: 60000, limiterPrivate: 45, limiterPublic: 9 });
 
+client.bancho = bancho;
+
 //login with the Discord client using the Token from the .env file
 // eslint-disable-next-line no-undef
 client.login(process.env.BOTTOKEN);
@@ -129,7 +131,7 @@ process.on('message', message => {
 		console.log(`The shard id is: ${message.data.shardId}`);
 		client.shardId = message.data.shardId;
 
-		if (!wrongCluster(client, client.shardId)) {
+		if (!wrongCluster(client)) {
 			restartProcessQueueTask();
 		}
 
@@ -139,7 +141,7 @@ process.on('message', message => {
 
 		//Connect for the first shard
 		// eslint-disable-next-line no-undef
-		if (!wrongCluster(client, client.shardId) && process.env.SERVER !== 'QA') {
+		if (!wrongCluster(client) && process.env.SERVER !== 'QA') {
 			bancho.connect();
 
 			bancho.lastUserMaps = new Discord.Collection();
