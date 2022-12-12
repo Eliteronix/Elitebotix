@@ -1306,8 +1306,6 @@ module.exports = {
 
 		console.log(`Marked ${update[0]} new beatmaps as used often`);
 
-		console.log(update);
-
 		if (date.getUTCHours() > 0 && !manually) {
 			return;
 		}
