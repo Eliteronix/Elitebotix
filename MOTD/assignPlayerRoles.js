@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 module.exports = {
 	assignPlayerRoles: async function (client) {
 		// eslint-disable-next-line no-undef
@@ -23,6 +25,16 @@ module.exports = {
 						const members = [];
 						guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
 
+						logDatabaseQueries(2, 'MOTD/assignPlayerRoles.js DBDiscordUsers');
+						const registeredPlayers = await DBDiscordUsers.findAll({
+							where: {
+								userId: {
+									[Op.in]: members.map(member => member.user.id)
+								},
+								osuMOTDRegistered: true
+							}
+						});
+
 						//Set all 4 bracket role ids as a reference
 						const bracketRoles = [
 							'833313544400535613',
@@ -46,9 +58,7 @@ module.exports = {
 						for (let i = 0; i < members.length; i++) {
 							//Find out if they are registered or not
 							logDatabaseQueries(2, 'MOTD/assignPlayerRoles.js DBDiscordUsers');
-							const registeredPlayer = await DBDiscordUsers.findOne({
-								where: { userId: members[i].user.id, osuMOTDRegistered: true }
-							});
+							const registeredPlayer = registeredPlayers.find(player => player.userId === members[i].user.id);
 
 							if (registeredPlayer && registeredPlayer.osuMOTDMuted && registeredPlayer.osuMOTDmutedUntil === null) {
 								let week = new Date();
