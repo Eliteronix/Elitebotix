@@ -10573,7 +10573,8 @@ module.exports = {
 					lastDuelRatingUpdate: {
 						[Op.not]: null,
 					},
-				}
+				},
+				silent: true
 			});
 
 			return await msg.reply(`Updated ${updated} discord users.`);
