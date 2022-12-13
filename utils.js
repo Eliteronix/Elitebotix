@@ -1189,12 +1189,6 @@ module.exports = {
 		return outputScore;
 	},
 	async cleanUpDuplicateEntries(manually) {
-		//Only clean up during the night
-		let date = new Date();
-		if (date.getUTCHours() > 6 && !manually) {
-			return;
-		}
-
 		const Sequelize = require('sequelize');
 
 		const sequelize = new Sequelize('database', 'username', 'password', {
@@ -1245,6 +1239,12 @@ module.exports = {
 		}
 
 		console.log(`Created ${iterator} missing users`);
+
+		//Only clean up during the night
+		let date = new Date();
+		if (date.getUTCHours() > 6 && !manually) {
+			return;
+		}
 
 		let mostplayed = await DBOsuMultiScores.findAll({
 			attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
@@ -4534,7 +4534,7 @@ async function logDatabaseQueriesFunction(level, output) {
 
 		//if 750MiB descrease, log it
 		if (startTotal - 750 > (os.freemem() / 1000000)) {
-			console.log('traceDatabaseQueries: ', output, 'Memory usage increased by 750MB', new Date(), os.freemem() / 1000000, 'MiB in use right now');
+			console.log('traceDatabaseQueries: Memory usage increased by 750MB', new Date(), os.freemem() / 1000000, 'MiB in use right now', output);
 			break;
 		}
 	}
