@@ -36,7 +36,6 @@ module.exports = {
 		}
 
 		if (type === 'bug') {
-			//send the bug into the correct Channel
 			createJiraIssue('10006', `[BUG] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
 
 			return interaction.reply('Your bug report was sent to the developers.');
@@ -44,11 +43,11 @@ module.exports = {
 			createJiraIssue('10007', `[FEATURE] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
 
 			return interaction.reply('Your feature-request was sent to the developers.');
-		} else if (args[0].toLowerCase() === 'feedback') {
+		} else if (type === 'feedback') {
 			createJiraIssue('10005', `[FEEDBACK] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
 
 			return interaction.reply('Your feedback has been sent to the developers.');
-		} else if (args[0].toLowerCase() === 'question') {
+		} else if (type === 'question') {
 			createJiraIssue('10008', `[QUESTION] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
 
 			return interaction.reply('Your question has been sent to the developers. They will respond to you as soon as possible.');
