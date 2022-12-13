@@ -274,6 +274,8 @@ module.exports = {
 												} else {
 													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] });
 												}
+
+												lastMessage.react('<:COMPARE:827974793365159997>');
 											} else if (json.events[i].detail.type === 'other') {
 												if (lastMessageType !== 'playing') {
 													let modBits = getModBits(json.events[i].game.mods.join(''));
@@ -646,7 +648,7 @@ async function getResultImage(event, users) {
 	}
 
 	//Create as an attachment
-	return new Discord.MessageAttachment(canvas.toBuffer(), `osu-game-${event.game.id}.png`);
+	return new Discord.MessageAttachment(canvas.toBuffer(), `osu-game-${event.game.id}-${event.game.beatmap.id}.png`);
 }
 
 async function getPlayingImage(event) {
@@ -704,7 +706,7 @@ async function getPlayingImage(event) {
 	fitTextOnLeftCanvas(ctx, `${event.game.beatmap.beatmapset.artist}`, 30, 'comfortaa, sans-serif', 280, 940, 30);
 
 	//Create as an attachment
-	return new Discord.MessageAttachment(canvas.toBuffer(), `osu-game-${event.game.id}.png`);
+	return new Discord.MessageAttachment(canvas.toBuffer(), `osu-game-${event.game.id}-${event.game.beatmap.id}.png`);
 }
 
 function partition(list, start, end) {
