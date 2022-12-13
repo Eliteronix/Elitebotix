@@ -1,5 +1,3 @@
-const { Op } = require('sequelize');
-
 module.exports = {
 	assignPlayerRoles: async function (client) {
 		// eslint-disable-next-line no-undef
@@ -17,6 +15,7 @@ module.exports = {
 				const { DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 				// eslint-disable-next-line no-undef
 				const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+				const { Op } = require('sequelize');
 				//Fetch all members
 				await guild.members.fetch()
 					.then(async (guildMembers) => {

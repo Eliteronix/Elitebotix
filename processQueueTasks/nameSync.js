@@ -7,6 +7,7 @@ module.exports = {
 			const { DBProcessQueue, DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 			// eslint-disable-next-line no-undef
 			const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+			const { Op } = require('sequelize');
 
 			let guild;
 			try {
@@ -26,14 +27,20 @@ module.exports = {
 					.then(async (guildMembers) => {
 						const members = [];
 						guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
+
+						logDatabaseQueries(2, 'processQueueTasks/nameSync.js DBDiscordUsers');
+						let discordUsers = await DBDiscordUsers.findAll({
+							where: {
+								userId: {
+									[Op.in]: members.map(member => member.user.id),
+								},
+							}
+						});
+
 						for (let i = 0; i < members.length; i++) {
 							//Get the user
 							logDatabaseQueries(2, 'processQueueTasks/nameSync.js DBDiscordUsers');
-							let discordUser = await DBDiscordUsers.findOne({
-								where: {
-									userId: members[i].user.id,
-								}
-							});
+							let discordUser = discordUsers.find(user => user.userId === members[i].user.id);
 
 							if (members[i].user.id !== guild.ownerId && discordUser && discordUser.osuUserId && discordUser.osuVerified) {
 								try {
