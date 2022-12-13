@@ -71,7 +71,7 @@ module.exports = {
 
 		osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
-				if (match.raw_end) {
+				if (match.raw_end && !showStart) {
 					if (msg.id) {
 						return msg.channel.send(`Match \`${match.name.replace(/`/g, '')}\` has already ended.`);
 					} else {
@@ -520,7 +520,9 @@ async function getResultImage(event, users) {
 			'300': scores[i].statistics.count_300,
 			'100': scores[i].statistics.count_100,
 			'50': scores[i].statistics.count_50,
-			miss: scores[i].statistics.count_miss
+			miss: scores[i].statistics.count_miss,
+			katu: scores[i].statistics.count_katu,
+			geki: scores[i].statistics.count_geki,
 		};
 
 		let mods = scores[i].mods;
@@ -583,9 +585,23 @@ async function getResultImage(event, users) {
 		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.textAlign = 'left';
 		ctx.fillStyle = '#F0DBE4';
-		ctx.fillText('300', 730, 350 + i * 75);
-		ctx.fillStyle = '#FFFFFF';
-		ctx.fillText(humanReadable(scores[i].statistics.count_300.toString()), 750, 350 + i * 75);
+		if (mode === 'Mania') {
+			ctx.fillText('MAX', 618, 350 + i * 75);
+			ctx.fillStyle = '#FFFFFF';
+			ctx.fillText(humanReadable(scores[i].statistics.count_geki.toString()), 645, 350 + i * 75);
+			ctx.fillStyle = '#F0DBE4';
+			ctx.fillText('300', 680, 350 + i * 75);
+			ctx.fillStyle = '#FFFFFF';
+			ctx.fillText(humanReadable(scores[i].statistics.count_300.toString()), 700, 350 + i * 75);
+			ctx.fillStyle = '#F0DBE4';
+			ctx.fillText('200', 730, 350 + i * 75);
+			ctx.fillStyle = '#FFFFFF';
+			ctx.fillText(humanReadable(scores[i].statistics.count_katu.toString()), 750, 350 + i * 75);
+		} else {
+			ctx.fillText('300', 730, 350 + i * 75);
+			ctx.fillStyle = '#FFFFFF';
+			ctx.fillText(humanReadable(scores[i].statistics.count_300.toString()), 750, 350 + i * 75);
+		}
 		ctx.fillStyle = '#F0DBE4';
 		ctx.fillText('100', 781, 350 + i * 75);
 		ctx.fillStyle = '#FFFFFF';
