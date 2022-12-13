@@ -2806,15 +2806,14 @@ async function getUserDuelStarRatingFunction(input) {
 	let startDate = new Date(endDate);
 	startDate.setUTCFullYear(endDate.getUTCFullYear() - 1);
 
-	//Check if it is the last moment of a year
-	let completeYear = false;
+	//Check if it is the last moment of a month
+	let completeMonth = false;
 	if (endDate.getUTCDate() === 31
-		&& endDate.getUTCMonth() === 11
 		&& endDate.getUTCHours() === 23
 		&& endDate.getUTCMinutes() === 59
 		&& endDate.getUTCSeconds() === 59
 		&& endDate.getUTCMilliseconds() === 999) {
-		completeYear = true;
+		completeMonth = true;
 	}
 
 	//Check if it is the last moment of a week
@@ -2853,7 +2852,7 @@ async function getUserDuelStarRatingFunction(input) {
 	};
 
 	let savedStats = null;
-	if (completeYear || completeWeek) {
+	if (completeMonth || completeWeek) {
 		logDatabaseQueriesFunction(4, 'utils.js getUserDuelStarRatingFunction DuelRatingHistory');
 		savedStats = await DBDuelRatingHistory.findOne({
 			where: {
@@ -2865,7 +2864,7 @@ async function getUserDuelStarRatingFunction(input) {
 		});
 	}
 
-	// console.log(`getUserDuelStarRatingFunction: completeYear/Week: ${new Date() - startTime}ms`);
+	// console.log(`getUserDuelStarRatingFunction: completeMonth/Week: ${new Date() - startTime}ms`);
 
 	if (savedStats) {
 		duelRatings.total = savedStats.osuDuelStarRating;
@@ -3239,43 +3238,42 @@ async function getUserDuelStarRatingFunction(input) {
 
 	// console.log(`getUserDuelStarRatingFunction: getting Mod Maps and steps: ${new Date() - startTime}ms`);
 
-	//Check the past year for individual ratings and limit a potential drop to .2
-	let lastYearStats = await DBDuelRatingHistory.findOne({
+	//Check the past month for individual ratings and limit a potential drop to .02
+	let newEndDate = new Date(endDate);
+	newEndDate.setUTCDate(1);
+	newEndDate.setUTCHours(0);
+	newEndDate.setUTCMinutes(0);
+	newEndDate.setUTCSeconds(0);
+	newEndDate.setUTCMilliseconds(-1);
+
+	let lastMonthStats = await DBDuelRatingHistory.findOne({
 		where: {
 			osuUserId: input.osuUserId,
-			year: endDate.getUTCFullYear() - 1,
-			month: 12,
-			date: 31
+			year: newEndDate.getUTCFullYear(),
+			month: newEndDate.getUTCMonth(),
+			date: newEndDate.getUTCDate()
 		}
 	});
 
-	// console.log(`getUserDuelStarRatingFunction: got last year stats: ${new Date() - startTime}ms`);
+	// console.log(`getUserDuelStarRatingFunction: got last month stats: ${new Date() - startTime}ms`);
 
-	if (!lastYearStats && (duelRatings.noMod > 0 || duelRatings.hidden > 0 || duelRatings.hardRock > 0 || duelRatings.doubleTime > 0 || duelRatings.freeMod > 0)) {
-		let newEndDate = new Date(endDate);
-		newEndDate.setUTCFullYear(newEndDate.getUTCFullYear() - 1);
-		newEndDate.setUTCMonth(11);
-		newEndDate.setUTCDate(31);
-		newEndDate.setUTCHours(23);
-		newEndDate.setUTCMinutes(59);
-		newEndDate.setUTCSeconds(59);
-		newEndDate.setUTCMilliseconds(999);
+	if (!lastMonthStats && (duelRatings.noMod > 0 || duelRatings.hidden > 0 || duelRatings.hardRock > 0 || duelRatings.doubleTime > 0 || duelRatings.freeMod > 0)) {
+		let lastMonthDuelRating = await getUserDuelStarRatingFunction({ osuUserId: input.osuUserId, client: input.client, date: newEndDate });
 
-		let lastYearDuelRating = await getUserDuelStarRatingFunction({ osuUserId: input.osuUserId, client: input.client, date: newEndDate });
+		// console.log(`getUserDuelStarRatingFunction: got last month rating: ${new Date() - startTime}ms`);
 
-		// console.log(`getUserDuelStarRatingFunction: got last year rating: ${new Date() - startTime}ms`);
-
-		lastYearStats = {
+		lastMonthStats = {
 			osuUserId: input.osuUserId,
-			osuDuelStarRating: lastYearDuelRating.total,
-			osuNoModDuelStarRating: lastYearDuelRating.noMod,
-			osuHiddenDuelStarRating: lastYearDuelRating.hidden,
-			osuHardRockDuelStarRating: lastYearDuelRating.hardRock,
-			osuDoubleTimeDuelStarRating: lastYearDuelRating.doubleTime,
-			osuFreeModDuelStarRating: lastYearDuelRating.freeMod,
+			osuDuelStarRating: lastMonthDuelRating.total,
+			osuNoModDuelStarRating: lastMonthDuelRating.noMod,
+			osuHiddenDuelStarRating: lastMonthDuelRating.hidden,
+			osuHardRockDuelStarRating: lastMonthDuelRating.hardRock,
+			osuDoubleTimeDuelStarRating: lastMonthDuelRating.doubleTime,
+			osuFreeModDuelStarRating: lastMonthDuelRating.freeMod,
+			osuDuelProvisional: lastMonthDuelRating.provisional,
 		};
-	} else if (!lastYearStats) {
-		lastYearStats = {
+	} else if (!lastMonthStats) {
+		lastMonthStats = {
 			osuUserId: input.osuUserId,
 			osuDuelStarRating: null,
 			osuNoModDuelStarRating: null,
@@ -3283,32 +3281,35 @@ async function getUserDuelStarRatingFunction(input) {
 			osuHardRockDuelStarRating: null,
 			osuDoubleTimeDuelStarRating: null,
 			osuFreeModDuelStarRating: null,
+			osuDuelProvisional: true,
 		};
 	}
 
-	// console.log(`getUserDuelStarRatingFunction: got last year stats completely: ${new Date() - startTime}ms`);
+	// console.log(`getUserDuelStarRatingFunction: got last month stats completely: ${new Date() - startTime}ms`);
 
 	//Get the modpool spread out of the past 100 user scores for the total value
 	if (duelRatings.noMod || duelRatings.hidden || duelRatings.hardRock || duelRatings.doubleTime || duelRatings.freeMod) {
 
-		if (lastYearStats && lastYearStats.osuNoModDuelStarRating && duelRatings.noMod < lastYearStats.osuNoModDuelStarRating - 0.2) {
-			duelRatings.noMod = lastYearStats.osuNoModDuelStarRating - 0.2;
-		}
+		if (lastMonthStats && !lastMonthStats.osuDuelProvisional) {
+			if (lastMonthStats.osuNoModDuelStarRating && duelRatings.noMod < lastMonthStats.osuNoModDuelStarRating - 0.025) {
+				duelRatings.noMod = lastMonthStats.osuNoModDuelStarRating - 0.025;
+			}
 
-		if (lastYearStats && lastYearStats.osuHiddenDuelStarRating && duelRatings.hidden < lastYearStats.osuHiddenDuelStarRating - 0.2) {
-			duelRatings.hidden = lastYearStats.osuHiddenDuelStarRating - 0.2;
-		}
+			if (lastMonthStats.osuHiddenDuelStarRating && duelRatings.hidden < lastMonthStats.osuHiddenDuelStarRating - 0.025) {
+				duelRatings.hidden = lastMonthStats.osuHiddenDuelStarRating - 0.025;
+			}
 
-		if (lastYearStats && lastYearStats.osuHardRockDuelStarRating && duelRatings.hardRock < lastYearStats.osuHardRockDuelStarRating - 0.2) {
-			duelRatings.hardRock = lastYearStats.osuHardRockDuelStarRating - 0.2;
-		}
+			if (lastMonthStats.osuHardRockDuelStarRating && duelRatings.hardRock < lastMonthStats.osuHardRockDuelStarRating - 0.025) {
+				duelRatings.hardRock = lastMonthStats.osuHardRockDuelStarRating - 0.025;
+			}
 
-		if (lastYearStats && lastYearStats.osuDoubleTimeDuelStarRating && duelRatings.doubleTime < lastYearStats.osuDoubleTimeDuelStarRating - 0.2) {
-			duelRatings.doubleTime = lastYearStats.osuDoubleTimeDuelStarRating - 0.2;
-		}
+			if (lastMonthStats.osuDoubleTimeDuelStarRating && duelRatings.doubleTime < lastMonthStats.osuDoubleTimeDuelStarRating - 0.025) {
+				duelRatings.doubleTime = lastMonthStats.osuDoubleTimeDuelStarRating - 0.025;
+			}
 
-		if (lastYearStats && lastYearStats.osuFreeModDuelStarRating && duelRatings.freeMod < lastYearStats.osuFreeModDuelStarRating - 0.2) {
-			duelRatings.freeMod = lastYearStats.osuFreeModDuelStarRating - 0.2;
+			if (lastMonthStats.osuFreeModDuelStarRating && duelRatings.freeMod < lastMonthStats.osuFreeModDuelStarRating - 0.025) {
+				duelRatings.freeMod = lastMonthStats.osuFreeModDuelStarRating - 0.025;
+			}
 		}
 
 		//Get ratio of modPools played maps
@@ -3345,7 +3346,7 @@ async function getUserDuelStarRatingFunction(input) {
 
 		// console.log(`getUserDuelStarRatingFunction: got total star rating: ${new Date() - startTime}ms`);
 
-		if (completeYear || completeWeek) {
+		if (completeMonth || completeWeek) {
 			//Create the stats if they don't exist
 			await DBDuelRatingHistory.create({
 				osuUserId: input.osuUserId,
@@ -3363,21 +3364,6 @@ async function getUserDuelStarRatingFunction(input) {
 			});
 
 			// console.log(`getUserDuelStarRatingFunction: created new stats: ${new Date() - startTime}ms`);
-
-			if (completeYear) {
-				DBDuelRatingHistory.destroy({
-					where: {
-						osuUserId: input.osuUserId,
-						year: {
-							[Op.gt]: endDate.getUTCFullYear(),
-						},
-						month: 12,
-						date: 31,
-					}
-				});
-
-				// console.log(`getUserDuelStarRatingFunction: deleted old stats: ${new Date() - startTime}ms`);
-			}
 		}
 
 		//Log the values in the discords if they changed and the user is connected to the bot

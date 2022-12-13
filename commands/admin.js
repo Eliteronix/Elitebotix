@@ -1,4 +1,4 @@
-const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBOsuForumPosts } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBOsuForumPosts, DBDuelRatingHistory } = require('../dbObjects');
 const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries, saveOsuMultiScores, humanReadable, multiToBanchoScore, getOsuBeatmap, getMods } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
@@ -10555,6 +10555,28 @@ module.exports = {
 				}
 			}, { context: { condition: args[1] } });
 			return;
+		} else if (args[0] === 'resetSavedRatings') {
+			let deleted = await DBDuelRatingHistory.destroy({
+				where: {
+					id: {
+						[Op.gt]: 0,
+					},
+				}
+			});
+
+			await msg.reply(`Deleted ${deleted} duel rating histories.`);
+
+			let updated = await DBDiscordUsers.update({
+				lastDuelRatingUpdate: null,
+			}, {
+				where: {
+					lastDuelRatingUpdate: {
+						[Op.not]: null,
+					},
+				}
+			});
+
+			return await msg.reply(`Updated ${updated} discord users.`);
 		} else {
 			msg.reply('Invalid command');
 		}
