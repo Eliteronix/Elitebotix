@@ -1316,7 +1316,7 @@ module.exports = {
 
 		while (duplicates && deleted < 25) {
 			let result = await sequelize.query(
-				'SELECT * FROM DBDiscordUsers WHERE 0 < (SELECT COUNT(1) FROM DBDiscordUsers as a WHERE a.osuUserId = DBDiscordUsers.osuUserId AND a.id <> DBDiscordUsers.id) ORDER BY userId ASC LIMIT 1',
+				'SELECT * FROM DBDiscordUsers WHERE 0 < (SELECT COUNT(1) FROM DBDiscordUsers as a WHERE a.osuUserId = DBDiscordUsers.osuUserId AND a.id <> DBDiscordUsers.id)',
 			);
 
 			duplicates = result[0].length;
