@@ -2795,6 +2795,12 @@ module.exports = {
 			// 						'required': true
 			// 					},
 			// 					{
+			// 						'name': 'freemodmessage',
+			// 						'description': 'An intruction message to be displayed when the map is played freemod',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
 			// 						'name': 'players',
 			// 						'description': 'The username, id or link of the players seperated by a \',\'',
 			// 						'type': 3,
@@ -2828,137 +2834,137 @@ module.exports = {
 			// 					},
 			// 				]
 			// 			},
-			// 			{
-			// 				'name': '1v1',
-			// 				'description': 'Lets you schedule a match which is being reffed by the bot',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'date',
-			// 						'description': 'The date of the month in UTC (i.e. 29)',
-			// 						'type': 4,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'month',
-			// 						'description': 'The month in UTC (i.e. 11)',
-			// 						'type': 4,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'year',
-			// 						'description': 'The year in UTC (i.e. 2021)',
-			// 						'type': 4,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'hour',
-			// 						'description': 'The hour in UTC (i.e. 18)',
-			// 						'type': 4,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'minute',
-			// 						'description': 'The minute in UTC (i.e. 0)',
-			// 						'type': 4,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'channel',
-			// 						'description': 'The channel in which the players should be notified.',
-			// 						'type': 7,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'matchname',
-			// 						'description': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
-			// 						'type': 3,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'mappool',
-			// 						'description': 'The mappool in the following format: NM234826,HD123141,HR123172. Available mods: NM,HD,HR,DT,FM,TB',
-			// 						'type': 3,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'bestof',
-			// 						'description': 'The best of',
-			// 						'type': 4,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'bans',
-			// 						'description': 'The amount of bans for each player.',
-			// 						'type': 4,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'players',
-			// 						'description': 'The username, id or link of the players seperated by a \',\'',
-			// 						'type': 3,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'pickbanorder',
-			// 						'description': 'What is the pick and ban order?',
-			// 						'type': 3,
-			// 						'required': true,
-			// 						'choices': [
-			// 							{
-			// 								'name': 'Determined: Roll Winner Bans Second and Picks First (Bans: ABAB)',
-			// 								'value': '1'
-			// 							},
-			// 							{
-			// 								'name': 'Determined: Roll Winner Bans Second and Picks First (Bans: ABBA)',
-			// 								'value': '2'
-			// 							},
-			// 							{
-			// 								'name': 'Choice: Roll Winner chooses Ban Second and Pick First or opposite (Bans: ABAB)',
-			// 								'value': '3'
-			// 							},
-			// 							{
-			// 								'name': 'Choice: Roll Winner chooses Ban Second and Pick First or opposite (Bans: ABBA)',
-			// 								'value': '4'
-			// 							},
-			// 							{
-			// 								'name': 'Choice: Roll Winner chooses Ban First and Pick First or opposite (Bans: ABAB)',
-			// 								'value': '5'
-			// 							},
-			// 							{
-			// 								'name': 'Choice: Roll Winner chooses Ban First and Pick First or opposite (Bans: ABBA)',
-			// 								'value': '6'
-			// 							},
-			// 						]
-			// 					},
-			// 					{
-			// 						'name': 'usenofail',
-			// 						'description': 'Should nofail be applied to all maps?',
-			// 						'type': 5,
-			// 						'required': true,
-			// 					},
-			// 					{
-			// 						'name': 'score',
-			// 						'description': 'What is the winning condition of the match?',
-			// 						'type': 3,
-			// 						'required': true,
-			// 						'choices': [
-			// 							{
-			// 								'name': 'Score v1',
-			// 								'value': '0'
-			// 							},
-			// 							{
-			// 								'name': 'Score v2',
-			// 								'value': '3'
-			// 							},
-			// 							{
-			// 								'name': 'Accuracy',
-			// 								'value': '1'
-			// 							}
-			// 						]
-			// 					},
-			// 				]
-			// 			},
+			// 			// {
+			// 			// 	'name': '1v1',
+			// 			// 	'description': 'Lets you schedule a match which is being reffed by the bot',
+			// 			// 	'type': 1, // 1 is type SUB_COMMAND
+			// 			// 	'options': [
+			// 			// 		{
+			// 			// 			'name': 'date',
+			// 			// 			'description': 'The date of the month in UTC (i.e. 29)',
+			// 			// 			'type': 4,
+			// 			// 			'required': true
+			// 			// 		},
+			// 			// 		{
+			// 			// 			'name': 'month',
+			// 			// 			'description': 'The month in UTC (i.e. 11)',
+			// 			// 			'type': 4,
+			// 			// 			'required': true
+			// 			// 		},
+			// 			// 		{
+			// 			// 			'name': 'year',
+			// 			// 			'description': 'The year in UTC (i.e. 2021)',
+			// 			// 			'type': 4,
+			// 			// 			'required': true
+			// 			// 		},
+			// 			// 		{
+			// 			// 			'name': 'hour',
+			// 			// 			'description': 'The hour in UTC (i.e. 18)',
+			// 			// 			'type': 4,
+			// 			// 			'required': true
+			// 			// 		},
+			// 			// 		{
+			// 			// 			'name': 'minute',
+			// 			// 			'description': 'The minute in UTC (i.e. 0)',
+			// 			// 			'type': 4,
+			// 			// 			'required': true
+			// 			// 		},
+			// 			// 		{
+			// 			// 			'name': 'channel',
+			// 			// 			'description': 'The channel in which the players should be notified.',
+			// 			// 			'type': 7,
+			// 			// 			'required': true
+			// 			// 		},
+			// 			// 		{
+			// 			// 			'name': 'matchname',
+			// 			// 			'description': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
+			// 			// 			'type': 3,
+			// 			// 			'required': true
+			// 			// 		},
+			// 			// 		{
+			// 			// 			'name': 'mappool',
+			// 			// 			'description': 'The mappool in the following format: NM234826,HD123141,HR123172. Available mods: NM,HD,HR,DT,FM,TB',
+			// 			// 			'type': 3,
+			// 			// 			'required': true
+			// 			// 		},
+			// 			// 		{
+			// 			// 			'name': 'bestof',
+			// 			// 			'description': 'The best of',
+			// 			// 			'type': 4,
+			// 			// 			'required': true
+			// 			// 		},
+			// 			// 		{
+			// 			// 			'name': 'bans',
+			// 			// 			'description': 'The amount of bans for each player.',
+			// 			// 			'type': 4,
+			// 			// 			'required': true
+			// 			// 		},
+			// 			// 		{
+			// 			// 			'name': 'players',
+			// 			// 			'description': 'The username, id or link of the players seperated by a \',\'',
+			// 			// 			'type': 3,
+			// 			// 			'required': true
+			// 			// 		},
+			// 			// 		{
+			// 			// 			'name': 'pickbanorder',
+			// 			// 			'description': 'What is the pick and ban order?',
+			// 			// 			'type': 3,
+			// 			// 			'required': true,
+			// 			// 			'choices': [
+			// 			// 				{
+			// 			// 					'name': 'Determined: Roll Winner Bans Second and Picks First (Bans: ABAB)',
+			// 			// 					'value': '1'
+			// 			// 				},
+			// 			// 				{
+			// 			// 					'name': 'Determined: Roll Winner Bans Second and Picks First (Bans: ABBA)',
+			// 			// 					'value': '2'
+			// 			// 				},
+			// 			// 				{
+			// 			// 					'name': 'Choice: Roll Winner chooses Ban Second and Pick First or opposite (Bans: ABAB)',
+			// 			// 					'value': '3'
+			// 			// 				},
+			// 			// 				{
+			// 			// 					'name': 'Choice: Roll Winner chooses Ban Second and Pick First or opposite (Bans: ABBA)',
+			// 			// 					'value': '4'
+			// 			// 				},
+			// 			// 				{
+			// 			// 					'name': 'Choice: Roll Winner chooses Ban First and Pick First or opposite (Bans: ABAB)',
+			// 			// 					'value': '5'
+			// 			// 				},
+			// 			// 				{
+			// 			// 					'name': 'Choice: Roll Winner chooses Ban First and Pick First or opposite (Bans: ABBA)',
+			// 			// 					'value': '6'
+			// 			// 				},
+			// 			// 			]
+			// 			// 		},
+			// 			// 		{
+			// 			// 			'name': 'usenofail',
+			// 			// 			'description': 'Should nofail be applied to all maps?',
+			// 			// 			'type': 5,
+			// 			// 			'required': true,
+			// 			// 		},
+			// 			// 		{
+			// 			// 			'name': 'score',
+			// 			// 			'description': 'What is the winning condition of the match?',
+			// 			// 			'type': 3,
+			// 			// 			'required': true,
+			// 			// 			'choices': [
+			// 			// 				{
+			// 			// 					'name': 'Score v1',
+			// 			// 					'value': '0'
+			// 			// 				},
+			// 			// 				{
+			// 			// 					'name': 'Score v2',
+			// 			// 					'value': '3'
+			// 			// 				},
+			// 			// 				{
+			// 			// 					'name': 'Accuracy',
+			// 			// 					'value': '1'
+			// 			// 				}
+			// 			// 			]
+			// 			// 		},
+			// 			// 	]
+			// 			// },
 			// 			{
 			// 				'name': 'scheduled',
 			// 				'description': 'Show what matches you have scheduled',
@@ -7724,6 +7730,12 @@ module.exports = {
 									'required': true
 								},
 								{
+									'name': 'freemodmessage',
+									'description': 'An intruction message to be displayed when the map is played freemod',
+									'type': 3,
+									'required': true
+								},
+								{
 									'name': 'players',
 									'description': 'The username, id or link of the players seperated by a \',\'',
 									'type': 3,
@@ -7757,6 +7769,137 @@ module.exports = {
 								},
 							]
 						},
+						// {
+						// 	'name': '1v1',
+						// 	'description': 'Lets you schedule a match which is being reffed by the bot',
+						// 	'type': 1, // 1 is type SUB_COMMAND
+						// 	'options': [
+						// 		{
+						// 			'name': 'date',
+						// 			'description': 'The date of the month in UTC (i.e. 29)',
+						// 			'type': 4,
+						// 			'required': true
+						// 		},
+						// 		{
+						// 			'name': 'month',
+						// 			'description': 'The month in UTC (i.e. 11)',
+						// 			'type': 4,
+						// 			'required': true
+						// 		},
+						// 		{
+						// 			'name': 'year',
+						// 			'description': 'The year in UTC (i.e. 2021)',
+						// 			'type': 4,
+						// 			'required': true
+						// 		},
+						// 		{
+						// 			'name': 'hour',
+						// 			'description': 'The hour in UTC (i.e. 18)',
+						// 			'type': 4,
+						// 			'required': true
+						// 		},
+						// 		{
+						// 			'name': 'minute',
+						// 			'description': 'The minute in UTC (i.e. 0)',
+						// 			'type': 4,
+						// 			'required': true
+						// 		},
+						// 		{
+						// 			'name': 'channel',
+						// 			'description': 'The channel in which the players should be notified.',
+						// 			'type': 7,
+						// 			'required': true
+						// 		},
+						// 		{
+						// 			'name': 'matchname',
+						// 			'description': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
+						// 			'type': 3,
+						// 			'required': true
+						// 		},
+						// 		{
+						// 			'name': 'mappool',
+						// 			'description': 'The mappool in the following format: NM234826,HD123141,HR123172. Available mods: NM,HD,HR,DT,FM,TB',
+						// 			'type': 3,
+						// 			'required': true
+						// 		},
+						// 		{
+						// 			'name': 'bestof',
+						// 			'description': 'The best of',
+						// 			'type': 4,
+						// 			'required': true
+						// 		},
+						// 		{
+						// 			'name': 'bans',
+						// 			'description': 'The amount of bans for each player.',
+						// 			'type': 4,
+						// 			'required': true
+						// 		},
+						// 		{
+						// 			'name': 'players',
+						// 			'description': 'The username, id or link of the players seperated by a \',\'',
+						// 			'type': 3,
+						// 			'required': true
+						// 		},
+						// 		{
+						// 			'name': 'pickbanorder',
+						// 			'description': 'What is the pick and ban order?',
+						// 			'type': 3,
+						// 			'required': true,
+						// 			'choices': [
+						// 				{
+						// 					'name': 'Determined: Roll Winner Bans Second and Picks First (Bans: ABAB)',
+						// 					'value': '1'
+						// 				},
+						// 				{
+						// 					'name': 'Determined: Roll Winner Bans Second and Picks First (Bans: ABBA)',
+						// 					'value': '2'
+						// 				},
+						// 				{
+						// 					'name': 'Choice: Roll Winner chooses Ban Second and Pick First or opposite (Bans: ABAB)',
+						// 					'value': '3'
+						// 				},
+						// 				{
+						// 					'name': 'Choice: Roll Winner chooses Ban Second and Pick First or opposite (Bans: ABBA)',
+						// 					'value': '4'
+						// 				},
+						// 				{
+						// 					'name': 'Choice: Roll Winner chooses Ban First and Pick First or opposite (Bans: ABAB)',
+						// 					'value': '5'
+						// 				},
+						// 				{
+						// 					'name': 'Choice: Roll Winner chooses Ban First and Pick First or opposite (Bans: ABBA)',
+						// 					'value': '6'
+						// 				},
+						// 			]
+						// 		},
+						// 		{
+						// 			'name': 'usenofail',
+						// 			'description': 'Should nofail be applied to all maps?',
+						// 			'type': 5,
+						// 			'required': true,
+						// 		},
+						// 		{
+						// 			'name': 'score',
+						// 			'description': 'What is the winning condition of the match?',
+						// 			'type': 3,
+						// 			'required': true,
+						// 			'choices': [
+						// 				{
+						// 					'name': 'Score v1',
+						// 					'value': '0'
+						// 				},
+						// 				{
+						// 					'name': 'Score v2',
+						// 					'value': '3'
+						// 				},
+						// 				{
+						// 					'name': 'Accuracy',
+						// 					'value': '1'
+						// 				}
+						// 			]
+						// 		},
+						// 	]
+						// },
 						{
 							'name': 'scheduled',
 							'description': 'Show what matches you have scheduled',
