@@ -82,12 +82,18 @@ module.exports = {
 		let lobbyStatus = 'Joining phase';
 		let mapIndex = 0;
 		let maps = args[2].split(',');
+		let mappoolReadable = args[6].split(',');
 		let dbMaps = [];
 		for (let i = 0; i < maps.length; i++) {
 			logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBOsuBeatmaps');
 			const dbOsuBeatmap = await DBOsuBeatmaps.findOne({
 				where: { id: maps[i] }
 			});
+
+			if (mappoolReadable[i].toUpperCase().includes('FM')) {
+				dbOsuBeatmap.freeMod = true;
+			}
+
 			dbMaps.push(dbOsuBeatmap);
 		}
 
@@ -112,8 +118,14 @@ module.exports = {
 			await channel.sendMessage(`!mp invite #${dbPlayers[i].osuUserId}`);
 			await messageUserWithRetries(client, users[i], args[1], `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 		}
-		// eslint-disable-next-line no-undef
-		discordChannel.send(`<@${discordIds.join('>, <@')}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup.`);
+
+		client.shard.broadcastEval(async (c, { channelId, message }) => {
+			let channel = await c.channels.cache.get(channelId);
+			if (channel) {
+				channel.send(message);
+			}
+			// eslint-disable-next-line no-undef
+		}, { context: { channelId: args[1], message: `<@${discordIds.join('>, <@')}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup.` } });
 
 		//Add timers to 10 minutes after the match and also during the scheduled time send another message
 		let matchStartingTime = new Date();
@@ -224,6 +236,12 @@ module.exports = {
 						}
 					}
 				}
+
+				if (dbMaps[mapIndex].freeMod) {
+					await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail} freemod`);
+					await channel.sendMessage(args[8]);
+				}
+
 				await channel.sendMessage('Everyone please ready up!');
 				await channel.sendMessage('!mp timer 120');
 				mapIndex++;
@@ -281,6 +299,12 @@ module.exports = {
 							}
 						}
 					}
+
+					if (dbMaps[mapIndex].freeMod) {
+						await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail} freemod`);
+						await channel.sendMessage(args[8]);
+					}
+
 					await channel.sendMessage('Everyone please ready up!');
 					await channel.sendMessage('!mp timer 120');
 					mapIndex++;
@@ -336,6 +360,12 @@ module.exports = {
 						}
 					}
 				}
+
+				if (dbMaps[mapIndex].freeMod) {
+					await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail} freemod`);
+					await channel.sendMessage(args[8]);
+				}
+
 				await channel.sendMessage('Everyone please ready up!');
 				await channel.sendMessage('!mp timer 120');
 				mapIndex++;
