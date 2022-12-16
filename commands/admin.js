@@ -7725,7 +7725,7 @@ module.exports = {
 								},
 								{
 									'name': 'mappool',
-									'description': 'The mappool in the following format: NM234826,HD123141,HR123172. Available mods: NM, HD, HR, DT',
+									'description': 'The mappool in the following format: NM234826,HD123141,HR123172,FMDT2342316',
 									'type': 3,
 									'required': true
 								},
