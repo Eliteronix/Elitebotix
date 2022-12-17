@@ -996,6 +996,9 @@ module.exports = {
 					}
 				}
 			} else if (interaction.options._subcommand === 'data') {
+				const os = require('os');
+
+				console.log('/osu-duel data start', (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now');
 				try {
 					await interaction.deferReply({ ephemeral: true });
 				} catch (error) {
@@ -1070,6 +1073,8 @@ module.exports = {
 				for (let i = 0; i < 5 && !userDuelStarRating; i++) {
 					try {
 						userDuelStarRating = await getUserDuelStarRating({ osuUserId: osuUser.id, client: interaction.client, forceUpdate: true });
+
+						console.log('/osu-duel data duelRating', (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now');
 					} catch (e) {
 						if (i === 4) {
 							if (e === 'No standard plays') {
@@ -1094,8 +1099,12 @@ module.exports = {
 					userDuelStarRating.stepData.FM
 				];
 
+				console.log('/osu-duel data stepData', (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now');
+
 				for (let i = 0; i < stepData.length; i++) {
 					quicksortStep(stepData[i]);
+
+					console.log('/osu-duel data quicksortStep', (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now');
 
 					for (let j = 0; j < stepData[i].length; j++) {
 						stepData[i][j] = `${stepData[i][j].step.toFixed(1)}*: ${(Math.round(stepData[i][j].averageWeight * 1000) / 1000).toFixed(3)} weight`;
@@ -1136,6 +1145,8 @@ module.exports = {
 				}
 
 				quicksortMatchId(multiMatches);
+
+				console.log('/osu-duel data quicksortMatchId', (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now');
 
 				for (let i = 0; i < multiMatches.length; i++) {
 					try {
@@ -1274,8 +1285,12 @@ module.exports = {
 
 				files.push(attachment);
 
+				console.log('/osu-duel data expectedScores.png', (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now');
+
 				for (let i = 0; i < scores.length; i++) {
 					quicksortScore(scores[i]);
+
+					console.log('/osu-duel data quicksortScore', (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now');
 
 					for (let j = 0; j < scores[i].length; j++) {
 						let outlierText = '';
@@ -1310,6 +1325,8 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 				multiMatches = new Discord.MessageAttachment(Buffer.from(multiMatches.join('\n'), 'utf-8'), `osu-duel-multimatches-${osuUser.id}.txt`);
 				files.push(multiMatches);
+
+				console.log('/osu-duel data txts', (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now');
 
 				let explaination = [];
 				explaination.push('**Hello!**');
@@ -1359,6 +1376,8 @@ module.exports = {
 				explaination.push('');
 				explaination.push('**What does outdated mean?**');
 				explaination.push('An outdated rank means that there have not been equal to or more than 5 scores in the past 6 months.');
+
+				console.log('/osu-duel data end', (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now');
 
 				return await interaction.followUp({ content: explaination.join('\n'), files: files, ephemeral: true });
 			} else if (interaction.options._subcommand === 'rating-spread') {

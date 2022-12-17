@@ -4525,7 +4525,7 @@ async function logDatabaseQueriesFunction(level, output) {
 		console.log('traceDatabaseQueries: ', new Date(), output);
 	}
 
-	var os = require('os');
+	const os = require('os');
 
 	let startTotal = os.freemem() / 1000000;
 
@@ -4534,7 +4534,7 @@ async function logDatabaseQueriesFunction(level, output) {
 
 		//if 750MiB descrease, log it
 		if (startTotal - 750 > (os.freemem() / 1000000)) {
-			console.log('traceDatabaseQueries: Memory usage increased by 750MB', new Date(), os.freemem() / 1000000, 'MiB in use right now', output);
+			console.log('traceDatabaseQueries: Memory usage increased by 750MB', new Date(), (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now', output);
 			break;
 		}
 	}
