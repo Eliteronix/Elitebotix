@@ -731,16 +731,20 @@ module.exports = {
 					processingMessage.delete();
 					sentMessage = await interaction.channel.send({ content: 'The data is based on matches played using `/osu-duel queue` and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
 				}
-				await sentMessage.react('👤');
-				await sentMessage.react('🥇');
-				await sentMessage.react('📈');
-				if (userDuelStarRating.noMod !== null
-					|| userDuelStarRating.hidden !== null
-					|| userDuelStarRating.hardRock !== null
-					|| userDuelStarRating.doubleTime !== null
-					|| userDuelStarRating.freeMod !== null) {
-					await sentMessage.react('🆚');
-					await sentMessage.react('📊');
+				try {
+					await sentMessage.react('👤');
+					await sentMessage.react('🥇');
+					await sentMessage.react('📈');
+					if (userDuelStarRating.noMod !== null
+						|| userDuelStarRating.hidden !== null
+						|| userDuelStarRating.hardRock !== null
+						|| userDuelStarRating.doubleTime !== null
+						|| userDuelStarRating.freeMod !== null) {
+						await sentMessage.react('🆚');
+						await sentMessage.react('📊');
+					}
+				} catch (error) {
+					console.error(error);
 				}
 				return;
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
