@@ -40,6 +40,7 @@ module.exports = {
 					await channel.send(message);
 
 					if (autoTrack === 'true') {
+						console.log('tourneyFollow autoTrack', 'matchId', matchId, 'channelId', channelId, 'message', message);
 						// eslint-disable-next-line no-undef
 						let trackCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-matchtrack.js`);
 						trackCommand.execute({ id: 1, channel: channel, author: { id: 1 }, client: c }, [matchId, '--tracking']);
