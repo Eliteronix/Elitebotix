@@ -3,7 +3,7 @@ const osu = require('node-osu');
 
 module.exports = {
 	async execute(client, bancho, twitchClient, processQueueEntry) {
-		// console.log('tourneyFollow');
+		console.log('tourneyFollow', client.shardId);
 		let args = processQueueEntry.additions.split(';');
 
 		try {
