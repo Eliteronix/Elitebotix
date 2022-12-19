@@ -83,10 +83,10 @@ module.exports = {
 
 				if (msg.id) {
 					initialMessage = await msg.channel.send(`Tracking match \`${match.name.replace(/`/g, '')}\`\nReact to this message with :octagonal_sign: to stop tracking`);
-					msg.client.matchTracks++;
+					msg.client.matchTracks.push(matchID);
 				} else {
 					initialMessage = await interaction.editReply(`Tracking match \`${match.name.replace(/`/g, '')}\`\nReact to this message with :octagonal_sign: to stop tracking`);
-					interaction.client.matchTracks++;
+					interaction.client.matchTracks.push(matchID);
 				}
 
 				let stop = false;
@@ -104,9 +104,13 @@ module.exports = {
 					initialMessage.reactions.removeAll().catch(() => { });
 					msg.channel.send(`Stopped tracking match \`${match.name.replace(/`/g, '')}\``);
 					if (msg.id) {
-						msg.client.matchTracks--;
+						if (msg.client.matchTracks.includes(matchID)) {
+							msg.client.matchTracks.splice(msg.client.matchTracks.indexOf(matchID), 1);
+						}
 					} else {
-						interaction.client.matchTracks--;
+						if (interaction.client.matchTracks.includes(matchID)) {
+							interaction.client.matchTracks.splice(interaction.client.matchTracks.indexOf(matchID), 1);
+						}
 					}
 
 					osuApi.getMatch({ mp: matchID })

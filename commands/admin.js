@@ -10668,6 +10668,11 @@ module.exports = {
 			let matchtracks = await msg.client.shard.fetchClientValues('matchTracks');
 			let bingoMatches = await msg.client.shard.fetchClientValues('bingoMatches');
 			let update = await msg.client.shard.fetchClientValues('update');
+
+			console.log('duels', duels);
+			console.log('other', other);
+			console.log('matchtracks', matchtracks);
+
 			let output = `Options: \`all\`, \`free\`, \`shardId\`, \`update\`, \`free&update\`\n\`\`\`Cur.: ${msg.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | Update\n`;
 			for (let i = 0; i < guildSizes.length; i++) {
 				output = output + '--------|------------------|--------|-------|-------|------------|-------|--------\n';
@@ -10676,7 +10681,7 @@ module.exports = {
 				let guildSize = guildSizes[i].toString().padStart(6, ' ');
 				let duelSize = duels[i].length.toString().padStart(5, ' ');
 				let otherSize = other[i].length.toString().padStart(5, ' ');
-				let matchtrackSize = matchtracks[i].toString().padStart(10, ' ');
+				let matchtrackSize = matchtracks[i].length.toString().padStart(10, ' ');
 				let bingoMatchSize = bingoMatches[i].toString().padStart(5, ' ');
 				let updateString = update[i].toString().padStart(6, ' ');
 				output = output + `Shard ${i} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize} | ${updateString}\n`;
@@ -10689,7 +10694,7 @@ module.exports = {
 				if (condition === 'all' ||
 					condition === 'free' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches === 0 ||
 					!isNaN(condition) && c.shardId === parseInt(condition) ||
-					condition === 'free&update' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches === 0 && c.update === 1) {
+					condition === 'free&update' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches === 0 && c.update === 1) {
 
 					// eslint-disable-next-line no-undef
 					process.exit();

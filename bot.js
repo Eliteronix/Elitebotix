@@ -168,7 +168,7 @@ function readyDiscord() {
 	client.startDate = new Date();
 	client.duels = [];
 	client.otherMatches = [];
-	client.matchTracks = 0;
+	client.matchTracks = [];
 	client.bingoMatches = 0;
 	client.update = 0;
 
