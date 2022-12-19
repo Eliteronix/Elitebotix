@@ -135,7 +135,11 @@ module.exports = {
 
 				while (!stop) {
 					if (msg.client) {
-						console.log(msg.client.shardId, 'tracking match', matchID, 'lastMessage', lastMessage, 'lastMessageType', lastMessageType);
+						if (lastMessage) {
+							console.log(`[${msg.client.shardId}]`, 'tracking match', matchID, 'lastMessage', lastMessage.id, 'lastMessageType', lastMessageType);
+						} else {
+							console.log(`[${msg.client.shardId}]`, 'tracking match', matchID, 'lastMessage', 'null', 'lastMessageType', lastMessageType);
+						}
 					}
 					await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 						.then(async (res) => {
@@ -299,6 +303,10 @@ module.exports = {
 
 													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment] });
 
+													if (msg.client) {
+														console.log(`[${msg.client.shardId}]`, 'tracking match', matchID, 'lastMessage', lastMessage.id, 'sent playing dings');
+													}
+
 													await lastMessage.react('<:COMPARE:827974793365159997>');
 													await lastMessage.react('🗺️');
 												}
@@ -330,7 +338,9 @@ module.exports = {
 													latestEventId = json.events[i].id;
 												} else {
 													latestEventId = json.events[i].id - 1;
-													console.log('matchtrack break');
+													if (msg.client) {
+														console.log(`[${msg.client.shardId}] matchtrack break`);
+													}
 													break;
 												}
 											} else {
