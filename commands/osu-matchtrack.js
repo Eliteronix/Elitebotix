@@ -135,7 +135,7 @@ module.exports = {
 
 				while (!stop) {
 					if (msg.client) {
-						console.log(msg.client.shardId, 'tracking match', matchID);
+						console.log(msg.client.shardId, 'tracking match', matchID, 'lastMessage', lastMessage, 'lastMessageType', lastMessageType);
 					}
 					await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 						.then(async (res) => {
@@ -330,6 +330,7 @@ module.exports = {
 													latestEventId = json.events[i].id;
 												} else {
 													latestEventId = json.events[i].id - 1;
+													console.log('matchtrack break');
 													break;
 												}
 											} else {
