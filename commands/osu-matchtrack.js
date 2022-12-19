@@ -134,13 +134,6 @@ module.exports = {
 				let lastMessageType = 'mapresult';
 
 				while (!stop) {
-					if (msg.client) {
-						if (lastMessage) {
-							console.log(`[${msg.client.shardId}]`, 'tracking match', matchID, 'lastMessage', lastMessage.id, 'lastMessageType', lastMessageType);
-						} else {
-							console.log(`[${msg.client.shardId}]`, 'tracking match', matchID, 'lastMessage', 'null', 'lastMessageType', lastMessageType);
-						}
-					}
 					await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 						.then(async (res) => {
 							let htmlCode = await res.text();
@@ -277,14 +270,8 @@ module.exports = {
 												}
 
 												if (lastMessageType === 'playing') {
-													if (msg.client) {
-														console.log(`[${msg.client.shardId}]`, 'tracking match', matchID, 'lastMessage', lastMessage.id, 'edited playing dings for result');
-													}
 													lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] });
 												} else {
-													if (msg.client) {
-														console.log(`[${msg.client.shardId}]`, 'tracking match', matchID, 'lastMessage', lastMessage.id, 'sent result without editing playing dings');
-													}
 													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] });
 												}
 
@@ -308,10 +295,6 @@ module.exports = {
 													}
 
 													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment] });
-
-													if (msg.client) {
-														console.log(`[${msg.client.shardId}]`, 'tracking match', matchID, 'lastMessage', lastMessage.id, 'sent playing dings');
-													}
 
 													await lastMessage.react('<:COMPARE:827974793365159997>');
 													await lastMessage.react('🗺️');
@@ -344,9 +327,6 @@ module.exports = {
 													latestEventId = json.events[i].id;
 												} else {
 													latestEventId = json.events[i].id - 1;
-													if (msg.client) {
-														console.log(`[${msg.client.shardId}] matchtrack break`);
-													}
 													break;
 												}
 											} else {
