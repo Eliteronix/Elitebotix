@@ -134,6 +134,9 @@ module.exports = {
 				let lastMessageType = 'mapresult';
 
 				while (!stop) {
+					if (msg.client) {
+						console.log(msg.client.shardId, 'tracking match', matchID);
+					}
 					await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 						.then(async (res) => {
 							let htmlCode = await res.text();
