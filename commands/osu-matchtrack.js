@@ -277,8 +277,14 @@ module.exports = {
 												}
 
 												if (lastMessageType === 'playing') {
+													if (msg.client) {
+														console.log(`[${msg.client.shardId}]`, 'tracking match', matchID, 'lastMessage', lastMessage.id, 'edited playing dings for result');
+													}
 													lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] });
 												} else {
+													if (msg.client) {
+														console.log(`[${msg.client.shardId}]`, 'tracking match', matchID, 'lastMessage', lastMessage.id, 'sent result without editing playing dings');
+													}
 													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] });
 												}
 
