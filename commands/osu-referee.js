@@ -35,7 +35,7 @@ module.exports = {
 			date.setUTCMonth(interaction.options.getInteger('month') - 1);
 			date.setUTCFullYear(interaction.options.getInteger('year'));
 			let useNoFail = interaction.options.getBoolean('usenofail');
-			let scoreMode = interaction.options.getString('scoremode');
+			let scoreMode = interaction.options.getString('score');
 			let freemodMessage = interaction.options.getString('freemodmessage');
 
 			let channel = interaction.options.getChannel('channel');
