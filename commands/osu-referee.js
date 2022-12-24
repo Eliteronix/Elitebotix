@@ -3,6 +3,7 @@ const osu = require('node-osu');
 const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, logDatabaseQueries, getModBits } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-referee',
@@ -24,8 +25,15 @@ module.exports = {
 			return msg.reply('Please set up the game using the / command `/osu-referee`');
 		}
 
-		await interaction.reply('Information is being processed');
-		if (interaction.options._subcommand === 'soloqualifiers') {
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
+		}
+		if (interaction.options._subcommand === 'soloqualifiers' || interaction.options._subcommand === 'teamqualifiers') {
 			let matchname = interaction.options.getString('matchname');
 			let date = new Date();
 			date.setUTCSeconds(0);
@@ -37,13 +45,17 @@ module.exports = {
 			let useNoFail = interaction.options.getBoolean('usenofail');
 			let scoreMode = interaction.options.getString('score');
 			let freemodMessage = interaction.options.getString('freemodmessage');
+			let teamsize = 1;
+
+			if (interaction.options._subcommand === 'teamqualifiers') {
+				teamsize = interaction.options.getInteger('teamsize');
+			}
 
 			let channel = interaction.options.getChannel('channel');
 			if (channel.type !== 'GUILD_TEXT') {
 				return interaction.followUp(`<#${channel.id}> is not a valid text channel.`);
 			}
 
-			let dbPlayers = [];
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -52,41 +64,54 @@ module.exports = {
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
 
-			let players = interaction.options.getString('players').split(',');
+			let players = interaction.options.getString('players');
 
-			for (let j = 0; j < players.length; j++) {
-				const response = await osuApi.getUser({ u: getIDFromPotentialOsuLink(players[j]), m: 0 })
-					.then(async (user) => {
-						updateOsuDetailsforUser(user, 0);
+			if (interaction.options._subcommand === 'soloqualifiers') {
+				players = players.replaceAll(',', ';');
+			}
 
-						logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 1');
-						const dbDiscordUser = await DBDiscordUsers.findOne({
-							where: {
-								userId: {
-									[Op.not]: null
+			let teams = players.split(';');
+
+			let dbPlayers = [];
+			for (let i = 0; i < teams.length; i++) {
+				let team = [];
+				for (let j = 0; j < teams[i].split(',').length; j++) {
+					const response = await osuApi.getUser({ u: getIDFromPotentialOsuLink(teams[i].split(',')[j]), m: 0 })
+						.then(async (user) => {
+							updateOsuDetailsforUser(user, 0);
+
+							logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 1');
+							const dbDiscordUser = await DBDiscordUsers.findOne({
+								where: {
+									userId: {
+										[Op.not]: null
+									},
+									osuUserId: user.id
 								},
-								osuUserId: user.id
-							},
+							});
+
+							if (dbDiscordUser) {
+								// Add the user to the team
+								team.push(dbDiscordUser.id);
+							} else {
+								return interaction.followUp(`\`${user.name}\` doesn't have their account connected. Please tell them to connect their account using \`/osu-link connect\`. (Use \`_\` instead of spaces)`);
+							}
+						})
+						.catch(err => {
+							if (err.message === 'Not found') {
+								return interaction.followUp(`Could not find user \`${getIDFromPotentialOsuLink(teams[i].split(',')[j]).replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
+							} else {
+								console.log(err);
+								return interaction.followUp(`The bot ran into an error processing the user ${getIDFromPotentialOsuLink(teams[i].split(',')[j])}. Please try again.`);
+							}
 						});
 
-						if (dbDiscordUser) {
-							dbPlayers.push(dbDiscordUser.id);
-						} else {
-							return interaction.followUp(`\`${user.name}\` doesn't have their account connected. Please tell them to connect their account using \`/osu-link connect\`. (Use \`_\` instead of spaces)`);
-						}
-					})
-					.catch(err => {
-						if (err.message === 'Not found') {
-							return interaction.followUp(`Could not find user \`${getIDFromPotentialOsuLink(players[j]).replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
-						} else {
-							console.log(err);
-							return interaction.followUp(`The bot ran into an error processing the user ${getIDFromPotentialOsuLink(players[j])}. Please try again.`);
-						}
-					});
-
-				if (response) {
-					return;
+					if (response) {
+						return;
+					}
 				}
+				//Push the team to the array
+				dbPlayers.push(team.join(','));
 			}
 
 			let dbMaps = [];
@@ -144,8 +169,8 @@ module.exports = {
 
 			date.setUTCMinutes(date.getUTCMinutes() - 15);
 
-			DBProcessQueue.create({ guildId: interaction.guildId, task: 'tourneyMatchNotification', priority: 10, additions: `${interaction.user.id};${channel.id};${dbMaps.join(',')};${dbPlayers.join(',')};${useNoFail};${matchname};${mappoolReadable};${scoreMode};${freemodMessage}`, date: date });
-			return interaction.followUp('The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use `/osu-referee scheduled`');
+			DBProcessQueue.create({ guildId: interaction.guildId, task: 'tourneyMatchNotification', priority: 10, additions: `${interaction.user.id};${channel.id};${dbMaps.join(',')};${dbPlayers.join('|')};${useNoFail};${matchname};${mappoolReadable};${scoreMode};${freemodMessage};${teamsize}`, date: date });
+			return interaction.editReply('The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use `/osu-referee scheduled`');
 		} else if (interaction.options._subcommand === 'scheduled') {
 			let scheduledMatches = [];
 			//Get all scheduled matches that still need to notify
@@ -159,16 +184,22 @@ module.exports = {
 				let additions = tourneyMatchNotifications[i].additions.split(';');
 				//Check if the executing user is the 0 index of the additions
 				if (additions[0] === interaction.user.id) {
-					//Get the player IDs from the additions on index 3
-					let players = additions[3].split(',');
-					//Translate the player IDs to osu! usernames
-					let dbPlayerNames = [];
+					let players = additions[3].replaceAll('|', ',').split(',');
+					let dbPlayers = [];
 					for (let j = 0; j < players.length; j++) {
-						logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 2');
+						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
 						const dbDiscordUser = await DBDiscordUsers.findOne({
 							where: { id: players[j] }
 						});
-						dbPlayerNames.push(dbDiscordUser.osuName);
+						dbPlayers.push(dbDiscordUser);
+					}
+
+					// Sort players by id desc
+					dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
+
+					players = additions[3];
+					for (let j = 0; j < dbPlayers.length; j++) {
+						players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
 					}
 
 					//Get the match date from the date the task is scheduled to
@@ -176,7 +207,7 @@ module.exports = {
 					//Increase the matchDate by 15 minutes to get the date the match actually starts (Because notifications happen 15 minutes earlier)
 					matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 15);
 
-					scheduledMatches.push(`\`\`\`Scheduled:\nInternal ID: ${tourneyMatchNotifications[i].id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${additions[6]}\`\`\``);
+					scheduledMatches.push(`\`\`\`Scheduled:\nInternal ID: ${tourneyMatchNotifications[i].id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${players}\nMappool: ${additions[6]}\`\`\``);
 				}
 			}
 
@@ -188,20 +219,28 @@ module.exports = {
 			for (let i = 0; i < tourneyMatchReferees.length; i++) {
 				let additions = tourneyMatchReferees[i].additions.split(';');
 				if (additions[0] === interaction.user.id) {
-					let players = additions[3].split(',');
-					let dbPlayerNames = [];
+					let players = additions[3].replaceAll('|', ',').split(',');
+					let dbPlayers = [];
 					for (let j = 0; j < players.length; j++) {
-						logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 3');
+						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
 						const dbDiscordUser = await DBDiscordUsers.findOne({
 							where: { id: players[j] }
 						});
-						dbPlayerNames.push(dbDiscordUser.osuName);
+						dbPlayers.push(dbDiscordUser);
+					}
+
+					// Sort players by id desc
+					dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
+
+					players = additions[3];
+					for (let j = 0; j < dbPlayers.length; j++) {
+						players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
 					}
 
 					const matchDate = tourneyMatchReferees[i].date;
 					matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 10);
 
-					scheduledMatches.push(`\`\`\`Scheduled (Already pinged):\nInternal ID: ${tourneyMatchReferees[i].id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${additions[6]}\`\`\``);
+					scheduledMatches.push(`\`\`\`Scheduled (Already pinged):\nInternal ID: ${tourneyMatchReferees[i].id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${players}\nMappool: ${additions[6]}\`\`\``);
 				}
 			}
 
@@ -222,14 +261,22 @@ module.exports = {
 			if (processQueueTask && (processQueueTask.task === 'tourneyMatchNotification' || processQueueTask.task === 'tourneyMatchReferee')) {
 				let additions = processQueueTask.additions.split(';');
 				if (additions[0] === interaction.user.id) {
-					let players = additions[3].split(',');
-					let dbPlayerNames = [];
+					let players = additions[3].replaceAll('|', ',').split(',');
+					let dbPlayers = [];
 					for (let j = 0; j < players.length; j++) {
-						logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 4');
+						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
 						const dbDiscordUser = await DBDiscordUsers.findOne({
 							where: { id: players[j] }
 						});
-						dbPlayerNames.push(dbDiscordUser.osuName);
+						dbPlayers.push(dbDiscordUser);
+					}
+
+					// Sort players by id desc
+					dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
+
+					players = additions[3];
+					for (let j = 0; j < dbPlayers.length; j++) {
+						players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
 					}
 
 					const matchDate = processQueueTask.date;
@@ -239,7 +286,7 @@ module.exports = {
 						matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 10);
 					}
 
-					interaction.followUp(`The following match has been removed and is no longer scheduled to happen:\n\`\`\`Internal ID: ${processQueueTask.id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${additions[6]}\`\`\``);
+					interaction.followUp(`The following match has been removed and is no longer scheduled to happen:\n\`\`\`Internal ID: ${processQueueTask.id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${players}\nMappool: ${additions[6]}\`\`\``);
 
 					return processQueueTask.destroy();
 				}
