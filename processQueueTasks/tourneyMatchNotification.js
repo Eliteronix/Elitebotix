@@ -16,7 +16,7 @@ module.exports = {
 
 			let channel = await c.channels.cache.get(channelId);
 			if (channel) {
-				let players = args[3].split(',');
+				let players = args[3].replaceAll('|', ',').split(',');
 				let dbPlayers = [];
 				for (let i = 0; i < players.length; i++) {
 					logDatabaseQueries(2, 'processQueueTasks/tourneyMatchNotification.js DBDiscordUsers 1');
@@ -25,6 +25,7 @@ module.exports = {
 					});
 					dbPlayers.push(dbDiscordUser.userId);
 				}
+
 				let matchTime = new Date();
 				matchTime.setUTCFullYear(processQueueEntry.date.getUTCFullYear());
 				matchTime.setUTCMonth(processQueueEntry.date.getUTCMonth());

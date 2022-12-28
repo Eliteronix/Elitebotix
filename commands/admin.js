@@ -2790,7 +2790,7 @@ module.exports = {
 			// 					},
 			// 					{
 			// 						'name': 'mappool',
-			// 						'description': 'The mappool in the following format: NM234826,HD123141,HR123172. Available mods: NM, HD, HR, DT',
+			// 						'description': 'The mappool in the following format: NM234826,HD123141,HR123172,FMDT2342316',
 			// 						'type': 3,
 			// 						'required': true
 			// 					},
@@ -2804,6 +2804,105 @@ module.exports = {
 			// 						'name': 'players',
 			// 						'description': 'The username, id or link of the players seperated by a \',\'',
 			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'usenofail',
+			// 						'description': 'Should nofail be applied to all maps?',
+			// 						'type': 5,
+			// 						'required': true,
+			// 					},
+			// 					{
+			// 						'name': 'score',
+			// 						'description': 'What is the winning condition of the match?',
+			// 						'type': 3,
+			// 						'required': true,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Score v1',
+			// 								'value': '0'
+			// 							},
+			// 							{
+			// 								'name': 'Score v2',
+			// 								'value': '3'
+			// 							},
+			// 							{
+			// 								'name': 'Accuracy',
+			// 								'value': '1'
+			// 							}
+			// 						]
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'teamqualifiers',
+			// 				'description': 'Lets you schedule a match which is being reffed by the bot',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'date',
+			// 						'description': 'The date of the month in UTC (i.e. 29)',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'month',
+			// 						'description': 'The month in UTC (i.e. 11)',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'year',
+			// 						'description': 'The year in UTC (i.e. 2021)',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'hour',
+			// 						'description': 'The hour in UTC (i.e. 18)',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'minute',
+			// 						'description': 'The minute in UTC (i.e. 0)',
+			// 						'type': 4,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'channel',
+			// 						'description': 'The channel in which the players should be notified.',
+			// 						'type': 7,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'matchname',
+			// 						'description': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'mappool',
+			// 						'description': 'The mappool in the following format: NM234826,HD123141,HR123172,FMDT2342316',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'freemodmessage',
+			// 						'description': 'An intruction message to be displayed when the map is played freemod',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'players',
+			// 						'description': 'The username, id or link of the players seperated by a \',\' | Teams seperated by a \';\'',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'teamsize',
+			// 						'description': 'The amount of players per team to play at once',
+			// 						'type': 4,
 			// 						'required': true
 			// 					},
 			// 					{
@@ -7769,6 +7868,105 @@ module.exports = {
 								},
 							]
 						},
+						{
+							'name': 'teamqualifiers',
+							'description': 'Lets you schedule a match which is being reffed by the bot',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'date',
+									'description': 'The date of the month in UTC (i.e. 29)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'month',
+									'description': 'The month in UTC (i.e. 11)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'year',
+									'description': 'The year in UTC (i.e. 2021)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'hour',
+									'description': 'The hour in UTC (i.e. 18)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'minute',
+									'description': 'The minute in UTC (i.e. 0)',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'channel',
+									'description': 'The channel in which the players should be notified.',
+									'type': 7,
+									'required': true
+								},
+								{
+									'name': 'matchname',
+									'description': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'mappool',
+									'description': 'The mappool in the following format: NM234826,HD123141,HR123172,FMDT2342316',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'freemodmessage',
+									'description': 'An intruction message to be displayed when the map is played freemod',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'players',
+									'description': 'The username, id or link of the players seperated by a \',\' | Teams seperated by a \';\'',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'teamsize',
+									'description': 'The amount of players per team to play at once',
+									'type': 4,
+									'required': true
+								},
+								{
+									'name': 'usenofail',
+									'description': 'Should nofail be applied to all maps?',
+									'type': 5,
+									'required': true,
+								},
+								{
+									'name': 'score',
+									'description': 'What is the winning condition of the match?',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Score v1',
+											'value': '0'
+										},
+										{
+											'name': 'Score v2',
+											'value': '3'
+										},
+										{
+											'name': 'Accuracy',
+											'value': '1'
+										}
+									]
+								},
+							]
+						},
 						// {
 						// 	'name': '1v1',
 						// 	'description': 'Lets you schedule a match which is being reffed by the bot',
@@ -10657,8 +10855,6 @@ module.exports = {
 					data = [];
 				}
 			}
-		} else if (args[0] === 'shardGuildSizes') {
-			msg.client.shard.fetchClientValues('guilds.cache.size').then(console.log);
 		} else if (args[0] === 'restart') {
 
 			let guildSizes = await msg.client.shard.fetchClientValues('guilds.cache.size');

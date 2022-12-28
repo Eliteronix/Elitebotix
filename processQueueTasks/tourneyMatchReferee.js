@@ -23,24 +23,33 @@ module.exports = {
 				break;
 			} catch (error) {
 				if (i === 4) {
-					let players = args[3].split(',');
+					let players = args[3].replaceAll('|', ',').split(',');
 					let dbPlayers = [];
 					for (let j = 0; j < players.length; j++) {
 						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
 						const dbDiscordUser = await DBDiscordUsers.findOne({
 							where: { id: players[j] }
 						});
-						dbPlayers.push(dbDiscordUser.osuName);
+						dbPlayers.push(dbDiscordUser);
 					}
+
+					// Sort players by id desc
+					dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
+
+					players = args[3];
+					for (let j = 0; j < dbPlayers.length; j++) {
+						players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
+					}
+
 					processQueueEntry.destroy();
 					let user = await client.users.fetch(args[0]);
-					user.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[6]}`);
+					user.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`);
 					client.shard.broadcastEval(async (c, { channelId, message }) => {
 						let channel = await c.channels.cache.get(channelId);
 						if (channel) {
 							channel.send(message);
 						}
-					}, { context: { channelId: args[1], message: `I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[6]}` } });
+					}, { context: { channelId: args[1], message: `I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}` } });
 					return;
 				} else {
 					await pause(10000);
@@ -48,21 +57,25 @@ module.exports = {
 			}
 		}
 
-		let players = args[3].split(',');
-		let dbPlayers = [];
+		let teams = args[3].split('|');
 		let playerIds = [];
 		let discordIds = [];
-		let users = [];
-		for (let i = 0; i < players.length; i++) {
-			logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 2');
-			const dbDiscordUser = await DBDiscordUsers.findOne({
-				where: { id: players[i] }
-			});
-			dbPlayers.push(dbDiscordUser);
-			playerIds.push(dbDiscordUser.osuUserId);
-			discordIds.push(dbDiscordUser.userId);
-			const user = await client.users.fetch(dbDiscordUser.userId);
-			users.push(user);
+		for (let i = 0; i < teams.length; i++) {
+			teams[i] = teams[i].split(',');
+			for (let j = 0; j < teams[i].length; j++) {
+				logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 2');
+				const dbDiscordUser = await DBDiscordUsers.findOne({
+					where: { id: teams[i][j] }
+				});
+
+				playerIds.push(dbDiscordUser.osuUserId);
+				discordIds.push(dbDiscordUser.userId);
+
+				const user = await client.users.fetch(dbDiscordUser.userId);
+				dbDiscordUser.user = user;
+
+				teams[i][j] = dbDiscordUser;
+			}
 		}
 
 		channel.on('message', async (msg) => {
@@ -78,7 +91,7 @@ module.exports = {
 		await lobby.setPassword(password);
 		await channel.sendMessage('!mp addref Eliteronix');
 		await channel.sendMessage('!mp map 975342 0');
-		await channel.sendMessage(`!mp set 0 ${args[7]} ${dbPlayers.length}`);
+		await channel.sendMessage(`!mp set 0 ${args[7]} ${playerIds.length}`);
 		let lobbyStatus = 'Joining phase';
 		let mapIndex = 0;
 		let maps = args[2].split(',');
@@ -99,24 +112,35 @@ module.exports = {
 
 		//Send the MP to the scheduler
 		try {
-			let dbPlayerNames = [];
+			let players = args[3].replaceAll('|', ',').split(',');
+			let dbPlayers = [];
 			for (let j = 0; j < players.length; j++) {
-				logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 4');
+				logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
 				const dbDiscordUser = await DBDiscordUsers.findOne({
 					where: { id: players[j] }
 				});
-				dbPlayerNames.push(dbDiscordUser.osuName);
+				dbPlayers.push(dbDiscordUser);
+			}
+
+			// Sort players by id desc
+			dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
+
+			players = args[3];
+			for (let j = 0; j < dbPlayers.length; j++) {
+				players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
 			}
 
 			let user = await client.users.fetch(args[0]);
-			user.send(`The scheduled Qualifier match has started. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${args[6]}`);
+			user.send(`The scheduled Qualifier match has started. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`);
 		} catch (e) {
 			//Nothing
 		}
 
-		for (let i = 0; i < users.length; i++) {
-			await channel.sendMessage(`!mp invite #${dbPlayers[i].osuUserId}`);
-			await messageUserWithRetries(client, users[i], args[1], `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+		for (let i = 0; i < teams.length; i++) {
+			for (let j = 0; j < teams[i].length; j++) {
+				await channel.sendMessage(`!mp invite #${teams[i][j].osuUserId}`);
+				await messageUserWithRetries(client, teams[i][j].user, args[1], `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+			}
 		}
 
 		client.shard.broadcastEval(async (c, { channelId, message }) => {
@@ -154,7 +178,7 @@ module.exports = {
 			noFail = 1;
 		}
 
-		let playersThatDontSeemToForfeit = [];
+		let teamsThatDontSeemToForfeit = [];
 
 		//Add discord messages and also ingame invites for the timers
 		channel.on('message', async (msg) => {
@@ -199,17 +223,26 @@ module.exports = {
 					await channel.sendMessage('!mp close');
 					processQueueEntry.destroy();
 
-					let dbPlayerNames = [];
+					let players = args[3].replaceAll('|', ',').split(',');
+					let dbPlayers = [];
 					for (let j = 0; j < players.length; j++) {
-						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 3');
+						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
 						const dbDiscordUser = await DBDiscordUsers.findOne({
 							where: { id: players[j] }
 						});
-						dbPlayerNames.push(dbDiscordUser.osuName);
+						dbPlayers.push(dbDiscordUser);
+					}
+
+					// Sort players by id desc
+					dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
+
+					players = args[3];
+					for (let j = 0; j < dbPlayers.length; j++) {
+						players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
 					}
 
 					let user = await client.users.fetch(args[0]);
-					user.send(`The scheduled Qualifier has been aborted because no one showed up. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${args[6]}`);
+					user.send(`The scheduled Qualifier has been aborted because no one showed up. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`);
 					return await channel.leave();
 				}
 
@@ -248,17 +281,30 @@ module.exports = {
 			} else if (matchStartingTime < now && !secondRoundOfInvitesSent && lobbyStatus === 'Joining phase') {
 				secondRoundOfInvitesSent = true;
 				await lobby.updateSettings();
-				for (let i = 0; i < users.length; i++) {
-					if (!lobby.playersById[dbPlayers[i].osuUserId.toString()]) {
-						await channel.sendMessage(`!mp invite #${dbPlayers[i].osuUserId}`);
-						await messageUserWithRetries(client, users[i], args[1], `Your match is about to start. Please join as soon as possible. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+				for (let i = 0; i < teams.length; i++) {
+					//Check if there are enough players in the lobby from the team
+					let playersInLobby = 0;
+					for (let j = 0; j < teams[i].length; j++) {
+						if (lobby.playersById[teams[i][j].osuUserId.toString()]) {
+							playersInLobby++;
+						}
+					}
 
-						client.shard.broadcastEval(async (c, { channelId, message }) => {
-							let channel = await c.channels.cache.get(channelId);
-							if (channel) {
-								channel.send(message);
+					//If not enough players in the lobby invite the missing players
+					if (playersInLobby < parseInt(args[9])) {
+						for (let j = 0; j < teams[i].length; j++) {
+							if (!lobby.playersById[teams[i][j].osuUserId.toString()]) {
+								await channel.sendMessage(`!mp invite #${teams[i][j].osuUserId}`);
+								await messageUserWithRetries(client, teams[i][j].user, args[1], `Your match is about to start. Please join as soon as possible. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+
+								client.shard.broadcastEval(async (c, { channelId, message }) => {
+									const channel = c.channels.cache.get(channelId);
+									if (channel) {
+										await channel.send(message);
+									}
+								}, { context: { channelId: args[1], message: `<@${teams[i][j].userId}> The lobby is about to start. I've sent you another invite.` } });
 							}
-						}, { context: { channelId: args[1], message: `<@${dbPlayers[i].userId}> The lobby is about to start. I've sent you another invite.` } });
+						}
 					}
 				}
 			}
@@ -269,13 +315,21 @@ module.exports = {
 				channel.sendMessage(`!mp kick #${obj.player.user.id}`);
 			} else if (lobbyStatus === 'Joining phase') {
 				await lobby.updateSettings();
-				let allPlayersJoined = true;
-				for (let i = 0; i < dbPlayers.length && allPlayersJoined; i++) {
-					if (!lobby.playersById[dbPlayers[i].osuUserId.toString()]) {
-						allPlayersJoined = false;
+				let allTeamsJoined = true;
+				for (let i = 0; i < teams.length && allTeamsJoined; i++) {
+					let playersInLobby = 0;
+					for (let j = 0; j < teams[i].length; j++) {
+						if (lobby.playersById[teams[i][j].osuUserId.toString()]) {
+							playersInLobby++;
+						}
+					}
+
+					if (playersInLobby < parseInt(args[9])) {
+						allTeamsJoined = false;
 					}
 				}
-				if (allPlayersJoined) {
+
+				if (allTeamsJoined) {
 					lobbyStatus = 'Waiting for start';
 
 					while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
@@ -312,22 +366,40 @@ module.exports = {
 			}
 
 			//Add all players that belong into the lobby and have joined once already here
-			if (playerIds.includes(obj.player.user.id.toString()) && !playersThatDontSeemToForfeit.includes(obj.player.user.id.toString())) {
-				playersThatDontSeemToForfeit.push(obj.player.user.id.toString());
+			for (let i = 0; i < teams.length; i++) {
+				let playersInLobby = 0;
+				for (let j = 0; j < teams[i].length; j++) {
+					if (lobby.playersById[teams[i][j].osuUserId.toString()]) {
+						playersInLobby++;
+					}
+				}
+
+				if (playersInLobby >= parseInt(args[9])) {
+					if (!teamsThatDontSeemToForfeit.includes(teams[i].join(','))) {
+						teamsThatDontSeemToForfeit.push(teams[i].join(','));
+					}
+				}
 			}
 		});
 
 		lobby.on('allPlayersReady', async () => {
 			await lobby.updateSettings();
-			let playersInLobby = 0;
-			for (let i = 0; i < 16; i++) {
-				if (lobby.slots[i]) {
-					playersInLobby++;
+			let teamsInLobby = 0;
+			for (let i = 0; i < teams.length; i++) {
+				let playersInLobby = 0;
+				for (let j = 0; j < teams[i].length; j++) {
+					if (lobby.playersById[teams[i][j].osuUserId.toString()]) {
+						playersInLobby++;
+					}
+				}
+
+				if (playersInLobby >= parseInt(args[9])) {
+					teamsInLobby++;
 				}
 			}
 
 			//Check that all players are in the lobby that previously joined
-			if (lobbyStatus === 'Waiting for start' && playersInLobby >= playersThatDontSeemToForfeit.length) {
+			if (lobbyStatus === 'Waiting for start' && teamsInLobby >= teamsThatDontSeemToForfeit.length) {
 				await channel.sendMessage('!mp start 10');
 
 				lobbyStatus === 'Map being played';
@@ -392,17 +464,26 @@ module.exports = {
 						//Nothing
 					});
 
-				let dbPlayerNames = [];
+				let players = args[3].replaceAll('|', ',').split(',');
+				let dbPlayers = [];
 				for (let j = 0; j < players.length; j++) {
-					logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 4');
+					logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
 					const dbDiscordUser = await DBDiscordUsers.findOne({
 						where: { id: players[j] }
 					});
-					dbPlayerNames.push(dbDiscordUser.osuName);
+					dbPlayers.push(dbDiscordUser);
+				}
+
+				// Sort players by id desc
+				dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
+
+				players = args[3];
+				for (let j = 0; j < dbPlayers.length; j++) {
+					players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
 				}
 
 				let user = await client.users.fetch(args[0]);
-				user.send(`The scheduled Qualifier match has finished. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayerNames.join(', ')}\nMappool: ${args[6]}`);
+				user.send(`The scheduled Qualifier match has finished. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`);
 
 				return await channel.leave();
 
