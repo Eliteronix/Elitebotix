@@ -6285,7 +6285,7 @@ async function updateQueueChannelsFunction(client) {
 
 			players = players.map(player => player.text);
 
-			textChannel.send(`There ${verb} currently ${existingQueueTasks.length} user${multipleString} in the 1v1 queue!\n\n${players.join('\n')}`);
+			textChannel.send(`There ${verb} currently ${existingQueueTasks.length} user${multipleString} in the 1v1 queue!\nRead <#1042938217684541551> for more information.\n\n${players.join('\n')}`);
 		}
 	}, { context: {} });
 }
