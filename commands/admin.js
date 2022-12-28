@@ -10726,6 +10726,14 @@ module.exports = {
 			});
 
 			return await msg.reply(`Updated ${updated} discord users.`);
+		} else if (args[0] === 'removeProcessQueueTask') {
+			await DBProcessQueue.destroy({
+				where: {
+					id: args[1],
+				}
+			});
+
+			return await msg.reply('Deleted the processqueue entry.');
 		} else {
 			msg.reply('Invalid command');
 		}
