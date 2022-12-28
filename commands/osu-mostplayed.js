@@ -473,7 +473,7 @@ async function drawMostPlayed(input, server, limit) {
 			ctx.save();
 			ctx.clip();
 			try {
-				let beatmapImage = await getMapListCover(link[i].beatmapsetId, link[i].beatmapId);
+				let beatmapImage = await getMapListCover(link[i].beatmapset.id, link[i].beatmap.id);
 				ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
 			} catch (err) {
 				// Nothing
@@ -692,8 +692,10 @@ async function drawFooter(input, totalPages, page) {
 	ctx.textAlign = 'right';
 	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 5);
 
-	ctx.textAlign = 'left';
-	ctx.fillText(`Page ${page} of ${totalPages}`, canvas.width / 140, canvas.height - 5);
+	if (page) {
+		ctx.textAlign = 'left';
+		ctx.fillText(`Page ${page} of ${totalPages}`, canvas.width / 140, canvas.height - 5);
+	}
 
 	return [canvas, ctx, user];
 }
