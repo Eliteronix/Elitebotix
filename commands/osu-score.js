@@ -669,7 +669,16 @@ async function drawCover(input, mode) {
 	ctx.fillStyle = '#FFFFFF';
 	ctx.fillText(humanReadable(score.score), canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 100 + canvas.height / 6.25);
 
-	roundedRect(ctx, canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 125 + canvas.height / 6.25, 220, 50, 5, '00', '00', '00', 0.75);
+	//Write Played By and Submitted on
+	ctx.font = '10px comfortaa, sans-serif';
+	ctx.textAlign = 'left';
+	ctx.fillStyle = '#FFFFFF';
+
+	if (score.matchName) {
+		roundedRect(ctx, canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 125 + canvas.height / 6.25, Math.max(220, ctx.measureText(score.matchName).width + 100), 75, 5, '00', '00', '00', 0.75);
+	} else {
+		roundedRect(ctx, canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 125 + canvas.height / 6.25, 220, 50, 5, '00', '00', '00', 0.75);
+	}
 
 	let month = 'January';
 	if (score.raw_date.substring(5, 7) === '02') {
@@ -698,7 +707,6 @@ async function drawCover(input, mode) {
 
 	const formattedSubmitDate = `${score.raw_date.substring(8, 10)} ${month} ${score.raw_date.substring(0, 4)} ${score.raw_date.substring(11, 16)}`;
 
-	//Write Played By and Submitted on
 	ctx.font = '10px comfortaa, sans-serif';
 	ctx.textAlign = 'left';
 	ctx.fillStyle = '#FFFFFF';
@@ -706,6 +714,10 @@ async function drawCover(input, mode) {
 	ctx.fillText(user.name, canvas.width / 900 * 380, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
 	ctx.fillText('Submitted on', canvas.width / 900 * 310, (background.height / background.width * canvas.width) / 250 * 162 + canvas.height / 6.25);
 	ctx.fillText(formattedSubmitDate, canvas.width / 900 * 380, (background.height / background.width * canvas.width) / 250 * 162 + canvas.height / 6.25);
+	if (score.matchName) {
+		ctx.fillText('Match', canvas.width / 900 * 310, (background.height / background.width * canvas.width) / 250 * 184 + canvas.height / 6.25);
+		ctx.fillText(score.matchName, canvas.width / 900 * 380, (background.height / background.width * canvas.width) / 250 * 184 + canvas.height / 6.25);
+	}
 
 	const output = [canvas, ctx, score, beatmap, user];
 	return output;
