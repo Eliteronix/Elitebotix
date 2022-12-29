@@ -160,6 +160,8 @@ module.exports = {
 							if (regexMatch) {
 								let json = JSON.parse(regexMatch);
 
+								console.log(json.match.end_time);
+
 								if (!latestEventId) {
 									latestEventId = json.latest_event_id - 1;
 								}
@@ -327,7 +329,7 @@ module.exports = {
 													}
 												}
 
-												if (notLastMap) {
+												if (notLastMap || json.match.end_time) {
 													latestEventId = json.events[i].id;
 												} else {
 													latestEventId = json.events[i].id - 1;
