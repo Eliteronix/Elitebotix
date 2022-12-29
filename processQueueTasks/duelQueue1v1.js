@@ -21,7 +21,7 @@ module.exports = {
 
 			let taskUser = taskArgs[0];
 			let taskStarRating = parseFloat(taskArgs[1]);
-			let taskDifficultyArea = parseFloat(taskArgs[2]);
+			// let taskDifficultyArea = parseFloat(taskArgs[2]);
 
 			//Check if it is the same user
 			if (taskUser === currentUser) {
@@ -37,12 +37,12 @@ module.exports = {
 				continue;
 			}
 
-			//Check if the current task is in reach for the task
-			if (taskStarRating + taskDifficultyArea < starRating || taskStarRating - taskDifficultyArea > starRating) {
-				otherQueueTasks.splice(i, 1);
-				i--;
-				continue;
-			}
+			// //Check if the current task is in reach for the task
+			// if (taskStarRating + taskDifficultyArea < starRating || taskStarRating - taskDifficultyArea > starRating) {
+			// 	otherQueueTasks.splice(i, 1);
+			// 	i--;
+			// 	continue;
+			// }
 		}
 
 		if (otherQueueTasks.length > 0) {
