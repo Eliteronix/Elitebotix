@@ -780,6 +780,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 				raw_mods: sortedScores[i].raw_mods,
 			});
 		}
+
 		roundedRect(ctx, canvas.width / 70, 500 / 8 + (500 / 12) * i, canvas.width - canvas.width / 35, 500 / 13, 500 / 70, '70', '57', '63', 0.75);
 
 		const rankImage = await Canvas.loadImage(getRankImage(sortedScores[i].rank));
@@ -812,8 +813,6 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 		let achievedTime = new Date().toLocaleDateString();
 
-		// timeDifference = 545678;
-
 		if (timeDifference < 60000) { //if achieved in the last minute
 			achievedTime = `${Math.round(timeDifference / 1000)} second(s) ago`;
 		} else if (timeDifference < 3600000) { //if achieved in the last hour
@@ -833,9 +832,9 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		ctx.fillStyle = '#A08C95';
 		ctx.textAlign = 'left';
 		if (server === 'tournaments') {
-			ctx.fillText(`${achievedTime} in ${sortedScores[i].matchName}`, (canvas.width / 35) * 3 + parseInt(beatmaps[i].difficulty.length) * 6 + canvas.width / 50, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+			ctx.fillText(`${achievedTime} in ${sortedScores[i].matchName}`, (canvas.width / 35) * 3 + ctx.measureText(beatmaps[i].difficulty).width + canvas.width / 100, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 		} else {
-			ctx.fillText(achievedTime, (canvas.width / 35) * 3 + parseInt(beatmaps[i].difficulty.length) * 6 + canvas.width / 50, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+			ctx.fillText(achievedTime, (canvas.width / 35) * 3 + ctx.measureText(beatmaps[i].difficulty).width + canvas.width / 100, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 		}
 		let accuracy = getAccuracy(sortedScores[i], mode) * 100;
 
