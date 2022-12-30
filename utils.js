@@ -6033,8 +6033,8 @@ async function getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, a
 				mode: 'Standard',
 				upperDrain: 270,
 				lowerDrain: 100,
-				lowerCircleSize: 3.8,
-				upperCircleSize: 4.6,
+				lowerCircleSize: 4.2,
+				upperCircleSize: 5.5,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
 			});
@@ -6047,7 +6047,7 @@ async function getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, a
 				mode: 'Standard',
 				upperDrain: 270,
 				lowerDrain: 100,
-				lowerCircleSize: 5,
+				lowerCircleSize: 6.5,
 				avoidMaps: avoidMaps,
 				onlyRanked: onlyRanked,
 			});
