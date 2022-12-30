@@ -5614,6 +5614,10 @@ async function getValidTournamentBeatmapFunction(input) {
 		}
 	}
 
+	if (modPool === 'HR') {
+		console.log('avoidMaps', avoidMaps.length, 'finalAvoidList', finalAvoidList.length);
+	}
+
 	//Set if it should only be ranked maps
 	let rankedStatus = ['Ranked', 'Approved', 'Qualified', 'Loved', 'Pending', 'Graveyard', 'WIP'];
 
