@@ -257,7 +257,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 						}
 					});
 				} else {
-					console.log(err);
+					console.error(err);
 				}
 			});
 	} else if (server === 'ripple') {
@@ -315,7 +315,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				if (err.message === 'Not found') {
 					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes; \`--n\` / \`--new\` / \`--recent\` for recent scores; \`--25\` for top 25...)`);
 				} else {
-					console.log(err);
+					console.error(err);
 				}
 			});
 	} else if (server === 'tournaments') {
@@ -406,7 +406,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				if (err.message === 'Not found') {
 					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--r\` for ripple; \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes; \`--n\` / \`--new\` / \`--recent\` for recent scores; \`--25\` for top 25...)`);
 				} else {
-					console.log(err);
+					console.error(err);
 				}
 			});
 	}

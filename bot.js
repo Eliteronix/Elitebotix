@@ -1,4 +1,5 @@
 //Log message upon starting the bot
+// eslint-disable-next-line no-console
 console.log('Bot is starting...');
 const { twitchConnect, wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack } = require('./utils');
 require('dotenv').config();
@@ -128,6 +129,7 @@ process.on('message', message => {
 	if (!message.type) return false;
 
 	if (message.type == 'shardId') {
+		// eslint-disable-next-line no-console
 		console.log(`The shard id is: ${message.data.shardId}`);
 		client.shardId = message.data.shardId;
 
@@ -152,6 +154,7 @@ process.on('message', message => {
 			});
 		}
 	} else if (message.type == 'totalShards') {
+		// eslint-disable-next-line no-console
 		console.log(`[${client.shardId}] The total amount of shards is: ${message.data.totalShards}`);
 		client.totalShards = message.data.totalShards;
 	}
@@ -163,6 +166,7 @@ client.on('ready', readyDiscord);
 //declare the function which will be used when ready
 function readyDiscord() {
 	//log a message when ready
+	// eslint-disable-next-line no-console
 	console.log('The Bot is ready.');
 
 	client.startDate = new Date();
@@ -264,7 +268,7 @@ async function executeProcessQueue(client, bancho, twitchClient) {
 	try {
 		await executeNextProcessQueueTask(client, bancho, twitchClient.client);
 	} catch (e) {
-		console.log(e);
+		console.error(e);
 	}
 
 	setTimeout(() => {
@@ -276,7 +280,7 @@ async function cleanUpDuplicates() {
 	try {
 		await cleanUpDuplicateEntries();
 	} catch (e) {
-		console.log(e);
+		console.error(e);
 	}
 
 	setTimeout(() => {
@@ -288,7 +292,7 @@ async function startJiraCardSync(client) {
 	try {
 		await syncJiraCards(client);
 	} catch (e) {
-		console.log(e);
+		console.error(e);
 	}
 
 	setTimeout(() => {
@@ -300,7 +304,7 @@ async function getForumPosts(client) {
 	try {
 		await createNewForumPostRecords(client);
 	} catch (e) {
-		console.log(e);
+		console.error(e);
 	}
 
 	setTimeout(() => {
@@ -312,7 +316,7 @@ async function checkOsuTracks(client) {
 	try {
 		await processOsuTrack(client);
 	} catch (e) {
-		console.log(e);
+		console.error(e);
 	}
 
 	setTimeout(() => {
