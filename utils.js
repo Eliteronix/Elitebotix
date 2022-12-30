@@ -5954,7 +5954,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		return clone;
 	}
 
-	console.log('Map Selection: None found - Going again');
+	if (modPool === 'HR') {
+		console.log('Map Selection: None found - Going again');
+	}
 	return await getValidTournamentBeatmapFunction(input);
 }
 
