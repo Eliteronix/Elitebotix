@@ -28,7 +28,6 @@ module.exports = {
 				await interaction.deferReply();
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					// eslint-disable-next-line no-console
 					console.error(error);
 				}
 				return;
@@ -124,7 +123,6 @@ module.exports = {
 				});
 
 				reactionCollector.on('error', (error) => {
-					// eslint-disable-next-line no-console
 					console.error(error);
 				});
 
@@ -144,7 +142,6 @@ module.exports = {
 						.then(async (res) => {
 							let htmlCode = await res.text();
 							htmlCode = htmlCode.replace(/&quot;/gm, '"');
-							// console.log(htmlCode);
 							const matchRunningRegex = /{"match".+,"current_game_id":\d+}/gm;
 							const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
 							const matchesRunning = matchRunningRegex.exec(htmlCode);
@@ -356,7 +353,6 @@ module.exports = {
 						return interaction.editReply(`Could not find match \`${matchID.replace(/`/g, '')}\`.`);
 					}
 				} else {
-					// eslint-disable-next-line no-console
 					console.error(err);
 				}
 			});
