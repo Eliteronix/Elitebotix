@@ -28,6 +28,7 @@ module.exports = {
 				await interaction.deferReply();
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					// eslint-disable-next-line no-console
 					console.error(error);
 				}
 				return;
@@ -123,7 +124,8 @@ module.exports = {
 				});
 
 				reactionCollector.on('error', (error) => {
-					console.log(error);
+					// eslint-disable-next-line no-console
+					console.error(error);
 				});
 
 				initialMessage.react('🛑');
@@ -159,8 +161,6 @@ module.exports = {
 
 							if (regexMatch) {
 								let json = JSON.parse(regexMatch);
-
-								console.log(json.match.end_time);
 
 								if (!latestEventId) {
 									latestEventId = json.latest_event_id - 1;
@@ -356,7 +356,8 @@ module.exports = {
 						return interaction.editReply(`Could not find match \`${matchID.replace(/`/g, '')}\`.`);
 					}
 				} else {
-					console.log(err);
+					// eslint-disable-next-line no-console
+					console.error(err);
 				}
 			});
 	},
