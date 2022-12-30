@@ -292,7 +292,7 @@ module.exports = {
 				}
 			})
 			.catch(err => {
-				console.log(err);
+				console.error(err);
 			});
 		return;
 	},
@@ -1083,7 +1083,7 @@ module.exports = {
 					}
 				} catch (error) {
 					if (error.message !== 'Currently disconnected!') {
-						console.log(error);
+						console.error(error);
 					}
 				}
 			}
@@ -1091,6 +1091,7 @@ module.exports = {
 
 		// Called every time the bot connects to Twitch chat
 		function onConnectedHandler(addr, port) {
+			// eslint-disable-next-line no-console
 			console.log(`* Connected to ${addr}:${port}`);
 		}
 
@@ -1181,7 +1182,7 @@ module.exports = {
 				}
 			}
 		} catch (e) {
-			console.log(`Error calculating pp for beatmap ${outputScore.beatmapId}`, e);
+			console.error(`Error calculating pp for beatmap ${outputScore.beatmapId}`, e);
 		}
 
 		outputScore.rank = calculateGradeFunction(inputScore.mode, outputScore.counts, outputScore.raw_mods);
@@ -1225,6 +1226,7 @@ module.exports = {
 
 		missingUsers = missingUsers.map(user => user.osuUserId);
 
+		// eslint-disable-next-line no-console
 		console.log(`${missingUsers.length} missing users found`);
 
 		let iterator = 0;
@@ -1238,6 +1240,7 @@ module.exports = {
 			iterator++;
 		}
 
+		// eslint-disable-next-line no-console
 		console.log(`Created ${iterator} missing users`);
 
 		//Only clean up during the night
@@ -1283,6 +1286,7 @@ module.exports = {
 			silent: true
 		});
 
+		// eslint-disable-next-line no-console
 		console.log(`Marked ${update[0]} new beatmaps as popular`);
 
 		// Filter out maps that have less than 250 plays
@@ -1304,6 +1308,7 @@ module.exports = {
 			silent: true
 		});
 
+		// eslint-disable-next-line no-console
 		console.log(`Marked ${update[0]} new beatmaps as used often`);
 
 		if (date.getUTCHours() > 0 && !manually) {
@@ -1362,6 +1367,7 @@ module.exports = {
 			deleted++;
 		}
 
+		// eslint-disable-next-line no-console
 		console.log(`Cleaned up ${deleted} old duel rating histories`);
 
 		duplicates = true;
@@ -1394,6 +1400,7 @@ module.exports = {
 
 						deleted++;
 
+						// eslint-disable-next-line no-console
 						console.log('#', deleted, 'iteration', iterations, 'beatmapId', duplicate.beatmapId, 'mods', duplicate.mods, 'updatedAt', duplicate.updatedAt);
 
 						await new Promise(resolve => setTimeout(resolve, 2000));
@@ -1404,6 +1411,7 @@ module.exports = {
 			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
 
+		// eslint-disable-next-line no-console
 		console.log(`Cleaned up ${deleted} duplicate beatmaps`);
 
 		duplicates = true;
@@ -1436,6 +1444,7 @@ module.exports = {
 
 						deleted++;
 
+						// eslint-disable-next-line no-console
 						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'osuUserId', duplicate.osuUserId, 'matchStartDate', duplicate.matchStartDate, 'updatedAt', duplicate.updatedAt);
 
 						await new Promise(resolve => setTimeout(resolve, 2000));
@@ -1446,6 +1455,7 @@ module.exports = {
 			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
 
+		// eslint-disable-next-line no-console
 		console.log(`Cleaned up ${deleted} duplicate scores`);
 	},
 	wrongCluster(client, id) {
@@ -1698,7 +1708,7 @@ module.exports = {
 					if (interaction) {
 						return await interaction.editReply('I am having issues creating the lobby and the match has been aborted.\nPlease try again later.');
 					} else {
-						return console.log('I am having issues creating the lobby and the match has been aborted.');
+						return console.error('I am having issues creating a queued lobby and the match has been aborted.');
 					}
 				} else {
 					await new Promise(resolve => setTimeout(resolve, 10000));
@@ -3484,13 +3494,13 @@ async function getUserDuelStarRatingFunction(input) {
 								if (err.message === 'Missing Access') {
 									await guildTrackers[i].destroy();
 								} else {
-									console.log(err);
+									console.error(err);
 								}
 							}
 						}
 					}
 				} catch (e) {
-					console.log(e);
+					console.error(e);
 				}
 			}
 
@@ -3541,7 +3551,7 @@ async function getUserDuelStarRatingFunction(input) {
 					if (err.message === 'Not found') {
 						throw new Error('No standard plays');
 					} else {
-						console.log(err);
+						console.error(err);
 					}
 				} else {
 					await new Promise(resolve => setTimeout(resolve, 10000));
@@ -3714,7 +3724,7 @@ async function getDerankStatsFunction(discordUser) {
 			expectedCurrentDuelRating: duelDiscordUsers[ppRank].osuDuelStarRating
 		};
 	} catch (error) {
-		console.log(duelDiscordUsers.length, ppRank, discordUser.osuUserId, discordUser.osuName);
+		console.error(duelDiscordUsers.length, ppRank, discordUser.osuUserId, discordUser.osuName);
 		throw error;
 	}
 }
@@ -3821,7 +3831,7 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, dep
 		} else if (e.message !== 'Failed to parse beatmap: expected `osu file format v` at file begin' &&
 			e.message !== 'internal error in Neon module: index out of bounds: the len is 299 but the index is 299' &&
 			parseInt(beatmapId) !== 2568364) {
-			console.log(`error with map ${beatmapId}`, e);
+			console.error(`error with map ${beatmapId}`, e);
 			return null;
 		}
 	}
@@ -4522,6 +4532,7 @@ async function logDatabaseQueriesFunction(level, output) {
 	//Level 2: Log constant periodic queries
 	//Level 1: Log all queries
 	if (traceDatabaseQueries <= level) {
+		// eslint-disable-next-line no-console
 		console.log('traceDatabaseQueries: ', new Date(), output);
 	}
 
@@ -4534,6 +4545,7 @@ async function logDatabaseQueriesFunction(level, output) {
 
 		//if 2500MiB descrease, log it
 		if (startTotal - 2500 > (os.freemem() / 1000000)) {
+			// eslint-disable-next-line no-console
 			console.log('traceDatabaseQueries: Memory usage increased by 2500MB', new Date(), (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now', output);
 			break;
 		}
@@ -4760,7 +4772,7 @@ async function executeFoundTask(client, bancho, twitchClient, nextTask) {
 			await task.execute(client, bancho, twitchClient, nextTask);
 		}
 	} catch (e) {
-		console.log('Error executing process queue task', e);
+		console.error('Error executing process queue task', e);
 		if (nextTask.task === 'saveMultiMatches') {
 			nextTask.beingExecuted = false;
 			await new Promise(resolve => setTimeout(resolve, 10000));
@@ -4771,7 +4783,7 @@ async function executeFoundTask(client, bancho, twitchClient, nextTask) {
 				await nextTask.save();
 			}
 		} else {
-			console.log('Process Queue entry:', nextTask);
+			console.error('Process Queue entry:', nextTask);
 			nextTask.destroy();
 		}
 	}
@@ -5008,7 +5020,7 @@ async function messageUserWithRetries(user, interaction, content) {
 				}
 			} else {
 				i = Infinity;
-				console.log(error);
+				console.error(error);
 			}
 		}
 	}
@@ -5819,7 +5831,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		});
 	}
 
-	// console.log('Found', beatmaps.length, 'maps');
+	if (modPool === 'HR') {
+		console.log('Found', beatmaps.length, 'maps');
+	}
 
 	if (beatmaps.length === 0) {
 		input.alreadyCheckedSR = [];
@@ -5831,7 +5845,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (input.upperBound > 9.9) {
 			input.upperBound = 9.9;
 		}
-		// console.log('Increased SR range to', input.lowerBound, '-', input.upperBound);
+		if (modPool === 'HR') {
+			console.log('Increased SR range to', input.lowerBound, '-', input.upperBound);
+		}
 	}
 
 	//Loop through the beatmaps until a fitting one is found
@@ -5893,7 +5909,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		//Check drain length
 		if (randomBeatmap.drainLength > upperDrain || randomBeatmap.drainLength < lowerDrain) {
 			beatmaps.splice(index, 1);
-			// console.log('Map Selection: Drain length out of bounds');
+			if (modPool === 'HR') {
+				console.log('Map Selection: Drain length out of bounds', randomBeatmap.drainLength, lowerDrain, upperDrain);
+			}
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
@@ -5901,7 +5919,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		//Check the approach rate
 		if (randomBeatmap.approachRate > upperApproach || randomBeatmap.approachRate < lowerApproach) {
 			beatmaps.splice(index, 1);
-			// console.log('Map Selection: Approach rate out of bounds');
+			if (modPool === 'HR') {
+				console.log('Map Selection: Approach rate out of bounds', randomBeatmap.approachRate, lowerApproach, upperApproach);
+			}
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
@@ -5909,6 +5929,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		//Check the circle size
 		if (randomBeatmap.circleSize > upperCircleSize || randomBeatmap.circleSize < lowerCircleSize) {
 			beatmaps.splice(index, 1);
+			if (modPool === 'HR') {
+				console.log('Map Selection: Circle size out of bounds', randomBeatmap.circleSize, lowerCircleSize, upperCircleSize);
+			}
 			// console.log('Map Selection: Circle size out of bounds');
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
@@ -5918,6 +5941,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (randomBeatmap.starRating > upperBound || randomBeatmap.starRating < lowerBound) {
 			beatmaps.splice(index, 1);
 			// console.log('Map Selection: Star rating out of bounds', randomBeatmap.starRating);
+			if (modPool === 'HR') {
+				console.log('Map Selection: Star rating out of bounds', randomBeatmap.starRating, lowerBound, upperBound);
+			}
 			input.alreadyCheckedSR.push(randomBeatmap.beatmapId);
 			continue;
 		}
@@ -5928,8 +5954,7 @@ async function getValidTournamentBeatmapFunction(input) {
 		return clone;
 	}
 
-	// console.log('Map Selection: None found - Going again');
-	//Return null
+	console.log('Map Selection: None found - Going again');
 	return await getValidTournamentBeatmapFunction(input);
 }
 
@@ -6145,7 +6170,7 @@ async function addMatchMessageFunction(matchId, array, user, message) {
 
 	fs.writeFile(`./matchLogs/${matchId}.txt`, matchLog, function (err) {
 		if (err) {
-			return console.log(err);
+			return console.error(err);
 		}
 	});
 }
