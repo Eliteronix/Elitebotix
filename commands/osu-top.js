@@ -648,7 +648,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 				unrankedPP += parseFloat(multiScores[i].pp) * Math.pow(0.95, (unrankedPlayCounter - 1));
 				unrankedPlayCounter++;
 
-				if (multiScores[i].beatmap && (multiScores[i].beatmap.approvalStatus === 'Approved' || multiScores[i].beatmap.approvalStatus === 'Ranked')) {
+				if (multiScores[i].beatmap && !getMods(multiScores[i].raw_mods).includes('RX') && (multiScores[i].beatmap.approvalStatus === 'Approved' || multiScores[i].beatmap.approvalStatus === 'Ranked')) {
 					rankedPP += parseFloat(multiScores[i].pp) * Math.pow(0.95, (rankedPlayCounter - 1));
 					rankedPlayCounter++;
 				}
