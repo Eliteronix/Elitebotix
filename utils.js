@@ -6301,7 +6301,7 @@ async function updateQueueChannelsFunction(client) {
 				let playername = await getOsuPlayerName(currentUser);
 				let starRating = parseFloat(args[1]);
 
-				players.push({ text: `${playername} - ${starRating.toFixed(2)}*`, starRating: starRating });
+				players.push({ text: `${playername} - ${starRating.toFixed(2)}* <t:${Date.parse(existingQueueTasks[i].createdAt) / 1000}:R>`, starRating: starRating });
 			}
 
 			players.sort((a, b) => {
