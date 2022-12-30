@@ -190,7 +190,7 @@ module.exports = {
 								starRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
 							} catch (e) {
 								if (e !== 'No standard plays') {
-									console.log(e);
+									console.error(e);
 								}
 							}
 							starRatings.push(starRating.total);
@@ -365,7 +365,7 @@ module.exports = {
 					const user = await osuApi.getUser({ u: osuUser.name, m: 0 })
 						.catch(err => {
 							if (err.message !== 'Not found') {
-								console.log(err);
+								console.error(err);
 							}
 						});
 
@@ -800,7 +800,7 @@ module.exports = {
 							}
 						})
 						.catch(err => {
-							console.log(err);
+							console.error(err);
 						});
 				} else {
 					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard 2');
@@ -1058,7 +1058,7 @@ module.exports = {
 					const user = await osuApi.getUser({ u: osuUser.id, m: 0 })
 						.catch(err => {
 							if (err.message !== 'Not found') {
-								console.log(err);
+								console.error(err);
 							}
 						});
 
@@ -1147,7 +1147,7 @@ module.exports = {
 						multiMatches[i] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiMatches[i].matchId}`;
 					} catch (e) {
 						multiMatches[i] = 'Error';
-						console.log(e, multiMatches[i]);
+						console.error(e, multiMatches[i]);
 					}
 				}
 
@@ -1413,7 +1413,7 @@ module.exports = {
 							}
 						})
 						.catch(err => {
-							console.log(err);
+							console.error(err);
 						});
 				} else {
 					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread 2');
@@ -1600,7 +1600,7 @@ module.exports = {
 					ownStarRating = ownStarRating.total;
 				} catch (e) {
 					if (e !== 'No standard plays') {
-						console.log(e);
+						console.error(e);
 					}
 				}
 

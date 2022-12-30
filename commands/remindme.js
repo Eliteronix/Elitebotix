@@ -1,5 +1,6 @@
 const { DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'remindme',
@@ -26,6 +27,14 @@ module.exports = {
 		let minutes = 0;
 
 		if (interaction) {
+			try {
+				await interaction.deferReply();
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 			msg = await populateMsgFromInteraction(interaction);
 
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
@@ -89,7 +98,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply(`You aren't allowed to use negative values for the time.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
 			}
-			return interaction.reply({ content: `You aren't allowed to use negative values for the time.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``, ephemeral: true });
+			return interaction.editReply({ content: `You aren't allowed to use negative values for the time.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``, ephemeral: true });
 		}
 
 		if (now.getTime() === date.getTime()) {
@@ -97,7 +106,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply(`You didn't specify when I should remind you.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
 			}
-			return interaction.reply({ content: 'You didn\'t specify when I should remind you.', ephemeral: true });
+			return interaction.editReply({ content: 'You didn\'t specify when I should remind you.', ephemeral: true });
 		}
 
 		DBProcessQueue.create({ guildId: 'None', task: 'remind', priority: 10, additions: `${msg.author.id};${args.join(' ')}`, date: date });
@@ -106,6 +115,6 @@ module.exports = {
 			return msg.reply('Reminder has been set. Be sure to have DMs enabled for the bot.');
 		}
 
-		return interaction.reply({ content: 'Reminder has been set. Be sure to have DMs enabled for the bot.', ephemeral: true });
+		return interaction.editReply({ content: 'Reminder has been set. Be sure to have DMs enabled for the bot.', ephemeral: true });
 	},
 };

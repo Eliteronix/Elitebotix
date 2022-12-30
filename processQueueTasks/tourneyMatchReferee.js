@@ -20,9 +20,13 @@ module.exports = {
 				}
 				channel = await bancho.createLobby(args[5]);
 				client.otherMatches.push(parseInt(channel.lobby.id));
+
+				processQueueEntry.destroy();
 				break;
 			} catch (error) {
 				if (i === 4) {
+					processQueueEntry.destroy();
+
 					let players = args[3].replaceAll('|', ',').split(',');
 					let dbPlayers = [];
 					for (let j = 0; j < players.length; j++) {
@@ -40,8 +44,6 @@ module.exports = {
 					for (let j = 0; j < dbPlayers.length; j++) {
 						players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
 					}
-
-					processQueueEntry.destroy();
 					let user = await client.users.fetch(args[0]);
 					user.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`);
 					client.shard.broadcastEval(async (c, { channelId, message }) => {
@@ -221,7 +223,6 @@ module.exports = {
 				if (noPlayers) {
 					lobbyStatus = 'Aborted';
 					await channel.sendMessage('!mp close');
-					processQueueEntry.destroy();
 
 					let players = args[3].replaceAll('|', ',').split(',');
 					let dbPlayers = [];
@@ -447,7 +448,6 @@ module.exports = {
 				await channel.sendMessage('Thank you everyone for playing! The lobby will automatically close in one minute.');
 				await pause(60000);
 				await channel.sendMessage('!mp close');
-				processQueueEntry.destroy();
 				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -516,7 +516,7 @@ async function messageUserWithRetries(client, user, channelId, content) {
 				}
 			} else {
 				i = Infinity;
-				console.log(error);
+				console.error(error);
 			}
 		}
 	}
