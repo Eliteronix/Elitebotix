@@ -464,6 +464,11 @@ module.exports = {
 						}
 					},
 					{
+						lastDuelRatingUpdate: {
+							[Op.eq]: null
+						}
+					},
+					{
 						nextOsuPPUpdate: {
 							[Op.lt]: now
 						}
@@ -524,6 +529,11 @@ module.exports = {
 				[Op.or]: [
 					{
 						nextOsuPPUpdate: {
+							[Op.eq]: null
+						}
+					},
+					{
+						lastDuelRatingUpdate: {
 							[Op.eq]: null
 						}
 					},
