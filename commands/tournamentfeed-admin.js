@@ -278,7 +278,7 @@ module.exports = {
 						pingUsers[i].tournamentPings = false;
 						await pingUsers[i].save();
 					} else {
-						console.log(err);
+						console.error(err);
 					}
 				}
 			}
@@ -433,7 +433,8 @@ module.exports = {
 			}
 
 			if (forumPost.posted) {
-				embed.setFooter({ text: `Posted: ${forumPost.posted.getUTCDate()}.${forumPost.posted.getUTCMonth() + 1}.${forumPost.posted.getUTCFullYear()} by ${forumPost.host}` });
+				let posted = new Date(forumPost.posted);
+				embed.setFooter({ text: `Posted: ${posted.getUTCDate()}.${posted.getUTCMonth() + 1}.${posted.getUTCFullYear()} by ${forumPost.host}` });
 			}
 
 			interaction.editReply({ embeds: [embed] });
