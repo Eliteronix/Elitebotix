@@ -108,7 +108,7 @@ module.exports = {
 				if (e.message === 'No standard plays') {
 					discordUser.osuDuelStarRating = null;
 				} else {
-					console.log(e);
+					console.error(e);
 				}
 			}
 
@@ -205,7 +205,7 @@ module.exports = {
 				await discordUser.save();
 
 			} else {
-				console.log(error);
+				console.error(error);
 			}
 		}
 
@@ -232,7 +232,7 @@ module.exports = {
 									await member.roles.add(ecs2021ParticipantRole);
 								}
 							} catch (e) {
-								console.log(e);
+								console.error(e);
 							}
 						} else {
 							try {
@@ -241,7 +241,7 @@ module.exports = {
 									await member.roles.remove(ecs2021ParticipantRole);
 								}
 							} catch (e) {
-								console.log(e);
+								console.error(e);
 							}
 						}
 
@@ -255,7 +255,7 @@ module.exports = {
 									await member.roles.add(ecs2021WinnerRole);
 								}
 							} catch (e) {
-								console.log(e);
+								console.error(e);
 							}
 						}
 					} catch (error) {
@@ -287,7 +287,7 @@ module.exports = {
 									await member.roles.add(ecw2022ParticipantRole);
 								}
 							} catch (e) {
-								console.log(e);
+								console.error(e);
 							}
 						} else {
 							try {
@@ -296,7 +296,7 @@ module.exports = {
 									await member.roles.remove(ecw2022ParticipantRole);
 								}
 							} catch (e) {
-								console.log(e);
+								console.error(e);
 							}
 						}
 
@@ -310,7 +310,7 @@ module.exports = {
 									await member.roles.add(ecw2022WinnerRole);
 								}
 							} catch (e) {
-								console.log(e);
+								console.error(e);
 							}
 						}
 					} catch (error) {
