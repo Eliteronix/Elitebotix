@@ -10132,6 +10132,7 @@ module.exports = {
 				DBDiscordUser.maniaPP = null;
 				DBDiscordUser.maniaRank = null;
 				DBDiscordUser.save();
+				// eslint-disable-next-line no-console
 				console.log('Removed osuUserId and verification for:', args[1]);
 			} else {
 				msg.reply('User not found');
@@ -10143,6 +10144,7 @@ module.exports = {
 
 			if (DBElitiriSignup) {
 				DBElitiriSignup.destroy();
+				// eslint-disable-next-line no-console
 				console.log('Deleted Elitiri Signup:', args[1]);
 			} else {
 				msg.reply('Signup not found');
@@ -10177,6 +10179,7 @@ module.exports = {
 		} else if (args[0] === 'multiScoresDBSize') {
 			const mapScoreAmount = await DBOsuMultiScores.count();
 
+			// eslint-disable-next-line no-console
 			console.log(mapScoreAmount);
 		} else if (args[0] === 'updateServerDuelRatings') {
 			let sentMessage = await msg.reply('Processing...');
@@ -10205,7 +10208,7 @@ module.exports = {
 					sentMessage.delete();
 				})
 				.catch(error => {
-					console.log(error);
+					console.error(error);
 				});
 		} else if (args[0] === 'connectTwitch') {
 			const discordUser = await DBDiscordUsers.findOne({
@@ -10249,7 +10252,7 @@ module.exports = {
 					});
 				})
 				.catch(error => {
-					console.log(error);
+					console.error(error);
 				});
 		} else if (args[0] === 'patreon') {
 			const discordUser = await DBDiscordUsers.findOne({
@@ -10647,7 +10650,7 @@ module.exports = {
 					}
 				})
 				.catch(err => {
-					console.log(err);
+					console.error(err);
 				});
 
 			let tourneyTops = [];
@@ -10865,8 +10868,11 @@ module.exports = {
 			let bingoMatches = await msg.client.shard.fetchClientValues('bingoMatches');
 			let update = await msg.client.shard.fetchClientValues('update');
 
+			// eslint-disable-next-line no-console
 			console.log('duels', duels);
+			// eslint-disable-next-line no-console
 			console.log('other', other);
+			// eslint-disable-next-line no-console
 			console.log('matchtracks', matchtracks);
 
 			let output = `Options: \`all\`, \`free\`, \`shardId\`, \`update\`, \`free&update\`\n\`\`\`Cur.: ${msg.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | Update\n`;

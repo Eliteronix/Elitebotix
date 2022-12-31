@@ -2233,6 +2233,10 @@ module.exports = {
 									rankRange = rankRangeMatch.join(' | ');
 								}
 
+								if (rankRange === null && title.toLowerCase().includes('open rank')) {
+									rankRange = 'Open Rank';
+								}
+
 								if (title.toLowerCase().includes('std')) {
 									gamemode = 'Standard';
 								} else if (title.toLowerCase().includes('taiko')) {
