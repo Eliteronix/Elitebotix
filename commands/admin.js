@@ -4068,17 +4068,17 @@ module.exports = {
 					dm_permission: true,
 					options: [
 						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
 							'name': 'year',
 							'description': 'The year to get the wrapped for',
 							'type': 4,
 							'required': false,
 							'choices': wrappedYears
-						},
-						{
-							'name': 'username',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
 						},
 					]
 				}
