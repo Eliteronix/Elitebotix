@@ -2881,12 +2881,12 @@ async function getUserDuelStarRatingFunction(input) {
 	// console.log(`getUserDuelStarRatingFunction: completeMonth/Week: ${new Date() - startTime}ms`);
 
 	if (savedStats) {
-		duelRatings.total = savedStats.osuDuelStarRating;
-		duelRatings.noMod = savedStats.osuNoModDuelStarRating;
-		duelRatings.hidden = savedStats.osuHiddenDuelStarRating;
-		duelRatings.hardRock = savedStats.osuHardRockDuelStarRating;
-		duelRatings.doubleTime = savedStats.osuDoubleTimeDuelStarRating;
-		duelRatings.freeMod = savedStats.osuFreeModDuelStarRating;
+		duelRatings.total = parseFloat(savedStats.osuDuelStarRating);
+		duelRatings.noMod = parseFloat(savedStats.osuNoModDuelStarRating);
+		duelRatings.hidden = parseFloat(savedStats.osuHiddenDuelStarRating);
+		duelRatings.hardRock = parseFloat(savedStats.osuHardRockDuelStarRating);
+		duelRatings.doubleTime = parseFloat(savedStats.osuDoubleTimeDuelStarRating);
+		duelRatings.freeMod = parseFloat(savedStats.osuFreeModDuelStarRating);
 		duelRatings.provisional = savedStats.osuDuelProvisional;
 		duelRatings.outdated = savedStats.osuDuelOutdated;
 

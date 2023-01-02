@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const { Permissions } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
-const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuDuelLeague } = require('../utils');
+const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap } = require('../utils');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 
@@ -278,14 +278,11 @@ module.exports = {
 		mostPlayedWith.sort((a, b) => b.amount - a.amount);
 
 		tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
-		console.log('Top tourney pp plays', tourneyPPPlays.length);
 
 		// Get the user's duel ratings
 		let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: new Date(`${year}-12-31 23:59:59.999 UTC`) });
 
 		let oldDuelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: new Date(`${year - 1}-12-31 23:59:59.999 UTC`) });
-
-		console.log('Duel rating change');
 
 		// Draw the image
 		const canvasWidth = 1000;
@@ -306,12 +303,12 @@ module.exports = {
 			}
 		}
 
-		let duelLeague = getOsuDuelLeague(duelRating.total);
+		// let duelLeague = getOsuDuelLeague(duelRating.total);
 
 		// let leagueText = duelLeague.name;
-		let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName.replace(/[2-3]/gm, '1')}.png`);
+		// let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName.replace(/[2-3]/gm, '1')}.png`);
 
-		ctx.drawImage(leagueImage, -250, -500, 1500, 1500);
+		// ctx.drawImage(leagueImage, -250, -500, 1500, 1500);
 
 		// Write the title of the player
 		ctx.font = '35px comfortaa, sans-serif';
@@ -336,12 +333,105 @@ module.exports = {
 			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 190, 330 + i * 30);
 		}
 
-		let today = new Date().toLocaleDateString();
+		ctx.fillText('Duel Rating changes:', 810, 90);
+		ctx.textAlign = 'right';
+		ctx.fillText('Total: ', 730, 120);
+		ctx.fillText(oldDuelRating.total.toFixed(3), 792, 120);
+		ctx.fillText('→', 820, 120);
+		ctx.fillText(duelRating.total.toFixed(3), 884, 120);
+		ctx.fillText('|', 900, 120);
+		if (duelRating.total - oldDuelRating.total < 0) {
+			ctx.fillText((duelRating.total - oldDuelRating.total).toFixed(3), 975, 120);
+		} else {
+			ctx.fillText(`+${(duelRating.total - oldDuelRating.total).toFixed(3)}`, 975, 120);
+		}
+
+		ctx.fillText('NM: ', 730, 145);
+		ctx.fillText(oldDuelRating.noMod.toFixed(3), 792, 145);
+		ctx.fillText('→', 820, 145);
+		ctx.fillText(duelRating.noMod.toFixed(3), 884, 145);
+		ctx.fillText('|', 900, 145);
+		if (duelRating.noMod - oldDuelRating.noMod < 0) {
+			ctx.fillText((duelRating.noMod - oldDuelRating.noMod).toFixed(3), 975, 145);
+		} else {
+			ctx.fillText(`+${(duelRating.noMod - oldDuelRating.noMod).toFixed(3)}`, 975, 145);
+		}
+
+		ctx.fillText('HD: ', 730, 170);
+		ctx.fillText(oldDuelRating.hidden.toFixed(3), 792, 170);
+		ctx.fillText('→', 820, 170);
+		ctx.fillText(duelRating.hidden.toFixed(3), 884, 170);
+		ctx.fillText('|', 900, 170);
+		if (duelRating.hidden - oldDuelRating.hidden < 0) {
+			ctx.fillText((duelRating.hidden - oldDuelRating.hidden).toFixed(3), 975, 170);
+		} else {
+			ctx.fillText(`+${(duelRating.hidden - oldDuelRating.hidden).toFixed(3)}`, 975, 170);
+		}
+
+		ctx.fillText('HR: ', 730, 195);
+		ctx.fillText(oldDuelRating.hardRock.toFixed(3), 792, 195);
+		ctx.fillText('→', 820, 195);
+		ctx.fillText(duelRating.hardRock.toFixed(3), 884, 195);
+		ctx.fillText('|', 900, 195);
+		if (duelRating.hardRock - oldDuelRating.hardRock < 0) {
+			ctx.fillText((duelRating.hardRock - oldDuelRating.hardRock).toFixed(3), 975, 195);
+		} else {
+			ctx.fillText(`+${(duelRating.hardRock - oldDuelRating.hardRock).toFixed(3)}`, 975, 195);
+		}
+
+		ctx.fillText('DT: ', 730, 220);
+		ctx.fillText(oldDuelRating.doubleTime.toFixed(3), 792, 220);
+		ctx.fillText('→', 820, 220);
+		ctx.fillText(duelRating.doubleTime.toFixed(3), 884, 220);
+		ctx.fillText('|', 900, 220);
+		if (duelRating.doubleTime - oldDuelRating.doubleTime < 0) {
+			ctx.fillText((duelRating.doubleTime - oldDuelRating.doubleTime).toFixed(3), 975, 220);
+		} else {
+			ctx.fillText(`+${(duelRating.doubleTime - oldDuelRating.doubleTime).toFixed(3)}`, 975, 220);
+		}
+
+		ctx.fillText('FM: ', 730, 245);
+		ctx.fillText(oldDuelRating.freeMod.toFixed(3), 792, 245);
+		ctx.fillText('→', 820, 245);
+		ctx.fillText(duelRating.freeMod.toFixed(3), 884, 245);
+		ctx.fillText('|', 900, 245);
+		if (duelRating.freeMod - oldDuelRating.freeMod < 0) {
+			ctx.fillText((duelRating.freeMod - oldDuelRating.freeMod).toFixed(3), 975, 245);
+		} else {
+			ctx.fillText(`+${(duelRating.freeMod - oldDuelRating.freeMod).toFixed(3)}`, 975, 245);
+		}
+
+		ctx.textAlign = 'left';
+		ctx.fillText(`Top ${Math.min(10, tourneyPPPlays.length)} tournament pp plays:`, 635, 300);
+		ctx.font = '11px comfortaa, sans-serif';
+		for (let i = 0; i < Math.min(10, tourneyPPPlays.length); i++) {
+			tourneyPPPlays[i].beatmap = await getOsuBeatmap({ beatmapId: tourneyPPPlays[i].beatmapId });
+			let title = 'Unavailable';
+			let artist = 'Unavailable';
+			let difficulty = 'Unavailable';
+			if (tourneyPPPlays[i].beatmap) {
+				title = tourneyPPPlays[i].beatmap.title;
+				artist = tourneyPPPlays[i].beatmap.artist;
+				difficulty = tourneyPPPlays[i].beatmap.difficulty;
+			}
+			let mapString = `#${i + 1} ${parseFloat(tourneyPPPlays[i].pp).toFixed(0)}pp | ${artist} - ${title} [${difficulty}]`;
+			let cut = false;
+			while (ctx.measureText(mapString).width > 340) {
+				cut = true;
+				mapString = mapString.slice(0, mapString.length - 1);
+			}
+			if (cut) {
+				mapString += '...';
+			}
+
+			ctx.fillText(mapString, 635, 318 + i * 16);
+		}
 
 		// Write the title of the player
 		ctx.font = '16px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'right';
+		let today = new Date().toLocaleDateString();
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 5, canvas.height - 5);
 
 		//Get a circle in the middle for inserting the player avatar
