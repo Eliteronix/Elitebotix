@@ -3,7 +3,9 @@ const osu = require('node-osu');
 const { Permissions } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
-const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore } = require('../utils');
+const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuDuelLeague } = require('../utils');
+const Canvas = require('canvas');
+const Discord = require('discord.js');
 
 module.exports = {
 	name: 'osu-wrapped',
@@ -101,7 +103,6 @@ module.exports = {
 		if (interaction.options.getInteger('year')) {
 			year = interaction.options.getInteger('year');
 		}
-		console.log(year);
 
 		let multiMatches = await DBOsuMultiScores.findAll({
 			attributes: ['matchId'],
@@ -119,8 +120,6 @@ module.exports = {
 		});
 
 		multiMatches = multiMatches.map(match => match.matchId);
-
-		console.log('Amount of matches played', multiMatches.length);
 
 		if (multiMatches.length === 0) {
 			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches in ${year}.`);
@@ -147,7 +146,14 @@ module.exports = {
 		let mostPlayedWith = [];
 		let tourneysPlayed = [];
 
+		let lastUpdate = new Date();
+
 		for (let i = 0; i < multiScores.length; i++) {
+			if (new Date() - lastUpdate > 15000) {
+				interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
+				lastUpdate = new Date();
+			}
+
 			if (!matchesChecked.includes(multiScores[i].matchId)) {
 				matchesChecked.push(multiScores[i].matchId);
 
@@ -272,15 +278,90 @@ module.exports = {
 		mostPlayedWith.sort((a, b) => b.amount - a.amount);
 
 		tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
-
-		console.log('Amount of matches won', matchesWon);
-		console.log('Amount of matches lost', matchesLost);
-		console.log('Amount of maps played', gamesChecked.length);
-		console.log('Amount of maps won', gamesWon);
-		console.log('Amount of maps lost', gamesLost);
-		console.log('Most played with players', mostPlayedWith.length);
-		console.log('Amount of tourneys played', tourneysPlayed.length);
 		console.log('Top tourney pp plays', tourneyPPPlays.length);
+
+		// Get the user's duel ratings
+		let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: new Date(`${year}-12-31 23:59:59.999 UTC`) });
+
+		let oldDuelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: new Date(`${year - 1}-12-31 23:59:59.999 UTC`) });
+
 		console.log('Duel rating change');
+
+		// Draw the image
+		const canvasWidth = 1000;
+		const canvasHeight = 500;
+
+		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+		//Create Canvas
+		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+		//Get context and load the image
+		const ctx = canvas.getContext('2d');
+		const background = await Canvas.loadImage('./other/osu-background.png');
+
+		for (let i = 0; i < canvas.height / background.height; i++) {
+			for (let j = 0; j < canvas.width / background.width; j++) {
+				ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+			}
+		}
+
+		let duelLeague = getOsuDuelLeague(duelRating.total);
+
+		// let leagueText = duelLeague.name;
+		let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName.replace(/[2-3]/gm, '1')}.png`);
+
+		ctx.drawImage(leagueImage, -250, -500, 1500, 1500);
+
+		// Write the title of the player
+		ctx.font = '35px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		ctx.fillText(`${year} osu! wrapped for ${osuUser.osuName}`, canvas.width / 2, 40);
+
+		// Write the title of the player
+		ctx.font = '22px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		ctx.fillText(`Played tournaments: ${tourneysPlayed.length}`, 190, 90);
+
+		ctx.fillText(`Played matches: ${multiMatches.length}`, 190, 140);
+		ctx.fillText(`Won: ${matchesWon} / Lost: ${matchesLost}`, 190, 170);
+
+		ctx.fillText(`Played maps: ${gamesChecked.length}`, 190, 220);
+		ctx.fillText(`Won: ${gamesWon} / Lost: ${gamesLost}`, 190, 250);
+
+		ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 190, 300);
+		for (let i = 0; i < Math.min(5, mostPlayedWith.length); i++) {
+			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 190, 330 + i * 30);
+		}
+
+		let today = new Date().toLocaleDateString();
+
+		// Write the title of the player
+		ctx.font = '16px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'right';
+		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 5, canvas.height - 5);
+
+		//Get a circle in the middle for inserting the player avatar
+		ctx.beginPath();
+		ctx.arc(canvas.width / 2, canvas.height / 2, canvas.height / 4, 0, Math.PI * 2, true);
+		ctx.closePath();
+		ctx.clip();
+
+		//Draw a shape onto the main canvas in the middle 
+		try {
+			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.osuUserId}`);
+			ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 4, canvas.height / 4, canvas.height / 2, canvas.height / 2);
+		} catch (error) {
+			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
+			ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 4, canvas.height / 4, canvas.height / 2, canvas.height / 2);
+		}
+
+		//Create as an attachment
+		const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-wrapped-${osuUser.osuUserId}-${year}.png`)];
+
+		return interaction.editReply({ content: ' ', files: files });
 	},
 };
