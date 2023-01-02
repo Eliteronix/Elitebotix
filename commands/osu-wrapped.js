@@ -333,6 +333,54 @@ module.exports = {
 			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 190, 330 + i * 30);
 		}
 
+		if (isNaN(duelRating.total) || duelRating.total === null) {
+			duelRating.total = 0;
+		}
+
+		if (isNaN(oldDuelRating.total) || oldDuelRating.total === null) {
+			oldDuelRating.total = 0;
+		}
+
+		if (isNaN(duelRating.noMod) || duelRating.noMod === null) {
+			duelRating.noMod = 0;
+		}
+
+		if (isNaN(oldDuelRating.noMod) || oldDuelRating.noMod === null) {
+			oldDuelRating.noMod = 0;
+		}
+
+		if (isNaN(duelRating.hidden) || duelRating.hidden === null) {
+			duelRating.hidden = 0;
+		}
+
+		if (isNaN(oldDuelRating.hidden) || oldDuelRating.hidden === null) {
+			oldDuelRating.hidden = 0;
+		}
+
+		if (isNaN(duelRating.hardRock) || duelRating.hardRock === null) {
+			duelRating.hardRock = 0;
+		}
+
+		if (isNaN(oldDuelRating.hardRock) || oldDuelRating.hardRock === null) {
+			oldDuelRating.hardRock = 0;
+		}
+
+		if (isNaN(duelRating.doubleTime) || duelRating.doubleTime === null) {
+			duelRating.doubleTime = 0;
+		}
+
+		if (isNaN(oldDuelRating.doubleTime) || oldDuelRating.doubleTime === null) {
+			oldDuelRating.doubleTime = 0;
+		}
+
+		if (isNaN(duelRating.freeMod) || duelRating.freeMod === null) {
+			duelRating.freeMod = 0;
+		}
+
+		if (isNaN(oldDuelRating.freeMod) || oldDuelRating.freeMod === null) {
+			oldDuelRating.freeMod = 0;
+		}
+
 		ctx.fillText('Duel Rating changes:', 810, 90);
 		ctx.textAlign = 'right';
 		ctx.fillText('Total: ', 730, 120);
