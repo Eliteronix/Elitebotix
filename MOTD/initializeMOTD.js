@@ -269,8 +269,7 @@ async function getPlayers(client) {
 
 				client.users.fetch(registeredUsers[i].userId)
 					.then(async (user) => {
-						//TODO
-						user.send('It seems like you removed your connected osu! account and have been removed as a player for the `Maps of the Day` competition because of that.\nIf you want to take part again please reconnect your osu! account and use `/osu-motd register` again.');
+						user.send('It seems like you removed your connected osu! account and have been removed as a player for the `Maps of the Day` competition because of that.\nIf you want to take part again please reconnect your osu! account and use </osu-motd register:1023849722361946173> again.');
 					});
 			}
 		}

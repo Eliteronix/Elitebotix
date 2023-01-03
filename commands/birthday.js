@@ -100,8 +100,7 @@ module.exports = {
 			});
 
 			if (!dbDiscordUser || dbDiscordUser && !dbDiscordUser.birthday) {
-				// TODO
-				return interaction.reply({ content: 'You currently don\'t have your birthday set. Please set your birthday first by using `/birthday set`', ephemeral: true });
+				return interaction.reply({ content: 'You currently don\'t have your birthday set. Please set your birthday first by using </birthday set:1023849281871949914>', ephemeral: true });
 			}
 
 			let now = new Date();

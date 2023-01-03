@@ -76,8 +76,7 @@ module.exports = {
 			commandUser = commandConfig[0];
 
 			if (!commandUser || commandUser && !commandUser.osuUserId || commandUser && commandUser.osuVerified !== true) {
-				//TODO
-				return interaction.editReply('Please connect and verify your account with the bot on discord as a backup by using: \'/osu-link connect\' [https://discord.gg/Asz5Gfe Discord]');
+				return interaction.editReply('Please connect and verify your account with the bot on discord as a backup by using: </osu-link connect:1023849632599658496> [https://discord.gg/Asz5Gfe Discord]');
 			}
 		} else {
 			await msg.user.fetchFromAPI();
@@ -89,8 +88,7 @@ module.exports = {
 			});
 
 			if (!commandUser) {
-				//TODO
-				return msg.user.sendMessage(`Please connect and verify your account with the bot on discord as a backup by using: '/osu-link connect username:${msg.user.username}' [https://discord.gg/Asz5Gfe Discord]`);
+				return msg.user.sendMessage('Please connect and verify your account with the bot on discord as a backup by using: </osu-link connect:1023849632599658496> [https://discord.gg/Asz5Gfe Discord]');
 			}
 		}
 

@@ -77,8 +77,7 @@ module.exports = {
 								registeredPlayer.osuMOTDmutedUntil = null;
 								registeredPlayer.save();
 								try {
-									//TODO
-									await members[i].user.send('The `Maps of the Day` competition is no longer muted for you.\nFeel free to mute it again by using `/osu-motd mute <#mo/#w/#d/#h>`.');
+									await members[i].user.send('The `Maps of the Day` competition is no longer muted for you.\nFeel free to mute it again by using </osu-motd mute:1023849722361946173>.');
 								} catch {
 									//Nothing
 								}
@@ -98,8 +97,7 @@ module.exports = {
 									registeredPlayer.osuMOTDmutedUntil = null;
 									registeredPlayer.save();
 									try {
-										//TODO
-										await members[i].user.send('You were removed from the `Maps of the Day` competition due to inactivity.\nFeel free to register again by using `/osu-motd register` when you want to play.');
+										await members[i].user.send('You were removed from the `Maps of the Day` competition due to inactivity.\nFeel free to register again by using </osu-motd register:1023849722361946173> when you want to play.');
 									} catch {
 										//Nothing
 									}

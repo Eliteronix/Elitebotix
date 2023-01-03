@@ -94,8 +94,7 @@ module.exports = {
 								// Add the user to the team
 								team.push(dbDiscordUser.id);
 							} else {
-								//TODO
-								return interaction.followUp(`\`${user.name}\` doesn't have their account connected. Please tell them to connect their account using \`/osu-link connect\`. (Use \`_\` instead of spaces)`);
+								return interaction.followUp(`\`${user.name}\` doesn't have their account connected. Please tell them to connect their account using </osu-link connect:1023849632599658496>. (Use \`_\` instead of spaces)`);
 							}
 						})
 						.catch(err => {
@@ -169,8 +168,7 @@ module.exports = {
 			date.setUTCMinutes(date.getUTCMinutes() - 15);
 
 			DBProcessQueue.create({ guildId: interaction.guildId, task: 'tourneyMatchNotification', priority: 10, additions: `${interaction.user.id};${channel.id};${dbMaps.join(',')};${dbPlayers.join('|')};${useNoFail};${matchname};${mappoolReadable};${scoreMode};${freemodMessage};${teamsize}`, date: date });
-			//TODO
-			return interaction.editReply('The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use `/osu-referee scheduled`');
+			return interaction.editReply('The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use </osu-referee scheduled:1023849805648252988>');
 		} else if (interaction.options._subcommand === 'scheduled') {
 			let scheduledMatches = [];
 			//Get all scheduled matches that still need to notify
@@ -292,8 +290,7 @@ module.exports = {
 				}
 			}
 
-			//TODO
-			return interaction.followUp('I couldn\'t find a scheduled match created by you with that internal ID.\nTo see what ID you need to put please use `/osu-referee scheduled`');
+			return interaction.followUp('I couldn\'t find a scheduled match created by you with that internal ID.\nTo see what ID you need to put please use </osu-referee scheduled:1023849805648252988>');
 		}
 	},
 };
