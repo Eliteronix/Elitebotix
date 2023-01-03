@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const { Permissions } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
-const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap } = require('../utils');
+const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague } = require('../utils');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 
@@ -303,35 +303,42 @@ module.exports = {
 			}
 		}
 
-		// let duelLeague = getOsuDuelLeague(duelRating.total);
+		let duelLeague = getOsuDuelLeague(duelRating.total);
 
-		// let leagueText = duelLeague.name;
-		// let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName.replace(/[2-3]/gm, '1')}.png`);
+		let leagueImage = await Canvas.loadImage(`./other/borders/${duelLeague.imageName.replace(/_[1-3]/gm, '')}.png`);
 
-		// ctx.drawImage(leagueImage, -250, -500, 1500, 1500);
+		ctx.drawImage(leagueImage, 0, 0, 1000, 500);
 
 		// Write the title of the player
 		ctx.font = '35px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
-		ctx.fillText(`${year} osu! wrapped for ${osuUser.osuName}`, canvas.width / 2, 40);
+		ctx.fillText(`${year} osu! wrapped for ${osuUser.osuName}`, 475, 40);
+
+		let lineLength = ctx.measureText(`${year} osu! wrapped for ${osuUser.osuName}`).width;
+
+		// Draw an underline
+		ctx.beginPath();
+		ctx.lineWidth = 2;
+		ctx.strokeStyle = '#ffffff';
+		ctx.moveTo(475 - lineLength / 2, 47);
+		ctx.lineTo(475 + lineLength / 2, 47);
+		ctx.stroke();
 
 		// Write the title of the player
 		ctx.font = '22px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
-		ctx.textAlign = 'center';
-		ctx.fillText(`Played tournaments: ${tourneysPlayed.length}`, 190, 90);
+		ctx.textAlign = 'left';
+		ctx.fillText(`Played tournaments: ${tourneysPlayed.length}`, 50, 90);
 
-		ctx.fillText(`Played matches: ${multiMatches.length}`, 190, 140);
-		ctx.fillText(`Won: ${matchesWon} / Lost: ${matchesLost}`, 190, 170);
+		ctx.fillText(`Played matches: ${multiMatches.length}`, 50, 140);
+		ctx.font = '18px comfortaa, sans-serif';
+		ctx.fillText(`Won: ${matchesWon} / Lost: ${matchesLost}`, 75, 165);
 
-		ctx.fillText(`Played maps: ${gamesChecked.length}`, 190, 220);
-		ctx.fillText(`Won: ${gamesWon} / Lost: ${gamesLost}`, 190, 250);
-
-		ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 190, 300);
-		for (let i = 0; i < Math.min(5, mostPlayedWith.length); i++) {
-			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 190, 330 + i * 30);
-		}
+		ctx.font = '22px comfortaa, sans-serif';
+		ctx.fillText(`Played maps: ${gamesChecked.length}`, 50, 220);
+		ctx.font = '18px comfortaa, sans-serif';
+		ctx.fillText(`Won: ${gamesWon} / Lost: ${gamesLost}`, 75, 245);
 
 		if (isNaN(duelRating.total) || duelRating.total === null) {
 			duelRating.total = 0;
@@ -381,72 +388,83 @@ module.exports = {
 			oldDuelRating.freeMod = 0;
 		}
 
-		ctx.fillText('Duel Rating changes:', 810, 90);
+		ctx.font = '22px comfortaa, sans-serif';
+		ctx.textAlign = 'left';
+		ctx.fillText('Duel Rating changes:', 50, 300);
+		ctx.font = '18px comfortaa, sans-serif';
 		ctx.textAlign = 'right';
-		ctx.fillText('Total: ', 730, 120);
-		ctx.fillText(oldDuelRating.total.toFixed(3), 792, 120);
-		ctx.fillText('→', 820, 120);
-		ctx.fillText(duelRating.total.toFixed(3), 884, 120);
-		ctx.fillText('|', 900, 120);
+		ctx.fillText('Total: ', 106, 325);
+		ctx.fillText(oldDuelRating.total.toFixed(3), 150, 325);
+		ctx.fillText('→', 172, 325);
+		ctx.fillText(duelRating.total.toFixed(3), 224, 325);
+		ctx.fillText('|', 236, 325);
 		if (duelRating.total - oldDuelRating.total < 0) {
-			ctx.fillText((duelRating.total - oldDuelRating.total).toFixed(3), 975, 120);
+			ctx.fillText((duelRating.total - oldDuelRating.total).toFixed(3), 295, 325);
 		} else {
-			ctx.fillText(`+${(duelRating.total - oldDuelRating.total).toFixed(3)}`, 975, 120);
+			ctx.fillText(`+${(duelRating.total - oldDuelRating.total).toFixed(3)}`, 295, 325);
 		}
 
-		ctx.fillText('NM: ', 730, 145);
-		ctx.fillText(oldDuelRating.noMod.toFixed(3), 792, 145);
-		ctx.fillText('→', 820, 145);
-		ctx.fillText(duelRating.noMod.toFixed(3), 884, 145);
-		ctx.fillText('|', 900, 145);
+		ctx.fillText('NM: ', 106, 350);
+		ctx.fillText(oldDuelRating.noMod.toFixed(3), 150, 350);
+		ctx.fillText('→', 172, 350);
+		ctx.fillText(duelRating.noMod.toFixed(3), 224, 350);
+		ctx.fillText('|', 236, 350);
 		if (duelRating.noMod - oldDuelRating.noMod < 0) {
-			ctx.fillText((duelRating.noMod - oldDuelRating.noMod).toFixed(3), 975, 145);
+			ctx.fillText((duelRating.noMod - oldDuelRating.noMod).toFixed(3), 295, 350);
 		} else {
-			ctx.fillText(`+${(duelRating.noMod - oldDuelRating.noMod).toFixed(3)}`, 975, 145);
+			ctx.fillText(`+${(duelRating.noMod - oldDuelRating.noMod).toFixed(3)}`, 295, 350);
 		}
 
-		ctx.fillText('HD: ', 730, 170);
-		ctx.fillText(oldDuelRating.hidden.toFixed(3), 792, 170);
-		ctx.fillText('→', 820, 170);
-		ctx.fillText(duelRating.hidden.toFixed(3), 884, 170);
-		ctx.fillText('|', 900, 170);
+		ctx.fillText('HD: ', 106, 375);
+		ctx.fillText(oldDuelRating.hidden.toFixed(3), 150, 375);
+		ctx.fillText('→', 172, 375);
+		ctx.fillText(duelRating.hidden.toFixed(3), 224, 375);
+		ctx.fillText('|', 236, 375);
 		if (duelRating.hidden - oldDuelRating.hidden < 0) {
-			ctx.fillText((duelRating.hidden - oldDuelRating.hidden).toFixed(3), 975, 170);
+			ctx.fillText((duelRating.hidden - oldDuelRating.hidden).toFixed(3), 295, 375);
 		} else {
-			ctx.fillText(`+${(duelRating.hidden - oldDuelRating.hidden).toFixed(3)}`, 975, 170);
+			ctx.fillText(`+${(duelRating.hidden - oldDuelRating.hidden).toFixed(3)}`, 295, 375);
 		}
 
-		ctx.fillText('HR: ', 730, 195);
-		ctx.fillText(oldDuelRating.hardRock.toFixed(3), 792, 195);
-		ctx.fillText('→', 820, 195);
-		ctx.fillText(duelRating.hardRock.toFixed(3), 884, 195);
-		ctx.fillText('|', 900, 195);
+		ctx.fillText('HR: ', 106, 400);
+		ctx.fillText(oldDuelRating.hardRock.toFixed(3), 150, 400);
+		ctx.fillText('→', 172, 400);
+		ctx.fillText(duelRating.hardRock.toFixed(3), 224, 400);
+		ctx.fillText('|', 236, 400);
 		if (duelRating.hardRock - oldDuelRating.hardRock < 0) {
-			ctx.fillText((duelRating.hardRock - oldDuelRating.hardRock).toFixed(3), 975, 195);
+			ctx.fillText((duelRating.hardRock - oldDuelRating.hardRock).toFixed(3), 295, 400);
 		} else {
-			ctx.fillText(`+${(duelRating.hardRock - oldDuelRating.hardRock).toFixed(3)}`, 975, 195);
+			ctx.fillText(`+${(duelRating.hardRock - oldDuelRating.hardRock).toFixed(3)}`, 295, 400);
 		}
 
-		ctx.fillText('DT: ', 730, 220);
-		ctx.fillText(oldDuelRating.doubleTime.toFixed(3), 792, 220);
-		ctx.fillText('→', 820, 220);
-		ctx.fillText(duelRating.doubleTime.toFixed(3), 884, 220);
-		ctx.fillText('|', 900, 220);
+		ctx.fillText('DT: ', 106, 425);
+		ctx.fillText(oldDuelRating.doubleTime.toFixed(3), 150, 425);
+		ctx.fillText('→', 172, 425);
+		ctx.fillText(duelRating.doubleTime.toFixed(3), 224, 425);
+		ctx.fillText('|', 236, 425);
 		if (duelRating.doubleTime - oldDuelRating.doubleTime < 0) {
-			ctx.fillText((duelRating.doubleTime - oldDuelRating.doubleTime).toFixed(3), 975, 220);
+			ctx.fillText((duelRating.doubleTime - oldDuelRating.doubleTime).toFixed(3), 295, 425);
 		} else {
-			ctx.fillText(`+${(duelRating.doubleTime - oldDuelRating.doubleTime).toFixed(3)}`, 975, 220);
+			ctx.fillText(`+${(duelRating.doubleTime - oldDuelRating.doubleTime).toFixed(3)}`, 295, 425);
 		}
 
-		ctx.fillText('FM: ', 730, 245);
-		ctx.fillText(oldDuelRating.freeMod.toFixed(3), 792, 245);
-		ctx.fillText('→', 820, 245);
-		ctx.fillText(duelRating.freeMod.toFixed(3), 884, 245);
-		ctx.fillText('|', 900, 245);
+		ctx.fillText('FM: ', 106, 450);
+		ctx.fillText(oldDuelRating.freeMod.toFixed(3), 150, 450);
+		ctx.fillText('→', 172, 450);
+		ctx.fillText(duelRating.freeMod.toFixed(3), 224, 450);
+		ctx.fillText('|', 236, 450);
 		if (duelRating.freeMod - oldDuelRating.freeMod < 0) {
-			ctx.fillText((duelRating.freeMod - oldDuelRating.freeMod).toFixed(3), 975, 245);
+			ctx.fillText((duelRating.freeMod - oldDuelRating.freeMod).toFixed(3), 295, 450);
 		} else {
-			ctx.fillText(`+${(duelRating.freeMod - oldDuelRating.freeMod).toFixed(3)}`, 975, 245);
+			ctx.fillText(`+${(duelRating.freeMod - oldDuelRating.freeMod).toFixed(3)}`, 295, 450);
+		}
+
+		ctx.textAlign = 'center';
+		ctx.font = '22px comfortaa, sans-serif';
+		ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 800, 90);
+		ctx.font = '18px comfortaa, sans-serif';
+		for (let i = 0; i < Math.min(5, mostPlayedWith.length); i++) {
+			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 800, 115 + i * 25);
 		}
 
 		ctx.textAlign = 'left';
@@ -478,23 +496,23 @@ module.exports = {
 		// Write the title of the player
 		ctx.font = '16px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
-		ctx.textAlign = 'right';
+		ctx.textAlign = 'left';
 		let today = new Date().toLocaleDateString();
-		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 5, canvas.height - 5);
+		ctx.fillText(`Made by Elitebotix on ${today}`, 10, canvas.height - 10);
 
 		//Get a circle in the middle for inserting the player avatar
 		ctx.beginPath();
-		ctx.arc(canvas.width / 2, canvas.height / 2, canvas.height / 4, 0, Math.PI * 2, true);
+		ctx.arc(475, canvas.height / 2, canvas.height / 4, 0, Math.PI * 2, true);
 		ctx.closePath();
 		ctx.clip();
 
 		//Draw a shape onto the main canvas in the middle 
 		try {
 			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.osuUserId}`);
-			ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 4, canvas.height / 4, canvas.height / 2, canvas.height / 2);
+			ctx.drawImage(avatar, 475 - canvas.height / 4, canvas.height / 4, canvas.height / 2, canvas.height / 2);
 		} catch (error) {
 			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-			ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 4, canvas.height / 4, canvas.height / 2, canvas.height / 2);
+			ctx.drawImage(avatar, 475 - canvas.height / 4, canvas.height / 4, canvas.height / 2, canvas.height / 2);
 		}
 
 		//Create as an attachment
