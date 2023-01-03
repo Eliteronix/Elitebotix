@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-console
 console.log('Syncing database...');
 const Sequelize = require('sequelize');
 
@@ -39,6 +40,7 @@ require('./models/DBOsuTrackingUsers')(sequelize, Sequelize.DataTypes);
 require('./models/DBOsuGuildTrackers')(sequelize, Sequelize.DataTypes);
 sequelize.sync({ alter: true })
 	.then(async () => {
+		// eslint-disable-next-line no-console
 		console.log('Database synced');
 		sequelize.close();
 	})

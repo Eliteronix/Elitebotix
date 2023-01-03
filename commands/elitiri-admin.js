@@ -148,7 +148,7 @@ module.exports = {
 				targetGroup = 'Players with missing availabilities';
 			} else if (args[0] === 'noSubmissions') {
 				targetGroup = 'Players with missing submissions';
-			} else if (args[0] === 'noLobby') { 
+			} else if (args[0] === 'noLobby') {
 				targetGroup = 'Players with missing lobby';
 			} else {
 				return msg.reply(`${args[0]} is not a valid target group. It should be \`everyone\`, \`noAvailability\` or \`noSubmissions\` instead.`);
@@ -242,10 +242,11 @@ module.exports = {
 							}
 						} else {
 							j = Infinity;
-							console.log(error);
+							console.error(error);
 						}
 					}
 				}
+				// eslint-disable-next-line no-console
 				console.log('Finished messaging', i, 'out of', elitiriSignUps.length);
 			}
 		} else if (args[0] === 'prune') {
@@ -300,10 +301,11 @@ module.exports = {
 									}
 								} else {
 									j = Infinity;
-									console.log(error);
+									console.error(error);
 								}
 							}
 						}
+						// eslint-disable-next-line no-console
 						console.log('Player removed from Elitiri Cup');
 					}
 				}
@@ -338,15 +340,16 @@ module.exports = {
 									}
 								} else {
 									j = Infinity;
-									console.log(error);
+									console.error(error);
 								}
 							}
 						}
+						// eslint-disable-next-line no-console
 						console.log('Player removed from Elitiri Cup');
 					}
 				}
 			}
-		} else if (args[0].toLowerCase() === 'prunelobby') { 
+		} else if (args[0].toLowerCase() === 'prunelobby') {
 			args.shift();
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: {
@@ -421,7 +424,7 @@ module.exports = {
 
 			await sheet.saveUpdatedCells();
 			msg.reply('Done.');
-		} else if (args[0].toLowerCase() === 'setlobby') { 
+		} else if (args[0].toLowerCase() === 'setlobby') {
 			args.shift();
 
 			// lobbyID = args[0]

@@ -71,7 +71,7 @@ module.exports = {
 					if (err.message === 'Not found') {
 						msg.channel.send(`Could not find user \`${args[1].replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
 					} else {
-						console.log(err);
+						console.error(err);
 					}
 				});
 		} else if (args[0] === 'unfollow') {
@@ -107,7 +107,7 @@ module.exports = {
 					if (err.message === 'Not found') {
 						msg.channel.send(`Could not find user \`${args[1].replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
 					} else {
-						console.log(err);
+						console.error(err);
 					}
 				});
 		} else if (args[0] === 'followlist') {
@@ -146,7 +146,7 @@ module.exports = {
 							followList.push(osuUser.name);
 						})
 						.catch(err => {
-							console.log(err);
+							console.error(err);
 						});
 				}
 			}

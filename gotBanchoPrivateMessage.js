@@ -107,7 +107,7 @@ module.exports = async function (client, bancho, message) {
 			ownStarRating = ownStarRating.total;
 		} catch (e) {
 			if (e !== 'No standard plays') {
-				console.log(e);
+				console.error(e);
 			}
 		}
 

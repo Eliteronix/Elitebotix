@@ -28,7 +28,7 @@ module.exports = async function (oldMsg, newMsg) {
 				const owner = await newMsg.client.users.fetch(newMsg.guild.ownerId);
 				return owner.send(`It seems like the logging channel on the guild \`${newMsg.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
-			console.log(error);
+			console.error(error);
 		}
 
 		const changeEmbed = new Discord.MessageEmbed()

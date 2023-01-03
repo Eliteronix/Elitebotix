@@ -24,7 +24,7 @@ module.exports = async function (role) {
 				const owner = await role.client.users.fetch(role.guild.ownerId);
 				return owner.send(`It seems like the logging channel on the guild \`${role.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
-			console.log(error);
+			console.error(error);
 		}
 
 		let permissionsReadable = 'None';

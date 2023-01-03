@@ -35,7 +35,7 @@ module.exports = async function (member) {
 					const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
 					return owner.send(`I could not send a welcome message for a new user into the channel \`${guildGoodbyeMessageChannel.name}\` on \`${member.guild.name}\` due to missing permissions.`);
 				} else {
-					return console.log(e);
+					return console.error(e);
 				}
 			}
 		}
@@ -51,7 +51,7 @@ module.exports = async function (member) {
 					const owner = await member.message.client.users.fetch(member.guild.ownerId);
 					return owner.send(`It seems like the logging channel on the guild \`${member.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
-				console.log(error);
+				console.error(error);
 			}
 
 			const changeEmbed = new Discord.MessageEmbed()

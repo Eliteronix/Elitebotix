@@ -5628,9 +5628,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		}
 	}
 
-	if (modPool === 'HR') {
-		console.log('avoidMaps', avoidMaps.length, 'finalAvoidList', finalAvoidList.length);
-	}
+	// if (modPool === 'HR') {
+	// 	console.log('avoidMaps', avoidMaps.length, 'finalAvoidList', finalAvoidList.length);
+	// }
 
 	//Set if it should only be ranked maps
 	let rankedStatus = ['Ranked', 'Approved', 'Qualified', 'Loved', 'Pending', 'Graveyard', 'WIP'];
@@ -5849,9 +5849,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		});
 	}
 
-	if (modPool === 'HR') {
-		console.log('Found', beatmaps.length, 'maps');
-	}
+	// if (modPool === 'HR') {
+	// 	console.log('Found', beatmaps.length, 'maps');
+	// }
 
 	if (beatmaps.length === 0) {
 		input.alreadyCheckedSR = [];
@@ -5863,9 +5863,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (input.upperBound > 9.9) {
 			input.upperBound = 9.9;
 		}
-		if (modPool === 'HR') {
-			console.log('Increased SR range to', input.lowerBound, '-', input.upperBound);
-		}
+		// if (modPool === 'HR') {
+		// 	console.log('Increased SR range to', input.lowerBound, '-', input.upperBound);
+		// }
 	}
 
 	//Loop through the beatmaps until a fitting one is found
@@ -5927,9 +5927,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		//Check drain length
 		if (randomBeatmap.drainLength > upperDrain || randomBeatmap.drainLength < lowerDrain) {
 			beatmaps.splice(index, 1);
-			if (modPool === 'HR') {
-				console.log('Map Selection: Drain length out of bounds', randomBeatmap.drainLength, lowerDrain, upperDrain);
-			}
+			// if (modPool === 'HR') {
+			// 	console.log('Map Selection: Drain length out of bounds', randomBeatmap.drainLength, lowerDrain, upperDrain);
+			// }
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
@@ -5937,9 +5937,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		//Check the approach rate
 		if (randomBeatmap.approachRate > upperApproach || randomBeatmap.approachRate < lowerApproach) {
 			beatmaps.splice(index, 1);
-			if (modPool === 'HR') {
-				console.log('Map Selection: Approach rate out of bounds', randomBeatmap.approachRate, lowerApproach, upperApproach);
-			}
+			// if (modPool === 'HR') {
+			// 	console.log('Map Selection: Approach rate out of bounds', randomBeatmap.approachRate, lowerApproach, upperApproach);
+			// }
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
 		}
@@ -5947,9 +5947,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		//Check the circle size
 		if (randomBeatmap.circleSize > upperCircleSize || randomBeatmap.circleSize < lowerCircleSize) {
 			beatmaps.splice(index, 1);
-			if (modPool === 'HR') {
-				console.log('Map Selection: Circle size out of bounds', randomBeatmap.circleSize, lowerCircleSize, upperCircleSize);
-			}
+			// if (modPool === 'HR') {
+			// 	console.log('Map Selection: Circle size out of bounds', randomBeatmap.circleSize, lowerCircleSize, upperCircleSize);
+			// }
 			// console.log('Map Selection: Circle size out of bounds');
 			input.alreadyCheckedOther.push(randomBeatmap.beatmapId);
 			continue;
@@ -5959,9 +5959,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (randomBeatmap.starRating > upperBound || randomBeatmap.starRating < lowerBound) {
 			beatmaps.splice(index, 1);
 			// console.log('Map Selection: Star rating out of bounds', randomBeatmap.starRating);
-			if (modPool === 'HR') {
-				console.log('Map Selection: Star rating out of bounds', randomBeatmap.starRating, lowerBound, upperBound);
-			}
+			// if (modPool === 'HR') {
+			// 	console.log('Map Selection: Star rating out of bounds', randomBeatmap.starRating, lowerBound, upperBound);
+			// }
 			input.alreadyCheckedSR.push(randomBeatmap.beatmapId);
 			continue;
 		}
@@ -5972,9 +5972,9 @@ async function getValidTournamentBeatmapFunction(input) {
 		return clone;
 	}
 
-	if (modPool === 'HR') {
-		console.log('Map Selection: None found - Going again');
-	}
+	// if (modPool === 'HR') {
+	// 	console.log('Map Selection: None found - Going again');
+	// }
 	return await getValidTournamentBeatmapFunction(input);
 }
 

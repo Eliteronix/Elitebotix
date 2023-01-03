@@ -235,7 +235,7 @@ module.exports = {
 				await sheet.saveUpdatedCells();
 
 			} catch (error) {
-				console.log(error);
+				console.error(error);
 				if (msg.id) {
 					return msg.reply('Something went wrong... Please, try again');
 				} else {
@@ -411,7 +411,7 @@ module.exports = {
 					playerArray.push(players[i].osuName);
 				}
 			}
-				
+
 			DBProcessQueue.create({ guildId: 'None', task: 'tourneyLobbyRemind', priority: 10, additions: `${user};${potentialLobby.lobbyId};${currentElitiriCup};${date};${playerArray}`, date: date });
 
 			try {
@@ -426,7 +426,7 @@ module.exports = {
 					return interaction.editReply({ content: `You successfully claimed \`${lobbyId}\` as referee` });
 				}
 			} catch (error) {
-				console.log(error);
+				console.error(error);
 				if (msg.id) {
 					return msg.reply('Something went wrong. Please, try again');
 				} else {
@@ -491,7 +491,7 @@ module.exports = {
 			} else {
 				scheduleSheetId = 'Qualifiers Schedules-Beginner';
 			}
-			
+
 			// Delete notification task
 			let date = new Date(roundOverCheck(potentialLobby.bracketName, lobbyId.replace(/\D+/, '')) - 1800000).toUTCString();
 			const task = await DBProcessQueue.findOne({
@@ -501,7 +501,7 @@ module.exports = {
 				}
 			});
 			task.destroy();
-			
+
 			try {
 				const sheet = doc.sheetsByTitle[scheduleSheetId];
 				await sheet.loadCells('A1:U29');
@@ -517,7 +517,7 @@ module.exports = {
 					interaction.editReply({ content: `Successfully unassigned you from \`${lobbyId}\`` });
 				}
 			} catch (error) {
-				console.log(error);
+				console.error(error);
 				if (msg.id) {
 					return msg.reply('Something went wrong. Please, try again');
 				} else {

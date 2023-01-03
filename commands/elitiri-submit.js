@@ -450,7 +450,7 @@ module.exports = {
 					}
 					return interaction.editReply({ content: `Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`, ephemeral: true });
 				} else {
-					console.log(err);
+					console.error(err);
 				}
 			}
 			);

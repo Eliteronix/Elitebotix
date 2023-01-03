@@ -24,7 +24,7 @@ module.exports = async function (oldMember, newMember) {
 					const owner = await newMember.message.client.users.fetch(newMember.guild.ownerId);
 					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
-				console.log(error);
+				console.error(error);
 			}
 
 			let oldUserDisplayName = oldMember.user.username;
@@ -77,7 +77,7 @@ module.exports = async function (oldMember, newMember) {
 					const owner = await newMember.message.client.users.fetch(newMember.guild.ownerId);
 					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
-				console.log(error);
+				console.error(error);
 			}
 
 			let removedRoles = '';

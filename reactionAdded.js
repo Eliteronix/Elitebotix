@@ -47,7 +47,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 					channel = await reaction.client.channels.fetch(starBoardedMessage.starBoardChannelId);
 				} catch (error) {
 					if (error.message !== 'Unknown Channel') {
-						console.log(error);
+						console.error(error);
 					}
 				}
 				if (channel) {
@@ -56,7 +56,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 						message = await channel.messages.fetch(starBoardedMessage.starBoardMessageId);
 					} catch (error) {
 						if (error.message !== 'Unknown Message') {
-							console.log(error);
+							console.error(error);
 						}
 					}
 
@@ -112,7 +112,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 						const owner = await reaction.message.client.users.fetch(reaction.message.guild.ownerId);
 						return owner.send(`It seems like the starboard channel on the guild \`${reaction.message.guild.name}\` has been deleted.\nThe starboard has been deactivated.`);
 					}
-					console.log(error);
+					console.error(error);
 				}
 
 				const starBoardMessage = await channel.send({ content: `${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, embeds: [starBoardMessageEmbed] });
@@ -145,7 +145,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 						const owner = await reaction.message.client.users.fetch(reaction.message.guild.ownerId);
 						return owner.send(`It seems like the starboard channel on the guild \`${reaction.message.guild.name}\` has been deleted.\nThe starboard has been deactivated.`);
 					}
-					console.log(error);
+					console.error(error);
 				}
 
 				const starBoardMessage = await channel.send({ content: `${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, embeds: [starBoardMessageEmbed] });
@@ -1042,7 +1042,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
 						return owner.send(`I could not assign a reactionrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
 					} else {
-						return console.log(e);
+						return console.error(e);
 					}
 				}
 			} else {
@@ -1075,7 +1075,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
 							return owner.send(`I could not assign a reactionrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
 						} else {
-							return console.log(e);
+							return console.error(e);
 						}
 					}
 				} else {
@@ -1083,7 +1083,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 					editEmbed(reaction.message, dbReactionRolesHeader);
 				}
 			} else {
-				console.log(`There was an error trying to get a ReactionRole from the db for message ${reaction.message.id}, in ${reaction.message.guild.name} on a reaction.`);
+				console.error(`There was an error trying to get a ReactionRole from the db for message ${reaction.message.id}, in ${reaction.message.guild.name} on a reaction.`);
 			}
 		}
 	}
@@ -1129,7 +1129,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		DBReactionRolesHeader.destroy({
 			where: { guildId: msg.guildId, id: reactionRolesHeader.id },
 		});
-		return console.log(e);
+		return console.error(e);
 	}
 	//Get the message object
 	const embedMessage = await embedChannel.messages.fetch(embedMessageId);
@@ -1149,7 +1149,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 				const owner = await msg.client.users.cache.find(user => user.id === msg.guild.ownerId);
 				return owner.send(`I could not add reactions to a reactionrole-embed because I'm missing the \`Add Reactions\` permission on \`${msg.guild.name}\`.`);
 			} else {
-				return console.log(e);
+				return console.error(e);
 			}
 		}
 	}

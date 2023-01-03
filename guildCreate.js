@@ -21,6 +21,6 @@ module.exports = async function (guild) {
 			}
 		}
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 	}
 };

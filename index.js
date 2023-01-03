@@ -19,6 +19,7 @@ if (process.env.SERVER === 'Dev') {
 }
 
 manager.on('shardCreate', shard => {
+	// eslint-disable-next-line no-console
 	console.log(`Launched shard ${shard.id}`);
 
 	// Listeing for the ready event on shard.
