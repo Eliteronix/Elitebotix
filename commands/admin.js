@@ -4050,39 +4050,39 @@ module.exports = {
 			// 	},
 			// });
 
-			let wrappedYears = [];
+			// let wrappedYears = [];
 
-			for (let i = 2018; i <= new Date().getFullYear() - 1; i++) {
-				wrappedYears.push({
-					'name': i.toString(),
-					'value': i,
-				});
-			}
+			// for (let i = 2018; i <= new Date().getFullYear() - 1; i++) {
+			// 	wrappedYears.push({
+			// 		'name': i.toString(),
+			// 		'value': i,
+			// 	});
+			// }
 
-			wrappedYears.reverse();
+			// wrappedYears.reverse();
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'osu-wrapped',
-					description: 'Sums up the year in osu! for a user',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'username',
-							'description': 'The username, id or link of the player',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'year',
-							'description': 'The year to get the wrapped for',
-							'type': 4,
-							'required': false,
-							'choices': wrappedYears
-						},
-					]
-				}
-			});
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
+			// 		name: 'osu-wrapped',
+			// 		description: 'Sums up the year in osu! for a user',
+			// 		dm_permission: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'username',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'year',
+			// 				'description': 'The year to get the wrapped for',
+			// 				'type': 4,
+			// 				'required': false,
+			// 				'choices': wrappedYears
+			// 			},
+			// 		]
+			// 	}
+			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
