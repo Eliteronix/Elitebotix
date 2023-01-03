@@ -23,6 +23,7 @@ module.exports = {
 		const commandUser = commandConfig[0];
 
 		if (!commandUser) {
+			//TODO
 			return msg.reply('You don\'t have an osu! account linked to your discord account. Please do so by using `/osu-link connect`');
 		}
 

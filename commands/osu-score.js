@@ -109,6 +109,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getScore(msg, dbBeatmap, discordUser.osuUserId, server, mode, false, mapRank, mods);
 					} else {
+						//TODO
 						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						getScore(msg, dbBeatmap, args[i], server, mode, false, mapRank, mods);
 					}
@@ -219,6 +220,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						//Send attachment
 						if (noLinkedAccount) {
+							//TODO
 							sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`/osu-link connect username:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 						} else {
 							sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });
@@ -247,7 +249,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 				if (err.message === 'Not found') {
 					msg.channel.send(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\`.`);
 				} else {
-					console.log(err);
+					console.error(err);
 				}
 			});
 	} else if (server === 'ripple') {
@@ -312,7 +314,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						if (err.message === 'Not found') {
 							msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 						} else {
-							console.log(err);
+							console.error(err);
 						}
 					});
 			})
@@ -320,7 +322,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 				if (err.message === 'Not found') {
 					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else {
-					console.log(err);
+					console.error(err);
 				}
 			});
 	} else if (server === 'tournaments') {
@@ -420,6 +422,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 			//Send attachment
 			if (noLinkedAccount) {
+				//TODO
 				sentMessage = await msg.channel.send({ content: `${osuUser.name}: <https://osu.ppy.sh/users/${osuUser.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${osuUser.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\nFeel free to use \`/osu-link connect username:${osuUser.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 			} else {
 				sentMessage = await msg.channel.send({ content: `${osuUser.name}: <https://osu.ppy.sh/users/${osuUser.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${osuUser.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: [attachment] });

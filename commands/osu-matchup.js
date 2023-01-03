@@ -207,6 +207,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						team1[i] = discordUser.osuUserId;
 					} else {
+						//TODO
 						msg.channel.send(`\`${team1[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						team1.splice(i, 1);
 						i--;
@@ -227,7 +228,7 @@ module.exports = {
 							team1.splice(i, 1);
 							i--;
 						} else {
-							console.log(err);
+							console.error(err);
 						}
 					});
 			}
@@ -245,6 +246,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						team2[i] = discordUser.osuUserId;
 					} else {
+						//TODO
 						msg.channel.send(`\`${team2[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						team2.splice(i, 1);
 						i--;
@@ -265,7 +267,7 @@ module.exports = {
 							team2.splice(i, 1);
 							i--;
 						} else {
-							console.log(err);
+							console.error(err);
 						}
 					});
 			}

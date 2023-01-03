@@ -159,6 +159,7 @@ module.exports = {
 					if (msg.id) {
 						return sendMessage(msg, `You are already registered for the \`Maps of the Day\` competition.\nBe sure to join the server if you didn't already. (\`${guildPrefix}osu-motd server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`);
 					}
+					//TODO
 					return interaction.reply({ content: 'You are already registered for the `Maps of the Day` competition.\nBe sure to join the server if you didn\'t already. (`/osu-motd server`)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!', ephemeral: true });
 				}
 				if (discordUser.osuVerified) {
@@ -171,17 +172,20 @@ module.exports = {
 					if (msg.id) {
 						return sendMessage(msg, `You successfully registered for the \`Maps of the Day\` competition.\nBe sure to join the server and read <#834833321438740490> if you didn't already. (\`${guildPrefix}osu-motd server\`)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`);
 					}
+					//TODO
 					return interaction.reply({ content: 'You successfully registered for the `Maps of the Day` competition.\nBe sure to join the server and read <#834833321438740490> if you didn\'t already. (`/osu-motd server`)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!', ephemeral: true });
 				} else {
 					if (msg.id) {
 						return sendMessage(msg, `It seems like you don't have your connected osu! account verified.\nPlease use \`${guildPrefix}osu-link verify\` to send a verification code to your osu! dms, follow the instructions and try again afterwards.`);
 					}
+					//TODO
 					return interaction.reply({ content: 'It seems like you don\'t have your connected osu! account verified.\nPlease use `$/osu-link verify` to send a verification code to your osu! dms, follow the instructions and try again afterwards.', ephemeral: true });
 				}
 			} else {
 				if (msg.id) {
 					return sendMessage(msg, `It seems like you don't have your osu! account connected to the bot.\nPlease use \`${guildPrefix}osu-link osu-username\` to connect you account and verify it.`);
 				}
+				//TODO
 				return interaction.reply({ content: 'It seems like you don\'t have your osu! account connected to the bot.\nPlease use `/osu-link osu-username` to connect you account and verify it.', ephemeral: true });
 			}
 		} else if (args[0].toLowerCase() === 'unregister') {
@@ -195,13 +199,17 @@ module.exports = {
 				discordUser.osuMOTDRegistered = false;
 				discordUser.save();
 				if (msg.id) {
+					//TODO
 					return sendMessage(msg, 'You have been unregistered from the `Maps of the Day` competition.\nStill thank you for showing interest!\nYou can always register again by using `/osu-motd register`!');
 				}
+				//TODO
 				return interaction.reply({ content: 'You have been unregistered from the `Maps of the Day` competition.\nStill thank you for showing interest!\nYou can always register again by using `/osu-motd register`!', ephemeral: true });
 			} else {
 				if (msg.id) {
+					//TODO
 					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!');
 				}
+				//TODO
 				return interaction.reply({ content: 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!', ephemeral: true });
 			}
 		} else if (args[0].toLowerCase() === 'mute') {
@@ -251,8 +259,10 @@ module.exports = {
 						}
 					}
 					if (msg.id) {
+						//TODO
 						return sendMessage(msg, 'The `Maps of the Day` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use `/osu-motd unmute`.');
 					}
+					//TODO
 					return interaction.reply({ content: 'The `Maps of the Day` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use `/osu-motd unmute`.', ephemeral: true });
 				} else {
 					if (args[1]) {
@@ -305,14 +315,18 @@ module.exports = {
 					discordUser.osuMOTDMuted = true;
 					discordUser.save();
 					if (msg.id) {
+						//TODO
 						return sendMessage(msg, 'The `Maps of the Day` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use `/osu-motd unmute`.');
 					}
+					//TODO
 					return interaction.reply({ content: 'The `Maps of the Day` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use `/osu-motd unmute`.', ephemeral: true });
 				}
 			} else {
 				if (msg.id) {
+					//TODO
 					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!');
 				}
+				//TODO
 				return interaction.reply({ content: 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!', ephemeral: true });
 			}
 		} else if (args[0].toLowerCase() === 'unmute') {
@@ -339,13 +353,16 @@ module.exports = {
 				}
 			} else {
 				if (msg.id) {
+					//TODO
 					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!');
 				}
+				//TODO
 				return interaction.reply({ content: 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using `/osu-motd register`!', ephemeral: true });
 			}
 		} else if (args[0].toLowerCase() === 'custom-fixed-players') {
 			//Return if its not triggered by a slash command
 			if (msg.id) {
+				//TODO
 				return msg.reply('Please use `/osu-motd custom-fixed-players` to set up the custom MOTD');
 			}
 			args.shift();
@@ -738,11 +755,13 @@ module.exports = {
 		} else if (args[0].toLowerCase() === 'custom-react-to-play') {
 			//Return if its not triggered by a slash command
 			if (msg.id) {
+				//TODO
 				return msg.reply('Please use `/osu-motd custom-react-to-play` to set up the custom MOTD.');
 			}
 
 			//Return if triggered in DMs
 			if (msg.channel.type === 'dm') {
+				//TODO
 				return msg.reply('Please use `/osu-motd custom-react-to-play` in a server to set up the custom MOTD.');
 			}
 
@@ -1093,6 +1112,7 @@ module.exports = {
 					interaction.editReply({ embeds: [mappoolEmbed] });
 				} else {
 					reaction.users.remove(user.id);
+					//TODO
 					let hintMessage = await embedMessage.channel.send(`It seems like you don't have your account connected and verified to the bot <@${user.id}>.\nPlease do so by using \`/osu-link connect\` and try again.`);
 					await pause(10000);
 					hintMessage.delete();

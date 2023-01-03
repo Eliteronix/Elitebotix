@@ -77,6 +77,7 @@ module.exports = {
 								registeredPlayer.osuMOTDmutedUntil = null;
 								registeredPlayer.save();
 								try {
+									//TODO
 									await members[i].user.send('The `Maps of the Day` competition is no longer muted for you.\nFeel free to mute it again by using `/osu-motd mute <#mo/#w/#d/#h>`.');
 								} catch {
 									//Nothing
@@ -97,6 +98,7 @@ module.exports = {
 									registeredPlayer.osuMOTDmutedUntil = null;
 									registeredPlayer.save();
 									try {
+										//TODO
 										await members[i].user.send('You were removed from the `Maps of the Day` competition due to inactivity.\nFeel free to register again by using `/osu-motd register` when you want to play.');
 									} catch {
 										//Nothing
@@ -120,7 +122,7 @@ module.exports = {
 										await members[i].roles.add(MOTDRole);
 									}
 								} catch (e) {
-									console.log(e);
+									console.error(e);
 								}
 
 								//Check which bracket role should be received
@@ -145,7 +147,7 @@ module.exports = {
 												await members[i].roles.add(bracketRoleObjects[j]);
 											}
 										} catch (e) {
-											console.log(e);
+											console.error(e);
 										}
 									} else {
 										try {
@@ -154,7 +156,7 @@ module.exports = {
 												await members[i].roles.remove(bracketRoleObjects[j]);
 											}
 										} catch (e) {
-											console.log(e);
+											console.error(e);
 										}
 									}
 								}
@@ -167,7 +169,7 @@ module.exports = {
 											await members[i].roles.remove(bracketRoleObjects[j]);
 										}
 									} catch (e) {
-										console.log(e);
+										console.error(e);
 									}
 								}
 							}

@@ -161,10 +161,13 @@ module.exports = {
 				//Send attachment
 				let leaderboardMessage;
 				if (msg.id) {
+					//TODO
 					leaderboardMessage = await msg.reply({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect username:<username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-profile username:<username>\` is being used.`, files: [attachment] });
 				} else if (interaction) {
+					//TODO
 					leaderboardMessage = await interaction.followUp({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect username:<username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-profile username:<username>\` is being used.`, files: [attachment] });
 				} else {
+					//TODO
 					leaderboardMessage = await msg.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse \`/osu-link connect username:<username>\` to connect your osu! account.\nData is being updated once a day or when \`/osu-profile username:<username>\` is being used.`, files: [attachment] });
 				}
 
@@ -186,7 +189,7 @@ module.exports = {
 				if (processingMessage) {
 					processingMessage.edit('Error');
 				}
-				console.log(err);
+				console.error(err);
 			});
 	},
 };

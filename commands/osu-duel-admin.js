@@ -105,7 +105,7 @@ module.exports = {
 								starRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
 							} catch (e) {
 								if (e !== 'No standard plays') {
-									console.log(e);
+									console.error(e);
 								}
 							}
 							starRatings.push(starRating.total);
@@ -113,6 +113,7 @@ module.exports = {
 							getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
 						}
 					} else {
+						//TODO
 						return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect username:<username>\`.`);
 					}
 				}

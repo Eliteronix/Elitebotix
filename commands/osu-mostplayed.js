@@ -93,6 +93,7 @@ module.exports = {
 						if (discordUser && discordUser.osuUserId) {
 							getMostPlayed(msg, discordUser.osuUserId, server, false, limit);
 						} else {
+							//TODO
 							msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 							getMostPlayed(msg, args[i], server, false, limit);
 						}
@@ -388,6 +389,7 @@ async function getMostPlayed(msg, username, server, noLinkedAccount, limit) {
 				//Send attachment
 				let sentMessage;
 				if (noLinkedAccount) {
+					//TODO
 					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nFeel free to use \`/osu-link connect username:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 				} else {
 					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>`, files: [attachment] });

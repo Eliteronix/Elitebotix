@@ -28,6 +28,7 @@ module.exports = {
 		const commandUser = commandConfig[0];
 
 		if (!commandUser) {
+			//TODO
 			return interaction.editReply('Please use `/osu-link connect` to connect your osu! account first.');
 		}
 

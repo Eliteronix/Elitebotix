@@ -76,6 +76,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getProfile(msg, discordUser.osuUserId, server, mode, showGraph);
 					} else {
+						//TODO
 						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						getProfile(msg, args[i], server, mode, showGraph);
 					}
@@ -165,6 +166,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 				//Send attachment
 				let sentMessage = null;
 				if (noLinkedAccount) {
+					//TODO
 					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`/osu-link connect username:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: files });
 				} else {
 					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: files });
@@ -205,7 +207,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 				if (err.message === 'Not found') {
 					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--r\` for ripple; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
 				} else {
-					console.log(err);
+					console.error(err);
 				}
 			});
 	} else if (server === 'ripple') {
@@ -290,7 +292,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 				if (err.message === 'Not found') {
 					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
 				} else {
-					console.log(err);
+					console.error(err);
 				}
 			});
 	}

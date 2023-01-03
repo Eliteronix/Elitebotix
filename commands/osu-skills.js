@@ -131,6 +131,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getOsuSkills(msg, args, discordUser.osuUserId, scaled, scoringType, tourneyMatch, runningAverage);
 					} else {
+						//TODO
 						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						getOsuSkills(msg, args, args[i], scaled, scoringType, tourneyMatch, runningAverage);
 					}
@@ -167,7 +168,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					if (err.message === 'Not found') {
 						throw new Error('No standard plays');
 					} else {
-						console.log(err);
+						console.error(err);
 					}
 				});
 
@@ -850,7 +851,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			} else if (err.message === 'No standard plays') {
 				msg.channel.send(`Could not find any standard plays for user \`${username.replace(/`/g, '')}\`.`);
 			} else {
-				console.log(err);
+				console.error(err);
 			}
 		});
 }

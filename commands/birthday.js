@@ -100,6 +100,7 @@ module.exports = {
 			});
 
 			if (!dbDiscordUser || dbDiscordUser && !dbDiscordUser.birthday) {
+				// TODO
 				return interaction.reply({ content: 'You currently don\'t have your birthday set. Please set your birthday first by using `/birthday set`', ephemeral: true });
 			}
 

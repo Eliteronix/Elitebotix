@@ -77,6 +77,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getScore(msg, discordUser.osuUserId, server, mode, false, pass);
 					} else {
+						//TODO
 						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						getScore(msg, args[i], server, mode);
 					}
@@ -198,6 +199,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 
 				//Send attachment
 				if (noLinkedAccount) {
+					//TODO
 					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nosu! direct: <osu://b/${dbBeatmap.beatmapId}>\nFeel free to use \`/osu-link connect username:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: [attachment] });
 				} else {
 					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nosu! direct: <osu://b/${dbBeatmap.beatmapId}>`, files: [attachment] });
@@ -213,7 +215,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 				if (err.message === 'Not found') {
 					msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--r\` for ripple; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
 				} else {
-					console.log(err);
+					console.error(err);
 				}
 			});
 	} else if (server === 'ripple') {
@@ -279,7 +281,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 						if (err.message === 'Not found') {
 							msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
 						} else {
-							console.log(err);
+							console.error(err);
 						}
 					});
 			})
@@ -287,7 +289,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 				if (err.message === 'Not found') {
 					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
 				} else {
-					console.log(err);
+					console.error(err);
 				}
 			});
 	}

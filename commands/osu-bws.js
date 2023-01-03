@@ -58,9 +58,11 @@ module.exports = {
 						getProfile(msg, interaction, discordUser.osuUserId, mode);
 					} else {
 						if (msg.id) {
+							//TODO
 							return msg.reply(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 						}
 
+						//TODO
 						return interaction.followUp(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
 					}
 				} else {
@@ -128,6 +130,7 @@ async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 			}
 
 			if (noLinkedAccount) {
+				//TODO
 				data.push(`Feel free to use \`/osu-link connect username:${user.name}\` to connect your account.`);
 			}
 			if (msg.id) {
@@ -142,7 +145,7 @@ async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 				}
 				return interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 			} else {
-				console.log(err);
+				console.error(err);
 			}
 		});
 

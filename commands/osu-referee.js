@@ -94,6 +94,7 @@ module.exports = {
 								// Add the user to the team
 								team.push(dbDiscordUser.id);
 							} else {
+								//TODO
 								return interaction.followUp(`\`${user.name}\` doesn't have their account connected. Please tell them to connect their account using \`/osu-link connect\`. (Use \`_\` instead of spaces)`);
 							}
 						})
@@ -101,7 +102,7 @@ module.exports = {
 							if (err.message === 'Not found') {
 								return interaction.followUp(`Could not find user \`${getIDFromPotentialOsuLink(teams[i].split(',')[j]).replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
 							} else {
-								console.log(err);
+								console.error(err);
 								return interaction.followUp(`The bot ran into an error processing the user ${getIDFromPotentialOsuLink(teams[i].split(',')[j])}. Please try again.`);
 							}
 						});
@@ -126,7 +127,6 @@ module.exports = {
 				let mods = maps[j].replace(/\d*/gm, '');
 
 				if (mods.length % 2 !== 0) {
-					console.log('1');
 					return interaction.followUp(`${maps[j]} does not have a valid mod combination`);
 				}
 
@@ -142,7 +142,6 @@ module.exports = {
 					mod = getModBits(mod);
 
 					if (mod === 0) {
-						console.log('2');
 						return interaction.followUp(`${maps[j]} does not have a valid mod combination`);
 					}
 
@@ -170,6 +169,7 @@ module.exports = {
 			date.setUTCMinutes(date.getUTCMinutes() - 15);
 
 			DBProcessQueue.create({ guildId: interaction.guildId, task: 'tourneyMatchNotification', priority: 10, additions: `${interaction.user.id};${channel.id};${dbMaps.join(',')};${dbPlayers.join('|')};${useNoFail};${matchname};${mappoolReadable};${scoreMode};${freemodMessage};${teamsize}`, date: date });
+			//TODO
 			return interaction.editReply('The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use `/osu-referee scheduled`');
 		} else if (interaction.options._subcommand === 'scheduled') {
 			let scheduledMatches = [];
@@ -292,6 +292,7 @@ module.exports = {
 				}
 			}
 
+			//TODO
 			return interaction.followUp('I couldn\'t find a scheduled match created by you with that internal ID.\nTo see what ID you need to put please use `/osu-referee scheduled`');
 		}
 	},
