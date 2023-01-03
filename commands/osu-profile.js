@@ -76,8 +76,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getProfile(msg, discordUser.osuUserId, server, mode, showGraph);
 					} else {
-						//TODO
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using \`/osu-link connect username:<username>\`.`);
+						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1023849632599658496>.`);
 						getProfile(msg, args[i], server, mode, showGraph);
 					}
 				} else {
@@ -166,8 +165,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 				//Send attachment
 				let sentMessage = null;
 				if (noLinkedAccount) {
-					//TODO
-					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use \`/osu-link connect username:${user.name.replace(/ /g, '_')}\` if the specified account is yours.`, files: files });
+					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use </osu-link connect:1023849632599658496> if the specified account is yours.`, files: files });
 				} else {
 					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: files });
 				}

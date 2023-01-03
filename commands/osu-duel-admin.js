@@ -113,8 +113,7 @@ module.exports = {
 							getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
 						}
 					} else {
-						//TODO
-						return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using \`/osu-link connect username:<username>\`.`);
+						return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using </osu-link connect:1023849632599658496>.`);
 					}
 				}
 
