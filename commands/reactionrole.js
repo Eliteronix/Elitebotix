@@ -107,7 +107,7 @@ module.exports = {
 							DBReactionRolesHeader.destroy({
 								where: { guildId: msg.guildId, id: args[2] },
 							});
-							return console.log(e);
+							return console.error(e);
 						}
 						//Get the message object
 						const embedMessage = await embedChannel.messages.fetch(embedMessageId);
@@ -517,7 +517,7 @@ async function editEmbed(msg, reactionRolesHeader, client) {
 		DBReactionRolesHeader.destroy({
 			where: { guildId: msg.guildId, id: reactionRolesHeader.id },
 		});
-		return console.log(e);
+		return console.error(e);
 	}
 	//Get the message object
 	let embedMessage = await embedChannel.messages.fetch(embedMessageId);

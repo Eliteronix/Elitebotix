@@ -127,7 +127,7 @@ module.exports = {
 					}
 				}, { context: { message: `Lobby #${lobbyNumber}: <https://osu.ppy.sh/mp/${lobby.id}>` } });
 			} catch (error) {
-				console.log('MOTD/knockoutLobby.js', error);
+				console.error('MOTD/knockoutLobby.js', error);
 			}
 		}
 
@@ -659,7 +659,7 @@ async function getKnockoutScores(map, players, doubleTime) {
 
 					return score;
 				} else {
-					console.log(err);
+					console.error(err);
 				}
 			});
 
@@ -790,7 +790,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 				}
 			} else {
 				i = Infinity;
-				console.log(error);
+				console.error(error);
 			}
 		}
 	}

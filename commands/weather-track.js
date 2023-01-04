@@ -132,7 +132,7 @@ module.exports = {
 		}
 
 		weather.find({ search: args.join(' '), degreeType: degreeType }, async function (err, result) {
-			if (err) console.log(err);
+			if (err) console.error(err);
 
 			if (!result[0]) {
 				if (msg.id) {

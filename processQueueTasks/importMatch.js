@@ -66,7 +66,7 @@ module.exports = {
 				return await processQueueEntry.save();
 			})
 			.catch(async (error) => {
-				console.log(error, `going same importMatch.js https://osu.ppy.sh/community/matches/${parseInt(matchId)}`);
+				console.error(error, `going same importMatch.js https://osu.ppy.sh/community/matches/${parseInt(matchId)}`);
 				//Go same if error
 				let date = new Date();
 				date.setUTCMinutes(date.getUTCMinutes() + 1);

@@ -81,7 +81,7 @@ module.exports = {
 										await members[i].roles.add(ElitiriRole);
 									}
 								} catch (e) {
-									console.log(e);
+									console.error(e);
 								}
 
 								//Check which bracket role should be received
@@ -109,7 +109,7 @@ module.exports = {
 												await members[i].roles.add(bracketRoleObjects[j]);
 											}
 										} catch (e) {
-											console.log(e);
+											console.error(e);
 										}
 									} else {
 										try {
@@ -118,7 +118,7 @@ module.exports = {
 												await members[i].roles.remove(bracketRoleObjects[j]);
 											}
 										} catch (e) {
-											console.log(e);
+											console.error(e);
 										}
 									}
 								}
@@ -131,7 +131,7 @@ module.exports = {
 											await members[i].roles.remove(bracketRoleObjects[j]);
 										}
 									} catch (e) {
-										console.log(e);
+										console.error(e);
 									}
 								}
 							}
@@ -156,7 +156,7 @@ module.exports = {
 											await members[i].roles.add(alumniRole);
 										}
 									} catch (e) {
-										console.log(e);
+										console.error(e);
 									}
 								}
 
@@ -173,7 +173,7 @@ module.exports = {
 													await members[i].roles.add(hostRole);
 												}
 											} catch (e) {
-												console.log(e);
+												console.error(e);
 											}
 										} else {
 											//Remove host role if not removed yet
@@ -183,7 +183,7 @@ module.exports = {
 													await members[i].roles.remove(hostRole);
 												}
 											} catch (e) {
-												console.log(e);
+												console.error(e);
 											}
 										}
 
@@ -195,7 +195,7 @@ module.exports = {
 													await members[i].roles.add(streamerRole);
 												}
 											} catch (e) {
-												console.log(e);
+												console.error(e);
 											}
 										} else {
 											//Remove streamer role if not removed yet
@@ -205,7 +205,7 @@ module.exports = {
 													await members[i].roles.remove(streamerRole);
 												}
 											} catch (e) {
-												console.log(e);
+												console.error(e);
 											}
 										}
 
@@ -217,7 +217,7 @@ module.exports = {
 													await members[i].roles.add(commentatorRole);
 												}
 											} catch (e) {
-												console.log(e);
+												console.error(e);
 											}
 										} else {
 											//Remove commentator role if not removed yet
@@ -227,7 +227,7 @@ module.exports = {
 													await members[i].roles.remove(commentatorRole);
 												}
 											} catch (e) {
-												console.log(e);
+												console.error(e);
 											}
 										}
 
@@ -239,7 +239,7 @@ module.exports = {
 													await members[i].roles.add(refereeRole);
 												}
 											} catch (e) {
-												console.log(e);
+												console.error(e);
 											}
 										} else {
 											//Remove referee role if not removed yet
@@ -249,7 +249,7 @@ module.exports = {
 													await members[i].roles.remove(refereeRole);
 												}
 											} catch (e) {
-												console.log(e);
+												console.error(e);
 											}
 										}
 
@@ -261,7 +261,7 @@ module.exports = {
 													await members[i].roles.add(replayerRole);
 												}
 											} catch (e) {
-												console.log(e);
+												console.error(e);
 											}
 										} else {
 											//Remove replayer role if not removed yet
@@ -271,7 +271,7 @@ module.exports = {
 													await members[i].roles.remove(replayerRole);
 												}
 											} catch (e) {
-												console.log(e);
+												console.error(e);
 											}
 										}
 									}
@@ -285,7 +285,7 @@ module.exports = {
 											await members[i].roles.remove(hostRole);
 										}
 									} catch (e) {
-										console.log(e);
+										console.error(e);
 									}
 
 									try {
@@ -294,7 +294,7 @@ module.exports = {
 											await members[i].roles.remove(streamerRole);
 										}
 									} catch (e) {
-										console.log(e);
+										console.error(e);
 									}
 
 									try {
@@ -304,7 +304,7 @@ module.exports = {
 										}
 									}
 									catch (e) {
-										console.log(e);
+										console.error(e);
 									}
 
 									try {
@@ -313,7 +313,7 @@ module.exports = {
 											await members[i].roles.remove(refereeRole);
 										}
 									} catch (e) {
-										console.log(e);
+										console.error(e);
 									}
 
 									try {
@@ -322,7 +322,7 @@ module.exports = {
 											await members[i].roles.remove(replayerRole);
 										}
 									} catch (e) {
-										console.log(e);
+										console.error(e);
 									}
 								}
 							}

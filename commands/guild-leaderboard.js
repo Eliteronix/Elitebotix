@@ -153,7 +153,7 @@ module.exports = {
 				if (processingMessage) {
 					processingMessage.edit('Error');
 				}
-				console.log(err);
+				console.error(err);
 			});
 	},
 };

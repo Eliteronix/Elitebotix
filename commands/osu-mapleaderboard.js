@@ -127,7 +127,7 @@ module.exports = {
 						return interaction.followUp({ content: 'The map doesn\'t have any submitted scores.' });
 					}
 
-					console.log(error);
+					console.error(error);
 				}
 
 				for (let i = 0; i < scoresArray.length; i++) {

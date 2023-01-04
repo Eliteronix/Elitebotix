@@ -17,7 +17,7 @@ module.exports = {
 					await DBProcessQueue.destroy({ where: { id: processQueueEntryId } });
 					return;
 				} else {
-					return console.log('processQueueTasks/nameSync.js fetch guild', e);
+					return console.error('processQueueTasks/nameSync.js fetch guild', e);
 				}
 			}
 
@@ -69,7 +69,7 @@ module.exports = {
 									}
 								} catch (e) {
 									if (!e.message === 'Missing Permissions') {
-										return console.log('processQueueTasks/nameSync.js setNickname', e);
+										return console.error('processQueueTasks/nameSync.js setNickname', e);
 									}
 								}
 							}

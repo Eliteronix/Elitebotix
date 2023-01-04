@@ -138,7 +138,7 @@ async function updateSheet(spreadsheetID, bracketName) {
 				DBProcessQueue.create({ guildId: 'None', task: 'elitiriCupSignUps', priority: 3, additions: bracketName, date: date });
 			}
 		} else {
-			console.log(error);
+			console.error(error);
 		}
 	}
 

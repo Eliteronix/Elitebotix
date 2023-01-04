@@ -252,7 +252,7 @@ module.exports = {
 						return interaction.followUp(`Could not find match \`${matchId.replace(/`/g, '')}\`.`);
 					}
 				} else {
-					console.log(err);
+					console.error(err);
 				}
 			});
 	},

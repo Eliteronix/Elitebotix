@@ -177,7 +177,7 @@ async function getQualifierResults(map, players) {
 
 					return score;
 				} else {
-					console.log(err);
+					console.error(err);
 				}
 			});
 
@@ -315,7 +315,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 				}
 			} else {
 				i = Infinity;
-				console.log(error);
+				console.error(error);
 			}
 		}
 	}
@@ -346,7 +346,7 @@ async function messageIngame(bancho, map, players) {
 				await IRCUser.sendMessage(`A new round of MOTD just started! Today's qualifier map is this one: https://osu.ppy.sh/b/${map.id} Be sure to play the [${map.version}] difficulty without Relax, Autopilot, Auto or Scorev2 mod! You have 10 minutes.`);
 			} catch (error) {
 				if (error.message !== 'Currently disconnected!') {
-					console.log('MOTD/qualifier.js', error);
+					console.error('MOTD/qualifier.js', error);
 				}
 			}
 		}

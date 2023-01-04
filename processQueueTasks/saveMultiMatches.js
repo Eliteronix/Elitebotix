@@ -29,7 +29,7 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'QA' && matchID === '56267496') {
-			// eslint-disable-next-line no-undef
+			// eslint-disable-next-line no-undef, no-console
 			console.log(`Manually deleted task for saving Multi Matches for ${matchID} ${process.env.SERVER}`);
 			return await processQueueEntry.destroy();
 		}
@@ -154,7 +154,7 @@ module.exports = {
 							return await processQueueEntry.save();
 						}
 					} catch (error) {
-						console.log(error, `going same saveMultiMatches.js https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
+						console.error(error, `going same saveMultiMatches.js https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
 						//Go same if error
 						let date = new Date();
 						date.setUTCMinutes(date.getUTCMinutes() + 1);

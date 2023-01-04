@@ -53,7 +53,7 @@ module.exports = {
 					await m.delete();
 				} catch (e) {
 					if (e.message !== 'Unknown Message') {
-						console.log(e);
+						console.error(e);
 					}
 				}
 				sentMessage = await updateEmbed(sentMessage, players, [], 'React with 🎲 or type `join` to join the lobby.\nReact with 🎲 or type `start` if you created the lobby.', true);
@@ -62,7 +62,7 @@ module.exports = {
 					await m.delete();
 				} catch (e) {
 					if (e.message !== 'Unknown Message') {
-						console.log(e);
+						console.error(e);
 					}
 				}
 				mCollector.stop();
@@ -102,7 +102,7 @@ module.exports = {
 						await m.delete();
 					} catch (e) {
 						if (e.message !== 'Unknown Message') {
-							console.log(e);
+							console.error(e);
 						}
 					}
 					const roll = rollMax(100);
@@ -259,7 +259,7 @@ async function rollRound(msg, sentMessage, players, rounds) {
 				await m.delete();
 			} catch (e) {
 				if (e.message !== 'Unknown Message') {
-					console.log(e);
+					console.error(e);
 				}
 			}
 			const roll = rollMax(toRoll);

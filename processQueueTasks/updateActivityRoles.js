@@ -25,7 +25,7 @@ module.exports = {
 				if (e.message === 'Missing Access') {
 					return;
 				} else {
-					return console.log(e);
+					return console.error(e);
 				}
 			}
 
@@ -111,7 +111,7 @@ module.exports = {
 											}
 											return;
 										} else {
-											return console.log(e);
+											return console.error(e);
 										}
 									}
 								} else {
@@ -131,7 +131,7 @@ module.exports = {
 											}
 											return;
 										} else {
-											return console.log(e);
+											return console.error(e);
 										}
 									}
 								}

@@ -235,7 +235,6 @@ module.exports = {
 			}
 		} else if (args[0].toLowerCase() === 'channel') {
 			if (!msg.mentions.channels.first()) {
-				console.log(msg.mentions);
 				if (msg.id) {
 					return msg.reply('Please mention a channel where the highlighted messages should be sent into.');
 				}

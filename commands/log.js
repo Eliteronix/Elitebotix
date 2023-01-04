@@ -1,3 +1,4 @@
+//TODO: Delete
 module.exports = {
 	name: 'log',
 	//aliases: ['developer'],

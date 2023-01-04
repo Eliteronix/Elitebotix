@@ -85,7 +85,7 @@ module.exports = {
 						interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 					} else {
 						interaction.editReply('The API ran into an error. Please try again later.');
-						console.log(err);
+						console.error(err);
 					}
 					return null;
 				});

@@ -67,7 +67,7 @@ module.exports = {
 					guildTrackers[i].destroy();
 				}
 			} else {
-				console.log(err);
+				console.error(err);
 			}
 		}
 	},

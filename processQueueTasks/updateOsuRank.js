@@ -116,6 +116,7 @@ module.exports = {
 			await discordUser.save();
 		} catch (error) {
 			if (error.message === 'Not found') {
+				console.log(discordUser.osuUserId, discordUser.osuName, 'not found');
 				let now = new Date();
 				let weekAgo = new Date();
 				weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);

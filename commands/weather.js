@@ -177,7 +177,7 @@ module.exports = {
 				if (error.message === 'ESOCKETTIMEDOUT') {
 					await pause(15000);
 				} else {
-					console.log(error);
+					console.error(error);
 					triesBeforeError = Infinity;
 				}
 			}
