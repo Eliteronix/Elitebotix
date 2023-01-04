@@ -244,6 +244,7 @@ module.exports = {
 					await channel.sendMessage('!skip - Skips the currently selected map.');
 					await channel.sendMessage('!timeout - Increases the timer to 5 minutes.');
 					await channel.sendMessage('!mods - Allows you to change the played mods. (Ex: "NM,HR,DT")');
+					await channel.sendMessage('!sr - Allows you to change the SR of all mods (Ex: "!sr 5.6")');
 					await channel.sendMessage('!nm - Allows you to change the NM SR (Ex: "!nm 5.6")');
 					await channel.sendMessage('!hd - Allows you to change the HD SR (Ex: "!hd 5.6")');
 					await channel.sendMessage('!hr - Allows you to change the HR SR (Ex: "!hr 5.6")');
@@ -339,6 +340,22 @@ module.exports = {
 
 					await channel.sendMessage(`!mp name ${matchName}`);
 					await channel.sendMessage('Adapted the played mods. The changes will take place next map. Use !skip to update now.');
+				} else if (msg.message.toLowerCase().startsWith('!sr')) {
+					let args = msg.message.slice(3).trim().split(/ +/);
+					if (!args.length) {
+						await channel.sendMessage('You didn\'t specify a star rating');
+					} else if (isNaN(parseFloat(args[0]))) {
+						await channel.sendMessage(`"${args[0]}" is not a valid star rating`);
+					} else if (parseFloat(args[0]) > 10 || parseFloat(args[0]) < 3.5) {
+						await channel.sendMessage('The star rating should not be higher than 10 or lower than 3.5');
+					} else {
+						nmStarRating = parseFloat(args[0]);
+						hdStarRating = parseFloat(args[0]);
+						hrStarRating = parseFloat(args[0]);
+						dtStarRating = parseFloat(args[0]);
+						fmStarRating = parseFloat(args[0]);
+						modUpdate = true;
+					}
 				} else if (msg.message.toLowerCase().startsWith('!nm')) {
 					let args = msg.message.slice(3).trim().split(/ +/);
 					if (!args.length) {
@@ -458,6 +475,7 @@ module.exports = {
 				await channel.sendMessage('!skip - Skips the currently selected map.');
 				await channel.sendMessage('!timeout - Increases the timer to 5 minutes.');
 				await channel.sendMessage('!mods - Allows you to change the played mods. (Ex: "NM,HR,DT")');
+				await channel.sendMessage('!sr - Allows you to change the SR of all mods (Ex: "!sr 5.6")');
 				await channel.sendMessage('!nm - Allows you to change the NM SR (Ex: "!nm 5.6")');
 				await channel.sendMessage('!hd - Allows you to change the HD SR (Ex: "!hd 5.6")');
 				await channel.sendMessage('!hr - Allows you to change the HR SR (Ex: "!hr 5.6")');
