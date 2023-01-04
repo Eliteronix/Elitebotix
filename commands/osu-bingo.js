@@ -519,7 +519,11 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 											if (mappool[k].score < Number(scores[j].score)) {
 												mappool[k].score = Number(scores[j].score);
 												mappool[k].achievedCombo = scores[j].maxCombo;
-												mappool[k].mods = getMods(scores[j].raw_mods);
+												if (getMods(scores[j].raw_mods).length === 0) {
+													mappool[k].mods = 'NM';
+												} else {
+													mappool[k].mods = getMods(scores[j].raw_mods).join('');
+												}
 
 												// Get the players team
 												if (team1.includes(everyUser[i].userId)) {
@@ -542,7 +546,11 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 										} else {
 											mappool[k].score = Number(scores[j].score);
 											mappool[k].achievedCombo = scores[j].maxCombo;
-											mappool[k].mods = getMods(scores[j].raw_mods);
+											if (getMods(scores[j].raw_mods).length === 0) {
+												mappool[k].mods = 'NM';
+											} else {
+												mappool[k].mods = getMods(scores[j].raw_mods).join('');
+											}
 
 											// Get the players team
 											if (team1.includes(everyUser[i].userId)) {
