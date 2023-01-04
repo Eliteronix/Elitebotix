@@ -122,7 +122,12 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 					} else {
 						await interaction.editReply('Processing...');
 					}
-					const verificationCode = Math.random().toString(36).substring(8);
+
+					let verificationCode = Math.random().toString(36).substring(8);
+
+					while (verificationCode.includes('0') || verificationCode.includes('o') || verificationCode.includes('O')) {
+						verificationCode = Math.random().toString(36).substring(8);
+					}
 
 					//Remove duplicate discord user if existing and not the same record
 					let existingDiscordUser = await DBDiscordUsers.findOne({
@@ -164,7 +169,13 @@ async function connect(msg, args, interaction, additionalObjects, osuApi, bancho
 					} else {
 						await interaction.editReply('Processing...');
 					}
-					const verificationCode = Math.random().toString(36).substring(8);
+
+					let verificationCode = Math.random().toString(36).substring(8);
+
+					while (verificationCode.includes('0') || verificationCode.includes('o') || verificationCode.includes('O')) {
+						verificationCode = Math.random().toString(36).substring(8);
+					}
+
 					let badges = await getOsuBadgeNumberById(osuUser.id);
 
 					let existingDiscordUser = await DBDiscordUsers.findOne({
@@ -324,7 +335,12 @@ async function verify(msg, args, interaction, additionalObjects, osuApi, bancho,
 							} else {
 								await interaction.editReply('Processing...');
 							}
-							const verificationCode = Math.random().toString(36).substring(8);
+
+							let verificationCode = Math.random().toString(36).substring(8);
+
+							while (verificationCode.includes('0') || verificationCode.includes('o') || verificationCode.includes('O')) {
+								verificationCode = Math.random().toString(36).substring(8);
+							}
 
 							discordUser.osuVerificationCode = verificationCode;
 							discordUser.osuName = osuUser.name;
