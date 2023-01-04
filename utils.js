@@ -1192,7 +1192,9 @@ module.exports = {
 				}
 			}
 		} catch (e) {
-			console.error(`Error calculating pp for beatmap ${outputScore.beatmapId}`, e);
+			if (e.message !== 'Failed to parse beatmap: IO error  - caused by: The system cannot find the file specified. (os error 2)') {
+				console.error(`Error calculating pp for beatmap ${outputScore.beatmapId}`, e);
+			}
 		}
 
 		outputScore.rank = calculateGradeFunction(inputScore.mode, outputScore.counts, outputScore.raw_mods);
