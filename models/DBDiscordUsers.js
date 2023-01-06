@@ -12,6 +12,9 @@ module.exports = (sequelize, DataTypes) => {
 		osuUserId: {
 			type: DataTypes.STRING,
 		},
+		country: {
+			type: DataTypes.STRING,
+		},
 		osuVerificationCode: {
 			type: DataTypes.STRING,
 		},
@@ -69,7 +72,17 @@ module.exports = (sequelize, DataTypes) => {
 			defaultValue: false,
 		},
 		osuRank: {
-			type: DataTypes.STRING,
+			type: DataTypes.INTEGER,
+		},
+		oldOsuRank: {
+			type: DataTypes.INTEGER,
+		},
+		osuDerankRank: {
+			type: DataTypes.INTEGER,
+		},
+		osuPlayCount: {
+			type: DataTypes.INTEGER,
+			defaultValue: 0,
 		},
 		taikoPP: {
 			type: DataTypes.STRING,
@@ -81,7 +94,11 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.DATE,
 		},
 		taikoRank: {
-			type: DataTypes.STRING,
+			type: DataTypes.INTEGER,
+		},
+		taikoPlayCount: {
+			type: DataTypes.INTEGER,
+			defaultValue: 0,
 		},
 		catchPP: {
 			type: DataTypes.STRING,
@@ -93,7 +110,11 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.DATE,
 		},
 		catchRank: {
-			type: DataTypes.STRING,
+			type: DataTypes.INTEGER,
+		},
+		catchPlayCount: {
+			type: DataTypes.INTEGER,
+			defaultValue: 0,
 		},
 		maniaPP: {
 			type: DataTypes.STRING,
@@ -105,7 +126,11 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.DATE,
 		},
 		maniaRank: {
-			type: DataTypes.STRING,
+			type: DataTypes.INTEGER,
+		},
+		maniaPlayCount: {
+			type: DataTypes.INTEGER,
+			defaultValue: 0,
 		},
 		osuMainServer: {
 			type: DataTypes.STRING,

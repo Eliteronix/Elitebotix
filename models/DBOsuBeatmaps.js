@@ -101,6 +101,9 @@ module.exports = (sequelize, DataTypes) => {
 		popular: {
 			type: DataTypes.BOOLEAN,
 		},
+		notDownloadable: {
+			type: DataTypes.BOOLEAN,
+		},
 		paranoid: true,
 	}, {
 		indexes: [
