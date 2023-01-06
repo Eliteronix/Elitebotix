@@ -104,6 +104,9 @@ module.exports = (sequelize, DataTypes) => {
 		notDownloadable: {
 			type: DataTypes.BOOLEAN,
 		},
+		audioUnavailable: {
+			type: DataTypes.BOOLEAN,
+		},
 		paranoid: true,
 	}, {
 		indexes: [

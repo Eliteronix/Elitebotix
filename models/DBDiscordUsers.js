@@ -170,6 +170,10 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		twitchOsuMatchCommand: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		patreon: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
