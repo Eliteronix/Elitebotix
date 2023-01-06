@@ -237,9 +237,9 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 					//Send attachment
 					let sentMessage;
 					if (noLinkedAccount) {
-						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use </osu-link connect:1023849632599658496> if the specified account is yours.`, files: files });
+						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:1023849632599658496> if the specified account is yours.`, files: files });
 					} else {
-						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: files });
+						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
 					}
 					await sentMessage.react('👤');
 					await sentMessage.react('📈');
@@ -307,7 +307,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				}
 
 				//Send attachment
-				await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: files });
+				await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>`, files: files });
 				processingMessage.delete();
 			})
 			.catch(err => {
@@ -388,9 +388,9 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 					//Send attachment
 					let sentMessage;
 					if (noLinkedAccount) {
-						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use </osu-link connect:1023849632599658496> if the specified account is yours.`, files: files });
+						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:1023849632599658496> if the specified account is yours.`, files: files });
 					} else {
-						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: files });
+						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
 					}
 					try {
 						await sentMessage.react('👤');

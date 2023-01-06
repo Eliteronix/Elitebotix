@@ -165,9 +165,9 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 				//Send attachment
 				let sentMessage = null;
 				if (noLinkedAccount) {
-					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nFeel free to use </osu-link connect:1023849632599658496> if the specified account is yours.`, files: files });
+					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:1023849632599658496> if the specified account is yours.`, files: files });
 				} else {
-					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>`, files: files });
+					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
 				}
 				processingMessage.delete();
 				await sentMessage.react('🥇');

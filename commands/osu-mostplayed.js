@@ -388,9 +388,9 @@ async function getMostPlayed(msg, username, server, noLinkedAccount, limit) {
 				//Send attachment
 				let sentMessage;
 				if (noLinkedAccount) {
-					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>\nFeel free to use </osu-link connect:1023849632599658496> if the specified account is yours.`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}>\nFeel free to use </osu-link connect:1023849632599658496> if the specified account is yours.`, files: [attachment] });
 				} else {
-					sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}>`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}>`, files: [attachment] });
 				}
 				await sentMessage.react('👤');
 				await sentMessage.react('📈');

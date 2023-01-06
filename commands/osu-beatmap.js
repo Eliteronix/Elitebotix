@@ -207,9 +207,9 @@ async function getBeatmap(msg, interaction, beatmap, tournament) {
 
 	//Send attachment
 	if (interaction && interaction.commandName !== 'osu-beatmap') {
-		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files, ephemeral: true });
+		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files, ephemeral: true });
 	} else {
-		const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files });
+		const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files });
 		if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
 			sentMessage.react('<:COMPARE:827974793365159997>');
 		}

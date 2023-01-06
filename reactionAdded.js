@@ -251,12 +251,8 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 	//For the compare emoji
 	if (reaction._emoji.id === '827974793365159997') {
-		const scoreRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+/gm;
-		const beatmapRegex = /Website: <https:\/\/osu.ppy.sh\/b\/.+>\nosu! direct: <osu:\/\/b\/.+>/gm;
-		if (reaction.message.content.match(scoreRegex)) {
-			const beginningRegex = /.+\nSpectate: .+\nBeatmap: <https:\/\/osu.ppy.sh\/b\//gm;
-			const endingRegex = />\nosu! direct:.+/gm;
-			const beatmapId = reaction.message.content.replace(beginningRegex, '').replace(endingRegex, '');
+		if (reaction.message.attachments.first().name.startsWith('osu-recent') || reaction.message.attachments.first().name.startsWith('osu-score')) {
+			const beatmapId = reaction.message.attachments.first().name.replace(/osu-(recent|score)-\d+-/, '').replace(/-.*/gm, '');
 
 			const beatmap = await getOsuBeatmap({ beatmapId: beatmapId });
 
@@ -291,9 +287,8 @@ module.exports = async function (reaction, user, additionalObjects) {
 				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
 				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 			}
-		} else if (reaction.message.content.match(beatmapRegex)) {
-			const beginningRegex = /Website: https:\/\/osu.ppy.sh\/b\/.+\nosu! direct: osu:\/\/b\//gm;
-			const beatmapId = reaction.message.content.replace(beginningRegex, '').replace('>', '');
+		} else if (reaction.message.attachments.first().name.startsWith('osu-beatmap')) {
+			const beatmapId = reaction.message.attachments.first().name.replace('osu-beatmap-', '').replace(/-.+/gm, '');
 
 			let args = [beatmapId];
 
@@ -365,13 +360,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 	//Check if reacted for map information
 	if (reaction._emoji.name === '🗺️') {
-		const scoreRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+/gm;
 		//Check if it is actually a scorepost
-		if (reaction.message.content.match(scoreRegex)) {
+		if (reaction.message.attachments.first().name.startsWith('osu-recent-') || reaction.message.attachments.first().name.startsWith('osu-score')) {
 			//Regex the beatmapId out of there
-			const beginningRegex = /.+\nSpectate: .+\nBeatmap: <https:\/\/osu.ppy.sh\/b\//gm;
-			const endingRegex = />\nosu! direct:.+/gm;
-			const beatmapId = reaction.message.content.replace(beginningRegex, '').replace(endingRegex, '');
+			const beatmapId = reaction.message.attachments.first().name.replace(/osu-(recent|score)-\d+-/, '').replace(/-.*/gm, '');
 
 			//get the mods used
 			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');

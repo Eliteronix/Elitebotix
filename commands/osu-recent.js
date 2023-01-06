@@ -198,9 +198,9 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 
 				//Send attachment
 				if (noLinkedAccount) {
-					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nosu! direct: <osu://b/${dbBeatmap.beatmapId}>\nFeel free to use </osu-link connect:1023849632599658496> if the specified account is yours.`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nFeel free to use </osu-link connect:1023849632599658496> if the specified account is yours.`, files: [attachment] });
 				} else {
-					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nosu! direct: <osu://b/${dbBeatmap.beatmapId}>`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>`, files: [attachment] });
 				}
 				processingMessage.delete();
 				if (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved' || dbBeatmap.approvalStatus === 'Qualified' || dbBeatmap.approvalStatus === 'Loved') {
@@ -266,7 +266,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-recent-${user.id}-${dbBeatmap.beatmapId}-${score.raw_mods}.png`);
 
 						//Send attachment
-						const sentMessage = await msg.channel.send({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nosu! direct: <osu://b/${dbBeatmap.beatmapId}>`, files: [attachment] });
+						const sentMessage = await msg.channel.send({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>`, files: [attachment] });
 						processingMessage.delete();
 						if (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved' || dbBeatmap.approvalStatus === 'Qualified' || dbBeatmap.approvalStatus === 'Loved') {
 							sentMessage.react('<:COMPARE:827974793365159997>');
