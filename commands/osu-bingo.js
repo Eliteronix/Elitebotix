@@ -483,8 +483,14 @@ async function refreshMessage(message, mappool, lastRefresh) {
 	}
 
 	const bingoCard = new Discord.MessageAttachment(canvas.toBuffer(), 'bingo.png');
-	await message.fetch();
-	await message.edit({ content: reply, files: [bingoCard] });
+	try {
+		await message.fetch();
+		await message.edit({ content: reply, files: [bingoCard] });
+	} catch (e) {
+		if (e.message !== 'Unknown Message') {
+			console.error(e);
+		}
+	}
 }
 
 async function refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh) {
