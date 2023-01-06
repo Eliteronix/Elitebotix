@@ -1301,8 +1301,8 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log(`Marked ${update[0]} new beatmaps as popular`);
 
-		// Filter out maps that have less than 250 plays
-		let usedOften = mostplayed.filter(map => map.dataValues.playcount > 50);
+		// Filter out maps that have less than 100 plays
+		let usedOften = mostplayed.filter(map => map.dataValues.playcount > 100);
 		usedOften = usedOften.map(map => map.dataValues.beatmapId);
 
 		// Update beatmap data

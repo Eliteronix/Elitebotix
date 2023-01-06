@@ -1,4 +1,4 @@
-const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBOsuForumPosts, DBDuelRatingHistory } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBOsuForumPosts, DBDuelRatingHistory, DBOsuBeatmaps } = require('../dbObjects');
 const { pause, logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries, saveOsuMultiScores, humanReadable, multiToBanchoScore, getOsuBeatmap, getMods } = require('../utils');
 const osu = require('node-osu');
 const { developers, currentElitiriCup } = require('../config.json');
@@ -11004,6 +11004,18 @@ module.exports = {
 			});
 
 			return await msg.reply('Deleted the processqueue entry.');
+		} else if (args[0] === 'resetUsedOften') {
+			// Update beatmap data
+			let update = await DBOsuBeatmaps.update({
+				usedOften: false
+			}, {
+				where: {
+					usedOften: true
+				},
+				silent: true
+			});
+
+			return await msg.reply(`Updated ${update} beatmaps.`);
 		} else {
 			msg.reply('Invalid command');
 		}
