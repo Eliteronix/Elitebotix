@@ -271,10 +271,12 @@ module.exports = {
 		});
 
 		// Add 25 random beatmaps to the mappool
-		for (let i = 0; i < 25 && beatmaps.length; i++) {
+		for (let i = 0; mappool.length < 25 && beatmaps.length; i++) {
 			let index = Math.floor(Math.random() * beatmaps.length);
 			let randomBeatmap = beatmaps[index];
-			mappool.push(randomBeatmap);
+			if (randomBeatmap) {
+				mappool.push(randomBeatmap);
+			}
 			beatmaps.splice(index, 1);
 		}
 
