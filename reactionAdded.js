@@ -322,7 +322,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 			}
 		} else if (reaction.message.attachments.first().name.startsWith('osu-game-')) {
-			const beatmapId = reaction.message.attachments.first().name.replace(/osu-game-\d+-/gm, '').replace('.png', '');
+			const beatmapId = reaction.message.attachments.first().name.replace(/osu-game-\d+-/gm, '').replace(/-.*/gm, '');
 
 			let args = [beatmapId, '--tournaments'];
 
@@ -407,9 +407,18 @@ module.exports = async function (reaction, user, additionalObjects) {
 				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 			}
 		} else if (reaction.message.attachments.first().name.startsWith('osu-game-')) {
-			const beatmapId = reaction.message.attachments.first().name.replace(/osu-game-\d+-/gm, '').replace('.png', '');
+			const beatmapId = reaction.message.attachments.first().name.replace(/osu-game-\d+-/gm, '').replace(/-.*/gm, '');
 
-			let args = [beatmapId];
+			//get the mods used
+			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+
+			let mods = getMods(modBits);
+
+			if (!mods[0]) {
+				mods = ['NM'];
+			}
+
+			let args = [beatmapId, `--${mods.join('')}`];
 
 			const command = require('./commands/osu-beatmap.js');
 
@@ -427,7 +436,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 			let tempMessage = {
 				guild: reaction.message.guild,
 				guildId: guildId,
-				content: `e!osu-beatmap ${beatmapId}`,
+				content: `e!osu-beatmap ${beatmapId} --${mods.join('')}`,
 				author: user,
 				channel: reaction.message.channel,
 			};

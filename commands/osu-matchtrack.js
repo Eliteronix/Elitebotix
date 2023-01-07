@@ -654,8 +654,25 @@ async function getResultImage(event, users) {
 		}
 	}
 
+	let mods = event.game.mods;
+	for (let i = 0; i < mods.length; i++) {
+		if (mods[i].includes('no-fail')) {
+			mods[i] = 'NF';
+		} else if (mods[i].includes('hidden')) {
+			mods[i] = 'HD';
+		} else if (mods[i].includes('hard-rock')) {
+			mods[i] = 'HR';
+		} else if (mods[i].includes('double-time')) {
+			mods[i] = 'DT';
+		} else if (mods[i].includes('half-time')) {
+			mods[i] = 'HT';
+		}
+	}
+
+	let modBits = getModBits(mods.join(''));
+
 	//Create as an attachment
-	return new Discord.MessageAttachment(canvas.toBuffer(), `osu-game-${event.game.id}-${event.game.beatmap.id}.png`);
+	return new Discord.MessageAttachment(canvas.toBuffer(), `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png`);
 }
 
 async function getPlayingImage(event) {
@@ -712,8 +729,25 @@ async function getPlayingImage(event) {
 	fitTextOnLeftCanvas(ctx, `${event.game.beatmap.beatmapset.title} [${event.game.beatmap.version}]`, 30, 'comfortaa, sans-serif', 240, 940, 30);
 	fitTextOnLeftCanvas(ctx, `${event.game.beatmap.beatmapset.artist}`, 30, 'comfortaa, sans-serif', 280, 940, 30);
 
+	let mods = event.game.mods;
+	for (let i = 0; i < mods.length; i++) {
+		if (mods[i].includes('no-fail')) {
+			mods[i] = 'NF';
+		} else if (mods[i].includes('hidden')) {
+			mods[i] = 'HD';
+		} else if (mods[i].includes('hard-rock')) {
+			mods[i] = 'HR';
+		} else if (mods[i].includes('double-time')) {
+			mods[i] = 'DT';
+		} else if (mods[i].includes('half-time')) {
+			mods[i] = 'HT';
+		}
+	}
+
+	let modBits = getModBits(mods.join(''));
+
 	//Create as an attachment
-	return new Discord.MessageAttachment(canvas.toBuffer(), `osu-game-${event.game.id}-${event.game.beatmap.id}.png`);
+	return new Discord.MessageAttachment(canvas.toBuffer(), `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png`);
 }
 
 function partition(list, start, end) {
