@@ -134,6 +134,26 @@ module.exports = {
 			}
 		}
 
+		let lowerDrainTime = 30;
+
+		if (interaction.options.getNumber('lowerdraintime')) {
+			lowerDrainTime = interaction.options.getNumber('lowerdraintime');
+
+			if (lowerDrainTime < 0) {
+				lowerDrainTime = 0;
+			}
+		}
+
+		let higherDrainTime = 300;
+
+		if (interaction.options.getNumber('higherdraintime')) {
+			higherDrainTime = interaction.options.getNumber('higherdraintime');
+
+			if (higherDrainTime < 0) {
+				higherDrainTime = 0;
+			}
+		}
+
 		let requirement = 'Pass';
 
 		if (interaction.options.getString('requirement')) {
@@ -207,11 +227,11 @@ module.exports = {
 		const collector = sentMessage.createReactionCollector({ time: 300000 });
 
 		collector.on('collect', (reaction, user) => {
-			if (reaction.emoji.name === '✅' && [...team1, ...team2, ...team3, ...team4, ...team5].includes(user.id)) {
+			if (reaction.emoji.name === '✅' && [...[...team1].splice(team1.indexOf(commandUser.userId, 1)), ...team2, ...team3, ...team4, ...team5].includes(user.id)) {
 				if (!accepted.includes(user.id)) {
 					accepted.push(user.id);
 
-					if (accepted.length === team1.length + team2.length + team3.length + team4.length + team5.length) {
+					if (accepted.length === team1.length - 1 + team2.length + team3.length + team4.length + team5.length) {
 						collector.stop();
 					}
 				}
@@ -222,7 +242,7 @@ module.exports = {
 		});
 
 		collector.on('end', () => {
-			if (accepted.length < team1.length + team2.length + team3.length + team4.length + team5.length) {
+			if (accepted.length < team1.length - 1 + team2.length + team3.length + team4.length + team5.length) {
 				declined = true;
 			}
 			responded = true;
@@ -262,8 +282,8 @@ module.exports = {
 				},
 				drainLength: {
 					[Op.and]: {
-						[Op.gte]: 30,
-						[Op.lte]: 300,
+						[Op.gte]: lowerDrainTime,
+						[Op.lte]: higherDrainTime,
 					}
 				},
 				usedOften: true,

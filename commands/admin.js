@@ -789,6 +789,18 @@ module.exports = {
 			// 				'required': false,
 			// 			},
 			// 			{
+			// 				'name': 'lowerdraintime',
+			// 				'description': 'The lower drain time limit in seconds',
+			// 				'type': 10, // 10 is type NUMBER
+			// 				'required': false,
+			// 			},
+			// 			{
+			// 				'name': 'higherdraintime',
+			// 				'description': 'The higher drain time limit in seconds',
+			// 				'type': 10, // 10 is type NUMBER
+			// 				'required': false,
+			// 			},
+			// 			{
 			// 				'name': 'requirement',
 			// 				'description': 'The minimum requirement for the score',
 			// 				'type': 3,
@@ -5853,6 +5865,18 @@ module.exports = {
 						{
 							'name': 'higherstarrating',
 							'description': 'The higher star rating limit',
+							'type': 10, // 10 is type NUMBER
+							'required': false,
+						},
+						{
+							'name': 'lowerdraintime',
+							'description': 'The lower drain time limit in seconds',
+							'type': 10, // 10 is type NUMBER
+							'required': false,
+						},
+						{
+							'name': 'higherdraintime',
+							'description': 'The higher drain time limit in seconds',
 							'type': 10, // 10 is type NUMBER
 							'required': false,
 						},
