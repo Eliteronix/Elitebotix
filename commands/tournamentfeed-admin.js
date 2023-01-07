@@ -107,7 +107,8 @@ module.exports = {
 				}
 
 				if (post.posted) {
-					embed.setFooter({ text: `Posted: ${post.posted.getUTCDate()}.${post.posted.getUTCMonth() + 1}.${post.posted.getUTCFullYear()} by ${post.host}` });
+					let date = new Date(post.posted);
+					embed.setFooter({ text: `Posted: ${date.getUTCDate()}.${date.getUTCMonth() + 1}.${date.getUTCFullYear()} by ${post.host}` });
 				}
 
 				interaction.followUp({ embeds: [embed] });
