@@ -734,7 +734,9 @@ module.exports = {
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.font = 'bold 40px comfortaa, sans-serif';
-		fitTextOnMiddleCanvas(ctx, `${team1Names.join(' | ')} vs. ${team2Names.join(' | ')}`, 40, 'comfortaa, sans-serif', 90, 1000, 400);
+		fitTextOnMiddleCanvas(ctx, team1Names.join(' | '), 40, 'comfortaa, sans-serif', 55, 1000, 400);
+		fitTextOnMiddleCanvas(ctx, 'vs.', 40, 'comfortaa, sans-serif', 100, 1000, 400);
+		fitTextOnMiddleCanvas(ctx, team2Names.join(' | '), 40, 'comfortaa, sans-serif', 145, 1000, 400);
 
 		ctx.font = 'bold 30px comfortaa, sans-serif';
 		ctx.fillText('Direct Matchups', 250, 210);
