@@ -568,7 +568,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 
 												await mappool[k].message.fetch();
 												await mappool[k].message.delete();
-												mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just reclaimed map ${k + 1}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)} score; ${humanReadable(mappool[k].achievedCombo)}/${humanReadable(mappool[k].maxCombo)} combo; ${getMods(mappool[k].mods)}\`!`);
+												mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just reclaimed map ${k + 1}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)} score; ${humanReadable(mappool[k].achievedCombo)}/${humanReadable(mappool[k].maxCombo)} combo; ${mappool[k].mods}\`!`);
 												lastRefresh.lastScore = new Date();
 											}
 										} else {
@@ -593,7 +593,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 												mappool[k].team = 'Team 5';
 											}
 
-											mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just claimed map ${k + 1}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)} score; ${humanReadable(mappool[k].achievedCombo)}/${humanReadable(mappool[k].maxCombo)} combo; ${getMods(mappool[k].mods)}\`!`);
+											mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just claimed map ${k + 1}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)} score; ${humanReadable(mappool[k].achievedCombo)}/${humanReadable(mappool[k].maxCombo)} combo; ${mappool[k].mods}\`!`);
 											lastRefresh.lastScore = new Date();
 										}
 
