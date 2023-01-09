@@ -74,7 +74,7 @@ module.exports = (sequelize, DataTypes) => {
 		osuRank: {
 			type: DataTypes.INTEGER,
 		},
-		oldOsuRank: { //TODO
+		oldOsuRank: {
 			type: DataTypes.INTEGER,
 		},
 		osuDerankRank: { //TODO

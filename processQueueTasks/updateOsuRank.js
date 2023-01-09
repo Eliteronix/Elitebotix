@@ -24,18 +24,22 @@ module.exports = {
 		discordUser.changed('updatedAt', true);
 
 		try {
-			if (!discordUser.nextOsuPPUpdate) {
+			if (!discordUser.lastOsuPlayCountChange) {
 				discordUser.nextOsuPPUpdate = new Date();
 				discordUser.lastOsuPPChange = new Date();
+				discordUser.lastOsuPlayCountChange = new Date();
 
 				discordUser.nextTaikoPPUpdate = new Date();
 				discordUser.lastTaikoPPChange = new Date();
+				discordUser.lastTaikoPlayCountChange = new Date();
 
 				discordUser.nextCatchPPUpdate = new Date();
 				discordUser.lastCatchPPChange = new Date();
+				discordUser.lastCatchPlayCountChange = new Date();
 
 				discordUser.nextManiaPPUpdate = new Date();
 				discordUser.lastManiaPPChange = new Date();
+				discordUser.lastManiaPlayCountChange = new Date();
 			}
 
 			if (discordUser.nextOsuPPUpdate <= new Date()) {
@@ -44,13 +48,21 @@ module.exports = {
 				discordUser.osuName = osuUser.name;
 				discordUser.country = osuUser.country;
 				discordUser.osuRank = osuUser.pp.rank;
-				if (Number(discordUser.osuPlayCount) != Number(osuUser.counts.plays)) {
+
+				if (Number(discordUser.osuPP) !== Number(osuUser.pp.raw)) {
 					discordUser.lastOsuPPChange = new Date();
+					discordUser.oldOsuRank = osuUser.pp.rank;
+					discordUser.osuPP = osuUser.pp.raw;
+				}
+
+				if (Number(discordUser.osuPlayCount) !== Number(osuUser.counts.plays)) {
+					discordUser.lastOsuPlayCountChange = new Date();
+					discordUser.osuPlayCount = osuUser.counts.plays;
 					discordUser.nextOsuPPUpdate = new Date();
 				} else {
-					discordUser.nextOsuPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastOsuPPChange));
+					discordUser.nextOsuPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastOsuPlayCountChange));
 				}
-				discordUser.osuPP = osuUser.pp.raw;
+
 				discordUser.osuRankedScore = osuUser.scores.ranked;
 				discordUser.osuTotalScore = osuUser.scores.total;
 			}
@@ -61,13 +73,20 @@ module.exports = {
 				discordUser.osuName = taikoUser.name;
 				discordUser.country = taikoUser.country;
 				discordUser.taikoRank = taikoUser.pp.rank;
-				if (Number(discordUser.taikoPlayCount) != Number(taikoUser.counts.plays)) {
+
+				if (Number(discordUser.taikoPP) !== Number(taikoUser.pp.raw)) {
 					discordUser.lastTaikoPPChange = new Date();
+					discordUser.taikoPP = taikoUser.pp.raw;
+				}
+
+				if (Number(discordUser.taikoPlayCount) !== Number(taikoUser.counts.plays)) {
+					discordUser.lastTaikoPlayCountChange = new Date();
+					discordUser.taikoPlayCount = taikoUser.counts.plays;
 					discordUser.nextTaikoPPUpdate = new Date();
 				} else {
-					discordUser.nextTaikoPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastTaikoPPChange));
+					discordUser.nextTaikoPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastTaikoPlayCountChange));
 				}
-				discordUser.taikoPP = taikoUser.pp.raw;
+
 				discordUser.taikoRankedScore = taikoUser.scores.ranked;
 				discordUser.taikoTotalScore = taikoUser.scores.total;
 			}
@@ -78,13 +97,20 @@ module.exports = {
 				discordUser.osuName = catchUser.name;
 				discordUser.country = catchUser.country;
 				discordUser.catchRank = catchUser.pp.rank;
-				if (Number(discordUser.catchPlayCount) != Number(catchUser.counts.plays)) {
+
+				if (Number(discordUser.catchPP) !== Number(catchUser.pp.raw)) {
 					discordUser.lastCatchPPChange = new Date();
+					discordUser.catchPP = catchUser.pp.raw;
+				}
+
+				if (Number(discordUser.catchPlayCount) !== Number(catchUser.counts.plays)) {
+					discordUser.lastCatchPlayCountChange = new Date();
+					discordUser.catchPlayCount = catchUser.counts.plays;
 					discordUser.nextCatchPPUpdate = new Date();
 				} else {
-					discordUser.nextCatchPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastCatchPPChange));
+					discordUser.nextCatchPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastCatchPlayCountChange));
 				}
-				discordUser.catchPP = catchUser.pp.raw;
+
 				discordUser.catchRankedScore = catchUser.scores.ranked;
 				discordUser.catchTotalScore = catchUser.scores.total;
 			}
@@ -95,13 +121,20 @@ module.exports = {
 				discordUser.osuName = maniaUser.name;
 				discordUser.country = maniaUser.country;
 				discordUser.maniaRank = maniaUser.pp.rank;
-				if (Number(discordUser.maniaPlayCount) != Number(maniaUser.counts.plays)) {
+
+				if (Number(discordUser.maniaPP) !== Number(maniaUser.pp.raw)) {
 					discordUser.lastManiaPPChange = new Date();
+					discordUser.maniaPP = maniaUser.pp.raw;
+				}
+
+				if (Number(discordUser.maniaPlayCount) !== Number(maniaUser.counts.plays)) {
+					discordUser.lastManiaPlayCountChange = new Date();
+					discordUser.maniaPlayCount = maniaUser.counts.plays;
 					discordUser.nextManiaPPUpdate = new Date();
 				} else {
-					discordUser.nextManiaPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastManiaPPChange));
+					discordUser.nextManiaPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastManiaPlayCountChange));
 				}
-				discordUser.maniaPP = maniaUser.pp.raw;
+
 				discordUser.maniaRankedScore = maniaUser.scores.ranked;
 				discordUser.maniaTotalScore = maniaUser.scores.total;
 			}
