@@ -14,6 +14,9 @@ module.exports = (sequelize, DataTypes) => {
 		channelId: {
 			type: DataTypes.STRING,
 		},
+		acronym: {
+			type: DataTypes.STRING,
+		},
 		osuLeaderboard: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
