@@ -74,15 +74,18 @@ module.exports = (sequelize, DataTypes) => {
 		osuRank: {
 			type: DataTypes.INTEGER,
 		},
-		oldOsuRank: {
+		oldOsuRank: { //TODO
 			type: DataTypes.INTEGER,
 		},
-		osuDerankRank: {
+		osuDerankRank: { //TODO
 			type: DataTypes.INTEGER,
 		},
 		osuPlayCount: {
 			type: DataTypes.INTEGER,
 			defaultValue: 0,
+		},
+		lastOsuPlayCountChange: {
+			type: DataTypes.DATE,
 		},
 		osuRankedScore: {
 			type: DataTypes.STRING,
@@ -106,6 +109,9 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.INTEGER,
 			defaultValue: 0,
 		},
+		lastTaikoPlayCountChange: {
+			type: DataTypes.DATE,
+		},
 		taikoRankedScore: {
 			type: DataTypes.STRING,
 		},
@@ -128,6 +134,9 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.INTEGER,
 			defaultValue: 0,
 		},
+		lastCatchPlayCountChange: {
+			type: DataTypes.DATE,
+		},
 		catchRankedScore: {
 			type: DataTypes.STRING,
 		},
@@ -149,6 +158,9 @@ module.exports = (sequelize, DataTypes) => {
 		maniaPlayCount: {
 			type: DataTypes.INTEGER,
 			defaultValue: 0,
+		},
+		lastManiaPlayCountChange: {
+			type: DataTypes.DATE,
 		},
 		maniaRankedScore: {
 			type: DataTypes.STRING,

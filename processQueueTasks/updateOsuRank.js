@@ -42,56 +42,68 @@ module.exports = {
 				const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
 
 				discordUser.osuName = osuUser.name;
+				discordUser.country = osuUser.country;
 				discordUser.osuRank = osuUser.pp.rank;
-				if (Number(discordUser.osuPP) != Number(osuUser.pp.raw)) {
+				if (Number(discordUser.osuPlayCount) != Number(osuUser.counts.plays)) {
 					discordUser.lastOsuPPChange = new Date();
 					discordUser.nextOsuPPUpdate = new Date();
 				} else {
 					discordUser.nextOsuPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastOsuPPChange));
 				}
 				discordUser.osuPP = osuUser.pp.raw;
+				discordUser.osuRankedScore = osuUser.scores.ranked;
+				discordUser.osuTotalScore = osuUser.scores.total;
 			}
 
 			if (discordUser.nextTaikoPPUpdate <= new Date()) {
 				const taikoUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 1 });
 
 				discordUser.osuName = taikoUser.name;
+				discordUser.country = taikoUser.country;
 				discordUser.taikoRank = taikoUser.pp.rank;
-				if (Number(discordUser.taikoPP) != Number(taikoUser.pp.raw)) {
+				if (Number(discordUser.taikoPlayCount) != Number(taikoUser.counts.plays)) {
 					discordUser.lastTaikoPPChange = new Date();
 					discordUser.nextTaikoPPUpdate = new Date();
 				} else {
 					discordUser.nextTaikoPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastTaikoPPChange));
 				}
 				discordUser.taikoPP = taikoUser.pp.raw;
+				discordUser.taikoRankedScore = taikoUser.scores.ranked;
+				discordUser.taikoTotalScore = taikoUser.scores.total;
 			}
 
 			if (discordUser.nextCatchPPUpdate <= new Date()) {
 				const catchUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 2 });
 
 				discordUser.osuName = catchUser.name;
+				discordUser.country = catchUser.country;
 				discordUser.catchRank = catchUser.pp.rank;
-				if (Number(discordUser.catchPP) != Number(catchUser.pp.raw)) {
+				if (Number(discordUser.catchPlayCount) != Number(catchUser.counts.plays)) {
 					discordUser.lastCatchPPChange = new Date();
 					discordUser.nextCatchPPUpdate = new Date();
 				} else {
 					discordUser.nextCatchPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastCatchPPChange));
 				}
 				discordUser.catchPP = catchUser.pp.raw;
+				discordUser.catchRankedScore = catchUser.scores.ranked;
+				discordUser.catchTotalScore = catchUser.scores.total;
 			}
 
 			if (discordUser.nextManiaPPUpdate <= new Date()) {
 				const maniaUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 3 });
 
 				discordUser.osuName = maniaUser.name;
+				discordUser.country = maniaUser.country;
 				discordUser.maniaRank = maniaUser.pp.rank;
-				if (Number(discordUser.maniaPP) != Number(maniaUser.pp.raw)) {
+				if (Number(discordUser.maniaPlayCount) != Number(maniaUser.counts.plays)) {
 					discordUser.lastManiaPPChange = new Date();
 					discordUser.nextManiaPPUpdate = new Date();
 				} else {
 					discordUser.nextManiaPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastManiaPPChange));
 				}
 				discordUser.maniaPP = maniaUser.pp.raw;
+				discordUser.maniaRankedScore = maniaUser.scores.ranked;
+				discordUser.maniaTotalScore = maniaUser.scores.total;
 			}
 
 			let badges = await getOsuBadgeNumberById(discordUser.osuUserId);
@@ -116,7 +128,23 @@ module.exports = {
 			await discordUser.save();
 		} catch (error) {
 			if (error.message === 'Not found') {
-				console.log(discordUser.osuUserId, discordUser.osuName, 'not found');
+				client.shard.broadcastEval(async (c, { osuName, osuUserId }) => {
+					const guild = await c.guilds.cache.get('727407178499096597');
+					if (guild) {
+						let channelId = '1061942415864385536';
+
+						// eslint-disable-next-line no-undef
+						if (process.env.SERVER === 'Dev') {
+							channelId = '1061942304979566614';
+						}
+
+						const channel = await guild.channels.cache.get(channelId);
+
+						if (channel) {
+							channel.send(`Could not find osu! user \`${osuName}\` (\`${osuUserId}\`) anymore`);
+						}
+					}
+				}, { context: { osuName: discordUser.osuName, osuUserId: discordUser.osuUserId } });
 				let now = new Date();
 				let weekAgo = new Date();
 				weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
