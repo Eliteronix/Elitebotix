@@ -101,10 +101,10 @@ module.exports = (sequelize, DataTypes) => {
 		popular: {
 			type: DataTypes.BOOLEAN,
 		},
-		notDownloadable: { //TODO
+		notDownloadable: {
 			type: DataTypes.BOOLEAN,
 		},
-		audioUnavailable: { //TODO
+		audioUnavailable: {
 			type: DataTypes.BOOLEAN,
 		},
 		paranoid: true,
