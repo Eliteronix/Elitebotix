@@ -77,7 +77,7 @@ module.exports = (sequelize, DataTypes) => {
 		oldOsuRank: {
 			type: DataTypes.INTEGER,
 		},
-		osuDerankRank: { //TODO
+		osuDerankRank: {
 			type: DataTypes.INTEGER,
 		},
 		osuPlayCount: {
@@ -206,7 +206,7 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
-		twitchOsuMatchCommand: {
+		twitchOsuMatchCommand: { //TODO
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
