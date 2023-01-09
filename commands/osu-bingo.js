@@ -287,6 +287,12 @@ module.exports = {
 					}
 				},
 				usedOften: true,
+				notDownloadable: {
+					[Op.not]: true,
+				},
+				audioUnavailable: {
+					[Op.not]: true,
+				},
 			},
 		});
 
