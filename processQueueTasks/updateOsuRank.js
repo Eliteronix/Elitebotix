@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { getOsuBadgeNumberById, logDatabaseQueries, getUserDuelStarRating } = require('../utils.js');
+const { getOsuBadgeNumberById, logDatabaseQueries, getUserDuelStarRating, getDerankStats } = require('../utils.js');
 const osu = require('node-osu');
 const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.json');
 
@@ -17,7 +17,7 @@ module.exports = {
 		const discordUserId = processQueueEntry.additions;
 
 		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBDiscordUsers');
-		const discordUser = await DBDiscordUsers.findOne({
+		let discordUser = await DBDiscordUsers.findOne({
 			where: { osuUserId: discordUserId }
 		});
 
@@ -149,6 +149,15 @@ module.exports = {
 
 			try {
 				await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: client });
+
+				logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBDiscordUsers derank');
+				discordUser = await DBDiscordUsers.findOne({
+					where: { osuUserId: discordUserId }
+				});
+
+				let derankStats = await getDerankStats(discordUser);
+
+				discordUser.osuDerankRank = derankStats.expectedPpRankOsu;
 			} catch (e) {
 				if (e.message === 'No standard plays') {
 					discordUser.osuDuelStarRating = null;
