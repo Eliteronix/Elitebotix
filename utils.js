@@ -4187,6 +4187,16 @@ async function getOsuBeatmapFunction(input) {
 						od = Math.min(Math.round(od * 100) / 100, 10);
 						hpDrain = Math.min(Math.round(hpDrain * 100) / 100, 10);
 
+						let notDownloadable = false;
+						if (!beatmaps[0].hasDownload) {
+							notDownloadable = true;
+						}
+
+						let audioUnavailable = false;
+						if (!beatmaps[0].hasAudio) {
+							audioUnavailable = true;
+						}
+
 						//Map has to be updated
 						if (dbBeatmap) {
 							dbBeatmap.title = beatmaps[0].title;
@@ -4212,6 +4222,8 @@ async function getOsuBeatmapFunction(input) {
 							dbBeatmap.spinners = beatmaps[0].objects.spinner;
 							dbBeatmap.mods = modBits;
 							dbBeatmap.userRating = beatmaps[0].rating;
+							dbBeatmap.notDownloadable = notDownloadable;
+							dbBeatmap.audioUnavailable = audioUnavailable;
 							dbBeatmap.changed('updatedAt', true);
 							await dbBeatmap.save();
 						} else { // Map has to be added new
@@ -4287,6 +4299,8 @@ async function getOsuBeatmapFunction(input) {
 								hardRockMap: hardRockMap,
 								doubleTimeMap: doubleTimeMap,
 								freeModMap: freeModMap,
+								notDownloadable: notDownloadable,
+								audioUnavailable: audioUnavailable,
 							});
 						}
 					})
@@ -5680,6 +5694,12 @@ async function getValidTournamentBeatmapFunction(input) {
 				beatmapId: {
 					[Op.notIn]: finalAvoidList,
 				},
+				notDownloadable: {
+					[Op.not]: true,
+				},
+				audioUnavailable: {
+					[Op.not]: true,
+				},
 			},
 			limit: 2500,
 		});
@@ -5723,6 +5743,12 @@ async function getValidTournamentBeatmapFunction(input) {
 				beatmapId: {
 					[Op.notIn]: finalAvoidList,
 				},
+				notDownloadable: {
+					[Op.not]: true,
+				},
+				audioUnavailable: {
+					[Op.not]: true,
+				},
 			},
 			limit: 2500,
 		});
@@ -5763,6 +5789,12 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 				beatmapId: {
 					[Op.notIn]: finalAvoidList,
+				},
+				notDownloadable: {
+					[Op.not]: true,
+				},
+				audioUnavailable: {
+					[Op.not]: true,
 				},
 			},
 			limit: 2500,
@@ -5805,6 +5837,12 @@ async function getValidTournamentBeatmapFunction(input) {
 				beatmapId: {
 					[Op.notIn]: finalAvoidList,
 				},
+				notDownloadable: {
+					[Op.not]: true,
+				},
+				audioUnavailable: {
+					[Op.not]: true,
+				},
 			},
 			limit: 2500,
 		});
@@ -5845,6 +5883,12 @@ async function getValidTournamentBeatmapFunction(input) {
 				},
 				beatmapId: {
 					[Op.notIn]: finalAvoidList,
+				},
+				notDownloadable: {
+					[Op.not]: true,
+				},
+				audioUnavailable: {
+					[Op.not]: true,
 				},
 			},
 			limit: 2500,
