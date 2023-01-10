@@ -2073,6 +2073,7 @@ module.exports = {
 				while (lobby._beatmapId != nextMap.beatmapId) {
 					await channel.sendMessage(`!mp map ${nextMap.beatmapId}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
+					await lobby.updateSettings();
 				}
 
 				let noFail = 'NF';
@@ -2090,6 +2091,7 @@ module.exports = {
 				) {
 					await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
+					await lobby.updateSettings();
 				}
 
 				currentMapSelected = true;

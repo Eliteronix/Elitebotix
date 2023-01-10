@@ -102,6 +102,7 @@ module.exports = {
 		while (lobby._beatmapId != mappool[mapIndex].id) {
 			await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 			await pause(5000);
+			await lobby.updateSettings();
 		}
 
 		//Check mods and set them if needed
@@ -385,6 +386,7 @@ module.exports = {
 				while (lobby._beatmapId != mappool[mapIndex].id) {
 					await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 					await pause(5000);
+					await lobby.updateSettings();
 				}
 
 				//Check mods and set them if needed

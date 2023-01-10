@@ -259,6 +259,7 @@ module.exports = {
 					while (lobby._beatmapId != beatmap.beatmapId) {
 						await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
+						await lobby.updateSettings();
 					}
 
 					if (winCondition === '3') {
@@ -280,6 +281,7 @@ module.exports = {
 							}
 
 							await new Promise(resolve => setTimeout(resolve, 5000));
+							await lobby.updateSettings();
 						}
 					} else {
 						while (nextModPool === 'FM' && !lobby.freemod //There is no FreeMod combination otherwise
@@ -509,6 +511,7 @@ module.exports = {
 				while (lobby._beatmapId != beatmap.beatmapId) {
 					await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
+					await lobby.updateSettings();
 				}
 
 				if (winCondition === '3') {
@@ -530,6 +533,7 @@ module.exports = {
 						}
 
 						await new Promise(resolve => setTimeout(resolve, 5000));
+						await lobby.updateSettings();
 					}
 				} else {
 					while (nextModPool === 'FM' && !lobby.freemod //There is no FreeMod combination otherwise
@@ -568,6 +572,7 @@ module.exports = {
 			while (lobby._beatmapId != beatmap.beatmapId) {
 				await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
 				await new Promise(resolve => setTimeout(resolve, 5000));
+				await lobby.updateSettings();
 			}
 
 			while (nextModPool === 'FM' && !lobby.freemod //There is no FreeMod combination otherwise
@@ -587,6 +592,7 @@ module.exports = {
 					await channel.sendMessage(`!mp mods ${nextModPool}`);
 				}
 				await new Promise(resolve => setTimeout(resolve, 5000));
+				await lobby.updateSettings();
 			}
 
 			await channel.sendMessage('!mp timer 120');

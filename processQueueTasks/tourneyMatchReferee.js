@@ -415,6 +415,7 @@ module.exports = {
 				while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
 					await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
 					await pause(5000);
+					await lobby.updateSettings();
 				}
 				//Check mods and set them if needed
 				let modBits = 0;
@@ -426,6 +427,7 @@ module.exports = {
 				while (parseInt(dbMaps[mapIndex].mods) + noFail !== modBits) {
 					await channel.sendMessage(`!mp mods ${parseInt(dbMaps[mapIndex].mods) + noFail}`);
 					await pause(5000);
+					await lobby.updateSettings();
 					modBits = 0;
 					if (lobby.mods) {
 						for (let i = 0; i < lobby.mods.length; i++) {
