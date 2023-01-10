@@ -28,7 +28,7 @@ module.exports = {
 
 		if (interaction) {
 			try {
-				await interaction.deferReply();
+				await interaction.deferReply({ ephemeral: true });
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
