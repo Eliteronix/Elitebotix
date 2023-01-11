@@ -170,30 +170,18 @@ module.exports = {
 			await discordUser.save();
 		} catch (error) {
 			if (error.message === 'Not found') {
-				client.shard.broadcastEval(async (c, { osuName, osuUserId }) => {
-					const guild = await c.guilds.cache.get('727407178499096597');
-					if (guild) {
-						let channelId = '1061942415864385536';
+				let message = `Could not find osu! user \`${discordUser.osuName}\` (\`${discordUser.osuUserId}\` | https://osu.ppy.sh/users/${discordUser.osuUserId}) anymore (repeatedly)`;
 
-						// eslint-disable-next-line no-undef
-						if (process.env.SERVER === 'Dev') {
-							channelId = '1061942304979566614';
-						}
-
-						const channel = await guild.channels.cache.get(channelId);
-
-						if (channel) {
-							channel.send(`Could not find osu! user \`${osuName}\` (\`${osuUserId}\`) anymore`);
-						}
-					}
-				}, { context: { osuName: discordUser.osuName, osuUserId: discordUser.osuUserId } });
 				let now = new Date();
 				let weekAgo = new Date();
 				weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
 				if (discordUser.osuNotFoundFirstOccurence === null) {
+					message = `Could not find osu! user \`${discordUser.osuName}\` (\`${discordUser.osuUserId}\` | https://osu.ppy.sh/users/${discordUser.osuUserId}) anymore (first time)`;
+
 					discordUser.osuNotFoundFirstOccurence = now;
 					discordUser.save();
 				} else if (discordUser.osuNotFoundFirstOccurence && weekAgo > discordUser.osuNotFoundFirstOccurence) {
+					message = `Could not find osu! user \`${discordUser.osuName}\` (\`${discordUser.osuUserId}\` | https://osu.ppy.sh/users/${discordUser.osuUserId}) anymore (deleting user)`;
 					const user = await client.users.fetch(discordUser.userId).catch(async () => {
 						//Nothing
 					});
@@ -273,6 +261,25 @@ module.exports = {
 						}
 					}
 				}
+
+				client.shard.broadcastEval(async (c, { message }) => {
+					const guild = await c.guilds.cache.get('727407178499096597');
+					if (guild) {
+						let channelId = '1061942415864385536';
+
+						// eslint-disable-next-line no-undef
+						if (process.env.SERVER === 'Dev') {
+							channelId = '1061942304979566614';
+						}
+
+						const channel = await guild.channels.cache.get(channelId);
+
+						if (channel) {
+							channel.send(message);
+						}
+					}
+				}, { context: { message: message } });
+
 				await discordUser.save();
 
 			} else {
