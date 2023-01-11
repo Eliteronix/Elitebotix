@@ -1,6 +1,6 @@
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'slap',
@@ -19,28 +19,45 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			await interaction.reply('Slap initiated');
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
 		}
-		if (msg.mentions.users.first()) {
-			msg.mentions.users.forEach(async (user) => {
-				// eslint-disable-next-line no-undef
-				let url = `https://g.tenor.com/v1/search?q=slap%20anime&key=${process.env.TENORTOKEN}&contentfilter=high`;
-				let response = await fetch(url);
-				let json = await response.json();
-				const index = Math.floor(Math.random() * json.results.length);
-				if (msg.id) {
-					return msg.reply(`<@${msg.author.id}> has slapped <@${user.id}>\n${json.results[index].url}`);
-				}
 
-				return interaction.followUp(`<@${msg.author.id}> has slapped <@${user.id}>\n${json.results[index].url}`);
-			});
-		} else {
-			msg.reply('please mention a user.');
+		let users = [];
+
+		if (interaction.options.getUser('user')) {
+			users.push(interaction.options.getUser('user'));
 		}
+
+		if (interaction.options.getUser('user2')) {
+			users.push(interaction.options.getUser('user2'));
+		}
+
+		if (interaction.options.getUser('user3')) {
+			users.push(interaction.options.getUser('user3'));
+		}
+
+		if (interaction.options.getUser('user4')) {
+			users.push(interaction.options.getUser('user4'));
+		}
+
+		if (interaction.options.getUser('user5')) {
+			users.push(interaction.options.getUser('user5'));
+		}
+
+		users.forEach(async (user) => {
+			// eslint-disable-next-line no-undef
+			let url = `https://g.tenor.com/v1/search?q=slap%20anime&key=${process.env.TENORTOKEN}&contentfilter=high`;
+			let response = await fetch(url);
+			let json = await response.json();
+			const index = Math.floor(Math.random() * json.results.length);
+
+			return interaction.followUp(`<@${interaction.user.id}> has slapped <@${user.id}>\n${json.results[index].url}`);
+		});
 	},
 };
