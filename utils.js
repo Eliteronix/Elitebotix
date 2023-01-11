@@ -2230,6 +2230,7 @@ module.exports = {
 							let format = null;
 							let rankRange = null;
 							let gamemode = null;
+							let notes = null;
 							if (titleMatch) {
 								title = titleMatch[0].replace('<h1 class="forum-topic-title__title forum-topic-title__title--display">\n', '').trim();
 
@@ -2278,6 +2279,15 @@ module.exports = {
 								}
 							}
 
+							if (title.includes('SMST') && host === 'Sinaeb') {
+								format = '1v1';
+							} else if (title.includes('Rapid Monthly osu! Tournament') && host === 'Redavor') {
+								format = '1v1';
+								rankRange = '28k-72k';
+								gamemode = 'Standard';
+								notes = 'The matches are played in Scorev1';
+							}
+
 							await DBOsuForumPosts.create({
 								forumPost: uniqueTopics[i],
 								discord: discord,
@@ -2287,6 +2297,7 @@ module.exports = {
 								rankRange: rankRange,
 								gamemode: gamemode,
 								posted: posted,
+								notes: notes,
 							});
 
 							client.shard.broadcastEval(async (c, { message }) => {
