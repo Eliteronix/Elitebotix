@@ -1,5 +1,5 @@
-const { populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: '8ball',
@@ -18,12 +18,17 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
 		}
 
 		//Create a random 8ball answer to the users message
-		var answers = [
+		let answers = [
 			'It is certain',
 			'It is decidedly so',
 			'Without a doubt',
@@ -47,9 +52,6 @@ module.exports = {
 		];
 
 		//Send the 8ball answer to the user
-		if (msg.id) {
-			return msg.reply(answers[Math.floor(Math.random() * answers.length)]);
-		}
 		return interaction.reply(answers[Math.floor(Math.random() * answers.length)]);
 	},
 };
