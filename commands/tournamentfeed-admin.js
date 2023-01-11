@@ -1,4 +1,3 @@
-const { developers } = require('../config.json');
 const { DBOsuForumPosts, DBDiscordUsers } = require('../dbObjects');
 const { populateMsgFromInteraction } = require('../utils.js');
 const Discord = require('discord.js');
@@ -22,9 +21,6 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		msg = await populateMsgFromInteraction(interaction);
-		if (!developers.includes(msg.author.id)) {
-			return;
-		}
 		if (!interaction) {
 			return msg.reply('Please use the / command `/tournamentfeed-admin`');
 		}
