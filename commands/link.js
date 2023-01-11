@@ -1,4 +1,5 @@
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'link',
@@ -16,14 +17,14 @@ module.exports = {
 	tags: 'general',
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
-	execute(msg, args, interaction, additionalObjects) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (interaction) {
-			return interaction.reply('Here is a [link](https://discord.com/oauth2/authorize?client_id=981205694340546571&scope=bot+applications.commands&permissions=285256792) to add the bot to your server');
+	async execute(msg, args, interaction, additionalObjects) {
+		try {
+			return await interaction.reply('Here is a [link](https://discord.com/oauth2/authorize?client_id=981205694340546571&scope=bot+applications.commands&permissions=285256792) to add the bot to your server');
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
 		}
-
-		//Link with permissions | Administrator, Manage Roles, Manage Channels, Read Messages, Send Messages, Manage Messages, Attach Files, View Channel, Move Members, Add Reactions
-		msg.reply('Here is a link to add the bot to your server: https://discord.com/oauth2/authorize?client_id=981205694340546571&scope=bot+applications.commands&permissions=285256792');
 	},
 };
