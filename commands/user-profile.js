@@ -9,6 +9,7 @@ const Discord = require('discord.js');
 
 //Require node-osu module
 const osu = require('node-osu');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'user-profile',
@@ -28,27 +29,48 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			await interaction.reply('User profiles will be displayed');
-		}
-
-		if (!msg.mentions.users.first()) {
-			sendUserEmbed(msg, interaction, msg.author);
-		} else {
-			const users = [];
-			msg.mentions.users.each(user => users.push(user));
-			for (let i = 0; i < users.length; i++) {
-				sendUserEmbed(msg, interaction, users[i]);
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
+			return;
 		}
 
+		let users = [];
+
+		if (interaction.options.getUser('user')) {
+			users.push(interaction.options.getUser('user'));
+		}
+
+		if (interaction.options.getUser('user2')) {
+			users.push(interaction.options.getUser('user2'));
+		}
+
+		if (interaction.options.getUser('user3')) {
+			users.push(interaction.options.getUser('user3'));
+		}
+
+		if (interaction.options.getUser('user4')) {
+			users.push(interaction.options.getUser('user4'));
+		}
+
+		if (interaction.options.getUser('user5')) {
+			users.push(interaction.options.getUser('user5'));
+		}
+
+		if (!users.length) {
+			users.push(interaction.user);
+		}
+
+		for (let i = 0; i < users.length; i++) {
+			sendUserEmbed(interaction, users[i]);
+		}
 	},
 };
 
-async function sendUserEmbed(msg, interaction, user) {
+async function sendUserEmbed(interaction, user) {
 	const discordUser = await DBDiscordUsers.findOne({
 		where: { userId: user.id },
 	});
@@ -77,8 +99,8 @@ async function sendUserEmbed(msg, interaction, user) {
 		)
 		.setTimestamp();
 
-	if (msg.channel.type !== 'DM') {
-		const member = await msg.guild.members.fetch(user.id);
+	if (interaction.guildId) {
+		const member = await interaction.member.guild.members.cache.get(user.id);
 
 		//Get the member roles and push the IDs and rawPosition related to the id into an array
 		const memberRoles = [];
@@ -139,7 +161,7 @@ async function sendUserEmbed(msg, interaction, user) {
 					minute: 'numeric',
 				})}`
 			}
-		).setFooter({ text: `Created by ${msg.client.user.username}`, iconURL: `${msg.client.user.displayAvatarURL({ format: 'png', dynamic: true })}` });
+		).setFooter({ text: `Created by ${interaction.client.user.username}`, iconURL: `${interaction.client.user.displayAvatarURL({ format: 'png', dynamic: true })}` });
 		// add field which shows when the user joined the server
 		if (member.joinedAt) {
 			userInfoEmbed.addFields(
@@ -180,9 +202,6 @@ async function sendUserEmbed(msg, interaction, user) {
 		}
 	}
 
-	if (msg.id) {
-		return msg.reply({ embeds: [userInfoEmbed] });
-	}
 	return interaction.followUp({ embeds: [userInfoEmbed] });
 }
 
