@@ -19,25 +19,33 @@ require('./models/DBReactionRoles')(sequelize, Sequelize.DataTypes);
 require('./models/DBReactionRolesHeader')(sequelize, Sequelize.DataTypes);
 require('./models/DBAutoRoles')(sequelize, Sequelize.DataTypes);
 require('./models/DBTemporaryVoices')(sequelize, Sequelize.DataTypes);
-require('./models/DBDiscordUsers')(sequelize, Sequelize.DataTypes);
-require('./models/DBServerUserActivity')(sequelize, Sequelize.DataTypes);
-require('./models/DBProcessQueue')(sequelize, Sequelize.DataTypes);
 require('./models/DBActivityRoles')(sequelize, Sequelize.DataTypes);
-require('./models/DBMOTDPoints')(sequelize, Sequelize.DataTypes);
-require('./models/DBElitiriCupSignUp')(sequelize, Sequelize.DataTypes);
-require('./models/DBElitiriCupStaff')(sequelize, Sequelize.DataTypes);
-require('./models/DBElitiriCupSubmissions')(sequelize, Sequelize.DataTypes);
 require('./models/DBStarBoardMessages')(sequelize, Sequelize.DataTypes);
 require('./models/DBTickets')(sequelize, Sequelize.DataTypes);
-require('./models/DBOsuMultiScores')(sequelize, Sequelize.DataTypes);
-require('./models/DBOsuBeatmaps')(sequelize, Sequelize.DataTypes);
-require('./models/DBElitiriCupLobbies')(sequelize, Sequelize.DataTypes);
 require('./models/DBBirthdayGuilds')(sequelize, Sequelize.DataTypes);
+require('./models/DBOsuGuildTrackers')(sequelize, Sequelize.DataTypes);
+
+require('./models/DBDiscordUsers')(sequelize, Sequelize.DataTypes);
+
+require('./models/DBServerUserActivity')(sequelize, Sequelize.DataTypes);
+
+require('./models/DBProcessQueue')(sequelize, Sequelize.DataTypes);
+
+require('./models/DBMOTDPoints')(sequelize, Sequelize.DataTypes);
 require('./models/DBOsuTourneyFollows')(sequelize, Sequelize.DataTypes);
 require('./models/DBDuelRatingHistory')(sequelize, Sequelize.DataTypes);
 require('./models/DBOsuForumPosts')(sequelize, Sequelize.DataTypes);
 require('./models/DBOsuTrackingUsers')(sequelize, Sequelize.DataTypes);
-require('./models/DBOsuGuildTrackers')(sequelize, Sequelize.DataTypes);
+
+require('./models/DBElitiriCupSignUp')(sequelize, Sequelize.DataTypes);
+require('./models/DBElitiriCupStaff')(sequelize, Sequelize.DataTypes);
+require('./models/DBElitiriCupSubmissions')(sequelize, Sequelize.DataTypes);
+require('./models/DBElitiriCupLobbies')(sequelize, Sequelize.DataTypes);
+
+require('./models/DBOsuMultiScores')(sequelize, Sequelize.DataTypes);
+
+require('./models/DBOsuBeatmaps')(sequelize, Sequelize.DataTypes);
+
 sequelize.sync({ alter: true })
 	.then(async () => {
 		// eslint-disable-next-line no-console
