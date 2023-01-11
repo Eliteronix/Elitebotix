@@ -20,6 +20,8 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -42,30 +44,6 @@ module.exports = {
 			membername = member.nickname;
 		} else {
 			membername = user.username;
-		}
-
-		let dadmodeEnabled;
-
-		if (guild && guild.dadmodeEnabled) {
-			dadmodeEnabled = 'Enabled';
-		} else {
-			dadmodeEnabled = 'Disabled';
-		}
-
-		let saluteEnabled;
-
-		if (guild && guild.saluteEnabled) {
-			saluteEnabled = 'Enabled';
-		} else {
-			saluteEnabled = 'Disabled';
-		}
-
-		let owoEnabled;
-
-		if (guild && guild.owoEnabled) {
-			owoEnabled = 'Enabled';
-		} else {
-			owoEnabled = 'Disabled';
 		}
 
 		let welcomeMessage;
@@ -117,9 +95,6 @@ module.exports = {
 			.setTitle(`${membername} server settings`)
 			.setThumbnail(`${user.displayAvatarURL({ dynamic: true })}`)
 			.addFields(
-				{ name: 'Dadmode', value: `${dadmodeEnabled}` },
-				{ name: 'Salute', value: `${saluteEnabled}` },
-				{ name: 'owo', value: `${owoEnabled}` },
 				{ name: 'Prefix', value: `${guildPrefix}` },
 				{ name: 'Welcome-Messages', value: `${welcomeMessage}` },
 				{ name: 'Goodbye-Messages', value: `${goodbyeMessage}` },

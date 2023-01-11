@@ -52,6 +52,6 @@ module.exports = {
 		];
 
 		//Send the 8ball answer to the user
-		return interaction.reply(answers[Math.floor(Math.random() * answers.length)]);
+		return interaction.editReply(answers[Math.floor(Math.random() * answers.length)]);
 	},
 };

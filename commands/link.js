@@ -17,6 +17,8 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	execute(msg, args, interaction, additionalObjects) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		if (interaction) {
 			return interaction.reply('Here is a [link](https://discord.com/oauth2/authorize?client_id=981205694340546571&scope=bot+applications.commands&permissions=285256792) to add the bot to your server');
 		}

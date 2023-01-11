@@ -21,6 +21,8 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		if (!interaction) {
 			return msg.reply('Please use the slash command `/osu-matchscore` instead.');
 		}

@@ -22,6 +22,8 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		let weekday = 7;
 		let team1 = [];
 		let team2 = [];

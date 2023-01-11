@@ -19,6 +19,8 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		logDatabaseQueries(4, 'commands/toggletickets.js DBGuilds');
 		//get guild from db
 		const guild = await DBGuilds.findOne({

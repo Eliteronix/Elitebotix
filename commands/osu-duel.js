@@ -27,6 +27,8 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		if (msg) {
 			return msg.reply('Please use the / command `/osu-duel`');
 		}

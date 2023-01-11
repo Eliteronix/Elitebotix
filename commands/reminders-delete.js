@@ -20,6 +20,8 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, processQueueEntry) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		let userReminderId;
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);

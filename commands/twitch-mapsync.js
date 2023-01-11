@@ -19,6 +19,8 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];
 

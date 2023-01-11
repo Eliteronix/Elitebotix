@@ -18,10 +18,7 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		if (msg) {
-			return msg.reply('please use `/birthday` instead');
-		}
-
+		//TODO: deferReply
 		let guild = await DBGuilds.findOne({
 			where: {
 				guildId: interaction.guild.id,

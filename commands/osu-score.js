@@ -23,6 +23,8 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		let mods = 'best';
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);

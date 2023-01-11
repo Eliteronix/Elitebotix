@@ -19,6 +19,8 @@ module.exports = {
 	tags: 'misc',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		//make a call to find a lat and long of the location
 		// eslint-disable-next-line no-undef
 		const timeEmbed = new Discord.MessageEmbed();

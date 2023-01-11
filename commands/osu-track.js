@@ -22,6 +22,8 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		if (interaction.options._subcommand === 'enable') {
 			try {
 				await interaction.reply({ content: 'Processing...', ephemeral: true });

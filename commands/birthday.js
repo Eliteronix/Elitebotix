@@ -19,9 +19,7 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		if (msg) {
-			return msg.reply('please use `/birthday` instead');
-		}
+		//TODO: deferReply
 
 		if (interaction.options._subcommand === 'set') {
 			let date = new Date();

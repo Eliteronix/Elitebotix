@@ -17,6 +17,8 @@ module.exports = {
 	tags: 'general',
 	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 

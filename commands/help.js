@@ -18,6 +18,8 @@ module.exports = {
 	tags: 'general',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		if (interaction) {
 			if (interaction.options._subcommand !== 'list') {
 				args.push(interaction.options._hoistedOptions[0].value);

@@ -21,6 +21,8 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
+		//TODO: Remove message code and replace with interaction code
+		//TODO: deferReply
 		if (msg) {
 			return msg.reply('Please set up the game using the / command `/osu-referee`');
 		}
