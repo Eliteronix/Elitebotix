@@ -1,6 +1,6 @@
 //Import Tables
 const { DBDiscordUsers } = require('../dbObjects');
-const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 const { developers } = require('../config.json');
 
