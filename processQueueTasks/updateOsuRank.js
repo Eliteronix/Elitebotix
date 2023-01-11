@@ -263,7 +263,14 @@ module.exports = {
 				}
 
 				client.shard.broadcastEval(async (c, { message }) => {
-					const guild = await c.guilds.cache.get('727407178499096597');
+					let guildId = '727407178499096597';
+
+					// eslint-disable-next-line no-undef
+					if (process.env.SERVER === 'Dev') {
+						guildId = '800641468321759242';
+					}
+
+					const guild = await c.guilds.cache.get(guildId);
 					if (guild) {
 						let channelId = '1061942415864385536';
 

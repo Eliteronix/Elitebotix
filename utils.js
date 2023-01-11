@@ -2289,8 +2289,37 @@ module.exports = {
 								posted: posted,
 							});
 
-							const eliteronixUser = await client.users.fetch('138273136285057025');
-							eliteronixUser.send(`There is a new tournament post: ${uniqueTopics[i]}`);
+							// eslint-disable-next-line no-undef
+							if (process.env.SERVER === 'Dev') {
+								const eliteronixUser = await client.users.fetch('138273136285057025');
+								eliteronixUser.send(`There is a new tournament post: ${uniqueTopics[i]}`);
+							} else {
+								client.shard.broadcastEval(async (c, { message }) => {
+									let guildId = '727407178499096597';
+
+									// eslint-disable-next-line no-undef
+									if (process.env.SERVER === 'Dev') {
+										guildId = '800641468321759242';
+									}
+
+									const guild = await c.guilds.cache.get(guildId);
+									if (guild) {
+										let channelId = '1062637410594340874';
+
+										// eslint-disable-next-line no-undef
+										if (process.env.SERVER === 'Dev') {
+											channelId = '1062644551271075930';
+										}
+
+										const channel = await guild.channels.cache.get(channelId);
+
+										if (channel) {
+											channel.send(message);
+										}
+									}
+								}, { context: { message: `There is a new tournament post: ${uniqueTopics[i]}` } });
+							}
+
 						});
 				}
 			});
