@@ -465,7 +465,6 @@ async function drawTitle(input, mode) {
 	ctx.textAlign = 'left';
 
 	let outputString = `${beatmap.title} by ${beatmap.artist}`;
-	console.log(ctx.measureText(outputString).width);
 	let shortened = false;
 	while (ctx.measureText(outputString + '...').width > 930) {
 		shortened = true;
