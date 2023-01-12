@@ -2245,7 +2245,7 @@ module.exports = {
 							let gamemode = null;
 							let notes = null;
 							if (titleMatch) {
-								title = titleMatch[0].replace('<h1 class="forum-topic-title__title forum-topic-title__title--display">\n', '').trim();
+								title = titleMatch[0].replace('<h1 class="forum-topic-title__title forum-topic-title__title--display">\n', '').replace('&#039;', '\'').replace('&amp;', '&').trim();
 
 								const formatRegex = /\dv\d/gm;
 								const formatMatch = title.match(formatRegex);
