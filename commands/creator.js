@@ -20,7 +20,6 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply
 		const eliteronixUser = await additionalObjects[0].users.fetch('138273136285057025');
 		const roddyUser = await additionalObjects[0].users.fetch('212511522407055360');
@@ -65,10 +64,6 @@ module.exports = {
 				{ name: '\u200B', value: '\u200B', inline: true })
 			.setTimestamp();
 
-
-		if (msg) {
-			return msg.reply({ embeds: [creatorInfoEmbed], files: [file] });
-		}
 		return interaction.reply({ embeds: [creatorInfoEmbed], files: [file] });
 	},
 };
