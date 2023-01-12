@@ -1645,7 +1645,7 @@ module.exports = {
 					return Math.abs(ownStarRating - parseFloat(task.additions.split(';')[1])) < 1;
 				});
 
-				return await interaction.editReply(`You are now queued up for a 1v1 duel. There are ${existingQueueTasks.length - 1} opponents in the queue (${tasksInReach.length - 1} in reach).`);
+				return await interaction.editReply(`You are now queued up for a 1v1 duel. There are ${existingQueueTasks.length} opponents in the queue (${tasksInReach.length} in reach).`);
 			} else if (interaction.options._subcommand === 'queue1v1-leave') {
 				try {
 					await interaction.deferReply({ ephemeral: true });
