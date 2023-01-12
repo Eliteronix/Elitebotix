@@ -40,27 +40,27 @@ module.exports = {
 			}
 
 			msg = await populateMsgFromInteraction(interaction);
-		}
 
-		args = [];
+			args = [];
 
-		for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-			if (interaction.options._hoistedOptions[i].name === 'password') {
-				password = interaction.options._hoistedOptions[i].value;
-			} else if (interaction.options._hoistedOptions[i].name === 'condition') {
-				winCondition = interaction.options._hoistedOptions[i].value;
-			} else if (interaction.options._hoistedOptions[i].name === 'mods') {
-				modsInput = interaction.options._hoistedOptions[i].value;
-			} else if (interaction.options._hoistedOptions[i].name === 'nmstarrating') {
-				nmStarRating = interaction.options._hoistedOptions[i].value;
-			} else if (interaction.options._hoistedOptions[i].name === 'hdstarrating') {
-				hdStarRating = interaction.options._hoistedOptions[i].value;
-			} else if (interaction.options._hoistedOptions[i].name === 'hrstarrating') {
-				hrStarRating = interaction.options._hoistedOptions[i].value;
-			} else if (interaction.options._hoistedOptions[i].name === 'dtstarrating') {
-				dtStarRating = interaction.options._hoistedOptions[i].value;
-			} else if (interaction.options._hoistedOptions[i].name === 'fmstarrating') {
-				fmStarRating = interaction.options._hoistedOptions[i].value;
+			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
+				if (interaction.options._hoistedOptions[i].name === 'password') {
+					password = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'condition') {
+					winCondition = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'mods') {
+					modsInput = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'nmstarrating') {
+					nmStarRating = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'hdstarrating') {
+					hdStarRating = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'hrstarrating') {
+					hrStarRating = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'dtstarrating') {
+					dtStarRating = interaction.options._hoistedOptions[i].value;
+				} else if (interaction.options._hoistedOptions[i].name === 'fmstarrating') {
+					fmStarRating = interaction.options._hoistedOptions[i].value;
+				}
 			}
 		}
 
