@@ -24,7 +24,6 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -320,7 +319,20 @@ async function drawTitle(input, mode) {
 	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'left';
-	ctx.fillText(`${beatmap.title} by ${beatmap.artist}`, canvas.width / 1000 * 60, canvas.height / 500 * 35);
+
+	let outputString = `${beatmap.title} by ${beatmap.artist}`;
+	let shortened = false;
+	while (ctx.measureText(outputString + '...').width > 930) {
+		shortened = true;
+		outputString = outputString.substring(0, outputString.length - 1);
+	}
+
+	if (shortened) {
+		outputString += '...';
+	}
+
+	ctx.fillText(outputString, 60, 35);
+
 	ctx.font = '25px comfortaa, sans-serif';
 
 	const mods = getMods(score.raw_mods);
