@@ -38,9 +38,9 @@ module.exports = {
 				}
 				return;
 			}
-		}
 
-		msg = await populateMsgFromInteraction(interaction);
+			msg = await populateMsgFromInteraction(interaction);
+		}
 
 		args = [];
 
