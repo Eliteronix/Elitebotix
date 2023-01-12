@@ -2,6 +2,7 @@ const { populateMsgFromInteraction, logMatchCreation, getOsuUserServerMode, logD
 const { Permissions } = require('discord.js');
 const { DBDiscordUsers, DBOsuMultiScores, DBProcessQueue, } = require('../dbObjects');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-autohost',
@@ -19,7 +20,6 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
-		//TODO: deferReply
 		let password = '';
 		let winCondition = '0';
 		let modsInput = null;
@@ -29,7 +29,17 @@ module.exports = {
 		let dtStarRating = null;
 		let fmStarRating = null;
 
-		await interaction.deferReply({ ephemeral: true });
+		if (interaction) {
+			try {
+				await interaction.deferReply({ ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
+		}
+
 		msg = await populateMsgFromInteraction(interaction);
 
 		args = [];
