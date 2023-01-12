@@ -2005,11 +2005,11 @@ module.exports = {
 			// 				'choices': [
 			// 					{
 			// 						'name': 'Bancho',
-			// 						'value': '--b'
+			// 						'value': 'bancho'
 			// 					},
 			// 					{
 			// 						'name': 'Tournaments',
-			// 						'value': '--tournaments'
+			// 						'value': 'tournaments'
 			// 					},
 			// 				]
 			// 			},
@@ -2041,7 +2041,12 @@ module.exports = {
 			// 				'name': 'amount',
 			// 				'description': 'The amount of scores you want to get',
 			// 				'type': 4,
-			// 			}
+			// 			},
+			// 			{
+			// 				'name': 'acronym',
+			// 				'description': 'tournament acronym',
+			// 				'type': 3,
+			// 			},
 			// 		]
 			// 	}
 			// });
@@ -7121,7 +7126,12 @@ module.exports = {
 							'name': 'amount',
 							'description': 'The amount of scores you want to get',
 							'type': 4,
-						}
+						},
+						{
+							'name': 'acronym',
+							'description': 'tournament acronym',
+							'type': 3,
+						},
 					]
 				}
 			});
