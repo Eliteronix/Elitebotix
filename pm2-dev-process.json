@@ -2,8 +2,7 @@
 	"script": "index.js",
 	"watch": true,
 	"ignore_watch": [
-		"database.sqlite",
-		"database.sqlite-journal",
+		"databases",
 		".git",
 		"maps",
 		"package-lock.json",

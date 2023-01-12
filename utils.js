@@ -1203,19 +1203,6 @@ module.exports = {
 	},
 	async cleanUpDuplicateEntries(manually) {
 		const Sequelize = require('sequelize');
-
-		const sequelize = new Sequelize('database', 'username', 'password', {
-			host: 'localhost',
-			dialect: 'sqlite',
-			logging: false,
-			storage: 'database.sqlite',
-			retry: {
-				max: 10, // Maximum rety 3 times
-				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-				backoffExponent: 1.15, // Exponent to increase backoff each try. Default: 1.1
-			},
-		});
-
 		// Automatically add missing players to the database
 		let existingUsers = await DBDiscordUsers.findAll({
 			attributes: ['osuUserId']
@@ -1388,8 +1375,20 @@ module.exports = {
 		deleted = 0;
 		let iterations = 0;
 
+		const beatmaps = new Sequelize('database', 'username', 'password', {
+			host: 'localhost',
+			dialect: 'sqlite',
+			logging: false,
+			storage: 'databases/beatmaps.sqlite',
+			retry: {
+				max: 15, // Maximum retry 15 times
+				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+			},
+		});
+
 		while (duplicates && iterations < 10) {
-			let result = await sequelize.query(
+			let result = await beatmaps.query(
 				'SELECT * FROM DBOsuBeatmaps WHERE 0 < (SELECT COUNT(1) FROM DBOsuBeatmaps as a WHERE a.beatmapId = DBOsuBeatmaps.beatmapId AND a.mods = DBOsuBeatmaps.mods AND a.id <> DBOsuBeatmaps.id)',
 			);
 
@@ -1432,8 +1431,20 @@ module.exports = {
 		deleted = 0;
 		iterations = 0;
 
+		const multiScores = new Sequelize('database', 'username', 'password', {
+			host: 'localhost',
+			dialect: 'sqlite',
+			logging: false,
+			storage: 'databases/multiScores.sqlite',
+			retry: {
+				max: 15, // Maximum retry 15 times
+				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+			},
+		});
+
 		while (duplicates && iterations < 10) {
-			let result = await sequelize.query(
+			let result = await multiScores.query(
 				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id)',
 			);
 
