@@ -4087,13 +4087,6 @@ async function getOsuBeatmapFunction(input) {
 	// 	lastRework.setUTCDate(21);
 	// }
 
-	// //Date of reworked HR values
-	// if (getModsFunction(modBits).includes('HR')) {
-	// 	lastRework.setUTCFullYear(2022);
-	// 	lastRework.setUTCMonth(7);
-	// 	lastRework.setUTCDate(28);
-	// }
-
 	// //Date of reworked FL values
 	// if (getModsFunction(modBits).includes('FL')) {
 	// 	lastRework.setUTCFullYear(2022);
@@ -4117,6 +4110,14 @@ async function getOsuBeatmapFunction(input) {
 				lastRework.setUTCMonth(9);
 				lastRework.setUTCDate(12);
 			}
+
+			//Date of reworked SO values
+			if (getModsFunction(modBits).includes('SO')) {
+				lastRework.setUTCFullYear(2023);
+				lastRework.setUTCMonth(0);
+				lastRework.setUTCDate(13);
+			}
+
 			//Fucked up Not found partially, this should make the process faster
 			if (dbBeatmap && dbBeatmap.approvalStatus === 'Not found') {
 				lastRework.setUTCFullYear(2022);
@@ -4153,7 +4154,7 @@ async function getOsuBeatmapFunction(input) {
 				await osuApi.getBeatmaps({ b: beatmapId, mods: modBits })
 					.then(async (beatmaps) => {
 						let noVisualModBeatmap = beatmaps[0];
-						if (getModsFunction(modBits).includes('MI') || getModsFunction(modBits).includes('HD') && !getModsFunction(modBits).includes('FL') || getModsFunction(modBits).includes('FI') || getModsFunction(modBits).includes('NF') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('PF') || getModsFunction(modBits).includes('SD')) {
+						if (getModsFunction(modBits).includes('MI') || getModsFunction(modBits).includes('HD') && !getModsFunction(modBits).includes('FL') || getModsFunction(modBits).includes('FI') || getModsFunction(modBits).includes('NF') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('PF') || getModsFunction(modBits).includes('SD') || getModsFunction(modBits).includes('SO')) {
 							let realNoVisualModBeatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: getModBitsFunction(getModsFunction(modBits).join(''), true) });
 							noVisualModBeatmap.difficulty.rating = realNoVisualModBeatmap.starRating;
 							noVisualModBeatmap.difficulty.aim = realNoVisualModBeatmap.aimRating;
