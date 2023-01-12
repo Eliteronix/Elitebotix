@@ -2014,28 +2014,15 @@ module.exports = {
 			// 				]
 			// 			},
 			// 			{
-			// 				'name': 'mode',
-			// 				'description': 'The gamemode you want to get the leaderboard from',
+			// 				'name': 'mods',
+			// 				'description': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
 			// 				'type': 3,
 			// 				'required': false,
-			// 				'choices': [
-			// 					{
-			// 						'name': 'osu',
-			// 						'value': '--osu'
-			// 					},
-			// 					{
-			// 						'name': 'taiko',
-			// 						'value': '--taiko'
-			// 					},
-			// 					{
-			// 						'name': 'catch',
-			// 						'value': '--catch'
-			// 					},
-			// 					{
-			// 						'name': 'mania',
-			// 						'value': '--mania'
-			// 					},
-			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'acronym',
+			// 				'description': 'tournament acronym',
+			// 				'type': 3,
 			// 			},
 			// 			{
 			// 				'name': 'amount',
@@ -2043,9 +2030,28 @@ module.exports = {
 			// 				'type': 4,
 			// 			},
 			// 			{
-			// 				'name': 'acronym',
-			// 				'description': 'tournament acronym',
+			// 				'name': 'mode',
+			// 				'description': 'The gamemode you want to get the leaderboard from',
 			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'osu',
+			// 						'value': 'Standard'
+			// 					},
+			// 					{
+			// 						'name': 'taiko',
+			// 						'value': 'Taiko'
+			// 					},
+			// 					{
+			// 						'name': 'catch',
+			// 						'value': 'Catch'
+			// 					},
+			// 					{
+			// 						'name': 'mania',
+			// 						'value': 'Mania'
+			// 					},
+			// 				]
 			// 			},
 			// 		]
 			// 	}
@@ -7099,28 +7105,15 @@ module.exports = {
 							]
 						},
 						{
-							'name': 'mode',
-							'description': 'The gamemode you want to get the leaderboard from',
+							'name': 'mods',
+							'description': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
 							'type': 3,
 							'required': false,
-							'choices': [
-								{
-									'name': 'osu',
-									'value': '--osu'
-								},
-								{
-									'name': 'taiko',
-									'value': '--taiko'
-								},
-								{
-									'name': 'catch',
-									'value': '--catch'
-								},
-								{
-									'name': 'mania',
-									'value': '--mania'
-								},
-							]
+						},
+						{
+							'name': 'acronym',
+							'description': 'tournament acronym',
+							'type': 3,
 						},
 						{
 							'name': 'amount',
@@ -7128,9 +7121,28 @@ module.exports = {
 							'type': 4,
 						},
 						{
-							'name': 'acronym',
-							'description': 'tournament acronym',
+							'name': 'mode',
+							'description': 'The gamemode you want to get the leaderboard from',
 							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'osu',
+									'value': 'Standard'
+								},
+								{
+									'name': 'taiko',
+									'value': 'Taiko'
+								},
+								{
+									'name': 'catch',
+									'value': 'Catch'
+								},
+								{
+									'name': 'mania',
+									'value': 'Mania'
+								},
+							]
 						},
 					]
 				}

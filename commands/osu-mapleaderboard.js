@@ -2,8 +2,9 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName } = require('../utils');
+const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-mapleaderboard',
@@ -21,65 +22,50 @@ module.exports = {
 	tags: 'osu',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		let server = 'bancho';
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
+		try {
 			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
+		}
 
-			args = [];
+		let id = interaction.options.getString('id');
 
-			if (interaction.options._hoistedOptions) {
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					if (interaction.options._hoistedOptions[i].name === 'id') {
-						args.push(`${interaction.options._hoistedOptions[i].value}`);
-					} else if (interaction.options._hoistedOptions[i].name === 'mode') {
-						args.push(`--${interaction.options._hoistedOptions[i].value}`);
-					} else if (interaction.options._hoistedOptions[i].name === 'server') {
-						server = interaction.options._hoistedOptions[i].value;
-					} else if (interaction.options._hoistedOptions[i].name === 'amount') {
-						args.push(`--${interaction.options._hoistedOptions[i].value}`);
-					} else {
-						args.push(interaction.options._hoistedOptions[i].value);
-					}
-				}
+		let server = 'bancho';
+		if (interaction.options.getString('server')) {
+			server = interaction.options.getString('server');
+		}
+
+		let amount = 10;
+		if (interaction.options.getInteger('amount')) {
+			amount = interaction.options.getInteger('amount');
+
+			if (amount > 50) {
+				amount = 50;
+			} else if (amount < 1) {
+				amount = 1;
 			}
 		}
 
 		let modBits = 0;
-		let limit = 10;
 
-		for (let i = 0; i < args.length; i++) {
-			if (args[i].startsWith('--') && !isNaN(args[i].replace('--', ''))) {
-				limit = parseInt(args[i].replace('--', ''));
-				if (limit > 50) {
-					limit = 50;
-				} else if (limit < 1) {
-					limit = 1;
-				}
-				args.splice(i, 1);
-				i--;
-			}
+		if (interaction.options.getString('mods')) {
+			modBits = getModBits(interaction.options.getString('mods'));
 		}
 
-		args.forEach(async (arg) => {
-			let modCompatibility = await checkModsCompatibility(modBits, getIDFromPotentialOsuLink(arg));
-			if (!modCompatibility) {
-				modBits = 0;
-			}
-			const dbBeatmap = await getOsuBeatmap({ beatmapId: getIDFromPotentialOsuLink(arg), modBits: modBits });
-			if (dbBeatmap) {
-				getBeatmapLeaderboard(msg, interaction, dbBeatmap, limit);
-			} else {
-				if (msg.id) {
-					await msg.reply({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
-				} else {
-					await interaction.followUp({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
-				}
-			}
-		});
+		let modCompatibility = await checkModsCompatibility(modBits, getIDFromPotentialOsuLink(id));
+
+		if (!modCompatibility) {
+			modBits = 0;
+		}
+
+		const dbBeatmap = await getOsuBeatmap({ beatmapId: getIDFromPotentialOsuLink(id), modBits: modBits });
+
+		if (!dbBeatmap) {
+			return await interaction.followUp({ content: `Could not find beatmap \`${id.replace(/`/g, '')}\`.` });
+		}
 
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -89,153 +75,172 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		async function getBeatmapLeaderboard(msg, interaction, beatmap, limit) {
+		let mode = dbBeatmap.mode;
 
-			let processingMessage = null;
+		if (interaction.options.getString('mode')) {
+			mode = interaction.options.getString('mode');
+		}
 
-			if (msg.id) {
-				processingMessage = await msg.reply('Processing...');
+		if (mode == 'Standard') {
+			mode = 0;
+		} else if (mode == 'Taiko') {
+			mode = 1;
+		} else if (mode == 'Catch') {
+			mode = 2;
+		} else if (mode == 'Mania') {
+			mode = 3;
+		}
+
+		let scoresArray = [];
+		let userScore = null;
+
+		const user = await DBDiscordUsers.findOne({
+			where: {
+				userId: interaction.user.id,
+			}
+		});
+
+		if (server === 'bancho') {
+			let options = {
+				b: dbBeatmap.beatmapId,
+				m: mode,
+			};
+
+			try {
+				if (interaction.options.getString('mods')) {
+					options.mods = modBits;
+				}
+
+				await osuApi.getScores(options)
+					.then(async (mapScores) => {
+						scoresArray = mapScores;
+					});
+			} catch (error) {
+				if (error.message === 'Not found') {
+					return interaction.followUp({ content: 'The map doesn\'t have any submitted scores.' });
+				}
+
+				console.error(error);
 			}
 
-			let mode = beatmap.mode;
-
-			if (mode == 'Standard') {
-				mode = 0;
-			} else if (mode == 'Taiko') {
-				mode = 1;
-			} else if (mode == 'Catch') {
-				mode = 2;
-			} else if (mode == 'Mania') {
-				mode = 3;
+			for (let i = 0; i < scoresArray.length; i++) {
+				if (user && scoresArray[i].user.id === user.osuUserId) {
+					userScore = {
+						score: scoresArray[i],
+						rank: i
+					};
+					break;
+				}
 			}
 
-			let scoresArray = [];
-			let userScore = null;
-
-			const user = await DBDiscordUsers.findOne({
+			if (user && !userScore) {
+				try {
+					options.u = user.osuUserId;
+					await osuApi.getScores(options)
+						.then(async scores => {
+							userScore = { score: scores[0] };
+						});
+				} catch (error) {
+					// nothing
+				}
+			}
+		} else if (server === 'tournaments') {
+			let multiScores = await DBOsuMultiScores.findAll({
 				where: {
-					userId: msg.author.id,
+					beatmapId: dbBeatmap.beatmapId,
+					scoringType: 'Score v2',
+					tourneyMatch: true
 				}
 			});
 
-			if (server === 'bancho') {
-				try {
-					await osuApi.getScores({ b: beatmap.beatmapId, m: mode })
-						.then(async (mapScores) => {
-							scoresArray = mapScores;
-						});
-				} catch (error) {
-					if (error.message === 'Not found') {
-						return interaction.followUp({ content: 'The map doesn\'t have any submitted scores.' });
-					}
+			quicksort(multiScores);
 
-					console.error(error);
+			let addedUserScores = [];
+
+			for (let i = 0; i < multiScores.length; i++) {
+				if (parseInt(multiScores[i].score) < 10000) {
+					break;
 				}
 
-				for (let i = 0; i < scoresArray.length; i++) {
-					if (user && scoresArray[i].user.id === user.osuUserId) {
-						userScore = {
-							score: scoresArray[i],
-							rank: i
-						};
-						break;
+				//Check mods
+				if (interaction.options.getString('mods')) {
+					if (getMods(modBits).includes('NF')) {
+						modBits--;
 					}
-				}
 
-				if (user && !userScore) {
-					try {
-						await osuApi.getScores({ b: beatmap.beatmapId, u: user.osuName, m: mode })
-							.then(async scores => {
-								userScore = { score: scores[0] };
-							});
-					} catch (error) {
-						// nothing
-					}
-				}
-			} else if (server === 'tournaments') {
-				let multiScores = await DBOsuMultiScores.findAll({
-					where: {
-						beatmapId: beatmap.beatmapId,
-						scoringType: 'Score v2'
-					}
-				});
 
-				quicksort(multiScores);
-
-				let addedUserScores = [];
-
-				for (let i = 0; i < multiScores.length; i++) {
-					if (parseInt(multiScores[i].score) < 10000) {
-						break;
-					}
-					if (!addedUserScores.includes(multiScores[i].osuUserId)) {
-						addedUserScores.push(multiScores[i].osuUserId);
-
-						let banchoScore = await multiToBanchoScore(multiScores[i]);
-
-						scoresArray.push(banchoScore);
-
-						if (user && multiScores[i].osuUserId === user.osuUserId) {
-							userScore = { score: banchoScore, rank: scoresArray.length };
-						}
+					if (parseInt(multiScores[i].gameRawMods) + parseInt(multiScores[i].rawMods) !== modBits
+						&& parseInt(multiScores[i].gameRawMods) + parseInt(multiScores[i].rawMods) !== modBits + 1) {
+						continue;
 					}
 				}
 
-				if (!scoresArray.length) {
-					return interaction.followUp({ content: 'The map doesn\'t have any submitted scores.' });
+				//Check acronym
+				if (interaction.options.getString('acronym')) {
+					if (!multiScores[i].matchName.trim().startsWith(interaction.options.getString('acronym'))) {
+						continue;
+					}
+				}
+
+				if (!addedUserScores.includes(multiScores[i].osuUserId)) {
+					addedUserScores.push(multiScores[i].osuUserId);
+
+					let banchoScore = await multiToBanchoScore(multiScores[i]);
+
+					scoresArray.push(banchoScore);
+
+					if (user && multiScores[i].osuUserId === user.osuUserId) {
+						userScore = { score: banchoScore, rank: scoresArray.length };
+					}
 				}
 			}
 
-			if (limit > scoresArray.length) {
-				limit = scoresArray.length;
-			}
-
-			let userScoreHeight = 0;
-			if (userScore) {
-				userScoreHeight = 90;
-			}
-
-			const canvasWidth = 900;
-			let canvasHeight = 275 + userScoreHeight + limit * 30;
-
-			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
-
-			//Create Canvas
-			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
-
-			//Get context and load the image
-			const ctx = canvas.getContext('2d');
-			const background = await Canvas.loadImage('./other/osu-background.png');
-			for (let i = 0; i < canvas.height / background.height; i++) {
-				for (let j = 0; j < canvas.width / background.width; j++) {
-					ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
-				}
-			}
-
-			let elements = [canvas, ctx, beatmap];
-
-			elements = await drawTitle(elements);
-
-			elements = await drawTopScore(elements, mode, scoresArray);
-
-			elements = await drawScores(elements, mode, userScore, scoresArray);
-
-			await drawFooter(elements);
-
-			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-map-leaderboard-${beatmap.beatmapId}-${beatmap.mods}.png`);
-
-			if (msg.id) {
-				processingMessage.delete();
-			}
-
-			let files = [attachment];
-
-			if (interaction) {
-				return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: files, ephemeral: false });
-			} else {
-				return await msg.reply({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\nosu! direct: <osu://b/${beatmap.beatmapId}>`, files: files });
+			if (!scoresArray.length) {
+				return interaction.followUp({ content: 'The map doesn\'t have any submitted scores.' });
 			}
 		}
+
+		if (amount > scoresArray.length) {
+			amount = scoresArray.length;
+		}
+
+		let userScoreHeight = 0;
+		if (userScore) {
+			userScoreHeight = 90;
+		}
+
+		const canvasWidth = 900;
+		let canvasHeight = 275 + userScoreHeight + amount * 30;
+
+		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+		//Create Canvas
+		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+		//Get context and load the image
+		const ctx = canvas.getContext('2d');
+		const background = await Canvas.loadImage('./other/osu-background.png');
+		for (let i = 0; i < canvas.height / background.height; i++) {
+			for (let j = 0; j < canvas.width / background.width; j++) {
+				ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+			}
+		}
+
+		let elements = [canvas, ctx, dbBeatmap];
+
+		elements = await drawTitle(elements);
+
+		elements = await drawTopScore(elements, mode, scoresArray);
+
+		elements = await drawScores(elements, mode, userScore, scoresArray);
+
+		await drawFooter(elements);
+
+		const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-map-leaderboard-${dbBeatmap.beatmapId}-${dbBeatmap.mods}.png`);
+
+		let files = [attachment];
+
+		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nosu! direct: <osu://b/${dbBeatmap.beatmapId}>`, files: files, ephemeral: false });
 
 		async function drawTitle(input) {
 			let canvas = input[0];
@@ -548,7 +553,7 @@ module.exports = {
 				ctx.fillText('300', 475, 217 + 90);
 			}
 
-			if (limit > 1 && scoresArray.length > 1) {
+			if (amount > 1 && scoresArray.length > 1) {
 				ctx.fillText('Rank', 60, 258.5 + globalOffset);
 				ctx.fillText('Score', 90, 258.5 + globalOffset);
 				ctx.fillText('Accuracy', 160, 258.5 + globalOffset);
@@ -563,7 +568,7 @@ module.exports = {
 			}
 
 			let localOffset = 10;
-			for (let i = 1; i < scoresArray.length && i < limit; i++) {
+			for (let i = 1; i < scoresArray.length && i < amount; i++) {
 				localOffset += 30;
 				roundedRect(ctx, 50, 220.5 + globalOffset + localOffset, 800, 20, 500 / 70, '70', '57', '63', 0.75);
 
