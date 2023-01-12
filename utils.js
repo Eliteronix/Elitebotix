@@ -1331,34 +1331,34 @@ module.exports = {
 		let duplicates = true;
 		let deleted = 0;
 
-		while (duplicates && deleted < 25) {
-			let result = await sequelize.query(
-				'SELECT * FROM DBDiscordUsers WHERE 0 < (SELECT COUNT(1) FROM DBDiscordUsers as a WHERE a.osuUserId = DBDiscordUsers.osuUserId AND a.id <> DBDiscordUsers.id) ORDER BY userId ASC LIMIT 1',
-			);
+		// while (duplicates && deleted < 25) {
+		// 	let result = await sequelize.query(
+		// 		'SELECT * FROM DBDiscordUsers WHERE 0 < (SELECT COUNT(1) FROM DBDiscordUsers as a WHERE a.osuUserId = DBDiscordUsers.osuUserId AND a.id <> DBDiscordUsers.id) ORDER BY userId ASC LIMIT 1',
+		// 	);
 
-			duplicates = result[0].length;
+		// 	duplicates = result[0].length;
 
-			if (result[0].length) {
-				await new Promise(resolve => setTimeout(resolve, 2000));
-				logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries');
-				let duplicate = await DBDiscordUsers.findOne({
-					where: {
-						id: result[0][0].id
-					}
-				});
+		// 	if (result[0].length) {
+		// 		await new Promise(resolve => setTimeout(resolve, 2000));
+		// 		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries');
+		// 		let duplicate = await DBDiscordUsers.findOne({
+		// 			where: {
+		// 				id: result[0][0].id
+		// 			}
+		// 		});
 
-				// eslint-disable-next-line no-console
-				console.log(duplicate.userId, duplicate.osuUserId, duplicate.updatedAt);
+		// 		// eslint-disable-next-line no-console
+		// 		console.log(duplicate.userId, duplicate.osuUserId, duplicate.updatedAt);
 
-				deleted++;
-				await new Promise(resolve => setTimeout(resolve, 2000));
-				await duplicate.destroy();
-			}
-			await new Promise(resolve => setTimeout(resolve, 10000));
-		}
+		// 		deleted++;
+		// 		await new Promise(resolve => setTimeout(resolve, 2000));
+		// 		await duplicate.destroy();
+		// 	}
+		// 	await new Promise(resolve => setTimeout(resolve, 10000));
+		// }
 
-		// eslint-disable-next-line no-console
-		console.log(`Cleaned up ${deleted} duplicate users`);
+		// // eslint-disable-next-line no-console
+		// console.log(`Cleaned up ${deleted} duplicate users`);
 
 		// Remove entries over half a year old
 		duplicates = true;
