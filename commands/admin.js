@@ -2005,13 +2005,29 @@ module.exports = {
 			// 				'choices': [
 			// 					{
 			// 						'name': 'Bancho',
-			// 						'value': '--b'
+			// 						'value': 'bancho'
 			// 					},
 			// 					{
 			// 						'name': 'Tournaments',
-			// 						'value': '--tournaments'
+			// 						'value': 'tournaments'
 			// 					},
 			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'mods',
+			// 				'description': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
+			// 				'type': 3,
+			// 				'required': false,
+			// 			},
+			// 			{
+			// 				'name': 'acronym',
+			// 				'description': 'tournament acronym',
+			// 				'type': 3,
+			// 			},
+			// 			{
+			// 				'name': 'amount',
+			// 				'description': 'The amount of scores you want to get',
+			// 				'type': 4,
 			// 			},
 			// 			{
 			// 				'name': 'mode',
@@ -2021,27 +2037,22 @@ module.exports = {
 			// 				'choices': [
 			// 					{
 			// 						'name': 'osu',
-			// 						'value': '--osu'
+			// 						'value': 'Standard'
 			// 					},
 			// 					{
 			// 						'name': 'taiko',
-			// 						'value': '--taiko'
+			// 						'value': 'Taiko'
 			// 					},
 			// 					{
 			// 						'name': 'catch',
-			// 						'value': '--catch'
+			// 						'value': 'Catch'
 			// 					},
 			// 					{
 			// 						'name': 'mania',
-			// 						'value': '--mania'
+			// 						'value': 'Mania'
 			// 					},
 			// 				]
 			// 			},
-			// 			{
-			// 				'name': 'amount',
-			// 				'description': 'The amount of scores you want to get',
-			// 				'type': 4,
-			// 			}
 			// 		]
 			// 	}
 			// });
@@ -7094,6 +7105,22 @@ module.exports = {
 							]
 						},
 						{
+							'name': 'mods',
+							'description': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
+							'type': 3,
+							'required': false,
+						},
+						{
+							'name': 'acronym',
+							'description': 'tournament acronym',
+							'type': 3,
+						},
+						{
+							'name': 'amount',
+							'description': 'The amount of scores you want to get',
+							'type': 4,
+						},
+						{
 							'name': 'mode',
 							'description': 'The gamemode you want to get the leaderboard from',
 							'type': 3,
@@ -7101,27 +7128,22 @@ module.exports = {
 							'choices': [
 								{
 									'name': 'osu',
-									'value': '--osu'
+									'value': 'Standard'
 								},
 								{
 									'name': 'taiko',
-									'value': '--taiko'
+									'value': 'Taiko'
 								},
 								{
 									'name': 'catch',
-									'value': '--catch'
+									'value': 'Catch'
 								},
 								{
 									'name': 'mania',
-									'value': '--mania'
+									'value': 'Mania'
 								},
 							]
 						},
-						{
-							'name': 'amount',
-							'description': 'The amount of scores you want to get',
-							'type': 4,
-						}
 					]
 				}
 			});
