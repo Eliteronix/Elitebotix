@@ -680,6 +680,9 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 	let beatmaps = [];
 
 	if (sorting && sorting == 'recent') {
+		for (let i = 0; i < scores.length; i++) {
+			scores[i].best = i + 1;
+		}
 		quicksortRecent(scores);
 	}
 
@@ -861,21 +864,17 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		ctx.fillText(Math.round(accuracy * 100) / 100 + '%', (canvas.width / 28) * 24.75, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 
 		const mods = getMods(sortedScores[i].raw_mods);
-		let arrow = '';
-		if (mods.includes('DT') || mods.includes('NC')) {
-			arrow = '^';
-		}
 
 		let sortingText = '';
 		if (sorting !== null) {
 			if (sorting == 'ar') {
-				sortingText = ` (AR: ${beatmaps[i].approachRate + arrow})`;
+				sortingText = ` (AR: ${beatmaps[i].approachRate})`;
 			} else if (sorting == 'cs') {
 				sortingText = ` (CS: ${beatmaps[i].circleSize})`;
 			} else if (sorting == 'drain') {
-				sortingText = ` (HP: ${beatmaps[i].drain + arrow})`;
+				sortingText = ` (HP: ${beatmaps[i].drain})`;
 			} else if (sorting == 'od') {
-				sortingText = ` (OD: ${beatmaps[i].overallDifficulty + arrow})`;
+				sortingText = ` (OD: ${beatmaps[i].overallDifficulty})`;
 			} else if (sorting == 'bpm') {
 				sortingText = ` (BPM: ${beatmaps[i].bpm})`;
 			} else if (sorting == 'length') {
@@ -885,6 +884,8 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 				sortingText = ` (Length: ${totalLength})`;
 			} else if (sorting == 'sr') {
 				sortingText = ` (${Math.round(beatmaps[i].starRating * 100) / 100}*)`;
+			} else if (sorting == 'recent') {
+				sortingText = ` (#${sortedScores[i].best})`;
 			}
 		}
 
