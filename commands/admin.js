@@ -2624,6 +2624,30 @@ module.exports = {
 			// 				'required': false
 			// 			},
 			// 			{
+			// 				'name': 'gamemode',
+			// 				'description': 'Gamemode',
+			// 				'type': 3,
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Standard',
+			// 						'value': '--s',
+			// 					},
+			// 					{
+			// 						'name': 'Mania',
+			// 						'value': '--m',
+			// 					},
+			// 					{
+			// 						'name': 'Catch The Beat',
+			// 						'value': '--c',
+			// 					},
+			// 					{
+			// 						'name': 'Taiko',
+			// 						'value': '--t',
+			// 					},
+			// 				]
+			// 			},
+			// 			{
 			// 				'name': 'username2',
 			// 				'description': 'The username, id or link of the player',
 			// 				'type': 3,
@@ -2646,7 +2670,7 @@ module.exports = {
 			// 				'description': 'The username, id or link of the player',
 			// 				'type': 3,
 			// 				'required': false
-			// 			}
+			// 			},
 			// 		]
 			// 	},
 			// });
@@ -2658,6 +2682,12 @@ module.exports = {
 			// 		dm_permission: true,
 			// 		options: [
 			// 			{
+			// 				'name': 'username',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
 			// 				'name': 'pass',
 			// 				'description': 'Show the recent pass?',
 			// 				'type': 3,
@@ -2667,14 +2697,31 @@ module.exports = {
 			// 						'name': 'True',
 			// 						'value': '--pass'
 			// 					},
-
 			// 				]
 			// 			},
 			// 			{
-			// 				'name': 'username',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'gamemode',
+			// 				'description': 'Gamemode',
 			// 				'type': 3,
-			// 				'required': false
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Standard',
+			// 						'value': '--s',
+			// 					},
+			// 					{
+			// 						'name': 'Mania',
+			// 						'value': '--m',
+			// 					},
+			// 					{
+			// 						'name': 'Catch The Beat',
+			// 						'value': '--c',
+			// 					},
+			// 					{
+			// 						'name': 'Taiko',
+			// 						'value': '--t',
+			// 					},
+			// 				]
 			// 			},
 			// 			{
 			// 				'name': 'username2',
@@ -2711,6 +2758,12 @@ module.exports = {
 			// 		dm_permission: true,
 			// 		options: [
 			// 			{
+			// 				'name': 'username',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
 			// 				'name': 'pass',
 			// 				'description': 'Show the recent pass?',
 			// 				'type': 3,
@@ -2720,14 +2773,31 @@ module.exports = {
 			// 						'name': 'True',
 			// 						'value': '--pass'
 			// 					},
-
 			// 				]
 			// 			},
 			// 			{
-			// 				'name': 'username',
-			// 				'description': 'The username, id or link of the player',
+			// 				'name': 'gamemode',
+			// 				'description': 'Gamemode',
 			// 				'type': 3,
-			// 				'required': false
+			// 				'required': false,
+			// 				'choices': [
+			// 					{
+			// 						'name': 'Standard',
+			// 						'value': '--s',
+			// 					},
+			// 					{
+			// 						'name': 'Mania',
+			// 						'value': '--m',
+			// 					},
+			// 					{
+			// 						'name': 'Catch The Beat',
+			// 						'value': '--c',
+			// 					},
+			// 					{
+			// 						'name': 'Taiko',
+			// 						'value': '--t',
+			// 					},
+			// 				]
 			// 			},
 			// 			{
 			// 				'name': 'username2',
@@ -7757,6 +7827,30 @@ module.exports = {
 							'required': false
 						},
 						{
+							'name': 'gamemode',
+							'description': 'Gamemode',
+							'type': 3,
+							'required': false,
+							'choices': [
+								{
+									'name': 'Standard',
+									'value': '--s',
+								},
+								{
+									'name': 'Mania',
+									'value': '--m',
+								},
+								{
+									'name': 'Catch The Beat',
+									'value': '--c',
+								},
+								{
+									'name': 'Taiko',
+									'value': '--t',
+								},
+							]
+						},
+						{
 							'name': 'username2',
 							'description': 'The username, id or link of the player',
 							'type': 3,
@@ -7779,7 +7873,7 @@ module.exports = {
 							'description': 'The username, id or link of the player',
 							'type': 3,
 							'required': false
-						}
+						},
 					]
 				},
 			});
@@ -7791,6 +7885,12 @@ module.exports = {
 					dm_permission: true,
 					options: [
 						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
 							'name': 'pass',
 							'description': 'Show the recent pass?',
 							'type': 3,
@@ -7800,14 +7900,31 @@ module.exports = {
 									'name': 'True',
 									'value': '--pass'
 								},
-
 							]
 						},
 						{
-							'name': 'username',
-							'description': 'The username, id or link of the player',
+							'name': 'gamemode',
+							'description': 'Gamemode',
 							'type': 3,
-							'required': false
+							'required': false,
+							'choices': [
+								{
+									'name': 'Standard',
+									'value': '--s',
+								},
+								{
+									'name': 'Mania',
+									'value': '--m',
+								},
+								{
+									'name': 'Catch The Beat',
+									'value': '--c',
+								},
+								{
+									'name': 'Taiko',
+									'value': '--t',
+								},
+							]
 						},
 						{
 							'name': 'username2',
@@ -7844,6 +7961,12 @@ module.exports = {
 					dm_permission: true,
 					options: [
 						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+						{
 							'name': 'pass',
 							'description': 'Show the recent pass?',
 							'type': 3,
@@ -7853,14 +7976,31 @@ module.exports = {
 									'name': 'True',
 									'value': '--pass'
 								},
-
 							]
 						},
 						{
-							'name': 'username',
-							'description': 'The username, id or link of the player',
+							'name': 'gamemode',
+							'description': 'Gamemode',
 							'type': 3,
-							'required': false
+							'required': false,
+							'choices': [
+								{
+									'name': 'Standard',
+									'value': '--s',
+								},
+								{
+									'name': 'Mania',
+									'value': '--m',
+								},
+								{
+									'name': 'Catch The Beat',
+									'value': '--c',
+								},
+								{
+									'name': 'Taiko',
+									'value': '--t',
+								},
+							]
 						},
 						{
 							'name': 'username2',
