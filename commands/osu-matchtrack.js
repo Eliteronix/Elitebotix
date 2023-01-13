@@ -24,7 +24,6 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
 			try {
 				await interaction.deferReply();
@@ -101,7 +100,7 @@ module.exports = {
 					}
 				});
 
-				reactionCollector.on('end', () => {
+				reactionCollector.on('end', async () => {
 					stop = true;
 					initialMessage.reactions.removeAll().catch(() => { });
 					msg.channel.send(`Stopped tracking match \`${match.name.replace(/`/g, '')}\``);
@@ -115,13 +114,27 @@ module.exports = {
 						}
 					}
 
-					osuApi.getMatch({ mp: matchID })
+					await osuApi.getMatch({ mp: matchID })
 						.then(async (match) => {
-							saveOsuMultiScores(match);
+							await saveOsuMultiScores(match);
 						})
 						.catch(() => {
 							//Nothing
 						});
+
+					if (msg.id) {
+						if (msg.client.update === 1 && msg.client.duels.length === 0 && msg.client.otherMatches.length === 0 && msg.client.matchTracks.length === 0 && msg.client.bingoMatches === 0) {
+
+							// eslint-disable-next-line no-undef
+							process.exit();
+						}
+					} else {
+						if (interaction.client.update === 1 && interaction.client.duels.length === 0 && interaction.client.otherMatches.length === 0 && interaction.client.matchTracks.length === 0 && interaction.client.bingoMatches === 0) {
+
+							// eslint-disable-next-line no-undef
+							process.exit();
+						}
+					}
 				});
 
 				reactionCollector.on('error', (error) => {

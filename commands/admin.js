@@ -11213,7 +11213,7 @@ module.exports = {
 			// eslint-disable-next-line no-console
 			console.log('matchtracks', matchtracks);
 
-			let output = `Options: \`all\`, \`free\`, \`shardId\`, \`update\`, \`free&update\`\n\`\`\`Cur.: ${msg.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | Update\n`;
+			let output = `Options: \`all\`, \`free\`, \`shardId\`, \`update\`\n\`\`\`Cur.: ${msg.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | Update\n`;
 			for (let i = 0; i < guildSizes.length; i++) {
 				output = output + '--------|------------------|--------|-------|-------|------------|-------|--------\n';
 				let startDate = new Date(startDates[i]);
@@ -11234,7 +11234,7 @@ module.exports = {
 				if (condition === 'all' ||
 					condition === 'free' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches === 0 ||
 					!isNaN(condition) && c.shardId === parseInt(condition) ||
-					condition === 'free&update' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches === 0 && c.update === 1) {
+					condition === 'update' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches === 0) {
 
 					// eslint-disable-next-line no-undef
 					process.exit();
