@@ -585,24 +585,47 @@ module.exports = {
 				await lobby.updateSettings();
 			}
 
-			while (nextModPool === 'FM' && !lobby.freemod //There is no FreeMod combination otherwise
-				|| nextModPool !== 'FM' && lobby.freemod
-				|| nextModPool !== 'NM' && nextModPool !== 'FM' && !lobby.mods
-				|| nextModPool === 'NM' && lobby.mods && lobby.mods.length //Only NM has only one mod
-				|| nextModPool === 'HD' && lobby.mods && lobby.mods.length < 1
-				|| nextModPool === 'HD' && lobby.mods && lobby.mods[0].shortMod !== 'hd'
-				|| nextModPool === 'HR' && lobby.mods && lobby.mods.length < 1
-				|| nextModPool === 'HR' && lobby.mods && lobby.mods[0].shortMod !== 'hr'
-				|| nextModPool === 'DT' && lobby.mods && lobby.mods.length < 1
-				|| nextModPool === 'DT' && lobby.mods && lobby.mods[0].shortMod !== 'dt'
-			) {
-				if (nextModPool === 'FM') {
-					await channel.sendMessage('!mp mods FreeMod');
-				} else {
-					await channel.sendMessage(`!mp mods ${nextModPool}`);
+			if (winCondition === '3') {
+				while (nextModPool === 'FM' && !lobby.freemod //There is no FreeMod combination otherwise
+					|| nextModPool !== 'FM' && lobby.freemod
+					|| nextModPool !== 'NM' && nextModPool !== 'FM' && !lobby.mods
+					|| nextModPool === 'NM' && lobby.mods && lobby.mods.length !== 1 //Only NM has only one mod
+					|| nextModPool === 'HD' && lobby.mods && lobby.mods.length < 2
+					|| nextModPool === 'HD' && lobby.mods && lobby.mods[1].shortMod !== 'hd'
+					|| nextModPool === 'HR' && lobby.mods && lobby.mods.length < 2
+					|| nextModPool === 'HR' && lobby.mods && lobby.mods[1].shortMod !== 'hr'
+					|| nextModPool === 'DT' && lobby.mods && lobby.mods.length < 2
+					|| nextModPool === 'DT' && lobby.mods && lobby.mods[1].shortMod !== 'dt'
+				) {
+					if (nextModPool === 'FM') {
+						await channel.sendMessage('!mp mods FreeMod');
+					} else {
+						await channel.sendMessage(`!mp mods ${nextModPool} NF`);
+					}
+
+					await new Promise(resolve => setTimeout(resolve, 5000));
+					await lobby.updateSettings();
 				}
-				await new Promise(resolve => setTimeout(resolve, 5000));
-				await lobby.updateSettings();
+			} else {
+				while (nextModPool === 'FM' && !lobby.freemod //There is no FreeMod combination otherwise
+					|| nextModPool !== 'FM' && lobby.freemod
+					|| nextModPool !== 'NM' && nextModPool !== 'FM' && !lobby.mods
+					|| nextModPool === 'NM' && lobby.mods && lobby.mods.length //Only NM has only one mod
+					|| nextModPool === 'HD' && lobby.mods && lobby.mods.length < 1
+					|| nextModPool === 'HD' && lobby.mods && lobby.mods[0].shortMod !== 'hd'
+					|| nextModPool === 'HR' && lobby.mods && lobby.mods.length < 1
+					|| nextModPool === 'HR' && lobby.mods && lobby.mods[0].shortMod !== 'hr'
+					|| nextModPool === 'DT' && lobby.mods && lobby.mods.length < 1
+					|| nextModPool === 'DT' && lobby.mods && lobby.mods[0].shortMod !== 'dt'
+				) {
+					if (nextModPool === 'FM') {
+						await channel.sendMessage('!mp mods FreeMod');
+					} else {
+						await channel.sendMessage(`!mp mods ${nextModPool}`);
+					}
+
+					await new Promise(resolve => setTimeout(resolve, 5000));
+				}
 			}
 
 			await channel.sendMessage('!mp timer 120');
