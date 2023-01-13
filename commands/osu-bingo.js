@@ -165,13 +165,13 @@ module.exports = {
 		const allUsers = [...team1, ...team2, ...team3, ...team4, ...team5];
 		const uniqueUsers = [...new Set(allUsers)];
 
-		if (allUsers.length !== uniqueUsers.length) {
-			return await interaction.editReply('You can\'t play a bingo match with the same user twice');
-		}
+		// if (allUsers.length !== uniqueUsers.length) {
+		// 	return await interaction.editReply('You can\'t play a bingo match with the same user twice');
+		// }
 
-		if (allUsers.length < 2) {
-			return await interaction.editReply('You can\'t play a bingo match alone');
-		}
+		// if (allUsers.length < 2) {
+		// 	return await interaction.editReply('You can\'t play a bingo match alone');
+		// }
 
 		let everyUser = [];
 		for (let i = 0; i < allUsers.length; i++) {
@@ -286,7 +286,7 @@ module.exports = {
 						[Op.lte]: higherDrainTime,
 					}
 				},
-				usedOften: true,
+				// usedOften: true,
 				notDownloadable: {
 					[Op.not]: true,
 				},
@@ -391,8 +391,8 @@ async function refreshMessage(message, mappool, lastRefresh) {
 	lastRefresh.date = new Date();
 	let reply = `\n\nLast updated: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:R>`;
 
-	const canvasWidth = 1280;
-	const canvasHeight = 1280;
+	const canvasWidth = 1430;
+	const canvasHeight = 1430;
 
 	//Create Canvas
 	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -409,6 +409,21 @@ async function refreshMessage(message, mappool, lastRefresh) {
 			ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
 		}
 	}
+
+	ctx.font = '80px comfortaa, sans-serif';
+	ctx.fillStyle = '#ffffff';
+	ctx.textAlign = 'center';
+	ctx.fillText('A', 1355, 160);
+	ctx.fillText('B', 1355, 415);
+	ctx.fillText('C', 1355, 670);
+	ctx.fillText('D', 1355, 925);
+	ctx.fillText('E', 1355, 1180);
+
+	ctx.fillText('1', 130, 1385);
+	ctx.fillText('2', 385, 1385);
+	ctx.fillText('3', 640, 1385);
+	ctx.fillText('4', 895, 1385);
+	ctx.fillText('5', 1150, 1385);
 
 	// Draw the grid of maps
 	for (let i = 0; i < 5; i++) {
@@ -574,7 +589,22 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 
 												await mappool[k].message.fetch();
 												await mappool[k].message.delete();
-												mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just reclaimed map ${k + 1}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)} score; ${humanReadable(mappool[k].achievedCombo)}/${humanReadable(mappool[k].maxCombo)} combo; ${mappool[k].mods}\`!`);
+
+												// Translate K into A1, A2, A3, A4, A5, B1, B2, ... E4, E5
+												let code = '';
+												if (k < 5) {
+													code = 'A' + (k + 1).toString();
+												} else if (k < 10) {
+													code = 'B' + (k - 4).toString();
+												} else if (k < 15) {
+													code = 'C' + (k - 9).toString();
+												} else if (k < 20) {
+													code = 'D' + (k - 14).toString();
+												} else {
+													code = 'E' + (k - 19).toString();
+												}
+
+												mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just reclaimed map ${code}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)} score; ${humanReadable(mappool[k].achievedCombo)}/${humanReadable(mappool[k].maxCombo)} combo; ${mappool[k].mods}\`!`);
 												lastRefresh.lastScore = new Date();
 											}
 										} else {
@@ -599,7 +629,21 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 												mappool[k].team = 'Team 5';
 											}
 
-											mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just claimed map ${k + 1}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)} score; ${humanReadable(mappool[k].achievedCombo)}/${humanReadable(mappool[k].maxCombo)} combo; ${mappool[k].mods}\`!`);
+											// Translate K into A1, A2, A3, A4, A5, B1, B2, ... E4, E5
+											let code = '';
+											if (k < 5) {
+												code = 'A' + (k + 1).toString();
+											} else if (k < 10) {
+												code = 'B' + (k - 4).toString();
+											} else if (k < 15) {
+												code = 'C' + (k - 9).toString();
+											} else if (k < 20) {
+												code = 'D' + (k - 14).toString();
+											} else {
+												code = 'E' + (k - 19).toString();
+											}
+
+											mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just claimed map ${code}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)} score; ${humanReadable(mappool[k].achievedCombo)}/${humanReadable(mappool[k].maxCombo)} combo; ${mappool[k].mods}\`!`);
 											lastRefresh.lastScore = new Date();
 										}
 
