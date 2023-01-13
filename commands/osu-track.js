@@ -22,8 +22,6 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction.options._subcommand === 'enable') {
 			try {
 				await interaction.reply({ content: 'Processing...', ephemeral: true });
@@ -479,18 +477,22 @@ module.exports = {
 				return;
 			}
 
-			logDatabaseQueries(4, 'commands/osu-track.js list DBOsuGuildTrackers');
-			const guildTrackers = await DBOsuGuildTrackers.findAll({
+			logDatabaseQueries(4, 'commands/osu-track.js list DBOsuGuildTrackers users');
+			let guildTrackers = await DBOsuGuildTrackers.findAll({
 				where: {
 					channelId: interaction.channel.id,
+					osuUserId: {
+						[Op.ne]: null,
+					}
 				},
 			});
 
+			let output = [];
+
 			if (guildTrackers.length === 0) {
-				return await interaction.editReply({ content: 'There are currently no users tracked in this channel.', ephemeral: true });
+				output.push('There are currently no users tracked in this channel.');
 			}
 
-			let output = [];
 			for (let i = 0; i < guildTrackers.length; i++) {
 				let username = guildTrackers[i].osuUserId;
 
@@ -499,7 +501,10 @@ module.exports = {
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						osuUserId: username,
-					}
+					},
+					order: [
+						['osuName', 'ASC'],
+					],
 				});
 
 				let osuUser = {
@@ -614,30 +619,113 @@ module.exports = {
 					}
 				}
 
-				output.push({ osuName: osuUser.osuName, content: `\`${osuUser.osuName}\`\n- Top Plays: ${topPlayTrackings.join(', ')}\n- Leaderboard Scores: ${leaderboardTrackings.join(', ')}\n- Ameobea updates: ${ameobeaTrackings.join(', ')}${showAmeobeaUpdates}${medals}${duelRating}${matchActivity}` });
+				output.push(`\`${osuUser.osuName}\`\n- Top Plays: ${topPlayTrackings.join(', ')}\n- Leaderboard Scores: ${leaderboardTrackings.join(', ')}\n- Ameobea updates: ${ameobeaTrackings.join(', ')}${showAmeobeaUpdates}${medals}${duelRating}${matchActivity}`);
 			}
 
-			//Sort by osu name
-			output.sort((a, b) => {
-				if (a.osuName < b.osuName) {
-					return -1;
-				}
-				if (a.osuName > b.osuName) {
-					return 1;
-				}
-				return 0;
+			output.push('\n');
+
+			logDatabaseQueries(4, 'commands/osu-track.js list DBOsuGuildTrackers users');
+			guildTrackers = await DBOsuGuildTrackers.findAll({
+				where: {
+					channelId: interaction.channel.id,
+					acronym: {
+						[Op.ne]: null,
+					}
+				},
+				order: [
+					['acronym', 'ASC']
+				]
 			});
+
+			if (guildTrackers.length === 0) {
+				output.push('There are currently no tourneys tracked in this channel.');
+			}
+
+			for (let i = 0; i < guildTrackers.length; i++) {
+				let matchActivity = ' \n- Showing match activity';
+				if (guildTrackers[i].matchActivityAutoTrack) {
+					matchActivity += ' (auto-track)';
+				}
+				output.push(`\`${guildTrackers[i].acronym}\`${matchActivity}`);
+			}
 
 			let currentOutput = [];
 
 			while (output.length) {
 				while (currentOutput.length < 10 && output.length) {
-					currentOutput.push(output.shift().content);
+					currentOutput.push(output.shift());
 				}
 
 				await interaction.followUp({ content: currentOutput.join('\n\n'), ephemeral: true });
 				currentOutput = [];
 			}
+		} else if (interaction.options._subcommand === 'tourneyenable') {
+			try {
+				await interaction.deferReply({ ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
+
+			let acronym = interaction.options.getString('acronym');
+
+			let tracking = interaction.options.getString('matchactivity');
+
+			let guildTracker = await DBOsuGuildTrackers.findOne({
+				where: {
+					guildId: interaction.guild.id,
+					channelId: interaction.channel.id,
+					acronym: acronym,
+				}
+			});
+
+			if (!guildTracker) {
+				guildTracker = await DBOsuGuildTrackers.create({
+					guildId: interaction.guild.id,
+					channelId: interaction.channel.id,
+					acronym: acronym,
+					matchActivity: true,
+				});
+			}
+
+			if (tracking === 'matches (auto matchtrack)') {
+				guildTracker.matchActivityAutoTrack = true;
+			} else {
+				guildTracker.matchActivityAutoTrack = false;
+			}
+
+			await guildTracker.save();
+
+			return interaction.followUp({ content: `Match activity tracking updated for ${acronym} in this channel.`, ephemeral: true });
+		} else if (interaction.options._subcommand === 'tourneydisable') {
+			try {
+				await interaction.deferReply({ ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
+
+			let acronym = interaction.options.getString('acronym');
+
+			let guildTracker = await DBOsuGuildTrackers.findOne({
+				where: {
+					guildId: interaction.guild.id,
+					channelId: interaction.channel.id,
+					acronym: acronym,
+				}
+			});
+
+			if (guildTracker) {
+				await guildTracker.destroy();
+
+				return interaction.followUp({ content: `Match activity tracking disabled for ${acronym} in this channel.`, ephemeral: true });
+			}
+
+			return interaction.followUp({ content: `Match activity tracking is not enabled for ${acronym} in this channel.`, ephemeral: true });
 		}
 	},
 };

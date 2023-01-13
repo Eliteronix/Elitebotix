@@ -3768,7 +3768,7 @@ module.exports = {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'osu-track',
-			// 		description: 'Tracks new scores set by the specified users',
+			// 		description: 'Tracks new scores/matches set by the specified users / acronym',
 			// 		dm_permission: false,
 			// 		default_member_permissions: manageGuild,
 			// 		options: [
@@ -4017,6 +4017,35 @@ module.exports = {
 			// 				]
 			// 			},
 			// 			{
+			// 				'name': 'tourneyenable',
+			// 				'description': 'Lets you add an acronym to track',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'acronym',
+			// 						'description': 'The acronym to track',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 					{
+			// 						'name': 'matchactivity',
+			// 						'description': 'Should matches be tracked',
+			// 						'type': 3,
+			// 						'required': true,
+			// 						'choices': [
+			// 							{
+			// 								'name': 'Notify on matches',
+			// 								'value': 'matches',
+			// 							},
+			// 							{
+			// 								'name': 'Notify on matches and auto matchtrack',
+			// 								'value': 'matches (auto matchtrack)',
+			// 							},
+			// 						]
+			// 					},
+			// 				]
+			// 			},
+			// 			{
 			// 				'name': 'disable',
 			// 				'description': 'Stop tracking a user',
 			// 				'type': 1, // 1 is type SUB_COMMAND
@@ -4065,8 +4094,21 @@ module.exports = {
 			// 				]
 			// 			},
 			// 			{
+			// 				'name': 'tourneydisable',
+			// 				'description': 'Lets you remove an acronym to track',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'acronym',
+			// 						'description': 'The acronym to stop tracking',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 			{
 			// 				'name': 'list',
-			// 				'description': 'Show which users are being tracked in the channel',
+			// 				'description': 'Show which users/acronyms are being tracked in the channel',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 			},
 			// 		]
@@ -8859,7 +8901,7 @@ module.exports = {
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'osu-track',
-					description: 'Tracks new scores set by the specified users',
+					description: 'Tracks new scores/matches set by the specified users / acronym',
 					dm_permission: false,
 					default_member_permissions: manageGuild,
 					options: [
@@ -9108,6 +9150,35 @@ module.exports = {
 							]
 						},
 						{
+							'name': 'tourneyenable',
+							'description': 'Lets you add an acronym to track',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'acronym',
+									'description': 'The acronym to track',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'matchactivity',
+									'description': 'Should matches be tracked',
+									'type': 3,
+									'required': true,
+									'choices': [
+										{
+											'name': 'Notify on matches',
+											'value': 'matches',
+										},
+										{
+											'name': 'Notify on matches and auto matchtrack',
+											'value': 'matches (auto matchtrack)',
+										},
+									]
+								},
+							]
+						},
+						{
 							'name': 'disable',
 							'description': 'Stop tracking a user',
 							'type': 1, // 1 is type SUB_COMMAND
@@ -9156,8 +9227,21 @@ module.exports = {
 							]
 						},
 						{
+							'name': 'tourneydisable',
+							'description': 'Lets you remove an acronym to track',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'acronym',
+									'description': 'The acronym to stop tracking',
+									'type': 3,
+									'required': true
+								},
+							]
+						},
+						{
 							'name': 'list',
-							'description': 'Show which users are being tracked in the channel',
+							'description': 'Show which users/acronyms are being tracked in the channel',
 							'type': 1, // 1 is type SUB_COMMAND
 						},
 					]
