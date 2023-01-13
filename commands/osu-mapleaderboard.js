@@ -33,6 +33,8 @@ module.exports = {
 
 		let id = interaction.options.getString('id');
 
+		let acronym = interaction.options.getString('acronym');
+
 		let server = 'bancho';
 		if (interaction.options.getString('server')) {
 			server = interaction.options.getString('server');
@@ -157,6 +159,10 @@ module.exports = {
 
 			let addedUserScores = [];
 
+			if (getMods(modBits).includes('NF')) {
+				modBits--;
+			}
+
 			for (let i = 0; i < multiScores.length; i++) {
 				if (parseInt(multiScores[i].score) < 10000) {
 					break;
@@ -164,20 +170,15 @@ module.exports = {
 
 				//Check mods
 				if (interaction.options.getString('mods')) {
-					if (getMods(modBits).includes('NF')) {
-						modBits--;
-					}
-
-
-					if (parseInt(multiScores[i].gameRawMods) + parseInt(multiScores[i].rawMods) !== modBits
-						&& parseInt(multiScores[i].gameRawMods) + parseInt(multiScores[i].rawMods) !== modBits + 1) {
+					if (parseInt(multiScores[i].gameRawMods) + parseInt(multiScores[i].rawMods) !== modBits &&
+						parseInt(multiScores[i].gameRawMods) + parseInt(multiScores[i].rawMods) !== modBits + 1) {
 						continue;
 					}
 				}
 
 				//Check acronym
-				if (interaction.options.getString('acronym')) {
-					if (!multiScores[i].matchName.trim().startsWith(interaction.options.getString('acronym'))) {
+				if (acronym) {
+					if (!multiScores[i].matchName.trim().startsWith(acronym)) {
 						continue;
 					}
 				}
@@ -290,6 +291,14 @@ module.exports = {
 			ctx.fillText(beatmapTitle, 70, 55);
 			ctx.font = 'bold 23px comfortaa, sans-serif';
 			ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100} [${beatmapDifficulty}] mapped by ${beatmap.mapper}`, 100, 103.5);
+
+			//Draw mods
+			let mods = getMods(beatmap.mods);
+			for (let i = 0; i < mods.length; i++) {
+				mods[i] = getModImage(mods[i]);
+				const modImage = await Canvas.loadImage(mods[i]);
+				ctx.drawImage(modImage, 860 - ((mods.length - i) * 48), 35, 45, 32);
+			}
 
 			const output = [canvas, ctx, beatmap];
 			return output;
@@ -622,8 +631,14 @@ module.exports = {
 
 			let today = new Date().toLocaleDateString();
 
-			ctx.font = '12px comfortaa, sans-serif';
+			ctx.font = '23px comfortaa, sans-serif';
 			ctx.fillStyle = '#ffffff';
+			if (acronym) {
+				ctx.textAlign = 'left';
+				ctx.fillText(`Filtered to ${acronym}`, 50, canvas.height - 25);
+			}
+
+			ctx.font = '12px comfortaa, sans-serif';
 			ctx.textAlign = 'right';
 			ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 10, canvas.height - 10);
 
@@ -631,9 +646,6 @@ module.exports = {
 		}
 	}
 };
-
-
-
 
 function getDate(topScore) {
 	let month = 'January';
