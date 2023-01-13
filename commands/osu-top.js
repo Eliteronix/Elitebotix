@@ -479,10 +479,15 @@ async function drawFooter(input) {
 
 	let today = new Date().toLocaleDateString();
 
-	ctx.font = '12px comfortaa, sans-serif';
-	ctx.fillStyle = '#ffffff';
-	ctx.textAlign = 'right';
-	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 5);
+	try {
+		ctx.font = '12px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'right';
+		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 5);
+	} catch (err) {
+		console.log(input);
+		console.error(err);
+	}
 
 	const output = [canvas, ctx, user];
 	return output;
