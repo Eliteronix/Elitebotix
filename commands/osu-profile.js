@@ -26,7 +26,6 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		let showGraph = false;
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);

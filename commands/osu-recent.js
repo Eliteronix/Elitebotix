@@ -111,14 +111,14 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 		osuApi.getUserRecent({ u: username, m: mode })
 			.then(async (scores) => {
 				if (!(scores[0])) {
-					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; \`--r\` for ripple; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
+					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; \`--r\` for ripple)`);
 				} else {
 					if (pass) {
 						do {
 							i++;
 						} while (scores[i] && scores[i].rank == 'F');
 						if (!scores[i] || scores[i].rank == 'F') {
-							return msg.channel.send(`Couldn't find any recent passes for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; \`--r\` for ripple; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
+							return msg.channel.send(`Couldn't find any recent passes for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; \`--r\` for ripple)`);
 						}
 					}
 				}
@@ -212,7 +212,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--r\` for ripple; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
+					msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--r\` for ripple)`);
 				} else {
 					console.error(err);
 				}
@@ -223,7 +223,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
+					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho)`);
 				}
 
 				let score = rippleToBanchoScore(responseJson[0]);
@@ -278,7 +278,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {
-							msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
+							msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho)`);
 						} else {
 							console.error(err);
 						}
@@ -286,7 +286,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho)`);
 				} else {
 					console.error(err);
 				}
