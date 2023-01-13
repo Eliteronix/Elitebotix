@@ -262,30 +262,32 @@ module.exports = {
 					}
 				}
 
-				client.shard.broadcastEval(async (c, { message }) => {
-					let guildId = '727407178499096597';
-
-					// eslint-disable-next-line no-undef
-					if (process.env.SERVER === 'Dev') {
-						guildId = '800641468321759242';
-					}
-
-					const guild = await c.guilds.cache.get(guildId);
-					if (guild) {
-						let channelId = '1061942415864385536';
+				if (discordUser.osuName) {
+					client.shard.broadcastEval(async (c, { message }) => {
+						let guildId = '727407178499096597';
 
 						// eslint-disable-next-line no-undef
 						if (process.env.SERVER === 'Dev') {
-							channelId = '1061942304979566614';
+							guildId = '800641468321759242';
 						}
 
-						const channel = await guild.channels.cache.get(channelId);
+						const guild = await c.guilds.cache.get(guildId);
+						if (guild) {
+							let channelId = '1061942415864385536';
 
-						if (channel) {
-							channel.send(message);
+							// eslint-disable-next-line no-undef
+							if (process.env.SERVER === 'Dev') {
+								channelId = '1061942304979566614';
+							}
+
+							const channel = await guild.channels.cache.get(channelId);
+
+							if (channel) {
+								channel.send(message);
+							}
 						}
-					}
-				}, { context: { message: message } });
+					}, { context: { message: message } });
+				}
 
 				await discordUser.save();
 
