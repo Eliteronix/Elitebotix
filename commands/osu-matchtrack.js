@@ -454,6 +454,12 @@ async function getResultImage(event, users) {
 	fitTextOnLeftCanvas(ctx, `${event.game.beatmap.beatmapset.title} [${event.game.beatmap.version}]`, 30, 'comfortaa, sans-serif', 240, 940, 30);
 	fitTextOnLeftCanvas(ctx, `${event.game.beatmap.beatmapset.artist}`, 30, 'comfortaa, sans-serif', 280, 940, 30);
 
+	//Write team and scoring type
+	ctx.textAlign = 'right';
+	ctx.font = '30px comfortaa, sans-serif';
+	ctx.fillText(event.game.scoring_type, 970, 240);
+	ctx.fillText(event.game.team_type, 970, 280);
+
 	for (let i = 0; i < scores.length; i++) {
 		//Draw background rectangle
 		roundedRect(ctx, 25, 300 + i * 75, 950, 65, 10, '70', '57', '63', 0.75);
@@ -730,6 +736,12 @@ async function getPlayingImage(event) {
 	ctx.fillStyle = '#ffffff';
 	fitTextOnLeftCanvas(ctx, `${event.game.beatmap.beatmapset.title} [${event.game.beatmap.version}]`, 30, 'comfortaa, sans-serif', 240, 940, 30);
 	fitTextOnLeftCanvas(ctx, `${event.game.beatmap.beatmapset.artist}`, 30, 'comfortaa, sans-serif', 280, 940, 30);
+
+	//Write team and scoring type
+	ctx.textAlign = 'right';
+	ctx.font = '30px comfortaa, sans-serif';
+	ctx.fillText(event.game.scoring_type, 970, 240);
+	ctx.fillText(event.game.team_type, 970, 280);
 
 	let mods = event.game.mods;
 	for (let i = 0; i < mods.length; i++) {
