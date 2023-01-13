@@ -746,7 +746,7 @@ module.exports = {
 						await sentMessage.react('📊');
 					}
 				} catch (error) {
-					console.error(error);
+					// Nothing
 				}
 				return;
 			} else if (interaction.options._subcommand === 'rating-leaderboard') {
