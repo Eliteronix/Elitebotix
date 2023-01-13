@@ -5591,6 +5591,36 @@ async function saveOsuMultiScoresFunction(match) {
 				await DBProcessQueue.create({ task: 'guildTourneyFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${channelsToNotify[i].osuUserIds.join(',')};${channelsToNotify[i].trackMatch}`, date: now });
 			}
 		}
+
+		//Manage osu-track follows for guilds for acronyms
+		if (newMatchPlayers.length && existingMatchPlayers.length === 0) {
+			//Get all follows for the players in the match
+			let guildTrackers = await DBOsuGuildTrackers.findAll({
+				where: {
+					acronym: match.name.replace(/:.*/gm, ''),
+					matchActivity: true
+				}
+			});
+
+
+			//Collect the follows
+			let channelsToNotify = [];
+			let channelsToNotifyIds = [];
+
+			for (let i = 0; i < guildTrackers.length; i++) {
+				if (channelsToNotifyIds.indexOf(guildTrackers[i].channelId) === -1) {
+					channelsToNotifyIds.push(guildTrackers[i].channelId);
+					let trackMatch = guildTrackers[i].matchActivityAutoTrack;
+					channelsToNotify.push({ guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, trackMatch: trackMatch });
+				}
+			}
+
+			//Create a notification for each channel
+			let now = new Date();
+			for (let i = 0; i < channelsToNotify.length; i++) {
+				await DBProcessQueue.create({ task: 'guildTourneyAcronymFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${match.name.replace(/:.*/gm, '')};${channelsToNotify[i].trackMatch}`, date: now });
+			}
+		}
 	}
 }
 
