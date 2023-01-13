@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, fitTextOnLeftCanvas, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap } = require('../utils');
+const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap } = require('../utils');
 const { Permissions } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
@@ -464,12 +464,12 @@ async function getResultImage(event, users) {
 
 	//Write Title and Artist
 	ctx.fillStyle = '#ffffff';
-	fitTextOnLeftCanvas(ctx, `${event.game.beatmap.beatmapset.title} [${event.game.beatmap.version}]`, 30, 'comfortaa, sans-serif', 240, 940, 30);
-	fitTextOnLeftCanvas(ctx, `${event.game.beatmap.beatmapset.artist}`, 30, 'comfortaa, sans-serif', 280, 940, 30);
+	ctx.font = '30px comfortaa, sans-serif';
+	ctx.fillText(`${event.game.beatmap.beatmapset.title} [${event.game.beatmap.version}]`, 30, 240, 900 - ctx.measureText(event.game.scoring_type).width);
+	ctx.fillText(`${event.game.beatmap.beatmapset.artist}`, 30, 280, 900 - ctx.measureText(event.game.scoring_type).width);
 
 	//Write team and scoring type
 	ctx.textAlign = 'right';
-	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillText(event.game.scoring_type, 970, 240);
 	ctx.fillText(event.game.team_type, 970, 280);
 
@@ -747,12 +747,12 @@ async function getPlayingImage(event) {
 
 	//Write Title and Artist
 	ctx.fillStyle = '#ffffff';
-	fitTextOnLeftCanvas(ctx, `${event.game.beatmap.beatmapset.title} [${event.game.beatmap.version}]`, 30, 'comfortaa, sans-serif', 240, 940, 30);
-	fitTextOnLeftCanvas(ctx, `${event.game.beatmap.beatmapset.artist}`, 30, 'comfortaa, sans-serif', 280, 940, 30);
+	ctx.font = '30px comfortaa, sans-serif';
+	ctx.fillText(`${event.game.beatmap.beatmapset.title} [${event.game.beatmap.version}]`, 30, 240, 900 - ctx.measureText(event.game.scoring_type).width);
+	ctx.fillText(`${event.game.beatmap.beatmapset.artist}`, 30, 280, 900 - ctx.measureText(event.game.scoring_type).width);
 
 	//Write team and scoring type
 	ctx.textAlign = 'right';
-	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillText(event.game.scoring_type, 970, 240);
 	ctx.fillText(event.game.team_type, 970, 280);
 
