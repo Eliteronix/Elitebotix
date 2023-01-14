@@ -466,7 +466,7 @@ async function getResultImage(event, users) {
 	ctx.fillStyle = '#ffffff';
 	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillText(`${event.game.beatmap.beatmapset.title} [${event.game.beatmap.version}]`, 30, 240, 900 - ctx.measureText(event.game.scoring_type).width);
-	ctx.fillText(`${event.game.beatmap.beatmapset.artist}`, 30, 280, 900 - ctx.measureText(event.game.scoring_type).width);
+	ctx.fillText(`${event.game.beatmap.beatmapset.artist}`, 30, 280, 900 - ctx.measureText(event.game.team_type).width);
 
 	//Write team and scoring type
 	ctx.textAlign = 'right';
@@ -749,7 +749,7 @@ async function getPlayingImage(event) {
 	ctx.fillStyle = '#ffffff';
 	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillText(`${event.game.beatmap.beatmapset.title} [${event.game.beatmap.version}]`, 30, 240, 900 - ctx.measureText(event.game.scoring_type).width);
-	ctx.fillText(`${event.game.beatmap.beatmapset.artist}`, 30, 280, 900 - ctx.measureText(event.game.scoring_type).width);
+	ctx.fillText(`${event.game.beatmap.beatmapset.artist}`, 30, 280, 900 - ctx.measureText(event.game.team_type).width);
 
 	//Write team and scoring type
 	ctx.textAlign = 'right';
