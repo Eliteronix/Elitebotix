@@ -980,7 +980,14 @@ module.exports = {
 		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers twitchConnect');
 		let twitchSyncUsers = await DBDiscordUsers.findAll({
 			where: {
-				twitchOsuMapSync: true
+				[Op.or]: [
+					{
+						twitchOsuMatchCommand: true
+					},
+					{
+						twitchOsuMapSync: true
+					},
+				],
 			}
 		});
 
@@ -1018,7 +1025,43 @@ module.exports = {
 		async function onMessageHandler(target, context, msg, self) {
 			if (self) { return; } // Ignore messages from the bot
 
-			if (msg.startsWith('!')) { return; } // Ignore messages starting with !
+			if (msg === '!mp') {
+				logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers twitchConnect 2');
+				let discordUser = await DBDiscordUsers.findOne({
+					where: {
+						twitchName: target.substring(1),
+						twitchOsuMatchCommand: true,
+						osuUserId: {
+							[Op.ne]: null
+						}
+					}
+				});
+
+				if (!discordUser) {
+					return;
+				}
+
+				let lastMultiScore = await DBOsuMultiScores.findOne({
+					where: {
+						osuUserId: discordUser.osuUserId
+					},
+					order: [
+						['gameStartDate', 'DESC']
+					]
+				});
+
+				if (!lastMultiScore) {
+					return;
+				}
+
+				if (lastMultiScore.matchEndDate) {
+					return twitchClient.say(target.substring(1), `Last match with ${discordUser.osuName}: https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
+				}
+
+				return twitchClient.say(target.substring(1), `Current match with ${discordUser.osuName}: https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
+			}
+
+			if (msg.startsWith('!')) { return; } // Ignore other messages starting with !
 
 			const longRegex = /https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm;
 			const shortRegex = /https?:\/\/osu\.ppy\.sh\/b\/\d+/gm;

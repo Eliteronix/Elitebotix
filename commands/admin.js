@@ -4990,6 +4990,26 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'twitch',
+			// 		description: 'Allows control of the twitch integration',
+			// 		dm_permission: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'togglemp',
+			// 				'description': 'Toggle the !mp command',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'togglemapsync',
+			// 				'description': 'Toggle the twitch to osu! map sync',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 		]
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'user-profile',
 			// 		description: 'Sends an info card about the specified user',
 			// 		dm_permission: true,
@@ -10186,6 +10206,26 @@ module.exports = {
 									'required': false
 								},
 							]
+						},
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'twitch',
+					description: 'Allows control of the twitch integration',
+					dm_permission: true,
+					options: [
+						{
+							'name': 'togglemp',
+							'description': 'Toggle the !mp command',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'togglemapsync',
+							'description': 'Toggle the twitch to osu! map sync',
+							'type': 1, // 1 is type SUB_COMMAND
 						},
 					]
 				}
