@@ -78,7 +78,7 @@ module.exports = {
 						osuUser.osuName = user.name;
 					} catch (error) {
 						console.error(error);
-						await interaction.followUp({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`, ephemeral: true });
+						await interaction.followUp({ content: `Could not find user \`${username.replace(/`/g, '')}\`.`, ephemeral: true });
 						continue;
 					}
 				}
