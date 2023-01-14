@@ -997,8 +997,6 @@ module.exports = {
 			twitchChannels.push(twitchSyncUsers[i].twitchName);
 		}
 
-		console.log(twitchChannels);
-
 		//Require twitch irc module
 		const tmi = require('tmi.js');
 
