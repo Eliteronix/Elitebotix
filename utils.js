@@ -1080,7 +1080,7 @@ module.exports = {
 				matchID = matchID[0].replace(/.*\//gm, '');
 
 				// eslint-disable-next-line no-undef
-				const osuApi = new osu.Api(APItoken, {
+				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
 					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
