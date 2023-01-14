@@ -165,13 +165,13 @@ module.exports = {
 		const allUsers = [...team1, ...team2, ...team3, ...team4, ...team5];
 		const uniqueUsers = [...new Set(allUsers)];
 
-		// if (allUsers.length !== uniqueUsers.length) {
-		// 	return await interaction.editReply('You can\'t play a bingo match with the same user twice');
-		// }
+		if (allUsers.length !== uniqueUsers.length) {
+			return await interaction.editReply('You can\'t play a bingo match with the same user twice');
+		}
 
-		// if (allUsers.length < 2) {
-		// 	return await interaction.editReply('You can\'t play a bingo match alone');
-		// }
+		if (allUsers.length < 2) {
+			return await interaction.editReply('You can\'t play a bingo match alone');
+		}
 
 		let everyUser = [];
 		for (let i = 0; i < allUsers.length; i++) {
@@ -286,7 +286,7 @@ module.exports = {
 						[Op.lte]: higherDrainTime,
 					}
 				},
-				// usedOften: true,
+				usedOften: true,
 				notDownloadable: {
 					[Op.not]: true,
 				},
