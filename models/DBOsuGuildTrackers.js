@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
 		channelId: {
 			type: DataTypes.STRING,
 		},
-		acronym: { //TODO
+		acronym: {
 			type: DataTypes.STRING,
 		},
 		osuLeaderboard: {
