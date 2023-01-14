@@ -1055,10 +1055,10 @@ module.exports = {
 				}
 
 				if (lastMultiScore.matchEndDate) {
-					return twitchClient.say(target.substring(1), `Last match with ${discordUser.osuName}: https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
+					return twitchClient.say(target.substring(1), `Last match with ${discordUser.osuName}: ${lastMultiScore.matchName} | https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
 				}
 
-				return twitchClient.say(target.substring(1), `Current match with ${discordUser.osuName}: https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
+				return twitchClient.say(target.substring(1), `Current match with ${discordUser.osuName}: ${lastMultiScore.matchName} | https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
 			}
 
 			if (msg.startsWith('!')) { return; } // Ignore other messages starting with !
