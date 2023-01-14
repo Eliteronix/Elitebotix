@@ -58,20 +58,8 @@ module.exports = {
 							// Remove match from client
 							if (c.duels.indexOf(matchID) > -1) {
 								c.duels.splice(c.duels.indexOf(matchID), 1);
-
-								if (c.update === 1 && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches === 0) {
-
-									// eslint-disable-next-line no-undef
-									process.exit();
-								}
 							} else if (c.otherMatches.indexOf(matchID) > -1) {
 								c.otherMatches.splice(c.otherMatches.indexOf(matchID), 1);
-
-								if (c.update === 1 && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches === 0) {
-
-									// eslint-disable-next-line no-undef
-									process.exit();
-								}
 							}
 
 							let channel;
@@ -87,6 +75,12 @@ module.exports = {
 
 							if (channel) {
 								await channel.send(message);
+							}
+
+							if (c.update === 1 && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches === 0) {
+
+								// eslint-disable-next-line no-undef
+								process.exit();
 							}
 						}, { context: { message: `<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done`, matchID: parseInt(matchID) } });
 					}
