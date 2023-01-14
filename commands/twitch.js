@@ -50,7 +50,7 @@ module.exports = {
 				interaction.editReply('!mp is now disabled.');
 			} else {
 				discordUser.twitchOsuMatchCommand = true;
-				interaction.editReply('!mp is now enabled.');
+				interaction.editReply('!mp is now enabled. Be sure to mod or vip `Elitebotix` in your twitch channel.');
 				await interaction.client.shard.broadcastEval(async (c, { channelName }) => {
 					if (c.shardId === 0) {
 						c.twitchClient.join(channelName);
@@ -79,7 +79,7 @@ module.exports = {
 				interaction.editReply('Twitch-Mapsync is now disabled.');
 			} else {
 				discordUser.twitchOsuMapSync = true;
-				interaction.editReply('Twitch-Mapsync is now enabled.');
+				interaction.editReply('Twitch-Mapsync is now enabled. Be sure to mod or vip `Elitebotix` in your twitch channel.');
 				await interaction.client.shard.broadcastEval(async (c, { channelName }) => {
 					if (c.shardId === 0) {
 						c.twitchClient.join(channelName);
