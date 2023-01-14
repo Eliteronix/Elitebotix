@@ -1,5 +1,5 @@
 const { Permissions } = require('discord.js');
-const { DBProcessQueue, DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
 const { logDatabaseQueries } = require('../utils');
 
@@ -51,7 +51,11 @@ module.exports = {
 			} else {
 				discordUser.twitchOsuMatchCommand = true;
 				interaction.editReply('!mp is now enabled.');
-				await DBProcessQueue.create({ task: 'joinTwitchChannel', priority: 15, additions: discordUser.twitchName, date: new Date() });
+				await interaction.client.shard.broadcastEval(async (c, { channelName }) => {
+					if (c.shardId === 0) {
+						c.twitchClient.join(channelName);
+					}
+				}, { context: { channelName: discordUser.twitchName } });
 			}
 			discordUser.save();
 		} else if (interaction.options._subcommand === 'togglemapsync') {
@@ -76,7 +80,11 @@ module.exports = {
 			} else {
 				discordUser.twitchOsuMapSync = true;
 				interaction.editReply('Twitch-Mapsync is now enabled.');
-				await DBProcessQueue.create({ task: 'joinTwitchChannel', priority: 15, additions: discordUser.twitchName, date: new Date() });
+				await interaction.client.shard.broadcastEval(async (c, { channelName }) => {
+					if (c.shardId === 0) {
+						c.twitchClient.join(channelName);
+					}
+				}, { context: { channelName: discordUser.twitchName } });
 			}
 			discordUser.save();
 		}

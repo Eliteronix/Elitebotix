@@ -1,7 +1,7 @@
 const { logDatabaseQueries } = require('../utils');
 const { DBActivityRoles } = require('../dbObjects');
 module.exports = {
-	async execute(client, bancho, twitchClient, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		// console.log('updateActivityRoles');
 		logDatabaseQueries(2, 'processQueueTasks/updateActivityRoles.js DBActivityRoles');
 		const activityRoles = await DBActivityRoles.findAll({

@@ -8,7 +8,7 @@ const { Permissions } = require('discord.js');
 const { DBElitiriCupSignUp, DBTickets } = require('./dbObjects');
 const { developers, currentElitiriCup } = require('./config.json');
 
-module.exports = async function (msg, bancho, twitchClient) {
+module.exports = async function (msg, bancho) {
 	//check if the message wasn't sent by the bot itself or another bot
 	if (!(msg.author.bot) || msg.channel.id === '892873577479692358') {
 		//Create a collection for the commands
@@ -231,7 +231,7 @@ module.exports = async function (msg, bancho, twitchClient) {
 		setTimeout(() => timestamps.delete(msg.author.id), cooldownAmount);
 
 		try {
-			let additionalObjects = [msg.client, bancho, twitchClient];
+			let additionalObjects = [msg.client, bancho];
 			command.execute(msg, args, null, additionalObjects);
 		} catch (error) {
 			console.error(error);

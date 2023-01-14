@@ -10211,7 +10211,7 @@ module.exports = {
 				}
 			});
 
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'twitch',
 					description: 'Allows control of the twitch integration',

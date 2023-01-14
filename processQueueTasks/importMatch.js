@@ -2,7 +2,7 @@ const { saveOsuMultiScores } = require('../utils');
 const osu = require('node-osu');
 
 module.exports = {
-	async execute(client, bancho, twitchClient, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		// console.log('importMatch');
 		let args = processQueueEntry.additions.split(';');
 

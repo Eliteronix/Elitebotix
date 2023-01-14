@@ -1,5 +1,5 @@
 module.exports = {
-	async execute(client, bancho, twitchClient, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		// console.log('tourneyLobbyRemind');
 		let args = processQueueEntry.additions.split(';');
 

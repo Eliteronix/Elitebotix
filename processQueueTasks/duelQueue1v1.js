@@ -2,7 +2,7 @@ const { DBProcessQueue, DBDiscordUsers } = require('../dbObjects');
 const { createDuelMatch, updateQueueChannels } = require('../utils');
 
 module.exports = {
-	async execute(client, bancho, twitchClient, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		// console.log('duelQueue1v1');
 		let args = processQueueEntry.additions.split(';');
 

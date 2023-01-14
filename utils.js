@@ -410,7 +410,7 @@ module.exports = {
 
 		return userDisplayName;
 	},
-	executeNextProcessQueueTask: async function (client, bancho, twitchClient) {
+	executeNextProcessQueueTask: async function (client, bancho) {
 		let now = new Date();
 		logDatabaseQueriesFunction(1, 'utils.js DBProcessQueue nextTask');
 		let nextTasks = await DBProcessQueue.findAll({
@@ -431,7 +431,7 @@ module.exports = {
 				nextTasks[i].beingExecuted = true;
 				await nextTasks[i].save();
 
-				executeFoundTask(client, bancho, twitchClient, nextTasks[i]);
+				executeFoundTask(client, bancho, nextTasks[i]);
 				break;
 			}
 		}
@@ -996,6 +996,8 @@ module.exports = {
 		for (let i = 0; i < twitchSyncUsers.length; i++) {
 			twitchChannels.push(twitchSyncUsers[i].twitchName);
 		}
+
+		console.log(twitchChannels);
 
 		//Require twitch irc module
 		const tmi = require('tmi.js');
@@ -4921,12 +4923,12 @@ function calculateGradeFunction(mode, counts, modBits) {
 	}
 }
 
-async function executeFoundTask(client, bancho, twitchClient, nextTask) {
+async function executeFoundTask(client, bancho, nextTask) {
 	try {
 		if (nextTask && !wrongClusterFunction(client, nextTask.id)) {
 			const task = require(`./processQueueTasks/${nextTask.task}.js`);
 
-			await task.execute(client, bancho, twitchClient, nextTask);
+			await task.execute(client, bancho, nextTask);
 		}
 	} catch (e) {
 		console.error('Error executing process queue task', e);

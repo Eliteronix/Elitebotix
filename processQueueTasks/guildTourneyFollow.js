@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuGuildTrackers } = require('../dbObjects');
 const osu = require('node-osu');
 
 module.exports = {
-	async execute(client, bancho, twitchClient, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		// console.log('tourneyFollow', client.shardId);
 		let args = processQueueEntry.additions.split(';');
 

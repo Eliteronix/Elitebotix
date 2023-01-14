@@ -2,7 +2,7 @@ const { DBTickets } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
-	async execute(client, bancho, twitchClient, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		// console.log('closeTicket');
 		logDatabaseQueries(2, 'processQueueTasks/closeTicket.js DBTickets');
 		const ticket = await DBTickets.findOne({

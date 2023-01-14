@@ -1,7 +1,7 @@
 const { DBOsuGuildTrackers } = require('../dbObjects');
 
 module.exports = {
-	async execute(client, bancho, twitchClient, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		// console.log('tourneyFollow', client.shardId);
 		let args = processQueueEntry.additions.split(';');
 

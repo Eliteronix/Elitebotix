@@ -1,5 +1,5 @@
 module.exports = {
-	async execute(client, bancho, twitchClient, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		// console.log('nameSync');
 
 		client.shard.broadcastEval(async (c, { guildId, processQueueEntryId, setting }) => {

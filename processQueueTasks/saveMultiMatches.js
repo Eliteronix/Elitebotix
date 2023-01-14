@@ -5,7 +5,7 @@ const { saveOsuMultiScores, logDatabaseQueries } = require('../utils');
 //Archiving started around 40000000
 
 module.exports = {
-	async execute(client, bancho, twitchClient, processQueueEntry) {
+	async execute(client, bancho, processQueueEntry) {
 		// console.log('saveMultiMatches');
 		let args = processQueueEntry.additions.split(';');
 
