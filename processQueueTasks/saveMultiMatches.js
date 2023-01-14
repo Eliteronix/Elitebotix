@@ -1,6 +1,7 @@
 const osu = require('node-osu');
 const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { saveOsuMultiScores, logDatabaseQueries } = require('../utils');
+const { Op } = require('sequelize');
 
 //Archiving started around 40000000
 
@@ -186,7 +187,14 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 	let incompleteMatchScore = await DBOsuMultiScores.findOne({
 		where: {
 			tourneyMatch: true,
-			warmup: null
+			[Op.or]: [
+				{
+					warmup: null
+				},
+				{
+					matchEndDate: null
+				}
+			],
 		},
 		order: [
 			['updatedAt', 'ASC']
