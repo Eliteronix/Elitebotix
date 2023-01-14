@@ -5481,7 +5481,7 @@ async function saveOsuMultiScoresFunction(match) {
 							}
 						}
 					}
-				} else if (existingScore.warmup === null) {
+				} else if (existingScore.warmup === null || existingScore.matchEndDate === null) {
 					if (!existingMatchPlayers.includes(match.games[gameIndex].scores[scoreIndex].userId)) {
 						existingMatchPlayers.push(match.games[gameIndex].scores[scoreIndex].userId);
 					}
