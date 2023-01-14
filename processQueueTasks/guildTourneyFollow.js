@@ -42,7 +42,7 @@ module.exports = {
 
 				const channel = await guild.channels.cache.get(channelId);
 
-				if (channel) {
+				if (!channel) {
 					return;
 				}
 
