@@ -436,20 +436,25 @@ async function refreshMessage(message, mappool, lastRefresh) {
 			}
 
 			// Draw a border around the map
-			if (mappool[i * 5 + j].team) {
-				if (mappool[i * 5 + j].team === 'Team 1') {
-					ctx.strokeStyle = '#FF0000';
-				} else if (mappool[i * 5 + j].team === 'Team 2') {
-					ctx.strokeStyle = '#0000FF';
-				} else if (mappool[i * 5 + j].team === 'Team 3') {
-					ctx.strokeStyle = '#00FF00';
-				} else if (mappool[i * 5 + j].team === 'Team 4') {
-					ctx.strokeStyle = '#FFFF00';
-				} else if (mappool[i * 5 + j].team === 'Team 5') {
-					ctx.strokeStyle = '#FF00FF';
+			try {
+				if (mappool[i * 5 + j].team) {
+					if (mappool[i * 5 + j].team === 'Team 1') {
+						ctx.strokeStyle = '#FF0000';
+					} else if (mappool[i * 5 + j].team === 'Team 2') {
+						ctx.strokeStyle = '#0000FF';
+					} else if (mappool[i * 5 + j].team === 'Team 3') {
+						ctx.strokeStyle = '#00FF00';
+					} else if (mappool[i * 5 + j].team === 'Team 4') {
+						ctx.strokeStyle = '#FFFF00';
+					} else if (mappool[i * 5 + j].team === 'Team 5') {
+						ctx.strokeStyle = '#FF00FF';
+					}
+					ctx.lineWidth = 30;
+					ctx.strokeRect(20 + (5 + 250) * j, 20 + (5 + 250) * i, 220, 220);
 				}
-				ctx.lineWidth = 30;
-				ctx.strokeRect(20 + (5 + 250) * j, 20 + (5 + 250) * i, 220, 220);
+			} catch (e) {
+				console.log(i, j, mappool);
+				throw e;
 			}
 		}
 	}
