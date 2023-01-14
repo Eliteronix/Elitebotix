@@ -1079,7 +1079,21 @@ module.exports = {
 
 				matchID = matchID[0].replace(/.*\//gm, '');
 
-				await saveOsuMultiScoresFunction(matchID);
+				// eslint-disable-next-line no-undef
+				const osuApi = new osu.Api(APItoken, {
+					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+				});
+
+				await osuApi.getMatch({ mp: matchID })
+					.then(async (match) => {
+						await saveOsuMultiScoresFunction(match);
+					})
+					.catch(async () => {
+						//Nothing
+					});
 
 				DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: new Date() });
 			}
