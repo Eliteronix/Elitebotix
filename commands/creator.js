@@ -2,6 +2,7 @@
 const { MessageAttachment, MessageEmbed } = require('discord.js');
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'creator',
@@ -20,7 +21,15 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		//TODO: deferReply
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
+		}
+
 		const eliteronixUser = await additionalObjects[0].users.fetch('138273136285057025');
 		const roddyUser = await additionalObjects[0].users.fetch('212511522407055360');
 
@@ -64,6 +73,6 @@ module.exports = {
 				{ name: '\u200B', value: '\u200B', inline: true })
 			.setTimestamp();
 
-		return interaction.reply({ embeds: [creatorInfoEmbed], files: [file] });
+		return interaction.editReply({ embeds: [creatorInfoEmbed], files: [file] });
 	},
 };
