@@ -158,12 +158,21 @@ module.exports = {
 							if (existingScore) {
 								existingScore.playedRounds += 1;
 								existingScore.score += 1 / parseInt(middleScore) * parseInt(gameScores[j].score);
+
+								if (j === 0) {
+									existingScore.wins += 1;
+								}
 							} else {
 								let newScore = {
 									userId: gameScores[j].userId,
 									playedRounds: 1,
-									score: 1 / parseInt(middleScore) * parseInt(gameScores[j].score)
+									score: 1 / parseInt(middleScore) * parseInt(gameScores[j].score),
+									wins: 0
 								};
+
+								if (j === 0) {
+									newScore.wins = 1;
+								}
 
 								playerMatchResults.push(newScore);
 							}
@@ -234,7 +243,7 @@ module.exports = {
 
 					let dataset = {
 						name: playerName,
-						value: `Value: ${Math.round(playerMatchResults[i].score * 100) / 100} ${valueType} over ${playerMatchResults[i].playedRounds} played rounds`,
+						value: `Value: ${Math.round(playerMatchResults[i].score * 100) / 100} ${valueType} over ${playerMatchResults[i].playedRounds} played rounds (${playerMatchResults[i].wins}x #1})`,
 					};
 
 					leaderboardData.push(dataset);
