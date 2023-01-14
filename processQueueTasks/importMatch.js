@@ -1,5 +1,6 @@
 const { saveOsuMultiScores } = require('../utils');
 const osu = require('node-osu');
+const { DBOsuMultiScores } = require('../dbObjects');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -71,8 +72,23 @@ module.exports = {
 
 				//Match has not been completed yet / 6 hours didn't pass
 				await saveOsuMultiScores(match);
+
+				let playedRound = DBOsuMultiScores.findOne({
+					where: {
+						matchId: matchId,
+					}
+				});
+
+				if (playedRound) {
+					let date = new Date();
+					date.setUTCMinutes(date.getUTCMinutes() + 5);
+					processQueueEntry.date = date;
+					processQueueEntry.beingExecuted = false;
+					return await processQueueEntry.save();
+				}
+
 				let date = new Date();
-				date.setUTCMinutes(date.getUTCMinutes() + 5);
+				date.setUTCMinutes(date.getUTCMinutes() + 1);
 				processQueueEntry.date = date;
 				processQueueEntry.beingExecuted = false;
 				return await processQueueEntry.save();
