@@ -1063,6 +1063,27 @@ module.exports = {
 
 			if (msg.startsWith('!')) { return; } // Ignore other messages starting with !
 
+			if (msg.includes('https://osu.ppy.sh/community/matches/') || msg.includes('https://osu.ppy.sh/mp/')) {
+				// Get the match ID
+				let matchIDRegex = /https:\/\/osu\.ppy\.sh\/community\/matches\/(\d+)/gm;
+				let matchID = matchIDRegex.exec(msg);
+
+				if (!matchID) {
+					matchIDRegex = /https:\/\/osu\.ppy\.sh\/mp\/(\d+)/gm;
+					matchID = matchIDRegex.exec(msg);
+				}
+
+				if (!matchID) {
+					return;
+				}
+
+				matchID = matchID[0].replace(/.*\//gm, '');
+
+				await saveOsuMultiScoresFunction(matchID);
+
+				DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: new Date() });
+			}
+
 			const longRegex = /https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm;
 			const shortRegex = /https?:\/\/osu\.ppy\.sh\/b\/\d+/gm;
 			const longMatches = longRegex.exec(msg);
