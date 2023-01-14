@@ -2,6 +2,13 @@
 console.log('Syncing databases...');
 const Sequelize = require('sequelize');
 
+const fs = require('fs');
+
+//Check if the maps folder exists and create it if necessary
+if (!fs.existsSync('./databases')) {
+	fs.mkdirSync('./databases');
+}
+
 const guilds = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
