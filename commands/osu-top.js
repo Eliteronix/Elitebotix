@@ -26,7 +26,6 @@ module.exports = {
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		let csv = false;
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
@@ -205,7 +204,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				elements = await drawTitle(elements, server, mode, sorting, order);
 
-				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order);
+				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order, tracking);
 
 				let scores = elements[3];
 
@@ -356,7 +355,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				elements = await drawTitle(elements, server, mode, sorting, order);
 
-				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order);
+				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order, tracking);
 
 				let scores = elements[3];
 
@@ -493,7 +492,7 @@ async function drawFooter(input) {
 	return output;
 }
 
-async function drawTopPlays(input, server, mode, msg, sorting, showLimit, processingMessage, order) {
+async function drawTopPlays(input, server, mode, msg, sorting, showLimit, processingMessage, order, tracking) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -862,6 +861,25 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		ctx.textAlign = 'right';
 		ctx.fillText(combo, (canvas.width / 28) * 23.4, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 		ctx.fillText(Math.round(accuracy * 100) / 100 + '%', (canvas.width / 28) * 24.75, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+
+		if (tracking) {
+			// Write hits
+			ctx.font = 'bold 10px comfortaa, sans-serif';
+			ctx.fillStyle = '#FFCC22';
+			ctx.textAlign = 'right';
+
+			let hits = `${sortedScores[i].counts['300']}/${sortedScores[i].counts['100']}/${sortedScores[i].counts['50']}/${sortedScores[i].counts.miss}`;
+			if (mode === 1) {
+				hits = `${sortedScores[i].counts['300']}/${sortedScores[i].counts['100']}/${sortedScores[i].counts.miss}`;
+			} else if (mode === 2) {
+				hits = `${sortedScores[i].counts['300']}/${sortedScores[i].counts['100']}/${sortedScores[i].counts['katu']}/${sortedScores[i].counts.miss}`;
+			} else if (mode === 3) {
+				hits = `${sortedScores[i].counts['geki']}/${sortedScores[i].counts['300']}/${sortedScores[i].counts['katu']}/${sortedScores[i].counts['100']}/${sortedScores[i].counts['50']}/${sortedScores[i].counts.miss}`;
+			}
+
+			ctx.fillText(hits, (canvas.width / 28) * 23.4 - ctx.measureText(combo).width - 10, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+		}
+
 
 		const mods = getMods(sortedScores[i].raw_mods);
 
