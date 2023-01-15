@@ -30,19 +30,6 @@ module.exports = async function (client, bancho, interaction) {
 	let command = client.commands.get(interaction.commandName)
 		|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(interaction.commandName));
 
-	//Check if the command can't be used outside of DMs
-	if (command.guildOnly && !interaction.guildId) {
-		return interaction.reply({ content: 'I can\'t execute that command inside DMs!', ephemeral: true });
-	}
-
-	//Check permissions of the user
-	if (command.permissions && interaction.guildId) {
-		const authorPerms = interaction.channel.permissionsFor(interaction.member);
-		if (!authorPerms || !authorPerms.has(command.permissions)) {
-			return interaction.reply({ content: `You need the ${command.permissionsTranslated} permission to do this!`, ephemeral: true });
-		}
-	}
-
 	//Check permissions of the bot
 	if (interaction.guildId) {
 		const botPermissions = interaction.channel.permissionsFor(await interaction.guild.members.fetch(client.user.id));
@@ -91,13 +78,5 @@ module.exports = async function (client, bancho, interaction) {
 	//Automatically delete the timestamp after the cooldown
 	setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
 
-	try {
-		let additionalObjects = [client, bancho];
-		command.execute(null, [], interaction, additionalObjects);
-	} catch (error) {
-		console.error(error);
-		const eliteronixUser = await client.users.cache.find(user => user.id === '138273136285057025');
-		interaction.reply('There was an error trying to execute that command. The developer has been alerted.');
-		eliteronixUser.send(`There was an error trying to execute a command.\n\nMessage by ${interaction.user.username}#${interaction.user.discriminator}: \`${interaction.commandName}\`\n\n${error}`);
-	}
+	command.execute(null, [], interaction, [client, bancho]);
 };
