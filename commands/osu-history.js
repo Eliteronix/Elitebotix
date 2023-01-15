@@ -6,11 +6,12 @@ const { Op } = require('sequelize');
 const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague } = require('../utils');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
 module.exports = {
-	name: 'osu-wrapped',
+	name: 'osu-history',
 	// aliases: ['developer', 'donate', 'support'],
-	description: 'Sums up the year in osu! for a user',
+	description: 'Summarizes the whole osu! history for a user',
 	// usage: '<add/list/remove> <username>',
 	// permissions: Permissions.FLAGS.MANAGE_GUILD,
 	// permissionsTranslated: 'Manage Server',
@@ -98,22 +99,10 @@ module.exports = {
 		}
 
 		// Gather all the data
-		let year = new Date().getFullYear() - 1;
-
-		if (interaction.options.getInteger('year')) {
-			year = interaction.options.getInteger('year');
-		}
-
 		let multiMatches = await DBOsuMultiScores.findAll({
 			attributes: ['matchId'],
 			where: {
 				osuUserId: osuUser.osuUserId,
-				gameEndDate: {
-					[Op.and]: {
-						[Op.gte]: new Date(`${year}-01-01`),
-						[Op.lte]: new Date(`${year}-12-31 23:59:59.999 UTC`),
-					}
-				},
 				tourneyMatch: true,
 			},
 			group: ['matchId'],
@@ -122,7 +111,7 @@ module.exports = {
 		multiMatches = multiMatches.map(match => match.matchId);
 
 		if (multiMatches.length === 0) {
-			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches in ${year}.`);
+			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches.`);
 		}
 
 		let multiScores = await DBOsuMultiScores.findAll({
@@ -148,10 +137,17 @@ module.exports = {
 
 		let lastUpdate = new Date();
 
+		let matchesPlayed = [];
+
 		for (let i = 0; i < multiScores.length; i++) {
 			if (new Date() - lastUpdate > 15000) {
 				interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
 				lastUpdate = new Date();
+			}
+
+			let date = new Date(multiScores[i].matchStartDate);
+			if (!matchesPlayed.includes(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiScores[i].matchId}`)) {
+				matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiScores[i].matchId}`);
 			}
 
 			if (!matchesChecked.includes(multiScores[i].matchId)) {
@@ -280,9 +276,7 @@ module.exports = {
 		tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
 
 		// Get the user's duel ratings
-		let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: new Date(`${year}-12-31 23:59:59.999 UTC`) });
-
-		let oldDuelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: new Date(`${year - 1}-12-31 23:59:59.999 UTC`) });
+		let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client });
 
 		// Draw the image
 		const canvasWidth = 1000;
@@ -303,19 +297,13 @@ module.exports = {
 			}
 		}
 
-		let duelLeague = getOsuDuelLeague(duelRating.total);
-
-		let leagueImage = await Canvas.loadImage(`./other/borders/${duelLeague.imageName.replace(/_[1-3]/gm, '')}.png`);
-
-		ctx.drawImage(leagueImage, 0, 0, 1000, 500);
-
 		// Write the title of the player
 		ctx.font = '35px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
-		ctx.fillText(`${year} osu! wrapped for ${osuUser.osuName}`, 475, 40);
+		ctx.fillText(`osu! history for ${osuUser.osuName}`, 475, 40);
 
-		let lineLength = ctx.measureText(`${year} osu! wrapped for ${osuUser.osuName}`).width;
+		let lineLength = ctx.measureText(`osu! history for ${osuUser.osuName}`).width;
 
 		// Draw an underline
 		ctx.beginPath();
@@ -340,124 +328,14 @@ module.exports = {
 		ctx.font = '18px comfortaa, sans-serif';
 		ctx.fillText(`Won: ${gamesWon} / Lost: ${gamesLost}`, 75, 245);
 
-		if (isNaN(duelRating.total) || duelRating.total === null) {
-			duelRating.total = 0;
-		}
+		let duelLeague = getOsuDuelLeague(duelRating.total);
 
-		if (isNaN(oldDuelRating.total) || oldDuelRating.total === null) {
-			oldDuelRating.total = 0;
-		}
-
-		if (isNaN(duelRating.noMod) || duelRating.noMod === null) {
-			duelRating.noMod = 0;
-		}
-
-		if (isNaN(oldDuelRating.noMod) || oldDuelRating.noMod === null) {
-			oldDuelRating.noMod = 0;
-		}
-
-		if (isNaN(duelRating.hidden) || duelRating.hidden === null) {
-			duelRating.hidden = 0;
-		}
-
-		if (isNaN(oldDuelRating.hidden) || oldDuelRating.hidden === null) {
-			oldDuelRating.hidden = 0;
-		}
-
-		if (isNaN(duelRating.hardRock) || duelRating.hardRock === null) {
-			duelRating.hardRock = 0;
-		}
-
-		if (isNaN(oldDuelRating.hardRock) || oldDuelRating.hardRock === null) {
-			oldDuelRating.hardRock = 0;
-		}
-
-		if (isNaN(duelRating.doubleTime) || duelRating.doubleTime === null) {
-			duelRating.doubleTime = 0;
-		}
-
-		if (isNaN(oldDuelRating.doubleTime) || oldDuelRating.doubleTime === null) {
-			oldDuelRating.doubleTime = 0;
-		}
-
-		if (isNaN(duelRating.freeMod) || duelRating.freeMod === null) {
-			duelRating.freeMod = 0;
-		}
-
-		if (isNaN(oldDuelRating.freeMod) || oldDuelRating.freeMod === null) {
-			oldDuelRating.freeMod = 0;
-		}
+		let leagueText = duelLeague.name;
+		let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
 		ctx.font = '22px comfortaa, sans-serif';
-		ctx.textAlign = 'left';
-		ctx.fillText('Duel Rating changes:', 50, 300);
-		ctx.font = '18px comfortaa, sans-serif';
-		ctx.textAlign = 'right';
-		ctx.fillText('Total: ', 106, 325);
-		ctx.fillText(oldDuelRating.total.toFixed(3), 150, 325);
-		ctx.fillText('→', 172, 325);
-		ctx.fillText(duelRating.total.toFixed(3), 224, 325);
-		ctx.fillText('|', 236, 325);
-		if (duelRating.total - oldDuelRating.total < 0) {
-			ctx.fillText((duelRating.total - oldDuelRating.total).toFixed(3), 295, 325);
-		} else {
-			ctx.fillText(`+${(duelRating.total - oldDuelRating.total).toFixed(3)}`, 295, 325);
-		}
-
-		ctx.fillText('NM: ', 106, 350);
-		ctx.fillText(oldDuelRating.noMod.toFixed(3), 150, 350);
-		ctx.fillText('→', 172, 350);
-		ctx.fillText(duelRating.noMod.toFixed(3), 224, 350);
-		ctx.fillText('|', 236, 350);
-		if (duelRating.noMod - oldDuelRating.noMod < 0) {
-			ctx.fillText((duelRating.noMod - oldDuelRating.noMod).toFixed(3), 295, 350);
-		} else {
-			ctx.fillText(`+${(duelRating.noMod - oldDuelRating.noMod).toFixed(3)}`, 295, 350);
-		}
-
-		ctx.fillText('HD: ', 106, 375);
-		ctx.fillText(oldDuelRating.hidden.toFixed(3), 150, 375);
-		ctx.fillText('→', 172, 375);
-		ctx.fillText(duelRating.hidden.toFixed(3), 224, 375);
-		ctx.fillText('|', 236, 375);
-		if (duelRating.hidden - oldDuelRating.hidden < 0) {
-			ctx.fillText((duelRating.hidden - oldDuelRating.hidden).toFixed(3), 295, 375);
-		} else {
-			ctx.fillText(`+${(duelRating.hidden - oldDuelRating.hidden).toFixed(3)}`, 295, 375);
-		}
-
-		ctx.fillText('HR: ', 106, 400);
-		ctx.fillText(oldDuelRating.hardRock.toFixed(3), 150, 400);
-		ctx.fillText('→', 172, 400);
-		ctx.fillText(duelRating.hardRock.toFixed(3), 224, 400);
-		ctx.fillText('|', 236, 400);
-		if (duelRating.hardRock - oldDuelRating.hardRock < 0) {
-			ctx.fillText((duelRating.hardRock - oldDuelRating.hardRock).toFixed(3), 295, 400);
-		} else {
-			ctx.fillText(`+${(duelRating.hardRock - oldDuelRating.hardRock).toFixed(3)}`, 295, 400);
-		}
-
-		ctx.fillText('DT: ', 106, 425);
-		ctx.fillText(oldDuelRating.doubleTime.toFixed(3), 150, 425);
-		ctx.fillText('→', 172, 425);
-		ctx.fillText(duelRating.doubleTime.toFixed(3), 224, 425);
-		ctx.fillText('|', 236, 425);
-		if (duelRating.doubleTime - oldDuelRating.doubleTime < 0) {
-			ctx.fillText((duelRating.doubleTime - oldDuelRating.doubleTime).toFixed(3), 295, 425);
-		} else {
-			ctx.fillText(`+${(duelRating.doubleTime - oldDuelRating.doubleTime).toFixed(3)}`, 295, 425);
-		}
-
-		ctx.fillText('FM: ', 106, 450);
-		ctx.fillText(oldDuelRating.freeMod.toFixed(3), 150, 450);
-		ctx.fillText('→', 172, 450);
-		ctx.fillText(duelRating.freeMod.toFixed(3), 224, 450);
-		ctx.fillText('|', 236, 450);
-		if (duelRating.freeMod - oldDuelRating.freeMod < 0) {
-			ctx.fillText((duelRating.freeMod - oldDuelRating.freeMod).toFixed(3), 295, 450);
-		} else {
-			ctx.fillText(`+${(duelRating.freeMod - oldDuelRating.freeMod).toFixed(3)}`, 295, 450);
-		}
+		ctx.fillText(`League: ${leagueText}`, 50, 300);
+		ctx.drawImage(leagueImage, 75, 315, 150, 150);
 
 		ctx.textAlign = 'center';
 		ctx.font = '22px comfortaa, sans-serif';
@@ -516,7 +394,219 @@ module.exports = {
 		}
 
 		//Create as an attachment
-		const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-wrapped-${osuUser.osuUserId}-${year}.png`)];
+		const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-history-${osuUser.osuUserId}.png`)];
+
+		// Create rank history graph
+		let oldestScore = await DBOsuMultiScores.findOne({
+			where: {
+				osuUserId: osuUser.osuUserId,
+				tourneyMatch: true,
+				scoringType: 'Score v2',
+				mode: 'Standard',
+			},
+			order: [
+				['gameEndDate', 'ASC']
+			]
+		});
+
+		let duelRatings = [duelRating.total];
+
+		//Set the date to the end of the last month
+		let date = new Date();
+		date.setUTCDate(1);
+		date.setUTCDate(date.getUTCDate() - 1);
+		date.setUTCHours(23, 59, 59, 999);
+
+		let iterator = 0;
+		let startTime = date - oldestScore.gameEndDate;
+
+		while (date > oldestScore.gameEndDate) {
+			iterator++;
+			if (new Date() - lastUpdate > 15000) {
+				interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
+				lastUpdate = new Date();
+			}
+			let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: date });
+			duelRatings.push(duelRating.total);
+			date.setUTCDate(1);
+			date.setUTCDate(date.getUTCDate() - 1);
+		}
+
+		let labels = [];
+
+		for (let i = 0; i < duelRatings.length; i++) {
+			if (i === 0) {
+				labels.push('Today');
+			} else if (i === 1) {
+				labels.push(`${i} month ago`);
+			} else {
+				labels.push(`${i} months ago`);
+			}
+		}
+
+		labels.reverse();
+		duelRatings.reverse();
+
+		let masterHistory = [];
+		let diamondHistory = [];
+		let platinumHistory = [];
+		let goldHistory = [];
+		let silverHistory = [];
+		let bronzeHistory = [];
+
+		for (let i = 0; i < duelRatings.length; i++) {
+			if (i === 0 && !duelRatings[i]) {
+				duelRatings.shift();
+				labels.shift();
+				i--;
+				continue;
+			}
+
+			let masterRating = null;
+			let diamondRating = null;
+			let platinumRating = null;
+			let goldRating = null;
+			let silverRating = null;
+			let bronzeRating = null;
+
+			if (duelRatings[i] > 7) {
+				masterRating = duelRatings[i];
+			} else if (duelRatings[i] > 6.4) {
+				diamondRating = duelRatings[i];
+			} else if (duelRatings[i] > 5.8) {
+				platinumRating = duelRatings[i];
+			} else if (duelRatings[i] > 5.2) {
+				goldRating = duelRatings[i];
+			} else if (duelRatings[i] > 4.6) {
+				silverRating = duelRatings[i];
+			} else {
+				bronzeRating = duelRatings[i];
+			}
+
+			masterHistory.push(masterRating);
+			diamondHistory.push(diamondRating);
+			platinumHistory.push(platinumRating);
+			goldHistory.push(goldRating);
+			silverHistory.push(silverRating);
+			bronzeHistory.push(bronzeRating);
+		}
+
+		const width = 1500; //px
+		const height = 750; //px
+		const canvasRenderService = new ChartJSNodeCanvas({ width, height });
+
+		const data = {
+			labels: labels,
+			datasets: [
+				{
+					label: 'Master',
+					data: masterHistory,
+					borderColor: 'rgb(255, 174, 251)',
+					fill: true,
+					backgroundColor: 'rgba(255, 174, 251, 0.6)',
+					tension: 0.4
+				},
+				{
+					label: 'Diamond',
+					data: diamondHistory,
+					borderColor: 'rgb(73, 176, 255)',
+					fill: true,
+					backgroundColor: 'rgba(73, 176, 255, 0.6)',
+					tension: 0.4
+				},
+				{
+					label: 'Platinum',
+					data: platinumHistory,
+					borderColor: 'rgb(29, 217, 165)',
+					fill: true,
+					backgroundColor: 'rgba(29, 217, 165, 0.6)',
+					tension: 0.4
+				},
+				{
+					label: 'Gold',
+					data: goldHistory,
+					borderColor: 'rgb(255, 235, 71)',
+					fill: true,
+					backgroundColor: 'rgba(255, 235, 71, 0.6)',
+					tension: 0.4
+				},
+				{
+					label: 'Silver',
+					data: silverHistory,
+					borderColor: 'rgb(181, 181, 181)',
+					fill: true,
+					backgroundColor: 'rgba(181, 181, 181, 0.6)',
+					tension: 0.4
+				},
+				{
+					label: 'Bronze',
+					data: bronzeHistory,
+					borderColor: 'rgb(240, 121, 0)',
+					fill: true,
+					backgroundColor: 'rgba(240, 121, 0, 0.6)',
+					tension: 0.4
+				},
+			]
+		};
+
+		const configuration = {
+			type: 'line',
+			data: data,
+			options: {
+				responsive: true,
+				plugins: {
+					title: {
+						display: true,
+						text: 'Duel Rating History (Total)',
+						color: '#FFFFFF',
+					},
+					legend: {
+						labels: {
+							color: '#FFFFFF',
+						}
+					},
+				},
+				interaction: {
+					intersect: false,
+				},
+				scales: {
+					x: {
+						display: true,
+						title: {
+							display: true,
+							color: '#FFFFFF'
+						},
+						grid: {
+							color: '#8F8F8F'
+						},
+						ticks: {
+							color: '#FFFFFF',
+						},
+					},
+					y: {
+						display: true,
+						title: {
+							display: true,
+							text: 'Duel Rating',
+							color: '#FFFFFF'
+						},
+						grid: {
+							color: '#8F8F8F'
+						},
+						ticks: {
+							color: '#FFFFFF',
+						},
+					}
+				}
+			},
+		};
+
+		const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+		files.push(new Discord.MessageAttachment(imageBuffer, `duelRatingHistory-${osuUser.osuUserId}.png`));
+
+		// eslint-disable-next-line no-undef
+		matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${osuUser.osuUserId}.txt`);
+		files.push(matchesPlayed);
 
 		return interaction.editReply({ content: ' ', files: files });
 	},
