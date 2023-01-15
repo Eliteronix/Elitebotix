@@ -1,5 +1,6 @@
 const { Permissions } = require('discord.js');
 const { DBGuilds } = require('../dbObjects');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'birthday-admin',
@@ -18,7 +19,15 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		//TODO: deferReply
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
+		}
+
 		let guild = await DBGuilds.findOne({
 			where: {
 				guildId: interaction.guild.id,
