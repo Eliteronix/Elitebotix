@@ -1,5 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
-const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -13,119 +13,102 @@ module.exports = {
 	cooldown: 10,
 	tags: 'osu',
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		if (interaction) {
-			try {
-				await interaction.deferReply({ ephemeral: true });
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				return;
+		try {
+			await interaction.deferReply({ ephemeral: true });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
-
-			msg = await populateMsgFromInteraction(interaction);
-
-			args = [interaction.options._subcommand, interaction.options._hoistedOptions[0].value];
+			return;
 		}
 
-		//get discordUser from db
 		logDatabaseQueries(4, 'commands/osu-set.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
-			where: { userId: msg.author.id },
+			where: {
+				userId: interaction.user.id
+			},
 		});
 
-		if (args[0].toLowerCase() === 'server') {
-			if (args[1] && args[1].toLowerCase() === 'bancho') {
-				if (discordUser) {
-					discordUser.osuMainServer = 'bancho';
-					discordUser.save();
-				} else {
-					DBDiscordUsers.create({ userId: msg.author.id, osuMainServer: 'bancho' });
-				}
+		if (interaction.options._subcommand === 'mode') {
+			let mode = interaction.options.getString('mode');
 
-				if (msg.id) {
-					return msg.reply('Bancho has been set as your main server.');
-				}
-				return interaction.followUp({ content: 'Bancho has been set as your main server.', ephemeral: true });
-			} else if (args[1] && args[1].toLowerCase() === 'ripple') {
-				if (discordUser) {
-					discordUser.osuMainServer = 'ripple';
-					discordUser.save();
-				} else {
-					DBDiscordUsers.create({ userId: msg.author.id, osuMainServer: 'ripple' });
-				}
-
-				if (msg.id) {
-					return msg.reply('Ripple has been set as your main server.');
-				}
-				return interaction.followUp({ content: 'Ripple has been set as your main server.', ephemeral: true });
-			} else {
-				if (msg.id) {
-					return msg.reply('Please specify which server you want to set as your main server: `bancho`, `ripple`');
-				}
-				return interaction.followUp({ content: 'Please specify which server you want to set as your main server: `bancho`, `ripple`', ephemeral: true });
-			}
-		} else if (args[0].toLowerCase() === 'mode') {
-			if (args[1] && args[1].toLowerCase() === 'standard') {
+			if (mode === 'standard') {
 				if (discordUser) {
 					discordUser.osuMainMode = 0;
-					discordUser.save();
+					await discordUser.save();
 				} else {
-					DBDiscordUsers.create({ userId: msg.author.id, osuMainMode: 0 });
+					await DBDiscordUsers.create({
+						userId: interaction.user.id,
+						osuMainMode: 0
+					});
 				}
 
-				if (msg.id) {
-					return msg.reply('Standard has been set as your main mode.');
-				}
-				return interaction.followUp({ content: 'Standard has been set as your main mode.', ephemeral: true });
-			} else if (args[1] && args[1].toLowerCase() === 'taiko') {
+				return interaction.editReply('Standard has been set as your main mode.');
+			} else if (mode === 'taiko') {
 				if (discordUser) {
 					discordUser.osuMainMode = 1;
-					discordUser.save();
+					await discordUser.save();
 				} else {
-					DBDiscordUsers.create({ userId: msg.author.id, osuMainMode: 1 });
+					await DBDiscordUsers.create({
+						userId: interaction.user.id,
+						osuMainMode: 1
+					});
 				}
 
-				if (msg.id) {
-					return msg.reply('Taiko has been set as your main mode.');
-				}
-				return interaction.followUp({ content: 'Taiko has been set as your main mode.', ephemeral: true });
-			} else if (args[1] && args[1].toLowerCase() === 'catch') {
+				return interaction.editReply('Taiko has been set as your main mode.');
+			} else if (mode === 'catch') {
 				if (discordUser) {
 					discordUser.osuMainMode = 2;
-					discordUser.save();
+					await discordUser.save();
 				} else {
-					DBDiscordUsers.create({ userId: msg.author.id, osuMainMode: 2 });
+					await DBDiscordUsers.create({
+						userId: interaction.user.id,
+						osuMainMode: 2
+					});
 				}
 
-				if (msg.id) {
-					return msg.reply('Catch has been set as your main mode.');
-				}
-				return interaction.followUp({ content: 'Catch has been set as your main mode.', ephemeral: true });
-			} else if (args[1] && args[1].toLowerCase() === 'mania') {
+				return interaction.editReply('Catch has been set as your main mode.');
+			} else if (mode === 'mania') {
 				if (discordUser) {
 					discordUser.osuMainMode = 3;
-					discordUser.save();
+					await discordUser.save();
 				} else {
-					DBDiscordUsers.create({ userId: msg.author.id, osuMainMode: 3 });
+					await DBDiscordUsers.create({
+						userId: interaction.user.id,
+						osuMainMode: 3
+					});
 				}
 
-				if (msg.id) {
-					return msg.reply('Mania has been set as your main mode.');
-				}
-				return interaction.followUp({ content: 'Mania has been set as your main mode.', ephemeral: true });
-			} else {
-				if (msg.id) {
-					return msg.reply('Please specify which mode you want to set as your main mode: `standard`, `taiko`, `catch`, `mania`');
-				}
-				return interaction.followUp({ content: 'Please specify which mode you want to set as your main mode: `standard`, `taiko`, `catch`, `mania`', ephemeral: true });
+				return interaction.editReply('Mania has been set as your main mode.');
 			}
-		} else {
-			if (msg.id) {
-				return msg.reply('Please specify what you want to change: `mode`, `server`');
+		} else if (interaction.options._subcommand === 'server') {
+			let server = interaction.options.getString('server');
+
+			if (server === 'bancho') {
+				if (discordUser) {
+					discordUser.osuMainServer = 'bancho';
+					await discordUser.save();
+				} else {
+					await DBDiscordUsers.create({
+						userId: interaction.user.id,
+						osuMainServer: 'bancho'
+					});
+				}
+
+				return interaction.editReply('Bancho has been set as your main server.');
+			} else if (server === 'ripple') {
+				if (discordUser) {
+					discordUser.osuMainServer = 'ripple';
+					await discordUser.save();
+				} else {
+					await DBDiscordUsers.create({
+						userId: interaction.user.id,
+						osuMainServer: 'ripple'
+					});
+				}
+
+				return interaction.editReply('Ripple has been set as your main server.');
 			}
-			return interaction.followUp({ content: 'Please specify what you want to change: `mode`, `server`', ephemeral: true });
 		}
 	},
 };
