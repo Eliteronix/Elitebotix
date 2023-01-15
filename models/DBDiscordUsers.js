@@ -206,7 +206,7 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
-		twitchOsuMatchCommand: { //TODO
+		twitchOsuMatchCommand: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
