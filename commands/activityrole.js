@@ -1,6 +1,7 @@
 const { DBActivityRoles, DBProcessQueue } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'activityrole',
@@ -18,140 +19,92 @@ module.exports = {
 	tags: 'server-admin',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			args = [interaction.options._subcommand];
-
-			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-				if (interaction.options._hoistedOptions[i].name === 'role') {
-					args.push(`<@&${interaction.options._hoistedOptions[i].value}>`);
-				} else if (interaction.options._hoistedOptions[i].name === 'rank') {
-					args.push(`top${interaction.options._hoistedOptions[i].value}`);
-				} else if (interaction.options._hoistedOptions[i].name === 'percentage') {
-					args.push(`top${interaction.options._hoistedOptions[i].value}%`);
-				} else if (interaction.options._hoistedOptions[i].name === 'points') {
-					args.push(`${interaction.options._hoistedOptions[i].value}points`);
-				}
+		try {
+			await interaction.deferReply({ ephemeral: true });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
+			return;
 		}
 
-		//Check the first argument
-		if (args[0] === 'add') {
-			//Check if any roles were memtioned
-			if (msg.mentions.roles.first()) {
-				//Remove <@& > and get roleId
-				const activityRoleId = args[1].replace('<@&', '').replace('>', '');
-				//get role object with id
-				let activityRoleName = msg.guild.roles.cache.get(args[1].replace('<@&', '').replace('>', ''));
-				//try to find that activityrole in the db
-				logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles 1');
-				const activityRole = await DBActivityRoles.findOne({
-					where: { guildId: msg.guildId, roleId: activityRoleId },
+		let role = interaction.options.getRole('role');
+
+		if (interaction.options._subcommand === 'add') {
+			let rank = interaction.options.getInteger('rank');
+			let percentage = interaction.options.getInteger('percentage');
+			let points = interaction.options.getInteger('points');
+
+			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles add');
+			const activityRole = await DBActivityRoles.findOne({
+				where: {
+					guildId: interaction.guildId,
+					roleId: role.id
+				},
+			});
+
+			if (activityRole) {
+				return interaction.editReply(`${role.name} is already an activityrole.`);
+			}
+
+			if (!rank && !percentage && !points) {
+				return interaction.editReply('Please declare conditions using the at least one of the optional arguments.');
+			}
+
+			if (points & points < 1) {
+				return interaction.editReply(`\`${points}\` is below the minimum of 1 point.`);
+			}
+
+			if (percentage & percentage < 1) {
+				return interaction.editReply(`\`${percentage}\` is below the minimum of top 1%.`);
+			}
+
+			if (percentage & percentage > 99) {
+				return interaction.editReply(`\`${percentage}\` is above the maximum of top 99%.`);
+			}
+
+			if (rank & rank < 1) {
+				return interaction.editReply(`\`${rank}\` is below the minimum of rank #1.`);
+			}
+
+			await DBActivityRoles.create({ guildId: interaction.guildId, roleId: role.id, percentageCutoff: percentage, pointsCutoff: points, rankCutoff: rank });
+
+			logDatabaseQueries(4, 'commands/activityrole.js DBProcessQueue add');
+			const existingTask = await DBProcessQueue.findOne({ where: { guildId: interaction.guildId, task: 'updateActivityRoles', priority: 5 } });
+			if (!existingTask) {
+				await DBProcessQueue.create({ guildId: interaction.guildId, task: 'updateActivityRoles', priority: 5 });
+			}
+
+			return interaction.editReply(`${role.name} has been added as an activityrole. The roles will get updated periodically and will not happen right after a user reached a new milestone.`);
+		} else if (interaction.options._subcommand === 'remove') {
+			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles remove');
+			const rowCount = await DBActivityRoles.destroy({ where: { guildId: interaction.guildId, roleId: role.id } });
+
+			//Send feedback message accordingly
+			if (rowCount > 0) {
+				interaction.guild.members.cache.forEach(member => {
+					if (member.roles.cache.find(r => r.id == role.id)) {
+						member.roles.remove(role.id);
+					}
 				});
-
-				//If activityrole already exists
-				if (activityRole) {
-					msg.channel.send(`${activityRoleName.name} is already an activityrole.`);
-				} else {
-					if (!args[2]) {
-						if (msg.id) {
-							return msg.reply('Please declare conditions: topx/topx%/xpoints');
-						}
-						return interaction.reply('Please declare conditions: topx/topx%/xpoints');
-					}
-					let rankCutoff;
-					let percentageCutoff;
-					let pointsCutoff;
-					for (let i = 0; i < args.length; i++) {
-						if (args[i].startsWith('top') && args[i].endsWith('%')) {
-							const percentage = args[i].substring(3, args[i].length - 1);
-							if (isNaN(percentage)) {
-								return msg.channel.send(`\`${percentage.replace(/`/g, '')}\` is not a valid percentage. (\`${args[i].replace(/`/g, '')}\`)`);
-							}
-							percentageCutoff = percentage;
-						} else if (args[i].endsWith('points')) {
-							const points = args[i].substring(0, args[i].length - 6);
-							if (isNaN(points)) {
-								return msg.channel.send(`\`${points.replace(/`/g, '')}\` is not a valid amount of points. (\`${args[i].replace(/`/g, '')}\`)`);
-							}
-							if (points < 1) {
-								return msg.channel.send(`\`${points.replace(/`/g, '')}\` is below the minimum of 1 point. (\`${args[i].replace(/`/g, '')}\`)`);
-							}
-							pointsCutoff = parseInt(points);
-						} else if (args[i].startsWith('top')) {
-							const rank = args[i].substring(3, args[i].length);
-							if (isNaN(rank)) {
-								return msg.channel.send(`\`${rank.replace(/`/g, '')}\` is not a valid rank. (\`${args[i].replace(/`/g, '')}\`)`);
-							}
-							if (rank < 1) {
-								return msg.channel.send(`\`${rank.replace(/`/g, '')}\` is below the minimum of 1 point. (\`${args[i].replace(/`/g, '')}\`)`);
-							}
-							rankCutoff = parseInt(rank);
-						}
-					}
-
-					//If activityrole doesn't exist in db then create it
-					DBActivityRoles.create({ guildId: msg.guildId, roleId: activityRoleId, percentageCutoff: percentageCutoff, pointsCutoff: pointsCutoff, rankCutoff: rankCutoff });
-					logDatabaseQueries(4, 'commands/activityrole.js DBProcessQueue');
-					const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
-					if (!existingTask) {
-						DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 });
-					}
-					if (msg.id) {
-						return msg.reply(`${activityRoleName.name} has been added as an activityrole. The roles will get updated periodically and will not happen right after a user reached a new milestone.`);
-					}
-					return interaction.reply(`${activityRoleName.name} has been added as an activityrole. The roles will get updated periodically and will not happen right after a user reached a new milestone.`);
-				}
+				return interaction.editReply(`${role.name} has been removed from activityroles.`);
 			} else {
-				//If no roles were mentioned
-				msg.reply('you didn\'t mention any roles.');
+				return interaction.editReply(`${role.name} was no activityrole.`);
 			}
-			//check for first argument
-		} else if (args[0] === 'remove') {
-			//check if any roles were mentioned
-			if (msg.mentions.roles.first()) {
-				//Remove <@& > and get roleId
-				const activityRoleId = args[1].replace('<@&', '').replace('>', '');
-				//get role object with id
-				let activityRoleName = msg.guild.roles.cache.get(args[1].replace('<@&', '').replace('>', ''));
-				//Delete roles with roleId and guildId
-				const rowCount = await DBActivityRoles.destroy({ where: { guildId: msg.guildId, roleId: activityRoleId } });
-				//Send feedback message accordingly
-				if (rowCount > 0) {
-					msg.guild.members.cache.forEach(member => {
-						if (member.roles.cache.find(r => r.id == activityRoleName.id)) {
-							member.roles.remove(activityRoleName.id);
-						}
-					});
-					if (msg.id) {
-						return msg.reply(`${activityRoleName.name} has been removed from activityroles.`);
-					}
-					return interaction.reply(`${activityRoleName.name} has been removed from activityroles.`);
-				} else {
-					if (msg.id) {
-						return msg.reply(`${activityRoleName.name} was no activityrole.`);
-					}
-					return interaction.reply(`${activityRoleName.name} was no activityrole.`);
+		} else if (interaction.options._subcommand === 'list') {
+			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles list');
+			const activityRolesList = await DBActivityRoles.findAll({
+				where: {
+					guildId: interaction.guildId
 				}
-			} else {
-				//if no roles were mentioned
-				msg.reply('you didn\'t mention any roles.');
-			}
-			//Check first argument
-		} else if (args[0] === 'list') { // has to be adapted still
-			//get all activityRoles for the guild
-			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles 2');
-			const activityRolesList = await DBActivityRoles.findAll({ where: { guildId: msg.guildId } });
+			});
 
 			let activityRolesString = '';
 
 			//iterate for every activityrole in the array
 			for (let i = 0; i < activityRolesList.length; i++) {
 				//get role object by role Id
-				let activityRole = msg.guild.roles.cache.get(activityRolesList[i].roleId);
+				let activityRole = interaction.guild.roles.cache.get(activityRolesList[i].roleId);
 
 				let conditions = '';
 
@@ -179,7 +132,7 @@ module.exports = {
 				if (activityRole) {
 					activityRolesString = `${activityRolesString}\n${activityRole.name} -> ${conditions}`;
 				} else {
-					DBActivityRoles.destroy({ where: { guildId: msg.guildId, roleId: activityRolesList[i].roleId } });
+					DBActivityRoles.destroy({ where: { guildId: interaction.guildId, roleId: activityRolesList[i].roleId } });
 					activityRolesList.shift();
 				}
 			}
@@ -187,16 +140,9 @@ module.exports = {
 			if (activityRolesString === '') {
 				activityRolesString = 'No activityroles found.';
 			}
-			//Output activityrole list
-			if (msg.id) {
-				return msg.reply(`List of activityroles: ${activityRolesString}`);
-			}
-			return interaction.reply(`List of activityroles: ${activityRolesString}`);
-		} else {
-			let guildPrefix = await getGuildPrefix(msg);
 
-			//If no proper first argument is given
-			msg.channel.send(`Please declare if you want to add, remove or list the activityrole(s). Proper usage: \`${guildPrefix}${this.name} ${this.usage}\``);
+			//Output activityrole list
+			return interaction.editReply(`List of activityroles: ${activityRolesString}`);
 		}
 	},
 };

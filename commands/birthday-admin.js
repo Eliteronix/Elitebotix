@@ -20,7 +20,7 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {
-			await interaction.deferReply();
+			await interaction.deferReply({ ephemeral: true });
 		} catch (error) {
 			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 				console.error(error);
