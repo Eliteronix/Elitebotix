@@ -1,6 +1,7 @@
 const { Permissions } = require('discord.js');
 const { DBDiscordUsers, DBBirthdayGuilds } = require('../dbObjects');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'birthday',
@@ -19,7 +20,14 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		//TODO: deferReply
+		try {
+			await interaction.deferReply({ ephemeral: true });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
+		}
 
 		if (interaction.options._subcommand === 'set') {
 			let date = new Date();
