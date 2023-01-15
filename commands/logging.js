@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const { DBGuilds } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'logging',
@@ -14,8 +15,16 @@ module.exports = {
 	tags: 'server-admin',
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
+			try {
+				await interaction.deferReply();
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
+
 			msg = await populateMsgFromInteraction(interaction);
 
 			if (interaction.options._subcommand !== 'toggleevent') {
@@ -210,7 +219,7 @@ module.exports = {
 			if (msg.id) {
 				await msg.reply({ embeds: [loggingEmbed] });
 			} else {
-				await interaction.reply({ embeds: [loggingEmbed] });
+				await interaction.followUp({ embeds: [loggingEmbed] });
 			}
 
 			const loggingEmbed2 = new Discord.MessageEmbed()
@@ -234,7 +243,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Please mention a channel where the highlighted messages should be sent into.');
 				}
-				return interaction.reply('Please mention a channel where the highlighted messages should be sent into.');
+				return interaction.followUp('Please mention a channel where the highlighted messages should be sent into.');
 			}
 			if (guild) {
 				guild.loggingChannel = msg.mentions.channels.first().id;
@@ -242,13 +251,13 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
 				}
-				return interaction.reply(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
+				return interaction.followUp(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
 			} else {
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, loggingChannel: msg.mentions.channels.first().id });
 				if (msg.id) {
 					return msg.reply(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
 				}
-				return interaction.reply(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
+				return interaction.followUp(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
 			}
 		} else {
 			if (!guild || !guild.loggingChannel) {
@@ -256,7 +265,7 @@ module.exports = {
 				if (msg.id) {
 					msg.reply(`Be sure to use \`${guildPrefix}${this.name} channel <mentioned channel>\` to set a channel where this information should be logged into.`);
 				}
-				interaction.reply(`Be sure to use \`${guildPrefix}${this.name} channel <mentioned channel>\` to set a channel where this information should be logged into.`);
+				interaction.followUp(`Be sure to use \`${guildPrefix}${this.name} channel <mentioned channel>\` to set a channel where this information should be logged into.`);
 			}
 			if (!guild) {
 				guild = await DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name });
@@ -269,7 +278,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Nickname changes will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Nickname changes will no longer get logged in the specified channel.');
+							interaction.followUp('Nickname changes will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingNicknames = true;
@@ -277,7 +286,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Nickname changes will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Nickname changes will now get logged in the specified channel.');
+							interaction.followUp('Nickname changes will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'usernames') {
@@ -287,7 +296,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Username changes will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Username changes will no longer get logged in the specified channel.');
+							interaction.followUp('Username changes will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingUsernames = true;
@@ -295,7 +304,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Username changes will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Username changes will now get logged in the specified channel.');
+							interaction.followUp('Username changes will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'userdiscriminators') {
@@ -305,7 +314,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Discriminator changes will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Discriminator changes will no longer get logged in the specified channel.');
+							interaction.followUp('Discriminator changes will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingDiscriminators = true;
@@ -313,7 +322,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Discriminator changes will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Discriminator changes will now get logged in the specified channel.');
+							interaction.followUp('Discriminator changes will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'useravatars') {
@@ -323,7 +332,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Avatar changes will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Avatar changes will no longer get logged in the specified channel.');
+							interaction.followUp('Avatar changes will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingAvatars = true;
@@ -331,7 +340,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Avatar changes will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Avatar changes will now get logged in the specified channel.');
+							interaction.followUp('Avatar changes will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'userroles') {
@@ -341,7 +350,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('User role changes will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('User role changes will no longer get logged in the specified channel.');
+							interaction.followUp('User role changes will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingUserroles = true;
@@ -349,7 +358,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('User role changes will now get logged in the specified channel.');
 						} else {
-							interaction.reply('User role changes will now get logged in the specified channel.');
+							interaction.followUp('User role changes will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'userjoining') {
@@ -359,7 +368,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Users joining will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Users joining will no longer get logged in the specified channel.');
+							interaction.followUp('Users joining will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingMemberAdd = true;
@@ -367,7 +376,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Users joining will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Users joining will now get logged in the specified channel.');
+							interaction.followUp('Users joining will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'userleaving') {
@@ -377,7 +386,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Users leaving will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Users leaving will no longer get logged in the specified channel.');
+							interaction.followUp('Users leaving will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingMemberRemove = true;
@@ -385,7 +394,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Users leaving will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Users leaving will now get logged in the specified channel.');
+							interaction.followUp('Users leaving will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'rolecreate') {
@@ -395,7 +404,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Create roles will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Create roles will no longer get logged in the specified channel.');
+							interaction.followUp('Create roles will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingRoleCreate = true;
@@ -403,7 +412,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Create roles will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Create roles will now get logged in the specified channel.');
+							interaction.followUp('Create roles will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'roleupdate') {
@@ -413,7 +422,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Updated roles will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Updated roles will no longer get logged in the specified channel.');
+							interaction.followUp('Updated roles will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingRoleUpdate = true;
@@ -421,7 +430,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Updated roles will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Updated roles will now get logged in the specified channel.');
+							interaction.followUp('Updated roles will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'roledelete') {
@@ -431,7 +440,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Deleted roles will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Deleted roles will no longer get logged in the specified channel.');
+							interaction.followUp('Deleted roles will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingRoleDelete = true;
@@ -439,7 +448,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Deleted roles will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Deleted roles will now get logged in the specified channel.');
+							interaction.followUp('Deleted roles will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'banadd') {
@@ -449,7 +458,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Banned users will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Banned users will no longer get logged in the specified channel.');
+							interaction.followUp('Banned users will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingBanAdd = true;
@@ -457,7 +466,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Banned users will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Banned users will now get logged in the specified channel.');
+							interaction.followUp('Banned users will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'banremove') {
@@ -467,7 +476,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Unbanned users will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Unbanned users will no longer get logged in the specified channel.');
+							interaction.followUp('Unbanned users will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingBanRemove = true;
@@ -475,7 +484,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Unbanned users will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Unbanned users will now get logged in the specified channel.');
+							interaction.followUp('Unbanned users will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'guildupdate') {
@@ -485,7 +494,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Guild updates will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Guild updates will no longer get logged in the specified channel.');
+							interaction.followUp('Guild updates will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingGuildUpdate = true;
@@ -493,7 +502,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Guild updates will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Guild updates will now get logged in the specified channel.');
+							interaction.followUp('Guild updates will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'servermute') {
@@ -503,7 +512,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Server mutes will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Server mutes will no longer get logged in the specified channel.');
+							interaction.followUp('Server mutes will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingServerMute = true;
@@ -511,7 +520,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Server mutes will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Server mutes will now get logged in the specified channel.');
+							interaction.followUp('Server mutes will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'serverdeaf') {
@@ -521,7 +530,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Server deafs will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Server deafs will no longer get logged in the specified channel.');
+							interaction.followUp('Server deafs will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingServerDeaf = true;
@@ -529,7 +538,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Server deafs will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Server deafs will now get logged in the specified channel.');
+							interaction.followUp('Server deafs will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'joinvoice') {
@@ -539,7 +548,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Joining voices will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Joining voices will no longer get logged in the specified channel.');
+							interaction.followUp('Joining voices will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingJoinVoice = true;
@@ -547,7 +556,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Joining voices will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Joining voices will now get logged in the specified channel.');
+							interaction.followUp('Joining voices will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'leavevoice') {
@@ -557,7 +566,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Leaving voices will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Leaving voices will no longer get logged in the specified channel.');
+							interaction.followUp('Leaving voices will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingLeaveVoice = true;
@@ -565,7 +574,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Leaving voices will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Leaving voices will now get logged in the specified channel.');
+							interaction.followUp('Leaving voices will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'channelcreate') {
@@ -575,7 +584,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Created channels will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Created channels will no longer get logged in the specified channel.');
+							interaction.followUp('Created channels will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingChannelCreate = true;
@@ -583,7 +592,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Created channels will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Created channels will now get logged in the specified channel.');
+							interaction.followUp('Created channels will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'channelupdate') {
@@ -593,7 +602,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Updated channels will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Updated channels will no longer get logged in the specified channel.');
+							interaction.followUp('Updated channels will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingChannelUpdate = true;
@@ -601,7 +610,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Updated channels will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Updated channels will now get logged in the specified channel.');
+							interaction.followUp('Updated channels will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'channeldelete') {
@@ -611,7 +620,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Deleted channels will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Deleted channels will no longer get logged in the specified channel.');
+							interaction.followUp('Deleted channels will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingChannelDelete = true;
@@ -619,7 +628,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Deleted channels will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Deleted channels will now get logged in the specified channel.');
+							interaction.followUp('Deleted channels will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'invitecreate') {
@@ -629,7 +638,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Created invites will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Created invites will no longer get logged in the specified channel.');
+							interaction.followUp('Created invites will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingInviteCreate = true;
@@ -637,7 +646,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Created invites will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Created invites will now get logged in the specified channel.');
+							interaction.followUp('Created invites will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'invitedelete') {
@@ -647,7 +656,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Deleted invites will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Deleted invites will no longer get logged in the specified channel.');
+							interaction.followUp('Deleted invites will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingInviteDelete = true;
@@ -655,7 +664,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Deleted invites will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Deleted invites will now get logged in the specified channel.');
+							interaction.followUp('Deleted invites will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'messageupdate') {
@@ -665,7 +674,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Updated messages will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Updated messages will no longer get logged in the specified channel.');
+							interaction.followUp('Updated messages will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingMessageUpdate = true;
@@ -673,7 +682,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Updated messages will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Updated messages will now get logged in the specified channel.');
+							interaction.followUp('Updated messages will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'messagedelete') {
@@ -683,7 +692,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Deleted messages will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Deleted messages will no longer get logged in the specified channel.');
+							interaction.followUp('Deleted messages will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingMessageDelete = true;
@@ -691,7 +700,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Deleted messages will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Deleted messages will now get logged in the specified channel.');
+							interaction.followUp('Deleted messages will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'emojicreate') {
@@ -701,7 +710,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Created emojis will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Created emojis will no longer get logged in the specified channel.');
+							interaction.followUp('Created emojis will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingEmojiCreate = true;
@@ -709,7 +718,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Created emojis will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Created emojis will now get logged in the specified channel.');
+							interaction.followUp('Created emojis will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'emojiupdate') {
@@ -719,7 +728,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Updated emojis will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Updated emojis will no longer get logged in the specified channel.');
+							interaction.followUp('Updated emojis will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingEmojiUpdate = true;
@@ -727,7 +736,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Updated emojis will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Updated emojis will now get logged in the specified channel.');
+							interaction.followUp('Updated emojis will now get logged in the specified channel.');
 						}
 					}
 				} else if (arg.toLowerCase() === 'emojidelete') {
@@ -737,7 +746,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Deleted emojis will no longer get logged in the specified channel.');
 						} else {
-							interaction.reply('Deleted emojis will no longer get logged in the specified channel.');
+							interaction.followUp('Deleted emojis will no longer get logged in the specified channel.');
 						}
 					} else {
 						guild.loggingEmojiDelete = true;
@@ -745,14 +754,14 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Deleted emojis will now get logged in the specified channel.');
 						} else {
-							interaction.reply('Deleted emojis will now get logged in the specified channel.');
+							interaction.followUp('Deleted emojis will now get logged in the specified channel.');
 						}
 					}
 				} else {
 					if (msg.id) {
 						msg.reply(`\`${arg.replace(/`/g, '')}\` is not a valid event to log.`);
 					} else {
-						interaction.reply(`\`${arg.replace(/`/g, '')}\` is not a valid event to log.`);
+						interaction.followUp(`\`${arg.replace(/`/g, '')}\` is not a valid event to log.`);
 					}
 				}
 			});
