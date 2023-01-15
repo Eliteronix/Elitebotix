@@ -1,5 +1,6 @@
 const { getMessageUserDisplayname, populateMsgFromInteraction } = require('../utils.js');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'ship',
@@ -19,7 +20,15 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
+		}
+
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
