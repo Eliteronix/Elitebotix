@@ -1,7 +1,7 @@
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
-const { populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'time',
@@ -19,30 +19,26 @@ module.exports = {
 	tags: 'misc',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		//make a call to find a lat and long of the location
-		// eslint-disable-next-line no-undef
-		const timeEmbed = new Discord.MessageEmbed();
-
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-			args = [interaction.options._hoistedOptions[0].value];
-			await interaction.reply('Locations are being processed');
+		try {
+			await interaction.deferReply({ ephemeral: true });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
 		}
 
-		//getting Latitude and longtitude 
-		let url = `http://api.geonames.org/searchJSON?q=${args}&maxRows=1&username=roddy`;
+		let location = interaction.options.getString('location');
+
+		//make a call to find a lat and long of the location
+		let url = `http://api.geonames.org/searchJSON?q=${location}&maxRows=1&username=roddy`;
 		let response = await fetch(url);
 		let json = await response.json();
 
 		//checking if the location exists agreeGe
 		if (json.totalResultsCount === 0) {
 			//pinge check
-			if (msg.id) {
-				return msg.reply(`Couldn't find \`${args.join(' ').replace(/`/g, '')}\` location. Maybe you've mistyped?`);
-			}
-			return interaction.followUp(`Couldn't find \`${args.join(' ').replace(/`/g, '')}\` location. Maybe you've mistyped?`);
+			return interaction.followUp(`Couldn't find \`${location.replace(/`/g, '')}\` location. Maybe you've mistyped?`);
 		} else {
 
 			let lat = json.geonames[0].lat;
@@ -64,6 +60,7 @@ module.exports = {
 			//have to do this because .toLocaleString doesnt work with json2.time (because json2.time is a string and not a date format)
 			let time = new Date(json2.time);
 
+			const timeEmbed = new Discord.MessageEmbed();
 			timeEmbed.setColor('#7289DA')
 				.addFields(
 					// eslint-disable-next-line indent
@@ -83,9 +80,6 @@ module.exports = {
 				.setTimestamp();
 
 			//send embed
-			if (msg.id) {
-				return msg.reply({ embeds: [timeEmbed] });
-			}
 			return interaction.followUp({ embeds: [timeEmbed], ephemeral: false });
 		}
 	}
