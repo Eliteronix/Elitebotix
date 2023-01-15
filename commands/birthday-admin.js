@@ -4,19 +4,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'birthday-admin',
-	// aliases: ['dice', 'ouo'],
 	description: 'Manage birthday logging on your server',
-	usage: '<set>',
 	permissions: 'MANAGE_GUILD',
 	permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages',
-	guildOnly: true,
-	// args: true,
 	cooldown: 10,
-	// noCooldownMessage: true,
 	tags: 'server-admin',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {

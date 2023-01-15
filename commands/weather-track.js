@@ -5,19 +5,13 @@ const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'weather-track',
-	// aliases: ['developer', 'donate', 'support'],
 	description: 'Sends info about the weather of the given location each time period',
-	usage: '[hourly/daily] [F/Fahrenheit] <location/zipcode> | <List> | <remove> <C/F> <location>',
 	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'server-admin',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code

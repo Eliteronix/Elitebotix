@@ -4,19 +4,13 @@ const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'starboard',
-	aliases: ['star-board'],
 	description: 'Sends the messages receiving a star into the specified channel.',
-	usage: '\n<enable/disable> - turn on/off starboard\n<channel> <mentioned channel> - change starboard\'s channel\n<minimum> <#amount> - change minimum star amount',
 	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
-	//guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'server-admin',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply

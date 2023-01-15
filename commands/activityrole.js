@@ -5,19 +5,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'activityrole',
-	aliases: ['activityroles'],
 	description: 'Assigns roles depending on how active your users are; Recommended for use in a private channel to not mention every user with that role',
-	usage: '<add/remove/list> <@role> <topx/topx%/xpoints> [topx/topx%/xpoints] [topx/topx%/xpoints]',
 	permissions: Permissions.FLAGS.MANAGE_ROLES,
 	permissionsTranslated: 'Manage Roles',
 	botPermissions: [Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages and Manage Roles',
-	guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'server-admin',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply({ ephemeral: true });

@@ -5,19 +5,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'goodbye-message',
-	aliases: ['farewell-message'],
 	description: 'Sends the specified message into the channel the user used the command in as soon as a member leaves.',
-	usage: '<current/disable/message to send> (use "@member" to mention the member)',
 	permissions: [Permissions.FLAGS.MANAGE_GUILD, Permissions.FLAGS.SEND_MESSAGES],
 	permissionsTranslated: 'Send Messages and Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	//guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'server-admin',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply({ ephemeral: true });

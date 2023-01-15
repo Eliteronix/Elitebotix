@@ -5,19 +5,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'birthday',
-	// aliases: ['dice', 'ouo'],
 	description: 'Set your birthday',
-	usage: '<set> <month> <date> | <enable> | <disable>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages',
-	guildOnly: true,
-	// args: true,
 	cooldown: 10,
-	// noCooldownMessage: true,
 	tags: 'misc',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {

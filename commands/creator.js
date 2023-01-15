@@ -6,19 +6,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'creator',
-	aliases: ['developer', 'donate', 'support', 'creators', 'developers', 'devs'],
 	description: 'Sends an info card about the developers',
-	//usage: '<bug/feature/request> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
-	//guildOnly: true,
-	//args: true,
 	cooldown: 15,
-	//noCooldownMessage: true,
 	tags: 'general',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {

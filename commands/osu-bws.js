@@ -5,19 +5,13 @@ const { humanReadable, updateOsuDetailsforUser, getOsuUserServerMode, getMessage
 
 module.exports = {
 	name: 'osu-bws',
-	// aliases: ['osu-player', 'osu-user', 'o-u', 'o-p'],
 	description: 'Sends info about the BWS rank of the specified player',
-	usage: '[username] [username] ... (Use `_` instead of spaces; Use `--s`/`--t`/`--c`/`--m` for modes)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
-	//guildOnly: true,
-	//args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply

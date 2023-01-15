@@ -4,19 +4,13 @@ const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'tempvoice',
-	aliases: ['tempvoices', 'temporaryvoices', 'modularchannels', 'customvoice', 'tempchannel', 'tempchannels', 'customvoices', 'customchannel', 'customchannels'],
 	description: 'Toggles the temporary channel setting for the server',
-	usage: '<enable/disable/text> <for \'text\' option: enable/disable>',
 	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MOVE_MEMBERS, Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages, Manage Channels, Manage Roles and Move Members',
-	guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'server-admin',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply

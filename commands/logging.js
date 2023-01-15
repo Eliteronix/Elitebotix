@@ -5,19 +5,13 @@ const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'logging',
-	aliases: ['server-logging'],
 	description: '[Toggle] Logs the enabled events in the specified channel.',
-	usage: 'list | <channel> <mentioned channel> | <eventnames to toggle>',
 	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
-	//guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'server-admin',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply

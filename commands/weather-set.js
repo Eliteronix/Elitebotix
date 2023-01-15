@@ -7,19 +7,13 @@ const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
 	name: 'weather-set',
-	// aliases: ['developer', 'donate', 'support'],
 	description: 'Allows you to set the default degree type/location for the weather command',
-	usage: '<F/Fahrenheit/C/Celsius> | <location/zipcode>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages',
-	//guildOnly: true,
-	args: false,
 	cooldown: 10,
-	//noCooldownMessage: true,
 	tags: 'misc',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

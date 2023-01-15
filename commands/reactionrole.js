@@ -5,19 +5,13 @@ const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'reactionrole',
-	aliases: ['reactionroles', 'rr'],
 	description: 'Create and manage reaction roles',
-	usage: 'help <- For a detailed help in using the command',
 	permissions: Permissions.FLAGS.MANAGE_ROLES,
 	permissionsTranslated: 'Manage Roles',
 	botPermissions: [Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.MANAGE_MESSAGES],
 	botPermissionsTranslated: 'Manage Roles and Manage Messages',
-	guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'server-admin',
-	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply

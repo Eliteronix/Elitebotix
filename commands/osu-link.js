@@ -6,22 +6,15 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-link',
-	aliases: ['osu-connect', 'osu-account', 'osu-acc'],
 	description: 'Allows you to link your Discord Account to your osu! Account',
-	usage: '<connect/current/disconnect/verify> [username ("_" for " ")]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
-	//guildOnly: true,
-	args: true,
 	cooldown: 15,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -32,7 +25,7 @@ module.exports = {
 			}
 
 			try {
-				await interaction.deferReply();
+				await interaction.deferReply({ ephemeral: true });
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);

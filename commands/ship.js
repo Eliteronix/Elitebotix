@@ -4,19 +4,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'ship',
-	// aliases: ['dice', 'ouo'],
 	description: 'Lets you check how compatible two users are.',
-	usage: '<@user/name> [@user/name]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
-	// guildOnly: true,
-	args: true,
 	cooldown: 5,
-	// noCooldownMessage: true,
 	tags: 'misc',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

@@ -3,19 +3,13 @@ const { populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'prune',
-	aliases: ['delete', 'delete-messages'],
 	description: 'Deletes the specified amount of messages; Messages have to be less than 2 weeks old',
-	usage: '<amount> (has to be between 1 and 99)',
 	permissions: Permissions.FLAGS.MANAGE_MESSAGES,
 	permissionsTranslated: 'Manage Messages',
 	botPermissions: Permissions.FLAGS.MANAGE_MESSAGES,
 	botPermissionsTranslated: 'Manage Messages',
-	guildOnly: true,
-	args: true,
 	cooldown: 15,
-	//noCooldownMessage: true,
 	tags: 'server-admin',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply

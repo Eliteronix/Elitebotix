@@ -8,19 +8,13 @@ const { DBDiscordUsers } = require('../dbObjects');
 
 module.exports = {
 	name: 'weather',
-	// aliases: ['developer', 'donate', 'support'],
 	description: 'Sends info about the weather of the given location',
-	usage: '[F/Fahrenheit] <location/zipcode>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	//guildOnly: true,
-	args: false,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'misc',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

@@ -2,19 +2,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'help',
-	aliases: ['commands'],
 	description: 'List all commands or get info about a specific command.',
-	usage: '[command name]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	//guildOnly: true,
-	//args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'general',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply({ ephemeral: true });

@@ -8,19 +8,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-beatmap',
-	aliases: ['osu-map', 'beatmap-info', 'o-bm'],
 	description: 'Sends an info card about the specified beatmap',
-	usage: '<id> [id] [id] ...',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.ATTACH_FILES, Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	//guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		let tournament = false;

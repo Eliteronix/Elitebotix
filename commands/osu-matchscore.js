@@ -6,19 +6,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-matchscore',
-	aliases: ['osu-match'],
 	description: 'Sends an evaluation of how valuable all the players in the match were',
-	usage: '<match ID or URL> [# of warmups] [avg]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	//guildOnly: true,
-	args: true,
 	cooldown: 15,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

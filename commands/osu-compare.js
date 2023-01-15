@@ -3,19 +3,13 @@ const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'osu-compare',
-	aliases: ['osu-comp', 'o-c', 'oc'],
 	description: 'Sends an info card about the score of the specified player on the last map sent into the channel by the bot',
-	usage: '[username] [username] ...',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.ATTACH_FILES, Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	guildOnly: true,
-	// args: true,
 	cooldown: 15,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply

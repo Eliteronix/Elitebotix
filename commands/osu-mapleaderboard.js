@@ -8,19 +8,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-mapleaderboard',
-	aliases: ['osu-map-leaderboard'],
 	description: 'Sends an info card about the leaderboard on the specified beatmap',
-	usage: '<id>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.ATTACH_FILES, Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	guildOnly: false,
-	args: true,
 	cooldown: 10,
-	noCooldownMessage: false,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply();

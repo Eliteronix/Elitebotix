@@ -10,19 +10,13 @@ const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 
 module.exports = {
 	name: 'osu-history',
-	// aliases: ['developer', 'donate', 'support'],
 	description: 'Summarizes the whole osu! history for a user',
-	// usage: '<add/list/remove> <username>',
 	// permissions: Permissions.FLAGS.MANAGE_GUILD,
 	// permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	// guildOnly: true,
-	// args: true,
 	cooldown: 15,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		//TODO: most opponents faced, won most / lost most against

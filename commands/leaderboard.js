@@ -3,19 +3,13 @@ const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'leaderboard',
-	aliases: ['leaderboard', 'ranking', 'lb'],
 	description: 'Sends a leaderboard of all the players in the guild that have their account connected',
-	usage: '<server/osu> [page]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.ATTACH_FILES, Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	guildOnly: true,
-	args: true,
 	cooldown: 60,
-	//noCooldownMessage: true,
 	tags: 'general',
-	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply

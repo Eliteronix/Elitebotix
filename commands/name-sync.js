@@ -4,19 +4,13 @@ const { DBProcessQueue } = require('../dbObjects');
 
 module.exports = {
 	name: 'name-sync',
-	// aliases: ['osu-main'],
 	description: 'Allows you to sync discord player names to ingame names (and ranks)',
-	usage: '<disable/osuname/osunameandrank>',
 	permissions: 'MANAGE_GUILD',
 	permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.MANAGE_NICKNAMES],
 	botPermissionsTranslated: 'Send Messages and Manage Nicknames',
-	//guildOnly: true,
-	args: true,
 	cooldown: 10,
-	//noCooldownMessage: true,
 	tags: 'server-admin',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply

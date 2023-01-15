@@ -13,19 +13,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'user-profile',
-	aliases: ['discord-profile', 'u-p'],
 	description: 'Sends an info card about the specified user',
-	usage: '[@user]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
-	//guildOnly: true,
-	//args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'general',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {

@@ -4,19 +4,13 @@ const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.jso
 
 module.exports = {
 	name: 'elitiri-cup',
-	aliases: ['ec'],
 	description: `Allows you to sign up for the \`${currentElitiriCup}\` tournament!`,
-	usage: '<register> <desired lower SR limit> <desired upper SR limit> | <unregister> | <server> | <availability>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	//guildOnly: true,
-	args: true,
 	cooldown: 10,
-	//noCooldownMessage: true,
 	tags: 'elitiri',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

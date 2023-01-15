@@ -4,19 +4,13 @@ const { developers } = require('../config.json');
 
 module.exports = {
 	name: 'changelog',
-	//aliases: ['developer'],
 	description: 'Sends a message with the bots server',
-	usage: 'height<|>title',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	//guildOnly: true,
-	args: true,
 	cooldown: 5,
-	// noCooldownMessage: true,
 	tags: 'debug',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
 		if (developers.includes(msg.author.id)) {

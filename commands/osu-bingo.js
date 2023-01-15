@@ -9,19 +9,13 @@ const osu = require('node-osu');
 
 module.exports = {
 	name: 'osu-bingo',
-	// aliases: ['osu-map', 'beatmap-info', 'o-bm'],
 	description: 'Allows you to play a bingo match',
-	// usage: '<id> [id] [id] ...',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.ATTACH_FILES, Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	guildOnly: true,
-	args: true,
 	cooldown: 15,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply();

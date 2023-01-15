@@ -3,19 +3,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'link',
-	aliases: ['invite', 'invitelink'],
 	description: 'Sends a link to add the bot to a server',
-	//usage: '<bug/feature/request> <description>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
-	//guildOnly: true,
-	//args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'general',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {

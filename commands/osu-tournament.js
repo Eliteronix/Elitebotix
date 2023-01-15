@@ -7,26 +7,20 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-tournament',
-	// aliases: ['os', 'o-s'],
 	description: 'Sends a .txt file with all the data for the tournament matches with this acronym',
-	usage: '<acronym>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	//guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
 			try {
+				//TODO:await interaction.deferReply();
 				await interaction.reply('Data is being processed');
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {

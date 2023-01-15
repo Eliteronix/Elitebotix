@@ -6,19 +6,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-autohost',
-	// aliases: ['osu-map', 'beatmap-info', 'o-bm'],
 	description: 'Hosts an automated lobby ingame',
-	// usage: '<id> [id] [id] ...',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages',
-	//guildOnly: true,
-	args: true,
 	cooldown: 60,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
 		let password = '';
 		let winCondition = '0';

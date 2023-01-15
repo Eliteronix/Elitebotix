@@ -5,19 +5,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'time',
-	aliases: ['localtime'],
 	description: 'Sends current time of the given location',
-	usage: '<location>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.EMBED_LINKS, Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send messages and link embeds',
-	//guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'misc',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply({ ephemeral: true });

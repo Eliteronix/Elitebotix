@@ -1,32 +1,18 @@
 const { DBOsuForumPosts, DBDiscordUsers } = require('../dbObjects');
-const { populateMsgFromInteraction } = require('../utils.js');
 const Discord = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'tournamentfeed-admin',
-	//aliases: ['osu-map', 'beatmap-info'],
 	description: 'Admin control for the tournament feed',
-	// usage: '<recalculate/fix/start/createLeaderboard>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	//guildOnly: true,
-	// args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'debug',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		msg = await populateMsgFromInteraction(interaction);
-		if (!interaction) {
-			return msg.reply('Please use the / command `/tournamentfeed-admin`');
-		}
-
 		try {
 			await interaction.deferReply();
 		} catch (error) {

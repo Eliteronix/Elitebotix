@@ -5,19 +5,13 @@ const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'twitch',
-	//aliases: ['developer'],
 	description: 'Allowes you to manage the twitch commands',
-	//usage: '<bug/feature/request> <description>',
 	// permissions: Permissions.FLAGS.MANAGE_GUILD,
 	// permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
-	// guildOnly: true,
-	// args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {

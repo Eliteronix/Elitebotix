@@ -8,19 +8,13 @@ const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-schedule',
-	// aliases: ['os', 'o-s'],
 	description: 'Sends an info graph about the schedules of the players',
-	usage: '[username] [username] ... (Use `_` instead of spaces)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	//guildOnly: true,
-	// args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply

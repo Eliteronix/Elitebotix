@@ -7,26 +7,14 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-referee',
-	aliases: ['osu-host'],
 	description: 'Lets you schedule a match which is being reffed by the bot',
-	// usage: '[username] [username] ... (Use `_` instead of spaces; Use `--b` for bancho / `--r` for ripple; Use `--s`/`--t`/`--c`/`--m` for modes)',
 	// permissions: Permissions.FLAGS.MANAGE_GUILD,
 	// permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
-	guildOnly: true,
-	//args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (msg) {
-			return msg.reply('Please set up the game using the / command `/osu-referee`');
-		}
-
 		try {
 			await interaction.deferReply();
 		} catch (error) {
@@ -35,6 +23,7 @@ module.exports = {
 			}
 			return;
 		}
+
 		if (interaction.options._subcommand === 'soloqualifiers' || interaction.options._subcommand === 'teamqualifiers') {
 			let matchname = interaction.options.getString('matchname');
 			let date = new Date();

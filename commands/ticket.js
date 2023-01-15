@@ -5,19 +5,13 @@ const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'ticket',
-	//aliases: ['developer'],
 	description: 'Ticket manager',
-	usage: '<issue description> | <responded/r/action/a/close/c> | <add/remove> <@role>',
 	// permissions: 'MANAGE_GUILD',
 	// permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages, Manage Channels and Manage Roles',
-	guildOnly: true,
-	args: true,
 	cooldown: 10,
-	//noCooldownMessage: true,
 	tags: 'general',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

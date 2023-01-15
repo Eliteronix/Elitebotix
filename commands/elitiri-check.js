@@ -6,19 +6,13 @@ const { currentElitiriCup } = require('../config.json');
 
 module.exports = {
 	name: 'elitiri-check',
-	//aliases: ['osu-map', 'beatmap-info'],
 	description: `Sends an info card about the viability of the beatmap for the ${currentElitiriCup}`,
-	usage: '<NM/HD/HR/DT/FM> <id> [Bracket]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	//guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'elitiri',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

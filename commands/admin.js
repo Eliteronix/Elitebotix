@@ -8,19 +8,13 @@ const ObjectsToCsv = require('objects-to-csv');
 
 module.exports = {
 	name: 'admin',
-	//aliases: ['developer'],
 	description: 'Sends a message with the bots server',
-	//usage: '<bug/feature/request> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	//guildOnly: true,
-	//args: true,
 	cooldown: 5,
-	noCooldownMessage: true,
 	tags: 'debug',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		if (!developers.includes(msg.author.id)) {

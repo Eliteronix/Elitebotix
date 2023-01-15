@@ -6,19 +6,13 @@ const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-leaderboard',
-	aliases: ['osu-guild-leaderboard', 'osu-ranking', 'osu-guild-ranking', 'osu-lb'],
 	description: 'Sends a leaderboard of all the players in the guild that have their account connected',
-	usage: '[page]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	guildOnly: true,
-	// args: true,
 	cooldown: 30,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

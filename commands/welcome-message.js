@@ -4,19 +4,13 @@ const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'welcome-message',
-	//aliases: ['developer'],
 	description: 'Sends the specified message into the channel the user used the command in as soon as a new member arrives.',
-	usage: '<current/disable/message to send> (use "@member" to mention the new member)',
 	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
-	//guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'server-admin',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply

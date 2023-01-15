@@ -10,26 +10,20 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-skills',
-	// aliases: ['os', 'o-s'],
 	description: 'Sends an info card about the skills of the specified player',
-	usage: '[username] [username] ... (Use `_` instead of spaces; Use `--noscale` to not scale by totalEvaluation (better for mods); Use `--vx`/`--v1`/`--v2` to change scoring type filter; Use `--all` to not filter by tourney matches only; Use `--norunningavg` to not take the running average)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	//guildOnly: true,
-	// args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
 			try {
+				//TODO:await interaction.deferReply();
 				await interaction.reply('Players are being processed');
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {

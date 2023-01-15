@@ -6,19 +6,13 @@ const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-motd',
-	aliases: ['motd'],
 	description: 'Allows you to join the `Maps of the Day` competition!',
-	usage: '<server/register/unregister/mute/unmute> <#y/#mo/#w/#d/#h/#m>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	//guildOnly: true,
-	args: true,
 	cooldown: 10,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply

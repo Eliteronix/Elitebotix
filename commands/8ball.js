@@ -3,19 +3,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: '8ball',
-	//aliases: ['developer'],
 	description: 'Answers with a random 8-Ball message',
-	usage: '<Question>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
-	//guildOnly: true,
-	args: true,
 	cooldown: 5,
-	noCooldownMessage: true,
 	tags: 'misc',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		try {

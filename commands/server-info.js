@@ -5,19 +5,13 @@ const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'server-info',
-	aliases: ['guild-info'],
 	description: 'Sends an info card about the server',
-	//usage: '<bug/feature/request> <description>',
 	//permissions: 'MANAGE_MESSAGES',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
-	guildOnly: true,
-	//args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'general',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

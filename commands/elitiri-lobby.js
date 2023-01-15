@@ -5,19 +5,13 @@ const { populateMsgFromInteraction } = require('../utils');
 
 module.exports = {
 	name: 'elitiri-lobby',
-	//aliases: ['developer'],
 	description: `Allows you to claim lobby for the ${currentElitiriCup}`,
-	usage: 'claim <LobbyID> | referee <LobbyID> | refereeDrop <LobbyID>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	// botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
-	//guildOnly: true,
-	args: true,
 	cooldown: 15,
-	noCooldownMessage: false,
 	tags: 'elitiri',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

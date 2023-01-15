@@ -6,23 +6,16 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-derank',
-	aliases: ['derank'],
 	description: 'Reranks players based on their duel rating compared to others',
-	//usage: '<bug/feature/request> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	//guildOnly: true,
-	// args: true,
 	cooldown: 5,
-	noCooldownMessage: true,
 	tags: 'debug',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 
 		try {
 			await interaction.deferReply();

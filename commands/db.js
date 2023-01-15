@@ -6,19 +6,13 @@ const { developers } = require('../config.json');
 
 module.exports = {
 	name: 'db',
-	//aliases: ['developer'],
 	description: 'Sends the data found in the db',
-	//usage: '<bug/feature/request> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	//guildOnly: true,
-	//args: true,
 	cooldown: 5,
-	noCooldownMessage: true,
 	tags: 'debug',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args) {
 		if (!developers.includes(msg.author.id)) {

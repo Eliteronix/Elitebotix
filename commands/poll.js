@@ -6,19 +6,13 @@ const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'poll',
-	aliases: ['vote'],
 	description: 'Start a vote / poll',
-	usage: '<title>; <option1>; <option2[; <option3>] ... [; <option10>] <#y/#mo/#w/#d/#h/#m>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	guildOnly: true,
-	args: true,
 	cooldown: 30,
-	//noCooldownMessage: true,
 	tags: 'general',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

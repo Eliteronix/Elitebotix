@@ -9,19 +9,13 @@ const Discord = require('discord.js');
 
 module.exports = {
 	name: 'osu-wrapped',
-	// aliases: ['developer', 'donate', 'support'],
 	description: 'Sums up the year in osu! for a user',
-	// usage: '<add/list/remove> <username>',
 	// permissions: Permissions.FLAGS.MANAGE_GUILD,
 	// permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	// guildOnly: true,
-	// args: true,
 	cooldown: 15,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		try {

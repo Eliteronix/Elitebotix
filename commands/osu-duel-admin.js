@@ -5,19 +5,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-duel-admin',
-	// aliases: ['osu-quickmatch'],
 	description: 'Admin commands for osu-duel',
-	// usage: '[username] [username] ... (Use `_` instead of spaces; Use `--b` for bancho / `--r` for ripple; Use `--s`/`--t`/`--c`/`--m` for modes)',
 	// permissions: Permissions.FLAGS.MANAGE_GUILD,
 	// permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
-	// guildOnly: true,
-	//args: true,
 	cooldown: 60,
-	//noCooldownMessage: true,
 	tags: 'debug',
-	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction.options._subcommand === 'createduel1v1' || interaction.options._subcommand === 'createduel2v2') {
 			try {

@@ -8,19 +8,13 @@ const Discord = require('discord.js');
 
 module.exports = {
 	name: 'earlyaccess',
-	aliases: ['early', 'ea'],
 	description: 'Has some early access features for patreons if possible',
-	usage: 'follow / unfollow / followlist / followers',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	//guildOnly: true,
-	//args: true,
 	cooldown: 5,
-	noCooldownMessage: true,
 	tags: 'debug',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		let discordUser = await DBDiscordUsers.findOne({

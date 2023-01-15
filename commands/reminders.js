@@ -5,19 +5,13 @@ const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'reminders',
-	aliases: ['remind-list', 'reminders-list'],
 	description: 'Sends your set reminders',
-	//usage: '<location>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES],
 	botPermissionsTranslated: 'Send Messages',
-	//guildOnly: true,
-	//args: false,
 	cooldown: 15,
-	//noCooldownMessage: true,
 	tags: 'general',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code

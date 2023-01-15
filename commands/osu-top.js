@@ -11,19 +11,13 @@ const ObjectsToCsv = require('objects-to-csv');
 
 module.exports = {
 	name: 'osu-top',
-	aliases: ['osu-plays', 'osu-topplays', 'osu-best'],
 	description: 'Sends an info card about the topplays of the specified player',
-	usage: '[username] [username] ... (Use `_` instead of spaces; Use `--b` for bancho / `--r` for ripple; Use `--s`/`--t`/`--c`/`--m` for modes; `--n` / `--new` / `--recent` for recent scores; `--25` for top 25...)',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	//guildOnly: true,
-	//args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		let csv = false;
@@ -31,6 +25,7 @@ module.exports = {
 			msg = await populateMsgFromInteraction(interaction);
 
 			try {
+				//TODO: Deferreply
 				await interaction.reply('Players are being processed');
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {

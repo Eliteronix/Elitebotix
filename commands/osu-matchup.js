@@ -10,22 +10,15 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-matchup',
-	aliases: ['matchup'],
 	description: 'Sends an info card about the matchups between the specified players',
-	usage: '<username> [username]',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	//guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		let teamsize = 1;
 		let team1 = [];
 		let team2 = [];
@@ -37,7 +30,7 @@ module.exports = {
 			msg = await populateMsgFromInteraction(interaction);
 
 			try {
-				await interaction.reply('Matchup is being processed');
+				await interaction.deferReply();
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);

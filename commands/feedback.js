@@ -4,19 +4,13 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'feedback',
-	//aliases: ['developer'],
 	description: 'Sends feedback to the dev',
-	usage: '<bug/feature/feedback/question> <description>',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
-	//guildOnly: true,
-	args: true,
 	cooldown: 15,
-	//noCooldownMessage: true,
 	tags: 'general',
-	prefixCommand: true,
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply();

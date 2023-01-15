@@ -5,20 +5,15 @@ const { logDatabaseQueries } = require('../utils.js');
 
 module.exports = {
 	name: 'osu-motd-admin',
-	//aliases: ['osu-map', 'beatmap-info'],
 	description: 'Admin control for the Maps of the Day Competition',
-	usage: '<recalculate/fix/start/createLeaderboard>',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	//guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'debug',
-	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
+		//TODO: Remove message code and replace with interaction code
 		if (!developers.includes(msg.author.id)) {
 			return;
 		}

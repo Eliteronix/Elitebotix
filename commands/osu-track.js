@@ -7,19 +7,13 @@ const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'osu-track',
-	// aliases: ['developer', 'donate', 'support'],
 	description: 'Sends info about the scores achieved by the user',
-	usage: '<add/list/remove> <username>',
 	permissions: Permissions.FLAGS.MANAGE_GUILD,
 	permissionsTranslated: 'Manage Server',
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
-	guildOnly: true,
-	args: true,
 	cooldown: 5,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		if (interaction.options._subcommand === 'enable') {

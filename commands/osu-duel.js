@@ -13,19 +13,13 @@ const ObjectsToCsv = require('objects-to-csv');
 
 module.exports = {
 	name: 'osu-duel',
-	aliases: ['osu-quickmatch'],
 	description: 'Lets you play a match which is being reffed by the bot',
-	// usage: '[username] [username] ... (Use `_` instead of spaces; Use `--b` for bancho / `--r` for ripple; Use `--s`/`--t`/`--c`/`--m` for modes)',
 	// permissions: Permissions.FLAGS.MANAGE_GUILD,
 	// permissionsTranslated: 'Manage Server',
 	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
 	botPermissionsTranslated: 'Send Messages',
-	// guildOnly: true,
-	//args: true,
 	cooldown: 15,
-	//noCooldownMessage: true,
 	tags: 'osu',
-	prefixCommand: true,
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply
