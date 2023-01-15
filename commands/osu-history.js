@@ -25,6 +25,9 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
+		//TODO: most opponents faced, won most / lost most against
+		//TODO: all time highest duel rating
+		//TODO: all tournaments and their results
 		try {
 			await interaction.deferReply();
 		} catch (error) {
@@ -393,9 +396,6 @@ module.exports = {
 			ctx.drawImage(avatar, 475 - canvas.height / 4, canvas.height / 4, canvas.height / 2, canvas.height / 2);
 		}
 
-		//Create as an attachment
-		const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-history-${osuUser.osuUserId}.png`)];
-
 		// Create rank history graph
 		let oldestScore = await DBOsuMultiScores.findOne({
 			where: {
@@ -454,12 +454,18 @@ module.exports = {
 		let silverHistory = [];
 		let bronzeHistory = [];
 
+		let highestRating = 0;
+
 		for (let i = 0; i < duelRatings.length; i++) {
 			if (i === 0 && !duelRatings[i]) {
 				duelRatings.shift();
 				labels.shift();
 				i--;
 				continue;
+			}
+
+			if (duelRatings[i] > highestRating) {
+				highestRating = duelRatings[i];
 			}
 
 			let masterRating = null;
@@ -491,6 +497,10 @@ module.exports = {
 			bronzeHistory.push(bronzeRating);
 		}
 
+		//Create as an attachment
+		const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-history-${osuUser.osuUserId}.png`)];
+
+		//Create chart
 		const width = 1500; //px
 		const height = 750; //px
 		const canvasRenderService = new ChartJSNodeCanvas({ width, height });
