@@ -1,5 +1,5 @@
-const { populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'roll',
@@ -18,26 +18,27 @@ module.exports = {
 	prefixCommand: true,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			if (interaction.options._hoistedOptions[0]) {
-				args = [interaction.options._hoistedOptions[0].value];
+		try {
+			await interaction.deferReply({ ephemeral: true });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
+			return;
 		}
 
 		let max = 100;
-		if (args[0] && !isNaN(args[0]) && args[0] > 1) {
-			max = parseInt(args[0]);
+
+		if (interaction.options.getInteger('maximum')) {
+			max = interaction.options.getInteger('maximum');
+
+			if (max < 2) {
+				max = 2;
+			}
 		}
 
 		const result = Math.floor(Math.random() * max) + 1;
 
-		if (msg.id) {
-			return msg.reply(`<@${msg.author.id}> rolled ${result}!`);
-		}
-		return interaction.reply(`<@${msg.author.id}> rolled ${result}!`);
+		return interaction.reply(`<@${interaction.user.id}> rolled ${result}!`);
 	},
 };
