@@ -379,11 +379,6 @@ module.exports = {
 			// 		dm_permission: true,
 			// 		options: [
 			// 			{
-			// 				'name': 'list',
-			// 				'description': 'Get a list of all commands',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
 			// 				'name': 'category',
 			// 				'description': 'Get a list of commands for a category',
 			// 				'type': 1, // 1 is type SUB_COMMAND
@@ -5617,11 +5612,6 @@ module.exports = {
 					description: 'List all commands or get info about a specific command',
 					dm_permission: true,
 					options: [
-						{
-							'name': 'list',
-							'description': 'Get a list of all commands',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
 						{
 							'name': 'category',
 							'description': 'Get a list of commands for a category',
