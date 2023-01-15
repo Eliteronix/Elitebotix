@@ -26,7 +26,6 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		//TODO: most opponents faced, won most / lost most against
-		//TODO: all time highest duel rating
 		//TODO: all tournaments and their results
 		try {
 			await interaction.deferReply();
@@ -283,7 +282,7 @@ module.exports = {
 
 		// Draw the image
 		const canvasWidth = 1000;
-		const canvasHeight = 500;
+		const canvasHeight = 575;
 
 		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
 
@@ -320,16 +319,16 @@ module.exports = {
 		ctx.font = '22px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'left';
-		ctx.fillText(`Played tournaments: ${tourneysPlayed.length}`, 50, 90);
+		ctx.fillText(`Played tournaments: ${tourneysPlayed.length}`, 50, 140);
 
-		ctx.fillText(`Played matches: ${multiMatches.length}`, 50, 140);
+		ctx.fillText(`Played matches: ${multiMatches.length}`, 50, 190);
 		ctx.font = '18px comfortaa, sans-serif';
-		ctx.fillText(`Won: ${matchesWon} / Lost: ${matchesLost}`, 75, 165);
+		ctx.fillText(`Won: ${matchesWon} / Lost: ${matchesLost}`, 75, 215);
 
 		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillText(`Played maps: ${gamesChecked.length}`, 50, 220);
+		ctx.fillText(`Played maps: ${gamesChecked.length}`, 50, 270);
 		ctx.font = '18px comfortaa, sans-serif';
-		ctx.fillText(`Won: ${gamesWon} / Lost: ${gamesLost}`, 75, 245);
+		ctx.fillText(`Won: ${gamesWon} / Lost: ${gamesLost}`, 75, 295);
 
 		let duelLeague = getOsuDuelLeague(duelRating.total);
 
@@ -337,19 +336,21 @@ module.exports = {
 		let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
 		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillText(`League: ${leagueText}`, 50, 300);
-		ctx.drawImage(leagueImage, 75, 315, 150, 150);
+		ctx.fillText('Highest duel rating:', 50, 345);
+		ctx.font = '18px comfortaa, sans-serif';
+		ctx.fillText(`League: ${leagueText} (${duelRating.total.toFixed(3)})`, 75, 370);
+		ctx.drawImage(leagueImage, 75, 385, 150, 150);
 
 		ctx.textAlign = 'center';
 		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 800, 90);
+		ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 800, 140);
 		ctx.font = '18px comfortaa, sans-serif';
 		for (let i = 0; i < Math.min(5, mostPlayedWith.length); i++) {
-			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 800, 115 + i * 25);
+			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 800, 165 + i * 25);
 		}
 
 		ctx.textAlign = 'left';
-		ctx.fillText(`Top ${Math.min(10, tourneyPPPlays.length)} tournament pp plays:`, 635, 300);
+		ctx.fillText(`Top ${Math.min(10, tourneyPPPlays.length)} tournament pp plays:`, 635, 350);
 		ctx.font = '11px comfortaa, sans-serif';
 		for (let i = 0; i < Math.min(10, tourneyPPPlays.length); i++) {
 			tourneyPPPlays[i].beatmap = await getOsuBeatmap({ beatmapId: tourneyPPPlays[i].beatmapId });
@@ -371,7 +372,7 @@ module.exports = {
 				mapString += '...';
 			}
 
-			ctx.fillText(mapString, 635, 318 + i * 16);
+			ctx.fillText(mapString, 635, 368 + i * 16);
 		}
 
 		// Write the title of the player
@@ -383,17 +384,17 @@ module.exports = {
 
 		//Get a circle in the middle for inserting the player avatar
 		ctx.beginPath();
-		ctx.arc(475, canvas.height / 2, canvas.height / 4, 0, Math.PI * 2, true);
+		ctx.arc(475, 250, 125, 0, Math.PI * 2, true);
 		ctx.closePath();
 		ctx.clip();
 
 		//Draw a shape onto the main canvas in the middle 
 		try {
 			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.osuUserId}`);
-			ctx.drawImage(avatar, 475 - canvas.height / 4, canvas.height / 4, canvas.height / 2, canvas.height / 2);
+			ctx.drawImage(avatar, 350, 125, 250, 250);
 		} catch (error) {
 			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-			ctx.drawImage(avatar, 475 - canvas.height / 4, canvas.height / 4, canvas.height / 2, canvas.height / 2);
+			ctx.drawImage(avatar, 350, 125, 250, 250);
 		}
 
 		// Create rank history graph
@@ -409,7 +410,7 @@ module.exports = {
 			]
 		});
 
-		let duelRatings = [duelRating.total];
+		let duelRatings = [{ rating: duelRating.total, date: 'Today' }];
 
 		//Set the date to the end of the last month
 		let date = new Date();
@@ -427,7 +428,7 @@ module.exports = {
 				lastUpdate = new Date();
 			}
 			let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: date });
-			duelRatings.push(duelRating.total);
+			duelRatings.push({ rating: duelRating.total, date: `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}.${date.getUTCFullYear()}` });
 			date.setUTCDate(1);
 			date.setUTCDate(date.getUTCDate() - 1);
 		}
@@ -435,13 +436,7 @@ module.exports = {
 		let labels = [];
 
 		for (let i = 0; i < duelRatings.length; i++) {
-			if (i === 0) {
-				labels.push('Today');
-			} else if (i === 1) {
-				labels.push(`${i} month ago`);
-			} else {
-				labels.push(`${i} months ago`);
-			}
+			labels.push(duelRatings[i].date);
 		}
 
 		labels.reverse();
@@ -457,15 +452,15 @@ module.exports = {
 		let highestRating = 0;
 
 		for (let i = 0; i < duelRatings.length; i++) {
-			if (i === 0 && !duelRatings[i]) {
+			if (i === 0 && !duelRatings[i].rating) {
 				duelRatings.shift();
 				labels.shift();
 				i--;
 				continue;
 			}
 
-			if (duelRatings[i] > highestRating) {
-				highestRating = duelRatings[i];
+			if (duelRatings[i].rating > highestRating) {
+				highestRating = duelRatings[i].rating;
 			}
 
 			let masterRating = null;
@@ -475,18 +470,18 @@ module.exports = {
 			let silverRating = null;
 			let bronzeRating = null;
 
-			if (duelRatings[i] > 7) {
-				masterRating = duelRatings[i];
-			} else if (duelRatings[i] > 6.4) {
-				diamondRating = duelRatings[i];
-			} else if (duelRatings[i] > 5.8) {
-				platinumRating = duelRatings[i];
-			} else if (duelRatings[i] > 5.2) {
-				goldRating = duelRatings[i];
-			} else if (duelRatings[i] > 4.6) {
-				silverRating = duelRatings[i];
+			if (duelRatings[i].rating > 7) {
+				masterRating = duelRatings[i].rating;
+			} else if (duelRatings[i].rating > 6.4) {
+				diamondRating = duelRatings[i].rating;
+			} else if (duelRatings[i].rating > 5.8) {
+				platinumRating = duelRatings[i].rating;
+			} else if (duelRatings[i].rating > 5.2) {
+				goldRating = duelRatings[i].rating;
+			} else if (duelRatings[i].rating > 4.6) {
+				silverRating = duelRatings[i].rating;
 			} else {
-				bronzeRating = duelRatings[i];
+				bronzeRating = duelRatings[i].rating;
 			}
 
 			masterHistory.push(masterRating);
