@@ -1901,6 +1901,22 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'osu-history',
+			// 		description: 'Summarizes the whole osu! history for a user',
+			// 		dm_permission: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'username',
+			// 				'description': 'The username, id or link of the player',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 		]
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'osu-leaderboard',
 			// 		description: 'Sends a leaderboard of all the players in the guild that have their account connected',
 			// 		dm_permission: false,
@@ -7120,6 +7136,22 @@ module.exports = {
 						},
 					]
 				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-history',
+					description: 'Summarizes the whole osu! history for a user',
+					dm_permission: true,
+					options: [
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player',
+							'type': 3,
+							'required': false
+						},
+					]
+				}
 			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
