@@ -1,6 +1,7 @@
 const { DBGuilds } = require('../dbObjects');
 const { Permissions } = require('discord.js');
-const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { logDatabaseQueries } = require('../utils');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'goodbye-message',
@@ -18,115 +19,67 @@ module.exports = {
 	tags: 'server-admin',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			if (interaction.options._subcommand === 'set') {
-				args.push(interaction.options._hoistedOptions[0].value);
-			} else {
-				args = [interaction.options._subcommand];
+		try {
+			await interaction.deferReply({ ephemeral: true });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
+			return;
 		}
 
-		//Check first argument of the command
-		if (args[0] === 'current') {
-			//get guild from db
-			logDatabaseQueries(4, 'commands/goodbye-message.js DBGuilds current');
-			const guild = await DBGuilds.findOne({
-				where: { guildId: msg.guildId },
-			});
+		logDatabaseQueries(4, 'commands/goodbye-message.js DBGuilds');
+		const guild = await DBGuilds.findOne({
+			where: { guildId: interaction.guildId },
+		});
 
-			//Check if the guild was found in the db
-			if (guild) {
-				//Check if there is a goodbye message set
-				if (guild.sendGoodbyeMessage) {
-					//get the channel id
-					const guildGoodbyeMessageChannelId = guild.goodbyeMessageChannel;
-					//get the channel object by the id
-					const guildGoodbyeMessageChannel = msg.guild.channels.cache.find(channel => channel.id === guildGoodbyeMessageChannelId);
-					if (msg.id) {
-						return msg.reply(`The current goodbye message is set to channel \`${guildGoodbyeMessageChannel.name}\`: \`${guild.goodbyeMessageText.replace(/`/g, '')}\``);
-					}
-					return interaction.reply(`The current goodbye message is set to channel \`${guildGoodbyeMessageChannel.name}\`: \`${guild.goodbyeMessageText.replace(/`/g, '')}\``);
-				} else {
-					//if no goodbye message is set
-					if (msg.id) {
-						return msg.reply('There is currently no goodbye message set.');
-					}
-					return interaction.reply('There is currently no goodbye message set.');
-				}
-			} else {
-				//Create guild in the db in case the guild is not in the db yet
-				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendGoodbyeMessage: false });
-				//Send that no goodbye message is set
-				if (msg.id) {
-					return msg.reply('There is currently no goodbye message set.');
-				}
-				return interaction.reply('There is currently no goodbye message set.');
+		if (interaction.options._subcommand === 'current') {
+			if (!guild) {
+				logDatabaseQueries(4, 'commands/goodbye-message.js DBGuilds current create');
+				await DBGuilds.create({ guildId: interaction.guildId, guildName: interaction.guild.name, sendGoodbyeMessage: false });
+				return interaction.editReply('There is currently no goodbye message set.');
 			}
-			//Check first argument of the command
-		} else if (args[0] === 'disable') {
-			//get guild from db
-			logDatabaseQueries(4, 'commands/goodbye-message.js DBGuilds disable');
-			const guild = await DBGuilds.findOne({
-				where: { guildId: msg.guildId },
-			});
 
-			//Check if the guild was found in the db
-			if (guild) {
-				//Check if there is a goodbye message set
-				if (guild.sendGoodbyeMessage) {
-					//Set the dataset to no goodbye message
-					guild.sendGoodbyeMessage = false;
-					//Save the dataset
-					guild.save();
-					if (msg.id) {
-						return msg.reply('Goodbye messages have been disabled for this server.');
-					}
-					return interaction.reply('Goodbye messages have been disabled for this server.');
-				} else {
-					//if goodbye messages are already disabled
-					if (msg.id) {
-						return msg.reply('Goodbye messages are already disabled for this server.');
-					}
-					return interaction.reply('Goodbye messages are already disabled for this server.');
-				}
-			} else {
-				//Create guild in the db in case the guild is not in the db yet
-				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendGoodbyeMessage: false });
-				//Send that no goodbye message is set
-				if (msg.id) {
-					return msg.reply('Goodbye messages are already disabled for this server.');
-				}
-				return interaction.reply('Goodbye messages are already disabled for this server.');
+			if (!guild.sendGoodbyeMessage) {
+				return interaction.editReply('There is currently no goodbye message set.');
 			}
-			//If not specified keyword for the command
-		} else {
-			//Define goodbye message from the rest of the arguments
-			let goodbyeMessage = args.join(' ');
-			//get guild from db
-			logDatabaseQueries(4, 'commands/goodbye-message.js DBGuilds else');
-			const guild = await DBGuilds.findOne({
-				where: { guildId: msg.guildId },
-			});
 
-			//Check if the guild was found in the db
+			return interaction.editReply(`The current goodbye message is set to channel <#${guild.goodbyeMessageChannel}>: \`${guild.goodbyeMessageText.replace(/`/g, '')}\``);
+
+		} else if (interaction.options._subcommand === 'disable') {
+			if (!guild) {
+				logDatabaseQueries(4, 'commands/goodbye-message.js DBGuilds disable create');
+				await DBGuilds.create({ guildId: interaction.guildId, guildName: interaction.guild.name, sendGoodbyeMessage: false });
+				return interaction.editReply('There is currently no goodbye message set.');
+			}
+
+			if (!guild.sendGoodbyeMessage) {
+				return interaction.editReply('There is currently no goodbye message set.');
+			}
+
+			guild.sendGoodbyeMessage = false;
+			await guild.save();
+			return interaction.editReply('Goodbye messages have been disabled for this server.');
+		} else if (interaction.options._subcommand === 'set') {
+			let message = interaction.options.getString('message');
+
 			if (guild) {
-				//Set goodbye message fields and save the dataset
 				guild.sendGoodbyeMessage = true;
-				guild.goodbyeMessageChannel = msg.channel.id;
-				guild.goodbyeMessageText = goodbyeMessage;
-				guild.save();
+				guild.goodbyeMessageChannel = interaction.channelId;
+				guild.goodbyeMessageText = message;
+				await guild.save();
 			} else {
-				//if guild was not found, create it in db
-				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendGoodbyeMessage: true, goodbyeMessageChannel: msg.channel.id, goodbyeMessageText: goodbyeMessage });
+				logDatabaseQueries(4, 'commands/goodbye-message.js DBGuilds set create');
+				await DBGuilds.create({
+					guildId: interaction.guildId,
+					guildName: interaction.guild.name,
+					sendGoodbyeMessage: true,
+					goodbyeMessageChannel: interaction.channelId,
+					goodbyeMessageText: message
+				});
 			}
-			if (msg.id) {
-				return msg.reply(`The new message \`${goodbyeMessage.replace(/`/g, '')}\` has been set for leaving members in the channel \`${msg.channel.name}\`.`);
-			}
-			return interaction.reply(`The new message \`${goodbyeMessage.replace(/`/g, '')}\` has been set for leaving members in the channel \`${msg.channel.name}\`.`);
+
+			return interaction.editReply(`The new message \`${message.replace(/`/g, '')}\` has been set for leaving members in the channel \`${interaction.channel.name}\`.`);
 		}
 	},
 };
