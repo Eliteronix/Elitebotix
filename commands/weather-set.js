@@ -4,6 +4,7 @@ const util = require('util');
 const { populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
 const { DBDiscordUsers } = require('../dbObjects');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'weather-set',
@@ -17,7 +18,6 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (msg) {
 			return msg.reply('Please use `/weather-set` instead.');
 		}
@@ -25,7 +25,14 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.deferReply({ ephemeral: true });
+			try {
+				await interaction.deferReply({ ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
 			args = [];
 

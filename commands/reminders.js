@@ -2,6 +2,7 @@ const { Permissions } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'reminders',
@@ -15,8 +16,15 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
+			try {
+				await interaction.deferReply({ ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 			msg = await populateMsgFromInteraction(interaction);
 		}
 
@@ -38,7 +46,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply('There are no reminders set for you');
 			}
-			return interaction.reply({ content: 'There are no reminders set for you', ephemeral: true });
+			return interaction.editReply({ content: 'There are no reminders set for you', ephemeral: true });
 		}
 
 		let setReminders = [];
@@ -67,6 +75,6 @@ module.exports = {
 					return msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
 				});
 		}
-		return interaction.reply({ content: message, ephemeral: true });
+		return interaction.editReply({ content: message, ephemeral: true });
 	}
 };

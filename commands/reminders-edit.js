@@ -2,6 +2,7 @@ const { Permissions } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'reminders-edit',
@@ -15,8 +16,16 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, processQueueEntry) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
+			try {
+				await interaction.deferReply({ ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
+
 			msg = await populateMsgFromInteraction(interaction);
 		} else if (msg.id) {
 			return msg.reply('Please edit your reminders by using the / command `/reminders-edit`');
@@ -38,7 +47,7 @@ module.exports = {
 
 		//reminders check
 		if (reminders.length === 0) {
-			return interaction.reply({ content: 'There are no reminders set for you', ephemeral: true });
+			return interaction.editReply({ content: 'There are no reminders set for you', ephemeral: true });
 		}
 
 		let userReminderId;
@@ -75,7 +84,7 @@ module.exports = {
 		try {
 			reminderDate = reminders[Number(userReminderId) - 1].date;
 		} catch (error) {
-			return interaction.reply({ content: 'There are no reminders with the given ID', ephemeral: true });
+			return interaction.editReply({ content: 'There are no reminders with the given ID', ephemeral: true });
 		}
 
 		if (years || months || weeks || days || hours || minutes) {
@@ -95,7 +104,7 @@ module.exports = {
 			try {
 				reminderId = reminders[Number(userReminderId) - 1].id;
 			} catch (error) {
-				return interaction.reply({ content: 'There are no reminders with the given ID', ephemeral: true });
+				return interaction.editReply({ content: 'There are no reminders with the given ID', ephemeral: true });
 			}
 			//If no reminder with the given Id
 			//destroy previous reminder
@@ -108,7 +117,7 @@ module.exports = {
 			//Set a new reminder
 			DBProcessQueue.create({ id: reminderId, guildId: 'None', task: 'remind', priority: 10, additions: `${msg.author.id};${userReminderMessage}`, date: userReminderDate });
 
-			return interaction.reply({
+			return interaction.editReply({
 				content: `Your reminder has been successfully edited.\nNew message: \`${userReminderMessage}\`\nNew date: \`${userReminderDate.toLocaleTimeString('en-UK', {
 					day: 'numeric', // numeric, 2-digit
 					year: 'numeric', // numeric, 2-digit

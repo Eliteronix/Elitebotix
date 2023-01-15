@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const { DBReactionRolesHeader, DBReactionRoles } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'reactionrole',
@@ -14,11 +15,17 @@ module.exports = {
 	tags: 'server-admin',
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.deferReply({ ephemeral: true });
+			try {
+				await interaction.deferReply({ ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
 			if (interaction.options._subcommand.startsWith('embed')) {
 				args = ['embed', interaction.options._subcommand.substring(5)];

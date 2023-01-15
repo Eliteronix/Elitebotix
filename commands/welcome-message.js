@@ -1,6 +1,7 @@
 const { DBGuilds } = require('../dbObjects');
 const { Permissions } = require('discord.js');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'welcome-message',
@@ -13,8 +14,15 @@ module.exports = {
 	tags: 'server-admin',
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
+			try {
+				await interaction.deferReply({ ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 			msg = await populateMsgFromInteraction(interaction);
 
 			if (interaction.options._subcommand === 'set') {
@@ -42,13 +50,13 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply(`The current welcome message is set to channel \`${guildWelcomeMessageChannel.name}\`: \`${guild.welcomeMessageText.replace(/`/g, '')}\``);
 					}
-					return interaction.reply(`The current welcome message is set to channel \`${guildWelcomeMessageChannel.name}\`: \`${guild.welcomeMessageText.replace(/`/g, '')}\``);
+					return interaction.editReply(`The current welcome message is set to channel \`${guildWelcomeMessageChannel.name}\`: \`${guild.welcomeMessageText.replace(/`/g, '')}\``);
 				} else {
 					//if no welcome message is set
 					if (msg.id) {
 						return msg.reply('There is currently no welcome message set.');
 					}
-					return interaction.reply('There is currently no welcome message set.');
+					return interaction.editReply('There is currently no welcome message set.');
 				}
 			} else {
 				//Create guild in the db in case the guild is not in the db yet
@@ -57,7 +65,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('There is currently no welcome message set.');
 				}
-				return interaction.reply('There is currently no welcome message set.');
+				return interaction.editReply('There is currently no welcome message set.');
 			}
 			//Check first argument of the command
 		} else if (args[0] === 'disable') {
@@ -78,13 +86,13 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply('Welcome messages have been disabled for this server.');
 					}
-					return interaction.reply('Welcome messages have been disabled for this server.');
+					return interaction.editReply('Welcome messages have been disabled for this server.');
 				} else {
 					//if welcome messages are already disabled
 					if (msg.id) {
 						return msg.reply('Welcome messages are already disabled for this server.');
 					}
-					return interaction.reply('Welcome messages are already disabled for this server.');
+					return interaction.editReply('Welcome messages are already disabled for this server.');
 				}
 			} else {
 				//Create guild in the db in case the guild is not in the db yet
@@ -93,7 +101,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Welcome messages are already disabled for this server.');
 				}
-				return interaction.reply('Welcome messages are already disabled for this server.');
+				return interaction.editReply('Welcome messages are already disabled for this server.');
 			}
 			//If not specified keyword for the command
 		} else {
@@ -119,7 +127,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply(`The new message \`${welcomeMessage.replace(/`/g, '')}\` has been set for welcoming new members in the channel \`${msg.channel.name}\`.`);
 			}
-			return interaction.reply(`The new message \`${welcomeMessage.replace(/`/g, '')}\` has been set for welcoming new members in the channel \`${msg.channel.name}\`.`);
+			return interaction.editReply(`The new message \`${welcomeMessage.replace(/`/g, '')}\` has been set for welcoming new members in the channel \`${msg.channel.name}\`.`);
 		}
 	},
 };

@@ -2,6 +2,7 @@ const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const { Permissions } = require('discord.js');
 const { humanReadable, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-bws',
@@ -14,11 +15,17 @@ module.exports = {
 	tags: 'osu',
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
+			try {
+				await interaction.deferReply();
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
-			await interaction.reply('Players are being processed');
+			msg = await populateMsgFromInteraction(interaction);
 
 			args = [];
 

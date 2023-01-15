@@ -1,6 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-set',
@@ -13,8 +14,16 @@ module.exports = {
 	tags: 'osu',
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
+			try {
+				await interaction.deferReply({ ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
+
 			msg = await populateMsgFromInteraction(interaction);
 
 			args = [interaction.options._subcommand, interaction.options._hoistedOptions[0].value];
@@ -38,7 +47,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Bancho has been set as your main server.');
 				}
-				return interaction.reply({ content: 'Bancho has been set as your main server.', ephemeral: true });
+				return interaction.followUp({ content: 'Bancho has been set as your main server.', ephemeral: true });
 			} else if (args[1] && args[1].toLowerCase() === 'ripple') {
 				if (discordUser) {
 					discordUser.osuMainServer = 'ripple';
@@ -50,12 +59,12 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Ripple has been set as your main server.');
 				}
-				return interaction.reply({ content: 'Ripple has been set as your main server.', ephemeral: true });
+				return interaction.followUp({ content: 'Ripple has been set as your main server.', ephemeral: true });
 			} else {
 				if (msg.id) {
 					return msg.reply('Please specify which server you want to set as your main server: `bancho`, `ripple`');
 				}
-				return interaction.reply({ content: 'Please specify which server you want to set as your main server: `bancho`, `ripple`', ephemeral: true });
+				return interaction.followUp({ content: 'Please specify which server you want to set as your main server: `bancho`, `ripple`', ephemeral: true });
 			}
 		} else if (args[0].toLowerCase() === 'mode') {
 			if (args[1] && args[1].toLowerCase() === 'standard') {
@@ -69,7 +78,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Standard has been set as your main mode.');
 				}
-				return interaction.reply({ content: 'Standard has been set as your main mode.', ephemeral: true });
+				return interaction.followUp({ content: 'Standard has been set as your main mode.', ephemeral: true });
 			} else if (args[1] && args[1].toLowerCase() === 'taiko') {
 				if (discordUser) {
 					discordUser.osuMainMode = 1;
@@ -81,7 +90,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Taiko has been set as your main mode.');
 				}
-				return interaction.reply({ content: 'Taiko has been set as your main mode.', ephemeral: true });
+				return interaction.followUp({ content: 'Taiko has been set as your main mode.', ephemeral: true });
 			} else if (args[1] && args[1].toLowerCase() === 'catch') {
 				if (discordUser) {
 					discordUser.osuMainMode = 2;
@@ -93,7 +102,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Catch has been set as your main mode.');
 				}
-				return interaction.reply({ content: 'Catch has been set as your main mode.', ephemeral: true });
+				return interaction.followUp({ content: 'Catch has been set as your main mode.', ephemeral: true });
 			} else if (args[1] && args[1].toLowerCase() === 'mania') {
 				if (discordUser) {
 					discordUser.osuMainMode = 3;
@@ -105,18 +114,18 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Mania has been set as your main mode.');
 				}
-				return interaction.reply({ content: 'Mania has been set as your main mode.', ephemeral: true });
+				return interaction.followUp({ content: 'Mania has been set as your main mode.', ephemeral: true });
 			} else {
 				if (msg.id) {
 					return msg.reply('Please specify which mode you want to set as your main mode: `standard`, `taiko`, `catch`, `mania`');
 				}
-				return interaction.reply({ content: 'Please specify which mode you want to set as your main mode: `standard`, `taiko`, `catch`, `mania`', ephemeral: true });
+				return interaction.followUp({ content: 'Please specify which mode you want to set as your main mode: `standard`, `taiko`, `catch`, `mania`', ephemeral: true });
 			}
 		} else {
 			if (msg.id) {
 				return msg.reply('Please specify what you want to change: `mode`, `server`');
 			}
-			return interaction.reply({ content: 'Please specify what you want to change: `mode`, `server`', ephemeral: true });
+			return interaction.followUp({ content: 'Please specify what you want to change: `mode`, `server`', ephemeral: true });
 		}
 	},
 };

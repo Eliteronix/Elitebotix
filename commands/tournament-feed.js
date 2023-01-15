@@ -1,5 +1,6 @@
 const { populateMsgFromInteraction, getOsuUserServerMode } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'tournament-feed',
@@ -13,12 +14,16 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		msg = await populateMsgFromInteraction(interaction);
-		if (!interaction) {
-			return msg.reply('Please use the / command `/tournamentfeed-admin`');
+
+		try {
+			await interaction.deferReply({ ephemeral: true });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
 		}
-		await interaction.deferReply({ ephemeral: true });
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const commandUser = commandConfig[0];

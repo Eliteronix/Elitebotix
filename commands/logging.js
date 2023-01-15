@@ -15,6 +15,7 @@ module.exports = {
 	tags: 'server-admin',
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
+		//TODO:Follow ups are not ephemeral
 		if (interaction) {
 			try {
 				await interaction.deferReply();

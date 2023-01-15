@@ -19,6 +19,7 @@ module.exports = {
 			msg = await populateMsgFromInteraction(interaction);
 
 			try {
+				//TODO: deferReply
 				await interaction.reply('Processing guild leaderboard...');
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {

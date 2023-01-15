@@ -5,6 +5,7 @@ const util = require('util');
 const { pause, populateMsgFromInteraction, fitTextOnMiddleCanvas } = require('../utils');
 const { Permissions } = require('discord.js');
 const { DBDiscordUsers } = require('../dbObjects');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'weather',
@@ -18,11 +19,17 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
+			try {
+				await interaction.deferReply();
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
-			await interaction.reply('Location is being evaluated');
+			msg = await populateMsgFromInteraction(interaction);
 
 			args = [];
 
@@ -80,7 +87,7 @@ module.exports = {
 							if (msg.id) {
 								return msg.reply(`Could not find location \`${weatherLocation.replace(/`/g, '')}\``);
 							}
-							return interaction.reply(`Could not find location \`${weatherLocation.replace(/`/g, '')}\``);
+							return interaction.editReply(`Could not find location \`${weatherLocation.replace(/`/g, '')}\``);
 						}
 
 						const weather = result[0];
@@ -161,7 +168,7 @@ module.exports = {
 						if (msg.id) {
 							msg.channel.send({ content: `Weather for ${weather.location.name}`, files: [attachment] });
 						} else {
-							interaction.followUp({ content: `Weather for ${weather.location.name}`, files: [attachment] });
+							interaction.editReply({ content: `Weather for ${weather.location.name}`, files: [attachment] });
 						}
 
 						return triesBeforeError = Infinity;

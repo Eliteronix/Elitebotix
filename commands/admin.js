@@ -6164,45 +6164,45 @@ module.exports = {
 				},
 			});
 
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'osu-compare',
-					description: 'Sends an info card about the score of the specified player on the last map sent into the channel',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'username',
-							'description': 'The username, id or link of the player to compare',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username2',
-							'description': 'The username, id or link of the player to compare',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username3',
-							'description': 'The username, id or link of the player to compare',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username4',
-							'description': 'The username, id or link of the player to compare',
-							'type': 3,
-							'required': false
-						},
-						{
-							'name': 'username5',
-							'description': 'The username, id or link of the player to compare',
-							'type': 3,
-							'required': false
-						},
-					]
-				},
-			});
+			// await msg.client.api.applications(msg.client.user.id).commands.post({
+			// 	data: {
+			// 		name: 'osu-compare',
+			// 		description: 'Sends an info card about the score of the specified player on the last map sent into the channel',
+			// 		dm_permission: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'username',
+			// 				'description': 'The username, id or link of the player to compare',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'username2',
+			// 				'description': 'The username, id or link of the player to compare',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'username3',
+			// 				'description': 'The username, id or link of the player to compare',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'username4',
+			// 				'description': 'The username, id or link of the player to compare',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'username5',
+			// 				'description': 'The username, id or link of the player to compare',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 		]
+			// 	},
+			// });
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

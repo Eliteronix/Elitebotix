@@ -1,6 +1,7 @@
 const { DBGuilds } = require('../dbObjects');
 const { Permissions } = require('discord.js');
 const { logDatabaseQueries } = require('../utils');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'toggletickets',
@@ -12,13 +13,19 @@ module.exports = {
 	cooldown: 5,
 	tags: 'server-admin',
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
+	async execute(msg, args, interaction) {
+		try {
+			await interaction.deferReply({ ephemeral: true });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
+		}
 		logDatabaseQueries(4, 'commands/toggletickets.js DBGuilds');
 		//get guild from db
 		const guild = await DBGuilds.findOne({
-			where: { guildId: msg.guildId },
+			where: { guildId: interaction.guildId },
 		});
 
 		//Check if guild exists in db
@@ -33,14 +40,14 @@ module.exports = {
 
 			//output change
 			if (guild.ticketsEnabled) {
-				msg.reply('Tickets have been enabled');
+				interaction.editReply('Tickets have been enabled');
 			} else {
-				msg.reply('Tickets have been disabled');
+				interaction.editReply('Tickets have been disabled');
 			}
 		} else {
 			//Create guild in db if it wasn't there yet and disable it by default
-			DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, ticketsEnabled: true });
-			msg.reply('Tickets have been enabled');
+			DBGuilds.create({ guildId: interaction.guildId, guildName: interaction.guild.name, ticketsEnabled: true });
+			interaction.editReply('Tickets have been enabled');
 		}
 	},
 };

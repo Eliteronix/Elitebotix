@@ -2,6 +2,7 @@ const { Permissions } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'reminders-delete',
@@ -15,9 +16,16 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, processQueueEntry) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		let userReminderId;
 		if (interaction) {
+			try {
+				await interaction.deferReply({ ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 			msg = await populateMsgFromInteraction(interaction);
 			userReminderId = interaction.options._hoistedOptions[0].value;
 		} else {
@@ -42,7 +50,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply('There are no reminders set for you');
 			}
-			return interaction.reply({ content: 'There are no reminders set for you', ephemeral: true });
+			return interaction.editReply({ content: 'There are no reminders set for you', ephemeral: true });
 		}
 
 		try {
@@ -55,12 +63,12 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply('Reminder has been successfully deleted');
 			}
-			return interaction.reply({ content: 'Reminder has been successfully deleted', ephemeral: true });
+			return interaction.editReply({ content: 'Reminder has been successfully deleted', ephemeral: true });
 		} catch (error) {
 			if (msg.id) {
 				return msg.reply('There are no reminders with the given ID');
 			}
-			return interaction.reply({ content: 'There are no reminders with the given ID', ephemeral: true });
+			return interaction.editReply({ content: 'There are no reminders with the given ID', ephemeral: true });
 		}
 
 	}

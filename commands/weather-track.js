@@ -2,6 +2,7 @@ const { DBProcessQueue } = require('../dbObjects');
 const weather = require('weather-js');
 const { Permissions } = require('discord.js');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'weather-track',
@@ -15,11 +16,17 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.deferReply({ ephemeral: true });
+			try {
+				await interaction.deferReply({ ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
 			if (interaction.options._subcommand === 'list') {
 				args = ['list'];

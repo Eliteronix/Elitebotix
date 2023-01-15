@@ -16,9 +16,13 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (!interaction) {
-			return msg.reply('Please use the slash command `/osu-matchscore` instead.');
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
 		}
 
 		msg = await populateMsgFromInteraction(interaction);
@@ -61,7 +65,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`You didn't provide a valid match ID or URL.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);
 				} else {
-					return interaction.reply(`You didn't provide a valid match ID or URL.\nUsage: \`/${this.name} ${this.usage}\``);
+					return interaction.followUp(`You didn't provide a valid match ID or URL.\nUsage: \`/${this.name} ${this.usage}\``);
 				}
 			}
 		}
@@ -69,16 +73,6 @@ module.exports = {
 		osuApi.getMatch({ mp: matchId })
 			.then(async (match) => {
 				saveOsuMultiScores(match);
-				if (interaction) {
-					try {
-						await interaction.reply('Matchscores are getting calculated');
-					} catch (error) {
-						if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-							console.error(error);
-						}
-						return;
-					}
-				}
 				let processingMessage = await msg.channel.send('Processing osu! match leaderboard...');
 				let warmups = 2;
 				let warmupsReason = `Assumed ${warmups} warmups.`;

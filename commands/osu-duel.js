@@ -22,10 +22,6 @@ module.exports = {
 	tags: 'osu',
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (msg) {
-			return msg.reply('Please use the / command `/osu-duel`');
-		}
 		if (interaction) {
 			if (interaction.options._subcommand === 'match1v1' ||
 				interaction.options._subcommand === 'match2v2' ||
@@ -1365,7 +1361,14 @@ module.exports = {
 
 				return await interaction.followUp({ content: explaination.join('\n'), files: files, ephemeral: true });
 			} else if (interaction.options._subcommand === 'rating-spread') {
-				await interaction.deferReply();
+				try {
+					await interaction.deferReply();
+				} catch (error) {
+					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+						console.error(error);
+					}
+					return;
+				}
 
 				const width = 1500; //px
 				const height = 750; //px
@@ -1528,7 +1531,14 @@ module.exports = {
 
 				interaction.editReply({ content: `${guildName} osu! Duel League Rating Spread`, files: [attachment] });
 			} else if (interaction.options._subcommand === 'rating-updates') {
-				await interaction.deferReply({ ephemeral: true });
+				try {
+					await interaction.deferReply({ ephemeral: true });
+				} catch (error) {
+					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+						console.error(error);
+					}
+					return;
+				}
 
 				let enable = false;
 
@@ -1566,7 +1576,14 @@ module.exports = {
 
 				return interaction.editReply('You will no longer receive osu! Duel rating updates.');
 			} else if (interaction.options._subcommand === 'queue1v1') {
-				await interaction.deferReply({ ephemeral: true });
+				try {
+					await interaction.deferReply({ ephemeral: true });
+				} catch (error) {
+					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+						console.error(error);
+					}
+					return;
+				}
 
 				msg = await populateMsgFromInteraction(interaction);
 

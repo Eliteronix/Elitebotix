@@ -1,5 +1,6 @@
 const { Permissions } = require('discord.js');
 const { populateMsgFromInteraction } = require('../utils');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'prune',
@@ -12,13 +13,21 @@ module.exports = {
 	tags: 'server-admin',
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		if (interaction) {
+			try {
+				await interaction.deferReply({ ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
+
 			msg = await populateMsgFromInteraction(interaction);
 
 			args = [interaction.options._hoistedOptions[0].value];
 
-			interaction.reply({ content: 'Deleted messages', ephemeral: true });
+			interaction.followUp({ content: 'Deleted messages', ephemeral: true });
 		}
 		//Set amount by argument + 1
 		const amount = parseInt(args[0]) + 1;
@@ -37,7 +46,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply('there was an error trying to prune messages in this channel!');
 			}
-			return interaction.reply({ content: 'There was an error trying to prune messages in this channel', ephemeral: true });
+			return interaction.followUp({ content: 'There was an error trying to prune messages in this channel', ephemeral: true });
 		});
 	},
 };

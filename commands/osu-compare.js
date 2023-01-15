@@ -1,4 +1,4 @@
-const { populateMsgFromInteraction, getOsuBeatmap } = require('../utils');
+const { getOsuBeatmap } = require('../utils');
 const { Permissions } = require('discord.js');
 
 module.exports = {
@@ -12,20 +12,6 @@ module.exports = {
 	tags: 'osu',
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			await interaction.reply('Score will be compared');
-
-			args = [];
-
-			if (interaction.options._hoistedOptions) {
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					args.push(interaction.options._hoistedOptions[i].value);
-				}
-			}
-		}
 		msg.channel.messages.fetch({ limit: 100 })
 			.then(async (messages) => {
 				const allRegex = /.+\nSpectate: .+\nBeatmap: .+\nosu! direct: .+/gm;
@@ -53,14 +39,7 @@ module.exports = {
 
 				const command = require('./osu-score.js');
 
-				try {
-					command.execute(msg, newArgs, null, additionalObjects);
-				} catch (error) {
-					console.error(error);
-					const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
-					msg.reply('There was an error trying to execute that command. The developers have been alerted.');
-					eliteronixUser.send(`There was an error trying to execute a command.\n\nMessage by ${msg.author.username}#${msg.author.discriminator}: \`${msg.content}\`\n\n${error}`);
-				}
+				command.execute(msg, newArgs, null, additionalObjects);
 			});
 	},
 };

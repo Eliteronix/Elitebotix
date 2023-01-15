@@ -1,7 +1,7 @@
 //Require discord.js module
 const Discord = require('discord.js');
-const { populateMsgFromInteraction } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'server-info',
@@ -14,30 +14,29 @@ module.exports = {
 	tags: 'general',
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-			await interaction.reply('Server info card will be sent');
+		try {
+			await interaction.deferReply({ ephemeral: true });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
 		}
 
 		const guildInfoEmbed = new Discord.MessageEmbed()
 			.setColor('#ffcc00')
-			.setTitle(`${msg.guild.name}`)
+			.setTitle(`${interaction.guild.name}`)
 			.addFields(
-				{ name: 'Server Owner', value: `${msg.client.users.cache.find(user => user.id === `${msg.guild.ownerId}`)}` },
-				{ name: 'Member count', value: `${msg.guild.memberCount}` },
-				{ name: 'AFK Timeout', value: `${msg.guild.afkTimeout / 60} minutes` }
+				{ name: 'Server Owner', value: `${interaction.client.users.cache.find(user => user.id === `${interaction.guild.ownerId}`)}` },
+				{ name: 'Member count', value: `${interaction.guild.memberCount}` },
+				{ name: 'AFK Timeout', value: `${interaction.guild.afkTimeout / 60} minutes` }
 			)
 			.setTimestamp();
 
-		if (msg.guild.iconURL()) {
-			guildInfoEmbed.setThumbnail(`${msg.guild.iconURL()}`);
+		if (interaction.guild.iconURL()) {
+			guildInfoEmbed.setThumbnail(`${interaction.guild.iconURL()}`);
 		}
 
-		if (msg.id) {
-			return msg.reply({ embeds: [guildInfoEmbed] });
-		}
-		return interaction.followUp({ embeds: [guildInfoEmbed] });
+		return interaction.editReply({ embeds: [guildInfoEmbed] });
 	},
 };

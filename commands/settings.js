@@ -1,7 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBAutoRoles } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'settings',
@@ -11,25 +12,26 @@ module.exports = {
 	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,
-	tags: 'general',
+	tags: 'server-admin',
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			await interaction.reply('Server settings info card will be sent');
+		try {
+			await interaction.deferReply({ ephemeral: true });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
 		}
 
 		//Get bot member
-		const member = await msg.guild.members.fetch(msg.client.user.id);
+		const member = await interaction.guild.members.fetch(interaction.client.user.id);
 
-		const user = await msg.client.users.fetch(msg.client.user.id);
+		const user = await interaction.client.users.fetch(interaction.client.user.id);
 
 		logDatabaseQueries(4, 'commands/settings.js DBGuilds');
 		const guild = await DBGuilds.findOne({
-			where: { guildId: msg.guildId },
+			where: { guildId: interaction.guildId },
 		});
 
 		let membername;
@@ -58,16 +60,14 @@ module.exports = {
 
 		logDatabaseQueries(4, 'commands/settings.js DBAutoRoles');
 		//get all autoRoles for the guild
-		const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: msg.guildId } });
+		const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: interaction.guildId } });
 		//iterate for every autorole in the array
 		for (let i = 0; i < autoRolesList.length; i++) {
 			//get role object by role Id
-			let autoRole = msg.guild.roles.cache.get(autoRolesList[i].roleId);
+			let autoRole = interaction.guild.roles.cache.get(autoRolesList[i].roleId);
 			//Set array index to the role name for the output
 			autoRolesList[i] = autoRole.name;
 		}
-
-		let guildPrefix = await getGuildPrefix(msg);
 
 		//Set the output string
 		const autoRolesString = autoRolesList.join(', ') || 'None.';
@@ -89,7 +89,6 @@ module.exports = {
 			.setTitle(`${membername} server settings`)
 			.setThumbnail(`${user.displayAvatarURL({ dynamic: true })}`)
 			.addFields(
-				{ name: 'Prefix', value: `${guildPrefix}` },
 				{ name: 'Welcome-Messages', value: `${welcomeMessage}` },
 				{ name: 'Goodbye-Messages', value: `${goodbyeMessage}` },
 				{ name: 'Autoroles', value: `${autoRolesString}` },
@@ -98,9 +97,6 @@ module.exports = {
 			)
 			.setTimestamp();
 
-		if (msg.id) {
-			return msg.reply({ embeds: [guildBotInfoEmbed] });
-		}
-		return interaction.followUp({ embeds: [guildBotInfoEmbed] });
+		return interaction.editReply({ embeds: [guildBotInfoEmbed] });
 	},
 };
