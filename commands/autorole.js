@@ -1,6 +1,7 @@
 const { DBAutoRoles } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'autorole',
@@ -18,118 +19,71 @@ module.exports = {
 	tags: 'server-admin',
 	prefixCommand: true,
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			args = [interaction.options._subcommand];
-
-			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-				if (interaction.options._hoistedOptions[i].name === 'role') {
-					args.push(`<@&${interaction.options._hoistedOptions[i].value}>`);
-				}
+		try {
+			await interaction.deferReply({ ephemeral: true });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
+			return;
 		}
 
-		//Check the first argument
-		if (args[0] === 'add') {
-			//Check if any roles were memtioned
-			if (msg.mentions.roles.first()) {
-				//Remove <@& > and get roleId
-				const autoRoleId = args[1].replace('<@&', '').replace('>', '');
-				//get role object with id
-				let autoRoleName = msg.guild.roles.cache.get(args[1].replace('<@&', '').replace('>', ''));
-				//try to find that autorole in the db
-				logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles 1');
-				const autoRole = await DBAutoRoles.findOne({
-					where: { guildId: msg.guildId, roleId: autoRoleId },
-				});
+		let role = interaction.options.getRole('role');
 
-				//If autorole already exists
-				if (autoRole) {
-					if (msg.id) {
-						return msg.reply(`${autoRoleName.name} is already an autorole.`);
-					}
-					return interaction.reply(`${autoRoleName.name} is already an autorole.`);
-				} else {
-					//If autorole doesn't exist in db then create it
-					DBAutoRoles.create({ guildId: msg.guildId, roleId: autoRoleId });
-					if (msg.id) {
-						msg.reply(`${autoRoleName.name} has been added as an autorole.`);
-					} else {
-						interaction.reply(`${autoRoleName.name} has been added as an autorole.`);
-					}
+		if (interaction.options._subcommand === 'add') {
+			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles add');
+			const autoRole = await DBAutoRoles.findOne({
+				where: { guildId: interaction.guildId, roleId: role.id },
+			});
 
-					//Get all members of the guild
-					const guildMembers = await msg.guild.members.fetch();
-
-					//Assign the role to every member
-					guildMembers.forEach(autoRole => {
-						autoRole.roles.add(autoRoleName);
-					});
-				}
-			} else {
-				//If no roles were mentioned
-				msg.reply('you didn\'t mention any roles.');
+			if (autoRole) {
+				return interaction.editReply(`${role.name} is already an autorole.`);
 			}
-			//check for first argument
-		} else if (args[0] === 'remove') {
-			//check if any roles were mentioned
-			if (msg.mentions.roles.first()) {
-				//Remove <@& > and get roleId
-				const autoRoleId = args[1].replace('<@&', '').replace('>', '');
-				//get role object with id
-				let autoRoleName = msg.guild.roles.cache.get(args[1].replace('<@&', '').replace('>', ''));
-				//Delete roles with roleId and guildId
-				const rowCount = await DBAutoRoles.destroy({ where: { guildId: msg.guildId, roleId: autoRoleId } });
-				//Send feedback message accordingly
-				if (rowCount > 0) {
-					if (msg.id) {
-						return msg.reply(`${autoRoleName.name} has been removed from autoroles.`);
-					}
-					return interaction.reply(`${autoRoleName.name} has been removed from autoroles.`);
-				} else {
-					if (msg.id) {
-						msg.reply(`${autoRoleName.name} was no autorole.`);
-					}
-					return interaction.reply(`${autoRoleName.name} was no autorole.`);
-				}
+
+			await DBAutoRoles.create({ guildId: interaction.guildId, roleId: role.id });
+
+			interaction.editReply(`${role.name} has been added as an autorole.`);
+
+			const guildMembers = await interaction.guild.members.fetch();
+
+			//Assign the role to every member
+			guildMembers.forEach(autoRole => {
+				autoRole.roles.add(role);
+			});
+		} else if (interaction.options._subcommand === 'remove') {
+			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles remove');
+			const rowCount = await DBAutoRoles.destroy({ where: { guildId: interaction.guildId, roleId: role.id } });
+
+			if (rowCount > 0) {
+				return interaction.editReply(`${role.name} has been removed from autoroles.`);
 			} else {
-				//if no roles were mentioned
-				msg.reply('you didn\'t mention any roles.');
+				return interaction.editReply(`${role.name} was no autorole.`);
 			}
-			//Check first argument
-		} else if (args[0] === 'list') {
-			//get all autoRoles for the guild
-			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles 2');
-			const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: msg.guildId } });
+		} else if (interaction.options._subcommand === 'list') {
+			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles list');
+			const autoRolesList = await DBAutoRoles.findAll({
+				where: {
+					guildId: interaction.guildId
+				}
+			});
+
 			//iterate for every autorole in the array
 			for (let i = 0; i < autoRolesList.length; i++) {
 				//get role object by role Id
-				let autoRole = msg.guild.roles.cache.get(autoRolesList[i].roleId);
+				let autoRole = interaction.guild.roles.cache.get(autoRolesList[i].roleId);
 
-				//Check if deleted role
 				if (autoRole) {
-					//Set array index to the role name for the output
 					autoRolesList[i] = autoRole.name;
 				} else {
-					DBAutoRoles.destroy({ where: { guildId: msg.guildId, roleId: autoRolesList[i].roleId } });
+					DBAutoRoles.destroy({ where: { guildId: interaction.guildId, roleId: autoRolesList[i].roleId } });
 					autoRolesList.shift();
 				}
 			}
-			//Set the output string
-			const autoRolesString = autoRolesList.join(', ') || 'No autoroles found.';
-			//Output autorole list
-			if (msg.id) {
-				return msg.reply(`List of autoroles: ${autoRolesString}`);
-			}
-			return interaction.reply(`List of autoroles: ${autoRolesString}`);
-		} else {
-			let guildPrefix = await getGuildPrefix(msg);
 
-			//If no proper first argument is given
-			msg.reply(`Please add if you want to add, remove or list the autorole(s). Proper usage: \`${guildPrefix}${this.name} ${this.usage}\``);
+			const autoRolesString = autoRolesList.join(', ') || 'No autoroles found.';
+
+			return interaction.editReply(`List of autoroles: ${autoRolesString}`);
 		}
+
 	},
 };
