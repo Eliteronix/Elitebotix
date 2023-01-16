@@ -24,26 +24,24 @@ module.exports = {
 			return;
 		}
 
-		let matchId = null;
-		let customWarmups = null;
+		let matchId = interaction.options.getString('match');
+		let customWarmups = interaction.options.getInteger('warmups');
 		let calculation = 'mixed';
+
+		if (interaction.options.getString('calculation')) {
+			calculation = interaction.options.getString('calculation');
+		}
+
 		let skiplast = 0;
+
+		if (interaction.options.getInteger('skiplast')) {
+			skiplast = interaction.options.getInteger('skiplast');
+		}
+
 		let ezmultiplier = 1.7;
 
-		if (interaction.options._hoistedOptions) {
-			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-				if (interaction.options._hoistedOptions[i].name === 'match') {
-					matchId = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'warmups') {
-					customWarmups = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'calculation') {
-					calculation = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'skiplast') {
-					skiplast = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'ezmultiplier') {
-					ezmultiplier = interaction.options._hoistedOptions[i].value;
-				}
-			}
+		if (interaction.options.getNumber('ezmultiplier')) {
+			ezmultiplier = interaction.options.getNumber('ezmultiplier');
 		}
 
 		// eslint-disable-next-line no-undef

@@ -2106,7 +2106,7 @@ module.exports = {
 			// 			{
 			// 				'name': 'ezmultiplier',
 			// 				'description': 'The EZ multiplier for the match (Default: 1.7)',
-			// 				'type': 4,
+			// 				'type': 10, // 10 is type Number
 			// 			},
 			// 		]
 			// 	}
@@ -7340,7 +7340,7 @@ module.exports = {
 						{
 							'name': 'ezmultiplier',
 							'description': 'The EZ multiplier for the match (Default: 1.7)',
-							'type': 4,
+							'type': 10, // 10 is type Number
 						},
 					]
 				}
