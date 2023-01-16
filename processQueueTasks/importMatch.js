@@ -33,9 +33,11 @@ module.exports = {
 					let daysBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60 / 24);
 					client.shard.broadcastEval(async (c, { message, matchID }) => {
 						// Remove match from client
-						if (c.duels.indexOf(matchID) > -1) {
+						while (c.duels.indexOf(matchID) > -1) {
 							c.duels.splice(c.duels.indexOf(matchID), 1);
-						} else if (c.otherMatches.indexOf(matchID) > -1) {
+						}
+
+						while (c.otherMatches.indexOf(matchID) > -1) {
 							c.otherMatches.splice(c.otherMatches.indexOf(matchID), 1);
 						}
 
