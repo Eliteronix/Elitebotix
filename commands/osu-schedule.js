@@ -5,6 +5,7 @@ const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
 const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Permissions } = require('discord.js');
 const { Op } = require('sequelize');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-schedule',
@@ -17,14 +18,20 @@ module.exports = {
 	tags: 'osu',
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
 		let weekday = 7;
 		let team1 = [];
 		let team2 = [];
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Players are being processed');
+			try {
+				await interaction.deferReply();
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
 
 			args = [];
 
@@ -73,7 +80,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						teams[i][j] = discordUser.osuUserId;
 					} else {
-						msg.channel.send(`\`${teams[i][j].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1023849632599658496>.`);
+						await interaction.followUp(`\`${teams[i][j].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1023849632599658496>.`);
 						teams[i].splice(j, 1);
 						j--;
 					}
@@ -99,9 +106,9 @@ module.exports = {
 						teams[i][j] = user.id;
 						teamsReadable[i].push(user.name);
 					})
-					.catch(err => {
+					.catch(async (err) => {
 						if (err.message === 'Not found') {
-							msg.channel.send(`Could not find user \`${teams[i][j].replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
+							await interaction.followUp(`Could not find user \`${teams[i][j].replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
 							teams[i].splice(j, 1);
 							j--;
 						} else {
@@ -112,7 +119,7 @@ module.exports = {
 		}
 
 		if (teams[0].length + teams[1].length === 0) {
-			return msg.channel.send('No users left to look for schedules.');
+			return await interaction.followUp('No users left to look for schedules.');
 		}
 
 		const width = 1500; //px
@@ -284,6 +291,6 @@ module.exports = {
 
 		let weekdayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'All Week'];
 
-		msg.channel.send({ content: `${weekdayName[weekday]} Schedule for: ${usersReadable.join(', ')}\nThe data is based on multiplayer matches evaluated by / sent to the bot`, files: [attachment] });
+		await interaction.followUp({ content: `${weekdayName[weekday]} Schedule for: ${usersReadable.join(', ')}\nThe data is based on multiplayer matches evaluated by / sent to the bot`, files: [attachment] });
 	},
 };
