@@ -38,13 +38,9 @@ module.exports = async function (msg, bancho) {
 
 		const guildPrefix = await getGuildPrefix(msg);
 
-		if (msg.content === '<@!981205694340546571>' || msg.content === '<@981205694340546571>') {
-			msg.content = `${guildPrefix}help`;
-		}
-
 		//Define if it is a command with prefix
 		//Split the message into an args array
-		let prefixCommand;
+		let prefixCommand = false;
 		let args;
 		if (msg.content.startsWith(guildPrefix)) {
 			prefixCommand = true;
@@ -63,97 +59,12 @@ module.exports = async function (msg, bancho) {
 		let command = msg.client.commands.get(commandName)
 			|| msg.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
-		//if there is no command used then break
-		if (!command && prefixCommand === true) {
-			let commandNames = [];
-			const commandArray = [];
-			msg.client.commands.each(clientCommand => commandArray.push(clientCommand));
-
-			//define variables
-			const categories = ['general', 'server-admin', 'osu', 'misc'];
-
-			//Developer
-			if (developers.includes(msg.author.id)) {
-				categories.push('debug');
-			}
-
-			logDatabaseQueries(3, 'gotMessage.js DBElitiriCupSignUp');
-			//elitiri player
-			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-				where: { tournamentName: currentElitiriCup, userId: msg.author.id }
-			});
-
-			if (elitiriSignUp) {
-				categories.push('elitiri');
-			}
-
-			let authorPerms;
-
-			if (msg.channel.type !== 'DM') {
-				authorPerms = msg.channel.permissionsFor(msg.member);
-			} else {
-				const flags = [
-					Permissions.FLAGS.SEND_MESSAGES,
-					Permissions.FLAGS.ATTACH_FILES,
-				];
-
-				authorPerms = new Permissions(flags);
-			}
-
-			for (let i = 0; i < commandArray.length; i++) {
-				if (commandArray[i].prefixCommand === true && categories.includes(commandArray[i].tags) && commandArray[i].permissions && authorPerms.has(commandArray[i].permissions) ||
-					commandArray[i].prefixCommand === true && categories.includes(commandArray[i].tags)) {
-					commandNames.push(commandArray[i].name);
-					if (commandArray[i].aliases) {
-						for (let j = 0; j < commandArray[i].aliases.length; j++) {
-							commandNames.push(commandArray[i].aliases[j]);
-						}
-					}
-				}
-			}
-
-			const closestMatch = closest(commandName, commandNames);
-
-			let closestMatchMessage;
-
-			//.replace(/`/g, '')
-
-			for (let i = 0; i < args.length; i++) {
-				args[i] = args[i].replace(/`/g, '');
-			}
-
-			if (args[0]) {
-				try {
-					closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch} ${args.join(' ')}\`?`);
-				} catch (e) {
-					//Nothing as its an optional feature
-				}
-			} else {
-				try {
-					closestMatchMessage = await msg.reply(`I could not find the command \`${guildPrefix}${commandName}\`.\nDid you mean \`${guildPrefix}${closestMatch}\`?`);
-				} catch (e) {
-					//Nothing as its an optional feature
-				}
-			}
-
-			if (closestMatchMessage) {
-				try {
-					await closestMatchMessage.react('✅');
-					await closestMatchMessage.react('❌');
-				} catch (e) {
-					msg.reply('I don\'t have permissions to add reactions. Please notify an admin so that you just need to click an emote to fix your typos.');
-				}
-			}
-
-			return;
-		}
-
 		if (!command) {
 			return;
 		}
 
 		//Check if prefix has to be used or not
-		if (command.prefixCommand !== prefixCommand) return;
+		if (!prefixCommand) return;
 
 		//Check if the command can't be used outside of DMs
 		if (command.guildOnly && msg.channel.type === 'DM') {
