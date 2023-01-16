@@ -33,6 +33,6 @@ module.exports = {
 
 		const result = Math.floor(Math.random() * max) + 1;
 
-		return interaction.reply(`<@${interaction.user.id}> rolled ${result}!`);
+		return await interaction.editReply(`<@${interaction.user.id}> rolled ${result}!`);
 	},
 };
