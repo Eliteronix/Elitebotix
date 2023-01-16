@@ -27,7 +27,7 @@ module.exports = async function (msg, bancho) {
 	});
 
 	if (!developers.includes(msg.author.id) && !discordUser) {
-		return msg.reply('Prefix commands have been depricated. Please use the /-commands instead.');
+		return;
 	}
 
 	//Create a collection for the commands
