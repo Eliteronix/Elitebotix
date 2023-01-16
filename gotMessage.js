@@ -18,9 +18,6 @@ module.exports = async function (msg, bancho) {
 	//Handle Ticket
 	handleTicketStatus(msg);
 
-	//Save all osu! matches when found
-	saveSentOsuMatches(msg, args);
-
 	//Return if not developer or earlyaccess
 	let discordUser = await DBDiscordUsers.findOne({
 		where: {
