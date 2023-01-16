@@ -2,155 +2,102 @@ const { getGuildPrefix, updateServerUserActivity, saveOsuMultiScores, isWrongSys
 const fs = require('fs');
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const cooldowns = new Discord.Collection();
-const { closest } = require('fastest-levenshtein');
 const { Permissions } = require('discord.js');
-const { DBElitiriCupSignUp, DBTickets } = require('./dbObjects');
-const { developers, currentElitiriCup } = require('./config.json');
+const { DBTickets, DBDiscordUsers } = require('./dbObjects');
+const { developers } = require('./config.json');
 
 module.exports = async function (msg, bancho) {
 	//check if the message wasn't sent by the bot itself or another bot
-	if (!(msg.author.bot) || msg.channel.id === '892873577479692358') {
-		//Create a collection for the commands
-		msg.client.commands = new Discord.Collection();
+	if (msg.author.bot) {
+		return;
+	}
 
-		//get all command files
-		const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+	//Update user activity
+	updateServerUserActivity(msg);
 
-		//Add the commands from the command files to the client.commands collection
-		for (const file of commandFiles) {
-			const command = require(`./commands/${file}`);
+	//Handle Ticket
+	handleTicketStatus(msg);
 
-			// set a new item in the Collection
-			// with the key as the command name and the value as the exported module
-			msg.client.commands.set(command.name, command);
+	//Save all osu! matches when found
+	saveSentOsuMatches(msg, args);
+
+	//Return if not developer or earlyaccess
+	let discordUser = await DBDiscordUsers.findOne({
+		where: {
+			userId: msg.author.id,
+			patreon: true,
 		}
+	});
 
-		if (isWrongSystem(msg.guildId, msg.channel.type === 'DM')) {
-			return;
-		}
+	if (!developers.includes(msg.author.id) && !discordUser) {
+		return msg.reply('Prefix commands have been depricated. Please use the /-commands instead.');
+	}
 
-		//Update user activity
-		updateServerUserActivity(msg);
+	//Create a collection for the commands
+	msg.client.commands = new Discord.Collection();
 
-		//Handle Ticket
-		handleTicketStatus(msg);
+	//get all command files
+	const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
-		const guildPrefix = await getGuildPrefix(msg);
+	//Add the commands from the command files to the client.commands collection
+	for (const file of commandFiles) {
+		const command = require(`./commands/${file}`);
 
-		//Define if it is a command with prefix
-		//Split the message into an args array
-		let prefixCommand = false;
-		let args;
-		if (msg.content.startsWith(guildPrefix)) {
-			prefixCommand = true;
-			args = msg.content.slice(guildPrefix.length).trim().split(/ +/);
-		} else {
-			args = msg.content.trim().split(/ +/);
-		}
+		// set a new item in the Collection
+		// with the key as the command name and the value as the exported module
+		msg.client.commands.set(command.name, command);
+	}
 
-		//Save all osu! matches when found
-		saveSentOsuMatches(msg, args);
+	if (isWrongSystem(msg.guildId, msg.channel.type === 'DM')) {
+		return;
+	}
 
-		//Delete the first item from the args array and use it for the command variable
-		let commandName = args.shift().toLowerCase();
+	const guildPrefix = await getGuildPrefix(msg);
 
-		//Set the command and check for possible uses of aliases
-		let command = msg.client.commands.get(commandName)
-			|| msg.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+	//Define if it is a command with prefix
+	//Split the message into an args array
+	if (!msg.content.startsWith(guildPrefix)) {
+		return;
+	}
 
-		if (!command) {
-			return;
-		}
+	let args = msg.content.slice(guildPrefix.length).trim().split(/ +/);
 
-		//Check if prefix has to be used or not
-		if (!prefixCommand) return;
+	//Delete the first item from the args array and use it for the command variable
+	let commandName = args.shift().toLowerCase();
 
-		//Check if the command can't be used outside of DMs
-		if (command.guildOnly && msg.channel.type === 'DM') {
-			return msg.reply('I can\'t execute that command inside DMs!');
-		}
+	//Set the command and check for possible uses of aliases
+	let command = msg.client.commands.get(commandName)
+		|| msg.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
-		//Check permissions of the user
-		if (command.permissions) {
-			const authorPerms = msg.channel.permissionsFor(msg.member);
-			if (!authorPerms || !authorPerms.has(command.permissions)) {
-				return msg.reply(`You need the ${command.permissionsTranslated} permission to do this!`);
-			}
-		}
+	if (!command) {
+		return;
+	}
 
-		//Check permissions of the bot
-		if (msg.channel.type !== 'DM') {
-			const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch(msg.client.user.id));
-			if (!botPermissions || !botPermissions.has(Permissions.FLAGS.SEND_MESSAGES) || !botPermissions.has(Permissions.FLAGS.READ_MESSAGE_HISTORY)) {
-				//The bot can't possibly answer the message
-				return;
-			}
-
-			//Check the command permissions
-			if (command.botPermissions) {
-				if (!botPermissions.has(command.botPermissions)) {
-					return msg.reply(`I need the ${command.botPermissionsTranslated} permission to do this!`);
-				}
-			}
-		}
-
-		//Check if arguments are provided if needed
-		if (command.args && !args.length) {
-			//Set standard reply
-			let reply = 'You didn\'t provide any arguments.';
-
-			//Set reply with usage if needed.
-			if (command.usage) {
-				reply += `\nThe proper usage would be: \`${guildPrefix}${command.name} ${command.usage}\``;
-			}
-
-			//Send message
-			return msg.reply(reply);
-		}
-
-		//Check if the cooldown collection has the command already; if not write it in
-		if (!cooldowns.has(command.name)) {
-			cooldowns.set(command.name, new Discord.Collection());
-		}
-
-		//Set current time
-		const now = Date.now();
-		//gets the collections for the current command used
-		const timestamps = cooldowns.get(command.name);
-		//set necessary cooldown amount; if non stated in command default to 5; calculate ms afterwards
-		const cooldownAmount = (command.cooldown || 5) * 1000;
-
-		//get expiration times for the cooldowns for the authorId
-		if (timestamps.has(msg.author.id)) {
-			const expirationTime = timestamps.get(msg.author.id) + cooldownAmount;
-
-			//If cooldown didn't expire yet send cooldown message
-			if (command.noCooldownMessage) {
-				return;
-			} else if (now < expirationTime) {
-				const timeLeft = (expirationTime - now) / 1000;
-				return msg.reply(`Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
-			}
-		}
-
-		//Set timestamp for the used command
-		if (!developers.includes(msg.author.id)) {
-			timestamps.set(msg.author.id, now);
-		}
-		//Automatically delete the timestamp after the cooldown
-		setTimeout(() => timestamps.delete(msg.author.id), cooldownAmount);
-
-		try {
-			let additionalObjects = [msg.client, bancho];
-			command.execute(msg, args, null, additionalObjects);
-		} catch (error) {
-			console.error(error);
-			const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
-			msg.reply('There was an error trying to execute that command. The developers have been alerted.');
-			eliteronixUser.send(`There was an error trying to execute a command.\n\nMessage by ${msg.author.username}#${msg.author.discriminator}: \`${msg.content}\`\n\n${error}`);
+	//Check permissions of the user
+	if (command.permissions) {
+		const authorPerms = msg.channel.permissionsFor(msg.member);
+		if (!authorPerms || !authorPerms.has(command.permissions)) {
+			return msg.reply(`You need the ${command.permissionsTranslated} permission to do this!`);
 		}
 	}
+
+	//Check permissions of the bot
+	if (msg.channel.type !== 'DM') {
+		const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch(msg.client.user.id));
+		if (!botPermissions || !botPermissions.has(Permissions.FLAGS.SEND_MESSAGES) || !botPermissions.has(Permissions.FLAGS.READ_MESSAGE_HISTORY)) {
+			//The bot can't possibly answer the message
+			return;
+		}
+
+		//Check the command permissions
+		if (command.botPermissions) {
+			if (!botPermissions.has(command.botPermissions)) {
+				return msg.reply(`I need the ${command.botPermissionsTranslated} permission to do this!`);
+			}
+		}
+	}
+
+	command.execute(msg, args, null, [msg.client, bancho]);
 };
 
 async function handleTicketStatus(msg) {
