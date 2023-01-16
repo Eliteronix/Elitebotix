@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getGuildPrefix, createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, populateMsgFromInteraction, logDatabaseQueries, getMods } = require('../utils');
+const { createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, logDatabaseQueries, getMods } = require('../utils');
 const { DBDiscordUsers } = require('../dbObjects');
 const { Permissions } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -15,7 +15,6 @@ module.exports = {
 	tags: 'osu',
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		//TODO: Remove message code and replace with interaction code
 		try {
 			await interaction.deferReply();
 		} catch (error) {
@@ -24,8 +23,6 @@ module.exports = {
 			}
 			return;
 		}
-
-		msg = await populateMsgFromInteraction(interaction);
 
 		let matchId = null;
 		let customWarmups = null;
@@ -61,19 +58,13 @@ module.exports = {
 			if (matchId.startsWith('https://osu.ppy.sh/community/matches/') || matchId.startsWith('https://osu.ppy.sh/mp/')) {
 				matchId = getIDFromPotentialOsuLink(matchId);
 			} else {
-				const guildPrefix = await getGuildPrefix(msg);
-				if (msg.id) {
-					return msg.reply(`You didn't provide a valid match ID or URL.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);
-				} else {
-					return interaction.followUp(`You didn't provide a valid match ID or URL.\nUsage: \`/${this.name} ${this.usage}\``);
-				}
+				return await interaction.editReply('You didn\'t provide a valid match ID or URL.');
 			}
 		}
 
 		osuApi.getMatch({ mp: matchId })
 			.then(async (match) => {
 				saveOsuMultiScores(match);
-				let processingMessage = await msg.channel.send('Processing osu! match leaderboard...');
 				let warmups = 2;
 				let warmupsReason = `Assumed ${warmups} warmups.`;
 				if (customWarmups !== null) {
@@ -97,7 +88,7 @@ module.exports = {
 				}
 
 				if (match.games.length === 0) {
-					return msg.channel.send(`${warmupsReason}\n${skiplastReason}There seems to be no maps left after removing the warmups.`);
+					return await interaction.editReply(`${warmupsReason}\n${skiplastReason}There seems to be no maps left after removing the warmups.`);
 				}
 
 				let playerMatchResults = [];
@@ -150,6 +141,12 @@ module.exports = {
 								if (j === 0) {
 									existingScore.wins += 1;
 								}
+
+								if (gameScores[j].team === 'Blue') {
+									existingScore.color = '#3498DB';
+								} else if (gameScores[j].team === 'Red') {
+									existingScore.color = '#FF6961';
+								}
 							} else {
 								let newScore = {
 									userId: gameScores[j].userId,
@@ -160,6 +157,12 @@ module.exports = {
 
 								if (j === 0) {
 									newScore.wins = 1;
+								}
+
+								if (gameScores[j].team === 'Blue') {
+									newScore.color = '#3498DB';
+								} else if (gameScores[j].team === 'Red') {
+									newScore.color = '#FF6961';
 								}
 
 								playerMatchResults.push(newScore);
@@ -190,7 +193,7 @@ module.exports = {
 				}
 
 				if (playerMatchResults.length === 0) {
-					return processingMessage.edit('No rounds with at least 2 players found in the match.');
+					return await interaction.editReply('No rounds with at least 2 players found in the match.');
 				}
 
 				quicksort(playerMatchResults);
@@ -232,6 +235,7 @@ module.exports = {
 					let dataset = {
 						name: playerName,
 						value: `Value: ${Math.round(playerMatchResults[i].score * 100) / 100} ${valueType} over ${playerMatchResults[i].playedRounds} played rounds (${playerMatchResults[i].wins}x #1})`,
+						color: playerMatchResults[i].color,
 					};
 
 					leaderboardData.push(dataset);
@@ -240,16 +244,11 @@ module.exports = {
 				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${match.name}`, `osu-match-${match.name}.png`);
 
 				//Send attachment
-				await msg.channel.send({ content: `The leaderboard shows the evaluation of the players that participated in the match.\n${warmupsReason}\n${skiplastReason}${valueHint}\n<https://osu.ppy.sh/community/matches/${match.id}>`, files: [attachment] });
-				processingMessage.delete();
+				return await interaction.editReply({ content: `The leaderboard shows the evaluation of the players that participated in the match.\n${warmupsReason}\n${skiplastReason}${valueHint}\n<https://osu.ppy.sh/community/matches/${match.id}>`, files: [attachment] });
 			})
-			.catch(err => {
+			.catch(async (err) => {
 				if (err.message === 'Not found') {
-					if (msg.id) {
-						return msg.reply(`Could not find match \`${matchId.replace(/`/g, '')}\`.`);
-					} else {
-						return interaction.followUp(`Could not find match \`${matchId.replace(/`/g, '')}\`.`);
-					}
+					return await interaction.editReply(`Could not find match \`${matchId.replace(/`/g, '')}\`.`);
 				} else {
 					console.error(err);
 				}

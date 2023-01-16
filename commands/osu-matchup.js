@@ -762,9 +762,9 @@ module.exports = {
 		ctx.fillText(`${directFreeModWins[0][0] + directFreeModWins[1][0]} - ${directFreeModWins[0][1] + directFreeModWins[1][1]}`, 250, 490);
 		ctx.fillStyle = '#ffffff';
 		if (directNoModWins[0][0] + directNoModWins[1][0] + directHiddenWins[0][0] + directHiddenWins[1][0] + directHardRockWins[0][0] + directHardRockWins[1][0] + directDoubleTimeWins[0][0] + directDoubleTimeWins[1][0] + directFreeModWins[0][0] + directFreeModWins[1][0] > directNoModWins[0][1] + directNoModWins[1][1] + directHiddenWins[0][1] + directHiddenWins[1][1] + directHardRockWins[0][1] + directHardRockWins[1][1] + directDoubleTimeWins[0][1] + directDoubleTimeWins[1][1] + directFreeModWins[0][1] + directFreeModWins[1][1]) {
-			ctx.fillStyle = '#2299BB';
+			ctx.fillStyle = '#3498DB';
 		} else if (directNoModWins[0][0] + directNoModWins[1][0] + directHiddenWins[0][0] + directHiddenWins[1][0] + directHardRockWins[0][0] + directHardRockWins[1][0] + directDoubleTimeWins[0][0] + directDoubleTimeWins[1][0] + directFreeModWins[0][0] + directFreeModWins[1][0] < directNoModWins[0][1] + directNoModWins[1][1] + directHiddenWins[0][1] + directHiddenWins[1][1] + directHardRockWins[0][1] + directHardRockWins[1][1] + directDoubleTimeWins[0][1] + directDoubleTimeWins[1][1] + directFreeModWins[0][1] + directFreeModWins[1][1]) {
-			ctx.fillStyle = '#BB1177';
+			ctx.fillStyle = '#FF6961';
 		}
 		ctx.fillText(`${directNoModWins[0][0] + directNoModWins[1][0] + directHiddenWins[0][0] + directHiddenWins[1][0] + directHardRockWins[0][0] + directHardRockWins[1][0] + directDoubleTimeWins[0][0] + directDoubleTimeWins[1][0] + directFreeModWins[0][0] + directFreeModWins[1][0]} - ${directNoModWins[0][1] + directNoModWins[1][1] + directHiddenWins[0][1] + directHiddenWins[1][1] + directHardRockWins[0][1] + directHardRockWins[1][1] + directDoubleTimeWins[0][1] + directDoubleTimeWins[1][1] + directFreeModWins[0][1] + directFreeModWins[1][1]}`, 250, 580);
 
@@ -787,9 +787,9 @@ module.exports = {
 		ctx.fillText(`${indirectFreeModWins[0][0] + indirectFreeModWins[1][0]} - ${indirectFreeModWins[0][1] + indirectFreeModWins[1][1]}`, 750, 490);
 		ctx.fillStyle = '#ffffff';
 		if (indirectNoModWins[0][0] + indirectNoModWins[1][0] + indirectHiddenWins[0][0] + indirectHiddenWins[1][0] + indirectHardRockWins[0][0] + indirectHardRockWins[1][0] + indirectDoubleTimeWins[0][0] + indirectDoubleTimeWins[1][0] + indirectFreeModWins[0][0] + indirectFreeModWins[1][0] > indirectNoModWins[0][1] + indirectNoModWins[1][1] + indirectHiddenWins[0][1] + indirectHiddenWins[1][1] + indirectHardRockWins[0][1] + indirectHardRockWins[1][1] + indirectDoubleTimeWins[0][1] + indirectDoubleTimeWins[1][1] + indirectFreeModWins[0][1] + indirectFreeModWins[1][1]) {
-			ctx.fillStyle = '#2299BB';
+			ctx.fillStyle = '#3498DB';
 		} else if (indirectNoModWins[0][0] + indirectNoModWins[1][0] + indirectHiddenWins[0][0] + indirectHiddenWins[1][0] + indirectHardRockWins[0][0] + indirectHardRockWins[1][0] + indirectDoubleTimeWins[0][0] + indirectDoubleTimeWins[1][0] + indirectFreeModWins[0][0] + indirectFreeModWins[1][0] < indirectNoModWins[0][1] + indirectNoModWins[1][1] + indirectHiddenWins[0][1] + indirectHiddenWins[1][1] + indirectHardRockWins[0][1] + indirectHardRockWins[1][1] + indirectDoubleTimeWins[0][1] + indirectDoubleTimeWins[1][1] + indirectFreeModWins[0][1] + indirectFreeModWins[1][1]) {
-			ctx.fillStyle = '#BB1177';
+			ctx.fillStyle = '#FF6961';
 		}
 		ctx.fillText(`${indirectNoModWins[0][0] + indirectNoModWins[1][0] + indirectHiddenWins[0][0] + indirectHiddenWins[1][0] + indirectHardRockWins[0][0] + indirectHardRockWins[1][0] + indirectDoubleTimeWins[0][0] + indirectDoubleTimeWins[1][0] + indirectFreeModWins[0][0] + indirectFreeModWins[1][0]} - ${indirectNoModWins[0][1] + indirectNoModWins[1][1] + indirectHiddenWins[0][1] + indirectHiddenWins[1][1] + indirectHardRockWins[0][1] + indirectHardRockWins[1][1] + indirectDoubleTimeWins[0][1] + indirectDoubleTimeWins[1][1] + indirectFreeModWins[0][1] + indirectFreeModWins[1][1]}`, 750, 580);
 
@@ -799,7 +799,7 @@ module.exports = {
 		//Add a stroke around
 		ctx.beginPath();
 		ctx.arc(90, 90, 85, 0, Math.PI * 2);
-		ctx.strokeStyle = '#2299BB';
+		ctx.strokeStyle = '#3498DB';
 		ctx.lineWidth = 5;
 		ctx.stroke();
 
@@ -824,7 +824,7 @@ module.exports = {
 		//Add a stroke around
 		ctx.beginPath();
 		ctx.arc(910, 90, 85, 0, Math.PI * 2);
-		ctx.strokeStyle = '#BB1177';
+		ctx.strokeStyle = '#FF6961';
 		ctx.lineWidth = 5;
 		ctx.stroke();
 
@@ -1384,9 +1384,9 @@ function quicksortMapsPlayedReadable(list, start = 0, end = undefined) {
 function getColor(array) {
 	let color = '#ffffff';
 	if (array[0][0] + array[1][0] > array[0][1] + array[1][1]) {
-		color = '#2299BB';
+		color = '#3498DB';
 	} else if (array[0][0] + array[1][0] < array[0][1] + array[1][1]) {
-		color = '#BB1177';
+		color = '#FF6961';
 	}
 
 	return color;
