@@ -100,6 +100,9 @@ module.exports = {
 			where: {
 				osuUserId: osuUser.osuUserId,
 				tourneyMatch: true,
+				matchName: {
+					[Op.notLike]: 'MOTD:%',
+				},
 			},
 			group: ['matchId'],
 		});
@@ -271,126 +274,6 @@ module.exports = {
 
 		tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
 
-		// Get the user's duel ratings
-		let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client });
-
-		// Draw the image
-		const canvasWidth = 1000;
-		const canvasHeight = 575;
-
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
-
-		//Create Canvas
-		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
-
-		//Get context and load the image
-		const ctx = canvas.getContext('2d');
-		const background = await Canvas.loadImage('./other/osu-background.png');
-
-		for (let i = 0; i < canvas.height / background.height; i++) {
-			for (let j = 0; j < canvas.width / background.width; j++) {
-				ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
-			}
-		}
-
-		// Write the title of the player
-		ctx.font = '35px comfortaa, sans-serif';
-		ctx.fillStyle = '#ffffff';
-		ctx.textAlign = 'center';
-		ctx.fillText(`osu! history for ${osuUser.osuName}`, 475, 40);
-
-		let lineLength = ctx.measureText(`osu! history for ${osuUser.osuName}`).width;
-
-		// Draw an underline
-		ctx.beginPath();
-		ctx.lineWidth = 2;
-		ctx.strokeStyle = '#ffffff';
-		ctx.moveTo(475 - lineLength / 2, 47);
-		ctx.lineTo(475 + lineLength / 2, 47);
-		ctx.stroke();
-
-		// Write the title of the player
-		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillStyle = '#ffffff';
-		ctx.textAlign = 'left';
-		ctx.fillText(`Played tournaments: ${tourneysPlayed.length}`, 50, 140);
-
-		ctx.fillText(`Played matches: ${multiMatches.length}`, 50, 190);
-		ctx.font = '18px comfortaa, sans-serif';
-		ctx.fillText(`Won: ${matchesWon} / Lost: ${matchesLost}`, 75, 215);
-
-		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillText(`Played maps: ${gamesChecked.length}`, 50, 270);
-		ctx.font = '18px comfortaa, sans-serif';
-		ctx.fillText(`Won: ${gamesWon} / Lost: ${gamesLost}`, 75, 295);
-
-		let duelLeague = getOsuDuelLeague(duelRating.total);
-
-		let leagueText = duelLeague.name;
-		let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
-
-		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillText('Highest duel rating:', 50, 345);
-		ctx.font = '18px comfortaa, sans-serif';
-		ctx.fillText(`League: ${leagueText} (${duelRating.total.toFixed(3)})`, 75, 370);
-		ctx.drawImage(leagueImage, 75, 385, 150, 150);
-
-		ctx.textAlign = 'center';
-		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 800, 140);
-		ctx.font = '18px comfortaa, sans-serif';
-		for (let i = 0; i < Math.min(5, mostPlayedWith.length); i++) {
-			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 800, 165 + i * 25);
-		}
-
-		ctx.textAlign = 'left';
-		ctx.fillText(`Top ${Math.min(10, tourneyPPPlays.length)} tournament pp plays:`, 635, 350);
-		ctx.font = '11px comfortaa, sans-serif';
-		for (let i = 0; i < Math.min(10, tourneyPPPlays.length); i++) {
-			tourneyPPPlays[i].beatmap = await getOsuBeatmap({ beatmapId: tourneyPPPlays[i].beatmapId });
-			let title = 'Unavailable';
-			let artist = 'Unavailable';
-			let difficulty = 'Unavailable';
-			if (tourneyPPPlays[i].beatmap) {
-				title = tourneyPPPlays[i].beatmap.title;
-				artist = tourneyPPPlays[i].beatmap.artist;
-				difficulty = tourneyPPPlays[i].beatmap.difficulty;
-			}
-			let mapString = `#${i + 1} ${parseFloat(tourneyPPPlays[i].pp).toFixed(0)}pp | ${artist} - ${title} [${difficulty}]`;
-			let cut = false;
-			while (ctx.measureText(mapString).width > 340) {
-				cut = true;
-				mapString = mapString.slice(0, mapString.length - 1);
-			}
-			if (cut) {
-				mapString += '...';
-			}
-
-			ctx.fillText(mapString, 635, 368 + i * 16);
-		}
-
-		// Write the title of the player
-		ctx.font = '16px comfortaa, sans-serif';
-		ctx.fillStyle = '#ffffff';
-		ctx.textAlign = 'left';
-		let today = new Date().toLocaleDateString();
-		ctx.fillText(`Made by Elitebotix on ${today}`, 10, canvas.height - 10);
-
-		//Get a circle in the middle for inserting the player avatar
-		ctx.beginPath();
-		ctx.arc(475, 250, 125, 0, Math.PI * 2, true);
-		ctx.closePath();
-		ctx.clip();
-
-		//Draw a shape onto the main canvas in the middle 
-		try {
-			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.osuUserId}`);
-			ctx.drawImage(avatar, 350, 125, 250, 250);
-		} catch (error) {
-			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-			ctx.drawImage(avatar, 350, 125, 250, 250);
-		}
-
 		// Create rank history graph
 		let oldestScore = await DBOsuMultiScores.findOne({
 			where: {
@@ -403,6 +286,9 @@ module.exports = {
 				['gameEndDate', 'ASC']
 			]
 		});
+
+		// Get the user's duel ratings
+		let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client });
 
 		let duelRatings = [{ rating: duelRating.total, date: 'Today' }];
 
@@ -484,6 +370,123 @@ module.exports = {
 			goldHistory.push(goldRating);
 			silverHistory.push(silverRating);
 			bronzeHistory.push(bronzeRating);
+		}
+
+		// Draw the image
+		const canvasWidth = 1000;
+		const canvasHeight = 575;
+
+		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+		//Create Canvas
+		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+		//Get context and load the image
+		const ctx = canvas.getContext('2d');
+		const background = await Canvas.loadImage('./other/osu-background.png');
+
+		for (let i = 0; i < canvas.height / background.height; i++) {
+			for (let j = 0; j < canvas.width / background.width; j++) {
+				ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+			}
+		}
+
+		// Write the title of the player
+		ctx.font = '35px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'center';
+		ctx.fillText(`osu! history for ${osuUser.osuName}`, 475, 40);
+
+		let lineLength = ctx.measureText(`osu! history for ${osuUser.osuName}`).width;
+
+		// Draw an underline
+		ctx.beginPath();
+		ctx.lineWidth = 2;
+		ctx.strokeStyle = '#ffffff';
+		ctx.moveTo(475 - lineLength / 2, 47);
+		ctx.lineTo(475 + lineLength / 2, 47);
+		ctx.stroke();
+
+		// Write the title of the player
+		ctx.font = '22px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'left';
+		ctx.fillText(`Played tournaments: ${tourneysPlayed.length}`, 50, 140);
+
+		ctx.fillText(`Played matches: ${multiMatches.length}`, 50, 190);
+		ctx.font = '18px comfortaa, sans-serif';
+		ctx.fillText(`Won: ${matchesWon} / Lost: ${matchesLost}`, 75, 215);
+
+		ctx.font = '22px comfortaa, sans-serif';
+		ctx.fillText(`Played maps: ${gamesChecked.length}`, 50, 270);
+		ctx.font = '18px comfortaa, sans-serif';
+		ctx.fillText(`Won: ${gamesWon} / Lost: ${gamesLost}`, 75, 295);
+
+		let duelLeague = getOsuDuelLeague(highestRating);
+
+		let leagueText = duelLeague.name;
+		let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+		ctx.font = '22px comfortaa, sans-serif';
+		ctx.fillText('Highest duel rating:', 50, 345);
+		ctx.font = '18px comfortaa, sans-serif';
+		ctx.fillText(`League: ${leagueText} (${highestRating.toFixed(3)})`, 75, 370);
+		ctx.drawImage(leagueImage, 75, 385, 150, 150);
+
+		ctx.textAlign = 'center';
+		ctx.font = '22px comfortaa, sans-serif';
+		ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 800, 140);
+		ctx.font = '18px comfortaa, sans-serif';
+		for (let i = 0; i < Math.min(5, mostPlayedWith.length); i++) {
+			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 800, 165 + i * 25);
+		}
+
+		ctx.textAlign = 'left';
+		ctx.fillText(`Top ${Math.min(10, tourneyPPPlays.length)} tournament pp plays:`, 635, 350);
+		ctx.font = '11px comfortaa, sans-serif';
+		for (let i = 0; i < Math.min(10, tourneyPPPlays.length); i++) {
+			tourneyPPPlays[i].beatmap = await getOsuBeatmap({ beatmapId: tourneyPPPlays[i].beatmapId });
+			let title = 'Unavailable';
+			let artist = 'Unavailable';
+			let difficulty = 'Unavailable';
+			if (tourneyPPPlays[i].beatmap) {
+				title = tourneyPPPlays[i].beatmap.title;
+				artist = tourneyPPPlays[i].beatmap.artist;
+				difficulty = tourneyPPPlays[i].beatmap.difficulty;
+			}
+			let mapString = `#${i + 1} ${parseFloat(tourneyPPPlays[i].pp).toFixed(0)}pp | ${artist} - ${title} [${difficulty}]`;
+			let cut = false;
+			while (ctx.measureText(mapString).width > 340) {
+				cut = true;
+				mapString = mapString.slice(0, mapString.length - 1);
+			}
+			if (cut) {
+				mapString += '...';
+			}
+
+			ctx.fillText(mapString, 635, 368 + i * 16);
+		}
+
+		// Write the title of the player
+		ctx.font = '16px comfortaa, sans-serif';
+		ctx.fillStyle = '#ffffff';
+		ctx.textAlign = 'left';
+		let today = new Date().toLocaleDateString();
+		ctx.fillText(`Made by Elitebotix on ${today}`, 10, canvas.height - 10);
+
+		//Get a circle in the middle for inserting the player avatar
+		ctx.beginPath();
+		ctx.arc(475, 250, 125, 0, Math.PI * 2, true);
+		ctx.closePath();
+		ctx.clip();
+
+		//Draw a shape onto the main canvas in the middle 
+		try {
+			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.osuUserId}`);
+			ctx.drawImage(avatar, 350, 125, 250, 250);
+		} catch (error) {
+			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
+			ctx.drawImage(avatar, 350, 125, 250, 250);
 		}
 
 		//Create as an attachment
