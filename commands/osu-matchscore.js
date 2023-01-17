@@ -142,7 +142,7 @@ module.exports = {
 								if (gameScores[j].team === 'Blue') {
 									existingScore.color = '#3498DB';
 								} else if (gameScores[j].team === 'Red') {
-									existingScore.color = '#FF6961';
+									existingScore.color = '#ff392e';
 								}
 							} else {
 								let newScore = {
@@ -159,7 +159,7 @@ module.exports = {
 								if (gameScores[j].team === 'Blue') {
 									newScore.color = '#3498DB';
 								} else if (gameScores[j].team === 'Red') {
-									newScore.color = '#FF6961';
+									newScore.color = '#ff392e';
 								}
 
 								playerMatchResults.push(newScore);

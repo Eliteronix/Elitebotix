@@ -1303,8 +1303,10 @@ module.exports = {
 
 		missingUsers = missingUsers.map(user => user.osuUserId);
 
-		// eslint-disable-next-line no-console
-		console.log(`${missingUsers.length} missing users found`);
+		if (missingUsers.length) {
+			// eslint-disable-next-line no-console
+			console.log(`${missingUsers.length} missing users found`);
+		}
 
 		let iterator = 0;
 		while (iterator < 50 && missingUsers.length) {
@@ -1317,8 +1319,10 @@ module.exports = {
 			iterator++;
 		}
 
-		// eslint-disable-next-line no-console
-		console.log(`Created ${iterator} missing users`);
+		if (iterator) {
+			// eslint-disable-next-line no-console
+			console.log(`Created ${iterator} missing users`);
+		}
 
 		//Only clean up during the night
 		let date = new Date();
