@@ -225,6 +225,10 @@ module.exports = {
 					guildTracker.matchActivityAutoTrack = true;
 				}
 
+				if (guildTracker.matchActivity) {
+					guildTracker.acronym = interaction.options.getString('acronym');
+				}
+
 				if (guildTracker.osuTopPlays ||
 					guildTracker.taikoTopPlays ||
 					guildTracker.catchTopPlays ||
@@ -239,7 +243,8 @@ module.exports = {
 					guildTracker.maniaAmeobea ||
 					guildTracker.medals ||
 					guildTracker.duelRating ||
-					guildTracker.matchActivity) {
+					guildTracker.matchActivity ||
+					guildTracker.acronym) {
 					await guildTracker.save();
 
 					await interaction.followUp({ content: `Tracking \`${osuUser.osuName.replace(/`/g, '')}\` in <#${interaction.channel.id}>.`, ephemeral: true });
@@ -418,6 +423,13 @@ module.exports = {
 				if (matchactivity || disableEverything) {
 					guildTracker.matchActivity = false;
 					guildTracker.matchActivityAutoTrack = false;
+					guildTracker.acronym = null;
+				}
+
+				let acronym = interaction.options.getBoolean('acronym');
+
+				if (acronym || disableEverything) {
+					guildTracker.acronym = null;
 				}
 
 				if (guildTracker.osuTopPlays ||
@@ -434,7 +446,8 @@ module.exports = {
 					guildTracker.maniaAmeobea ||
 					guildTracker.medals ||
 					guildTracker.duelRating ||
-					guildTracker.matchActivity) {
+					guildTracker.matchActivity ||
+					guildTracker.acronym) {
 					await guildTracker.save();
 
 					await interaction.followUp({ content: `Updated tracking \`${osuUser.osuName.replace(/`/g, '')}\` in <#${interaction.channel.id}>.`, ephemeral: true });
@@ -611,6 +624,10 @@ module.exports = {
 					if (guildTrackers[i].matchActivityAutoTrack) {
 						matchActivity += ' (auto-track)';
 					}
+
+					if (guildTrackers[i].acronym) {
+						matchActivity += ` (${guildTrackers[i].acronym})`;
+					}
 				}
 
 				output.push(`\`${osuUser.osuName}\`\n- Top Plays: ${topPlayTrackings.join(', ')}\n- Leaderboard Scores: ${leaderboardTrackings.join(', ')}\n- Ameobea updates: ${ameobeaTrackings.join(', ')}${showAmeobeaUpdates}${medals}${duelRating}${matchActivity}`);
@@ -622,9 +639,7 @@ module.exports = {
 			guildTrackers = await DBOsuGuildTrackers.findAll({
 				where: {
 					channelId: interaction.channel.id,
-					acronym: {
-						[Op.ne]: null,
-					}
+					osuUserId: null,
 				},
 				order: [
 					['acronym', 'ASC']
