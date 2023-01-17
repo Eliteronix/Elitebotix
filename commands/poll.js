@@ -1,8 +1,9 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { fitTextOnLeftCanvas, getGuildPrefix, populateMsgFromInteraction } = require('../utils');
+const { fitTextOnLeftCanvas } = require('../utils');
 const { DBProcessQueue } = require('../dbObjects');
 const { Permissions } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'poll',
@@ -15,101 +16,110 @@ module.exports = {
 	tags: 'general',
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		//TODO: Remove message code and replace with interaction code
-		let years = 0;
+		try {
+			await interaction.reply('The poll is being created');
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
+		}
+
 		let months = 0;
+
+		if (interaction.options.getInteger('months')) {
+			months = interaction.options.getInteger('months');
+		}
+
 		let weeks = 0;
+
+		if (interaction.options.getInteger('weeks')) {
+			weeks = interaction.options.getInteger('weeks');
+		}
+
 		let days = 0;
+
+		if (interaction.options.getInteger('days')) {
+			days = interaction.options.getInteger('days');
+		}
+
 		let hours = 0;
+
+		if (interaction.options.getInteger('hours')) {
+			hours = interaction.options.getInteger('hours');
+		}
+
 		let minutes = 0;
 
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			await interaction.reply('The poll is being created');
-
-			months = interaction.options._hoistedOptions[0].value;
-			weeks = interaction.options._hoistedOptions[1].value;
-			days = interaction.options._hoistedOptions[2].value;
-			hours = interaction.options._hoistedOptions[3].value;
-			minutes = interaction.options._hoistedOptions[4].value;
-
-			args = [];
-
-			for (let i = 5; i < interaction.options._hoistedOptions.length; i++) {
-				args.push(`${interaction.options._hoistedOptions[i].value};`);
-			}
+		if (interaction.options.getInteger('minutes')) {
+			minutes = interaction.options.getInteger('minutes');
 		}
 
-		for (let i = 0; i < args.length; i++) {
-			let splice = true;
-			if (args[i].endsWith('y') && !isNaN(args[i].replace('y', ''))) {
-				years += parseInt(args[i].replace('y', ''));
-			} else if (args[i].endsWith('mo') && !isNaN(args[i].replace('mo', ''))) {
-				months += parseInt(args[i].replace('mo', ''));
-			} else if (args[i].endsWith('w') && !isNaN(args[i].replace('w', ''))) {
-				weeks += parseInt(args[i].replace('w', ''));
-			} else if (args[i].endsWith('d') && !isNaN(args[i].replace('d', ''))) {
-				days += parseInt(args[i].replace('d', ''));
-			} else if (args[i].endsWith('h') && !isNaN(args[i].replace('h', ''))) {
-				hours += parseInt(args[i].replace('h', ''));
-			} else if (args[i].endsWith('m') && !isNaN(args[i].replace('m', ''))) {
-				minutes += parseInt(args[i].replace('m', ''));
-			} else {
-				splice = false;
-			}
-
-			if (splice) {
-				args.splice(i, 1);
-				i--;
-			}
-		}
 		let now = new Date();
 		let date = new Date();
-		date.setUTCFullYear(date.getUTCFullYear() + years);
 		date.setUTCMonth(date.getUTCMonth() + months);
 		date.setUTCDate(date.getUTCDate() + weeks * 7 + days);
 		date.setUTCHours(date.getUTCHours() + hours);
 		date.setUTCMinutes(date.getUTCMinutes() + minutes);
 
 		if (now.getTime() === date.getTime()) {
-			const guildPrefix = await getGuildPrefix(msg);
-			return msg.channel.send(`Please specify when the vote should be finished by using \`<#y/#mo/#w/#d/#h/#m>\`.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);
+			return await interaction.editReply('Please specify when the vote should be finished by using at least one of the optional arguments.');
 		}
 
-		let allArgs = args.join(' ');
-		let options = allArgs.split(';');
+		let title = interaction.options.getString('topic');
 
-		if (interaction) {
-			options = [];
-			for (let i = 5; i < interaction.options._hoistedOptions.length; i++) {
-				options.push(interaction.options._hoistedOptions[i].value);
-			}
+		let options = [];
+
+		if (interaction.options.getString('option1')) {
+			options.push(interaction.options.getString('option1'));
 		}
 
-		let title = options.shift();
+		if (interaction.options.getString('option2')) {
+			options.push(interaction.options.getString('option2'));
+		}
+
+		if (interaction.options.getString('option3')) {
+			options.push(interaction.options.getString('option3'));
+		}
+
+		if (interaction.options.getString('option4')) {
+			options.push(interaction.options.getString('option4'));
+		}
+
+		if (interaction.options.getString('option5')) {
+			options.push(interaction.options.getString('option5'));
+		}
+
+		if (interaction.options.getString('option6')) {
+			options.push(interaction.options.getString('option6'));
+		}
+
+		if (interaction.options.getString('option7')) {
+			options.push(interaction.options.getString('option7'));
+		}
+
+		if (interaction.options.getString('option8')) {
+			options.push(interaction.options.getString('option8'));
+		}
+
+		if (interaction.options.getString('option9')) {
+			options.push(interaction.options.getString('option9'));
+		}
+
+		if (interaction.options.getString('option10')) {
+			options.push(interaction.options.getString('option10'));
+		}
 
 		let optionsMaxLength = 0;
 
 		for (let i = 0; i < options.length; i++) {
-			if (!options[i]) {
-				options.splice(i, 1);
-				i--;
-			} else if (options[i].length > optionsMaxLength) {
+			if (options[i].length > optionsMaxLength) {
 				optionsMaxLength = options[i].length;
 			}
 		}
 
-		if (!options[1]) {
-			return msg.channel.send('Please provide at least two options to vote for seperated by a `;`.');
-		}
-
-		if (options[10]) {
-			return msg.channel.send('Votes are limited to 10 possibilities maximum.');
-		}
-
 		if (title.length > optionsMaxLength) {
-			optionsMaxLength = title.length;
+			optionsMaxLength = title.length * 2;
 		}
 
 		let canvasWidth = 200 + 15 * optionsMaxLength;
@@ -154,7 +164,7 @@ module.exports = {
 		//Create as an attachment
 		const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'vote.png');
 
-		const pollMessage = await msg.channel.send({ content: 'Vote for the options by using the reactions below the image!', files: [attachment] });
+		const pollMessage = await interaction.channel.send({ content: 'Vote for the options by using the reactions below the image!', files: [attachment] });
 
 		for (let i = 0; i < options.length; i++) {
 			if (i === 0) {
@@ -180,6 +190,6 @@ module.exports = {
 			}
 		}
 
-		DBProcessQueue.create({ guildId: msg.guildId, task: 'closePoll', priority: 5, additions: `${pollMessage.channel.id};${pollMessage.id};${title};${options.join(';')}`, date: date });
+		DBProcessQueue.create({ guildId: interaction.guildId, task: 'closePoll', priority: 5, additions: `${pollMessage.channel.id};${pollMessage.id};${title};${options.join(';')}`, date: date });
 	},
 };
