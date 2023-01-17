@@ -232,7 +232,7 @@ module.exports = {
 
 					let dataset = {
 						name: playerName,
-						value: `Value: ${Math.round(playerMatchResults[i].score * 100) / 100} ${valueType} over ${playerMatchResults[i].playedRounds} played rounds (${playerMatchResults[i].wins}x #1)`,
+						value: `${Math.round(playerMatchResults[i].score * 100) / 100} ${valueType} over ${playerMatchResults[i].playedRounds} maps (${playerMatchResults[i].wins}x #1)`,
 						color: playerMatchResults[i].color,
 					};
 
