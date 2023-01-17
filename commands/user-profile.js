@@ -1,14 +1,8 @@
-//Import Tables
 const { DBDiscordUsers } = require('../dbObjects');
-const { logDatabaseQueries } = require('../utils');
+const { logDatabaseQueries, getOsuPlayerName } = require('../utils');
 const { Permissions } = require('discord.js');
 const { developers } = require('../config.json');
-
-//Require discord.js module
 const Discord = require('discord.js');
-
-//Require node-osu module
-const osu = require('node-osu');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -174,25 +168,31 @@ async function sendUserEmbed(interaction, user) {
 	//get discordUser from db
 
 	if (discordUser && discordUser.osuUserId) {
-		// eslint-disable-next-line no-undef
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
+		let username = await getOsuPlayerName(discordUser.osuUserId);
 
-		const osuUser = await osuApi.getUser({ u: discordUser.osuUserId });
 		if (discordUser.osuVerified) {
 			userInfoEmbed.addFields(
 				// link to osu profile page
-				{ name: 'osu! Account', value: `☑️ [${osuUser.name}](https://osu.ppy.sh/users/${discordUser.osuUserId})` }
+				{ name: 'osu! Account', value: `☑️ [${username}](https://osu.ppy.sh/users/${discordUser.osuUserId})` }
 			);
 		} else {
 			userInfoEmbed.addFields(
-				{ name: 'osu! Account', value: `❌ [${osuUser.name}](https://osu.ppy.sh/users/${discordUser.osuUserId})` },
+				{ name: 'osu! Account', value: `❌ [${username}](https://osu.ppy.sh/users/${discordUser.osuUserId})` },
 			);
 		}
+	}
+
+	if (discordUser && discordUser.twitchName) {
+		// if (discordUser.osuVerified) {
+		userInfoEmbed.addFields(
+			// link to osu profile page
+			{ name: 'twitch Account', value: `☑️ [${discordUser.twitchName}](https://www.twitch.tv/${discordUser.twitchName})` }
+		);
+		// } else {
+		// 	userInfoEmbed.addFields(
+		// 		{ name: 'osu! Account', value: `❌ [${osuUser.name}](https://osu.ppy.sh/users/${discordUser.osuUserId})` },
+		// 	);
+		// }
 	}
 
 	return interaction.followUp({ embeds: [userInfoEmbed] });
