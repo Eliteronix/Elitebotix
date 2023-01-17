@@ -4281,36 +4281,6 @@ module.exports = {
 			// 		dm_permission: false,
 			// 		options: [
 			// 			{
-			// 				'name': 'months',
-			// 				'description': 'The months until the end of the poll',
-			// 				'type': 4,
-			// 				'required': true
-			// 			},
-			// 			{
-			// 				'name': 'weeks',
-			// 				'description': 'The weeks until the end of the poll',
-			// 				'type': 4,
-			// 				'required': true
-			// 			},
-			// 			{
-			// 				'name': 'days',
-			// 				'description': 'The days until the end of the poll',
-			// 				'type': 4,
-			// 				'required': true
-			// 			},
-			// 			{
-			// 				'name': 'hours',
-			// 				'description': 'The hours until the end of the poll',
-			// 				'type': 4,
-			// 				'required': true
-			// 			},
-			// 			{
-			// 				'name': 'minutes',
-			// 				'description': 'The minutes until the end of the poll',
-			// 				'type': 4,
-			// 				'required': true
-			// 			},
-			// 			{
 			// 				'name': 'topic',
 			// 				'description': 'The poll topic',
 			// 				'type': 3,
@@ -4327,6 +4297,36 @@ module.exports = {
 			// 				'description': 'The second option of the poll',
 			// 				'type': 3,
 			// 				'required': true
+			// 			},
+			// 			{
+			// 				'name': 'months',
+			// 				'description': 'The months until the end of the poll',
+			// 				'type': 4,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'weeks',
+			// 				'description': 'The weeks until the end of the poll',
+			// 				'type': 4,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'days',
+			// 				'description': 'The days until the end of the poll',
+			// 				'type': 4,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'hours',
+			// 				'description': 'The hours until the end of the poll',
+			// 				'type': 4,
+			// 				'required': false
+			// 			},
+			// 			{
+			// 				'name': 'minutes',
+			// 				'description': 'The minutes until the end of the poll',
+			// 				'type': 4,
+			// 				'required': false
 			// 			},
 			// 			{
 			// 				'name': 'option3',
@@ -9525,36 +9525,6 @@ module.exports = {
 					dm_permission: false,
 					options: [
 						{
-							'name': 'months',
-							'description': 'The months until the end of the poll',
-							'type': 4,
-							'required': true
-						},
-						{
-							'name': 'weeks',
-							'description': 'The weeks until the end of the poll',
-							'type': 4,
-							'required': true
-						},
-						{
-							'name': 'days',
-							'description': 'The days until the end of the poll',
-							'type': 4,
-							'required': true
-						},
-						{
-							'name': 'hours',
-							'description': 'The hours until the end of the poll',
-							'type': 4,
-							'required': true
-						},
-						{
-							'name': 'minutes',
-							'description': 'The minutes until the end of the poll',
-							'type': 4,
-							'required': true
-						},
-						{
 							'name': 'topic',
 							'description': 'The poll topic',
 							'type': 3,
@@ -9571,6 +9541,36 @@ module.exports = {
 							'description': 'The second option of the poll',
 							'type': 3,
 							'required': true
+						},
+						{
+							'name': 'months',
+							'description': 'The months until the end of the poll',
+							'type': 4,
+							'required': false
+						},
+						{
+							'name': 'weeks',
+							'description': 'The weeks until the end of the poll',
+							'type': 4,
+							'required': false
+						},
+						{
+							'name': 'days',
+							'description': 'The days until the end of the poll',
+							'type': 4,
+							'required': false
+						},
+						{
+							'name': 'hours',
+							'description': 'The hours until the end of the poll',
+							'type': 4,
+							'required': false
+						},
+						{
+							'name': 'minutes',
+							'description': 'The minutes until the end of the poll',
+							'type': 4,
+							'required': false
 						},
 						{
 							'name': 'option3',
