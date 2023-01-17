@@ -1,6 +1,5 @@
 const osu = require('node-osu');
-const { createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, logDatabaseQueries, getMods } = require('../utils');
-const { DBDiscordUsers } = require('../dbObjects');
+const { createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, getMods, getOsuPlayerName } = require('../utils');
 const { Permissions } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -210,28 +209,8 @@ module.exports = {
 				let leaderboardData = [];
 
 				for (let i = 0; i < playerMatchResults.length; i++) {
-					let playerName = `ID: ${playerMatchResults[i].userId}`;
-
-					if (playerMatchResults.length < 33) {
-						logDatabaseQueries(4, 'commands/osu-matchscore.js DBDiscordUsers');
-						let discordUser = await DBDiscordUsers.findOne({
-							where: { osuUserId: playerMatchResults[i].userId }
-						});
-
-						if (discordUser) {
-							playerName = discordUser.osuName;
-						} else {
-							const osuUser = await osuApi.getUser({ u: playerMatchResults[i].userId });
-							if (osuUser) {
-								playerName = osuUser.name;
-
-								await DBDiscordUsers.create({ osuUserId: playerMatchResults[i].userId, osuName: osuUser.name });
-							}
-						}
-					}
-
 					let dataset = {
-						name: playerName,
+						name: await getOsuPlayerName(playerMatchResults[i].userId),
 						value: `${Math.round(playerMatchResults[i].score * 100) / 100} ${valueType} over ${playerMatchResults[i].playedRounds} maps (${playerMatchResults[i].wins}x #1)`,
 						color: playerMatchResults[i].color,
 					};
