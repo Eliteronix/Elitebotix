@@ -5630,6 +5630,28 @@ async function saveOsuMultiScoresFunction(match) {
 				}
 			});
 
+			//Check for the acronym
+			for (let i = 0; i < guildTrackers.length; i++) {
+				if (!guildTrackers[i].acronym) {
+					continue;
+				}
+
+				let acronyms = guildTrackers[i].acronym.split(',');
+
+				let correctAcronym = false;
+
+				for (let j = 0; j < acronyms.length; j++) {
+					if (match.name.toLowerCase().startsWith(acronyms[j].toLowerCase().trim())) {
+						correctAcronym = true;
+					}
+				}
+
+				if (!correctAcronym) {
+					guildTrackers.splice(i, 1);
+					i--;
+				}
+			}
+
 			let existingMatchPlayerTrackers = await DBOsuGuildTrackers.findAll({
 				where: {
 					osuUserId: {

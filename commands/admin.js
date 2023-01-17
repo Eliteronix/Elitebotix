@@ -4089,6 +4089,11 @@ module.exports = {
 			// 							},
 			// 						]
 			// 					},
+			// 					{
+			// 						'name': 'acronym',
+			// 						'description': 'The acronyms to track (separate with \',\')',
+			// 						'type': 3,
+			// 					},
 			// 				]
 			// 			},
 			// 			{
@@ -4164,6 +4169,11 @@ module.exports = {
 			// 					{
 			// 						'name': 'matchactivity',
 			// 						'description': 'Stop tracking match activity',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 					},
+			// 					{
+			// 						'name': 'acronym',
+			// 						'description': 'Stop tracking only these acronyms',
 			// 						'type': 5, // 5 is type BOOLEAN
 			// 					},
 			// 				]
@@ -9323,6 +9333,11 @@ module.exports = {
 										},
 									]
 								},
+								{
+									'name': 'acronym',
+									'description': 'The acronyms to track (separate with \',\')',
+									'type': 3,
+								},
 							]
 						},
 						{
@@ -9398,6 +9413,11 @@ module.exports = {
 								{
 									'name': 'matchactivity',
 									'description': 'Stop tracking match activity',
+									'type': 5, // 5 is type BOOLEAN
+								},
+								{
+									'name': 'acronym',
+									'description': 'Stop tracking only these acronyms',
 									'type': 5, // 5 is type BOOLEAN
 								},
 							]
