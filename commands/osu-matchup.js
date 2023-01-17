@@ -31,7 +31,7 @@ module.exports = {
 
 			try {//TODO: Deferreply
 				//await interaction.deferReply();
-				interaction.editReply('Processing...');
+				await interaction.editReply('Processing...');
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
