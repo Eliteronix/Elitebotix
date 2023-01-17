@@ -295,6 +295,6 @@ module.exports = {
 			return await interaction.followUp({ content: `${weekdayName[weekday]} Schedule for: ${usersReadable.join(', ')}\nThe data is based on multiplayer matches evaluated by / sent to the bot`, files: [attachment] });
 		}
 
-		return await interaction.channel.send({ content: `${weekdayName[weekday]} Schedule for: ${usersReadable.join(', ')}\nThe data is based on multiplayer matches evaluated by / sent to the bot`, files: [attachment] });
+		return await msg.channel.send({ content: `${weekdayName[weekday]} Schedule for: ${usersReadable.join(', ')}\nThe data is based on multiplayer matches evaluated by / sent to the bot`, files: [attachment] });
 	},
 };
