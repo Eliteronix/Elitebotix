@@ -5701,6 +5701,7 @@ async function saveOsuMultiScoresFunction(match) {
 			//Get all follows for the players in the match
 			let guildTrackers = await DBOsuGuildTrackers.findAll({
 				where: {
+					osuUserId: null,
 					acronym: match.name.replace(/:.*/gm, ''),
 					matchActivity: true
 				}
