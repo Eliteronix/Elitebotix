@@ -3943,7 +3943,9 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, dep
 			});
 		}
 	} catch (err) {
+		console.log(err.message);
 		console.error(err);
+		return;
 	}
 
 	if (!combo) {
