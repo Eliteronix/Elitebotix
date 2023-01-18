@@ -1414,7 +1414,7 @@ module.exports = {
 
 		while (duplicates && deleted < 25) {
 			let result = await discordUsers.query(
-				'SELECT * FROM DBDiscordUsers WHERE 0 < (SELECT COUNT(1) FROM DBDiscordUsers as a WHERE a.osuUserId = DBDiscordUsers.osuUserId AND a.id <> DBDiscordUsers.id) ORDER BY userId ASC LIMIT 1',
+				'SELECT * FROM DBDiscordUsers WHERE 0 < (SELECT COUNT(1) FROM DBDiscordUsers as a WHERE a.osuUserId = DBDiscordUsers.osuUserId AND a.id <> DBDiscordUsers.id OR a.userId = DBDiscordUsers.userId AND a.id <> DBDiscordUsers.id) ORDER BY osuUserId ASC LIMIT 1',
 			);
 
 			duplicates = result[0].length;
@@ -1429,7 +1429,7 @@ module.exports = {
 				});
 
 				// eslint-disable-next-line no-console
-				console.log(duplicate.userId, duplicate.osuUserId, duplicate.updatedAt);
+				console.log(duplicate.userId, duplicate.osuUserId, duplicate.osuName, duplicate.updatedAt);
 
 				deleted++;
 				await new Promise(resolve => setTimeout(resolve, 2000));
