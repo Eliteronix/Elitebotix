@@ -76,7 +76,7 @@ module.exports = {
 				month: 'long',
 				day: 'numeric',
 			});
-			return interaction.reply({ content: `Your birthday has been set for \`${dateString}\``, ephemeral: true });
+			return await interaction.editReply({ content: `Your birthday has been set for \`${dateString}\``, ephemeral: true });
 		} else if (interaction.options._subcommand === 'enable') {
 
 			let currentGuild = await DBBirthdayGuilds.findOne({
@@ -87,7 +87,7 @@ module.exports = {
 			});
 
 			if (currentGuild) {
-				return interaction.reply({ content: `You are already sharing your birthday on ${interaction.guild.name}`, ephemeral: true });
+				return await interaction.editReply({ content: `You are already sharing your birthday on ${interaction.guild.name}`, ephemeral: true });
 			}
 
 			let dbDiscordUser = await DBDiscordUsers.findOne({
@@ -100,7 +100,7 @@ module.exports = {
 			});
 
 			if (!dbDiscordUser || dbDiscordUser && !dbDiscordUser.birthday) {
-				return interaction.reply({ content: 'You currently don\'t have your birthday set. Please set your birthday first by using </birthday set:1023849281871949914>', ephemeral: true });
+				return await interaction.editReply({ content: 'You currently don\'t have your birthday set. Please set your birthday first by using </birthday set:1023849281871949914>', ephemeral: true });
 			}
 
 			let now = new Date();
@@ -116,7 +116,7 @@ module.exports = {
 				birthdayTime: nextBirthday,
 			});
 
-			return interaction.reply({ content: `Your birthday will now be shared on ${interaction.guild.name}`, ephemeral: true });
+			return await interaction.editReply({ content: `Your birthday will now be shared on ${interaction.guild.name}`, ephemeral: true });
 		} else if (interaction.options._subcommand === 'disable') {
 			let currentGuild = await DBBirthdayGuilds.findOne({
 				where: {
@@ -127,12 +127,12 @@ module.exports = {
 
 			//No guild found
 			if (!currentGuild) {
-				return interaction.reply({ content: 'You were not sharing your birthday on this server.', ephemeral: true });
+				return await interaction.editReply({ content: 'You were not sharing your birthday on this server.', ephemeral: true });
 			}
 
 			//Delete guild
 			await currentGuild.destroy();
-			return interaction.reply({ content: `Your birthday will no longer be shared on ${interaction.guild.name}`, ephemeral: true });
+			return await interaction.editReply({ content: `Your birthday will no longer be shared on ${interaction.guild.name}`, ephemeral: true });
 		}
 	}
 };
