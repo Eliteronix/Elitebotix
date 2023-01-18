@@ -32,11 +32,11 @@ module.exports = {
 			});
 
 			if (!discordUser || !discordUser.osuUserId) {
-				return interaction.editReply('You don\'t have an osu! account linked to your discord account. Please do so by using </osu-link connect:1023849632599658496>');
+				return interaction.editReply('You don\'t have an osu! account linked to your discord account. Please do so by using </osu-link connect:1064502370710605836>');
 			}
 
 			if (!discordUser.twitchName) {
-				return interaction.editReply('You don\'t have a twitch account linked to your discord account. Use </feedback:1023849367817424937> with type `question` to request access.');
+				return interaction.editReply('You don\'t have a twitch account linked to your discord account. Use </feedback:1064502027591364649> with type `question` to request access.');
 			}
 
 			if (discordUser.twitchOsuMatchCommand) {
@@ -61,11 +61,11 @@ module.exports = {
 			});
 
 			if (!discordUser || !discordUser.osuUserId) {
-				return interaction.editReply('You don\'t have an osu! account linked to your discord account. Please do so by using </osu-link connect:1023849632599658496>');
+				return interaction.editReply('You don\'t have an osu! account linked to your discord account. Please do so by using </osu-link connect:1064502370710605836>');
 			}
 
 			if (!discordUser.twitchName) {
-				return interaction.editReply('You don\'t have a twitch account linked to your discord account. Use </feedback:1023849367817424937> with type `question` to request access.');
+				return interaction.editReply('You don\'t have a twitch account linked to your discord account. Use </feedback:1064502027591364649> with type `question` to request access.');
 			}
 
 			if (discordUser.twitchOsuMapSync) {

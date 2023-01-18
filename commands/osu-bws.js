@@ -61,10 +61,10 @@ module.exports = {
 						getProfile(msg, interaction, discordUser.osuUserId, mode);
 					} else {
 						if (msg.id) {
-							return msg.reply(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1023849632599658496>.`);
+							return msg.reply(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
 						}
 
-						return interaction.followUp(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1023849632599658496>.`);
+						return interaction.followUp(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
 					}
 				} else {
 
@@ -131,7 +131,7 @@ async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 			}
 
 			if (noLinkedAccount) {
-				data.push('Feel free to use </osu-link connect:1023849632599658496> to connect your account.');
+				data.push('Feel free to use </osu-link connect:1064502370710605836> to connect your account.');
 			}
 			if (msg.id) {
 				return msg.reply(data.join('\n'), { split: true });

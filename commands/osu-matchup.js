@@ -203,7 +203,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						team1[i] = discordUser.osuUserId;
 					} else {
-						msg.channel.send(`\`${team1[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1023849632599658496>.`);
+						msg.channel.send(`\`${team1[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
 						team1.splice(i, 1);
 						i--;
 						continue;
@@ -241,7 +241,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						team2[i] = discordUser.osuUserId;
 					} else {
-						msg.channel.send(`\`${team2[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1023849632599658496>.`);
+						msg.channel.send(`\`${team2[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
 						team2.splice(i, 1);
 						i--;
 						continue;

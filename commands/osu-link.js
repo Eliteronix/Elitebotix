@@ -64,7 +64,7 @@ module.exports = {
 
 async function connect(args, interaction, additionalObjects, osuApi, bancho, discordUser) {
 	if (discordUser && discordUser.osuVerified) {
-		return interaction.editReply(`You already connected and verified your connection of your discord account to the osu! account \`${discordUser.osuName}\`.\nIf you want to disconnect it please use </osu-link disconnect:1023849632599658496>.`);
+		return interaction.editReply(`You already connected and verified your connection of your discord account to the osu! account \`${discordUser.osuName}\`.\nIf you want to disconnect it please use </osu-link disconnect:1064502370710605836>.`);
 	}
 
 	if (args[0]) {
@@ -227,7 +227,7 @@ async function disconnect(interaction, additionalObjects, discordUser) {
 		discordUser.maniaRank = null;
 		discordUser.save();
 
-		return interaction.editReply('There is no longer an osu! account linked to your discord account.\nUse </osu-link connect:1023849632599658496> to link an osu! account to your discord account.');
+		return interaction.editReply('There is no longer an osu! account linked to your discord account.\nUse </osu-link connect:1064502370710605836> to link an osu! account to your discord account.');
 	} else {
 		linkAccountMessage(interaction);
 	}
@@ -244,7 +244,7 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 						discordUser.osuRank = osuUser.pp.rank;
 						discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 						discordUser.save();
-						return interaction.editReply(`Your osu! account \`${osuUser.name}\` is already verified\nIf you need to connect a different account use </osu-link disconnect:1023849632599658496> first.`);
+						return interaction.editReply(`Your osu! account \`${osuUser.name}\` is already verified\nIf you need to connect a different account use </osu-link disconnect:1064502370710605836> first.`);
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {
@@ -324,7 +324,7 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 						discordUser.osuRank = osuUser.pp.rank;
 						discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
 						discordUser.save();
-						return interaction.editReply(`The sent code \`${args[1].replace(/`/g, '')}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse </osu-link verify:1023849632599658496> to resend the code.`);
+						return interaction.editReply(`The sent code \`${args[1].replace(/`/g, '')}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse </osu-link verify:1064502370710605836> to resend the code.`);
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {
@@ -341,5 +341,5 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 }
 
 function linkAccountMessage(interaction) {
-	return interaction.editReply('There is currently no osu! account linked to your discord account.\nPlease use </osu-link connect:1023849632599658496>');
+	return interaction.editReply('There is currently no osu! account linked to your discord account.\nPlease use </osu-link connect:1064502370710605836>');
 }

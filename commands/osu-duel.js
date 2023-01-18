@@ -147,7 +147,7 @@ module.exports = {
 				const commandUser = commandConfig[0];
 
 				if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
-					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:1023849632599658496>.');
+					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:1064502370710605836>.');
 				}
 
 				//Cross check that commandUser.userId, teammates and opponents are all unique
@@ -190,7 +190,7 @@ module.exports = {
 							getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
 						}
 					} else {
-						return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using </osu-link connect:1023849632599658496>.`);
+						return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using </osu-link connect:1064502370710605836>.`);
 					}
 				}
 
@@ -325,7 +325,7 @@ module.exports = {
 							osuUser.id = discordUser.osuUserId;
 							osuUser.name = discordUser.osuName;
 						} else {
-							return await interaction.editReply({ content: `\`${username.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1023849632599658496>.`, ephemeral: true });
+							return await interaction.editReply({ content: `\`${username.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`, ephemeral: true });
 						}
 					} else {
 						osuUser.name = getIDFromPotentialOsuLink(username);
@@ -719,10 +719,10 @@ module.exports = {
 
 				try {
 					if (interaction.id) {
-						sentMessage = await interaction.editReply({ content: 'The data is based on matches played using </osu-duel queue1v1:1023849629932064828> and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
+						sentMessage = await interaction.editReply({ content: 'The data is based on matches played using </osu-duel queue1v1:1064502289357881405> and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
 					} else {
 						processingMessage.delete();
-						sentMessage = await interaction.channel.send({ content: 'The data is based on matches played using </osu-duel queue1v1:1023849629932064828> and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
+						sentMessage = await interaction.channel.send({ content: 'The data is based on matches played using </osu-duel queue1v1:1064502289357881405> and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.', files: [leagueRatings] });
 					}
 
 					await sentMessage.react('👤');
@@ -983,7 +983,7 @@ module.exports = {
 				}
 
 				//Send attachment
-				let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:1023849632599658496> to connect your osu! account.\nData is being updated once a day or when </osu-duel rating:1023849629932064828> is being used.`, files: files });
+				let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:1064502370710605836> to connect your osu! account.\nData is being updated once a day or when </osu-duel rating:1023849629932064828> is being used.`, files: files });
 
 				if (page) {
 					if (page > 1) {
@@ -1021,7 +1021,7 @@ module.exports = {
 							osuUser.id = discordUser.osuUserId;
 							osuUser.name = discordUser.osuName;
 						} else {
-							return await interaction.editReply({ content: `\`${interaction.options._hoistedOptions[0].value.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1023849632599658496>.`, ephemeral: true });
+							return await interaction.editReply({ content: `\`${interaction.options._hoistedOptions[0].value.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`, ephemeral: true });
 						}
 					} else {
 						osuUser.id = getIDFromPotentialOsuLink(interaction.options._hoistedOptions[0].value);
@@ -1591,7 +1591,7 @@ module.exports = {
 				const commandUser = commandConfig[0];
 
 				if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
-					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:1023849632599658496>.');
+					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:1064502370710605836>.');
 				}
 
 				let existingQueueTasks = await DBProcessQueue.findAll({
@@ -1676,7 +1676,7 @@ module.exports = {
 				const commandUser = commandConfig[0];
 
 				if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
-					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:1023849632599658496>.');
+					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:1064502370710605836>.');
 				}
 
 				let existingQueueTasks = await DBProcessQueue.findAll({
