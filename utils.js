@@ -3943,8 +3943,9 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, dep
 			});
 		}
 	} catch (err) {
-		console.log(err.message);
-		console.error(err);
+		if (!err.message.match(/request to https:\/\/osu.ppy.sh\/osu\/\d+ failed, reason: Parse Error: Invalid header value char/gm)) {
+			console.error(err);
+		}
 		return;
 	}
 
