@@ -6,7 +6,7 @@ const guilds = new Sequelize('database', 'username', 'password', {
 	logging: false,
 	storage: 'databases/guilds.sqlite',
 	retry: {
-		max: 15, // Maximum retry 15 times
+		max: 20, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
@@ -18,7 +18,7 @@ const discordUsers = new Sequelize('database', 'username', 'password', {
 	logging: false,
 	storage: 'databases/discordUsers.sqlite',
 	retry: {
-		max: 15, // Maximum retry 15 times
+		max: 20, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
@@ -30,7 +30,7 @@ const serverActivity = new Sequelize('database', 'username', 'password', {
 	logging: false,
 	storage: 'databases/serverActivity.sqlite',
 	retry: {
-		max: 15, // Maximum retry 15 times
+		max: 20, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
@@ -42,7 +42,7 @@ const processQueue = new Sequelize('database', 'username', 'password', {
 	logging: false,
 	storage: 'databases/processQueue.sqlite',
 	retry: {
-		max: 15, // Maximum retry 15 times
+		max: 20, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
@@ -54,7 +54,7 @@ const osuData = new Sequelize('database', 'username', 'password', {
 	logging: false,
 	storage: 'databases/osuData.sqlite',
 	retry: {
-		max: 15, // Maximum retry 15 times
+		max: 20, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
@@ -66,7 +66,7 @@ const elitiriData = new Sequelize('database', 'username', 'password', {
 	logging: false,
 	storage: 'databases/elitiriData.sqlite',
 	retry: {
-		max: 15, // Maximum retry 15 times
+		max: 20, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
@@ -78,7 +78,7 @@ const multiScores = new Sequelize('database', 'username', 'password', {
 	logging: false,
 	storage: 'databases/multiScores.sqlite',
 	retry: {
-		max: 15, // Maximum retry 15 times
+		max: 20, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
@@ -90,7 +90,7 @@ const beatmaps = new Sequelize('database', 'username', 'password', {
 	logging: false,
 	storage: 'databases/beatmaps.sqlite',
 	retry: {
-		max: 15, // Maximum retry 15 times
+		max: 20, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},

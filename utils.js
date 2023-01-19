@@ -2890,7 +2890,11 @@ module.exports = {
 				if (recentActivity) {
 					osuTracker.minutesBetweenChecks = 15;
 				} else {
-					osuTracker.minutesBetweenChecks = osuTracker.minutesBetweenChecks + 5;
+					osuTracker.minutesBetweenChecks = osuTracker.minutesBetweenChecks + 1;
+				}
+
+				if (osuTracker.minutesBetweenChecks > 60 * 23) {
+					osuTracker.minutesBetweenChecks = 60 * 23;
 				}
 
 				let date = new Date();
