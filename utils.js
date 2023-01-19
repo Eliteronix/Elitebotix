@@ -2012,9 +2012,17 @@ module.exports = {
 					}
 					avoidMaps.push(nextMap.beatmapId);
 
+					let tries = 0;
 					while (lobby._beatmapId != nextMap.beatmapId) {
+						if (tries % 5 === 0) {
+							await channel.sendMessage('!mp map 975342 0');
+							await new Promise(resolve => setTimeout(resolve, 5000));
+						}
+
 						await channel.sendMessage(`!mp map ${nextMap.beatmapId}`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
+						await lobby.updateSettings();
+						tries++;
 					}
 
 					let noFail = 'NF';
@@ -2177,10 +2185,17 @@ module.exports = {
 				avoidMaps.push(nextMap.beatmapId);
 
 
+				let tries = 0;
 				while (lobby._beatmapId != nextMap.beatmapId) {
+					if (tries % 5 === 0) {
+						await channel.sendMessage('!mp map 975342 0');
+						await new Promise(resolve => setTimeout(resolve, 5000));
+					}
+
 					await channel.sendMessage(`!mp map ${nextMap.beatmapId}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
 					await lobby.updateSettings();
+					tries++;
 				}
 
 				let noFail = 'NF';

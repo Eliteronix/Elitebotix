@@ -260,10 +260,17 @@ module.exports = {
 					let nextModPool = getNextModPool(true);
 					let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 
+					let tries = 0;
 					while (lobby._beatmapId != beatmap.beatmapId) {
+						if (tries % 5 === 0) {
+							await channel.sendMessage('!mp map 975342 0');
+							await new Promise(resolve => setTimeout(resolve, 5000));
+						}
+
 						await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
 						await lobby.updateSettings();
+						tries++;
 					}
 
 					if (winCondition === '3') {
@@ -512,10 +519,17 @@ module.exports = {
 				let nextModPool = getNextModPool(true);
 				let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 
+				let tries = 0;
 				while (lobby._beatmapId != beatmap.beatmapId) {
+					if (tries % 5 === 0) {
+						await channel.sendMessage('!mp map 975342 0');
+						await new Promise(resolve => setTimeout(resolve, 5000));
+					}
+
 					await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
 					await lobby.updateSettings();
+					tries++;
 				}
 
 				if (winCondition === '3') {
@@ -573,10 +587,17 @@ module.exports = {
 			let nextModPool = getNextModPool(true);
 			let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 
+			let tries = 0;
 			while (lobby._beatmapId != beatmap.beatmapId) {
+				if (tries % 5 === 0) {
+					await channel.sendMessage('!mp map 975342 0');
+					await new Promise(resolve => setTimeout(resolve, 5000));
+				}
+
 				await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
 				await new Promise(resolve => setTimeout(resolve, 5000));
 				await lobby.updateSettings();
+				tries++;
 			}
 
 			if (winCondition === '3') {

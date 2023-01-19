@@ -249,9 +249,17 @@ module.exports = {
 
 				lobbyStatus = 'Waiting for start';
 
+				let tries = 0;
 				while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
+					if (tries % 5 === 0) {
+						await channel.sendMessage('!mp map 975342 0');
+						await new Promise(resolve => setTimeout(resolve, 5000));
+					}
+
 					await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
 					await pause(5000);
+					await lobby.updateSettings();
+					tries++;
 				}
 				//Check mods and set them if needed
 				let modBits = 0;
@@ -333,9 +341,16 @@ module.exports = {
 				if (allTeamsJoined) {
 					lobbyStatus = 'Waiting for start';
 
+					let tries = 0;
 					while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
+						if (tries % 5 === 0) {
+							await channel.sendMessage('!mp map 975342 0');
+							await new Promise(resolve => setTimeout(resolve, 5000));
+						}
+
 						await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
 						await pause(5000);
+						tries++;
 					}
 					//Check mods and set them if needed
 					let modBits = 0;
@@ -412,10 +427,17 @@ module.exports = {
 			if (mapIndex < dbMaps.length) {
 				lobbyStatus = 'Waiting for start';
 
+				let tries = 0;
 				while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
+					if (tries % 5 === 0) {
+						await channel.sendMessage('!mp map 975342 0');
+						await new Promise(resolve => setTimeout(resolve, 5000));
+					}
+
 					await channel.sendMessage(`!mp map ${dbMaps[mapIndex].beatmapId}`);
 					await pause(5000);
 					await lobby.updateSettings();
+					tries++;
 				}
 				//Check mods and set them if needed
 				let modBits = 0;
