@@ -41,6 +41,10 @@ module.exports = {
 							c.otherMatches.splice(c.otherMatches.indexOf(matchID), 1);
 						}
 
+						while (c.matchTracks.indexOf(matchID) > -1) {
+							c.matchTracks.splice(c.matchTracks.indexOf(matchID), 1);
+						}
+
 						let channel;
 						// eslint-disable-next-line no-undef
 						if (process.env.SERVER === 'Live') {
