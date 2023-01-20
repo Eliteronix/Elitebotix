@@ -166,9 +166,14 @@ async function getBeatmap(msg, interaction, beatmap, tournament) {
 
 	let tournaments = [];
 	let matches = [];
+	let matchMakingScores = 0;
 
 	for (let i = 0; i < mapScores.length; i++) {
 		let acronym = mapScores[i].matchName.replace(/:.+/gm, '').replace(/`/g, '');
+
+		if (mapScores[i].matchName.startsWith('ETX') || mapScores[i].matchName.startsWith('o!mm')) {
+			matchMakingScores++;
+		}
 
 		if (tournaments.indexOf(acronym) === -1) {
 			tournaments.push(acronym);
@@ -182,7 +187,7 @@ async function getBeatmap(msg, interaction, beatmap, tournament) {
 		matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`);
 	}
 
-	let tournamentOccurences = `The map was played ${mapScores.length} times with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
+	let tournamentOccurences = `The map was played ${mapScores.length} times (${mapScores.length - matchMakingScores} times without ETX / o!mm) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
 
 	if (tournaments.length === 0) {
 		tournamentOccurences = 'The map was never played in any tournaments.';
