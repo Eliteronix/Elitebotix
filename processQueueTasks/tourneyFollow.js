@@ -37,7 +37,7 @@ module.exports = {
 				players[i] = discordUser.osuName;
 			}
 
-			await user.send(`Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[1]}`);
+			await user.send(`Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[1]}`); //TODO: Hide Qualifiers
 		}
 		processQueueEntry.destroy();
 	},

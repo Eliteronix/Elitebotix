@@ -184,7 +184,7 @@ async function getBeatmap(msg, interaction, beatmap, tournament) {
 		let date = new Date(mapScores[i].matchStartDate);
 		let dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
 
-		matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`);
+		matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`); //TODO: Hide qualifiers
 	}
 
 	let tournamentOccurences = `The map was played ${mapScores.length} times (${mapScores.length - matchMakingScores} times without ETX / o!mm) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;

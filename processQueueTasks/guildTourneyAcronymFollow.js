@@ -30,7 +30,7 @@ module.exports = {
 				context: {
 					guildId: args[0],
 					channelId: args[1],
-					message: `Follow Notification:\nA match under the \`${args[3].replace(/`/g, '')}\` acronym has been played.\nhttps://osu.ppy.sh/community/matches/${args[2]}`,
+					message: `Follow Notification:\nA match under the \`${args[3].replace(/`/g, '')}\` acronym has been played.\nhttps://osu.ppy.sh/community/matches/${args[2]}`, //TODO: Hide Qualifiers
 					autoTrack: args[4],
 					matchId: args[2]
 				}

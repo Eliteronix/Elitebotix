@@ -146,7 +146,7 @@ module.exports = {
 
 			let date = new Date(multiScores[i].matchStartDate);
 			if (!matchesPlayed.includes(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiScores[i].matchId}`)) {
-				matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiScores[i].matchId}`);
+				matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiScores[i].matchId}`); //TODO: Hide Qualifiers
 			}
 
 			if (!matchesChecked.includes(multiScores[i].matchId)) {

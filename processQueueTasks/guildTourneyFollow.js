@@ -57,7 +57,7 @@ module.exports = {
 				context: {
 					guildId: args[0],
 					channelId: args[1],
-					message: `Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[2]}`,
+					message: `Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[2]}`, //TODO: Hide Qualifiers
 					autoTrack: args[4],
 					matchId: args[2]
 				}

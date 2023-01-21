@@ -147,7 +147,7 @@ module.exports = {
 				let lastMessageType = 'mapresult';
 
 				while (!stop) {
-					await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
+					await fetch(`https://osu.ppy.sh/community/matches/${match.id}`) //TODO: Hide Qualifiers
 						.then(async (res) => {
 							let htmlCode = await res.text();
 							htmlCode = htmlCode.replace(/&quot;/gm, '"');
@@ -271,7 +271,7 @@ module.exports = {
 													.setColor(0x0099FF)
 													.setTitle(`${match.name.replace(/`/g, '')}`)
 													.setDescription(`${playerUpdates.join('\n')}`)
-													.setURL(`https://osu.ppy.sh/mp/${match.id}`);
+													.setURL(`https://osu.ppy.sh/mp/${match.id}`); //TODO: Hide Qualifiers
 
 												lastMessage = await msg.channel.send({ embeds: [embed] });
 											} else if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
@@ -282,9 +282,9 @@ module.exports = {
 												}
 
 												if (lastMessageType === 'playing') {
-													lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] });
+													lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] }); //TODO: Hide Qualifiers
 												} else {
-													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] });
+													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] }); //TODO: Hide Qualifiers
 												}
 
 												await lastMessage.react('<:COMPARE:827974793365159997>');
@@ -306,7 +306,7 @@ module.exports = {
 														startDate.setUTCSeconds(startDate.getUTCSeconds() + parseInt(beatmap.totalLength) + 30);
 													}
 
-													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment] });
+													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment] }); //TODO: Hide Qualifiers
 
 													await lastMessage.react('<:COMPARE:827974793365159997>');
 													await lastMessage.react('🗺️');
@@ -316,7 +316,7 @@ module.exports = {
 													.setColor(0x0099FF)
 													.setTitle(`${match.name.replace(/`/g, '')}`)
 													.setDescription(`${playerUpdates.join('\n')}`)
-													.setURL(`https://osu.ppy.sh/mp/${match.id}`);
+													.setURL(`https://osu.ppy.sh/mp/${match.id}`); //TODO: Hide Qualifiers
 
 												lastMessage.edit({ embeds: [embed] });
 											}

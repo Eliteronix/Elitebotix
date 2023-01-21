@@ -1139,7 +1139,7 @@ module.exports = {
 				for (let i = 0; i < multiMatches.length; i++) {
 					try {
 						let date = new Date(multiMatches[i].matchStartDate);
-						multiMatches[i] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiMatches[i].matchId}`;
+						multiMatches[i] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiMatches[i].matchId}`; //TODO: Hide Qualifiers
 					} catch (e) {
 						multiMatches[i] = 'Error';
 						console.error(e, multiMatches[i]);
