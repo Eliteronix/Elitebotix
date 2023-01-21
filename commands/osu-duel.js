@@ -8,7 +8,7 @@ const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
-const { showUnknownInteractionError } = require('../config.json');
+const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 const ObjectsToCsv = require('objects-to-csv');
 
 module.exports = {
@@ -1136,10 +1136,18 @@ module.exports = {
 
 				quicksortMatchId(multiMatches);
 
+				let hideQualifiers = new Date();
+				hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+
 				for (let i = 0; i < multiMatches.length; i++) {
 					try {
 						let date = new Date(multiMatches[i].matchStartDate);
-						multiMatches[i] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiMatches[i].matchId}`; //TODO: Hide Qualifiers
+
+						if (date > hideQualifiers && multiMatches[i].matchName.toLowerCase().includes('qualifier')) {
+							multiMatches[i].matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
+						}
+
+						multiMatches[i] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiMatches[i].matchId}`;
 					} catch (e) {
 						multiMatches[i] = 'Error';
 						console.error(e, multiMatches[i]);
