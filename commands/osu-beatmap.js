@@ -4,7 +4,7 @@ const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getO
 const { Permissions } = require('discord.js');
 const { DBOsuMultiScores } = require('../dbObjects');
 const { Op } = require('sequelize');
-const { showUnknownInteractionError } = require('../config.json');
+const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
 module.exports = {
 	name: 'osu-beatmap',
@@ -168,6 +168,9 @@ async function getBeatmap(msg, interaction, beatmap, tournament) {
 	let matches = [];
 	let matchMakingScores = 0;
 
+	let hideQualifiers = new Date();
+	hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+
 	for (let i = 0; i < mapScores.length; i++) {
 		let acronym = mapScores[i].matchName.replace(/:.+/gm, '').replace(/`/g, '');
 
@@ -184,7 +187,12 @@ async function getBeatmap(msg, interaction, beatmap, tournament) {
 		let date = new Date(mapScores[i].matchStartDate);
 		let dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
 
-		matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`); //TODO: Hide qualifiers
+		if (date > hideQualifiers && mapScores[i].matchName.toLowerCase().includes('qualifier')) {
+			mapScores[i].matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
+			mapScores[i].score = 'XXXXXX';
+		}
+
+		matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`);
 	}
 
 	let tournamentOccurences = `The map was played ${mapScores.length} times (${mapScores.length - matchMakingScores} times without ETX / o!mm) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
