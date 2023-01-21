@@ -3591,6 +3591,10 @@ module.exports = {
 			// 						'name': 'Star Rating',
 			// 						'value': '--sr',
 			// 					},
+			// 					{
+			// 						'name': 'Accuracy',
+			// 						'value': '--acc',
+			// 					},
 			// 				]
 			// 			},
 			// 			{
@@ -8834,6 +8838,10 @@ module.exports = {
 								{
 									'name': 'Star Rating',
 									'value': '--sr',
+								},
+								{
+									'name': 'Accuracy',
+									'value': '--acc',
 								},
 							]
 						},
