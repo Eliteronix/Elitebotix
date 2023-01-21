@@ -3,16 +3,17 @@ const { getUserDuelStarRating, populateMsgFromInteraction, getOsuUserServerMode,
 const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'osu-derank',
 	description: 'Reranks players based on their duel rating compared to others',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
-	//botPermissions: 'MANAGE_ROLES',
-	//botPermissionsTranslated: 'Manage Roles',
+	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
-	tags: 'debug',
+	tags: 'osu',
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

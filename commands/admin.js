@@ -1890,6 +1890,52 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'osu-follow',
+			// 		description: 'Allows following osu! users',
+			// 		dm_permission: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'follow',
+			// 				'description': 'Get notified when a user plays a new match',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'The username, id or link of the player to follow',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'unfollow',
+			// 				'description': 'Stop getting notified when a user plays a new match',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'The username, id or link of the player to unfollow',
+			// 						'type': 3,
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'followlist',
+			// 				'description': 'Get a list of all followed users',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 			{
+			// 				'name': 'followers',
+			// 				'description': 'Get a list of users following you',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'osu-history',
 			// 		description: 'Summarizes the whole osu! history for a user',
 			// 		dm_permission: true,
@@ -7131,6 +7177,52 @@ module.exports = {
 									'required': true
 								},
 							]
+						},
+					]
+				},
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-follow',
+					description: 'Allows following osu! users',
+					dm_permission: true,
+					options: [
+						{
+							'name': 'follow',
+							'description': 'Get notified when a user plays a new match',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'username',
+									'description': 'The username, id or link of the player to follow',
+									'type': 3,
+									'required': true
+								},
+							]
+						},
+						{
+							'name': 'unfollow',
+							'description': 'Stop getting notified when a user plays a new match',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'username',
+									'description': 'The username, id or link of the player to unfollow',
+									'type': 3,
+									'required': true
+								},
+							]
+						},
+						{
+							'name': 'followlist',
+							'description': 'Get a list of all followed users',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'followers',
+							'description': 'Get a list of users following you',
+							'type': 1, // 1 is type SUB_COMMAND
 						},
 					]
 				},
