@@ -1,7 +1,6 @@
-const { getGuildPrefix, updateServerUserActivity, saveOsuMultiScores, isWrongSystem, logDatabaseQueries } = require('./utils');
+const { getGuildPrefix, updateServerUserActivity, isWrongSystem, logDatabaseQueries } = require('./utils');
 const fs = require('fs');
 const Discord = require('discord.js');
-const osu = require('node-osu');
 const { Permissions } = require('discord.js');
 const { DBTickets, DBDiscordUsers } = require('./dbObjects');
 const { developers } = require('./config.json');
@@ -181,50 +180,4 @@ async function handleTicketStatus(msg) {
 			closedCategory.delete();
 		}
 	}
-}
-
-async function saveSentOsuMatches(msg, oldArgs) {
-	let args = [];
-	for (let i = 0; i < oldArgs.length; i++) {
-		args.push(oldArgs[i]);
-	}
-
-	// eslint-disable-next-line no-undef
-	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-	});
-
-	let containsLink = false;
-	for (let i = 0; i < args.length; i++) {
-		if (args[i].includes('http')) {
-			containsLink = true;
-		}
-		if (args[i].includes('\n')) {
-			const split = args[i].split('\n');
-			for (let j = 0; j < split.length; j++) {
-				args.push(split[j]);
-			}
-			args.splice(i, 1);
-			i--;
-		}
-	}
-
-	if (!containsLink) {
-		return;
-	}
-
-	args.forEach(arg => {
-		if (arg.replace(/\D/g, '')) {
-			osuApi.getMatch({ mp: arg.replace(/\D/g, '') })
-				.then(async (match) => {
-					await saveOsuMultiScores(match);
-				})
-				.catch(() => {
-					//Nothing
-				});
-		}
-	});
 }

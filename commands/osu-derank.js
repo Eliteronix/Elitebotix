@@ -3,6 +3,7 @@ const { getUserDuelStarRating, populateMsgFromInteraction, getOsuUserServerMode,
 const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
+const { Permissions } = require('discord.js');
 
 module.exports = {
 	name: 'osu-derank',
