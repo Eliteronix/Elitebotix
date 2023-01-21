@@ -4,7 +4,7 @@ const { Permissions } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { showUnknownInteractionError } = require('../config.json');
+const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
 module.exports = {
 	name: 'osu-matchtrack',
@@ -270,8 +270,14 @@ module.exports = {
 												let embed = new Discord.MessageEmbed()
 													.setColor(0x0099FF)
 													.setTitle(`${match.name.replace(/`/g, '')}`)
-													.setDescription(`${playerUpdates.join('\n')}`)
-													.setURL(`https://osu.ppy.sh/mp/${match.id}`); //TODO: Hide Qualifiers
+													.setDescription(`${playerUpdates.join('\n')}`);
+
+												let hideQualifiers = new Date();
+												hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+
+												if (!match.name.toLowerCase().includes('qualifier') || new Date(match.raw_start) < hideQualifiers) {
+													embed.setURL(`https://osu.ppy.sh/mp/${match.id}`);
+												}
 
 												lastMessage = await msg.channel.send({ embeds: [embed] });
 											} else if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
@@ -281,10 +287,19 @@ module.exports = {
 													currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
 												}
 
+												let sharedLink = `<https://osu.ppy.sh/mp/${match.id}>`;
+
+												let hideQualifiers = new Date();
+												hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+
+												if (match.name.toLowerCase().includes('qualifier') && new Date(match.raw_start) > hideQualifiers) {
+													sharedLink = `MP Link hidden for ${daysHidingQualifiers} days (Qualifiers)`;
+												}
+
 												if (lastMessageType === 'playing') {
-													lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] }); //TODO: Hide Qualifiers
+													lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
 												} else {
-													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}`, files: [attachment] }); //TODO: Hide Qualifiers
+													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
 												}
 
 												await lastMessage.react('<:COMPARE:827974793365159997>');
@@ -306,7 +321,16 @@ module.exports = {
 														startDate.setUTCSeconds(startDate.getUTCSeconds() + parseInt(beatmap.totalLength) + 30);
 													}
 
-													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n<https://osu.ppy.sh/mp/${match.id}>${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment] }); //TODO: Hide Qualifiers
+													let sharedLink = `<https://osu.ppy.sh/mp/${match.id}>`;
+
+													let hideQualifiers = new Date();
+													hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+
+													if (match.name.toLowerCase().includes('qualifier') && new Date(match.raw_start) > hideQualifiers) {
+														sharedLink = `MP Link hidden for ${daysHidingQualifiers} days (Qualifiers)`;
+													}
+
+													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment] });
 
 													await lastMessage.react('<:COMPARE:827974793365159997>');
 													await lastMessage.react('🗺️');
@@ -315,8 +339,14 @@ module.exports = {
 												let embed = new Discord.MessageEmbed()
 													.setColor(0x0099FF)
 													.setTitle(`${match.name.replace(/`/g, '')}`)
-													.setDescription(`${playerUpdates.join('\n')}`)
-													.setURL(`https://osu.ppy.sh/mp/${match.id}`); //TODO: Hide Qualifiers
+													.setDescription(`${playerUpdates.join('\n')}`);
+
+												let hideQualifiers = new Date();
+												hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+
+												if (!match.name.toLowerCase().includes('qualifier') || new Date(match.raw_start) < hideQualifiers) {
+													embed.setURL(`https://osu.ppy.sh/mp/${match.id}`);
+												}
 
 												lastMessage.edit({ embeds: [embed] });
 											}
