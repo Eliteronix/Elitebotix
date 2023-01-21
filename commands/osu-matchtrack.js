@@ -149,178 +149,145 @@ module.exports = {
 				let lastMessageType = 'mapresult';
 
 				while (!stop) {
-					await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
-						.then(async (res) => {
-							let htmlCode = await res.text();
-							htmlCode = htmlCode.replace(/&quot;/gm, '"');
-							const matchRunningRegex = /{"match".+,"current_game_id":\d+}/gm;
-							const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
-							const matchesRunning = matchRunningRegex.exec(htmlCode);
-							const matchesPaused = matchPausedRegex.exec(htmlCode);
+					try {
+						await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
+							.then(async (res) => {
+								let htmlCode = await res.text();
+								htmlCode = htmlCode.replace(/&quot;/gm, '"');
+								const matchRunningRegex = /{"match".+,"current_game_id":\d+}/gm;
+								const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
+								const matchesRunning = matchRunningRegex.exec(htmlCode);
+								const matchesPaused = matchPausedRegex.exec(htmlCode);
 
-							let regexMatch = null;
-							if (matchesRunning && matchesRunning[0]) {
-								regexMatch = matchesRunning[0];
-							}
-
-							if (matchesPaused && matchesPaused[0]) {
-								regexMatch = matchesPaused[0];
-							}
-
-							if (regexMatch) {
-								let json = JSON.parse(regexMatch);
-
-								if (!latestEventId) {
-									latestEventId = json.latest_event_id - 1;
+								let regexMatch = null;
+								if (matchesRunning && matchesRunning[0]) {
+									regexMatch = matchesRunning[0];
 								}
 
-								if (json.latest_event_id > latestEventId) {
-									let playerUpdates = [];
-									let redScore = 0; //Score on the left side / first slots
-									let blueScore = 0; //Score on the right side / last slots
-									for (let i = 0; i < json.events.length; i++) {
-										if (json.events[i].detail.type === 'other') {
-											//Reset player updates
-											playerUpdates = [];
+								if (matchesPaused && matchesPaused[0]) {
+									regexMatch = matchesPaused[0];
+								}
 
-											//Get the scores of the teams
-											let blueScores = json.events[i].game.scores.filter(score => score.match.team === 'blue');
-											let redScores = json.events[i].game.scores.filter(score => score.match.team === 'red');
+								if (regexMatch) {
+									let json = JSON.parse(regexMatch);
 
-											if (blueScores.length || redScores.length) {
-												//Team vs
-												quicksort(blueScores);
-												quicksort(redScores);
+									if (!latestEventId) {
+										latestEventId = json.latest_event_id - 1;
+									}
 
-												let blueTotalScore = 0;
-												for (let i = 0; i < blueScores.length; i++) {
-													blueTotalScore += blueScores[i].score;
-												}
+									if (json.latest_event_id > latestEventId) {
+										let playerUpdates = [];
+										let redScore = 0; //Score on the left side / first slots
+										let blueScore = 0; //Score on the right side / last slots
+										for (let i = 0; i < json.events.length; i++) {
+											if (json.events[i].detail.type === 'other') {
+												//Reset player updates
+												playerUpdates = [];
 
-												let redTotalScore = 0;
-												for (let i = 0; i < redScores.length; i++) {
-													redTotalScore += redScores[i].score;
-												}
+												//Get the scores of the teams
+												let blueScores = json.events[i].game.scores.filter(score => score.match.team === 'blue');
+												let redScores = json.events[i].game.scores.filter(score => score.match.team === 'red');
 
-												if (blueTotalScore > redTotalScore) {
-													blueScore++;
-												} else {
-													redScore++;
-												}
-											} else if (json.events[i].game.scores.length === 2) {
-												//Head to head
-												let playerNames = match.name.split(/\) ?vs.? ?\(/gm);
-												//basically a check if its a tourney match (basically)
-												if (playerNames[1]) {
-													let redPlayer = playerNames[0].replace(/.+\(/gm, '');
-													let bluePlayer = playerNames[1].replace(')', '');
+												if (blueScores.length || redScores.length) {
+													//Team vs
+													quicksort(blueScores);
+													quicksort(redScores);
 
-													let redTotal = null;
-													let blueTotal = null;
-
-													for (let j = 0; j < json.events[i].game.scores.length; j++) {
-														json.events[i].game.scores[j].username = await getOsuPlayerName(json.events[i].game.scores[j].user_id);
-														if (json.events[i].game.scores[j].username === redPlayer) {
-															redTotal = json.events[i].game.scores[j].score;
-														}
-
-														if (json.events[i].game.scores[j].username === bluePlayer) {
-															blueTotal = json.events[i].game.scores[j].score;
-														}
+													let blueTotalScore = 0;
+													for (let i = 0; i < blueScores.length; i++) {
+														blueTotalScore += blueScores[i].score;
 													}
 
-													if (blueTotal > redTotal) {
+													let redTotalScore = 0;
+													for (let i = 0; i < redScores.length; i++) {
+														redTotalScore += redScores[i].score;
+													}
+
+													if (blueTotalScore > redTotalScore) {
 														blueScore++;
-													} else if (blueTotal < redTotal) {
+													} else {
 														redScore++;
 													}
+												} else if (json.events[i].game.scores.length === 2) {
+													//Head to head
+													let playerNames = match.name.split(/\) ?vs.? ?\(/gm);
+													//basically a check if its a tourney match (basically)
+													if (playerNames[1]) {
+														let redPlayer = playerNames[0].replace(/.+\(/gm, '');
+														let bluePlayer = playerNames[1].replace(')', '');
+
+														let redTotal = null;
+														let blueTotal = null;
+
+														for (let j = 0; j < json.events[i].game.scores.length; j++) {
+															json.events[i].game.scores[j].username = await getOsuPlayerName(json.events[i].game.scores[j].user_id);
+															if (json.events[i].game.scores[j].username === redPlayer) {
+																redTotal = json.events[i].game.scores[j].score;
+															}
+
+															if (json.events[i].game.scores[j].username === bluePlayer) {
+																blueTotal = json.events[i].game.scores[j].score;
+															}
+														}
+
+														if (blueTotal > redTotal) {
+															blueScore++;
+														} else if (blueTotal < redTotal) {
+															redScore++;
+														}
+													}
 												}
+											} else if (json.events[i].detail.type === 'host-changed' && json.events[i].user_id) {
+												let playerName = await getOsuPlayerName(json.events[i].user_id);
+												playerUpdates.push(`<:exchangealtsolid:1005141205069344859> ${playerName} became the host.`);
+											} else if (json.events[i].detail.type === 'host-changed') {
+												playerUpdates.push('<:exchangealtsolid:1005141205069344859> The host has been reset.');
+
+												if (json.events[i].user_id === 0) {
+													redScore = 0;
+													blueScore = 0;
+												}
+											} else if (json.events[i].detail.type === 'player-joined') {
+												let playerName = await getOsuPlayerName(json.events[i].user_id);
+												playerUpdates.push(`<:arrowrightsolid:1005141207879536761> ${playerName} joined the match.`);
+											} else if (json.events[i].detail.type === 'player-left') {
+												let playerName = await getOsuPlayerName(json.events[i].user_id);
+												playerUpdates.push(`<:arrowleftsolid:1005141359008682024> ${playerName} left the match.`);
+											} else if (json.events[i].detail.type === 'player-kicked') {
+												let playerName = await getOsuPlayerName(json.events[i].user_id);
+												playerUpdates.push(`<:bansolid:1032747189941829683> ${playerName} has been kicked from the match.`);
+											} else if (json.events[i].detail.type === 'match-disbanded') {
+												playerUpdates.push('<:timessolid:1005141203819434104> The match has been closed.');
+											} else if (json.events[i].detail.type === 'match-created') {
+												playerUpdates.push('<:plussolid:1005142572823494677> The match has been created.');
+											} else {
+												playerUpdates.push(`${json.events[i].detail.type}, ${json.events[i].user_id}`);
 											}
-										} else if (json.events[i].detail.type === 'host-changed' && json.events[i].user_id) {
-											let playerName = await getOsuPlayerName(json.events[i].user_id);
-											playerUpdates.push(`<:exchangealtsolid:1005141205069344859> ${playerName} became the host.`);
-										} else if (json.events[i].detail.type === 'host-changed') {
-											playerUpdates.push('<:exchangealtsolid:1005141205069344859> The host has been reset.');
 
-											if (json.events[i].user_id === 0) {
-												redScore = 0;
-												blueScore = 0;
-											}
-										} else if (json.events[i].detail.type === 'player-joined') {
-											let playerName = await getOsuPlayerName(json.events[i].user_id);
-											playerUpdates.push(`<:arrowrightsolid:1005141207879536761> ${playerName} joined the match.`);
-										} else if (json.events[i].detail.type === 'player-left') {
-											let playerName = await getOsuPlayerName(json.events[i].user_id);
-											playerUpdates.push(`<:arrowleftsolid:1005141359008682024> ${playerName} left the match.`);
-										} else if (json.events[i].detail.type === 'player-kicked') {
-											let playerName = await getOsuPlayerName(json.events[i].user_id);
-											playerUpdates.push(`<:bansolid:1032747189941829683> ${playerName} has been kicked from the match.`);
-										} else if (json.events[i].detail.type === 'match-disbanded') {
-											playerUpdates.push('<:timessolid:1005141203819434104> The match has been closed.');
-										} else if (json.events[i].detail.type === 'match-created') {
-											playerUpdates.push('<:plussolid:1005142572823494677> The match has been created.');
-										} else {
-											playerUpdates.push(`${json.events[i].detail.type}, ${json.events[i].user_id}`);
-										}
-
-										if (json.events[i].id > latestEventId) {
-											if (json.events[i].detail.type === 'match-disbanded') {
-												reactionCollector.stop();
-											}
-
-											if (lastMessageType === 'mapresult' && json.events[i].detail.type !== 'other') {
-												let embed = new Discord.MessageEmbed()
-													.setColor(0x0099FF)
-													.setTitle(`${match.name.replace(/`/g, '')}`)
-													.setDescription(`${playerUpdates.join('\n')}`);
-
-												let hideQualifiers = new Date();
-												hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
-
-												if (!match.name.toLowerCase().includes('qualifier') || new Date(match.raw_start) < hideQualifiers) {
-													embed.setURL(`https://osu.ppy.sh/mp/${match.id}`);
+											if (json.events[i].id > latestEventId) {
+												if (json.events[i].detail.type === 'match-disbanded') {
+													reactionCollector.stop();
 												}
 
-												lastMessage = await msg.channel.send({ embeds: [embed] });
-											} else if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
-												let attachment = await getResultImage(json.events[i], json.users);
-												let currentScore = '';
-												if (redScore + blueScore > 0) {
-													currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
-												}
+												if (lastMessageType === 'mapresult' && json.events[i].detail.type !== 'other') {
+													let embed = new Discord.MessageEmbed()
+														.setColor(0x0099FF)
+														.setTitle(`${match.name.replace(/`/g, '')}`)
+														.setDescription(`${playerUpdates.join('\n')}`);
 
-												let sharedLink = `<https://osu.ppy.sh/mp/${match.id}>`;
+													let hideQualifiers = new Date();
+													hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
 
-												let hideQualifiers = new Date();
-												hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+													if (!match.name.toLowerCase().includes('qualifier') || new Date(match.raw_start) < hideQualifiers) {
+														embed.setURL(`https://osu.ppy.sh/mp/${match.id}`);
+													}
 
-												if (match.name.toLowerCase().includes('qualifier') && new Date(match.raw_start) > hideQualifiers) {
-													sharedLink = `MP Link hidden for ${daysHidingQualifiers} days (Qualifiers)`;
-												}
-
-												if (lastMessageType === 'playing') {
-													lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
-												} else {
-													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
-												}
-
-												await lastMessage.react('<:COMPARE:827974793365159997>');
-												await lastMessage.react('🗺️');
-											} else if (json.events[i].detail.type === 'other') {
-												if (lastMessageType !== 'playing') {
-													let modBits = getModBits(json.events[i].game.mods.join(''));
-													let attachment = await getPlayingImage(json.events[i], json.users);
+													lastMessage = await msg.channel.send({ embeds: [embed] });
+												} else if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
+													let attachment = await getResultImage(json.events[i], json.users);
 													let currentScore = '';
 													if (redScore + blueScore > 0) {
 														currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
-													}
-
-													let beatmap = await getOsuBeatmap({ beatmapId: json.events[i].game.beatmap.id, modBits: modBits });
-
-													let startDate = new Date(json.events[i].game.start_time);
-
-													if (beatmap) {
-														startDate.setUTCSeconds(startDate.getUTCSeconds() + parseInt(beatmap.totalLength) + 30);
 													}
 
 													let sharedLink = `<https://osu.ppy.sh/mp/${match.id}>`;
@@ -332,58 +299,98 @@ module.exports = {
 														sharedLink = `MP Link hidden for ${daysHidingQualifiers} days (Qualifiers)`;
 													}
 
-													lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment] });
+													if (lastMessageType === 'playing') {
+														lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
+													} else {
+														lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
+													}
 
 													await lastMessage.react('<:COMPARE:827974793365159997>');
 													await lastMessage.react('🗺️');
-												}
-											} else if (json.events[i].detail.type !== 'other') {
-												let embed = new Discord.MessageEmbed()
-													.setColor(0x0099FF)
-													.setTitle(`${match.name.replace(/`/g, '')}`)
-													.setDescription(`${playerUpdates.join('\n')}`);
+												} else if (json.events[i].detail.type === 'other') {
+													if (lastMessageType !== 'playing') {
+														let modBits = getModBits(json.events[i].game.mods.join(''));
+														let attachment = await getPlayingImage(json.events[i], json.users);
+														let currentScore = '';
+														if (redScore + blueScore > 0) {
+															currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
+														}
 
-												let hideQualifiers = new Date();
-												hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+														let beatmap = await getOsuBeatmap({ beatmapId: json.events[i].game.beatmap.id, modBits: modBits });
 
-												if (!match.name.toLowerCase().includes('qualifier') || new Date(match.raw_start) < hideQualifiers) {
-													embed.setURL(`https://osu.ppy.sh/mp/${match.id}`);
-												}
+														let startDate = new Date(json.events[i].game.start_time);
 
-												lastMessage.edit({ embeds: [embed] });
-											}
+														if (beatmap) {
+															startDate.setUTCSeconds(startDate.getUTCSeconds() + parseInt(beatmap.totalLength) + 30);
+														}
 
+														let sharedLink = `<https://osu.ppy.sh/mp/${match.id}>`;
 
-											if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
-												lastMessageType = 'mapresult';
-												latestEventId = json.events[i].id;
-											} else if (json.events[i].detail.type === 'other') {
-												lastMessageType = 'playing';
-												let notLastMap = false;
+														let hideQualifiers = new Date();
+														hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
 
-												for (let j = i + 1; j < json.events.length; j++) {
-													if (json.events[j].detail.type === 'other') {
-														notLastMap = true;
+														if (match.name.toLowerCase().includes('qualifier') && new Date(match.raw_start) > hideQualifiers) {
+															sharedLink = `MP Link hidden for ${daysHidingQualifiers} days (Qualifiers)`;
+														}
+
+														lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment] });
+
+														await lastMessage.react('<:COMPARE:827974793365159997>');
+														await lastMessage.react('🗺️');
 													}
+												} else if (json.events[i].detail.type !== 'other') {
+													let embed = new Discord.MessageEmbed()
+														.setColor(0x0099FF)
+														.setTitle(`${match.name.replace(/`/g, '')}`)
+														.setDescription(`${playerUpdates.join('\n')}`);
+
+													let hideQualifiers = new Date();
+													hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+
+													if (!match.name.toLowerCase().includes('qualifier') || new Date(match.raw_start) < hideQualifiers) {
+														embed.setURL(`https://osu.ppy.sh/mp/${match.id}`);
+													}
+
+													lastMessage.edit({ embeds: [embed] });
 												}
 
-												if (notLastMap || json.match.end_time) {
+
+												if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
+													lastMessageType = 'mapresult';
 													latestEventId = json.events[i].id;
+												} else if (json.events[i].detail.type === 'other') {
+													lastMessageType = 'playing';
+													let notLastMap = false;
+
+													for (let j = i + 1; j < json.events.length; j++) {
+														if (json.events[j].detail.type === 'other') {
+															notLastMap = true;
+														}
+													}
+
+													if (notLastMap || json.match.end_time) {
+														latestEventId = json.events[i].id;
+													} else {
+														latestEventId = json.events[i].id - 1;
+														break;
+													}
 												} else {
-													latestEventId = json.events[i].id - 1;
-													break;
+													lastMessageType = 'updates';
+													latestEventId = json.events[i].id;
 												}
-											} else {
-												lastMessageType = 'updates';
-												latestEventId = json.events[i].id;
 											}
 										}
 									}
 								}
-							}
-						});
+							});
 
-					await pause(15000);
+						await pause(15000);
+					} catch (e) {
+						if (!e.message.endsWith('reason: Client network socket disconnected before secure TLS connection was established')) {
+							console.error(e);
+						}
+						await pause(15000);
+					}
 				}
 			})
 			.catch(err => {
