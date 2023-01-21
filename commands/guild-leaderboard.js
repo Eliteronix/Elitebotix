@@ -4,7 +4,7 @@ const { leaderboardEntriesPerPage, showUnknownInteractionError } = require('../c
 const { Permissions } = require('discord.js');
 
 module.exports = {
-	name: 'server-leaderboard',
+	name: 'guild-leaderboard',
 	description: 'Sends a leaderboard of the top users in the guild',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
