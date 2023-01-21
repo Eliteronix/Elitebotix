@@ -6,7 +6,7 @@ const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayna
 const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 const { Op } = require('sequelize');
-const { showUnknownInteractionError } = require('../config.json');
+const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
 module.exports = {
 	name: 'osu-skills',
@@ -520,13 +520,21 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 						rawModsData.push(rawModsDataObject);
 					}
 
+					let hideQualifiers = new Date();
+					hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+
 					let uncompletedMonths = [];
 					let runningAverageAmount = 150; //All mods together
 					for (let i = 0; i < userScores.length; i++) {
 						//Push matches for the history txt
 						let date = new Date(userScores[i].matchStartDate);
+
+						if (date > hideQualifiers && userScores[i].matchName.toLowerCase().includes('qualifier')) {
+							userScores[i].matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
+						}
+
 						if (!matchesPlayed.includes(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`)) {
-							matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`); //TODO: Hide Qualifiers
+							matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`);
 						}
 
 						for (let j = 0; j < rawModsData.length; j++) {
