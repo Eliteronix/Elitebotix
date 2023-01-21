@@ -10622,10 +10622,6 @@ module.exports = {
 
 			let now = new Date();
 			DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${args[1]}`, priority: 2, date: now });
-		} else if (args[0] === 'sendMultis') {
-			for (let i = parseInt(args[1]); i < parseInt(args[2]); i++) {
-				msg.reply(`https://osu.ppy.sh/community/matches/${i}`);
-			}
 		} else if (args[0] === 'removeOsuUserConnection') {
 			let DBDiscordUser = await DBDiscordUsers.findOne({
 				where: { osuUserId: args[1], osuVerified: true }
