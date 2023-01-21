@@ -106,6 +106,10 @@ module.exports = {
 				sorting = 'sr';
 				args.splice(i, 1);
 				i--;
+			} else if (args[i] === '--acc') {
+				sorting = 'acc';
+				args.splice(i, 1);
+				i--;
 			} else if (args[i].startsWith('--') && !isNaN(args[i].replace('--', ''))) {
 				limit = parseInt(args[i].replace('--', ''));
 				if (limit > 100) {
@@ -439,6 +443,8 @@ async function drawTitle(input, server, mode, sorting, order) {
 			sortingText += 'length ';
 		} else if (sorting == 'sr') {
 			sortingText += 'Star Rating ';
+		} else if (sorting == 'acc') {
+			sortingText += 'Accuracy ';
 		}
 	}
 
@@ -673,11 +679,19 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 	let sortedScores = [];
 	let beatmaps = [];
 
+	for (let i = 0; i < scores.length; i++) {
+		scores[i].acc = getAccuracy(scores[i], mode) * 100;
+	}
+
 	if (sorting && sorting == 'recent') {
 		for (let i = 0; i < scores.length; i++) {
 			scores[i].best = i + 1;
 		}
 		quicksortRecent(scores);
+	} else if (sorting && sorting == 'acc') {
+		scores = scores.sort((a, b) => {
+			return parseFloat(b.acc) - parseFloat(a.acc);
+		});
 	}
 
 	let now = new Date();
@@ -840,7 +854,6 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		} else {
 			ctx.fillText(achievedTime, (canvas.width / 35) * 3 + ctx.measureText(beatmaps[i].difficulty).width + canvas.width / 100, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 		}
-		let accuracy = getAccuracy(sortedScores[i], mode) * 100;
 
 		let combo;
 
@@ -855,7 +868,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		ctx.fillStyle = '#FFCC22';
 		ctx.textAlign = 'right';
 		ctx.fillText(combo, (canvas.width / 28) * 23.4, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
-		ctx.fillText(Math.round(accuracy * 100) / 100 + '%', (canvas.width / 28) * 24.75, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+		ctx.fillText(Math.round(sortedScores[i].acc * 100) / 100 + '%', (canvas.width / 28) * 24.75, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 
 		if (tracking) {
 			// Write hits
