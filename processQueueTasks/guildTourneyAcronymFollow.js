@@ -6,6 +6,12 @@ module.exports = {
 		let args = processQueueEntry.additions.split(';');
 
 		try {
+			let message = `Follow Notification:\nA match under the \`${args[3].replace(/`/g, '')}\` acronym has been played.\nhttps://osu.ppy.sh/community/matches/${args[2]}`;
+
+			if (args[5].toLowerCase().includes('qualifier')) {
+				message = `Follow Notification:\nA match under the \`${args[3].replace(/`/g, '')}\` acronym has been played.\n${args[5]}\n(Qualifier MP Links are hidden)`;
+			}
+
 			client.shard.broadcastEval(async (c, { guildId, channelId, message, autoTrack, matchId }) => {
 				const guild = await c.guilds.cache.get(guildId);
 
@@ -30,7 +36,7 @@ module.exports = {
 				context: {
 					guildId: args[0],
 					channelId: args[1],
-					message: `Follow Notification:\nA match under the \`${args[3].replace(/`/g, '')}\` acronym has been played.\nhttps://osu.ppy.sh/community/matches/${args[2]}`, //TODO: Hide Qualifiers
+					message: message,
 					autoTrack: args[4],
 					matchId: args[2]
 				}

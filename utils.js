@@ -5652,7 +5652,7 @@ async function saveOsuMultiScoresFunction(match) {
 			//Create a notification for each user
 			let now = new Date();
 			for (let i = 0; i < usersToNotify.length; i++) {
-				await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')}`, date: now });
+				await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')};${match.name}`, date: now });
 			}
 		}
 
@@ -5726,7 +5726,7 @@ async function saveOsuMultiScoresFunction(match) {
 			//Create a notification for each channel
 			let now = new Date();
 			for (let i = 0; i < channelsToNotify.length; i++) {
-				await DBProcessQueue.create({ task: 'guildTourneyFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${channelsToNotify[i].osuUserIds.join(',')};${channelsToNotify[i].trackMatch}`, date: now });
+				await DBProcessQueue.create({ task: 'guildTourneyFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${channelsToNotify[i].osuUserIds.join(',')};${channelsToNotify[i].trackMatch};${match.name}`, date: now });
 			}
 		}
 
@@ -5757,7 +5757,7 @@ async function saveOsuMultiScoresFunction(match) {
 			//Create a notification for each channel
 			let now = new Date();
 			for (let i = 0; i < channelsToNotify.length; i++) {
-				await DBProcessQueue.create({ task: 'guildTourneyAcronymFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${match.name.replace(/:.*/gm, '')};${channelsToNotify[i].trackMatch}`, date: now });
+				await DBProcessQueue.create({ task: 'guildTourneyAcronymFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${match.name.replace(/:.*/gm, '')};${channelsToNotify[i].trackMatch};${match.name}`, date: now });
 			}
 		}
 	}

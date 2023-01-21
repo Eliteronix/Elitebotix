@@ -37,7 +37,13 @@ module.exports = {
 				players[i] = discordUser.osuName;
 			}
 
-			await user.send(`Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[1]}`); //TODO: Hide Qualifiers
+			let message = `Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[1]}`;
+
+			if (args[3].toLowerCase().includes('qualifier')) {
+				message = `Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\n${args[3]}\n(Qualifier MP Links are hidden)`;
+			}
+
+			await user.send(message);
 		}
 		processQueueEntry.destroy();
 	},
