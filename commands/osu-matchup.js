@@ -6,7 +6,7 @@ const { Permissions } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { Op } = require('sequelize');
-const { showUnknownInteractionError } = require('../config.json');
+const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
 module.exports = {
 	name: 'osu-matchup',
@@ -407,6 +407,9 @@ module.exports = {
 
 		//Loop through all games, get the score for each player and add the teamsize best scores together and compare
 		let matchesPlayed = [];
+
+		let hideQualifiers = new Date();
+		hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
 		for (let i = 0; i < gamesPlayed.length; i++) {
 			let team1GameScores = [];
 			let team2GameScores = [];
@@ -469,8 +472,13 @@ module.exports = {
 
 			//Push matches for the history txt
 			let date = new Date(team1GameScores[0].matchStartDate);
+
+			if (date > hideQualifiers && team1GameScores[0].matchName.toLowerCase().includes('qualifier')) {
+				team1GameScores[0].matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
+			}
+
 			if (!matchesPlayed.includes(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${team1GameScores[0].matchName} ----- https://osu.ppy.sh/community/matches/${team1GameScores[0].matchId}`)) {
-				matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${team1GameScores[0].matchName} ----- https://osu.ppy.sh/community/matches/${team1GameScores[0].matchId}`); //TODO: Hide Qualifiers
+				matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${team1GameScores[0].matchName} ----- https://osu.ppy.sh/community/matches/${team1GameScores[0].matchId}`);
 			}
 		}
 
