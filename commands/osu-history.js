@@ -272,6 +272,12 @@ module.exports = {
 
 		mostPlayedWith.sort((a, b) => b.amount - a.amount);
 
+		for (let i = 0; i < mostPlayedWith.length; i++) {
+			if (mostPlayedWith[i].osuName === null) {
+				mostPlayedWith[i].osuName = '[Redacted]';
+			}
+		}
+
 		tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
 
 		// Create rank history graph
@@ -609,6 +615,14 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${osuUser.osuUserId}.txt`);
 		files.push(matchesPlayed);
+
+		mostPlayedWith = mostPlayedWith.map((user) => {
+			return `${user.amount} times - ${user.osuName} (${user.osuUserId})`;
+		});
+
+		// eslint-disable-next-line no-undef
+		mostPlayedWith = new Discord.MessageAttachment(Buffer.from(mostPlayedWith.join('\n'), 'utf-8'), `most-played-with-${osuUser.osuUserId}.txt`);
+		files.push(mostPlayedWith);
 
 		return interaction.editReply({ content: ' ', files: files });
 	},
