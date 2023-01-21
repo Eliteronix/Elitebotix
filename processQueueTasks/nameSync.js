@@ -39,7 +39,6 @@ module.exports = {
 
 						for (let i = 0; i < members.length; i++) {
 							//Get the user
-							logDatabaseQueries(2, 'processQueueTasks/nameSync.js DBDiscordUsers');
 							let discordUser = discordUsers.find(user => user.userId === members[i].user.id);
 
 							if (members[i].user.id !== guild.ownerId && discordUser && discordUser.osuUserId && discordUser.osuVerified) {
