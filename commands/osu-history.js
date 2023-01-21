@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const osu = require('node-osu');
 const { Permissions } = require('discord.js');
-const { showUnknownInteractionError } = require('../config.json');
+const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 const { Op } = require('sequelize');
 const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague } = require('../utils');
 const Canvas = require('canvas');
@@ -138,6 +138,9 @@ module.exports = {
 
 		let matchesPlayed = [];
 
+		let hideQualifiers = new Date();
+		hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+
 		for (let i = 0; i < multiScores.length; i++) {
 			if (new Date() - lastUpdate > 15000) {
 				interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
@@ -145,8 +148,13 @@ module.exports = {
 			}
 
 			let date = new Date(multiScores[i].matchStartDate);
+
+			if (date > hideQualifiers && multiScores[i].matchName.toLowerCase().includes('qualifier')) {
+				multiScores[i].matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
+			}
+
 			if (!matchesPlayed.includes(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiScores[i].matchId}`)) {
-				matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiScores[i].matchId}`); //TODO: Hide Qualifiers
+				matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiScores[i].matchId}`);
 			}
 
 			if (!matchesChecked.includes(multiScores[i].matchId)) {
