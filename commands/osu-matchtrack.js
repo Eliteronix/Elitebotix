@@ -64,6 +64,8 @@ module.exports = {
 			}
 		}
 
+		matchID = Number(matchID);
+
 		osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
 				if (match.raw_end && !showStart) {
