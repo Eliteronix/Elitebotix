@@ -2,7 +2,7 @@ const { getGuildPrefix, updateServerUserActivity, isWrongSystem, logDatabaseQuer
 const fs = require('fs');
 const Discord = require('discord.js');
 const { Permissions } = require('discord.js');
-const { DBTickets, DBDiscordUsers } = require('./dbObjects');
+const { DBTickets } = require('./dbObjects');
 const { developers } = require('./config.json');
 
 module.exports = async function (msg, bancho) {
@@ -17,15 +17,7 @@ module.exports = async function (msg, bancho) {
 	//Handle Ticket
 	handleTicketStatus(msg);
 
-	//Return if not developer or earlyaccess
-	let discordUser = await DBDiscordUsers.findOne({
-		where: {
-			userId: msg.author.id,
-			patreon: true,
-		}
-	});
-
-	if (!developers.includes(msg.author.id) && !discordUser) {
+	if (!developers.includes(msg.author.id)) {
 		return;
 	}
 
