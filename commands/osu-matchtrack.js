@@ -147,7 +147,7 @@ module.exports = {
 				let lastMessageType = 'mapresult';
 
 				while (!stop) {
-					await fetch(`https://osu.ppy.sh/community/matches/${match.id}`) //TODO: Hide Qualifiers
+					await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 						.then(async (res) => {
 							let htmlCode = await res.text();
 							htmlCode = htmlCode.replace(/&quot;/gm, '"');
