@@ -2413,6 +2413,7 @@ module.exports = {
 								format: format,
 								rankRange: rankRange,
 								gamemode: gamemode,
+								region: 'International',
 								posted: posted,
 								notes: notes,
 							});

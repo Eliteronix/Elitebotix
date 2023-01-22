@@ -72,6 +72,10 @@ module.exports = {
 					embed.addField('Gamemode', 'No gamemode specified');
 				}
 
+				if (post.region) {
+					embed.addField('Region', post.gamemode);
+				}
+
 				if (post.notes) {
 					embed.addField('Notes', post.notes);
 				} else {
@@ -175,6 +179,26 @@ module.exports = {
 
 			let pingedUsers = 0;
 
+			//Load the country data csv and get the continent
+			const fs = require('fs');
+			let countryData = fs.readFileSync('./other/country-and-continent-codes-list.csv', 'utf8');
+			let countryDataArray = countryData.split('\r\n');
+			for (let i = 0; i < countryDataArray.length; i++) {
+				countryDataArray[i] = countryDataArray[i].split(',');
+
+				for (let j = 0; j < countryDataArray[i].length; j++) {
+					while (countryDataArray[i][j].startsWith('"') && !countryDataArray[i][j].endsWith('"')) {
+						countryDataArray[i][j] = countryDataArray[i][j] + ',' + countryDataArray[i][j + 1];
+						countryDataArray[i].splice(j + 1, 1);
+						j--;
+					}
+
+					if (countryDataArray[i][j].startsWith('"')) {
+						countryDataArray[i][j] = countryDataArray[i][j].substring(1, countryDataArray[i][j].length - 1);
+					}
+				}
+			}
+
 			for (let i = 0; i < pingUsers.length; i++) {
 				try {
 					let user = pingUsers[i];
@@ -253,6 +277,20 @@ module.exports = {
 								}
 							}
 
+							if (user.country && forumPost.region && forumPost.region.toLowerCase() !== 'international') {
+								let userCountry = null;
+								for (let k = 0; k < countryDataArray.length; k++) {
+									if (countryDataArray[k][3] === user.country) {
+										userCountry = countryDataArray[k];
+										break;
+									}
+								}
+
+								if (!forumPost.region.includes(userCountry[0])) {
+									continue;
+								}
+							}
+
 							let userDM = await interaction.client.users.fetch(user.userId);
 							await userDM.send({ content: 'A new tournament has been announced.', embeds: [embed] });
 							pingedUsers++;
@@ -274,53 +312,16 @@ module.exports = {
 			interaction.editReply(`Ping sent. (Pinged ${pingedUsers} users)`);
 
 		} else if (interaction.options._subcommand === 'update') {
-			let id = null;
-			let format = null;
-			let rankrange = null;
-			let gamemode = null;
-			let notes = null;
-			let bws = null;
-			let badged = null;
-			let outdated = null;
-			let notournament = null;
-
-			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-				if (interaction.options._hoistedOptions[i].name === 'id') {
-					id = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'format') {
-					format = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'rankrange') {
-					rankrange = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'gamemode') {
-					gamemode = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'notes') {
-					notes = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'bws') {
-					if (interaction.options._hoistedOptions[i].value === true) {
-						bws = true;
-					} else {
-						bws = false;
-					}
-				} else if (interaction.options._hoistedOptions[i].name === 'badged') {
-					if (interaction.options._hoistedOptions[i].value === true) {
-						badged = true;
-					} else {
-						badged = false;
-					}
-				} else if (interaction.options._hoistedOptions[i].name === 'outdated') {
-					if (interaction.options._hoistedOptions[i].value === true) {
-						outdated = true;
-					} else {
-						outdated = false;
-					}
-				} else if (interaction.options._hoistedOptions[i].name === 'notournament') {
-					if (interaction.options._hoistedOptions[i].value === true) {
-						notournament = true;
-					} else {
-						notournament = false;
-					}
-				}
-			}
+			let id = interaction.options.getString('id');
+			let format = interaction.options.getString('format');
+			let rankrange = interaction.options.getString('rankrange');
+			let gamemode = interaction.options.getString('gamemode');
+			let region = interaction.options.getString('region');
+			let notes = interaction.options.getString('notes');
+			let bws = interaction.options.getBoolean('bws');
+			let badged = interaction.options.getBoolean('badged');
+			let outdated = interaction.options.getBoolean('outdated');
+			let notournament = interaction.options.getBoolean('notournament');
 
 			let forumPost = await DBOsuForumPosts.findOne({
 				where: {
@@ -340,6 +341,9 @@ module.exports = {
 			}
 			if (gamemode) {
 				forumPost.gamemode = gamemode;
+			}
+			if (region) {
+				forumPost.region = region;
 			}
 			if (notes) {
 				forumPost.notes = notes;
@@ -389,6 +393,10 @@ module.exports = {
 				embed.addField('Gamemode', forumPost.gamemode);
 			} else {
 				embed.addField('Gamemode', 'No gamemode specified');
+			}
+
+			if (forumPost.region) {
+				embed.addField('Region', forumPost.region);
 			}
 
 			if (forumPost.notes) {
