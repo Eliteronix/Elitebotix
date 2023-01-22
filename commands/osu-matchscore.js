@@ -90,6 +90,9 @@ module.exports = {
 
 				let playerMatchResults = [];
 
+				let redScore = 0;
+				let blueScore = 0;
+
 				for (let i = 0; i < match.games.length; i++) {
 					let gameScores = match.games[i].scores;
 
@@ -99,6 +102,56 @@ module.exports = {
 							//Only individual mods have to be checked because the matchscore is relative anyway so it won't matter if everyone plays ez or not
 							if (getMods(gameScores[i].raw_mods).includes('EZ')) {
 								gameScores[i].score *= ezmultiplier;
+							}
+						}
+
+						//Get the scores of the teams
+						let blueScores = gameScores.filter(score => score.team === 'Blue');
+						let redScores = gameScores.filter(score => score.team === 'Red');
+
+						if (blueScores.length || redScores.length) {
+							let blueTotalScore = 0;
+							for (let i = 0; i < blueScores.length; i++) {
+								blueTotalScore += parseInt(blueScores[i].score);
+							}
+
+							let redTotalScore = 0;
+							for (let i = 0; i < redScores.length; i++) {
+								redTotalScore += parseInt(redScores[i].score);
+							}
+
+							if (blueTotalScore > redTotalScore) {
+								blueScore++;
+							} else if (redTotalScore > blueTotalScore) {
+								redScore++;
+							}
+						} else if (gameScores.length === 2) {
+							//Head to head
+							let playerNames = match.name.split(/\) ?vs.? ?\(/gm);
+							//basically a check if its a tourney match (basically)
+							if (playerNames[1]) {
+								let redPlayer = playerNames[0].replace(/.+\(/gm, '');
+								let bluePlayer = playerNames[1].replace(')', '');
+
+								let redTotal = null;
+								let blueTotal = null;
+
+								for (let j = 0; j < gameScores.length; j++) {
+									gameScores[j].username = await getOsuPlayerName(gameScores[j].userId);
+									if (gameScores[j].username === redPlayer) {
+										redTotal = parseInt(gameScores[j].score);
+									}
+
+									if (gameScores[j].username === bluePlayer) {
+										blueTotal = parseInt(gameScores[j].score);
+									}
+								}
+
+								if (blueTotal > redTotal) {
+									blueScore++;
+								} else if (blueTotal < redTotal) {
+									redScore++;
+								}
 							}
 						}
 
@@ -220,8 +273,14 @@ module.exports = {
 
 				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${match.name}`, `osu-match-${match.name}.png`);
 
+				let finalScore = '';
+
+				if (redScore || blueScore) {
+					finalScore = `\n\n**Final score:** \`${redScore} - ${blueScore}\``;
+				}
+
 				//Send attachment
-				return await interaction.editReply({ content: `The leaderboard shows the evaluation of the players that participated in the match.\n${warmupsReason}\n${skiplastReason}${valueHint}\n<https://osu.ppy.sh/community/matches/${match.id}>`, files: [attachment] });
+				return await interaction.editReply({ content: `The leaderboard shows the evaluation of the players that participated in the match.\n${warmupsReason}\n${skiplastReason}${valueHint}\n<https://osu.ppy.sh/community/matches/${match.id}>${finalScore}`, files: [attachment] });
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {

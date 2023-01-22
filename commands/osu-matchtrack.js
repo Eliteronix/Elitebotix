@@ -205,7 +205,7 @@ module.exports = {
 
 													if (blueTotalScore > redTotalScore) {
 														blueScore++;
-													} else {
+													} else if (blueTotalScore < redTotalScore) {
 														redScore++;
 													}
 												} else if (json.events[i].game.scores.length === 2) {
