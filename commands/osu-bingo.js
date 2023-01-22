@@ -191,23 +191,23 @@ module.exports = {
 		let teamsString = '';
 
 		if (team1.length > 0) {
-			teamsString = `\nTeam 1: <@${team1.join('>, <@')}>`;
+			teamsString = `\nTeam Red: <@${team1.join('>, <@')}>`;
 		}
 
 		if (team2.length > 0) {
-			teamsString = teamsString + `\nTeam 2: <@${team2.join('>, <@')}>`;
+			teamsString = teamsString + `\nTeam Blue: <@${team2.join('>, <@')}>`;
 		}
 
 		if (team3.length > 0) {
-			teamsString = teamsString + `\nTeam 3: <@${team3.join('>, <@')}>`;
+			teamsString = teamsString + `\nTeam Green: <@${team3.join('>, <@')}>`;
 		}
 
 		if (team4.length > 0) {
-			teamsString = teamsString + `\nTeam 4: <@${team4.join('>, <@')}>`;
+			teamsString = teamsString + `\nTeam Yellow: <@${team4.join('>, <@')}>`;
 		}
 
 		if (team5.length > 0) {
-			teamsString = teamsString + `\nTeam 5: <@${team5.join('>, <@')}>`;
+			teamsString = teamsString + `\nTeam Pink: <@${team5.join('>, <@')}>`;
 		}
 
 		let sentMessage = await interaction.editReply(`<@${commandUser.userId}> wants to play a bingo match:${teamsString}. (SR: ${Math.round(lowerstarrating * 100) / 100}-${Math.round(higherstarrating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`);
@@ -436,15 +436,15 @@ async function refreshMessage(message, mappool, lastRefresh) {
 			// Draw a border around the map
 			try {
 				if (mappool[i * 5 + j].team) {
-					if (mappool[i * 5 + j].team === 'Team 1') {
+					if (mappool[i * 5 + j].team === 'Team Red') {
 						ctx.strokeStyle = '#FF0000';
-					} else if (mappool[i * 5 + j].team === 'Team 2') {
+					} else if (mappool[i * 5 + j].team === 'Team Blue') {
 						ctx.strokeStyle = '#0000FF';
-					} else if (mappool[i * 5 + j].team === 'Team 3') {
+					} else if (mappool[i * 5 + j].team === 'Team Green') {
 						ctx.strokeStyle = '#00FF00';
-					} else if (mappool[i * 5 + j].team === 'Team 4') {
+					} else if (mappool[i * 5 + j].team === 'Team Yellow') {
 						ctx.strokeStyle = '#FFFF00';
-					} else if (mappool[i * 5 + j].team === 'Team 5') {
+					} else if (mappool[i * 5 + j].team === 'Team Pink') {
 						ctx.strokeStyle = '#FF00FF';
 					}
 					ctx.lineWidth = 30;
@@ -579,15 +579,15 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 
 												// Get the players team
 												if (team1.includes(everyUser[i].userId)) {
-													mappool[k].team = 'Team 1';
+													mappool[k].team = 'Team Red';
 												} else if (team2.includes(everyUser[i].userId)) {
-													mappool[k].team = 'Team 2';
+													mappool[k].team = 'Team Blue';
 												} else if (team3.includes(everyUser[i].userId)) {
-													mappool[k].team = 'Team 3';
+													mappool[k].team = 'Team Green';
 												} else if (team4.includes(everyUser[i].userId)) {
-													mappool[k].team = 'Team 4';
+													mappool[k].team = 'Team Yellow';
 												} else if (team5.includes(everyUser[i].userId)) {
-													mappool[k].team = 'Team 5';
+													mappool[k].team = 'Team Pink';
 												}
 
 												await mappool[k].message.fetch();
@@ -621,15 +621,15 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 
 											// Get the players team
 											if (team1.includes(everyUser[i].userId)) {
-												mappool[k].team = 'Team 1';
+												mappool[k].team = 'Team Red';
 											} else if (team2.includes(everyUser[i].userId)) {
-												mappool[k].team = 'Team 2';
+												mappool[k].team = 'Team Blue';
 											} else if (team3.includes(everyUser[i].userId)) {
-												mappool[k].team = 'Team 3';
+												mappool[k].team = 'Team Green';
 											} else if (team4.includes(everyUser[i].userId)) {
-												mappool[k].team = 'Team 4';
+												mappool[k].team = 'Team Yellow';
 											} else if (team5.includes(everyUser[i].userId)) {
-												mappool[k].team = 'Team 5';
+												mappool[k].team = 'Team Pink';
 											}
 
 											// Translate K into A1, A2, A3, A4, A5, B1, B2, ... E4, E5
