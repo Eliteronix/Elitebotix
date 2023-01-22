@@ -1615,6 +1615,77 @@ module.exports = {
 
 		// eslint-disable-next-line no-console
 		console.log(`Cleaned up ${deleted} duplicate scores`);
+
+		logDatabaseQueriesFunction(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries wrong mode scores');
+		let beatmapsOtherModes = await DBOsuBeatmaps.findAll({
+			attributes: ['beatmapId', 'mode'],
+			where: {
+				mode: {
+					[Op.not]: 'Standard'
+				}
+			},
+			group: ['beatmapId', 'mode'],
+		});
+
+		let taikoMaps = beatmapsOtherModes.filter(beatmap => beatmap.mode === 'Taiko');
+
+		taikoMaps = taikoMaps.map(beatmap => beatmap.beatmapId);
+
+		let updated = await DBOsuMultiScores.update({
+			mode: 'Taiko'
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: taikoMaps
+				},
+				mode: {
+					[Op.not]: 'Taiko'
+				}
+			}
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Updated ${updated[0]} Taiko scores that were in the wrong mode`);
+
+		let catchMaps = beatmapsOtherModes.filter(beatmap => beatmap.mode === 'Catch the Beat');
+
+		catchMaps = catchMaps.map(beatmap => beatmap.beatmapId);
+
+		updated = await DBOsuMultiScores.update({
+			mode: 'Catch the Beat'
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: catchMaps
+				},
+				mode: {
+					[Op.not]: 'Catch the Beat'
+				}
+			}
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Updated ${updated[0]} Catch the Beat scores that were in the wrong mode`);
+
+		let maniaMaps = beatmapsOtherModes.filter(beatmap => beatmap.mode === 'Mania');
+
+		maniaMaps = maniaMaps.map(beatmap => beatmap.beatmapId);
+
+		updated = await DBOsuMultiScores.update({
+			mode: 'Mania'
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: maniaMaps
+				},
+				mode: {
+					[Op.not]: 'Mania'
+				}
+			}
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Updated ${updated[0]} Mania scores that were in the wrong mode`);
 	},
 	wrongCluster(client, id) {
 		return wrongClusterFunction(client, id);
