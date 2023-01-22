@@ -1397,49 +1397,88 @@ module.exports = {
 		}
 
 		// Remove duplicate discorduser entries
-		let duplicates = true;
 		let deleted = 0;
 
-		// const discordUsers = new Sequelize('database', 'username', 'password', {
-		// 	host: 'localhost',
-		// 	dialect: 'sqlite',
-		// 	logging: false,
-		// 	storage: 'databases/discordUsers.sqlite',
-		// 	retry: {
-		// 		max: 15, // Maximum retry 15 times
-		// 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		// 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-		// 	},
-		// });
+		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries osuUserId 1');
+		let duplicates = await DBDiscordUsers.findAll({
+			attributes: ['osuUserId', [Sequelize.fn('COUNT', Sequelize.col('osuUserId')), 'amount']],
+			where: {
+				userId: {
+					[Op.ne]: null
+				},
+				osuUserId: {
+					[Op.ne]: null
+				},
+			},
+			group: ['osuUserId'],
+			order: [[Sequelize.fn('COUNT', Sequelize.col('osuUserId')), 'DESC']],
+		});
 
-		// while (duplicates && deleted < 25) {
-		// 	let result = await discordUsers.query(
-		// 		'SELECT * FROM DBDiscordUsers WHERE 0 < (SELECT COUNT(1) FROM DBDiscordUsers as a WHERE a.osuUserId = DBDiscordUsers.osuUserId AND a.id <> DBDiscordUsers.id OR a.userId = DBDiscordUsers.userId AND a.id <> DBDiscordUsers.id) ORDER BY osuUserId ASC LIMIT 1',
-		// 	);
+		duplicates = duplicates.filter(user => user.dataValues.amount > 1);
 
-		// 	duplicates = result[0].length;
+		for (let i = 0; i < duplicates.length; i++) {
+			logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries osuUserId 2');
+			let results = await DBDiscordUsers.findAll({
+				where: {
+					osuUserId: duplicates[i].osuUserId
+				},
+				order: [['userId', 'ASC'], ['osuVerified', 'ASC'], ['updatedAt', 'ASC']]
+			});
 
-		// 	if (result[0].length) {
-		// 		await new Promise(resolve => setTimeout(resolve, 2000));
-		// 		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries');
-		// 		let duplicate = await DBDiscordUsers.findOne({
-		// 			where: {
-		// 				id: result[0][0].id
-		// 			}
-		// 		});
+			if (results.length > 1) {
+				await new Promise(resolve => setTimeout(resolve, 2000));
+				await results[0].destroy();
 
-		// 		// eslint-disable-next-line no-console
-		// 		console.log(duplicate.userId, duplicate.osuUserId, duplicate.osuName, duplicate.updatedAt);
+				// eslint-disable-next-line no-console
+				console.log(results[0].userId, results[0].osuUserId, results[0].osuName, results[0].updatedAt);
 
-		// 		deleted++;
-		// 		await new Promise(resolve => setTimeout(resolve, 2000));
-		// 		await duplicate.destroy();
-		// 	}
-		// 	await new Promise(resolve => setTimeout(resolve, 10000));
-		// }
+				deleted++;
+				i--;
+			}
+		}
 
-		// // eslint-disable-next-line no-console
-		// console.log(`Cleaned up ${deleted} duplicate users`);
+		// eslint-disable-next-line no-console
+		console.log(`Cleaned up ${deleted} duplicate users (by osuUserId)`);
+
+		deleted = 0;
+
+		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries userId 1');
+		duplicates = await DBDiscordUsers.findAll({
+			attributes: ['userId', [Sequelize.fn('COUNT', Sequelize.col('userId')), 'amount']],
+			where: {
+				userId: {
+					[Op.ne]: null
+				},
+			},
+			group: ['userId'],
+			order: [[Sequelize.fn('COUNT', Sequelize.col('userId')), 'DESC']],
+		});
+
+		duplicates = duplicates.filter(user => user.dataValues.amount > 1);
+
+		for (let i = 0; i < duplicates.length; i++) {
+			logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries userId 2');
+			let results = await DBDiscordUsers.findAll({
+				where: {
+					osuUserId: duplicates[i].osuUserId
+				},
+				order: [['osuVerified', 'ASC'], ['osuUserId', 'ASC'], ['updatedAt', 'ASC']]
+			});
+
+			if (results.length > 1) {
+				await new Promise(resolve => setTimeout(resolve, 2000));
+				await results[0].destroy();
+
+				// eslint-disable-next-line no-console
+				console.log(results[0].userId, results[0].osuUserId, results[0].osuName, results[0].updatedAt);
+
+				deleted++;
+				i--;
+			}
+		}
+
+		// eslint-disable-next-line no-console
+		console.log(`Cleaned up ${deleted} duplicate users (by userId)`);
 
 		// Remove entries over half a year old
 		duplicates = true;
