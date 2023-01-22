@@ -179,6 +179,13 @@ module.exports = {
 
 			let pingedUsers = 0;
 
+			//Load the country data csv and get the continent
+			const fs = require('fs');
+			let countryData = fs.readFileSync('./other/country-and-continent-codes-list.csv', 'utf8');
+			let countryDataArray = countryData.split('\r\n');
+
+			return console.log(countryDataArray);
+
 			for (let i = 0; i < pingUsers.length; i++) {
 				try {
 					let user = pingUsers[i];
@@ -256,6 +263,19 @@ module.exports = {
 								if (!user.tournamentPingsMode || user.tournamentPingsMode !== 'all' && !user.tournamentPingsMode.includes('m')) {
 									continue;
 								}
+							}
+
+							if (user.country) {
+								let countryContinent = '';
+								for (let i = 0; i < countryDataArray.length; i++) {
+									let country = countryDataArray[i].split(',');
+									if (country[0] === user.country) {
+										countryContinent = country[1];
+										break;
+									}
+								}
+
+
 							}
 
 							let userDM = await interaction.client.users.fetch(user.userId);
