@@ -229,9 +229,6 @@ module.exports = {
 				if (!accepted.includes(user.id)) {
 					accepted.push(user.id);
 
-					console.log('To accept:', [...team1Accept, ...team2, ...team3, ...team4, ...team5]);
-					console.log('Accepted:', accepted);
-
 					if (accepted.length === team1Accept.length + team2.length + team3.length + team4.length + team5.length) {
 						collector.stop();
 					}
