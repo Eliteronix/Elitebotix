@@ -250,7 +250,7 @@ module.exports = {
 				lobbyStatus = 'Waiting for start';
 
 				let tries = 0;
-				while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
+				while (lobby._beatmapId != dbMaps[mapIndex].beatmapId && tries < 25) {
 					if (tries % 5 === 0) {
 						await channel.sendMessage('!mp map 975342 0');
 						await new Promise(resolve => setTimeout(resolve, 5000));
@@ -342,7 +342,7 @@ module.exports = {
 					lobbyStatus = 'Waiting for start';
 
 					let tries = 0;
-					while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
+					while (lobby._beatmapId != dbMaps[mapIndex].beatmapId && tries < 25) {
 						if (tries % 5 === 0) {
 							await channel.sendMessage('!mp map 975342 0');
 							await new Promise(resolve => setTimeout(resolve, 5000));
@@ -428,7 +428,7 @@ module.exports = {
 				lobbyStatus = 'Waiting for start';
 
 				let tries = 0;
-				while (lobby._beatmapId != dbMaps[mapIndex].beatmapId) {
+				while (lobby._beatmapId != dbMaps[mapIndex].beatmapId && tries < 25) {
 					if (tries % 5 === 0) {
 						await channel.sendMessage('!mp map 975342 0');
 						await new Promise(resolve => setTimeout(resolve, 5000));

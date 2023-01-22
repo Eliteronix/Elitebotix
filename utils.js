@@ -2004,19 +2004,17 @@ module.exports = {
 					await channel.sendMessage(`Average star rating of the mappool: ${Math.round(averageStarRating * 100) / 100}`);
 
 					await channel.sendMessage('Looking for a map...');
-					let nextMap = null;
-					if (bestOf === 1) {
-						nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
-					} else {
-						nextMap = await getNextMapFunction(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
-					}
-					avoidMaps.push(nextMap.beatmapId);
 
+					let nextMap = null;
 					let tries = 0;
 					while (lobby._beatmapId != nextMap.beatmapId) {
 						if (tries % 5 === 0) {
-							await channel.sendMessage('!mp map 975342 0');
-							await new Promise(resolve => setTimeout(resolve, 5000));
+							if (bestOf === 1) {
+								nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
+							} else {
+								nextMap = await getNextMapFunction(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
+							}
+							avoidMaps.push(nextMap.beatmapId);
 						}
 
 						await channel.sendMessage(`!mp map ${nextMap.beatmapId}`);
@@ -2175,21 +2173,18 @@ module.exports = {
 				lobbyStatus = 'Waiting for start';
 
 				await channel.sendMessage('Looking for a map...');
+
 				let nextMap = null;
-				if (scores[0] + scores[1] === bestOf - 1) {
-					nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
-				} else {
-					nextMap = await getNextMapFunction(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
-				}
-
-				avoidMaps.push(nextMap.beatmapId);
-
-
 				let tries = 0;
 				while (lobby._beatmapId != nextMap.beatmapId) {
 					if (tries % 5 === 0) {
-						await channel.sendMessage('!mp map 975342 0');
-						await new Promise(resolve => setTimeout(resolve, 5000));
+						if (scores[0] + scores[1] === bestOf - 1) {
+							nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
+						} else {
+							nextMap = await getNextMapFunction(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
+						}
+
+						avoidMaps.push(nextMap.beatmapId);
 					}
 
 					await channel.sendMessage(`!mp map ${nextMap.beatmapId}`);

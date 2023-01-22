@@ -100,17 +100,9 @@ module.exports = {
 		await channel.sendMessage(`!mp set 0 ${scoreversion} ${players.length}`);
 		await pause(60000);
 
-		let tries = 0;
 		while (lobby._beatmapId != mappool[mapIndex].id) {
-			if (tries % 5 === 0) {
-				await channel.sendMessage('!mp map 975342 0');
-				await new Promise(resolve => setTimeout(resolve, 5000));
-			}
-
 			await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 			await pause(5000);
-			await lobby.updateSettings();
-			tries++;
 		}
 
 		//Check mods and set them if needed
@@ -391,17 +383,9 @@ module.exports = {
 					doubleTime = ' DT';
 				}
 
-				let tries = 0;
 				while (lobby._beatmapId != mappool[mapIndex].id) {
-					if (tries % 5 === 0) {
-						await channel.sendMessage('!mp map 975342 0');
-						await new Promise(resolve => setTimeout(resolve, 5000));
-					}
-
 					await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 					await pause(5000);
-					await lobby.updateSettings();
-					tries++;
 				}
 
 				//Check mods and set them if needed

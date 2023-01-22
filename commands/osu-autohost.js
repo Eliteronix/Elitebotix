@@ -258,13 +258,12 @@ module.exports = {
 					await channel.sendMessage('!mp aborttimer');
 					await channel.sendMessage('Looking for new map...');
 					let nextModPool = getNextModPool(true);
-					let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 
+					let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 					let tries = 0;
 					while (lobby._beatmapId != beatmap.beatmapId) {
-						if (tries % 5 === 0) {
-							await channel.sendMessage('!mp map 975342 0');
-							await new Promise(resolve => setTimeout(resolve, 5000));
+						if (tries % 5 === 0 && tries) {
+							beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 						}
 
 						await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
@@ -517,13 +516,12 @@ module.exports = {
 				await channel.sendMessage('!dt - Allows you to change the DT SR (Ex: "!dt 5.6")');
 				await channel.sendMessage('!fm - Allows you to change the FM SR (Ex: "!fm 5.6")');
 				let nextModPool = getNextModPool(true);
-				let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 
+				let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 				let tries = 0;
 				while (lobby._beatmapId != beatmap.beatmapId) {
-					if (tries % 5 === 0) {
-						await channel.sendMessage('!mp map 975342 0');
-						await new Promise(resolve => setTimeout(resolve, 5000));
+					if (tries % 5 === 0 && tries) {
+						beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 					}
 
 					await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
@@ -585,13 +583,12 @@ module.exports = {
 
 		lobby.on('matchFinished', async () => {
 			let nextModPool = getNextModPool(true);
-			let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 
+			let beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 			let tries = 0;
 			while (lobby._beatmapId != beatmap.beatmapId) {
-				if (tries % 5 === 0) {
-					await channel.sendMessage('!mp map 975342 0');
-					await new Promise(resolve => setTimeout(resolve, 5000));
+				if (tries % 5 === 0 && tries) {
+					beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 				}
 
 				await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
