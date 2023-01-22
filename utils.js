@@ -2007,7 +2007,7 @@ module.exports = {
 
 					let nextMap = null;
 					let tries = 0;
-					while (lobby._beatmapId != nextMap.beatmapId) {
+					while (tries === 0 || lobby._beatmapId != nextMap.beatmapId) {
 						if (tries % 5 === 0) {
 							if (bestOf === 1) {
 								nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
@@ -2176,7 +2176,7 @@ module.exports = {
 
 				let nextMap = null;
 				let tries = 0;
-				while (lobby._beatmapId != nextMap.beatmapId) {
+				while (tries === 0 || lobby._beatmapId != nextMap.beatmapId) {
 					if (tries % 5 === 0) {
 						if (scores[0] + scores[1] === bestOf - 1) {
 							nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
