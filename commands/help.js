@@ -27,7 +27,7 @@ module.exports = {
 			const command = commands.get(commandname) || commands.find(c => c.aliases && c.aliases.includes(commandname));
 
 			if (!command) {
-				return interaction.reply({ content: 'That\'s not a valid command!', ephemeral: true });
+				return await interaction.editReply({ content: 'That\'s not a valid command!', ephemeral: true });
 			}
 
 			const data = [];
@@ -37,7 +37,7 @@ module.exports = {
 			data.push(`**Cooldown:** ${command.cooldown || 3} second(s)`);
 			data.push('To stay informed about changes go to [the official server](https://discord.com/invite/Asz5Gfe) and follow <#804658828883787784>');
 
-			return interaction.editReply(data.join('\n'));
+			return await interaction.editReply(data.join('\n'));
 		} else if (interaction.options._subcommand === 'category') {
 			let category = interaction.options.getString('categoryname');
 
@@ -52,7 +52,7 @@ module.exports = {
 			data.push('You can send </help command:1064502107832594484> to get info on a specific command!');
 			data.push('To stay informed about changes go to [the official server](https://discord.com/invite/Asz5Gfe) and follow <#804658828883787784>');
 
-			return interaction.editReply(data.join('\n'));
+			return await interaction.editReply(data.join('\n'));
 		}
 	},
 };
