@@ -39,9 +39,11 @@ module.exports = (sequelize, DataTypes) => {
 		teamType: DataTypes.STRING,
 		team: DataTypes.STRING,
 		pp: DataTypes.STRING,
+		verifiedAt: DataTypes.DATE,
+		verifiedBy: DataTypes.STRING,
+		verificationComment: DataTypes.STRING,
 		paranoid: true,
-	},
-	{
+	}, {
 		indexes: [
 			{
 				unique: false,

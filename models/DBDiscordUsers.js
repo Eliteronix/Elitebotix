@@ -44,17 +44,37 @@ module.exports = (sequelize, DataTypes) => {
 		osuNoModDuelStarRating: {
 			type: DataTypes.STRING,
 		},
+		osuNoModDuelStarRatingLimited: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		osuHiddenDuelStarRating: {
 			type: DataTypes.STRING,
+		},
+		osuHiddenDuelStarRatingLimited: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
 		},
 		osuHardRockDuelStarRating: {
 			type: DataTypes.STRING,
 		},
+		osuHardRockDuelStarRatingLimited: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		osuDoubleTimeDuelStarRating: {
 			type: DataTypes.STRING,
 		},
+		osuDoubleTimeDuelStarRatingLimited: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		osuFreeModDuelStarRating: {
 			type: DataTypes.STRING,
+		},
+		osuFreeModDuelStarRatingLimited: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
 		},
 		osuDuelProvisional: {
 			type: DataTypes.BOOLEAN,
@@ -202,6 +222,10 @@ module.exports = (sequelize, DataTypes) => {
 		twitchId: {
 			type: DataTypes.STRING,
 		},
+		twitchVerified: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		twitchOsuMapSync: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
@@ -233,6 +257,19 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		tournamentPingsMode: {
 			type: DataTypes.STRING,
+		},
+		tournamentPingsStartingFrom: {
+			type: DataTypes.STRING,
+		},
+		tournamentBannedUntil: {
+			type: DataTypes.DATE,
+		},
+		tournamentBannedReason: {
+			type: DataTypes.STRING,
+		},
+		disableFollows: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
 		},
 		paranoid: true,
 	});

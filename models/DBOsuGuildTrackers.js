@@ -65,6 +65,10 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		tournamentTopPlays: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		showAmeobeaUpdates: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,

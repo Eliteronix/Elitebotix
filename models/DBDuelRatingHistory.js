@@ -14,17 +14,37 @@ module.exports = (sequelize, DataTypes) => {
 		osuNoModDuelStarRating: {
 			type: DataTypes.STRING,
 		},
+		osuNoModDuelStarRatingLimited: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		osuHiddenDuelStarRating: {
 			type: DataTypes.STRING,
+		},
+		osuHiddenDuelStarRatingLimited: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
 		},
 		osuHardRockDuelStarRating: {
 			type: DataTypes.STRING,
 		},
+		osuHardRockDuelStarRatingLimited: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		osuDoubleTimeDuelStarRating: {
 			type: DataTypes.STRING,
 		},
+		osuDoubleTimeDuelStarRatingLimited: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
+		},
 		osuFreeModDuelStarRating: {
 			type: DataTypes.STRING,
+		},
+		osuFreeModDuelStarRatingLimited: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
 		},
 		osuDuelProvisional: {
 			type: DataTypes.BOOLEAN,
