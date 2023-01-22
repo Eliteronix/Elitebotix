@@ -10826,6 +10826,34 @@ module.exports = {
 									'name': 'gamemode',
 									'description': 'The gamemode of the tournament',
 									'type': 3,
+									'required': false,
+									'choices': [
+										{
+											'name': 'Standard',
+											'value': 'Standard'
+										},
+										{
+											'name': 'Taiko',
+											'value': 'Taiko'
+										},
+										{
+											'name': 'Catch the Beat',
+											'value': 'Catch the Beat'
+										},
+										{
+											'name': 'Mania',
+											'value': 'Mania'
+										},
+										{
+											'name': 'Multimode',
+											'value': 'Multimode'
+										},
+									]
+								},
+								{
+									'name': 'region',
+									'description': 'The region of the tournament',
+									'type': 3,
 									'required': false
 								},
 								{

@@ -72,6 +72,10 @@ module.exports = {
 					embed.addField('Gamemode', 'No gamemode specified');
 				}
 
+				if (post.region) {
+					embed.addField('Region', post.gamemode);
+				}
+
 				if (post.notes) {
 					embed.addField('Notes', post.notes);
 				} else {
@@ -179,6 +183,7 @@ module.exports = {
 				try {
 					let user = pingUsers[i];
 					if (user.userId) {
+						//TODO: Check region
 						//Check the rank range
 						let validRank = false;
 						let rankRange = forumPost.rankRange.split('|');
@@ -274,53 +279,16 @@ module.exports = {
 			interaction.editReply(`Ping sent. (Pinged ${pingedUsers} users)`);
 
 		} else if (interaction.options._subcommand === 'update') {
-			let id = null;
-			let format = null;
-			let rankrange = null;
-			let gamemode = null;
-			let notes = null;
-			let bws = null;
-			let badged = null;
-			let outdated = null;
-			let notournament = null;
-
-			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-				if (interaction.options._hoistedOptions[i].name === 'id') {
-					id = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'format') {
-					format = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'rankrange') {
-					rankrange = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'gamemode') {
-					gamemode = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'notes') {
-					notes = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'bws') {
-					if (interaction.options._hoistedOptions[i].value === true) {
-						bws = true;
-					} else {
-						bws = false;
-					}
-				} else if (interaction.options._hoistedOptions[i].name === 'badged') {
-					if (interaction.options._hoistedOptions[i].value === true) {
-						badged = true;
-					} else {
-						badged = false;
-					}
-				} else if (interaction.options._hoistedOptions[i].name === 'outdated') {
-					if (interaction.options._hoistedOptions[i].value === true) {
-						outdated = true;
-					} else {
-						outdated = false;
-					}
-				} else if (interaction.options._hoistedOptions[i].name === 'notournament') {
-					if (interaction.options._hoistedOptions[i].value === true) {
-						notournament = true;
-					} else {
-						notournament = false;
-					}
-				}
-			}
+			let id = interaction.options.getString('id');
+			let format = interaction.options.getString('format');
+			let rankrange = interaction.options.getString('rankrange');
+			let gamemode = interaction.options.getString('gamemode');
+			let region = interaction.options.getString('region');
+			let notes = interaction.options.getString('notes');
+			let bws = interaction.options.getBoolean('bws');
+			let badged = interaction.options.getBoolean('badged');
+			let outdated = interaction.options.getBoolean('outdated');
+			let notournament = interaction.options.getBoolean('notournament');
 
 			let forumPost = await DBOsuForumPosts.findOne({
 				where: {
@@ -340,6 +308,9 @@ module.exports = {
 			}
 			if (gamemode) {
 				forumPost.gamemode = gamemode;
+			}
+			if (region) {
+				forumPost.region = region;
 			}
 			if (notes) {
 				forumPost.notes = notes;
@@ -389,6 +360,10 @@ module.exports = {
 				embed.addField('Gamemode', forumPost.gamemode);
 			} else {
 				embed.addField('Gamemode', 'No gamemode specified');
+			}
+
+			if (forumPost.region) {
+				embed.addField('Region', forumPost.region);
 			}
 
 			if (forumPost.notes) {
