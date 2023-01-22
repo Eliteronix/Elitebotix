@@ -39,12 +39,16 @@ module.exports = {
 
 		team1.push(commandUser.userId);
 
+		let team1Accept = [];
+
 		if (interaction.options.getUser('player2team1')) {
 			team1.push(interaction.options.getUser('player2team1').id);
+			team1Accept.push(interaction.options.getUser('player2team1').id);
 		}
 
 		if (interaction.options.getUser('player3team1')) {
 			team1.push(interaction.options.getUser('player3team1').id);
+			team1Accept.push(interaction.options.getUser('player3team1').id);
 		}
 
 		let team2 = [];
@@ -221,14 +225,14 @@ module.exports = {
 		const collector = sentMessage.createReactionCollector({ time: 300000 });
 
 		collector.on('collect', (reaction, user) => {
-			if (reaction.emoji.name === '✅' && [...[...team1].splice(team1.indexOf(commandUser.userId, 1)), ...team2, ...team3, ...team4, ...team5].includes(user.id)) {
+			if (reaction.emoji.name === '✅' && [...team1Accept, ...team2, ...team3, ...team4, ...team5].includes(user.id)) {
 				if (!accepted.includes(user.id)) {
 					accepted.push(user.id);
 
-					console.log('To accept:', [...[...team1].splice(team1.indexOf(commandUser.userId, 1)), ...team2, ...team3, ...team4, ...team5]);
+					console.log('To accept:', [...team1Accept, ...team2, ...team3, ...team4, ...team5]);
 					console.log('Accepted:', accepted);
 
-					if (accepted.length === team1.length - 1 + team2.length + team3.length + team4.length + team5.length) {
+					if (accepted.length === team1Accept.length + team2.length + team3.length + team4.length + team5.length) {
 						collector.stop();
 					}
 				}
@@ -239,7 +243,7 @@ module.exports = {
 		});
 
 		collector.on('end', () => {
-			if (accepted.length < team1.length - 1 + team2.length + team3.length + team4.length + team5.length) {
+			if (accepted.length < team1Accept.length + team2.length + team3.length + team4.length + team5.length) {
 				declined = true;
 			}
 			responded = true;
