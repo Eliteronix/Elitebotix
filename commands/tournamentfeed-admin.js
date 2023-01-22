@@ -183,14 +183,26 @@ module.exports = {
 			const fs = require('fs');
 			let countryData = fs.readFileSync('./other/country-and-continent-codes-list.csv', 'utf8');
 			let countryDataArray = countryData.split('\r\n');
+			for (let i = 0; i < countryDataArray.length; i++) {
+				countryDataArray[i] = countryDataArray[i].split(',');
 
-			return console.log(countryDataArray);
+				for (let j = 0; j < countryDataArray[i].length; j++) {
+					while (countryDataArray[i][j].startsWith('"') && !countryDataArray[i][j].endsWith('"')) {
+						countryDataArray[i][j] = countryDataArray[i][j] + ',' + countryDataArray[i][j + 1];
+						countryDataArray[i].splice(j + 1, 1);
+						j--;
+					}
+
+					if (countryDataArray[i][j].startsWith('"')) {
+						countryDataArray[i][j] = countryDataArray[i][j].substring(1, countryDataArray[i][j].length - 1);
+					}
+				}
+			}
 
 			for (let i = 0; i < pingUsers.length; i++) {
 				try {
 					let user = pingUsers[i];
 					if (user.userId) {
-						//TODO: Check region
 						//Check the rank range
 						let validRank = false;
 						let rankRange = forumPost.rankRange.split('|');
@@ -265,17 +277,18 @@ module.exports = {
 								}
 							}
 
-							if (user.country) {
-								let countryContinent = '';
-								for (let i = 0; i < countryDataArray.length; i++) {
-									let country = countryDataArray[i].split(',');
-									if (country[0] === user.country) {
-										countryContinent = country[1];
+							if (user.country && forumPost.region && forumPost.region.toLowerCase() !== 'international') {
+								let userCountry = null;
+								for (let k = 0; k < countryDataArray.length; k++) {
+									if (countryDataArray[k][3] === user.country) {
+										userCountry = countryDataArray[k];
 										break;
 									}
 								}
 
-
+								if (!forumPost.region.includes(userCountry[0])) {
+									continue;
+								}
 							}
 
 							let userDM = await interaction.client.users.fetch(user.userId);

@@ -10852,7 +10852,7 @@ module.exports = {
 								},
 								{
 									'name': 'region',
-									'description': 'The region of the tournament',
+									'description': 'The region of the tournament (Africa, Asia, Europe, North America, Oceania, South America | Detail)',
 									'type': 3,
 									'required': false
 								},
