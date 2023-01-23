@@ -4449,6 +4449,16 @@ async function getOsuBeatmapFunction(input) {
 							ar = 10;
 						}
 
+						//Limit OD to 10 if not DT or NC
+						if (od > 10 && !getModsFunction(modBits).includes('DT') && !getModsFunction(modBits).includes('NC')) {
+							od = 10;
+						}
+
+						//Limit HP to 10 if not DT or NC
+						if (hpDrain > 10 && !getModsFunction(modBits).includes('DT') && !getModsFunction(modBits).includes('NC')) {
+							hpDrain = 10;
+						}
+
 						//EZ
 						if (getModsFunction(modBits).includes('EZ')) {
 							cs = parseFloat(beatmaps[0].difficulty.size) / 2;
@@ -4459,8 +4469,8 @@ async function getOsuBeatmapFunction(input) {
 
 						cs = Math.min(Math.round(cs * 100) / 100, 10);
 						ar = Math.min(Math.round(ar * 100) / 100, 11);
-						od = Math.min(Math.round(od * 100) / 100, 10);
-						hpDrain = Math.min(Math.round(hpDrain * 100) / 100, 10);
+						od = Math.min(Math.round(od * 100) / 100, 11);
+						hpDrain = Math.min(Math.round(hpDrain * 100) / 100, 11);
 
 						let notDownloadable = false;
 						if (!beatmaps[0].hasDownload) {
