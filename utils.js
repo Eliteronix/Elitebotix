@@ -1460,7 +1460,7 @@ module.exports = {
 			logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries userId 2');
 			let results = await DBDiscordUsers.findAll({
 				where: {
-					osuUserId: duplicates[i].osuUserId
+					userId: duplicates[i].userId
 				},
 				order: [['osuVerified', 'ASC'], ['osuUserId', 'ASC'], ['updatedAt', 'ASC']]
 			});
