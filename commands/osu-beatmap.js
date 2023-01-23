@@ -50,13 +50,19 @@ module.exports = {
 						if (interaction.options._hoistedOptions[i].value) {
 							tournament = true;
 						}
-					} else {
+					} else if (interaction.options._hoistedOptions[i].name !== 'accuracy') {
 						args.push(interaction.options._hoistedOptions[i].value);
 					}
 				}
 			}
 
 		}
+
+		let accuracy = interaction.options.getNumber('accuracy') || 95;
+
+		accuracy = Math.min(accuracy, 100);
+		accuracy = Math.max(accuracy, 0);
+		accuracy = Math.round(accuracy * 100) / 100;
 
 		let mods = 0;
 
@@ -87,7 +93,7 @@ module.exports = {
 			}
 			const dbBeatmap = await getOsuBeatmap({ beatmapId: getIDFromPotentialOsuLink(arg), modBits: modBits });
 			if (dbBeatmap) {
-				getBeatmap(msg, interaction, dbBeatmap, tournament);
+				getBeatmap(msg, interaction, dbBeatmap, tournament, accuracy);
 			} else {
 				if (msg.id) {
 					await msg.reply({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
@@ -99,7 +105,7 @@ module.exports = {
 	},
 };
 
-async function getBeatmap(msg, interaction, beatmap, tournament) {
+async function getBeatmap(msg, interaction, beatmap, tournament, accuracy) {
 	let processingMessage = null;
 
 	if (!interaction) {
@@ -125,7 +131,7 @@ async function getBeatmap(msg, interaction, beatmap, tournament) {
 
 	elements = await drawMode(elements);
 
-	elements = await drawStats(elements);
+	elements = await drawStats(elements, accuracy);
 
 	elements = await drawFooter(elements);
 
@@ -303,7 +309,7 @@ async function drawMode(input) {
 	return output;
 }
 
-async function drawStats(input) {
+async function drawStats(input, accuracy) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let beatmap = input[2];
@@ -365,9 +371,9 @@ async function drawStats(input) {
 	ctx.fillText(userRatingDisplay, canvas.width / 1000 * 330, canvas.height / 500 * 375);
 
 	ctx.font = 'bold 15px comfortaa, sans-serif';
-	ctx.fillText('95% Accuracy', canvas.width / 1000 * 330, canvas.height / 500 * 410);
+	ctx.fillText(`${accuracy}% Accuracy`, canvas.width / 1000 * 330, canvas.height / 500 * 410);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, 95.00, 0, beatmap.maxCombo))} pp`, canvas.width / 1000 * 330, canvas.height / 500 * 440);
+	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, accuracy, 0, beatmap.maxCombo))} pp`, canvas.width / 1000 * 330, canvas.height / 500 * 440);
 
 	//Second column
 	ctx.font = 'bold 15px comfortaa, sans-serif';
