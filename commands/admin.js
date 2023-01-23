@@ -11486,6 +11486,66 @@ module.exports = {
 			});
 
 			return await msg.reply(`Updated ${update} beatmaps.`);
+		} else if (args[0] === 'fixBuggedMps') {
+			// Update beatmap data
+			let scores = await DBOsuMultiScores.findAll({
+				where: {
+					matchId: 'XXXXXXXXX (hidden for 3 days)'
+				},
+			});
+
+			let gameIds = scores.map(s => s.gameId);
+
+			for (let i = 0; i < gameIds.length; i++) {
+				let score = await DBOsuMultiScores.findOne({
+					where: {
+						gameId: gameIds[i],
+						matchId: {
+							[Op.not]: 'XXXXXXXXX (hidden for 3 days)'
+						}
+					},
+				});
+
+				if (score) {
+					for (let j = 0; j < scores.length; j++) {
+						if (scores[j].gameId === gameIds[i]) {
+							await scores[j].destroy();
+						}
+					}
+
+					// eslint-disable-next-line no-undef
+					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+					});
+
+					score.warmup = null;
+					await score.save();
+
+					await osuApi.getMatch({ mp: score.matchId })
+						.then(async (match) => {
+							await saveOsuMultiScores(match);
+						})
+						.catch(() => {
+							//Nothing
+						});
+
+					await msg.reply(`Reimported \`${score.matchName}\``);
+				} else {
+					let messaged = false;
+					for (let j = 0; j < scores.length; j++) {
+						if (scores[j].gameId === gameIds[i]) {
+							if (!messaged) {
+								await msg.reply(`\`${scores[j].matchName}\` has to be done manually`);
+								messaged = true;
+							}
+							await scores[j].destroy();
+						}
+					}
+				}
+			}
 		} else {
 			msg.reply('Invalid command');
 		}
