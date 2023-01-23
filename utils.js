@@ -5639,7 +5639,7 @@ async function saveOsuMultiScoresFunction(match) {
 							}
 						}
 					}
-				} else if (existingScore.warmup === null || match.raw_end && existingScore.matchEndDate === null) {
+				} else if (existingScore.warmup === null) {
 					if (!existingMatchPlayers.includes(match.games[gameIndex].scores[scoreIndex].userId)) {
 						existingMatchPlayers.push(match.games[gameIndex].scores[scoreIndex].userId);
 					}
