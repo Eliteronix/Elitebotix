@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuBeatmaps } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuBeatmaps, DBProcessQueue } = require('../dbObjects');
 const { pause, saveOsuMultiScores, logDatabaseQueries, logMatchCreation, addMatchMessage } = require('../utils');
 const osu = require('node-osu');
 
@@ -20,6 +20,8 @@ module.exports = {
 				}
 				channel = await bancho.createLobby(args[5]);
 				client.otherMatches.push(parseInt(channel.lobby.id));
+
+				DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${channel.lobby.id}`, priority: 1, date: new Date() });
 
 				processQueueEntry.destroy();
 				break;
