@@ -3809,6 +3809,30 @@ module.exports = {
 			// 						]
 			// 					},
 			// 					{
+			// 						'name': 'mode',
+			// 						'description': 'The gamemode you want to get the leaderboard from (tourney only)',
+			// 						'type': 3,
+			// 						'required': false,
+			// 						'choices': [
+			//							{
+			//								'name': 'Standard',
+			//								'value': 'Standard'
+			//							},
+			//							{
+			//								'name': 'Taiko',
+			//								'value': 'Taiko'
+			//							},
+			//							{
+			//								'name': 'Catch the Beat',
+			//								'value': 'Catch the Beat'
+			//							},
+			//							{
+			//								'name': 'Mania',
+			//								'value': 'Mania'
+			//							},
+			//						]
+			// 					},
+			// 					{
 			// 						'name': 'username',
 			// 						'description': 'The username, id or link of the player',
 			// 						'type': 3,
@@ -9127,6 +9151,30 @@ module.exports = {
 										{
 											'name': 'Tournaments',
 											'value': 'tournaments',
+										},
+									]
+								},
+								{
+									'name': 'mode',
+									'description': 'The gamemode you want to get the leaderboard from (tourney only)',
+									'type': 3,
+									'required': false,
+									'choices': [
+										{
+											'name': 'Standard',
+											'value': 'Standard'
+										},
+										{
+											'name': 'Taiko',
+											'value': 'Taiko'
+										},
+										{
+											'name': 'Catch the Beat',
+											'value': 'Catch the Beat'
+										},
+										{
+											'name': 'Mania',
+											'value': 'Mania'
 										},
 									]
 								},

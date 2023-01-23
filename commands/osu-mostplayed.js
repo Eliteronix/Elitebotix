@@ -29,7 +29,9 @@ module.exports = {
 			msg = await populateMsgFromInteraction(interaction);
 
 			try {
-				await interaction.deferReply();
+				//TODO: Deferreply
+				//await interaction.deferReply();
+				await interaction.reply('Processing...');
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -43,11 +45,13 @@ module.exports = {
 						args.push(`--${interaction.options._hoistedOptions[i].value}`);
 					} else if (interaction.options._hoistedOptions[i].name === 'amount') {
 						args.push(`--${interaction.options._hoistedOptions[i].value}`);
-					} else {
+					} else if (interaction.options._hoistedOptions[i].name !== 'mode') {
 						args.push(interaction.options._hoistedOptions[i].value);
 					}
 				}
 			}
+
+			let mode = interaction.options.getString('mode');
 
 			const commandConfig = await getOsuUserServerMode(msg, args);
 			const commandUser = commandConfig[0];
@@ -71,10 +75,10 @@ module.exports = {
 			if (!args[0]) {
 				//Get profile by author if no argument
 				if (commandUser && commandUser.osuUserId) {
-					getMostPlayed(msg, commandUser.osuUserId, server, false, limit);
+					getMostPlayed(msg, commandUser.osuUserId, server, mode, false, limit);
 				} else {
 					const userDisplayName = await getMessageUserDisplayname(msg);
-					getMostPlayed(msg, userDisplayName, server, false, limit);
+					getMostPlayed(msg, userDisplayName, server, mode, false, limit);
 				}
 			} else {
 				//Get profiles by arguments
@@ -86,20 +90,20 @@ module.exports = {
 						});
 
 						if (discordUser && discordUser.osuUserId) {
-							getMostPlayed(msg, discordUser.osuUserId, server, false, limit);
+							getMostPlayed(msg, discordUser.osuUserId, server, mode, false, limit);
 						} else {
 							msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
-							getMostPlayed(msg, args[i], server, false, limit);
+							getMostPlayed(msg, args[i], server, mode, false, limit);
 						}
 					} else {
 						if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
 							if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-								getMostPlayed(msg, getIDFromPotentialOsuLink(args[i]), server, true, limit);
+								getMostPlayed(msg, getIDFromPotentialOsuLink(args[i]), server, mode, true, limit);
 							} else {
-								getMostPlayed(msg, getIDFromPotentialOsuLink(args[i]), server, false, limit);
+								getMostPlayed(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, limit);
 							}
 						} else {
-							getMostPlayed(msg, getIDFromPotentialOsuLink(args[i]), server, false, limit);
+							getMostPlayed(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, limit);
 						}
 					}
 				}
@@ -329,7 +333,7 @@ module.exports = {
 	}
 };
 
-async function getMostPlayed(msg, username, server, noLinkedAccount, limit) {
+async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit) {
 	if (server === 'bancho' || server === 'tournaments') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -364,7 +368,7 @@ async function getMostPlayed(msg, username, server, noLinkedAccount, limit) {
 
 				elements = await drawTitle(elements, server);
 
-				elements = await drawMostPlayed(elements, server, limit);
+				elements = await drawMostPlayed(elements, server, mode, limit);
 
 				await drawFooter(elements);
 
@@ -428,7 +432,7 @@ async function getMostPlayed(msg, username, server, noLinkedAccount, limit) {
 
 				elements = await drawTitle(elements, server);
 
-				elements = await drawMostPlayed(elements, server, limit);
+				elements = await drawMostPlayed(elements, server, mode, limit);
 
 				await drawFooter(elements);
 
@@ -449,7 +453,7 @@ async function getMostPlayed(msg, username, server, noLinkedAccount, limit) {
 	}
 }
 
-async function drawMostPlayed(input, server, limit) {
+async function drawMostPlayed(input, server, mode, limit) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -572,6 +576,10 @@ async function drawMostPlayed(input, server, limit) {
 
 		for (let i = 0; i < multiScores.length; i++) {
 			if (parseInt(multiScores[i].score) < 10000 || !multiScores[i].tourneyMatch) {
+				continue;
+			}
+
+			if (mode && mode !== multiScores[i].mode) {
 				continue;
 			}
 
