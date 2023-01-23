@@ -11548,13 +11548,6 @@ module.exports = {
 			}
 		} else if (args[0] === 'fixBuggedMods') {
 			// Resets warmup flag for all scores with both mod values even (NoFail is the only mod that can make it uneven)
-			let date = new Date();
-
-			date.setUTCHours(16);
-			date.setUTCDate(23);
-			date.setUTCMonth(0);
-			date.setUTCFullYear(2023);
-
 			let updated = await DBOsuMultiScores.update({
 				warmup: null,
 			}, {
@@ -11619,6 +11612,17 @@ module.exports = {
 							],
 						},
 					]
+				},
+			});
+
+			return await msg.reply(`Reset warmup flag for ${updated[0]} scores`);
+		} else if (args[0] === 'fixBuggedEndDate') {
+			// Resets warmup flag for all scores with both mod values even (NoFail is the only mod that can make it uneven)
+			let updated = await DBOsuMultiScores.update({
+				warmup: null,
+			}, {
+				where: {
+					matchEndDate: null
 				},
 			});
 

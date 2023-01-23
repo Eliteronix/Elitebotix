@@ -191,9 +191,6 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				{
 					warmup: null
 				},
-				{
-					matchEndDate: null
-				}
 			],
 		},
 		order: [
