@@ -978,6 +978,28 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'osu-decay',
+			// 		description: 'Calculates how long it would take for a player to decay from their current rank',
+			// 		dm_permission: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'rank',
+			// 				'description': 'The rank to decay to',
+			// 				'type': 4,
+			// 				'required': true
+			// 			},
+			// 			{
+			// 				'name': 'username',
+			// 				'description': 'The username, id or link of the player to calculate',
+			// 				'type': 3,
+			// 				'required': false
+			// 			},
+			// 		]
+			// 	},
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'osu-derank',
 			// 		description: 'Reranks players based on their duel rating compared to others',
 			// 		dm_permission: true,
@@ -6275,6 +6297,28 @@ module.exports = {
 			// 		]
 			// 	},
 			// });
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'osu-decay',
+					description: 'Calculates how long it would take for a player to decay from their current rank',
+					dm_permission: true,
+					options: [
+						{
+							'name': 'rank',
+							'description': 'The rank to decay to',
+							'type': 4,
+							'required': true
+						},
+						{
+							'name': 'username',
+							'description': 'The username, id or link of the player to calculate',
+							'type': 3,
+							'required': false
+						},
+					]
+				},
+			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
