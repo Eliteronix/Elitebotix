@@ -18,6 +18,7 @@ module.exports = {
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		let tournament = false;
+		let accuracy = 95;
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -31,6 +32,8 @@ module.exports = {
 					return;
 				}
 			}
+
+			accuracy = interaction.options.getNumber('accuracy') || 95;
 
 			args = [];
 
@@ -57,8 +60,6 @@ module.exports = {
 			}
 
 		}
-
-		let accuracy = interaction.options.getNumber('accuracy') || 95;
 
 		accuracy = Math.min(accuracy, 100);
 		accuracy = Math.max(accuracy, 0);
