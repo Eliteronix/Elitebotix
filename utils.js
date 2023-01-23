@@ -1632,7 +1632,8 @@ module.exports = {
 		taikoMaps = taikoMaps.map(beatmap => beatmap.beatmapId);
 
 		let updated = await DBOsuMultiScores.update({
-			mode: 'Taiko'
+			mode: 'Taiko',
+			pp: null,
 		}, {
 			where: {
 				beatmapId: {
@@ -1652,7 +1653,8 @@ module.exports = {
 		catchMaps = catchMaps.map(beatmap => beatmap.beatmapId);
 
 		updated = await DBOsuMultiScores.update({
-			mode: 'Catch the Beat'
+			mode: 'Catch the Beat',
+			pp: null,
 		}, {
 			where: {
 				beatmapId: {
@@ -1672,7 +1674,8 @@ module.exports = {
 		maniaMaps = maniaMaps.map(beatmap => beatmap.beatmapId);
 
 		updated = await DBOsuMultiScores.update({
-			mode: 'Mania'
+			mode: 'Mania',
+			pp: null,
 		}, {
 			where: {
 				beatmapId: {
