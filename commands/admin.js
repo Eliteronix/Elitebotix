@@ -11613,6 +11613,7 @@ module.exports = {
 						},
 					]
 				},
+				silent: true,
 			});
 
 			return await msg.reply(`Reset warmup flag for ${updated[0]} scores`);
@@ -11624,6 +11625,7 @@ module.exports = {
 				where: {
 					matchEndDate: null
 				},
+				silent: true,
 			});
 
 			return await msg.reply(`Reset warmup flag for ${updated[0]} scores`);
