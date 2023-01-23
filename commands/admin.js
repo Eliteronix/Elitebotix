@@ -11546,6 +11546,83 @@ module.exports = {
 					}
 				}
 			}
+		} else if (args[0] === 'fixBuggedMods') {
+			// Resets warmup flag for all scores with both mod values even (NoFail is the only mod that can make it uneven)
+			let date = new Date();
+
+			date.setUTCHours(16);
+			date.setUTCDate(23);
+			date.setUTCMonth(0);
+			date.setUTCFullYear(2023);
+
+			let updated = await DBOsuMultiScores.update({
+				warmup: null,
+			}, {
+				where: {
+					[Op.and]: [
+						{
+							[Op.or]: [
+								{
+									gameRawMods: {
+										[Op.endsWith]: '0'
+									}
+								},
+								{
+									gameRawMods: {
+										[Op.endsWith]: '2'
+									}
+								},
+								{
+									gameRawMods: {
+										[Op.endsWith]: '4'
+									}
+								},
+								{
+									gameRawMods: {
+										[Op.endsWith]: '6'
+									}
+								},
+								{
+									gameRawMods: {
+										[Op.endsWith]: '8'
+									}
+								},
+							],
+						},
+						{
+							[Op.or]: [
+								{
+									rawMods: {
+										[Op.endsWith]: '0'
+									}
+								},
+								{
+									rawMods: {
+										[Op.endsWith]: '2'
+									}
+								},
+								{
+									rawMods: {
+										[Op.endsWith]: '4'
+									}
+								},
+								{
+									rawMods: {
+										[Op.endsWith]: '6'
+									}
+								},
+								{
+									rawMods: {
+										[Op.endsWith]: '8'
+									}
+								},
+							],
+						},
+					]
+				},
+			});
+
+			return await msg.reply(`Reset warmup flag for ${updated[0]} scores`);
 		} else {
 			msg.reply('Invalid command');
 		}
