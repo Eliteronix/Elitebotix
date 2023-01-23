@@ -168,10 +168,14 @@ module.exports = {
 				if (gameScores.length === 2 && gameScores[0].teamType === 'Head to Head' && ownScore) {
 					let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
 
-					if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
-						matchesWon++;
-					} else {
-						matchesLost++;
+					try {
+						if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
+							matchesWon++;
+						} else {
+							matchesLost++;
+						}
+					} catch (error) {
+						console.error(error, ownScore, otherScore, multiScores[i].matchId);
 					}
 				} else if (gameScores[0].teamType === 'Team vs') {
 					let matchScores = multiScores.filter(score => score.matchId === multiScores[i].matchId);
