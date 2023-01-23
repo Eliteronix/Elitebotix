@@ -1264,8 +1264,9 @@ module.exports = {
 				const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: outputScore.beatmapId, modBits: 0 });
 				if (dbBeatmap) {
 					let pp = await getOsuPPFunction(outputScore.beatmapId, outputScore.raw_mods, getAccuracyFunction(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
-					inputScore.pp = pp;
-					inputScore.save();
+
+					DBOsuMultiScores.update({ pp: pp }, { where: { id: inputScore.id } });
+
 					outputScore.pp = pp;
 				}
 			}
