@@ -35,7 +35,7 @@ module.exports = {
 		let discordUser = null;
 
 		if (username === null) {
-			logDatabaseQueries(4, 'commands/osu-wrapped.js DBDiscordUsers 1');
+			logDatabaseQueries(4, 'commands/osu-history.js DBDiscordUsers 1');
 			discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.user.id,
@@ -53,7 +53,7 @@ module.exports = {
 
 		//Get the user from the database if possible
 		if (discordUser === null) {
-			logDatabaseQueries(4, 'commands/osu-wrapped.js DBDiscordUsers 2');
+			logDatabaseQueries(4, 'commands/osu-history.js DBDiscordUsers 2');
 			discordUser = await DBDiscordUsers.findOne({
 				where: {
 					[Op.or]: {
