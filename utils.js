@@ -2912,7 +2912,7 @@ module.exports = {
 							//Check which scores are new
 							let newScores = [];
 							for (let i = 0; i < scores.length; i++) {
-								if (new Date(scores[i].gameStartDate) > new Date(lastUpdated)) {
+								if (new Date(scores[i].createdAt) > new Date(lastUpdated)) {
 									newScores.push(scores[i]);
 								}
 							}
@@ -3159,6 +3159,7 @@ async function multiToBanchoScoreFunction(inputScore) {
 		matchName: inputScore.matchName,
 		mapRank: inputScore.mapRank,
 		gameStartDate: inputScore.gameStartDate,
+		createdAt: inputScore.createdAt,
 	};
 
 	try {
