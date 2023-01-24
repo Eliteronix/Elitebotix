@@ -139,6 +139,12 @@ module.exports = {
 					} else {
 						guildTracker.maniaTopPlays = false;
 					}
+
+					if (topPlays.includes('u')) {
+						guildTracker.tournamentTopPlays = true;
+					} else {
+						guildTracker.tournamentTopPlays = false;
+					}
 				}
 
 				let leaderboardPlays = interaction.options.getString('leaderboardplays');
@@ -233,6 +239,7 @@ module.exports = {
 					guildTracker.taikoTopPlays ||
 					guildTracker.catchTopPlays ||
 					guildTracker.maniaTopPlays ||
+					guildTracker.tournamentTopPlays ||
 					guildTracker.osuLeaderboard ||
 					guildTracker.taikoLeaderboard ||
 					guildTracker.catchLeaderboard ||
@@ -379,6 +386,7 @@ module.exports = {
 					guildTracker.taikoTopPlays = false;
 					guildTracker.catchTopPlays = false;
 					guildTracker.maniaTopPlays = false;
+					guildTracker.tournamentTopPlays = false;
 				}
 
 				let leaderboardPlays = interaction.options.getBoolean('leaderboardplays');
@@ -436,6 +444,7 @@ module.exports = {
 					guildTracker.taikoTopPlays ||
 					guildTracker.catchTopPlays ||
 					guildTracker.maniaTopPlays ||
+					guildTracker.tournamentTopPlays ||
 					guildTracker.osuLeaderboard ||
 					guildTracker.taikoLeaderboard ||
 					guildTracker.catchLeaderboard ||
@@ -561,6 +570,10 @@ module.exports = {
 
 				if (guildTrackers[i].maniaTopPlays) {
 					topPlayTrackings.push('Mania');
+				}
+
+				if (guildTrackers[i].tournamentTopPlays) {
+					topPlayTrackings.push('Tournaments');
 				}
 
 				if (!topPlayTrackings.length) {

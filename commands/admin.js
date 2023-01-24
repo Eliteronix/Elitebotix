@@ -3982,6 +3982,10 @@ module.exports = {
 			// 								'value': 'm',
 			// 							},
 			// 							{
+			// 								'name': 'tournaments only',
+			// 								'value': 'u',
+			// 							},
+			// 							{
 			// 								'name': 'osu! & taiko',
 			// 								'value': 'ot',
 			// 							},
@@ -3994,6 +3998,10 @@ module.exports = {
 			// 								'value': 'om',
 			// 							},
 			// 							{
+			// 								'name': 'osu! & tournaments',
+			// 								'value': 'ou',
+			// 							},
+			// 							{
 			// 								'name': 'taiko & catch',
 			// 								'value': 'tc',
 			// 							},
@@ -4002,8 +4010,20 @@ module.exports = {
 			// 								'value': 'tm',
 			// 							},
 			// 							{
+			// 								'name': 'taiko & tournaments',
+			// 								'value': 'tu',
+			// 							},
+			// 							{
 			// 								'name': 'catch & mania',
 			// 								'value': 'cm',
+			// 							},
+			// 							{
+			// 								'name': 'catch & tournaments',
+			// 								'value': 'cu',
+			// 							},
+			// 							{
+			// 								'name': 'mania & tournaments',
+			// 								'value': 'mu',
 			// 							},
 			// 							{
 			// 								'name': 'osu!, taiko & catch',
@@ -4014,16 +4034,60 @@ module.exports = {
 			// 								'value': 'otm',
 			// 							},
 			// 							{
+			// 								'name': 'osu!, taiko & tournaments',
+			// 								'value': 'otu',
+			// 							},
+			// 							{
 			// 								'name': 'osu!, catch & mania',
 			// 								'value': 'ocm',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, catch & tournaments',
+			// 								'value': 'ocu',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, mania & tournaments',
+			// 								'value': 'omu',
 			// 							},
 			// 							{
 			// 								'name': 'taiko, catch & mania',
 			// 								'value': 'tcm',
 			// 							},
 			// 							{
+			// 								'name': 'taiko, catch & tournaments',
+			// 								'value': 'tcu',
+			// 							},
+			// 							{
+			// 								'name': 'taiko, mania & tournaments',
+			// 								'value': 'tmu',
+			// 							},
+			// 							{
+			// 								'name': 'catch, mania & tournaments',
+			// 								'value': 'cmu',
+			// 							},
+			// 							{
 			// 								'name': 'osu!, taiko, catch & mania',
 			// 								'value': 'otcm',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, taiko, catch & tournaments',
+			// 								'value': 'otcu',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, taiko, mania & tournaments',
+			// 								'value': 'otmu',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, catch, mania & tournaments',
+			// 								'value': 'ocmu',
+			// 							},
+			// 							{
+			// 								'name': 'taiko, catch, mania & tournaments',
+			// 								'value': 'tcmu',
+			// 							},
+			// 							{
+			// 								'name': 'osu!, taiko, catch, mania & tournaments',
+			// 								'value': 'otcmu',
 			// 							},
 			// 						]
 			// 					},
@@ -9328,6 +9392,10 @@ module.exports = {
 											'value': 'm',
 										},
 										{
+											'name': 'tournaments only',
+											'value': 'u',
+										},
+										{
 											'name': 'osu! & taiko',
 											'value': 'ot',
 										},
@@ -9340,6 +9408,10 @@ module.exports = {
 											'value': 'om',
 										},
 										{
+											'name': 'osu! & tournaments',
+											'value': 'ou',
+										},
+										{
 											'name': 'taiko & catch',
 											'value': 'tc',
 										},
@@ -9348,8 +9420,20 @@ module.exports = {
 											'value': 'tm',
 										},
 										{
+											'name': 'taiko & tournaments',
+											'value': 'tu',
+										},
+										{
 											'name': 'catch & mania',
 											'value': 'cm',
+										},
+										{
+											'name': 'catch & tournaments',
+											'value': 'cu',
+										},
+										{
+											'name': 'mania & tournaments',
+											'value': 'mu',
 										},
 										{
 											'name': 'osu!, taiko & catch',
@@ -9360,16 +9444,60 @@ module.exports = {
 											'value': 'otm',
 										},
 										{
+											'name': 'osu!, taiko & tournaments',
+											'value': 'otu',
+										},
+										{
 											'name': 'osu!, catch & mania',
 											'value': 'ocm',
+										},
+										{
+											'name': 'osu!, catch & tournaments',
+											'value': 'ocu',
+										},
+										{
+											'name': 'osu!, mania & tournaments',
+											'value': 'omu',
 										},
 										{
 											'name': 'taiko, catch & mania',
 											'value': 'tcm',
 										},
 										{
+											'name': 'taiko, catch & tournaments',
+											'value': 'tcu',
+										},
+										{
+											'name': 'taiko, mania & tournaments',
+											'value': 'tmu',
+										},
+										{
+											'name': 'catch, mania & tournaments',
+											'value': 'cmu',
+										},
+										{
 											'name': 'osu!, taiko, catch & mania',
 											'value': 'otcm',
+										},
+										{
+											'name': 'osu!, taiko, catch & tournaments',
+											'value': 'otcu',
+										},
+										{
+											'name': 'osu!, taiko, mania & tournaments',
+											'value': 'otmu',
+										},
+										{
+											'name': 'osu!, catch, mania & tournaments',
+											'value': 'ocmu',
+										},
+										{
+											'name': 'taiko, catch, mania & tournaments',
+											'value': 'tcmu',
+										},
+										{
+											'name': 'osu!, taiko, catch, mania & tournaments',
+											'value': 'otcmu',
 										},
 									]
 								},
