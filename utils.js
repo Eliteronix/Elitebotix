@@ -2583,6 +2583,7 @@ module.exports = {
 
 			let recentActivities = await client.shard.broadcastEval(async (c, { osuUser, lastUpdated }) => {
 				const osu = require('node-osu');
+				const { Op } = require('sequelize');
 				const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 				// eslint-disable-next-line no-undef
 				const { DBOsuGuildTrackers, DBOsuMultiScores } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
