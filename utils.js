@@ -1231,7 +1231,56 @@ module.exports = {
 		return await getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo);
 	},
 	async multiToBanchoScore(inputScore) {
-		return await multiToBanchoScoreFunction(inputScore);
+		let date = new Date(inputScore.gameStartDate);
+		let outputScore = {
+			score: inputScore.score,
+			user: {
+				name: null,
+				id: inputScore.osuUserId
+			},
+			beatmapId: inputScore.beatmapId,
+			counts: {
+				'50': inputScore.count50,
+				'100': inputScore.count100,
+				'300': inputScore.count300,
+				geki: inputScore.countGeki,
+				katu: inputScore.countKatu,
+				miss: inputScore.countMiss
+			},
+			maxCombo: inputScore.maxCombo,
+			perfect: inputScore.perfect,
+			raw_date: `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${(date.getUTCDate()).toString().padStart(2, '0')} ${(date.getUTCHours()).toString().padStart(2, '0')}:${(date.getUTCMinutes()).toString().padStart(2, '0')}:${(date.getUTCSeconds()).toString().padStart(2, '0')}`,
+			rank: inputScore.rank,
+			pp: inputScore.pp,
+			hasReplay: false,
+			raw_mods: parseInt(inputScore.gameRawMods) + parseInt(inputScore.rawMods),
+			beatmap: undefined,
+			matchName: inputScore.matchName,
+			mapRank: inputScore.mapRank,
+			gameStartDate: inputScore.gameStartDate,
+			createdAt: inputScore.createdAt,
+		};
+
+		try {
+			if (!outputScore.pp && outputScore.maxCombo) {
+				const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: outputScore.beatmapId, modBits: 0 });
+				if (dbBeatmap) {
+					let pp = await getOsuPPFunction(outputScore.beatmapId, outputScore.raw_mods, getAccuracyFunction(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
+
+					DBOsuMultiScores.update({ pp: pp }, { where: { id: inputScore.id } });
+
+					outputScore.pp = pp;
+				}
+			}
+		} catch (e) {
+			if (e.message !== 'Failed to parse beatmap: IO error  - caused by: The system cannot find the file specified. (os error 2)') {
+				console.error(`Error calculating pp for beatmap ${outputScore.beatmapId}`, e);
+			}
+		}
+
+		outputScore.rank = calculateGradeFunction(inputScore.mode, outputScore.counts, outputScore.raw_mods);
+
+		return outputScore;
 	},
 	async cleanUpDuplicateEntries(manually) {
 		const Sequelize = require('sequelize');
@@ -2536,9 +2585,9 @@ module.exports = {
 				const osu = require('node-osu');
 				const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 				// eslint-disable-next-line no-undef
-				const { DBOsuGuildTrackers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+				const { DBOsuGuildTrackers, DBOsuMultiScores } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 				// eslint-disable-next-line no-undef
-				const { getOsuPlayerName } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+				const { getOsuPlayerName, multiToBanchoScore } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -2876,7 +2925,7 @@ module.exports = {
 								if (parseInt(multiScores[i].rawMods) % 2 === 1) {
 									multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
 								}
-								multiScores[i] = await multiToBanchoScoreFunction(multiScores[i]);
+								multiScores[i] = await multiToBanchoScore(multiScores[i]);
 
 								if (!multiScores[i].pp || parseFloat(multiScores[i].pp) > 2000 || !parseFloat(multiScores[i].pp)) {
 									multiScores.splice(i, 1);
@@ -3129,59 +3178,6 @@ module.exports = {
 		}
 	}
 };
-
-async function multiToBanchoScoreFunction(inputScore) {
-	let date = new Date(inputScore.gameStartDate);
-	let outputScore = {
-		score: inputScore.score,
-		user: {
-			name: null,
-			id: inputScore.osuUserId
-		},
-		beatmapId: inputScore.beatmapId,
-		counts: {
-			'50': inputScore.count50,
-			'100': inputScore.count100,
-			'300': inputScore.count300,
-			geki: inputScore.countGeki,
-			katu: inputScore.countKatu,
-			miss: inputScore.countMiss
-		},
-		maxCombo: inputScore.maxCombo,
-		perfect: inputScore.perfect,
-		raw_date: `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${(date.getUTCDate()).toString().padStart(2, '0')} ${(date.getUTCHours()).toString().padStart(2, '0')}:${(date.getUTCMinutes()).toString().padStart(2, '0')}:${(date.getUTCSeconds()).toString().padStart(2, '0')}`,
-		rank: inputScore.rank,
-		pp: inputScore.pp,
-		hasReplay: false,
-		raw_mods: parseInt(inputScore.gameRawMods) + parseInt(inputScore.rawMods),
-		beatmap: undefined,
-		matchName: inputScore.matchName,
-		mapRank: inputScore.mapRank,
-		gameStartDate: inputScore.gameStartDate,
-		createdAt: inputScore.createdAt,
-	};
-
-	try {
-		if (!outputScore.pp && outputScore.maxCombo) {
-			const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: outputScore.beatmapId, modBits: 0 });
-			if (dbBeatmap) {
-				let pp = await getOsuPPFunction(outputScore.beatmapId, outputScore.raw_mods, getAccuracyFunction(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
-
-				DBOsuMultiScores.update({ pp: pp }, { where: { id: inputScore.id } });
-
-				outputScore.pp = pp;
-			}
-		}
-	} catch (e) {
-		if (e.message !== 'Failed to parse beatmap: IO error  - caused by: The system cannot find the file specified. (os error 2)') {
-			console.error(`Error calculating pp for beatmap ${outputScore.beatmapId}`, e);
-		}
-	}
-
-	outputScore.rank = calculateGradeFunction(inputScore.mode, outputScore.counts, outputScore.raw_mods);
-
-	return outputScore;
-}
 
 async function getUserDuelStarRatingFunction(input) {
 	// console.log('-------------------------------------------------------------------------------------------------------------------');
