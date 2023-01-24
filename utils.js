@@ -1231,54 +1231,7 @@ module.exports = {
 		return await getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo);
 	},
 	async multiToBanchoScore(inputScore) {
-		let date = new Date(inputScore.gameStartDate);
-		let outputScore = {
-			score: inputScore.score,
-			user: {
-				name: null,
-				id: inputScore.osuUserId
-			},
-			beatmapId: inputScore.beatmapId,
-			counts: {
-				'50': inputScore.count50,
-				'100': inputScore.count100,
-				'300': inputScore.count300,
-				geki: inputScore.countGeki,
-				katu: inputScore.countKatu,
-				miss: inputScore.countMiss
-			},
-			maxCombo: inputScore.maxCombo,
-			perfect: inputScore.perfect,
-			raw_date: `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${(date.getUTCDate()).toString().padStart(2, '0')} ${(date.getUTCHours()).toString().padStart(2, '0')}:${(date.getUTCMinutes()).toString().padStart(2, '0')}:${(date.getUTCSeconds()).toString().padStart(2, '0')}`,
-			rank: inputScore.rank,
-			pp: inputScore.pp,
-			hasReplay: false,
-			raw_mods: parseInt(inputScore.gameRawMods) + parseInt(inputScore.rawMods),
-			beatmap: undefined,
-			matchName: inputScore.matchName,
-			mapRank: inputScore.mapRank,
-		};
-
-		try {
-			if (!outputScore.pp && outputScore.maxCombo) {
-				const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: outputScore.beatmapId, modBits: 0 });
-				if (dbBeatmap) {
-					let pp = await getOsuPPFunction(outputScore.beatmapId, outputScore.raw_mods, getAccuracyFunction(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
-
-					DBOsuMultiScores.update({ pp: pp }, { where: { id: inputScore.id } });
-
-					outputScore.pp = pp;
-				}
-			}
-		} catch (e) {
-			if (e.message !== 'Failed to parse beatmap: IO error  - caused by: The system cannot find the file specified. (os error 2)') {
-				console.error(`Error calculating pp for beatmap ${outputScore.beatmapId}`, e);
-			}
-		}
-
-		outputScore.rank = calculateGradeFunction(inputScore.mode, outputScore.counts, outputScore.raw_mods);
-
-		return outputScore;
+		return await multiToBanchoScoreFunction(inputScore);
 	},
 	async cleanUpDuplicateEntries(manually) {
 		const Sequelize = require('sequelize');
@@ -2894,6 +2847,95 @@ module.exports = {
 						}
 					}
 
+					if (guildTrackers[i].tournamentTopPlays) {
+						if (guildTrackers[i].tournamentNumberTopPlays === undefined) {
+							//Get all scores from tournaments
+							logDatabaseQueriesFunction(4, 'commands/utils.js tourney tracking DBOsuMultiScores');
+							let multiScores = await DBOsuMultiScores.findAll({
+								where: {
+									osuUserId: osuUser.osuUserId,
+									mode: 'Standard',
+									tourneyMatch: true,
+									score: {
+										[Op.gte]: 10000
+									}
+								}
+							});
+
+							for (let i = 0; i < multiScores.length; i++) {
+								if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].teamType === 'Tag Team vs' || multiScores[i].teamType === 'Tag Co-op') {
+									multiScores.splice(i, 1);
+									i--;
+								}
+							}
+
+							//Translate the scores to bancho scores
+							for (let i = 0; i < multiScores.length; i++) {
+								if (parseInt(multiScores[i].gameRawMods) % 2 === 1) {
+									multiScores[i].gameRawMods = parseInt(multiScores[i].gameRawMods) - 1;
+								}
+								if (parseInt(multiScores[i].rawMods) % 2 === 1) {
+									multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
+								}
+								multiScores[i] = await multiToBanchoScoreFunction(multiScores[i]);
+
+								if (!multiScores[i].pp || parseFloat(multiScores[i].pp) > 2000 || !parseFloat(multiScores[i].pp)) {
+									multiScores.splice(i, 1);
+									i--;
+									continue;
+								}
+							}
+
+							//Sort the scores by pp descending
+							multiScores.sort((a, b) => {
+								return parseFloat(b.pp) - parseFloat(a.pp);
+							});
+
+							//Remove duplicates by beatmapId
+							for (let i = 0; i < multiScores.length; i++) {
+								for (let j = i + 1; j < multiScores.length; j++) {
+									if (multiScores[i].beatmapId === multiScores[j].beatmapId) {
+										multiScores.splice(j, 1);
+										j--;
+									}
+								}
+							}
+
+							//Feed the scores into the array
+							let scores = [];
+							for (let i = 0; i < multiScores.length && i < 100; i++) {
+								if (multiScores[i].pp) {
+									scores.push(multiScores[i]);
+								}
+							}
+
+							//Check which scores are new
+							let newScores = [];
+							for (let i = 0; i < scores.length; i++) {
+								if (new Date(scores[i].gameStartDate) > new Date(lastUpdated)) {
+									newScores.push(scores[i]);
+								}
+							}
+
+							guildTrackers[i].tournamentNumberTopPlays = newScores.length;
+						}
+
+						if (!isNaN(guildTrackers[i].tournamentNumberTopPlays) && guildTrackers[i].tournamentNumberTopPlays > 0) {
+							recentActivity = true;
+							let msg = {
+								guild: guildTrackers[i].guild,
+								channel: guildTrackers[i].channel,
+								guildId: guildTrackers[i].guild.id,
+								author: {
+									id: 0
+								}
+							};
+							// eslint-disable-next-line no-undef
+							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
+							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].tournamentNumberTopPlays}`, '--tracking', '--tournaments']);
+						}
+					}
+
 					if (guildTrackers[i].osuAmeobea) {
 						try {
 							if (!guildTrackers[i].osuAmeobeaUpdated) {
@@ -3088,6 +3130,58 @@ module.exports = {
 		}
 	}
 };
+
+async function multiToBanchoScoreFunction(inputScore) {
+	let date = new Date(inputScore.gameStartDate);
+	let outputScore = {
+		score: inputScore.score,
+		user: {
+			name: null,
+			id: inputScore.osuUserId
+		},
+		beatmapId: inputScore.beatmapId,
+		counts: {
+			'50': inputScore.count50,
+			'100': inputScore.count100,
+			'300': inputScore.count300,
+			geki: inputScore.countGeki,
+			katu: inputScore.countKatu,
+			miss: inputScore.countMiss
+		},
+		maxCombo: inputScore.maxCombo,
+		perfect: inputScore.perfect,
+		raw_date: `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${(date.getUTCDate()).toString().padStart(2, '0')} ${(date.getUTCHours()).toString().padStart(2, '0')}:${(date.getUTCMinutes()).toString().padStart(2, '0')}:${(date.getUTCSeconds()).toString().padStart(2, '0')}`,
+		rank: inputScore.rank,
+		pp: inputScore.pp,
+		hasReplay: false,
+		raw_mods: parseInt(inputScore.gameRawMods) + parseInt(inputScore.rawMods),
+		beatmap: undefined,
+		matchName: inputScore.matchName,
+		mapRank: inputScore.mapRank,
+		gameStartDate: inputScore.gameStartDate,
+	};
+
+	try {
+		if (!outputScore.pp && outputScore.maxCombo) {
+			const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: outputScore.beatmapId, modBits: 0 });
+			if (dbBeatmap) {
+				let pp = await getOsuPPFunction(outputScore.beatmapId, outputScore.raw_mods, getAccuracyFunction(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
+
+				DBOsuMultiScores.update({ pp: pp }, { where: { id: inputScore.id } });
+
+				outputScore.pp = pp;
+			}
+		}
+	} catch (e) {
+		if (e.message !== 'Failed to parse beatmap: IO error  - caused by: The system cannot find the file specified. (os error 2)') {
+			console.error(`Error calculating pp for beatmap ${outputScore.beatmapId}`, e);
+		}
+	}
+
+	outputScore.rank = calculateGradeFunction(inputScore.mode, outputScore.counts, outputScore.raw_mods);
+
+	return outputScore;
+}
 
 async function getUserDuelStarRatingFunction(input) {
 	// console.log('-------------------------------------------------------------------------------------------------------------------');
