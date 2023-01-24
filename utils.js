@@ -2850,7 +2850,6 @@ module.exports = {
 					if (guildTrackers[i].tournamentTopPlays) {
 						if (guildTrackers[i].tournamentNumberTopPlays === undefined) {
 							//Get all scores from tournaments
-							logDatabaseQueriesFunction(4, 'commands/utils.js tourney tracking DBOsuMultiScores');
 							let multiScores = await DBOsuMultiScores.findAll({
 								where: {
 									osuUserId: osuUser.osuUserId,
