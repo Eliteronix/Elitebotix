@@ -116,31 +116,31 @@ module.exports = {
 				let topPlays = interaction.options.getString('topplays');
 
 				if (topPlays) {
-					if (topPlays.includes('o')) {
+					if (topPlays.includes('1')) {
 						guildTracker.osuTopPlays = true;
 					} else {
 						guildTracker.osuTopPlays = false;
 					}
 
-					if (topPlays.includes('t')) {
+					if (topPlays.includes('2')) {
 						guildTracker.taikoTopPlays = true;
 					} else {
 						guildTracker.taikoTopPlays = false;
 					}
 
-					if (topPlays.includes('c')) {
+					if (topPlays.includes('3')) {
 						guildTracker.catchTopPlays = true;
 					} else {
 						guildTracker.catchTopPlays = false;
 					}
 
-					if (topPlays.includes('m')) {
+					if (topPlays.includes('4')) {
 						guildTracker.maniaTopPlays = true;
 					} else {
 						guildTracker.maniaTopPlays = false;
 					}
 
-					if (topPlays.includes('u')) {
+					if (topPlays.includes('5')) {
 						guildTracker.tournamentTopPlays = true;
 					} else {
 						guildTracker.tournamentTopPlays = false;
