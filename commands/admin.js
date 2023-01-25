@@ -5,6 +5,7 @@ const { developers, currentElitiriCup } = require('../config.json');
 const { Op } = require('sequelize');
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 module.exports = {
 	name: 'admin',
@@ -5055,6 +5056,24 @@ module.exports = {
 			// 		description: 'Allows control of the twitch integration',
 			// 		dm_permission: true,
 			// 		options: [
+			// 			{
+			// 				'name': 'connect',
+			// 				'description': 'Allows you to connect your twitch account to the bot',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'username',
+			// 						'description': 'Your twitch name as found in your URL',
+			// 						'type': 3,
+			// 						'required': true
+			// 					}
+			// 				]
+			// 			},
+			// 			{
+			// 				'name': 'disconnect',
+			// 				'description': 'Removes the currently connected twitch account',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 			},
 			// 			{
 			// 				'name': 'togglemp',
 			// 				'description': 'Toggle the !mp command',
@@ -10346,6 +10365,24 @@ module.exports = {
 					dm_permission: true,
 					options: [
 						{
+							'name': 'connect',
+							'description': 'Allows you to connect your twitch account to the bot',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'username',
+									'description': 'Your twitch name as found in your URL',
+									'type': 3,
+									'required': true
+								}
+							]
+						},
+						{
+							'name': 'disconnect',
+							'description': 'Removes the currently connected twitch account',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
 							'name': 'togglemp',
 							'description': 'Toggle the !mp command',
 							'type': 1, // 1 is type SUB_COMMAND
@@ -11621,6 +11658,51 @@ module.exports = {
 			});
 
 			return await msg.reply(`Reset warmup flag for ${updated[0]} scores`);
+		} else if (args[0] === 'getTwitchIds') {
+			let discordUsers = await DBDiscordUsers.findAll({
+				where: {
+					twitchName: {
+						[Op.not]: null
+					}
+				}
+			});
+
+			// eslint-disable-next-line no-undef
+			let response = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=client_credentials`, {
+				method: 'POST',
+			});
+
+			let json = await response.json();
+
+			let accessToken = json.access_token;
+
+			for (let i = 0; i < discordUsers.length; i++) {
+
+				// Do a GET https://api.twitch.tv/helix/users?login=USERNAME
+				response = await fetch(`https://api.twitch.tv/helix/users?login=${discordUsers[i].twitchName}`, {
+					headers: {
+						// eslint-disable-next-line no-undef
+						'Client-ID': process.env.TWITCH_CLIENT_ID,
+						// eslint-disable-next-line no-undef
+						'Authorization': `Bearer ${accessToken}`
+					}
+				});
+
+				if (response.status === 200) {
+					let json = await response.json();
+					if (json.data.length > 0) {
+						discordUsers[i].twitchId = json.data[0].id;
+						discordUsers[i].twitchVerified = true;
+						await discordUsers[i].save();
+
+						await msg.reply(discordUsers[i].twitchName + '-' + discordUsers[i].twitchId + '-' + discordUsers[i].twitchVerified);
+					} else {
+						await msg.reply(discordUsers[i].twitchName + ' not found');
+					}
+				} else {
+					await msg.reply(discordUsers[i].twitchName + ' error');
+				}
+			}
 		} else {
 			msg.reply('Invalid command');
 		}

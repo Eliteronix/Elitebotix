@@ -107,7 +107,7 @@ const interactionCreate = require('./interactionCreate');
 const gotBanchoPrivateMessage = require('./gotBanchoPrivateMessage');
 
 //Get executeNextProcessQueueTask
-const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateEntries, checkForBirthdays } = require('./utils');
+const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateEntries, checkForBirthdays, updateTwitchNames } = require('./utils');
 
 //Get MOTD/getMapsOnTime
 const { initializeMOTD } = require('./MOTD/initializeMOTD');
@@ -252,6 +252,7 @@ setTimeout(() => {
 	cleanUpDuplicates();
 	getForumPosts(client);
 	checkOsuTracks(client);
+	updateTwitchNames(client);
 
 	setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
 

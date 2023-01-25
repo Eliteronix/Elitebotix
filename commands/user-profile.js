@@ -183,16 +183,15 @@ async function sendUserEmbed(interaction, user) {
 	}
 
 	if (discordUser && discordUser.twitchName) {
-		// if (discordUser.osuVerified) {
-		userInfoEmbed.addFields(
-			// link to osu profile page
-			{ name: 'twitch Account', value: `☑️ [${discordUser.twitchName}](https://www.twitch.tv/${discordUser.twitchName})` }
-		);
-		// } else {
-		// 	userInfoEmbed.addFields(
-		// 		{ name: 'osu! Account', value: `❌ [${osuUser.name}](https://osu.ppy.sh/users/${discordUser.osuUserId})` },
-		// 	);
-		// }
+		if (discordUser.twitchVerified) {
+			userInfoEmbed.addFields(
+				{ name: 'twitch Account', value: `☑️ [${discordUser.twitchName}](https://www.twitch.tv/${discordUser.twitchName})` }
+			);
+		} else {
+			userInfoEmbed.addFields(
+				{ name: 'twitch Account', value: `❌ [${discordUser.twitchName}](https://www.twitch.tv/${discordUser.twitchName})` },
+			);
+		}
 	}
 
 	return interaction.followUp({ embeds: [userInfoEmbed] });
