@@ -2911,26 +2911,26 @@ module.exports = {
 								}
 							});
 
-							for (let i = 0; i < multiScores.length; i++) {
-								if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].teamType === 'Tag Team vs' || multiScores[i].teamType === 'Tag Co-op') {
-									multiScores.splice(i, 1);
-									i--;
+							for (let j = 0; j < multiScores.length; j++) {
+								if (parseInt(multiScores[j].score) <= 10000 || multiScores[j].teamType === 'Tag Team vs' || multiScores[j].teamType === 'Tag Co-op') {
+									multiScores.splice(j, 1);
+									j--;
 								}
 							}
 
 							//Translate the scores to bancho scores
-							for (let i = 0; i < multiScores.length; i++) {
-								if (parseInt(multiScores[i].gameRawMods) % 2 === 1) {
-									multiScores[i].gameRawMods = parseInt(multiScores[i].gameRawMods) - 1;
+							for (let j = 0; j < multiScores.length; j++) {
+								if (parseInt(multiScores[j].gameRawMods) % 2 === 1) {
+									multiScores[j].gameRawMods = parseInt(multiScores[j].gameRawMods) - 1;
 								}
-								if (parseInt(multiScores[i].rawMods) % 2 === 1) {
-									multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
+								if (parseInt(multiScores[j].rawMods) % 2 === 1) {
+									multiScores[j].rawMods = parseInt(multiScores[j].rawMods) - 1;
 								}
-								multiScores[i] = await multiToBanchoScore(multiScores[i]);
+								multiScores[j] = await multiToBanchoScore(multiScores[j]);
 
-								if (!multiScores[i].pp || parseFloat(multiScores[i].pp) > 2000 || !parseFloat(multiScores[i].pp)) {
-									multiScores.splice(i, 1);
-									i--;
+								if (!multiScores[j].pp || parseFloat(multiScores[j].pp) > 2000 || !parseFloat(multiScores[j].pp)) {
+									multiScores.splice(j, 1);
+									j--;
 									continue;
 								}
 							}
@@ -2941,28 +2941,28 @@ module.exports = {
 							});
 
 							//Remove duplicates by beatmapId
-							for (let i = 0; i < multiScores.length; i++) {
-								for (let j = i + 1; j < multiScores.length; j++) {
-									if (multiScores[i].beatmapId === multiScores[j].beatmapId) {
-										multiScores.splice(j, 1);
-										j--;
+							for (let j = 0; j < multiScores.length; j++) {
+								for (let k = j + 1; k < multiScores.length; k++) {
+									if (multiScores[j].beatmapId === multiScores[k].beatmapId) {
+										multiScores.splice(k, 1);
+										k--;
 									}
 								}
 							}
 
 							//Feed the scores into the array
 							let scores = [];
-							for (let i = 0; i < multiScores.length && i < 100; i++) {
-								if (multiScores[i].pp) {
-									scores.push(multiScores[i]);
+							for (let j = 0; j < multiScores.length && j < 100; j++) {
+								if (multiScores[j].pp) {
+									scores.push(multiScores[j]);
 								}
 							}
 
 							//Check which scores are new
 							let newScores = [];
-							for (let i = 0; i < scores.length; i++) {
-								if (new Date(scores[i].createdAt) > new Date(lastUpdated)) {
-									newScores.push(scores[i]);
+							for (let j = 0; j < scores.length; j++) {
+								if (new Date(scores[j].createdAt) > new Date(lastUpdated)) {
+									newScores.push(scores[j]);
 								}
 							}
 
