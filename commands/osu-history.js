@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const { Permissions } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 const { Op } = require('sequelize');
-const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague } = require('../utils');
+const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getIDFromPotentialOsuLink } = require('../utils');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
@@ -57,7 +57,7 @@ module.exports = {
 			discordUser = await DBDiscordUsers.findOne({
 				where: {
 					[Op.or]: {
-						osuUserId: username,
+						osuUserId: getIDFromPotentialOsuLink(username),
 						osuName: username,
 						userId: username.replace('<@', '').replace('>', '').replace('!', ''),
 					}
