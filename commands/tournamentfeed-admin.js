@@ -247,7 +247,13 @@ module.exports = {
 								rankRange[j][1] = temp;
 							}
 
-							if (osuRank >= rankRange[j][0] && osuRank <= rankRange[j][1]) {
+							let maxRank = 1;
+
+							if (user.tournamentPingsStartingFrom) {
+								maxRank = Number(user.tournamentPingsStartingFrom);
+							}
+
+							if (osuRank >= rankRange[j][0] && osuRank <= rankRange[j][1] && rankRange[j][0] >= maxRank) {
 								validRank = true;
 								break;
 							}

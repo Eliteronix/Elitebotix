@@ -82,6 +82,11 @@ module.exports = {
 						commandUser.tournamentPingsBadged = false;
 					}
 					await commandUser.save();
+				} else if (interaction.options._hoistedOptions[i].name === 'maxrank') {
+					let maxRank = interaction.options._hoistedOptions[i].value;
+
+					commandUser.tournamentPingsStartingFrom = maxRank;
+					await commandUser.save();
 				}
 			}
 
@@ -90,7 +95,13 @@ module.exports = {
 				await commandUser.save();
 			}
 
-			return interaction.editReply(`New current settings:\nOnly Badged: ${commandUser.tournamentPingsBadged}\nGamemodes: ${commandUser.tournamentPingsMode}`);
+			let maxRank = 1;
+
+			if (commandUser.tournamentPingsStartingFrom) {
+				maxRank = commandUser.tournamentPingsStartingFrom;
+			}
+
+			return interaction.editReply(`New current settings:\nOnly Badged: ${commandUser.tournamentPingsBadged}\nGamemodes: ${commandUser.tournamentPingsMode}\nMax Rank: ${maxRank}`);
 		}
 	},
 };
