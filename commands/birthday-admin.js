@@ -1,6 +1,7 @@
 const { Permissions } = require('discord.js');
-const { DBGuilds } = require('../dbObjects');
+const { DBGuilds, DBBirthdayGuilds } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'birthday-admin',
@@ -58,6 +59,24 @@ module.exports = {
 			guild.birthdayEnabled = false;
 			guild.save();
 			return interaction.editReply({ content: 'Birthday announcements have been disabled.', ephemeral: true });
+		} else if (interaction.options._subcommand === 'list') {
+			logDatabaseQueries(2, 'birthday-admin.js DBBirthdayGuilds list');
+			let birthdayAnnouncements = await DBBirthdayGuilds.findAll({
+				where: {
+					guildId: interaction.guild.id,
+				},
+				order: [['birthdayTime', 'ASC']],
+			});
+
+			if (birthdayAnnouncements.length === 0) {
+				return interaction.editReply({ content: 'There are no birthdays shared for this server.', ephemeral: true });
+			}
+
+			let birthdays = birthdayAnnouncements.map(birthday => {
+				return `<@${birthday.userId}>: <t:${Math.round(birthday.birthdayTime.getTime() / 1000)}:D>`;
+			});
+
+			return interaction.editReply({ content: `Shared birthdays for this server:\n${birthdays.join('\n')}`, ephemeral: true });
 		} else if (interaction.options._subcommand === 'channel') {
 			//There is only one argument so we can set the channelId to the first argument
 			let channel = interaction.options._hoistedOptions[0].value;

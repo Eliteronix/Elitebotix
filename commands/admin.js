@@ -212,6 +212,12 @@ module.exports = {
 			// 				'required': false
 			// 			},
 			// 			{
+			// 				'name': 'list',
+			// 				'description': 'Returns a list of all birthdays shared with the server',
+			// 				'type': 1,
+			// 				'required': false
+			// 			},
+			// 			{
 			// 				'name': 'channel',
 			// 				'description': 'Sets the channel for birthday announcements',
 			// 				'type': 1,
@@ -5516,6 +5522,12 @@ module.exports = {
 						{
 							'name': 'disable',
 							'description': 'Disables birthday announcements on the server',
+							'type': 1,
+							'required': false
+						},
+						{
+							'name': 'list',
+							'description': 'Returns a list of all birthdays shared with the server',
 							'type': 1,
 							'required': false
 						},
