@@ -5037,6 +5037,12 @@ module.exports = {
 			// 						'type': 5, // 5 is type BOOLEAN
 			// 						'required': false
 			// 					},
+			// 					{
+			// 						'name': 'maxrank',
+			// 						'description': 'Example: 10000 = tournaments that allow 4 digits to play will not be shown',
+			// 						'type': 4,
+			// 						'required': false
+			// 					},
 			// 				]
 			// 			},
 			// 		]
@@ -10319,6 +10325,12 @@ module.exports = {
 									'name': 'badged',
 									'description': 'Should you only get notifications for badged tournaments',
 									'type': 5, // 5 is type BOOLEAN
+									'required': false
+								},
+								{
+									'name': 'maxrank',
+									'description': 'Example: 10000 = tournaments that allow 4 digits to play will not be shown',
+									'type': 4,
 									'required': false
 								},
 							]
