@@ -73,7 +73,7 @@ module.exports = {
 			}
 
 			let birthdays = birthdayAnnouncements.map(birthday => {
-				return `<@${birthday.userId}>: <t:${Math.round(birthday.birthdayTime.getTime() / 1000)}:D>`;
+				return `<@${birthday.userId}>: <t:${Math.round(birthday.birthdayTime.getTime() / 1000)}:f>`;
 			});
 
 			return interaction.editReply({ content: `Shared birthdays for this server:\n${birthdays.join('\n')}`, ephemeral: true });
