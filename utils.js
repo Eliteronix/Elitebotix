@@ -980,15 +980,10 @@ module.exports = {
 		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers twitchConnect');
 		let twitchSyncUsers = await DBDiscordUsers.findAll({
 			where: {
-				[Op.or]: [
-					{
-						twitchOsuMatchCommand: true
-					},
-					{
-						twitchOsuMapSync: true
-					},
-				],
-			}
+				twitchName: {
+					[Op.not]: null,
+				}
+			},
 		});
 
 		let twitchChannels = [];
@@ -1025,11 +1020,56 @@ module.exports = {
 		async function onMessageHandler(target, context, msg, self) {
 			if (self) { return; } // Ignore messages from the bot
 
+			if (msg.startsWith('!verify') && context.username === target.substring(1)) {
+				let content = msg.substring(7).trim();
+
+				if (!content) {
+					return;
+				}
+
+				if (!content.includes('#')) {
+					return;
+				}
+
+				let discordName = content.split('#')[0];
+				let discordDiscriminator = content.split('#')[1];
+
+				let discordUser = client.users.cache.find(user => user.username === discordName && user.discriminator === discordDiscriminator);
+
+				if (!discordUser) {
+					return;
+				}
+
+				logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers twitchConnect 1');
+				let dbDiscordUser = await DBDiscordUsers.findOne({
+					where: {
+						userId: discordUser.id,
+						twitchName: target.substring(1).toLowerCase(),
+					}
+				});
+
+				if (!dbDiscordUser) {
+					return;
+				}
+
+				dbDiscordUser.twitchVerified = true;
+				await dbDiscordUser.save();
+
+				twitchClient.say(target.substring(1), 'Your connection has been verified.');
+
+				try {
+					await discordUser.send(`Your connection to the twitch account ${dbDiscordUser.twitchName} has been verified!`);
+				} catch (e) {
+					console.error(e);
+				}
+			}
+
 			if (msg === '!mp') {
 				logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers twitchConnect 2');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						twitchName: target.substring(1),
+						twitchVerified: true,
 						twitchOsuMatchCommand: true,
 						osuUserId: {
 							[Op.ne]: null
@@ -1129,7 +1169,11 @@ module.exports = {
 					let discordUser = await DBDiscordUsers.findOne({
 						where: {
 							twitchName: target.substring(1),
-							twitchOsuMapSync: true
+							twitchVerified: true,
+							twitchOsuMapSync: true,
+							osuUserId: {
+								[Op.ne]: null
+							}
 						}
 					});
 
@@ -3176,6 +3220,53 @@ module.exports = {
 			return Canvas.loadImage(path);
 		} catch (err) {
 			return null;
+		}
+	},
+	async updateTwitchNames(client) {
+		let twitchUsers = await DBDiscordUsers.findAll({
+			where: {
+				twitchId: {
+					[Op.not]: null,
+				},
+			},
+		});
+
+		// eslint-disable-next-line no-undef
+		let response = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=client_credentials`, {
+			method: 'POST',
+		});
+
+		let json = await response.json();
+
+		let accessToken = json.access_token;
+
+		for (let i = 0; i < twitchUsers.length; i++) {
+			await new Promise(resolve => setTimeout(resolve, 5000));
+			response = await fetch(`https://api.twitch.tv/helix/users?id=${twitchUsers[i].twitchId}`, {
+				headers: {
+					// eslint-disable-next-line no-undef
+					'Client-ID': process.env.TWITCH_CLIENT_ID,
+					// eslint-disable-next-line no-undef
+					'Authorization': `Bearer ${accessToken}`
+				}
+			});
+
+			if (response.status === 200) {
+				let json = await response.json();
+				if (json.data.length > 0) {
+					if (twitchUsers[i].twitchName !== json.data[0].login) {
+						await client.shard.broadcastEval(async (c, { channelName }) => {
+							if (c.shardId === 0) {
+								c.twitchClient.join(channelName);
+							}
+						}, { context: { channelName: json.data[0].login } });
+					}
+
+					twitchUsers[i].twitchName = json.data[0].login;
+					twitchUsers[i].twitchId = json.data[0].id;
+					await twitchUsers[i].save();
+				}
+			}
 		}
 	}
 };
