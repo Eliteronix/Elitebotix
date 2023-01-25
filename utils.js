@@ -3217,10 +3217,15 @@ async function getUserDuelStarRatingFunction(input) {
 	let duelRatings = {
 		total: null,
 		noMod: null,
+		noModLimited: false,
 		hidden: null,
+		hiddenLimited: false,
 		hardRock: null,
+		hardRockLimited: false,
 		doubleTime: null,
+		doubleTimeLimited: false,
 		freeMod: null,
+		freeModLimited: false,
 		stepData: {
 			NM: [],
 			HD: [],
@@ -3257,10 +3262,15 @@ async function getUserDuelStarRatingFunction(input) {
 	if (savedStats) {
 		duelRatings.total = parseFloat(savedStats.osuDuelStarRating);
 		duelRatings.noMod = parseFloat(savedStats.osuNoModDuelStarRating);
+		duelRatings.noModLimited = savedStats.osuNoModDuelStarRatingLimited;
 		duelRatings.hidden = parseFloat(savedStats.osuHiddenDuelStarRating);
+		duelRatings.hiddenLimited = savedStats.osuHiddenDuelStarRatingLimited;
 		duelRatings.hardRock = parseFloat(savedStats.osuHardRockDuelStarRating);
+		duelRatings.hardRockLimited = savedStats.osuHardRockDuelStarRatingLimited;
 		duelRatings.doubleTime = parseFloat(savedStats.osuDoubleTimeDuelStarRating);
+		duelRatings.doubleTimeLimited = savedStats.osuDoubleTimeDuelStarRatingLimited;
 		duelRatings.freeMod = parseFloat(savedStats.osuFreeModDuelStarRating);
+		duelRatings.freeModLimited = savedStats.osuFreeModDuelStarRatingLimited;
 		duelRatings.provisional = savedStats.osuDuelProvisional;
 		duelRatings.outdated = savedStats.osuDuelOutdated;
 
@@ -3280,10 +3290,15 @@ async function getUserDuelStarRatingFunction(input) {
 	if (discordUser && discordUser.lastDuelRatingUpdate && discordUser.lastDuelRatingUpdate > weeksAgo && !input.date && !input.forceUpdate) {
 		duelRatings.total = parseFloat(discordUser.osuDuelStarRating);
 		duelRatings.noMod = parseFloat(discordUser.osuNoModDuelStarRating);
+		duelRatings.noModLimited = discordUser.osuNoModDuelStarRatingLimited;
 		duelRatings.hidden = parseFloat(discordUser.osuHiddenDuelStarRating);
+		duelRatings.hiddenLimited = discordUser.osuHiddenDuelStarRatingLimited;
 		duelRatings.hardRock = parseFloat(discordUser.osuHardRockDuelStarRating);
+		duelRatings.hardRockLimited = discordUser.osuHardRockDuelStarRatingLimited;
 		duelRatings.doubleTime = parseFloat(discordUser.osuDoubleTimeDuelStarRating);
+		duelRatings.doubleTimeLimited = discordUser.osuDoubleTimeDuelStarRatingLimited;
 		duelRatings.freeMod = parseFloat(discordUser.osuFreeModDuelStarRating);
+		duelRatings.freeModLimited = discordUser.osuFreeModDuelStarRatingLimited;
 		duelRatings.provisional = discordUser.osuDuelProvisional;
 		duelRatings.outdated = discordUser.osuDuelOutdated;
 		return duelRatings;
@@ -3654,10 +3669,15 @@ async function getUserDuelStarRatingFunction(input) {
 			osuUserId: input.osuUserId,
 			osuDuelStarRating: lastMonthDuelRating.total,
 			osuNoModDuelStarRating: lastMonthDuelRating.noMod,
+			osuNoModDuelStarRatingLimited: lastMonthDuelRating.noModLimited,
 			osuHiddenDuelStarRating: lastMonthDuelRating.hidden,
+			osuHiddenDuelStarRatingLimited: lastMonthDuelRating.hiddenLimited,
 			osuHardRockDuelStarRating: lastMonthDuelRating.hardRock,
+			osuHardRockDuelStarRatingLimited: lastMonthDuelRating.hardRockLimited,
 			osuDoubleTimeDuelStarRating: lastMonthDuelRating.doubleTime,
+			osuDoubleTimeDuelStarRatingLimited: lastMonthDuelRating.doubleTimeLimited,
 			osuFreeModDuelStarRating: lastMonthDuelRating.freeMod,
+			osuFreeModDuelStarRatingLimited: lastMonthDuelRating.freeModLimited,
 			osuDuelProvisional: lastMonthDuelRating.provisional,
 		};
 	} else if (!lastMonthStats) {
@@ -3665,10 +3685,15 @@ async function getUserDuelStarRatingFunction(input) {
 			osuUserId: input.osuUserId,
 			osuDuelStarRating: null,
 			osuNoModDuelStarRating: null,
+			osuNoModDuelStarRatingLimited: false,
 			osuHiddenDuelStarRating: null,
+			osuHiddenDuelStarRatingLimited: false,
 			osuHardRockDuelStarRating: null,
+			osuHardRockDuelStarRatingLimited: false,
 			osuDoubleTimeDuelStarRating: null,
+			osuDoubleTimeDuelStarRatingLimited: false,
 			osuFreeModDuelStarRating: null,
+			osuFreeModDuelStarRatingLimited: false,
 			osuDuelProvisional: true,
 		};
 	}
@@ -3681,22 +3706,27 @@ async function getUserDuelStarRatingFunction(input) {
 		if (lastMonthStats && !lastMonthStats.osuDuelProvisional) {
 			if (lastMonthStats.osuNoModDuelStarRating && duelRatings.noMod < lastMonthStats.osuNoModDuelStarRating - 0.025) {
 				duelRatings.noMod = lastMonthStats.osuNoModDuelStarRating - 0.025;
+				duelRatings.noModLimited = true;
 			}
 
 			if (lastMonthStats.osuHiddenDuelStarRating && duelRatings.hidden < lastMonthStats.osuHiddenDuelStarRating - 0.025) {
 				duelRatings.hidden = lastMonthStats.osuHiddenDuelStarRating - 0.025;
+				duelRatings.hiddenLimited = true;
 			}
 
 			if (lastMonthStats.osuHardRockDuelStarRating && duelRatings.hardRock < lastMonthStats.osuHardRockDuelStarRating - 0.025) {
 				duelRatings.hardRock = lastMonthStats.osuHardRockDuelStarRating - 0.025;
+				duelRatings.hardRockLimited = true;
 			}
 
 			if (lastMonthStats.osuDoubleTimeDuelStarRating && duelRatings.doubleTime < lastMonthStats.osuDoubleTimeDuelStarRating - 0.025) {
 				duelRatings.doubleTime = lastMonthStats.osuDoubleTimeDuelStarRating - 0.025;
+				duelRatings.doubleTimeLimited = true;
 			}
 
 			if (lastMonthStats.osuFreeModDuelStarRating && duelRatings.freeMod < lastMonthStats.osuFreeModDuelStarRating - 0.025) {
 				duelRatings.freeMod = lastMonthStats.osuFreeModDuelStarRating - 0.025;
+				duelRatings.freeModLimited = true;
 			}
 		}
 
@@ -3743,10 +3773,15 @@ async function getUserDuelStarRatingFunction(input) {
 				date: endDate.getUTCDate(),
 				osuDuelStarRating: duelRatings.total,
 				osuNoModDuelStarRating: duelRatings.noMod,
+				osuNoModDuelStarRatingLimited: duelRatings.noModLimited,
 				osuHiddenDuelStarRating: duelRatings.hidden,
+				osuHiddenDuelStarRatingLimited: duelRatings.hiddenLimited,
 				osuHardRockDuelStarRating: duelRatings.hardRock,
+				osuHardRockDuelStarRatingLimited: duelRatings.hardRockLimited,
 				osuDoubleTimeDuelStarRating: duelRatings.doubleTime,
+				osuDoubleTimeDuelStarRatingLimited: duelRatings.doubleTimeLimited,
 				osuFreeModDuelStarRating: duelRatings.freeMod,
+				osuFreeModDuelStarRatingLimited: duelRatings.freeModLimited,
 				osuDuelProvisional: duelRatings.provisional,
 				osuDuelOutdated: duelRatings.outdated,
 			});
@@ -3884,10 +3919,15 @@ async function getUserDuelStarRatingFunction(input) {
 
 			discordUser.osuDuelStarRating = duelRatings.total;
 			discordUser.osuNoModDuelStarRating = duelRatings.noMod;
+			discordUser.osuNoModDuelStarRatingLimited = duelRatings.noModLimited;
 			discordUser.osuHiddenDuelStarRating = duelRatings.hidden;
+			discordUser.osuHiddenDuelStarRatingLimited = duelRatings.hiddenLimited;
 			discordUser.osuHardRockDuelStarRating = duelRatings.hardRock;
+			discordUser.osuHardRockDuelStarRatingLimited = duelRatings.hardRockLimited;
 			discordUser.osuDoubleTimeDuelStarRating = duelRatings.doubleTime;
+			discordUser.osuDoubleTimeDuelStarRatingLimited = duelRatings.doubleTimeLimited;
 			discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
+			discordUser.osuFreeModDuelStarRatingLimited = duelRatings.freeModLimited;
 			discordUser.osuDuelProvisional = duelRatings.provisional;
 			discordUser.osuDuelOutdated = duelRatings.outdated;
 			discordUser.lastDuelRatingUpdate = new Date();
