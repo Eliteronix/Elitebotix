@@ -46,6 +46,21 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
+			// 		name: 'avatar',
+			// 		description: 'Sends the avatar of the selected user',
+			// 		dm_permission: true,
+			// 		options: [
+			// 			{
+			// 				'name': 'user',
+			// 				'description': 'The user whose avatar should be sent',
+			// 				'type': 6, // 6 is type USER
+			// 			}
+			// 		]
+			// 	}
+			// });
+
+			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+			// 	data: {
 			// 		name: 'activityrole',
 			// 		description: 'Lets you set up roles which will be assigned based on useractivity',
 			// 		dm_permission: false,
@@ -5353,6 +5368,21 @@ module.exports = {
 							'description': 'The question that should be answered',
 							'type': 3,
 							'required': true
+						}
+					]
+				}
+			});
+
+			await msg.client.api.applications(msg.client.user.id).commands.post({
+				data: {
+					name: 'avatar',
+					description: 'Sends the avatar of the selected user',
+					dm_permission: true,
+					options: [
+						{
+							'name': 'user',
+							'description': 'The user whose avatar should be sent',
+							'type': 6, // 6 is type USER
 						}
 					]
 				}
