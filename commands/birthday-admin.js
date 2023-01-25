@@ -37,12 +37,12 @@ module.exports = {
 			}
 
 			if (guild.birthdayEnabled) {
-				return interaction.reply({ content: 'Birthday announcements are already enabled.', ephemeral: true });
+				return interaction.editReply({ content: 'Birthday announcements are already enabled.', ephemeral: true });
 			}
 
 			guild.birthdayEnabled = true;
 			guild.save();
-			return interaction.reply({ content: 'Birthday announcements have been enabled.', ephemeral: true });
+			return interaction.editReply({ content: 'Birthday announcements have been enabled.', ephemeral: true });
 		} else if (interaction.options._subcommand === 'disable') {
 			if (!guild) {
 				guild = await DBGuilds.create({
@@ -52,12 +52,12 @@ module.exports = {
 			}
 
 			if (!guild.birthdayEnabled) {
-				return interaction.reply({ content: 'Birthday announcements are already disabled.', ephemeral: true });
+				return interaction.editReply({ content: 'Birthday announcements are already disabled.', ephemeral: true });
 			}
 
 			guild.birthdayEnabled = false;
 			guild.save();
-			return interaction.reply({ content: 'Birthday announcements have been disabled.', ephemeral: true });
+			return interaction.editReply({ content: 'Birthday announcements have been disabled.', ephemeral: true });
 		} else if (interaction.options._subcommand === 'channel') {
 			//There is only one argument so we can set the channelId to the first argument
 			let channel = interaction.options._hoistedOptions[0].value;
@@ -71,7 +71,7 @@ module.exports = {
 
 			guild.birthdayMessageChannel = channel;
 			guild.save();
-			return interaction.reply({ content: `Birthday announcements channel has been set to <#${channel}>`, ephemeral: true });
+			return interaction.editReply({ content: `Birthday announcements channel has been set to <#${channel}>`, ephemeral: true });
 		}
 	}
 };
