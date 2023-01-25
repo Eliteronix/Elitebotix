@@ -495,7 +495,11 @@ module.exports = {
 
 				ctx.fillText(leagueText, 100, 475);
 				if (userDuelStarRating.noMod !== null) {
-					ctx.fillText(`(${Math.round(userDuelStarRating.noMod * 1000) / 1000}*)`, 100, 500);
+					let limited = '';
+					if (userDuelStarRating.noModLimited) {
+						limited = '~';
+					}
+					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.noMod * 1000) / 1000}*)`, 100, 500);
 				}
 
 				//Current Hidden Rating
@@ -509,7 +513,11 @@ module.exports = {
 
 				ctx.fillText(leagueText, 225, 475);
 				if (userDuelStarRating.hidden !== null) {
-					ctx.fillText(`(${Math.round(userDuelStarRating.hidden * 1000) / 1000}*)`, 225, 500);
+					let limited = '';
+					if (userDuelStarRating.hiddenLimited) {
+						limited = '~';
+					}
+					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.hidden * 1000) / 1000}*)`, 225, 500);
 				}
 
 				//Current HardRock Rating
@@ -523,7 +531,11 @@ module.exports = {
 
 				ctx.fillText(leagueText, 350, 475);
 				if (userDuelStarRating.hardRock !== null) {
-					ctx.fillText(`(${Math.round(userDuelStarRating.hardRock * 1000) / 1000}*)`, 350, 500);
+					let limited = '';
+					if (userDuelStarRating.hardRockLimited) {
+						limited = '~';
+					}
+					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.hardRock * 1000) / 1000}*)`, 350, 500);
 				}
 
 				//Current DoubleTime Rating
@@ -537,7 +549,11 @@ module.exports = {
 
 				ctx.fillText(leagueText, 475, 475);
 				if (userDuelStarRating.doubleTime !== null) {
-					ctx.fillText(`(${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}*)`, 475, 500);
+					let limited = '';
+					if (userDuelStarRating.doubleTimeLimited) {
+						limited = '~';
+					}
+					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}*)`, 475, 500);
 				}
 
 				//Current FreeMod Rating
@@ -551,7 +567,11 @@ module.exports = {
 
 				ctx.fillText(leagueText, 600, 475);
 				if (userDuelStarRating.freeMod !== null) {
-					ctx.fillText(`(${Math.round(userDuelStarRating.freeMod * 1000) / 1000}*)`, 600, 500);
+					let limited = '';
+					if (userDuelStarRating.freeModLimited) {
+						limited = '~';
+					}
+					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.freeMod * 1000) / 1000}*)`, 600, 500);
 				}
 
 				for (let i = 0; i < historicalUserDuelStarRatings.length; i++) {
@@ -578,8 +598,8 @@ module.exports = {
 						leagueText = 'Provisional: ' + leagueText;
 					}
 
-					ctx.fillText(leagueText, 125, 750 + i * 250, 150, 150);
-					ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.total * 1000) / 1000}*)`, 125, 775 + i * 250, 150, 150);
+					ctx.fillText(leagueText, 125, 750 + i * 250);
+					ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.total * 1000) / 1000}*)`, 125, 775 + i * 250);
 
 					ctx.font = 'bold 15px comfortaa, sans-serif';
 
