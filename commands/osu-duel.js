@@ -1345,6 +1345,7 @@ module.exports = {
 				explaination.push('');
 				explaination.push('**TL;DR:**');
 				explaination.push('The star rating is calculated based on your last 35 tournament score v2 scores for each modpool.');
+				explaination.push('The star rating can only drop by 0.025* per month. If it is limited it will be indicated by a ~ next to the star rating.');
 				explaination.push('You can see the scores taken into account in the first file attached.');
 				explaination.push('You can see the starratings and how they are evaluated in the second file. (The higher the weight the more effect the star rating has on the overall star rating)');
 				explaination.push('You can see the matches where the scores are from in the third file.');
