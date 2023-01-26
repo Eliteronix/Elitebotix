@@ -73,7 +73,7 @@ module.exports = {
 				}
 
 				if (post.region) {
-					embed.addField('Region', post.gamemode);
+					embed.addField('Region', post.region);
 				}
 
 				if (post.notes) {

@@ -19,8 +19,8 @@ module.exports = {
 	tags: 'osu',
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
-		//TODO: most opponents faced, won most / lost most against
 		//TODO: all tournaments and their results
+
 		try {
 			await interaction.deferReply();
 		} catch (error) {
@@ -132,6 +132,8 @@ module.exports = {
 
 		let tourneyPPPlays = [];
 		let mostPlayedWith = [];
+		let mostWonAgainst = [];
+		let mostLostAgainst = [];
 		let tourneysPlayed = [];
 
 		let lastUpdate = new Date();
@@ -246,11 +248,15 @@ module.exports = {
 			if (multiScores[i].osuUserId !== osuUser.osuUserId) {
 				let mostPlayedWithPlayer = mostPlayedWith.find(player => player.osuUserId === multiScores[i].osuUserId);
 
+				let newMatch = false;
+
 				if (mostPlayedWithPlayer) {
 					// Check if this match has already been counted
 					if (!mostPlayedWithPlayer.matches.includes(multiScores[i].matchId)) {
 						mostPlayedWithPlayer.amount++;
 						mostPlayedWithPlayer.matches.push(multiScores[i].matchId);
+
+						newMatch = true;
 					}
 				} else {
 					mostPlayedWith.push({
@@ -259,6 +265,93 @@ module.exports = {
 						amount: 1,
 						matches: [multiScores[i].matchId],
 					});
+
+					newMatch = true;
+				}
+
+				if (newMatch) {
+					let matchWonAgainst = false;
+					let matchLostAgainst = false;
+
+					// Get all the scores for this game
+					let gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
+
+					let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
+
+					if (gameScores.length === 2 && gameScores[0].teamType === 'Head to Head' && ownScore) {
+						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
+
+						try {
+							if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
+								matchWonAgainst = true;
+							} else {
+								matchLostAgainst = true;
+							}
+						} catch (error) {
+							console.error(error, ownScore, otherScore, multiScores[i].matchId);
+						}
+					} else if (gameScores[0].teamType === 'Team vs') {
+						let matchScores = multiScores.filter(score => score.matchId === multiScores[i].matchId);
+
+						let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
+
+						let team = ownScores[0].team;
+
+						let ownTeamScore = 0;
+						let otherTeamScore = 0;
+
+						for (let j = 0; j < gameScores.length; j++) {
+							if (gameScores[j].team === team) {
+								ownTeamScore += parseInt(gameScores[j].score);
+							} else {
+								otherTeamScore += parseInt(gameScores[j].score);
+							}
+						}
+
+						if (team !== multiScores[i].team) {
+							if (ownTeamScore > otherTeamScore) {
+								matchWonAgainst = true;
+							} else {
+								matchLostAgainst = true;
+							}
+						}
+					}
+
+					if (matchWonAgainst) {
+						let mostWonAgainstPlayer = mostWonAgainst.find(player => player.osuUserId === multiScores[i].osuUserId);
+
+						if (mostWonAgainstPlayer) {
+							// Check if this match has already been counted
+							if (!mostWonAgainstPlayer.matches.includes(multiScores[i].matchId)) {
+								mostWonAgainstPlayer.amount++;
+								mostWonAgainstPlayer.matches.push(multiScores[i].matchId);
+							}
+						} else {
+							mostWonAgainst.push({
+								osuName: await getOsuPlayerName(multiScores[i].osuUserId),
+								osuUserId: multiScores[i].osuUserId,
+								amount: 1,
+								matches: [multiScores[i].matchId],
+							});
+						}
+					} else if (matchLostAgainst) {
+						let mostLostAgainstPlayer = mostLostAgainst.find(player => player.osuUserId === multiScores[i].osuUserId);
+
+						if (mostLostAgainstPlayer) {
+							// Check if this match has already been counted
+							if (!mostLostAgainstPlayer.matches.includes(multiScores[i].matchId)) {
+								mostLostAgainstPlayer.amount++;
+								mostLostAgainstPlayer.matches.push(multiScores[i].matchId);
+							}
+						} else {
+							mostLostAgainst.push({
+								osuName: await getOsuPlayerName(multiScores[i].osuUserId),
+								osuUserId: multiScores[i].osuUserId,
+								amount: 1,
+								matches: [multiScores[i].matchId],
+							});
+						}
+					}
 				}
 			} else {
 				if (parseInt(multiScores[i].score) > 10000 && multiScores[i].teamType !== 'Tag Team vs' && multiScores[i].teamType !== 'Tag Co-op') {
@@ -287,6 +380,22 @@ module.exports = {
 		for (let i = 0; i < mostPlayedWith.length; i++) {
 			if (mostPlayedWith[i].osuName === null) {
 				mostPlayedWith[i].osuName = '[Redacted]';
+			}
+		}
+
+		mostWonAgainst.sort((a, b) => b.amount - a.amount);
+
+		for (let i = 0; i < mostWonAgainst.length; i++) {
+			if (mostWonAgainst[i].osuName === null) {
+				mostWonAgainst[i].osuName = '[Redacted]';
+			}
+		}
+
+		mostLostAgainst.sort((a, b) => b.amount - a.amount);
+
+		for (let i = 0; i < mostLostAgainst.length; i++) {
+			if (mostLostAgainst[i].osuName === null) {
+				mostLostAgainst[i].osuName = '[Redacted]';
 			}
 		}
 
@@ -392,7 +501,7 @@ module.exports = {
 
 		// Draw the image
 		const canvasWidth = 1000;
-		const canvasHeight = 575;
+		const canvasHeight = 775;
 
 		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
 
@@ -451,16 +560,8 @@ module.exports = {
 		ctx.fillText(`League: ${leagueText} (${highestRating.toFixed(3)})`, 75, 370);
 		ctx.drawImage(leagueImage, 75, 385, 150, 150);
 
-		ctx.textAlign = 'center';
-		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 800, 140);
-		ctx.font = '18px comfortaa, sans-serif';
-		for (let i = 0; i < Math.min(5, mostPlayedWith.length); i++) {
-			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 800, 165 + i * 25);
-		}
-
 		ctx.textAlign = 'left';
-		ctx.fillText(`Top ${Math.min(10, tourneyPPPlays.length)} tournament pp plays:`, 635, 350);
+		ctx.fillText(`Top ${Math.min(10, tourneyPPPlays.length)} tournament pp plays:`, 635, 140);
 		ctx.font = '11px comfortaa, sans-serif';
 		for (let i = 0; i < Math.min(10, tourneyPPPlays.length); i++) {
 			tourneyPPPlays[i].beatmap = await getOsuBeatmap({ beatmapId: tourneyPPPlays[i].beatmapId });
@@ -482,7 +583,31 @@ module.exports = {
 				mapString += '...';
 			}
 
-			ctx.fillText(mapString, 635, 368 + i * 16);
+			ctx.fillText(mapString, 635, 158 + i * 16);
+		}
+
+		ctx.textAlign = 'center';
+		ctx.font = '22px comfortaa, sans-serif';
+		ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 800, 375);
+		ctx.font = '18px comfortaa, sans-serif';
+		for (let i = 0; i < Math.min(5, mostPlayedWith.length); i++) {
+			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 800, 400 + i * 25);
+		}
+
+		ctx.textAlign = 'center';
+		ctx.font = '22px comfortaa, sans-serif';
+		ctx.fillText(`Won against ${mostWonAgainst.length} players:`, 300, 575);
+		ctx.font = '18px comfortaa, sans-serif';
+		for (let i = 0; i < Math.min(5, mostWonAgainst.length); i++) {
+			ctx.fillText(`#${i + 1} ${mostWonAgainst[i].osuName} (${mostWonAgainst[i].amount} times)`, 300, 600 + i * 25);
+		}
+
+		ctx.textAlign = 'center';
+		ctx.font = '22px comfortaa, sans-serif';
+		ctx.fillText(`Lost against ${mostLostAgainst.length} players:`, 700, 575);
+		ctx.font = '18px comfortaa, sans-serif';
+		for (let i = 0; i < Math.min(5, mostLostAgainst.length); i++) {
+			ctx.fillText(`#${i + 1} ${mostLostAgainst[i].osuName} (${mostLostAgainst[i].amount} times)`, 700, 600 + i * 25);
 		}
 
 		// Write the title of the player
@@ -632,9 +757,31 @@ module.exports = {
 			return `${user.amount} times - ${user.osuName} (${user.osuUserId})`;
 		});
 
+		mostPlayedWith.unshift('Most played with: (Most won against / Most lost against is below)');
+
+		mostWonAgainst = mostWonAgainst.map((user) => {
+			return `${user.amount} times - ${user.osuName} (${user.osuUserId})`;
+		});
+
+		mostWonAgainst.unshift('');
+		mostWonAgainst.unshift('');
+		mostWonAgainst.unshift('');
+		mostWonAgainst.unshift('Most won against:');
+
+		mostLostAgainst = mostLostAgainst.map((user) => {
+			return `${user.amount} times - ${user.osuName} (${user.osuUserId})`;
+		});
+
+		mostLostAgainst.unshift('');
+		mostLostAgainst.unshift('');
+		mostLostAgainst.unshift('');
+		mostLostAgainst.unshift('Most lost against:');
+
+		let mostPlayedWonLost = mostPlayedWith.concat(mostWonAgainst, mostLostAgainst);
+
 		// eslint-disable-next-line no-undef
-		mostPlayedWith = new Discord.MessageAttachment(Buffer.from(mostPlayedWith.join('\n'), 'utf-8'), `most-played-with-${osuUser.osuUserId}.txt`);
-		files.push(mostPlayedWith);
+		mostPlayedWonLost = new Discord.MessageAttachment(Buffer.from(mostPlayedWonLost.join('\n'), 'utf-8'), `most-played-won-and-lost-${osuUser.osuUserId}.txt`);
+		files.push(mostPlayedWonLost);
 
 		return interaction.editReply({ content: ' ', files: files });
 	},
