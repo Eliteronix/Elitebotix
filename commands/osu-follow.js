@@ -3,6 +3,7 @@ const osu = require('node-osu');
 const { showUnknownInteractionError } = require('../config.json');
 const { Permissions } = require('discord.js');
 const { getOsuPlayerName } = require('../utils');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-follow',
@@ -46,6 +47,17 @@ module.exports = {
 
 					if (existingFollow) {
 						return await interaction.editReply(`You are already following ${osuUser.name}`);
+					}
+
+					let disabledFollows = await DBDiscordUsers.findOne({
+						where: {
+							osuUserId: osuUser.id,
+							disableFollows: true
+						},
+					});
+
+					if (disabledFollows) {
+						return await interaction.editReply('This user doesn\'t allow others to follow them.');
 					}
 
 					await DBOsuTourneyFollows.create({
@@ -170,6 +182,35 @@ module.exports = {
 			}
 
 			return await interaction.editReply(`You have ${followers.length} followers: \`${followerList.join('`, `')}\``);
+		} else if (interaction.options._subcommand === 'allowfollowing') {
+			let allowFollowing = interaction.options.getBoolean('allow');
+
+			let discordUser = await DBDiscordUsers.findOne({
+				where: {
+					userId: interaction.user.id,
+					osuUserId: {
+						[Op.not]: null
+					},
+					osuVerified: true
+				}
+			});
+
+			if (!discordUser) {
+				return await interaction.editReply('You have not connected and verified your osu! account. Use </osu-link connect:1064502370710605836> to connect your account');
+			}
+
+			if (!allowFollowing) {
+				await DBOsuTourneyFollows.destroy({
+					where: {
+						osuUserId: discordUser.osuUserId
+					}
+				});
+			}
+
+			discordUser.disableFollows = !allowFollowing;
+			await discordUser.save();
+
+			return await interaction.editReply(`You are now ${allowFollowing ? 'allowing' : 'disallowing'} people to follow you`);
 		}
 	},
 };
