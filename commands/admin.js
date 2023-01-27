@@ -1980,6 +1980,19 @@ module.exports = {
 			// 				'description': 'Get a list of users following you',
 			// 				'type': 1, // 1 is type SUB_COMMAND
 			// 			},
+			// 			{
+			// 				'name': 'allowfollowing',
+			// 				'description': 'Allow others to follow you or not',
+			// 				'type': 1, // 1 is type SUB_COMMAND
+			// 				'options': [
+			// 					{
+			// 						'name': 'allow',
+			// 						'description': 'Change if others can follow you or not',
+			// 						'type': 5, // 5 is type BOOLEAN
+			// 						'required': true
+			// 					},
+			// 				]
+			// 			},
 			// 		]
 			// 	},
 			// });
@@ -7308,6 +7321,19 @@ module.exports = {
 							'name': 'followers',
 							'description': 'Get a list of users following you',
 							'type': 1, // 1 is type SUB_COMMAND
+						},
+						{
+							'name': 'allowfollowing',
+							'description': 'Allow others to follow you or not',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'allow',
+									'description': 'Change if others can follow you or not',
+									'type': 5, // 5 is type BOOLEAN
+									'required': true
+								},
+							]
 						},
 					]
 				},
