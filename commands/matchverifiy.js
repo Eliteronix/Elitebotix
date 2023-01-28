@@ -26,6 +26,9 @@ module.exports = {
 			let unverifiedScores = await DBOsuMultiScores.findAll({
 				Attributes: ['matchId', 'matchName'],
 				where: {
+					matchEndDate: {
+						[Op.not]: null,
+					},
 					verifiedAt: null,
 				},
 				group: ['matchId', 'matchName'],
