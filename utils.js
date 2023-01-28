@@ -5900,6 +5900,9 @@ async function saveOsuMultiScoresFunction(match) {
 					existingScore.perfect = match.games[gameIndex].scores[scoreIndex].perfect;
 					existingScore.teamType = match.games[gameIndex].teamType;
 					existingScore.team = match.games[gameIndex].scores[scoreIndex].team;
+					existingScore.verifiedAt = null;
+					existingScore.verifiedBy = null;
+					existingScore.verificationComment = null;
 					existingScore.changed('updatedAt', true);
 					await existingScore.save();
 
