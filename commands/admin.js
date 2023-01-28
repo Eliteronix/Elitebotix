@@ -11771,6 +11771,46 @@ module.exports = {
 					await msg.reply(discordUsers[i].twitchName + ' error');
 				}
 			}
+		} else if (args[0] === 'verifyCommand') {
+			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
+				data: {
+					name: 'matchverify',
+					description: 'Allows for managing the validity of a match',
+					default_member_permissions: '0',
+					options: [
+						{
+							'name': 'update',
+							'description': 'Allows for updating the validity of a match',
+							'type': 1, // 1 is type SUB_COMMAND
+							'options': [
+								{
+									'name': 'id',
+									'description': 'The match id',
+									'type': 3,
+									'required': true
+								},
+								{
+									'name': 'valid',
+									'description': 'Is the match valid or not?',
+									'type': 5, // 5 is type BOOLEAN
+									'required': true
+								},
+								{
+									'name': 'comment',
+									'description': 'Why is the match valid or not?',
+									'type': 3,
+									'required': true
+								},
+							]
+						},
+						{
+							'name': 'list',
+							'description': 'Show unverified matches',
+							'type': 1, // 1 is type SUB_COMMAND
+						},
+					]
+				},
+			});
 		} else {
 			msg.reply('Invalid command');
 		}
