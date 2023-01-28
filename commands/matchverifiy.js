@@ -101,7 +101,7 @@ module.exports = {
 
 				if (score.tourneyMatch !== valid) {
 					tourneyMatchChanged = true;
-					tourneyMatchChangedString += '**Changed**: ';
+					tourneyMatchChangedString = '**Changed**: ';
 				}
 
 				score.tourneyMatch = valid;
