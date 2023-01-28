@@ -5903,7 +5903,6 @@ async function saveOsuMultiScoresFunction(match) {
 					existingScore.verifiedAt = null;
 					existingScore.verifiedBy = null;
 					existingScore.verificationComment = null;
-					existingScore.changed('updatedAt', true);
 					await existingScore.save();
 
 					//Set the tournament flags on the corresponding beatmap
