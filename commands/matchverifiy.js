@@ -59,6 +59,8 @@ module.exports = {
 			let valid = interaction.options.getBoolean('valid');
 			let comment = interaction.options.getString('comment');
 
+			console.log('matchverify update 1');
+
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.user.id,
@@ -73,11 +75,15 @@ module.exports = {
 				return await interaction.editReply('You need to connect and verify your osu! account first to use this command.');
 			}
 
+			console.log('matchverify update 2');
+
 			let scores = await DBOsuMultiScores.findAll({
 				where: {
 					matchId: matchId,
 				},
 			});
+
+			console.log('matchverify update 3');
 
 			if (!developers.includes(interaction.user.id)) {
 				for (let i = 0; i < scores.length; i++) {
@@ -87,6 +93,8 @@ module.exports = {
 					}
 				}
 			}
+
+			console.log('matchverify update 4');
 
 			let updatedUsers = [];
 			let tourneyMatchChanged = false;
@@ -109,7 +117,11 @@ module.exports = {
 				score.verifiedBy = discordUser.osuUserId;
 				score.verificationComment = comment;
 				await score.save();
+
+				console.log('matchverify update 4.1');
 			}
+
+			console.log('matchverify update 5');
 
 			if (tourneyMatchChanged) {
 				let ratingHistories = await DBDuelRatingHistory.findAll({
@@ -119,6 +131,8 @@ module.exports = {
 						},
 					},
 				});
+
+				console.log('matchverify update 5.1');
 
 				for (let i = 0; i < ratingHistories.length; i++) {
 					let ratingHistory = ratingHistories[i];
@@ -130,7 +144,11 @@ module.exports = {
 
 					if (ratingHistoryDate > new Date(scores[0].matchStartDate)) {
 						await ratingHistory.destroy();
+
+						console.log('matchverify update 5.1.1');
 					}
+
+					console.log('matchverify update 5.2');
 				}
 
 				await DBDiscordUsers.update({
@@ -143,14 +161,21 @@ module.exports = {
 					},
 				});
 
+				console.log('matchverify update 5.3');
 			}
+
+			console.log('matchverify update 6');
 
 			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Live') {
 				interaction.guild.channels.cache.get('1068905937219362826').send(`${tourneyMatchChangedString} - Valid: ${valid} https://osu.ppy.sh/mp/${matchId} was verified by ${interaction.user.username}#${interaction.user.discriminator} (<@${interaction.user.id}> | <https://osu.ppy.sh/users/${discordUser.osuUserId}>)`);
 			}
 
+			console.log('matchverify update 7');
+
 			await interaction.editReply(`Updated ${scores.length} scores.`);
+
+			console.log('matchverify update 8');
 		}
 	}
 };
