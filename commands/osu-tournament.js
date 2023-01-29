@@ -49,7 +49,8 @@ module.exports = {
 							[Op.like]: `${acronym} :%`,
 						}
 					}
-				]
+				],
+				tourneyMatch: true,
 			}
 		});
 
