@@ -168,7 +168,7 @@ module.exports = {
 
 			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Live') {
-				interaction.guild.channels.cache.get('1068905937219362826').send(`${tourneyMatchChangedString} - Valid: ${valid} https://osu.ppy.sh/mp/${matchId} was verified by ${interaction.user.username}#${interaction.user.discriminator} (<@${interaction.user.id}> | <https://osu.ppy.sh/users/${discordUser.osuUserId}>)`);
+				interaction.guild.channels.cache.get('1068905937219362826').send(`${tourneyMatchChangedString} - Valid: ${valid} | Comment: ${comment} | https://osu.ppy.sh/mp/${matchId} was verified by ${interaction.user.username}#${interaction.user.discriminator} (<@${interaction.user.id}> | <https://osu.ppy.sh/users/${discordUser.osuUserId}>)`);
 			}
 
 			console.log('matchverify update 7');
