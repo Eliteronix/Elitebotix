@@ -4,7 +4,7 @@ const osu = require('node-osu');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
-		console.log('tourneyMatchReferee', processQueueEntry);
+		// console.log('tourneyMatchReferee');
 		let args = processQueueEntry.additions.split(';');
 
 		let channel;
@@ -101,6 +101,7 @@ module.exports = {
 		let maps = args[2].split(',');
 		let mappoolReadable = args[6].split(',');
 		let dbMaps = [];
+
 		for (let i = 0; i < maps.length; i++) {
 			logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBOsuBeatmaps');
 			const dbOsuBeatmap = await DBOsuBeatmaps.findOne({
@@ -288,7 +289,6 @@ module.exports = {
 
 				await channel.sendMessage('Everyone please ready up!');
 				await channel.sendMessage('!mp timer 120');
-				mapIndex++;
 			} else if (matchStartingTime < now && !secondRoundOfInvitesSent && lobbyStatus === 'Joining phase') {
 				secondRoundOfInvitesSent = true;
 				await lobby.updateSettings();
@@ -379,7 +379,6 @@ module.exports = {
 
 					await channel.sendMessage('Everyone please ready up!');
 					await channel.sendMessage('!mp timer 120');
-					mapIndex++;
 				}
 			}
 
@@ -426,6 +425,7 @@ module.exports = {
 
 		// eslint-disable-next-line no-unused-vars
 		lobby.on('matchFinished', async (results) => {
+			mapIndex++;
 			if (mapIndex < dbMaps.length) {
 				lobbyStatus = 'Waiting for start';
 
@@ -467,7 +467,6 @@ module.exports = {
 
 				await channel.sendMessage('Everyone please ready up!');
 				await channel.sendMessage('!mp timer 120');
-				mapIndex++;
 			} else {
 				lobbyStatus = 'Lobby finished';
 

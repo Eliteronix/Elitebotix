@@ -3,7 +3,7 @@ const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
-		console.log('tourneyMatchNotification', processQueueEntry);
+		// console.log('tourneyMatchNotification');
 		let args = processQueueEntry.additions.split(';');
 
 		let foundChannel = await client.shard.broadcastEval(async (c, { channelId, processQueueEntryId }) => {
