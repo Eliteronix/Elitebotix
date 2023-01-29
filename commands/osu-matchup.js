@@ -219,7 +219,7 @@ module.exports = {
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {
-							msg.channel.send(`Could not find user \`${team1[i].replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
+							msg.channel.send(`Could not find user \`${team1[i].replace(/`/g, '')}\`.`);
 							team1.splice(i, 1);
 							i--;
 						} else {
@@ -257,7 +257,7 @@ module.exports = {
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {
-							msg.channel.send(`Could not find user \`${team2[i].replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
+							msg.channel.send(`Could not find user \`${team2[i].replace(/`/g, '')}\`.`);
 							team2.splice(i, 1);
 							i--;
 						} else {

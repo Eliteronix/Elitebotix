@@ -199,7 +199,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--r\` for ripple; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else {
 					console.error(err);
 				}
@@ -209,7 +209,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
+					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				}
 
 				let user = rippleToBanchoUser(responseJson[0]);
@@ -284,7 +284,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho; Use \`--s\`/\`--t\`/\`--c\`/\`--m\` for modes)`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else {
 					console.error(err);
 				}

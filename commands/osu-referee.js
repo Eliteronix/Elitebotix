@@ -85,12 +85,12 @@ module.exports = {
 								// Add the user to the team
 								team.push(dbDiscordUser.id);
 							} else {
-								return interaction.followUp(`\`${user.name}\` doesn't have their account connected. Please tell them to connect their account using </osu-link connect:1064502370710605836>. (Use \`_\` instead of spaces)`);
+								return interaction.followUp(`\`${user.name}\` doesn't have their account connected. Please tell them to connect their account using </osu-link connect:1064502370710605836>.`);
 							}
 						})
 						.catch(err => {
 							if (err.message === 'Not found') {
-								return interaction.followUp(`Could not find user \`${getIDFromPotentialOsuLink(teams[i].split(',')[j]).replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
+								return interaction.followUp(`Could not find user \`${getIDFromPotentialOsuLink(teams[i].split(',')[j]).replace(/`/g, '')}\`.`);
 							} else {
 								console.error(err);
 								return interaction.followUp(`The bot ran into an error processing the user ${getIDFromPotentialOsuLink(teams[i].split(',')[j])}. Please try again.`);

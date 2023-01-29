@@ -5,7 +5,7 @@ const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'activityrole',
-	description: 'Assigns roles depending on how active your users are; Recommended for use in a private channel to not mention every user with that role',
+	description: 'Assigns roles depending on how active your users are',
 	permissions: Permissions.FLAGS.MANAGE_ROLES,
 	permissionsTranslated: 'Manage Roles',
 	botPermissions: [Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.SEND_MESSAGES],

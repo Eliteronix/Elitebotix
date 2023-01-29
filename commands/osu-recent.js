@@ -107,14 +107,14 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 		osuApi.getUserRecent({ u: username, m: mode })
 			.then(async (scores) => {
 				if (!(scores[0])) {
-					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; \`--r\` for ripple)`);
+					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`.`);
 				} else {
 					if (pass) {
 						do {
 							i++;
 						} while (scores[i] && scores[i].rank == 'F');
 						if (!scores[i] || scores[i].rank == 'F') {
-							return msg.channel.send(`Couldn't find any recent passes for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; \`--r\` for ripple)`);
+							return msg.channel.send(`Couldn't find any recent passes for \`${username.replace(/`/g, '')}\`.`);
 						}
 					}
 				}
@@ -208,7 +208,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--r\` for ripple)`);
+					msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`.`);
 				} else {
 					console.error(err);
 				}
@@ -219,7 +219,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho)`);
+					return msg.channel.send(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`.`);
 				}
 
 				let score = rippleToBanchoScore(responseJson[0]);
@@ -274,7 +274,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 					})
 					.catch(err => {
 						if (err.message === 'Not found') {
-							msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho)`);
+							msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 						} else {
 							console.error(err);
 						}
@@ -282,7 +282,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces; Use \`--b\` for bancho)`);
+					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else {
 					console.error(err);
 				}

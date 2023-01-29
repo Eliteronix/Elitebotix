@@ -850,7 +850,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 		})
 		.catch(err => {
 			if (err.message === 'Not found') {
-				msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
+				msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 			} else if (err.message === 'No standard plays') {
 				msg.channel.send(`Could not find any standard plays for user \`${username.replace(/`/g, '')}\`.`);
 			} else {

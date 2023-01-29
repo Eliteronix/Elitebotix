@@ -108,7 +108,7 @@ module.exports = {
 					})
 					.catch(async (err) => {
 						if (err.message === 'Not found') {
-							await interaction.followUp(`Could not find user \`${teams[i][j].replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
+							await interaction.followUp(`Could not find user \`${teams[i][j].replace(/`/g, '')}\`.`);
 							teams[i].splice(j, 1);
 							j--;
 						} else {

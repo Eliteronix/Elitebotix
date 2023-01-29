@@ -69,7 +69,7 @@ module.exports = {
 				})
 				.catch(async (err) => {
 					if (err.message === 'Not found') {
-						await interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
+						await interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 					} else {
 						console.error(err);
 					}
@@ -103,7 +103,7 @@ module.exports = {
 				})
 				.catch(async (err) => {
 					if (err.message === 'Not found') {
-						await interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`. (Use \`_\` instead of spaces)`);
+						await interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 					} else {
 						console.error(err);
 					}
