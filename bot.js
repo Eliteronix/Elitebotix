@@ -244,6 +244,12 @@ client.on('emojiUpdate', emojiUpdate);
 
 client.on('emojiDelete', emojiDelete);
 
+client.on('interactionCreate', interaction => {
+	interactionCreate(client, bancho, interaction);
+});
+
+client.on('error', console.error);
+
 setTimeout(() => {
 	// eslint-disable-next-line no-undef
 	if (wrongCluster(client)) {
@@ -260,10 +266,6 @@ setTimeout(() => {
 
 	setInterval(() => refreshOsuRank(client), 60000);
 }, 60000);
-
-client.on('interactionCreate', interaction => {
-	interactionCreate(client, bancho, interaction);
-});
 
 async function executeProcessQueue(client, bancho) {
 	try {
