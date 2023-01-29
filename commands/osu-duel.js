@@ -811,6 +811,7 @@ module.exports = {
 									osuFreeModDuelStarRating: parseFloat(discordUsers[i].osuFreeModDuelStarRating),
 									osuDuelProvisional: discordUsers[i].osuDuelProvisional,
 									osuDuelOutdated: discordUsers[i].osuDuelOutdated,
+									osuRank: discordUsers[i].osuRank,
 								});
 							}
 						})
@@ -847,6 +848,7 @@ module.exports = {
 							osuFreeModDuelStarRating: parseFloat(discordUsers[i].osuFreeModDuelStarRating),
 							osuDuelProvisional: discordUsers[i].osuDuelProvisional,
 							osuDuelOutdated: discordUsers[i].osuDuelOutdated,
+							osuRank: discordUsers[i].osuRank,
 						});
 					}
 				}
@@ -894,6 +896,7 @@ module.exports = {
 							duelProvisional: osuAccounts[i].osuDuelProvisional,
 							duelOutdated: osuAccounts[i].osuDuelOutdated,
 							verified: osuAccounts[i].osuVerified,
+							osuRank: osuAccounts[i].osuRank,
 						};
 
 						leaderboardData.push(dataset);
@@ -913,6 +916,7 @@ module.exports = {
 							duelProvisional: osuAccounts[i].osuDuelProvisional,
 							duelOutdated: osuAccounts[i].osuDuelOutdated,
 							verified: osuAccounts[i].osuVerified,
+							osuRank: osuAccounts[i].osuRank,
 						};
 
 						leaderboardData.push(dataset);
@@ -964,6 +968,7 @@ module.exports = {
 							rank: i + 1,
 							osuUserId: leaderboardData[i].osuUserId,
 							osuName: leaderboardData[i].osuName,
+							osuRank: leaderboardData[i].osuRank,
 							duelRating: leaderboardData[i].duelRating,
 							noModDuelStarRating: leaderboardData[i].noModDuelStarRating,
 							hiddenDuelStarRating: leaderboardData[i].hiddenDuelStarRating,
