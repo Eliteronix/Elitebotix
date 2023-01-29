@@ -251,7 +251,6 @@ client.on('interactionCreate', interaction => {
 client.on('error', console.error);
 
 setTimeout(() => {
-	// eslint-disable-next-line no-undef
 	if (wrongCluster(client)) {
 		return;
 	}
