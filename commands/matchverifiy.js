@@ -1,6 +1,7 @@
 const { DBOsuMultiScores, DBDiscordUsers, DBDuelRatingHistory } = require('../dbObjects');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { Op } = require('sequelize');
+const { getIDFromPotentialOsuLink } = require('../utils');
 
 module.exports = {
 	name: 'matchverify',
@@ -23,6 +24,38 @@ module.exports = {
 		}
 
 		if (interaction.options._subcommand === 'list') {
+			let matchNames = await DBOsuMultiScores.findAll({
+				Attributes: ['matchName'],
+				where: {
+					matchEndDate: {
+						[Op.not]: null,
+					},
+					verifiedAt: null,
+				},
+				group: ['matchName'],
+			});
+
+			let acronyms = [];
+			for (let i = 0; i < matchNames.length; i++) {
+				let acronym = matchNames[i].matchName.replace(/:.*/gm, '').trim();
+
+				let existingAcronym = acronyms.find((acronym) => acronym.acronym === acronym);
+
+				if (existingAcronym) {
+					existingAcronym.count++;
+				} else {
+					acronyms.push({
+						acronym: acronym,
+						count: 1,
+					});
+				}
+			}
+
+			//Sort acronyms by count ASC
+			acronyms.sort((a, b) => {
+				return a.count - b.count;
+			});
+
 			let unverifiedScores = await DBOsuMultiScores.findAll({
 				Attributes: ['matchId', 'matchName'],
 				where: {
@@ -30,12 +63,64 @@ module.exports = {
 						[Op.not]: null,
 					},
 					verifiedAt: null,
+					[Op.or]: [
+						{
+							matchName: {
+								[Op.like]: `%${acronyms[0].acronym}%`,
+							},
+						},
+						{
+							matchName: {
+								[Op.like]: `%${acronyms[1].acronym}%`,
+							},
+						},
+						{
+							matchName: {
+								[Op.like]: `%${acronyms[2].acronym}%`,
+							},
+						},
+						{
+							matchName: {
+								[Op.like]: `%${acronyms[3].acronym}%`,
+							},
+						},
+						{
+							matchName: {
+								[Op.like]: `%${acronyms[4].acronym}%`,
+							},
+						},
+						{
+							matchName: {
+								[Op.like]: `%${acronyms[5].acronym}%`,
+							},
+						},
+						{
+							matchName: {
+								[Op.like]: `%${acronyms[6].acronym}%`,
+							},
+						},
+						{
+							matchName: {
+								[Op.like]: `%${acronyms[7].acronym}%`,
+							},
+						},
+						{
+							matchName: {
+								[Op.like]: `%${acronyms[8].acronym}%`,
+							},
+						},
+						{
+							matchName: {
+								[Op.like]: `%${acronyms[9].acronym}%`,
+							},
+						},
+					],
 				},
 				group: ['matchId', 'matchName'],
 				order: [
 					['matchStartDate', 'DESC'],
 				],
-				limit: 10,
+				limit: 25,
 			});
 
 			let unverifiedScoresEmbed = {
@@ -55,11 +140,9 @@ module.exports = {
 
 			await interaction.editReply({ embeds: [unverifiedScoresEmbed] });
 		} else if (interaction.options._subcommand === 'update') {
-			let matchId = interaction.options.getString('id');
+			let matchId = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 			let valid = interaction.options.getBoolean('valid');
 			let comment = interaction.options.getString('comment');
-
-			console.log('matchverify update 1');
 
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -75,15 +158,11 @@ module.exports = {
 				return await interaction.editReply('You need to connect and verify your osu! account first to use this command.');
 			}
 
-			console.log('matchverify update 2');
-
 			let scores = await DBOsuMultiScores.findAll({
 				where: {
 					matchId: matchId,
 				},
 			});
-
-			console.log('matchverify update 3');
 
 			if (!developers.includes(interaction.user.id)) {
 				for (let i = 0; i < scores.length; i++) {
@@ -93,8 +172,6 @@ module.exports = {
 					}
 				}
 			}
-
-			console.log('matchverify update 4');
 
 			let updatedUsers = [];
 			let tourneyMatchChanged = false;
@@ -111,17 +188,18 @@ module.exports = {
 					tourneyMatchChanged = true;
 					tourneyMatchChangedString = '**Changed**: ';
 				}
-
-				score.tourneyMatch = valid;
-				score.verifiedAt = new Date();
-				score.verifiedBy = discordUser.osuUserId;
-				score.verificationComment = comment;
-				await score.save();
-
-				console.log('matchverify update 4.1');
 			}
 
-			console.log('matchverify update 5');
+			await DBOsuMultiScores.update({
+				tourneyMatch: valid,
+				verifiedAt: new Date(),
+				verifiedBy: discordUser.osuUserId,
+				verificationComment: comment,
+			}, {
+				where: {
+					matchId: matchId,
+				},
+			});
 
 			if (tourneyMatchChanged) {
 				let ratingHistories = await DBDuelRatingHistory.findAll({
@@ -131,8 +209,6 @@ module.exports = {
 						},
 					},
 				});
-
-				console.log('matchverify update 5.1');
 
 				for (let i = 0; i < ratingHistories.length; i++) {
 					let ratingHistory = ratingHistories[i];
@@ -144,11 +220,7 @@ module.exports = {
 
 					if (ratingHistoryDate > new Date(scores[0].matchStartDate)) {
 						await ratingHistory.destroy();
-
-						console.log('matchverify update 5.1.1');
 					}
-
-					console.log('matchverify update 5.2');
 				}
 
 				await DBDiscordUsers.update({
@@ -160,22 +232,14 @@ module.exports = {
 						},
 					},
 				});
-
-				console.log('matchverify update 5.3');
 			}
-
-			console.log('matchverify update 6');
 
 			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Live') {
 				interaction.guild.channels.cache.get('1068905937219362826').send(`${tourneyMatchChangedString} - Valid: ${valid} | Comment: ${comment} | https://osu.ppy.sh/mp/${matchId} was verified by ${interaction.user.username}#${interaction.user.discriminator} (<@${interaction.user.id}> | <https://osu.ppy.sh/users/${discordUser.osuUserId}>)`);
 			}
 
-			console.log('matchverify update 7');
-
 			await interaction.editReply(`Updated ${scores.length} scores.`);
-
-			console.log('matchverify update 8');
 		}
 	}
 };
