@@ -31,7 +31,7 @@ module.exports = async function (channel) {
 			console.error(error);
 		}
 
-		const changeEmbed = new Discord.MessageEmbed()
+		const changeEmbed = new Discord.EmbedBuilder()
 			.setColor('#0099ff')
 			.setDescription(`<#${channel.id}> has been created`)
 			.addFields(
@@ -43,34 +43,32 @@ module.exports = async function (channel) {
 			.setFooter({ text: 'Eventname: channelcreate' });
 
 		if (channel.type === 'voice') {
-			changeEmbed.addField('Bitrate', channel.bitrate);
-			changeEmbed.addField('User Limit', channel.userLimit);
+			changeEmbed.addFields([{ name: 'Bitrate', value: channel.bitrate }, { name: 'User Limit', value: channel.userLimit }]);
 		} else if (channel.type === 'text') {
 			if (channel.topic) {
-				changeEmbed.addField('Topic', channel.topic);
+				changeEmbed.addFields([{ name: 'Topic', value: channel.topic }]);
 			}
-			changeEmbed.addField('NSFW', channel.nsfw);
-			changeEmbed.addField('Rate Limit Per User (Slowmode)', channel.rateLimitPerUser);
+			changeEmbed.addFields([{ name: 'NSFW', value: channel.nsfw }, { name: 'Rate Limit Per User (Slowmode)', value: channel.rateLimitPerUser }]);
 		}
 
 		channel.permissionOverwrites.forEach(permissionGroup => {
 			if (permissionGroup.type === 'role') {
-				changeEmbed.addField('Permissions for', `<@&${permissionGroup.id}>`);
+				changeEmbed.addFields([{ name: 'Permissions for', value: `<@&${permissionGroup.id}>` }]);
 			} else {
-				changeEmbed.addField('Permissions for', `<@${permissionGroup.id}>`);
+				changeEmbed.addFields([{ name: 'Permissions for', value: `<@${permissionGroup.id}>` }]);
 			}
 
 			let permissionsAllowReadable = 'None';
 			if (permissionGroup.allow.toArray().length > 0) {
 				permissionsAllowReadable = permissionGroup.allow.toArray().join(', ');
 			}
-			changeEmbed.addField('Allow', permissionsAllowReadable);
+			changeEmbed.addFields([{ name: 'Allow', value: permissionsAllowReadable }]);
 
 			let permissionsDenyReadable = 'None';
 			if (permissionGroup.deny.toArray().length > 0) {
 				permissionsDenyReadable = permissionGroup.deny.toArray().join(', ');
 			}
-			changeEmbed.addField('Deny', permissionsDenyReadable);
+			changeEmbed.addFields([{ name: 'Deny', value: permissionsDenyReadable }]);
 		});
 
 		loggingChannel.send({ embeds: [changeEmbed] });

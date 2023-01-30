@@ -1,15 +1,15 @@
 const { DBProcessQueue } = require('../dbObjects');
 const weather = require('weather-js');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'weather-track',
 	description: 'Sends info about the weather of the given location each time period',
-	permissions: Permissions.FLAGS.MANAGE_GUILD,
+	permissions: PermissionsBitField.Flags.ManageGuild,
 	permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'server-admin',

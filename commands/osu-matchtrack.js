@@ -1,6 +1,6 @@
 const osu = require('node-osu');
 const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
 const Canvas = require('canvas');
@@ -9,9 +9,9 @@ const { showUnknownInteractionError, daysHidingQualifiers } = require('../config
 module.exports = {
 	name: 'osu-matchtrack',
 	description: 'Sends an evaluation of how valuable all the players in the match were',
-	// permissions: Permissions.FLAGS.MANAGE_GUILD,
+	// permissions: PermissionsBitField.Flags.SendMessages,
 	// permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES, Permissions.FLAGS.EMBED_LINKS],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages, Attach Files and Embed Links',
 	cooldown: 15,
 	tags: 'osu',
@@ -270,7 +270,7 @@ module.exports = {
 												}
 
 												if (lastMessageType === 'mapresult' && json.events[i].detail.type !== 'other') {
-													let embed = new Discord.MessageEmbed()
+													let embed = new Discord.EmbedBuilder()
 														.setColor(0x0099FF)
 														.setTitle(`${match.name.replace(/`/g, '')}`)
 														.setDescription(`${playerUpdates.join('\n')}`);
@@ -339,7 +339,7 @@ module.exports = {
 														await lastMessage.react('🗺️');
 													}
 												} else if (json.events[i].detail.type !== 'other') {
-													let embed = new Discord.MessageEmbed()
+													let embed = new Discord.EmbedBuilder()
 														.setColor(0x0099FF)
 														.setTitle(`${match.name.replace(/`/g, '')}`)
 														.setDescription(`${playerUpdates.join('\n')}`);
@@ -727,7 +727,7 @@ async function getResultImage(event, users) {
 	let modBits = getModBits(mods.join(''));
 
 	//Create as an attachment
-	return new Discord.MessageAttachment(canvas.toBuffer(), `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png`);
+	return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
 }
 
 async function getPlayingImage(event) {
@@ -808,7 +808,7 @@ async function getPlayingImage(event) {
 	let modBits = getModBits(mods.join(''));
 
 	//Create as an attachment
-	return new Discord.MessageAttachment(canvas.toBuffer(), `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png`);
+	return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
 }
 
 function partition(list, start, end) {

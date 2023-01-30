@@ -1,7 +1,7 @@
 const { getGuildPrefix, updateServerUserActivity, isWrongSystem, logDatabaseQueries } = require('./utils');
 const fs = require('fs');
 const Discord = require('discord.js');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { DBTickets } = require('./dbObjects');
 const { developers } = require('./config.json');
 
@@ -72,7 +72,7 @@ module.exports = async function (msg, bancho) {
 	//Check permissions of the bot
 	if (msg.channel.type !== 'DM') {
 		const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch(msg.client.user.id));
-		if (!botPermissions || !botPermissions.has(Permissions.FLAGS.SEND_MESSAGES) || !botPermissions.has(Permissions.FLAGS.READ_MESSAGE_HISTORY)) {
+		if (!botPermissions || !botPermissions.has(PermissionsBitField.Flags.SendMessages) || !botPermissions.has(PermissionsBitField.Flags.ReadMessageHistory)) {
 			//The bot can't possibly answer the message
 			return;
 		}

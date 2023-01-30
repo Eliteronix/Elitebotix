@@ -39,7 +39,7 @@ module.exports = async function (oldRole, newRole) {
 			newPermissionsReadable = newRole.permissions.toArray().join(', ');
 		}
 
-		const changeEmbed = new Discord.MessageEmbed()
+		const changeEmbed = new Discord.EmbedBuilder()
 			.setColor('#0099ff')
 			.setDescription(`<@&${newRole.id}> has been updated`)
 			.addFields(
@@ -49,27 +49,27 @@ module.exports = async function (oldRole, newRole) {
 			.setFooter({ text: 'Eventname: roleupdate' });
 
 		if (oldRole.name !== newRole.name) {
-			changeEmbed.addField('Name', `\`${oldRole.name}\` -> \`${newRole.name}\``);
+			changeEmbed.addFields([{ name: 'Name', value: `\`${oldRole.name}\` -> \`${newRole.name}\`` }]);
 		}
 
 		if (oldRole.name !== newRole.name) {
-			changeEmbed.addField('Colour', `\`${oldRole.hexColor}\` -> \`${newRole.hexColor}\``);
+			changeEmbed.addFields([{ name: 'Colour', value: `\`${oldRole.hexColor}\` -> \`${newRole.hexColor}\`` }]);
 		}
 
 		if (oldRole.hoist !== newRole.hoist) {
-			changeEmbed.addField('Show seperate', `\`${oldRole.hoist}\` -> \`${newRole.hoist}\``);
+			changeEmbed.addFields([{ name: 'Show seperate', value: `\`${oldRole.hoist}\` -> \`${newRole.hoist}\`` }]);
 		}
 
 		if (oldRole.managed !== newRole.managed) {
-			changeEmbed.addField('Managed by bot, etc.', `\`${oldRole.managed}\` -> \`${newRole.managed}\``);
+			changeEmbed.addFields([{ name: 'Managed by bot, etc.', value: `\`${oldRole.managed}\` -> \`${newRole.managed}\`` }]);
 		}
 
 		if (oldRole.mentionable !== newRole.mentionable) {
-			changeEmbed.addField('Can be mentioned', `\`${oldRole.mentionable}\` -> \`${newRole.mentionable}\``);
+			changeEmbed.addFields([{ name: 'Can be mentioned', value: `\`${oldRole.mentionable}\` -> \`${newRole.mentionable}\`` }]);
 		}
 
 		if (oldPermissionsReadable !== newPermissionsReadable) {
-			changeEmbed.addField('Permissions', `\`${oldPermissionsReadable}\` -> \`${newPermissionsReadable}\``);
+			changeEmbed.addFields([{ name: 'Permissions', value: `\`${oldPermissionsReadable}\` -> \`${newPermissionsReadable}\`` }]);
 		}
 
 		channel.send({ embeds: [changeEmbed] });

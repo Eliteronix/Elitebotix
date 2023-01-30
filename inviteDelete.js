@@ -27,7 +27,7 @@ module.exports = async function (invite) {
 			console.error(error);
 		}
 
-		const changeEmbed = new Discord.MessageEmbed()
+		const changeEmbed = new Discord.EmbedBuilder()
 			.setColor('#0099ff')
 			.setDescription('Invite has been deleted')
 			.addFields(

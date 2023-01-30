@@ -54,7 +54,7 @@ module.exports = async function (member) {
 				console.error(error);
 			}
 
-			const changeEmbed = new Discord.MessageEmbed()
+			const changeEmbed = new Discord.EmbedBuilder()
 				.setColor('#0099ff')
 				.setAuthor({ name: `${member.user.username}#${member.user.discriminator}`, iconURL: member.user.displayAvatarURL() })
 				.setDescription(`<@${member.user.id}> left the server!`)

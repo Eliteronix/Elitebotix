@@ -53,7 +53,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				if (channel) {
 					let message;
 					try {
-						message = await channel.messages.fetch(starBoardedMessage.starBoardMessageId);
+						message = await channel.messages.fetch({ message: starBoardedMessage.starBoardMessageId });
 					} catch (error) {
 						if (error.message !== 'Unknown Message') {
 							console.error(error);
@@ -62,7 +62,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 					//Check that the message was sent from itself (Avoiding migration issues from legacy messages)
 					if (message && message.author.id === reaction.client.user.id) {
-						const starBoardMessageEmbed = new Discord.MessageEmbed()
+						const starBoardMessageEmbed = new Discord.EmbedBuilder()
 							.setAuthor({ name: reaction.message.author.username, iconURL: reaction.message.author.displayAvatarURL() })
 							.setColor('#d9b51c')
 							.setDescription(reaction.message.content)
@@ -73,7 +73,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 						reaction.message.attachments.forEach(attachment => {
 							starBoardMessageEmbed
-								.addField('Attachment', attachment.name)
+								.addFields([{ name: 'Attachment', value: attachment.name }])
 								.setImage(attachment.url);
 						});
 
@@ -88,7 +88,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				}
 
 				//Try to resend the message
-				const starBoardMessageEmbed = new Discord.MessageEmbed()
+				const starBoardMessageEmbed = new Discord.EmbedBuilder()
 					.setAuthor({ name: reaction.message.author.username, iconURL: reaction.message.author.displayAvatarURL() })
 					.setColor('#d9b51c')
 					.setDescription(reaction.message.content)
@@ -99,7 +99,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				reaction.message.attachments.forEach(attachment => {
 					starBoardMessageEmbed
-						.addField('Attachment', attachment.name)
+						.addFields([{ name: 'Attachment', value: attachment.name }])
 						.setImage(attachment.url);
 				});
 
@@ -120,7 +120,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				starBoardedMessage.starBoardMessageId = starBoardMessage.id;
 				starBoardedMessage.save();
 			} else {
-				const starBoardMessageEmbed = new Discord.MessageEmbed()
+				const starBoardMessageEmbed = new Discord.EmbedBuilder()
 					.setAuthor({ name: reaction.message.author.username, iconURL: reaction.message.author.displayAvatarURL() })
 					.setColor('#d9b51c')
 					.setDescription(reaction.message.content)
@@ -131,7 +131,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				reaction.message.attachments.forEach(attachment => {
 					starBoardMessageEmbed
-						.addField('Attachment', attachment.name)
+						.addFields([{ name: 'Attachment', value: attachment.name }])
 						.setImage(attachment.url);
 				});
 
@@ -228,7 +228,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 		|| reaction.message.content && reaction.message.mentions.repliedUser && reaction.message.mentions.repliedUser.id && reaction.message.mentions.repliedUser.id === user.id && reaction.message.content.match(didYouMeanRegex)) {
 		if (reaction._emoji.name === '✅') {
 			//Grab old message and change content instead
-			reaction.message.channel.messages.fetch(reaction.message.reference.messageId).then(async (message) => {
+			reaction.message.channel.messages.fetch({ message: reaction.message.reference.messageId }).then(async (message) => {
 
 				if (message) {
 					const didYouMeanBeginningRegex = /I could not find the command `.+`.\nDid you mean `/gm;
@@ -1092,7 +1092,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 async function editEmbed(msg, reactionRolesHeader) {
 	//Create embed
-	const reactionRoleEmbed = new Discord.MessageEmbed()
+	const reactionRoleEmbed = new Discord.EmbedBuilder()
 		.setColor(reactionRolesHeader.reactionColor)
 		.setTitle(reactionRolesHeader.reactionTitle)
 		.setThumbnail(reactionRolesHeader.reactionImage)
@@ -1114,7 +1114,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		//Get role object
 		let reactionRoleName = msg.guild.roles.cache.get(reactionRole.roleId);
 		//Add field to embed
-		reactionRoleEmbed.addField(reactionRole.emoji + ': ' + reactionRoleName.name, reactionRole.description);
+		reactionRoleEmbed.addFields([{ name: reactionRole.emoji + ': ' + reactionRoleName.name, value: reactionRole.description }]);
 	});
 
 	//Get the Id of the message
@@ -1133,7 +1133,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		return console.error(e);
 	}
 	//Get the message object
-	const embedMessage = await embedChannel.messages.fetch(embedMessageId);
+	const embedMessage = await embedChannel.messages.fetch({ message: embedMessageId });
 	//Edit the message
 	embedMessage.edit(reactionRoleEmbed);
 

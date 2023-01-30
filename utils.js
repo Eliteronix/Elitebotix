@@ -717,7 +717,7 @@ module.exports = {
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);
 
 		//Create as an attachment and return
-		return new Discord.MessageAttachment(canvas.toBuffer(), filename);
+		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: filename });
 	},
 	async getOsuBadgeNumberById(osuUserId) {
 		return await getOsuBadgeNumberByIdFunction(osuUserId);
@@ -809,7 +809,7 @@ module.exports = {
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);
 
 		//Create as an attachment and return
-		return new Discord.MessageAttachment(canvas.toBuffer(), `${stagename}.png`);
+		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `${stagename}.png` });
 	}, pause(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	},
@@ -1805,7 +1805,7 @@ module.exports = {
 
 					//Create embed
 					const Discord = require('discord.js');
-					const issueEmbed = new Discord.MessageEmbed()
+					const issueEmbed = new Discord.EmbedBuilder()
 						.setColor(color)
 						.setTitle(issues[i].fields.summary)
 						.setFooter({ text: `Last updated: ${updatedDate.getUTCHours().toString().padStart(2, '0')}:${updatedDate.getUTCMinutes().toString().padStart(2, '0')} ${updatedDate.getUTCDate().toString().padStart(2, '0')}.${(updatedDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${updatedDate.getUTCFullYear()}` });
@@ -1815,7 +1815,7 @@ module.exports = {
 					}
 
 					if (issues[i].fields.parent) {
-						issueEmbed.addField('Parent', `${issues[i].fields.parent.key} - ${issues[i].fields.parent.fields.summary}`);
+						issueEmbed.addFields([{ name: 'Parent', value: `${issues[i].fields.parent.key} - ${issues[i].fields.parent.fields.summary}` }]);
 					}
 
 					await backlogChannel.messages.fetch({ limit: 100 })
@@ -2725,15 +2725,15 @@ module.exports = {
 									}
 
 									const Discord = require('discord.js');
-									let medalEmbed = new Discord.MessageEmbed()
+									let medalEmbed = new Discord.EmbedBuilder()
 										.setColor('#583DA9')
 										.setTitle(`${osuUser.osuName} unlocked the medal ${medalName}`)
 										.setThumbnail(medal.link)
 										.setDescription(medal.description)
-										.addField('Medal Group', medal.grouping);
+										.addFields([{ name: 'Medal Group', value: medal.grouping }]);
 
 									if (medal.instructions) {
-										medalEmbed.addField('Medal Hint', medal.instructions.replace('<b>', '**').replace('</b>', '**').replace('<i>', '*').replace('</i>', '*'));
+										medalEmbed.addFields([{ name: 'Medal Hint', value: medal.instructions.replace('<b>', '**').replace('</b>', '**').replace('<i>', '*').replace('</i>', '*') }]);
 									}
 
 									try {

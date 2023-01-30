@@ -1,4 +1,4 @@
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { DBDiscordUsers, DBBirthdayGuilds } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
@@ -8,7 +8,7 @@ module.exports = {
 	description: 'Set your birthday',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 10,
 	tags: 'misc',

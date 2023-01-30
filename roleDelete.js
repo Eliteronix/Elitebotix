@@ -33,7 +33,7 @@ module.exports = async function (role) {
 			permissionsReadable = role.permissions.toArray().join(', ');
 		}
 
-		const changeEmbed = new Discord.MessageEmbed()
+		const changeEmbed = new Discord.EmbedBuilder()
 			.setColor('#0099ff')
 			.setDescription(`\`${role.name}\` has been deleted`)
 			.addFields(

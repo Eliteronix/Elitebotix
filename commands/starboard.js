@@ -1,14 +1,14 @@
 const { DBGuilds } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'starboard',
 	description: 'Sends the messages receiving a star into the specified channel.',
-	permissions: Permissions.FLAGS.MANAGE_GUILD,
+	permissions: PermissionsBitField.Flags.ManageGuild,
 	permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,
 	tags: 'server-admin',

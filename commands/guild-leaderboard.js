@@ -1,14 +1,14 @@
 const { DBServerUserActivity } = require('../dbObjects');
 const { createLeaderboard, humanReadable, populateMsgFromInteraction, logDatabaseQueries } = require('../utils.js');
 const { leaderboardEntriesPerPage, showUnknownInteractionError } = require('../config.json');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 
 module.exports = {
 	name: 'guild-leaderboard',
 	description: 'Sends a leaderboard of the top users in the guild',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 30,
 	tags: 'general',

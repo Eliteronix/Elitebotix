@@ -27,7 +27,7 @@ module.exports = async function (invite) {
 			console.error(error);
 		}
 
-		const changeEmbed = new Discord.MessageEmbed()
+		const changeEmbed = new Discord.EmbedBuilder()
 			.setColor('#0099ff')
 			.setAuthor({ name: `${invite.inviter.username}#${invite.inviter.discriminator}`, iconURL: invite.inviter.displayAvatarURL() })
 			.setDescription('Invite has been created')

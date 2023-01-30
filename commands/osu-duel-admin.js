@@ -1,14 +1,14 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const { logDatabaseQueries, getUserDuelStarRating, createDuelMatch, updateQueueChannels } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'osu-duel-admin',
 	description: 'Admin commands for osu-duel',
-	// permissions: Permissions.FLAGS.MANAGE_GUILD,
+	// permissions: PermissionsBitField.Flags.SendMessages,
 	// permissionsTranslated: 'Manage Server',
-	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 60,
 	tags: 'debug',

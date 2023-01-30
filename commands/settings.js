@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBAutoRoles } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -9,7 +9,7 @@ module.exports = {
 	description: 'Sends an info card about the settings of the bot for the server',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,
 	tags: 'server-admin',
@@ -84,7 +84,7 @@ module.exports = {
 			temporaryText = 'Enabled';
 		}
 
-		const guildBotInfoEmbed = new Discord.MessageEmbed()
+		const guildBotInfoEmbed = new Discord.EmbedBuilder()
 			.setColor('#ffcc00')
 			.setTitle(`${membername} server settings`)
 			.setThumbnail(`${user.displayAvatarURL({ dynamic: true })}`)

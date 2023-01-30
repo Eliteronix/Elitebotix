@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const { isWrongSystem } = require('./utils');
 const cooldowns = new Discord.Collection();
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { developers, salesmen } = require('./config.json');
 
 module.exports = async function (client, bancho, interaction) {
@@ -33,7 +33,7 @@ module.exports = async function (client, bancho, interaction) {
 	//Check permissions of the bot
 	if (interaction.guildId) {
 		const botPermissions = interaction.channel.permissionsFor(await interaction.guild.members.fetch(client.user.id));
-		if (!botPermissions || !botPermissions.has(Permissions.FLAGS.VIEW_CHANNEL)) {
+		if (!botPermissions || !botPermissions.has(PermissionsBitField.Flags.ViewChannel)) {
 			//The bot can't possibly answer the message
 			return interaction.reply({ content: 'I can\'t view this channel.', ephemeral: true });
 		}

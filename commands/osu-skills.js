@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
 const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const Canvas = require('canvas');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
@@ -13,7 +13,7 @@ module.exports = {
 	description: 'Sends an info card about the skills of the specified player',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
@@ -433,7 +433,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			}
 
 			//Create as an attachment
-			const topPlayStats = new Discord.MessageAttachment(canvas.toBuffer(), `osu-topPlayStats-${user.id}.png`);
+			const topPlayStats = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-topPlayStats-${user.id}.png` });
 
 			const files = [topPlayStats];
 
@@ -802,7 +802,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 					const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
 
-					const attachment = new Discord.MessageAttachment(imageBuffer, `osu-skills-${user.id}.png`);
+					const attachment = new Discord.AttachmentBuilder(imageBuffer, { name: `osu-skills-${user.id}.png` });
 
 					files.push(attachment);
 
@@ -824,7 +824,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					}
 
 					// eslint-disable-next-line no-undef
-					matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${user.id}.txt`);
+					matchesPlayed = new Discord.AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${user.id}.txt` });
 					files.push(matchesPlayed);
 
 					content = `${content} and Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}${runningAverageText}\n${user.name}: <https://osu.ppy.sh/users/${user.id}>`;

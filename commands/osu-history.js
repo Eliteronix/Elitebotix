@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const osu = require('node-osu');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 const { Op } = require('sequelize');
 const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getIDFromPotentialOsuLink } = require('../utils');
@@ -11,9 +11,9 @@ const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 module.exports = {
 	name: 'osu-history',
 	description: 'Summarizes the whole osu! history for a user',
-	// permissions: Permissions.FLAGS.MANAGE_GUILD,
+	// permissions: PermissionsBitField.Flags.SendMessages,
 	// permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 15,
 	tags: 'osu',
@@ -633,7 +633,7 @@ module.exports = {
 		}
 
 		//Create as an attachment
-		const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-history-${osuUser.osuUserId}.png`)];
+		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-history-${osuUser.osuUserId}.png` })];
 
 		//Create chart
 		const width = 1500; //px
@@ -747,10 +747,10 @@ module.exports = {
 		};
 
 		const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
-		files.push(new Discord.MessageAttachment(imageBuffer, `duelRatingHistory-${osuUser.osuUserId}.png`));
+		files.push(new Discord.AttachmentBuilder(imageBuffer, { name: `duelRatingHistory-${osuUser.osuUserId}.png` }));
 
 		// eslint-disable-next-line no-undef
-		matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${osuUser.osuUserId}.txt`);
+		matchesPlayed = new Discord.AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${osuUser.osuUserId}.txt` });
 		files.push(matchesPlayed);
 
 		mostPlayedWith = mostPlayedWith.map((user) => {
@@ -780,7 +780,7 @@ module.exports = {
 		let mostPlayedWonLost = mostPlayedWith.concat(mostWonAgainst, mostLostAgainst);
 
 		// eslint-disable-next-line no-undef
-		mostPlayedWonLost = new Discord.MessageAttachment(Buffer.from(mostPlayedWonLost.join('\n'), 'utf-8'), `most-played-won-and-lost-${osuUser.osuUserId}.txt`);
+		mostPlayedWonLost = new Discord.AttachmentBuilder(Buffer.from(mostPlayedWonLost.join('\n'), 'utf-8'), { name: `most-played-won-and-lost-${osuUser.osuUserId}.txt` });
 		files.push(mostPlayedWonLost);
 
 		return interaction.editReply({ content: ' ', files: files });

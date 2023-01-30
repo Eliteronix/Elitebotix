@@ -1,6 +1,6 @@
 //Require discord.js module
 const Discord = require('discord.js');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
 	description: 'Sends an info card about the server',
 	//permissions: 'MANAGE_MESSAGES',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,
 	tags: 'general',
@@ -23,7 +23,7 @@ module.exports = {
 			return;
 		}
 
-		const guildInfoEmbed = new Discord.MessageEmbed()
+		const guildInfoEmbed = new Discord.EmbedBuilder()
 			.setColor('#ffcc00')
 			.setTitle(`${interaction.guild.name}`)
 			.addFields(

@@ -1,14 +1,14 @@
 const { DBGuilds } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'tempvoice',
 	description: 'Toggles the temporary channel setting for the server',
-	permissions: Permissions.FLAGS.MANAGE_GUILD,
+	permissions: PermissionsBitField.Flags.ManageGuild,
 	permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MOVE_MEMBERS, Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.SEND_MESSAGES],
+	botPermissions: [PermissionsBitField.Flags.ManageChannels, PermissionsBitField.Flags.MoveMembers, PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages, Manage Channels, Manage Roles and Move Members',
 	cooldown: 5,
 	tags: 'server-admin',

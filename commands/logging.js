@@ -1,15 +1,15 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'logging',
 	description: '[Toggle] Logs the enabled events in the specified channel.',
-	permissions: Permissions.FLAGS.MANAGE_GUILD,
+	permissions: PermissionsBitField.Flags.ManageGuild,
 	permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,
 	tags: 'server-admin',
@@ -184,7 +184,7 @@ module.exports = {
 
 			const guildPrefix = await getGuildPrefix(msg);
 
-			const loggingEmbed = new Discord.MessageEmbed()
+			const loggingEmbed = new Discord.EmbedBuilder()
 				.setColor('#0099ff')
 				.setDescription('A list of all events and if they are being logged or not is being provided below (part 1)')
 				.addFields(
@@ -223,7 +223,7 @@ module.exports = {
 				await interaction.followUp({ embeds: [loggingEmbed] });
 			}
 
-			const loggingEmbed2 = new Discord.MessageEmbed()
+			const loggingEmbed2 = new Discord.EmbedBuilder()
 				.setColor('#0099ff')
 				.setDescription('A list of all events and if they are being logged or not is being provided below (part 2)')
 				.addFields(

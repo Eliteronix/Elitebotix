@@ -1,4 +1,4 @@
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Op } = require('sequelize');
@@ -9,7 +9,7 @@ module.exports = {
 	description: 'Edit your reminders',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 15,
 	tags: 'general',

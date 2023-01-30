@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
 const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -12,7 +12,7 @@ module.exports = {
 	description: 'Sends an info graph about the schedules of the players',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
@@ -287,7 +287,7 @@ module.exports = {
 
 		const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
 
-		const attachment = new Discord.MessageAttachment(imageBuffer, 'osu-schedules.png');
+		const attachment = new Discord.AttachmentBuilder(imageBuffer, { name: 'osu-schedules.png' });
 
 		let weekdayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'All Week'];
 

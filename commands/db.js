@@ -138,7 +138,7 @@ module.exports = {
 				const buffer = Buffer.from(csv);
 				//Create as an attachment
 				// eslint-disable-next-line no-undef
-				const attachment = new Discord.MessageAttachment(buffer, `${dbTableName}-${process.env.SERVER}-${process.env.PROVIDER}.csv`);
+				const attachment = new Discord.AttachmentBuilder(buffer, { name: `${dbTableName}-${process.env.SERVER}-${process.env.PROVIDER}.csv` });
 				// eslint-disable-next-line no-undef
 				await developerUser.send({ content: `${dbTableName} - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`, files: [attachment] });
 				data = [];

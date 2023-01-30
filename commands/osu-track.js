@@ -1,6 +1,6 @@
 const { DBOsuTrackingUsers, DBDiscordUsers, DBOsuGuildTrackers } = require('../dbObjects');
 const osu = require('node-osu');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
 const { logDatabaseQueries } = require('../utils');
@@ -8,9 +8,9 @@ const { logDatabaseQueries } = require('../utils');
 module.exports = {
 	name: 'osu-track',
 	description: 'Sends info about the scores achieved by the user',
-	permissions: Permissions.FLAGS.MANAGE_GUILD,
+	permissions: PermissionsBitField.Flags.ManageGuild,
 	permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',

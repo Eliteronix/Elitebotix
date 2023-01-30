@@ -2,7 +2,7 @@
 const weather = require('weather-js');
 const util = require('util');
 const { populateMsgFromInteraction } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { DBDiscordUsers } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -11,7 +11,7 @@ module.exports = {
 	description: 'Allows you to set the default degree type/location for the weather command',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 10,
 	tags: 'misc',

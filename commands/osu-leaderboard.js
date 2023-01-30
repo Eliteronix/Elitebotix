@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const { humanReadable, createLeaderboard, populateMsgFromInteraction, logDatabaseQueries, getOsuUserServerMode, getGameModeName } = require('../utils');
 const { leaderboardEntriesPerPage } = require('../config.json');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -9,7 +9,7 @@ module.exports = {
 	description: 'Sends a leaderboard of all the players in the guild that have their account connected',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 30,
 	tags: 'osu',

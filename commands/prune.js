@@ -1,12 +1,12 @@
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'prune',
 	description: 'Deletes the specified amount of messages; Messages have to be less than 2 weeks old',
-	permissions: Permissions.FLAGS.MANAGE_MESSAGES,
+	permissions: PermissionsBitField.Flags.ManageMessages,
 	permissionsTranslated: 'Manage Messages',
-	botPermissions: Permissions.FLAGS.MANAGE_MESSAGES,
+	botPermissions: PermissionsBitField.Flags.ManageMessages,
 	botPermissionsTranslated: 'Manage Messages',
 	cooldown: 15,
 	tags: 'server-admin',

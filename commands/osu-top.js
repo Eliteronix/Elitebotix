@@ -4,7 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('canvas');
 const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, saveOsuMultiScores, pause } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 const ObjectsToCsv = require('objects-to-csv');
@@ -14,7 +14,7 @@ module.exports = {
 	description: 'Sends an info card about the topplays of the specified player',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
@@ -210,7 +210,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}-mode${mode}.png`)];
+				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-top-${user.id}-mode${mode}.png` })];
 
 				if (csv) {
 					let csv = new ObjectsToCsv(scores);
@@ -218,7 +218,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 					// eslint-disable-next-line no-undef
 					const buffer = Buffer.from(csv);
 					//Create as an attachment
-					files.push(new Discord.MessageAttachment(buffer, `osu-top-${user.id}-mode${mode}.csv`));
+					files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-top-${user.id}-mode${mode}.csv` }));
 				}
 
 				//If created by osu-tracking
@@ -295,7 +295,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}-mode${mode}.png`)];
+				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-top-${user.id}-mode${mode}.png` })];
 
 				if (csv) {
 					let csv = new ObjectsToCsv(scores);
@@ -303,7 +303,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 					// eslint-disable-next-line no-undef
 					const buffer = Buffer.from(csv);
 					//Create as an attachment
-					files.push(new Discord.MessageAttachment(buffer, `osu-top-${user.id}-mode${mode}.csv`));
+					files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-top-${user.id}-mode${mode}.csv` }));
 				}
 
 				//Send attachment
@@ -361,7 +361,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-top-${user.id}-mode${mode}.png`)];
+				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-top-${user.id}-mode${mode}.png` })];
 
 				if (csv) {
 					let csv = new ObjectsToCsv(scores);
@@ -369,7 +369,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 					// eslint-disable-next-line no-undef
 					const buffer = Buffer.from(csv);
 					//Create as an attachment
-					files.push(new Discord.MessageAttachment(buffer, `osu-top-${user.id}-mode${mode}.csv`));
+					files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-top-${user.id}-mode${mode}.csv` }));
 				}
 
 				//If created by osu-tracking

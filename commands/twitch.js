@@ -1,4 +1,4 @@
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { DBDiscordUsers } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
 const { logDatabaseQueries } = require('../utils');
@@ -8,9 +8,9 @@ const { Op } = require('sequelize');
 module.exports = {
 	name: 'twitch',
 	description: 'Allowes you to manage the twitch commands',
-	// permissions: Permissions.FLAGS.MANAGE_GUILD,
+	// permissions: PermissionsBitField.Flags.MANAGE_GUILD,
 	// permissionsTranslated: 'Manage Server',
-	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
 	tags: 'osu',

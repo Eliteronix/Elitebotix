@@ -1,14 +1,14 @@
 const { DBAutoRoles } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'autorole',
 	description: 'Assigns roles on joining the server',
-	permissions: Permissions.FLAGS.MANAGE_ROLES,
+	permissions: PermissionsBitField.Flags.ManageRoles,
 	permissionsTranslated: 'Manage Roles',
-	botPermissions: [Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.SEND_MESSAGES],
+	botPermissions: [PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages and Manage Roles',
 	cooldown: 5,
 	tags: 'server-admin',

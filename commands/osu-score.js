@@ -4,7 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('canvas');
 const { humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getBeatmapApprovalStatusImage, logDatabaseQueries, getBeatmapModeId, getGameModeName, getOsuPP, getModBits, multiToBanchoScore } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
 	description: 'Sends an info card about the score of the specified player on the map',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 45,
 	tags: 'osu',
@@ -200,7 +200,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						await drawUserInfo(elements, server);
 
 						//Create as an attachment
-						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-score-${user.id}-${beatmap.beatmapId}-${scores[0].raw_mods}.png`);
+						const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-score-${user.id}-${beatmap.beatmapId}-${scores[0].raw_mods}.png` });
 
 						let sentMessage;
 
@@ -292,7 +292,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						await drawUserInfo(elements, server);
 
 						//Create as an attachment
-						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-score-${user.id}-${beatmap.beatmapId}-${score.raw_mods}.png`);
+						const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-score-${user.id}-${beatmap.beatmapId}-${score.raw_mods}.png` });
 
 						//Send attachment
 						let sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>`, files: [attachment] });
@@ -401,7 +401,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 			await drawUserInfo(elements, server);
 
 			//Create as an attachment
-			const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-score-${osuUser.id}-${beatmap.beatmapId}-${userScores[i].raw_mods}.png`);
+			const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-score-${osuUser.id}-${beatmap.beatmapId}-${userScores[i].raw_mods}.png` });
 
 			let sentMessage;
 

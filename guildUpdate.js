@@ -28,7 +28,7 @@ module.exports = async function (oldGuild, newGuild) {
 			console.error(error);
 		}
 
-		const changeEmbed = new Discord.MessageEmbed()
+		const changeEmbed = new Discord.EmbedBuilder()
 			.setColor('#0099ff')
 			.setAuthor({ name: newGuild.name, iconURL: oldGuild.iconURL() })
 			.setDescription('The server has been updated!')
@@ -40,83 +40,83 @@ module.exports = async function (oldGuild, newGuild) {
 			.setFooter({ text: 'Eventname: guildupdate' });
 
 		if (oldGuild.name !== newGuild.name) {
-			changeEmbed.addField('Name', `\`${oldGuild.name}\` -> \`${newGuild.name}\``);
+			changeEmbed.addFields([{ name: 'Name', value: `\`${oldGuild.name}\` -> \`${newGuild.name}\`` }]);
 		}
 
 		if (oldGuild.iconURL() !== newGuild.iconURL()) {
-			changeEmbed.addField('Icon', `[Old Icon](${oldGuild.iconURL()}) -> [New Icon](${newGuild.iconURL()})`);
+			changeEmbed.addFields([{ name: 'Icon', value: `[Old Icon](${oldGuild.iconURL()}) -> [New Icon](${newGuild.iconURL()})` }]);
 		}
 
 		if (oldGuild.region !== newGuild.region) {
-			changeEmbed.addField('Region', `\`${oldGuild.region}\` -> \`${newGuild.region}\``);
+			changeEmbed.addFields([{ name: 'Region', value: `\`${oldGuild.region}\` -> \`${newGuild.region}\`` }]);
 		}
 
 		if (oldGuild.afkTimeout !== newGuild.afkTimeout) {
-			changeEmbed.addField('AFK Timeout', `\`${oldGuild.afkTimeout}\` -> \`${newGuild.afkTimeout}\``);
+			changeEmbed.addFields([{ name: 'AFK Timeout', value: `\`${oldGuild.afkTimeout}\` -> \`${newGuild.afkTimeout}\`` }]);
 		}
 
 		if (oldGuild.afkChannelId !== newGuild.afkChannelId) {
-			changeEmbed.addField('AFK Channel', `<#${oldGuild.afkChannelId}> -> <#${newGuild.afkChannelId}>`);
+			changeEmbed.addFields([{ name: 'AFK Channel', value: `<#${oldGuild.afkChannelId}> -> <#${newGuild.afkChannelId}>` }]);
 		}
 
 		if (oldGuild.systemChannelId !== newGuild.systemChannelId) {
-			changeEmbed.addField('System Channel', `<#${oldGuild.systemChannelId}> -> <#${newGuild.systemChannelId}>`);
+			changeEmbed.addFields([{ name: 'System Channel', value: `<#${oldGuild.systemChannelId}> -> <#${newGuild.systemChannelId}>` }]);
 		}
 
 		if (oldGuild.premiumTier !== newGuild.premiumTier) {
-			changeEmbed.addField('Premium Tier', `\`${oldGuild.premiumTier}\` -> \`${newGuild.premiumTier}\``);
+			changeEmbed.addFields([{ name: 'Premium Tier', value: `\`${oldGuild.premiumTier}\` -> \`${newGuild.premiumTier}\`` }]);
 		}
 
 		if (oldGuild.premiumSubscriptionCount !== newGuild.premiumSubscriptionCount) {
-			changeEmbed.addField('Premium Tier', `\`${oldGuild.premiumSubscriptionCount}\` -> \`${newGuild.premiumSubscriptionCount}\``);
+			changeEmbed.addFields([{ name: 'Premium Tier', value: `\`${oldGuild.premiumSubscriptionCount}\` -> \`${newGuild.premiumSubscriptionCount}\`` }]);
 		}
 
 		if (oldGuild.verificationLevel !== newGuild.verificationLevel) {
-			changeEmbed.addField('Verification Level', `\`${oldGuild.verificationLevel}\` -> \`${newGuild.verificationLevel}\``);
+			changeEmbed.addFields([{ name: 'Verification Level', value: `\`${oldGuild.verificationLevel}\` -> \`${newGuild.verificationLevel}\`` }]);
 		}
 
 		if (oldGuild.explicitContentFilter !== newGuild.explicitContentFilter) {
-			changeEmbed.addField('Explicit Content Filter', `\`${oldGuild.explicitContentFilter}\` -> \`${newGuild.explicitContentFilter}\``);
+			changeEmbed.addFields([{ name: 'Explicit Content Filter', value: `\`${oldGuild.explicitContentFilter}\` -> \`${newGuild.explicitContentFilter}\`` }]);
 		}
 
 		if (oldGuild.mfaLevel !== newGuild.mfaLevel) {
-			changeEmbed.addField('MFA Level', `\`${oldGuild.mfaLevel}\` -> \`${newGuild.mfaLevel}\``);
+			changeEmbed.addFields([{ name: 'MFA Level', value: `\`${oldGuild.mfaLevel}\` -> \`${newGuild.mfaLevel}\`` }]);
 		}
 
 		if (oldGuild.defaultMessageNotifications !== newGuild.defaultMessageNotifications) {
-			changeEmbed.addField('Default Message Notifications', `\`${oldGuild.defaultMessageNotifications}\` -> \`${newGuild.defaultMessageNotifications}\``);
+			changeEmbed.addFields([{ name: 'Default Message Notifications', value: `\`${oldGuild.defaultMessageNotifications}\` -> \`${newGuild.defaultMessageNotifications}\`` }]);
 		}
 
 		if (oldGuild.description !== newGuild.description) {
-			changeEmbed.addField('Description', `\`${oldGuild.description}\` -> \`${newGuild.description}\``);
+			changeEmbed.addFields([{ name: 'Description', value: `\`${oldGuild.description}\` -> \`${newGuild.description}\`` }]);
 		}
 
 		if (oldGuild.vanityURLCode !== newGuild.vanityURLCode) {
-			changeEmbed.addField('Vanity Invite Code', `\`${oldGuild.vanityURLCode}\` -> \`${newGuild.vanityURLCode}\``);
+			changeEmbed.addFields([{ name: 'Vanity Invite Code', value: `\`${oldGuild.vanityURLCode}\` -> \`${newGuild.vanityURLCode}\`` }]);
 		}
 
 		if (oldGuild.banner !== newGuild.banner) {
-			changeEmbed.addField('Banner', 'The serverbanner has been updated');
+			changeEmbed.addFields([{ name: 'Banner', value: 'The serverbanner has been updated' }]);
 		}
 
 		if (oldGuild.rulesChannelId !== newGuild.rulesChannelId) {
-			changeEmbed.addField('Rules Channel', `<#${oldGuild.rulesChannelId}> -> <#${newGuild.rulesChannelId}>`);
+			changeEmbed.addFields([{ name: 'Rules Channel', value: `<#${oldGuild.rulesChannelId}> -> <#${newGuild.rulesChannelId}>` }]);
 		}
 
 		if (oldGuild.publicUpdatesChannelId !== newGuild.publicUpdatesChannelId) {
-			changeEmbed.addField('Public Updates Channel', `<#${oldGuild.publicUpdatesChannelId}> -> <#${newGuild.publicUpdatesChannelId}>`);
+			changeEmbed.addFields([{ name: 'Public Updates Channel', value: `<#${oldGuild.publicUpdatesChannelId}> -> <#${newGuild.publicUpdatesChannelId}>` }]);
 		}
 
 		if (oldGuild.ownerId !== newGuild.ownerId) {
-			changeEmbed.addField('Owner', `<@${oldGuild.ownerId}> -> <@${newGuild.ownerId}>`);
+			changeEmbed.addFields([{ name: 'Owner', value: `<@${oldGuild.ownerId}> -> <@${newGuild.ownerId}>` }]);
 		}
 
 		if (oldGuild.widgetChannelId !== newGuild.widgetChannelId) {
-			changeEmbed.addField('Widget Channel', `<#${oldGuild.widgetChannelId}> -> <#${newGuild.widgetChannelId}>`);
+			changeEmbed.addFields([{ name: 'Widget Channel', value: `<#${oldGuild.widgetChannelId}> -> <#${newGuild.widgetChannelId}>` }]);
 		}
 
 		if (oldGuild.embedChannelId !== newGuild.embedChannelId) {
-			changeEmbed.addField('Embed Channel', `<#${oldGuild.embedChannelId}> -> <#${newGuild.embedChannelId}>`);
+			changeEmbed.addFields([{ name: 'Embed Channel', value: `<#${oldGuild.embedChannelId}> -> <#${newGuild.embedChannelId}>` }]);
 		}
 
 		channel.send({ embeds: [changeEmbed] });

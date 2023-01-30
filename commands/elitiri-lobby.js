@@ -8,7 +8,7 @@ module.exports = {
 	description: `Allows you to claim lobby for the ${currentElitiriCup}`,
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
-	// botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	// botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 15,
 	tags: 'elitiri',

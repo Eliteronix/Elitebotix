@@ -61,7 +61,7 @@ module.exports = {
 				guildPrefix = '/';
 			}
 
-			const submissionsEmbed = new Discord.MessageEmbed()
+			const submissionsEmbed = new Discord.EmbedBuilder()
 				.setColor('#00FF00')
 				.setTitle('You can find your submissions for the Elitiri Cup below')
 				.setDescription(`To submit a map use \`${guildPrefix}${this.name} <NM/HD/HR/DT/FM> <id>\``);
@@ -87,43 +87,43 @@ module.exports = {
 			}
 
 			if (NMSubmission) {
-				submissionsEmbed.addField(`NoMod Map: Submitted (${NMSubmission.beatmapId})`, `${NMSubmission.artist} - ${NMSubmission.title} [${NMSubmission.difficulty}] (${Math.round(NMSubmission.starRating * 100) / 100}*)`);
+				submissionsEmbed.addFields([{ name: `NoMod Map: Submitted (${NMSubmission.beatmapId})`, value: `${NMSubmission.artist} - ${NMSubmission.title} [${NMSubmission.difficulty}] (${Math.round(NMSubmission.starRating * 100) / 100}*)` }]);
 			} else {
 				submissionsEmbed
 					.setColor('#FF0000')
-					.addField('NoMod Map: Not yet submitted', `Please submit a map by using \`${guildPrefix}${this.name} NM <ID>\``);
+					.addFields([{ name: 'NoMod Map: Not yet submitted', value: `Please submit a map by using \`${guildPrefix}${this.name} NM <ID>\`` }]);
 			}
 
 			if (HDSubmission) {
-				submissionsEmbed.addField(`Hidden Map: Submitted (${HDSubmission.beatmapId})`, `${HDSubmission.artist} - ${HDSubmission.title} [${HDSubmission.difficulty}] (${Math.round(HDSubmission.starRating * 100) / 100}*)`);
+				submissionsEmbed.addFields([{ name: `Hidden Map: Submitted (${HDSubmission.beatmapId})`, value: `${HDSubmission.artist} - ${HDSubmission.title} [${HDSubmission.difficulty}] (${Math.round(HDSubmission.starRating * 100) / 100}*)` }]);
 			} else {
 				submissionsEmbed
 					.setColor('#FF0000')
-					.addField('Hidden Map: Not yet submitted', `Please submit a map by using \`${guildPrefix}${this.name} HD <ID>\``);
+					.addFields([{ name: 'Hidden Map: Not yet submitted', value: `Please submit a map by using \`${guildPrefix}${this.name} HD <ID>\`` }]);
 			}
 
 			if (HRSubmission) {
-				submissionsEmbed.addField(`HardRock Map: Submitted (${HRSubmission.beatmapId})`, `${HRSubmission.artist} - ${HRSubmission.title} [${HRSubmission.difficulty}] (${Math.round(HRSubmission.starRating * 100) / 100}*)`);
+				submissionsEmbed.addFields([{ name: `HardRock Map: Submitted (${HRSubmission.beatmapId})`, value: `${HRSubmission.artist} - ${HRSubmission.title} [${HRSubmission.difficulty}] (${Math.round(HRSubmission.starRating * 100) / 100}*)` }]);
 			} else {
 				submissionsEmbed
 					.setColor('#FF0000')
-					.addField('HardRock Map: Not yet submitted', `Please submit a map by using \`${guildPrefix}${this.name} HR <ID>\``);
+					.addFields([{ name: 'HardRock Map: Not yet submitted', value: `Please submit a map by using \`${guildPrefix}${this.name} HR <ID>\`` }]);
 			}
 
 			if (DTSubmission) {
-				submissionsEmbed.addField(`DoubleTime Map: Submitted (${DTSubmission.beatmapId})`, `${DTSubmission.artist} - ${DTSubmission.title} [${DTSubmission.difficulty}] (${Math.round(DTSubmission.starRating * 100) / 100}*)`);
+				submissionsEmbed.addFields([{ name: `DoubleTime Map: Submitted (${DTSubmission.beatmapId})`, value: `${DTSubmission.artist} - ${DTSubmission.title} [${DTSubmission.difficulty}] (${Math.round(DTSubmission.starRating * 100) / 100}*)` }]);
 			} else {
 				submissionsEmbed
 					.setColor('#FF0000')
-					.addField('DoubleTime Map: Not yet submitted', `Please submit a map by using \`${guildPrefix}${this.name} DT <ID>\``);
+					.addFields([{ name: 'DoubleTime Map: Not yet submitted', value: `Please submit a map by using \`${guildPrefix}${this.name} DT <ID>\`` }]);
 			}
 
 			if (FMSubmission) {
-				submissionsEmbed.addField(`FreeMod Map: Submitted (${FMSubmission.beatmapId})`, `${FMSubmission.artist} - ${FMSubmission.title} [${FMSubmission.difficulty}] (${Math.round(FMSubmission.starRating * 100) / 100}*)`);
+				submissionsEmbed.addFields([{ name: `FreeMod Map: Submitted (${FMSubmission.beatmapId})`, value: `${FMSubmission.artist} - ${FMSubmission.title} [${FMSubmission.difficulty}] (${Math.round(FMSubmission.starRating * 100) / 100}*)` }]);
 			} else {
 				submissionsEmbed
 					.setColor('#FF0000')
-					.addField('FreeMod Map: Not yet submitted', `Please submit a map by using \`${guildPrefix}${this.name} FM <ID>\``);
+					.addFields([{ name: 'FreeMod Map: Not yet submitted', value: `Please submit a map by using \`${guildPrefix}${this.name} FM <ID>\`` }]);
 			}
 
 			if (msg.channel.type !== 'DM') {
@@ -135,7 +135,7 @@ module.exports = {
 
 				if (msg.channel.type !== 'DM') {
 					await pause(30000);
-					const editEmbed = new Discord.MessageEmbed()
+					const editEmbed = new Discord.EmbedBuilder()
 						.setTitle('The embed was automatically deleted to avoid leaking maps.')
 						.setDescription(`You can use \`${guildPrefix}${this.name} list\` in my DMs to send the embed without a timer.`);
 					sentMessage.edit({ embeds: [editEmbed] });
@@ -206,7 +206,7 @@ module.exports = {
 
 				const guildPrefix = await getGuildPrefix(msg);
 
-				const viabilityEmbed = new Discord.MessageEmbed()
+				const viabilityEmbed = new Discord.EmbedBuilder()
 					.setColor('#00FF00')
 					.setTitle(`You have submitted the beatmap for the tournament (${bracket} bracket)`)
 					.setDescription(`To look at your submitted maps use \`${guildPrefix}${this.name} list\``)
@@ -217,7 +217,7 @@ module.exports = {
 						.setColor('#FF0000')
 						.setTitle('You already submitted the same map once. Please replace the map by another one in the modpool where it has been submitted already.')
 						.setDescription(`To look at your submitted maps use \`${guildPrefix}${this.name} list\`\nIf you think the map is within the restrictions please contact Eliteronix#4208`)
-						.addField('Map has been submitted already', 'Each map can just be submitted once for each player');
+						.addFields([{ name: 'Map has been submitted already', value: 'Each map can just be submitted once for each player' }]);
 
 					if (msg.id) {
 						return msg.reply({ embeds: [viabilityEmbed] });
@@ -231,7 +231,7 @@ module.exports = {
 						.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('Map has no audio', 'The map has to have audio / can\'t be muted');
+						.addFields([{ name: 'Map has no audio', value: 'The map has to have audio / can\'t be muted' }]);
 				}
 
 				//Mode has to be standard osu!
@@ -240,7 +240,7 @@ module.exports = {
 						.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('Map is not in Standard mode', 'The map has to be in the osu!Standard Mode');
+						.addFields([{ name: 'Map is not in Standard mode', value: 'The map has to be in the osu!Standard Mode' }]);
 				}
 
 				//Map status: Ranked/Approved -> Allowed (except Aspire maps)
@@ -249,7 +249,7 @@ module.exports = {
 						.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('Map is an Aspire Map', 'The map can\'t be an Aspire map');
+						.addFields([{ name: 'Map is an Aspire Map', value: 'The map can\'t be an Aspire map' }]);
 				}
 
 				//Map status: Ranked/Approved -> Allowed (except Aspire maps)
@@ -258,7 +258,7 @@ module.exports = {
 						.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('Map is not Ranked', 'The map has to be Ranked');
+						.addFields([{ name: 'Map is not Ranked', value: 'The map has to be Ranked' }]);
 				}
 
 				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 2:10-4:30
@@ -267,7 +267,7 @@ module.exports = {
 						.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('Map is too short', 'The Drain time should not be below 2:10');
+						.addFields([{ name: 'Map is too short', value: 'The Drain time should not be below 2:10' }]);
 				}
 
 				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 2:10-4:30
@@ -275,7 +275,7 @@ module.exports = {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('Map is too long', 'The Drain time should not be above 4:30');
+						.addFields([{ name: 'Map is too long', value: 'The Drain time should not be above 4:30' }]);
 				}
 
 				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 2:10-4:30
@@ -283,7 +283,7 @@ module.exports = {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('Map is too short', 'The Drain time should not be below 2:10 (after DT)');
+						.addFields([{ name: 'Map is too short', value: 'The Drain time should not be below 2:10 (after DT)' }]);
 				}
 
 				//Drain Time: NM,HD,HR,DT (after recalculations),FM: 2:10-4:30
@@ -291,7 +291,7 @@ module.exports = {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('Map is too long', 'The Drain time should not be above 4:30 (after DT)');
+						.addFields([{ name: 'Map is too long', value: 'The Drain time should not be above 4:30 (after DT)' }]);
 				}
 
 				//Circle Size: FM maps may not exceed the circle size of 5 when played NoMod
@@ -299,7 +299,7 @@ module.exports = {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField('Map is has too small Circle Size', 'FreeMod maps may not exceed circle size 5 when played NoMod');
+						.addFields([{ name: 'Map is has too small Circle Size', value: 'FreeMod maps may not exceed circle size 5 when played NoMod' }]);
 				}
 
 				//Top:
@@ -346,42 +346,42 @@ module.exports = {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField(`The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}`);
+						.addFields([{ name: `The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, value: `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}` }]);
 				} else if (bracket === 'top' && beatmaps[0].difficulty.rating > topUpperDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}`);
+						.addFields([{ name: `The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, value: `The Star Rating has to be between ${topLowerDiff} and ${topUpperDiff}` }]);
 				} else if (bracket === 'middle' && beatmaps[0].difficulty.rating < middleLowerDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField(`The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}`);
+						.addFields([{ name: `The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, value: `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}` }]);
 				} else if (bracket === 'middle' && beatmaps[0].difficulty.rating > middleUpperDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}`);
+						.addFields([{ name: `The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, value: `The Star Rating has to be between ${middleLowerDiff} and ${middleUpperDiff}` }]);
 				} else if (bracket === 'lower' && beatmaps[0].difficulty.rating < lowerLowerDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField(`The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}`);
+						.addFields([{ name: `The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, value: `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}` }]);
 				} else if (bracket === 'lower' && beatmaps[0].difficulty.rating > lowerUpperDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}`);
+						.addFields([{ name: `The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, value: `The Star Rating has to be between ${lowerLowerDiff} and ${lowerUpperDiff}` }]);
 				} else if (bracket === 'beginner' && beatmaps[0].difficulty.rating < beginnerLowerDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField(`The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}`);
+						.addFields([{ name: `The Star Rating is too low (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, value: `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}` }]);
 				} else if (bracket === 'beginner' && beatmaps[0].difficulty.rating > beginnerUpperDiff) {
 					viabilityEmbed.setColor('#FF0000')
 						.setTitle(`The Beatmap is NOT viable for the tournament (${bracket} bracket)`)
 						.setDescription('If you think the map is within the restrictions please contact Eliteronix#4208')
-						.addField(`The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}`);
+						.addFields([{ name: `The Star Rating is too high (${Math.round(beatmaps[0].difficulty.rating * 100) / 100})`, value: `The Star Rating has to be between ${beginnerLowerDiff} and ${beginnerUpperDiff}` }]);
 				}
 
 				if (viabilityEmbed.title.startsWith('You have submitted the beatmap for the tournament')) {

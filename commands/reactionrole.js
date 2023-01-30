@@ -1,15 +1,15 @@
 const Discord = require('discord.js');
 const { DBReactionRolesHeader, DBReactionRoles } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'reactionrole',
 	description: 'Create and manage reaction roles',
-	permissions: Permissions.FLAGS.MANAGE_ROLES,
+	permissions: PermissionsBitField.Flags.ManageRoles,
 	permissionsTranslated: 'Manage Roles',
-	botPermissions: [Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.MANAGE_MESSAGES],
+	botPermissions: [PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.ManageMessages],
 	botPermissionsTranslated: 'Manage Roles and Manage Messages',
 	cooldown: 5,
 	tags: 'server-admin',
@@ -65,7 +65,7 @@ module.exports = {
 					}
 
 					//Create embed
-					const reactionRoleEmbed = new Discord.MessageEmbed()
+					const reactionRoleEmbed = new Discord.EmbedBuilder()
 						.setColor('#0099ff')
 						.setTitle(embedName)
 						.setFooter({ text: `Reactionrole - EmbedId: ${embedId}` });
@@ -113,7 +113,7 @@ module.exports = {
 							return console.error(e);
 						}
 						//Get the message object
-						const embedMessage = await embedChannel.messages.fetch(embedMessageId);
+						const embedMessage = await embedChannel.messages.fetch({ message: embedMessageId });
 						if (!msg.id) {
 							interaction.editReply({ content: 'Embed will be deleted', ephemeral: true });
 						}
@@ -482,7 +482,7 @@ module.exports = {
 
 async function editEmbed(msg, reactionRolesHeader, client) {
 	//Create embed
-	const reactionRoleEmbed = new Discord.MessageEmbed()
+	const reactionRoleEmbed = new Discord.EmbedBuilder()
 		.setColor(reactionRolesHeader.reactionColor)
 		.setTitle(reactionRolesHeader.reactionTitle)
 		.setThumbnail(reactionRolesHeader.reactionImage)
@@ -504,7 +504,7 @@ async function editEmbed(msg, reactionRolesHeader, client) {
 		//Get role object
 		let reactionRoleName = msg.guild.roles.cache.get(reactionRole.roleId);
 		//Add field to embed
-		reactionRoleEmbed.addField(reactionRole.emoji + ': ' + reactionRoleName.name, reactionRole.description);
+		reactionRoleEmbed.addFields([{ name: reactionRole.emoji + ': ' + reactionRoleName.name, value: reactionRole.description }]);
 	});
 
 	//Get the Id of the message
@@ -523,7 +523,7 @@ async function editEmbed(msg, reactionRolesHeader, client) {
 		return console.error(e);
 	}
 	//Get the message object
-	let embedMessage = await embedChannel.messages.fetch(embedMessageId);
+	let embedMessage = await embedChannel.messages.fetch({ message: embedMessageId });
 
 	//Check if its a message from the old bot to handle legacy embeds
 	if (embedMessage.author.id === client.user.id) {

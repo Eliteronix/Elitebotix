@@ -31,7 +31,7 @@ module.exports = async function (oldChannel, newChannel) {
 			console.error(error);
 		}
 
-		const changeEmbed = new Discord.MessageEmbed()
+		const changeEmbed = new Discord.EmbedBuilder()
 			.setColor('#0099ff')
 			.setDescription(`<#${newChannel.id}> has been updated!`)
 			.addFields(
@@ -41,27 +41,27 @@ module.exports = async function (oldChannel, newChannel) {
 			.setFooter({ text: 'Eventname: channelupdate' });
 
 		if (oldChannel.name !== newChannel.name) {
-			changeEmbed.addField('Name', `\`${oldChannel.name}\` -> \`${newChannel.name}\``);
+			changeEmbed.addFields([{ name: 'Name', value: `\`${oldChannel.name}\` -> \`${newChannel.name}\`` }]);
 		}
 
 		if (oldChannel.bitrate !== newChannel.bitrate) {
-			changeEmbed.addField('Bitrate', `\`${oldChannel.bitrate}\` -> \`${newChannel.bitrate}\``);
+			changeEmbed.addFields([{ name: 'Bitrate', value: `\`${oldChannel.bitrate}\` -> \`${newChannel.bitrate}\`` }]);
 		}
 
 		if (oldChannel.userLimit !== newChannel.userLimit) {
-			changeEmbed.addField('User Limit', `\`${oldChannel.userLimit}\` -> \`${newChannel.userLimit}\``);
+			changeEmbed.addFields([{ name: 'User Limit', value: `\`${oldChannel.userLimit}\` -> \`${newChannel.userLimit}\`` }]);
 		}
 
 		if (oldChannel.topic !== newChannel.topic) {
-			changeEmbed.addField('Topic', `\`${oldChannel.topic}\` -> \`${newChannel.topic}\``);
+			changeEmbed.addFields([{ name: 'Topic', value: `\`${oldChannel.topic}\` -> \`${newChannel.topic}\`` }]);
 		}
 
 		if (oldChannel.nsfw !== newChannel.nsfw) {
-			changeEmbed.addField('NSFW', `\`${oldChannel.nsfw}\` -> \`${newChannel.nsfw}\``);
+			changeEmbed.addFields([{ name: 'NSFW', value: `\`${oldChannel.nsfw}\` -> \`${newChannel.nsfw}\`` }]);
 		}
 
 		if (oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser) {
-			changeEmbed.addField('Rate Limit Per User (Slowmode)', `\`${oldChannel.rateLimitPerUser}\` -> \`${newChannel.rateLimitPerUser}\``);
+			changeEmbed.addFields([{ name: 'Rate Limit Per User (Slowmode)', value: `\`${oldChannel.rateLimitPerUser}\` -> \`${newChannel.rateLimitPerUser}\`` }]);
 		}
 
 		const oldPermissionGroups = oldChannel.permissionOverwrites.array();
@@ -93,18 +93,18 @@ module.exports = async function (oldChannel, newChannel) {
 
 					if (oldPermissionsAllowReadable !== newPermissionsAllowReadable || oldPermissionsDenyReadable !== newPermissionsDenyReadable) {
 						if (oldPermissionGroups[i].type === 'role') {
-							changeEmbed.addField('Permissions updated for', `<@&${oldPermissionGroups[i].id}>`);
+							changeEmbed.addFields([{ name: 'Permissions updated for', value: `<@&${oldPermissionGroups[i].id}>` }]);
 						} else {
-							changeEmbed.addField('Permissions updated for', `<@${oldPermissionGroups[i].id}>`);
+							changeEmbed.addFields([{ name: 'Permissions updated for', value: `<@${oldPermissionGroups[i].id}>` }]);
 						}
 					}
 
 					if (oldPermissionsAllowReadable !== newPermissionsAllowReadable) {
-						changeEmbed.addField('Allow', `Old Permissions:\n\`${oldPermissionsAllowReadable}\`\n\nNew Permissions:\n\`${newPermissionsAllowReadable}\``);
+						changeEmbed.addFields([{ name: 'Allow', value: `Old Permissions:\n\`${oldPermissionsAllowReadable}\`\n\nNew Permissions:\n\`${newPermissionsAllowReadable}\`` }]);
 					}
 
 					if (oldPermissionsDenyReadable !== newPermissionsDenyReadable) {
-						changeEmbed.addField('Deny', `Old Permissions:\n\`${oldPermissionsDenyReadable}\`\n\nNew Permissions:\n\`${newPermissionsDenyReadable}\``);
+						changeEmbed.addFields([{ name: 'Deny', value: `Old Permissions:\n\`${oldPermissionsDenyReadable}\`\n\nNew Permissions:\n\`${newPermissionsDenyReadable}\`` }]);
 					}
 
 					newPermissionGroups.splice(j, 1);
@@ -115,31 +115,31 @@ module.exports = async function (oldChannel, newChannel) {
 
 			if (!groupIsThereAnymore) {
 				if (oldPermissionGroups[i].type === 'role') {
-					changeEmbed.addField('Permissions removed for', `<@&${oldPermissionGroups[i].id}>`);
+					changeEmbed.addFields([{ name: 'Permissions removed for', value: `<@&${oldPermissionGroups[i].id}>` }]);
 				} else {
-					changeEmbed.addField('Permissions removed for', `<@${oldPermissionGroups[i].id}>`);
+					changeEmbed.addFields([{ name: 'Permissions removed for', value: `<@${oldPermissionGroups[i].id}>` }]);
 				}
 			}
 		}
 
 		newPermissionGroups.forEach(permissionGroup => {
 			if (permissionGroup.type === 'role') {
-				changeEmbed.addField('Added permissions for', `<@&${permissionGroup.id}>`);
+				changeEmbed.addFields([{ name: 'Added permissions for', value: `<@&${permissionGroup.id}>` }]);
 			} else {
-				changeEmbed.addField('Added permissions for', `<@${permissionGroup.id}>`);
+				changeEmbed.addFields([{ name: 'Added permissions for', value: `<@${permissionGroup.id}>` }]);
 			}
 
 			let permissionsAllowReadable = 'None';
 			if (permissionGroup.allow.toArray().length > 0) {
 				permissionsAllowReadable = permissionGroup.allow.toArray().join(', ');
 			}
-			changeEmbed.addField('Allow', permissionsAllowReadable);
+			changeEmbed.addFields([{ name: 'Allow', value: permissionsAllowReadable }]);
 
 			let permissionsDenyReadable = 'None';
 			if (permissionGroup.deny.toArray().length > 0) {
 				permissionsDenyReadable = permissionGroup.deny.toArray().join(', ');
 			}
-			changeEmbed.addField('Deny', permissionsDenyReadable);
+			changeEmbed.addFields([{ name: 'Deny', value: permissionsDenyReadable }]);
 		});
 
 		loggingChannel.send({ embeds: [changeEmbed] });

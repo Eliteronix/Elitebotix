@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { Op } = require('sequelize');
@@ -13,7 +13,7 @@ module.exports = {
 	description: 'Sends an info card about the matchups between the specified players',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
@@ -853,7 +853,7 @@ module.exports = {
 
 		let files = [];
 		//Create as an attachment
-		const matchUpStats = new Discord.MessageAttachment(canvas.toBuffer(), `osu-matchup-${team1.join('-')}-${team2.join('-')}.png`);
+		const matchUpStats = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-matchup-${team1.join('-')}-${team2.join('-')}.png` });
 
 		files.push(matchUpStats);
 
@@ -1123,7 +1123,7 @@ module.exports = {
 
 			const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
 
-			const matchupWinrateChart = new Discord.MessageAttachment(imageBuffer, `osu-matchup-${team1.join('-')}-vs-${team2.join('-')}.png`);
+			const matchupWinrateChart = new Discord.AttachmentBuilder(imageBuffer, { name: `osu-matchup-${team1.join('-')}-vs-${team2.join('-')}.png` });
 
 			files.push(matchupWinrateChart);
 
@@ -1228,7 +1228,7 @@ module.exports = {
 
 			const scoresImageBuffer = await canvasRenderService.renderToBuffer(scoresConfiguration);
 
-			const scoresMatchupWinrateChart = new Discord.MessageAttachment(scoresImageBuffer, `osu-matchup-${team1.join('-')}-vs-${team2.join('-')}.png`);
+			const scoresMatchupWinrateChart = new Discord.AttachmentBuilder(scoresImageBuffer, { name: `osu-matchup-${team1.join('-')}-vs-${team2.join('-')}.png` });
 
 			files.push(scoresMatchupWinrateChart);
 
@@ -1258,13 +1258,13 @@ module.exports = {
 			mapsPlayedReadable[1] = `----------${team2Names.join(' ')}----------\n${mapsPlayedReadable[1]}`;
 
 			// eslint-disable-next-line no-undef
-			mapsPlayedReadable = new Discord.MessageAttachment(Buffer.from(mapsPlayedReadable.join('\n\n\n\n'), 'utf-8'), `indirect-matchups-${team1.join('-')}-vs-${team2.join('-')}.txt`);
+			mapsPlayedReadable = new Discord.AttachmentBuilder(Buffer.from(mapsPlayedReadable.join('\n\n\n\n'), 'utf-8'), { name: `indirect-matchups-${team1.join('-')}-vs-${team2.join('-')}.txt` });
 			files.push(mapsPlayedReadable);
 		}
 
 		if (matchesPlayed.length) {
 			// eslint-disable-next-line no-undef
-			matchesPlayed = new Discord.MessageAttachment(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), `multi-matches-${team1.join('-')}-vs-${team2.join('-')}.txt`);
+			matchesPlayed = new Discord.AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${team1.join('-')}-vs-${team2.join('-')}.txt` });
 			files.push(matchesPlayed);
 		}
 

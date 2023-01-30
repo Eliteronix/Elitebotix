@@ -12,7 +12,7 @@ module.exports = {
 			const channel = await c.channels.cache.get(args[0]);
 
 			if (channel) {
-				const msg = await channel.messages.fetch(args[1]).catch(async () => {
+				const msg = await channel.messages.fetch({ message: args[1] }).catch(async () => {
 					//Nothing
 				});
 
@@ -90,7 +90,7 @@ module.exports = {
 				}
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'vote.png');
+				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'vote.png' });
 
 				await msg.channel.send({ content: `Results for: \`${args[2]}\``, files: [attachment] });
 			}

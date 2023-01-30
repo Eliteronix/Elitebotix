@@ -4,7 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('canvas');
 const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap, getMapListCover } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const Sequelize = require('sequelize');
 const ObjectsToCsv = require('objects-to-csv');
@@ -15,7 +15,7 @@ module.exports = {
 	description: 'Sends an info card about the most played maps of the specified player',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
@@ -285,7 +285,7 @@ module.exports = {
 			await drawFooter(elements, totalPages, page);
 
 			//Create as an attachment
-			const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-mostplayed-maps-${amount}-${page}.png`)];
+			const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-mostplayed-maps-${amount}-${page}.png` })];
 
 			//Send the attachment
 			if (csv) {
@@ -321,7 +321,7 @@ module.exports = {
 						// eslint-disable-next-line no-undef
 						const buffer = Buffer.from(csv);
 						//Create as an attachment
-						files.push(new Discord.MessageAttachment(buffer, `osu-mostplayed-maps-${amount * page}.csv`));
+						files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-mostplayed-maps-${amount * page}.csv` }));
 
 						data = [];
 					}
@@ -373,7 +373,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-mostplayed-${user.id}.png`);
+				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-mostplayed-${user.id}.png` });
 
 				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBDiscordUsers Bancho linkedUser');
 				const linkedUser = await DBDiscordUsers.findOne({
@@ -437,7 +437,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-mostplayed-ripple-${user.id}.png`);
+				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-mostplayed-ripple-${user.id}.png` });
 
 				//Send attachment
 				await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });

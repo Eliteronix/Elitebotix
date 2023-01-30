@@ -127,14 +127,14 @@ module.exports = async function (reaction, user) {
 				if (channel) {
 					let message;
 					try {
-						message = await channel.messages.fetch(starBoardedMessage.starBoardMessageId);
+						message = await channel.messages.fetch({ message: starBoardedMessage.starBoardMessageId });
 					} catch (error) {
 						if (error.message !== 'Unknown Message') {
 							console.error(error);
 						}
 					}
 					if (message) {
-						const starBoardMessageEmbed = new Discord.MessageEmbed()
+						const starBoardMessageEmbed = new Discord.EmbedBuilder()
 							.setAuthor({ name: reaction.message.author.username, iconURL: reaction.message.author.displayAvatarURL() })
 							.setColor('#d9b51c')
 							.setDescription(reaction.message.content)
@@ -145,7 +145,7 @@ module.exports = async function (reaction, user) {
 
 						reaction.message.attachments.forEach(attachment => {
 							starBoardMessageEmbed
-								.addField('Attachment', attachment.name)
+								.addFields([{ name: 'Attachment', value: attachment.name }])
 								.setImage(attachment.url);
 						});
 						if (starBoardedMessage.starBoardMessageStarsQuantityMax <= reaction.count || starBoardedMessage.starBoardMessageStarsQuantityMax == null) {
@@ -166,7 +166,7 @@ module.exports = async function (reaction, user) {
 
 async function editEmbed(msg, reactionRolesHeader) {
 	//Create embed
-	const reactionRoleEmbed = new Discord.MessageEmbed()
+	const reactionRoleEmbed = new Discord.EmbedBuilder()
 		.setColor(reactionRolesHeader.reactionColor)
 		.setTitle(reactionRolesHeader.reactionTitle)
 		.setThumbnail(reactionRolesHeader.reactionImage)
@@ -188,7 +188,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		//Get role object
 		let reactionRoleName = msg.guild.roles.cache.get(reactionRole.roleId);
 		//Add field to embed
-		reactionRoleEmbed.addField(reactionRole.emoji + ': ' + reactionRoleName.name, reactionRole.description);
+		reactionRoleEmbed.addFields([{ name: reactionRole.emoji + ': ' + reactionRoleName.name, value: reactionRole.description }]);
 	});
 
 	//Get the Id of the message
@@ -207,7 +207,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		return console.error(e);
 	}
 	//Get the message object
-	const embedMessage = await embedChannel.messages.fetch(embedMessageId);
+	const embedMessage = await embedChannel.messages.fetch({ message: embedMessageId });
 	//Edit the message
 	embedMessage.edit(reactionRoleEmbed);
 

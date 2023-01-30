@@ -36,7 +36,7 @@ module.exports = async function (msg) {
 			content = msg.content;
 		}
 
-		const changeEmbed = new Discord.MessageEmbed()
+		const changeEmbed = new Discord.EmbedBuilder()
 			.setColor('#0099ff')
 			.setAuthor({ name: `${msg.author.username}#${msg.author.discriminator}`, iconURL: msg.author.displayAvatarURL() })
 			.setDescription('A message has been deleted')
@@ -51,7 +51,7 @@ module.exports = async function (msg) {
 
 		if (msg.attachments.array().length > 0) {
 			msg.attachments.forEach(attachment => {
-				changeEmbed.addField('Attachment', attachment.name);
+				changeEmbed.addFields([{ name: 'Attachment', value: attachment.name }]);
 			});
 		}
 

@@ -1,5 +1,5 @@
 const { populateMsgFromInteraction, logMatchCreation, getOsuUserServerMode, logDatabaseQueries, getNextMap, addMatchMessage } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { DBDiscordUsers, DBOsuMultiScores, DBProcessQueue, } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
@@ -9,7 +9,7 @@ module.exports = {
 	description: 'Hosts an automated lobby ingame',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 60,
 	tags: 'osu',

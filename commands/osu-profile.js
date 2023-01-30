@@ -4,7 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('canvas');
 const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { Op } = require('sequelize');
 const { developers, showUnknownInteractionError } = require('../config.json');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
@@ -14,7 +14,7 @@ module.exports = {
 	description: 'Sends an info card about the specified player',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
@@ -140,7 +140,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 				await drawAvatar(elements);
 
 				//Create as an attachment
-				const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-profile-${getGameModeName(mode)}-${user.id}.png`)];
+				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` })];
 
 				if (showGraph) {
 					let graph = await getRankHistoryGraph(user.id, mode);
@@ -246,7 +246,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 				await drawAvatar(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-profile-${getGameModeName(mode)}-${user.id}.png`);
+				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
 
 				//Send attachment
 				let sentMessage = await msg.channel.send({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
@@ -757,5 +757,5 @@ async function getRankHistoryGraph(osuUserId, mode) {
 
 	const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
 
-	return new Discord.MessageAttachment(imageBuffer, `rankHistory-osu-${osuUserId}.png`);
+	return new Discord.AttachmentBuilder(imageBuffer, { name: `rankHistory-osu-${osuUserId}.png` });
 }

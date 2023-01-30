@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Canvas = require('canvas');
 const { fitTextOnLeftCanvas } = require('../utils');
 const { DBProcessQueue } = require('../dbObjects');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
 	description: 'Start a vote / poll',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 30,
 	tags: 'general',
@@ -162,7 +162,7 @@ module.exports = {
 		}
 
 		//Create as an attachment
-		const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'vote.png');
+		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'vote.png' });
 
 		const pollMessage = await interaction.channel.send({ content: 'Vote for the options by using the reactions below the image!', files: [attachment] });
 

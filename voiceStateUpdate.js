@@ -38,7 +38,7 @@ module.exports = async function (oldMember, newMember) {
 				return;
 			}
 
-			const changeEmbed = new Discord.MessageEmbed()
+			const changeEmbed = new Discord.EmbedBuilder()
 				.setColor('#0099ff')
 				.setAuthor({ name: `${member.user.username}#${member.user.discriminator}`, iconURL: member.user.displayAvatarURL() })
 				.setDescription(`<@${member.user.id}> has been updated!`)
@@ -84,7 +84,7 @@ module.exports = async function (oldMember, newMember) {
 				return;
 			}
 
-			const changeEmbed = new Discord.MessageEmbed()
+			const changeEmbed = new Discord.EmbedBuilder()
 				.setColor('#0099ff')
 				.setAuthor({ name: `${member.user.username}#${member.user.discriminator}`, iconURL: member.user.displayAvatarURL() })
 				.setDescription(`<@${member.user.id}> has been updated!`)
@@ -130,7 +130,7 @@ module.exports = async function (oldMember, newMember) {
 				return;
 			}
 
-			const changeEmbed = new Discord.MessageEmbed()
+			const changeEmbed = new Discord.EmbedBuilder()
 				.setColor('#0099ff')
 				.setAuthor({ name: `${member.user.username}#${member.user.discriminator}`, iconURL: member.user.displayAvatarURL() })
 				.setDescription(`<@${member.user.id}> has joined a voice channel!`)
@@ -169,7 +169,7 @@ module.exports = async function (oldMember, newMember) {
 				return;
 			}
 
-			const changeEmbed = new Discord.MessageEmbed()
+			const changeEmbed = new Discord.EmbedBuilder()
 				.setColor('#0099ff')
 				.setAuthor({ name: `${member.user.username}#${member.user.discriminator}`, iconURL: member.user.displayAvatarURL() })
 				.setDescription(`<@${member.user.id}> has left a voice channel!`)

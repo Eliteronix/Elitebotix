@@ -27,7 +27,7 @@ module.exports = async function (oldEmoji, newEmoji) {
 			console.error(error);
 		}
 
-		const changeEmbed = new Discord.MessageEmbed()
+		const changeEmbed = new Discord.EmbedBuilder()
 			.setColor('#0099ff')
 			.setDescription(`${newEmoji.name} has been updated`)
 			.setImage(newEmoji.url)

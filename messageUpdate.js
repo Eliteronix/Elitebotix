@@ -31,7 +31,7 @@ module.exports = async function (oldMsg, newMsg) {
 			console.error(error);
 		}
 
-		const changeEmbed = new Discord.MessageEmbed()
+		const changeEmbed = new Discord.EmbedBuilder()
 			.setColor('#0099ff')
 			.setAuthor({ name: `${newMsg.author.username}#${newMsg.author.discriminator}`, iconURL: newMsg.author.displayAvatarURL() })
 			.setDescription('A message has been updated')
@@ -44,7 +44,7 @@ module.exports = async function (oldMsg, newMsg) {
 			.setFooter({ text: 'Eventname: messageupdate' });
 
 		if (oldMsg.content !== newMsg.content) {
-			changeEmbed.addField('Content', `\`${oldMsg.content}\` -> \`${newMsg.content}\``);
+			changeEmbed.addFields([{ name: 'Content', value: `\`${oldMsg.content}\` -> \`${newMsg.content}\`` }]);
 
 			channel.send({ embeds: [changeEmbed] });
 		}

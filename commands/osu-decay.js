@@ -1,6 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { logDatabaseQueries, humanReadable } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op, Sequelize } = require('sequelize');
@@ -10,7 +10,7 @@ module.exports = {
 	description: 'Calculates how long it would take for a player to decay from their current rank',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
 	tags: 'osu',

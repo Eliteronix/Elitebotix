@@ -384,7 +384,7 @@ module.exports = {
 				const mapsOfTheDayChannel = await c.channels.cache.get(channelId);
 				if (mapsOfTheDayChannel) {
 					const Discord = require('discord.js');
-					const mappoolEmbed = new Discord.MessageEmbed()
+					const mappoolEmbed = new Discord.EmbedBuilder()
 						.setColor('#C45686')
 						.setTitle(title)
 						.setDescription(description)
@@ -402,7 +402,7 @@ module.exports = {
 							}
 							const embedName = `${mapPrefix} ${mappoolInOrder[i].artist} - ${mappoolInOrder[i].title} | [${mappoolInOrder[i].version}]`;
 							const embedValue = `${Math.round(mappoolInOrder[i].difficulty.rating * 100) / 100}* | ${Math.floor(mappoolInOrder[i].length.total / 60)}:${(mappoolInOrder[i].length.total % 60).toString().padStart(2, '0')} | [Website](<https://osu.ppy.sh/b/${mappoolInOrder[i].id}>) | osu! direct: <osu://b/${mappoolInOrder[i].id}>`;
-							mappoolEmbed.addField(embedName, embedValue);
+							mappoolEmbed.addFields([{ name: embedName, value: embedValue }]);
 						}
 					}
 					mapsOfTheDayChannel.send('The new mappool is out!\nThe bot will send you a DM in a moment. Please follow the instructions given.');

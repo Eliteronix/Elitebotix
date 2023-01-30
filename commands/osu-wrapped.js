@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const osu = require('node-osu');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
 const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague } = require('../utils');
@@ -10,9 +10,9 @@ const Discord = require('discord.js');
 module.exports = {
 	name: 'osu-wrapped',
 	description: 'Sums up the year in osu! for a user',
-	// permissions: Permissions.FLAGS.MANAGE_GUILD,
+	// permissions: PermissionsBitField.Flags.SendMessages,
 	// permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 15,
 	tags: 'osu',
@@ -510,7 +510,7 @@ module.exports = {
 		}
 
 		//Create as an attachment
-		const files = [new Discord.MessageAttachment(canvas.toBuffer(), `osu-wrapped-${osuUser.osuUserId}-${year}.png`)];
+		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-wrapped-${osuUser.osuUserId}-${year}.png` })];
 
 		return interaction.editReply({ content: ' ', files: files });
 	},

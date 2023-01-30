@@ -1,5 +1,5 @@
 const { populateMsgFromInteraction, getOsuUserServerMode, pause, logDatabaseQueries, getMods, humanReadable, getMapListCover } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
 const { DBOsuBeatmaps, DBDiscordUsers } = require('../dbObjects');
@@ -12,7 +12,7 @@ module.exports = {
 	description: 'Allows you to play a bingo match',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.ATTACH_FILES, Permissions.FLAGS.SEND_MESSAGES],
+	botPermissions: [PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 15,
 	tags: 'osu',
@@ -528,7 +528,7 @@ async function refreshMessage(message, mappool, lastRefresh) {
 		}
 	}
 
-	const bingoCard = new Discord.MessageAttachment(canvas.toBuffer(), 'bingo.png');
+	const bingoCard = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bingo.png' });
 	try {
 		await message.fetch();
 		await message.edit({ content: reply, files: [bingoCard] });

@@ -1,6 +1,6 @@
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
 	description: 'Sends current time of the given location',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.EMBED_LINKS, Permissions.FLAGS.SEND_MESSAGES],
+	botPermissions: [PermissionsBitField.Flags.EmbedLinks, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send messages and link embeds',
 	cooldown: 5,
 	tags: 'misc',
@@ -54,7 +54,7 @@ module.exports = {
 			//have to do this because .toLocaleString doesnt work with json2.time (because json2.time is a string and not a date format)
 			let time = new Date(json2.time);
 
-			const timeEmbed = new Discord.MessageEmbed();
+			const timeEmbed = new Discord.EmbedBuilder();
 			timeEmbed.setColor('#7289DA')
 				.addFields(
 					// eslint-disable-next-line indent

@@ -11487,7 +11487,7 @@ module.exports = {
 					// eslint-disable-next-line no-undef
 					const buffer = Buffer.from(csv);
 					//Create as an attachment
-					const attachment = new Discord.MessageAttachment(buffer, `${msg.guild.name}-tournament-topplays.csv`);
+					const attachment = new Discord.AttachmentBuilder(buffer, { name: `${msg.guild.name}-tournament-topplays.csv` });
 
 					await msg.reply({ content: `${msg.guild.name} - Tournament Top Plays`, files: [attachment] });
 					data = [];

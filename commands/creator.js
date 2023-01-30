@@ -1,6 +1,6 @@
 //Require discord.js module
-const { MessageAttachment, MessageEmbed } = require('discord.js');
-const { Permissions } = require('discord.js');
+const { AttachmentBuilder, EmbedBuilder } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const Canvas = require('canvas');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -9,7 +9,7 @@ module.exports = {
 	description: 'Sends an info card about the developers',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 15,
 	tags: 'general',
@@ -36,11 +36,11 @@ module.exports = {
 		const roddyAvatar = await Canvas.loadImage(roddyUser.displayAvatarURL({ format: 'jpg' }));
 		ctx.drawImage(roddyAvatar, 133, 0, 128, canvas.height);
 
-		const file = new MessageAttachment(canvas.toBuffer(), 'profileImages.jpg');
+		const file = new AttachmentBuilder(canvas.toBuffer(), { name: 'profileImages.jpg' });
 
 
 		//Create new embed
-		const creatorInfoEmbed = new MessageEmbed()
+		const creatorInfoEmbed = new EmbedBuilder()
 			.setColor('#0492C2')
 			.setTitle('Developers info card')
 			.setDescription('We are working on this bot during our free time -\nfeel free to support us by using the links below.')

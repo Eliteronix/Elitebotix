@@ -1,14 +1,14 @@
 const { DBGuilds } = require('../dbObjects');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { logDatabaseQueries } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'toggletickets',
 	description: 'Toggles the tickets setting for the server',
-	permissions: Permissions.FLAGS.MANAGE_GUILD,
+	permissions: PermissionsBitField.Flags.ManageGuild,
 	permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MANAGE_ROLES],
+	botPermissions: [PermissionsBitField.Flags.ManageChannels, PermissionsBitField.Flags.ManageRoles],
 	botPermissionsTranslated: 'Manage Channels and Manage Roles',
 	cooldown: 5,
 	tags: 'server-admin',

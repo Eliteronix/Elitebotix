@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBOsuTourneyFollows } = require('../dbObjects');
 const osu = require('node-osu');
 const { showUnknownInteractionError } = require('../config.json');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { getOsuPlayerName } = require('../utils');
 const { Op } = require('sequelize');
 
@@ -10,7 +10,7 @@ module.exports = {
 	description: 'Allows following osu! users',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
 	tags: 'osu',

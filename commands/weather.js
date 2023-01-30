@@ -3,7 +3,7 @@ const Canvas = require('canvas');
 const weather = require('weather-js');
 const util = require('util');
 const { pause, populateMsgFromInteraction, fitTextOnMiddleCanvas } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { DBDiscordUsers } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -12,7 +12,7 @@ module.exports = {
 	description: 'Sends info about the weather of the given location',
 	//permissions: 'KICK_MEMBERS',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.ATTACH_FILES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'misc',
@@ -163,7 +163,7 @@ module.exports = {
 						ctx.drawImage(weatherPic, 25, 25, 100, 100);
 
 						//Create as an attachment
-						const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `elitebotix-weather-${weather.location.name}.png`);
+						const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `elitebotix-weather-${weather.location.name}.png` });
 
 						if (msg.id) {
 							msg.channel.send({ content: `Weather for ${weather.location.name}`, files: [attachment] });

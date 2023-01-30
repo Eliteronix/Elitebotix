@@ -324,7 +324,7 @@ module.exports = {
 				if (i === 0) {
 					processingMessage.delete();
 				}
-				await msg.reply({ content: `${type} Duel Rating History for ${osuUser.osuName}`, files: [new Discord.MessageAttachment(imageBuffer, `duelRatingHistory-${osuUser.osuUserId}.png`)] });
+				await msg.reply({ content: `${type} Duel Rating History for ${osuUser.osuName}`, files: [new Discord.AttachmentBuilder(imageBuffer, { name: `duelRatingHistory-${osuUser.osuUserId}.png` })] });
 			}
 		} else {
 			msg.reply('Invalid command');

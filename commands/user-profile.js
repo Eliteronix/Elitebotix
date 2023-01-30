@@ -1,6 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const { logDatabaseQueries, getOsuPlayerName } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { developers } = require('../config.json');
 const Discord = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -10,7 +10,7 @@ module.exports = {
 	description: 'Sends an info card about the specified user',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,
 	tags: 'general',
@@ -77,7 +77,7 @@ async function sendUserEmbed(interaction, user) {
 	}
 
 	//Send embed
-	const userInfoEmbed = new Discord.MessageEmbed()
+	const userInfoEmbed = new Discord.EmbedBuilder()
 		.setColor('#7289DA')
 		.setTitle(`${customEmoji}${username} profile info card`)
 		.setThumbnail(`${user.displayAvatarURL({ format: 'png', dynamic: true })}`)

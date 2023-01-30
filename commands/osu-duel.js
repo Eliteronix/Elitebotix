@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
 const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
 const Canvas = require('canvas');
@@ -14,9 +14,9 @@ const ObjectsToCsv = require('objects-to-csv');
 module.exports = {
 	name: 'osu-duel',
 	description: 'Lets you play a match which is being reffed by the bot',
-	// permissions: Permissions.FLAGS.MANAGE_GUILD,
+	// permissions: PermissionsBitField.Flags.SendMessages,
 	// permissionsTranslated: 'Manage Server',
-	botPermissions: Permissions.FLAGS.SEND_MESSAGES,
+	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 15,
 	tags: 'osu',
@@ -733,7 +733,7 @@ module.exports = {
 				}
 
 				//Create as an attachment
-				const leagueRatings = new Discord.MessageAttachment(canvas.toBuffer(), `osu-league-ratings-${osuUser.id}.png`);
+				const leagueRatings = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-league-ratings-${osuUser.id}.png` });
 
 				let sentMessage = null;
 
@@ -992,7 +992,7 @@ module.exports = {
 							const buffer = Buffer.from(csv);
 							//Create as an attachment
 							// eslint-disable-next-line no-undef
-							csvFiles.push(new Discord.MessageAttachment(buffer, `duelRatings${csvFiles.length.toString().padStart(2, '0')}.csv`));
+							csvFiles.push(new Discord.AttachmentBuilder(buffer, { name: `duelRatings${csvFiles.length.toString().padStart(2, '0')}.csv` }));
 
 							data = [];
 						}
@@ -1302,7 +1302,7 @@ module.exports = {
 
 				const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
 
-				const attachment = new Discord.MessageAttachment(imageBuffer, 'expectedScores.png');
+				const attachment = new Discord.AttachmentBuilder(imageBuffer, { name: 'expectedScores.png' });
 
 				files.push(attachment);
 
@@ -1332,15 +1332,15 @@ module.exports = {
 				}
 
 				// eslint-disable-next-line no-undef
-				scores = new Discord.MessageAttachment(Buffer.from(scores.join('\n\n'), 'utf-8'), `osu-duel-scores-and-weights-${osuUser.id}.txt`);
+				scores = new Discord.AttachmentBuilder(Buffer.from(scores.join('\n\n'), 'utf-8'), { name: `osu-duel-scores-and-weights-${osuUser.id}.txt` });
 				files.push(scores);
 
 				// eslint-disable-next-line no-undef
-				stepData = new Discord.MessageAttachment(Buffer.from(stepData.join('\n\n'), 'utf-8'), `osu-duel-star-rating-group-weights-${osuUser.id}.txt`);
+				stepData = new Discord.AttachmentBuilder(Buffer.from(stepData.join('\n\n'), 'utf-8'), { name: `osu-duel-star-rating-group-weights-${osuUser.id}.txt` });
 				files.push(stepData);
 
 				// eslint-disable-next-line no-undef
-				multiMatches = new Discord.MessageAttachment(Buffer.from(multiMatches.join('\n'), 'utf-8'), `osu-duel-multimatches-${osuUser.id}.txt`);
+				multiMatches = new Discord.AttachmentBuilder(Buffer.from(multiMatches.join('\n'), 'utf-8'), { name: `osu-duel-multimatches-${osuUser.id}.txt` });
 				files.push(multiMatches);
 
 				let explaination = [];
@@ -1555,7 +1555,7 @@ module.exports = {
 
 				const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
 
-				const attachment = new Discord.MessageAttachment(imageBuffer, 'osu-league-spread.png');
+				const attachment = new Discord.AttachmentBuilder(imageBuffer, { name: 'osu-league-spread.png' });
 
 				let guildName = 'Global';
 

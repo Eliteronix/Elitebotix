@@ -712,13 +712,13 @@ module.exports = {
 			}
 
 			//Prepare official mappool message
-			const mappoolEmbed = new Discord.MessageEmbed()
+			const mappoolEmbed = new Discord.EmbedBuilder()
 				.setColor('#C45686')
 				.setTitle('Custom MOTD settings')
 				.setFooter({ text: `Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}` });
 
 			for (let i = 0; i < players.length; i++) {
-				mappoolEmbed.addField(`Player #${i + 1}`, `${players[i].name} | #${players[i].pp.rank}`, true);
+				mappoolEmbed.addFields([{ name: `Player #${i + 1}`, value: `${players[i].name} | #${players[i].pp.rank}`, inline: true }]);
 			}
 
 			for (let i = 1; i < mappoolInOrder.length; i++) {
@@ -730,7 +730,7 @@ module.exports = {
 				}
 				const embedName = `${mapPrefix} ${mappoolInOrder[i].artist} - ${mappoolInOrder[i].title} | [${mappoolInOrder[i].version}]`;
 				const embedValue = `${Math.round(mappoolInOrder[i].difficulty.rating * 100) / 100}* | ${Math.floor(mappoolInOrder[i].length.total / 60)}:${(mappoolInOrder[i].length.total % 60).toString().padStart(2, '0')} | [Website](<https://osu.ppy.sh/b/${mappoolInOrder[i].id}>) | osu! direct: <osu://b/${mappoolInOrder[i].id}>`;
-				mappoolEmbed.addField(embedName, embedValue);
+				mappoolEmbed.addFields([{ name: embedName, value: embedValue }]);
 			}
 
 			interaction.editReply({ embeds: [mappoolEmbed] });
@@ -1029,7 +1029,7 @@ module.exports = {
 			}
 
 			//Prepare official mappool message
-			const mappoolEmbed = new Discord.MessageEmbed()
+			const mappoolEmbed = new Discord.EmbedBuilder()
 				.setColor('#C45686')
 				.setTitle('Custom MOTD settings')
 				.setDescription('Sign up by reacting with ✅ in the next 2 minutes')
@@ -1044,7 +1044,7 @@ module.exports = {
 				}
 				const embedName = `${mapPrefix} ${mappoolInOrder[i].artist} - ${mappoolInOrder[i].title} | [${mappoolInOrder[i].version}]`;
 				const embedValue = `${Math.round(mappoolInOrder[i].difficulty.rating * 100) / 100}* | ${Math.floor(mappoolInOrder[i].length.total / 60)}:${(mappoolInOrder[i].length.total % 60).toString().padStart(2, '0')} | [Website](<https://osu.ppy.sh/b/${mappoolInOrder[i].id}>) | osu! direct: <osu://b/${mappoolInOrder[i].id}>`;
-				mappoolEmbed.addField(embedName, embedValue);
+				mappoolEmbed.addFields([{ name: embedName, value: embedValue }]);
 			}
 
 			let embedMessage = await interaction.editReply({ embeds: [mappoolEmbed] });
@@ -1071,14 +1071,14 @@ module.exports = {
 					discordUserIds.push(user.id);
 
 					//Edit embed
-					const mappoolEmbed = new Discord.MessageEmbed()
+					const mappoolEmbed = new Discord.EmbedBuilder()
 						.setColor('#C45686')
 						.setTitle('Custom MOTD settings')
 						.setDescription('Sign up by reacting with ✅ in the next 2 minutes')
 						.setFooter({ text: `Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}` });
 
 					for (let i = 0; i < discordUsers.length; i++) {
-						mappoolEmbed.addField(`Player #${i + 1}`, `${discordUsers[i].osuName} | #${discordUsers[i].osuRank}`, true);
+						mappoolEmbed.addFields([{ name: `Player #${i + 1}`, value: `${discordUsers[i].osuName} | #${discordUsers[i].osuRank}`, inline: true }]);
 					}
 
 					for (let i = 1; i < mappoolInOrder.length; i++) {
@@ -1090,7 +1090,7 @@ module.exports = {
 						}
 						const embedName = `${mapPrefix} ${mappoolInOrder[i].artist} - ${mappoolInOrder[i].title} | [${mappoolInOrder[i].version}]`;
 						const embedValue = `${Math.round(mappoolInOrder[i].difficulty.rating * 100) / 100}* | ${Math.floor(mappoolInOrder[i].length.total / 60)}:${(mappoolInOrder[i].length.total % 60).toString().padStart(2, '0')} | [Website](<https://osu.ppy.sh/b/${mappoolInOrder[i].id}>) | osu! direct: <osu://b/${mappoolInOrder[i].id}>`;
-						mappoolEmbed.addField(embedName, embedValue);
+						mappoolEmbed.addFields([{ name: embedName, value: embedValue }]);
 					}
 
 					interaction.editReply({ embeds: [mappoolEmbed] });
@@ -1109,13 +1109,13 @@ module.exports = {
 				}
 
 				//Edit embed
-				const mappoolEmbed = new Discord.MessageEmbed()
+				const mappoolEmbed = new Discord.EmbedBuilder()
 					.setColor('#C45686')
 					.setTitle('Custom MOTD settings [In Progress]')
 					.setFooter({ text: `Mappool length: ${Math.floor(mappoolLength / 60)}:${(mappoolLength % 60).toString().padStart(2, '0')} | Estimated game length: ${Math.floor(gameLength / 60)}:${(gameLength % 60).toString().padStart(2, '0')}` });
 
 				for (let i = 0; i < discordUsers.length; i++) {
-					mappoolEmbed.addField(`Player #${i + 1}`, `${discordUsers[i].osuName} | #${discordUsers[i].osuRank}`, true);
+					mappoolEmbed.addFields([{ name: `Player #${i + 1}`, value: `${discordUsers[i].osuName} | #${discordUsers[i].osuRank}`, inline: true }]);
 				}
 
 				for (let i = 1; i < mappoolInOrder.length; i++) {
@@ -1127,7 +1127,7 @@ module.exports = {
 					}
 					const embedName = `${mapPrefix} ${mappoolInOrder[i].artist} - ${mappoolInOrder[i].title} | [${mappoolInOrder[i].version}]`;
 					const embedValue = `${Math.round(mappoolInOrder[i].difficulty.rating * 100) / 100}* | ${Math.floor(mappoolInOrder[i].length.total / 60)}:${(mappoolInOrder[i].length.total % 60).toString().padStart(2, '0')} | [Website](<https://osu.ppy.sh/b/${mappoolInOrder[i].id}>) | osu! direct: <osu://b/${mappoolInOrder[i].id}>`;
-					mappoolEmbed.addField(embedName, embedValue);
+					mappoolEmbed.addFields([{ name: embedName, value: embedValue }]);
 				}
 
 				interaction.editReply({ embeds: [mappoolEmbed] });

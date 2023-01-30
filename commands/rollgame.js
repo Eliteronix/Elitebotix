@@ -1,12 +1,12 @@
 const { populateMsgFromInteraction } = require('../utils');
-const { Permissions, MessageEmbed } = require('discord.js');
+const { PermissionsBitField, EmbedBuilder } = require('discord.js');
 
 module.exports = {
 	name: 'rollgame',
 	description: 'Play the rollgame against someone or the bot',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.EMBED_LINKS],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 30,
 	tags: 'misc',
@@ -22,7 +22,7 @@ module.exports = {
 
 		let players = [msg.author.id];
 
-		const rollgameEmbed = new MessageEmbed()
+		const rollgameEmbed = new EmbedBuilder()
 			.setColor('#187bcd')
 			.setTitle('Rollgame')
 			.setDescription('Players take turns rolling the previously rolled number - starting at 1000000.\nFirst to roll 1 wins')
@@ -30,10 +30,10 @@ module.exports = {
 
 		//Add playerNames
 		for (let i = 0; i < players.length; i++) {
-			rollgameEmbed.addField(`Player ${i + 1}`, `<@${players[i]}>`, true);
+			rollgameEmbed.addFields([{ name: `Player ${i + 1}`, value: `<@${players[i]}>`, inline: true }]);
 		}
 
-		rollgameEmbed.addField('Instructions', 'React with 🎲 or type `join` to join the lobby.\nReact with 🎲 or type `start` if you created the lobby.');
+		rollgameEmbed.addFields([{ name: 'Instructions', value: 'React with 🎲 or type `join` to join the lobby.\nReact with 🎲 or type `start` if you created the lobby.' }]);
 
 		let sentMessage = await msg.channel.send({ embeds: [rollgameEmbed] });
 		await sentMessage.react('🎲');
@@ -161,7 +161,7 @@ function rollMax(max) {
 }
 
 async function updateEmbed(embedMessage, players, rounds, instructions, edit) {
-	const rollgameEmbed = new MessageEmbed()
+	const rollgameEmbed = new EmbedBuilder()
 		.setColor('#187bcd')
 		.setTitle('Rollgame')
 		.setDescription('Players take turns rolling the previously rolled number - starting at 1000000.\nFirst to roll 1 wins')
@@ -173,17 +173,17 @@ async function updateEmbed(embedMessage, players, rounds, instructions, edit) {
 	//Add playerNames
 	for (let i = 0; i < players.length; i++) {
 		if (typeof players[i] === 'string') {
-			rollgameEmbed.addField(`Player ${i + 1}`, `<@${players[i]}>`, true);
+			rollgameEmbed.addFields([{ name: `Player ${i + 1}`, value: `<@${players[i]}>`, inline: true }]);
 			fieldAmount++;
 		} else {
-			rollgameEmbed.addField(`Player ${i + 1}`, `<@${players[i][0]}> (${players[i][1]})`, true);
+			rollgameEmbed.addFields([{ name: `Player ${i + 1}`, value: `<@${players[i][0]}> (${players[i][1]})`, inline: true }]);
 			fieldAmount++;
 		}
 	}
 
 	//Add rounds
 	if (rounds.length) {
-		rollgameEmbed.addField('Start', '1000000');
+		rollgameEmbed.addFields([{ name: 'Start', value: '1000000' }]);
 		fieldAmount++;
 	}
 
@@ -194,13 +194,13 @@ async function updateEmbed(embedMessage, players, rounds, instructions, edit) {
 	}
 
 	for (let i = startValue; i < rounds.length; i++) {
-		rollgameEmbed.addField(`Round ${i + 1}`, `<@${players[i % players.length][0]}> - ${rounds[i]}`);
+		rollgameEmbed.addFields([{ name: `Round ${i + 1}`, value: `<@${players[i % players.length][0]}> - ${rounds[i]}` }]);
 	}
 
 	if (rounds.length && rounds[rounds.length - 1] === 1) {
-		rollgameEmbed.addField('Winner', instructions);
+		rollgameEmbed.addFields([{ name: 'Winner', value: instructions }]);
 	} else {
-		rollgameEmbed.addField('Instructions', instructions);
+		rollgameEmbed.addFields([{ name: 'Instructions', value: instructions }]);
 	}
 
 	if (edit) {

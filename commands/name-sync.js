@@ -1,5 +1,5 @@
 const { populateMsgFromInteraction, getGuildPrefix, logDatabaseQueries } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -8,7 +8,7 @@ module.exports = {
 	description: 'Allows you to sync discord player names to ingame names (and ranks)',
 	permissions: 'MANAGE_GUILD',
 	permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES, Permissions.FLAGS.MANAGE_NICKNAMES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ManageNicknames],
 	botPermissionsTranslated: 'Send Messages and Manage Nicknames',
 	cooldown: 10,
 	tags: 'server-admin',

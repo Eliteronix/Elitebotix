@@ -1,12 +1,12 @@
 const { DBGuilds } = require('../dbObjects');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { logDatabaseQueries } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'goodbye-message',
 	description: 'Sends the specified message into the channel the user used the command in as soon as a member leaves.',
-	permissions: [Permissions.FLAGS.MANAGE_GUILD, Permissions.FLAGS.SEND_MESSAGES],
+	permissions: [PermissionsBitField.Flags.ManageGuild, PermissionsBitField.Flags.SendMessages],
 	permissionsTranslated: 'Send Messages and Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',

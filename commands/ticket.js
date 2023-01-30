@@ -1,7 +1,7 @@
 const { DBGuilds, DBTickets, DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const Discord = require('discord.js');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -9,7 +9,7 @@ module.exports = {
 	description: 'Ticket manager',
 	// permissions: 'MANAGE_GUILD',
 	// permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MANAGE_ROLES, Permissions.FLAGS.SEND_MESSAGES],
+	botPermissions: [PermissionsBitField.Flags.ManageChannels, PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages, Manage Channels and Manage Roles',
 	cooldown: 10,
 	tags: 'general',
@@ -349,7 +349,7 @@ module.exports = {
 
 			await setPermissions(ticketChannel, ticket);
 
-			const messageEmbed = new Discord.MessageEmbed()
+			const messageEmbed = new Discord.EmbedBuilder()
 				.setColor('#03C04A')
 				.setAuthor({ name: `${msg.author.username}#${msg.author.discriminator}`, iconURL: msg.author.displayAvatarURL() })
 				.setDescription(`<@${msg.author.id}> created a ticket.`)

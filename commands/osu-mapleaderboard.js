@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
 const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -11,7 +11,7 @@ module.exports = {
 	description: 'Sends an info card about the leaderboard on the specified beatmap',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.ATTACH_FILES, Permissions.FLAGS.SEND_MESSAGES],
+	botPermissions: [PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 10,
 	tags: 'osu',
@@ -231,7 +231,7 @@ module.exports = {
 
 		await drawFooter(elements);
 
-		const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-map-leaderboard-${dbBeatmap.beatmapId}-${dbBeatmap.mods}.png`);
+		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-map-leaderboard-${dbBeatmap.beatmapId}-${dbBeatmap.mods}.png` });
 
 		let files = [attachment];
 

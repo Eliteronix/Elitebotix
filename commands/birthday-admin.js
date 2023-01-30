@@ -1,4 +1,4 @@
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { DBGuilds, DBBirthdayGuilds } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
 const { logDatabaseQueries } = require('../utils');
@@ -8,7 +8,7 @@ module.exports = {
 	description: 'Manage birthday logging on your server',
 	permissions: 'MANAGE_GUILD',
 	permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.SEND_MESSAGES],
+	botPermissions: [PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 10,
 	tags: 'server-admin',

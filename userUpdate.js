@@ -42,7 +42,7 @@ module.exports = async function (oldUser, newUser) {
 						}
 
 						const Discord = require('discord.js');
-						const changeEmbed = new Discord.MessageEmbed()
+						const changeEmbed = new Discord.EmbedBuilder()
 							.setColor('#0099ff')
 							.setAuthor({ name: `${newUser.username}#${newUser.discriminator}`, iconURL: newUser.displayAvatarURL() })
 							.setDescription(`<@${newUser.id}> has updated their profile!`)
@@ -115,7 +115,7 @@ module.exports = async function (oldUser, newUser) {
 						}
 
 						const Discord = require('discord.js');
-						const changeEmbed = new Discord.MessageEmbed()
+						const changeEmbed = new Discord.EmbedBuilder()
 							.setColor('#0099ff')
 							.setAuthor({ name: `${newUser.username}#${newUser.discriminator}`, iconURL: newUser.displayAvatarURL() })
 							.setDescription(`<@${newUser.id}> has updated their profile!`)
@@ -188,7 +188,7 @@ module.exports = async function (oldUser, newUser) {
 						}
 
 						const Discord = require('discord.js');
-						const changeEmbed = new Discord.MessageEmbed()
+						const changeEmbed = new Discord.EmbedBuilder()
 							.setColor('#0099ff')
 							.setAuthor({ name: `${newUser.username}#${newUser.discriminator}`, iconURL: oldUser.displayAvatarURL() })
 							.setDescription(`<@${newUser.id}> has updated their profile!`)

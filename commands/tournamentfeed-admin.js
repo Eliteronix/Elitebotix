@@ -41,57 +41,57 @@ module.exports = {
 				let post = forumPosts[i];
 
 				//Create embed
-				const embed = new Discord.MessageEmbed()
+				const embed = new Discord.EmbedBuilder()
 					.setTitle(post.title);
 
-				embed.addField('Forum Post', post.forumPost);
+				embed.addFields([{ name: 'Forum Post', value: post.forumPost }]);
 
 				if (post.discord) {
-					embed.addField('Discord', post.discord);
+					embed.addFields([{ name: 'Discord', value: post.discord }]);
 				}
 
 				if (post.host) {
-					embed.addField('Host', post.host);
+					embed.addFields([{ name: 'Host', value: post.host }]);
 				}
 
 				if (post.format) {
-					embed.addField('Format', post.format);
+					embed.addFields([{ name: 'Format', value: post.format }]);
 				} else {
-					embed.addField('Format', 'No format specified');
+					embed.addFields([{ name: 'Format', value: 'No format specified' }]);
 				}
 
 				if (post.rankRange) {
-					embed.addField('Rank Range', post.rankRange);
+					embed.addFields([{ name: 'Rank Range', value: post.rankRange }]);
 				} else {
-					embed.addField('Rank Range', 'No rank range specified');
+					embed.addFields([{ name: 'Rank Range', value: 'No rank range specified' }]);
 				}
 
 				if (post.gamemode) {
-					embed.addField('Gamemode', post.gamemode);
+					embed.addFields([{ name: 'Gamemode', value: post.gamemode }]);
 				} else {
-					embed.addField('Gamemode', 'No gamemode specified');
+					embed.addFields([{ name: 'Gamemode', value: 'No gamemode specified' }]);
 				}
 
 				if (post.region) {
-					embed.addField('Region', post.region);
+					embed.addFields([{ name: 'Region', value: post.region }]);
 				}
 
 				if (post.notes) {
-					embed.addField('Notes', post.notes);
+					embed.addFields([{ name: 'Notes', value: post.notes }]);
 				} else {
-					embed.addField('Notes', 'No notes specified');
+					embed.addFields([{ name: 'Notes', value: 'No notes specified' }]);
 				}
 
 				if (post.bws) {
-					embed.addField('BWS', 'Yes');
+					embed.addFields([{ name: 'BWS', value: 'Yes' }]);
 				} else {
-					embed.addField('BWS', 'No');
+					embed.addFields([{ name: 'BWS', value: 'No' }]);
 				}
 
 				if (post.badged) {
-					embed.addField('Badged', 'Yes');
+					embed.addFields([{ name: 'Badged', value: 'Yes' }]);
 				} else {
-					embed.addField('Badged', 'No');
+					embed.addFields([{ name: 'Badged', value: 'No' }]);
 				}
 
 				if (post.posted) {
@@ -113,51 +113,51 @@ module.exports = {
 			}
 
 			//Create embed
-			const embed = new Discord.MessageEmbed()
+			const embed = new Discord.EmbedBuilder()
 				.setTitle(forumPost.title);
 
-			embed.addField('Forum Post', forumPost.forumPost);
+			embed.addFields([{ name: 'Forum Post', value: forumPost.forumPost }]);
 
 			if (forumPost.discord) {
-				embed.addField('Discord', forumPost.discord);
+				embed.addFields([{ name: 'Discord', value: forumPost.discord }]);
 			}
 
 			if (forumPost.host) {
-				embed.addField('Host', forumPost.host);
+				embed.addFields([{ name: 'Host', value: forumPost.host }]);
 			}
 
 			if (forumPost.format) {
-				embed.addField('Format', forumPost.format);
+				embed.addFields([{ name: 'Format', value: forumPost.format }]);
 			} else {
-				embed.addField('Format', 'No format specified');
+				embed.addFields([{ name: 'Format', value: 'No format specified' }]);
 			}
 
 			if (forumPost.rankRange) {
-				embed.addField('Rank Range', forumPost.rankRange);
+				embed.addFields([{ name: 'Rank Range', value: forumPost.rankRange }]);
 			} else {
-				embed.addField('Rank Range', 'No rank range specified');
+				embed.addFields([{ name: 'Rank Range', value: 'No rank range specified' }]);
 			}
 
 			if (forumPost.gamemode) {
-				embed.addField('Gamemode', forumPost.gamemode);
+				embed.addFields([{ name: 'Gamemode', value: forumPost.gamemode }]);
 			} else {
-				embed.addField('Gamemode', 'No gamemode specified');
+				embed.addFields([{ name: 'Gamemode', value: 'No gamemode specified' }]);
 			}
 
 			if (forumPost.bws) {
-				embed.addField('BWS', 'Yes');
+				embed.addFields([{ name: 'BWS', value: 'Yes' }]);
 			} else {
-				embed.addField('BWS', 'No');
+				embed.addFields([{ name: 'BWS', value: 'No' }]);
 			}
 
 			if (forumPost.badged) {
-				embed.addField('Badged', 'Yes');
+				embed.addFields([{ name: 'Badged', value: 'Yes' }]);
 			} else {
-				embed.addField('Badged', 'No');
+				embed.addFields([{ name: 'Badged', value: 'No' }]);
 			}
 
 			if (forumPost.notes) {
-				embed.addField('Notes', forumPost.notes);
+				embed.addFields([{ name: 'Notes', value: forumPost.notes }]);
 			}
 
 			if (forumPost.posted) {
@@ -370,65 +370,65 @@ module.exports = {
 			await forumPost.save();
 
 			//Create embed
-			const embed = new Discord.MessageEmbed()
+			const embed = new Discord.EmbedBuilder()
 				.setTitle(forumPost.title);
 
-			embed.addField('Forum Post', forumPost.forumPost);
+			embed.addFields([{ name: 'Forum Post', value: forumPost.forumPost }]);
 
 			if (forumPost.discord) {
-				embed.addField('Discord', forumPost.discord);
+				embed.addFields([{ name: 'Discord', value: forumPost.discord }]);
 			}
 
 			if (forumPost.host) {
-				embed.addField('Host', forumPost.host);
+				embed.addFields([{ name: 'Host', value: forumPost.host }]);
 			}
 
 			if (forumPost.format) {
-				embed.addField('Format', forumPost.format);
+				embed.addFields([{ name: 'Format', value: forumPost.format }]);
 			} else {
-				embed.addField('Format', 'No format specified');
+				embed.addFields([{ name: 'Format', value: 'No format specified' }]);
 			}
 
 			if (forumPost.rankRange) {
-				embed.addField('Rank Range', forumPost.rankRange);
+				embed.addFields([{ name: 'Rank Range', value: forumPost.rankRange }]);
 			} else {
-				embed.addField('Rank Range', 'No rank range specified');
+				embed.addFields([{ name: 'Rank Range', value: 'No rank range specified' }]);
 			}
 
 			if (forumPost.gamemode) {
-				embed.addField('Gamemode', forumPost.gamemode);
+				embed.addFields([{ name: 'Gamemode', value: forumPost.gamemode }]);
 			} else {
-				embed.addField('Gamemode', 'No gamemode specified');
+				embed.addFields([{ name: 'Gamemode', value: 'No gamemode specified' }]);
 			}
 
 			if (forumPost.region) {
-				embed.addField('Region', forumPost.region);
+				embed.addFields([{ name: 'Region', value: forumPost.region }]);
 			}
 
 			if (forumPost.notes) {
-				embed.addField('Notes', forumPost.notes);
+				embed.addFields([{ name: 'Notes', value: forumPost.notes }]);
 			} else {
-				embed.addField('Notes', 'No notes specified');
+				embed.addFields([{ name: 'Notes', value: 'No notes specified' }]);
 			}
 
 			if (forumPost.bws) {
-				embed.addField('BWS', 'Yes');
+				embed.addFields([{ name: 'BWS', value: 'Yes' }]);
 			} else {
-				embed.addField('BWS', 'No');
+				embed.addFields([{ name: 'BWS', value: 'No' }]);
 			}
 
 			if (forumPost.badged) {
-				embed.addField('Badged', 'Yes');
+				embed.addFields([{ name: 'Badged', value: 'Yes' }]);
 			} else {
-				embed.addField('Badged', 'No');
+				embed.addFields([{ name: 'Badged', value: 'No' }]);
 			}
 
 			if (forumPost.outdated) {
-				embed.addField('Outdated', 'Yes');
+				embed.addFields([{ name: 'Outdated', value: 'Yes' }]);
 			}
 
 			if (forumPost.noTournament) {
-				embed.addField('Not a tournament', 'Yes');
+				embed.addFields([{ name: 'Not a tournament', value: 'Yes' }]);
 			}
 
 			if (forumPost.posted) {

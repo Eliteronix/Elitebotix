@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
 const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries, getScoreModpool, humanReadable } = require('../utils');
-const { Permissions } = require('discord.js');
+const { PermissionsBitField } = require('discord.js');
 const { DBOsuMultiScores } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
@@ -11,7 +11,7 @@ module.exports = {
 	description: 'Sends an info card about the specified beatmap',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
-	botPermissions: [Permissions.FLAGS.ATTACH_FILES, Permissions.FLAGS.SEND_MESSAGES],
+	botPermissions: [PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
@@ -139,7 +139,7 @@ async function getBeatmap(msg, interaction, beatmap, tournament, accuracy) {
 	await drawBackground(elements);
 
 	//Create as an attachment
-	const attachment = new Discord.MessageAttachment(canvas.toBuffer(), `osu-beatmap-${beatmap.beatmapId}-${beatmap.mods}.png`);
+	const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-beatmap-${beatmap.beatmapId}-${beatmap.mods}.png` });
 
 	if (!interaction) {
 		processingMessage.delete();
@@ -216,7 +216,7 @@ async function getBeatmap(msg, interaction, beatmap, tournament, accuracy) {
 
 	if (tournament) {
 		// eslint-disable-next-line no-undef
-		matches = new Discord.MessageAttachment(Buffer.from(matches.join('\n'), 'utf-8'), `tourney-scores-${beatmap.beatmapId}.txt`);
+		matches = new Discord.AttachmentBuilder(Buffer.from(matches.join('\n'), 'utf-8'), { name: `tourney-scores-${beatmap.beatmapId}.txt` });
 		files.push(matches);
 	}
 
