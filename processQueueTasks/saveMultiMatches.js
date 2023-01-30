@@ -91,12 +91,7 @@ module.exports = {
 						}, { context: { message: `<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done`, matchID: parseInt(matchID) } });
 					}
 					//Go next if match found and ended / too long going already
-					// eslint-disable-next-line no-undef
-					if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
-						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
-					} else {
-						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
-					}
+					processQueueEntry.additions = `${parseInt(matchID) + 1}`;
 
 					let date = new Date();
 					processQueueEntry.date = date;
@@ -110,12 +105,7 @@ module.exports = {
 						DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: date });
 					}
 
-					// eslint-disable-next-line no-undef
-					if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
-						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
-					} else {
-						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
-					}
+					processQueueEntry.additions = `${parseInt(matchID) + 1}`;
 
 					let now = new Date();
 					processQueueEntry.date = now;
@@ -123,17 +113,12 @@ module.exports = {
 					return await processQueueEntry.save();
 				}
 
-				return await processIncompleteScores(osuApi, client, processQueueEntry, '959499050246344754', 10);
+				return await processIncompleteScores(osuApi, client, processQueueEntry, '959499050246344754', 5);
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
 					//Go next if match not found
-					// eslint-disable-next-line no-undef
-					if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
-						processQueueEntry.additions = `${parseInt(matchID) + 1}`;
-					} else {
-						processQueueEntry.additions = `${parseInt(matchID) - 1}`;
-					}
+					processQueueEntry.additions = `${parseInt(matchID) + 1}`;
 					let date = new Date();
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
@@ -148,12 +133,7 @@ module.exports = {
 						let json = JSON.parse(isolatedContent);
 						if (Date.parse(json.events[json.events.length - 1].timestamp) - Date.parse(json.match.start_time) > 86400000) {
 							//Go next if over 24 hours long game
-							// eslint-disable-next-line no-undef
-							if (process.env.SERVER === 'Live' || process.env.SERVER === 'Dev') {
-								processQueueEntry.additions = `${parseInt(matchID) + 1}`;
-							} else {
-								processQueueEntry.additions = `${parseInt(matchID) - 1}`;
-							}
+							processQueueEntry.additions = `${parseInt(matchID) + 1}`;
 							let date = new Date();
 							processQueueEntry.date = date;
 							processQueueEntry.beingExecuted = false;
