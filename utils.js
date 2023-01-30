@@ -1390,6 +1390,7 @@ module.exports = {
 						[Op.notLike]: 'o!mm%:%',
 					}
 				},
+				tourneyMatch: true,
 			},
 			group: ['beatmapId'],
 			order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
