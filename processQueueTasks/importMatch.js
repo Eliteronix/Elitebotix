@@ -81,7 +81,7 @@ module.exports = {
 
 				if (playedRound) {
 					let date = new Date();
-					date.setUTCMinutes(date.getUTCMinutes() + 5);
+					date.setUTCMinutes(date.getUTCMinutes() + 10);
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
 					return await processQueueEntry.save();
