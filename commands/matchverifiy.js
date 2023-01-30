@@ -33,6 +33,7 @@ module.exports = {
 					verifiedAt: null,
 				},
 				group: ['matchName'],
+				limit: 10000,
 			});
 
 			let acronyms = [];
