@@ -215,7 +215,164 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				}
 			});
 	} else {
-		secondsToWait = secondsToWait + 60;
+		// Verify matches instead
+		logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores verify matches');
+		let incompleteMatch = await DBOsuMultiScores.findOne({
+			where: {
+				tourneyMatch: true,
+				warmup: false,
+				verifiedAt: null,
+				verifiedBy: null,
+				matchName: {
+					[Op.startsWith]: 'o!mm'
+				},
+			},
+			order: [
+				['updatedAt', 'ASC']
+			]
+		});
+
+		if (incompleteMatch) {
+			// Fetch the match and check if the match was created by MaidBot
+			await osuApi.getMatch({ mp: incompleteMatch.matchId })
+				.then(async (match) => {
+					try {
+						await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
+							.then(async (res) => {
+								let htmlCode = await res.text();
+								htmlCode = htmlCode.replace(/&quot;/gm, '"');
+								const matchRunningRegex = /{"match".+,"current_game_id":\d+}/gm;
+								const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
+								const matchesRunning = matchRunningRegex.exec(htmlCode);
+								const matchesPaused = matchPausedRegex.exec(htmlCode);
+
+								let regexMatch = null;
+								if (matchesRunning && matchesRunning[0]) {
+									regexMatch = matchesRunning[0];
+								}
+
+								if (matchesPaused && matchesPaused[0]) {
+									regexMatch = matchesPaused[0];
+								}
+
+								if (regexMatch) {
+									let json = JSON.parse(regexMatch);
+
+									if (json.events[0].user_id === 16173747 && json.events[0].detail.type === 'match-created') {
+										await DBOsuMultiScores.update({
+											tourneyMatch: true,
+											verifiedAt: new Date(),
+											verifiedBy: 31050083, // Elitebotix
+											verificationComment: 'Match created by MaidBot',
+										}, {
+											where: {
+												matchId: match.id,
+											},
+										});
+
+										let guildId = '727407178499096597';
+										let channelId = '1068905937219362826';
+
+										// eslint-disable-next-line no-undef
+										if (process.env.SERVER === 'Dev') {
+											guildId = '800641468321759242';
+											channelId = '1070013925334204516';
+										}
+
+										client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
+											let guild = await c.guilds.cache.get(guildId);
+
+											if (!guild) {
+												return;
+											}
+
+											let channel = await guild.channels.cache.get(channelId);
+
+											if (!channel) {
+												return;
+											}
+
+											await channel.send(message);
+										}, {
+											context: {
+												guildId: guildId,
+												channelId: channelId,
+												message: `Valid: True | Comment: Match created by MaidBot | https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
+											}
+										});
+									} else {
+										await DBOsuMultiScores.update({
+											verifiedBy: 31050083, // Elitebotix
+											verificationComment: 'Not determinable if match was created by MaidBot',
+										}, {
+											where: {
+												matchId: match.id,
+											},
+										});
+									}
+								}
+							});
+					} catch (e) {
+						if (!e.message.endsWith('reason: Client network socket disconnected before secure TLS connection was established')
+							&& !e.message.endsWith('reason: read ECONNRESET')) {
+							console.error(e);
+						}
+						// Go same if error
+						secondsToWait = secondsToWait + 60;
+					}
+				})
+				.catch(async (err) => {
+					if (err.message === 'Not found') {
+						//If its not found anymore it should be fake because it must be created in a different way
+						await DBOsuMultiScores.update({
+							tourneyMatch: false,
+							verifiedAt: new Date(),
+							verifiedBy: 31050083, // Elitebotix
+							verificationComment: 'o!mm not found - Fake because MaidBot uses !mp make to create matches',
+						}, {
+							where: {
+								matchId: incompleteMatch.matchId,
+							},
+						});
+
+						let guildId = '727407178499096597';
+						let channelId = '1068905937219362826';
+
+						// eslint-disable-next-line no-undef
+						if (process.env.SERVER === 'Dev') {
+							guildId = '800641468321759242';
+							channelId = '1070013925334204516';
+						}
+
+						client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
+							let guild = await c.guilds.cache.get(guildId);
+
+							if (!guild) {
+								return;
+							}
+
+							let channel = await guild.channels.cache.get(channelId);
+
+							if (!channel) {
+								return;
+							}
+
+							await channel.send(message);
+						}, {
+							context: {
+								guildId: guildId,
+								channelId: channelId,
+								message: `Valid: False | Comment: o!mm not found - Fake because MaidBot uses !mp make to create matches | https://osu.ppy.sh/mp/${incompleteMatch.matchId} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
+							}
+						});
+					} else {
+						// Go same if error
+						secondsToWait = secondsToWait + 60;
+					}
+				});
+		} else {
+			secondsToWait = secondsToWait + 60;
+		}
 	}
 
 	let date = new Date();

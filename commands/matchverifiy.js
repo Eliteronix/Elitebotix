@@ -259,6 +259,9 @@ module.exports = {
 					// eslint-disable-next-line no-undef
 					if (process.env.SERVER === 'Live') {
 						interaction.guild.channels.cache.get('1068905937219362826').send(`${tourneyMatchChangedString} - Valid: ${valid} | Comment: ${comment} | https://osu.ppy.sh/mp/${matchId} was verified by ${interaction.user.username}#${interaction.user.discriminator} (<@${interaction.user.id}> | <https://osu.ppy.sh/users/${discordUser.osuUserId}>)`);
+						// eslint-disable-next-line no-undef
+					} else if (process.env.SERVER === 'Dev') {
+						interaction.guild.channels.cache.get('1070013925334204516').send(`${tourneyMatchChangedString} - Valid: ${valid} | Comment: ${comment} | https://osu.ppy.sh/mp/${matchId} was verified by ${interaction.user.username}#${interaction.user.discriminator} (<@${interaction.user.id}> | <https://osu.ppy.sh/users/${discordUser.osuUserId}>)`);
 					}
 
 					await interaction.followUp(`Updated ${scores.length} scores for https://osu.ppy.sh/mp/${matchId}`);
