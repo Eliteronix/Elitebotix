@@ -1,7 +1,7 @@
 const { DBOsuMultiScores, DBDiscordUsers, DBDuelRatingHistory } = require('../dbObjects');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { Op } = require('sequelize');
-const { getIDFromPotentialOsuLink } = require('../utils');
+const { getIDFromPotentialOsuLink, humanReadable } = require('../utils');
 
 module.exports = {
 	name: 'matchverify',
@@ -139,6 +139,20 @@ module.exports = {
 				});
 			}
 
+			let unverifiedScoresLeft = await DBOsuMultiScores.count({
+				where: {
+					matchEndDate: {
+						[Op.not]: null,
+					},
+					verifiedAt: null,
+				},
+			});
+
+			//Add footer
+			unverifiedScoresEmbed.footer = {
+				text: `There are ${humanReadable(unverifiedScoresLeft)} unverified scores left.`,
+			};
+
 			await interaction.editReply({ embeds: [unverifiedScoresEmbed] });
 		} else if (interaction.options._subcommand === 'update') {
 			let matchIds = interaction.options.getString('id').split(/ +/);
@@ -162,91 +176,95 @@ module.exports = {
 			await interaction.editReply('Processing...');
 
 			for (let matchIndex = 0; matchIndex < matchIds.length; matchIndex++) {
-				let matchId = getIDFromPotentialOsuLink(matchIds[matchIndex]);
+				try {
+					let matchId = getIDFromPotentialOsuLink(matchIds[matchIndex]);
 
-				let scores = await DBOsuMultiScores.findAll({
-					where: {
-						matchId: matchId,
-					},
-				});
+					let scores = await DBOsuMultiScores.findAll({
+						where: {
+							matchId: matchId,
+						},
+					});
 
-				if (!developers.includes(interaction.user.id)) {
+					if (!developers.includes(interaction.user.id)) {
+						for (let i = 0; i < scores.length; i++) {
+							let score = scores[i];
+							if (score.osuUserId === discordUser.osuUserId) {
+								await interaction.followUp('You cannot verify your own scores.');
+								continue;
+							}
+						}
+					}
+
+					let updatedUsers = [];
+					let tourneyMatchChanged = false;
+					let tourneyMatchChangedString = '';
+
 					for (let i = 0; i < scores.length; i++) {
 						let score = scores[i];
-						if (score.osuUserId === discordUser.osuUserId) {
-							await interaction.followUp('You cannot verify your own scores.');
-							continue;
+
+						if (!updatedUsers.includes(score.osuUserId)) {
+							updatedUsers.push(score.osuUserId);
 						}
-					}
-				}
 
-				let updatedUsers = [];
-				let tourneyMatchChanged = false;
-				let tourneyMatchChangedString = '';
-
-				for (let i = 0; i < scores.length; i++) {
-					let score = scores[i];
-
-					if (!updatedUsers.includes(score.osuUserId)) {
-						updatedUsers.push(score.osuUserId);
-					}
-
-					if (score.tourneyMatch !== valid) {
-						tourneyMatchChanged = true;
-						tourneyMatchChangedString = '**Changed**: ';
-					}
-				}
-
-				await DBOsuMultiScores.update({
-					tourneyMatch: valid,
-					verifiedAt: new Date(),
-					verifiedBy: discordUser.osuUserId,
-					verificationComment: comment,
-				}, {
-					where: {
-						matchId: matchId,
-					},
-				});
-
-				if (tourneyMatchChanged) {
-					let ratingHistories = await DBDuelRatingHistory.findAll({
-						where: {
-							osuUserId: {
-								[Op.in]: updatedUsers,
-							},
-						},
-					});
-
-					for (let i = 0; i < ratingHistories.length; i++) {
-						let ratingHistory = ratingHistories[i];
-
-						let ratingHistoryDate = new Date();
-						ratingHistoryDate.setUTCDate(ratingHistory.date);
-						ratingHistoryDate.setUTCMonth(ratingHistory.month - 1);
-						ratingHistoryDate.setUTCFullYear(ratingHistory.year);
-
-						if (ratingHistoryDate > new Date(scores[0].matchStartDate)) {
-							await ratingHistory.destroy();
+						if (score.tourneyMatch !== valid) {
+							tourneyMatchChanged = true;
+							tourneyMatchChangedString = '**Changed**: ';
 						}
 					}
 
-					await DBDiscordUsers.update({
-						lastDuelRatingUpdate: null,
+					await DBOsuMultiScores.update({
+						tourneyMatch: valid,
+						verifiedAt: new Date(),
+						verifiedBy: discordUser.osuUserId,
+						verificationComment: comment,
 					}, {
 						where: {
-							osuUserId: {
-								[Op.in]: updatedUsers,
-							},
+							matchId: matchId,
 						},
 					});
-				}
 
-				// eslint-disable-next-line no-undef
-				if (process.env.SERVER === 'Live') {
-					interaction.guild.channels.cache.get('1068905937219362826').send(`${tourneyMatchChangedString} - Valid: ${valid} | Comment: ${comment} | https://osu.ppy.sh/mp/${matchId} was verified by ${interaction.user.username}#${interaction.user.discriminator} (<@${interaction.user.id}> | <https://osu.ppy.sh/users/${discordUser.osuUserId}>)`);
-				}
+					if (tourneyMatchChanged) {
+						let ratingHistories = await DBDuelRatingHistory.findAll({
+							where: {
+								osuUserId: {
+									[Op.in]: updatedUsers,
+								},
+							},
+						});
 
-				await interaction.followUp(`Updated ${scores.length} scores for https://osu.ppy.sh/mp/${matchId}`);
+						for (let i = 0; i < ratingHistories.length; i++) {
+							let ratingHistory = ratingHistories[i];
+
+							let ratingHistoryDate = new Date();
+							ratingHistoryDate.setUTCDate(ratingHistory.date);
+							ratingHistoryDate.setUTCMonth(ratingHistory.month - 1);
+							ratingHistoryDate.setUTCFullYear(ratingHistory.year);
+
+							if (ratingHistoryDate > new Date(scores[0].matchStartDate)) {
+								await ratingHistory.destroy();
+							}
+						}
+
+						await DBDiscordUsers.update({
+							lastDuelRatingUpdate: null,
+						}, {
+							where: {
+								osuUserId: {
+									[Op.in]: updatedUsers,
+								},
+							},
+						});
+					}
+
+					// eslint-disable-next-line no-undef
+					if (process.env.SERVER === 'Live') {
+						interaction.guild.channels.cache.get('1068905937219362826').send(`${tourneyMatchChangedString} - Valid: ${valid} | Comment: ${comment} | https://osu.ppy.sh/mp/${matchId} was verified by ${interaction.user.username}#${interaction.user.discriminator} (<@${interaction.user.id}> | <https://osu.ppy.sh/users/${discordUser.osuUserId}>)`);
+					}
+
+					await interaction.followUp(`Updated ${scores.length} scores for https://osu.ppy.sh/mp/${matchId}`);
+				} catch (error) {
+					console.error(error);
+				}
 			}
 
 			await interaction.editReply('Done processing.');
