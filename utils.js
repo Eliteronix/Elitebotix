@@ -5878,7 +5878,6 @@ async function saveOsuMultiScoresFunction(match) {
 					existingScore.scoringType = match.games[gameIndex].scoringType;
 					existingScore.mode = match.games[gameIndex].mode;
 					existingScore.beatmapId = match.games[gameIndex].beatmapId;
-					existingScore.tourneyMatch = tourneyMatch;
 					existingScore.evaluation = evaluation;
 					existingScore.score = match.games[gameIndex].scores[scoreIndex].score;
 					existingScore.gameRawMods = match.games[gameIndex].raw_mods;
@@ -5901,9 +5900,6 @@ async function saveOsuMultiScoresFunction(match) {
 					existingScore.perfect = match.games[gameIndex].scores[scoreIndex].perfect;
 					existingScore.teamType = match.games[gameIndex].teamType;
 					existingScore.team = match.games[gameIndex].scores[scoreIndex].team;
-					existingScore.verifiedAt = null;
-					existingScore.verifiedBy = null;
-					existingScore.verificationComment = null;
 					await existingScore.save();
 
 					//Set the tournament flags on the corresponding beatmap
