@@ -273,7 +273,9 @@ module.exports = {
 
 					await interaction.followUp(`Updated ${scores.length} scores for https://osu.ppy.sh/mp/${matchId}`);
 				} catch (error) {
-					console.error(error);
+					if (error.message !== 'Invalid Webhook Token') {
+						console.error(error);
+					}
 				}
 			}
 
