@@ -126,14 +126,14 @@ module.exports = {
 					.addFields([{ name: 'FreeMod Map: Not yet submitted', value: `Please submit a map by using \`${guildPrefix}${this.name} FM <ID>\`` }]);
 			}
 
-			if (msg.channel.type !== 'DM') {
+			if (msg.channel.type !== Discord.ChannelType.DM) {
 				submissionsEmbed.setFooter({ text: `This embed will automatically get deleted in 30 seconds to avoid leaking maps.\nYou can use '${guildPrefix}${this.name} list' in my DMs to send the embed without a timer.` });
 			}
 
 			if (msg.id) {
 				let sentMessage = await msg.reply({ embeds: [submissionsEmbed] });
 
-				if (msg.channel.type !== 'DM') {
+				if (msg.channel.type !== Discord.ChannelType.DM) {
 					await pause(30000);
 					const editEmbed = new Discord.EmbedBuilder()
 						.setTitle('The embed was automatically deleted to avoid leaking maps.')

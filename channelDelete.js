@@ -3,11 +3,11 @@ const { DBGuilds, DBTemporaryVoices } = require('./dbObjects');
 const { isWrongSystem, pause, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (channel) {
-	if (channel.type === 'DM') {
+	if (channel.type === Discord.ChannelType.DM) {
 		return;
 	}
 
-	if (isWrongSystem(channel.guild.id, channel.type === 'DM')) {
+	if (isWrongSystem(channel.guild.id, channel.type === Discord.ChannelType.DM)) {
 		return;
 	}
 
@@ -42,9 +42,9 @@ module.exports = async function (channel) {
 			.setTimestamp()
 			.setFooter({ text: 'Eventname: channeldelete' });
 
-		if (channel.type === 'voice') {
+		if (channel.type === Discord.ChannelType.GuildVoice) {
 			changeEmbed.addFields([{ name: 'Bitrate', value: channel.bitrate }, { name: 'User Limit', value: channel.userLimit }]);
-		} else if (channel.type === 'text') {
+		} else if (channel.type === Discord.ChannelType.GuildText) {
 			if (channel.topic) {
 				changeEmbed.addFields([{ name: 'Topic', value: channel.topic }]);
 			}

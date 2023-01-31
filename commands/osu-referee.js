@@ -4,6 +4,7 @@ const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, logDa
 const { PermissionsBitField } = require('discord.js');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
+const Discord = require('discord.js');
 
 module.exports = {
 	name: 'osu-referee',
@@ -43,7 +44,7 @@ module.exports = {
 			}
 
 			let channel = interaction.options.getChannel('channel');
-			if (channel.type !== 'GUILD_TEXT') {
+			if (channel.type !== Discord.ChannelType.GuildText) {
 				return interaction.followUp(`<#${channel.id}> is not a valid text channel.`);
 			}
 

@@ -1,4 +1,5 @@
 const { isWrongSystem } = require('./utils');
+const Discord = require('discord.js');
 
 module.exports = async function (guild) {
 	if (isWrongSystem(guild.id, false)) {
@@ -14,7 +15,7 @@ module.exports = async function (guild) {
 			if (generalChannel) {
 				generalChannel.send('Thanks for adding me to the server!\nUse </help:1064502107832594484> to get a list of commands!\nTo provide feedback please use </feedback:1064502027591364649>');
 			} else {
-				const otherChannel = guild.channels.cache.find(channel => channel.type === 'text' && channel.permissionsFor(guild.me).has('SEND_MESSAGES'));
+				const otherChannel = guild.channels.cache.find(channel => channel.type === Discord.ChannelType.GuildText && channel.permissionsFor(guild.me).has('SEND_MESSAGES'));
 				if (otherChannel) {
 					otherChannel.send('Thanks for adding me to the server!\nUse </help:1064502107832594484> to get a list of commands!\nTo provide feedback please use </feedback:1064502027591364649>');
 				}

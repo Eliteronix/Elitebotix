@@ -7,7 +7,7 @@ const { developers, salesmen } = require('./config.json');
 
 module.exports = async function (client, bancho, interaction) {
 	if (!interaction.isCommand()) return;
-	if (isWrongSystem(interaction.guildId, interaction.channel.type === 'DM')) {
+	if (isWrongSystem(interaction.guildId, interaction.channel.type === Discord.ChannelType.DM)) {
 		return;
 	}
 

@@ -13,7 +13,7 @@ module.exports = {
 		let guildPrefix;
 
 		//Check if the channel type is not a dm
-		if (msg.channel.type === 'DM') {
+		if (msg.channel.type === Discord.ChannelType.DM) {
 			//Set prefix to standard prefix
 			guildPrefix = prefix;
 		} else {
@@ -351,7 +351,7 @@ module.exports = {
 	},
 	updateServerUserActivity: async function (msg) {
 		try {
-			if (msg.channel.type !== 'DM') {
+			if (msg.channel.type !== Discord.ChannelType.DM) {
 				const now = new Date();
 				now.setSeconds(now.getSeconds() - 15);
 				logDatabaseQueriesFunction(3, 'utils.js DBServerUserActivity');
@@ -400,7 +400,7 @@ module.exports = {
 	},
 	getMessageUserDisplayname: async function (msg) {
 		let userDisplayName = msg.author.username;
-		if (msg.channel.type !== 'DM') {
+		if (msg.channel.type !== Discord.ChannelType.DM) {
 			const member = await msg.guild.members.fetch(msg.author.id);
 			const guildDisplayName = member.displayName;
 			if (guildDisplayName) {

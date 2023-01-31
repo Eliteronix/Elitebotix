@@ -3,6 +3,7 @@ const { DBProcessQueue } = require('../dbObjects');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
+const Discord = require('discord.js');
 
 module.exports = {
 	name: 'reminders',
@@ -68,7 +69,7 @@ module.exports = {
 			//Try DM'ing the user
 			return msg.author.send(message, { split: true })
 				.then(async () => {
-					if (msg.channel.type === 'DM') return;
+					if (msg.channel.type === Discord.ChannelType.DM) return;
 					msg.reply('You have received a DM with your pending reminders.');
 				})
 				.catch(() => {

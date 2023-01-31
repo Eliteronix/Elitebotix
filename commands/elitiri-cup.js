@@ -1,6 +1,7 @@
 const { DBDiscordUsers, DBElitiriCupSignUp, DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix, logDatabaseQueries, populateMsgFromInteraction } = require('../utils');
 const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.json');
+const Discord = require('discord.js');
 
 module.exports = {
 	name: 'elitiri-cup',
@@ -228,7 +229,7 @@ function sendMessage(msg, interaction, content) {
 	if (msg.id) {
 		return msg.author.send(content)
 			.then(() => {
-				if (msg.channel.type === 'DM') return;
+				if (msg.channel.type === Discord.ChannelType.DM) return;
 				msg.reply('I\'ve sent you a DM with some info!');
 			})
 			.catch(() => {

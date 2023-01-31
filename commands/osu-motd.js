@@ -745,7 +745,7 @@ module.exports = {
 			}
 
 			//Return if triggered in DMs
-			if (msg.channel.type === 'dm') {
+			if (msg.channel.type === Discord.ChannelType.DM) {
 				return msg.reply('Please use </osu-motd custom-react-to-play:1064502462448410644> in a server to set up the custom MOTD.');
 			}
 
@@ -1145,7 +1145,7 @@ module.exports = {
 function sendMessage(msg, content) {
 	msg.author.send(content)
 		.then(() => {
-			if (msg.channel.type === 'DM') return;
+			if (msg.channel.type === Discord.ChannelType.DM) return;
 			msg.reply('I\'ve sent you a DM with some info!');
 		})
 		.catch(() => {

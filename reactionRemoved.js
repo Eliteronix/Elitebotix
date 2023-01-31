@@ -7,7 +7,7 @@ const { isWrongSystem, logDatabaseQueries } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user) {
-	if (reaction.message.guild && isWrongSystem(reaction.message.guild.id, reaction.message.channel.type === 'DM')) {
+	if (reaction.message.guild && isWrongSystem(reaction.message.guild.id, reaction.message.channel.type === Discord.ChannelType.DM)) {
 		return;
 	}
 
@@ -23,7 +23,7 @@ module.exports = async function (reaction, user) {
 		}
 	}
 
-	if (reaction.message.channel.type === 'DM') {
+	if (reaction.message.channel.type === Discord.ChannelType.DM) {
 		return;
 	}
 

@@ -36,7 +36,7 @@ module.exports = async function (msg, bancho) {
 		msg.client.commands.set(command.name, command);
 	}
 
-	if (isWrongSystem(msg.guildId, msg.channel.type === 'DM')) {
+	if (isWrongSystem(msg.guildId, msg.channel.type === Discord.ChannelType.DM)) {
 		return;
 	}
 
@@ -70,7 +70,7 @@ module.exports = async function (msg, bancho) {
 	}
 
 	//Check permissions of the bot
-	if (msg.channel.type !== 'DM') {
+	if (msg.channel.type !== Discord.ChannelType.DM) {
 		const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch(msg.client.user.id));
 		if (!botPermissions || !botPermissions.has(PermissionsBitField.Flags.SendMessages) || !botPermissions.has(PermissionsBitField.Flags.ReadMessageHistory)) {
 			//The bot can't possibly answer the message
@@ -100,25 +100,25 @@ async function handleTicketStatus(msg) {
 		ticket.save();
 
 		//Move the channel to the correct category
-		let awaitingResponseCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Awaiting Response');
+		let awaitingResponseCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Awaiting Response');
 		if (!awaitingResponseCategory) {
-			awaitingResponseCategory = await msg.guild.channels.create('Tickets - Awaiting Response', { type: 'GUILD_CATEGORY' });
+			awaitingResponseCategory = await msg.guild.channels.create('Tickets - Awaiting Response', { type: Discord.ChannelType.GuildCategory });
 			await awaitingResponseCategory.permissionOverwrites.set([
 				{
 					id: msg.guild.roles.everyone.id,
 					deny: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'MANAGE_MESSAGES', 'SEND_TTS_MESSAGES'],
 				},
 			]);
-			let openCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Open');
+			let openCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Open');
 			let position = 0;
 			if (openCategory) {
 				position++;
 			}
-			let respondedCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Responded');
+			let respondedCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Responded');
 			if (respondedCategory) {
 				position++;
 			}
-			let inActionCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - In Action');
+			let inActionCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - In Action');
 			if (inActionCategory) {
 				position++;
 			}
@@ -155,19 +155,19 @@ async function handleTicketStatus(msg) {
 
 		await msg.channel.permissionOverwrites.set(permissions);
 
-		let openCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Open');
+		let openCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Open');
 		if (openCategory && !openCategory.children.first()) {
 			openCategory.delete();
 		}
-		let respondedCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Responded');
+		let respondedCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Responded');
 		if (respondedCategory && !respondedCategory.children.first()) {
 			respondedCategory.delete();
 		}
-		let inActionCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - In Action');
+		let inActionCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - In Action');
 		if (inActionCategory && !inActionCategory.children.first()) {
 			inActionCategory.delete();
 		}
-		let closedCategory = msg.guild.channels.cache.find(c => c.type === 'GUILD_CATEGORY' && c.name === 'Tickets - Closed');
+		let closedCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Closed');
 		if (closedCategory && !closedCategory.children.first()) {
 			closedCategory.delete();
 		}
