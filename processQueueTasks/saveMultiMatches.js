@@ -362,7 +362,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 							context: {
 								guildId: guildId,
 								channelId: channelId,
-								message: `**Changed** - Valid: False | Comment: o!mm not found - Fake because MaidBot uses !mp make to create matches | https://osu.ppy.sh/mp/${incompleteMatch.matchId} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
+								message: `**Changed**: - Valid: False | Comment: o!mm not found - Fake because MaidBot uses !mp make to create matches | https://osu.ppy.sh/mp/${incompleteMatch.matchId} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
 							}
 						});
 					} else {
