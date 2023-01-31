@@ -31,6 +31,7 @@ module.exports = {
 						[Op.not]: null,
 					},
 					verifiedAt: null,
+					tourneyMatch: true,
 				},
 				group: ['matchName'],
 				limit: 10000,
@@ -38,15 +39,15 @@ module.exports = {
 
 			let acronyms = [];
 			for (let i = 0; i < matchNames.length; i++) {
-				let acronym = matchNames[i].matchName.replace(/:.*/gm, '').trim();
+				let matchAcronym = matchNames[i].matchName.replace(/:.*/gm, '').trim();
 
-				let existingAcronym = acronyms.find((acronym) => acronym.acronym === acronym);
+				let existingAcronym = acronyms.find((acronym) => acronym.acronym === matchAcronym);
 
 				if (existingAcronym) {
 					existingAcronym.count++;
 				} else {
 					acronyms.push({
-						acronym: acronym,
+						acronym: matchAcronym,
 						count: 1,
 					});
 				}
@@ -64,6 +65,7 @@ module.exports = {
 						[Op.not]: null,
 					},
 					verifiedAt: null,
+					tourneyMatch: true,
 					[Op.or]: [
 						{
 							matchName: {
@@ -121,23 +123,13 @@ module.exports = {
 				order: [
 					['matchStartDate', 'DESC'],
 				],
-				limit: 25,
+				limit: 100,
 			});
 
 			let unverifiedScoresEmbed = {
 				title: 'Unverified Scores',
 				description: 'The following scores have not been verified yet.',
-				fields: [],
 			};
-
-			for (let i = 0; i < unverifiedScores.length; i++) {
-				let score = unverifiedScores[i];
-				unverifiedScoresEmbed.fields.push({
-					name: score.matchName,
-					value: `https://osu.ppy.sh/mp/${score.matchId}`,
-					inline: false,
-				});
-			}
 
 			let unverifiedScoresLeft = await DBOsuMultiScores.count({
 				where: {
@@ -146,14 +138,29 @@ module.exports = {
 					},
 					verifiedAt: null,
 				},
+				group: ['matchId'],
 			});
 
-			//Add footer
-			unverifiedScoresEmbed.footer = {
-				text: `There are ${humanReadable(unverifiedScoresLeft)} unverified scores left.`,
-			};
+			for (let i = 0; i < unverifiedScores.length; i++) {
+				if (i % 25 === 0 || i === unverifiedScores.length - 1) {
+					if (i !== 0) {
+						await interaction.followUp({ embeds: [unverifiedScoresEmbed] });
+					}
 
-			await interaction.editReply({ embeds: [unverifiedScoresEmbed] });
+					unverifiedScoresEmbed.footer = {
+						text: `There are ${humanReadable(unverifiedScoresLeft.length)} unverified matches left.`,
+					};
+
+					unverifiedScoresEmbed.fields = [];
+				}
+
+				let score = unverifiedScores[i];
+				unverifiedScoresEmbed.fields.push({
+					name: score.matchName,
+					value: `https://osu.ppy.sh/mp/${score.matchId}`,
+					inline: false,
+				});
+			}
 		} else if (interaction.options._subcommand === 'update') {
 			let matchIds = interaction.options.getString('id').split(/ +/);
 			let valid = interaction.options.getBoolean('valid');
