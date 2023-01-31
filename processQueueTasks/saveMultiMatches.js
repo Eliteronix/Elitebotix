@@ -371,7 +371,74 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					}
 				});
 		} else {
-			secondsToWait = secondsToWait + 60;
+			// Get all matchLogs that contain "Looking for new map..." and are not verified
+			const fs = require('fs');
+
+			let matchLogFiles = fs.readdirSync('./matchLogs');
+			let matchLogsToVerify = [];
+			for (let i = 0; i < matchLogFiles.length; i++) {
+				let matchLog = fs.readFileSync(`./matchLogs/${matchLogFiles[i]}`, 'utf8');
+
+				if (matchLog.includes('[Eliteronix]: Looking for new map...') || matchLog.includes('[Elitebotix]: Looking for new map...')) {
+					matchLogsToVerify.push(matchLogFiles[i].replace('.txt', ''));
+				}
+			}
+
+			let matchToVerify = await DBOsuMultiScores.findOne({
+				where: {
+					verifiedAt: null,
+					matchId: {
+						[Op.in]: matchLogsToVerify,
+					},
+				},
+			});
+
+			if (matchToVerify) {
+				// If there is a match to verify
+				await DBOsuMultiScores.update({
+					tourneyMatch: true,
+					verifiedAt: new Date(),
+					verifiedBy: 31050083, // Elitebotix
+					verificationComment: 'Elitebotix Duel Match',
+				}, {
+					where: {
+						matchId: matchToVerify.matchId,
+					},
+				});
+
+				let guildId = '727407178499096597';
+				let channelId = '1068905937219362826';
+
+				// eslint-disable-next-line no-undef
+				if (process.env.SERVER === 'Dev') {
+					guildId = '800641468321759242';
+					channelId = '1070013925334204516';
+				}
+
+				client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
+					let guild = await c.guilds.cache.get(guildId);
+
+					if (!guild) {
+						return;
+					}
+
+					let channel = await guild.channels.cache.get(channelId);
+
+					if (!channel) {
+						return;
+					}
+
+					await channel.send(message);
+				}, {
+					context: {
+						guildId: guildId,
+						channelId: channelId,
+						message: `Valid: True | Comment: Elitebotix Duel Match | https://osu.ppy.sh/mp/${matchToVerify.matchId} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
+					}
+				});
+			} else {
+				secondsToWait = secondsToWait + 60;
+			}
 		}
 	}
 
