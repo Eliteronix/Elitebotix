@@ -144,6 +144,10 @@ module.exports = {
 				embed.addFields([{ name: 'Gamemode', value: 'No gamemode specified' }]);
 			}
 
+			if (forumPost.region) {
+				embed.addFields([{ name: 'Region', value: forumPost.region }]);
+			}
+
 			if (forumPost.bws) {
 				embed.addFields([{ name: 'BWS', value: 'Yes' }]);
 			} else {
