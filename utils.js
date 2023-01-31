@@ -1583,7 +1583,7 @@ module.exports = {
 					if (beatmapIds.indexOf(`${result[0][i].beatmapId}-${result[0][i].mods}`) === -1) {
 						beatmapIds.push(`${result[0][i].beatmapId}-${result[0][i].mods}`);
 
-						await new Promise(resolve => setTimeout(resolve, 2000));
+						await new Promise(resolve => setTimeout(resolve, 500));
 
 						logDatabaseQueriesFunction(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries');
 						let duplicate = await DBOsuBeatmaps.findOne({
@@ -1597,7 +1597,7 @@ module.exports = {
 						// eslint-disable-next-line no-console
 						console.log('#', deleted, 'iteration', iterations, 'beatmapId', duplicate.beatmapId, 'mods', duplicate.mods, 'updatedAt', duplicate.updatedAt);
 
-						await new Promise(resolve => setTimeout(resolve, 2000));
+						await new Promise(resolve => setTimeout(resolve, 500));
 						await duplicate.destroy();
 					}
 				}
@@ -1639,7 +1639,7 @@ module.exports = {
 					if (gameIds.indexOf(`${result[0][i].gameId}-${result[0][i].osuUserId}`) === -1) {
 						gameIds.push(`${result[0][i].gameId}-${result[0][i].osuUserId}`);
 
-						await new Promise(resolve => setTimeout(resolve, 2000));
+						await new Promise(resolve => setTimeout(resolve, 500));
 
 						logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries');
 						let duplicate = await DBOsuMultiScores.findOne({
@@ -1653,7 +1653,7 @@ module.exports = {
 						// eslint-disable-next-line no-console
 						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'osuUserId', duplicate.osuUserId, 'matchStartDate', duplicate.matchStartDate, 'updatedAt', duplicate.updatedAt);
 
-						await new Promise(resolve => setTimeout(resolve, 2000));
+						await new Promise(resolve => setTimeout(resolve, 500));
 						await duplicate.destroy();
 					}
 				}
