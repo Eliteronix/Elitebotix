@@ -34,7 +34,7 @@ module.exports = {
 					tourneyMatch: true,
 				},
 				group: ['matchName'],
-				limit: 10000,
+				limit: 100000,
 			});
 
 			let acronyms = [];
@@ -120,11 +120,17 @@ module.exports = {
 					],
 				},
 				group: ['matchId', 'matchName'],
-				order: [
-					['matchStartDate', 'DESC'],
-				],
 				limit: 100,
 			});
+
+			// Order by acronym count DESC
+
+			let orderedUnverifiedScores = [];
+			for (let i = 0; i < acronyms.length; i++) {
+				let acronym = acronyms[i].acronym;
+				let acronymScores = unverifiedScores.filter((score) => score.matchName.includes(acronym));
+				orderedUnverifiedScores = orderedUnverifiedScores.concat(acronymScores);
+			}
 
 			let unverifiedScoresEmbed = {
 				title: 'Unverified Scores',
@@ -141,8 +147,8 @@ module.exports = {
 				group: ['matchId'],
 			});
 
-			for (let i = 0; i < unverifiedScores.length; i++) {
-				if (i % 25 === 0 || i === unverifiedScores.length - 1) {
+			for (let i = 0; i < orderedUnverifiedScores.length; i++) {
+				if (i % 25 === 0 || i === orderedUnverifiedScores.length - 1) {
 					if (i !== 0) {
 						await interaction.followUp({ embeds: [unverifiedScoresEmbed] });
 					}
@@ -154,7 +160,7 @@ module.exports = {
 					unverifiedScoresEmbed.fields = [];
 				}
 
-				let score = unverifiedScores[i];
+				let score = orderedUnverifiedScores[i];
 				unverifiedScoresEmbed.fields.push({
 					name: score.matchName,
 					value: `https://osu.ppy.sh/mp/${score.matchId}`,
