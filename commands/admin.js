@@ -28,36 +28,6 @@ module.exports = {
 		let manageRoles = (1 << 28).toString();
 
 		if (args[0] === 'guildCommands') {
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: '8ball',
-			// 		description: 'Answers with a random 8-Ball message',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'question',
-			// 				'description': 'The question that should be answered',
-			// 				'type': 3,
-			// 				'required': true
-			// 			}
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'avatar',
-			// 		description: 'Sends the avatar of the selected user',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'user',
-			// 				'description': 'The user whose avatar should be sent',
-			// 				'type': 6, // 6 is type USER
-			// 			}
-			// 		]
-			// 	}
-			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -5363,43 +5333,51 @@ module.exports = {
 			// 		]
 			// 	},
 			// });
-
 		} else if (args[0] === 'removeGuildCommands') {
 			const commands = await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.get();
 			for (let i = 0; i < commands.length; i++) {
 				await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands(commands[i].id).delete();
 			}
 		} else if (args[0] === 'globalCommands') {
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: '8ball',
-					description: 'Answers with a random 8-Ball message',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'question',
-							'description': 'The question that should be answered',
-							'type': 3,
-							'required': true
-						}
-					]
-				}
-			});
+			const { REST, Routes } = require('discord.js');
+			const fs = require('node:fs');
 
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'avatar',
-					description: 'Sends the avatar of the selected user',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'user',
-							'description': 'The user whose avatar should be sent',
-							'type': 6, // 6 is type USER
-						}
-					]
+			const commands = [];
+			// Grab all the command files from the commands directory you created earlier
+			const commandFiles = fs.readdirSync('./commands');
+
+			// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
+			for (const file of commandFiles) {
+				const command = require(`./${file}`);
+
+				if (command.tags !== 'debug') {
+					commands.push(command.data.toJSON());
 				}
-			});
+			}
+
+			// Construct and prepare an instance of the REST module
+			// eslint-disable-next-line no-undef
+			const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN);
+
+			// and deploy your commands!
+			(async () => {
+				try {
+					await msg.reply(`Started refreshing ${commands.length} application (/) commands.`);
+
+					// The put method is used to fully refresh all commands in the guild with the current set
+					const data = await rest.put(
+						Routes.applicationCommands(msg.client.user.id),
+						{ body: commands },
+					);
+
+					await msg.reply(`Successfully reloaded ${data.length} application (/) commands.`);
+				} catch (error) {
+					// And of course, make sure you catch and log any errors!
+					console.error(error);
+				}
+			})();
+
+			return;
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
