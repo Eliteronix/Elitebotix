@@ -130,7 +130,7 @@ module.exports = {
 					tourneyMatch: true,
 				},
 				group: ['matchName'],
-				limit: 100000,
+				limit: 25000,
 			});
 
 			let acronyms = [];
