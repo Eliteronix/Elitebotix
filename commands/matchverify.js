@@ -425,6 +425,11 @@ module.exports = {
 				}
 			}
 
+			// Sort by count
+			leaderboardData.sort((a, b) => {
+				return b.value - a.value;
+			});
+
 			for (let i = 0; i < leaderboardData.length; i++) {
 				let leaderboardDataItem = leaderboardData[i];
 

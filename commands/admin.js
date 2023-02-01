@@ -11793,12 +11793,14 @@ module.exports = {
 						{ body: [command] },
 					);
 
-					msg.reply('Successfully reloaded matchverify command.');
+					await msg.reply('Successfully reloaded matchverify command.');
 				} catch (error) {
 					// And of course, make sure you catch and log any errors!
 					console.error(error);
 				}
 			})();
+
+			return;
 		} else if (args[0] === 'remainingUsers') {
 			let count = await DBDiscordUsers.count({
 				where: {
