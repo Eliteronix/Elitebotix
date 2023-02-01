@@ -224,7 +224,7 @@ module.exports = {
 			let orderedUnverifiedScores = [];
 			for (let i = 0; i < acronyms.length; i++) {
 				let acronym = acronyms[i].acronym;
-				console.log(acronym);
+				console.log(acronyms[i]);
 				let acronymScores = unverifiedScores.filter((score) => score.matchName.startsWith(acronym));
 
 				console.log(acronymScores.map((score) => score.matchName));
