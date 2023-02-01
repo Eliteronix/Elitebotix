@@ -165,52 +165,52 @@ module.exports = {
 					[Op.or]: [
 						{
 							matchName: {
-								[Op.like]: `%${acronyms[0].acronym}%`,
+								[Op.like]: `${acronyms[0].acronym}:%`,
 							},
 						},
 						{
 							matchName: {
-								[Op.like]: `%${acronyms[1].acronym}%`,
+								[Op.like]: `${acronyms[1].acronym}:%`,
 							},
 						},
 						{
 							matchName: {
-								[Op.like]: `%${acronyms[2].acronym}%`,
+								[Op.like]: `${acronyms[2].acronym}:%`,
 							},
 						},
 						{
 							matchName: {
-								[Op.like]: `%${acronyms[3].acronym}%`,
+								[Op.like]: `${acronyms[3].acronym}:%`,
 							},
 						},
 						{
 							matchName: {
-								[Op.like]: `%${acronyms[4].acronym}%`,
+								[Op.like]: `${acronyms[4].acronym}:%`,
 							},
 						},
 						{
 							matchName: {
-								[Op.like]: `%${acronyms[5].acronym}%`,
+								[Op.like]: `${acronyms[5].acronym}:%`,
 							},
 						},
 						{
 							matchName: {
-								[Op.like]: `%${acronyms[6].acronym}%`,
+								[Op.like]: `${acronyms[6].acronym}:%`,
 							},
 						},
 						{
 							matchName: {
-								[Op.like]: `%${acronyms[7].acronym}%`,
+								[Op.like]: `${acronyms[7].acronym}:%`,
 							},
 						},
 						{
 							matchName: {
-								[Op.like]: `%${acronyms[8].acronym}%`,
+								[Op.like]: `${acronyms[8].acronym}:%`,
 							},
 						},
 						{
 							matchName: {
-								[Op.like]: `%${acronyms[9].acronym}%`,
+								[Op.like]: `${acronyms[9].acronym}:%`,
 							},
 						},
 					],
