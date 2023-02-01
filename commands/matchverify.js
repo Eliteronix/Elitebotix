@@ -135,7 +135,7 @@ module.exports = {
 
 			let acronyms = [];
 			for (let i = 0; i < matchNames.length; i++) {
-				let matchAcronym = matchNames[i].matchName.replace(/:.*/gm, '').trim();
+				let matchAcronym = matchNames[i].matchName.replace(/:.*/gm, '');
 
 				let existingAcronym = acronyms.find((acronym) => acronym.acronym === matchAcronym);
 
