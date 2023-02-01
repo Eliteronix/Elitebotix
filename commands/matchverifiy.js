@@ -128,7 +128,7 @@ module.exports = {
 			let orderedUnverifiedScores = [];
 			for (let i = 0; i < acronyms.length; i++) {
 				let acronym = acronyms[i].acronym;
-				let acronymScores = unverifiedScores.filter((score) => score.matchName.includes(acronym));
+				let acronymScores = unverifiedScores.filter((score) => score.matchName.startsWith(acronym));
 				orderedUnverifiedScores = orderedUnverifiedScores.concat(acronymScores);
 			}
 
