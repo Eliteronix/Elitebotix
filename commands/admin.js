@@ -11811,6 +11811,22 @@ module.exports = {
 					]
 				},
 			});
+		} else if (args[0] === 'remainingUsers') {
+			let count = await DBDiscordUsers.count({
+				where: {
+					osuUserId: {
+						[Op.not]: null
+					},
+					userId: null,
+					osuRank: null,
+					nextOsuPPUpdate: {
+						[Op.eq]: null
+					},
+				},
+			});
+
+			// eslint-disable-next-line no-console
+			console.log(count);
 		} else {
 			msg.reply('Invalid command');
 		}
