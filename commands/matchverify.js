@@ -1,7 +1,8 @@
 const { DBOsuMultiScores, DBDiscordUsers, DBDuelRatingHistory } = require('../dbObjects');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { Op } = require('sequelize');
-const { getIDFromPotentialOsuLink, humanReadable } = require('../utils');
+const { getIDFromPotentialOsuLink, humanReadable, getOsuPlayerName, createLeaderboard } = require('../utils');
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	name: 'matchverify',
@@ -12,6 +13,101 @@ module.exports = {
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,
 	tags: 'debug',
+	data: new SlashCommandBuilder()
+		.setName('matchverify')
+		.setNameLocalizations({
+			'de': 'matchverifikation',
+			'en-GB': 'matchverify',
+			'en-US': 'matchverify',
+		})
+		.setDescription('Allows for managing the validity of a match')
+		.setDescriptionLocalizations({
+			'de': 'Ermöglicht das Verwalten der Gültigkeit eines Matches',
+			'en-GB': 'Allows for managing the validity of a match',
+			'en-US': 'Allows for managing the validity of a match',
+		})
+		.setDefaultMemberPermissions('0')
+		.setDMPermission(false)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('update')
+				.setDescription('Allows for updating the validity of a match')
+				.setDescriptionLocalizations({
+					'de': 'Ermöglicht das Aktualisieren der Gültigkeit eines Matches',
+					'en-GB': 'Allows for updating the validity of a match',
+					'en-US': 'Allows for updating the validity of a match',
+				})
+				.addStringOption(option =>
+					option.setName('id')
+						.setDescription('The match id')
+						.setDescriptionLocalizations({
+							'de': 'Die Match ID',
+							'en-GB': 'The match id',
+							'en-US': 'The match id',
+						})
+						.setRequired(true)
+				)
+				.addBooleanOption(option =>
+					option.setName('valid')
+						.setNameLocalizations({
+							'de': 'gültig',
+							'en-GB': 'valid',
+							'en-US': 'valid',
+						})
+						.setDescription('Is the match valid or not?')
+						.setDescriptionLocalizations({
+							'de': 'Ist das Match gültig oder nicht?',
+							'en-GB': 'Is the match valid or not?',
+							'en-US': 'Is the match valid or not?',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option.setName('comment')
+						.setNameLocalizations({
+							'de': 'kommentar',
+							'en-GB': 'comment',
+							'en-US': 'comment',
+						})
+						.setDescription('Why is the match valid or not?')
+						.setDescriptionLocalizations({
+							'de': 'Warum ist das Match gültig oder nicht?',
+							'en-GB': 'Why is the match valid or not?',
+							'en-US': 'Why is the match valid or not?',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('list')
+				.setNameLocalizations({
+					'de': 'liste',
+					'en-GB': 'list',
+					'en-US': 'list',
+				})
+				.setDescription('Lists all the matches that need to be verified')
+				.setDescriptionLocalizations({
+					'de': 'Listet alle Matches auf, die verifiziert werden müssen',
+					'en-GB': 'Lists all the matches that need to be verified',
+					'en-US': 'Lists all the matches that need to be verified',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('leaderboard')
+				.setNameLocalizations({
+					'de': 'rangliste',
+					'en-GB': 'leaderboard',
+					'en-US': 'leaderboard',
+				})
+				.setDescription('Show a leaderboard of hardest working verifiers')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt eine Rangliste der fleißigsten Verifizierer',
+					'en-GB': 'Show a leaderboard of hardest working verifiers',
+					'en-US': 'Show a leaderboard of hardest working verifiers',
+				})
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {
@@ -286,6 +382,58 @@ module.exports = {
 			}
 
 			await interaction.editReply('Done processing.');
+		} else if (interaction.options._subcommand === 'leaderboard') {
+			let counts = await DBOsuMultiScores.findAll({
+				attributes: ['verifiedBy', 'matchId'],
+				where: {
+					verifiedAt: {
+						[Op.ne]: null,
+					},
+				},
+				group: ['verifiedBy', 'matchId'],
+			});
+
+			counts = counts.map((count) => {
+				return {
+					verifiedBy: count.verifiedBy,
+					count: 1,
+				};
+			});
+
+			// Sort by count
+			counts.sort((a, b) => {
+				return b.count - a.count;
+			});
+
+			let leaderboardData = [];
+
+			for (let i = 0; i < counts.length; i++) {
+				let count = counts[i];
+
+				let existingLeaderboardData = leaderboardData.find((leaderboardData) => {
+					return leaderboardData.osuUserId === count.verifiedBy;
+				});
+
+				if (existingLeaderboardData) {
+					existingLeaderboardData.value += count.count;
+				} else {
+					leaderboardData.push({
+						name: await getOsuPlayerName(count.verifiedBy),
+						value: count.count,
+						osuUserId: count.verifiedBy,
+					});
+				}
+			}
+
+			for (let i = 0; i < leaderboardData.length; i++) {
+				let leaderboardDataItem = leaderboardData[i];
+
+				leaderboardDataItem.value = leaderboardDataItem.value + ' match' + (leaderboardDataItem.value === 1 ? '' : 'es');
+			}
+
+			const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', 'Top Match Verifiers', 'top-match-verifiers.png');
+
+			await interaction.editReply({ files: [attachment] });
 		}
 	}
 };

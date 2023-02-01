@@ -11772,45 +11772,33 @@ module.exports = {
 				}
 			}
 		} else if (args[0] === 'verifyCommand') {
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'matchverify',
-					description: 'Allows for managing the validity of a match',
-					default_member_permissions: '0',
-					options: [
-						{
-							'name': 'update',
-							'description': 'Allows for updating the validity of a match',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'id',
-									'description': 'The match id',
-									'type': 3,
-									'required': true
-								},
-								{
-									'name': 'valid',
-									'description': 'Is the match valid or not?',
-									'type': 5, // 5 is type BOOLEAN
-									'required': true
-								},
-								{
-									'name': 'comment',
-									'description': 'Why is the match valid or not?',
-									'type': 3,
-									'required': true
-								},
-							]
-						},
-						{
-							'name': 'list',
-							'description': 'Show unverified matches',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-					]
-				},
-			});
+			const { REST, Routes } = require('discord.js');
+
+			// Grab all the command files from the commands directory you created earlier
+			const commandFile = require('./matchverify.js');
+
+			// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
+			const command = commandFile.data.toJSON();
+
+			// Construct and prepare an instance of the REST module
+			// eslint-disable-next-line no-undef
+			const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN);
+
+			// and deploy your commands!
+			(async () => {
+				try {
+					// The put method is used to fully refresh all commands in the guild with the current set
+					await rest.put(
+						Routes.applicationGuildCommands(msg.client.user.id, msg.guildId),
+						{ body: [command] },
+					);
+
+					msg.reply('Successfully reloaded matchverify command.');
+				} catch (error) {
+					// And of course, make sure you catch and log any errors!
+					console.error(error);
+				}
+			})();
 		} else if (args[0] === 'remainingUsers') {
 			let count = await DBDiscordUsers.count({
 				where: {
