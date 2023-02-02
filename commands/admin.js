@@ -31,40 +31,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'goodbye-message',
-			// 		description: 'Lets you set up a message to be sent when someone leaves the server',
-			// 		dm_permission: false,
-			// 		default_member_permissions: manageGuild,
-			// 		options: [
-			// 			{
-			// 				'name': 'current',
-			// 				'description': 'Shows the current goodbye-message',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'disable',
-			// 				'description': 'Disables goodbye-messages',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'set',
-			// 				'description': 'Allows you to set a new goodbye-message in the current channel',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'message',
-			// 						'description': 'The message to be sent (use "@member" to mention the member)',
-			// 						'type': 3, // 3 is type STRING
-			// 						'required': true
-			// 					}
-			// 				]
-			// 			},
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'guild-leaderboard',
 			// 		description: 'Sends a leaderboard of the top users in the guild',
 			// 		dm_permission: false,
@@ -5099,40 +5065,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'goodbye-message',
-					description: 'Lets you set up a message to be sent when someone leaves the server',
-					dm_permission: false,
-					default_member_permissions: manageGuild,
-					options: [
-						{
-							'name': 'current',
-							'description': 'Shows the current goodbye-message',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'disable',
-							'description': 'Disables goodbye-messages',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'set',
-							'description': 'Allows you to set a new goodbye-message in the current channel',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'message',
-									'description': 'The message to be sent (use "@member" to mention the member)',
-									'type': 3, // 3 is type STRING
-									'required': true
-								}
-							]
-						},
-					]
-				},
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
