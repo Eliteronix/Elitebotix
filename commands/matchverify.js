@@ -496,6 +496,16 @@ module.exports = {
 				.setTimestamp();
 
 			for (let i = 0; i < mapsPlayed.length; i++) {
+				if (i % 25 === 0 && i !== 0) {
+					await interaction.followUp({ embeds: [embed] });
+
+					embed = new EmbedBuilder()
+						.setTitle(scores[0].matchName)
+						.setURL(`https://osu.ppy.sh/mp/${matchId}`)
+						.setColor('#ff0000')
+						.setTimestamp();
+				}
+
 				let mapScores = relatedScores.filter((score) => score.beatmapId === mapsPlayed[i] && score.matchId !== matchId);
 
 				let beatmap = await getOsuBeatmap({ beatmapId: mapsPlayed[i] });
@@ -514,7 +524,7 @@ module.exports = {
 				}]);
 			}
 
-			await interaction.editReply({ embeds: [embed] });
+			await interaction.followUp({ embeds: [embed] });
 
 			embed = new EmbedBuilder()
 				.setTitle(scores[0].matchName)
