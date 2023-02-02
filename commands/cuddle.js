@@ -1,5 +1,5 @@
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -11,6 +11,94 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,
 	tags: 'misc',
+	data: new SlashCommandBuilder()
+		.setName('cuddle')
+		.setNameLocalizations({
+			'de': 'knuddeln',
+			'en-GB': 'cuddle',
+			'en-US': 'cuddle',
+		})
+		.setDescription('Lets you send a gif to cuddle a user')
+		.setDescriptionLocalizations({
+			'de': 'Lässt dich ein GIF versenden, um einen Benutzer zu knuddeln',
+			'en-GB': 'Lets you send a gif to cuddle a user',
+			'en-US': 'Lets you send a gif to cuddle a user',
+		})
+		.addUserOption(option =>
+			option.setName('user')
+				.setNameLocalizations({
+					'de': 'benutzer',
+					'en-GB': 'user',
+					'en-US': 'user',
+				})
+				.setDescription('The user to cuddle')
+				.setDescriptionLocalizations({
+					'de': 'Der Benutzer, den du knuddeln willst',
+					'en-GB': 'The user to cuddle',
+					'en-US': 'The user to cuddle',
+				})
+				.setRequired(true)
+		)
+		.addUserOption(option =>
+			option.setName('user2')
+				.setNameLocalizations({
+					'de': 'benutzer2',
+					'en-GB': 'user2',
+					'en-US': 'user2',
+				})
+				.setDescription('The user to cuddle')
+				.setDescriptionLocalizations({
+					'de': 'Der Benutzer, den du knuddeln willst',
+					'en-GB': 'The user to cuddle',
+					'en-US': 'The user to cuddle',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('user3')
+				.setNameLocalizations({
+					'de': 'benutzer3',
+					'en-GB': 'user3',
+					'en-US': 'user3',
+				})
+				.setDescription('The user to cuddle')
+				.setDescriptionLocalizations({
+					'de': 'Der Benutzer, den du knuddeln willst',
+					'en-GB': 'The user to cuddle',
+					'en-US': 'The user to cuddle',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('user4')
+				.setNameLocalizations({
+					'de': 'benutzer4',
+					'en-GB': 'user4',
+					'en-US': 'user4',
+				})
+				.setDescription('The user to cuddle')
+				.setDescriptionLocalizations({
+					'de': 'Der Benutzer, den du knuddeln willst',
+					'en-GB': 'The user to cuddle',
+					'en-US': 'The user to cuddle',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('user5')
+				.setNameLocalizations({
+					'de': 'benutzer5',
+					'en-GB': 'user5',
+					'en-US': 'user5',
+				})
+				.setDescription('The user to cuddle')
+				.setDescriptionLocalizations({
+					'de': 'Der Benutzer, den du knuddeln willst',
+					'en-GB': 'The user to cuddle',
+					'en-US': 'The user to cuddle',
+				})
+				.setRequired(false)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		try {

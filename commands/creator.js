@@ -1,6 +1,4 @@
-//Require discord.js module
-const { AttachmentBuilder, EmbedBuilder } = require('discord.js');
-const { PermissionsBitField } = require('discord.js');
+const { AttachmentBuilder, EmbedBuilder, PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -13,6 +11,20 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 15,
 	tags: 'general',
+	data: new SlashCommandBuilder()
+		.setName('creator')
+		.setNameLocalizations({
+			'de': 'entwickler',
+			'en-GB': 'creator',
+			'en-US': 'creator',
+		})
+		.setDescription('Sends an info card about the developers')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Info-Karte über die Entwickler',
+			'en-GB': 'Sends an info card about the developers',
+			'en-US': 'Sends an info card about the developers',
+		})
+		.setDMPermission(true),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {

@@ -1,5 +1,5 @@
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -11,6 +11,55 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 15,
 	tags: 'general',
+	data: new SlashCommandBuilder()
+		.setName('feedback')
+		.setNameLocalizations({
+			'de': 'feedback',
+			'en-GB': 'feedback',
+			'en-US': 'feedback',
+		})
+		.setDescription('Sends feedback to the devs')
+		.setDescriptionLocalizations({
+			'de': 'Sende Feedback an die Entwickler',
+			'en-GB': 'Sends feedback to the devs',
+			'en-US': 'Sends feedback to the devs',
+		})
+		.addStringOption(option =>
+			option.setName('type')
+				.setNameLocalizations({
+					'de': 'typ',
+					'en-GB': 'type',
+					'en-US': 'type',
+				})
+				.setDescription('The type of feedback')
+				.setDescriptionLocalizations({
+					'de': 'Der Typ des Feedbacks',
+					'en-GB': 'The type of feedback',
+					'en-US': 'The type of feedback',
+				})
+				.setRequired(true)
+				.addChoices(
+					{ name: 'bug', value: 'bug' },
+					{ name: 'feature', value: 'feature' },
+					{ name: 'feedback', value: 'feedback' },
+					{ name: 'question', value: 'question' },
+				)
+		)
+		.addStringOption(option =>
+			option.setName('feedback')
+				.setNameLocalizations({
+					'de': 'feedback',
+					'en-GB': 'feedback',
+					'en-US': 'feedback',
+				})
+				.setDescription('The feedback message')
+				.setDescriptionLocalizations({
+					'de': 'Die Feedback-Nachricht',
+					'en-GB': 'The feedback message',
+					'en-US': 'The feedback message',
+				})
+				.setRequired(true)
+		),
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply();
