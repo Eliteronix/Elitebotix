@@ -31,60 +31,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'help',
-			// 		description: 'List all commands or get info about a specific command',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'category',
-			// 				'description': 'Get a list of commands for a category',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'categoryname',
-			// 						'description': 'The name of the category',
-			// 						'type': 3,
-			// 						'required': true,
-			// 						'choices': [
-			// 							{
-			// 								'name': 'general',
-			// 								'value': 'general'
-			// 							},
-			// 							{
-			// 								'name': 'osu',
-			// 								'value': 'osu'
-			// 							},
-			// 							{
-			// 								'name': 'misc',
-			// 								'value': 'misc'
-			// 							},
-			// 							{
-			// 								'name': 'server-admin',
-			// 								'value': 'server-admin'
-			// 							}
-			// 						]
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'command',
-			// 				'description': 'Get help for a command',
-			// 				'type': 1,
-			// 				'options': [
-			// 					{
-			// 						'name': 'commandname',
-			// 						'description': 'The name of the command',
-			// 						'type': 3,
-			// 						'required': true
-			// 					}
-			// 				]
-			// 			},
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'hug',
 			// 		description: 'Lets you send a gif to hug a user',
 			// 		dm_permission: false,
@@ -5015,60 +4961,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'help',
-					description: 'List all commands or get info about a specific command',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'category',
-							'description': 'Get a list of commands for a category',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'categoryname',
-									'description': 'The name of the category',
-									'type': 3,
-									'required': true,
-									'choices': [
-										{
-											'name': 'general',
-											'value': 'general'
-										},
-										{
-											'name': 'osu',
-											'value': 'osu'
-										},
-										{
-											'name': 'misc',
-											'value': 'misc'
-										},
-										{
-											'name': 'server-admin',
-											'value': 'server-admin'
-										}
-									]
-								}
-							]
-						},
-						{
-							'name': 'command',
-							'description': 'Get help for a command',
-							'type': 1,
-							'options': [
-								{
-									'name': 'commandname',
-									'description': 'The name of the command',
-									'type': 3,
-									'required': true
-								}
-							]
-						},
-					]
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

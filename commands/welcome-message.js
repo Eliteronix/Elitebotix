@@ -20,7 +20,7 @@ module.exports = {
 			'en-US': 'welcome-message',
 		})
 		.setDescription('Lets you set up a message to be sent when someone joins the server')
-		.setNameLocalizations({
+		.setDescriptionLocalizations({
 			'de': 'Erlaubt es dir eine Willkommensnachricht für neue Mitglieder zu setzen',
 			'en-GB': 'Lets you set up a message to be sent when someone joins the server',
 			'en-US': 'Lets you set up a message to be sent when someone joins the server',
@@ -36,7 +36,7 @@ module.exports = {
 					'en-US': 'current',
 				})
 				.setDescription('Shows the current welcome-message')
-				.setNameLocalizations({
+				.setDescriptionLocalizations({
 					'de': 'Zeigt die aktuelle Willkommensnachricht an',
 					'en-GB': 'Shows the current welcome-message',
 					'en-US': 'Shows the current welcome-message',
@@ -51,7 +51,7 @@ module.exports = {
 					'en-US': 'disable',
 				})
 				.setDescription('Disables welcome-messages')
-				.setNameLocalizations({
+				.setDescriptionLocalizations({
 					'de': 'Deaktiviert Willkommensnachrichten',
 					'en-GB': 'Disables welcome-messages',
 					'en-US': 'Disables welcome-messages',
@@ -66,7 +66,7 @@ module.exports = {
 					'en-US': 'set',
 				})
 				.setDescription('Allows you to set a new welcome-message in the current channel')
-				.setNameLocalizations({
+				.setDescriptionLocalizations({
 					'de': 'Erlaubt es dir eine neue Willkommensnachricht in diesem Kanal zu setzen',
 					'en-GB': 'Allows you to set a new welcome-message in the current channel',
 					'en-US': 'Allows you to set a new welcome-message in the current channel',
@@ -80,7 +80,7 @@ module.exports = {
 							'en-US': 'message',
 						})
 						.setDescription('The message to be sent (use "@member" to mention the member)')
-						.setNameLocalizations({
+						.setDescriptionLocalizations({
 							'de': 'Die Nachricht die gesendet werden soll (Benutze "@member" um das Mitglied zu erwähnen)',
 							'en-GB': 'The message to be sent (use "@member" to mention the member)',
 							'en-US': 'The message to be sent (use "@member" to mention the member)',
