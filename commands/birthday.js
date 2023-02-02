@@ -2,6 +2,7 @@ const { PermissionsBitField } = require('discord.js');
 const { DBDiscordUsers, DBBirthdayGuilds } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	name: 'birthday',
@@ -12,6 +13,101 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 10,
 	tags: 'misc',
+	data: new SlashCommandBuilder()
+		.setName('birthday')
+		.setNameLocalizations({
+			'de': 'geburtstag',
+			'en-GB': 'birthday',
+			'en-US': 'birthday',
+		})
+		.setDescription('Lets you set your birthday')
+		.setDescriptionLocalizations({
+			'de': 'Lässt dich deinen Geburtstag festlegen',
+			'en-GB': 'Lets you set your birthday',
+			'en-US': 'Lets you set your birthday',
+		})
+		.setDMPermission(true)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('set')
+				.setNameLocalizations({
+					'de': 'festlegen',
+					'en-GB': 'set',
+					'en-US': 'set',
+				})
+				.setDescription('Sets your birthday')
+				.setDescriptionLocalizations({
+					'de': 'Lässt dich deinen Geburtstag festlegen',
+					'en-GB': 'Lets you set your birthday',
+					'en-US': 'Lets you set your birthday',
+				})
+				.addIntegerOption(option =>
+					option
+						.setName('date')
+						.setNameLocalizations({
+							'de': 'datum',
+							'en-GB': 'date',
+							'en-US': 'date',
+						})
+						.setDescription('The date of the month in UTC (i.e. 29)')
+						.setDescriptionLocalizations({
+							'de': 'Das Datum des Monats in UTC (z.B. 29)',
+							'en-GB': 'The date of the month in UTC (i.e. 29)',
+							'en-US': 'The date of the month in UTC (i.e. 29)',
+						})
+						.setRequired(true)
+						.setMinValue(1)
+						.setMaxValue(31)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('month')
+						.setNameLocalizations({
+							'de': 'monat',
+							'en-GB': 'month',
+							'en-US': 'month',
+						})
+						.setDescription('The month in UTC (i.e. 11)')
+						.setDescriptionLocalizations({
+							'de': 'Der Monat in UTC (z.B. 11)',
+							'en-GB': 'The month in UTC (i.e. 11)',
+							'en-US': 'The month in UTC (i.e. 11)',
+						})
+						.setRequired(true)
+						.setMinValue(1)
+						.setMaxValue(12)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('enable')
+				.setNameLocalizations({
+					'de': 'aktivieren',
+					'en-GB': 'enable',
+					'en-US': 'enable',
+				})
+				.setDescription('Enables your birthday announcement on this server')
+				.setDescriptionLocalizations({
+					'de': 'Aktiviert deine Geburtstagsankündigung auf diesem Server',
+					'en-GB': 'Enables your birthday announcement on this server',
+					'en-US': 'Enables your birthday announcement on this server',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('disable')
+				.setNameLocalizations({
+					'de': 'deaktivieren',
+					'en-GB': 'disable',
+					'en-US': 'disable',
+				})
+				.setDescription('Disables your birthday announcement on this server')
+				.setDescriptionLocalizations({
+					'de': 'Deaktiviert deine Geburtstagsankündigung auf diesem Server',
+					'en-GB': 'Disables your birthday announcement on this server',
+					'en-US': 'Disables your birthday announcement on this server',
+				})
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {

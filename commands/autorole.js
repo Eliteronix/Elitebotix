@@ -26,6 +26,8 @@ module.exports = {
 			'en-GB': 'Lets you set up roles that will be automatically assigned on joining',
 			'en-US': 'Lets you set up roles that will be automatically assigned on joining',
 		})
+		.setDefaultMemberPermissions(PermissionsBitField.Flags.ManageRoles)
+		.setDMPermission(false)
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName('add')
