@@ -28,6 +28,45 @@ module.exports = {
 		let manageRoles = (1 << 28).toString();
 
 		if (args[0] === 'guildCommands') {
+			const { REST, Routes } = require('discord.js');
+			const fs = require('fs');
+
+			const commands = [];
+			// Grab all the command files from the commands directory you created earlier
+			const commandFiles = fs.readdirSync('./commands');
+
+			// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
+			for (const file of commandFiles) {
+				const command = require(`./${file}`);
+
+				if (args.includes(command.name)) {
+					commands.push(command.data.toJSON());
+				}
+			}
+
+			// Construct and prepare an instance of the REST module
+			// eslint-disable-next-line no-undef
+			const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN);
+
+			// and deploy your commands!
+			(async () => {
+				try {
+					await msg.reply(`Started adding ${commands.length} application (/) commands.`);
+
+					// The put method is used to fully refresh all commands in the guild with the current set
+					await rest.put(
+						Routes.applicationGuildCommands(msg.client.user.id, msg.guildId),
+						{ body: commands },
+					);
+
+					await msg.reply(`Successfully added ${commands.length} application (/) commands.`);
+				} catch (error) {
+					// And of course, make sure you catch and log any errors!
+					console.error(error);
+				}
+			})();
+
+			return;
 
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
@@ -9470,136 +9509,6 @@ module.exports = {
 			}
 		} else if (args[0] === 'cleanUp') {
 			cleanUpDuplicateEntries(true);
-		} else if (args[0] === 'tournamentFeedCommand') {
-			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-				data: {
-					name: 'tournamentfeed-admin',
-					description: 'Allows for managing the tournament feed',
-					default_member_permissions: '0',
-					options: [
-						{
-							'name': 'update',
-							'description': 'Allows for updating the tournament feed',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'id',
-									'description': 'The forum post id',
-									'type': 3,
-									'required': true
-								},
-								{
-									'name': 'format',
-									'description': 'The format of the tournament',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'rankrange',
-									'description': 'The rankrange of the tournament',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'gamemode',
-									'description': 'The gamemode of the tournament',
-									'type': 3,
-									'required': false,
-									'choices': [
-										{
-											'name': 'Standard',
-											'value': 'Standard'
-										},
-										{
-											'name': 'Taiko',
-											'value': 'Taiko'
-										},
-										{
-											'name': 'Catch the Beat',
-											'value': 'Catch the Beat'
-										},
-										{
-											'name': 'Mania',
-											'value': 'Mania'
-										},
-										{
-											'name': 'Multimode',
-											'value': 'Multimode'
-										},
-									]
-								},
-								{
-									'name': 'region',
-									'description': 'The region of the tournament (Africa, Asia, Europe, North America, Oceania, South America | Detail)',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'notes',
-									'description': 'Additional information about the tournament',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'bws',
-									'description': 'Is the rank range bws',
-									'type': 5, // 5 is type BOOLEAN
-									'required': false
-								},
-								{
-									'name': 'badged',
-									'description': 'Is the tourney going for badged',
-									'type': 5, // 5 is type BOOLEAN
-									'required': false
-								},
-								{
-									'name': 'outdated',
-									'description': 'Is the tournament post outdated',
-									'type': 5, // 5 is type BOOLEAN
-									'required': false
-								},
-								{
-									'name': 'notournament',
-									'description': 'Is the post not a tournament',
-									'type': 5, // 5 is type BOOLEAN
-									'required': false
-								},
-							]
-						},
-						{
-							'name': 'ping',
-							'description': 'Shares a new tournament',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'id',
-									'description': 'The forum post id',
-									'type': 3,
-									'required': true
-								}
-							]
-						},
-						{
-							'name': 'delete',
-							'description': 'Deletes a saved tournament record',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'id',
-									'description': 'The forum post id',
-									'type': 3,
-									'required': true
-								}
-							]
-						},
-						{
-							'name': 'list',
-							'description': 'Show open forum posts',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-					]
-				},
-			});
 		} else if (args[0] === 'clearForumPosts') {
 			let forumPosts = await DBOsuForumPosts.findAll();
 			for (let i = 0; i < forumPosts.length; i++) {
@@ -10352,36 +10261,6 @@ module.exports = {
 					await msg.reply(discordUsers[i].twitchName + ' error');
 				}
 			}
-		} else if (args[0] === 'verifyCommand') {
-			const { REST, Routes } = require('discord.js');
-
-			// Grab all the command files from the commands directory you created earlier
-			const commandFile = require('./matchverify.js');
-
-			// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
-			const command = commandFile.data.toJSON();
-
-			// Construct and prepare an instance of the REST module
-			// eslint-disable-next-line no-undef
-			const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN);
-
-			// and deploy your commands!
-			(async () => {
-				try {
-					// The put method is used to fully refresh all commands in the guild with the current set
-					await rest.put(
-						Routes.applicationGuildCommands(msg.client.user.id, msg.guildId),
-						{ body: [command] },
-					);
-
-					await msg.reply('Successfully reloaded matchverify command.');
-				} catch (error) {
-					// And of course, make sure you catch and log any errors!
-					console.error(error);
-				}
-			})();
-
-			return;
 		} else if (args[0] === 'remainingUsers') {
 			let count = await DBDiscordUsers.count({
 				where: {

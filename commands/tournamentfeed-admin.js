@@ -1,6 +1,7 @@
 const { DBOsuForumPosts, DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	name: 'tournamentfeed-admin',
@@ -11,6 +12,280 @@ module.exports = {
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,
 	tags: 'debug',
+	data: new SlashCommandBuilder()
+		.setName('tournamentfeed-admin')
+		.setNameLocalizations({
+			'de': 'turnierfeed-admin',
+			'en-GB': 'tournamentfeed-admin',
+			'en-US': 'tournamentfeed-admin',
+		})
+		.setDescription('Admin control for the tournament feed')
+		.setDescriptionLocalizations({
+			'de': 'Admin Kontrolle für den Turnierfeed',
+			'en-GB': 'Admin control for the tournament feed',
+			'en-US': 'Admin control for the tournament feed',
+		})
+		.setDefaultMemberPermissions('0')
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('update')
+				.setNameLocalizations({
+					'de': 'update',
+					'en-GB': 'update',
+					'en-US': 'update',
+				})
+				.setDescription('Allows for updating the tournament feed')
+				.setDescriptionLocalizations({
+					'de': 'Erlaubt das Updaten des Turnierfeeds',
+					'en-GB': 'Allows for updating the tournament feed',
+					'en-US': 'Allows for updating the tournament feed',
+				})
+				.addIntegerOption(option =>
+					option
+						.setName('id')
+						.setNameLocalizations({
+							'de': 'id',
+							'en-GB': 'id',
+							'en-US': 'id',
+						})
+						.setDescription('The forum post id')
+						.setDescriptionLocalizations({
+							'de': 'Die Forum Post ID',
+							'en-GB': 'The forum post id',
+							'en-US': 'The forum post id',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('format')
+						.setNameLocalizations({
+							'de': 'format',
+							'en-GB': 'format',
+							'en-US': 'format',
+						})
+						.setDescription('The format of the tournament')
+						.setDescriptionLocalizations({
+							'de': 'Das Format des Turniers',
+							'en-GB': 'The format of the tournament',
+							'en-US': 'The format of the tournament',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('rankrange')
+						.setNameLocalizations({
+							'de': 'rangbereich',
+							'en-GB': 'rankrange',
+							'en-US': 'rankrange',
+						})
+						.setDescription('The rankrange of the tournament')
+						.setDescriptionLocalizations({
+							'de': 'Der Rangbereich des Turniers',
+							'en-GB': 'The rankrange of the tournament',
+							'en-US': 'The rankrange of the tournament',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('gamemode')
+						.setNameLocalizations({
+							'de': 'spielmodus',
+							'en-GB': 'gamemode',
+							'en-US': 'gamemode',
+						})
+						.setDescription('The gamemode of the tournament')
+						.setDescriptionLocalizations({
+							'de': 'Der Spielmodus des Turniers',
+							'en-GB': 'The gamemode of the tournament',
+							'en-US': 'The gamemode of the tournament',
+						})
+						.setRequired(false)
+						.addChoices(
+							{ name: 'Standard', value: 'Standard' },
+							{ name: 'Taiko', value: 'Taiko' },
+							{ name: 'Catch the Beat', value: 'Catch the Beat' },
+							{ name: 'Mania', value: 'Mania' },
+							{ name: 'Multimode', value: 'Multimode' },
+						)
+				)
+				.addStringOption(option =>
+					option
+						.setName('region')
+						.setNameLocalizations({
+							'de': 'region',
+							'en-GB': 'region',
+							'en-US': 'region',
+						})
+						.setDescription('The region of the tournament (Africa, Asia, Europe, North America, Oceania, South America | Detail)')
+						.setDescriptionLocalizations({
+							'de': 'Die Region des Turniers (Africa, Asia, Europe, North America, Oceania, South America | Detail)',
+							'en-GB': 'The region of the tournament (Africa, Asia, Europe, North America, Oceania, South America | Detail)',
+							'en-US': 'The region of the tournament (Africa, Asia, Europe, North America, Oceania, South America | Detail)',
+						})
+						.setRequired(false)
+						.setAutocomplete(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('notes')
+						.setNameLocalizations({
+							'de': 'anmerkungen',
+							'en-GB': 'notes',
+							'en-US': 'notes',
+						})
+						.setDescription('Additional information about the tournament')
+						.setDescriptionLocalizations({
+							'de': 'Zusätzliche Informationen zum Turnier',
+							'en-GB': 'Additional information about the tournament',
+							'en-US': 'Additional information about the tournament',
+						})
+						.setRequired(false)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('bws')
+						.setNameLocalizations({
+							'de': 'bws',
+							'en-GB': 'bws',
+							'en-US': 'bws',
+						})
+						.setDescription('Is the rank range bws')
+						.setDescriptionLocalizations({
+							'de': 'Ist der Rangbereich bws',
+							'en-GB': 'Is the rank range bws',
+							'en-US': 'Is the rank range bws',
+						})
+						.setRequired(false)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('badged')
+						.setNameLocalizations({
+							'de': 'badged',
+							'en-GB': 'badged',
+							'en-US': 'badged',
+						})
+						.setDescription('Is the tourney going for badged')
+						.setDescriptionLocalizations({
+							'de': 'Ist das Turnier badged',
+							'en-GB': 'Is the tourney going for badged',
+							'en-US': 'Is the tourney going for badged',
+						})
+						.setRequired(false)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('outdated')
+						.setNameLocalizations({
+							'de': 'veraltet',
+							'en-GB': 'outdated',
+							'en-US': 'outdated',
+						})
+						.setDescription('Is the tournament post outdated')
+						.setDescriptionLocalizations({
+							'de': 'Ist der Turnierpost veraltet',
+							'en-GB': 'Is the tournament post outdated',
+							'en-US': 'Is the tournament post outdated',
+						})
+						.setRequired(false)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('notournament')
+						.setNameLocalizations({
+							'de': 'keinturnier',
+							'en-GB': 'notournament',
+							'en-US': 'notournament',
+						})
+						.setDescription('Is the post not a tournament')
+						.setDescriptionLocalizations({
+							'de': 'Ist der Post kein Turnier',
+							'en-GB': 'Is the post not a tournament',
+							'en-US': 'Is the post not a tournament',
+						})
+						.setRequired(false)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('ping')
+				.setNameLocalizations({
+					'de': 'pingen',
+					'en-GB': 'ping',
+					'en-US': 'ping',
+				})
+				.setDescription('Pings a new tournament')
+				.setDescriptionLocalizations({
+					'de': 'Pingt ein neues Turnier',
+					'en-GB': 'Pings a new tournament',
+					'en-US': 'Pings a new tournament',
+				})
+				.addIntegerOption(option =>
+					option
+						.setName('id')
+						.setNameLocalizations({
+							'de': 'id',
+							'en-GB': 'id',
+							'en-US': 'id',
+						})
+						.setDescription('The forum post id')
+						.setDescriptionLocalizations({
+							'de': 'Die Forum Post ID',
+							'en-GB': 'The forum post id',
+							'en-US': 'The forum post id',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('delete')
+				.setNameLocalizations({
+					'de': 'löschen',
+					'en-GB': 'delete',
+					'en-US': 'delete',
+				})
+				.setDescription('Deletes a saved tournament record')
+				.setDescriptionLocalizations({
+					'de': 'Löscht einen gespeicherten Turnier Eintrag',
+					'en-GB': 'Deletes a saved tournament record',
+					'en-US': 'Deletes a saved tournament record',
+				})
+				.addIntegerOption(option =>
+					option
+						.setName('id')
+						.setNameLocalizations({
+							'de': 'id',
+							'en-GB': 'id',
+							'en-US': 'id',
+						})
+						.setDescription('The forum post id')
+						.setDescriptionLocalizations({
+							'de': 'Die Forum Post ID',
+							'en-GB': 'The forum post id',
+							'en-US': 'The forum post id',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('list')
+				.setNameLocalizations({
+					'de': 'liste',
+					'en-GB': 'list',
+					'en-US': 'list',
+				})
+				.setDescription('Show open forum posts')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt offene Forum Posts',
+					'en-GB': 'Show open forum posts',
+					'en-US': 'Show open forum posts',
+				})
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {
