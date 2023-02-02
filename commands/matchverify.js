@@ -500,6 +500,14 @@ module.exports = {
 
 				let beatmap = await getOsuBeatmap({ beatmapId: mapsPlayed[i] });
 
+				if (!beatmap || !beatmap.artist || !beatmap.title || !beatmap.difficulty) {
+					beatmap = {
+						artist: 'Unknown',
+						title: 'Unknown',
+						difficulty: 'Unknown',
+					};
+				}
+
 				embed.addFields([{
 					name: `Map ${i + 1} | ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] | https://osu.ppy.sh/b/${mapsPlayed[i]}`,
 					value: `${mapScores.length} scores found for this map with the same acronym.`,
