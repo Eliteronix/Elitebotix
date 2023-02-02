@@ -14,13 +14,13 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('hug')
 		.setNameLocalizations({
-			'de-DE': 'umarmen',
+			'de': 'umarmen',
 			'en-GB': 'hug',
 			'en-US': 'hug',
 		})
 		.setDescription('Lets you send a gif to hug a user')
 		.setDescriptionLocalizations({
-			'de-DE': 'Sendet ein Gif um einen Benutzer zu umarmen',
+			'de': 'Sendet ein Gif um einen Benutzer zu umarmen',
 			'en-GB': 'Lets you send a gif to hug a user',
 			'en-US': 'Lets you send a gif to hug a user',
 		})
@@ -29,13 +29,13 @@ module.exports = {
 			option
 				.setName('user')
 				.setNameLocalizations({
-					'de-DE': 'benutzer',
+					'de': 'benutzer',
 					'en-GB': 'user',
 					'en-US': 'user',
 				})
 				.setDescription('The user to hug')
 				.setDescriptionLocalizations({
-					'de-DE': 'Der Benutzer den du umarmen willst',
+					'de': 'Der Benutzer den du umarmen willst',
 					'en-GB': 'The user to hug',
 					'en-US': 'The user to hug',
 				})
@@ -45,13 +45,13 @@ module.exports = {
 			option
 				.setName('user2')
 				.setNameLocalizations({
-					'de-DE': 'benutzer2',
+					'de': 'benutzer2',
 					'en-GB': 'user2',
 					'en-US': 'user2',
 				})
 				.setDescription('The user to hug')
 				.setDescriptionLocalizations({
-					'de-DE': 'Der Benutzer den du umarmen willst',
+					'de': 'Der Benutzer den du umarmen willst',
 					'en-GB': 'The user to hug',
 					'en-US': 'The user to hug',
 				})
@@ -61,13 +61,13 @@ module.exports = {
 			option
 				.setName('user3')
 				.setNameLocalizations({
-					'de-DE': 'benutzer3',
+					'de': 'benutzer3',
 					'en-GB': 'user3',
 					'en-US': 'user3',
 				})
 				.setDescription('The user to hug')
 				.setDescriptionLocalizations({
-					'de-DE': 'Der Benutzer den du umarmen willst',
+					'de': 'Der Benutzer den du umarmen willst',
 					'en-GB': 'The user to hug',
 					'en-US': 'The user to hug',
 				})
@@ -77,13 +77,13 @@ module.exports = {
 			option
 				.setName('user4')
 				.setNameLocalizations({
-					'de-DE': 'benutzer4',
+					'de': 'benutzer4',
 					'en-GB': 'user4',
 					'en-US': 'user4',
 				})
 				.setDescription('The user to hug')
 				.setDescriptionLocalizations({
-					'de-DE': 'Der Benutzer den du umarmen willst',
+					'de': 'Der Benutzer den du umarmen willst',
 					'en-GB': 'The user to hug',
 					'en-US': 'The user to hug',
 				})
@@ -93,13 +93,13 @@ module.exports = {
 			option
 				.setName('user5')
 				.setNameLocalizations({
-					'de-DE': 'benutzer5',
+					'de': 'benutzer5',
 					'en-GB': 'user5',
 					'en-US': 'user5',
 				})
 				.setDescription('The user to hug')
 				.setDescriptionLocalizations({
-					'de-DE': 'Der Benutzer den du umarmen willst',
+					'de': 'Der Benutzer den du umarmen willst',
 					'en-GB': 'The user to hug',
 					'en-US': 'The user to hug',
 				})
