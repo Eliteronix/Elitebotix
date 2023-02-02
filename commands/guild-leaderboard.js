@@ -1,7 +1,7 @@
 const { DBServerUserActivity } = require('../dbObjects');
 const { createLeaderboard, humanReadable, populateMsgFromInteraction, logDatabaseQueries } = require('../utils.js');
 const { leaderboardEntriesPerPage, showUnknownInteractionError } = require('../config.json');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	name: 'guild-leaderboard',
@@ -12,6 +12,35 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 30,
 	tags: 'general',
+	data: new SlashCommandBuilder()
+		.setName('guild-leaderboard')
+		.setNameLocalizations({
+			'de': 'server-rangliste',
+			'en-GB': 'guild-leaderboard',
+			'en-US': 'guild-leaderboard',
+		})
+		.setDescription('Sends a leaderboard of the top users in the guild')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Rangliste der Top-Nutzer im Server',
+			'en-GB': 'Sends a leaderboard of the top users in the guild',
+			'en-US': 'Sends a leaderboard of the top users in the guild',
+		})
+		.setDMPermission(false)
+		.addIntegerOption(option =>
+			option.setName('page')
+				.setNameLocalizations({
+					'de': 'seite',
+					'en-GB': 'page',
+					'en-US': 'page',
+				})
+				.setDescription('The page of the leaderboard to display')
+				.setDescriptionLocalizations({
+					'de': 'Die Seite der Rangliste, die angezeigt werden soll',
+					'en-GB': 'The page of the leaderboard to display',
+					'en-US': 'The page of the leaderboard to display',
+				})
+				.setRequired(false)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
