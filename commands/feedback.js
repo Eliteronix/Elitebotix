@@ -24,6 +24,7 @@ module.exports = {
 			'en-GB': 'Sends feedback to the devs',
 			'en-US': 'Sends feedback to the devs',
 		})
+		.setDMPermission(true)
 		.addStringOption(option =>
 			option.setName('type')
 				.setNameLocalizations({

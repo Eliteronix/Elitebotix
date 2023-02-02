@@ -24,6 +24,7 @@ module.exports = {
 			'en-GB': 'Lets you send a gif to cuddle a user',
 			'en-US': 'Lets you send a gif to cuddle a user',
 		})
+		.setDMPermission(false)
 		.addUserOption(option =>
 			option.setName('user')
 				.setNameLocalizations({
