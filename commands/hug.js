@@ -1,5 +1,5 @@
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -11,6 +11,100 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,
 	tags: 'misc',
+	data: new SlashCommandBuilder()
+		.setName('hug')
+		.setNameLocalizations({
+			'de-DE': 'umarmen',
+			'en-GB': 'hug',
+			'en-US': 'hug',
+		})
+		.setDescription('Lets you send a gif to hug a user')
+		.setDescriptionLocalizations({
+			'de-DE': 'Sendet ein Gif um einen Benutzer zu umarmen',
+			'en-GB': 'Lets you send a gif to hug a user',
+			'en-US': 'Lets you send a gif to hug a user',
+		})
+		.setDMPermission(false)
+		.addUserOption((option) =>
+			option
+				.setName('user')
+				.setNameLocalizations({
+					'de-DE': 'benutzer',
+					'en-GB': 'user',
+					'en-US': 'user',
+				})
+				.setDescription('The user to hug')
+				.setDescriptionLocalizations({
+					'de-DE': 'Der Benutzer den du umarmen willst',
+					'en-GB': 'The user to hug',
+					'en-US': 'The user to hug',
+				})
+				.setRequired(true),
+		)
+		.addUserOption((option) =>
+			option
+				.setName('user2')
+				.setNameLocalizations({
+					'de-DE': 'benutzer2',
+					'en-GB': 'user2',
+					'en-US': 'user2',
+				})
+				.setDescription('The user to hug')
+				.setDescriptionLocalizations({
+					'de-DE': 'Der Benutzer den du umarmen willst',
+					'en-GB': 'The user to hug',
+					'en-US': 'The user to hug',
+				})
+				.setRequired(false),
+		)
+		.addUserOption((option) =>
+			option
+				.setName('user3')
+				.setNameLocalizations({
+					'de-DE': 'benutzer3',
+					'en-GB': 'user3',
+					'en-US': 'user3',
+				})
+				.setDescription('The user to hug')
+				.setDescriptionLocalizations({
+					'de-DE': 'Der Benutzer den du umarmen willst',
+					'en-GB': 'The user to hug',
+					'en-US': 'The user to hug',
+				})
+				.setRequired(false),
+		)
+		.addUserOption((option) =>
+			option
+				.setName('user4')
+				.setNameLocalizations({
+					'de-DE': 'benutzer4',
+					'en-GB': 'user4',
+					'en-US': 'user4',
+				})
+				.setDescription('The user to hug')
+				.setDescriptionLocalizations({
+					'de-DE': 'Der Benutzer den du umarmen willst',
+					'en-GB': 'The user to hug',
+					'en-US': 'The user to hug',
+				})
+				.setRequired(false),
+		)
+		.addUserOption((option) =>
+			option
+				.setName('user5')
+				.setNameLocalizations({
+					'de-DE': 'benutzer5',
+					'en-GB': 'user5',
+					'en-US': 'user5',
+				})
+				.setDescription('The user to hug')
+				.setDescriptionLocalizations({
+					'de-DE': 'Der Benutzer den du umarmen willst',
+					'en-GB': 'The user to hug',
+					'en-US': 'The user to hug',
+				})
+				.setRequired(false),
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {
