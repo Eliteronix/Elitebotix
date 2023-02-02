@@ -100,7 +100,7 @@ module.exports = {
 
 		commands = commands.filter(command => command.tags !== 'debug').map(command => command.name);
 
-		let filtered = commands.filter(choice => choice.startsWith(focusedValue));
+		let filtered = commands.filter(choice => choice.includes(focusedValue));
 
 		filtered = filtered.slice(0, 25);
 

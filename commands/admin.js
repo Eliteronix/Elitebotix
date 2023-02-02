@@ -31,37 +31,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'name-sync',
-			// 		description: 'Allows you to sync discord player names to ingame names (and ranks)',
-			// 		dm_permission: false,
-			// 		default_member_permissions: manageGuild,
-			// 		options: [
-			// 			{
-			// 				'name': 'setting',
-			// 				'description': 'The setting for the name sync',
-			// 				'type': 3,
-			// 				'required': true,
-			// 				'choices': [
-			// 					{
-			// 						'name': 'disable',
-			// 						'value': 'disable'
-			// 					},
-			// 					{
-			// 						'name': 'osu! name',
-			// 						'value': 'osuname'
-			// 					},
-			// 					{
-			// 						'name': 'osu! name and rank',
-			// 						'value': 'osunameandrank'
-			// 					}
-			// 				]
-			// 			},
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'osu-autohost',
 			// 		description: 'Hosts an automated lobby ingame',
 			// 		dm_permission: true,
@@ -4775,37 +4744,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'name-sync',
-					description: 'Allows you to sync discord player names to ingame names (and ranks)',
-					dm_permission: false,
-					default_member_permissions: manageGuild,
-					options: [
-						{
-							'name': 'setting',
-							'description': 'The setting for the name sync',
-							'type': 3,
-							'required': true,
-							'choices': [
-								{
-									'name': 'disable',
-									'value': 'disable'
-								},
-								{
-									'name': 'osu! name',
-									'value': 'osuname'
-								},
-								{
-									'name': 'osu! name and rank',
-									'value': 'osunameandrank'
-								}
-							]
-						},
-					]
-				},
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

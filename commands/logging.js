@@ -139,7 +139,7 @@ module.exports = {
 			'emojidelete',
 		];
 
-		let filtered = events.filter(choice => choice.startsWith(focusedValue));
+		let filtered = events.filter(choice => choice.includes(focusedValue));
 
 		filtered = filtered.slice(0, 25);
 

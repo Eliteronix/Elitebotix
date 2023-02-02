@@ -1,5 +1,5 @@
 const { populateMsgFromInteraction, getGuildPrefix, logDatabaseQueries } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -12,6 +12,40 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Manage Nicknames',
 	cooldown: 10,
 	tags: 'server-admin',
+	data: new SlashCommandBuilder()
+		.setName('name-sync')
+		.setNameLocalizations({
+			'de': 'namen-sync',
+			'en-GB': 'name-sync',
+			'en-US': 'name-sync',
+		})
+		.setDescription('Allows you to sync discord player names to ingame names (and ranks)')
+		.setDescriptionLocalizations({
+			'de': 'Erlaubt es dir, Discord-Spielernamen mit Ingame-Namen (und Rängen) zu synchronisieren',
+			'en-GB': 'Allows you to sync discord player names to ingame names (and ranks)',
+			'en-US': 'Allows you to sync discord player names to ingame names (and ranks)',
+		})
+		.setDMPermission(false)
+		.setDefaultMemberPermissions(PermissionsBitField.Flags.ManageGuild)
+		.addStringOption(option =>
+			option.setName('setting')
+				.setNameLocalizations({
+					'de': 'einstellung',
+					'en-GB': 'setting',
+					'en-US': 'setting',
+				})
+				.setDescription('The setting for the name sync')
+				.setDescriptionLocalizations({
+					'de': 'Die Einstellung für die Namenssynchronisierung',
+					'en-GB': 'The setting for the name sync',
+					'en-US': 'The setting for the name sync',
+				})
+				.setRequired(true)
+				.addChoices({ name: 'disable', value: 'disable' }
+					, { name: 'osu! name', value: 'osuname' }
+					, { name: 'osu! name and rank', value: 'osunameandrank' }
+				)
+		),
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
