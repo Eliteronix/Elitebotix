@@ -31,62 +31,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'leaderboard',
-			// 		description: 'Sends a leaderboard of the top users in the guild',
-			// 		dm_permission: false,
-			// 		options: [
-			// 			{
-			// 				'name': 'type',
-			// 				'description': 'Sends a leaderboard of all the players in the guild that have their account connected',
-			// 				'type': 3,
-			// 				'required': true,
-			// 				'choices': [
-			// 					{
-			// 						'name': 'server',
-			// 						'value': 'server'
-			// 					},
-			// 					{
-			// 						'name': 'osu',
-			// 						'value': 'osu'
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'page',
-			// 				'description': 'The page of the leaderboard to display',
-			// 				'type': 4,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'mode',
-			// 				'description': 'The osu! mode you want as your main',
-			// 				'type': 3,
-			// 				'required': false,
-			// 				'choices': [
-			// 					{
-			// 						'name': 'standard',
-			// 						'value': '--s'
-			// 					},
-			// 					{
-			// 						'name': 'taiko',
-			// 						'value': '--t'
-			// 					},
-			// 					{
-			// 						'name': 'catch',
-			// 						'value': '--c'
-			// 					},
-			// 					{
-			// 						'name': 'mania',
-			// 						'value': '--m'
-			// 					}
-			// 				]
-			// 			}
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'logging',
 			// 		description: 'Lets you set up a message to be sent when someone leaves the server',
 			// 		dm_permission: false,
@@ -4873,61 +4817,6 @@ module.exports = {
 			})();
 
 			return;
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'leaderboard',
-					description: 'Sends a leaderboard of the top users in the guild',
-					dm_permission: false,
-					options: [
-						{
-							'name': 'type',
-							'description': 'Sends a leaderboard of all the players in the guild that have their account connected',
-							'type': 3,
-							'required': true,
-							'choices': [
-								{
-									'name': 'server',
-									'value': 'server'
-								},
-								{
-									'name': 'osu',
-									'value': 'osu'
-								}
-							]
-						},
-						{
-							'name': 'page',
-							'description': 'The page of the leaderboard to display',
-							'type': 4,
-							'required': false
-						},
-						{
-							'name': 'mode',
-							'description': 'The osu! mode you want as your main',
-							'type': 3,
-							'required': false,
-							'choices': [
-								{
-									'name': 'standard',
-									'value': '--s'
-								},
-								{
-									'name': 'taiko',
-									'value': '--t'
-								},
-								{
-									'name': 'catch',
-									'value': '--c'
-								},
-								{
-									'name': 'mania',
-									'value': '--m'
-								}
-							]
-						}
-					]
-				},
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
