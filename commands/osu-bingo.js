@@ -304,6 +304,11 @@ module.exports = {
 			beatmaps.splice(index, 1);
 		}
 
+		// Not enough beatmaps found
+		if (mappool.length < 25) {
+			return await interaction.editReply('Not enough beatmaps found that fit the criteria.');
+		}
+
 		beatmaps = null;
 
 		let lastRefresh = { date: new Date(), lastScore: new Date() };
@@ -434,25 +439,20 @@ async function refreshMessage(message, mappool, lastRefresh) {
 			}
 
 			// Draw a border around the map
-			try {
-				if (mappool[i * 5 + j].team) {
-					if (mappool[i * 5 + j].team === 'Team Red') {
-						ctx.strokeStyle = '#FF0000';
-					} else if (mappool[i * 5 + j].team === 'Team Blue') {
-						ctx.strokeStyle = '#0000FF';
-					} else if (mappool[i * 5 + j].team === 'Team Green') {
-						ctx.strokeStyle = '#00FF00';
-					} else if (mappool[i * 5 + j].team === 'Team Yellow') {
-						ctx.strokeStyle = '#FFFF00';
-					} else if (mappool[i * 5 + j].team === 'Team Pink') {
-						ctx.strokeStyle = '#FF00FF';
-					}
-					ctx.lineWidth = 30;
-					ctx.strokeRect(20 + (5 + 250) * j, 20 + (5 + 250) * i, 220, 220);
+			if (mappool[i * 5 + j].team) {
+				if (mappool[i * 5 + j].team === 'Team Red') {
+					ctx.strokeStyle = '#FF0000';
+				} else if (mappool[i * 5 + j].team === 'Team Blue') {
+					ctx.strokeStyle = '#0000FF';
+				} else if (mappool[i * 5 + j].team === 'Team Green') {
+					ctx.strokeStyle = '#00FF00';
+				} else if (mappool[i * 5 + j].team === 'Team Yellow') {
+					ctx.strokeStyle = '#FFFF00';
+				} else if (mappool[i * 5 + j].team === 'Team Pink') {
+					ctx.strokeStyle = '#FF00FF';
 				}
-			} catch (e) {
-				console.log(i, j, mappool);
-				throw e;
+				ctx.lineWidth = 30;
+				ctx.strokeRect(20 + (5 + 250) * j, 20 + (5 + 250) * i, 220, 220);
 			}
 		}
 	}
