@@ -30,48 +30,6 @@ module.exports = {
 		if (args[0] === 'guildCommands') {
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'autorole',
-			// 		description: 'Lets you set up roles that will be automatically assigned on joining',
-			// 		dm_permission: false,
-			// 		default_member_permissions: manageRoles,
-			// 		options: [
-			// 			{
-			// 				'name': 'add',
-			// 				'description': 'Lets you add a new role that will be automatically assigned on joining',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'role',
-			// 						'description': 'The role that should be an autorole',
-			// 						'type': 8,
-			// 						'required': true
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'remove',
-			// 				'description': 'Remove an existing autorole',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'role',
-			// 						'description': 'The role that should no longer be an autorole',
-			// 						'type': 8, // 8 is type ROLE
-			// 						'required': true
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'list',
-			// 				'description': 'Show which autoroles are set up',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'birthday',
 			// 		description: 'Sets your birthday',
 			// 		dm_permission: true,
@@ -5317,48 +5275,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'autorole',
-					description: 'Lets you set up roles that will be automatically assigned on joining',
-					default_member_permissions: manageRoles,
-					dm_permission: false,
-					options: [
-						{
-							'name': 'add',
-							'description': 'Lets you add a new role that will be automatically assigned on joining',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'role',
-									'description': 'The role that should be an autorole',
-									'type': 8,
-									'required': true
-								}
-							]
-						},
-						{
-							'name': 'remove',
-							'description': 'Remove an existing autorole',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'role',
-									'description': 'The role that should no longer be an autorole',
-									'type': 8, // 8 is type ROLE
-									'required': true
-								}
-							]
-						},
-						{
-							'name': 'list',
-							'description': 'Show which autoroles are set up',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-					]
-				},
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

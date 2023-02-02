@@ -2,6 +2,7 @@ const { DBAutoRoles } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
 const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	name: 'autorole',
@@ -12,6 +13,96 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Manage Roles',
 	cooldown: 5,
 	tags: 'server-admin',
+	data: new SlashCommandBuilder()
+		.setName('autorole')
+		.setNameLocalizations({
+			'de': 'automatische rollenvergabe',
+			'en-GB': 'autorole',
+			'en-US': 'autorole',
+		})
+		.setDescription('Lets you set up roles that will be automatically assigned on joining')
+		.setDescriptionLocalizations({
+			'de': 'Ermöglicht es dir, Rollen einzurichten, die automatisch vergeben werden, wenn jemand dem Server beitritt',
+			'en-GB': 'Lets you set up roles that will be automatically assigned on joining',
+			'en-US': 'Lets you set up roles that will be automatically assigned on joining',
+		})
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('add')
+				.setNameLocalizations({
+					'de': 'hinzufügen',
+					'en-GB': 'add',
+					'en-US': 'add',
+				})
+				.setDescription('Lets you add a new role that will be automatically assigned on joining')
+				.setDescriptionLocalizations({
+					'de': 'Ermöglicht es dir, eine neue Rolle hinzuzufügen, die automatisch vergeben wird, wenn jemand dem Server beitritt',
+					'en-GB': 'Lets you add a new role that will be automatically assigned on joining',
+					'en-US': 'Lets you add a new role that will be automatically assigned on joining',
+				})
+				.addRoleOption(option =>
+					option
+						.setName('role')
+						.setNameLocalizations({
+							'de': 'rolle',
+							'en-GB': 'role',
+							'en-US': 'role',
+						})
+						.setDescription('The role that should be an autorole')
+						.setDescriptionLocalizations({
+							'de': 'Die Rolle, die automatisch vergeben werden soll',
+							'en-GB': 'The role that should be an autorole',
+							'en-US': 'The role that should be an autorole',
+						})
+						.setRequired(true),
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('remove')
+				.setNameLocalizations({
+					'de': 'entfernen',
+					'en-GB': 'remove',
+					'en-US': 'remove',
+				})
+				.setDescription('Lets you remove an existing autorole')
+				.setDescriptionLocalizations({
+					'de': 'Ermöglicht es dir, eine bestehende automatische Rollenvergabe zu entfernen',
+					'en-GB': 'Lets you remove an existing autorole',
+					'en-US': 'Lets you remove an existing autorole',
+				})
+				.addRoleOption(option =>
+					option
+						.setName('role')
+						.setNameLocalizations({
+							'de': 'rolle',
+							'en-GB': 'role',
+							'en-US': 'role',
+						})
+						.setDescription('The role that should no longer be an autorole')
+						.setDescriptionLocalizations({
+							'de': 'Die Rolle, die nicht mehr automatisch vergeben werden soll',
+							'en-GB': 'The role that should no longer be an autorole',
+							'en-US': 'The role that should no longer be an autorole',
+						})
+						.setRequired(true),
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('list')
+				.setNameLocalizations({
+					'de': 'liste',
+					'en-GB': 'list',
+					'en-US': 'list',
+				})
+				.setDescription('Show which autoroles are set up')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt an, welche Rollen automatisch vergeben werden',
+					'en-GB': 'Show which autoroles are set up',
+					'en-US': 'Show which autoroles are set up',
+				}),
+		),
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply({ ephemeral: true });
