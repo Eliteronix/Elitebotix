@@ -421,8 +421,13 @@ module.exports = {
 					}
 				}
 			}
-
-			await interaction.editReply('Done processing.');
+			try {
+				await interaction.editReply('Done processing.');
+			} catch (error) {
+				if (error.message !== 'Invalid Webhook Token') {
+					console.error(error);
+				}
+			}
 		} else if (interaction.options._subcommand === 'check') {
 			let matchId = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 			let acronym = interaction.options.getString('acronym');
