@@ -1,8 +1,8 @@
 const { DBOsuMultiScores, DBDiscordUsers, DBDuelRatingHistory } = require('../dbObjects');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { Op } = require('sequelize');
-const { getIDFromPotentialOsuLink, humanReadable, getOsuPlayerName, createLeaderboard } = require('../utils');
-const { SlashCommandBuilder } = require('discord.js');
+const { getIDFromPotentialOsuLink, humanReadable, getOsuPlayerName, createLeaderboard, getOsuBeatmap } = require('../utils');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
 	name: 'matchverify',
@@ -76,6 +76,46 @@ module.exports = {
 							'en-US': 'Why is the match valid or not?',
 						})
 						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('check')
+				.setNameLocalizations({
+					'de': 'prüfen',
+					'en-GB': 'check',
+					'en-US': 'check',
+				})
+				.setDescription('Checks details about a match')
+				.setDescriptionLocalizations({
+					'de': 'Prüft Details zu einem Match',
+					'en-GB': 'Checks details about a match',
+					'en-US': 'Checks details about a match',
+				})
+				.addStringOption(option =>
+					option.setName('id')
+						.setDescription('The match id')
+						.setDescriptionLocalizations({
+							'de': 'Die Match ID',
+							'en-GB': 'The match id',
+							'en-US': 'The match id',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option.setName('acronym')
+						.setNameLocalizations({
+							'de': 'akronym',
+							'en-GB': 'acronym',
+							'en-US': 'acronym',
+						})
+						.setDescription('The actual acronym of the match')
+						.setDescriptionLocalizations({
+							'de': 'Das tatsächliche Akronym des Matches',
+							'en-GB': 'The actual acronym of the match',
+							'en-US': 'The actual acronym of the match',
+						})
+						.setRequired(false)
 				)
 		)
 		.addSubcommand(subcommand =>
@@ -383,6 +423,117 @@ module.exports = {
 			}
 
 			await interaction.editReply('Done processing.');
+		} else if (interaction.options._subcommand === 'check') {
+			let matchId = getIDFromPotentialOsuLink(interaction.options.getString('id'));
+			let acronym = interaction.options.getString('acronym');
+
+			let scores = await DBOsuMultiScores.findAll({
+				where: {
+					matchId: matchId,
+				},
+			});
+
+			if (scores.length === 0) {
+				return await interaction.editReply(`No scores found for https://osu.ppy.sh/mp/${matchId}`);
+			}
+
+			scores.sort((a, b) => {
+				return a.gameId - b.gameId;
+			});
+
+			if (!acronym) {
+				acronym = scores[0].matchName.replace(/:.*/gm, '');
+			}
+
+			let mapsPlayed = [];
+			let players = [];
+
+			for (let i = 0; i < scores.length; i++) {
+				let score = scores[i];
+
+				if (!mapsPlayed.includes(score.beatmapId)) {
+					mapsPlayed.push(score.beatmapId);
+				}
+
+				if (!players.includes(score.osuUserId)) {
+					players.push(score.osuUserId);
+				}
+			}
+
+			let weeksBeforeMatch = new Date(scores[0].matchStartDate);
+			weeksBeforeMatch.setDate(weeksBeforeMatch.getDate() - 21);
+
+			let weeksAfterMatch = new Date(scores[0].matchStartDate);
+			weeksAfterMatch.setDate(weeksAfterMatch.getDate() + 21);
+
+			let relatedScores = await DBOsuMultiScores.findAll({
+				where: {
+					[Op.or]: [
+						{
+							beatmapId: {
+								[Op.in]: mapsPlayed,
+							},
+						},
+						{
+							osuUserId: {
+								[Op.in]: players,
+							},
+						},
+					],
+					matchStartDate: {
+						[Op.between]: [weeksBeforeMatch, weeksAfterMatch],
+					},
+					matchName: {
+						[Op.like]: `${acronym}:%`,
+					},
+				},
+			});
+
+			let embed = new EmbedBuilder()
+				.setTitle(scores[0].matchName)
+				.setURL(`https://osu.ppy.sh/mp/${matchId}`)
+				.setColor('#ff0000')
+				.setTimestamp();
+
+			for (let i = 0; i < mapsPlayed.length; i++) {
+				let mapScores = relatedScores.filter((score) => score.beatmapId === mapsPlayed[i] && score.matchId !== matchId);
+
+				let beatmap = await getOsuBeatmap({ beatmapId: mapsPlayed[i] });
+
+				embed.addFields([{
+					name: `Map ${i + 1} | ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] | https://osu.ppy.sh/b/${mapsPlayed[i]}`,
+					value: `${mapScores.length} scores found for this map with the same acronym.`,
+				}]);
+			}
+
+			await interaction.editReply({ embeds: [embed] });
+
+			embed = new EmbedBuilder()
+				.setTitle(scores[0].matchName)
+				.setURL(`https://osu.ppy.sh/mp/${matchId}`)
+				.setColor('#ff0000')
+				.setTimestamp();
+
+			for (let i = 0; i < players.length; i++) {
+				let playerScores = relatedScores.filter((score) => score.osuUserId === players[i] && score.matchId !== matchId);
+
+				if (i % 25 === 0 && i !== 0) {
+					await interaction.followUp({ embeds: [embed] });
+
+					embed = new EmbedBuilder()
+						.setTitle(scores[0].matchName)
+						.setURL(`https://osu.ppy.sh/mp/${matchId}`)
+						.setColor('#ff0000')
+						.setTimestamp();
+				}
+
+				embed.addFields([{
+					name: `Player ${i + 1} | ${await getOsuPlayerName(players[i])} | https://osu.ppy.sh/users/${players[i]}`,
+					value: `${playerScores.length} scores found for this player with the same acronym.`,
+				}]);
+			}
+
+			await interaction.followUp({ embeds: [embed] });
 		} else if (interaction.options._subcommand === 'leaderboard') {
 			let counts = await DBOsuMultiScores.findAll({
 				attributes: ['verifiedBy', 'matchId'],
