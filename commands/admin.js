@@ -28,67 +28,6 @@ module.exports = {
 		let manageRoles = (1 << 28).toString();
 
 		if (args[0] === 'guildCommands') {
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'activityrole',
-			// 		description: 'Lets you set up roles which will be assigned based on useractivity',
-			// 		dm_permission: false,
-			// 		default_member_permissions: manageRoles,
-			// 		options: [
-			// 			{
-			// 				'name': 'add',
-			// 				'description': 'Lets you add a new role which will be assigned based on useractivity',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'role',
-			// 						'description': 'The role that should be an activityrole',
-			// 						'type': 8,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'rank',
-			// 						'description': 'The required rank for getting the role',
-			// 						'type': 4,
-			// 						'required': false
-			// 					},
-			// 					{
-			// 						'name': 'percentage',
-			// 						'description': 'The required topx% rank for getting the role',
-			// 						'type': 4,
-			// 						'required': false
-			// 					},
-			// 					{
-			// 						'name': 'points',
-			// 						'description': 'The required points for getting the role',
-			// 						'type': 4,
-			// 						'required': false
-			// 					},
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'remove',
-			// 				'description': 'Remove an existing activityrole',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'role',
-			// 						'description': 'The role that should no longer be an activityrole',
-			// 						'type': 8, // 8 is type ROLE
-			// 						'required': true
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'list',
-			// 				'description': 'Show which activityroles are set up',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 		]
-			// 	},
-			// });
-
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
 			// 		name: 'autorole',
@@ -5350,7 +5289,7 @@ module.exports = {
 			for (const file of commandFiles) {
 				const command = require(`./${file}`);
 
-				if (command.tags !== 'debug') {
+				if (command.tags !== 'debug' && command.data) {
 					commands.push(command.data.toJSON());
 				}
 			}
@@ -5378,66 +5317,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'activityrole',
-					description: 'Lets you set up roles which will be assigned based on useractivity',
-					default_member_permissions: manageRoles,
-					dm_permission: false,
-					options: [
-						{
-							'name': 'add',
-							'description': 'Lets you add a new role which will be assigned based on useractivity',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'role',
-									'description': 'The role that should be an activityrole',
-									'type': 8,
-									'required': true
-								},
-								{
-									'name': 'rank',
-									'description': 'The required rank for getting the role',
-									'type': 4,
-									'required': false
-								},
-								{
-									'name': 'percentage',
-									'description': 'The required topx% rank for getting the role',
-									'type': 4,
-									'required': false
-								},
-								{
-									'name': 'points',
-									'description': 'The required points for getting the role',
-									'type': 4,
-									'required': false
-								},
-							]
-						},
-						{
-							'name': 'remove',
-							'description': 'Remove an existing activityrole',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'role',
-									'description': 'The role that should no longer be an activityrole',
-									'type': 8, // 8 is type ROLE
-									'required': true
-								}
-							]
-						},
-						{
-							'name': 'list',
-							'description': 'Show which activityroles are set up',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-					]
-				},
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
