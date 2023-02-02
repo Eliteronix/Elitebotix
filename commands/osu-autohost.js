@@ -1,5 +1,5 @@
 const { populateMsgFromInteraction, logMatchCreation, getOsuUserServerMode, logDatabaseQueries, getNextMap, addMatchMessage } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBDiscordUsers, DBOsuMultiScores, DBProcessQueue, } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
@@ -13,6 +13,145 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 60,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-autohost')
+		.setNameLocalizations({
+			'de': 'osu-autohost',
+			'en-GB': 'osu-autohost',
+			'en-US': 'osu-autohost',
+		})
+		.setDescription('Hosts an automated lobby ingame')
+		.setDescriptionLocalizations({
+			'de': 'Hostet eine automatisierte Lobby ingame',
+			'en-GB': 'Hosts an automated lobby ingame',
+			'en-US': 'Hosts an automated lobby ingame',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('password')
+				.setNameLocalizations({
+					'de': 'passwort',
+					'en-GB': 'password',
+					'en-US': 'password',
+				})
+				.setDescription('Leave empty for a public room')
+				.setDescriptionLocalizations({
+					'de': 'Leer lassen für eine öffentliche Lobby',
+					'en-GB': 'Leave empty for a public room',
+					'en-US': 'Leave empty for a public room',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('condition')
+				.setNameLocalizations({
+					'de': 'bedingung',
+					'en-GB': 'condition',
+					'en-US': 'condition',
+				})
+				.setDescription('What is the winning condition of the match?')
+				.setDescriptionLocalizations({
+					'de': 'Was ist die Gewinnbedingung des Matches?',
+					'en-GB': 'What is the winning condition of the match?',
+					'en-US': 'What is the winning condition of the match?',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Score v1', value: '0' },
+					{ name: 'Score v2', value: '3' },
+					{ name: 'Accuracy', value: '1' },
+				)
+		)
+		.addStringOption(option =>
+			option.setName('mods')
+				.setNameLocalizations({
+					'de': 'mods',
+					'en-GB': 'mods',
+					'en-US': 'mods',
+				})
+				.setDescription('The active modpools to be chosen from (Ex: "NM,HR,DT")')
+				.setDescriptionLocalizations({
+					'de': 'Die aktiven Modpools aus denen ausgewählt werden kann (z.B.: "NM,HR,DT")',
+					'en-GB': 'The active modpools to be chosen from (Ex: "NM,HR,DT")',
+					'en-US': 'The active modpools to be chosen from (Ex: "NM,HR,DT")',
+				})
+				.setRequired(false)
+		)
+		.addNumberOption(option =>
+			option.setName('nmstarrating')
+				.setNameLocalizations({
+					'de': 'nmschwierigkeit',
+					'en-GB': 'nmstarrating',
+					'en-US': 'nmstarrating',
+				})
+				.setDescription('A custom difficulty for NM maps')
+				.setDescriptionLocalizations({
+					'de': 'Eine benutzerdefinierte Schwierigkeit für NM Maps',
+					'en-GB': 'A custom difficulty for NM maps',
+					'en-US': 'A custom difficulty for NM maps',
+				})
+				.setRequired(false)
+		)
+		.addNumberOption(option =>
+			option.setName('hdstarrating')
+				.setNameLocalizations({
+					'de': 'hdschwierigkeit',
+					'en-GB': 'hdstarrating',
+					'en-US': 'hdstarrating',
+				})
+				.setDescription('A custom difficulty for HD maps')
+				.setDescriptionLocalizations({
+					'de': 'Eine benutzerdefinierte Schwierigkeit für HD Maps',
+					'en-GB': 'A custom difficulty for HD maps',
+					'en-US': 'A custom difficulty for HD maps',
+				})
+				.setRequired(false)
+		)
+		.addNumberOption(option =>
+			option.setName('hrstarrating')
+				.setNameLocalizations({
+					'de': 'hrschwierigkeit',
+					'en-GB': 'hrstarrating',
+					'en-US': 'hrstarrating',
+				})
+				.setDescription('A custom difficulty for HR maps')
+				.setDescriptionLocalizations({
+					'de': 'Eine benutzerdefinierte Schwierigkeit für HR Maps',
+					'en-GB': 'A custom difficulty for HR maps',
+					'en-US': 'A custom difficulty for HR maps',
+				})
+				.setRequired(false)
+		)
+		.addNumberOption(option =>
+			option.setName('dtstarrating')
+				.setNameLocalizations({
+					'de': 'dtschwierigkeit',
+					'en-GB': 'dtstarrating',
+					'en-US': 'dtstarrating',
+				})
+				.setDescription('A custom difficulty for DT maps')
+				.setDescriptionLocalizations({
+					'de': 'Eine benutzerdefinierte Schwierigkeit für DT Maps',
+					'en-GB': 'A custom difficulty for DT maps',
+					'en-US': 'A custom difficulty for DT maps',
+				})
+				.setRequired(false)
+		)
+		.addNumberOption(option =>
+			option.setName('fmstarrating')
+				.setNameLocalizations({
+					'de': 'fmschwierigkeit',
+					'en-GB': 'fmstarrating',
+					'en-US': 'fmstarrating',
+				})
+				.setDescription('A custom difficulty for FM maps')
+				.setDescriptionLocalizations({
+					'de': 'Eine benutzerdefinierte Schwierigkeit für FM Maps',
+					'en-GB': 'A custom difficulty for FM maps',
+					'en-US': 'A custom difficulty for FM maps',
+				})
+				.setRequired(false)
+		),
 	async execute(msg, args, interaction, additionalObjects) {
 		let password = '';
 		let winCondition = '0';
