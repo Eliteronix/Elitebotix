@@ -10396,8 +10396,7 @@ module.exports = {
 				},
 			});
 
-			// eslint-disable-next-line no-console
-			console.log(count);
+			msg.reply(`Remaining users: ${count}`);
 		} else {
 			msg.reply('Invalid command');
 		}
