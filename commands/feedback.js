@@ -60,6 +60,7 @@ module.exports = {
 					'en-US': 'The feedback message',
 				})
 				.setRequired(true)
+				.setMaxLength(200)
 		),
 	async execute(msg, args, interaction) {
 		try {
@@ -74,10 +75,6 @@ module.exports = {
 		let type = interaction.options.getString('type');
 
 		let message = interaction.options.getString('feedback');
-
-		if (message.length > 200) {
-			return interaction.editReply(`Your message is too long. Please shorten it. (Max: 200 characters, currently: ${message.length})`);
-		}
 
 		if (type === 'bug') {
 			createJiraIssue('10006', `[BUG] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);

@@ -31,48 +31,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'logging',
-			// 		description: 'Lets you set up a message to be sent when someone leaves the server',
-			// 		dm_permission: false,
-			// 		default_member_permissions: manageGuild,
-			// 		options: [
-			// 			{
-			// 				'name': 'list',
-			// 				'description': 'Shows the current logging settings',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'channel',
-			// 				'description': 'Set the channel that is supposed to log the information',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'channel',
-			// 						'description': 'The channel that is supposed to log the information',
-			// 						'type': 7, // 7 is type CHANNEL
-			// 						'required': true
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'toggleevent',
-			// 				'description': 'Allows you to toggle if an event should be logged',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'eventname',
-			// 						'description': 'The eventname found in the list embeds',
-			// 						'type': 3, // 3 is type STRING
-			// 						'required': true
-			// 					}
-			// 				]
-			// 			},
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'name-sync',
 			// 		description: 'Allows you to sync discord player names to ingame names (and ranks)',
 			// 		dm_permission: false,
@@ -4817,48 +4775,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'logging',
-					description: 'Lets you set up a message to be sent when someone leaves the server',
-					dm_permission: false,
-					default_member_permissions: manageGuild,
-					options: [
-						{
-							'name': 'list',
-							'description': 'Shows the current logging settings',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'channel',
-							'description': 'Set the channel that is supposed to log the information',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'channel',
-									'description': 'The channel that is supposed to log the information',
-									'type': 7, // 7 is type CHANNEL
-									'required': true
-								}
-							]
-						},
-						{
-							'name': 'toggleevent',
-							'description': 'Allows you to toggle if an event should be logged',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'eventname',
-									'description': 'The eventname found in the list embeds',
-									'type': 3, // 3 is type STRING
-									'required': true
-								}
-							]
-						},
-					]
-				},
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

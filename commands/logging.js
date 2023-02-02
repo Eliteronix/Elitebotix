@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -13,6 +13,140 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,
 	tags: 'server-admin',
+	data: new SlashCommandBuilder()
+		.setName('logging')
+		.setNameLocalizations({
+			'de': 'logging',
+			'en-GB': 'logging',
+			'en-US': 'logging',
+		})
+		.setDescription('Lets you log the enabled events in the specified channel')
+		.setDescriptionLocalizations({
+			'de': 'Erlaubt es dir die aktivierten Ereignisse im angegebenen Kanal zu loggen',
+			'en-GB': 'Lets you log the enabled events in the specified channel',
+			'en-US': 'Lets you log the enabled events in the specified channel',
+		})
+		.setDMPermission(false)
+		.setDefaultMemberPermissions(PermissionsBitField.Flags.ManageGuild)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('list')
+				.setNameLocalizations({
+					'de': 'liste',
+					'en-GB': 'list',
+					'en-US': 'list',
+				})
+				.setDescription('Shows the current logging settings')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt die aktuellen Logeinstellungen an',
+					'en-GB': 'Shows the current logging settings',
+					'en-US': 'Shows the current logging settings',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('channel')
+				.setNameLocalizations({
+					'de': 'kanal',
+					'en-GB': 'channel',
+					'en-US': 'channel',
+				})
+				.setDescription('Sets the channel that is supposed to log the information')
+				.setDescriptionLocalizations({
+					'de': 'Setzt den Kanal, in dem die Informationen geloggt werden sollen',
+					'en-GB': 'Sets the channel that is supposed to log the information',
+					'en-US': 'Sets the channel that is supposed to log the information',
+				})
+				.addChannelOption(option =>
+					option
+						.setName('channel')
+						.setNameLocalizations({
+							'de': 'kanal',
+							'en-GB': 'channel',
+							'en-US': 'channel',
+						})
+						.setDescription('The channel that is supposed to log the information')
+						.setDescriptionLocalizations({
+							'de': 'Der Kanal, in dem die Informationen geloggt werden sollen',
+							'en-GB': 'The channel that is supposed to log the information',
+							'en-US': 'The channel that is supposed to log the information',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('toggleevent')
+				.setNameLocalizations({
+					'de': 'ereignis',
+					'en-GB': 'event',
+					'en-US': 'event',
+				})
+				.setDescription('Allows you to toggle if an event should be logged')
+				.setDescriptionLocalizations({
+					'de': 'Erlaubt es dir ein Ereignis zu aktivieren oder zu deaktivieren',
+					'en-GB': 'Allows you to toggle if an event should be logged',
+					'en-US': 'Allows you to toggle if an event should be logged',
+				})
+				.addStringOption(option =>
+					option
+						.setName('eventname')
+						.setNameLocalizations({
+							'de': 'ereignisname',
+							'en-GB': 'eventname',
+							'en-US': 'eventname',
+						})
+						.setDescription('The eventname found in the list embeds')
+						.setDescriptionLocalizations({
+							'de': 'Der Ereignisname, der in den Listen Embeds zu finden ist',
+							'en-GB': 'The eventname found in the list embeds',
+							'en-US': 'The eventname found in the list embeds',
+						})
+						.setRequired(true)
+						.setAutocomplete(true)
+				)
+		),
+	async autocomplete(interaction) {
+		const focusedValue = interaction.options.getFocused();
+
+		const events = [
+			'nicknames',
+			'usernames',
+			'userdiscriminators',
+			'useravatars',
+			'userroles',
+			'userjoining',
+			'userleaving',
+			'rolecreate',
+			'roleupdate',
+			'roledelete',
+			'banadd',
+			'banremove',
+			'guildupdate',
+			'servermute',
+			'serverdeaf',
+			'joinvoice',
+			'leavevoice',
+			'channelcreate',
+			'channelupdate',
+			'channeldelete',
+			'invitecreate',
+			'invitedelete',
+			'messageupdate',
+			'messagedelete',
+			'emojicreate',
+			'emojiupdate',
+			'emojidelete',
+		];
+
+		let filtered = events.filter(choice => choice.startsWith(focusedValue));
+
+		filtered = filtered.slice(0, 25);
+
+		await interaction.respond(
+			filtered.map(choice => ({ name: choice, value: choice })),
+		);
+	},
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO:Follow ups are not ephemeral
