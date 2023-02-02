@@ -16,13 +16,13 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('autorole')
 		.setNameLocalizations({
-			'de': 'automatische rollenvergabe',
+			'de': 'automatischerollenvergabe',
 			'en-GB': 'autorole',
 			'en-US': 'autorole',
 		})
 		.setDescription('Lets you set up roles that will be automatically assigned on joining')
 		.setDescriptionLocalizations({
-			'de': 'Ermöglicht es dir, Rollen einzurichten, die automatisch vergeben werden, wenn jemand dem Server beitritt',
+			'de': 'Ermöglicht es dir, Rollen einzurichten, die automatisch bei Server beitritt vergeben werden',
 			'en-GB': 'Lets you set up roles that will be automatically assigned on joining',
 			'en-US': 'Lets you set up roles that will be automatically assigned on joining',
 		})
@@ -38,7 +38,7 @@ module.exports = {
 				})
 				.setDescription('Lets you add a new role that will be automatically assigned on joining')
 				.setDescriptionLocalizations({
-					'de': 'Ermöglicht es dir, eine neue Rolle hinzuzufügen, die automatisch vergeben wird, wenn jemand dem Server beitritt',
+					'de': 'Ermöglicht es dir, eine neue Rolle hinzuzufügen, die automatisch bei Server beitritt vergeben wird',
 					'en-GB': 'Lets you add a new role that will be automatically assigned on joining',
 					'en-US': 'Lets you add a new role that will be automatically assigned on joining',
 				})
