@@ -1,4 +1,4 @@
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -10,6 +10,20 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
 	tags: 'general',
+	data: new SlashCommandBuilder()
+		.setName('link')
+		.setNameLocalizations({
+			'de': 'link',
+			'en-GB': 'link',
+			'en-US': 'link',
+		})
+		.setDescription('Sends a link to add the bot to a server')
+		.setDescriptionLocalizations({
+			'de': 'Sendet einen Link, um den Bot zu deinem Server hinzuzufügen',
+			'en-GB': 'Sends a link to add the bot to a server',
+			'en-US': 'Sends a link to add the bot to a server',
+		})
+		.setDMPermission(true),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {

@@ -87,14 +87,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'link',
-			// 		description: 'Sends a link to add the bot to a server'
-			// 		dm_permission: true,
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'logging',
 			// 		description: 'Lets you set up a message to be sent when someone leaves the server',
 			// 		dm_permission: false,
@@ -4935,14 +4927,6 @@ module.exports = {
 						}
 					]
 				},
-			});
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'link',
-					description: 'Sends a link to add the bot to a server',
-					dm_permission: true,
-				}
 			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
