@@ -1,5 +1,5 @@
 const { DBGuilds } = require('../dbObjects');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -12,6 +12,82 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
 	tags: 'server-admin',
+	data: new SlashCommandBuilder()
+		.setName('welcome-message')
+		.setNameLocalizations({
+			'de': 'willkommensnachricht',
+			'en-GB': 'welcome-message',
+			'en-US': 'welcome-message',
+		})
+		.setDescription('Lets you set up a message to be sent when someone joins the server')
+		.setNameLocalizations({
+			'de': 'Erlaubt es dir eine Willkommensnachricht für neue Mitglieder zu setzen',
+			'en-GB': 'Lets you set up a message to be sent when someone joins the server',
+			'en-US': 'Lets you set up a message to be sent when someone joins the server',
+		})
+		.setDMPermission(false)
+		.setDefaultMemberPermissions(PermissionsBitField.Flags.ManageGuild)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('current')
+				.setNameLocalizations({
+					'de': 'aktuell',
+					'en-GB': 'current',
+					'en-US': 'current',
+				})
+				.setDescription('Shows the current welcome-message')
+				.setNameLocalizations({
+					'de': 'Zeigt die aktuelle Willkommensnachricht an',
+					'en-GB': 'Shows the current welcome-message',
+					'en-US': 'Shows the current welcome-message',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('disable')
+				.setNameLocalizations({
+					'de': 'deaktivieren',
+					'en-GB': 'disable',
+					'en-US': 'disable',
+				})
+				.setDescription('Disables welcome-messages')
+				.setNameLocalizations({
+					'de': 'Deaktiviert Willkommensnachrichten',
+					'en-GB': 'Disables welcome-messages',
+					'en-US': 'Disables welcome-messages',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('set')
+				.setNameLocalizations({
+					'de': 'setzen',
+					'en-GB': 'set',
+					'en-US': 'set',
+				})
+				.setDescription('Allows you to set a new welcome-message in the current channel')
+				.setNameLocalizations({
+					'de': 'Erlaubt es dir eine neue Willkommensnachricht in diesem Kanal zu setzen',
+					'en-GB': 'Allows you to set a new welcome-message in the current channel',
+					'en-US': 'Allows you to set a new welcome-message in the current channel',
+				})
+				.addStringOption(option =>
+					option
+						.setName('message')
+						.setNameLocalizations({
+							'de': 'nachricht',
+							'en-GB': 'message',
+							'en-US': 'message',
+						})
+						.setDescription('The message to be sent (use "@member" to mention the member)')
+						.setNameLocalizations({
+							'de': 'Die Nachricht die gesendet werden soll (Benutze "@member" um das Mitglied zu erwähnen)',
+							'en-GB': 'The message to be sent (use "@member" to mention the member)',
+							'en-US': 'The message to be sent (use "@member" to mention the member)',
+						})
+						.setRequired(true)
+				)
+		),
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
