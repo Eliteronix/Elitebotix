@@ -286,6 +286,26 @@ module.exports = {
 					'en-US': 'Show open forum posts',
 				})
 		),
+	async autocomplete(interaction) {
+		const focusedValue = interaction.options.getFocused();
+
+		const continents = [
+			'Africa | Detail',
+			'Asia | Detail',
+			'Europe | Detail',
+			'North America | Detail',
+			'Oceania | Detail',
+			'South America | Detail',
+		];
+
+		let filtered = continents.filter(choice => choice.includes(focusedValue));
+
+		filtered = filtered.slice(0, 25);
+
+		await interaction.respond(
+			filtered.map(choice => ({ name: choice, value: choice })),
+		);
+	},
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {
