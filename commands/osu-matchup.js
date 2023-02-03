@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { Op } = require('sequelize');
@@ -17,6 +17,476 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-matchup')
+		.setNameLocalizations({
+			'de': 'osu-matchup',
+			'en-GB': 'osu-matchup',
+			'en-US': 'osu-matchup',
+		})
+		.setDescription('Sends an info card about the matchups between the specified players')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Info-Karte über die Begegnungen zwischen den angegebenen Spielern',
+			'en-GB': 'Sends an info card about the matchups between the specified players',
+			'en-US': 'Sends an info card about the matchups between the specified players',
+		})
+		.setDMPermission(true)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('1v1')
+				.setNameLocalizations({
+					'de': '1v1',
+					'en-GB': '1v1',
+					'en-US': '1v1',
+				})
+				.setDescription('Get an info card about the matchups between the specified players')
+				.setDescriptionLocalizations({
+					'de': 'Sendet eine Info-Karte über die Begegnungen zwischen den angegebenen Spielern',
+					'en-GB': 'Sends an info card about the matchups between the specified players',
+					'en-US': 'Sends an info card about the matchups between the specified players',
+				})
+				.addStringOption(option =>
+					option
+						.setName('username')
+						.setNameLocalizations({
+							'de': 'nutzername',
+							'en-GB': 'username',
+							'en-US': 'username',
+						})
+						.setDescription('The name of a player to compare with')
+						.setDescriptionLocalizations({
+							'de': 'Der Name eines Spielers, mit dem verglichen werden soll',
+							'en-GB': 'The name of a player to compare with',
+							'en-US': 'The name of a player to compare with',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username2')
+						.setNameLocalizations({
+							'de': 'nutzername2',
+							'en-GB': 'username2',
+							'en-US': 'username2',
+						})
+						.setDescription('The name of a player to compare with')
+						.setDescriptionLocalizations({
+							'de': 'Der Name eines Spielers, mit dem verglichen werden soll',
+							'en-GB': 'The name of a player to compare with',
+							'en-US': 'The name of a player to compare with',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('timeframe')
+						.setNameLocalizations({
+							'de': 'zeitraum',
+							'en-GB': 'timeframe',
+							'en-US': 'timeframe',
+						})
+						.setDescription('Since when should the scores be taken into account')
+						.setDescriptionLocalizations({
+							'de': 'Ab wann sollen die Ergebnisse berücksichtigt werden',
+							'en-GB': 'Since when should the scores be taken into account',
+							'en-US': 'Since when should the scores be taken into account',
+						})
+						.setRequired(false)
+						.addChoices(
+							{ name: '1 month', value: '1m' },
+							{ name: '3 months', value: '3m' },
+							{ name: '6 months', value: '6m' },
+							{ name: '1 year', value: '1y' },
+							{ name: '2 years', value: '2y' },
+							{ name: 'All time', value: 'all' },
+						)
+				)
+				.addStringOption(option =>
+					option
+						.setName('scores')
+						.setNameLocalizations({
+							'de': 'scores',
+							'en-GB': 'scores',
+							'en-US': 'scores',
+						})
+						.setDescription('Which types of scores should the matchup evaluate?')
+						.setDescriptionLocalizations({
+							'de': 'Welche Arten von scores soll die Begegnung auswerten?',
+							'en-GB': 'Which types of scores should the matchup evaluate?',
+							'en-US': 'Which types of scores should the matchup evaluate?',
+						})
+						.setRequired(false)
+						.addChoices(
+							{ name: 'Only Score v2', value: '--v2' },
+							{ name: 'Only Score v1', value: '--v1' },
+							{ name: 'All Scores', value: '--vx' },
+						)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('tourney')
+						.setNameLocalizations({
+							'de': 'turnier',
+							'en-GB': 'tourney',
+							'en-US': 'tourney',
+						})
+						.setDescription('Should it only count scores from tournaments?')
+						.setDescriptionLocalizations({
+							'de': 'Soll es nur Ergebnisse aus Turnieren zählen?',
+							'en-GB': 'Should it only count scores from tournaments?',
+							'en-US': 'Should it only count scores from tournaments?',
+						})
+						.setRequired(false)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('teamvs')
+				.setNameLocalizations({
+					'de': 'teamvs',
+					'en-GB': 'teamvs',
+					'en-US': 'teamvs',
+				})
+				.setDescription('Get an info card about the matchups between the specified teams')
+				.setDescriptionLocalizations({
+					'de': 'Erhalte eine Info-Karte über die Begegnungen zwischen den angegebenen Teams',
+					'en-GB': 'Get an info card about the matchups between the specified teams',
+					'en-US': 'Get an info card about the matchups between the specified teams',
+				})
+				.addIntegerOption(option =>
+					option
+						.setName('teamsize')
+						.setNameLocalizations({
+							'de': 'teamgröße',
+							'en-GB': 'teamsize',
+							'en-US': 'teamsize',
+						})
+						.setDescription('The amount of players that are playing against each other on the maps')
+						.setDescriptionLocalizations({
+							'de': 'Die Anzahl der Spieler, die gegeneinander auf den Karten spielen',
+							'en-GB': 'The amount of players that are playing against each other on the maps',
+							'en-US': 'The amount of players that are playing against each other on the maps',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team1player1')
+						.setNameLocalizations({
+							'de': 'team1spieler1',
+							'en-GB': 'team1player1',
+							'en-US': 'team1player1',
+						})
+						.setDescription('The first user of the first team')
+						.setDescriptionLocalizations({
+							'de': 'Der erste Spieler des ersten Teams',
+							'en-GB': 'The first user of the first team',
+							'en-US': 'The first user of the first team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team1player2')
+						.setNameLocalizations({
+							'de': 'team1spieler2',
+							'en-GB': 'team1player2',
+							'en-US': 'team1player2',
+						})
+						.setDescription('The second user of the first team')
+						.setDescriptionLocalizations({
+							'de': 'Der zweite Spieler des ersten Teams',
+							'en-GB': 'The second user of the first team',
+							'en-US': 'The second user of the first team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team1player3')
+						.setNameLocalizations({
+							'de': 'team1spieler3',
+							'en-GB': 'team1player3',
+							'en-US': 'team1player3',
+						})
+						.setDescription('The third user of the first team')
+						.setDescriptionLocalizations({
+							'de': 'Der dritte Spieler des ersten Teams',
+							'en-GB': 'The third user of the first team',
+							'en-US': 'The third user of the first team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team1player4')
+						.setNameLocalizations({
+							'de': 'team1spieler4',
+							'en-GB': 'team1player4',
+							'en-US': 'team1player4',
+						})
+						.setDescription('The fourth user of the first team')
+						.setDescriptionLocalizations({
+							'de': 'Der vierte Spieler des ersten Teams',
+							'en-GB': 'The fourth user of the first team',
+							'en-US': 'The fourth user of the first team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team1player5')
+						.setNameLocalizations({
+							'de': 'team1spieler5',
+							'en-GB': 'team1player5',
+							'en-US': 'team1player5',
+						})
+						.setDescription('The fifth user of the first team')
+						.setDescriptionLocalizations({
+							'de': 'Der fünfte Spieler des ersten Teams',
+							'en-GB': 'The fifth user of the first team',
+							'en-US': 'The fifth user of the first team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team1player6')
+						.setNameLocalizations({
+							'de': 'team1spieler6',
+							'en-GB': 'team1player6',
+							'en-US': 'team1player6',
+						})
+						.setDescription('The sixth user of the first team')
+						.setDescriptionLocalizations({
+							'de': 'Der sechste Spieler des ersten Teams',
+							'en-GB': 'The sixth user of the first team',
+							'en-US': 'The sixth user of the first team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team1player7')
+						.setNameLocalizations({
+							'de': 'team1spieler7',
+							'en-GB': 'team1player7',
+							'en-US': 'team1player7',
+						})
+						.setDescription('The seventh user of the first team')
+						.setDescriptionLocalizations({
+							'de': 'Der siebte Spieler des ersten Teams',
+							'en-GB': 'The seventh user of the first team',
+							'en-US': 'The seventh user of the first team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team1player8')
+						.setNameLocalizations({
+							'de': 'team1spieler8',
+							'en-GB': 'team1player8',
+							'en-US': 'team1player8',
+						})
+						.setDescription('The eighth user of the first team')
+						.setDescriptionLocalizations({
+							'de': 'Der achte Spieler des ersten Teams',
+							'en-GB': 'The eighth user of the first team',
+							'en-US': 'The eighth user of the first team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team2player1')
+						.setNameLocalizations({
+							'de': 'team2spieler1',
+							'en-GB': 'team2player1',
+							'en-US': 'team2player1',
+						})
+						.setDescription('The first user of the second team')
+						.setDescriptionLocalizations({
+							'de': 'Der erste Spieler des zweiten Teams',
+							'en-GB': 'The first user of the second team',
+							'en-US': 'The first user of the second team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team2player2')
+						.setNameLocalizations({
+							'de': 'team2spieler2',
+							'en-GB': 'team2player2',
+							'en-US': 'team2player2',
+						})
+						.setDescription('The second user of the second team')
+						.setDescriptionLocalizations({
+							'de': 'Der zweite Spieler des zweiten Teams',
+							'en-GB': 'The second user of the second team',
+							'en-US': 'The second user of the second team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team2player3')
+						.setNameLocalizations({
+							'de': 'team2spieler3',
+							'en-GB': 'team2player3',
+							'en-US': 'team2player3',
+						})
+						.setDescription('The third user of the second team')
+						.setDescriptionLocalizations({
+							'de': 'Der dritte Spieler des zweiten Teams',
+							'en-GB': 'The third user of the second team',
+							'en-US': 'The third user of the second team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team2player4')
+						.setNameLocalizations({
+							'de': 'team2spieler4',
+							'en-GB': 'team2player4',
+							'en-US': 'team2player4',
+						})
+						.setDescription('The fourth user of the second team')
+						.setDescriptionLocalizations({
+							'de': 'Der vierte Spieler des zweiten Teams',
+							'en-GB': 'The fourth user of the second team',
+							'en-US': 'The fourth user of the second team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team2player5')
+						.setNameLocalizations({
+							'de': 'team2spieler5',
+							'en-GB': 'team2player5',
+							'en-US': 'team2player5',
+						})
+						.setDescription('The fifth user of the second team')
+						.setDescriptionLocalizations({
+							'de': 'Der fünfte Spieler des zweiten Teams',
+							'en-GB': 'The fifth user of the second team',
+							'en-US': 'The fifth user of the second team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team2player6')
+						.setNameLocalizations({
+							'de': 'team2spieler6',
+							'en-GB': 'team2player6',
+							'en-US': 'team2player6',
+						})
+						.setDescription('The sixth user of the second team')
+						.setDescriptionLocalizations({
+							'de': 'Der sechste Spieler des zweiten Teams',
+							'en-GB': 'The sixth user of the second team',
+							'en-US': 'The sixth user of the second team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team2player7')
+						.setNameLocalizations({
+							'de': 'team2spieler7',
+							'en-GB': 'team2player7',
+							'en-US': 'team2player7',
+						})
+						.setDescription('The seventh user of the second team')
+						.setDescriptionLocalizations({
+							'de': 'Der siebte Spieler des zweiten Teams',
+							'en-GB': 'The seventh user of the second team',
+							'en-US': 'The seventh user of the second team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('team2player8')
+						.setNameLocalizations({
+							'de': 'team2spieler8',
+							'en-GB': 'team2player8',
+							'en-US': 'team2player8',
+						})
+						.setDescription('The eighth user of the second team')
+						.setDescriptionLocalizations({
+							'de': 'Der achte Spieler des zweiten Teams',
+							'en-GB': 'The eighth user of the second team',
+							'en-US': 'The eighth user of the second team',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('timeframe')
+						.setNameLocalizations({
+							'de': 'zeitraum',
+							'en-GB': 'timeframe',
+							'en-US': 'timeframe',
+						})
+						.setDescription('Since when should the scores be taken into account')
+						.setDescriptionLocalizations({
+							'de': 'Ab wann sollen die Scores berücksichtigt werden',
+							'en-GB': 'Since when should the scores be taken into account',
+							'en-US': 'Since when should the scores be taken into account',
+						})
+						.setRequired(false)
+						.addChoices(
+							{ name: '1 month', value: '1m' },
+							{ name: '3 months', value: '3m' },
+							{ name: '6 months', value: '6m' },
+							{ name: '1 year', value: '1y' },
+							{ name: '2 years', value: '2y' },
+							{ name: 'All time', value: 'all' },
+						)
+				)
+				.addStringOption(option =>
+					option
+						.setName('scores')
+						.setNameLocalizations({
+							'de': 'scores',
+							'en-GB': 'scores',
+							'en-US': 'scores',
+						})
+						.setDescription('Which types of scores should the matchup evaluate?')
+						.setDescriptionLocalizations({
+							'de': 'Welche Arten von scores soll die Begegnung auswerten?',
+							'en-GB': 'Which types of scores should the matchup evaluate?',
+							'en-US': 'Which types of scores should the matchup evaluate?',
+						})
+						.setRequired(false)
+						.addChoices(
+							{ name: 'Only Score v2', value: '--v2' },
+							{ name: 'Only Score v1', value: '--v1' },
+							{ name: 'All Scores', value: '--vx' },
+						)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('tourney')
+						.setNameLocalizations({
+							'de': 'turnier',
+							'en-GB': 'tourney',
+							'en-US': 'tourney',
+						})
+						.setDescription('Should it only count scores from tournaments?')
+						.setDescriptionLocalizations({
+							'de': 'Soll es nur Ergebnisse aus Turnieren zählen?',
+							'en-GB': 'Should it only count scores from tournaments?',
+							'en-US': 'Should it only count scores from tournaments?',
+						})
+						.setRequired(false)
+				)
+		),
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		let teamsize = 1;
