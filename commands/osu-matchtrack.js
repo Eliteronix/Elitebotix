@@ -508,6 +508,20 @@ async function getResultImage(event, users) {
 	ctx.arcTo(25, 25, 25, 25 + 10, 10);
 	ctx.clip();
 
+	if (!event.game.beatmap) {
+		event.game.beatmap = {
+			beatmapset: {
+				covers: {
+					slimcover: 'https://assets.ppy.sh/beatmaps/0/covers/cover.jpg?1530000000',
+				},
+				title: 'Unavailable',
+				artist: 'Unavailable',
+			},
+			id: '0',
+			version: 'Unavailable',
+		};
+	}
+
 	try {
 		const beatmapCover = await Canvas.loadImage(event.game.beatmap.beatmapset.covers.slimcover);
 
@@ -790,6 +804,20 @@ async function getPlayingImage(event) {
 	ctx.lineTo(25 + 10, 25);
 	ctx.arcTo(25, 25, 25, 25 + 10, 10);
 	ctx.clip();
+
+	if (!event.game.beatmap) {
+		event.game.beatmap = {
+			beatmapset: {
+				covers: {
+					slimcover: 'https://assets.ppy.sh/beatmaps/0/covers/cover.jpg?1530000000',
+				},
+				title: 'Unavailable',
+				artist: 'Unavailable',
+			},
+			id: '0',
+			version: 'Unavailable',
+		};
+	}
 
 	try {
 		const beatmapCover = await Canvas.loadImage(event.game.beatmap.beatmapset.covers.slimcover);
