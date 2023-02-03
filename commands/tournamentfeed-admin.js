@@ -2,6 +2,7 @@ const { DBOsuForumPosts, DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { SlashCommandBuilder } = require('discord.js');
+const { getIDFromPotentialOsuLink } = require('../utils');
 
 module.exports = {
 	name: 'tournamentfeed-admin',
@@ -40,7 +41,7 @@ module.exports = {
 					'en-GB': 'Allows for updating the tournament feed',
 					'en-US': 'Allows for updating the tournament feed',
 				})
-				.addIntegerOption(option =>
+				.addStringOption(option =>
 					option
 						.setName('id')
 						.setNameLocalizations({
@@ -223,7 +224,7 @@ module.exports = {
 					'en-GB': 'Pings a new tournament',
 					'en-US': 'Pings a new tournament',
 				})
-				.addIntegerOption(option =>
+				.addStringOption(option =>
 					option
 						.setName('id')
 						.setNameLocalizations({
@@ -254,7 +255,7 @@ module.exports = {
 					'en-GB': 'Deletes a saved tournament record',
 					'en-US': 'Deletes a saved tournament record',
 				})
-				.addIntegerOption(option =>
+				.addStringOption(option =>
 					option
 						.setName('id')
 						.setNameLocalizations({
@@ -397,9 +398,11 @@ module.exports = {
 				interaction.followUp({ embeds: [embed] });
 			}
 		} else if (interaction.options._subcommand === 'ping') {
+			let id = getIDFromPotentialOsuLink(interaction.options.getString('id'));
+
 			let forumPost = await DBOsuForumPosts.findOne({
 				where: {
-					forumPost: `https://osu.ppy.sh/community/forums/topics/${interaction.options._hoistedOptions[0].value}`
+					forumPost: `https://osu.ppy.sh/community/forums/topics/${id}`
 				}
 			});
 
@@ -617,7 +620,7 @@ module.exports = {
 			interaction.editReply(`Ping sent. (Pinged ${pingedUsers} users)`);
 
 		} else if (interaction.options._subcommand === 'update') {
-			let id = interaction.options.getString('id');
+			let id = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 			let format = interaction.options.getString('format');
 			let rankrange = interaction.options.getString('rankrange');
 			let gamemode = interaction.options.getString('gamemode');
@@ -737,9 +740,11 @@ module.exports = {
 
 			interaction.editReply({ embeds: [embed] });
 		} else if (interaction.options._subcommand === 'delete') {
+			let id = getIDFromPotentialOsuLink(interaction.options.getString('id'));
+
 			let forumPost = await DBOsuForumPosts.findOne({
 				where: {
-					forumPost: `https://osu.ppy.sh/community/forums/topics/${interaction.options._hoistedOptions[0].value}`
+					forumPost: `https://osu.ppy.sh/community/forums/topics/${id}`
 				}
 			});
 
