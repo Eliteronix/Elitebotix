@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBOsuTourneyFollows } = require('../dbObjects');
 const osu = require('node-osu');
 const { showUnknownInteractionError } = require('../config.json');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { getOsuPlayerName } = require('../utils');
 const { Op } = require('sequelize');
 
@@ -14,6 +14,143 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-follow')
+		.setNameLocalizations({
+			'de': 'osu-folgen',
+			'en-GB': 'osu-follow',
+			'en-US': 'osu-follow',
+		})
+		.setDescription('Allows following osu! users')
+		.setDescriptionLocalizations({
+			'de': 'Erlaubt es osu! Spielern zu folgen',
+			'en-GB': 'Allows following osu! users',
+			'en-US': 'Allows following osu! users',
+		})
+		.setDMPermission(true)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('follow')
+				.setNameLocalizations({
+					'de': 'folgen',
+					'en-GB': 'follow',
+					'en-US': 'follow',
+				})
+				.setDescription('Get notified when a user plays a new match')
+				.setDescriptionLocalizations({
+					'de': 'Benachrichtigt dich, wenn ein Spieler eine neues match spielt',
+					'en-GB': 'Get notified when a user plays a new match',
+					'en-US': 'Get notified when a user plays a new match',
+				})
+				.addStringOption(option =>
+					option
+						.setName('username')
+						.setNameLocalizations({
+							'de': 'nutzername',
+							'en-GB': 'username',
+							'en-US': 'username',
+						})
+						.setDescription('The username, id or link of the player to follow')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers, dem du folgen willst',
+							'en-GB': 'The username, id or link of the player to follow',
+							'en-US': 'The username, id or link of the player to follow',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('unfollow')
+				.setNameLocalizations({
+					'de': 'entfolgen',
+					'en-GB': 'unfollow',
+					'en-US': 'unfollow',
+				})
+				.setDescription('Stop getting notified when a user plays a new match')
+				.setDescriptionLocalizations({
+					'de': 'Stoppt die Benachrichtigung, wenn ein Spieler eine neues match spielt',
+					'en-GB': 'Stop getting notified when a user plays a new match',
+					'en-US': 'Stop getting notified when a user plays a new match',
+				})
+				.addStringOption(option =>
+					option
+						.setName('username')
+						.setNameLocalizations({
+							'de': 'nutzername',
+							'en-GB': 'username',
+							'en-US': 'username',
+						})
+						.setDescription('The username, id or link of the player to unfollow')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers, dem du entfolgen willst',
+							'en-GB': 'The username, id or link of the player to unfollow',
+							'en-US': 'The username, id or link of the player to unfollow',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('followlist')
+				.setNameLocalizations({
+					'de': 'followliste',
+					'en-GB': 'followlist',
+					'en-US': 'followlist',
+				})
+				.setDescription('Get a list of all followed users')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt eine Liste aller Spieler, denen du folgst',
+					'en-GB': 'Get a list of all followed users',
+					'en-US': 'Get a list of all followed users',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('followers')
+				.setNameLocalizations({
+					'de': 'follower',
+					'en-GB': 'followers',
+					'en-US': 'followers',
+				})
+				.setDescription('Get a list of all users following you')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt eine Liste aller Spieler, die dir folgen',
+					'en-GB': 'Get a list of all users following you',
+					'en-US': 'Get a list of all users following you',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('allowfollowing')
+				.setNameLocalizations({
+					'de': 'folgen erlauben',
+					'en-GB': 'allowfollowing',
+					'en-US': 'allowfollowing',
+				})
+				.setDescription('Allow others to follow you or not')
+				.setDescriptionLocalizations({
+					'de': 'Erlaubt es anderen, dir zu folgen oder nicht',
+					'en-GB': 'Allow others to follow you or not',
+					'en-US': 'Allow others to follow you or not',
+				})
+				.addBooleanOption(option =>
+					option
+						.setName('allow')
+						.setNameLocalizations({
+							'de': 'erlauben',
+							'en-GB': 'allow',
+							'en-US': 'allow',
+						})
+						.setDescription('Change if others can follow you or not')
+						.setDescriptionLocalizations({
+							'de': 'Ändert, ob andere dir folgen können oder nicht',
+							'en-GB': 'Change if others can follow you or not',
+							'en-US': 'Change if others can follow you or not',
+						})
+						.setRequired(true)
+				)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {

@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
 const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
 const Canvas = require('canvas');
@@ -20,6 +20,538 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 15,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-duel')
+		.setNameLocalizations({
+			'de': 'osu-duel',
+			'en-GB': 'osu-duel',
+			'en-US': 'osu-duel',
+		})
+		.setDescription('Lets you play a match which is being reffed by the bot')
+		.setDescriptionLocalizations({
+			'de': 'Erlaubt es dir ein Match zu spielen, welches von dem Bot geleitet wird',
+			'en-GB': 'Lets you play a match which is being reffed by the bot',
+			'en-US': 'Lets you play a match which is being reffed by the bot',
+		})
+		.setDMPermission(true)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('queue1v1')
+				.setNameLocalizations({
+					'de': 'queue1v1',
+					'en-GB': 'queue1v1',
+					'en-US': 'queue1v1',
+				})
+				.setDescription('Lets you queue up for a Bo7 match against an opponent')
+				.setDescriptionLocalizations({
+					'de': 'Lässt dich in eine Bo7 Warteschlange einreihen',
+					'en-GB': 'Lets you queue up for a Bo7 match against an opponent',
+					'en-US': 'Lets you queue up for a Bo7 match against an opponent',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('queue1v1-leave')
+				.setNameLocalizations({
+					'de': 'queue1v1-leave',
+					'en-GB': 'queue1v1-leave',
+					'en-US': 'queue1v1-leave',
+				})
+				.setDescription('Lets you leave the queue for Bo7 matches')
+				.setDescriptionLocalizations({
+					'de': 'Lässt dich die Bo7 Warteschlange verlassen',
+					'en-GB': 'Lets you leave the queue for Bo7 matches',
+					'en-US': 'Lets you leave the queue for Bo7 matches',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('match')
+				.setNameLocalizations({
+					'de': 'match',
+					'en-GB': 'match',
+					'en-US': 'match',
+				})
+				.setDescription('Create a match hosted by the bot')
+				.setDescriptionLocalizations({
+					'de': 'Erstelle ein Match das vom Bot gehostet wird',
+					'en-GB': 'Create a match hosted by the bot',
+					'en-US': 'Create a match hosted by the bot',
+				})
+				.addUserOption(option =>
+					option
+						.setName('firstteammate')
+						.setNameLocalizations({
+							'de': 'ersterpartner',
+							'en-GB': 'firstteammate',
+							'en-US': 'firstteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('secondteammate')
+						.setNameLocalizations({
+							'de': 'zweiterpartner',
+							'en-GB': 'secondteammate',
+							'en-US': 'secondteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('thirdteammate')
+						.setNameLocalizations({
+							'de': 'dritterpartner',
+							'en-GB': 'thirdteammate',
+							'en-US': 'thirdteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('fourthteammate')
+						.setNameLocalizations({
+							'de': 'vierterpartner',
+							'en-GB': 'fourthteammate',
+							'en-US': 'fourthteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('fifthteammate')
+						.setNameLocalizations({
+							'de': 'fünfterpartner',
+							'en-GB': 'fifthteammate',
+							'en-US': 'fifthteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('sixthteammate')
+						.setNameLocalizations({
+							'de': 'sechsterpartner',
+							'en-GB': 'sixthteammate',
+							'en-US': 'sixthteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('seventhteammate')
+						.setNameLocalizations({
+							'de': 'siebterpartner',
+							'en-GB': 'seventhteammate',
+							'en-US': 'seventhteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('firstopponent')
+						.setNameLocalizations({
+							'de': 'erstergegner',
+							'en-GB': 'firstopponent',
+							'en-US': 'firstopponent',
+						})
+						.setDescription('An opponent')
+						.setDescriptionLocalizations({
+							'de': 'Ein Gegner',
+							'en-GB': 'An opponent',
+							'en-US': 'An opponent',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('secondopponent')
+						.setNameLocalizations({
+							'de': 'zweitergegner',
+							'en-GB': 'secondopponent',
+							'en-US': 'secondopponent',
+						})
+						.setDescription('An opponent')
+						.setDescriptionLocalizations({
+							'de': 'Ein Gegner',
+							'en-GB': 'An opponent',
+							'en-US': 'An opponent',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('thirdopponent')
+						.setNameLocalizations({
+							'de': 'drittergegner',
+							'en-GB': 'thirdopponent',
+							'en-US': 'thirdopponent',
+						})
+						.setDescription('An opponent')
+						.setDescriptionLocalizations({
+							'de': 'Ein Gegner',
+							'en-GB': 'An opponent',
+							'en-US': 'An opponent',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('fourthopponent')
+						.setNameLocalizations({
+							'de': 'viertergegner',
+							'en-GB': 'fourthopponent',
+							'en-US': 'fourthopponent',
+						})
+						.setDescription('An opponent')
+						.setDescriptionLocalizations({
+							'de': 'Ein Gegner',
+							'en-GB': 'An opponent',
+							'en-US': 'An opponent',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('fifthopponent')
+						.setNameLocalizations({
+							'de': 'fünftergegner',
+							'en-GB': 'fifthopponent',
+							'en-US': 'fifthopponent',
+						})
+						.setDescription('An opponent')
+						.setDescriptionLocalizations({
+							'de': 'Ein Gegner',
+							'en-GB': 'An opponent',
+							'en-US': 'An opponent',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('sixthopponent')
+						.setNameLocalizations({
+							'de': 'sechstergegner',
+							'en-GB': 'sixthopponent',
+							'en-US': 'sixthopponent',
+						})
+						.setDescription('An opponent')
+						.setDescriptionLocalizations({
+							'de': 'Ein Gegner',
+							'en-GB': 'An opponent',
+							'en-US': 'An opponent',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('seventhopponent')
+						.setNameLocalizations({
+							'de': 'siebtergegner',
+							'en-GB': 'seventhopponent',
+							'en-US': 'seventhopponent',
+						})
+						.setDescription('An opponent')
+						.setDescriptionLocalizations({
+							'de': 'Ein Gegner',
+							'en-GB': 'An opponent',
+							'en-US': 'An opponent',
+						})
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('eighthopponent')
+						.setNameLocalizations({
+							'de': 'achtergegner',
+							'en-GB': 'eighthopponent',
+							'en-US': 'eighthopponent',
+						})
+						.setDescription('An opponent')
+						.setDescriptionLocalizations({
+							'de': 'Ein Gegner',
+							'en-GB': 'An opponent',
+							'en-US': 'An opponent',
+						})
+						.setRequired(true)
+				)
+				.addNumberOption(option =>
+					option
+						.setName('starrating')
+						.setNameLocalizations({
+							'de': 'sterne',
+							'en-GB': 'starrating',
+							'en-US': 'starrating',
+						})
+						.setDescription('The star rating to play on')
+						.setDescriptionLocalizations({
+							'de': 'Die Sterne die du spielen willst',
+							'en-GB': 'The star rating to play on',
+							'en-US': 'The star rating to play on',
+						})
+						.setRequired(false)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('bestof')
+						.setNameLocalizations({
+							'de': 'bestof',
+							'en-GB': 'bestof',
+							'en-US': 'bestof',
+						})
+						.setDescription('The best of')
+						.setDescriptionLocalizations({
+							'de': 'Das Best of',
+							'en-GB': 'The best of',
+							'en-US': 'The best of',
+						})
+						.setRequired(false)
+						.addChoices(
+							{ name: 'Best of 13', value: 13 },
+							{ name: 'Best of 11', value: 11 },
+							{ name: 'Best of 9', value: 9 },
+							{ name: 'Best of 7 (Default)', value: 7 },
+							{ name: 'Best of 5', value: 5 },
+							{ name: 'Best of 3', value: 3 },
+							{ name: 'Best of 1', value: 1 },
+						)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('ranked')
+						.setNameLocalizations({
+							'de': 'ranked',
+							'en-GB': 'ranked',
+							'en-US': 'ranked',
+						})
+						.setDescription('Should only ranked maps be played?')
+						.setDescriptionLocalizations({
+							'de': 'Sollen nur ranked Maps gespielt werden?',
+							'en-GB': 'Should only ranked maps be played?',
+							'en-US': 'Should only ranked maps be played?',
+						})
+						.setRequired(false)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('rating')
+				.setNameLocalizations({
+					'de': 'wertung',
+					'en-GB': 'rating',
+					'en-US': 'rating',
+				})
+				.setDescription('Get shown what a users rating is')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt dir die Wertung eines Spielers an',
+					'en-GB': 'Get shown what a users rating is',
+					'en-US': 'Get shown what a users rating is',
+				})
+				.addStringOption(option =>
+					option
+						.setName('username')
+						.setNameLocalizations({
+							'de': 'nutzername',
+							'en-GB': 'username',
+							'en-US': 'username',
+						})
+						.setDescription('The username of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername des Spielers',
+							'en-GB': 'The username of the player',
+							'en-US': 'The username of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('historical')
+						.setNameLocalizations({
+							'de': 'historie',
+							'en-GB': 'historical',
+							'en-US': 'historical',
+						})
+						.setDescription('The amount of historical data to be shown.')
+						.setDescriptionLocalizations({
+							'de': 'Die Menge an historischen Daten die angezeigt werden soll.',
+							'en-GB': 'The amount of historical data to be shown.',
+							'en-US': 'The amount of historical data to be shown.',
+						})
+						.setRequired(false)
+						.addChoices(
+							{ name: 'Only the current data', value: '0' },
+							{ name: 'Including last year', value: '1' },
+							{ name: 'All historical data', value: '99' },
+						)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('rating-leaderboard')
+				.setNameLocalizations({
+					'de': 'wertungs-rangliste',
+					'en-GB': 'rating-leaderboard',
+					'en-US': 'rating-leaderboard',
+				})
+				.setDescription('Get a leaderboard of the duel star ratings')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt eine Rangliste der Duel Star Ratings an',
+					'en-GB': 'Get a leaderboard of the duel star ratings',
+					'en-US': 'Get a leaderboard of the duel star ratings',
+				})
+				.addIntegerOption(option =>
+					option
+						.setName('page')
+						.setNameLocalizations({
+							'de': 'seite',
+							'en-GB': 'page',
+							'en-US': 'page',
+						})
+						.setDescription('The page of the leaderboard to display')
+						.setDescriptionLocalizations({
+							'de': 'Die Seite der Rangliste die angezeigt werden soll',
+							'en-GB': 'The page of the leaderboard to display',
+							'en-US': 'The page of the leaderboard to display',
+						})
+						.setRequired(false)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('csv')
+						.setNameLocalizations({
+							'de': 'csv',
+							'en-GB': 'csv',
+							'en-US': 'csv',
+						})
+						.setDescription('Should a csv file be attached')
+						.setDescriptionLocalizations({
+							'de': 'Soll eine csv Datei angehängt werden',
+							'en-GB': 'Should a csv file be attached',
+							'en-US': 'Should a csv file be attached',
+						})
+						.setRequired(false)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('data')
+				.setNameLocalizations({
+					'de': 'daten',
+					'en-GB': 'data',
+					'en-US': 'data',
+				})
+				.setDescription('Get shown what a users rating is based on')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt auf was die Wertung eines Spielers basiert',
+					'en-GB': 'Get shown what a users rating is based on',
+					'en-US': 'Get shown what a users rating is based on',
+				})
+				.addStringOption(option =>
+					option
+						.setName('username')
+						.setNameLocalizations({
+							'de': 'nutzername',
+							'en-GB': 'username',
+							'en-US': 'username',
+						})
+						.setDescription('The username, id or link')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link',
+							'en-GB': 'The username, id or link',
+							'en-US': 'The username, id or link',
+						})
+						.setRequired(false)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('rating-spread')
+				.setNameLocalizations({
+					'de': 'wertungs-aufteilung',
+					'en-GB': 'rating-spread',
+					'en-US': 'rating-spread',
+				})
+				.setDescription('See the rank spread across all connected users')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt wie die Ränge auf alle verbundenen Nutzer verteilt sind',
+					'en-GB': 'See the rank spread across all connected users',
+					'en-US': 'See the rank spread across all connected users',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('rating-updates')
+				.setNameLocalizations({
+					'de': 'wertungs-updates',
+					'en-GB': 'rating-updates',
+					'en-US': 'rating-updates',
+				})
+				.setDescription('Get notified on rating changes')
+				.setDescriptionLocalizations({
+					'de': 'Werde benachrichtigt wenn sich deine Wertung ändert',
+					'en-GB': 'Get notified on rating changes',
+					'en-US': 'Get notified on rating changes',
+				})
+				.addBooleanOption(option =>
+					option
+						.setName('enabled')
+						.setNameLocalizations({
+							'de': 'aktiviert',
+							'en-GB': 'enabled',
+							'en-US': 'enabled',
+						})
+						.setDescription('Change if updates should be sent or not')
+						.setDescriptionLocalizations({
+							'de': 'Ändert ob Updates gesendet werden sollen oder nicht',
+							'en-GB': 'Change if updates should be sent or not',
+							'en-US': 'Change if updates should be sent or not',
+						})
+						.setRequired(true)
+				)
+		),
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
@@ -30,7 +562,8 @@ module.exports = {
 				interaction.options.getSubcommand() === 'match5v5' ||
 				interaction.options.getSubcommand() === 'match6v6' ||
 				interaction.options.getSubcommand() === 'match7v7' ||
-				interaction.options.getSubcommand() === 'match8v8') {
+				interaction.options.getSubcommand() === 'match8v8' ||
+				interaction.options.getSubcommand() === 'match') {
 				try {
 					await interaction.deferReply();
 				} catch (error) {
@@ -141,6 +674,10 @@ module.exports = {
 
 				if (interaction.options.getUser('eigthopponent')) {
 					opponents.push(interaction.options.getUser('eigthopponent').id);
+				}
+
+				if (teammates.length + 1 !== opponents.length) {
+					return await interaction.editReply('You need to have the same amount of teammates and opponents');
 				}
 
 				const commandConfig = await getOsuUserServerMode(msg, []);

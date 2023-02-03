@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const osu = require('node-osu');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 const { Op } = require('sequelize');
 const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getIDFromPotentialOsuLink } = require('../utils');
@@ -17,6 +17,34 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 15,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-history')
+		.setNameLocalizations({
+			'de': 'osu-historie',
+			'en-GB': 'osu-history',
+			'en-US': 'osu-history',
+		})
+		.setDescription('Summarizes the whole osu! history for a user')
+		.setDescriptionLocalizations({
+			'de': 'Fässt die gesamte osu! Historie für einen Spieler zusammen',
+			'en-GB': 'Summarizes the whole osu! history for a user',
+			'en-US': 'Summarizes the whole osu! history for a user',
+		})
+		.addStringOption(option =>
+			option.setName('username')
+				.setNameLocalizations({
+					'de': 'nutzername',
+					'en-GB': 'username',
+					'en-US': 'username',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		//TODO: all tournaments and their results
