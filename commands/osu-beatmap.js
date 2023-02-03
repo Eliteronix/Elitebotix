@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
 const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries, getScoreModpool, humanReadable } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBOsuMultiScores } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
@@ -15,6 +15,140 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-beatmap')
+		.setNameLocalizations({
+			'de': 'osu-beatmap',
+			'en-GB': 'osu-beatmap',
+			'en-US': 'osu-beatmap',
+		})
+		.setDescription('Sends an info card about the specified beatmap')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Info-Karte über die angegebene Beatmap',
+			'en-GB': 'Sends an info card about the specified beatmap',
+			'en-US': 'Sends an info card about the specified beatmap',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('id')
+				.setNameLocalizations({
+					'de': 'id',
+					'en-GB': 'id',
+					'en-US': 'id',
+				})
+				.setDescription('The id or link of the beatmap to display')
+				.setDescriptionLocalizations({
+					'de': 'Die ID oder der Link der Beatmap, die angezeigt werden soll',
+					'en-GB': 'The id or link of the beatmap to display',
+					'en-US': 'The id or link of the beatmap to display',
+				})
+				.setRequired(true)
+		)
+		.addStringOption(option =>
+			option.setName('mods')
+				.setNameLocalizations({
+					'de': 'mods',
+					'en-GB': 'mods',
+					'en-US': 'mods',
+				})
+				.setDescription('The mod combination that should be displayed (i.e. NM, HDHR, ...)')
+				.setDescriptionLocalizations({
+					'de': 'Die Mod-Kombination, die angezeigt werden soll (z.B. NM, HDHR, ...)',
+					'en-GB': 'The mod combination that should be displayed (i.e. NM, HDHR, ...)',
+					'en-US': 'The mod combination that should be displayed (i.e. NM, HDHR, ...)',
+				})
+				.setRequired(false)
+		)
+		.addNumberOption(option =>
+			option.setName('accuracy')
+				.setNameLocalizations({
+					'de': 'genauigkeit',
+					'en-GB': 'accuracy',
+					'en-US': 'accuracy',
+				})
+				.setDescription('The accuracy that the pp should be calculated for')
+				.setDescriptionLocalizations({
+					'de': 'Die Genauigkeit, für die die pp berechnet werden sollen',
+					'en-GB': 'The accuracy that the pp should be calculated for',
+					'en-US': 'The accuracy that the pp should be calculated for',
+				})
+				.setRequired(false)
+		)
+		.addBooleanOption(option =>
+			option.setName('tourney')
+				.setNameLocalizations({
+					'de': 'turnier',
+					'en-GB': 'tourney',
+					'en-US': 'tourney',
+				})
+				.setDescription('Should additional tournament data be attached?')
+				.setDescriptionLocalizations({
+					'de': 'Soll zusätzliche Turnierdaten angehängt werden?',
+					'en-GB': 'Should additional tournament data be attached?',
+					'en-US': 'Should additional tournament data be attached?',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('id2')
+				.setNameLocalizations({
+					'de': 'id2',
+					'en-GB': 'id2',
+					'en-US': 'id2',
+				})
+				.setDescription('The id or link of the beatmap to display')
+				.setDescriptionLocalizations({
+					'de': 'Die ID oder der Link der Beatmap, die angezeigt werden soll',
+					'en-GB': 'The id or link of the beatmap to display',
+					'en-US': 'The id or link of the beatmap to display',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('id3')
+				.setNameLocalizations({
+					'de': 'id3',
+					'en-GB': 'id3',
+					'en-US': 'id3',
+				})
+				.setDescription('The id or link of the beatmap to display')
+				.setDescriptionLocalizations({
+					'de': 'Die ID oder der Link der Beatmap, die angezeigt werden soll',
+					'en-GB': 'The id or link of the beatmap to display',
+					'en-US': 'The id or link of the beatmap to display',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('id4')
+				.setNameLocalizations({
+					'de': 'id4',
+					'en-GB': 'id4',
+					'en-US': 'id4',
+				})
+				.setDescription('The id or link of the beatmap to display')
+				.setDescriptionLocalizations({
+					'de': 'Die ID oder der Link der Beatmap, die angezeigt werden soll',
+					'en-GB': 'The id or link of the beatmap to display',
+					'en-US': 'The id or link of the beatmap to display',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('id5')
+				.setNameLocalizations({
+					'de': 'id5',
+					'en-GB': 'id5',
+					'en-US': 'id5',
+				})
+				.setDescription('The id or link of the beatmap to display')
+				.setDescriptionLocalizations({
+					'de': 'Die ID oder der Link der Beatmap, die angezeigt werden soll',
+					'en-GB': 'The id or link of the beatmap to display',
+					'en-US': 'The id or link of the beatmap to display',
+				})
+				.setRequired(false)
+		),
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		let tournament = false;

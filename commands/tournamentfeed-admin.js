@@ -290,12 +290,12 @@ module.exports = {
 		const focusedValue = interaction.options.getFocused();
 
 		const continents = [
-			'Africa | Detail',
-			'Asia | Detail',
-			'Europe | Detail',
-			'North America | Detail',
-			'Oceania | Detail',
-			'South America | Detail',
+			'Africa | ',
+			'Asia | ',
+			'Europe | ',
+			'North America | ',
+			'Oceania | ',
+			'South America | ',
 		];
 
 		let filtered = continents.filter(choice => choice.includes(focusedValue));
