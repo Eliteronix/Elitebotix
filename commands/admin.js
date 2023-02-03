@@ -70,22 +70,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'osu-derank',
-			// 		description: 'Reranks players based on their duel rating compared to others',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'username',
-			// 				'description': 'The username, id or link of the player to calculate',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'osu-duel',
 			// 		description: 'Lets you play matches which are being reffed by the bot',
 			// 		dm_permission: true,
@@ -4417,22 +4401,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'osu-derank',
-					description: 'Reranks players based on their duel rating compared to others',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'username',
-							'description': 'The username, id or link of the player to calculate',
-							'type': 3,
-							'required': false
-						},
-					]
-				},
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

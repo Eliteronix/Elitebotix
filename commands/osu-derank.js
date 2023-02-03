@@ -3,7 +3,7 @@ const { getUserDuelStarRating, populateMsgFromInteraction, getOsuUserServerMode,
 const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	name: 'osu-derank',
@@ -14,6 +14,35 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-derank')
+		.setNameLocalizations({
+			'de': 'osu-derank',
+			'en-GB': 'osu-derank',
+			'en-US': 'osu-derank',
+		})
+		.setDescription('Reranks players based on their duel rating compared to others')
+		.setDescriptionLocalizations({
+			'de': 'Gibt Spielern basierend auf ihrem Duel Rating im Vergleich zu anderen einen neuen Rang',
+			'en-GB': 'Reranks players based on their duel rating compared to others',
+			'en-US': 'Reranks players based on their duel rating compared to others',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('username')
+				.setNameLocalizations({
+					'de': 'nutzername',
+					'en-GB': 'username',
+					'en-US': 'username',
+				})
+				.setDescription('The username, id or link of the player to calculate')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers, der berechnet werden soll',
+					'en-GB': 'The username, id or link of the player to calculate',
+					'en-US': 'The username, id or link of the player to calculate',
+				})
+				.setRequired(false)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
