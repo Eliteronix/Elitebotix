@@ -1,6 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { logDatabaseQueries, humanReadable } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op, Sequelize } = require('sequelize');
@@ -14,6 +14,50 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-decay')
+		.setNameLocalizations({
+			'de': 'osu-decay',
+			'en-GB': 'osu-decay',
+			'en-US': 'osu-decay',
+		})
+		.setDescription('Calculates how long it would take for a player to decay from their current rank')
+		.setDescriptionLocalizations({
+			'de': 'Berechnet, wie lange es dauern würde, bis ein Spieler von seinem aktuellen Rang absteigt',
+			'en-GB': 'Calculates how long it would take for a player to decay from their current rank',
+			'en-US': 'Calculates how long it would take for a player to decay from their current rank',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('rank')
+				.setNameLocalizations({
+					'de': 'rang',
+					'en-GB': 'rank',
+					'en-US': 'rank',
+				})
+				.setDescription('The rank to decay to')
+				.setDescriptionLocalizations({
+					'de': 'Der Rang, bis zu dem abgestiegen werden soll',
+					'en-GB': 'The rank to decay to',
+					'en-US': 'The rank to decay to',
+				})
+				.setRequired(true)
+		)
+		.addStringOption(option =>
+			option.setName('username')
+				.setNameLocalizations({
+					'de': 'nutzername',
+					'en-GB': 'username',
+					'en-US': 'username',
+				})
+				.setDescription('The username, id or link of the player to calculate')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers, für den die Berechnung durchgeführt werden soll',
+					'en-GB': 'The username, id or link of the player to calculate',
+					'en-US': 'The username, id or link of the player to calculate',
+				})
+				.setRequired(false)
+		),
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply();

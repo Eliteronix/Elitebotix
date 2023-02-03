@@ -70,28 +70,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'osu-decay',
-			// 		description: 'Calculates how long it would take for a player to decay from their current rank',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'rank',
-			// 				'description': 'The rank to decay to',
-			// 				'type': 4,
-			// 				'required': true
-			// 			},
-			// 			{
-			// 				'name': 'username',
-			// 				'description': 'The username, id or link of the player to calculate',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'osu-derank',
 			// 		description: 'Reranks players based on their duel rating compared to others',
 			// 		dm_permission: true,
@@ -4439,28 +4417,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'osu-decay',
-					description: 'Calculates how long it would take for a player to decay from their current rank',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'rank',
-							'description': 'The rank to decay to',
-							'type': 4,
-							'required': true
-						},
-						{
-							'name': 'username',
-							'description': 'The username, id or link of the player to calculate',
-							'type': 3,
-							'required': false
-						},
-					]
-				},
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
@@ -8877,15 +8833,6 @@ module.exports = {
 				.catch(error => {
 					console.error(error);
 				});
-		} else if (args[0] === 'connectTwitch') {
-			const discordUser = await DBDiscordUsers.findOne({
-				where: {
-					osuUserId: args[1]
-				}
-			});
-
-			discordUser.twitchName = args[2].toLowerCase();
-			discordUser.save();
 		} else if (args[0] === 'addElitiriTopBracketNMMap') {
 			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -8992,6 +8939,7 @@ module.exports = {
 
 			return msg.reply(`Reset ${humanReadable(count)} scores' pp values`);
 		} else if (args[0] === 'duelAdminCommand') {
+			//TODO: Move to command file
 			await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 				data: {
 					name: 'osu-duel-admin',
@@ -9424,7 +9372,6 @@ module.exports = {
 				}
 			}
 		} else if (args[0] === 'restart') {
-
 			let guildSizes = await msg.client.shard.fetchClientValues('guilds.cache.size');
 			let startDates = await msg.client.shard.fetchClientValues('startDate');
 			let duels = await msg.client.shard.fetchClientValues('duels');
@@ -9501,206 +9448,6 @@ module.exports = {
 			});
 
 			return await msg.reply('Deleted the processqueue entry.');
-		} else if (args[0] === 'resetUsedOften') {
-			// Update beatmap data
-			let update = await DBOsuBeatmaps.update({
-				usedOften: false
-			}, {
-				where: {
-					usedOften: true
-				},
-				silent: true
-			});
-
-			return await msg.reply(`Updated ${update} beatmaps.`);
-		} else if (args[0] === 'fixBuggedMps') {
-			// Update beatmap data
-			let scores = await DBOsuMultiScores.findAll({
-				where: {
-					matchId: 'XXXXXXXXX (hidden for 3 days)'
-				},
-			});
-
-			let gameIds = scores.map(s => s.gameId);
-
-			for (let i = 0; i < gameIds.length; i++) {
-				let score = await DBOsuMultiScores.findOne({
-					where: {
-						gameId: gameIds[i],
-						matchId: {
-							[Op.not]: 'XXXXXXXXX (hidden for 3 days)'
-						}
-					},
-				});
-
-				if (score) {
-					for (let j = 0; j < scores.length; j++) {
-						if (scores[j].gameId === gameIds[i]) {
-							await scores[j].destroy();
-						}
-					}
-
-					// eslint-disable-next-line no-undef
-					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-						completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-					});
-
-					score.warmup = null;
-					await score.save();
-
-					await osuApi.getMatch({ mp: score.matchId })
-						.then(async (match) => {
-							await saveOsuMultiScores(match);
-						})
-						.catch(() => {
-							//Nothing
-						});
-
-					await msg.reply(`Reimported \`${score.matchName}\``);
-				} else {
-					let messaged = false;
-					for (let j = 0; j < scores.length; j++) {
-						if (scores[j].gameId === gameIds[i]) {
-							if (!messaged) {
-								await msg.reply(`\`${scores[j].matchName}\` has to be done manually`);
-								messaged = true;
-							}
-							await scores[j].destroy();
-						}
-					}
-				}
-			}
-		} else if (args[0] === 'fixBuggedMods') {
-			// Resets warmup flag for all scores with both mod values even (NoFail is the only mod that can make it uneven)
-			let updated = await DBOsuMultiScores.update({
-				warmup: null,
-			}, {
-				where: {
-					[Op.and]: [
-						{
-							[Op.or]: [
-								{
-									gameRawMods: {
-										[Op.endsWith]: '0'
-									}
-								},
-								{
-									gameRawMods: {
-										[Op.endsWith]: '2'
-									}
-								},
-								{
-									gameRawMods: {
-										[Op.endsWith]: '4'
-									}
-								},
-								{
-									gameRawMods: {
-										[Op.endsWith]: '6'
-									}
-								},
-								{
-									gameRawMods: {
-										[Op.endsWith]: '8'
-									}
-								},
-							],
-						},
-						{
-							[Op.or]: [
-								{
-									rawMods: {
-										[Op.endsWith]: '0'
-									}
-								},
-								{
-									rawMods: {
-										[Op.endsWith]: '2'
-									}
-								},
-								{
-									rawMods: {
-										[Op.endsWith]: '4'
-									}
-								},
-								{
-									rawMods: {
-										[Op.endsWith]: '6'
-									}
-								},
-								{
-									rawMods: {
-										[Op.endsWith]: '8'
-									}
-								},
-							],
-						},
-					]
-				},
-				silent: true,
-			});
-
-			return await msg.reply(`Reset warmup flag for ${updated[0]} scores`);
-		} else if (args[0] === 'fixBuggedEndDate') {
-			// Resets warmup flag for all scores with both mod values even (NoFail is the only mod that can make it uneven)
-			let updated = await DBOsuMultiScores.update({
-				warmup: null,
-			}, {
-				where: {
-					matchEndDate: null
-				},
-				silent: true,
-			});
-
-			return await msg.reply(`Reset warmup flag for ${updated[0]} scores`);
-		} else if (args[0] === 'getTwitchIds') {
-			let discordUsers = await DBDiscordUsers.findAll({
-				where: {
-					twitchName: {
-						[Op.not]: null
-					}
-				}
-			});
-
-			// eslint-disable-next-line no-undef
-			let response = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=client_credentials`, {
-				method: 'POST',
-			});
-
-			let json = await response.json();
-
-			let accessToken = json.access_token;
-
-			for (let i = 0; i < discordUsers.length; i++) {
-
-				// Do a GET https://api.twitch.tv/helix/users?login=USERNAME
-				response = await fetch(`https://api.twitch.tv/helix/users?login=${discordUsers[i].twitchName}`, {
-					headers: {
-						// eslint-disable-next-line no-undef
-						'Client-ID': process.env.TWITCH_CLIENT_ID,
-						// eslint-disable-next-line no-undef
-						'Authorization': `Bearer ${accessToken}`
-					}
-				});
-
-				if (response.status === 200) {
-					let json = await response.json();
-					if (json.data.length > 0) {
-						discordUsers[i].twitchId = json.data[0].id;
-						discordUsers[i].twitchVerified = true;
-						await discordUsers[i].save();
-
-						await msg.reply(discordUsers[i].twitchName + '-' + discordUsers[i].twitchId + '-' + discordUsers[i].twitchVerified);
-					} else {
-						await msg.reply(discordUsers[i].twitchName + ' not found');
-					}
-				} else {
-					await msg.reply(discordUsers[i].twitchName + ' error');
-				}
-			}
 		} else if (args[0] === 'remainingUsers') {
 			let count = await DBDiscordUsers.count({
 				where: {
