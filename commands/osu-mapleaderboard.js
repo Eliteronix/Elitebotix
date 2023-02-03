@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
 const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -15,6 +15,120 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 10,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-mapleaderboard')
+		.setNameLocalizations({
+			'de': 'osu-maprangliste',
+			'en-GB': 'osu-mapleaderboard',
+			'en-US': 'osu-mapleaderboard',
+		})
+		.setDescription('Sends an info card about the leaderboard on the specified beatmap')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Info-Karte über die Rangliste auf der angegebenen Beatmap',
+			'en-GB': 'Sends an info card about the leaderboard on the specified beatmap',
+			'en-US': 'Sends an info card about the leaderboard on the specified beatmap',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('id')
+				.setNameLocalizations({
+					'de': 'id',
+					'en-GB': 'id',
+					'en-US': 'id',
+				})
+				.setDescription('beatmap ID')
+				.setDescriptionLocalizations({
+					'de': 'Beatmap ID',
+					'en-GB': 'beatmap ID',
+					'en-US': 'beatmap ID',
+				})
+				.setRequired(true)
+		)
+		.addStringOption(option =>
+			option.setName('server')
+				.setNameLocalizations({
+					'de': 'server',
+					'en-GB': 'server',
+					'en-US': 'server',
+				})
+				.setDescription('The server you want to get the leaderboard from')
+				.setDescriptionLocalizations({
+					'de': 'Der Server, von dem Sie die Rangliste erhalten möchten',
+					'en-GB': 'The server you want to get the leaderboard from',
+					'en-US': 'The server you want to get the leaderboard from',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Bancho', value: 'bancho' },
+					{ name: 'Tournaments', value: 'tournaments' },
+				)
+		)
+		.addStringOption(option =>
+			option.setName('mods')
+				.setNameLocalizations({
+					'de': 'mods',
+					'en-GB': 'mods',
+					'en-US': 'mods',
+				})
+				.setDescription('The mod combination that should be displayed (i.e. all, NM, HDHR, ...)')
+				.setDescriptionLocalizations({
+					'de': 'Die Mod-Kombination, die angezeigt werden soll (z. B. alle, NM, HDHR, ...)',
+					'en-GB': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
+					'en-US': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('acronym')
+				.setNameLocalizations({
+					'de': 'akronym',
+					'en-GB': 'acronym',
+					'en-US': 'acronym',
+				})
+				.setDescription('tournament acronym')
+				.setDescriptionLocalizations({
+					'de': 'Turnierakronym',
+					'en-GB': 'tournament acronym',
+					'en-US': 'tournament acronym',
+				})
+				.setRequired(false)
+		)
+		.addIntegerOption(option =>
+			option.setName('amount')
+				.setNameLocalizations({
+					'de': 'anzahl',
+					'en-GB': 'amount',
+					'en-US': 'amount',
+				})
+				.setDescription('The amount of scores you want to get')
+				.setDescriptionLocalizations({
+					'de': 'Die Anzahl der Scores, die Sie erhalten möchten',
+					'en-GB': 'The amount of scores you want to get',
+					'en-US': 'The amount of scores you want to get',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('mode')
+				.setNameLocalizations({
+					'de': 'modus',
+					'en-GB': 'mode',
+					'en-US': 'mode',
+				})
+				.setDescription('The gamemode you want to get the leaderboard from')
+				.setDescriptionLocalizations({
+					'de': 'Der Spielmodus, von dem Sie die Rangliste erhalten möchten',
+					'en-GB': 'The gamemode you want to get the leaderboard from',
+					'en-US': 'The gamemode you want to get the leaderboard from',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Standard', value: 'Standard' },
+					{ name: 'Taiko', value: 'Taiko' },
+					{ name: 'Catch the Beat', value: 'Catch the Beat' },
+					{ name: 'Mania', value: 'osu!mania' },
+				)
+		),
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply();

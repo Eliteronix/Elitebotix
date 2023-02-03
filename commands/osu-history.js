@@ -30,6 +30,7 @@ module.exports = {
 			'en-GB': 'Summarizes the whole osu! history for a user',
 			'en-US': 'Summarizes the whole osu! history for a user',
 		})
+		.setDMPermission(true)
 		.addStringOption(option =>
 			option.setName('username')
 				.setNameLocalizations({

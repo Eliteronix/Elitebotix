@@ -26,6 +26,7 @@ module.exports = {
 			'en-GB': 'Allows you to link your Discord Account to your osu! Account',
 			'en-US': 'Allows you to link your Discord Account to your osu! Account',
 		})
+		.setDMPermission(true)
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName('connect')

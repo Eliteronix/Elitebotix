@@ -26,6 +26,7 @@ module.exports = {
 			'en-GB': 'Sends a leaderboard of all the players in the guild that have their account connected',
 			'en-US': 'Sends a leaderboard of all the players in the guild that have their account connected',
 		})
+		.setDMPermission(false)
 		.addIntegerOption(option =>
 			option.setName('page')
 				.setNameLocalizations({
