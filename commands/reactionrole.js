@@ -27,10 +27,10 @@ module.exports = {
 				return;
 			}
 
-			if (interaction.options._subcommand.startsWith('embed')) {
-				args = ['embed', interaction.options._subcommand.substring(5)];
+			if (interaction.options.getSubcommand().startsWith('embed')) {
+				args = ['embed', interaction.options.getSubcommand().substring(5)];
 			} else {
-				args = ['role', interaction.options._subcommand.substring(4)];
+				args = ['role', interaction.options.getSubcommand().substring(4)];
 			}
 
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {

@@ -42,11 +42,11 @@ module.exports = {
 				}
 			});
 
-			if (interaction.options._subcommand === 'unit') {
+			if (interaction.options.getSubcommand() === 'unit') {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					args.push(interaction.options._hoistedOptions[i].value);
 				}
-				if (interaction.options._subcommand === 'unit') {
+				if (interaction.options.getSubcommand() === 'unit') {
 					// set default degree type to fahrenheit
 					if (args[0] === 'f') {
 						if (discordUser) {
@@ -69,7 +69,7 @@ module.exports = {
 
 			}
 
-			if (interaction.options._subcommand === 'location') {
+			if (interaction.options.getSubcommand() === 'location') {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					args.push(interaction.options._hoistedOptions[i].value);
 				}

@@ -26,11 +26,11 @@ module.exports = {
 				return;
 			}
 
-			if (interaction.options._subcommand === 'enablevoice') {
+			if (interaction.options.getSubcommand() === 'enablevoice') {
 				args = ['enable'];
-			} else if (interaction.options._subcommand === 'disablevoice') {
+			} else if (interaction.options.getSubcommand() === 'disablevoice') {
 				args = ['disable'];
-			} else if (interaction.options._subcommand === 'enabletext') {
+			} else if (interaction.options.getSubcommand() === 'enabletext') {
 				args = ['text', 'enable'];
 			} else {
 				args = ['text', 'disable'];

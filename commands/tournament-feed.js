@@ -32,7 +32,7 @@ module.exports = {
 			return interaction.editReply('Please use </osu-link connect:1064502370710605836> to connect your osu! account first.');
 		}
 
-		if (interaction.options._subcommand === 'togglenotifications') {
+		if (interaction.options.getSubcommand() === 'togglenotifications') {
 			if (commandUser.tournamentPings) {
 				commandUser.tournamentPings = false;
 
@@ -44,7 +44,7 @@ module.exports = {
 			}
 
 			return await commandUser.save();
-		} else if (interaction.options._subcommand === 'settings') {
+		} else if (interaction.options.getSubcommand() === 'settings') {
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 				if (interaction.options._hoistedOptions[i].name === 'gamemode') {
 					let gamemode = interaction.options._hoistedOptions[i].value;

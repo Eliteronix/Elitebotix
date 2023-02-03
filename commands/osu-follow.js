@@ -25,7 +25,7 @@ module.exports = {
 			return;
 		}
 
-		if (interaction.options._subcommand === 'follow') {
+		if (interaction.options.getSubcommand() === 'follow') {
 			let username = interaction.options.getString('username');
 
 			// eslint-disable-next-line no-undef
@@ -74,7 +74,7 @@ module.exports = {
 						console.error(err);
 					}
 				});
-		} else if (interaction.options._subcommand === 'unfollow') {
+		} else if (interaction.options.getSubcommand() === 'unfollow') {
 			let username = interaction.options.getString('username');
 
 			// eslint-disable-next-line no-undef
@@ -108,7 +108,7 @@ module.exports = {
 						console.error(err);
 					}
 				});
-		} else if (interaction.options._subcommand === 'followlist') {
+		} else if (interaction.options.getSubcommand() === 'followlist') {
 			//Get all follows for the user
 			let follows = await DBOsuTourneyFollows.findAll({
 				where: {
@@ -126,7 +126,7 @@ module.exports = {
 			}
 
 			return await interaction.editReply(`You are following: \`${followList.join('`, `')}\``);
-		} else if (interaction.options._subcommand === 'followers') {
+		} else if (interaction.options.getSubcommand() === 'followers') {
 			//Check if the user has a connected osu! account
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -182,7 +182,7 @@ module.exports = {
 			}
 
 			return await interaction.editReply(`You have ${followers.length} followers: \`${followerList.join('`, `')}\``);
-		} else if (interaction.options._subcommand === 'allowfollowing') {
+		} else if (interaction.options.getSubcommand() === 'allowfollowing') {
 			let allowFollowing = interaction.options.getBoolean('allow');
 
 			let discordUser = await DBDiscordUsers.findOne({

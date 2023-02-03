@@ -41,7 +41,7 @@ module.exports = {
 
 			args = [];
 
-			if (interaction.options._hoistedOptions && interaction.options._subcommand === '1v1') {
+			if (interaction.options._hoistedOptions && interaction.options.getSubcommand() === '1v1') {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					if (interaction.options._hoistedOptions[i].name === 'tourney') {
 						if (interaction.options._hoistedOptions[i].value) {
@@ -78,7 +78,7 @@ module.exports = {
 						args.push(interaction.options._hoistedOptions[i].value);
 					}
 				}
-			} else if (interaction.options._hoistedOptions && interaction.options._subcommand === 'teamvs') {
+			} else if (interaction.options._hoistedOptions && interaction.options.getSubcommand() === 'teamvs') {
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 					if (interaction.options._hoistedOptions[i].name === 'teamsize') {
 						teamsize = interaction.options._hoistedOptions[i].value;
@@ -154,7 +154,7 @@ module.exports = {
 		}
 
 		//Teamvs subcommand is the only occasion that args is empty
-		if (!interaction || interaction && interaction.options._subcommand !== 'teamvs') {
+		if (!interaction || interaction && interaction.options.getSubcommand() !== 'teamvs') {
 			//If only one player got specified the author wants to see the matchup between them and themselves
 			if (!args[1]) {
 				if (commandUser && commandUser.osuUserId) {
@@ -1281,7 +1281,7 @@ module.exports = {
 			sentMessage = await interaction.editReply({ content: content, files: files });
 		}
 
-		if (!interaction || interaction && interaction.options._subcommand !== 'teamvs') {
+		if (!interaction || interaction && interaction.options.getSubcommand() !== 'teamvs') {
 			sentMessage.react('🔵');
 			sentMessage.react('🔴');
 		}

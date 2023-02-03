@@ -25,7 +25,7 @@ module.exports = {
 			return;
 		}
 
-		if (interaction.options._subcommand === 'soloqualifiers' || interaction.options._subcommand === 'teamqualifiers') {
+		if (interaction.options.getSubcommand() === 'soloqualifiers' || interaction.options.getSubcommand() === 'teamqualifiers') {
 			let matchname = interaction.options.getString('matchname');
 			let date = new Date();
 			date.setUTCSeconds(0);
@@ -39,7 +39,7 @@ module.exports = {
 			let freemodMessage = interaction.options.getString('freemodmessage');
 			let teamsize = 1;
 
-			if (interaction.options._subcommand === 'teamqualifiers') {
+			if (interaction.options.getSubcommand() === 'teamqualifiers') {
 				teamsize = interaction.options.getInteger('teamsize');
 			}
 
@@ -58,7 +58,7 @@ module.exports = {
 
 			let players = interaction.options.getString('players');
 
-			if (interaction.options._subcommand === 'soloqualifiers') {
+			if (interaction.options.getSubcommand() === 'soloqualifiers') {
 				players = players.replaceAll(',', ';');
 			}
 
@@ -161,7 +161,7 @@ module.exports = {
 
 			DBProcessQueue.create({ guildId: interaction.guildId, task: 'tourneyMatchNotification', priority: 10, additions: `${interaction.user.id};${channel.id};${dbMaps.join(',')};${dbPlayers.join('|')};${useNoFail};${matchname};${mappoolReadable};${scoreMode};${freemodMessage};${teamsize}`, date: date });
 			return interaction.editReply('The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use </osu-referee scheduled:1064502493226225664>');
-		} else if (interaction.options._subcommand === 'scheduled') {
+		} else if (interaction.options.getSubcommand() === 'scheduled') {
 			let scheduledMatches = [];
 			//Get all scheduled matches that still need to notify
 			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 1');
@@ -241,7 +241,7 @@ module.exports = {
 			}
 
 			return interaction.followUp(`Your scheduled matches:\n${scheduledMatches}`);
-		} else if (interaction.options._subcommand === 'remove') {
+		} else if (interaction.options.getSubcommand() === 'remove') {
 			const internalId = interaction.options._hoistedOptions[0].value;
 			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 3');
 			const processQueueTask = await DBProcessQueue.findOne({

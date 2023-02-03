@@ -13,7 +13,7 @@ module.exports = {
 	cooldown: 60,
 	tags: 'debug',
 	async execute(msg, args, interaction, additionalObjects) {
-		if (interaction.options._subcommand === 'createduel1v1' || interaction.options._subcommand === 'createduel2v2') {
+		if (interaction.options.getSubcommand() === 'createduel1v1' || interaction.options.getSubcommand() === 'createduel2v2') {
 			try {
 				await interaction.deferReply();
 			} catch (error) {

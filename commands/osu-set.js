@@ -29,7 +29,7 @@ module.exports = {
 			},
 		});
 
-		if (interaction.options._subcommand === 'mode') {
+		if (interaction.options.getSubcommand() === 'mode') {
 			let mode = interaction.options.getString('mode');
 
 			if (mode === 'standard') {
@@ -81,7 +81,7 @@ module.exports = {
 
 				return interaction.editReply('Mania has been set as your main mode.');
 			}
-		} else if (interaction.options._subcommand === 'server') {
+		} else if (interaction.options.getSubcommand() === 'server') {
 			let server = interaction.options.getString('server');
 
 			if (server === 'bancho') {

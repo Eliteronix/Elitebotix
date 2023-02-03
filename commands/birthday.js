@@ -119,7 +119,7 @@ module.exports = {
 			return;
 		}
 
-		if (interaction.options._subcommand === 'set') {
+		if (interaction.options.getSubcommand() === 'set') {
 			let date = new Date();
 			date.setUTCSeconds(0);
 			date.setUTCHours(0);
@@ -173,7 +173,7 @@ module.exports = {
 				day: 'numeric',
 			});
 			return await interaction.editReply({ content: `Your birthday has been set for \`${dateString}\``, ephemeral: true });
-		} else if (interaction.options._subcommand === 'enable') {
+		} else if (interaction.options.getSubcommand() === 'enable') {
 
 			let currentGuild = await DBBirthdayGuilds.findOne({
 				where: {
@@ -213,7 +213,7 @@ module.exports = {
 			});
 
 			return await interaction.editReply({ content: `Your birthday will now be shared on ${interaction.guild.name}`, ephemeral: true });
-		} else if (interaction.options._subcommand === 'disable') {
+		} else if (interaction.options.getSubcommand() === 'disable') {
 			let currentGuild = await DBBirthdayGuilds.findOne({
 				where: {
 					guildId: interaction.guild.id,

@@ -161,7 +161,7 @@ module.exports = {
 
 		let role = interaction.options.getRole('role');
 
-		if (interaction.options._subcommand === 'add') {
+		if (interaction.options.getSubcommand() === 'add') {
 			let rank = interaction.options.getInteger('rank');
 			let percentage = interaction.options.getInteger('percentage');
 			let points = interaction.options.getInteger('points');
@@ -191,7 +191,7 @@ module.exports = {
 			}
 
 			return interaction.editReply(`${role.name} has been added as an activityrole. The roles will get updated periodically and will not happen right after a user reached a new milestone.`);
-		} else if (interaction.options._subcommand === 'remove') {
+		} else if (interaction.options.getSubcommand() === 'remove') {
 			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles remove');
 			const rowCount = await DBActivityRoles.destroy({ where: { guildId: interaction.guildId, roleId: role.id } });
 
@@ -206,7 +206,7 @@ module.exports = {
 			} else {
 				return interaction.editReply(`${role.name} was no activityrole.`);
 			}
-		} else if (interaction.options._subcommand === 'list') {
+		} else if (interaction.options.getSubcommand() === 'list') {
 			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles list');
 			const activityRolesList = await DBActivityRoles.findAll({
 				where: {

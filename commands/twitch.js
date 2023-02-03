@@ -25,7 +25,7 @@ module.exports = {
 			return;
 		}
 
-		if (interaction.options._subcommand === 'connect') {
+		if (interaction.options.getSubcommand() === 'connect') {
 			logDatabaseQueries(2, 'twitch.js DBDiscordUsers connect');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -97,7 +97,7 @@ module.exports = {
 				console.error(response);
 				await interaction.editReply('There was an error connecting your twitch account. Please try again later.');
 			}
-		} else if (interaction.options._subcommand === 'disconnect') {
+		} else if (interaction.options.getSubcommand() === 'disconnect') {
 			logDatabaseQueries(2, 'twitch.js DBDiscordUsers disconnect');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -115,7 +115,7 @@ module.exports = {
 			await discordUser.save();
 
 			await interaction.editReply('Your twitch account has been disconnected.');
-		} else if (interaction.options._subcommand === 'togglemp') {
+		} else if (interaction.options.getSubcommand() === 'togglemp') {
 			logDatabaseQueries(2, 'twitch.js DBDiscordUsers togglemp');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -148,7 +148,7 @@ module.exports = {
 				}, { context: { channelName: discordUser.twitchName } });
 			}
 			discordUser.save();
-		} else if (interaction.options._subcommand === 'togglemapsync') {
+		} else if (interaction.options.getSubcommand() === 'togglemapsync') {
 			logDatabaseQueries(2, 'twitch.js DBDiscordUsers togglemapsync');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {

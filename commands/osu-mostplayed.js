@@ -25,7 +25,7 @@ module.exports = {
 			return;
 		}
 
-		if (interaction.options._subcommand === 'user') {
+		if (interaction.options.getSubcommand() === 'user') {
 			msg = await populateMsgFromInteraction(interaction);
 
 			try {
@@ -108,7 +108,7 @@ module.exports = {
 					}
 				}
 			}
-		} else if (interaction.options._subcommand === 'tourneybeatmaps') {
+		} else if (interaction.options.getSubcommand() === 'tourneybeatmaps') {
 			try {
 				await interaction.deferReply();
 			} catch (error) {

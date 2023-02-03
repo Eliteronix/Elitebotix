@@ -101,10 +101,10 @@ module.exports = {
 			}
 			msg = await populateMsgFromInteraction(interaction);
 
-			if (interaction.options._subcommand === 'set') {
+			if (interaction.options.getSubcommand() === 'set') {
 				args.push(interaction.options._hoistedOptions[0].value);
 			} else {
-				args = [interaction.options._subcommand];
+				args = [interaction.options.getSubcommand()];
 			}
 		}
 		//Check first argument of the command

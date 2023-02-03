@@ -159,7 +159,7 @@ module.exports = {
 			return;
 		}
 
-		if (interaction.options._subcommand === 'list') {
+		if (interaction.options.getSubcommand() === 'list') {
 			let matchNames = await DBOsuMultiScores.findAll({
 				Attributes: ['matchName'],
 				where: {
@@ -304,7 +304,7 @@ module.exports = {
 					inline: false,
 				});
 			}
-		} else if (interaction.options._subcommand === 'update') {
+		} else if (interaction.options.getSubcommand() === 'update') {
 			let matchIds = interaction.options.getString('id').split(/ +/);
 			let valid = interaction.options.getBoolean('valid');
 			let comment = interaction.options.getString('comment');
@@ -428,7 +428,7 @@ module.exports = {
 					console.error(error);
 				}
 			}
-		} else if (interaction.options._subcommand === 'check') {
+		} else if (interaction.options.getSubcommand() === 'check') {
 			let matchId = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 			let acronym = interaction.options.getString('acronym');
 
@@ -557,7 +557,7 @@ module.exports = {
 			}
 
 			await interaction.followUp({ embeds: [embed] });
-		} else if (interaction.options._subcommand === 'leaderboard') {
+		} else if (interaction.options.getSubcommand() === 'leaderboard') {
 			let counts = await DBOsuMultiScores.findAll({
 				attributes: ['verifiedBy', 'matchId'],
 				where: {

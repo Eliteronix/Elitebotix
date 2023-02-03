@@ -124,7 +124,7 @@ module.exports = {
 			return;
 		}
 
-		if (interaction.options._subcommand === 'command') {
+		if (interaction.options.getSubcommand() === 'command') {
 			let commandname = interaction.options.getString('commandname');
 
 			let { commands } = interaction.client;
@@ -143,7 +143,7 @@ module.exports = {
 			data.push('To stay informed about changes go to [the official server](https://discord.com/invite/Asz5Gfe) and follow <#804658828883787784>');
 
 			return await interaction.editReply(data.join('\n'));
-		} else if (interaction.options._subcommand === 'category') {
+		} else if (interaction.options.getSubcommand() === 'category') {
 			let category = interaction.options.getString('categoryname');
 
 			let { commands } = interaction.client;

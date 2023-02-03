@@ -168,11 +168,11 @@ module.exports = {
 
 			msg = await populateMsgFromInteraction(interaction);
 
-			if (interaction.options._subcommand !== 'toggleevent') {
-				args = [interaction.options._subcommand];
+			if (interaction.options.getSubcommand() !== 'toggleevent') {
+				args = [interaction.options.getSubcommand()];
 			}
 
-			if (interaction.options._subcommand !== 'list') {
+			if (interaction.options.getSubcommand() !== 'list') {
 				args.push(interaction.options._hoistedOptions[0].value);
 			}
 		}

@@ -117,7 +117,7 @@ module.exports = {
 
 		let role = interaction.options.getRole('role');
 
-		if (interaction.options._subcommand === 'add') {
+		if (interaction.options.getSubcommand() === 'add') {
 			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles add');
 			const autoRole = await DBAutoRoles.findOne({
 				where: { guildId: interaction.guildId, roleId: role.id },
@@ -137,7 +137,7 @@ module.exports = {
 			guildMembers.forEach(autoRole => {
 				autoRole.roles.add(role);
 			});
-		} else if (interaction.options._subcommand === 'remove') {
+		} else if (interaction.options.getSubcommand() === 'remove') {
 			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles remove');
 			const rowCount = await DBAutoRoles.destroy({ where: { guildId: interaction.guildId, roleId: role.id } });
 
@@ -146,7 +146,7 @@ module.exports = {
 			} else {
 				return interaction.editReply(`${role.name} was no autorole.`);
 			}
-		} else if (interaction.options._subcommand === 'list') {
+		} else if (interaction.options.getSubcommand() === 'list') {
 			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles list');
 			const autoRolesList = await DBAutoRoles.findAll({
 				where: {

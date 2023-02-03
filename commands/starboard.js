@@ -26,7 +26,7 @@ module.exports = {
 				return;
 			}
 
-			args = [interaction.options._subcommand];
+			args = [interaction.options.getSubcommand()];
 
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 				args.push(interaction.options._hoistedOptions[i].value);

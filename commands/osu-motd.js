@@ -39,7 +39,7 @@ module.exports = {
 
 			msg = await populateMsgFromInteraction(interaction);
 
-			args = [interaction.options._subcommand];
+			args = [interaction.options.getSubcommand()];
 
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 				if (interaction.options._hoistedOptions[i].name === 'years') {
@@ -88,11 +88,11 @@ module.exports = {
 			}
 
 			//Swap lower and higher star limits if they're the wrong way around
-			if ((interaction.options._subcommand === 'custom-fixed-players' || interaction.options._subcommand === 'custom-react-to-play') && lowerStarLimit > higherStarLimit) {
+			if ((interaction.options.getSubcommand() === 'custom-fixed-players' || interaction.options.getSubcommand() === 'custom-react-to-play') && lowerStarLimit > higherStarLimit) {
 				[lowerStarLimit, higherStarLimit] = [higherStarLimit, lowerStarLimit];
 			}
 
-			if (interaction.options._subcommand === 'custom-fixed-players' || interaction.options._subcommand === 'custom-react-to-play') {
+			if (interaction.options.getSubcommand() === 'custom-fixed-players' || interaction.options.getSubcommand() === 'custom-react-to-play') {
 				//Defer the interaction
 				await interaction.deferReply();
 			}

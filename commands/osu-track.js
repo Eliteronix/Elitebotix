@@ -16,7 +16,7 @@ module.exports = {
 	tags: 'osu',
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
-		if (interaction.options._subcommand === 'enable') {
+		if (interaction.options.getSubcommand() === 'enable') {
 			try {
 				await interaction.reply({ content: 'Processing...', ephemeral: true });
 			} catch (error) {
@@ -278,7 +278,7 @@ module.exports = {
 			}
 
 			return interaction.editReply({ content: 'Finished processing.', ephemeral: true });
-		} else if (interaction.options._subcommand === 'disable') {
+		} else if (interaction.options.getSubcommand() === 'disable') {
 			try {
 				await interaction.reply({ content: 'Processing...', ephemeral: true });
 			} catch (error) {
@@ -483,7 +483,7 @@ module.exports = {
 			}
 
 			return interaction.editReply({ content: 'Finished processing.', ephemeral: true });
-		} else if (interaction.options._subcommand === 'list') {
+		} else if (interaction.options.getSubcommand() === 'list') {
 			try {
 				await interaction.deferReply({ ephemeral: true });
 			} catch (error) {
@@ -681,7 +681,7 @@ module.exports = {
 				await interaction.followUp({ content: currentOutput.join('\n\n'), ephemeral: true });
 				currentOutput = [];
 			}
-		} else if (interaction.options._subcommand === 'tourneyenable') {
+		} else if (interaction.options.getSubcommand() === 'tourneyenable') {
 			try {
 				await interaction.deferReply({ ephemeral: true });
 			} catch (error) {
@@ -721,7 +721,7 @@ module.exports = {
 			await guildTracker.save();
 
 			return interaction.followUp({ content: `Match activity tracking updated for ${acronym} in this channel.`, ephemeral: true });
-		} else if (interaction.options._subcommand === 'tourneydisable') {
+		} else if (interaction.options.getSubcommand() === 'tourneydisable') {
 			try {
 				await interaction.deferReply({ ephemeral: true });
 			} catch (error) {

@@ -23,14 +23,14 @@ module.exports = {
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
-			if (interaction.options._subcommand === 'match1v1' ||
-				interaction.options._subcommand === 'match2v2' ||
-				interaction.options._subcommand === 'match3v3' ||
-				interaction.options._subcommand === 'match4v4' ||
-				interaction.options._subcommand === 'match5v5' ||
-				interaction.options._subcommand === 'match6v6' ||
-				interaction.options._subcommand === 'match7v7' ||
-				interaction.options._subcommand === 'match8v8') {
+			if (interaction.options.getSubcommand() === 'match1v1' ||
+				interaction.options.getSubcommand() === 'match2v2' ||
+				interaction.options.getSubcommand() === 'match3v3' ||
+				interaction.options.getSubcommand() === 'match4v4' ||
+				interaction.options.getSubcommand() === 'match5v5' ||
+				interaction.options.getSubcommand() === 'match6v6' ||
+				interaction.options.getSubcommand() === 'match7v7' ||
+				interaction.options.getSubcommand() === 'match8v8') {
 				try {
 					await interaction.deferReply();
 				} catch (error) {
@@ -277,7 +277,7 @@ module.exports = {
 				updateQueueChannels(interaction.client);
 
 				createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, everyUser);
-			} else if (interaction.options._subcommand === 'rating') {
+			} else if (interaction.options.getSubcommand() === 'rating') {
 				let processingMessage = null;
 				if (interaction.id) {
 					try {
@@ -762,7 +762,7 @@ module.exports = {
 					}
 				}
 				return;
-			} else if (interaction.options._subcommand === 'rating-leaderboard') {
+			} else if (interaction.options.getSubcommand() === 'rating-leaderboard') {
 				if (interaction.id) {
 					try {
 						await interaction.reply('Processing leaderboard...');
@@ -1019,7 +1019,7 @@ module.exports = {
 						await leaderboardMessage.react('▶️');
 					}
 				}
-			} else if (interaction.options._subcommand === 'data') {
+			} else if (interaction.options.getSubcommand() === 'data') {
 				try {
 					await interaction.deferReply({ ephemeral: true });
 				} catch (error) {
@@ -1394,7 +1394,7 @@ module.exports = {
 				explaination.push('An outdated rank means that there have not been equal to or more than 5 scores in the past 6 months.');
 
 				return await interaction.followUp({ content: explaination.join('\n'), files: files, ephemeral: true });
-			} else if (interaction.options._subcommand === 'rating-spread') {
+			} else if (interaction.options.getSubcommand() === 'rating-spread') {
 				try {
 					await interaction.deferReply();
 				} catch (error) {
@@ -1564,7 +1564,7 @@ module.exports = {
 				}
 
 				interaction.editReply({ content: `${guildName} osu! Duel League Rating Spread`, files: [attachment] });
-			} else if (interaction.options._subcommand === 'rating-updates') {
+			} else if (interaction.options.getSubcommand() === 'rating-updates') {
 				try {
 					await interaction.deferReply({ ephemeral: true });
 				} catch (error) {
@@ -1609,7 +1609,7 @@ module.exports = {
 				await discordUser.save();
 
 				return interaction.editReply('You will no longer receive osu! Duel rating updates.');
-			} else if (interaction.options._subcommand === 'queue1v1') {
+			} else if (interaction.options.getSubcommand() === 'queue1v1') {
 				try {
 					await interaction.deferReply({ ephemeral: true });
 				} catch (error) {
@@ -1694,7 +1694,7 @@ module.exports = {
 				});
 
 				return await interaction.editReply(`You are now queued up for a 1v1 duel. There are ${existingQueueTasks.length} opponents in the queue (${tasksInReach.length} in reach).`);
-			} else if (interaction.options._subcommand === 'queue1v1-leave') {
+			} else if (interaction.options.getSubcommand() === 'queue1v1-leave') {
 				try {
 					await interaction.deferReply({ ephemeral: true });
 				} catch (error) {

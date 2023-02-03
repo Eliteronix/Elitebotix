@@ -116,7 +116,7 @@ module.exports = {
 			},
 		});
 
-		if (interaction.options._subcommand === 'enable') {
+		if (interaction.options.getSubcommand() === 'enable') {
 			if (!guild) {
 				guild = await DBGuilds.create({
 					guildId: interaction.guild.id,
@@ -131,7 +131,7 @@ module.exports = {
 			guild.birthdayEnabled = true;
 			guild.save();
 			return interaction.editReply({ content: 'Birthday announcements have been enabled.', ephemeral: true });
-		} else if (interaction.options._subcommand === 'disable') {
+		} else if (interaction.options.getSubcommand() === 'disable') {
 			if (!guild) {
 				guild = await DBGuilds.create({
 					guildId: interaction.guild.id,
@@ -146,7 +146,7 @@ module.exports = {
 			guild.birthdayEnabled = false;
 			guild.save();
 			return interaction.editReply({ content: 'Birthday announcements have been disabled.', ephemeral: true });
-		} else if (interaction.options._subcommand === 'list') {
+		} else if (interaction.options.getSubcommand() === 'list') {
 			logDatabaseQueries(2, 'birthday-admin.js DBBirthdayGuilds list');
 			let birthdayAnnouncements = await DBBirthdayGuilds.findAll({
 				where: {
@@ -164,7 +164,7 @@ module.exports = {
 			});
 
 			return interaction.editReply({ content: `Shared birthdays for this server:\n${birthdays.join('\n')}`, ephemeral: true });
-		} else if (interaction.options._subcommand === 'channel') {
+		} else if (interaction.options.getSubcommand() === 'channel') {
 			//There is only one argument so we can set the channelId to the first argument
 			let channel = interaction.options._hoistedOptions[0].value;
 

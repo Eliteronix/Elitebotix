@@ -16,9 +16,9 @@ module.exports = {
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Refactor this mess
 		if (interaction.options._hoistedOptions[0]) {
-			args = [interaction.options._subcommand, interaction.options._hoistedOptions[0].value];
+			args = [interaction.options.getSubcommand(), interaction.options._hoistedOptions[0].value];
 		} else {
-			args = [interaction.options._subcommand];
+			args = [interaction.options.getSubcommand()];
 		}
 
 		try {

@@ -28,13 +28,13 @@ module.exports = {
 				return;
 			}
 
-			if (interaction.options._subcommand === 'create') {
+			if (interaction.options.getSubcommand() === 'create') {
 				args = interaction.options._hoistedOptions[0].value.split(' ');
-			} else if (interaction.options._subcommand === 'state') {
+			} else if (interaction.options.getSubcommand() === 'state') {
 				args = interaction.options._hoistedOptions[0].value;
-			} else if (interaction.options._subcommand === 'addrole') {
+			} else if (interaction.options.getSubcommand() === 'addrole') {
 				args = ['add', interaction.options._hoistedOptions[0].value];
-			} else if (interaction.options._subcommand === 'removerole') {
+			} else if (interaction.options.getSubcommand() === 'removerole') {
 				args = ['remove', interaction.options._hoistedOptions[0].value];
 			}
 		}

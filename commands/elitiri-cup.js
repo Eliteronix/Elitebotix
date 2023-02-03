@@ -19,9 +19,9 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			args = [interaction.options._subcommand];
+			args = [interaction.options.getSubcommand()];
 
-			if (interaction.options._subcommand === 'register') {
+			if (interaction.options.getSubcommand() === 'register') {
 				let upperlimit;
 				let lowerlimit;
 				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
@@ -33,7 +33,7 @@ module.exports = {
 				}
 				args.push(lowerlimit);
 				args.push(upperlimit);
-			} else if (interaction.options._subcommand === 'availability') {
+			} else if (interaction.options.getSubcommand() === 'availability') {
 				let earlysaturday;
 				let latesaturday;
 				let earlysunday;

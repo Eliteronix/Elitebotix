@@ -32,7 +32,7 @@ module.exports = {
 				}
 			}
 
-			if (interaction.options._subcommand === 'list') {
+			if (interaction.options.getSubcommand() === 'list') {
 				args = ['list'];
 			} else {
 				args = [modpool, id];

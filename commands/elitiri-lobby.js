@@ -19,7 +19,7 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			args = [interaction.options._subcommand];
+			args = [interaction.options.getSubcommand()];
 
 			let lobbyId = null;
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {

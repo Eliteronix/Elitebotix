@@ -325,7 +325,7 @@ module.exports = {
 			return;
 		}
 
-		if (interaction.options._subcommand === 'list') {
+		if (interaction.options.getSubcommand() === 'list') {
 			let forumPosts = await DBOsuForumPosts.findAll({
 				where: {
 					pinged: false,
@@ -404,7 +404,7 @@ module.exports = {
 
 				interaction.followUp({ embeds: [embed] });
 			}
-		} else if (interaction.options._subcommand === 'ping') {
+		} else if (interaction.options.getSubcommand() === 'ping') {
 			let id = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 
 			let forumPost = await DBOsuForumPosts.findOne({
@@ -626,7 +626,7 @@ module.exports = {
 
 			interaction.editReply(`Ping sent. (Pinged ${pingedUsers} users)`);
 
-		} else if (interaction.options._subcommand === 'update') {
+		} else if (interaction.options.getSubcommand() === 'update') {
 			let id = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 			let format = interaction.options.getString('format');
 			let rankrange = interaction.options.getString('rankrange');
@@ -746,7 +746,7 @@ module.exports = {
 			}
 
 			interaction.editReply({ embeds: [embed] });
-		} else if (interaction.options._subcommand === 'delete') {
+		} else if (interaction.options.getSubcommand() === 'delete') {
 			let id = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 
 			let forumPost = await DBOsuForumPosts.findOne({

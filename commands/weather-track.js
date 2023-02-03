@@ -28,9 +28,9 @@ module.exports = {
 				return;
 			}
 
-			if (interaction.options._subcommand === 'list') {
+			if (interaction.options.getSubcommand() === 'list') {
 				args = ['list'];
-			} else if (interaction.options._subcommand === 'add') {
+			} else if (interaction.options.getSubcommand() === 'add') {
 				let location = null;
 				let frequency = null;
 				let unit = null;
@@ -47,7 +47,7 @@ module.exports = {
 
 				args = [frequency, unit, location];
 
-			} else if (interaction.options._subcommand === 'remove') {
+			} else if (interaction.options.getSubcommand() === 'remove') {
 				let location = null;
 				let unit = null;
 

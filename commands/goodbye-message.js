@@ -103,7 +103,7 @@ module.exports = {
 			where: { guildId: interaction.guildId },
 		});
 
-		if (interaction.options._subcommand === 'current') {
+		if (interaction.options.getSubcommand() === 'current') {
 			if (!guild) {
 				logDatabaseQueries(4, 'commands/goodbye-message.js DBGuilds current create');
 				await DBGuilds.create({ guildId: interaction.guildId, guildName: interaction.guild.name, sendGoodbyeMessage: false });
@@ -116,7 +116,7 @@ module.exports = {
 
 			return interaction.editReply(`The current goodbye message is set to channel <#${guild.goodbyeMessageChannel}>: \`${guild.goodbyeMessageText.replace(/`/g, '')}\``);
 
-		} else if (interaction.options._subcommand === 'disable') {
+		} else if (interaction.options.getSubcommand() === 'disable') {
 			if (!guild) {
 				logDatabaseQueries(4, 'commands/goodbye-message.js DBGuilds disable create');
 				await DBGuilds.create({ guildId: interaction.guildId, guildName: interaction.guild.name, sendGoodbyeMessage: false });
@@ -130,7 +130,7 @@ module.exports = {
 			guild.sendGoodbyeMessage = false;
 			await guild.save();
 			return interaction.editReply('Goodbye messages have been disabled for this server.');
-		} else if (interaction.options._subcommand === 'set') {
+		} else if (interaction.options.getSubcommand() === 'set') {
 			let message = interaction.options.getString('message');
 
 			if (guild) {
