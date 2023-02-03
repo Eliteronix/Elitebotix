@@ -6489,6 +6489,14 @@ module.exports = {
 			});
 
 			return msg.reply(`Remaining users: ${count}`);
+		} else if (args[0] === 'warmupnull') {
+			let count = await DBOsuMultiScores.count({
+				where: {
+					warmup: null,
+				},
+			});
+
+			return msg.reply(`Warmup null: ${count}`);
 		} else {
 			msg.reply('Invalid command');
 		}
