@@ -69,22 +69,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'osu-matchtrack',
-			// 		description: 'Tracks the progress of a match',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'match',
-			// 				'description': 'Match ID or link',
-			// 				'type': 3,
-			// 				'required': true
-			// 			},
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'osu-matchup',
 			// 		description: 'Sends an info card about the matchups between the specified players',
 			// 		dm_permission: true,
@@ -3183,22 +3167,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'osu-matchtrack',
-					description: 'Tracks the progress of a match',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'match',
-							'description': 'Match ID or link',
-							'type': 3,
-							'required': true
-						},
-					]
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

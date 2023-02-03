@@ -1,6 +1,6 @@
 const osu = require('node-osu');
 const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
 const Canvas = require('canvas');
@@ -15,6 +15,35 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages, Attach Files and Embed Links',
 	cooldown: 15,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-matchtrack')
+		.setNameLocalizations({
+			'de': 'osu-matchtrack',
+			'en-GB': 'osu-matchtrack',
+			'en-US': 'osu-matchtrack'
+		})
+		.setDescription('Tracks the progress of a match')
+		.setDescriptionLocalizations({
+			'de': 'Verfolgt den Fortschritt eines Matches',
+			'en-GB': 'Tracks the progress of a match',
+			'en-US': 'Tracks the progress of a match'
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('match')
+				.setNameLocalizations({
+					'de': 'match',
+					'en-GB': 'match',
+					'en-US': 'match'
+				})
+				.setDescription('Match ID or link')
+				.setDescriptionLocalizations({
+					'de': 'Match ID oder Link',
+					'en-GB': 'Match ID or link',
+					'en-US': 'Match ID or link'
+				})
+				.setRequired(true)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
