@@ -1,6 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { humanReadable, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -13,6 +13,95 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-bws')
+		.setNameLocalizations({
+			'de': 'osu-bws',
+			'en-GB': 'osu-bws',
+			'en-US': 'osu-bws',
+		})
+		.setDescription('Sends info about the BWS rank of the specified player')
+		.setDescriptionLocalizations({
+			'de': 'Sendet Informationen über den BWS-Rang des angegebenen Spielers',
+			'en-GB': 'Sends info about the BWS rank of the specified player',
+			'en-US': 'Sends info about the BWS rank of the specified player',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('username')
+				.setNameLocalizations({
+					'de': 'nutzername',
+					'en-GB': 'username',
+					'en-US': 'username',
+				})
+				.setDescription('The username, id or link of the player to calculate')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers, der berechnet werden soll',
+					'en-GB': 'The username, id or link of the player to calculate',
+					'en-US': 'The username, id or link of the player to calculate',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username2')
+				.setNameLocalizations({
+					'de': 'nutzername2',
+					'en-GB': 'username2',
+					'en-US': 'username2',
+				})
+				.setDescription('The username, id or link of the player to calculate')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers, der berechnet werden soll',
+					'en-GB': 'The username, id or link of the player to calculate',
+					'en-US': 'The username, id or link of the player to calculate',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username3')
+				.setNameLocalizations({
+					'de': 'nutzername3',
+					'en-GB': 'username3',
+					'en-US': 'username3',
+				})
+				.setDescription('The username, id or link of the player to calculate')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers, der berechnet werden soll',
+					'en-GB': 'The username, id or link of the player to calculate',
+					'en-US': 'The username, id or link of the player to calculate',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username4')
+				.setNameLocalizations({
+					'de': 'nutzername4',
+					'en-GB': 'username4',
+					'en-US': 'username4',
+				})
+				.setDescription('The username, id or link of the player to calculate')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers, der berechnet werden soll',
+					'en-GB': 'The username, id or link of the player to calculate',
+					'en-US': 'The username, id or link of the player to calculate',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username5')
+				.setNameLocalizations({
+					'de': 'nutzername5',
+					'en-GB': 'username5',
+					'en-US': 'username5',
+				})
+				.setDescription('The username, id or link of the player to calculate')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers, der berechnet werden soll',
+					'en-GB': 'The username, id or link of the player to calculate',
+					'en-US': 'The username, id or link of the player to calculate',
+				})
+				.setRequired(false)
+		),
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {

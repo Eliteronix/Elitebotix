@@ -1,5 +1,5 @@
 const { populateMsgFromInteraction, getOsuUserServerMode, pause, logDatabaseQueries, getMods, humanReadable, getMapListCover } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
 const { DBOsuBeatmaps, DBDiscordUsers } = require('../dbObjects');
@@ -16,6 +16,310 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 15,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-bingo')
+		.setNameLocalizations({
+			'de': 'osu-bingo',
+			'en-GB': 'osu-bingo',
+			'en-US': 'osu-bingo',
+		})
+		.setDescription('Play a game of osu!bingo')
+		.setDescriptionLocalizations({
+			'de': 'Erlaubt es dir ein osu!Bingo Match zu spielen',
+			'en-GB': 'Allows you to play an osu!bingo match',
+			'en-US': 'Allows you to play an osu!bingo match',
+		})
+		.setDMPermission(false)
+		.addUserOption(option =>
+			option.setName('player1team2')
+				.setNameLocalizations({
+					'de': 'spieler1team2',
+					'en-GB': 'player1team2',
+					'en-US': 'player1team2',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(true)
+		)
+		.addNumberOption(option =>
+			option.setName('lowerstarrating')
+				.setNameLocalizations({
+					'de': 'unteresternegrenze',
+					'en-GB': 'lowerstarrating',
+					'en-US': 'lowerstarrating',
+				})
+				.setDescription('The lower star rating limit')
+				.setDescriptionLocalizations({
+					'de': 'Die untere Sternegrenze',
+					'en-GB': 'The lower star rating limit',
+					'en-US': 'The lower star rating limit',
+				})
+				.setRequired(false)
+		)
+		.addNumberOption(option =>
+			option.setName('higherstarrating')
+				.setNameLocalizations({
+					'de': 'oberesternegrenze',
+					'en-GB': 'higherstarrating',
+					'en-US': 'higherstarrating',
+				})
+				.setDescription('The higher star rating limit')
+				.setDescriptionLocalizations({
+					'de': 'Die obere Sternegrenze',
+					'en-GB': 'The higher star rating limit',
+					'en-US': 'The higher star rating limit',
+				})
+				.setRequired(false)
+		)
+		.addNumberOption(option =>
+			option.setName('lowerdrain')
+				.setNameLocalizations({
+					'de': 'unteredrainzeitgrenze',
+					'en-GB': 'lowerdrain',
+					'en-US': 'lowerdrain',
+				})
+				.setDescription('The lower drain time limit in seconds')
+				.setDescriptionLocalizations({
+					'de': 'Die untere Drainzeitgrenze in Sekunden',
+					'en-GB': 'The lower drain time limit in seconds',
+					'en-US': 'The lower drain time limit in seconds',
+				})
+				.setRequired(false)
+		)
+		.addNumberOption(option =>
+			option.setName('higherdrain')
+				.setNameLocalizations({
+					'de': 'oberedrainzeitgrenze',
+					'en-GB': 'higherdrain',
+					'en-US': 'higherdrain',
+				})
+				.setDescription('The higher drain time limit in seconds')
+				.setDescriptionLocalizations({
+					'de': 'Die obere Drainzeitgrenze in Sekunden',
+					'en-GB': 'The higher drain time limit in seconds',
+					'en-US': 'The higher drain time limit in seconds',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('requirement')
+				.setNameLocalizations({
+					'de': 'anforderung',
+					'en-GB': 'requirement',
+					'en-US': 'requirement',
+				})
+				.setDescription('The minimum requirement for the score')
+				.setDescriptionLocalizations({
+					'de': 'Die minimale Anforderung für den Score',
+					'en-GB': 'The minimum requirement for the score',
+					'en-US': 'The minimum requirement for the score',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'S', value: 'S' },
+					{ name: 'A', value: 'A' },
+					{ name: 'Pass (Default)', value: 'Pass' },
+				)
+		)
+		.addUserOption(option =>
+			option.setName('player1team3')
+				.setNameLocalizations({
+					'de': 'spieler1team3',
+					'en-GB': 'player1team3',
+					'en-US': 'player1team3',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('player1team4')
+				.setNameLocalizations({
+					'de': 'spieler1team4',
+					'en-GB': 'player1team4',
+					'en-US': 'player1team4',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('player1team5')
+				.setNameLocalizations({
+					'de': 'spieler1team5',
+					'en-GB': 'player1team5',
+					'en-US': 'player1team5',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('player2team1')
+				.setNameLocalizations({
+					'de': 'spieler2team1',
+					'en-GB': 'player2team1',
+					'en-US': 'player2team1',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('player2team2')
+				.setNameLocalizations({
+					'de': 'spieler2team2',
+					'en-GB': 'player2team2',
+					'en-US': 'player2team2',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('player2team3')
+				.setNameLocalizations({
+					'de': 'spieler2team3',
+					'en-GB': 'player2team3',
+					'en-US': 'player2team3',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('player2team4')
+				.setNameLocalizations({
+					'de': 'spieler2team4',
+					'en-GB': 'player2team4',
+					'en-US': 'player2team4',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('player2team5')
+				.setNameLocalizations({
+					'de': 'spieler2team5',
+					'en-GB': 'player2team5',
+					'en-US': 'player2team5',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('player3team1')
+				.setNameLocalizations({
+					'de': 'spieler3team1',
+					'en-GB': 'player3team1',
+					'en-US': 'player3team1',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('player3team2')
+				.setNameLocalizations({
+					'de': 'spieler3team2',
+					'en-GB': 'player3team2',
+					'en-US': 'player3team2',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('player3team3')
+				.setNameLocalizations({
+					'de': 'spieler3team3',
+					'en-GB': 'player3team3',
+					'en-US': 'player3team3',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('player3team4')
+				.setNameLocalizations({
+					'de': 'spieler3team4',
+					'en-GB': 'player3team4',
+					'en-US': 'player3team4',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('player3team5')
+				.setNameLocalizations({
+					'de': 'spieler3team5',
+					'en-GB': 'player3team5',
+					'en-US': 'player3team5',
+				})
+				.setDescription('A player')
+				.setDescriptionLocalizations({
+					'de': 'Ein Spieler',
+					'en-GB': 'A player',
+					'en-US': 'A player',
+				})
+				.setRequired(false)
+		),
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply();
