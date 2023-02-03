@@ -104,9 +104,15 @@ module.exports = {
 
 		filtered = filtered.slice(0, 25);
 
-		await interaction.respond(
-			filtered.map(choice => ({ name: choice, value: choice })),
-		);
+		try {
+			await interaction.respond(
+				filtered.map(choice => ({ name: choice, value: choice })),
+			);
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+		}
 	},
 	async execute(msg, args, interaction) {
 		try {

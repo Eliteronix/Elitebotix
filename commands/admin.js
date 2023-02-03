@@ -4616,11 +4616,6 @@ module.exports = {
 			// 		]
 			// 	}
 			// });
-		} else if (args[0] === 'removeGuildCommands') {
-			const commands = await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.get();
-			for (let i = 0; i < commands.length; i++) {
-				await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands(commands[i].id).delete();
-			}
 		} else if (args[0] === 'globalCommands') {
 			const { REST, Routes } = require('discord.js');
 			const fs = require('node:fs');
@@ -9210,11 +9205,6 @@ module.exports = {
 					]
 				}
 			});
-		} else if (args[0] === 'removeGlobalCommands') {
-			const commands = await msg.client.api.applications(msg.client.user.id).commands.get();
-			for (let i = 0; i < commands.length; i++) {
-				await msg.client.api.applications(msg.client.user.id).commands(commands[i].id).delete();
-			}
 		} else if (args[0] === 'saveMultiMatches') {
 			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'saveMultiMatches' } });
 			for (let i = 0; i < processQueueTasks.length; i++) {
