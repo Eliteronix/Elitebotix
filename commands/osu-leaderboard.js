@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const { humanReadable, createLeaderboard, populateMsgFromInteraction, logDatabaseQueries, getOsuUserServerMode, getGameModeName } = require('../utils');
 const { leaderboardEntriesPerPage } = require('../config.json');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -13,6 +13,55 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 30,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-leaderboard')
+		.setNameLocalizations({
+			'de': 'osu-rangliste',
+			'en-GB': 'osu-leaderboard',
+			'en-US': 'osu-leaderboard',
+		})
+		.setDescription('Sends a leaderboard of all the players in the guild that have their account connected')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Rangliste aller Spieler in dem Server, die ihr Konto verbunden haben',
+			'en-GB': 'Sends a leaderboard of all the players in the guild that have their account connected',
+			'en-US': 'Sends a leaderboard of all the players in the guild that have their account connected',
+		})
+		.addIntegerOption(option =>
+			option.setName('page')
+				.setNameLocalizations({
+					'de': 'seite',
+					'en-GB': 'page',
+					'en-US': 'page',
+				})
+				.setDescription('The page of the leaderboard to display')
+				.setDescriptionLocalizations({
+					'de': 'Die Seite der Rangliste, die angezeigt werden soll',
+					'en-GB': 'The page of the leaderboard to display',
+					'en-US': 'The page of the leaderboard to display',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('mode')
+				.setNameLocalizations({
+					'de': 'modus',
+					'en-GB': 'mode',
+					'en-US': 'mode',
+				})
+				.setDescription('The osu! mode')
+				.setDescriptionLocalizations({
+					'de': 'Der osu! Modus',
+					'en-GB': 'The osu! mode',
+					'en-US': 'The osu! mode',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'standard', value: '--s' },
+					{ name: 'taiko', value: '--t' },
+					{ name: 'catch', value: '--c' },
+					{ name: 'mania', value: '--m' },
+				)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

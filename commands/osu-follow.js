@@ -124,7 +124,7 @@ module.exports = {
 			subcommand
 				.setName('allowfollowing')
 				.setNameLocalizations({
-					'de': 'folgen erlauben',
+					'de': 'erlaubefolgen',
 					'en-GB': 'allowfollowing',
 					'en-US': 'allowfollowing',
 				})

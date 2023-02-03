@@ -69,46 +69,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'osu-leaderboard',
-			// 		description: 'Sends a leaderboard of all the players in the guild that have their account connected',
-			// 		dm_permission: false,
-			// 		options: [
-			// 			{
-			// 				'name': 'page',
-			// 				'description': 'The page of the leaderboard to display',
-			// 				'type': 4,
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'mode',
-			// 				'description': 'The osu! mode you want as your main',
-			// 				'type': 3,
-			// 				'required': false,
-			// 				'choices': [
-			// 					{
-			// 						'name': 'standard',
-			// 						'value': '--s'
-			// 					},
-			// 					{
-			// 						'name': 'taiko',
-			// 						'value': '--t'
-			// 					},
-			// 					{
-			// 						'name': 'catch',
-			// 						'value': '--c'
-			// 					},
-			// 					{
-			// 						'name': 'mania',
-			// 						'value': '--m'
-			// 					}
-			// 				]
-			// 			}
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'osu-link',
 			// 		description: 'Allows you to link your Discord Account to your osu! Account',
 			// 		dm_permission: true,
@@ -3423,46 +3383,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'osu-leaderboard',
-					description: 'Sends a leaderboard of all the players in the guild that have their account connected',
-					dm_permission: false,
-					options: [
-						{
-							'name': 'page',
-							'description': 'The page of the leaderboard to display',
-							'type': 4,
-							'required': false
-						},
-						{
-							'name': 'mode',
-							'description': 'The osu! mode you want as your main',
-							'type': 3,
-							'required': false,
-							'choices': [
-								{
-									'name': 'standard',
-									'value': '--s'
-								},
-								{
-									'name': 'taiko',
-									'value': '--t'
-								},
-								{
-									'name': 'catch',
-									'value': '--c'
-								},
-								{
-									'name': 'mania',
-									'value': '--m'
-								}
-							]
-						}
-					]
-				},
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

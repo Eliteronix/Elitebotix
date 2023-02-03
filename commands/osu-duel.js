@@ -80,118 +80,6 @@ module.exports = {
 				})
 				.addUserOption(option =>
 					option
-						.setName('firstteammate')
-						.setNameLocalizations({
-							'de': 'ersterpartner',
-							'en-GB': 'firstteammate',
-							'en-US': 'firstteammate',
-						})
-						.setDescription('A teammate')
-						.setDescriptionLocalizations({
-							'de': 'Ein Partner',
-							'en-GB': 'A teammate',
-							'en-US': 'A teammate',
-						})
-						.setRequired(true)
-				)
-				.addUserOption(option =>
-					option
-						.setName('secondteammate')
-						.setNameLocalizations({
-							'de': 'zweiterpartner',
-							'en-GB': 'secondteammate',
-							'en-US': 'secondteammate',
-						})
-						.setDescription('A teammate')
-						.setDescriptionLocalizations({
-							'de': 'Ein Partner',
-							'en-GB': 'A teammate',
-							'en-US': 'A teammate',
-						})
-						.setRequired(true)
-				)
-				.addUserOption(option =>
-					option
-						.setName('thirdteammate')
-						.setNameLocalizations({
-							'de': 'dritterpartner',
-							'en-GB': 'thirdteammate',
-							'en-US': 'thirdteammate',
-						})
-						.setDescription('A teammate')
-						.setDescriptionLocalizations({
-							'de': 'Ein Partner',
-							'en-GB': 'A teammate',
-							'en-US': 'A teammate',
-						})
-						.setRequired(true)
-				)
-				.addUserOption(option =>
-					option
-						.setName('fourthteammate')
-						.setNameLocalizations({
-							'de': 'vierterpartner',
-							'en-GB': 'fourthteammate',
-							'en-US': 'fourthteammate',
-						})
-						.setDescription('A teammate')
-						.setDescriptionLocalizations({
-							'de': 'Ein Partner',
-							'en-GB': 'A teammate',
-							'en-US': 'A teammate',
-						})
-						.setRequired(true)
-				)
-				.addUserOption(option =>
-					option
-						.setName('fifthteammate')
-						.setNameLocalizations({
-							'de': 'fünfterpartner',
-							'en-GB': 'fifthteammate',
-							'en-US': 'fifthteammate',
-						})
-						.setDescription('A teammate')
-						.setDescriptionLocalizations({
-							'de': 'Ein Partner',
-							'en-GB': 'A teammate',
-							'en-US': 'A teammate',
-						})
-						.setRequired(true)
-				)
-				.addUserOption(option =>
-					option
-						.setName('sixthteammate')
-						.setNameLocalizations({
-							'de': 'sechsterpartner',
-							'en-GB': 'sixthteammate',
-							'en-US': 'sixthteammate',
-						})
-						.setDescription('A teammate')
-						.setDescriptionLocalizations({
-							'de': 'Ein Partner',
-							'en-GB': 'A teammate',
-							'en-US': 'A teammate',
-						})
-						.setRequired(true)
-				)
-				.addUserOption(option =>
-					option
-						.setName('seventhteammate')
-						.setNameLocalizations({
-							'de': 'siebterpartner',
-							'en-GB': 'seventhteammate',
-							'en-US': 'seventhteammate',
-						})
-						.setDescription('A teammate')
-						.setDescriptionLocalizations({
-							'de': 'Ein Partner',
-							'en-GB': 'A teammate',
-							'en-US': 'A teammate',
-						})
-						.setRequired(true)
-				)
-				.addUserOption(option =>
-					option
 						.setName('firstopponent')
 						.setNameLocalizations({
 							'de': 'erstergegner',
@@ -208,6 +96,118 @@ module.exports = {
 				)
 				.addUserOption(option =>
 					option
+						.setName('firstteammate')
+						.setNameLocalizations({
+							'de': 'ersterpartner',
+							'en-GB': 'firstteammate',
+							'en-US': 'firstteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(false)
+				)
+				.addUserOption(option =>
+					option
+						.setName('secondteammate')
+						.setNameLocalizations({
+							'de': 'zweiterpartner',
+							'en-GB': 'secondteammate',
+							'en-US': 'secondteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(false)
+				)
+				.addUserOption(option =>
+					option
+						.setName('thirdteammate')
+						.setNameLocalizations({
+							'de': 'dritterpartner',
+							'en-GB': 'thirdteammate',
+							'en-US': 'thirdteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(false)
+				)
+				.addUserOption(option =>
+					option
+						.setName('fourthteammate')
+						.setNameLocalizations({
+							'de': 'vierterpartner',
+							'en-GB': 'fourthteammate',
+							'en-US': 'fourthteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(false)
+				)
+				.addUserOption(option =>
+					option
+						.setName('fifthteammate')
+						.setNameLocalizations({
+							'de': 'fünfterpartner',
+							'en-GB': 'fifthteammate',
+							'en-US': 'fifthteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(false)
+				)
+				.addUserOption(option =>
+					option
+						.setName('sixthteammate')
+						.setNameLocalizations({
+							'de': 'sechsterpartner',
+							'en-GB': 'sixthteammate',
+							'en-US': 'sixthteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(false)
+				)
+				.addUserOption(option =>
+					option
+						.setName('seventhteammate')
+						.setNameLocalizations({
+							'de': 'siebterpartner',
+							'en-GB': 'seventhteammate',
+							'en-US': 'seventhteammate',
+						})
+						.setDescription('A teammate')
+						.setDescriptionLocalizations({
+							'de': 'Ein Partner',
+							'en-GB': 'A teammate',
+							'en-US': 'A teammate',
+						})
+						.setRequired(false)
+				)
+				.addUserOption(option =>
+					option
 						.setName('secondopponent')
 						.setNameLocalizations({
 							'de': 'zweitergegner',
@@ -220,7 +220,7 @@ module.exports = {
 							'en-GB': 'An opponent',
 							'en-US': 'An opponent',
 						})
-						.setRequired(true)
+						.setRequired(false)
 				)
 				.addUserOption(option =>
 					option
@@ -236,7 +236,7 @@ module.exports = {
 							'en-GB': 'An opponent',
 							'en-US': 'An opponent',
 						})
-						.setRequired(true)
+						.setRequired(false)
 				)
 				.addUserOption(option =>
 					option
@@ -252,7 +252,7 @@ module.exports = {
 							'en-GB': 'An opponent',
 							'en-US': 'An opponent',
 						})
-						.setRequired(true)
+						.setRequired(false)
 				)
 				.addUserOption(option =>
 					option
@@ -268,7 +268,7 @@ module.exports = {
 							'en-GB': 'An opponent',
 							'en-US': 'An opponent',
 						})
-						.setRequired(true)
+						.setRequired(false)
 				)
 				.addUserOption(option =>
 					option
@@ -284,7 +284,7 @@ module.exports = {
 							'en-GB': 'An opponent',
 							'en-US': 'An opponent',
 						})
-						.setRequired(true)
+						.setRequired(false)
 				)
 				.addUserOption(option =>
 					option
@@ -300,7 +300,7 @@ module.exports = {
 							'en-GB': 'An opponent',
 							'en-US': 'An opponent',
 						})
-						.setRequired(true)
+						.setRequired(false)
 				)
 				.addUserOption(option =>
 					option
@@ -316,7 +316,7 @@ module.exports = {
 							'en-GB': 'An opponent',
 							'en-US': 'An opponent',
 						})
-						.setRequired(true)
+						.setRequired(false)
 				)
 				.addNumberOption(option =>
 					option
