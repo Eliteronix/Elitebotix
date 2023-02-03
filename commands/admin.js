@@ -69,52 +69,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'osu-link',
-			// 		description: 'Allows you to link your Discord Account to your osu! Account',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'connect',
-			// 				'description': 'Connect your discord account to your osu! account',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'username',
-			// 						'description': 'Your osu! username or alternatively id',
-			// 						'type': 3,
-			// 						'required': true
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'current',
-			// 				'description': 'Get information on your current connection to an osu! account',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'disconnect',
-			// 				'description': 'Disconnect your discord account from your osu! account',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'verify',
-			// 				'description': 'Resend the verification code ingame or confirm your verification',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'code',
-			// 						'description': 'The verification code sent to you in osu! DMs',
-			// 						'type': 3,
-			// 						'required': false
-			// 					}
-			// 				]
-			// 			},
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'osu-mapleaderboard',
 			// 		description: 'Sends an info card about the leaderboard on the specified beatmap',
 			// 		dm_permission: true,
@@ -3311,38 +3265,6 @@ module.exports = {
 			// 		]
 			// 	},
 			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'weather',
-			// 		description: 'Sends info about the weather of the given location',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'unit',
-			// 				'description': 'The unit that should be used',
-			// 				'type': 3,
-			// 				'required': false,
-			// 				'choices': [
-			// 					{
-			// 						'name': 'celcius',
-			// 						'value': 'c'
-			// 					},
-			// 					{
-			// 						'name': 'fahrenheit',
-			// 						'value': 'f'
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'location',
-			// 				'description': 'The location name or zip',
-			// 				'type': 3,
-			// 				'required': false
-			// 			}
-			// 		]
-			// 	}
-			// });
 		} else if (args[0] === 'globalCommands') {
 			const { REST, Routes } = require('discord.js');
 			const fs = require('node:fs');
@@ -3383,52 +3305,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'osu-link',
-					description: 'Allows you to link your Discord Account to your osu! Account',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'connect',
-							'description': 'Connect your discord account to your osu! account',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'username',
-									'description': 'Your osu! username or alternatively id',
-									'type': 3,
-									'required': true
-								}
-							]
-						},
-						{
-							'name': 'current',
-							'description': 'Get information on your current connection to an osu! account',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'disconnect',
-							'description': 'Disconnect your discord account from your osu! account',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'verify',
-							'description': 'Resend the verification code ingame or confirm your verification',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'code',
-									'description': 'The verification code sent to you in osu! DMs',
-									'type': 3,
-									'required': false
-								}
-							]
-						},
-					]
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
@@ -6628,38 +6504,6 @@ module.exports = {
 					]
 				},
 			});
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'weather',
-					description: 'Sends info about the weather of the given location',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'unit',
-							'description': 'The unit that should be used',
-							'type': 3,
-							'required': false,
-							'choices': [
-								{
-									'name': 'celcius',
-									'value': 'c'
-								},
-								{
-									'name': 'fahrenheit',
-									'value': 'f'
-								}
-							]
-						},
-						{
-							'name': 'location',
-							'description': 'The location name or zip',
-							'type': 3,
-							'required': false
-						}
-					]
-				}
-			});
 		} else if (args[0] === 'saveMultiMatches') {
 			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'saveMultiMatches' } });
 			for (let i = 0; i < processQueueTasks.length; i++) {
@@ -7395,7 +7239,7 @@ module.exports = {
 				},
 			});
 
-			msg.reply(`Remaining users: ${count}`);
+			return msg.reply(`Remaining users: ${count}`);
 		} else {
 			msg.reply('Invalid command');
 		}

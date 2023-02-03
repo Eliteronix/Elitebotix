@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const { getOsuBadgeNumberById, getIDFromPotentialOsuLink, logDatabaseQueries } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -13,6 +13,111 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 15,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-link')
+		.setNameLocalizations({
+			'de': 'osu-verbinden',
+			'en-GB': 'osu-link',
+			'en-US': 'osu-link',
+		})
+		.setDescription('Allows you to link your Discord Account to your osu! Account')
+		.setDescriptionLocalizations({
+			'de': 'Erlaubt es dir, dein Discord-Konto mit deinem osu!-Konto zu verbinden',
+			'en-GB': 'Allows you to link your Discord Account to your osu! Account',
+			'en-US': 'Allows you to link your Discord Account to your osu! Account',
+		})
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('connect')
+				.setNameLocalizations({
+					'de': 'verbinden',
+					'en-GB': 'connect',
+					'en-US': 'connect',
+				})
+				.setDescription('Connect your discord account to your osu! account')
+				.setDescriptionLocalizations({
+					'de': 'Verbinde dein Discord-Konto mit deinem osu!-Konto',
+					'en-GB': 'Connect your discord account to your osu! account',
+					'en-US': 'Connect your discord account to your osu! account',
+				})
+				.addStringOption(option =>
+					option
+						.setName('username')
+						.setNameLocalizations({
+							'de': 'nutzername',
+							'en-GB': 'username',
+							'en-US': 'username',
+						})
+						.setDescription('Your osu! username or alternatively id')
+						.setDescriptionLocalizations({
+							'de': 'Dein osu!-Nutzername oder alternativ deine ID',
+							'en-GB': 'Your osu! username or alternatively id',
+							'en-US': 'Your osu! username or alternatively id',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('current')
+				.setNameLocalizations({
+					'de': 'aktuell',
+					'en-GB': 'current',
+					'en-US': 'current',
+				})
+				.setDescription('Get information on your current connection to an osu! account')
+				.setDescriptionLocalizations({
+					'de': 'Informationen über deine aktuelle Verbindung zu einem osu!-Konto',
+					'en-GB': 'Get information on your current connection to an osu! account',
+					'en-US': 'Get information on your current connection to an osu! account',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('disconnect')
+				.setNameLocalizations({
+					'de': 'trennen',
+					'en-GB': 'disconnect',
+					'en-US': 'disconnect',
+				})
+				.setDescription('Disconnect your discord account from your osu! account')
+				.setDescriptionLocalizations({
+					'de': 'Trenne dein Discord-Konto von deinem osu!-Konto',
+					'en-GB': 'Disconnect your discord account from your osu! account',
+					'en-US': 'Disconnect your discord account from your osu! account',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('verify')
+				.setNameLocalizations({
+					'de': 'verifizieren',
+					'en-GB': 'verify',
+					'en-US': 'verify',
+				})
+				.setDescription('Resend the verification code ingame or confirm your verification')
+				.setDescriptionLocalizations({
+					'de': 'Sende den Verifizierungscode erneut im Spiel oder bestätige deine Verifizierung',
+					'en-GB': 'Resend the verification code ingame or confirm your verification',
+					'en-US': 'Resend the verification code ingame or confirm your verification',
+				})
+				.addStringOption(option =>
+					option
+						.setName('code')
+						.setNameLocalizations({
+							'de': 'code',
+							'en-GB': 'code',
+							'en-US': 'code',
+						})
+						.setDescription('The verification code sent to you in osu! DMs')
+						.setDescriptionLocalizations({
+							'de': 'Der Verifizierungscode, der dir in osu!-DMs gesendet wurde',
+							'en-GB': 'The verification code sent to you in osu! DMs',
+							'en-US': 'The verification code sent to you in osu! DMs',
+						})
+						.setRequired(false)
+				)
+		),
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Refactor this mess
 		if (interaction.options._hoistedOptions[0]) {

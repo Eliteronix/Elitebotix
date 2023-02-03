@@ -3,7 +3,7 @@ const Canvas = require('canvas');
 const weather = require('weather-js');
 const util = require('util');
 const { pause, populateMsgFromInteraction, fitTextOnMiddleCanvas } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBDiscordUsers } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -16,6 +16,53 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'misc',
+	data: new SlashCommandBuilder()
+		.setName('weather')
+		.setNameLocalizations({
+			'de': 'wetter',
+			'en-GB': 'weather',
+			'en-US': 'weather',
+		})
+		.setDescription('Sends info about the weather of the given location')
+		.setDescriptionLocalizations({
+			'de': 'Sendet Infos über das Wetter des angegebenen Ortes',
+			'en-GB': 'Sends info about the weather of the given location',
+			'en-US': 'Sends info about the weather of the given location',
+		})
+		.addStringOption(option =>
+			option.setName('location')
+				.setNameLocalizations({
+					'de': 'ort',
+					'en-GB': 'location',
+					'en-US': 'location',
+				})
+				.setDescription('The location name or zip')
+				.setDescriptionLocalizations({
+					'de': 'Der Ortsname oder die Postleitzahl',
+					'en-GB': 'The location name or zip',
+					'en-US': 'The location name or zip',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('unit')
+				.setNameLocalizations({
+					'de': 'einheit',
+					'en-GB': 'unit',
+					'en-US': 'unit',
+				})
+				.setDescription('The unit that should be used')
+				.setDescriptionLocalizations({
+					'de': 'Die Einheit, die verwendet werden soll',
+					'en-GB': 'The unit that should be used',
+					'en-US': 'The unit that should be used',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'celcius', value: 'c' },
+					{ name: 'fahrenheit', value: 'f' }
+				)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
