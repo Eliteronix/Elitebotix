@@ -1,6 +1,6 @@
 const osu = require('node-osu');
 const { createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, getMods, getOsuPlayerName } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -12,6 +12,100 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 15,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-matchscore')
+		.setNameLocalizations({
+			'de': 'osu-matchwertung',
+			'en-GB': 'osu-matchscore',
+			'en-US': 'osu-matchscore',
+		})
+		.setDescription('Sends an evaluation of how valuable all the players in the match were')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Bewertung, wie wertvoll alle Spieler im Match waren',
+			'en-GB': 'Sends an evaluation of how valuable all the players in the match were',
+			'en-US': 'Sends an evaluation of how valuable all the players in the match were',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('match')
+				.setNameLocalizations({
+					'de': 'match',
+					'en-GB': 'match',
+					'en-US': 'match',
+				})
+				.setDescription('Match ID or link')
+				.setDescriptionLocalizations({
+					'de': 'Match ID oder Link',
+					'en-GB': 'Match ID or link',
+					'en-US': 'Match ID or link',
+				})
+				.setRequired(true)
+		)
+		.addIntegerOption(option =>
+			option.setName('warmups')
+				.setNameLocalizations({
+					'de': 'warmups',
+					'en-GB': 'warmups',
+					'en-US': 'warmups',
+				})
+				.setDescription('The amount of warmups played')
+				.setDescriptionLocalizations({
+					'de': 'Die Anzahl der Warmups, die gespielt wurden',
+					'en-GB': 'The amount of warmups played',
+					'en-US': 'The amount of warmups played',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('calculation')
+				.setNameLocalizations({
+					'de': 'berechnung',
+					'en-GB': 'calculation',
+					'en-US': 'calculation',
+				})
+				.setDescription('How the matchscore should be calculated')
+				.setDescriptionLocalizations({
+					'de': 'Wie die Matchwertung berechnet werden soll',
+					'en-GB': 'How the matchscore should be calculated',
+					'en-US': 'How the matchscore should be calculated',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Mixed (Default)', value: 'mixed' },
+					{ name: 'Sum (favors all-rounders)', value: 'sum' },
+					{ name: 'Average (favors niche players)', value: 'avg' },
+				)
+		)
+		.addIntegerOption(option =>
+			option.setName('skiplast')
+				.setNameLocalizations({
+					'de': 'überspringeletzte',
+					'en-GB': 'skiplast',
+					'en-US': 'skiplast',
+				})
+				.setDescription('The amount of maps to ignore from the end of the match')
+				.setDescriptionLocalizations({
+					'de': 'Die Anzahl der Maps, die am Ende des Matches ignoriert werden sollen',
+					'en-GB': 'The amount of maps to ignore from the end of the match',
+					'en-US': 'The amount of maps to ignore from the end of the match',
+				})
+				.setRequired(false)
+		)
+		.addNumberOption(option =>
+			option.setName('ezmultiplier')
+				.setNameLocalizations({
+					'de': 'ezmultiplikator',
+					'en-GB': 'ezmultiplier',
+					'en-US': 'ezmultiplier',
+				})
+				.setDescription('The EZ multiplier for the match (Default: 1.7)')
+				.setDescriptionLocalizations({
+					'de': 'Der EZ-Multiplikator für das Match (Standard: 1,7)',
+					'en-GB': 'The EZ multiplier for the match (Default: 1.7)',
+					'en-US': 'The EZ multiplier for the match (Default: 1.7)',
+				})
+				.setRequired(false)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {
