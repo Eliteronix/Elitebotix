@@ -4,7 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('canvas');
 const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { developers, showUnknownInteractionError } = require('../config.json');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
@@ -18,6 +18,131 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-profile')
+		.setNameLocalizations({
+			'de': 'osu-profil',
+			'en-GB': 'osu-profile',
+			'en-US': 'osu-profile',
+		})
+		.setDescription('Sends an info card about the specified player')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Info-Karte über den angegebenen Spieler',
+			'en-GB': 'Sends an info card about the specified player',
+			'en-US': 'Sends an info card about the specified player',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('username')
+				.setNameLocalizations({
+					'de': 'nutzername',
+					'en-GB': 'username',
+					'en-US': 'username',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addBooleanOption(option =>
+			option.setName('showgraph')
+				.setNameLocalizations({
+					'de': 'zeigegraph',
+					'en-GB': 'showgraph',
+					'en-US': 'showgraph',
+				})
+				.setDescription('Show the rank graph')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt den Rang-Graphen',
+					'en-GB': 'Show the rank graph',
+					'en-US': 'Show the rank graph',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('gamemode')
+				.setNameLocalizations({
+					'de': 'spielmodus',
+					'en-GB': 'gamemode',
+					'en-US': 'gamemode',
+				})
+				.setDescription('The osu! gamemode')
+				.setDescriptionLocalizations({
+					'de': 'Der osu! Spielmodus',
+					'en-GB': 'The osu! gamemode',
+					'en-US': 'The osu! gamemode',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Standard', value: '--s' },
+					{ name: 'Mania', value: '--m' },
+					{ name: 'Catch The Beat', value: '--c' },
+					{ name: 'Taiko', value: '--t' },
+				)
+		)
+		.addStringOption(option =>
+			option.setName('username2')
+				.setNameLocalizations({
+					'de': 'nutzername2',
+					'en-GB': 'username2',
+					'en-US': 'username2',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username3')
+				.setNameLocalizations({
+					'de': 'nutzername3',
+					'en-GB': 'username3',
+					'en-US': 'username3',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username4')
+				.setNameLocalizations({
+					'de': 'nutzername4',
+					'en-GB': 'username4',
+					'en-US': 'username4',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username5')
+				.setNameLocalizations({
+					'de': 'nutzername5',
+					'en-GB': 'username5',
+					'en-US': 'username5',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		),
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		let showGraph = false;
