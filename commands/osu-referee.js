@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
 const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, logDatabaseQueries, getModBits } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 const Discord = require('discord.js');
@@ -15,6 +15,658 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-referee')
+		.setNameLocalizations({
+			'de': 'osu-referee',
+			'en-GB': 'osu-referee',
+			'en-US': 'osu-referee',
+		})
+		.setDescription('Lets you schedule a match which is being reffed by the bot')
+		.setDescriptionLocalizations({
+			'de': 'Lässt dich ein Match planen, welches vom Bot geleitet wird',
+			'en-GB': 'Lets you schedule a match which is being reffed by the bot',
+			'en-US': 'Lets you schedule a match which is being reffed by the bot',
+		})
+		.setDMPermission(false)
+		.setDefaultMemberPermissions(PermissionsBitField.Flags.ManageGuild)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('soloqualifiers')
+				.setNameLocalizations({
+					'de': 'einzelqualis',
+					'en-GB': 'soloqualifiers',
+					'en-US': 'soloqualifiers',
+				})
+				.setDescription('Lets you schedule a match which is being reffed by the bot')
+				.setDescriptionLocalizations({
+					'de': 'Lässt dich ein Match planen, welches vom Bot geleitet wird',
+					'en-GB': 'Lets you schedule a match which is being reffed by the bot',
+					'en-US': 'Lets you schedule a match which is being reffed by the bot',
+				})
+				.addIntegerOption(option =>
+					option
+						.setName('date')
+						.setNameLocalizations({
+							'de': 'datum',
+							'en-GB': 'date',
+							'en-US': 'date',
+						})
+						.setDescription('The date of the month in UTC (i.e. 29)')
+						.setDescriptionLocalizations({
+							'de': 'Das Datum des Monats in UTC (z.B. 29)',
+							'en-GB': 'The date of the month in UTC (i.e. 29)',
+							'en-US': 'The date of the month in UTC (i.e. 29)',
+						})
+						.setRequired(true)
+						.setMinValue(1)
+						.setMaxValue(31)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('month')
+						.setNameLocalizations({
+							'de': 'monat',
+							'en-GB': 'month',
+							'en-US': 'month',
+						})
+						.setDescription('The month in UTC (i.e. 11)')
+						.setDescriptionLocalizations({
+							'de': 'Der Monat in UTC (z.B. 11)',
+							'en-GB': 'The month in UTC (i.e. 11)',
+							'en-US': 'The month in UTC (i.e. 11)',
+						})
+						.setRequired(true)
+						.setMinValue(1)
+						.setMaxValue(12)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('year')
+						.setNameLocalizations({
+							'de': 'jahr',
+							'en-GB': 'year',
+							'en-US': 'year',
+						})
+						.setDescription('The year in UTC (i.e. 2021)')
+						.setDescriptionLocalizations({
+							'de': 'Das Jahr in UTC (z.B. 2021)',
+							'en-GB': 'The year in UTC (i.e. 2021)',
+							'en-US': 'The year in UTC (i.e. 2021)',
+						})
+						.setRequired(true)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('hour')
+						.setNameLocalizations({
+							'de': 'stunde',
+							'en-GB': 'hour',
+							'en-US': 'hour',
+						})
+						.setDescription('The hour in UTC (i.e. 18)')
+						.setDescriptionLocalizations({
+							'de': 'Die Stunde in UTC (z.B. 18)',
+							'en-GB': 'The hour in UTC (i.e. 18)',
+							'en-US': 'The hour in UTC (i.e. 18)',
+						})
+						.setRequired(true)
+						.setMinValue(0)
+						.setMaxValue(23)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('minute')
+						.setNameLocalizations({
+							'de': 'minute',
+							'en-GB': 'minute',
+							'en-US': 'minute',
+						})
+						.setDescription('The minute in UTC (i.e. 0)')
+						.setDescriptionLocalizations({
+							'de': 'Die Minute in UTC (z.B. 0)',
+							'en-GB': 'The minute in UTC (i.e. 0)',
+							'en-US': 'The minute in UTC (i.e. 0)',
+						})
+						.setRequired(true)
+						.setMinValue(0)
+						.setMaxValue(59)
+				)
+				.addChannelOption(option =>
+					option
+						.setName('channel')
+						.setNameLocalizations({
+							'de': 'kanal',
+							'en-GB': 'channel',
+							'en-US': 'channel',
+						})
+						.setDescription('The channel in which the players should be notified.')
+						.setDescriptionLocalizations({
+							'de': 'Der Kanal, in dem die Spieler benachrichtigt werden sollen.',
+							'en-GB': 'The channel in which the players should be notified.',
+							'en-US': 'The channel in which the players should be notified.',
+						})
+						.setRequired(true)
+						.addChannelTypes(Discord.ChannelType.GuildText)
+				)
+				.addStringOption(option =>
+					option
+						.setName('matchname')
+						.setNameLocalizations({
+							'de': 'matchname',
+							'en-GB': 'matchname',
+							'en-US': 'matchname',
+						})
+						.setDescription('The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")')
+						.setDescriptionLocalizations({
+							'de': 'Der Name, den das Match haben soll. (z.B. "ECS: (Qualifiers) vs (Lobby 8)")',
+							'en-GB': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
+							'en-US': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('mappool')
+						.setNameLocalizations({
+							'de': 'mappool',
+							'en-GB': 'mappool',
+							'en-US': 'mappool',
+						})
+						.setDescription('The mappool in the following format: NM234826,HD123141,HR123172,FMDT2342316')
+						.setDescriptionLocalizations({
+							'de': 'Der Mappool im folgenden Format: NM234826,HD123141,HR123172,FMDT2342316',
+							'en-GB': 'The mappool in the following format: NM234826,HD123141,HR123172,FMDT2342316',
+							'en-US': 'The mappool in the following format: NM234826,HD123141,HR123172,FMDT2342316',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('freemodmessage')
+						.setNameLocalizations({
+							'de': 'freemodnachricht',
+							'en-GB': 'freemodmessage',
+							'en-US': 'freemodmessage',
+						})
+						.setDescription('An intruction message to be displayed when the map is played freemod')
+						.setDescriptionLocalizations({
+							'de': 'Eine Anleitungsnachricht, die angezeigt werden soll, wenn die Karte freemod gespielt wird',
+							'en-GB': 'An intruction message to be displayed when the map is played freemod',
+							'en-US': 'An intruction message to be displayed when the map is played freemod',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('players')
+						.setNameLocalizations({
+							'de': 'spieler',
+							'en-GB': 'players',
+							'en-US': 'players',
+						})
+						.setDescription('The username, id or link of the players seperated by a \',\'')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link der Spieler, getrennt durch ein \',\'',
+							'en-GB': 'The username, id or link of the players seperated by a \',\'',
+							'en-US': 'The username, id or link of the players seperated by a \',\'',
+						})
+						.setRequired(true)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('usenofail')
+						.setNameLocalizations({
+							'de': 'nutzenofail',
+							'en-GB': 'usenofail',
+							'en-US': 'usenofail',
+						})
+						.setDescription('Should nofail be applied to all maps?')
+						.setDescriptionLocalizations({
+							'de': 'Soll nofail auf allen maps angewendet werden?',
+							'en-GB': 'Should nofail be applied to all maps?',
+							'en-US': 'Should nofail be applied to all maps?',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('score')
+						.setNameLocalizations({
+							'de': 'score',
+							'en-GB': 'score',
+							'en-US': 'score',
+						})
+						.setDescription('What is the winning condition of the match?')
+						.setDescriptionLocalizations({
+							'de': 'Was ist die Gewinnbedingung des Spiels?',
+							'en-GB': 'What is the winning condition of the match?',
+							'en-US': 'What is the winning condition of the match?',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Score v1', value: '0' },
+							{ name: 'Score v2', value: '3' },
+							{ name: 'Accuracy', value: '1' },
+						)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('teamqualifiers')
+				.setNameLocalizations({
+					'de': 'teamqualis',
+					'en-GB': 'teamqualifiers',
+					'en-US': 'teamqualifiers',
+				})
+				.setDescription('Lets you schedule a match which is being reffed by the bot')
+				.setDescriptionLocalizations({
+					'de': 'Ermöglicht es dir, ein Spiel zu planen, das von dem Bot geleitet wird',
+					'en-GB': 'Lets you schedule a match which is being reffed by the bot',
+					'en-US': 'Lets you schedule a match which is being reffed by the bot',
+				})
+				.addIntegerOption(option =>
+					option
+						.setName('date')
+						.setNameLocalizations({
+							'de': 'datum',
+							'en-GB': 'date',
+							'en-US': 'date',
+						})
+						.setDescription('The date of the month in UTC (i.e. 29)')
+						.setDescriptionLocalizations({
+							'de': 'Das Datum des Monats in UTC (z.B. 29)',
+							'en-GB': 'The date of the month in UTC (i.e. 29)',
+							'en-US': 'The date of the month in UTC (i.e. 29)',
+						})
+						.setRequired(true)
+						.setMinValue(1)
+						.setMaxValue(31)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('month')
+						.setNameLocalizations({
+							'de': 'monat',
+							'en-GB': 'month',
+							'en-US': 'month',
+						})
+						.setDescription('The month in UTC (i.e. 11)')
+						.setDescriptionLocalizations({
+							'de': 'Der Monat in UTC (z.B. 11)',
+							'en-GB': 'The month in UTC (i.e. 11)',
+							'en-US': 'The month in UTC (i.e. 11)',
+						})
+						.setRequired(true)
+						.setMinValue(1)
+						.setMaxValue(12)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('year')
+						.setNameLocalizations({
+							'de': 'jahr',
+							'en-GB': 'year',
+							'en-US': 'year',
+						})
+						.setDescription('The year in UTC (i.e. 2021)')
+						.setDescriptionLocalizations({
+							'de': 'Das Jahr in UTC (z.B. 2021)',
+							'en-GB': 'The year in UTC (i.e. 2021)',
+							'en-US': 'The year in UTC (i.e. 2021)',
+						})
+						.setRequired(true)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('hour')
+						.setNameLocalizations({
+							'de': 'stunde',
+							'en-GB': 'hour',
+							'en-US': 'hour',
+						})
+						.setDescription('The hour in UTC (i.e. 18)')
+						.setDescriptionLocalizations({
+							'de': 'Die Stunde in UTC (z.B. 18)',
+							'en-GB': 'The hour in UTC (i.e. 18)',
+							'en-US': 'The hour in UTC (i.e. 18)',
+						})
+						.setRequired(true)
+						.setMinValue(0)
+						.setMaxValue(23)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('minute')
+						.setNameLocalizations({
+							'de': 'minute',
+							'en-GB': 'minute',
+							'en-US': 'minute',
+						})
+						.setDescription('The minute in UTC (i.e. 0)')
+						.setDescriptionLocalizations({
+							'de': 'Die Minute in UTC (z.B. 0)',
+							'en-GB': 'The minute in UTC (i.e. 0)',
+							'en-US': 'The minute in UTC (i.e. 0)',
+						})
+						.setRequired(true)
+						.setMinValue(0)
+						.setMaxValue(59)
+				)
+				.addChannelOption(option =>
+					option
+						.setName('channel')
+						.setNameLocalizations({
+							'de': 'kanal',
+							'en-GB': 'channel',
+							'en-US': 'channel',
+						})
+						.setDescription('The channel in which the players should be notified.')
+						.setDescriptionLocalizations({
+							'de': 'Der Kanal, in dem die Spieler benachrichtigt werden sollen.',
+							'en-GB': 'The channel in which the players should be notified.',
+							'en-US': 'The channel in which the players should be notified.',
+						})
+						.setRequired(true)
+						.addChannelTypes(Discord.ChannelType.GuildText)
+				)
+				.addStringOption(option =>
+					option
+						.setName('matchname')
+						.setNameLocalizations({
+							'de': 'matchname',
+							'en-GB': 'matchname',
+							'en-US': 'matchname',
+						})
+						.setDescription('The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")')
+						.setDescriptionLocalizations({
+							'de': 'Der Name, den das Match haben soll. (z.B. "ECS: (Qualifiers) vs (Lobby 8)")',
+							'en-GB': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
+							'en-US': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('mappool')
+						.setNameLocalizations({
+							'de': 'mappool',
+							'en-GB': 'mappool',
+							'en-US': 'mappool',
+						})
+						.setDescription('The mappool in the following format: NM234826,HD123141,HR123172,FMDT2342316')
+						.setDescriptionLocalizations({
+							'de': 'Der Mappool im folgenden Format: NM234826,HD123141,HR123172,FMDT2342316',
+							'en-GB': 'The mappool in the following format: NM234826,HD123141,HR123172,FMDT2342316',
+							'en-US': 'The mappool in the following format: NM234826,HD123141,HR123172,FMDT2342316',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('freemodmessage')
+						.setNameLocalizations({
+							'de': 'freemodnachricht',
+							'en-GB': 'freemodmessage',
+							'en-US': 'freemodmessage',
+						})
+						.setDescription('An intruction message to be displayed when the map is played freemod')
+						.setDescriptionLocalizations({
+							'de': 'Eine Anleitungsnachricht, die angezeigt werden soll, wenn die Karte freemod gespielt wird',
+							'en-GB': 'An intruction message to be displayed when the map is played freemod',
+							'en-US': 'An intruction message to be displayed when the map is played freemod',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('players')
+						.setNameLocalizations({
+							'de': 'spieler',
+							'en-GB': 'players',
+							'en-US': 'players',
+						})
+						.setDescription('The username, id or link of the players seperated by a \',\' | Teams seperated by a \';\'')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername oder die ID der Spieler, getrennt durch ein \',\' | Teams getrennt durch ein \';\'',
+							'en-GB': 'The username, id or link of the players seperated by a \',\' | Teams seperated by a \';\'',
+							'en-US': 'The username, id or link of the players seperated by a \',\' | Teams seperated by a \';\'',
+						})
+						.setRequired(true)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('teamsize')
+						.setNameLocalizations({
+							'de': 'teamgröße',
+							'en-GB': 'teamsize',
+							'en-US': 'teamsize',
+						})
+						.setDescription('The amount of players per team to play at once')
+						.setDescriptionLocalizations({
+							'de': 'Die Anzahl der Spieler pro Team, die gleichzeitig spielen',
+							'en-GB': 'The amount of players per team to play at once',
+							'en-US': 'The amount of players per team to play at once',
+						})
+						.setRequired(true)
+						.setMinValue(1)
+						.setMaxValue(16)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('usenofail')
+						.setNameLocalizations({
+							'de': 'nutzenofail',
+							'en-GB': 'usenofail',
+							'en-US': 'usenofail',
+						})
+						.setDescription('Should nofail be applied to all maps?')
+						.setDescriptionLocalizations({
+							'de': 'Soll nofail auf allen maps angewendet werden?',
+							'en-GB': 'Should nofail be applied to all maps?',
+							'en-US': 'Should nofail be applied to all maps?',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('score')
+						.setNameLocalizations({
+							'de': 'score',
+							'en-GB': 'score',
+							'en-US': 'score',
+						})
+						.setDescription('What is the winning condition of the match?')
+						.setDescriptionLocalizations({
+							'de': 'Was ist die Gewinnbedingung des Spiels?',
+							'en-GB': 'What is the winning condition of the match?',
+							'en-US': 'What is the winning condition of the match?',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Score v1', value: '0' },
+							{ name: 'Score v2', value: '3' },
+							{ name: 'Accuracy', value: '1' },
+						)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('scheduled')
+				.setNameLocalizations({
+					'de': 'geplant',
+					'en-GB': 'scheduled',
+					'en-US': 'scheduled',
+				})
+				.setDescription('Show what matches you have scheduled')
+				.setDescriptionLocalizations({
+					'de': 'Zeige an, welche Spiele du geplant hast',
+					'en-GB': 'Show what matches you have scheduled',
+					'en-US': 'Show what matches you have scheduled',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('remove')
+				.setNameLocalizations({
+					'de': 'entfernen',
+					'en-GB': 'remove',
+					'en-US': 'remove',
+				})
+				.setDescription('Remove matches that you have scheduled over the bot')
+				.setDescriptionLocalizations({
+					'de': 'Entferne Spiele, die du über den Bot geplant hast',
+					'en-GB': 'Remove matches that you have scheduled over the bot',
+					'en-US': 'Remove matches that you have scheduled over the bot',
+				})
+				.addIntegerOption(option =>
+					option
+						.setName('internalid')
+						.setNameLocalizations({
+							'de': 'interneid',
+							'en-GB': 'internalid',
+							'en-US': 'internalid',
+						})
+						.setDescription('The internal ID which can be found when using /osu-referee scheduled')
+						.setDescriptionLocalizations({
+							'de': 'Die interne ID, die du mit /osu-referee geplant findest',
+							'en-GB': 'The internal ID which can be found when using /osu-referee scheduled',
+							'en-US': 'The internal ID which can be found when using /osu-referee scheduled',
+						})
+						.setRequired(true)
+				)
+		),
+	// 			// {
+	// 			// 	'name': '1v1',
+	// 			// 	'description': 'Lets you schedule a match which is being reffed by the bot',
+	// 			// 	'type': 1, // 1 is type SUB_COMMAND
+	// 			// 	'options': [
+	// 			// 		{
+	// 			// 			'name': 'date',
+	// 			// 			'description': 'The date of the month in UTC (i.e. 29)',
+	// 			// 			'type': 4,
+	// 			// 			'required': true
+	// 			// 		},
+	// 			// 		{
+	// 			// 			'name': 'month',
+	// 			// 			'description': 'The month in UTC (i.e. 11)',
+	// 			// 			'type': 4,
+	// 			// 			'required': true
+	// 			// 		},
+	// 			// 		{
+	// 			// 			'name': 'year',
+	// 			// 			'description': 'The year in UTC (i.e. 2021)',
+	// 			// 			'type': 4,
+	// 			// 			'required': true
+	// 			// 		},
+	// 			// 		{
+	// 			// 			'name': 'hour',
+	// 			// 			'description': 'The hour in UTC (i.e. 18)',
+	// 			// 			'type': 4,
+	// 			// 			'required': true
+	// 			// 		},
+	// 			// 		{
+	// 			// 			'name': 'minute',
+	// 			// 			'description': 'The minute in UTC (i.e. 0)',
+	// 			// 			'type': 4,
+	// 			// 			'required': true
+	// 			// 		},
+	// 			// 		{
+	// 			// 			'name': 'channel',
+	// 			// 			'description': 'The channel in which the players should be notified.',
+	// 			// 			'type': 7,
+	// 			// 			'required': true
+	// 			// 		},
+	// 			// 		{
+	// 			// 			'name': 'matchname',
+	// 			// 			'description': 'The name that the match should have. (i.e. "ECS: (Qualifiers) vs (Lobby 8)")',
+	// 			// 			'type': 3,
+	// 			// 			'required': true
+	// 			// 		},
+	// 			// 		{
+	// 			// 			'name': 'mappool',
+	// 			// 			'description': 'The mappool in the following format: NM234826,HD123141,HR123172. Available mods: NM,HD,HR,DT,FM,TB',
+	// 			// 			'type': 3,
+	// 			// 			'required': true
+	// 			// 		},
+	// 			// 		{
+	// 			// 			'name': 'bestof',
+	// 			// 			'description': 'The best of',
+	// 			// 			'type': 4,
+	// 			// 			'required': true
+	// 			// 		},
+	// 			// 		{
+	// 			// 			'name': 'bans',
+	// 			// 			'description': 'The amount of bans for each player.',
+	// 			// 			'type': 4,
+	// 			// 			'required': true
+	// 			// 		},
+	// 			// 		{
+	// 			// 			'name': 'players',
+	// 			// 			'description': 'The username, id or link of the players seperated by a \',\'',
+	// 			// 			'type': 3,
+	// 			// 			'required': true
+	// 			// 		},
+	// 			// 		{
+	// 			// 			'name': 'pickbanorder',
+	// 			// 			'description': 'What is the pick and ban order?',
+	// 			// 			'type': 3,
+	// 			// 			'required': true,
+	// 			// 			'choices': [
+	// 			// 				{
+	// 			// 					'name': 'Determined: Roll Winner Bans Second and Picks First (Bans: ABAB)',
+	// 			// 					'value': '1'
+	// 			// 				},
+	// 			// 				{
+	// 			// 					'name': 'Determined: Roll Winner Bans Second and Picks First (Bans: ABBA)',
+	// 			// 					'value': '2'
+	// 			// 				},
+	// 			// 				{
+	// 			// 					'name': 'Choice: Roll Winner chooses Ban Second and Pick First or opposite (Bans: ABAB)',
+	// 			// 					'value': '3'
+	// 			// 				},
+	// 			// 				{
+	// 			// 					'name': 'Choice: Roll Winner chooses Ban Second and Pick First or opposite (Bans: ABBA)',
+	// 			// 					'value': '4'
+	// 			// 				},
+	// 			// 				{
+	// 			// 					'name': 'Choice: Roll Winner chooses Ban First and Pick First or opposite (Bans: ABAB)',
+	// 			// 					'value': '5'
+	// 			// 				},
+	// 			// 				{
+	// 			// 					'name': 'Choice: Roll Winner chooses Ban First and Pick First or opposite (Bans: ABBA)',
+	// 			// 					'value': '6'
+	// 			// 				},
+	// 			// 			]
+	// 			// 		},
+	// 			// 		{
+	// 			// 			'name': 'usenofail',
+	// 			// 			'description': 'Should nofail be applied to all maps?',
+	// 			// 			'type': 5,
+	// 			// 			'required': true,
+	// 			// 		},
+	// 			// 		{
+	// 			// 			'name': 'score',
+	// 			// 			'description': 'What is the winning condition of the match?',
+	// 			// 			'type': 3,
+	// 			// 			'required': true,
+	// 			// 			'choices': [
+	// 			// 				{
+	// 			// 					'name': 'Score v1',
+	// 			// 					'value': '0'
+	// 			// 				},
+	// 			// 				{
+	// 			// 					'name': 'Score v2',
+	// 			// 					'value': '3'
+	// 			// 				},
+	// 			// 				{
+	// 			// 					'name': 'Accuracy',
+	// 			// 					'value': '1'
+	// 			// 				}
+	// 			// 			]
+	// 			// 		},
+	// 			// 	]
+	// 			// },
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply();

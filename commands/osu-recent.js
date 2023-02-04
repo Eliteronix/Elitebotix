@@ -67,7 +67,7 @@ module.exports = {
 		.addStringOption(option =>
 			option.setName('gamemode')
 				.setNameLocalizations({
-					'de': 'Spielmodus',
+					'de': 'spielmodus',
 					'en-GB': 'gamemode',
 					'en-US': 'gamemode',
 				})
