@@ -4,16 +4,624 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	name: 'osu-motd',
-	description: 'Allows you to join the `Maps of the Day` competition!',
+	description: 'Allows you to join the \'Maps of the Day\' competition!',
 	//permissions: 'MANAGE_GUILD',
 	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 10,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-motd')
+		.setNameLocalizations({
+			'de': 'osu-motd',
+			'en-GB': 'osu-motd',
+			'en-US': 'osu-motd',
+		})
+		.setDescription('Allows you to join the \'Maps of the Day\' competition!')
+		.setDescriptionLocalizations({
+			'de': 'Erlaubt es dir, an dem \'Maps of the Day\'-Turnier teilzunehmen!',
+			'en-GB': 'Allows you to join the \'Maps of the Day\' competition!',
+			'en-US': 'Allows you to join the \'Maps of the Day\' competition!',
+		})
+		.setDMPermission(true)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('register')
+				.setNameLocalizations({
+					'de': 'registrieren',
+					'en-GB': 'register',
+					'en-US': 'register',
+				})
+				.setDescription('Register for the daily Maps of the Day competition')
+				.setDescriptionLocalizations({
+					'de': 'Registriere dich für das tägliche Maps of the Day Turnier',
+					'en-GB': 'Register for the daily Maps of the Day competition',
+					'en-US': 'Register for the daily Maps of the Day competition',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('unregister')
+				.setNameLocalizations({
+					'de': 'abmelden',
+					'en-GB': 'unregister',
+					'en-US': 'unregister',
+				})
+				.setDescription('Unregister from the daily Maps of the Day competition')
+				.setDescriptionLocalizations({
+					'de': 'Meld dich vom täglichen Maps of the Day Turnier ab',
+					'en-GB': 'Unregister from the daily Maps of the Day competition',
+					'en-US': 'Unregister from the daily Maps of the Day competition',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('server')
+				.setNameLocalizations({
+					'de': 'server',
+					'en-GB': 'server',
+					'en-US': 'server',
+				})
+				.setDescription('Get a link to the server of the daily Maps of the Day competition')
+				.setDescriptionLocalizations({
+					'de': 'Erhalte einen Link zum Server des täglichen Maps of the Day Turniers',
+					'en-GB': 'Get a link to the server of the daily Maps of the Day competition',
+					'en-US': 'Get a link to the server of the daily Maps of the Day competition',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('mute')
+				.setNameLocalizations({
+					'de': 'stumme',
+					'en-GB': 'mute',
+					'en-US': 'mute',
+				})
+				.setDescription('Mute the MOTD messages for the specified amount')
+				.setDescriptionLocalizations({
+					'de': 'Stumme die MOTD Nachrichten für die angegebene Zeit',
+					'en-GB': 'Mute the MOTD messages for the specified amount',
+					'en-US': 'Mute the MOTD messages for the specified amount',
+				})
+				.addIntegerOption(option =>
+					option
+						.setName('years')
+						.setNameLocalizations({
+							'de': 'jahre',
+							'en-GB': 'years',
+							'en-US': 'years',
+						})
+						.setDescription('The years until the messages should be re-enabled')
+						.setDescriptionLocalizations({
+							'de': 'Die Jahre bis die Nachrichten wieder aktiviert werden',
+							'en-GB': 'The years until the messages should be re-enabled',
+							'en-US': 'The years until the messages should be re-enabled',
+						})
+						.setRequired(false)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('months')
+						.setNameLocalizations({
+							'de': 'monate',
+							'en-GB': 'months',
+							'en-US': 'months',
+						})
+						.setDescription('The months until the messages should be re-enabled')
+						.setDescriptionLocalizations({
+							'de': 'Die Monate bis die Nachrichten wieder aktiviert werden',
+							'en-GB': 'The months until the messages should be re-enabled',
+							'en-US': 'The months until the messages should be re-enabled',
+						})
+						.setRequired(false)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('weeks')
+						.setNameLocalizations({
+							'de': 'wochen',
+							'en-GB': 'weeks',
+							'en-US': 'weeks',
+						})
+						.setDescription('The weeks until the messages should be re-enabled')
+						.setDescriptionLocalizations({
+							'de': 'Die Wochen bis die Nachrichten wieder aktiviert werden',
+							'en-GB': 'The weeks until the messages should be re-enabled',
+							'en-US': 'The weeks until the messages should be re-enabled',
+						})
+						.setRequired(false)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('days')
+						.setNameLocalizations({
+							'de': 'tage',
+							'en-GB': 'days',
+							'en-US': 'days',
+						})
+						.setDescription('The days until the messages should be re-enabled')
+						.setDescriptionLocalizations({
+							'de': 'Die Tage bis die Nachrichten wieder aktiviert werden',
+							'en-GB': 'The days until the messages should be re-enabled',
+							'en-US': 'The days until the messages should be re-enabled',
+						})
+						.setRequired(false)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('hours')
+						.setNameLocalizations({
+							'de': 'stunden',
+							'en-GB': 'hours',
+							'en-US': 'hours',
+						})
+						.setDescription('The hours until the messages should be re-enabled')
+						.setDescriptionLocalizations({
+							'de': 'Die Stunden bis die Nachrichten wieder aktiviert werden',
+							'en-GB': 'The hours until the messages should be re-enabled',
+							'en-US': 'The hours until the messages should be re-enabled',
+						})
+						.setRequired(false)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('minutes')
+						.setNameLocalizations({
+							'de': 'minuten',
+							'en-GB': 'minutes',
+							'en-US': 'minutes',
+						})
+						.setDescription('The minutes until the messages should be re-enabled')
+						.setDescriptionLocalizations({
+							'de': 'Die Minuten bis die Nachrichten wieder aktiviert werden',
+							'en-GB': 'The minutes until the messages should be re-enabled',
+							'en-US': 'The minutes until the messages should be re-enabled',
+						})
+						.setRequired(false)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('unmute')
+				.setNameLocalizations({
+					'de': 'entstummen',
+					'en-GB': 'unmute',
+					'en-US': 'unmute',
+				})
+				.setDescription('Unmute the MOTD messages')
+				.setDescriptionLocalizations({
+					'de': 'Entstumme die MOTD Nachrichten',
+					'en-GB': 'Unmute the MOTD messages',
+					'en-US': 'Unmute the MOTD messages',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('custom-fixed-players')
+				.setNameLocalizations({
+					'de': 'benutzerdefiniert-feste-spieler',
+					'en-GB': 'custom-fixed-players',
+					'en-US': 'custom-fixed-players',
+				})
+				.setDescription('Create a custom MOTD sort of competition with a fixed player list')
+				.setDescriptionLocalizations({
+					'de': 'Erstelle eine benutzerdefinierte MOTD Art Turnier mit einer festen Spielerliste',
+					'en-GB': 'Create a custom MOTD sort of competition with a fixed player list',
+					'en-US': 'Create a custom MOTD sort of competition with a fixed player list',
+				})
+				.addIntegerOption(option =>
+					option
+						.setName('lowerstars')
+						.setNameLocalizations({
+							'de': 'unteresternegrenze',
+							'en-GB': 'lowerstars',
+							'en-US': 'lowerstars',
+						})
+						.setDescription('The lower star rating limit for the custom lobby')
+						.setDescriptionLocalizations({
+							'de': 'Die untere Sternegrenze für die benutzerdefinierte Lobby',
+							'en-GB': 'The lower star rating limit for the custom lobby',
+							'en-US': 'The lower star rating limit for the custom lobby',
+						})
+						.setRequired(true)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('higherstars')
+						.setNameLocalizations({
+							'de': 'oberesternegrenze',
+							'en-GB': 'higherstars',
+							'en-US': 'higherstars',
+						})
+						.setDescription('The higher star rating limit for the custom lobby')
+						.setDescriptionLocalizations({
+							'de': 'Die obere Sternegrenze für die benutzerdefinierte Lobby',
+							'en-GB': 'The higher star rating limit for the custom lobby',
+							'en-US': 'The higher star rating limit for the custom lobby',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('scoreversion')
+						.setNameLocalizations({
+							'de': 'scoreversion',
+							'en-GB': 'scoreversion',
+							'en-US': 'scoreversion',
+						})
+						.setDescription('The score version for the custom lobby')
+						.setDescriptionLocalizations({
+							'de': 'Die Score Version für die benutzerdefinierte Lobby',
+							'en-GB': 'The score version for the custom lobby',
+							'en-US': 'The score version for the custom lobby',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Score v1', value: '0' },
+							{ name: 'Score v2', value: '3' },
+						)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username')
+						.setNameLocalizations({
+							'de': 'nutzername',
+							'en-GB': 'username',
+							'en-US': 'username',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username2')
+						.setNameLocalizations({
+							'de': 'nutzername2',
+							'en-GB': 'username2',
+							'en-US': 'username2',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username3')
+						.setNameLocalizations({
+							'de': 'nutzername3',
+							'en-GB': 'username3',
+							'en-US': 'username3',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username4')
+						.setNameLocalizations({
+							'de': 'nutzername4',
+							'en-GB': 'username4',
+							'en-US': 'username4',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username5')
+						.setNameLocalizations({
+							'de': 'nutzername5',
+							'en-GB': 'username5',
+							'en-US': 'username5',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username6')
+						.setNameLocalizations({
+							'de': 'nutzername6',
+							'en-GB': 'username6',
+							'en-US': 'username6',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username7')
+						.setNameLocalizations({
+							'de': 'nutzername7',
+							'en-GB': 'username7',
+							'en-US': 'username7',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username8')
+						.setNameLocalizations({
+							'de': 'nutzername8',
+							'en-GB': 'username8',
+							'en-US': 'username8',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username9')
+						.setNameLocalizations({
+							'de': 'nutzername9',
+							'en-GB': 'username9',
+							'en-US': 'username9',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username10')
+						.setNameLocalizations({
+							'de': 'nutzername10',
+							'en-GB': 'username10',
+							'en-US': 'username10',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username11')
+						.setNameLocalizations({
+							'de': 'nutzername11',
+							'en-GB': 'username11',
+							'en-US': 'username11',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username12')
+						.setNameLocalizations({
+							'de': 'nutzername12',
+							'en-GB': 'username12',
+							'en-US': 'username12',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username13')
+						.setNameLocalizations({
+							'de': 'nutzername13',
+							'en-GB': 'username13',
+							'en-US': 'username13',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username14')
+						.setNameLocalizations({
+							'de': 'nutzername14',
+							'en-GB': 'username14',
+							'en-US': 'username14',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username15')
+						.setNameLocalizations({
+							'de': 'nutzername15',
+							'en-GB': 'username15',
+							'en-US': 'username15',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('username16')
+						.setNameLocalizations({
+							'de': 'nutzername16',
+							'en-GB': 'username16',
+							'en-US': 'username16',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('mappool')
+						.setNameLocalizations({
+							'de': 'mappool',
+							'en-GB': 'mappool',
+							'en-US': 'mappool',
+						})
+						.setDescription('The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'')
+						.setDescriptionLocalizations({
+							'de': 'Die IDs oder Links der Beatmaps in diesem Format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+							'en-GB': 'The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+							'en-US': 'The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+						})
+						.setRequired(false)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('custom-react-to-play')
+				.setNameLocalizations({
+					'de': 'custom-reagiere-zum-spielen',
+					'en-GB': 'custom-react-to-play',
+					'en-US': 'custom-react-to-play',
+				})
+				.setDescription('Create a custom MOTD sort of competition where players can react to join')
+				.setDescriptionLocalizations({
+					'de': 'Erstellen Sie ein custom MOTD-Art von Turnier, bei dem Spieler reagieren können, um beizutreten',
+					'en-GB': 'Create a custom MOTD sort of competition where players can react to join',
+					'en-US': 'Create a custom MOTD sort of competition where players can react to join',
+				})
+				.addIntegerOption(option =>
+					option
+						.setName('lowerstars')
+						.setNameLocalizations({
+							'de': 'unteresternegrenze',
+							'en-GB': 'lowerstars',
+							'en-US': 'lowerstars',
+						})
+						.setDescription('The lower star rating limit for the custom lobby')
+						.setDescriptionLocalizations({
+							'de': 'Die untere Sternegrenze für die benutzerdefinierte Lobby',
+							'en-GB': 'The lower star rating limit for the custom lobby',
+							'en-US': 'The lower star rating limit for the custom lobby',
+						})
+						.setRequired(true)
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('higherstars')
+						.setNameLocalizations({
+							'de': 'oberesternegrenze',
+							'en-GB': 'higherstars',
+							'en-US': 'higherstars',
+						})
+						.setDescription('The higher star rating limit for the custom lobby')
+						.setDescriptionLocalizations({
+							'de': 'Die obere Sternegrenze für die benutzerdefinierte Lobby',
+							'en-GB': 'The higher star rating limit for the custom lobby',
+							'en-US': 'The higher star rating limit for the custom lobby',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('scoreversion')
+						.setNameLocalizations({
+							'de': 'scoreversion',
+							'en-GB': 'scoreversion',
+							'en-US': 'scoreversion',
+						})
+						.setDescription('The score version for the custom lobby')
+						.setDescriptionLocalizations({
+							'de': 'Die Score Version für die benutzerdefinierte Lobby',
+							'en-GB': 'The score version for the custom lobby',
+							'en-US': 'The score version for the custom lobby',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Score v1', value: '0' },
+							{ name: 'Score v2', value: '3' },
+						)
+				)
+				.addStringOption(option =>
+					option
+						.setName('mappool')
+						.setNameLocalizations({
+							'de': 'mappool',
+							'en-GB': 'mappool',
+							'en-US': 'mappool',
+						})
+						.setDescription('The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'')
+						.setDescriptionLocalizations({
+							'de': 'Die IDs oder Links der Beatmaps in diesem Format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+							'en-GB': 'The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+							'en-US': 'The ids or links of the beatmaps in this format: \'FM1,FM2,FM3,DT1,FM4,FM5,FM6,DT2,FM7,FM8\'',
+						})
+						.setRequired(false)
+				)
+		),
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
 		let years = 0;
