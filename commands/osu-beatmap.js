@@ -9,8 +9,6 @@ const { showUnknownInteractionError, daysHidingQualifiers } = require('../config
 module.exports = {
 	name: 'osu-beatmap',
 	description: 'Sends an info card about the specified beatmap',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,

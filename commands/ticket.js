@@ -7,8 +7,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'ticket',
 	description: 'Ticket manager',
-	// permissions: 'MANAGE_GUILD',
-	// permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.ManageChannels, PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages, Manage Channels and Manage Roles',
 	cooldown: 10,

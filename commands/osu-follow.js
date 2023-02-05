@@ -8,8 +8,6 @@ const { Op } = require('sequelize');
 module.exports = {
 	name: 'osu-follow',
 	description: 'Allows following osu! users',
-	//permissions: 'KICK_MEMBERS',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,

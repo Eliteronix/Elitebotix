@@ -6,8 +6,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'welcome-message',
 	description: 'Sends the specified message into the channel the user used the command in as soon as a new member arrives.',
-	permissions: PermissionsBitField.Flags.ManageGuild,
-	permissionsTranslated: 'Manage Server',
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,

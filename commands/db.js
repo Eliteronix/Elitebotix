@@ -7,8 +7,6 @@ const { developers } = require('../config.json');
 module.exports = {
 	name: 'db',
 	description: 'Sends the data found in the db',
-	//permissions: 'KICK_MEMBERS',
-	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,

@@ -7,8 +7,6 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
 	name: 'birthday',
 	description: 'Set your birthday',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 10,

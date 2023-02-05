@@ -4,8 +4,6 @@ const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 module.exports = {
 	name: 'osu-compare',
 	description: 'Sends an info card about the score of the specified player on the last map sent into the channel by the bot',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 15,

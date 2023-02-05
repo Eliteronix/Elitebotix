@@ -7,8 +7,6 @@ const { getIDFromPotentialOsuLink } = require('../utils');
 module.exports = {
 	name: 'tournamentfeed-admin',
 	description: 'Admin control for the tournament feed',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,

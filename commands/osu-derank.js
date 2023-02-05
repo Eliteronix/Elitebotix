@@ -8,8 +8,6 @@ const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 module.exports = {
 	name: 'osu-derank',
 	description: 'Reranks players based on their duel rating compared to others',
-	//permissions: 'KICK_MEMBERS',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,

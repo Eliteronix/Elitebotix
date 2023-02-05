@@ -6,8 +6,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'name-sync',
 	description: 'Allows you to sync discord player names to ingame names (and ranks)',
-	permissions: 'MANAGE_GUILD',
-	permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ManageNicknames],
 	botPermissionsTranslated: 'Send Messages and Manage Nicknames',
 	cooldown: 10,

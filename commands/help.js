@@ -4,8 +4,6 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 module.exports = {
 	name: 'help',
 	description: 'List all commands or get info about a specific command.',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,

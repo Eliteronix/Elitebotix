@@ -8,8 +8,6 @@ const Discord = require('discord.js');
 module.exports = {
 	name: 'reminders',
 	description: 'Sends your set reminders',
-	//permissions: 'KICK_MEMBERS',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 15,

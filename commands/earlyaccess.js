@@ -9,8 +9,6 @@ const Discord = require('discord.js');
 module.exports = {
 	name: 'earlyaccess',
 	description: 'Has some early access features for patreons if possible',
-	//permissions: 'KICK_MEMBERS',
-	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,

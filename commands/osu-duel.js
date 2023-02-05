@@ -14,8 +14,6 @@ const ObjectsToCsv = require('objects-to-csv');
 module.exports = {
 	name: 'osu-duel',
 	description: 'Lets you play a match which is being reffed by the bot',
-	// permissions: PermissionsBitField.Flags.SendMessages,
-	// permissionsTranslated: 'Manage Server',
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 15,

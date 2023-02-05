@@ -6,8 +6,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'time',
 	description: 'Sends current time of the given location',
-	//permissions: 'KICK_MEMBERS',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.EmbedLinks, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send messages and link embeds',
 	cooldown: 5,

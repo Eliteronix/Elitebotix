@@ -5,8 +5,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'remindme',
 	description: 'Sends a reminder at the specified time',
-	//permissions: 'KICK_MEMBERS',
-	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,

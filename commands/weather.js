@@ -10,8 +10,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'weather',
 	description: 'Sends info about the weather of the given location',
-	//permissions: 'KICK_MEMBERS',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,

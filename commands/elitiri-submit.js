@@ -7,8 +7,6 @@ const { currentElitiriCup, currentElitiriCupStartOfSubmissions, currentElitiriCu
 module.exports = {
 	name: 'elitiri-submit',
 	description: `Allows you to submit beatmaps for the ${currentElitiriCup}`,
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,

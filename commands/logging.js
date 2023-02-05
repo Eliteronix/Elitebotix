@@ -7,8 +7,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'logging',
 	description: '[Toggle] Logs the enabled events in the specified channel.',
-	permissions: PermissionsBitField.Flags.ManageGuild,
-	permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,

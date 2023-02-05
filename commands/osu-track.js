@@ -8,8 +8,6 @@ const { logDatabaseQueries } = require('../utils');
 module.exports = {
 	name: 'osu-track',
 	description: 'Sends info about the scores achieved by the user',
-	permissions: PermissionsBitField.Flags.ManageGuild,
-	permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,

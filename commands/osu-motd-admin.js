@@ -6,8 +6,6 @@ const { logDatabaseQueries } = require('../utils.js');
 module.exports = {
 	name: 'osu-motd-admin',
 	description: 'Admin control for the Maps of the Day Competition',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,

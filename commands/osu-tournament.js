@@ -8,8 +8,6 @@ const { showUnknownInteractionError, daysHidingQualifiers } = require('../config
 module.exports = {
 	name: 'osu-tournament',
 	description: 'Sends a .txt file with all the data for the tournament matches with this acronym',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,

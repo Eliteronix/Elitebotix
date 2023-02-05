@@ -10,8 +10,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'osu-schedule',
 	description: 'Sends an info graph about the schedules of the players',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,

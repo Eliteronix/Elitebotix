@@ -9,8 +9,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'osu-mapleaderboard',
 	description: 'Sends an info card about the leaderboard on the specified beatmap',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 10,

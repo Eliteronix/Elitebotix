@@ -5,8 +5,6 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
 	name: 'avatar',
 	description: 'Sends the avatar of the selected user',
-	//permissions: 'KICK_MEMBERS',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,

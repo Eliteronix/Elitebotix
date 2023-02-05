@@ -6,8 +6,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'osu-duel-admin',
 	description: 'Admin commands for osu-duel',
-	// permissions: PermissionsBitField.Flags.SendMessages,
-	// permissionsTranslated: 'Manage Server',
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 60,

@@ -7,8 +7,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'weather-track',
 	description: 'Sends info about the weather of the given location each time period',
-	permissions: PermissionsBitField.Flags.ManageGuild,
-	permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,

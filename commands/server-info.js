@@ -6,8 +6,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'server-info',
 	description: 'Sends an info card about the server',
-	//permissions: 'MANAGE_MESSAGES',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,

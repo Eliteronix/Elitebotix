@@ -6,8 +6,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'goodbye-message',
 	description: 'Sends the specified message into the channel the user used the command in as soon as a member leaves.',
-	permissions: [PermissionsBitField.Flags.ManageGuild, PermissionsBitField.Flags.SendMessages],
-	permissionsTranslated: 'Send Messages and Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,

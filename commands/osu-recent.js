@@ -11,8 +11,6 @@ module.exports = {
 	name: 'osu-recent',
 	aliases: ['ors'],
 	description: 'Sends an info card about the last score of the specified player',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,

@@ -4,8 +4,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'link',
 	description: 'Sends a link to add the bot to a server',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,

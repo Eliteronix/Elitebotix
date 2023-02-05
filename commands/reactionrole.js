@@ -7,8 +7,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'reactionrole',
 	description: 'Create and manage reaction roles',
-	permissions: PermissionsBitField.Flags.ManageRoles,
-	permissionsTranslated: 'Manage Roles',
 	botPermissions: [PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.ManageMessages],
 	botPermissionsTranslated: 'Manage Roles and Manage Messages',
 	cooldown: 5,

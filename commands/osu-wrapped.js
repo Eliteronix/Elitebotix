@@ -10,8 +10,6 @@ const Discord = require('discord.js');
 module.exports = {
 	name: 'osu-wrapped',
 	description: 'Sums up the year in osu! for a user',
-	// permissions: PermissionsBitField.Flags.SendMessages,
-	// permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 15,

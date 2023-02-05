@@ -9,8 +9,6 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
 	name: 'osu-motd',
 	description: 'Allows you to join the \'Maps of the Day\' competition!',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 10,

@@ -7,8 +7,6 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
 	name: 'autorole',
 	description: 'Assigns roles on joining the server',
-	permissions: PermissionsBitField.Flags.ManageRoles,
-	permissionsTranslated: 'Manage Roles',
 	botPermissions: [PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages and Manage Roles',
 	cooldown: 5,

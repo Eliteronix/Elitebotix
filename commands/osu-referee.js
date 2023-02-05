@@ -9,8 +9,6 @@ const Discord = require('discord.js');
 module.exports = {
 	name: 'osu-referee',
 	description: 'Lets you schedule a match which is being reffed by the bot',
-	// permissions: PermissionsBitField.Flags.SendMessages,
-	// permissionsTranslated: 'Manage Server',
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,

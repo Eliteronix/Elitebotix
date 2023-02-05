@@ -7,8 +7,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'osu-autohost',
 	description: 'Hosts an automated lobby ingame',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 60,

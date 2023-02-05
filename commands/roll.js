@@ -4,8 +4,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'roll',
 	description: 'Rolls a number between 1 and 100 or 1 and the number specified',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,

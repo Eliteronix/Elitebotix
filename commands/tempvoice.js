@@ -6,8 +6,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'tempvoice',
 	description: 'Toggles the temporary channel setting for the server',
-	permissions: PermissionsBitField.Flags.ManageGuild,
-	permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.ManageChannels, PermissionsBitField.Flags.MoveMembers, PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages, Manage Channels, Manage Roles and Move Members',
 	cooldown: 5,

@@ -8,8 +8,6 @@ const { Op } = require('sequelize');
 module.exports = {
 	name: 'twitch',
 	description: 'Allowes you to manage the twitch commands',
-	// permissions: PermissionsBitField.Flags.MANAGE_GUILD,
-	// permissionsTranslated: 'Manage Server',
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,

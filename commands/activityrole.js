@@ -7,8 +7,6 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
 	name: 'activityrole',
 	description: 'Assigns roles depending on how active your users are',
-	permissions: PermissionsBitField.Flags.ManageRoles,
-	permissionsTranslated: 'Manage Roles',
 	botPermissions: [PermissionsBitField.Flags.ManageRoles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages and Manage Roles',
 	cooldown: 5,

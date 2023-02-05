@@ -5,8 +5,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'cuddle',
 	description: 'Lets you send a gif to cuddle a user',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,

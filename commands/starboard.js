@@ -6,8 +6,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'starboard',
 	description: 'Sends the messages receiving a star into the specified channel.',
-	permissions: PermissionsBitField.Flags.ManageGuild,
-	permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,

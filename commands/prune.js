@@ -4,8 +4,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'prune',
 	description: 'Deletes the specified amount of messages; Messages have to be less than 2 weeks old',
-	permissions: PermissionsBitField.Flags.ManageMessages,
-	permissionsTranslated: 'Manage Messages',
 	botPermissions: PermissionsBitField.Flags.ManageMessages,
 	botPermissionsTranslated: 'Manage Messages',
 	cooldown: 15,

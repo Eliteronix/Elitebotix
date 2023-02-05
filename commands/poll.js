@@ -8,8 +8,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'poll',
 	description: 'Start a vote / poll',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 30,

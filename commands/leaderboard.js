@@ -4,8 +4,6 @@ const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 module.exports = {
 	name: 'leaderboard',
 	description: 'Sends a leaderboard of all the players in the guild that have their account connected',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 60,

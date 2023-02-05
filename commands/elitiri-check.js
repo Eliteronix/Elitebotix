@@ -7,8 +7,6 @@ const { currentElitiriCup } = require('../config.json');
 module.exports = {
 	name: 'elitiri-check',
 	description: `Sends an info card about the viability of the beatmap for the ${currentElitiriCup}`,
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,

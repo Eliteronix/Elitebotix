@@ -7,8 +7,6 @@ const { Op } = require('sequelize');
 module.exports = {
 	name: 'osu-leaderboard',
 	description: 'Sends a leaderboard of all the players in the guild that have their account connected',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 30,

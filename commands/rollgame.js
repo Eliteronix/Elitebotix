@@ -4,8 +4,6 @@ const { PermissionsBitField, EmbedBuilder } = require('discord.js');
 module.exports = {
 	name: 'rollgame',
 	description: 'Play the rollgame against someone or the bot',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 30,

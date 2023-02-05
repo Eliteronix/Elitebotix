@@ -9,8 +9,6 @@ const { showUnknownInteractionError, daysHidingQualifiers } = require('../config
 module.exports = {
 	name: 'osu-matchtrack',
 	description: 'Sends an evaluation of how valuable all the players in the match were',
-	// permissions: PermissionsBitField.Flags.SendMessages,
-	// permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.EmbedLinks],
 	botPermissionsTranslated: 'Send Messages, Attach Files and Embed Links',
 	cooldown: 15,

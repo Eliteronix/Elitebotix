@@ -5,8 +5,6 @@ const { developers } = require('../config.json');
 module.exports = {
 	name: 'changelog',
 	description: 'Sends a message with the bots server',
-	//permissions: 'KICK_MEMBERS',
-	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,

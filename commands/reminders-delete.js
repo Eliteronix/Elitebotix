@@ -7,8 +7,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'reminders-delete',
 	description: 'Delete a selected reminder',
-	//permissions: 'KICK_MEMBERS',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 15,

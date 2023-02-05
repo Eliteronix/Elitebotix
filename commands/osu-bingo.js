@@ -10,8 +10,6 @@ const osu = require('node-osu');
 module.exports = {
 	name: 'osu-bingo',
 	description: 'Allows you to play a bingo match',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 15,

@@ -11,8 +11,6 @@ const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 module.exports = {
 	name: 'osu-history',
 	description: 'Summarizes the whole osu! history for a user',
-	// permissions: PermissionsBitField.Flags.SendMessages,
-	// permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 15,

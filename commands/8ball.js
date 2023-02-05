@@ -5,8 +5,6 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
 	name: '8ball',
 	description: 'Answers with a random 8-Ball message',
-	//permissions: 'KICK_MEMBERS',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,

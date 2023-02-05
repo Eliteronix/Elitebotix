@@ -6,8 +6,6 @@ const Discord = require('discord.js');
 module.exports = {
 	name: 'elitiri-cup',
 	description: `Allows you to sign up for the \`${currentElitiriCup}\` tournament!`,
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 10,

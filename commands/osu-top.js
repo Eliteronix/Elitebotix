@@ -12,8 +12,6 @@ const ObjectsToCsv = require('objects-to-csv');
 module.exports = {
 	name: 'osu-top',
 	description: 'Sends an info card about the topplays of the specified player',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,

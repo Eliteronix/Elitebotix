@@ -6,8 +6,6 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'toggletickets',
 	description: 'Toggles the tickets setting for the server',
-	permissions: PermissionsBitField.Flags.ManageGuild,
-	permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.ManageChannels, PermissionsBitField.Flags.ManageRoles],
 	botPermissionsTranslated: 'Manage Channels and Manage Roles',
 	cooldown: 5,

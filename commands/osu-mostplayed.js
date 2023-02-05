@@ -13,8 +13,6 @@ const { Op } = require('sequelize');
 module.exports = {
 	name: 'osu-mostplayed',
 	description: 'Sends an info card about the most played maps of the specified player',
-	//permissions: 'MANAGE_GUILD',
-	//permissionsTranslated: 'Manage Server',
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
