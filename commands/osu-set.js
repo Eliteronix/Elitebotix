@@ -1,6 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -12,6 +12,62 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 10,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-set')
+		.setNameLocalizations({
+			'de': 'osu-setzen',
+			'en-GB': 'osu-set',
+			'en-US': 'osu-set',
+		})
+		.setDescription('Allows you to set your main mode and server')
+		.setDescriptionLocalizations({
+			'de': 'Erlaubt es dir, deinen Hauptmodus und Server festzulegen',
+			'en-GB': 'Allows you to set your main mode and server',
+			'en-US': 'Allows you to set your main mode and server',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option
+				.setName('mode')
+				.setNameLocalizations({
+					'de': 'modus',
+					'en-GB': 'mode',
+					'en-US': 'mode',
+				})
+				.setDescription('Change the main mode when handling the bot')
+				.setDescriptionLocalizations({
+					'de': 'Ändert den Hauptmodus, mit dem der Bot umgeht',
+					'en-GB': 'Change the main mode when handling the bot',
+					'en-US': 'Change the main mode when handling the bot',
+				})
+				.setRequired(true)
+				.addChoices(
+					{ name: 'Standard', value: 'standard' },
+					{ name: 'Taiko', value: 'taiko' },
+					{ name: 'Catch the Beat', value: 'catch' },
+					{ name: 'Mania', value: 'mania' },
+				)
+		)
+		.addStringOption(option =>
+			option
+				.setName('server')
+				.setNameLocalizations({
+					'de': 'server',
+					'en-GB': 'server',
+					'en-US': 'server',
+				})
+				.setDescription('Change the main server when handling the bot')
+				.setDescriptionLocalizations({
+					'de': 'Ändert den Hauptserver, mit dem der Bot umgeht',
+					'en-GB': 'Change the main server when handling the bot',
+					'en-US': 'Change the main server when handling the bot',
+				})
+				.setRequired(true)
+				.addChoices(
+					{ name: 'Bancho', value: 'bancho' },
+					{ name: 'Ripple', value: 'ripple' },
+				)
+		),
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply({ ephemeral: true });
