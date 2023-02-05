@@ -4,7 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('canvas');
 const { humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getBeatmapApprovalStatusImage, logDatabaseQueries, getBeatmapModeId, getGameModeName, getOsuPP, getModBits, multiToBanchoScore } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -16,6 +16,166 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 45,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-score')
+		.setNameLocalizations({
+			'de': 'osu-score',
+			'en-GB': 'osu-score',
+			'en-US': 'osu-score',
+		})
+		.setDescription('Sends an info card about the score of the specified player on the map')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Info-Karte über den Score des angegebenen Spielers auf der map',
+			'en-GB': 'Sends an info card about the score of the specified player on the map',
+			'en-US': 'Sends an info card about the score of the specified player on the map',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('beatmap')
+				.setNameLocalizations({
+					'de': 'beatmap',
+					'en-GB': 'beatmap',
+					'en-US': 'beatmap',
+				})
+				.setDescription('The beatmap id or link')
+				.setDescriptionLocalizations({
+					'de': 'Die Beatmap-ID oder der Link',
+					'en-GB': 'The beatmap id or link',
+					'en-US': 'The beatmap id or link',
+				})
+				.setRequired(true)
+		)
+		.addStringOption(option =>
+			option.setName('mods')
+				.setNameLocalizations({
+					'de': 'mods',
+					'en-GB': 'mods',
+					'en-US': 'mods',
+				})
+				.setDescription('The mod combination that should be displayed (i.e. all, NM, HDHR, ...)')
+				.setDescriptionLocalizations({
+					'de': 'Die Mod-Kombination, die angezeigt werden soll (z. B. alle, NM, HDHR, ...)',
+					'en-GB': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
+					'en-US': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('gamemode')
+				.setNameLocalizations({
+					'de': 'spielmodus',
+					'en-GB': 'gamemode',
+					'en-US': 'gamemode',
+				})
+				.setDescription('The gamemode that should be displayed')
+				.setDescriptionLocalizations({
+					'de': 'Der Spielmodus, der angezeigt werden soll',
+					'en-GB': 'The gamemode that should be displayed',
+					'en-US': 'The gamemode that should be displayed',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Standard', value: '--s' },
+					{ name: 'Taiko', value: '--t' },
+					{ name: 'Catch The Beat', value: '--c' },
+					{ name: 'Mania', value: '--m' },
+				)
+		)
+		.addStringOption(option =>
+			option.setName('server')
+				.setNameLocalizations({
+					'de': 'server',
+					'en-GB': 'server',
+					'en-US': 'server',
+				})
+				.setDescription('The server from which the results will be displayed')
+				.setDescriptionLocalizations({
+					'de': 'Der Server, von dem die Ergebnisse angezeigt werden',
+					'en-GB': 'The server from which the results will be displayed',
+					'en-US': 'The server from which the results will be displayed',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Bancho', value: '--b' },
+					{ name: 'Ripple', value: '--r' },
+					{ name: 'Tournaments', value: '--tournaments' },
+				)
+		)
+		.addStringOption(option =>
+			option.setName('username')
+				.setNameLocalizations({
+					'de': 'nutzername',
+					'en-GB': 'username',
+					'en-US': 'username',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username2')
+				.setNameLocalizations({
+					'de': 'nutzername2',
+					'en-GB': 'username2',
+					'en-US': 'username2',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username3')
+				.setNameLocalizations({
+					'de': 'nutzername3',
+					'en-GB': 'username3',
+					'en-US': 'username3',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username4')
+				.setNameLocalizations({
+					'de': 'nutzername4',
+					'en-GB': 'username4',
+					'en-US': 'username4',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username5')
+				.setNameLocalizations({
+					'de': 'nutzername5',
+					'en-GB': 'username5',
+					'en-US': 'username5',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		),
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		let mods = 'best';
