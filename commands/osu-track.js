@@ -1,6 +1,6 @@
 const { DBOsuTrackingUsers, DBDiscordUsers, DBOsuGuildTrackers } = require('../dbObjects');
 const osu = require('node-osu');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
 const { logDatabaseQueries } = require('../utils');
@@ -12,6 +12,467 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-track')
+		.setNameLocalizations({
+			'de': 'osu-track',
+			'en-GB': 'osu-track',
+			'en-US': 'osu-track',
+		})
+		.setDescription('Tracks new scores/matches set by the specified users / acronym')
+		.setDescriptionLocalizations({
+			'de': 'Verfolgt neue Scores/Matches, die von den angegebenen Spielern/Akronym gesetzt/gespielt wurden',
+			'en-GB': 'Tracks new scores/matches set by the specified users / acronym',
+			'en-US': 'Tracks new scores/matches set by the specified users / acronym',
+		})
+		.setDMPermission(false)
+		.setDefaultMemberPermissions(PermissionsBitField.Flags.ManageGuild)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('enable')
+				.setNameLocalizations({
+					'de': 'aktivieren',
+					'en-GB': 'enable',
+					'en-US': 'enable',
+				})
+				.setDescription('Lets you add a new user to track')
+				.setDescriptionLocalizations({
+					'de': 'Ermöglicht es dir, einen neuen Spieler hinzuzufügen, der verfolgt werden soll',
+					'en-GB': 'Lets you add a new user to track',
+					'en-US': 'Lets you add a new user to track',
+				})
+				.addStringOption(option =>
+					option
+						.setName('usernames')
+						.setNameLocalizations({
+							'de': 'nutzernamen',
+							'en-GB': 'usernames',
+							'en-US': 'usernames',
+						})
+						.setDescription('The user(s) to track (separate them with a \',\')')
+						.setDescriptionLocalizations({
+							'de': 'Der/die Spieler, die verfolgt werden sollen (trenne sie mit einem \',\')',
+							'en-GB': 'The user(s) to track (separate them with a \',\')',
+							'en-US': 'The user(s) to track (separate them with a \',\')',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('topplays')
+						.setNameLocalizations({
+							'de': 'topplays',
+							'en-GB': 'topplays',
+							'en-US': 'topplays',
+						})
+						.setDescription('Use one of the autofilled options or start typing to show more options')
+						.setDescriptionLocalizations({
+							'de': 'Verwende eine der vorgeschlagenen Optionen oder beginne zu tippen, um mehr Optionen anzuzeigen',
+							'en-GB': 'Use one of the autofilled options or start typing to show more options',
+							'en-US': 'Use one of the autofilled options or start typing to show more options',
+						})
+						.setRequired(false)
+						.setAutocomplete(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('leaderboardplays')
+						.setNameLocalizations({
+							'de': 'ranglistenplays',
+							'en-GB': 'leaderboardplays',
+							'en-US': 'leaderboardplays',
+						})
+						.setDescription('Which modes should be tracked')
+						.setDescriptionLocalizations({
+							'de': 'Welche Modi sollen verfolgt werden',
+							'en-GB': 'Which modes should be tracked',
+							'en-US': 'Which modes should be tracked',
+						})
+						.setRequired(false)
+						.addChoices(
+							{ name: 'osu! only', value: 'o' },
+							{ name: 'taiko only', value: 't' },
+							{ name: 'catch only', value: 'c' },
+							{ name: 'mania only', value: 'm' },
+							{ name: 'osu! & taiko', value: 'ot' },
+							{ name: 'osu! & catch', value: 'oc' },
+							{ name: 'osu! & mania', value: 'om' },
+							{ name: 'taiko & catch', value: 'tc' },
+							{ name: 'taiko & mania', value: 'tm' },
+							{ name: 'catch & mania', value: 'cm' },
+							{ name: 'osu!, taiko & catch', value: 'otc' },
+							{ name: 'osu!, taiko & mania', value: 'otm' },
+							{ name: 'osu!, catch & mania', value: 'ocm' },
+							{ name: 'taiko, catch & mania', value: 'tcm' },
+							{ name: 'osu!, taiko, catch & mania', value: 'otcm' },
+						)
+				)
+				.addStringOption(option =>
+					option
+						.setName('ameobea')
+						.setNameLocalizations({
+							'de': 'ameobea',
+							'en-GB': 'ameobea',
+							'en-US': 'ameobea',
+						})
+						.setDescription('Which modes should be updated for ameobea.me/osutrack/')
+						.setDescriptionLocalizations({
+							'de': 'Welche Modi sollen für ameobea.me/osutrack/ aktualisiert werden',
+							'en-GB': 'Which modes should be updated for ameobea.me/osutrack/',
+							'en-US': 'Which modes should be updated for ameobea.me/osutrack/',
+						})
+						.setRequired(false)
+						.addChoices(
+							{ name: 'osu! only', value: 'o' },
+							{ name: 'taiko only', value: 't' },
+							{ name: 'catch only', value: 'c' },
+							{ name: 'mania only', value: 'm' },
+							{ name: 'osu! & taiko', value: 'ot' },
+							{ name: 'osu! & catch', value: 'oc' },
+							{ name: 'osu! & mania', value: 'om' },
+							{ name: 'taiko & catch', value: 'tc' },
+							{ name: 'taiko & mania', value: 'tm' },
+							{ name: 'catch & mania', value: 'cm' },
+							{ name: 'osu!, taiko & catch', value: 'otc' },
+							{ name: 'osu!, taiko & mania', value: 'otm' },
+							{ name: 'osu!, catch & mania', value: 'ocm' },
+							{ name: 'taiko, catch & mania', value: 'tcm' },
+							{ name: 'osu!, taiko, catch & mania', value: 'otcm' },
+						)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('showameobeaupdate')
+						.setNameLocalizations({
+							'de': 'ameobeaupdate',
+							'en-GB': 'ameobeaupdate',
+							'en-US': 'ameobeaupdate',
+						})
+						.setDescription('Should messages be sent when ameobea is updated')
+						.setDescriptionLocalizations({
+							'de': 'Sollen Nachrichten gesendet werden, wenn ameobea aktualisiert wurde',
+							'en-GB': 'Should messages be sent when ameobea is updated',
+							'en-US': 'Should messages be sent when ameobea is updated',
+						})
+						.setRequired(false)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('medals')
+						.setNameLocalizations({
+							'de': 'medaillen',
+							'en-GB': 'medals',
+							'en-US': 'medals',
+						})
+						.setDescription('Should achieved medals be tracked')
+						.setDescriptionLocalizations({
+							'de': 'Sollen erreichte Medaillen verfolgt werden',
+							'en-GB': 'Should achieved medals be tracked',
+							'en-US': 'Should achieved medals be tracked',
+						})
+						.setRequired(false)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('duelrating')
+						.setNameLocalizations({
+							'de': 'duelrating',
+							'en-GB': 'duelrating',
+							'en-US': 'duelrating',
+						})
+						.setDescription('Should duel rating changes be tracked')
+						.setDescriptionLocalizations({
+							'de': 'Sollen Duel Rating Änderungen verfolgt werden',
+							'en-GB': 'Should duel rating changes be tracked',
+							'en-US': 'Should duel rating changes be tracked',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('matchactivity')
+						.setNameLocalizations({
+							'de': 'matchaktivität',
+							'en-GB': 'matchactivity',
+							'en-US': 'matchactivity',
+						})
+						.setDescription('Should matches be tracked')
+						.setDescriptionLocalizations({
+							'de': 'Sollen Matches verfolgt werden',
+							'en-GB': 'Should matches be tracked',
+							'en-US': 'Should matches be tracked',
+						})
+						.setRequired(false)
+						.addChoices(
+							{ name: 'Notify on matches', value: 'matches' },
+							{ name: 'Notify on matches and auto matchtrack', value: 'matches (auto matchtrack)' },
+						)
+				)
+				.addStringOption(option =>
+					option
+						.setName('acronym')
+						.setNameLocalizations({
+							'de': 'akronym',
+							'en-GB': 'acronym',
+							'en-US': 'acronym',
+						})
+						.setDescription('The acronyms to track (separate with \',\')')
+						.setDescriptionLocalizations({
+							'de': 'Die Akronyme, die verfolgt werden sollen (durch Komma trennen)',
+							'en-GB': 'The acronyms to track (separate with \',\')',
+							'en-US': 'The acronyms to track (separate with \',\')',
+						})
+						.setRequired(false)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('tourneyenable')
+				.setNameLocalizations({
+					'de': 'turnieraktivieren',
+					'en-GB': 'tourneyenable',
+					'en-US': 'tourneyenable',
+				})
+				.setDescription('Lets you add an acronym to track')
+				.setDescriptionLocalizations({
+					'de': 'Ermöglicht es dir ein Akronym hinzuzufügen, das verfolgt werden soll',
+					'en-GB': 'Lets you add an acronym to track',
+					'en-US': 'Lets you add an acronym to track',
+				})
+				.addStringOption(option =>
+					option
+						.setName('acronym')
+						.setNameLocalizations({
+							'de': 'akronym',
+							'en-GB': 'acronym',
+							'en-US': 'acronym',
+						})
+						.setDescription('The acronym to track')
+						.setDescriptionLocalizations({
+							'de': 'Das Akronym, das verfolgt werden soll',
+							'en-GB': 'The acronym to track',
+							'en-US': 'The acronym to track',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('matchactivity')
+						.setNameLocalizations({
+							'de': 'matchaktivität',
+							'en-GB': 'matchactivity',
+							'en-US': 'matchactivity',
+						})
+						.setDescription('Should matches be tracked')
+						.setDescriptionLocalizations({
+							'de': 'Sollen Matches verfolgt werden',
+							'en-GB': 'Should matches be tracked',
+							'en-US': 'Should matches be tracked',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Notify on matches', value: 'matches' },
+							{ name: 'Notify on matches and auto matchtrack', value: 'matches (auto matchtrack)' },
+						)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('disable')
+				.setNameLocalizations({
+					'de': 'deaktivieren',
+					'en-GB': 'disable',
+					'en-US': 'disable',
+				})
+				.setDescription('Lets you stop tracking a user')
+				.setDescriptionLocalizations({
+					'de': 'Ermöglicht es dir einen Benutzer nicht mehr zu verfolgen',
+					'en-GB': 'Lets you stop tracking a user',
+					'en-US': 'Lets you stop tracking a user',
+				})
+				.addStringOption(option =>
+					option
+						.setName('usernames')
+						.setNameLocalizations({
+							'de': 'nutzernamen',
+							'en-GB': 'usernames',
+							'en-US': 'usernames',
+						})
+						.setDescription('The user(s) to stop tracking (separate them with a \',\')')
+						.setDescriptionLocalizations({
+							'de': 'Der/die Benutzer, die nicht mehr verfolgt werden sollen (trenne sie mit einem \',\')',
+							'en-GB': 'The user(s) to stop tracking (separate them with a \',\')',
+							'en-US': 'The user(s) to stop tracking (separate them with a \',\')',
+						})
+						.setRequired(true)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('topplays')
+						.setNameLocalizations({
+							'de': 'topplays',
+							'en-GB': 'topplays',
+							'en-US': 'topplays',
+						})
+						.setDescription('Stop tracking top plays')
+						.setDescriptionLocalizations({
+							'de': 'Stoppt die Verfolgung von Top Plays',
+							'en-GB': 'Stop tracking top plays',
+							'en-US': 'Stop tracking top plays',
+						})
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('leaderboardplays')
+						.setNameLocalizations({
+							'de': 'ranglistenplays',
+							'en-GB': 'leaderboardplays',
+							'en-US': 'leaderboardplays',
+						})
+						.setDescription('Stop tracking leaderboard plays')
+						.setDescriptionLocalizations({
+							'de': 'Stoppt die Verfolgung von Ranglisten Plays',
+							'en-GB': 'Stop tracking leaderboard plays',
+							'en-US': 'Stop tracking leaderboard plays',
+						})
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('ameobea')
+						.setNameLocalizations({
+							'de': 'ameobea',
+							'en-GB': 'ameobea',
+							'en-US': 'ameobea',
+						})
+						.setDescription('Stop tracking ameobea updates')
+						.setDescriptionLocalizations({
+							'de': 'Stoppt die Ameobea Updates',
+							'en-GB': 'Stop tracking ameobea updates',
+							'en-US': 'Stop tracking ameobea updates',
+						})
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('showameobeaupdates')
+						.setNameLocalizations({
+							'de': 'ameobeaupdatesanzeigen',
+							'en-GB': 'showameobeaupdates',
+							'en-US': 'showameobeaupdates',
+						})
+						.setDescription('Stop tracking ameobea updates')
+						.setDescriptionLocalizations({
+							'de': 'Stoppt die Ameobea Updates',
+							'en-GB': 'Stop tracking ameobea updates',
+							'en-US': 'Stop tracking ameobea updates',
+						})
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('medals')
+						.setNameLocalizations({
+							'de': 'medaillen',
+							'en-GB': 'medals',
+							'en-US': 'medals',
+						})
+						.setDescription('Stop tracking medals')
+						.setDescriptionLocalizations({
+							'de': 'Stoppt die Verfolgung von Medaillen',
+							'en-GB': 'Stop tracking medals',
+							'en-US': 'Stop tracking medals',
+						})
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('duelrating')
+						.setNameLocalizations({
+							'de': 'duelrating',
+							'en-GB': 'duelrating',
+							'en-US': 'duelrating',
+						})
+						.setDescription('Stop tracking duel rating changes')
+						.setDescriptionLocalizations({
+							'de': 'Stoppt die Verfolgung von Duel Rating Änderungen',
+							'en-GB': 'Stop tracking duel rating changes',
+							'en-US': 'Stop tracking duel rating changes',
+						})
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('matchactivity')
+						.setNameLocalizations({
+							'de': 'matchaktivität',
+							'en-GB': 'matchactivity',
+							'en-US': 'matchactivity',
+						})
+						.setDescription('Stop tracking match activity')
+						.setDescriptionLocalizations({
+							'de': 'Stoppt die Verfolgung von Match Aktivität',
+							'en-GB': 'Stop tracking match activity',
+							'en-US': 'Stop tracking match activity',
+						})
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('acronym')
+						.setNameLocalizations({
+							'de': 'akronym',
+							'en-GB': 'acronym',
+							'en-US': 'acronym',
+						})
+						.setDescription('Stop tracking only these acronyms')
+						.setDescriptionLocalizations({
+							'de': 'Stoppt die Verfolgung nur dieser Akronyme',
+							'en-GB': 'Stop tracking only these acronyms',
+							'en-US': 'Stop tracking only these acronyms',
+						})
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('tourneydisable')
+				.setNameLocalizations({
+					'de': 'turnierdeaktivieren',
+					'en-GB': 'tourneydisable',
+					'en-US': 'tourneydisable',
+				})
+				.setDescription('Lets you remove an acronym to track')
+				.setDescriptionLocalizations({
+					'de': 'Ermöglicht es dir ein Akronym zu entfernen, das verfolgt werden soll',
+					'en-GB': 'Lets you remove an acronym to track',
+					'en-US': 'Lets you remove an acronym to track',
+				})
+				.addStringOption(option =>
+					option
+						.setName('acronym')
+						.setNameLocalizations({
+							'de': 'akronym',
+							'en-GB': 'acronym',
+							'en-US': 'acronym',
+						})
+						.setDescription('The acronym to stop tracking')
+						.setDescriptionLocalizations({
+							'de': 'Das Akronym, das nicht mehr verfolgt werden soll',
+							'en-GB': 'The acronym to stop tracking',
+							'en-US': 'The acronym to stop tracking',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('list')
+				.setNameLocalizations({
+					'de': 'liste',
+					'en-GB': 'list',
+					'en-US': 'list',
+				})
+				.setDescription('Lists all tracked users')
+				.setDescriptionLocalizations({
+					'de': 'Listet alle verfolgten Benutzer auf',
+					'en-GB': 'Lists all tracked users',
+					'en-US': 'Lists all tracked users',
+				})
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		if (interaction.options.getSubcommand() === 'enable') {
