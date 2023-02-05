@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Canvas = require('canvas');
 const { fitTextOnLeftCanvas } = require('../utils');
 const { DBProcessQueue } = require('../dbObjects');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -12,6 +12,260 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 30,
 	tags: 'general',
+	data: new SlashCommandBuilder()
+		.setName('poll')
+		.setNameLocalizations({
+			'de': 'umfrage',
+			'en-GB': 'poll',
+			'en-US': 'poll',
+		})
+		.setDescription('Start a vote / poll')
+		.setDescriptionLocalizations({
+			'de': 'Starte eine Umfrage',
+			'en-GB': 'Start a vote / poll',
+			'en-US': 'Start a vote / poll',
+		})
+		.setDMPermission(false)
+		.addStringOption(option =>
+			option.setName('topic')
+				.setNameLocalizations({
+					'de': 'thema',
+					'en-GB': 'topic',
+					'en-US': 'topic',
+				})
+				.setDescription('The poll topic')
+				.setDescriptionLocalizations({
+					'de': 'Das Thema der Umfrage',
+					'en-GB': 'The poll topic',
+					'en-US': 'The poll topic',
+				})
+				.setRequired(true)
+		)
+		.addStringOption(option =>
+			option.setName('option1')
+				.setNameLocalizations({
+					'de': 'option1',
+					'en-GB': 'option1',
+					'en-US': 'option1',
+				})
+				.setDescription('The first option of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die erste Option der Umfrage',
+					'en-GB': 'The first option of the poll',
+					'en-US': 'The first option of the poll',
+				})
+				.setRequired(true)
+		)
+		.addStringOption(option =>
+			option.setName('option2')
+				.setNameLocalizations({
+					'de': 'option2',
+					'en-GB': 'option2',
+					'en-US': 'option2',
+				})
+				.setDescription('The second option of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die zweite Option der Umfrage',
+					'en-GB': 'The second option of the poll',
+					'en-US': 'The second option of the poll',
+				})
+				.setRequired(true)
+		)
+		.addIntegerOption(option =>
+			option.setName('months')
+				.setNameLocalizations({
+					'de': 'monate',
+					'en-GB': 'months',
+					'en-US': 'months',
+				})
+				.setDescription('The months until the end of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die Monate bis zum Ende der Umfrage',
+					'en-GB': 'The months until the end of the poll',
+					'en-US': 'The months until the end of the poll',
+				})
+				.setRequired(false)
+		)
+		.addIntegerOption(option =>
+			option.setName('weeks')
+				.setNameLocalizations({
+					'de': 'wochen',
+					'en-GB': 'weeks',
+					'en-US': 'weeks',
+				})
+				.setDescription('The weeks until the end of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die Wochen bis zum Ende der Umfrage',
+					'en-GB': 'The weeks until the end of the poll',
+					'en-US': 'The weeks until the end of the poll',
+				})
+				.setRequired(false)
+		)
+		.addIntegerOption(option =>
+			option.setName('days')
+				.setNameLocalizations({
+					'de': 'tage',
+					'en-GB': 'days',
+					'en-US': 'days',
+				})
+				.setDescription('The days until the end of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die Tage bis zum Ende der Umfrage',
+					'en-GB': 'The days until the end of the poll',
+					'en-US': 'The days until the end of the poll',
+				})
+				.setRequired(false)
+		)
+		.addIntegerOption(option =>
+			option.setName('hours')
+				.setNameLocalizations({
+					'de': 'stunden',
+					'en-GB': 'hours',
+					'en-US': 'hours',
+				})
+				.setDescription('The hours until the end of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die Stunden bis zum Ende der Umfrage',
+					'en-GB': 'The hours until the end of the poll',
+					'en-US': 'The hours until the end of the poll',
+				})
+				.setRequired(false)
+		)
+		.addIntegerOption(option =>
+			option.setName('minutes')
+				.setNameLocalizations({
+					'de': 'minuten',
+					'en-GB': 'minutes',
+					'en-US': 'minutes',
+				})
+				.setDescription('The minutes until the end of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die Minuten bis zum Ende der Umfrage',
+					'en-GB': 'The minutes until the end of the poll',
+					'en-US': 'The minutes until the end of the poll',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('option3')
+				.setNameLocalizations({
+					'de': 'option3',
+					'en-GB': 'option3',
+					'en-US': 'option3',
+				})
+				.setDescription('The third option of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die dritte Option der Umfrage',
+					'en-GB': 'The third option of the poll',
+					'en-US': 'The third option of the poll',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('option4')
+				.setNameLocalizations({
+					'de': 'option4',
+					'en-GB': 'option4',
+					'en-US': 'option4',
+				})
+				.setDescription('The fourth option of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die vierte Option der Umfrage',
+					'en-GB': 'The fourth option of the poll',
+					'en-US': 'The fourth option of the poll',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('option5')
+				.setNameLocalizations({
+					'de': 'option5',
+					'en-GB': 'option5',
+					'en-US': 'option5',
+				})
+				.setDescription('The fifth option of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die fünfte Option der Umfrage',
+					'en-GB': 'The fifth option of the poll',
+					'en-US': 'The fifth option of the poll',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('option6')
+				.setNameLocalizations({
+					'de': 'option6',
+					'en-GB': 'option6',
+					'en-US': 'option6',
+				})
+				.setDescription('The sixth option of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die sechste Option der Umfrage',
+					'en-GB': 'The sixth option of the poll',
+					'en-US': 'The sixth option of the poll',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('option7')
+				.setNameLocalizations({
+					'de': 'option7',
+					'en-GB': 'option7',
+					'en-US': 'option7',
+				})
+				.setDescription('The seventh option of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die siebte Option der Umfrage',
+					'en-GB': 'The seventh option of the poll',
+					'en-US': 'The seventh option of the poll',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('option8')
+				.setNameLocalizations({
+					'de': 'option8',
+					'en-GB': 'option8',
+					'en-US': 'option8',
+				})
+				.setDescription('The eigth option of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die achte Option der Umfrage',
+					'en-GB': 'The eigth option of the poll',
+					'en-US': 'The eigth option of the poll',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('option9')
+				.setNameLocalizations({
+					'de': 'option9',
+					'en-GB': 'option9',
+					'en-US': 'option9',
+				})
+				.setDescription('The ninth option of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die neunte Option der Umfrage',
+					'en-GB': 'The ninth option of the poll',
+					'en-US': 'The ninth option of the poll',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('option10')
+				.setNameLocalizations({
+					'de': 'option10',
+					'en-GB': 'option10',
+					'en-US': 'option10',
+				})
+				.setDescription('The tenth option of the poll')
+				.setDescriptionLocalizations({
+					'de': 'Die zehnte Option der Umfrage',
+					'en-GB': 'The tenth option of the poll',
+					'en-US': 'The tenth option of the poll',
+				})
+				.setRequired(false)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {
