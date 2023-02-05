@@ -69,46 +69,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'pat',
-			// 		description: 'Lets you send a gif to pat a user',
-			// 		dm_permission: false,
-			// 		options: [
-			// 			{
-			// 				'name': 'user',
-			// 				'description': 'The user to pat',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': true
-			// 			},
-			// 			{
-			// 				'name': 'user2',
-			// 				'description': 'The user to pat',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'user3',
-			// 				'description': 'The user to pat',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'user4',
-			// 				'description': 'The user to pat',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'user5',
-			// 				'description': 'The user to pat',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': false
-			// 			},
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'poll',
 			// 		description: 'Start a vote / poll',
 			// 		dm_permission: false,
@@ -1095,46 +1055,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'pat',
-					description: 'Lets you send a gif to pat a user',
-					dm_permission: false,
-					options: [
-						{
-							'name': 'user',
-							'description': 'The user to pat',
-							'type': 6, // 6 is type USER
-							'required': true
-						},
-						{
-							'name': 'user2',
-							'description': 'The user to pat',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'user3',
-							'description': 'The user to pat',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'user4',
-							'description': 'The user to pat',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'user5',
-							'description': 'The user to pat',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-					]
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

@@ -27,6 +27,7 @@ module.exports = {
 			'en-GB': 'Sums up the year in osu! for a user',
 			'en-US': 'Sums up the year in osu! for a user',
 		})
+		.setDMPermission(true)
 		.addStringOption(option =>
 			option.setName('username')
 				.setNameLocalizations({
