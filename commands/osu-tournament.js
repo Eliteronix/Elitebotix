@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const { DBOsuMultiScores } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
@@ -12,6 +12,35 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-tournament')
+		.setNameLocalizations({
+			'de': 'osu-turnier',
+			'en-GB': 'osu-tournament',
+			'en-US': 'osu-tournament',
+		})
+		.setDescription('Sends a .txt file with all the data for the tournament matches with this acronym')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine .txt Datei mit allen Daten für die Turniermatches mit diesem Akronym',
+			'en-GB': 'Sends a .txt file with all the data for the tournament matches with this acronym',
+			'en-US': 'Sends a .txt file with all the data for the tournament matches with this acronym',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('acronym')
+				.setNameLocalizations({
+					'de': 'akronym',
+					'en-GB': 'acronym',
+					'en-US': 'acronym',
+				})
+				.setDescription('The acronym of the tournament')
+				.setDescriptionLocalizations({
+					'de': 'Das Akronym des Turniers',
+					'en-GB': 'The acronym of the tournament',
+					'en-US': 'The acronym of the tournament',
+				})
+				.setRequired(true)
+		),
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply();
