@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
 const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
@@ -17,6 +17,160 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-skills')
+		.setNameLocalizations({
+			'de': 'osu-skills',
+			'en-GB': 'osu-skills',
+			'en-US': 'osu-skills',
+		})
+		.setDescription('Sends an info card about the skills of the specified player')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Info-Karte über die Fähigkeiten des angegebenen Spielers',
+			'en-GB': 'Sends an info card about the skills of the specified player',
+			'en-US': 'Sends an info card about the skills of the specified player',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('username')
+				.setNameLocalizations({
+					'de': 'nutzername',
+					'en-GB': 'username',
+					'en-US': 'username',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username2')
+				.setNameLocalizations({
+					'de': 'nutzername2',
+					'en-GB': 'username2',
+					'en-US': 'username2',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username3')
+				.setNameLocalizations({
+					'de': 'nutzername3',
+					'en-GB': 'username3',
+					'en-US': 'username3',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username4')
+				.setNameLocalizations({
+					'de': 'nutzername4',
+					'en-GB': 'username4',
+					'en-US': 'username4',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username5')
+				.setNameLocalizations({
+					'de': 'nutzername5',
+					'en-GB': 'username5',
+					'en-US': 'username5',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addBooleanOption(option =>
+			option.setName('scaled')
+				.setNameLocalizations({
+					'de': 'skaliert',
+					'en-GB': 'scaled',
+					'en-US': 'scaled',
+				})
+				.setDescription('Should the graph be scaled by the total evaluation?')
+				.setDescriptionLocalizations({
+					'de': 'Soll der Graph nach der Gesamtbewertung skaliert werden?',
+					'en-GB': 'Should the graph be scaled by the total evaluation?',
+					'en-US': 'Should the graph be scaled by the total evaluation?',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('scores')
+				.setNameLocalizations({
+					'de': 'scores',
+					'en-GB': 'scores',
+					'en-US': 'scores',
+				})
+				.setDescription('Which types of scores should the graph evaluate?')
+				.setDescriptionLocalizations({
+					'de': 'Welche Arten von Scores sollen in den Graphen einfließen?',
+					'en-GB': 'Which types of scores should the graph evaluate?',
+					'en-US': 'Which types of scores should the graph evaluate?',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Only Score v2', value: '--v2' },
+					{ name: 'Only Score v1', value: '--v1' },
+					{ name: 'All Scores', value: '--vx' },
+				)
+		)
+		.addBooleanOption(option =>
+			option.setName('tourney')
+				.setNameLocalizations({
+					'de': 'turnier',
+					'en-GB': 'tourney',
+					'en-US': 'tourney',
+				})
+				.setDescription('Should it only count scores from tournaments?')
+				.setDescriptionLocalizations({
+					'de': 'Sollen nur Turnierscores gezählt werden?',
+					'en-GB': 'Should it only count scores from tournaments?',
+					'en-US': 'Should it only count scores from tournaments?',
+				})
+				.setRequired(false)
+		)
+		.addBooleanOption(option =>
+			option.setName('runningaverage')
+				.setNameLocalizations({
+					'de': 'laufenderdurchschnitt',
+					'en-GB': 'runningaverage',
+					'en-US': 'runningaverage',
+				})
+				.setDescription('Should a running average be shown instead?')
+				.setDescriptionLocalizations({
+					'de': 'Soll ein laufender Durchschnitt angezeigt werden?',
+					'en-GB': 'Should a running average be shown instead?',
+					'en-US': 'Should a running average be shown instead?',
+				})
+				.setRequired(false)
+		),
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
