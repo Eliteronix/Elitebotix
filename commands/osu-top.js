@@ -4,7 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('canvas');
 const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, saveOsuMultiScores, pause } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 const ObjectsToCsv = require('objects-to-csv');
@@ -16,6 +16,210 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-top')
+		.setNameLocalizations({
+			'de': 'osu-top',
+			'en-GB': 'osu-top',
+			'en-US': 'osu-top',
+		})
+		.setDescription('Sends an info card about the topplays of the specified player')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Info-Karte über die Topplays des angegebenen Spielers',
+			'en-GB': 'Sends an info card about the topplays of the specified player',
+			'en-US': 'Sends an info card about the topplays of the specified player',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('sorting')
+				.setNameLocalizations({
+					'de': 'sortierung',
+					'en-GB': 'sorting',
+					'en-US': 'sorting',
+				})
+				.setDescription('Sort your top plays by...')
+				.setDescriptionLocalizations({
+					'de': 'Sortiere deine Topplays nach...',
+					'en-GB': 'Sort your top plays by...',
+					'en-US': 'Sort your top plays by...',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Approach Rate', value: '--ar' },
+					{ name: 'Circle Size', value: '--cs' },
+					{ name: 'Overall Difficulty', value: '--od' },
+					{ name: 'HP Drain', value: '--hp' },
+					{ name: 'Beats Per Minute', value: '--bpm' },
+					{ name: 'Length', value: '--length' },
+					{ name: 'Recent', value: '--new' },
+					{ name: 'Star Rating', value: '--sr' },
+					{ name: 'Accuracy', value: '--acc' },
+				)
+		)
+		.addStringOption(option =>
+			option.setName('ascending')
+				.setNameLocalizations({
+					'de': 'aufsteigend',
+					'en-GB': 'ascending',
+					'en-US': 'ascending',
+				})
+				.setDescription('Sort your top plays in ascending order?')
+				.setDescriptionLocalizations({
+					'de': 'Sortiere deine Topplays aufsteigend?',
+					'en-GB': 'Sort your top plays in ascending order?',
+					'en-US': 'Sort your top plays in ascending order?',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'True', value: '--asc' },
+				)
+		)
+		.addIntegerOption(option =>
+			option.setName('amount')
+				.setNameLocalizations({
+					'de': 'anzahl',
+					'en-GB': 'amount',
+					'en-US': 'amount',
+				})
+				.setDescription('The amount of topplays to be displayed')
+				.setDescriptionLocalizations({
+					'de': 'Die Anzahl der anzuzeigenden Topplays',
+					'en-GB': 'The amount of topplays to be displayed',
+					'en-US': 'The amount of topplays to be displayed',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('gamemode')
+				.setNameLocalizations({
+					'de': 'spielmodus',
+					'en-GB': 'gamemode',
+					'en-US': 'gamemode',
+				})
+				.setDescription('Gamemode')
+				.setDescriptionLocalizations({
+					'de': 'Spielmodus',
+					'en-GB': 'Gamemode',
+					'en-US': 'Gamemode',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Standard', value: 's' },
+					{ name: 'Taiko', value: 't' },
+					{ name: 'Catch The Beat', value: 'c' },
+					{ name: 'Mania', value: 'm' },
+				)
+		)
+		.addStringOption(option =>
+			option.setName('server')
+				.setNameLocalizations({
+					'de': 'server',
+					'en-GB': 'server',
+					'en-US': 'server',
+				})
+				.setDescription('The server from which the results will be displayed')
+				.setDescriptionLocalizations({
+					'de': 'Der Server, von dem die Ergebnisse angezeigt werden',
+					'en-GB': 'The server from which the results will be displayed',
+					'en-US': 'The server from which the results will be displayed',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Bancho', value: 'b' },
+					{ name: 'Ripple', value: 'r' },
+					{ name: 'Tournaments', value: 't' },
+				)
+		)
+		.addStringOption(option =>
+			option.setName('username')
+				.setNameLocalizations({
+					'de': 'nutzername',
+					'en-GB': 'username',
+					'en-US': 'username',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username2')
+				.setNameLocalizations({
+					'de': 'nutzername2',
+					'en-GB': 'username2',
+					'en-US': 'username2',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username3')
+				.setNameLocalizations({
+					'de': 'nutzername3',
+					'en-GB': 'username3',
+					'en-US': 'username3',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username4')
+				.setNameLocalizations({
+					'de': 'nutzername4',
+					'en-GB': 'username4',
+					'en-US': 'username4',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('username5')
+				.setNameLocalizations({
+					'de': 'nutzername5',
+					'en-GB': 'username5',
+					'en-US': 'username5',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addBooleanOption(option =>
+			option.setName('csv')
+				.setNameLocalizations({
+					'de': 'csv',
+					'en-GB': 'csv',
+					'en-US': 'csv',
+				})
+				.setDescription('Should a csv file be attached')
+				.setDescriptionLocalizations({
+					'de': 'Soll eine csv Datei angehängt werden',
+					'en-GB': 'Should a csv file be attached',
+					'en-US': 'Should a csv file be attached',
+				})
+				.setRequired(false)
+		),
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		let csv = false;
