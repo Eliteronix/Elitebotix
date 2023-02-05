@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const osu = require('node-osu');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
 const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague } = require('../utils');
@@ -14,6 +14,67 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 15,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-wrapped')
+		.setNameLocalizations({
+			'de': 'osu-wrapped',
+			'en-GB': 'osu-wrapped',
+			'en-US': 'osu-wrapped',
+		})
+		.setDescription('Sums up the year in osu! for a user')
+		.setDescriptionLocalizations({
+			'de': 'Summiert das Jahr in osu! für einen Benutzer',
+			'en-GB': 'Sums up the year in osu! for a user',
+			'en-US': 'Sums up the year in osu! for a user',
+		})
+		.addStringOption(option =>
+			option.setName('username')
+				.setNameLocalizations({
+					'de': 'nutzername',
+					'en-GB': 'username',
+					'en-US': 'username',
+				})
+				.setDescription('The username, id or link of the player')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzername, die ID oder der Link des Spielers',
+					'en-GB': 'The username, id or link of the player',
+					'en-US': 'The username, id or link of the player',
+				})
+				.setRequired(false)
+		)
+		.addIntegerOption(option => {
+			option.setName('year')
+				.setNameLocalizations({
+					'de': 'jahr',
+					'en-GB': 'year',
+					'en-US': 'year',
+				})
+				.setDescription('The year to get the wrapped for')
+				.setDescriptionLocalizations({
+					'de': 'Das Jahr, für das das Wrapped abgerufen werden soll',
+					'en-GB': 'The year to get the wrapped for',
+					'en-US': 'The year to get the wrapped for',
+				})
+				.setRequired(false);
+
+			let wrappedYears = [];
+
+			for (let i = 2018; i <= new Date().getFullYear() - 1; i++) {
+				wrappedYears.push({
+					name: i.toString(),
+					value: i,
+				});
+			}
+
+			wrappedYears.reverse();
+
+			for (const wrappedYear of wrappedYears) {
+				option.addChoices({ name: wrappedYear.name, value: wrappedYear.value });
+			}
+
+			return option;
+		}
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		try {
