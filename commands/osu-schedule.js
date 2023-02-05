@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
 const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -16,6 +16,284 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-schedule')
+		.setNameLocalizations({
+			'de': 'osu-zeitplan',
+			'en-GB': 'osu-schedule',
+			'en-US': 'osu-schedule',
+		})
+		.setDescription('Sends an info graph about the schedules of the players')
+		.setDescriptionLocalizations({
+			'de': 'Sendet ein Info-Graph über die Zeitpläne der Spieler',
+			'en-GB': 'Sends an info graph about the schedules of the players',
+			'en-US': 'Sends an info graph about the schedules of the players',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('weekday')
+				.setNameLocalizations({
+					'de': 'wochentag',
+					'en-GB': 'weekday',
+					'en-US': 'weekday',
+				})
+				.setDescription('The day of the week to filter the schedule for')
+				.setDescriptionLocalizations({
+					'de': 'Der Wochentag, um den Zeitplan zu filtern',
+					'en-GB': 'The day of the week to filter the schedule for',
+					'en-US': 'The day of the week to filter the schedule for',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Monday', value: '1' },
+					{ name: 'Tuesday', value: '2' },
+					{ name: 'Wednesday', value: '3' },
+					{ name: 'Thursday', value: '4' },
+					{ name: 'Friday', value: '5' },
+					{ name: 'Saturday', value: '6' },
+					{ name: 'Sunday', value: '0' },
+				)
+		)
+		.addStringOption(option =>
+			option.setName('team1player1')
+				.setNameLocalizations({
+					'de': 'team1spieler1',
+					'en-GB': 'team1player1',
+					'en-US': 'team1player1',
+				})
+				.setDescription('The first user of the first team')
+				.setDescriptionLocalizations({
+					'de': 'Der erste Spieler des ersten Teams',
+					'en-GB': 'The first user of the first team',
+					'en-US': 'The first user of the first team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team1player2')
+				.setNameLocalizations({
+					'de': 'team1spieler2',
+					'en-GB': 'team1player2',
+					'en-US': 'team1player2',
+				})
+				.setDescription('The second user of the first team')
+				.setDescriptionLocalizations({
+					'de': 'Der zweite Spieler des ersten Teams',
+					'en-GB': 'The second user of the first team',
+					'en-US': 'The second user of the first team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team1player3')
+				.setNameLocalizations({
+					'de': 'team1spieler3',
+					'en-GB': 'team1player3',
+					'en-US': 'team1player3',
+				})
+				.setDescription('The third user of the first team')
+				.setDescriptionLocalizations({
+					'de': 'Der dritte Spieler des ersten Teams',
+					'en-GB': 'The third user of the first team',
+					'en-US': 'The third user of the first team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team1player4')
+				.setNameLocalizations({
+					'de': 'team1spieler4',
+					'en-GB': 'team1player4',
+					'en-US': 'team1player4',
+				})
+				.setDescription('The fourth user of the first team')
+				.setDescriptionLocalizations({
+					'de': 'Der vierte Spieler des ersten Teams',
+					'en-GB': 'The fourth user of the first team',
+					'en-US': 'The fourth user of the first team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team1player5')
+				.setNameLocalizations({
+					'de': 'team1spieler5',
+					'en-GB': 'team1player5',
+					'en-US': 'team1player5',
+				})
+				.setDescription('The fifth user of the first team')
+				.setDescriptionLocalizations({
+					'de': 'Der fünfte Spieler des ersten Teams',
+					'en-GB': 'The fifth user of the first team',
+					'en-US': 'The fifth user of the first team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team1player6')
+				.setNameLocalizations({
+					'de': 'team1spieler6',
+					'en-GB': 'team1player6',
+					'en-US': 'team1player6',
+				})
+				.setDescription('The sixth user of the first team')
+				.setDescriptionLocalizations({
+					'de': 'Der sechste Spieler des ersten Teams',
+					'en-GB': 'The sixth user of the first team',
+					'en-US': 'The sixth user of the first team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team1player7')
+				.setNameLocalizations({
+					'de': 'team1spieler7',
+					'en-GB': 'team1player7',
+					'en-US': 'team1player7',
+				})
+				.setDescription('The seventh user of the first team')
+				.setDescriptionLocalizations({
+					'de': 'Der siebte Spieler des ersten Teams',
+					'en-GB': 'The seventh user of the first team',
+					'en-US': 'The seventh user of the first team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team1player8')
+				.setNameLocalizations({
+					'de': 'team1spieler8',
+					'en-GB': 'team1player8',
+					'en-US': 'team1player8',
+				})
+				.setDescription('The eighth user of the first team')
+				.setDescriptionLocalizations({
+					'de': 'Der achte Spieler des ersten Teams',
+					'en-GB': 'The eighth user of the first team',
+					'en-US': 'The eighth user of the first team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team2player1')
+				.setNameLocalizations({
+					'de': 'team2spieler1',
+					'en-GB': 'team2player1',
+					'en-US': 'team2player1',
+				})
+				.setDescription('The first user of the second team')
+				.setDescriptionLocalizations({
+					'de': 'Der erste Spieler des zweiten Teams',
+					'en-GB': 'The first user of the second team',
+					'en-US': 'The first user of the second team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team2player2')
+				.setNameLocalizations({
+					'de': 'team2spieler2',
+					'en-GB': 'team2player2',
+					'en-US': 'team2player2',
+				})
+				.setDescription('The second user of the second team')
+				.setDescriptionLocalizations({
+					'de': 'Der zweite Spieler des zweiten Teams',
+					'en-GB': 'The second user of the second team',
+					'en-US': 'The second user of the second team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team2player3')
+				.setNameLocalizations({
+					'de': 'team2spieler3',
+					'en-GB': 'team2player3',
+					'en-US': 'team2player3',
+				})
+				.setDescription('The third user of the second team')
+				.setDescriptionLocalizations({
+					'de': 'Der dritte Spieler des zweiten Teams',
+					'en-GB': 'The third user of the second team',
+					'en-US': 'The third user of the second team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team2player4')
+				.setNameLocalizations({
+					'de': 'team2spieler4',
+					'en-GB': 'team2player4',
+					'en-US': 'team2player4',
+				})
+				.setDescription('The fourth user of the second team')
+				.setDescriptionLocalizations({
+					'de': 'Der vierte Spieler des zweiten Teams',
+					'en-GB': 'The fourth user of the second team',
+					'en-US': 'The fourth user of the second team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team2player5')
+				.setNameLocalizations({
+					'de': 'team2spieler5',
+					'en-GB': 'team2player5',
+					'en-US': 'team2player5',
+				})
+				.setDescription('The fifth user of the second team')
+				.setDescriptionLocalizations({
+					'de': 'Der fünfte Spieler des zweiten Teams',
+					'en-GB': 'The fifth user of the second team',
+					'en-US': 'The fifth user of the second team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team2player6')
+				.setNameLocalizations({
+					'de': 'team2spieler6',
+					'en-GB': 'team2player6',
+					'en-US': 'team2player6',
+				})
+				.setDescription('The sixth user of the second team')
+				.setDescriptionLocalizations({
+					'de': 'Der sechste Spieler des zweiten Teams',
+					'en-GB': 'The sixth user of the second team',
+					'en-US': 'The sixth user of the second team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team2player7')
+				.setNameLocalizations({
+					'de': 'team2spieler7',
+					'en-GB': 'team2player7',
+					'en-US': 'team2player7',
+				})
+				.setDescription('The seventh user of the second team')
+				.setDescriptionLocalizations({
+					'de': 'Der siebte Spieler des zweiten Teams',
+					'en-GB': 'The seventh user of the second team',
+					'en-US': 'The seventh user of the second team',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('team2player8')
+				.setNameLocalizations({
+					'de': 'team2spieler8',
+					'en-GB': 'team2player8',
+					'en-US': 'team2player8',
+				})
+				.setDescription('The eighth user of the second team')
+				.setDescriptionLocalizations({
+					'de': 'Der achte Spieler des zweiten Teams',
+					'en-GB': 'The eighth user of the second team',
+					'en-US': 'The eighth user of the second team',
+				})
+				.setRequired(false)
+		),
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		let weekday = 7;
