@@ -61,14 +61,6 @@ module.exports = async function (msg, bancho) {
 		return;
 	}
 
-	//Check permissions of the user
-	if (command.permissions) {
-		const authorPerms = msg.channel.permissionsFor(msg.member);
-		if (!authorPerms || !authorPerms.has(command.permissions)) {
-			return msg.reply(`You need the ${command.permissionsTranslated} permission to do this!`);
-		}
-	}
-
 	//Check permissions of the bot
 	if (msg.channel.type !== Discord.ChannelType.DM) {
 		const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch(msg.client.user.id));
