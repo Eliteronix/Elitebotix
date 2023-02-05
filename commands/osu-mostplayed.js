@@ -4,7 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('canvas');
 const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap, getMapListCover } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const Sequelize = require('sequelize');
 const ObjectsToCsv = require('objects-to-csv');
@@ -17,6 +17,271 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('osu-mostplayed')
+		.setNameLocalizations({
+			'de': 'osu-meistgespielt',
+			'en-GB': 'osu-mostplayed',
+			'en-US': 'osu-mostplayed',
+		})
+		.setDescription('Sends an info card about the most played maps of the specified player')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Info-Karte über die am meisten gespielten maps des angegebenen Spielers',
+			'en-GB': 'Sends an info card about the most played maps of the specified player',
+			'en-US': 'Sends an info card about the most played maps of the specified player',
+		})
+		.setDMPermission(true)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('user')
+				.setNameLocalizations({
+					'de': 'spieler',
+					'en-GB': 'user',
+					'en-US': 'user',
+				})
+				.setDescription('Get the stats for a user')
+				.setDescriptionLocalizations({
+					'de': 'Holen Sie sich die Statistiken für einen Benutzer',
+					'en-GB': 'Get the stats for a user',
+					'en-US': 'Get the stats for a user',
+				})
+				.addIntegerOption(option =>
+					option
+						.setName('amount')
+						.setNameLocalizations({
+							'de': 'menge',
+							'en-GB': 'amount',
+							'en-US': 'amount',
+						})
+						.setDescription('The amount of most played maps to be displayed')
+						.setDescriptionLocalizations({
+							'de': 'Die Anzahl der am meisten gespielten maps, die angezeigt werden sollen',
+							'en-GB': 'The amount of most played maps to be displayed',
+							'en-US': 'The amount of most played maps to be displayed',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option
+						.setName('server')
+						.setNameLocalizations({
+							'de': 'server',
+							'en-GB': 'server',
+							'en-US': 'server',
+						})
+						.setDescription('The server from which the results will be displayed')
+						.setDescriptionLocalizations({
+							'de': 'Der Server, von dem die Ergebnisse angezeigt werden',
+							'en-GB': 'The server from which the results will be displayed',
+							'en-US': 'The server from which the results will be displayed',
+						})
+						.setRequired(false)
+						.addChoices(
+							{ name: 'Bancho', value: 'b' },
+							{ name: 'Ripple', value: 'r' },
+							{ name: 'Tournaments', value: 'tournaments' },
+						)
+				)
+				.addStringOption(option =>
+					option
+						.setName('mode')
+						.setNameLocalizations({
+							'de': 'modus',
+							'en-GB': 'mode',
+							'en-US': 'mode',
+						})
+						.setDescription('The gamemode you want to get the leaderboard from (tourney only)')
+						.setDescriptionLocalizations({
+							'de': 'Der Gamemode, von dem Sie die Bestenliste erhalten möchten (nur Tourney)',
+							'en-GB': 'The gamemode you want to get the leaderboard from (tourney only)',
+							'en-US': 'The gamemode you want to get the leaderboard from (tourney only)',
+						})
+						.setRequired(false)
+						.addChoices(
+							{ name: 'Standard', value: 'Standard' },
+							{ name: 'Taiko', value: 'Taiko' },
+							{ name: 'Catch the Beat', value: 'Catch the Beat' },
+							{ name: 'Mania', value: 'Mania' },
+						)
+				)
+				.addStringOption(option =>
+					option.setName('username')
+						.setNameLocalizations({
+							'de': 'nutzername',
+							'en-GB': 'username',
+							'en-US': 'username',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option.setName('username2')
+						.setNameLocalizations({
+							'de': 'nutzername2',
+							'en-GB': 'username2',
+							'en-US': 'username2',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option.setName('username3')
+						.setNameLocalizations({
+							'de': 'nutzername3',
+							'en-GB': 'username3',
+							'en-US': 'username3',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option.setName('username4')
+						.setNameLocalizations({
+							'de': 'nutzername4',
+							'en-GB': 'username4',
+							'en-US': 'username4',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+				.addStringOption(option =>
+					option.setName('username5')
+						.setNameLocalizations({
+							'de': 'nutzername5',
+							'en-GB': 'username5',
+							'en-US': 'username5',
+						})
+						.setDescription('The username, id or link of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Nutzername, die ID oder der Link des Spielers',
+							'en-GB': 'The username, id or link of the player',
+							'en-US': 'The username, id or link of the player',
+						})
+						.setRequired(false)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand.setName('tourneybeatmaps')
+				.setNameLocalizations({
+					'de': 'turnierbeatmaps',
+					'en-GB': 'tourneybeatmaps',
+					'en-US': 'tourneybeatmaps',
+				})
+				.setDescription('Get the stats for most played beatmaps in tournaments')
+				.setDescriptionLocalizations({
+					'de': 'Erhalte die Statistiken für die meistgespielten Beatmaps in Turnieren',
+					'en-GB': 'Get the stats for most played beatmaps in tournaments',
+					'en-US': 'Get the stats for most played beatmaps in tournaments',
+				})
+				.addIntegerOption(option =>
+					option.setName('amount')
+						.setNameLocalizations({
+							'de': 'anzahl',
+							'en-GB': 'amount',
+							'en-US': 'amount',
+						})
+						.setDescription('The amount of most played maps to be displayed')
+						.setDescriptionLocalizations({
+							'de': 'Die Anzahl der am meisten gespielten Maps, die angezeigt werden sollen',
+							'en-GB': 'The amount of most played maps to be displayed',
+							'en-US': 'The amount of most played maps to be displayed',
+						})
+						.setRequired(false)
+				)
+				.addIntegerOption(option =>
+					option.setName('page')
+						.setNameLocalizations({
+							'de': 'seite',
+							'en-GB': 'page',
+							'en-US': 'page',
+						})
+						.setDescription('The page of the results')
+						.setDescriptionLocalizations({
+							'de': 'Die Seite der Ergebnisse',
+							'en-GB': 'The page of the results',
+							'en-US': 'The page of the results',
+						})
+						.setRequired(false)
+				)
+				.addBooleanOption(option =>
+					option.setName('dontfiltermm')
+						.setNameLocalizations({
+							'de': 'mmnichtfiltern',
+							'en-GB': 'dontfiltermm',
+							'en-US': 'dontfiltermm',
+						})
+						.setDescription('Should matchmaking (ETX/o!mm) matches not be filtered out')
+						.setDescriptionLocalizations({
+							'de': 'Sollten Matchmaking (ETX/o!mm) Matches nicht gefiltert werden',
+							'en-GB': 'Should matchmaking (ETX/o!mm) matches not be filtered out',
+							'en-US': 'Should matchmaking (ETX/o!mm) matches not be filtered out',
+						})
+						.setRequired(false)
+				)
+				.addBooleanOption(option =>
+					option.setName('csv')
+						.setNameLocalizations({
+							'de': 'csv',
+							'en-GB': 'csv',
+							'en-US': 'csv',
+						})
+						.setDescription('Should the results be displayed as a csv file')
+						.setDescriptionLocalizations({
+							'de': 'Sollen die Ergebnisse als csv Datei angezeigt werden',
+							'en-GB': 'Should the results be displayed as a csv file',
+							'en-US': 'Should the results be displayed as a csv file',
+						})
+						.setRequired(false)
+				)
+		),
+	// {
+	// 	'name': 'modpool',
+	// 	'description': 'The modpool the maps appeared in',
+	// 	'type': 3,
+	// 	'required': false,
+	// 	'choices': [
+	// 		{
+	// 			'name': 'NM',
+	// 			'value': 'NM',
+	// 		},
+	// 		{
+	// 			'name': 'HD',
+	// 			'value': 'HD',
+	// 		},
+	// 		{
+	// 			'name': 'HR',
+	// 			'value': 'HR',
+	// 		},
+	// 		{
+	// 			'name': 'DT',
+	// 			'value': 'DT',
+	// 		},
+	// 		{
+	// 			'name': 'FM',
+	// 			'value': 'FM',
+	// 		}
+	// 	]
+	// },
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		if (!interaction) {
