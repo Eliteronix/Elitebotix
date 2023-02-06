@@ -19,7 +19,6 @@ module.exports = {
 			return;
 		}
 
-		let manageChannels = (1 << 4).toString();
 		let manageGuild = (1 << 5).toString();
 
 		if (args[0] === 'guildCommands') {
@@ -62,83 +61,6 @@ module.exports = {
 			})();
 
 			return;
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'ticket',
-			// 		description: 'Create and manage tickets',
-			// 		dm_permission: false,
-			// 		default_member_permissions: manageGuild,
-			// 		options: [
-			// 			{
-			// 				'name': 'create',
-			// 				'description': 'Create a ticket',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'issue',
-			// 						'description': 'The issue description for your ticket',
-			// 						'type': 3,
-			// 						'required': true,
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'state',
-			// 				'description': 'Manage a ticket\'s workflow state',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'state',
-			// 						'description': 'The ticket\'s workflow state',
-			// 						'type': 3,
-			// 						'required': true,
-			// 						'choices': [
-			// 							{
-			// 								'name': 'Responded',
-			// 								'value': 'responded'
-			// 							},
-			// 							{
-			// 								'name': 'In action',
-			// 								'value': 'action'
-			// 							},
-			// 							{
-			// 								'name': 'Close',
-			// 								'value': 'close'
-			// 							}
-			// 						]
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'addrole',
-			// 				'description': 'Add a role to a ticket',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'role',
-			// 						'description': 'The role to add to the ticket',
-			// 						'type': 8,
-			// 						'required': true,
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'removerole',
-			// 				'description': 'Remove a role from a ticket',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'role',
-			// 						'description': 'The role to remove from the ticket',
-			// 						'type': 8,
-			// 						'required': true,
-			// 					}
-			// 				]
-			// 			},
-			// 		]
-			// 	}
-			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -449,83 +371,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'ticket',
-					description: 'Create and manage tickets',
-					dm_permission: false,
-					default_member_permissions: manageGuild,
-					options: [
-						{
-							'name': 'create',
-							'description': 'Create a ticket',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'issue',
-									'description': 'The issue description for your ticket',
-									'type': 3,
-									'required': true,
-								}
-							]
-						},
-						{
-							'name': 'state',
-							'description': 'Manage a ticket\'s workflow state',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'state',
-									'description': 'The ticket\'s workflow state',
-									'type': 3,
-									'required': true,
-									'choices': [
-										{
-											'name': 'Responded',
-											'value': 'responded'
-										},
-										{
-											'name': 'In action',
-											'value': 'action'
-										},
-										{
-											'name': 'Close',
-											'value': 'close'
-										}
-									]
-								}
-							]
-						},
-						{
-							'name': 'addrole',
-							'description': 'Add a role to a ticket',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'role',
-									'description': 'The role to add to the ticket',
-									'type': 8,
-									'required': true,
-								}
-							]
-						},
-						{
-							'name': 'removerole',
-							'description': 'Remove a role from a ticket',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'role',
-									'description': 'The role to remove from the ticket',
-									'type': 8,
-									'required': true,
-								}
-							]
-						},
-					]
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

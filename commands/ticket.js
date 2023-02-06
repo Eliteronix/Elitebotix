@@ -1,7 +1,7 @@
 const { DBGuilds, DBTickets, DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const Discord = require('discord.js');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -11,6 +11,150 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages, Manage Channels and Manage Roles',
 	cooldown: 10,
 	tags: 'general',
+	data: new SlashCommandBuilder()
+		.setName('ticket')
+		.setNameLocalizations({
+			'de': 'ticket',
+			'en-GB': 'ticket',
+			'en-US': 'ticket',
+		})
+		.setDescription('Create and manage tickets')
+		.setDescriptionLocalizations({
+			'de': 'Erstelle und verwalte Tickets',
+			'en-GB': 'Create and manage tickets',
+			'en-US': 'Create and manage tickets',
+		})
+		.setDMPermission(false)
+		.setDefaultMemberPermissions(PermissionsBitField.Flags.ManageGuild)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('create')
+				.setNameLocalizations({
+					'de': 'erstellen',
+					'en-GB': 'create',
+					'en-US': 'create',
+				})
+				.setDescription('Create a ticket')
+				.setDescriptionLocalizations({
+					'de': 'Erstelle ein Ticket',
+					'en-GB': 'Create a ticket',
+					'en-US': 'Create a ticket',
+				})
+				.addStringOption(option =>
+					option
+						.setName('issue')
+						.setNameLocalizations({
+							'de': 'problem',
+							'en-GB': 'issue',
+							'en-US': 'issue',
+						})
+						.setDescription('The issue description for your ticket')
+						.setDescriptionLocalizations({
+							'de': 'Die Beschreibung des Problems für dein Ticket',
+							'en-GB': 'The issue description for your ticket',
+							'en-US': 'The issue description for your ticket',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('state')
+				.setNameLocalizations({
+					'de': 'status',
+					'en-GB': 'state',
+					'en-US': 'state',
+				})
+				.setDescription('Manage a ticket\'s workflow state')
+				.setDescriptionLocalizations({
+					'de': 'Verwalte den Status eines Tickets',
+					'en-GB': 'Manage a ticket\'s workflow state',
+					'en-US': 'Manage a ticket\'s workflow state',
+				})
+				.addStringOption(option =>
+					option
+						.setName('state')
+						.setNameLocalizations({
+							'de': 'status',
+							'en-GB': 'state',
+							'en-US': 'state',
+						})
+						.setDescription('The ticket\'s workflow state')
+						.setDescriptionLocalizations({
+							'de': 'Der Status des Tickets',
+							'en-GB': 'The ticket\'s workflow state',
+							'en-US': 'The ticket\'s workflow state',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Responded', value: 'responded' },
+							{ name: 'In action', value: 'action' },
+							{ name: 'Close', value: 'close' },
+						)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('addrole')
+				.setNameLocalizations({
+					'de': 'rollehinzufügen',
+					'en-GB': 'addrole',
+					'en-US': 'addrole',
+				})
+				.setDescription('Add a role to a ticket')
+				.setDescriptionLocalizations({
+					'de': 'Füge eine Rolle zu einem Ticket hinzu',
+					'en-GB': 'Add a role to a ticket',
+					'en-US': 'Add a role to a ticket',
+				})
+				.addRoleOption(option =>
+					option
+						.setName('role')
+						.setNameLocalizations({
+							'de': 'rolle',
+							'en-GB': 'role',
+							'en-US': 'role',
+						})
+						.setDescription('The role to add to the ticket')
+						.setDescriptionLocalizations({
+							'de': 'Die Rolle, die dem Ticket hinzugefügt werden soll',
+							'en-GB': 'The role to add to the ticket',
+							'en-US': 'The role to add to the ticket',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('removerole')
+				.setNameLocalizations({
+					'de': 'rolleentfernen',
+					'en-GB': 'removerole',
+					'en-US': 'removerole',
+				})
+				.setDescription('Remove a role from a ticket')
+				.setDescriptionLocalizations({
+					'de': 'Entferne eine Rolle von einem Ticket',
+					'en-GB': 'Remove a role from a ticket',
+					'en-US': 'Remove a role from a ticket',
+				})
+				.addRoleOption(option =>
+					option
+						.setName('role')
+						.setNameLocalizations({
+							'de': 'rolle',
+							'en-GB': 'role',
+							'en-US': 'role',
+						})
+						.setDescription('The role to remove from the ticket')
+						.setDescriptionLocalizations({
+							'de': 'Die Rolle, die vom Ticket entfernt werden soll',
+							'en-GB': 'The role to remove from the ticket',
+							'en-US': 'The role to remove from the ticket',
+						})
+						.setRequired(true)
+				)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
