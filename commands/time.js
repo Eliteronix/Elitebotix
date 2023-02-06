@@ -1,6 +1,6 @@
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -10,6 +10,34 @@ module.exports = {
 	botPermissionsTranslated: 'Send messages and link embeds',
 	cooldown: 5,
 	tags: 'misc',
+	data: new SlashCommandBuilder()
+		.setName('time')
+		.setNameLocalizations({
+			'de': 'zeit',
+			'en-GB': 'time',
+			'en-US': 'time',
+		})
+		.setDescription('Sends current time of the given location')
+		.setDescriptionLocalizations({
+			'de': 'Sendet die aktuelle Zeit des angegebenen Standorts',
+			'en-GB': 'Sends current time of the given location',
+			'en-US': 'Sends current time of the given location',
+		})
+		.addStringOption(option =>
+			option.setName('location')
+				.setNameLocalizations({
+					'de': 'standort',
+					'en-GB': 'location',
+					'en-US': 'location',
+				})
+				.setDescription('The location of which you want to find out the time')
+				.setDescriptionLocalizations({
+					'de': 'Der Standort, dessen Zeit Sie herausfinden möchten',
+					'en-GB': 'The location of which you want to find out the time',
+					'en-US': 'The location of which you want to find out the time',
+				})
+				.setRequired(true)
+		),
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply({ ephemeral: true });
