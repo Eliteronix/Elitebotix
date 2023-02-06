@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const { DBReactionRolesHeader, DBReactionRoles } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -11,6 +11,361 @@ module.exports = {
 	botPermissionsTranslated: 'Manage Roles and Manage Messages',
 	cooldown: 5,
 	tags: 'server-admin',
+	data: new SlashCommandBuilder()
+		.setName('reactionrole')
+		.setNameLocalizations({
+			'de': 'reaktionsrolle',
+			'en-GB': 'reactionrole',
+			'en-US': 'reactionrole',
+		})
+		.setDescription('Create and manage reaction roles')
+		.setDescriptionLocalizations({
+			'de': 'Erstellt und verwalte Reaktionsrollen',
+			'en-GB': 'Create and manage reaction roles',
+			'en-US': 'Create and manage reaction roles',
+		})
+		.setDMPermission(false)
+		.setDefaultMemberPermissions(PermissionsBitField.Flags.ManageRoles)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('embedadd')
+				.setNameLocalizations({
+					'de': 'embedhinzufügen',
+					'en-GB': 'embedadd',
+					'en-US': 'embedadd',
+				})
+				.setDescription('Create a new embed for reactionroles')
+				.setDescriptionLocalizations({
+					'de': 'Erstellt ein neues Embed für Reaktionsrollen',
+					'en-GB': 'Create a new embed for reactionroles',
+					'en-US': 'Create a new embed for reactionroles',
+				})
+				.addStringOption(option =>
+					option
+						.setName('name')
+						.setNameLocalizations({
+							'de': 'name',
+							'en-GB': 'name',
+							'en-US': 'name',
+						})
+						.setDescription('The name of the embed')
+						.setDescriptionLocalizations({
+							'de': 'Der Name des Embeds',
+							'en-GB': 'The name of the embed',
+							'en-US': 'The name of the embed',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('embedremove')
+				.setNameLocalizations({
+					'de': 'embedentfernen',
+					'en-GB': 'embedremove',
+					'en-US': 'embedremove',
+				})
+				.setDescription('Remove an existing embed')
+				.setDescriptionLocalizations({
+					'de': 'Entfernt ein bestehendes Embed',
+					'en-GB': 'Remove an existing embed',
+					'en-US': 'Remove an existing embed',
+				})
+				.addStringOption(option =>
+					option
+						.setName('embedid')
+						.setNameLocalizations({
+							'de': 'embedid',
+							'en-GB': 'embedid',
+							'en-US': 'embedid',
+						})
+						.setDescription('The ID of the embed')
+						.setDescriptionLocalizations({
+							'de': 'Die ID des Embeds',
+							'en-GB': 'The ID of the embed',
+							'en-US': 'The ID of the embed',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('embedchange')
+				.setNameLocalizations({
+					'de': 'embedändern',
+					'en-GB': 'embedchange',
+					'en-US': 'embedchange',
+				})
+				.setDescription('Change an existing embed')
+				.setDescriptionLocalizations({
+					'de': 'Ändert ein bestehendes Embed',
+					'en-GB': 'Change an existing embed',
+					'en-US': 'Change an existing embed',
+				})
+				.addStringOption(option =>
+					option
+						.setName('embedid')
+						.setNameLocalizations({
+							'de': 'embedid',
+							'en-GB': 'embedid',
+							'en-US': 'embedid',
+						})
+						.setDescription('The ID of the embed')
+						.setDescriptionLocalizations({
+							'de': 'Die ID des Embeds',
+							'en-GB': 'The ID of the embed',
+							'en-US': 'The ID of the embed',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('property')
+						.setNameLocalizations({
+							'de': 'eigenschaft',
+							'en-GB': 'property',
+							'en-US': 'property',
+						})
+						.setDescription('The property to change')
+						.setDescriptionLocalizations({
+							'de': 'Die Eigenschaft, die geändert werden soll',
+							'en-GB': 'The property to change',
+							'en-US': 'The property to change',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Title', value: 'title' },
+							{ name: 'Description', value: 'description' },
+							{ name: 'Color', value: 'color' },
+							{ name: 'Image', value: 'image' },
+						)
+				)
+				.addStringOption(option =>
+					option
+						.setName('value')
+						.setNameLocalizations({
+							'de': 'wert',
+							'en-GB': 'value',
+							'en-US': 'value',
+						})
+						.setDescription('The new title/description/color/image URL')
+						.setDescriptionLocalizations({
+							'de': 'Der neue Titel/Beschreibung/Farbe/Bild-URL',
+							'en-GB': 'The new title/description/color/image URL',
+							'en-US': 'The new title/description/color/image URL',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('roleadd')
+				.setNameLocalizations({
+					'de': 'rollehinzufügen',
+					'en-GB': 'roleadd',
+					'en-US': 'roleadd',
+				})
+				.setDescription('Add a role to an embed')
+				.setDescriptionLocalizations({
+					'de': 'Fügt eine Rolle zu einem Embed hinzu',
+					'en-GB': 'Add a role to an embed',
+					'en-US': 'Add a role to an embed',
+				})
+				.addStringOption(option =>
+					option
+						.setName('embedid')
+						.setNameLocalizations({
+							'de': 'embedid',
+							'en-GB': 'embedid',
+							'en-US': 'embedid',
+						})
+						.setDescription('The ID of the embed')
+						.setDescriptionLocalizations({
+							'de': 'Die ID des Embeds',
+							'en-GB': 'The ID of the embed',
+							'en-US': 'The ID of the embed',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('emoji')
+						.setNameLocalizations({
+							'de': 'emoji',
+							'en-GB': 'emoji',
+							'en-US': 'emoji',
+						})
+						.setDescription('The emoji to represent the role')
+						.setDescriptionLocalizations({
+							'de': 'Das Emoji, das die Rolle repräsentiert',
+							'en-GB': 'The emoji to represent the role',
+							'en-US': 'The emoji to represent the role',
+						})
+						.setRequired(true)
+				)
+				.addRoleOption(option =>
+					option
+						.setName('role')
+						.setNameLocalizations({
+							'de': 'rolle',
+							'en-GB': 'role',
+							'en-US': 'role',
+						})
+						.setDescription('The role to add')
+						.setDescriptionLocalizations({
+							'de': 'Die Rolle, die hinzugefügt werden soll',
+							'en-GB': 'The role to add',
+							'en-US': 'The role to add',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('description')
+						.setNameLocalizations({
+							'de': 'beschreibung',
+							'en-GB': 'description',
+							'en-US': 'description',
+						})
+						.setDescription('The description of the role')
+						.setDescriptionLocalizations({
+							'de': 'Die Beschreibung der Rolle',
+							'en-GB': 'The description of the role',
+							'en-US': 'The description of the role',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('roleremove')
+				.setNameLocalizations({
+					'de': 'rolleentfernen',
+					'en-GB': 'roleremove',
+					'en-US': 'roleremove',
+				})
+				.setDescription('Remove a role from an embed')
+				.setDescriptionLocalizations({
+					'de': 'Entfernt eine Rolle von einem Embed',
+					'en-GB': 'Remove a role from an embed',
+					'en-US': 'Remove a role from an embed',
+				})
+				.addStringOption(option =>
+					option
+						.setName('embedid')
+						.setNameLocalizations({
+							'de': 'embedid',
+							'en-GB': 'embedid',
+							'en-US': 'embedid',
+						})
+						.setDescription('The ID of the embed')
+						.setDescriptionLocalizations({
+							'de': 'Die ID des Embeds',
+							'en-GB': 'The ID of the embed',
+							'en-US': 'The ID of the embed',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('emoji')
+						.setNameLocalizations({
+							'de': 'emoji',
+							'en-GB': 'emoji',
+							'en-US': 'emoji',
+						})
+						.setDescription('The emoji to represent the role')
+						.setDescriptionLocalizations({
+							'de': 'Das Emoji, das die Rolle repräsentiert',
+							'en-GB': 'The emoji to represent the role',
+							'en-US': 'The emoji to represent the role',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('rolechange')
+				.setNameLocalizations({
+					'de': 'rolleändern',
+					'en-GB': 'rolechange',
+					'en-US': 'rolechange',
+				})
+				.setDescription('Change an existing reactionrole')
+				.setDescriptionLocalizations({
+					'de': 'Ändert eine bestehende Reaktionsrolle',
+					'en-GB': 'Change an existing reactionrole',
+					'en-US': 'Change an existing reactionrole',
+				})
+				.addStringOption(option =>
+					option
+						.setName('embedid')
+						.setNameLocalizations({
+							'de': 'embedid',
+							'en-GB': 'embedid',
+							'en-US': 'embedid',
+						})
+						.setDescription('The ID of the embed')
+						.setDescriptionLocalizations({
+							'de': 'Die ID des Embeds',
+							'en-GB': 'The ID of the embed',
+							'en-US': 'The ID of the embed',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('emoji')
+						.setNameLocalizations({
+							'de': 'emoji',
+							'en-GB': 'emoji',
+							'en-US': 'emoji',
+						})
+						.setDescription('The emoji that represents the role')
+						.setDescriptionLocalizations({
+							'de': 'Das Emoji, das die Rolle repräsentiert',
+							'en-GB': 'The emoji that represents the role',
+							'en-US': 'The emoji that represents the role',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('property')
+						.setNameLocalizations({
+							'de': 'eigenschaft',
+							'en-GB': 'property',
+							'en-US': 'property',
+						})
+						.setDescription('The property to change')
+						.setDescriptionLocalizations({
+							'de': 'Die Eigenschaft, die geändert werden soll',
+							'en-GB': 'The property to change',
+							'en-US': 'The property to change',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Emoji', value: 'emoji' },
+							{ name: 'Description', value: 'description' },
+						)
+				)
+				.addStringOption(option =>
+					option
+						.setName('value')
+						.setNameLocalizations({
+							'de': 'wert',
+							'en-GB': 'value',
+							'en-US': 'value',
+						})
+						.setDescription('The new emoji/description')
+						.setDescriptionLocalizations({
+							'de': 'Das neue Emoji/Beschreibung',
+							'en-GB': 'The new emoji/description',
+							'en-US': 'The new emoji/description',
+						})
+						.setRequired(true)
+				)
+		),
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
