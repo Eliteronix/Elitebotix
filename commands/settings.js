@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBAutoRoles } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -11,6 +11,20 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,
 	tags: 'server-admin',
+	data: new SlashCommandBuilder()
+		.setName('settings')
+		.setNameLocalizations({
+			'de': 'einstellungen',
+			'en-GB': 'settings',
+			'en-US': 'settings',
+		})
+		.setDescription('Sends an info card about the settings of the bot for the server')
+		.setDescriptionLocalizations({
+			'de': 'Sende eine Info-Karte über die Einstellungen des Bots für den Server',
+			'en-GB': 'Sends an info card about the settings of the bot for the server',
+			'en-US': 'Sends an info card about the settings of the bot for the server',
+		})
+		.setDMPermission(false),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {

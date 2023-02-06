@@ -67,14 +67,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'settings',
-			// 		description: 'Sends an info card about the settings of the bot for the server'
-			// 		dm_permission: false,
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'ship',
 			// 		description: 'Lets you check how compatible two users are.',
 			// 		dm_permission: true,
@@ -599,14 +591,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'settings',
-					description: 'Sends an info card about the settings of the bot for the server',
-					dm_permission: false,
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
