@@ -64,52 +64,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'weather-set',
-			// 		description: 'Allows you to set the default degree type/location for the weather command',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'location',
-			// 				'description': 'The location name or zip',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'location',
-			// 						'description': 'The location name or zip',
-			// 						'type': 3,
-			// 						'required': true,
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'unit',
-			// 				'description': 'The unit that should be used',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'unit',
-			// 						'description': 'The unit that should be used',
-			// 						'type': 3,
-			// 						'required': true,
-			// 						'choices': [
-			// 							{
-			// 								'name': 'Celcius',
-			// 								'value': 'c'
-			// 							},
-			// 							{
-			// 								'name': 'Fahrenheit',
-			// 								'value': 'f'
-			// 							},
-			// 						]
-			// 					}
-			// 				]
-			// 			},
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'weather-track',
 			// 		description: 'Get hourly/daily weather updates for a specified location',
 			// 		dm_permission: false,
@@ -237,52 +191,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'weather-set',
-					description: 'Allows you to set the default degree type/location for the weather command',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'location',
-							'description': 'The location name or zip',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'location',
-									'description': 'The location name or zip',
-									'type': 3,
-									'required': true,
-								}
-							]
-						},
-						{
-							'name': 'unit',
-							'description': 'The unit that should be used',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'unit',
-									'description': 'The unit that should be used',
-									'type': 3,
-									'required': true,
-									'choices': [
-										{
-											'name': 'Celcius',
-											'value': 'c'
-										},
-										{
-											'name': 'Fahrenheit',
-											'value': 'f'
-										},
-									]
-								}
-							]
-						},
-					]
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

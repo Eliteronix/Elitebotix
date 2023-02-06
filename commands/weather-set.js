@@ -2,7 +2,7 @@
 const weather = require('weather-js');
 const util = require('util');
 const { populateMsgFromInteraction } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBDiscordUsers } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -13,6 +13,86 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 10,
 	tags: 'misc',
+	data: new SlashCommandBuilder()
+		.setName('weather-set')
+		.setNameLocalizations({
+			'de': 'wetter-setzen',
+			'en-GB': 'weather-set',
+			'en-US': 'weather-set',
+		})
+		.setDescription('Allows you to set the default degree type/location for the weather command')
+		.setDescriptionLocalizations({
+			'de': 'Ermöglicht es, die Standardeinheit-/Standortangabe für den Wetterbefehl festzulegen',
+			'en-GB': 'Allows you to set the default degree type/location for the weather command',
+			'en-US': 'Allows you to set the default degree type/location for the weather command',
+		})
+		.setDMPermission(true)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('location')
+				.setNameLocalizations({
+					'de': 'standort',
+					'en-GB': 'location',
+					'en-US': 'location',
+				})
+				.setDescription('The location name or zip')
+				.setDescriptionLocalizations({
+					'de': 'Der Standortname oder die Postleitzahl',
+					'en-GB': 'The location name or zip',
+					'en-US': 'The location name or zip',
+				})
+				.addStringOption(option =>
+					option
+						.setName('location')
+						.setNameLocalizations({
+							'de': 'standort',
+							'en-GB': 'location',
+							'en-US': 'location',
+						})
+						.setDescription('The location name or zip')
+						.setDescriptionLocalizations({
+							'de': 'Der Standortname oder die Postleitzahl',
+							'en-GB': 'The location name or zip',
+							'en-US': 'The location name or zip',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('unit')
+				.setNameLocalizations({
+					'de': 'einheit',
+					'en-GB': 'unit',
+					'en-US': 'unit',
+				})
+				.setDescription('The unit that should be used')
+				.setDescriptionLocalizations({
+					'de': 'Die Einheit, die verwendet werden soll',
+					'en-GB': 'The unit that should be used',
+					'en-US': 'The unit that should be used',
+				})
+				.addStringOption(option =>
+					option
+						.setName('unit')
+						.setNameLocalizations({
+							'de': 'einheit',
+							'en-GB': 'unit',
+							'en-US': 'unit',
+						})
+						.setDescription('The unit that should be used')
+						.setDescriptionLocalizations({
+							'de': 'Die Einheit, die verwendet werden soll',
+							'en-GB': 'The unit that should be used',
+							'en-US': 'The unit that should be used',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Celcius', value: 'c' },
+							{ name: 'Fahrenheit', value: 'f' },
+						)
+				)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
