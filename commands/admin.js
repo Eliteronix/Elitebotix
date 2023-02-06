@@ -9,8 +9,6 @@ const ObjectsToCsv = require('objects-to-csv');
 module.exports = {
 	name: 'admin',
 	description: 'Sends a message with the bots server',
-	//permissions: 'KICK_MEMBERS',
-	//permissionsTranslated: 'Manage Server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,
@@ -64,28 +62,6 @@ module.exports = {
 			})();
 
 			return;
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'ship',
-			// 		description: 'Lets you check how compatible two users are.',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'user',
-			// 				'description': 'The user or name to ship',
-			// 				'type': 3,
-			// 				'required': true
-			// 			},
-			// 			{
-			// 				'name': 'user2',
-			// 				'description': 'The user or name to ship',
-			// 				'type': 3,
-			// 				'required': false
-			// 			},
-			// 		]
-			// 	}
-			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -591,28 +567,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'ship',
-					description: 'Lets you check how compatible two users are.',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'user',
-							'description': 'The user or name to ship',
-							'type': 3,
-							'required': true
-						},
-						{
-							'name': 'user2',
-							'description': 'The user or name to ship',
-							'type': 3,
-							'required': false
-						},
-					]
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

@@ -1,5 +1,5 @@
 const { getMessageUserDisplayname, populateMsgFromInteraction } = require('../utils.js');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -9,6 +9,50 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
 	tags: 'misc',
+	data: new SlashCommandBuilder()
+		.setName('ship')
+		.setNameLocalizations({
+			'de': 'ship',
+			'en-GB': 'ship',
+			'en-US': 'ship',
+		})
+		.setDescription('Lets you check how compatible two users are.')
+		.setDescriptionLocalizations({
+			'de': 'Lässt dich überprüfen, wie kompatibel zwei Nutzer sind.',
+			'en-GB': 'Lets you check how compatible two users are.',
+			'en-US': 'Lets you check how compatible two users are.',
+		})
+		.setDMPermission(true)
+		.addUserOption(option =>
+			option.setName('user')
+				.setNameLocalizations({
+					'de': 'nutzer',
+					'en-GB': 'user',
+					'en-US': 'user',
+				})
+				.setDescription('The user or name to ship')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzer oder Name, zum shippen',
+					'en-GB': 'The user or name to ship',
+					'en-US': 'The user or name to ship',
+				})
+				.setRequired(true)
+		)
+		.addUserOption(option =>
+			option.setName('user2')
+				.setNameLocalizations({
+					'de': 'nutzer2',
+					'en-GB': 'user2',
+					'en-US': 'user2',
+				})
+				.setDescription('The user or name to ship')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzer oder Name, zum shippen',
+					'en-GB': 'The user or name to ship',
+					'en-US': 'The user or name to ship',
+				})
+				.setRequired(false)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
