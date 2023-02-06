@@ -202,6 +202,26 @@ module.exports = {
 										latestEventId = json.latest_event_id - 1;
 									}
 
+									while (json.first_event_id !== json.events[0].id) {
+										let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
+											.then(async (res) => {
+												let htmlCode = await res.text();
+												htmlCode = htmlCode.replace(/&quot;/gm, '"');
+												const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
+												const matchesPaused = matchPausedRegex.exec(htmlCode);
+
+												if (matchesPaused && matchesPaused[0]) {
+													regexMatch = matchesPaused[0];
+												}
+
+												let json = JSON.parse(regexMatch);
+
+												return json.events;
+											});
+
+										json.events = earlierEvents.concat(json.events);
+									}
+
 									if (json.latest_event_id > latestEventId) {
 										let playerUpdates = [];
 										let redScore = 0; //Score on the left side / first slots
