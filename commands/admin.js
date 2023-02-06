@@ -67,22 +67,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'roll',
-			// 		description: 'Rolls a number between 1 and 100 or 1 and the number specified',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'maximum',
-			// 				'description': 'The maximum number you can roll',
-			// 				'type': 4,
-			// 				'required': false
-			// 			}
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'rollgame',
 			// 		description: 'Start a round of rollgame'
 			// 		dm_permission: true,
@@ -631,21 +615,6 @@ module.exports = {
 			})();
 
 			return;
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'roll',
-					description: 'Rolls a number between 1 and 100 or 1 and the number specified',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'maximum',
-							'description': 'The maximum number you can roll',
-							'type': 4,
-							'required': false
-						}
-					]
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
