@@ -473,6 +473,57 @@ module.exports = {
 					'en-US': 'Lists all tracked users',
 				})
 		),
+	async autocomplete(interaction) {
+		const focusedValue = interaction.options.getFocused();
+
+		const options = [
+			{ name: 'osu! only', value: '1' },
+			{ name: 'taiko only', value: '2' },
+			{ name: 'catch only', value: '3' },
+			{ name: 'mania only', value: '4' },
+			{ name: 'tournaments only', value: '5' },
+			{ name: 'osu! & taiko', value: '12' },
+			{ name: 'osu! & catch', value: '13' },
+			{ name: 'osu! & mania', value: '14' },
+			{ name: 'osu! & tournaments', value: '15' },
+			{ name: 'taiko & catch', value: '23' },
+			{ name: 'taiko & mania', value: '24' },
+			{ name: 'taiko & tournaments', value: '25' },
+			{ name: 'catch & mania', value: '34' },
+			{ name: 'catch & tournaments', value: '35' },
+			{ name: 'mania & tournaments', value: '45' },
+			{ name: 'osu!, taiko & catch', value: '123' },
+			{ name: 'osu!, taiko & mania', value: '124' },
+			{ name: 'osu!, taiko & tournaments', value: '125' },
+			{ name: 'osu!, catch & mania', value: '134' },
+			{ name: 'osu!, catch & tournaments', value: '135' },
+			{ name: 'osu!, mania & tournaments', value: '145' },
+			{ name: 'taiko, catch & mania', value: '234' },
+			{ name: 'taiko, catch & tournaments', value: '235' },
+			{ name: 'taiko, mania & tournaments', value: '245' },
+			{ name: 'catch, mania & tournaments', value: '345' },
+			{ name: 'osu!, taiko, catch & mania', value: '1234' },
+			{ name: 'osu!, taiko, catch & tournaments', value: '1235' },
+			{ name: 'osu!, taiko, mania & tournaments', value: '1245' },
+			{ name: 'osu!, catch, mania & tournaments', value: '1345' },
+			{ name: 'taiko, catch, mania & tournaments', value: '2345' },
+			{ name: 'osu!, taiko, catch, mania & tournaments', value: '12345' }
+		];
+
+		let filtered = options.filter(choice => choice.name.includes(focusedValue));
+
+		filtered = filtered.slice(0, 25);
+
+		try {
+			await interaction.respond(
+				filtered.map(choice => ({ name: choice.name, value: choice.value })),
+			);
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+		}
+	},
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		if (interaction.options.getSubcommand() === 'enable') {
@@ -483,6 +534,10 @@ module.exports = {
 					console.error(error);
 				}
 				return;
+			}
+
+			if (interaction.options.getString('topplays') && isNaN(interaction.options.getString('topplays'))) {
+				return await interaction.editReply('Please choose one of the autocomplete options for the top plays option.');
 			}
 
 			let usernames = interaction.options.getString('usernames');
