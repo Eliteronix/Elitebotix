@@ -3287,6 +3287,9 @@ module.exports = {
 				}
 			}
 		}
+	},
+	async getOsuTournamentBansById(osuUserId) {
+		return await getOsuTournamentBansByIdFunction(osuUserId);
 	}
 };
 
@@ -4403,6 +4406,35 @@ async function getOsuBadgeNumberByIdFunction(osuUserId) {
 				return badgeNameArray.length;
 			}
 			return -1;
+		});
+}
+
+async function getOsuTournamentBansByIdFunction(osuUserId) {
+	return await fetch(`https://osu.ppy.sh/users/${osuUserId}/`)
+		.then(async (res) => {
+			let htmlCode = await res.text();
+			htmlCode = htmlCode.replace(/&quot;/gm, '"');
+			// console.log(htmlCode);
+			const accountHistoryRegex = /,"account_history".+,"active_tournament_banner":/gm;
+			const matches = accountHistoryRegex.exec(htmlCode);
+			if (matches && matches[0]) {
+				const cleanedMatch = matches[0].replace(',"account_history":', '').replace(',"active_tournament_banner":', '');
+				const rawAccountHistoryNotices = JSON.parse(cleanedMatch);
+				const tournamentBans = rawAccountHistoryNotices.filter((notice) => notice.type === 'tournament_ban');
+
+				if (tournamentBans.length) {
+					tournamentBans[0].tournamentBannedUntil = new Date(tournamentBans[0].timestamp);
+
+					if (tournamentBans[0].permanent) {
+						tournamentBans[0].tournamentBannedUntil.setUTCFullYear(9999);
+					} else {
+						tournamentBans[0].tournamentBannedUntil.setUTCSeconds(tournamentBans[0].tournamentBannedUntil.getUTCSeconds() + tournamentBans[0].length);
+					}
+
+					return tournamentBans[0];
+				}
+			}
+			return false;
 		});
 }
 
