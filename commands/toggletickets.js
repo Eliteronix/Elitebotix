@@ -10,6 +10,7 @@ module.exports = {
 	botPermissionsTranslated: 'Manage Channels and Manage Roles',
 	cooldown: 5,
 	tags: 'server-admin',
+	// TODO: Add data
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		try {
