@@ -69,23 +69,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'prune',
-			// 		description: 'Delete recent messages',
-			// 		dm_permission: false,
-			// 		default_member_permissions: manageMessages,
-			// 		options: [
-			// 			{
-			// 				'name': 'amount',
-			// 				'description': 'The amount of messages to delete',
-			// 				'type': 4,
-			// 				'required': true
-			// 			},
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'reactionrole',
 			// 		description: 'Set up roles that users can assign themselves',
 			// 		dm_permission: false,
@@ -949,23 +932,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'prune',
-					description: 'Delete recent messages',
-					dm_permission: false,
-					default_member_permissions: manageMessages,
-					options: [
-						{
-							'name': 'amount',
-							'description': 'The amount of messages to delete',
-							'type': 4,
-							'required': true
-						},
-					]
-				},
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

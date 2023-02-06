@@ -1,4 +1,4 @@
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -8,6 +8,36 @@ module.exports = {
 	botPermissionsTranslated: 'Manage Messages',
 	cooldown: 15,
 	tags: 'server-admin',
+	data: new SlashCommandBuilder()
+		.setName('prune')
+		.setNameLocalizations({
+			'de': 'löschen',
+			'en-GB': 'prune',
+			'en-US': 'prune',
+		})
+		.setDescription('Deletes the specified amount of messages; Messages have to be less than 2 weeks old')
+		.setDescriptionLocalizations({
+			'de': 'Löscht die angegebene Anzahl an Nachrichten; Nachrichten müssen weniger als 2 Wochen alt sein',
+			'en-GB': 'Deletes the specified amount of messages; Messages have to be less than 2 weeks old',
+			'en-US': 'Deletes the specified amount of messages; Messages have to be less than 2 weeks old',
+		})
+		.addIntegerOption(option =>
+			option.setName('amount')
+				.setNameLocalizations({
+					'de': 'anzahl',
+					'en-GB': 'amount',
+					'en-US': 'amount',
+				})
+				.setDescription('The amount of messages to delete')
+				.setDescriptionLocalizations({
+					'de': 'Die Anzahl an Nachrichten, die gelöscht werden sollen',
+					'en-GB': 'The amount of messages to delete',
+					'en-US': 'The amount of messages to delete',
+				})
+				.setRequired(true)
+				.setMinValue(1)
+				.setMaxValue(99)
+		),
 	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply({ ephemeral: true });
@@ -20,10 +50,6 @@ module.exports = {
 
 		//Set amount by argument + 1
 		const amount = interaction.options.getInteger('amount') + 1;
-
-		if (amount <= 1 || amount > 100) {
-			return interaction.editReply('You need to input a number between 1 and 99.');
-		}
 
 		//Delete messages which are less than 2 weeks old
 		interaction.channel.bulkDelete(amount, true).catch(async (err) => {
