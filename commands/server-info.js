@@ -1,6 +1,5 @@
-//Require discord.js module
 const Discord = require('discord.js');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -10,6 +9,20 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,
 	tags: 'general',
+	data: new SlashCommandBuilder()
+		.setName('server-info')
+		.setNameLocalizations({
+			'de': 'server-info',
+			'en-GB': 'server-info',
+			'en-US': 'server-info',
+		})
+		.setDescription('Sends an info card about the server')
+		.setDescriptionLocalizations({
+			'de': 'Sende eine Info-Karte über den Server',
+			'en-GB': 'Sends an info card about the server',
+			'en-US': 'Sends an info card about the server',
+		})
+		.setDMPermission(false),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {
