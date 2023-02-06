@@ -23,6 +23,7 @@ module.exports = {
 			'en-GB': 'Sends current time of the given location',
 			'en-US': 'Sends current time of the given location',
 		})
+		.setDMPermission(true)
 		.addStringOption(option =>
 			option.setName('location')
 				.setNameLocalizations({

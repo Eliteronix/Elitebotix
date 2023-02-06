@@ -1,5 +1,5 @@
 const { populateMsgFromInteraction, getOsuUserServerMode } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -9,6 +9,93 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 15,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('tournament-feed')
+		.setNameLocalizations({
+			'de': 'turnier-feed',
+			'en-GB': 'tournament-feed',
+			'en-US': 'tournament-feed',
+		})
+		.setDescription('Toggles receiving new tournament notifications')
+		.setDescriptionLocalizations({
+			'de': 'Schaltet die Empfangung neuer Turnierbenachrichtigungen ein oder aus',
+			'en-GB': 'Toggles receiving new tournament notifications',
+			'en-US': 'Toggles receiving new tournament notifications',
+		})
+		.setDMPermission(true)
+		.addSubcommand(subcommand =>
+			subcommand.setName('togglenotifications')
+				.setNameLocalizations({
+					'de': 'benachrichtigungeneinausschalten',
+					'en-GB': 'togglenotifications',
+					'en-US': 'togglenotifications',
+				})
+				.setDescription('Toggles receiving notifications')
+				.setDescriptionLocalizations({
+					'de': 'Schaltet die Empfangung von Benachrichtigungen ein oder aus',
+					'en-GB': 'Toggles receiving notifications',
+					'en-US': 'Toggles receiving notifications',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand.setName('settings')
+				.setNameLocalizations({
+					'de': 'einstellungen',
+					'en-GB': 'settings',
+					'en-US': 'settings',
+				})
+				.setDescription('Update your settings with this command')
+				.setDescriptionLocalizations({
+					'de': 'Aktualisiere deine Einstellungen mit diesem Befehl',
+					'en-GB': 'Update your settings with this command',
+					'en-US': 'Update your settings with this command',
+				})
+				.addStringOption(option =>
+					option.setName('gamemode')
+						.setNameLocalizations({
+							'de': 'spielmodus',
+							'en-GB': 'gamemode',
+							'en-US': 'gamemode',
+						})
+						.setDescription('Set to "All" for all gamemodes use "s/t/c/m" or a combination of them for modes')
+						.setDescriptionLocalizations({
+							'de': 'Setze es auf "All" für alle Spielmodi, benutze "s/t/c/m" oder eine Kombination für bestimmte Modi',
+							'en-GB': 'Set to "All" for all gamemodes use "s/t/c/m" or a combination of them for modes',
+							'en-US': 'Set to "All" for all gamemodes use "s/t/c/m" or a combination of them for modes',
+						})
+						.setRequired(false)
+				)
+				.addBooleanOption(option =>
+					option.setName('badged')
+						.setNameLocalizations({
+							'de': 'badged',
+							'en-GB': 'badged',
+							'en-US': 'badged',
+						})
+						.setDescription('Should you only get notifications for badged tournaments')
+						.setDescriptionLocalizations({
+							'de': 'Solltest du nur Benachrichtigungen für badged Turniere erhalten',
+							'en-GB': 'Should you only get notifications for badged tournaments',
+							'en-US': 'Should you only get notifications for badged tournaments',
+						})
+						.setRequired(false)
+				)
+				.addIntegerOption(option =>
+					option.setName('maxrank')
+						.setNameLocalizations({
+							'de': 'maximaler-rang',
+							'en-GB': 'maxrank',
+							'en-US': 'maxrank',
+						})
+						.setDescription('Example: 10000 = tournaments that allow 4 digits to play will not be shown')
+						.setDescriptionLocalizations({
+							'de': 'Beispiel: 10000 = Turniere, die 4-stellige Spieler zulassen, werden nicht angezeigt',
+							'en-GB': 'Example: 10000 = tournaments that allow 4 digits to play will not be shown',
+							'en-US': 'Example: 10000 = tournaments that allow 4 digits to play will not be shown',
+						})
+						.setRequired(false)
+				)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code

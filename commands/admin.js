@@ -64,46 +64,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'tournament-feed',
-			// 		description: 'Toggles receiving new tournament notifications',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'togglenotifications',
-			// 				'description': 'Toggles receiving notifications',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'settings',
-			// 				'description': 'Update your settings with this command',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'gamemode',
-			// 						'description': 'Set to "All" for all gamemodes use "s/t/c/m" or a combination of them for modes',
-			// 						'type': 3,
-			// 						'required': false
-			// 					},
-			// 					{
-			// 						'name': 'badged',
-			// 						'description': 'Should you only get notifications for badged tournaments',
-			// 						'type': 5, // 5 is type BOOLEAN
-			// 						'required': false
-			// 					},
-			// 					{
-			// 						'name': 'maxrank',
-			// 						'description': 'Example: 10000 = tournaments that allow 4 digits to play will not be shown',
-			// 						'type': 4,
-			// 						'required': false
-			// 					},
-			// 				]
-			// 			},
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'twitch',
 			// 		description: 'Allows control of the twitch integration',
 			// 		dm_permission: true,
@@ -355,46 +315,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'tournament-feed',
-					description: 'Toggles receiving new tournament notifications',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'togglenotifications',
-							'description': 'Toggles receiving notifications',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'settings',
-							'description': 'Update your settings with this command',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'gamemode',
-									'description': 'Set to "All" for all gamemodes use "s/t/c/m" or a combination of them for modes',
-									'type': 3,
-									'required': false
-								},
-								{
-									'name': 'badged',
-									'description': 'Should you only get notifications for badged tournaments',
-									'type': 5, // 5 is type BOOLEAN
-									'required': false
-								},
-								{
-									'name': 'maxrank',
-									'description': 'Example: 10000 = tournaments that allow 4 digits to play will not be shown',
-									'type': 4,
-									'required': false
-								},
-							]
-						},
-					]
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
