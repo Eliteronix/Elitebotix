@@ -1,6 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const { logDatabaseQueries, getOsuPlayerName } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { developers } = require('../config.json');
 const Discord = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -12,6 +12,95 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,
 	tags: 'general',
+	data: new SlashCommandBuilder()
+		.setName('user-profile')
+		.setNameLocalizations({
+			'de': 'nutzer-profil',
+			'en-GB': 'user-profile',
+			'en-US': 'user-profile',
+		})
+		.setDescription('Sends an info card about the specified user')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Info-Karte über den angegebenen Nutzer',
+			'en-GB': 'Sends an info card about the specified user',
+			'en-US': 'Sends an info card about the specified user',
+		})
+		.setDMPermission(true)
+		.addUserOption(option =>
+			option.setName('user')
+				.setNameLocalizations({
+					'de': 'nutzer',
+					'en-GB': 'user',
+					'en-US': 'user',
+				})
+				.setDescription('The user to send the info card of')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzer, dessen Info-Karte gesendet werden soll',
+					'en-GB': 'The user to send the info card of',
+					'en-US': 'The user to send the info card of',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('user2')
+				.setNameLocalizations({
+					'de': 'nutzer2',
+					'en-GB': 'user2',
+					'en-US': 'user2',
+				})
+				.setDescription('The user to send the info card of')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzer, dessen Info-Karte gesendet werden soll',
+					'en-GB': 'The user to send the info card of',
+					'en-US': 'The user to send the info card of',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('user3')
+				.setNameLocalizations({
+					'de': 'nutzer3',
+					'en-GB': 'user3',
+					'en-US': 'user3',
+				})
+				.setDescription('The user to send the info card of')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzer, dessen Info-Karte gesendet werden soll',
+					'en-GB': 'The user to send the info card of',
+					'en-US': 'The user to send the info card of',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('user4')
+				.setNameLocalizations({
+					'de': 'nutzer4',
+					'en-GB': 'user4',
+					'en-US': 'user4',
+				})
+				.setDescription('The user to send the info card of')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzer, dessen Info-Karte gesendet werden soll',
+					'en-GB': 'The user to send the info card of',
+					'en-US': 'The user to send the info card of',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('user5')
+				.setNameLocalizations({
+					'de': 'nutzer5',
+					'en-GB': 'user5',
+					'en-US': 'user5',
+				})
+				.setDescription('The user to send the info card of')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzer, dessen Info-Karte gesendet werden soll',
+					'en-GB': 'The user to send the info card of',
+					'en-US': 'The user to send the info card of',
+				})
+				.setRequired(false)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {

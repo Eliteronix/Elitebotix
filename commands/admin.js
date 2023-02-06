@@ -64,46 +64,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'user-profile',
-			// 		description: 'Sends an info card about the specified user',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'user',
-			// 				'description': 'The user to send the info card of',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'user2',
-			// 				'description': 'The user to send the info card of',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'user3',
-			// 				'description': 'The user to send the info card of',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'user4',
-			// 				'description': 'The user to send the info card of',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'user5',
-			// 				'description': 'The user to send the info card of',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': false
-			// 			},
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'weather-set',
 			// 		description: 'Allows you to set the default degree type/location for the weather command',
 			// 		dm_permission: true,
@@ -277,46 +237,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'user-profile',
-					description: 'Sends an info card about the specified user',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'user',
-							'description': 'The user to send the info card of',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'user2',
-							'description': 'The user to send the info card of',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'user3',
-							'description': 'The user to send the info card of',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'user4',
-							'description': 'The user to send the info card of',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'user5',
-							'description': 'The user to send the info card of',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-					]
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

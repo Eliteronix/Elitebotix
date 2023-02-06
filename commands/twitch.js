@@ -44,7 +44,7 @@ module.exports = {
 					option
 						.setName('username')
 						.setNameLocalizations({
-							'de': 'Nutzername',
+							'de': 'nutzername',
 							'en-GB': 'username',
 							'en-US': 'username',
 						})
