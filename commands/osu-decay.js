@@ -26,7 +26,7 @@ module.exports = {
 			'en-US': 'Calculates how long it would take for a player to decay from their current rank',
 		})
 		.setDMPermission(true)
-		.addStringOption(option =>
+		.addIntegerOption(option =>
 			option.setName('rank')
 				.setNameLocalizations({
 					'de': 'rang',
@@ -40,6 +40,7 @@ module.exports = {
 					'en-US': 'The rank to decay to',
 				})
 				.setRequired(true)
+				.setMinValue(2)
 		)
 		.addStringOption(option =>
 			option.setName('username')
