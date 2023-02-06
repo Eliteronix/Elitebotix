@@ -1,4 +1,4 @@
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Op } = require('sequelize');
@@ -12,6 +12,20 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 15,
 	tags: 'general',
+	data: new SlashCommandBuilder()
+		.setName('reminders')
+		.setNameLocalizations({
+			'de': 'erinnerungen',
+			'en-GB': 'reminders',
+			'en-US': 'reminders',
+		})
+		.setDescription('Sends your set reminders')
+		.setDescriptionLocalizations({
+			'de': 'Sendet deine gesetzten Erinnerungen',
+			'en-GB': 'Sends your set reminders',
+			'en-US': 'Sends your set reminders',
+		})
+		.setDMPermission(true),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code

@@ -23,8 +23,6 @@ module.exports = {
 
 		let manageChannels = (1 << 4).toString();
 		let manageGuild = (1 << 5).toString();
-		let manageMessages = (1 << 13).toString();
-		let manageRoles = (1 << 28).toString();
 
 		if (args[0] === 'guildCommands') {
 			const { REST, Routes } = require('discord.js');
@@ -66,14 +64,6 @@ module.exports = {
 			})();
 
 			return;
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'reminders',
-			// 		description: 'Sends your set reminders',
-			// 		dm_permission: true,
-			// 	}
-			// });
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
@@ -761,14 +751,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'reminders',
-					description: 'Sends your set reminders',
-					dm_permission: true,
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
