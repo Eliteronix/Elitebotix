@@ -67,52 +67,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'remindme',
-			// 		description: 'Sends a reminder at the specified time',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'message',
-			// 				'description': 'The message of the reminder',
-			// 				'type': 3,
-			// 				'required': true
-			// 			},
-			// 			{
-			// 				'name': 'years',
-			// 				'description': 'The years until the reminder',
-			// 				'type': 4,
-			// 			},
-			// 			{
-			// 				'name': 'months',
-			// 				'description': 'The months until the reminder',
-			// 				'type': 4,
-			// 			},
-			// 			{
-			// 				'name': 'weeks',
-			// 				'description': 'The weeks until the reminder',
-			// 				'type': 4,
-			// 			},
-			// 			{
-			// 				'name': 'days',
-			// 				'description': 'The days until the reminder',
-			// 				'type': 4,
-			// 			},
-			// 			{
-			// 				'name': 'hours',
-			// 				'description': 'The hours until the reminder',
-			// 				'type': 4,
-			// 			},
-			// 			{
-			// 				'name': 'minutes',
-			// 				'description': 'The minutes until the reminder',
-			// 				'type': 4,
-			// 			},
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'roll',
 			// 		description: 'Rolls a number between 1 and 100 or 1 and the number specified',
 			// 		dm_permission: true,
@@ -677,53 +631,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'remindme',
-					description: 'Sends a reminder at the specified time',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'message',
-							'description': 'The message of the reminder',
-							'type': 3,
-							'required': true
-						},
-						{
-							'name': 'years',
-							'description': 'The years until the reminder',
-							'type': 4,
-						},
-						{
-							'name': 'months',
-							'description': 'The months until the reminder',
-							'type': 4,
-						},
-						{
-							'name': 'weeks',
-							'description': 'The weeks until the reminder',
-							'type': 4,
-						},
-						{
-							'name': 'days',
-							'description': 'The days until the reminder',
-							'type': 4,
-						},
-						{
-							'name': 'hours',
-							'description': 'The hours until the reminder',
-							'type': 4,
-						},
-						{
-							'name': 'minutes',
-							'description': 'The minutes until the reminder',
-							'type': 4,
-						},
-					]
-				}
-			});
-
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
 					name: 'roll',

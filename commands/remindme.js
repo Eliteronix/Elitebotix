@@ -1,6 +1,7 @@
 const { DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
 	name: 'remindme',
@@ -9,6 +10,125 @@ module.exports = {
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,
 	tags: 'general',
+	data: new SlashCommandBuilder()
+		.setName('remindme')
+		.setNameLocalizations({
+			'de': 'erinnere-mich',
+			'en-GB': 'remindme',
+			'en-US': 'remindme',
+		})
+		.setDescription('Sends a reminder at the specified time')
+		.setDescriptionLocalizations({
+			'de': 'Sendet eine Erinnerung zu der angegebenen Zeit',
+			'en-GB': 'Sends a reminder at the specified time',
+			'en-US': 'Sends a reminder at the specified time',
+		})
+		.setDMPermission(true)
+		.addStringOption(option =>
+			option.setName('message')
+				.setNameLocalizations({
+					'de': 'nachricht',
+					'en-GB': 'message',
+					'en-US': 'message',
+				})
+				.setDescription('The message of the reminder')
+				.setDescriptionLocalizations({
+					'de': 'Die Nachricht der Erinnerung',
+					'en-GB': 'The message of the reminder',
+					'en-US': 'The message of the reminder',
+				})
+				.setRequired(true)
+		)
+		.addIntegerOption(option =>
+			option.setName('years')
+				.setNameLocalizations({
+					'de': 'jahre',
+					'en-GB': 'years',
+					'en-US': 'years',
+				})
+				.setDescription('The years until the reminder')
+				.setDescriptionLocalizations({
+					'de': 'Die Jahre bis zur Erinnerung',
+					'en-GB': 'The years until the reminder',
+					'en-US': 'The years until the reminder',
+				})
+				.setRequired(false)
+		)
+		.addIntegerOption(option =>
+			option.setName('months')
+				.setNameLocalizations({
+					'de': 'monate',
+					'en-GB': 'months',
+					'en-US': 'months',
+				})
+				.setDescription('The months until the reminder')
+				.setDescriptionLocalizations({
+					'de': 'Die Monate bis zur Erinnerung',
+					'en-GB': 'The months until the reminder',
+					'en-US': 'The months until the reminder',
+				})
+				.setRequired(false)
+		)
+		.addIntegerOption(option =>
+			option.setName('weeks')
+				.setNameLocalizations({
+					'de': 'wochen',
+					'en-GB': 'weeks',
+					'en-US': 'weeks',
+				})
+				.setDescription('The weeks until the reminder')
+				.setDescriptionLocalizations({
+					'de': 'Die Wochen bis zur Erinnerung',
+					'en-GB': 'The weeks until the reminder',
+					'en-US': 'The weeks until the reminder',
+				})
+				.setRequired(false)
+		)
+		.addIntegerOption(option =>
+			option.setName('days')
+				.setNameLocalizations({
+					'de': 'tage',
+					'en-GB': 'days',
+					'en-US': 'days',
+				})
+				.setDescription('The days until the reminder')
+				.setDescriptionLocalizations({
+					'de': 'Die Tage bis zur Erinnerung',
+					'en-GB': 'The days until the reminder',
+					'en-US': 'The days until the reminder',
+				})
+				.setRequired(false)
+		)
+		.addIntegerOption(option =>
+			option.setName('hours')
+				.setNameLocalizations({
+					'de': 'stunden',
+					'en-GB': 'hours',
+					'en-US': 'hours',
+				})
+				.setDescription('The hours until the reminder')
+				.setDescriptionLocalizations({
+					'de': 'Die Stunden bis zur Erinnerung',
+					'en-GB': 'The hours until the reminder',
+					'en-US': 'The hours until the reminder',
+				})
+				.setRequired(false)
+		)
+		.addIntegerOption(option =>
+			option.setName('minutes')
+				.setNameLocalizations({
+					'de': 'minuten',
+					'en-GB': 'minutes',
+					'en-US': 'minutes',
+				})
+				.setDescription('The minutes until the reminder')
+				.setDescriptionLocalizations({
+					'de': 'Die Minuten bis zur Erinnerung',
+					'en-GB': 'The minutes until the reminder',
+					'en-US': 'The minutes until the reminder',
+				})
+				.setRequired(false)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
