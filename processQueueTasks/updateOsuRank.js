@@ -170,6 +170,12 @@ module.exports = {
 			await discordUser.save();
 		} catch (error) {
 			if (error.message === 'Not found') {
+				let sendLogMessage = false;
+
+				if (discordUser.osuName) {
+					sendLogMessage = true;
+				}
+
 				let message = `Could not find osu! user \`${discordUser.osuName}\` (\`${discordUser.osuUserId}\` | https://osu.ppy.sh/users/${discordUser.osuUserId}) anymore (repeatedly)`;
 
 				let now = new Date();
@@ -262,7 +268,7 @@ module.exports = {
 					}
 				}
 
-				if (discordUser.osuName) {
+				if (sendLogMessage) {
 					client.shard.broadcastEval(async (c, { message }) => {
 						let guildId = '727407178499096597';
 
