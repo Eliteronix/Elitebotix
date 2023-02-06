@@ -1,5 +1,5 @@
 const { populateMsgFromInteraction } = require('../utils');
-const { PermissionsBitField, EmbedBuilder } = require('discord.js');
+const { PermissionsBitField, EmbedBuilder, SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	name: 'rollgame',
@@ -8,6 +8,20 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 30,
 	tags: 'misc',
+	data: new SlashCommandBuilder()
+		.setName('rollgame')
+		.setNameLocalizations({
+			'de': 'rollgame',
+			'en-GB': 'rollgame',
+			'en-US': 'rollgame',
+		})
+		.setDescription('Play the rollgame against someone or the bot')
+		.setDescriptionLocalizations({
+			'de': 'Spiele Rollgame gegen jemanden oder gegen den Bot',
+			'en-GB': 'Play the rollgame against someone or the bot',
+			'en-US': 'Play the rollgame against someone or the bot',
+		})
+		.setDMPermission(true),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
