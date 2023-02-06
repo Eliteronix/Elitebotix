@@ -1,5 +1,5 @@
 const { DBGuilds } = require('../dbObjects');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { logDatabaseQueries } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -10,7 +10,21 @@ module.exports = {
 	botPermissionsTranslated: 'Manage Channels and Manage Roles',
 	cooldown: 5,
 	tags: 'server-admin',
-	// TODO: Add data
+	data: new SlashCommandBuilder()
+		.setName('toggletickets')
+		.setNameLocalizations({
+			'de': 'ticketseinausschalten',
+			'en-GB': 'toggletickets',
+			'en-US': 'toggletickets',
+		})
+		.setDescription('Toggles the tickets setting for the server')
+		.setDescriptionLocalizations({
+			'de': 'Schaltet die Ticketeinstellung für den Server um',
+			'en-GB': 'Toggles the tickets setting for the server',
+			'en-US': 'Toggles the tickets setting for the server',
+		})
+		.setDMPermission(false)
+		.setDefaultMemberPermissions(PermissionsBitField.Flags.ManageGuild),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		try {
