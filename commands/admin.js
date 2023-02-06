@@ -65,46 +65,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'slap',
-			// 		description: 'Lets you send a gif to slap a user',
-			// 		dm_permission: false,
-			// 		options: [
-			// 			{
-			// 				'name': 'user',
-			// 				'description': 'The user to slap',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': true
-			// 			},
-			// 			{
-			// 				'name': 'user2',
-			// 				'description': 'The user to slap',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'user3',
-			// 				'description': 'The user to slap',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'user4',
-			// 				'description': 'The user to slap',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': false
-			// 			},
-			// 			{
-			// 				'name': 'user5',
-			// 				'description': 'The user to slap',
-			// 				'type': 6, // 6 is type USER
-			// 				'required': false
-			// 			},
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'starboard',
 			// 		description: 'Highlight favourite messages with a star emoji!',
 			// 		dm_permission: false,
@@ -567,46 +527,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'slap',
-					description: 'Lets you send a gif to slap a user',
-					dm_permission: false,
-					options: [
-						{
-							'name': 'user',
-							'description': 'The user to slap',
-							'type': 6, // 6 is type USER
-							'required': true
-						},
-						{
-							'name': 'user2',
-							'description': 'The user to slap',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'user3',
-							'description': 'The user to slap',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'user4',
-							'description': 'The user to slap',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-						{
-							'name': 'user5',
-							'description': 'The user to slap',
-							'type': 6, // 6 is type USER
-							'required': false
-						},
-					]
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

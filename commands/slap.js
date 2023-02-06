@@ -1,5 +1,5 @@
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -9,6 +9,95 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Embed Links',
 	cooldown: 5,
 	tags: 'misc',
+	data: new SlashCommandBuilder()
+		.setName('slap')
+		.setNameLocalizations({
+			'de': 'klatschen',
+			'en-GB': 'slap',
+			'en-US': 'slap',
+		})
+		.setDescription('Lets you send a gif to slap a user.')
+		.setDescriptionLocalizations({
+			'de': 'Lässt dich einen Gif schicken, um einen Nutzer eine zu klatschen.',
+			'en-GB': 'Lets you send a gif to slap a user.',
+			'en-US': 'Lets you send a gif to slap a user.',
+		})
+		.setDMPermission(false)
+		.addUserOption(option =>
+			option.setName('user')
+				.setNameLocalizations({
+					'de': 'nutzer',
+					'en-GB': 'user',
+					'en-US': 'user',
+				})
+				.setDescription('The user to slap.')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzer, dem du eine klatschen willst.',
+					'en-GB': 'The user to slap.',
+					'en-US': 'The user to slap.',
+				})
+				.setRequired(true)
+		)
+		.addUserOption(option =>
+			option.setName('user2')
+				.setNameLocalizations({
+					'de': 'nutzer2',
+					'en-GB': 'user2',
+					'en-US': 'user2',
+				})
+				.setDescription('The user to slap.')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzer, dem du eine klatschen willst.',
+					'en-GB': 'The user to slap.',
+					'en-US': 'The user to slap.',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('user3')
+				.setNameLocalizations({
+					'de': 'nutzer3',
+					'en-GB': 'user3',
+					'en-US': 'user3',
+				})
+				.setDescription('The user to slap.')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzer, dem du eine klatschen willst.',
+					'en-GB': 'The user to slap.',
+					'en-US': 'The user to slap.',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('user4')
+				.setNameLocalizations({
+					'de': 'nutzer4',
+					'en-GB': 'user4',
+					'en-US': 'user4',
+				})
+				.setDescription('The user to slap.')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzer, dem du eine klatschen willst.',
+					'en-GB': 'The user to slap.',
+					'en-US': 'The user to slap.',
+				})
+				.setRequired(false)
+		)
+		.addUserOption(option =>
+			option.setName('user5')
+				.setNameLocalizations({
+					'de': 'nutzer5',
+					'en-GB': 'user5',
+					'en-US': 'user5',
+				})
+				.setDescription('The user to slap.')
+				.setDescriptionLocalizations({
+					'de': 'Der Nutzer, dem du eine klatschen willst.',
+					'en-GB': 'The user to slap.',
+					'en-US': 'The user to slap.',
+				})
+				.setRequired(false)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {
