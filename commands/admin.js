@@ -19,8 +19,6 @@ module.exports = {
 			return;
 		}
 
-		let manageGuild = (1 << 5).toString();
-
 		if (args[0] === 'guildCommands') {
 			const { REST, Routes } = require('discord.js');
 			const fs = require('fs');
@@ -43,7 +41,7 @@ module.exports = {
 			const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN);
 
 			// and deploy your commands!
-			(async () => {
+			return (async () => {
 				try {
 					await msg.reply(`Started adding ${commands.length} application (/) commands.`);
 
@@ -59,98 +57,6 @@ module.exports = {
 					console.error(error);
 				}
 			})();
-
-			return;
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
-			// 		name: 'weather-track',
-			// 		description: 'Get hourly/daily weather updates for a specified location',
-			// 		dm_permission: false,
-			// 		default_member_permissions: manageGuild,
-			// 		options: [
-			// 			{
-			// 				'name': 'list',
-			// 				'description': 'List the currently tracked locations',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'add',
-			// 				'description': 'Track a new location',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'location',
-			// 						'description': 'The location or zipcode to track',
-			// 						'type': 3,
-			// 						'required': true
-			// 					},
-			// 					{
-			// 						'name': 'frequency',
-			// 						'description': 'The tracking frequency',
-			// 						'type': 3,
-			// 						'required': true,
-			// 						'choices': [
-			// 							{
-			// 								'name': 'Daily',
-			// 								'value': 'daily'
-			// 							},
-			// 							{
-			// 								'name': 'Hourly',
-			// 								'value': 'hourly'
-			// 							},
-			// 						]
-			// 					},
-			// 					{
-			// 						'name': 'unit',
-			// 						'description': 'The tracking unit',
-			// 						'type': 3,
-			// 						'required': true,
-			// 						'choices': [
-			// 							{
-			// 								'name': 'Celcius',
-			// 								'value': 'c'
-			// 							},
-			// 							{
-			// 								'name': 'Fahrenheit',
-			// 								'value': 'f'
-			// 							}
-			// 						]
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'remove',
-			// 				'description': 'Stop tracking a location',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'unit',
-			// 						'description': 'The tracking unit',
-			// 						'type': 3,
-			// 						'required': true,
-			// 						'choices': [
-			// 							{
-			// 								'name': 'Celcius',
-			// 								'value': 'c'
-			// 							},
-			// 							{
-			// 								'name': 'Fahrenheit',
-			// 								'value': 'f'
-			// 							}
-			// 						]
-			// 					},
-			// 					{
-			// 						'name': 'location',
-			// 						'description': 'The location or zipcode to track',
-			// 						'type': 3,
-			// 						'required': true
-			// 					},
-			// 				]
-			// 			},
-			// 		]
-			// 	},
-			// });
 		} else if (args[0] === 'globalCommands') {
 			const { REST, Routes } = require('discord.js');
 			const fs = require('node:fs');
@@ -173,7 +79,7 @@ module.exports = {
 			const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN);
 
 			// and deploy your commands!
-			(async () => {
+			return (async () => {
 				try {
 					await msg.reply(`Started refreshing ${commands.length} application (/) commands.`);
 
@@ -189,98 +95,6 @@ module.exports = {
 					console.error(error);
 				}
 			})();
-
-			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'weather-track',
-					description: 'Get hourly/daily weather updates for a specified location',
-					dm_permission: false,
-					default_member_permissions: manageGuild,
-					options: [
-						{
-							'name': 'list',
-							'description': 'List the currently tracked locations',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'add',
-							'description': 'Track a new location',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'location',
-									'description': 'The location or zipcode to track',
-									'type': 3,
-									'required': true
-								},
-								{
-									'name': 'frequency',
-									'description': 'The tracking frequency',
-									'type': 3,
-									'required': true,
-									'choices': [
-										{
-											'name': 'Daily',
-											'value': 'daily'
-										},
-										{
-											'name': 'Hourly',
-											'value': 'hourly'
-										},
-									]
-								},
-								{
-									'name': 'unit',
-									'description': 'The tracking unit',
-									'type': 3,
-									'required': true,
-									'choices': [
-										{
-											'name': 'Celcius',
-											'value': 'c'
-										},
-										{
-											'name': 'Fahrenheit',
-											'value': 'f'
-										}
-									]
-								}
-							]
-						},
-						{
-							'name': 'remove',
-							'description': 'Stop tracking a location',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'unit',
-									'description': 'The tracking unit',
-									'type': 3,
-									'required': true,
-									'choices': [
-										{
-											'name': 'Celcius',
-											'value': 'c'
-										},
-										{
-											'name': 'Fahrenheit',
-											'value': 'f'
-										}
-									]
-								},
-								{
-									'name': 'location',
-									'description': 'The location or zipcode to track',
-									'type': 3,
-									'required': true
-								},
-							]
-						},
-					]
-				},
-			});
 		} else if (args[0] === 'saveMultiMatches') {
 			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'saveMultiMatches' } });
 			for (let i = 0; i < processQueueTasks.length; i++) {

@@ -1,6 +1,6 @@
 const { DBProcessQueue } = require('../dbObjects');
 const weather = require('weather-js');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -11,6 +11,158 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'server-admin',
+	data: new SlashCommandBuilder()
+		.setName('weather-track')
+		.setNameLocalizations({
+			'de': 'wetter-verfolgen',
+			'en-GB': 'weather-track',
+			'en-US': 'weather-track',
+		})
+		.setDescription('Sends info about the weather of the given location each time period')
+		.setDescriptionLocalizations({
+			'de': 'Sendet Informationen zum Wetter des angegebenen Standorts zu jeder Zeitperiode',
+			'en-GB': 'Sends info about the weather of the given location each time period',
+			'en-US': 'Sends info about the weather of the given location each time period',
+		})
+		.setDMPermission(false)
+		.setDefaultMemberPermissions(PermissionsBitField.Flags.ManageGuild)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('list')
+				.setNameLocalizations({
+					'de': 'liste',
+					'en-GB': 'list',
+					'en-US': 'list',
+				})
+				.setDescription('List the currently tracked locations')
+				.setDescriptionLocalizations({
+					'de': 'Listet die derzeit verfolgten Standorte auf',
+					'en-GB': 'List the currently tracked locations',
+					'en-US': 'List the currently tracked locations',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('add')
+				.setNameLocalizations({
+					'de': 'hinzufügen',
+					'en-GB': 'add',
+					'en-US': 'add',
+				})
+				.setDescription('Track a new location')
+				.setDescriptionLocalizations({
+					'de': 'Verfolgen Sie einen neuen Standort',
+					'en-GB': 'Track a new location',
+					'en-US': 'Track a new location',
+				})
+				.addStringOption(option =>
+					option
+						.setName('location')
+						.setNameLocalizations({
+							'de': 'standort',
+							'en-GB': 'location',
+							'en-US': 'location',
+						})
+						.setDescription('The location or zipcode to track')
+						.setDescriptionLocalizations({
+							'de': 'Der Ort oder die Postleitzahl, die verfolgt werden soll',
+							'en-GB': 'The location or zipcode to track',
+							'en-US': 'The location or zipcode to track',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option
+						.setName('frequency')
+						.setNameLocalizations({
+							'de': 'frequenz',
+							'en-GB': 'frequency',
+							'en-US': 'frequency',
+						})
+						.setDescription('The tracking frequency')
+						.setDescriptionLocalizations({
+							'de': 'Die Verfolgungsfrequenz',
+							'en-GB': 'The tracking frequency',
+							'en-US': 'The tracking frequency',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Daily', value: 'daily' },
+							{ name: 'Hourly', value: 'hourly' },
+						)
+				)
+				.addStringOption(option =>
+					option
+						.setName('unit')
+						.setNameLocalizations({
+							'de': 'einheit',
+							'en-GB': 'unit',
+							'en-US': 'unit',
+						})
+						.setDescription('The unit to use')
+						.setDescriptionLocalizations({
+							'de': 'Die Einheit, die verwendet werden soll',
+							'en-GB': 'The unit to use',
+							'en-US': 'The unit to use',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Celcius', value: 'c' },
+							{ name: 'Fahrenheit', value: 'f' },
+						)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('remove')
+				.setNameLocalizations({
+					'de': 'entfernen',
+					'en-GB': 'remove',
+					'en-US': 'remove',
+				})
+				.setDescription('Stop tracking a location')
+				.setDescriptionLocalizations({
+					'de': 'Verfolgen Sie einen Standort nicht mehr',
+					'en-GB': 'Stop tracking a location',
+					'en-US': 'Stop tracking a location',
+				})
+				.addStringOption(option =>
+					option
+						.setName('unit')
+						.setNameLocalizations({
+							'de': 'einheit',
+							'en-GB': 'unit',
+							'en-US': 'unit',
+						})
+						.setDescription('The tracking unit')
+						.setDescriptionLocalizations({
+							'de': 'Die Verfolgungseinheit',
+							'en-GB': 'The tracking unit',
+							'en-US': 'The tracking unit',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Celcius', value: 'c' },
+							{ name: 'Fahrenheit', value: 'f' },
+						)
+				)
+				.addStringOption(option =>
+					option
+						.setName('location')
+						.setNameLocalizations({
+							'de': 'standort',
+							'en-GB': 'location',
+							'en-US': 'location',
+						})
+						.setDescription('The location or zipcode to track')
+						.setDescriptionLocalizations({
+							'de': 'Der Ort oder die Postleitzahl, die verfolgt werden soll',
+							'en-GB': 'The location or zipcode to track',
+							'en-US': 'The location or zipcode to track',
+						})
+						.setRequired(true)
+				)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
