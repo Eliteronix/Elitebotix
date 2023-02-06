@@ -67,22 +67,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'reminders-delete',
-			// 		description: 'Delete a selected reminder',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'id',
-			// 				'description': 'Id of the reminder (can be found by using /reminders command)',
-			// 				'type': 4,
-			// 				'required': true
-			// 			}
-			// 		],
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'reminders-edit',
 			// 		description: 'Edit your reminders',
 			// 		dm_permission: true,
@@ -751,22 +735,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'reminders-delete',
-					description: 'Delete a selected reminder',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'id',
-							'description': 'Id of the reminder (can be found by using /reminders command)',
-							'type': 4,
-							'required': true
-						}
-					],
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

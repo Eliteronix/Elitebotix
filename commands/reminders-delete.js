@@ -1,4 +1,4 @@
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Op } = require('sequelize');
@@ -11,6 +11,35 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 15,
 	tags: 'general',
+	data: new SlashCommandBuilder()
+		.setName('reminders-delete')
+		.setNameLocalizations({
+			'de': 'erinnerungen-löschen',
+			'en-GB': 'reminders-delete',
+			'en-US': 'reminders-delete',
+		})
+		.setDescription('Delete a selected reminder')
+		.setDescriptionLocalizations({
+			'de': 'Löscht eine ausgewählte Erinnerung',
+			'en-GB': 'Delete a selected reminder',
+			'en-US': 'Delete a selected reminder',
+		})
+		.setDMPermission(true)
+		.addIntegerOption(option =>
+			option.setName('id')
+				.setNameLocalizations({
+					'de': 'id',
+					'en-GB': 'id',
+					'en-US': 'id',
+				})
+				.setDescription('Id of the reminder (can be found by using /reminders command)')
+				.setDescriptionLocalizations({
+					'de': 'Id der Erinnerung (kann mit /erinnerungen gefunden werden)',
+					'en-GB': 'Id of the reminder (can be found by using /reminders command)',
+					'en-US': 'Id of the reminder (can be found by using /reminders command)',
+				})
+				.setRequired(true)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, processQueueEntry) {
 		//TODO: Remove message code and replace with interaction code
