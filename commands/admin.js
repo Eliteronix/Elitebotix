@@ -67,64 +67,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'reminders-edit',
-			// 		description: 'Edit your reminders',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'id',
-			// 				'description': 'Id of the reminder (can be found by using /reminders command)',
-			// 				'type': 4,
-			// 				'required': true
-			// 			},
-			// 			{
-			// 				'name': 'message',
-			// 				'description': 'The message of the reminder',
-			// 				'type': 3,
-			// 				'required': true
-			// 			},
-			// 			{
-			// 				'name': 'years',
-			// 				'description': 'The years until the reminder',
-			// 				'type': 4,
-			// 				'required': false,
-			// 			},
-			// 			{
-			// 				'name': 'months',
-			// 				'description': 'The months until the reminder',
-			// 				'type': 4,
-			// 				'required': false,
-			// 			},
-			// 			{
-			// 				'name': 'weeks',
-			// 				'description': 'The weeks until the reminder',
-			// 				'type': 4,
-			// 				'required': false,
-			// 			},
-			// 			{
-			// 				'name': 'days',
-			// 				'description': 'The days until the reminder',
-			// 				'type': 4,
-			// 				'required': false,
-			// 			},
-			// 			{
-			// 				'name': 'hours',
-			// 				'description': 'The hours until the reminder',
-			// 				'type': 4,
-			// 				'required': false,
-			// 			},
-			// 			{
-			// 				'name': 'minutes',
-			// 				'description': 'The minutes until the reminder',
-			// 				'type': 4,
-			// 				'required': false,
-			// 			},
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'remindme',
 			// 		description: 'Sends a reminder at the specified time',
 			// 		dm_permission: true,
@@ -735,64 +677,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'reminders-edit',
-					description: 'Edit your reminders',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'id',
-							'description': 'Id of the reminder (can be found by using /reminders command)',
-							'type': 4,
-							'required': true
-						},
-						{
-							'name': 'message',
-							'description': 'The message of the reminder',
-							'type': 3,
-							'required': true
-						},
-						{
-							'name': 'years',
-							'description': 'The years until the reminder',
-							'type': 4,
-							'required': false,
-						},
-						{
-							'name': 'months',
-							'description': 'The months until the reminder',
-							'type': 4,
-							'required': false,
-						},
-						{
-							'name': 'weeks',
-							'description': 'The weeks until the reminder',
-							'type': 4,
-							'required': false,
-						},
-						{
-							'name': 'days',
-							'description': 'The days until the reminder',
-							'type': 4,
-							'required': false,
-						},
-						{
-							'name': 'hours',
-							'description': 'The hours until the reminder',
-							'type': 4,
-							'required': false,
-						},
-						{
-							'name': 'minutes',
-							'description': 'The minutes until the reminder',
-							'type': 4,
-							'required': false,
-						},
-					]
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {
