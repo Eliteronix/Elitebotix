@@ -1150,6 +1150,24 @@ module.exports = {
 				map = shortMatches[0];
 			}
 
+			if (!map && msg.includes('https://osu.ppy.sh/beatmapsets/')) {
+				logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers no map selected');
+				let discordUser = await DBDiscordUsers.findOne({
+					where: {
+						twitchName: target.substring(1),
+						twitchVerified: true,
+						twitchOsuMapSync: true,
+						osuUserId: {
+							[Op.ne]: null
+						}
+					}
+				});
+
+				if (discordUser && context['display-name'].toLowerCase() !== discordUser.twitchName.toLowerCase()) {
+					twitchClient.say(target.substring(1), `${context['display-name']} -> Please select a difficulty of the mapset.`);
+				}
+			}
+
 			if (map) {
 				map = map.replace(/.+\//gm, '');
 
