@@ -65,37 +65,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'tempvoice',
-			// 		description: 'Create temporary voice- and textchannels',
-			// 		dm_permission: false,
-			// 		default_member_permissions: manageChannels,
-			// 		options: [
-			// 			{
-			// 				'name': 'enablevoice',
-			// 				'description': 'Enable temporary voices for the server',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'disablevoice',
-			// 				'description': 'Disable temporary voices for the server',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'enabletext',
-			// 				'description': 'Enable temporary textchannels along voices for the server',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'disabletext',
-			// 				'description': 'Disable temporary textchannels along voices for the server',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 		]
-			// 	},
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'ticket',
 			// 		description: 'Create and manage tickets',
 			// 		dm_permission: false,
@@ -480,84 +449,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'starboard',
-					description: 'Highlight favourite messages with a star emoji!',
-					dm_permission: false,
-					default_member_permissions: manageGuild,
-					options: [
-						{
-							'name': 'enable',
-							'description': 'Enable the starboard for the server',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'disable',
-							'description': 'Disable the starboard for the server',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'channel',
-							'description': 'Set the starboard channel where starred messages get sent to',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'channel',
-									'description': 'The channel to send messages to',
-									'type': 7, // 7 is type CHANNEL
-									'required': true
-								}
-							]
-						},
-						{
-							'name': 'minimum',
-							'description': 'Set the minimum amount of stars needed to highlight',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'amount',
-									'description': 'The minimum amount of stars needed',
-									'type': 4,
-									'required': true
-								}
-							]
-						},
-					]
-				},
-			});
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'tempvoice',
-					description: 'Create temporary voice- and textchannels',
-					dm_permission: false,
-					default_member_permissions: manageChannels,
-					options: [
-						{
-							'name': 'enablevoice',
-							'description': 'Enable temporary voices for the server',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'disablevoice',
-							'description': 'Disable temporary voices for the server',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'enabletext',
-							'description': 'Enable temporary textchannels along voices for the server',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'disabletext',
-							'description': 'Disable temporary textchannels along voices for the server',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-					]
-				},
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

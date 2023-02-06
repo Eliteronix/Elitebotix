@@ -1,6 +1,6 @@
 const { DBGuilds } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -10,6 +10,81 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages, Manage Channels, Manage Roles and Move Members',
 	cooldown: 5,
 	tags: 'server-admin',
+	data: new SlashCommandBuilder()
+		.setName('tempvoice')
+		.setNameLocalizations({
+			'de': 'tempvoice',
+			'en-GB': 'tempvoice',
+			'en-US': 'tempvoice',
+		})
+		.setDescription('Toggles the temporary channel setting for the server')
+		.setDescriptionLocalizations({
+			'de': 'Aktiviert/Deaktiviert temporäre Kanäle für den Server',
+			'en-GB': 'Toggles the temporary channel setting for the server',
+			'en-US': 'Toggles the temporary channel setting for the server',
+		})
+		.setDMPermission(false)
+		.setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('enablevoice')
+				.setNameLocalizations({
+					'de': 'aktivierevoice',
+					'en-GB': 'enablevoice',
+					'en-US': 'enablevoice',
+				})
+				.setDescription('Enable temporary voices for the server')
+				.setDescriptionLocalizations({
+					'de': 'Aktiviert temporäre Sprachkanäle für den Server',
+					'en-GB': 'Enable temporary voices for the server',
+					'en-US': 'Enable temporary voices for the server',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('disablevoice')
+				.setNameLocalizations({
+					'de': 'deaktivierevoice',
+					'en-GB': 'disablevoice',
+					'en-US': 'disablevoice',
+				})
+				.setDescription('Disable temporary voices for the server')
+				.setDescriptionLocalizations({
+					'de': 'Deaktiviert temporäre Sprachkanäle für den Server',
+					'en-GB': 'Disable temporary voices for the server',
+					'en-US': 'Disable temporary voices for the server',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('enabletext')
+				.setNameLocalizations({
+					'de': 'aktivieretext',
+					'en-GB': 'enabletext',
+					'en-US': 'enabletext',
+				})
+				.setDescription('Enable temporary textchannels along voices for the server')
+				.setDescriptionLocalizations({
+					'de': 'Aktiviert temporäre Textkanäle parallel zu Sprachkanälen für den Server',
+					'en-GB': 'Enable temporary textchannels along voices for the server',
+					'en-US': 'Enable temporary textchannels along voices for the server',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('disabletext')
+				.setNameLocalizations({
+					'de': 'deaktivieretext',
+					'en-GB': 'disabletext',
+					'en-US': 'disabletext',
+				})
+				.setDescription('Disable temporary textchannels along voices for the server')
+				.setDescriptionLocalizations({
+					'de': 'Deaktiviert temporäre Textkanäle parallel zu Sprachkanälen für den Server',
+					'en-GB': 'Disable temporary textchannels along voices for the server',
+					'en-US': 'Disable temporary textchannels along voices for the server',
+				})
+		),
 	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
