@@ -64,44 +64,6 @@ module.exports = {
 
 			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
 			// 	data: {
-			// 		name: 'twitch',
-			// 		description: 'Allows control of the twitch integration',
-			// 		dm_permission: true,
-			// 		options: [
-			// 			{
-			// 				'name': 'connect',
-			// 				'description': 'Allows you to connect your twitch account to the bot',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 				'options': [
-			// 					{
-			// 						'name': 'username',
-			// 						'description': 'Your twitch name as found in your URL',
-			// 						'type': 3,
-			// 						'required': true
-			// 					}
-			// 				]
-			// 			},
-			// 			{
-			// 				'name': 'disconnect',
-			// 				'description': 'Removes the currently connected twitch account',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'togglemp',
-			// 				'description': 'Toggle the !mp command',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 			{
-			// 				'name': 'togglemapsync',
-			// 				'description': 'Toggle the twitch to osu! map sync',
-			// 				'type': 1, // 1 is type SUB_COMMAND
-			// 			},
-			// 		]
-			// 	}
-			// });
-
-			// await msg.client.api.applications(msg.client.user.id).guilds(msg.guildId).commands.post({
-			// 	data: {
 			// 		name: 'user-profile',
 			// 		description: 'Sends an info card about the specified user',
 			// 		dm_permission: true,
@@ -315,44 +277,6 @@ module.exports = {
 			})();
 
 			return;
-
-			await msg.client.api.applications(msg.client.user.id).commands.post({
-				data: {
-					name: 'twitch',
-					description: 'Allows control of the twitch integration',
-					dm_permission: true,
-					options: [
-						{
-							'name': 'connect',
-							'description': 'Allows you to connect your twitch account to the bot',
-							'type': 1, // 1 is type SUB_COMMAND
-							'options': [
-								{
-									'name': 'username',
-									'description': 'Your twitch name as found in your URL',
-									'type': 3,
-									'required': true
-								}
-							]
-						},
-						{
-							'name': 'disconnect',
-							'description': 'Removes the currently connected twitch account',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'togglemp',
-							'description': 'Toggle the !mp command',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-						{
-							'name': 'togglemapsync',
-							'description': 'Toggle the twitch to osu! map sync',
-							'type': 1, // 1 is type SUB_COMMAND
-						},
-					]
-				}
-			});
 
 			await msg.client.api.applications(msg.client.user.id).commands.post({
 				data: {

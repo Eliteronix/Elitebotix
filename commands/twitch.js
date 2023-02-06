@@ -1,4 +1,4 @@
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBDiscordUsers } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
 const { logDatabaseQueries } = require('../utils');
@@ -12,6 +12,96 @@ module.exports = {
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
 	tags: 'osu',
+	data: new SlashCommandBuilder()
+		.setName('twitch')
+		.setNameLocalizations({
+			'de': 'twitch',
+			'en-GB': 'twitch',
+			'en-US': 'twitch',
+		})
+		.setDescription('Allows control of the twitch integration')
+		.setDescriptionLocalizations({
+			'de': 'Erlaubt die Kontrolle der Twitch-Integration',
+			'en-GB': 'Allows control of the twitch integration',
+			'en-US': 'Allows control of the twitch integration',
+		})
+		.setDMPermission(true)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('connect')
+				.setNameLocalizations({
+					'de': 'verbinden',
+					'en-GB': 'connect',
+					'en-US': 'connect',
+				})
+				.setDescription('Allows you to connect your twitch account to the bot')
+				.setDescriptionLocalizations({
+					'de': 'Erlaubt es dir, dein Twitch-Konto mit dem Bot zu verbinden',
+					'en-GB': 'Allows you to connect your twitch account to the bot',
+					'en-US': 'Allows you to connect your twitch account to the bot',
+				})
+				.addStringOption(option =>
+					option
+						.setName('username')
+						.setNameLocalizations({
+							'de': 'Nutzername',
+							'en-GB': 'username',
+							'en-US': 'username',
+						})
+						.setDescription('Your twitch name as found in your URL')
+						.setDescriptionLocalizations({
+							'de': 'Dein Twitch-Name, wie er in deiner URL zu finden ist',
+							'en-GB': 'Your twitch name as found in your URL',
+							'en-US': 'Your twitch name as found in your URL',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('disconnect')
+				.setNameLocalizations({
+					'de': 'trennen',
+					'en-GB': 'disconnect',
+					'en-US': 'disconnect',
+				})
+				.setDescription('Removes the currently connected twitch account')
+				.setDescriptionLocalizations({
+					'de': 'Entfernt das aktuell verbundene Twitch-Konto',
+					'en-GB': 'Removes the currently connected twitch account',
+					'en-US': 'Removes the currently connected twitch account',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('togglemp')
+				.setNameLocalizations({
+					'de': 'mpeinausschalten',
+					'en-GB': 'togglemp',
+					'en-US': 'togglemp',
+				})
+				.setDescription('Toggle the !mp command')
+				.setDescriptionLocalizations({
+					'de': 'Schaltet den !mp-Befehl ein oder aus',
+					'en-GB': 'Toggle the !mp command',
+					'en-US': 'Toggle the !mp command',
+				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('togglemapsync')
+				.setNameLocalizations({
+					'de': 'mapsynceinausschalten',
+					'en-GB': 'togglemapsync',
+					'en-US': 'togglemapsync',
+				})
+				.setDescription('Toggle the twitch to osu! map sync')
+				.setDescriptionLocalizations({
+					'de': 'Schaltet die Synchronisation der maps zwischen Twitch und osu! ein oder aus',
+					'en-GB': 'Toggle the twitch to osu! map sync',
+					'en-US': 'Toggle the twitch to osu! map sync',
+				})
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {
