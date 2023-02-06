@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { getOsuBadgeNumberById, logDatabaseQueries, getUserDuelStarRating, getDerankStats } = require('../utils.js');
+const { getOsuBadgeNumberById, logDatabaseQueries, getUserDuelStarRating, getDerankStats, getOsuTournamentBansById } = require('../utils.js');
 const osu = require('node-osu');
 const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.json');
 
@@ -145,6 +145,13 @@ module.exports = {
 				discordUser.osuBadges = badges;
 			}
 
+			let tournamentBan = await getOsuTournamentBansById(discordUser.osuUserId);
+
+			if (tournamentBan) {
+				discordUser.tournamentBannedReason = tournamentBan.description;
+				discordUser.tournamentBannedUntil = tournamentBan.tournamentBannedUntil;
+			}
+
 			await discordUser.save();
 
 			try {
@@ -205,6 +212,8 @@ module.exports = {
 					discordUser.catchRank = null;
 					discordUser.maniaPP = null;
 					discordUser.maniaRank = null;
+					discordUser.tournamentBannedReason = null;
+					discordUser.tournamentBannedUntil = null;
 
 					if (user) {
 						try {

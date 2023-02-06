@@ -839,6 +839,18 @@ module.exports = {
 			});
 
 			return msg.reply(`Warmup null: ${count}`);
+		} else if (args[0] === 'tournamentBanned') {
+			let discordUsers = await DBDiscordUsers.findAll({
+				where: {
+					tournamentBannedUntil: {
+						[Op.gte]: new Date(),
+					},
+				},
+			});
+
+			for (let i = 0; i < discordUsers.length; i++) {
+				await msg.reply(`${discordUsers[i].osuName} | <https://osu.ppy.sh/users/${discordUsers[i].osuUserId}>`);
+			}
 		} else {
 			msg.reply('Invalid command');
 		}
