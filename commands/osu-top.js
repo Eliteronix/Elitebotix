@@ -127,7 +127,7 @@ module.exports = {
 				.addChoices(
 					{ name: 'Bancho', value: 'b' },
 					{ name: 'Ripple', value: 'r' },
-					{ name: 'Tournaments', value: 't' },
+					{ name: 'Tournaments', value: 'tournaments' },
 				)
 		)
 		.addStringOption(option =>
