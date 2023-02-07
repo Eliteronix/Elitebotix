@@ -24,8 +24,8 @@ module.exports = {
 			'en-US': 'Allows you to set your main mode and server',
 		})
 		.setDMPermission(true)
-		.addStringOption(option =>
-			option
+		.addSubcommand(subcommand =>
+			subcommand
 				.setName('mode')
 				.setNameLocalizations({
 					'de': 'modus',
@@ -38,16 +38,31 @@ module.exports = {
 					'en-GB': 'Change the main mode when handling the bot',
 					'en-US': 'Change the main mode when handling the bot',
 				})
-				.setRequired(true)
-				.addChoices(
-					{ name: 'Standard', value: 'standard' },
-					{ name: 'Taiko', value: 'taiko' },
-					{ name: 'Catch the Beat', value: 'catch' },
-					{ name: 'Mania', value: 'mania' },
+				.addStringOption(option =>
+					option
+						.setName('mode')
+						.setNameLocalizations({
+							'de': 'modus',
+							'en-GB': 'mode',
+							'en-US': 'mode',
+						})
+						.setDescription('The main mode when handling the bot')
+						.setDescriptionLocalizations({
+							'de': 'Der Hauptmodus, mit dem der Bot umgeht',
+							'en-GB': 'The main mode when handling the bot',
+							'en-US': 'The main mode when handling the bot',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Standard', value: 'standard' },
+							{ name: 'Taiko', value: 'taiko' },
+							{ name: 'Catch the Beat', value: 'catch' },
+							{ name: 'Mania', value: 'mania' },
+						)
 				)
 		)
-		.addStringOption(option =>
-			option
+		.addSubcommand(subcommand =>
+			subcommand
 				.setName('server')
 				.setNameLocalizations({
 					'de': 'server',
@@ -60,10 +75,25 @@ module.exports = {
 					'en-GB': 'Change the main server when handling the bot',
 					'en-US': 'Change the main server when handling the bot',
 				})
-				.setRequired(true)
-				.addChoices(
-					{ name: 'Bancho', value: 'bancho' },
-					{ name: 'Ripple', value: 'ripple' },
+				.addStringOption(option =>
+					option
+						.setName('server')
+						.setNameLocalizations({
+							'de': 'server',
+							'en-GB': 'server',
+							'en-US': 'server',
+						})
+						.setDescription('The main server when handling the bot')
+						.setDescriptionLocalizations({
+							'de': 'Der Hauptserver, mit dem der Bot umgeht',
+							'en-GB': 'The main server when handling the bot',
+							'en-US': 'The main server when handling the bot',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Bancho', value: 'bancho' },
+							{ name: 'Ripple', value: 'ripple' },
+						)
 				)
 		),
 	async execute(msg, args, interaction) {
