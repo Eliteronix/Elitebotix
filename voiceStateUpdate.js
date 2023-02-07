@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const { PermissionFlagsBits } = require('discord.js');
 const { DBGuilds, DBTemporaryVoices } = require('./dbObjects');
 const { isWrongSystem, logDatabaseQueries } = require('./utils');
 
@@ -228,7 +229,10 @@ module.exports = async function (oldMember, newMember) {
 
 					try {
 						//Move further down to avoid waiting time
-						createdText = await newMember.guild.channels.create('temporaryText', 'text');
+						createdText = await newMember.guild.channels.create({
+							name: 'temporaryText',
+							type: Discord.ChannelType.GuildText,
+						});
 					} catch (e) {
 						if (e.message === 'Missing Access') {
 							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
@@ -311,7 +315,7 @@ module.exports = async function (oldMember, newMember) {
 				//Set all permissions for the creator
 				const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
 				try {
-					await createdChannel.permissionOverwrites.edit(newUser, { MANAGE_CHANNELS: true, MOVE_MEMBERS: true, CONNECT: true, SPEAK: true, VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, STREAM: true, USE_VAD: true });
+					await createdChannel.permissionOverwrites.edit(newUser, { ManageChannels: true, MoveMembers: true, Connect: true, Speak: true, ViewChannel: true, CreateInstantInvite: true, Stream: true, UseVAD: true });
 				} catch (e) {
 					if (e.message === 'Missing Access') {
 						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
@@ -327,11 +331,27 @@ module.exports = async function (oldMember, newMember) {
 						await createdText.permissionOverwrites.set([
 							{
 								id: newMember.id,
-								allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS', 'CREATE_INSTANT_INVITE', 'MANAGE_WEBHOOKS', 'SEND_MESSAGES', 'EMBED_LINKS', 'ATTACH_FILES', 'ADD_REACTIONS', 'USE_EXTERNAL_EMOJIS', 'MENTION_EVERYONE', 'MANAGE_MESSAGES', 'READ_MESSAGE_HISTORY', 'SEND_TTS_MESSAGES'],
+								allow: [
+									PermissionFlagsBits.ViewChannel,
+									PermissionFlagsBits.ManageChannels,
+									PermissionFlagsBits.CreateInstantInvite,
+									PermissionFlagsBits.ManageWebhooks,
+									PermissionFlagsBits.SendMessages,
+									PermissionFlagsBits.EmbedLinks,
+									PermissionFlagsBits.AttachFiles,
+									PermissionFlagsBits.AddReactions,
+									PermissionFlagsBits.UseExternalEmojis,
+									PermissionFlagsBits.MentionEveryone,
+									PermissionFlagsBits.ManageMessages,
+									PermissionFlagsBits.ReadMessageHistory,
+									PermissionFlagsBits.SendTTSMessages,
+								],
 							},
 							{
 								id: everyone.id,
-								deny: ['VIEW_CHANNEL'],
+								deny: [
+									PermissionFlagsBits.ViewChannel
+								],
 							},
 						]);
 					} catch (e) {
