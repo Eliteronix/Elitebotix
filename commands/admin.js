@@ -884,6 +884,7 @@ module.exports = {
 			let scores = await DBOsuMultiScores.findAll({
 				where: {
 					beatmapId: args[1],
+					freeMod: false,
 				}
 			});
 
