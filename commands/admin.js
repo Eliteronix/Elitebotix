@@ -851,6 +851,139 @@ module.exports = {
 			for (let i = 0; i < discordUsers.length; i++) {
 				await msg.reply(`${discordUsers[i].osuName} | <https://osu.ppy.sh/users/${discordUsers[i].osuUserId}>`);
 			}
+		} else if (args[0] === 'tournamentDifficulty') {
+			if (!args[1]) {
+				return msg.reply('Missing beatmap ID');
+			}
+
+			if (!args[1]) {
+				return msg.reply('Missing mods');
+			}
+
+			let modBits = 0;
+
+			if (args[2] === 'NM') {
+				modBits = 0;
+			} else if (args[2] === 'HD') {
+				modBits = 8;
+			} else if (args[2] === 'HR') {
+				modBits = 16;
+			} else if (args[2] === 'DT') {
+				modBits = 64;
+			} else {
+				return msg.reply('Invalid mod');
+			}
+
+			let beatmap = await getOsuBeatmap({ beatmapId: args[1], modBits: modBits });
+
+			if (!beatmap) {
+				return msg.reply('Beatmap not found');
+			}
+
+			//Get all the scores for the map
+			let scores = await DBOsuMultiScores.findAll({
+				where: {
+					beatmapId: args[1],
+				}
+			});
+
+			let plays = [];
+
+			// grab the player IDs, scores, mods, and month
+			for (let i = 0; i < scores.length; i++) {
+				if (scores[i].warmup) {
+					continue;
+				}
+
+				if (parseInt(scores[i].gameRawMods) % 2 === 1) {
+					scores[i].gameRawMods = parseInt(scores[i].gameRawMods) - 1;
+				}
+				if (parseInt(scores[i].rawMods) % 2 === 1) {
+					scores[i].rawMods = parseInt(scores[i].rawMods) - 1;
+				}
+
+				if (parseInt(modBits) !== parseInt(scores[i].rawMods) + parseInt(scores[i].gameRawMods)) {
+					continue;
+				}
+
+				plays.push({
+					osuUserId: scores[i].osuUserId,
+					score: scores[i].score,
+					month: new Date(scores[i].gameStartDate).getUTCMonth(),
+					year: new Date(scores[i].gameStartDate).getUTCFullYear(),
+				});
+			}
+
+			let allDuelRatingHistories = await DBDuelRatingHistory.findAll({
+				where: {
+					osuUserId: {
+						[Op.in]: plays.map(p => p.osuUserId),
+					},
+				}
+			});
+
+			for (let i = 0; i < plays.length; i++) {
+				let duelRatingHistory = allDuelRatingHistories.find(d => d.osuUserId === plays[i].osuUserId && d.month === plays[i].month && d.year === plays[i].year);
+
+				if (!duelRatingHistory) {
+					plays.splice(i, 1);
+					i--;
+					continue;
+				}
+
+				if (args[2] === 'NM') {
+					plays[i].score = plays[i].score / 1;
+					plays[i].duelRating = duelRatingHistory.osuNoModDuelStarRating;
+				} else if (args[2] === 'HD') {
+					plays[i].score = plays[i].score / 1.06;
+					plays[i].duelRating = duelRatingHistory.osuHiddenDuelStarRating;
+				} else if (args[2] === 'HR') {
+					plays[i].score = plays[i].score / 1.1;
+					plays[i].duelRating = duelRatingHistory.osuHardRockDuelStarRating;
+				} else if (args[2] === 'DT') {
+					plays[i].score = plays[i].score / 1.2;
+					plays[i].duelRating = duelRatingHistory.osuDoubleTimeDuelStarRating;
+				}
+
+				if (!plays[i].duelRating) {
+					plays.splice(i, 1);
+					i--;
+					continue;
+				}
+
+				plays[i].duelRating = parseFloat(plays[i].duelRating);
+
+				if (plays[i].score < 20000) {
+					plays[i].score = 20000;
+				}
+
+				// calculate the expected SR
+				// y=a (x + (b-r))²+c
+				// r = (ab+sqrt(-a(c-y))+ax)/a
+				// y = plays[i].score
+				// x = plays[i].duelRating
+				// r = ? (the expected duel rating)
+				const a = 120000;
+				const b = -1.67;
+				const c = 20000;
+
+				let helpRating = (a * b + Math.sqrt(-a * (c - plays[i].score)) + a * plays[i].duelRating) / a;
+
+				plays[i].expectedDuelRating = plays[i].duelRating - (helpRating - plays[i].duelRating);
+			}
+
+			if (plays.length === 0) {
+				return msg.reply('No plays found');
+			}
+
+			// Get the average expected duel rating
+			let averageExpectedDuelRating = 0;
+			for (let i = 0; i < plays.length; i++) {
+				averageExpectedDuelRating += plays[i].expectedDuelRating;
+			}
+			averageExpectedDuelRating /= plays.length;
+
+			return await msg.reply(`The tournament difficulty for ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] with ${args[2]} is ${averageExpectedDuelRating.toFixed(2)} based on ${plays.length} plays.`);
 		} else {
 			msg.reply('Invalid command');
 		}
