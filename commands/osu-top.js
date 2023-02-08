@@ -378,6 +378,8 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		osuApi.getUser({ u: username, m: mode })
 			.then(async (user) => {
 				updateOsuDetailsforUser(user, mode);
@@ -529,6 +531,8 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		osuApi.getUser({ u: username, m: mode })
 			.then(async (user) => {
 				updateOsuDetailsforUser(user, mode);
@@ -722,6 +726,8 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 	let unrankedBonusPP = 0;
 
 	if (server === 'bancho') {
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		scores = await osuApi.getUserBest({ u: user.name, m: mode, limit: limit });
 	} else if (server === 'ripple') {
 		const response = await fetch(`https://www.ripple.moe/api/get_user_best?u=${user.name}&m=${mode}&limit=${limit}`);
@@ -773,6 +779,8 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 		for (let i = 0; i < multisToUpdate.length; i++) {
 			processingMessage.edit(`[One time process] Updating legacy scores for ${user.name}... ${i + 1}/${multisToUpdate.length}`);
+			// eslint-disable-next-line no-undef
+			process.send('osu!API');
 			await osuApi.getMatch({ mp: multisToUpdate[i] })
 				.then(async (match) => {
 					await saveOsuMultiScores(match);

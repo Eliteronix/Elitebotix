@@ -20,6 +20,8 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		await osuApi.getMatch({ mp: matchId })
 			.then(async (match) => {
 				let sixHoursAgo = new Date();

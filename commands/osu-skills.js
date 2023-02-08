@@ -308,6 +308,8 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 	});
 
+	// eslint-disable-next-line no-undef
+	process.send('osu!API');
 	osuApi.getUser({ u: username })
 		.then(async (user) => {
 			const topScores = await osuApi.getUserBest({ u: user.name, m: 0, limit: 100 })

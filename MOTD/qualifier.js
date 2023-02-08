@@ -127,6 +127,8 @@ async function getQualifierResults(map, players) {
 	let results = [];
 
 	for (let i = 0; i < players.length; i++) {
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		const score = await osuApi.getScores({ b: map.id, u: players[i].osuUserId })
 			.then(async (scores) => {
 				let score = scores[0];

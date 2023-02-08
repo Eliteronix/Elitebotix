@@ -80,6 +80,8 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		osuApi.getBeatmaps({ b: getIDFromPotentialOsuLink(args[1]) })
 			.then(async (beatmaps) => {
 				getBeatmap(msg, args, interaction);
@@ -180,12 +182,16 @@ module.exports = {
 				const beginnerUpperDiff = 5.54;
 
 				if (args[0].toLowerCase() === 'hr') {
+					// eslint-disable-next-line no-undef
+					process.send('osu!API');
 					const hrMap = await osuApi.getBeatmaps({ b: getIDFromPotentialOsuLink(args[1]), mods: 16 });
 
 					beatmaps[0].difficulty.rating = hrMap[0].difficulty.rating;
 					beatmaps[0].difficulty.aim = hrMap[0].difficulty.aim;
 					beatmaps[0].difficulty.speed = hrMap[0].difficulty.speed;
 				} else if (args[0].toLowerCase() === 'dt') {
+					// eslint-disable-next-line no-undef
+					process.send('osu!API');
 					const dtMap = await osuApi.getBeatmaps({ b: getIDFromPotentialOsuLink(args[1]), mods: 64 });
 
 					beatmaps[0].difficulty.rating = dtMap[0].difficulty.rating;

@@ -332,6 +332,8 @@ module.exports = {
 					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 				});
 
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				osuApi.getMatch({ mp: lobby.id })
 					.then(async (match) => {
 						saveOsuMultiScores(match);
@@ -353,6 +355,8 @@ module.exports = {
 					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 				});
 
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				osuApi.getMatch({ mp: lobby.id })
 					.then(async (match) => {
 						saveOsuMultiScores(match);
@@ -601,6 +605,8 @@ async function getKnockoutScores(map, players, doubleTime) {
 	//pp field is abused for reason of knockout
 	let results = [];
 	for (let i = 0; i < players.length; i++) {
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		const score = await osuApi.getUserRecent({ u: players[i].osuUserId })
 			.then(async (scores) => {
 				let mods = getMods(scores[0].raw_mods);

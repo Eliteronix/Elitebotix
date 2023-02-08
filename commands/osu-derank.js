@@ -96,6 +96,8 @@ module.exports = {
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
 
+			// eslint-disable-next-line no-undef
+			process.send('osu!API');
 			let user = await osuApi.getUser({ u: username, m: 0 })
 				.then(osuUser => {
 					return osuUser;

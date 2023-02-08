@@ -117,6 +117,8 @@ module.exports = {
 		let user = null;
 
 		try {
+			// eslint-disable-next-line no-undef
+			process.send('osu!API');
 			user = await osuApi.getUser({ u: username });
 		} catch (error) {
 			return await interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
@@ -187,6 +189,8 @@ module.exports = {
 			}
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				let updatedUserToCompare = await osuApi.getUser({ u: discordUsers[index].osuUserId });
 
 				if (Number(updatedUserToCompare.pp.raw) !== Number(discordUsers[index].osuPP)) {

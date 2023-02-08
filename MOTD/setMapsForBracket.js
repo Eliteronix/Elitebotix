@@ -60,6 +60,8 @@ module.exports = {
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
 			while (amountOfMapsInDB === -1) {
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
 
 				const dbBeatmap = await getOsuBeatmap({ beatmapId: mostRecentBeatmap[0].id, modBits: 0 });

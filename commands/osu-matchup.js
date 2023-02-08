@@ -680,6 +680,8 @@ module.exports = {
 					team1[i] = getIDFromPotentialOsuLink(team1[i]);
 				}
 
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				await osuApi.getUser({ u: team1[i] })
 					.then(user => {
 						team1[i] = user.id;
@@ -718,6 +720,8 @@ module.exports = {
 					team2[i] = getIDFromPotentialOsuLink(team2[i]);
 				}
 
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				await osuApi.getUser({ u: team2[i] })
 					.then(user => {
 						team2[i] = user.id;

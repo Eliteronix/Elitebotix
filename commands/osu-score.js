@@ -302,6 +302,8 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 			username = discordUser.osuName;
 		}
 
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		osuApi.getScores({ b: beatmap.beatmapId, u: username, m: mode })
 			.then(async (scores) => {
 				if (!(scores[0])) {
@@ -311,11 +313,15 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 				for (let i = 0; i < scores.length; i++) {
 					if (mods === 'best' && i === 0 || mods === 'all' || mods !== 'best' && mods !== 'all' && getModBits(mods) === scores[i].raw_mods) {
 						scoreHasBeenOutput = true;
+						// eslint-disable-next-line no-undef
+						process.send('osu!API');
 						const user = await osuApi.getUser({ u: username, m: mode });
 						updateOsuDetailsforUser(user, mode);
 
 						//Get the map leaderboard and fill the maprank if found
 						if (!mapRank) {
+							// eslint-disable-next-line no-undef
+							process.send('osu!API');
 							await osuApi.getScores({ b: beatmap.beatmapId, m: mode, limit: 100 })
 								.then(async (mapScores) => {
 									for (let j = 0; j < mapScores.length && !mapRank; j++) {
@@ -478,6 +484,8 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 				}
 			});
 	} else if (server === 'tournaments') {
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		const osuUser = await osuApi.getUser({ u: username, m: mode });
 
 		const beatmapScores = await DBOsuMultiScores.findAll({

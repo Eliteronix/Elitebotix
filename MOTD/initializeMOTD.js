@@ -38,6 +38,8 @@ module.exports = {
 			const yesterdayMySQLFormat = `${yesterdayYear}-${yesterdayMonth}-${yesterdayDay} ${yesterdayHour}:${yesterdayMinute}:${yesterdaySecond}`;
 
 			//Get all maps since yesterday
+			// eslint-disable-next-line no-undef
+			process.send('osu!API');
 			osuApi.getBeatmaps({ m: 0, since: yesterdayMySQLFormat }) //mySQL date YYYY-MM-DD hh:mm:ss
 				.then(async (beatmaps) => {
 					let NMBeatmaps = [];
@@ -107,6 +109,8 @@ module.exports = {
 
 					//Calculate Difficulties and other stuff for DT
 					for (let i = 0; i < DTBeatmaps.length; i++) {
+						// eslint-disable-next-line no-undef
+						process.send('osu!API');
 						const dtMap = await osuApi.getBeatmaps({ b: DTBeatmaps[i].id, mods: 64 });
 
 						DTBeatmaps[i].difficulty.rating = dtMap[0].difficulty.rating;

@@ -230,6 +230,8 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 		let i = 0;
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		osuApi.getUserRecent({ u: username, m: mode })
 			.then(async (scores) => {
 				if (!(scores[0])) {
@@ -246,11 +248,15 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 				}
 
 				const dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: 0 });
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				const user = await osuApi.getUser({ u: username, m: mode });
 				updateOsuDetailsforUser(user, mode);
 
 				let mapRank = 0;
 				//Get the map leaderboard and fill the maprank if found
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				await osuApi.getScores({ b: dbBeatmap.beatmapId, m: mode, limit: 100 })
 					.then(async (mapScores) => {
 						for (let j = 0; j < mapScores.length && !mapRank; j++) {
@@ -270,6 +276,8 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 				let lookedUpScore;
 
 				try {
+					// eslint-disable-next-line no-undef
+					process.send('osu!API');
 					lookedUpScore = await osuApi.getScores({ b: scores[i].beatmapId, u: user.id, m: beatmapMode, mods: scores[i].raw_mods });
 				} catch (err) {
 					//No score found

@@ -605,6 +605,8 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 			parseNumeric: false,
 		});
 
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		osuApi.getUser({ u: username })
 			.then(async (user) => {
 

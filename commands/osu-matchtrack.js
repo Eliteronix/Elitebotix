@@ -93,6 +93,8 @@ module.exports = {
 
 		matchID = Number(matchID);
 
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
 				if (match.raw_end && !showStart) {
@@ -137,6 +139,8 @@ module.exports = {
 						}
 					}
 
+					// eslint-disable-next-line no-undef
+					process.send('osu!API');
 					await osuApi.getMatch({ mp: matchID })
 						.then(async (match) => {
 							await saveOsuMultiScores(match);

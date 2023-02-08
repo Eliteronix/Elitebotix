@@ -151,6 +151,8 @@ module.exports = {
 			}
 		}
 
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		osuApi.getMatch({ mp: matchId })
 			.then(async (match) => {
 				saveOsuMultiScores(match);

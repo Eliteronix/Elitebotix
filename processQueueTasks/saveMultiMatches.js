@@ -40,8 +40,12 @@ module.exports = {
 			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 10);
 		}
 
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		await osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
+				// eslint-disable-next-line no-undef
+				process.send('saveMultiMatches ' + Math.floor((Date.now() - Date.parse(match.raw_start)) / 1000));
 				let sixHoursAgo = new Date();
 				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
 
@@ -179,6 +183,8 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 	});
 
 	if (incompleteMatchScore) {
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
 			.then(async (match) => {
 				client.shard.broadcastEval(async (c, { channelId, message }) => {
@@ -234,6 +240,8 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 
 		if (incompleteMatch) {
 			// Fetch the match and check if the match was created by MaidBot
+			// eslint-disable-next-line no-undef
+			process.send('osu!API');
 			await osuApi.getMatch({ mp: incompleteMatch.matchId })
 				.then(async (match) => {
 					try {

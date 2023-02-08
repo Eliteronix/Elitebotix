@@ -43,6 +43,8 @@ module.exports = {
 			}
 
 			if (discordUser.nextOsuPPUpdate <= new Date()) {
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
 
 				discordUser.osuName = osuUser.name;
@@ -68,6 +70,8 @@ module.exports = {
 			}
 
 			if (discordUser.nextTaikoPPUpdate <= new Date()) {
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				const taikoUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 1 });
 
 				discordUser.osuName = taikoUser.name;
@@ -92,6 +96,8 @@ module.exports = {
 			}
 
 			if (discordUser.nextCatchPPUpdate <= new Date()) {
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				const catchUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 2 });
 
 				discordUser.osuName = catchUser.name;
@@ -116,6 +122,8 @@ module.exports = {
 			}
 
 			if (discordUser.nextManiaPPUpdate <= new Date()) {
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				const maniaUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 3 });
 
 				discordUser.osuName = maniaUser.name;

@@ -377,6 +377,8 @@ module.exports = {
 		let teamsReadable = [[], []];
 		for (let i = 0; i < teams.length; i++) {
 			for (let j = 0; j < teams[i].length; j++) {
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				await osuApi.getUser({ u: teams[i][j] })
 					.then(user => {
 						teams[i][j] = user.id;

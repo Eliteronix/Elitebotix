@@ -29,6 +29,8 @@ module.exports = {
 						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 					});
 
+					// eslint-disable-next-line no-undef
+					process.send('osu!API');
 					const osuUser = await osuApi.getUser({ u: players[i], m: 0 });
 
 					discordUser = await DBDiscordUsers.create({ osuUserId: osuUser.id, osuName: osuUser.name });

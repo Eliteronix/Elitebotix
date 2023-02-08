@@ -718,6 +718,8 @@ module.exports = {
 			for (let i = 0; i < teams.length; i++) {
 				let team = [];
 				for (let j = 0; j < teams[i].split(',').length; j++) {
+					// eslint-disable-next-line no-undef
+					process.send('osu!API');
 					const response = await osuApi.getUser({ u: getIDFromPotentialOsuLink(teams[i].split(',')[j]), m: 0 })
 						.then(async (user) => {
 							updateOsuDetailsforUser(user, 0);

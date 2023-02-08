@@ -181,6 +181,8 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 			return interaction.editReply(`You provided multiple arguments (\`${args.join('`, `')}\`). If your name has spaces please replace them with an \`_\` like this: \`${args.join('_')}\`.`);
 		}
 
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		osuApi.getUser({ u: getIDFromPotentialOsuLink(args[0]) })
 			.then(async (osuUser) => {
 				//get discordUser from db
@@ -286,6 +288,8 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 
 async function current(osuApi, interaction, additionalObjects, discordUser) {
 	if (discordUser && discordUser.osuUserId) {
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		osuApi.getUser({ u: discordUser.osuUserId })
 			.then(async (osuUser) => {
 				let verified = 'No';
@@ -341,6 +345,8 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 	if (!args[1]) {
 		if (discordUser) {
 			if (discordUser.osuVerified) {
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				osuApi.getUser({ u: discordUser.osuUserId })
 					.then(async (osuUser) => {
 						discordUser.osuName = osuUser.name;
@@ -359,6 +365,8 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 					});
 			} else {
 				if (discordUser.osuUserId) {
+					// eslint-disable-next-line no-undef
+					process.send('osu!API');
 					osuApi.getUser({ u: discordUser.osuUserId })
 						.then(async (osuUser) => {
 							let verificationCode = Math.random().toString(36).substring(8);
@@ -403,6 +411,8 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 	} else {
 		if (discordUser && discordUser.osuUserId) {
 			if (discordUser.osuVerificationCode === args[1]) {
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				osuApi.getUser({ u: discordUser.osuUserId })
 					.then(async (osuUser) => {
 						discordUser.osuVerified = true;
@@ -421,6 +431,8 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 						}
 					});
 			} else {
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				osuApi.getUser({ u: discordUser.osuUserId })
 					.then(async (osuUser) => {
 						discordUser.osuName = osuUser.name;

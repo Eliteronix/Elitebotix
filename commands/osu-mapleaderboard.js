@@ -219,6 +219,8 @@ module.exports = {
 					options.mods = modBits;
 				}
 
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
 				await osuApi.getScores(options)
 					.then(async (mapScores) => {
 						scoresArray = mapScores;
@@ -244,6 +246,8 @@ module.exports = {
 			if (user && !userScore) {
 				try {
 					options.u = user.osuUserId;
+					// eslint-disable-next-line no-undef
+					process.send('osu!API');
 					await osuApi.getScores(options)
 						.then(async scores => {
 							userScore = { score: scores[0] };

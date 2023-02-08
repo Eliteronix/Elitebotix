@@ -208,6 +208,8 @@ module.exports = {
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
 
+			// eslint-disable-next-line no-undef
+			process.send('osu!API');
 			osuApi.getBeatmaps({ b: args[1] })
 				.then(async (beatmaps) => {
 					DBElitiriCupSubmissions.create({

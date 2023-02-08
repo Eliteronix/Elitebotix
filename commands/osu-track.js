@@ -581,6 +581,8 @@ module.exports = {
 					});
 
 					try {
+						// eslint-disable-next-line no-undef
+						process.send('osu!API');
 						const user = await osuApi.getUser({ u: username });
 						osuUser.osuUserId = user.id;
 						osuUser.osuName = user.name;
@@ -843,6 +845,8 @@ module.exports = {
 					});
 
 					try {
+						// eslint-disable-next-line no-undef
+						process.send('osu!API');
 						const user = await osuApi.getUser({ u: username });
 						osuUser.osuUserId = user.id;
 						osuUser.osuName = user.name;
@@ -1058,6 +1062,8 @@ module.exports = {
 					});
 
 					try {
+						// eslint-disable-next-line no-undef
+						process.send('osu!API');
 						const user = await osuApi.getUser({ u: username });
 						osuUser.osuUserId = user.id;
 						osuUser.osuName = user.name;

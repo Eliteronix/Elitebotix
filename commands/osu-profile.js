@@ -225,6 +225,8 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		osuApi.getUser({ u: username, m: mode })
 			.then(async (user) => {
 				updateOsuDetailsforUser(user, mode);

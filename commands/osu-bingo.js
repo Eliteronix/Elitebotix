@@ -856,6 +856,8 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 	let winningTeam = checkWin(mappool);
 
 	for (let i = 0; i < everyUser.length && !winningTeam; i++) {
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
 		await osuApi.getUserRecent({ u: everyUser[i].osuUserId, m: 0, limit: 10 })
 			.then(async (scores) => {
 				for (let j = 0; j < scores.length && !winningTeam; j++) {
