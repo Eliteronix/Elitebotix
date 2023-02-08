@@ -87,6 +87,7 @@ module.exports = async function (member) {
 				}
 			}
 		} else {
+			logDatabaseQueries(2, 'guildMemberAdd.js DBAutoRoles destroy');
 			DBAutoRoles.destroy({ where: { guildId: member.guild.id, roleId: autoRolesList[i].roleId } });
 			autoRolesList.shift();
 		}

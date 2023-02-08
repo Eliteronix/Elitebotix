@@ -63,6 +63,7 @@ module.exports = async function (reaction, user) {
 					}
 				}
 			} else {
+				logDatabaseQueries(2, 'reactionAdded.js DBReactionRoles destroy');
 				DBReactionRoles.destroy({ where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, roleId: dbReactionRole.roleId } });
 				editEmbed(reaction.message, dbReactionRolesHeader);
 			}
@@ -95,6 +96,7 @@ module.exports = async function (reaction, user) {
 						}
 					}
 				} else {
+					logDatabaseQueries(2, 'reactionAdded.js DBReactionRoles destroy 2');
 					DBReactionRoles.destroy({ where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, roleId: dbReactionRoleBackup.roleId } });
 					editEmbed(reaction.message, dbReactionRolesHeader);
 				}
@@ -201,6 +203,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		embedChannel = msg.guild.channels.cache.get(embedChannelId);
 	} catch (e) {
 		msg.channel.send('Couldn\'t find an embed with this EmbedId');
+		logDatabaseQueries(2, 'reactionAdded.js DBReactionRolesHeader destroy');
 		DBReactionRolesHeader.destroy({
 			where: { guildId: msg.guildId, id: reactionRolesHeader.id },
 		});

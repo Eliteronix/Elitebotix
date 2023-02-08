@@ -202,7 +202,7 @@ module.exports = async function (oldMember, newMember) {
 
 	if (newUserChannel && newUserChannel.name.startsWith('➕') && !(dbTemporaryVoicesNew) && newUserChannel !== oldUserChannel) {
 
-		logDatabaseQueries(4, 'voiceStateUpdate.js DBTemporaryVoices 4');
+		logDatabaseQueries(4, 'voiceStateUpdate.js DBGuilds 4');
 		const dbGuild = await DBGuilds.findOne({
 			where: { guildId: newMember.guild.id }
 		});
@@ -244,8 +244,10 @@ module.exports = async function (oldMember, newMember) {
 
 					await createdText.setParent(createdCategoryId);
 
+					logDatabaseQueries(4, 'voiceStateUpdate.js DBTemporaryVoices create 1');
 					DBTemporaryVoices.create({ guildId: createdChannel.guild.id, channelId: createdChannel.id, textChannelId: createdText.id, creatorId: newMember.id });
 				} else {
+					logDatabaseQueries(4, 'voiceStateUpdate.js DBTemporaryVoices create 2');
 					DBTemporaryVoices.create({ guildId: createdChannel.guild.id, channelId: createdChannel.id, creatorId: newMember.id });
 				}
 

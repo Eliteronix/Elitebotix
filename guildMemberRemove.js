@@ -67,6 +67,7 @@ module.exports = async function (member) {
 
 			channel.send({ embeds: [changeEmbed] });
 		}
+		logDatabaseQueries(2, 'guildMemberAdd.js DBBirthdayGuilds destroy');
 		// destroy the guild dataset in the db
 		await DBBirthdayGuilds.destroy({
 			where: {

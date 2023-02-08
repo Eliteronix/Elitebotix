@@ -17,7 +17,7 @@ module.exports = {
 			//Set prefix to standard prefix
 			guildPrefix = prefix;
 		} else {
-			logDatabaseQueriesFunction(3, 'utils.js getGuildPrefix');
+			logDatabaseQueriesFunction(3, 'utils.js DBGuilds getGuildPrefix');
 			//Get guild from the db
 			const guild = await DBGuilds.findOne({
 				where: { guildId: msg.guildId },
@@ -266,7 +266,7 @@ module.exports = {
 		return outputUser;
 	},
 	updateOsuDetailsforUser: async function (user, mode) {
-		logDatabaseQueriesFunction(4, 'utils.js updateOsuDetailsforUser');
+		logDatabaseQueriesFunction(4, 'utils.js DBDiscordUsers updateOsuDetailsforUser');
 		//get discordUser from db to update pp and rank
 		DBDiscordUsers.findOne({
 			where: { osuUserId: user.id },
@@ -300,7 +300,7 @@ module.exports = {
 		let server = 'bancho';
 		let mode = 0;
 
-		logDatabaseQueriesFunction(4, 'utils.js getOsuUserServerMode');
+		logDatabaseQueriesFunction(4, 'utils.js DBDiscordUsers getOsuUserServerMode');
 		//Check user settings
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { userId: msg.author.id },
@@ -362,7 +362,7 @@ module.exports = {
 				if (serverUserActivity && serverUserActivity.updatedAt < now) {
 					serverUserActivity.points = serverUserActivity.points + 1;
 					await serverUserActivity.save();
-					logDatabaseQueriesFunction(3, 'utils.js old updateServerUserActivity activityRoles');
+					logDatabaseQueriesFunction(3, 'utils.js DBActivityRoles old updateServerUserActivity activityRoles');
 					const activityRoles = await DBActivityRoles.findAll({
 						where: { guildId: msg.guildId }
 					});
@@ -372,14 +372,16 @@ module.exports = {
 						if (!existingTask) {
 							let date = new Date();
 							date.setUTCMinutes(date.getUTCMinutes() + 5);
+							logDatabaseQueriesFunction(3, 'utils.js old updateServerUserActivity DBProcessQueue create');
 							await DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
 						}
 					}
 				}
 
 				if (!serverUserActivity) {
+					logDatabaseQueriesFunction(3, 'utils.js DBServerUserActivity new ServerUserActivity create');
 					await DBServerUserActivity.create({ guildId: msg.guildId, userId: msg.author.id });
-					logDatabaseQueriesFunction(3, 'utils.js new updateServerUserActivity DBProcessQueue');
+					logDatabaseQueriesFunction(3, 'utils.js new updateServerUserActivity DBActivityRoles');
 					const activityRoles = await DBActivityRoles.findAll({
 						where: { guildId: msg.guildId }
 					});
@@ -389,6 +391,7 @@ module.exports = {
 						if (!existingTask) {
 							let date = new Date();
 							date.setUTCMinutes(date.getUTCMinutes() + 5);
+							logDatabaseQueriesFunction(3, 'utils.js new updateServerUserActivity DBProcessQueue create');
 							await DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
 						}
 					}
@@ -500,6 +503,7 @@ module.exports = {
 			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
 			if (!existingTask) {
 				let now = new Date();
+				logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBProcessQueue create');
 				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId, date: now });
 			}
 		}
@@ -569,6 +573,7 @@ module.exports = {
 			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
 			if (!existingTask) {
 				let now = new Date();
+				logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBProcessQueue create');
 				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId, date: now });
 			}
 		}
@@ -723,7 +728,7 @@ module.exports = {
 		return await getOsuBadgeNumberByIdFunction(osuUserId);
 	},
 	async restartProcessQueueTask() {
-		logDatabaseQueriesFunction(5, 'utils.js restartProcessQueueTask');
+		logDatabaseQueriesFunction(5, 'utils.js DBProcessQueue restartProcessQueueTask');
 		const tasksInWork = await DBProcessQueue.findAll({
 			where: { beingExecuted: true }
 		});
@@ -1081,6 +1086,7 @@ module.exports = {
 					return;
 				}
 
+				logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores lastMultiScore');
 				let lastMultiScore = await DBOsuMultiScores.findOne({
 					where: {
 						osuUserId: discordUser.osuUserId
@@ -1137,6 +1143,7 @@ module.exports = {
 						//Nothing
 					});
 
+				logDatabaseQueriesFunction(2, 'utils.js DBProcessQueue importMatch twitch chat');
 				DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: new Date() });
 			}
 
@@ -1331,6 +1338,7 @@ module.exports = {
 				if (dbBeatmap) {
 					let pp = await getOsuPPFunction(outputScore.beatmapId, outputScore.raw_mods, getAccuracyFunction(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
 
+					logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores pp update');
 					DBOsuMultiScores.update({ pp: pp }, { where: { id: inputScore.id } });
 
 					outputScore.pp = pp;
@@ -1349,6 +1357,7 @@ module.exports = {
 	async cleanUpDuplicateEntries(manually) {
 		const Sequelize = require('sequelize');
 		// Automatically add missing players to the database
+		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries existingUsers');
 		let existingUsers = await DBDiscordUsers.findAll({
 			attributes: ['osuUserId']
 		});
@@ -1358,6 +1367,7 @@ module.exports = {
 		// Remove null values
 		existingUsers = existingUsers.filter(user => user !== null);
 
+		logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries missingUsers');
 		let missingUsers = await DBOsuMultiScores.findAll({
 			attributes: ['osuUserId'],
 			where: {
@@ -1378,6 +1388,7 @@ module.exports = {
 		let iterator = 0;
 		while (iterator < 50 && missingUsers.length) {
 			let randomIndex = Math.floor(Math.random() * missingUsers.length);
+			logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries missingUsers create');
 			await DBDiscordUsers.create({
 				osuUserId: missingUsers[randomIndex]
 			});
@@ -1397,6 +1408,7 @@ module.exports = {
 			return;
 		}
 
+		logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries mostplayed');
 		let mostplayed = await DBOsuMultiScores.findAll({
 			attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
 			where: {
@@ -1421,6 +1433,7 @@ module.exports = {
 		popular = popular.map(map => map.dataValues.beatmapId);
 
 		// Update beatmap data
+		logDatabaseQueriesFunction(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries popular');
 		let update = await DBOsuBeatmaps.update({
 			popular: true
 		}, {
@@ -1443,6 +1456,7 @@ module.exports = {
 		usedOften = usedOften.map(map => map.dataValues.beatmapId);
 
 		// Update beatmap data
+		logDatabaseQueriesFunction(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries usedOften');
 		update = await DBOsuBeatmaps.update({
 			usedOften: true
 		}, {
@@ -1555,6 +1569,7 @@ module.exports = {
 		let dateLimit = new Date();
 		dateLimit.setMonth(dateLimit.getMonth() - 6);
 
+		logDatabaseQueriesFunction(2, 'utils.js DBDuelRatingHistory cleanUpDuplicateEntries oldData');
 		let oldData = await DBDuelRatingHistory.findAll({
 			where: {
 				updatedAt: {
@@ -1589,6 +1604,7 @@ module.exports = {
 		});
 
 		while (duplicates && iterations < 10) {
+			logDatabaseQueriesFunction(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries duplicates');
 			let result = await beatmaps.query(
 				'SELECT * FROM DBOsuBeatmaps WHERE 0 < (SELECT COUNT(1) FROM DBOsuBeatmaps as a WHERE a.beatmapId = DBOsuBeatmaps.beatmapId AND a.mods = DBOsuBeatmaps.mods AND a.id <> DBOsuBeatmaps.id)',
 			);
@@ -1605,7 +1621,7 @@ module.exports = {
 
 						await new Promise(resolve => setTimeout(resolve, 500));
 
-						logDatabaseQueriesFunction(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries');
+						logDatabaseQueriesFunction(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries duplicates delete');
 						let duplicate = await DBOsuBeatmaps.findOne({
 							where: {
 								id: result[0][i].id
@@ -1645,6 +1661,7 @@ module.exports = {
 		});
 
 		while (duplicates && iterations < 10) {
+			logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries duplicates');
 			let result = await multiScores.query(
 				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id)',
 			);
@@ -1661,7 +1678,7 @@ module.exports = {
 
 						await new Promise(resolve => setTimeout(resolve, 500));
 
-						logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries');
+						logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries duplicates delete');
 						let duplicate = await DBOsuMultiScores.findOne({
 							where: {
 								id: result[0][i].id
@@ -1699,6 +1716,7 @@ module.exports = {
 
 		taikoMaps = taikoMaps.map(beatmap => beatmap.beatmapId);
 
+		logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries update taiko');
 		let updated = await DBOsuMultiScores.update({
 			mode: 'Taiko',
 			pp: null,
@@ -1720,6 +1738,7 @@ module.exports = {
 
 		catchMaps = catchMaps.map(beatmap => beatmap.beatmapId);
 
+		logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries update catcch');
 		updated = await DBOsuMultiScores.update({
 			mode: 'Catch the Beat',
 			pp: null,
@@ -1741,6 +1760,7 @@ module.exports = {
 
 		maniaMaps = maniaMaps.map(beatmap => beatmap.beatmapId);
 
+		logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries update mania');
 		updated = await DBOsuMultiScores.update({
 			mode: 'Mania',
 			pp: null,
@@ -1898,7 +1918,6 @@ module.exports = {
 
 		for (let i = 0; i < users.length; i++) {
 			logDatabaseQueriesFunction(4, 'utils.js createDuelMatch DBOsuMultiScores player scores');
-
 			const playerScores = await DBOsuMultiScores.findAll({
 				where: {
 					osuUserId: users[i].osuUserId,
@@ -2065,6 +2084,7 @@ module.exports = {
 			lobby.closeLobby();
 
 			for (let i = 0; i < usersOnline.length; i++) {
+				logDatabaseQueriesFunction(2, 'utils.js DBProcessQueue duelQueue1v1 requeue');
 				await DBProcessQueue.create({
 					guildId: 'none',
 					task: 'duelQueue1v1',
@@ -2117,6 +2137,7 @@ module.exports = {
 							let user = users.find(user => user.osuUserId === joinedUser);
 
 							//Requeue
+							logDatabaseQueriesFunction(2, 'utils.js DBProcessQueue duelQueue1v1 requeue 2');
 							await DBProcessQueue.create({
 								guildId: 'none',
 								task: 'duelQueue1v1',
@@ -2492,6 +2513,7 @@ module.exports = {
 				}
 
 				for (let i = 0; i < uniqueTopics.length; i++) {
+					logDatabaseQueriesFunction(2, 'utils.js DBOsuForumPosts existingForumPost');
 					let existingForumPost = await DBOsuForumPosts.findOne({
 						where: {
 							forumPost: uniqueTopics[i]
@@ -2590,6 +2612,7 @@ module.exports = {
 								notes = 'The matches are played in Scorev1';
 							}
 
+							logDatabaseQueriesFunction(2, 'utils.js DBOsuForumPosts create');
 							await DBOsuForumPosts.create({
 								forumPost: uniqueTopics[i],
 								discord: discord,
@@ -2636,6 +2659,7 @@ module.exports = {
 	},
 	async processOsuTrack(client) {
 		let now = new Date();
+		logDatabaseQueriesFunction(2, 'utils.js DBOsuTrackingUsers processOsuTrack');
 		let osuTracker = await DBOsuTrackingUsers.findOne({
 			where: {
 				nextCheck: {
@@ -2669,6 +2693,7 @@ module.exports = {
 
 				let recentActivity = false;
 
+				logDatabaseQueriesFunction(2, 'utils.js DBOsuGuildTrackers processOsuTrack');
 				let guildTrackers = await DBOsuGuildTrackers.findAll({
 					where: {
 						osuUserId: osuUser.osuUserId,
@@ -2979,6 +3004,7 @@ module.exports = {
 					if (guildTrackers[i].tournamentTopPlays) {
 						if (guildTrackers[i].tournamentNumberTopPlays === undefined) {
 							//Get all scores from tournaments
+							logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores processOsuTrack tournamentTopPlays');
 							let multiScores = await DBOsuMultiScores.findAll({
 								where: {
 									osuUserId: osuUser.osuUserId,
@@ -3172,6 +3198,7 @@ module.exports = {
 				return recentActivity;
 			}, { context: { osuUser: osuUser, lastUpdated: osuTracker.updatedAt } });
 
+			logDatabaseQueriesFunction(2, 'utils.js DBOsuGuildTrackers processOsuTrack updateActivity');
 			let guildTrackers = await DBOsuGuildTrackers.findAll({
 				where: {
 					osuUserId: osuUser.osuUserId,
@@ -3258,6 +3285,7 @@ module.exports = {
 		}
 	},
 	async updateTwitchNames(client) {
+		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers updateTwitchNames');
 		let twitchUsers = await DBDiscordUsers.findAll({
 			where: {
 				twitchId: {
@@ -3375,7 +3403,7 @@ async function getUserDuelStarRatingFunction(input) {
 
 	let savedStats = null;
 	if (completeMonth || completeWeek) {
-		logDatabaseQueriesFunction(4, 'utils.js getUserDuelStarRatingFunction DuelRatingHistory');
+		logDatabaseQueriesFunction(4, 'utils.js getUserDuelStarRatingFunction DBDuelRatingHistory');
 		savedStats = await DBDuelRatingHistory.findOne({
 			where: {
 				osuUserId: input.osuUserId,
@@ -3406,6 +3434,7 @@ async function getUserDuelStarRatingFunction(input) {
 		return duelRatings;
 	}
 
+	logDatabaseQueriesFunction(4, 'utils.js getUserDuelStarRatingFunction DBDiscordUsers savedStats');
 	let discordUser = await DBDiscordUsers.findOne({
 		where: {
 			osuUserId: input.osuUserId
@@ -3466,6 +3495,7 @@ async function getUserDuelStarRatingFunction(input) {
 	const lastHalfYear = new Date();
 	lastHalfYear.setUTCMonth(lastHalfYear.getUTCMonth() - 6);
 
+	logDatabaseQueriesFunction(4, 'utils.js getUserDuelStarRatingFunction DBOsuMultiScores pastHalfYearScoreCount');
 	const pastHalfYearScoreCount = await DBOsuMultiScores.count({
 		where: {
 			osuUserId: input.osuUserId,
@@ -3517,6 +3547,7 @@ async function getUserDuelStarRatingFunction(input) {
 			}
 		}
 
+		logDatabaseQueriesFunction(4, 'utils.js getUserDuelStarRatingFunction DBOsuBeatmaps beatmaps');
 		let beatmaps = await DBOsuBeatmaps.findAll({
 			where: {
 				beatmapId: {
@@ -3778,6 +3809,7 @@ async function getUserDuelStarRatingFunction(input) {
 	newEndDate.setUTCSeconds(0);
 	newEndDate.setUTCMilliseconds(-1);
 
+	logDatabaseQueriesFunction(4, 'utils.js getUserDuelStarRatingFunction DBDuelRatingHistory lastMonthStats');
 	let lastMonthStats = await DBDuelRatingHistory.findOne({
 		where: {
 			osuUserId: input.osuUserId,
@@ -3895,6 +3927,7 @@ async function getUserDuelStarRatingFunction(input) {
 
 		if (completeMonth || completeWeek) {
 			//Create the stats if they don't exist
+			logDatabaseQueriesFunction(4, 'utils.js getUserDuelStarRatingFunction DBDuelRatingHistory create');
 			await DBDuelRatingHistory.create({
 				osuUserId: input.osuUserId,
 				year: endDate.getUTCFullYear(),
@@ -3929,6 +3962,7 @@ async function getUserDuelStarRatingFunction(input) {
 		// console.log(`getUserDuelStarRatingFunction: got discord user second time: ${new Date() - startTime}ms`);
 
 		if (!discordUser) {
+			logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getUserDuelStarRating create');
 			discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId });
 		}
 
@@ -4012,6 +4046,7 @@ async function getUserDuelStarRatingFunction(input) {
 							}
 						}
 
+						logDatabaseQueriesFunction(2, 'utils.js DBOsuGuildTrackers getUserDuelStarRating');
 						let guildTrackers = await DBOsuGuildTrackers.findAll({
 							where: {
 								osuUserId: discordUser.osuUserId,
@@ -4138,6 +4173,7 @@ async function getUserDuelStarRatingFunction(input) {
 	});
 
 	if (!discordUser) {
+		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getUserDuelRatings backup create');
 		discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId });
 	}
 
@@ -4183,6 +4219,7 @@ async function logMatchCreationFunction(client, name, matchId) {
 }
 
 async function getDerankStatsFunction(discordUser) {
+	logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getDerankStatsFunction osuPP');
 	let ppDiscordUsers = await DBDiscordUsers.findAll({
 		where: {
 			osuUserId: {
@@ -4205,6 +4242,7 @@ async function getDerankStatsFunction(discordUser) {
 
 	quicksortOsuPP(ppDiscordUsers);
 
+	logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getDerankStatsFunction osuDuelStarRating');
 	let duelDiscordUsers = await DBDiscordUsers.findAll({
 		where: {
 			osuUserId: {
@@ -4614,7 +4652,7 @@ async function getOsuBeatmapFunction(input) {
 	//Repeat up to 3 times if errors appear
 	for (let i = 0; i < 3; i++) {
 		if (!dbBeatmap) {
-			logDatabaseQueriesFunction(1, 'utils.js getOsuBeatmapFunction');
+			logDatabaseQueriesFunction(1, 'utils.js DBOsuBeatmaps getOsuBeatmapFunction');
 			dbBeatmap = await DBOsuBeatmaps.findOne({
 				where: { beatmapId: beatmapId, mods: modBits }
 			});
@@ -4846,6 +4884,7 @@ async function getOsuBeatmapFunction(input) {
 								}
 							}
 
+							logDatabaseQueriesFunction(1, 'utils.js DBOsuBeatmaps getOsuBeatmapFunction create');
 							dbBeatmap = await DBOsuBeatmaps.create({
 								title: beatmaps[0].title,
 								artist: beatmaps[0].artist,
@@ -4890,6 +4929,7 @@ async function getOsuBeatmapFunction(input) {
 							dbBeatmap.changed('updatedAt', true);
 							await dbBeatmap.save();
 						} else if (error.message === 'Not found') { // Map has to be added new
+							logDatabaseQueriesFunction(1, 'utils.js DBOsuBeatmaps getOsuBeatmapFunction create not found');
 							dbBeatmap = await DBOsuBeatmaps.create({
 								beatmapId: beatmapId,
 								approvalStatus: 'Not found',
@@ -5637,7 +5677,7 @@ async function messageUserWithRetries(user, interaction, content) {
 }
 
 async function getOsuMapInfo(dbBeatmap) {
-	logDatabaseQueriesFunction(4, 'commands/osu-duel.js DBOsuMultiScores Mapinfo');
+	logDatabaseQueriesFunction(4, 'utils.js DBOsuMultiScores getOsuMapInfo');
 	const mapScores = await DBOsuMultiScores.findAll({
 		where: {
 			beatmapId: dbBeatmap.beatmapId,
@@ -5854,6 +5894,7 @@ async function saveOsuMultiScoresFunction(match) {
 						playersToUpdate.push(match.games[gameIndex].scores[scoreIndex].userId);
 					}
 
+					logDatabaseQueriesFunction(4, 'utils.js DBOsuMultiScores create');
 					let score = await DBOsuMultiScores.create({
 						osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
 						matchId: match.id,
@@ -6020,6 +6061,7 @@ async function saveOsuMultiScoresFunction(match) {
 
 	if (tourneyMatch) {
 		if (playersToUpdate.length) {
+			logDatabaseQueriesFunction(4, 'utils.js DBDiscordUsers lastDuelRatingUpdate null');
 			await DBDiscordUsers.update({
 				lastDuelRatingUpdate: null,
 			}, {
@@ -6041,6 +6083,7 @@ async function saveOsuMultiScoresFunction(match) {
 
 		if (newMatchPlayers.length) {
 			//Get all follows for the players in the match
+			logDatabaseQueriesFunction(4, 'utils.js DBOsuTourneyFollows saveOsuMultiScores');
 			let follows = await DBOsuTourneyFollows.findAll({
 				where: {
 					osuUserId: {
@@ -6065,6 +6108,7 @@ async function saveOsuMultiScoresFunction(match) {
 			//Create a notification for each user
 			let now = new Date();
 			for (let i = 0; i < usersToNotify.length; i++) {
+				logDatabaseQueriesFunction(4, 'utils.js DBProcessQueue saveOsuMultiScores tourneyFollow');
 				await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')};${match.name}`, date: now });
 			}
 		}
@@ -6072,6 +6116,7 @@ async function saveOsuMultiScoresFunction(match) {
 		//Manage osu-track follows for guilds
 		if (newMatchPlayers.length) {
 			//Get all follows for the players in the match
+			logDatabaseQueriesFunction(4, 'utils.js DBOsuGuildTrackers saveOsuMultiScores');
 			let guildTrackers = await DBOsuGuildTrackers.findAll({
 				where: {
 					osuUserId: {
@@ -6103,6 +6148,7 @@ async function saveOsuMultiScoresFunction(match) {
 				}
 			}
 
+			logDatabaseQueriesFunction(4, 'utils.js DBOsuGuildTrackers saveOsuMultiScores existingMatchPlayerTrackers');
 			let existingMatchPlayerTrackers = await DBOsuGuildTrackers.findAll({
 				where: {
 					osuUserId: {
@@ -6139,6 +6185,7 @@ async function saveOsuMultiScoresFunction(match) {
 			//Create a notification for each channel
 			let now = new Date();
 			for (let i = 0; i < channelsToNotify.length; i++) {
+				logDatabaseQueriesFunction(4, 'utils.js DBProcessQueue saveOsuMultiScores guildTourneyFollow');
 				await DBProcessQueue.create({ task: 'guildTourneyFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${channelsToNotify[i].osuUserIds.join(',')};${channelsToNotify[i].trackMatch};${match.name}`, date: now });
 			}
 		}
@@ -6146,6 +6193,7 @@ async function saveOsuMultiScoresFunction(match) {
 		//Manage osu-track follows for guilds for acronyms
 		if (newMatchPlayers.length && existingMatchPlayers.length === 0) {
 			//Get all follows for the players in the match
+			logDatabaseQueriesFunction(4, 'utils.js DBOsuGuildTrackers saveOsuMultiScores no existing match players');
 			let guildTrackers = await DBOsuGuildTrackers.findAll({
 				where: {
 					osuUserId: null,
@@ -6170,6 +6218,7 @@ async function saveOsuMultiScoresFunction(match) {
 			//Create a notification for each channel
 			let now = new Date();
 			for (let i = 0; i < channelsToNotify.length; i++) {
+				logDatabaseQueriesFunction(4, 'utils.js DBProcessQueue saveOsuMultiScores guildTourneyAcronymFollow');
 				await DBProcessQueue.create({ task: 'guildTourneyAcronymFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${match.name.replace(/:.*/gm, '')};${channelsToNotify[i].trackMatch};${match.name}`, date: now });
 			}
 		}
@@ -6821,7 +6870,7 @@ async function getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, a
 
 async function getOsuPlayerNameFunction(osuUserId) {
 	let playerName = osuUserId;
-	logDatabaseQueriesFunction(4, 'utils.js getOsuPlayerName');
+	logDatabaseQueriesFunction(4, 'utils.js DBDiscordUsers getOsuPlayerName');
 	let discordUser = await DBDiscordUsers.findOne({
 		where: { osuUserId: osuUserId }
 	});
@@ -6844,6 +6893,7 @@ async function getOsuPlayerNameFunction(osuUserId) {
 			if (osuUser) {
 				playerName = osuUser.name;
 
+				logDatabaseQueriesFunction(4, 'utils.js DBDiscordUsers getOsuPlayerName create');
 				await DBDiscordUsers.create({ osuUserId: osuUserId, osuName: osuUser.name });
 			}
 		} catch (err) {
@@ -6966,6 +7016,7 @@ async function updateQueueChannelsFunction(client) {
 			const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 			// eslint-disable-next-line no-undef
 			const { getOsuPlayerName } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+			logDatabaseQueriesFunction(4, 'utils.js DBProcessQueue existingQueueTasks');
 			let existingQueueTasks = await DBProcessQueue.findAll({
 				where: {
 					task: 'duelQueue1v1',
