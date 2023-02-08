@@ -28,6 +28,54 @@ const timeBehindMatchCreation = new client.Gauge({
 });
 register.registerMetric(timeBehindMatchCreation);
 
+const beatmapsAccessInTheLastMinute = new client.Gauge({
+	name: 'beatmaps_access_in_the_last_minute',
+	help: 'Beatmaps access in the last minute',
+});
+register.registerMetric(beatmapsAccessInTheLastMinute);
+
+const discordUsersAccessInTheLastMinute = new client.Gauge({
+	name: 'discord_users_access_in_the_last_minute',
+	help: 'Discord users access in the last minute',
+});
+register.registerMetric(discordUsersAccessInTheLastMinute);
+
+const elitiriDataAccessInTheLastMinute = new client.Gauge({
+	name: 'elitiri_data_access_in_the_last_minute',
+	help: 'Elitiri data access in the last minute',
+});
+register.registerMetric(elitiriDataAccessInTheLastMinute);
+
+const guildsAccessInTheLastMinute = new client.Gauge({
+	name: 'guilds_access_in_the_last_minute',
+	help: 'Guilds access in the last minute',
+});
+register.registerMetric(guildsAccessInTheLastMinute);
+
+const multiScoresAccessInTheLastMinute = new client.Gauge({
+	name: 'multi_scores_access_in_the_last_minute',
+	help: 'Multi scores access in the last minute',
+});
+register.registerMetric(multiScoresAccessInTheLastMinute);
+
+const osuDataAccessInTheLastMinute = new client.Gauge({
+	name: 'osu_data_access_in_the_last_minute',
+	help: 'Osu data access in the last minute',
+});
+register.registerMetric(osuDataAccessInTheLastMinute);
+
+const processQueueAccessInTheLastMinute = new client.Gauge({
+	name: 'process_queue_access_in_the_last_minute',
+	help: 'Process queue access in the last minute',
+});
+register.registerMetric(processQueueAccessInTheLastMinute);
+
+const serverActivityAccessInTheLastMinute = new client.Gauge({
+	name: 'server_activity_access_in_the_last_minute',
+	help: 'Server activity access in the last minute',
+});
+register.registerMetric(serverActivityAccessInTheLastMinute);
+
 // Define the HTTP server
 const server = http.createServer(async (req, res) => {
 	// Retrieve route from request object
@@ -89,6 +137,64 @@ manager.spawn()
 				} else if (typeof message === 'string' && message.startsWith('saveMultiMatches')) {
 					const timeBehind = message.split(' ')[1];
 					timeBehindMatchCreation.set(parseInt(timeBehind));
+				} else if (typeof message === 'string' && message.startsWith('traceDatabaseQueries:')) {
+					if (message.includes('DBOsuBeatmaps')) {
+						beatmapsAccessInTheLastMinute.inc();
+						setTimeout(() => {
+							beatmapsAccessInTheLastMinute.dec();
+						}, 60000);
+					} else if (message.includes('DBDiscordUsers')) {
+						discordUsersAccessInTheLastMinute.inc();
+						setTimeout(() => {
+							discordUsersAccessInTheLastMinute.dec();
+						}, 60000);
+					} else if (message.includes('DBElitiriCupSignUp')
+						|| message.includes('DBElitiriCupStaff')
+						|| message.includes('DBElitiriCupSubmissions')
+						|| message.includes('DBElitiriCupLobbies')) {
+						elitiriDataAccessInTheLastMinute.inc();
+						setTimeout(() => {
+							elitiriDataAccessInTheLastMinute.dec();
+						}, 60000);
+					} else if (message.includes('DBGuilds')
+						|| message.includes('DBReactionRoles')
+						|| message.includes('DBReactionRolesHeader')
+						|| message.includes('DBAutoRoles')
+						|| message.includes('DBTemporaryVoices')
+						|| message.includes('DBActivityRoles')
+						|| message.includes('DBStarboardMessages')
+						|| message.includes('DBTickets')
+						|| message.includes('DBBirthdayGuilds')
+						|| message.includes('DBOsuGuildTrackers')) {
+						guildsAccessInTheLastMinute.inc();
+						setTimeout(() => {
+							guildsAccessInTheLastMinute.dec();
+						}, 60000);
+					} else if (message.includes('DBOsuMultiScores')) {
+						multiScoresAccessInTheLastMinute.inc();
+						setTimeout(() => {
+							multiScoresAccessInTheLastMinute.dec();
+						}, 60000);
+					} else if (message.includes('DBMOTDPoints')
+						|| message.includes('DBOsuTourneyFollows')
+						|| message.includes('DBDuelRatingHistory')
+						|| message.includes('DBOsuForumPosts')
+						|| message.includes('DBOsuTrackingUsers')) {
+						osuDataAccessInTheLastMinute.inc();
+						setTimeout(() => {
+							osuDataAccessInTheLastMinute.dec();
+						}, 60000);
+					} else if (message.includes('DBProcessQueue')) {
+						processQueueAccessInTheLastMinute.inc();
+						setTimeout(() => {
+							processQueueAccessInTheLastMinute.dec();
+						}, 60000);
+					} else if (message.includes('DBServerUserActivity')) {
+						serverActivityAccessInTheLastMinute.inc();
+						setTimeout(() => {
+							serverActivityAccessInTheLastMinute.dec();
+						}, 60000);
+					}
 				}
 			});
 		});

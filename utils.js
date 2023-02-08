@@ -5134,6 +5134,8 @@ function getModsFunction(input) {
 }
 
 async function logDatabaseQueriesFunction(level, output) {
+	// eslint-disable-next-line no-undef
+	process.send('traceDatabaseQueries: ' + output);
 	//Level 5: Log rarely used queries
 	//Level 4: Log queries used in commands
 	//Level 3: Log queries used in (all) messages
