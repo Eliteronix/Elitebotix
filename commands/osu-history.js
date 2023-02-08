@@ -43,6 +43,21 @@ module.exports = {
 					'en-US': 'The username, id or link of the player',
 				})
 				.setRequired(false)
+		)
+		.addBooleanOption(option =>
+			option.setName('onlymatchhistory')
+				.setNameLocalizations({
+					'de': 'nurmatchhistorie',
+					'en-GB': 'onlymatchhistory',
+					'en-US': 'onlymatchhistory',
+				})
+				.setDescription('Only show the match history')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt nur die Matchhistorie an',
+					'en-GB': 'Only show the match history',
+					'en-US': 'Only show the match history',
+				})
+				.setRequired(false)
 		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
@@ -149,6 +164,14 @@ module.exports = {
 			],
 		});
 
+		let onlymatchhistory = false;
+
+		if (interaction.options.getBoolean('onlymatchhistory')) {
+			onlymatchhistory = true;
+		}
+
+		const files = [];
+
 		let matchesChecked = [];
 		let matchesWon = 0;
 		let matchesLost = 0;
@@ -184,6 +207,10 @@ module.exports = {
 
 			if (!matchesPlayed.includes(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiScores[i].matchId}`)) {
 				matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiScores[i].matchId}`);
+			}
+
+			if (onlymatchhistory) {
+				continue;
 			}
 
 			if (!matchesChecked.includes(multiScores[i].matchId)) {
@@ -402,413 +429,418 @@ module.exports = {
 			}
 		}
 
-		mostPlayedWith.sort((a, b) => b.amount - a.amount);
+		if (!onlymatchhistory) {
+			mostPlayedWith.sort((a, b) => b.amount - a.amount);
 
-		for (let i = 0; i < mostPlayedWith.length; i++) {
-			if (mostPlayedWith[i].osuName === null) {
-				mostPlayedWith[i].osuName = '[Redacted]';
+			for (let i = 0; i < mostPlayedWith.length; i++) {
+				if (mostPlayedWith[i].osuName === null) {
+					mostPlayedWith[i].osuName = '[Redacted]';
+				}
 			}
-		}
 
-		mostWonAgainst.sort((a, b) => b.amount - a.amount);
+			mostWonAgainst.sort((a, b) => b.amount - a.amount);
 
-		for (let i = 0; i < mostWonAgainst.length; i++) {
-			if (mostWonAgainst[i].osuName === null) {
-				mostWonAgainst[i].osuName = '[Redacted]';
+			for (let i = 0; i < mostWonAgainst.length; i++) {
+				if (mostWonAgainst[i].osuName === null) {
+					mostWonAgainst[i].osuName = '[Redacted]';
+				}
 			}
-		}
 
-		mostLostAgainst.sort((a, b) => b.amount - a.amount);
+			mostLostAgainst.sort((a, b) => b.amount - a.amount);
 
-		for (let i = 0; i < mostLostAgainst.length; i++) {
-			if (mostLostAgainst[i].osuName === null) {
-				mostLostAgainst[i].osuName = '[Redacted]';
+			for (let i = 0; i < mostLostAgainst.length; i++) {
+				if (mostLostAgainst[i].osuName === null) {
+					mostLostAgainst[i].osuName = '[Redacted]';
+				}
 			}
-		}
 
-		tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
+			tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
 
-		// Create rank history graph
-		let oldestScore = await DBOsuMultiScores.findOne({
-			where: {
-				osuUserId: osuUser.osuUserId,
-				tourneyMatch: true,
-				scoringType: 'Score v2',
-				mode: 'Standard',
-			},
-			order: [
-				['gameEndDate', 'ASC']
-			]
-		});
+			// Create rank history graph
+			let oldestScore = await DBOsuMultiScores.findOne({
+				where: {
+					osuUserId: osuUser.osuUserId,
+					tourneyMatch: true,
+					scoringType: 'Score v2',
+					mode: 'Standard',
+				},
+				order: [
+					['gameEndDate', 'ASC']
+				]
+			});
 
-		// Get the user's duel ratings
-		let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client });
+			// Get the user's duel ratings
+			let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client });
 
-		let duelRatings = [{ rating: duelRating.total, date: 'Today' }];
+			let duelRatings = [{ rating: duelRating.total, date: 'Today' }];
 
-		//Set the date to the end of the last month
-		let date = new Date();
-		date.setUTCDate(1);
-		date.setUTCDate(date.getUTCDate() - 1);
-		date.setUTCHours(23, 59, 59, 999);
-
-		let iterator = 0;
-		let startTime = date - oldestScore.gameEndDate;
-
-		while (date > oldestScore.gameEndDate) {
-			iterator++;
-			if (new Date() - lastUpdate > 15000) {
-				interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
-				lastUpdate = new Date();
-			}
-			let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: date });
-			duelRatings.push({ rating: duelRating.total, date: `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}.${date.getUTCFullYear()}` });
+			//Set the date to the end of the last month
+			let date = new Date();
 			date.setUTCDate(1);
 			date.setUTCDate(date.getUTCDate() - 1);
-		}
+			date.setUTCHours(23, 59, 59, 999);
 
-		let labels = [];
+			let iterator = 0;
+			let startTime = date - oldestScore.gameEndDate;
 
-		for (let i = 0; i < duelRatings.length; i++) {
-			labels.push(duelRatings[i].date);
-		}
-
-		labels.reverse();
-		duelRatings.reverse();
-
-		let masterHistory = [];
-		let diamondHistory = [];
-		let platinumHistory = [];
-		let goldHistory = [];
-		let silverHistory = [];
-		let bronzeHistory = [];
-
-		let highestRating = 0;
-
-		for (let i = 0; i < duelRatings.length; i++) {
-			if (i === 0 && !duelRatings[i].rating) {
-				duelRatings.shift();
-				labels.shift();
-				i--;
-				continue;
-			}
-
-			if (duelRatings[i].rating > highestRating) {
-				highestRating = duelRatings[i].rating;
-			}
-
-			let masterRating = null;
-			let diamondRating = null;
-			let platinumRating = null;
-			let goldRating = null;
-			let silverRating = null;
-			let bronzeRating = null;
-
-			if (duelRatings[i].rating > 7) {
-				masterRating = duelRatings[i].rating;
-			} else if (duelRatings[i].rating > 6.4) {
-				diamondRating = duelRatings[i].rating;
-			} else if (duelRatings[i].rating > 5.8) {
-				platinumRating = duelRatings[i].rating;
-			} else if (duelRatings[i].rating > 5.2) {
-				goldRating = duelRatings[i].rating;
-			} else if (duelRatings[i].rating > 4.6) {
-				silverRating = duelRatings[i].rating;
-			} else {
-				bronzeRating = duelRatings[i].rating;
-			}
-
-			masterHistory.push(masterRating);
-			diamondHistory.push(diamondRating);
-			platinumHistory.push(platinumRating);
-			goldHistory.push(goldRating);
-			silverHistory.push(silverRating);
-			bronzeHistory.push(bronzeRating);
-		}
-
-		// Draw the image
-		const canvasWidth = 1000;
-		const canvasHeight = 775;
-
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
-
-		//Create Canvas
-		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
-
-		//Get context and load the image
-		const ctx = canvas.getContext('2d');
-		const background = await Canvas.loadImage('./other/osu-background.png');
-
-		for (let i = 0; i < canvas.height / background.height; i++) {
-			for (let j = 0; j < canvas.width / background.width; j++) {
-				ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
-			}
-		}
-
-		// Write the title of the player
-		ctx.font = '35px comfortaa, sans-serif';
-		ctx.fillStyle = '#ffffff';
-		ctx.textAlign = 'center';
-		ctx.fillText(`osu! history for ${osuUser.osuName}`, 475, 40);
-
-		let lineLength = ctx.measureText(`osu! history for ${osuUser.osuName}`).width;
-
-		// Draw an underline
-		ctx.beginPath();
-		ctx.lineWidth = 2;
-		ctx.strokeStyle = '#ffffff';
-		ctx.moveTo(475 - lineLength / 2, 47);
-		ctx.lineTo(475 + lineLength / 2, 47);
-		ctx.stroke();
-
-		// Write the title of the player
-		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillStyle = '#ffffff';
-		ctx.textAlign = 'left';
-		ctx.fillText(`Played tournaments: ${tourneysPlayed.length}`, 50, 140);
-
-		ctx.fillText(`Played matches: ${multiMatches.length}`, 50, 190);
-		ctx.font = '18px comfortaa, sans-serif';
-		ctx.fillText(`Won: ${matchesWon} / Lost: ${matchesLost}`, 75, 215);
-
-		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillText(`Played maps: ${gamesChecked.length}`, 50, 270);
-		ctx.font = '18px comfortaa, sans-serif';
-		ctx.fillText(`Won: ${gamesWon} / Lost: ${gamesLost}`, 75, 295);
-
-		let duelLeague = getOsuDuelLeague(highestRating);
-
-		let leagueText = duelLeague.name;
-		let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
-
-		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillText('Highest duel rating:', 50, 345);
-		ctx.font = '18px comfortaa, sans-serif';
-		ctx.fillText(`League: ${leagueText} (${highestRating.toFixed(3)})`, 75, 370);
-		ctx.drawImage(leagueImage, 75, 385, 150, 150);
-
-		ctx.textAlign = 'left';
-		ctx.fillText(`Top ${Math.min(10, tourneyPPPlays.length)} tournament pp plays:`, 635, 140);
-		ctx.font = '11px comfortaa, sans-serif';
-		for (let i = 0; i < Math.min(10, tourneyPPPlays.length); i++) {
-			tourneyPPPlays[i].beatmap = await getOsuBeatmap({ beatmapId: tourneyPPPlays[i].beatmapId });
-			let title = 'Unavailable';
-			let artist = 'Unavailable';
-			let difficulty = 'Unavailable';
-			if (tourneyPPPlays[i].beatmap) {
-				title = tourneyPPPlays[i].beatmap.title;
-				artist = tourneyPPPlays[i].beatmap.artist;
-				difficulty = tourneyPPPlays[i].beatmap.difficulty;
-			}
-			let mapString = `#${i + 1} ${parseFloat(tourneyPPPlays[i].pp).toFixed(0)}pp | ${artist} - ${title} [${difficulty}]`;
-			let cut = false;
-			while (ctx.measureText(mapString).width > 340) {
-				cut = true;
-				mapString = mapString.slice(0, mapString.length - 1);
-			}
-			if (cut) {
-				mapString += '...';
-			}
-
-			ctx.fillText(mapString, 635, 158 + i * 16);
-		}
-
-		ctx.textAlign = 'center';
-		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 800, 375);
-		ctx.font = '18px comfortaa, sans-serif';
-		for (let i = 0; i < Math.min(5, mostPlayedWith.length); i++) {
-			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 800, 400 + i * 25);
-		}
-
-		ctx.textAlign = 'center';
-		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillText(`Won against ${mostWonAgainst.length} players:`, 300, 575);
-		ctx.font = '18px comfortaa, sans-serif';
-		for (let i = 0; i < Math.min(5, mostWonAgainst.length); i++) {
-			ctx.fillText(`#${i + 1} ${mostWonAgainst[i].osuName} (${mostWonAgainst[i].amount} times)`, 300, 600 + i * 25);
-		}
-
-		ctx.textAlign = 'center';
-		ctx.font = '22px comfortaa, sans-serif';
-		ctx.fillText(`Lost against ${mostLostAgainst.length} players:`, 700, 575);
-		ctx.font = '18px comfortaa, sans-serif';
-		for (let i = 0; i < Math.min(5, mostLostAgainst.length); i++) {
-			ctx.fillText(`#${i + 1} ${mostLostAgainst[i].osuName} (${mostLostAgainst[i].amount} times)`, 700, 600 + i * 25);
-		}
-
-		// Write the title of the player
-		ctx.font = '16px comfortaa, sans-serif';
-		ctx.fillStyle = '#ffffff';
-		ctx.textAlign = 'left';
-		let today = new Date().toLocaleDateString();
-		ctx.fillText(`Made by Elitebotix on ${today}`, 10, canvas.height - 10);
-
-		//Get a circle in the middle for inserting the player avatar
-		ctx.beginPath();
-		ctx.arc(475, 250, 125, 0, Math.PI * 2, true);
-		ctx.closePath();
-		ctx.clip();
-
-		//Draw a shape onto the main canvas in the middle 
-		try {
-			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.osuUserId}`);
-			ctx.drawImage(avatar, 350, 125, 250, 250);
-		} catch (error) {
-			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-			ctx.drawImage(avatar, 350, 125, 250, 250);
-		}
-
-		//Create as an attachment
-		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-history-${osuUser.osuUserId}.png` })];
-
-		//Create chart
-		const width = 1500; //px
-		const height = 750; //px
-		const canvasRenderService = new ChartJSNodeCanvas({ width, height });
-
-		const data = {
-			labels: labels,
-			datasets: [
-				{
-					label: 'Master',
-					data: masterHistory,
-					borderColor: 'rgb(255, 174, 251)',
-					fill: true,
-					backgroundColor: 'rgba(255, 174, 251, 0.6)',
-					tension: 0.4
-				},
-				{
-					label: 'Diamond',
-					data: diamondHistory,
-					borderColor: 'rgb(73, 176, 255)',
-					fill: true,
-					backgroundColor: 'rgba(73, 176, 255, 0.6)',
-					tension: 0.4
-				},
-				{
-					label: 'Platinum',
-					data: platinumHistory,
-					borderColor: 'rgb(29, 217, 165)',
-					fill: true,
-					backgroundColor: 'rgba(29, 217, 165, 0.6)',
-					tension: 0.4
-				},
-				{
-					label: 'Gold',
-					data: goldHistory,
-					borderColor: 'rgb(255, 235, 71)',
-					fill: true,
-					backgroundColor: 'rgba(255, 235, 71, 0.6)',
-					tension: 0.4
-				},
-				{
-					label: 'Silver',
-					data: silverHistory,
-					borderColor: 'rgb(181, 181, 181)',
-					fill: true,
-					backgroundColor: 'rgba(181, 181, 181, 0.6)',
-					tension: 0.4
-				},
-				{
-					label: 'Bronze',
-					data: bronzeHistory,
-					borderColor: 'rgb(240, 121, 0)',
-					fill: true,
-					backgroundColor: 'rgba(240, 121, 0, 0.6)',
-					tension: 0.4
-				},
-			]
-		};
-
-		const configuration = {
-			type: 'line',
-			data: data,
-			options: {
-				responsive: true,
-				plugins: {
-					title: {
-						display: true,
-						text: 'Duel Rating History (Total)',
-						color: '#FFFFFF',
-					},
-					legend: {
-						labels: {
-							color: '#FFFFFF',
-						}
-					},
-				},
-				interaction: {
-					intersect: false,
-				},
-				scales: {
-					x: {
-						display: true,
-						title: {
-							display: true,
-							color: '#FFFFFF'
-						},
-						grid: {
-							color: '#8F8F8F'
-						},
-						ticks: {
-							color: '#FFFFFF',
-						},
-					},
-					y: {
-						display: true,
-						title: {
-							display: true,
-							text: 'Duel Rating',
-							color: '#FFFFFF'
-						},
-						grid: {
-							color: '#8F8F8F'
-						},
-						ticks: {
-							color: '#FFFFFF',
-						},
-					}
+			while (date > oldestScore.gameEndDate) {
+				iterator++;
+				if (new Date() - lastUpdate > 15000) {
+					interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
+					lastUpdate = new Date();
 				}
-			},
-		};
+				let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: date });
+				duelRatings.push({ rating: duelRating.total, date: `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}.${date.getUTCFullYear()}` });
+				date.setUTCDate(1);
+				date.setUTCDate(date.getUTCDate() - 1);
+			}
 
-		const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
-		files.push(new Discord.AttachmentBuilder(imageBuffer, { name: `duelRatingHistory-${osuUser.osuUserId}.png` }));
+			let labels = [];
+
+			for (let i = 0; i < duelRatings.length; i++) {
+				labels.push(duelRatings[i].date);
+			}
+
+			labels.reverse();
+			duelRatings.reverse();
+
+			let masterHistory = [];
+			let diamondHistory = [];
+			let platinumHistory = [];
+			let goldHistory = [];
+			let silverHistory = [];
+			let bronzeHistory = [];
+
+			let highestRating = 0;
+
+			for (let i = 0; i < duelRatings.length; i++) {
+				if (i === 0 && !duelRatings[i].rating) {
+					duelRatings.shift();
+					labels.shift();
+					i--;
+					continue;
+				}
+
+				if (duelRatings[i].rating > highestRating) {
+					highestRating = duelRatings[i].rating;
+				}
+
+				let masterRating = null;
+				let diamondRating = null;
+				let platinumRating = null;
+				let goldRating = null;
+				let silverRating = null;
+				let bronzeRating = null;
+
+				if (duelRatings[i].rating > 7) {
+					masterRating = duelRatings[i].rating;
+				} else if (duelRatings[i].rating > 6.4) {
+					diamondRating = duelRatings[i].rating;
+				} else if (duelRatings[i].rating > 5.8) {
+					platinumRating = duelRatings[i].rating;
+				} else if (duelRatings[i].rating > 5.2) {
+					goldRating = duelRatings[i].rating;
+				} else if (duelRatings[i].rating > 4.6) {
+					silverRating = duelRatings[i].rating;
+				} else {
+					bronzeRating = duelRatings[i].rating;
+				}
+
+				masterHistory.push(masterRating);
+				diamondHistory.push(diamondRating);
+				platinumHistory.push(platinumRating);
+				goldHistory.push(goldRating);
+				silverHistory.push(silverRating);
+				bronzeHistory.push(bronzeRating);
+			}
+
+			// Draw the image
+			const canvasWidth = 1000;
+			const canvasHeight = 775;
+
+			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+			//Create Canvas
+			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+			//Get context and load the image
+			const ctx = canvas.getContext('2d');
+			const background = await Canvas.loadImage('./other/osu-background.png');
+
+			for (let i = 0; i < canvas.height / background.height; i++) {
+				for (let j = 0; j < canvas.width / background.width; j++) {
+					ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+				}
+			}
+
+			// Write the title of the player
+			ctx.font = '35px comfortaa, sans-serif';
+			ctx.fillStyle = '#ffffff';
+			ctx.textAlign = 'center';
+			ctx.fillText(`osu! history for ${osuUser.osuName}`, 475, 40);
+
+			let lineLength = ctx.measureText(`osu! history for ${osuUser.osuName}`).width;
+
+			// Draw an underline
+			ctx.beginPath();
+			ctx.lineWidth = 2;
+			ctx.strokeStyle = '#ffffff';
+			ctx.moveTo(475 - lineLength / 2, 47);
+			ctx.lineTo(475 + lineLength / 2, 47);
+			ctx.stroke();
+
+			// Write the title of the player
+			ctx.font = '22px comfortaa, sans-serif';
+			ctx.fillStyle = '#ffffff';
+			ctx.textAlign = 'left';
+			ctx.fillText(`Played tournaments: ${tourneysPlayed.length}`, 50, 140);
+
+			ctx.fillText(`Played matches: ${multiMatches.length}`, 50, 190);
+			ctx.font = '18px comfortaa, sans-serif';
+			ctx.fillText(`Won: ${matchesWon} / Lost: ${matchesLost}`, 75, 215);
+
+			ctx.font = '22px comfortaa, sans-serif';
+			ctx.fillText(`Played maps: ${gamesChecked.length}`, 50, 270);
+			ctx.font = '18px comfortaa, sans-serif';
+			ctx.fillText(`Won: ${gamesWon} / Lost: ${gamesLost}`, 75, 295);
+
+			let duelLeague = getOsuDuelLeague(highestRating);
+
+			let leagueText = duelLeague.name;
+			let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+			ctx.font = '22px comfortaa, sans-serif';
+			ctx.fillText('Highest duel rating:', 50, 345);
+			ctx.font = '18px comfortaa, sans-serif';
+			ctx.fillText(`League: ${leagueText} (${highestRating.toFixed(3)})`, 75, 370);
+			ctx.drawImage(leagueImage, 75, 385, 150, 150);
+
+			ctx.textAlign = 'left';
+			ctx.fillText(`Top ${Math.min(10, tourneyPPPlays.length)} tournament pp plays:`, 635, 140);
+			ctx.font = '11px comfortaa, sans-serif';
+			for (let i = 0; i < Math.min(10, tourneyPPPlays.length); i++) {
+				tourneyPPPlays[i].beatmap = await getOsuBeatmap({ beatmapId: tourneyPPPlays[i].beatmapId });
+				let title = 'Unavailable';
+				let artist = 'Unavailable';
+				let difficulty = 'Unavailable';
+				if (tourneyPPPlays[i].beatmap) {
+					title = tourneyPPPlays[i].beatmap.title;
+					artist = tourneyPPPlays[i].beatmap.artist;
+					difficulty = tourneyPPPlays[i].beatmap.difficulty;
+				}
+				let mapString = `#${i + 1} ${parseFloat(tourneyPPPlays[i].pp).toFixed(0)}pp | ${artist} - ${title} [${difficulty}]`;
+				let cut = false;
+				while (ctx.measureText(mapString).width > 340) {
+					cut = true;
+					mapString = mapString.slice(0, mapString.length - 1);
+				}
+				if (cut) {
+					mapString += '...';
+				}
+
+				ctx.fillText(mapString, 635, 158 + i * 16);
+			}
+
+			ctx.textAlign = 'center';
+			ctx.font = '22px comfortaa, sans-serif';
+			ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 800, 375);
+			ctx.font = '18px comfortaa, sans-serif';
+			for (let i = 0; i < Math.min(5, mostPlayedWith.length); i++) {
+				ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 800, 400 + i * 25);
+			}
+
+			ctx.textAlign = 'center';
+			ctx.font = '22px comfortaa, sans-serif';
+			ctx.fillText(`Won against ${mostWonAgainst.length} players:`, 300, 575);
+			ctx.font = '18px comfortaa, sans-serif';
+			for (let i = 0; i < Math.min(5, mostWonAgainst.length); i++) {
+				ctx.fillText(`#${i + 1} ${mostWonAgainst[i].osuName} (${mostWonAgainst[i].amount} times)`, 300, 600 + i * 25);
+			}
+
+			ctx.textAlign = 'center';
+			ctx.font = '22px comfortaa, sans-serif';
+			ctx.fillText(`Lost against ${mostLostAgainst.length} players:`, 700, 575);
+			ctx.font = '18px comfortaa, sans-serif';
+			for (let i = 0; i < Math.min(5, mostLostAgainst.length); i++) {
+				ctx.fillText(`#${i + 1} ${mostLostAgainst[i].osuName} (${mostLostAgainst[i].amount} times)`, 700, 600 + i * 25);
+			}
+
+			// Write the title of the player
+			ctx.font = '16px comfortaa, sans-serif';
+			ctx.fillStyle = '#ffffff';
+			ctx.textAlign = 'left';
+			let today = new Date().toLocaleDateString();
+			ctx.fillText(`Made by Elitebotix on ${today}`, 10, canvas.height - 10);
+
+			//Get a circle in the middle for inserting the player avatar
+			ctx.beginPath();
+			ctx.arc(475, 250, 125, 0, Math.PI * 2, true);
+			ctx.closePath();
+			ctx.clip();
+
+			//Draw a shape onto the main canvas in the middle 
+			try {
+				const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.osuUserId}`);
+				ctx.drawImage(avatar, 350, 125, 250, 250);
+			} catch (error) {
+				const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
+				ctx.drawImage(avatar, 350, 125, 250, 250);
+			}
+
+			//Create as an attachment
+			files.push(new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-history-${osuUser.osuUserId}.png` }));
+
+			//Create chart
+			const width = 1500; //px
+			const height = 750; //px
+			const canvasRenderService = new ChartJSNodeCanvas({ width, height });
+
+			const data = {
+				labels: labels,
+				datasets: [
+					{
+						label: 'Master',
+						data: masterHistory,
+						borderColor: 'rgb(255, 174, 251)',
+						fill: true,
+						backgroundColor: 'rgba(255, 174, 251, 0.6)',
+						tension: 0.4
+					},
+					{
+						label: 'Diamond',
+						data: diamondHistory,
+						borderColor: 'rgb(73, 176, 255)',
+						fill: true,
+						backgroundColor: 'rgba(73, 176, 255, 0.6)',
+						tension: 0.4
+					},
+					{
+						label: 'Platinum',
+						data: platinumHistory,
+						borderColor: 'rgb(29, 217, 165)',
+						fill: true,
+						backgroundColor: 'rgba(29, 217, 165, 0.6)',
+						tension: 0.4
+					},
+					{
+						label: 'Gold',
+						data: goldHistory,
+						borderColor: 'rgb(255, 235, 71)',
+						fill: true,
+						backgroundColor: 'rgba(255, 235, 71, 0.6)',
+						tension: 0.4
+					},
+					{
+						label: 'Silver',
+						data: silverHistory,
+						borderColor: 'rgb(181, 181, 181)',
+						fill: true,
+						backgroundColor: 'rgba(181, 181, 181, 0.6)',
+						tension: 0.4
+					},
+					{
+						label: 'Bronze',
+						data: bronzeHistory,
+						borderColor: 'rgb(240, 121, 0)',
+						fill: true,
+						backgroundColor: 'rgba(240, 121, 0, 0.6)',
+						tension: 0.4
+					},
+				]
+			};
+
+			const configuration = {
+				type: 'line',
+				data: data,
+				options: {
+					responsive: true,
+					plugins: {
+						title: {
+							display: true,
+							text: 'Duel Rating History (Total)',
+							color: '#FFFFFF',
+						},
+						legend: {
+							labels: {
+								color: '#FFFFFF',
+							}
+						},
+					},
+					interaction: {
+						intersect: false,
+					},
+					scales: {
+						x: {
+							display: true,
+							title: {
+								display: true,
+								color: '#FFFFFF'
+							},
+							grid: {
+								color: '#8F8F8F'
+							},
+							ticks: {
+								color: '#FFFFFF',
+							},
+						},
+						y: {
+							display: true,
+							title: {
+								display: true,
+								text: 'Duel Rating',
+								color: '#FFFFFF'
+							},
+							grid: {
+								color: '#8F8F8F'
+							},
+							ticks: {
+								color: '#FFFFFF',
+							},
+						}
+					}
+				},
+			};
+
+			const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+			files.push(new Discord.AttachmentBuilder(imageBuffer, { name: `duelRatingHistory-${osuUser.osuUserId}.png` }));
+		}
 
 		// eslint-disable-next-line no-undef
 		matchesPlayed = new Discord.AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${osuUser.osuUserId}.txt` });
 		files.push(matchesPlayed);
 
-		mostPlayedWith = mostPlayedWith.map((user) => {
-			return `${user.amount} times - ${user.osuName} (${user.osuUserId})`;
-		});
+		if (!onlymatchhistory) {
 
-		mostPlayedWith.unshift('Most played with: (Most won against / Most lost against is below)');
+			mostPlayedWith = mostPlayedWith.map((user) => {
+				return `${user.amount} times - ${user.osuName} (${user.osuUserId})`;
+			});
 
-		mostWonAgainst = mostWonAgainst.map((user) => {
-			return `${user.amount} times - ${user.osuName} (${user.osuUserId})`;
-		});
+			mostPlayedWith.unshift('Most played with: (Most won against / Most lost against is below)');
 
-		mostWonAgainst.unshift('');
-		mostWonAgainst.unshift('');
-		mostWonAgainst.unshift('');
-		mostWonAgainst.unshift('Most won against:');
+			mostWonAgainst = mostWonAgainst.map((user) => {
+				return `${user.amount} times - ${user.osuName} (${user.osuUserId})`;
+			});
 
-		mostLostAgainst = mostLostAgainst.map((user) => {
-			return `${user.amount} times - ${user.osuName} (${user.osuUserId})`;
-		});
+			mostWonAgainst.unshift('');
+			mostWonAgainst.unshift('');
+			mostWonAgainst.unshift('');
+			mostWonAgainst.unshift('Most won against:');
 
-		mostLostAgainst.unshift('');
-		mostLostAgainst.unshift('');
-		mostLostAgainst.unshift('');
-		mostLostAgainst.unshift('Most lost against:');
+			mostLostAgainst = mostLostAgainst.map((user) => {
+				return `${user.amount} times - ${user.osuName} (${user.osuUserId})`;
+			});
 
-		let mostPlayedWonLost = mostPlayedWith.concat(mostWonAgainst, mostLostAgainst);
+			mostLostAgainst.unshift('');
+			mostLostAgainst.unshift('');
+			mostLostAgainst.unshift('');
+			mostLostAgainst.unshift('Most lost against:');
 
-		// eslint-disable-next-line no-undef
-		mostPlayedWonLost = new Discord.AttachmentBuilder(Buffer.from(mostPlayedWonLost.join('\n'), 'utf-8'), { name: `most-played-won-and-lost-${osuUser.osuUserId}.txt` });
-		files.push(mostPlayedWonLost);
+			let mostPlayedWonLost = mostPlayedWith.concat(mostWonAgainst, mostLostAgainst);
+
+			// eslint-disable-next-line no-undef
+			mostPlayedWonLost = new Discord.AttachmentBuilder(Buffer.from(mostPlayedWonLost.join('\n'), 'utf-8'), { name: `most-played-won-and-lost-${osuUser.osuUserId}.txt` });
+			files.push(mostPlayedWonLost);
+		}
 
 		return interaction.editReply({ content: ' ', files: files });
 	},
