@@ -426,6 +426,16 @@ module.exports = {
 					}, {
 						where: {
 							matchId: matchId,
+							[Op.or]: [
+								{
+									tourneyMatch: {
+										[Op.not]: valid,
+									},
+								},
+								{
+									verifiedAt: null,
+								},
+							],
 						},
 					});
 
