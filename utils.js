@@ -2681,7 +2681,7 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 				const { DBOsuGuildTrackers, DBOsuMultiScores } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 				// eslint-disable-next-line no-undef
-				const { getOsuPlayerName, multiToBanchoScore, logDatabaseQueriesFunction } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+				const { getOsuPlayerName, multiToBanchoScore, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -2693,7 +2693,7 @@ module.exports = {
 
 				let recentActivity = false;
 
-				logDatabaseQueriesFunction(2, 'utils.js DBOsuGuildTrackers processOsuTrack');
+				logDatabaseQueries(2, 'utils.js DBOsuGuildTrackers processOsuTrack');
 				let guildTrackers = await DBOsuGuildTrackers.findAll({
 					where: {
 						osuUserId: osuUser.osuUserId,
@@ -3004,7 +3004,7 @@ module.exports = {
 					if (guildTrackers[i].tournamentTopPlays) {
 						if (guildTrackers[i].tournamentNumberTopPlays === undefined) {
 							//Get all scores from tournaments
-							logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores processOsuTrack tournamentTopPlays');
+							logDatabaseQueries(2, 'utils.js DBOsuMultiScores processOsuTrack tournamentTopPlays');
 							let multiScores = await DBOsuMultiScores.findAll({
 								where: {
 									osuUserId: osuUser.osuUserId,
@@ -7015,8 +7015,8 @@ async function updateQueueChannelsFunction(client) {
 			// eslint-disable-next-line no-undef
 			const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 			// eslint-disable-next-line no-undef
-			const { getOsuPlayerName, logDatabaseQueriesFunction } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
-			logDatabaseQueriesFunction(4, 'utils.js DBProcessQueue existingQueueTasks');
+			const { getOsuPlayerName, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+			logDatabaseQueries(4, 'utils.js DBProcessQueue existingQueueTasks');
 			let existingQueueTasks = await DBProcessQueue.findAll({
 				where: {
 					task: 'duelQueue1v1',
