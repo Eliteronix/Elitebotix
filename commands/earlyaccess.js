@@ -85,7 +85,7 @@ module.exports = {
 		logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
-				userId: msg.author.id,
+				userId: interaction ? interaction.user.id : msg.author.id,
 				patreon: true
 			}
 		});
