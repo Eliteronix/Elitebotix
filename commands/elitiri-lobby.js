@@ -14,6 +14,7 @@ module.exports = {
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply
+		//TODO: Update logdatabasequeries
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 

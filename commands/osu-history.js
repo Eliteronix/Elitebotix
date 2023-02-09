@@ -139,6 +139,7 @@ module.exports = {
 		}
 
 		// Gather all the data
+		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 1');
 		let multiMatches = await DBOsuMultiScores.findAll({
 			attributes: ['matchId'],
 			where: {
@@ -157,6 +158,7 @@ module.exports = {
 			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches.`);
 		}
 
+		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 2');
 		let multiScores = await DBOsuMultiScores.findAll({
 			where: {
 				matchId: multiMatches,
@@ -459,6 +461,7 @@ module.exports = {
 			tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
 
 			// Create rank history graph
+			logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 3');
 			let oldestScore = await DBOsuMultiScores.findOne({
 				where: {
 					osuUserId: osuUser.osuUserId,

@@ -3,6 +3,7 @@ const { DBDiscordUsers, DBBirthdayGuilds } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 const { SlashCommandBuilder } = require('discord.js');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	name: 'birthday',
@@ -133,6 +134,7 @@ module.exports = {
 				}
 			}
 
+			logDatabaseQueries(4, 'commands/birthday.js DBDiscordUsers set');
 			let user = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.member.user.id,
@@ -140,6 +142,7 @@ module.exports = {
 			});
 
 			if (!user) {
+				logDatabaseQueries(4, 'commands/birthday.js DBDiscordUsers set create');
 				user = await DBDiscordUsers.create({
 					userId: interaction.member.user.id,
 				});
@@ -148,6 +151,7 @@ module.exports = {
 			user.birthday = date;
 			user.save();
 
+			logDatabaseQueries(4, 'commands/birthday.js DBBirthdayGuilds set');
 			let guilds = await DBBirthdayGuilds.findAll({
 				where: {
 					userId: interaction.member.user.id,
@@ -172,7 +176,7 @@ module.exports = {
 			});
 			return await interaction.editReply({ content: `Your birthday has been set for \`${dateString}\``, ephemeral: true });
 		} else if (interaction.options.getSubcommand() === 'enable') {
-
+			logDatabaseQueries(4, 'commands/birthday.js DBBirthdayGuilds enable');
 			let currentGuild = await DBBirthdayGuilds.findOne({
 				where: {
 					guildId: interaction.guild.id,
@@ -184,6 +188,7 @@ module.exports = {
 				return await interaction.editReply({ content: `You are already sharing your birthday on ${interaction.guild.name}`, ephemeral: true });
 			}
 
+			logDatabaseQueries(4, 'commands/birthday.js DBDiscordUsers enable');
 			let dbDiscordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.member.user.id,
@@ -204,6 +209,7 @@ module.exports = {
 				nextBirthday.setUTCFullYear(nextBirthday.getUTCFullYear() + 1);
 			}
 
+			logDatabaseQueries(4, 'commands/birthday.js DBBirthdayGuilds enable create');
 			await DBBirthdayGuilds.create({
 				guildId: interaction.guild.id,
 				userId: interaction.member.user.id,
@@ -212,6 +218,7 @@ module.exports = {
 
 			return await interaction.editReply({ content: `Your birthday will now be shared on ${interaction.guild.name}`, ephemeral: true });
 		} else if (interaction.options.getSubcommand() === 'disable') {
+			logDatabaseQueries(4, 'commands/birthday.js DBBirthdayGuilds disable');
 			let currentGuild = await DBBirthdayGuilds.findOne({
 				where: {
 					guildId: interaction.guild.id,

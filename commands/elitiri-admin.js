@@ -53,6 +53,7 @@ module.exports = {
 	cooldown: 5,
 	tags: 'debug',
 	async execute(msg, args) {
+		//TODO: Update logdatabasequeries to use the new logger
 		//Get the user from the DBDiscordUsers
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { userId: msg.author.id }

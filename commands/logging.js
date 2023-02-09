@@ -392,6 +392,7 @@ module.exports = {
 				}
 				return interaction.followUp(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
 			} else {
+				logDatabaseQueries(4, 'commands/logging.js DBGuilds create 1');
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, loggingChannel: msg.mentions.channels.first().id });
 				if (msg.id) {
 					return msg.reply(`The enabled events are now being logged into the channel <#${msg.mentions.channels.first().id}>.`);
@@ -407,6 +408,7 @@ module.exports = {
 				interaction.followUp(`Be sure to use \`${guildPrefix}${this.name} channel <mentioned channel>\` to set a channel where this information should be logged into.`);
 			}
 			if (!guild) {
+				logDatabaseQueries(4, 'commands/logging.js DBGuilds create 2');
 				guild = await DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name });
 			}
 			args.forEach(arg => {

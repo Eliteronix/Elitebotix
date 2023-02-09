@@ -811,6 +811,7 @@ module.exports = {
 
 			date.setUTCMinutes(date.getUTCMinutes() - 15);
 
+			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue create');
 			DBProcessQueue.create({ guildId: interaction.guildId, task: 'tourneyMatchNotification', priority: 10, additions: `${interaction.user.id};${channel.id};${dbMaps.join(',')};${dbPlayers.join('|')};${useNoFail};${matchname};${mappoolReadable};${scoreMode};${freemodMessage};${teamsize}`, date: date });
 			return interaction.editReply('The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use </osu-referee scheduled:1064502493226225664>');
 		} else if (interaction.options.getSubcommand() === 'scheduled') {
@@ -829,7 +830,7 @@ module.exports = {
 					let players = additions[3].replaceAll('|', ',').split(',');
 					let dbPlayers = [];
 					for (let j = 0; j < players.length; j++) {
-						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
+						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 2');
 						const dbDiscordUser = await DBDiscordUsers.findOne({
 							where: { id: players[j] }
 						});
@@ -864,7 +865,7 @@ module.exports = {
 					let players = additions[3].replaceAll('|', ',').split(',');
 					let dbPlayers = [];
 					for (let j = 0; j < players.length; j++) {
-						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
+						logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 3');
 						const dbDiscordUser = await DBDiscordUsers.findOne({
 							where: { id: players[j] }
 						});
@@ -906,7 +907,7 @@ module.exports = {
 					let players = additions[3].replaceAll('|', ',').split(',');
 					let dbPlayers = [];
 					for (let j = 0; j < players.length; j++) {
-						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
+						logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 4');
 						const dbDiscordUser = await DBDiscordUsers.findOne({
 							where: { id: players[j] }
 						});

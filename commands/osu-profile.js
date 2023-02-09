@@ -187,7 +187,7 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < args.length; i++) {
 				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
-					logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers');
+					logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
 					});
@@ -274,7 +274,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 					}
 				}
 
-				logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers Bancho linkedUser');
+				logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers 2');
 				const linkedUser = await DBDiscordUsers.findOne({
 					where: { osuUserId: user.id }
 				});
@@ -294,7 +294,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
 
-				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores');
+				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores 1');
 				let userScores = await DBOsuMultiScores.findAll({
 					where: {
 						osuUserId: user.id,
@@ -379,7 +379,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
 
-				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores');
+				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores 2');
 				let userScores = await DBOsuMultiScores.findAll({
 					where: {
 						osuUserId: user.id,
@@ -439,7 +439,7 @@ async function drawTitle(input, server, mode) {
 	ctx.textAlign = 'center';
 	ctx.fillText(title, canvas.width / 2, 35);
 
-	logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers Patreon/Dev');
+	logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers 3');
 	const discordUser = await DBDiscordUsers.findOne({
 		where: {
 			osuUserId: user.id
@@ -481,7 +481,7 @@ async function drawRank(input, msg) {
 	ctx.fillText(`PP: ${pp}`, canvas.width / 2, 83 + yOffset);
 
 	try {
-		logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers Duelrating');
+		logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers 4');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: {
 				osuUserId: user.id
@@ -489,6 +489,7 @@ async function drawRank(input, msg) {
 		});
 
 		if (!discordUser) {
+			logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers create');
 			await DBDiscordUsers.create({ osuName: user.name, osuUserId: user.id });
 		}
 

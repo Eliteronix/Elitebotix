@@ -125,6 +125,7 @@ module.exports = {
 				return interaction.editReply(`${role.name} is already an autorole.`);
 			}
 
+			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles add create');
 			await DBAutoRoles.create({ guildId: interaction.guildId, roleId: role.id });
 
 			interaction.editReply(`${role.name} has been added as an autorole.`);
@@ -160,6 +161,7 @@ module.exports = {
 				if (autoRole) {
 					autoRolesList[i] = autoRole.name;
 				} else {
+					logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles list destroy');
 					DBAutoRoles.destroy({ where: { guildId: interaction.guildId, roleId: autoRolesList[i].roleId } });
 					autoRolesList.shift();
 				}

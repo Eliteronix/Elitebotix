@@ -347,7 +347,7 @@ module.exports = {
 				//Get profiles by arguments
 				for (let i = 0; i < args.length; i++) {
 					if (args[i].startsWith('<@') && args[i].endsWith('>')) {
-						logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers');
+						logDatabaseQueries(4, 'commands/osu-mostplayed.js DBDiscordUsers 1');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
 						});
@@ -405,6 +405,7 @@ module.exports = {
 			let mostplayed = null;
 
 			if (interaction.options.getBoolean('dontfiltermm')) {
+				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiScores 1');
 				mostplayed = await DBOsuMultiScores.findAll({
 					attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
 					where: {
@@ -417,6 +418,7 @@ module.exports = {
 					order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
 				});
 			} else {
+				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiScores 2');
 				mostplayed = await DBOsuMultiScores.findAll({
 					attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
 					where: {
@@ -823,15 +825,7 @@ async function drawMostPlayed(input, server, mode, limit) {
 			}
 		}
 	} else if (server === 'tournaments') {
-		// Keeping this here because its the cooler way to do it but the filtering doesn't work properly
-		// let mostplayed = await DBOsuMultiScores.findAll({
-		// 	where: { osuUserId: user.id },
-		// 	group: ['beatmapId'],
-		// 	attributes: ['beatmapId', [sequelize.fn('COUNT', 'beatmapId'), 'playcount']],
-		// 	order: [[sequelize.fn('COUNT', 'beatmapId'), 'DESC']],
-		// 	limit: limit * 2
-		// });
-
+		logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiScores 3');
 		let multiScores = await DBOsuMultiScores.findAll({
 			where: { osuUserId: user.id },
 		});

@@ -180,11 +180,13 @@ module.exports = {
 				return interaction.editReply('Please declare conditions using the at least one of the optional arguments.');
 			}
 
+			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles add create');
 			await DBActivityRoles.create({ guildId: interaction.guildId, roleId: role.id, percentageCutoff: percentage, pointsCutoff: points, rankCutoff: rank });
 
 			logDatabaseQueries(4, 'commands/activityrole.js DBProcessQueue add');
 			const existingTask = await DBProcessQueue.findOne({ where: { guildId: interaction.guildId, task: 'updateActivityRoles', priority: 5 } });
 			if (!existingTask) {
+				logDatabaseQueries(4, 'commands/activityrole.js DBProcessQueue add create');
 				await DBProcessQueue.create({ guildId: interaction.guildId, task: 'updateActivityRoles', priority: 5 });
 			}
 
@@ -245,6 +247,7 @@ module.exports = {
 				if (activityRole) {
 					activityRolesString = `${activityRolesString}\n${activityRole.name} -> ${conditions}`;
 				} else {
+					logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles list destroy');
 					DBActivityRoles.destroy({ where: { guildId: interaction.guildId, roleId: activityRolesList[i].roleId } });
 					activityRolesList.shift();
 				}

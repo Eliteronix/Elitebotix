@@ -758,7 +758,7 @@ module.exports = {
 			return interaction.followUp({ content: 'The discord server for the competition can be found here: <https://discord.com/invite/Asz5Gfe>\nAfter joining be sure to head to <#801000891750547496> and assign yourself the MOTD role!\nEverything else will be done automatically when you registered!', ephemeral: true });
 		} else if (args[0].toLowerCase() === 'register') {
 			//get discordUser from db
-			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers register');
+			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 1');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: { userId: msg.author.id },
 			});
@@ -795,7 +795,7 @@ module.exports = {
 			}
 		} else if (args[0].toLowerCase() === 'unregister') {
 			//get discordUser from db
-			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers unregister');
+			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 2');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: { userId: msg.author.id },
 			});
@@ -815,7 +815,7 @@ module.exports = {
 			}
 		} else if (args[0].toLowerCase() === 'mute') {
 			//get discordUser from db
-			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers mute');
+			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 3');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: { userId: msg.author.id },
 			});
@@ -926,7 +926,7 @@ module.exports = {
 			}
 		} else if (args[0].toLowerCase() === 'unmute') {
 			//get discordUser from db
-			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers unmute');
+			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 4');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: { userId: msg.author.id },
 			});
@@ -1006,7 +1006,7 @@ module.exports = {
 			let playersNotConnected = [];
 
 			for (let i = 0; i < players.length; i++) {
-				logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers custom-fixed-players');
+				logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 5');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						userId: {
@@ -1673,7 +1673,7 @@ module.exports = {
 			const collector = embedMessage.createReactionCollector({ filter, time: 120000, max: 16 });
 
 			collector.on('collect', async (reaction, user) => {
-				logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers custom-react-to-play');
+				logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 6');
 				const dbDiscordUser = await DBDiscordUsers.findOne({
 					where: { userId: user.id }
 				});

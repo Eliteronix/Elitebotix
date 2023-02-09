@@ -94,14 +94,17 @@ module.exports = {
 				}
 			})();
 		} else if (args[0] === 'saveMultiMatches') {
+			logDatabaseQueries(4, 'commands/admin.js DBProcessQueue saveMultiMatches');
 			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'saveMultiMatches' } });
 			for (let i = 0; i < processQueueTasks.length; i++) {
 				await processQueueTasks[i].destroy();
 			}
 
 			let now = new Date();
+			logDatabaseQueries(4, 'commands/admin.js DBProcessQueue saveMultiMatches create');
 			DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${args[1]}`, priority: 2, date: now });
 		} else if (args[0] === 'removeOsuUserConnection') {
+			logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers removeOsuUserConnection');
 			let DBDiscordUser = await DBDiscordUsers.findOne({
 				where: { osuUserId: args[1], osuVerified: true }
 			});
@@ -127,6 +130,7 @@ module.exports = {
 				msg.reply('User not found');
 			}
 		} else if (args[0] === 'deleteElitiriSignup') {
+			logDatabaseQueries(4, 'commands/admin.js DBElitiriCupSignUp deleteElitiriSignup');
 			let DBElitiriSignup = await DBElitiriCupSignUp.findOne({
 				where: { id: args[1] }
 			});
@@ -148,6 +152,7 @@ module.exports = {
 				logDatabaseQueries(4, 'commands/admin.js updateElitiriRanks DBProcessQueue');
 				const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: DBElitiriSignups[i].userId } });
 				if (!existingTask) {
+					logDatabaseQueries(4, 'commands/admin.js updateElitiriRanks DBProcessQueue create');
 					DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: DBElitiriSignups[i].userId });
 				}
 			}
@@ -160,12 +165,14 @@ module.exports = {
 			logDatabaseQueries(4, 'commands/admin.js updateElitiriRanks DBProcessQueue');
 			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: DBElitiriSignup.userId } });
 			if (!existingTask) {
+				logDatabaseQueries(4, 'commands/admin.js updateElitiriRanks DBProcessQueue create');
 				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: DBElitiriSignup.userId });
 			}
 			// DBElitiriSignup.osuRank = args[2];
 			// DBElitiriSignup.bracketName = args[3] + ' ' + args[4];
 			// DBElitiriSignup.save();
 		} else if (args[0] === 'multiScoresDBSize') {
+			logDatabaseQueries(4, 'commands/admin.js DBOsuMultiScores multiScoresDBSize');
 			const mapScoreAmount = await DBOsuMultiScores.count();
 
 			// eslint-disable-next-line no-console
@@ -182,7 +189,7 @@ module.exports = {
 						if (i % 25 === 0) {
 							sentMessage.edit(`${i} out of ${members.length} done`);
 						}
-						logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers');
+						logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers updateServerDuelRatings');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: {
 								userId: members[i].id
@@ -212,6 +219,7 @@ module.exports = {
 			process.send('osu!API');
 			osuApi.getBeatmaps({ b: args[1] })
 				.then(async (beatmaps) => {
+					logDatabaseQueries(4, 'commands/admin.js DBElitiriCupSubmissions addElitiriTopBracketNMMap');
 					DBElitiriCupSubmissions.create({
 						osuUserId: '-1',
 						osuName: 'ECW 2021 Submission',
@@ -237,6 +245,7 @@ module.exports = {
 					console.error(error);
 				});
 		} else if (args[0] === 'patreon') {
+			logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers patreon');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: args[1]
@@ -252,6 +261,7 @@ module.exports = {
 			}
 			discordUser.save();
 		} else if (args[0] === 'removeTwitchSyncEnable') {
+			logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers removeTwitchSyncEnable');
 			let twitchSyncUsers = await DBDiscordUsers.findAll({
 				where: {
 					twitchOsuMapSync: true
@@ -265,11 +275,13 @@ module.exports = {
 		} else if (args[0] === 'cleanUp') {
 			cleanUpDuplicateEntries(true);
 		} else if (args[0] === 'clearForumPosts') {
+			logDatabaseQueries(4, 'commands/admin.js DBOsuForumPosts clearForumPosts');
 			let forumPosts = await DBOsuForumPosts.findAll();
 			for (let i = 0; i < forumPosts.length; i++) {
 				await forumPosts[i].destroy();
 			}
 		} else if (args[0] === 'runningMatches') {
+			logDatabaseQueries(4, 'commands/admin.js DBProcessQueue runningMatches');
 			let importMatchTasks = await DBProcessQueue.findAll({
 				where: {
 					task: 'importMatch',
@@ -280,6 +292,7 @@ module.exports = {
 				await msg.reply(`https://osu.ppy.sh/mp/${importMatchTasks[i].additions}`);
 			}
 		} else if (args[0] === 'deleteDiscordUser') {
+			logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers deleteDiscordUser');
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: args[1]
@@ -295,6 +308,7 @@ module.exports = {
 		} else if (args[0] === 'resetSavedPPValues') {
 			// Reset saved pp values in DBOsuMultiScores using an update statement
 			await msg.reply('Resetting...');
+			logDatabaseQueries(4, 'commands/admin.js DBOsuMultiScores resetSavedPPValues');
 			let count = await DBOsuMultiScores.update({
 				pp: null,
 			}, {
@@ -458,6 +472,7 @@ module.exports = {
 				},
 			});
 		} else if (args[0] === 'averageRating') {
+			logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers averageRating');
 			let discordUsers = await DBDiscordUsers.findAll({
 				where: {
 					osuUserId: {
@@ -537,6 +552,7 @@ module.exports = {
 			}, { context: { condition: args[1] } });
 			return;
 		} else if (args[0] === 'resetSavedRatings') {
+			logDatabaseQueries(4, 'commands/admin.js DBDuelRatingHistory resetSavedRatings');
 			let deleted = await DBDuelRatingHistory.destroy({
 				where: {
 					id: {
@@ -547,6 +563,7 @@ module.exports = {
 
 			await msg.reply(`Deleted ${deleted} duel rating histories.`);
 
+			logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers resetSavedRatings');
 			let updated = await DBDiscordUsers.update({
 				lastDuelRatingUpdate: null,
 			}, {
@@ -560,6 +577,7 @@ module.exports = {
 
 			return await msg.reply(`Updated ${updated} discord users.`);
 		} else if (args[0] === 'removeProcessQueueTask') {
+			logDatabaseQueries(4, 'commands/admin.js DBProcessQueue removeProcessQueueTask');
 			await DBProcessQueue.destroy({
 				where: {
 					id: args[1],
@@ -568,6 +586,7 @@ module.exports = {
 
 			return await msg.reply('Deleted the processqueue entry.');
 		} else if (args[0] === 'remainingUsers') {
+			logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers remainingUsers');
 			let count = await DBDiscordUsers.count({
 				where: {
 					osuUserId: {
@@ -583,6 +602,7 @@ module.exports = {
 
 			return msg.reply(`Remaining users: ${count}`);
 		} else if (args[0] === 'warmupnull') {
+			logDatabaseQueries(4, 'commands/admin.js DBOsuMultiScores warmupnull');
 			let count = await DBOsuMultiScores.count({
 				where: {
 					warmup: null,
@@ -591,6 +611,7 @@ module.exports = {
 
 			return msg.reply(`Warmup null: ${count}`);
 		} else if (args[0] === 'tournamentBanned') {
+			logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers tournamentBanned');
 			let discordUsers = await DBDiscordUsers.findAll({
 				where: {
 					tournamentBannedUntil: {
@@ -632,6 +653,7 @@ module.exports = {
 			}
 
 			//Get all the scores for the map
+			logDatabaseQueries(4, 'commands/admin.js DBOsuMultiScores tournamentDifficulty');
 			let scores = await DBOsuMultiScores.findAll({
 				where: {
 					beatmapId: args[1],
@@ -666,6 +688,7 @@ module.exports = {
 				});
 			}
 
+			logDatabaseQueries(4, 'commands/admin.js DBDuelRatingHistory tournamentDifficulty');
 			let allDuelRatingHistories = await DBDuelRatingHistory.findAll({
 				where: {
 					osuUserId: {

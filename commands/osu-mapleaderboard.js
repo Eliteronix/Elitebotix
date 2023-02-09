@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits } = require('../utils');
+const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits, logDatabaseQueries } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -202,6 +202,7 @@ module.exports = {
 		let scoresArray = [];
 		let userScore = null;
 
+		logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBDiscordUsers');
 		const user = await DBDiscordUsers.findOne({
 			where: {
 				userId: interaction.user.id,
@@ -257,6 +258,7 @@ module.exports = {
 				}
 			}
 		} else if (server === 'tournaments') {
+			logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBOsuMultiScores');
 			let multiScores = await DBOsuMultiScores.findAll({
 				where: {
 					beatmapId: dbBeatmap.beatmapId,

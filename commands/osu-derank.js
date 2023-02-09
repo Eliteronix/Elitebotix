@@ -1,5 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
-const { getUserDuelStarRating, populateMsgFromInteraction, getOsuUserServerMode, getMessageUserDisplayname, getDerankStats, getIDFromPotentialOsuLink } = require('../utils');
+const { getUserDuelStarRating, populateMsgFromInteraction, getOsuUserServerMode, getMessageUserDisplayname, getDerankStats, getIDFromPotentialOsuLink, logDatabaseQueries } = require('../utils');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
@@ -63,6 +63,7 @@ module.exports = {
 		let discordUser = null;
 
 		if (username) {
+			logDatabaseQueries(4, 'commands/osu-derank.js DBDiscordUsers 1');
 			discordUser = await DBDiscordUsers.findOne({
 				where: {
 					[Op.or]: {
@@ -129,6 +130,7 @@ module.exports = {
 					osuDuelStarRating: duelRating.total,
 				};
 
+				logDatabaseQueries(4, 'commands/osu-derank.js DBDiscordUsers 2');
 				discordUser = await DBDiscordUsers.findOne({
 					where: {
 						osuUserId: user.id

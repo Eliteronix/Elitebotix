@@ -103,6 +103,7 @@ module.exports = {
 			}
 
 			let date = new Date();
+			logDatabaseQueries(4, 'commands/name-sync.js DBProcessQueue osuname create');
 			await DBProcessQueue.create({
 				guildId: msg.guild.id,
 				task: 'nameSync',
@@ -139,6 +140,7 @@ module.exports = {
 			}
 
 			let date = new Date();
+			logDatabaseQueries(4, 'commands/name-sync.js DBProcessQueue osunameandrank create');
 			await DBProcessQueue.create({
 				guildId: msg.guild.id,
 				task: 'nameSync',

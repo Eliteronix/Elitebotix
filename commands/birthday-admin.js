@@ -108,6 +108,7 @@ module.exports = {
 			return;
 		}
 
+		logDatabaseQueries(4, 'commands/birthday-admin.js DBGuilds');
 		let guild = await DBGuilds.findOne({
 			where: {
 				guildId: interaction.guild.id,
@@ -116,6 +117,7 @@ module.exports = {
 
 		if (interaction.options.getSubcommand() === 'enable') {
 			if (!guild) {
+				logDatabaseQueries(4, 'commands/birthday-admin.js DBGuilds enable create');
 				guild = await DBGuilds.create({
 					guildId: interaction.guild.id,
 					guildName: interaction.guild.name,
@@ -131,6 +133,7 @@ module.exports = {
 			return interaction.editReply({ content: 'Birthday announcements have been enabled.', ephemeral: true });
 		} else if (interaction.options.getSubcommand() === 'disable') {
 			if (!guild) {
+				logDatabaseQueries(4, 'commands/birthday-admin.js DBGuilds disable create');
 				guild = await DBGuilds.create({
 					guildId: interaction.guild.id,
 					guildName: interaction.guild.name,
@@ -167,6 +170,7 @@ module.exports = {
 			let channel = interaction.options._hoistedOptions[0].value;
 
 			if (!guild) {
+				logDatabaseQueries(4, 'commands/birthday-admin.js DBGuilds channel create');
 				guild = await DBGuilds.create({
 					guildId: interaction.guild.id,
 					guildName: interaction.guild.name,

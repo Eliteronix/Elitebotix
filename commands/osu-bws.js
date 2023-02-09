@@ -196,6 +196,7 @@ async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 				discordUser.osuBadges = badgeAmount;
 				await discordUser.save();
 			} else {
+				logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers create');
 				DBDiscordUsers.create({ osuName: user.name, osuUserId: user.id });
 			}
 

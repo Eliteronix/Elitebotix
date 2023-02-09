@@ -221,6 +221,7 @@ module.exports = {
 			}
 		} else {
 			await msg.user.fetchFromAPI();
+			logDatabaseQueries(4, 'commands/name-sync.js DBDiscordUsers');
 			commandUser = await DBDiscordUsers.findOne({
 				where: {
 					osuUserId: msg.user.id,
@@ -370,6 +371,7 @@ module.exports = {
 
 		let date = new Date();
 		date.setUTCMinutes(date.getUTCMinutes() + 5);
+		logDatabaseQueries(4, 'commands/name-sync.js DBProcessQueue');
 		DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: lobby.id, priority: 1, date: date });
 
 		channel.on('message', async (msg) => {

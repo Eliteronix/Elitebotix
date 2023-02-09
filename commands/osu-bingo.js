@@ -567,6 +567,7 @@ module.exports = {
 		// Get the map pool
 		let mappool = [];
 
+		logDatabaseQueries(4, 'commands/osu-bingo.js DBOsuBeatmaps');
 		let beatmaps = await DBOsuBeatmaps.findAll({
 			where: {
 				mode: 'Standard',

@@ -70,7 +70,7 @@ module.exports = {
 		let username = interaction.options.getString('username');
 
 		if (username === null) {
-			logDatabaseQueries(4, 'commands/osu-history.js DBDiscordUsers 1');
+			logDatabaseQueries(4, 'commands/osu-decay.js DBDiscordUsers 1');
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.user.id,
@@ -90,6 +90,7 @@ module.exports = {
 				}
 			}
 		} else if (username.startsWith('<@')) {
+			logDatabaseQueries(4, 'commands/osu-decay.js DBDiscordUsers 2');
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: username.replace('<@', '').replace('>', '').replace('!', ''),
@@ -133,7 +134,7 @@ module.exports = {
 		let lastWeek = new Date();
 		lastWeek.setDate(lastWeek.getDate() - 7);
 
-		logDatabaseQueries(4, 'commands/osu-decay.js DBDiscordUsers');
+		logDatabaseQueries(4, 'commands/osu-decay.js DBDiscordUsers 3');
 		let discordUsers = await DBDiscordUsers.findAll({
 			attributes: ['osuUserId', 'osuRank', 'oldOsuRank', 'osuPP', 'lastOsuPPChange'],
 			where: {

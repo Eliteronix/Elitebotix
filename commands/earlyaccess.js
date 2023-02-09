@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const osu = require('node-osu');
 const { developers, salesmen } = require('../config.json');
 const { Op } = require('sequelize');
-const { getUserDuelStarRating, getMessageUserDisplayname } = require('../utils');
+const { getUserDuelStarRating, getMessageUserDisplayname, logDatabaseQueries } = require('../utils');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const Discord = require('discord.js');
 
@@ -15,6 +15,7 @@ module.exports = {
 	tags: 'debug',
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
+		logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
 				userId: msg.author.id,
@@ -35,6 +36,7 @@ module.exports = {
 			let username = null;
 			if (args[1]) {
 				username = args[1];
+				logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers duelRatingDevelopment 1');
 				discordUser = await DBDiscordUsers.findOne({
 					where: {
 						osuUserId: {
@@ -48,6 +50,7 @@ module.exports = {
 					}
 				});
 			} else {
+				logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers duelRatingDevelopment 2');
 				discordUser = await DBDiscordUsers.findOne({
 					where: {
 						userId: msg.author.id,
@@ -93,6 +96,7 @@ module.exports = {
 
 			let processingMessage = await msg.reply('Processing...');
 
+			logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiScores duelRatingDevelopment');
 			let oldestScore = await DBOsuMultiScores.findOne({
 				where: {
 					osuUserId: osuUser.osuUserId,
