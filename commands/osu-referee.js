@@ -819,72 +819,73 @@ module.exports = {
 			//Get all scheduled matches that still need to notify
 			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 1');
 			const tourneyMatchNotifications = await DBProcessQueue.findAll({
-				where: { task: 'tourneyMatchNotification' }
+				where: {
+					guildId: interaction.guildId,
+					task: 'tourneyMatchNotification'
+				}
 			});
 
 			for (let i = 0; i < tourneyMatchNotifications.length; i++) {
 				//Get the match data from the additions field
 				let additions = tourneyMatchNotifications[i].additions.split(';');
-				//Check if the executing user is the 0 index of the additions
-				if (additions[0] === interaction.user.id) {
-					let players = additions[3].replaceAll('|', ',').split(',');
-					let dbPlayers = [];
-					for (let j = 0; j < players.length; j++) {
-						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 2');
-						const dbDiscordUser = await DBDiscordUsers.findOne({
-							where: { id: players[j] }
-						});
-						dbPlayers.push(dbDiscordUser);
-					}
-
-					// Sort players by id desc
-					dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
-
-					players = additions[3];
-					for (let j = 0; j < dbPlayers.length; j++) {
-						players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
-					}
-
-					//Get the match date from the date the task is scheduled to
-					const matchDate = tourneyMatchNotifications[i].date;
-					//Increase the matchDate by 15 minutes to get the date the match actually starts (Because notifications happen 15 minutes earlier)
-					matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 15);
-
-					scheduledMatches.push(`\`\`\`Scheduled:\nInternal ID: ${tourneyMatchNotifications[i].id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${players}\nMappool: ${additions[6]}\`\`\``);
+				let players = additions[3].replaceAll('|', ',').split(',');
+				let dbPlayers = [];
+				for (let j = 0; j < players.length; j++) {
+					logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 2');
+					const dbDiscordUser = await DBDiscordUsers.findOne({
+						where: { id: players[j] }
+					});
+					dbPlayers.push(dbDiscordUser);
 				}
+
+				// Sort players by id desc
+				dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
+
+				players = additions[3];
+				for (let j = 0; j < dbPlayers.length; j++) {
+					players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
+				}
+
+				//Get the match date from the date the task is scheduled to
+				const matchDate = tourneyMatchNotifications[i].date;
+				//Increase the matchDate by 15 minutes to get the date the match actually starts (Because notifications happen 15 minutes earlier)
+				matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 15);
+
+				scheduledMatches.push(`\`\`\`Scheduled:\nInternal ID: ${tourneyMatchNotifications[i].id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${players}\nMappool: ${additions[6]}\`\`\``);
 			}
 
 			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 2');
 			const tourneyMatchReferees = await DBProcessQueue.findAll({
-				where: { task: 'tourneyMatchReferee' }
+				where: {
+					guildId: interaction.guildId,
+					task: 'tourneyMatchReferee'
+				}
 			});
 
 			for (let i = 0; i < tourneyMatchReferees.length; i++) {
 				let additions = tourneyMatchReferees[i].additions.split(';');
-				if (additions[0] === interaction.user.id) {
-					let players = additions[3].replaceAll('|', ',').split(',');
-					let dbPlayers = [];
-					for (let j = 0; j < players.length; j++) {
-						logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 3');
-						const dbDiscordUser = await DBDiscordUsers.findOne({
-							where: { id: players[j] }
-						});
-						dbPlayers.push(dbDiscordUser);
-					}
-
-					// Sort players by id desc
-					dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
-
-					players = additions[3];
-					for (let j = 0; j < dbPlayers.length; j++) {
-						players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
-					}
-
-					const matchDate = tourneyMatchReferees[i].date;
-					matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 10);
-
-					scheduledMatches.push(`\`\`\`Scheduled (Already pinged):\nInternal ID: ${tourneyMatchReferees[i].id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${players}\nMappool: ${additions[6]}\`\`\``);
+				let players = additions[3].replaceAll('|', ',').split(',');
+				let dbPlayers = [];
+				for (let j = 0; j < players.length; j++) {
+					logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 3');
+					const dbDiscordUser = await DBDiscordUsers.findOne({
+						where: { id: players[j] }
+					});
+					dbPlayers.push(dbDiscordUser);
 				}
+
+				// Sort players by id desc
+				dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
+
+				players = additions[3];
+				for (let j = 0; j < dbPlayers.length; j++) {
+					players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
+				}
+
+				const matchDate = tourneyMatchReferees[i].date;
+				matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 10);
+
+				scheduledMatches.push(`\`\`\`Scheduled (Already pinged):\nInternal ID: ${tourneyMatchReferees[i].id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${players}\nMappool: ${additions[6]}\`\`\``);
 			}
 
 			if (!scheduledMatches.length) {
@@ -898,41 +899,42 @@ module.exports = {
 			const internalId = interaction.options._hoistedOptions[0].value;
 			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 3');
 			const processQueueTask = await DBProcessQueue.findOne({
-				where: { id: internalId }
+				where: {
+					id: internalId,
+					guildId: interaction.guildId
+				}
 			});
 
 			if (processQueueTask && (processQueueTask.task === 'tourneyMatchNotification' || processQueueTask.task === 'tourneyMatchReferee')) {
 				let additions = processQueueTask.additions.split(';');
-				if (additions[0] === interaction.user.id) {
-					let players = additions[3].replaceAll('|', ',').split(',');
-					let dbPlayers = [];
-					for (let j = 0; j < players.length; j++) {
-						logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 4');
-						const dbDiscordUser = await DBDiscordUsers.findOne({
-							where: { id: players[j] }
-						});
-						dbPlayers.push(dbDiscordUser);
-					}
-
-					// Sort players by id desc
-					dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
-
-					players = additions[3];
-					for (let j = 0; j < dbPlayers.length; j++) {
-						players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
-					}
-
-					const matchDate = processQueueTask.date;
-					if (processQueueTask.task === 'tourneyMatchNotification') {
-						matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 15);
-					} else if (processQueueTask.task === 'tourneyMatchReferee') {
-						matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 10);
-					}
-
-					interaction.followUp(`The following match has been removed and is no longer scheduled to happen:\n\`\`\`Internal ID: ${processQueueTask.id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${players}\nMappool: ${additions[6]}\`\`\``);
-
-					return processQueueTask.destroy();
+				let players = additions[3].replaceAll('|', ',').split(',');
+				let dbPlayers = [];
+				for (let j = 0; j < players.length; j++) {
+					logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 4');
+					const dbDiscordUser = await DBDiscordUsers.findOne({
+						where: { id: players[j] }
+					});
+					dbPlayers.push(dbDiscordUser);
 				}
+
+				// Sort players by id desc
+				dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
+
+				players = additions[3];
+				for (let j = 0; j < dbPlayers.length; j++) {
+					players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
+				}
+
+				const matchDate = processQueueTask.date;
+				if (processQueueTask.task === 'tourneyMatchNotification') {
+					matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 15);
+				} else if (processQueueTask.task === 'tourneyMatchReferee') {
+					matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 10);
+				}
+
+				interaction.followUp(`The following match has been removed and is no longer scheduled to happen:\n\`\`\`Internal ID: ${processQueueTask.id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${players}\nMappool: ${additions[6]}\`\`\``);
+
+				return processQueueTask.destroy();
 			}
 
 			return interaction.followUp('I couldn\'t find a scheduled match created by you with that internal ID.\nTo see what ID you need to put please use </osu-referee scheduled:1064502493226225664>');
