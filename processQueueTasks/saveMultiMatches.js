@@ -107,7 +107,9 @@ module.exports = {
 						let date = new Date();
 						date.setUTCMinutes(date.getUTCMinutes() + 5);
 						logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBProcessQueue create');
-						DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: date });
+						await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: date });
+						// eslint-disable-next-line no-undef
+						process.send('importMatch');
 					}
 
 					processQueueEntry.additions = `${parseInt(matchID) + 1}`;

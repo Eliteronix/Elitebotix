@@ -4,6 +4,7 @@ require('dotenv').config();
 const http = require('http');
 const url = require('url');
 const client = require('prom-client');
+const { DBProcessQueue } = require('./dbObjects');
 
 // Create a Registry which registers the metrics
 const register = new client.Registry();
@@ -75,6 +76,12 @@ const serverActivityAccessInTheLastMinute = new client.Gauge({
 	help: 'Server activity access in the last minute',
 });
 register.registerMetric(serverActivityAccessInTheLastMinute);
+
+const runningTournamentMatches = new client.Gauge({
+	name: 'running_tournament_matches',
+	help: 'Running tournament matches',
+});
+register.registerMetric(runningTournamentMatches);
 
 // Define the HTTP server
 const server = http.createServer(async (req, res) => {
@@ -195,6 +202,16 @@ manager.spawn()
 							serverActivityAccessInTheLastMinute.dec();
 						}, 60000);
 					}
+				} else if (message === 'importMatch') {
+					DBProcessQueue.count({
+						where: {
+							task: 'importMatch'
+						}
+					})
+						.then(processQueueTasks => {
+							runningTournamentMatches.set(processQueueTasks.length);
+						})
+						.catch(console.error);
 				}
 			});
 		});

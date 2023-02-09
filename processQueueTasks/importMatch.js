@@ -69,7 +69,9 @@ module.exports = {
 						}
 					}, { context: { message: `<https://osu.ppy.sh/mp/${matchId}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done`, matchID: parseInt(matchId) } });
 
-					return await processQueueEntry.destroy();
+					await processQueueEntry.destroy();
+					// eslint-disable-next-line no-undef
+					return process.send('importMatch');
 				}
 
 				//Match has not been completed yet / 6 hours didn't pass
