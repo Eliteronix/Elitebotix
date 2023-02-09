@@ -472,6 +472,11 @@ module.exports = {
 			for (let i = 0; i < discordUsers.length; i++) {
 				await msg.reply(`${discordUsers[i].osuName} | <https://osu.ppy.sh/users/${discordUsers[i].osuUserId}>`);
 			}
+		} else if (args[0] === 'removeUpdateFlag') {
+			// eslint-disable-next-line no-empty-pattern
+			await msg.client.shard.broadcastEval(async (c, { }) => {
+				c.update = 0;
+			}, { context: {} });
 		} else {
 			msg.reply('Invalid command');
 		}
