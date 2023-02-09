@@ -2681,7 +2681,7 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 				const { DBOsuGuildTrackers, DBOsuMultiScores } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 				// eslint-disable-next-line no-undef
-				const { getOsuPlayerName, multiToBanchoScore } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+				const { getOsuPlayerName, multiToBanchoScore, logDatabaseQueriesFunction } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -7015,7 +7015,7 @@ async function updateQueueChannelsFunction(client) {
 			// eslint-disable-next-line no-undef
 			const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 			// eslint-disable-next-line no-undef
-			const { getOsuPlayerName } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+			const { getOsuPlayerName, logDatabaseQueriesFunction } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 			logDatabaseQueriesFunction(4, 'utils.js DBProcessQueue existingQueueTasks');
 			let existingQueueTasks = await DBProcessQueue.findAll({
 				where: {
