@@ -368,7 +368,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						let sentMessage;
 
-						logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers Bancho linkedUser');
+						logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers 3');
 						const linkedUser = await DBDiscordUsers.findOne({
 							where: { osuUserId: user.id }
 						});
@@ -488,6 +488,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 		process.send('osu!API');
 		const osuUser = await osuApi.getUser({ u: username, m: mode });
 
+		logDatabaseQueries(4, 'commands/osu-score.js DBOsuMultiScores');
 		const beatmapScores = await DBOsuMultiScores.findAll({
 			where: {
 				beatmapId: beatmap.beatmapId,
@@ -571,7 +572,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 			let sentMessage;
 
-			logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers Tournaments linkedUser');
+			logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers 4');
 			const linkedUser = await DBDiscordUsers.findOne({
 				where: { osuUserId: osuUser.id }
 			});

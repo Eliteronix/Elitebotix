@@ -174,6 +174,7 @@ module.exports = {
 			if (args[0] === 'enable') {
 
 				//Create guild in db if it wasn't there yet
+				logDatabaseQueries(4, 'commands/tempvoice.js DBGuilds create 1');
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, temporaryVoices: true, addTemporaryText: true });
 
 				let guildPrefix = await getGuildPrefix(msg);
@@ -184,6 +185,7 @@ module.exports = {
 				return interaction.editReply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
 			} else if (args[0] === 'disable') {
 				//Create guild in db if it wasn't there yet
+				logDatabaseQueries(4, 'commands/tempvoice.js DBGuilds create 2');
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, temporaryVoices: false, addTemporaryText: true });
 				if (msg.id) {
 					return msg.reply('Temporary channels have been disabled.');
@@ -201,6 +203,7 @@ module.exports = {
 					}
 
 					//Create guild in db if it wasn't there yet
+					logDatabaseQueries(4, 'commands/tempvoice.js DBGuilds create 3');
 					DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, temporaryVoices: false, addTemporaryText: true });
 					if (msg.id) {
 						return msg.reply('Text channels will now be created alongside temporary voice channels.');
@@ -208,6 +211,7 @@ module.exports = {
 					return interaction.editReply('Text channels will now be created alongside temporary voice channels.');
 				} else if (args[1] === 'disable') {
 					//Create guild in db if it wasn't there yet
+					logDatabaseQueries(4, 'commands/tempvoice.js DBGuilds create 4');
 					DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, temporaryVoices: false, addTemporaryText: false });
 					if (msg.id) {
 						return msg.reply('Text channels will NOT be created alongside temporary voice channels.');
@@ -215,6 +219,7 @@ module.exports = {
 					return interaction.editReply('Text channels will NOT be created alongside temporary voice channels.');
 				} else {
 					//Create guild in db if it wasn't there yet
+					logDatabaseQueries(4, 'commands/tempvoice.js DBGuilds create 5');
 					DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, temporaryVoices: false, addTemporaryText: false });
 					if (msg.id) {
 						return msg.reply('Please specify if you want to enable or disable the textchannel creation.');

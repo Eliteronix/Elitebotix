@@ -10,10 +10,11 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 				const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 				// eslint-disable-next-line no-undef
-				const { getGuildPrefix, pause } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+				const { getGuildPrefix, pause, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 				// eslint-disable-next-line no-undef
 				let command = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\weather.js`);
 
+				logDatabaseQueries(2, 'processQueueTasks/periodic-weather.js DBProcessQueue');
 				let processQueueEntry = await DBProcessQueue.findOne({ where: { id: processQueueEntryId } });
 				let args = processQueueEntry.additions.split(';');
 

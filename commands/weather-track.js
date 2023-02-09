@@ -350,6 +350,7 @@ module.exports = {
 				}
 			}
 
+			logDatabaseQueries(4, 'commands/weather-track.js DBProcessQueue create');
 			DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`, date: date });
 
 			if (msg.id) {

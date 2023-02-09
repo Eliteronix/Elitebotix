@@ -549,7 +549,7 @@ module.exports = {
 				let username = usernames[i];
 
 				//Get the user from the database if possible
-				logDatabaseQueries(4, 'commands/osu-track.js enable DBDiscordUsers');
+				logDatabaseQueries(4, 'commands/osu-track.js DBDiscordUsers 1');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						[Op.or]: {
@@ -594,7 +594,7 @@ module.exports = {
 				}
 
 				//Create the timer for checking the user if needed
-				logDatabaseQueries(4, 'commands/osu-track.js enable DBOsuTrackingUsers');
+				logDatabaseQueries(4, 'commands/osu-track.js DBOsuTrackingUsers 1');
 				let userTimer = await DBOsuTrackingUsers.findOne({
 					where: {
 						osuUserId: osuUser.osuUserId,
@@ -605,6 +605,7 @@ module.exports = {
 					let nextCheck = new Date();
 					nextCheck.setMinutes(nextCheck.getMinutes() + 15);
 
+					logDatabaseQueries(4, 'commands/osu-track.js DBOsuTrackingUsers create');
 					userTimer = await DBOsuTrackingUsers.create({
 						osuUserId: osuUser.osuUserId,
 						nextCheck: nextCheck,
@@ -612,7 +613,7 @@ module.exports = {
 				}
 
 				//Create or update the guild tracker
-				logDatabaseQueries(4, 'commands/osu-track.js enable DBOsuGuildTrackers 1');
+				logDatabaseQueries(4, 'commands/osu-track.js DBOsuGuildTrackers 1');
 				let guildTracker = await DBOsuGuildTrackers.findOne({
 					where: {
 						guildId: interaction.guild.id,
@@ -622,6 +623,7 @@ module.exports = {
 				});
 
 				if (!guildTracker) {
+					logDatabaseQueries(4, 'commands/osu-track.js DBOsuGuildTrackers create');
 					guildTracker = await DBOsuGuildTrackers.create({
 						guildId: interaction.guild.id,
 						channelId: interaction.channel.id,
@@ -813,7 +815,7 @@ module.exports = {
 				let username = usernames[i];
 
 				//Get the user from the database if possible
-				logDatabaseQueries(4, 'commands/osu-track.js disable DBDiscordUsers');
+				logDatabaseQueries(4, 'commands/osu-track.js DBDiscordUsers 2');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						[Op.or]: {
@@ -858,7 +860,7 @@ module.exports = {
 				}
 
 				//Create the timer for checking the user if needed
-				logDatabaseQueries(4, 'commands/osu-track.js disable DBOsuTrackingUsers');
+				logDatabaseQueries(4, 'commands/osu-track.js DBOsuTrackingUsers 2');
 				let userTimer = await DBOsuTrackingUsers.findOne({
 					where: {
 						osuUserId: osuUser.osuUserId,
@@ -1031,7 +1033,7 @@ module.exports = {
 				let username = guildTrackers[i].osuUserId;
 
 				//Get the user from the database if possible
-				logDatabaseQueries(4, 'commands/osu-track.js list DBDiscordUsers');
+				logDatabaseQueries(4, 'commands/osu-track.js DBDiscordUsers 3');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						osuUserId: username,
@@ -1215,6 +1217,7 @@ module.exports = {
 
 			let tracking = interaction.options.getString('matchactivity');
 
+			logDatabaseQueries(4, 'commands/osu-track.js DBOsuGuildTrackers tourneyenable');
 			let guildTracker = await DBOsuGuildTrackers.findOne({
 				where: {
 					guildId: interaction.guild.id,
@@ -1224,6 +1227,7 @@ module.exports = {
 			});
 
 			if (!guildTracker) {
+				logDatabaseQueries(4, 'commands/osu-track.js DBOsuGuildTrackers tourneyenable create');
 				guildTracker = await DBOsuGuildTrackers.create({
 					guildId: interaction.guild.id,
 					channelId: interaction.channel.id,
@@ -1253,6 +1257,7 @@ module.exports = {
 
 			let acronym = interaction.options.getString('acronym');
 
+			logDatabaseQueries(4, 'commands/osu-track.js DBOsuGuildTrackers tourneydisable');
 			let guildTracker = await DBOsuGuildTrackers.findOne({
 				where: {
 					guildId: interaction.guild.id,

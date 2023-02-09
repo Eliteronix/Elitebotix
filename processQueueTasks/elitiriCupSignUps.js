@@ -21,6 +21,7 @@ module.exports = {
 		processQueueEntry.destroy();
 	},
 };
+//TODO: add proper logdatabasequeries
 
 async function updateSheet(spreadsheetID, bracketName) {
 	// eslint-disable-next-line no-undef

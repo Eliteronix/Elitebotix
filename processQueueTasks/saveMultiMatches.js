@@ -106,6 +106,7 @@ module.exports = {
 						await saveOsuMultiScores(match);
 						let date = new Date();
 						date.setUTCMinutes(date.getUTCMinutes() + 5);
+						logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBProcessQueue create');
 						DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: date });
 					}
 
@@ -267,6 +268,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 									let json = JSON.parse(regexMatch);
 
 									if (json.events[0].user_id === 16173747 && json.events[0].detail.type === 'match-created') {
+										logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update maidbot match');
 										await DBOsuMultiScores.update({
 											tourneyMatch: true,
 											verifiedAt: new Date(),
@@ -309,6 +311,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 											}
 										});
 									} else {
+										logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update not determinable maidbot match');
 										await DBOsuMultiScores.update({
 											verifiedBy: 31050083, // Elitebotix
 											verificationComment: 'Not determinable if match was created by MaidBot',
@@ -332,6 +335,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				.catch(async (err) => {
 					if (err.message === 'Not found') {
 						//If its not found anymore it should be fake because it must be created in a different way
+						logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update fake maidbot match');
 						await DBOsuMultiScores.update({
 							tourneyMatch: false,
 							verifiedAt: new Date(),
@@ -392,6 +396,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				}
 			}
 
+			logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores');
 			let matchToVerify = await DBOsuMultiScores.findOne({
 				where: {
 					verifiedAt: null,
@@ -403,6 +408,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 
 			if (matchToVerify) {
 				// If there is a match to verify
+				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Elitebotix duel match');
 				await DBOsuMultiScores.update({
 					tourneyMatch: true,
 					verifiedAt: new Date(),

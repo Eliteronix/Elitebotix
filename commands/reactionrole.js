@@ -429,6 +429,7 @@ module.exports = {
 					//Send embed
 					const embedMessage = await msg.channel.send({ embeds: [reactionRoleEmbed] });
 					//Create the record for the embed in the db
+					logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader embed add create');
 					DBReactionRolesHeader.create({ guildId: embedMessage.guild.id, reactionHeaderId: embedMessage.id, reactionChannelHeaderId: msg.channel.id, reactionTitle: embedName, reactionColor: '#0099ff' });
 				} else {
 					msg.reply('Please specify what name you want to give the embed you want to create.');
@@ -460,6 +461,7 @@ module.exports = {
 							} else {
 								interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
 							}
+							logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader embed remove destroy 1');
 							DBReactionRolesHeader.destroy({
 								where: { guildId: msg.guildId, id: args[2] },
 							});
@@ -473,6 +475,7 @@ module.exports = {
 						//Delete the embed
 						embedMessage.delete();
 						//Delete the record from the db
+						logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader embed remove destroy 2');
 						DBReactionRolesHeader.destroy({
 							where: { guildId: msg.guildId, id: args[2] },
 						});
@@ -675,6 +678,7 @@ module.exports = {
 									args.shift();
 									args.shift();
 
+									logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRoles role add count');
 									let totalEmojis = await DBReactionRoles.count({
 										where: { dbReactionRolesHeaderId: headerId },
 									});
@@ -686,6 +690,7 @@ module.exports = {
 										return interaction.editReply({ content: 'You can only have a maximum of 20 reactionroles in one embed.', ephemeral: true });
 									}
 
+									logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRoles role add create');
 									DBReactionRoles.create({ dbReactionRolesHeaderId: headerId, roleId: roleMentioned, emoji: emoji, description: args.join(' ') });
 									if (msg.id) {
 										msg.reply('The role has been added as an reactionrole.');
@@ -731,6 +736,7 @@ module.exports = {
 						});
 
 						if (reactionRolesHeader) {
+							logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader role remove destroy');
 							const rowCount = await DBReactionRoles.destroy({
 								where: { dbReactionRolesHeaderId: headerId, emoji: emoji }
 							});
@@ -870,6 +876,7 @@ async function editEmbed(msg, reactionRolesHeader, client) {
 		embedChannel = msg.guild.channels.cache.get(embedChannelId);
 	} catch (e) {
 		msg.reply('Couldn\'t find an embed with this EmbedId');
+		logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRoles editEmbed destroy');
 		DBReactionRolesHeader.destroy({
 			where: { guildId: msg.guildId, id: reactionRolesHeader.id },
 		});

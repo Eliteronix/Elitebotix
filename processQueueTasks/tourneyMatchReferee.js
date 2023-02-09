@@ -21,6 +21,7 @@ module.exports = {
 				channel = await bancho.createLobby(args[5]);
 				client.otherMatches.push(parseInt(channel.lobby.id));
 
+				logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBProcessQueue create');
 				DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${channel.lobby.id}`, priority: 1, date: new Date() });
 
 				processQueueEntry.destroy();
@@ -120,7 +121,7 @@ module.exports = {
 			let players = args[3].replaceAll('|', ',').split(',');
 			let dbPlayers = [];
 			for (let j = 0; j < players.length; j++) {
-				logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
+				logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 3');
 				const dbDiscordUser = await DBDiscordUsers.findOne({
 					where: { id: players[j] }
 				});
@@ -230,7 +231,7 @@ module.exports = {
 					let players = args[3].replaceAll('|', ',').split(',');
 					let dbPlayers = [];
 					for (let j = 0; j < players.length; j++) {
-						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
+						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 4');
 						const dbDiscordUser = await DBDiscordUsers.findOne({
 							where: { id: players[j] }
 						});
@@ -494,7 +495,7 @@ module.exports = {
 				let players = args[3].replaceAll('|', ',').split(',');
 				let dbPlayers = [];
 				for (let j = 0; j < players.length; j++) {
-					logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
+					logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 5');
 					const dbDiscordUser = await DBDiscordUsers.findOne({
 						where: { id: players[j] }
 					});

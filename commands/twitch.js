@@ -131,6 +131,7 @@ module.exports = {
 				return await interaction.editReply('Your twitch account is already connected and verified to this discord account.');
 			}
 
+			logDatabaseQueries(2, 'twitch.js DBDiscordUsers connect existingLinkedAccount');
 			let existingLinkedAccount = await DBDiscordUsers.findOne({
 				where: {
 					twitchName: twitchName.toLowerCase(),

@@ -240,6 +240,7 @@ module.exports = {
 			}
 			//If no reminder with the given Id
 			//destroy previous reminder
+			logDatabaseQueries(4, 'commands/reminders-edit.js DBProcessQueue destroy');
 			DBProcessQueue.destroy({
 				where: {
 					task: 'remind',
@@ -247,6 +248,7 @@ module.exports = {
 				}
 			});
 			//Set a new reminder
+			logDatabaseQueries(4, 'commands/reminders-edit.js DBProcessQueue create');
 			DBProcessQueue.create({ id: reminderId, guildId: 'None', task: 'remind', priority: 10, additions: `${msg.author.id};${userReminderMessage}`, date: userReminderDate });
 
 			return interaction.editReply({

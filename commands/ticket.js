@@ -446,6 +446,7 @@ module.exports = {
 
 					let date = new Date();
 					date.setUTCMinutes(date.getUTCMinutes() + 3);
+					logDatabaseQueries(4, 'commands/ticket.js DBProcessQueue create closeTicket');
 					return DBProcessQueue.create({ guildId: msg.guildId, task: 'closeTicket', priority: 5, additions: msg.channel.id, date: date });
 				} else {
 					if (msg.id) {
@@ -481,6 +482,7 @@ module.exports = {
 			let ticketChannel = await msg.guild.channels.create(`${msg.guild.name.substring(0, 3)}-${(tickets.length + 1).toString().padStart(6, '0')}-${msg.author.username.substring(0, 3)}`, 'text');
 			await ticketChannel.setParent(openCategory);
 
+			logDatabaseQueries(4, 'commands/ticket.js DBTickets create Open');
 			const ticket = await DBTickets.create({
 				guildId: msg.guildId,
 				channelId: ticketChannel.id,

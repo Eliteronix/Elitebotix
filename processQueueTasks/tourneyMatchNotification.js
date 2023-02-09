@@ -11,6 +11,7 @@ module.exports = {
 			const { DBDiscordUsers, DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 			// eslint-disable-next-line no-undef
 			const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+			logDatabaseQueries(2, 'processQueueTasks/tourneyFollow.js DBProcessQueue');
 			let processQueueEntry = await DBProcessQueue.findOne({ where: { id: processQueueEntryId } });
 			let args = processQueueEntry.additions.split(';');
 
@@ -51,6 +52,7 @@ module.exports = {
 
 				// eslint-disable-next-line no-undef
 				channel.send(`Hi, I will be reffing your match <@${dbPlayers.join('>, <@')}>!\nYour match starts <t:${Date.parse(matchTime) / 1000}:R>. Invites will be sent <t:${inviteSendTime}:R>.\nIngame invites will be sent out by \`${process.env.OSUNAME}\` - be sure to allow DMs on discord as a backup.`);
+				logDatabaseQueries(2, 'processQueueTasks/tourneyFollow.js DBProcessQueue create');
 				DBProcessQueue.create({ guildId: processQueueEntry.guildId, task: 'tourneyMatchReferee', priority: 10, additions: processQueueEntry.additions, date: inviteTime });
 			}
 		}, { context: { channelId: args[1], processQueueEntryId: processQueueEntry.id } });

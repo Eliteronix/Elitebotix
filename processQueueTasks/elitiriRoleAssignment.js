@@ -136,7 +136,7 @@ module.exports = {
 								}
 							}
 
-							logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupSignUp');
+							logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBDiscordUsers');
 							//Get the user from the DBDiscordUsers
 							const discordUser = await DBDiscordUsers.findOne({
 								where: { userId: members[i].user.id }
@@ -144,6 +144,7 @@ module.exports = {
 
 							if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
 								//Find out if they are registered or not
+								logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupStaff');
 								const staffSignups = await DBElitiriCupStaff.findAll({
 									where: { osuUserId: discordUser.osuUserId }
 								});

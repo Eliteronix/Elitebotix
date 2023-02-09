@@ -1,7 +1,7 @@
 
 const weather = require('weather-js');
 const util = require('util');
-const { populateMsgFromInteraction } = require('../utils');
+const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBDiscordUsers } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
@@ -114,6 +114,7 @@ module.exports = {
 
 			args = [];
 
+			logDatabaseQueries(4, 'commands/weather-set.js DBDiscordUsers');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: msg.author.id

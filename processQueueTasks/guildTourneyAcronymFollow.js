@@ -1,4 +1,5 @@
 const { DBOsuGuildTrackers } = require('../dbObjects');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -44,6 +45,7 @@ module.exports = {
 			processQueueEntry.destroy();
 		} catch (err) {
 			if (err.message === 'Missing Access') {
+				logDatabaseQueries(2, 'processQueueTasks/guildTourneyAcronymFollow.js DBOsuGuildTrackers');
 				let guildTrackers = await DBOsuGuildTrackers.findAll({
 					where: {
 						channelId: args[1]

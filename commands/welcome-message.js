@@ -134,6 +134,7 @@ module.exports = {
 				}
 			} else {
 				//Create guild in the db in case the guild is not in the db yet
+				logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds current create');
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendWelcomeMessage: false });
 				//Send that no welcome message is set
 				if (msg.id) {
@@ -170,6 +171,7 @@ module.exports = {
 				}
 			} else {
 				//Create guild in the db in case the guild is not in the db yet
+				logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds disable create');
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendWelcomeMessage: false });
 				//Send that no welcome message is set
 				if (msg.id) {
@@ -196,6 +198,7 @@ module.exports = {
 				guild.save();
 			} else {
 				//if guild was not found, create it in db
+				logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds else create');
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendWelcomeMessage: true, welcomeMessageChannel: msg.channel.id, welcomeMessageText: welcomeMessage });
 			}
 			if (msg.id) {

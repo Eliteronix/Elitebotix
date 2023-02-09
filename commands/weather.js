@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Canvas = require('canvas');
 const weather = require('weather-js');
 const util = require('util');
-const { pause, populateMsgFromInteraction, fitTextOnMiddleCanvas } = require('../utils');
+const { pause, populateMsgFromInteraction, fitTextOnMiddleCanvas, logDatabaseQueries } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBDiscordUsers } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
@@ -83,6 +83,7 @@ module.exports = {
 			}
 		}
 
+		logDatabaseQueries(4, 'commands/weather.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: {
 				userId: msg.author.id

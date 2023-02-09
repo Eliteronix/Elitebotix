@@ -63,6 +63,7 @@ module.exports = {
 		} else {
 			let qualifierPoints = allPlayers.length - rank + 1;
 			let knockoutPoints = Math.round(allPlayers.length * (parseInt(round) / 10 * 2));
+			logDatabaseQueries(2, 'MOTD/givePointsToPlayers.js DBMOTDPoints create');
 			const motdPoints = await DBMOTDPoints.create({
 				userId: player.userId,
 				osuUserId: player.osuUserId,
@@ -108,6 +109,7 @@ async function createQualifierResult(player, playerAmount, playerRank) {
 	today.setUTCSeconds(0);
 	today.setUTCMilliseconds(0);
 
+	logDatabaseQueries(2, 'MOTD/givePointsToPlayers.js DBMOTDPoints create 2');
 	DBMOTDPoints.create({
 		userId: player.userId,
 		osuUserId: player.osuUserId,

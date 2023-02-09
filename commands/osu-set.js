@@ -121,6 +121,7 @@ module.exports = {
 					discordUser.osuMainMode = 0;
 					await discordUser.save();
 				} else {
+					logDatabaseQueries(4, 'commands/osu-set.js DBDiscordUsers create 1');
 					await DBDiscordUsers.create({
 						userId: interaction.user.id,
 						osuMainMode: 0
@@ -133,6 +134,7 @@ module.exports = {
 					discordUser.osuMainMode = 1;
 					await discordUser.save();
 				} else {
+					logDatabaseQueries(4, 'commands/osu-set.js DBDiscordUsers create 2');
 					await DBDiscordUsers.create({
 						userId: interaction.user.id,
 						osuMainMode: 1
@@ -145,6 +147,7 @@ module.exports = {
 					discordUser.osuMainMode = 2;
 					await discordUser.save();
 				} else {
+					logDatabaseQueries(4, 'commands/osu-set.js DBDiscordUsers create 3');
 					await DBDiscordUsers.create({
 						userId: interaction.user.id,
 						osuMainMode: 2
@@ -157,6 +160,7 @@ module.exports = {
 					discordUser.osuMainMode = 3;
 					await discordUser.save();
 				} else {
+					logDatabaseQueries(4, 'commands/osu-set.js DBDiscordUsers create 4');
 					await DBDiscordUsers.create({
 						userId: interaction.user.id,
 						osuMainMode: 3
@@ -173,6 +177,7 @@ module.exports = {
 					discordUser.osuMainServer = 'bancho';
 					await discordUser.save();
 				} else {
+					logDatabaseQueries(4, 'commands/osu-set.js DBDiscordUsers create 5');
 					await DBDiscordUsers.create({
 						userId: interaction.user.id,
 						osuMainServer: 'bancho'
@@ -185,6 +190,7 @@ module.exports = {
 					discordUser.osuMainServer = 'ripple';
 					await discordUser.save();
 				} else {
+					logDatabaseQueries(4, 'commands/osu-set.js DBDiscordUsers create 6');
 					await DBDiscordUsers.create({
 						userId: interaction.user.id,
 						osuMainServer: 'ripple'

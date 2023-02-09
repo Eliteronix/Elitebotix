@@ -1,4 +1,4 @@
-const { saveOsuMultiScores } = require('../utils');
+const { saveOsuMultiScores, logDatabaseQueries } = require('../utils');
 const osu = require('node-osu');
 const { DBOsuMultiScores } = require('../dbObjects');
 
@@ -75,6 +75,7 @@ module.exports = {
 				//Match has not been completed yet / 6 hours didn't pass
 				await saveOsuMultiScores(match);
 
+				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores');
 				let playedRound = DBOsuMultiScores.findOne({
 					where: {
 						matchId: matchId,

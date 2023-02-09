@@ -81,6 +81,7 @@ module.exports = {
 		}
 
 		try {
+			logDatabaseQueries(4, 'commands/reminders-delete.js DBProcessQueue destroy');
 			DBProcessQueue.destroy({
 				where: {
 					task: 'remind',

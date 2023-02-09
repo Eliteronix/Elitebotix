@@ -1,15 +1,17 @@
 const { DBDiscordUsers, DBOsuGuildTrackers } = require('../dbObjects');
 const osu = require('node-osu');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
-		// console.log('tourneyFollow', client.shardId);
+		// console.log('guildTourneyFollow', client.shardId);
 		let args = processQueueEntry.additions.split(';');
 
 		try {
 			let players = args[3].split(',');
 
 			for (let i = 0; i < players.length; i++) {
+				logDatabaseQueries(2, 'processQueueTasks/guildTourneyFollow.js DBDiscordUsers');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						osuUserId: players[i]
@@ -29,6 +31,7 @@ module.exports = {
 					process.send('osu!API');
 					const osuUser = await osuApi.getUser({ u: players[i], m: 0 });
 
+					logDatabaseQueries(2, 'processQueueTasks/guildTourneyFollow.js DBDiscordUsers create');
 					discordUser = await DBDiscordUsers.create({ osuUserId: osuUser.id, osuName: osuUser.name });
 				}
 
@@ -73,6 +76,7 @@ module.exports = {
 			processQueueEntry.destroy();
 		} catch (err) {
 			if (err.message === 'Missing Access') {
+				logDatabaseQueries(2, 'processQueueTasks/guildTourneyFollow.js DBOsuGuildTrackers');
 				let guildTrackers = await DBOsuGuildTrackers.findAll({
 					where: {
 						channelId: args[1]

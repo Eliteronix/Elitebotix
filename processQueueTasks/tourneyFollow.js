@@ -1,5 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
+const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -14,6 +15,7 @@ module.exports = {
 			let players = args[2].split(',');
 
 			for (let i = 0; i < players.length; i++) {
+				logDatabaseQueries(2, 'processQueueTasks/tourneyFollow.js DBDiscordUsers');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						osuUserId: players[i]
@@ -33,6 +35,7 @@ module.exports = {
 					process.send('osu!API');
 					const osuUser = await osuApi.getUser({ u: players[i], m: 0 });
 
+					logDatabaseQueries(2, 'processQueueTasks/tourneyFollow.js DBDiscordUsers create');
 					discordUser = await DBDiscordUsers.create({ osuUserId: osuUser.id, osuName: osuUser.name });
 				}
 

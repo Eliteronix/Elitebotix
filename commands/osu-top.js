@@ -340,7 +340,7 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < args.length; i++) {
 				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
-					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers');
+					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
 					});
@@ -429,7 +429,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				if (tracking) {
 					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
 				} else {
-					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers Bancho linkedUser');
+					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 2');
 					const linkedUser = await DBDiscordUsers.findOne({
 						where: { osuUserId: user.id }
 					});
@@ -455,6 +455,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				if (err.message === 'Not found') {
 					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else if (err.message === 'Missing Permissions') {
+					logDatabaseQueries(4, 'commands/osu-top.js DBOsuGuildTrackers destroy 1');
 					DBOsuGuildTrackers.destroy({
 						where: {
 							channelId: msg.channel.id
@@ -582,7 +583,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				if (tracking) {
 					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
 				} else {
-					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers Tournaments linkedUser');
+					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 3');
 					const linkedUser = await DBDiscordUsers.findOne({
 						where: { osuUserId: user.id }
 					});
@@ -751,7 +752,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		}
 
 		//Get all scores from tournaments
-		logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores');
+		logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores 1');
 		let multiScores = await DBOsuMultiScores.findAll({
 			where: {
 				osuUserId: user.id,
@@ -793,7 +794,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 		if (multisToUpdate.length) {
 			//Get all scores from tournaments
-			logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores2');
+			logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores 2');
 			multiScores = await DBOsuMultiScores.findAll({
 				where: {
 					osuUserId: user.id,
@@ -1140,6 +1141,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 	//Write the tournament pp
 	if (server === 'tournaments') {
+		logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 4');
 		let discordUsers = await DBDiscordUsers.findAll();
 
 		//Find the closest users to the PP values

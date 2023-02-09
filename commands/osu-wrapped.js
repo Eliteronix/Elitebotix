@@ -160,6 +160,7 @@ module.exports = {
 			year = interaction.options.getInteger('year');
 		}
 
+		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiScores 1');
 		let multiMatches = await DBOsuMultiScores.findAll({
 			attributes: ['matchId'],
 			where: {
@@ -181,6 +182,7 @@ module.exports = {
 			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches in ${year}.`);
 		}
 
+		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiScores 2');
 		let multiScores = await DBOsuMultiScores.findAll({
 			where: {
 				matchId: multiMatches,

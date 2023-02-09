@@ -424,7 +424,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 			ctx.font = 'bold 15px comfortaa, sans-serif';
 			ctx.fillText('Duel Rating', 90, 195);
 
-			logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiScores duelrating');
+			logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers duelrating');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
 					osuUserId: user.id

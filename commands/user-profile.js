@@ -145,6 +145,7 @@ module.exports = {
 };
 
 async function sendUserEmbed(interaction, user) {
+	logDatabaseQueries(4, 'commands/user-profile.js DBDiscordUsers');
 	const discordUser = await DBDiscordUsers.findOne({
 		where: { userId: user.id },
 	});

@@ -1,5 +1,5 @@
 const { DBProcessQueue, DBDiscordUsers } = require('../dbObjects');
-const { createDuelMatch, updateQueueChannels } = require('../utils');
+const { createDuelMatch, updateQueueChannels, logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -10,6 +10,7 @@ module.exports = {
 		let starRating = parseFloat(args[1]);
 		let difficultyArea = parseFloat(args[2]);
 
+		logDatabaseQueries(2, 'processQueueTasks/duelQueue1v1.js DBProcessQueue');
 		let otherQueueTasks = await DBProcessQueue.findAll({
 			where: {
 				task: 'duelQueue1v1',
@@ -55,12 +56,14 @@ module.exports = {
 				}
 			}
 
+			logDatabaseQueries(2, 'processQueueTasks/duelQueue1v1.js DBDiscordUsers 1');
 			let firstUser = await DBDiscordUsers.findOne({
 				where: {
 					osuUserId: currentUser
 				}
 			});
 
+			logDatabaseQueries(2, 'processQueueTasks/duelQueue1v1.js DBDiscordUsers 2');
 			let secondUser = await DBDiscordUsers.findOne({
 				where: {
 					osuUserId: otherQueueTask.additions.split(';')[0]

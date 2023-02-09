@@ -14,6 +14,7 @@ module.exports = {
 				guild = await c.guilds.cache.get(guildId);
 			} catch (e) {
 				if (e.message === 'Missing Access') {
+					logDatabaseQueries(2, 'processQueueTasks/nameSync.js DBProcessQueue destroy');
 					await DBProcessQueue.destroy({ where: { id: processQueueEntryId } });
 					return;
 				} else {
