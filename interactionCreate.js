@@ -73,6 +73,8 @@ module.exports = async function (client, bancho, interaction) {
 		//Automatically delete the timestamp after the cooldown
 		setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
 
+		interaction.client.cooldowns = cooldowns;
+
 		command.execute(null, [], interaction, [client, bancho]);
 	} else if (interaction.isAutocomplete()) {
 		const command = interaction.client.commands.get(interaction.commandName);
