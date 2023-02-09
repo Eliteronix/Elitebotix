@@ -73,7 +73,7 @@ module.exports = {
 	async execute(msg, args, interaction, additionalObjects) {
 		if (interaction) {
 			try {
-				await interaction.deferReply({ ephemeral: true });
+				await interaction.deferReply();
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -90,8 +90,12 @@ module.exports = {
 			}
 		});
 
-		if (!developers.includes(msg.author.id) && !salesmen.includes(msg.author.id) && !discordUser) {
+		if (msg && !developers.includes(msg.author.id) && !salesmen.includes(msg.author.id) && !discordUser) {
 			return msg.reply('Earlyaccess commands are reserved for developers and patreons. As soon as they are up to standard for release you will be able to use them.');
+		}
+
+		if (interaction && !developers.includes(interaction.user.id) && !salesmen.includes(interaction.user.id) && !discordUser) {
+			return await interaction.editReply('Earlyaccess commands are reserved for developers and patreons. As soon as they are up to standard for release you will be able to use them.');
 		}
 
 		if (interaction && interaction.options.getSubcommand() === 'tournamentdifficulty') {
