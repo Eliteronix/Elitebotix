@@ -209,7 +209,7 @@ manager.spawn()
 						}
 					})
 						.then(processQueueTasks => {
-							runningTournamentMatches.set(processQueueTasks.length);
+							runningTournamentMatches.set(processQueueTasks);
 						})
 						.catch(console.error);
 				}

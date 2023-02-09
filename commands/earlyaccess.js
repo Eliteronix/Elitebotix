@@ -1,10 +1,11 @@
-const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores, DBDuelRatingHistory } = require('../dbObjects');
 const osu = require('node-osu');
-const { developers, salesmen } = require('../config.json');
+const { developers, salesmen, showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
-const { getUserDuelStarRating, getMessageUserDisplayname, logDatabaseQueries } = require('../utils');
+const { getUserDuelStarRating, getMessageUserDisplayname, logDatabaseQueries, getOsuBeatmap } = require('../utils');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const Discord = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	name: 'earlyaccess',
@@ -12,9 +13,75 @@ module.exports = {
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,
-	tags: 'debug',
+	tags: 'general',
+	data: new SlashCommandBuilder()
+		.setName('earlyaccess')
+		.setNameLocalizations({
+			'de': 'earlyaccess',
+			'en-GB': 'earlyaccess',
+			'en-US': 'earlyaccess',
+		})
+		.setDescription('Has some early access features for patreons if possible')
+		.setDescriptionLocalizations({
+			'de': 'Hat einige frühe Zugriffsfunktionen für Patreons, wenn möglich',
+			'en-GB': 'Has some early access features for patreons if possible',
+			'en-US': 'Has some early access features for patreons if possible',
+		})
+		.setDMPermission(true)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('tournamentdifficulty')
+				.setNameLocalizations({
+					'de': 'turnierschwierigkeit',
+					'en-GB': 'tournamentdifficulty',
+					'en-US': 'tournamentdifficulty',
+				})
+				.setDescription('Gets the difficulty of a map for a tournament')
+				.setDescriptionLocalizations({
+					'de': 'Gibt die Schwierigkeit einer map für ein Turnier an',
+					'en-GB': 'Gets the difficulty of a map for a tournament',
+					'en-US': 'Gets the difficulty of a map for a tournament',
+				})
+				.addStringOption(option =>
+					option.setName('beatmapid')
+						.setDescription('The beatmap ID')
+						.setDescriptionLocalizations({
+							'de': 'Die Beatmap ID',
+							'en-GB': 'The beatmap ID',
+							'en-US': 'The beatmap ID',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option.setName('modpool')
+						.setDescription('The modpool')
+						.setDescriptionLocalizations({
+							'de': 'Der Modpool',
+							'en-GB': 'The modpool',
+							'en-US': 'The modpool',
+						})
+						.setRequired(true)
+						.addChoices(
+							{ name: 'NM', value: 'NM' },
+							{ name: 'HD', value: 'HD' },
+							{ name: 'HR', value: 'HR' },
+							{ name: 'DT', value: 'DT' },
+						)
+				)
+		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
+		if (interaction) {
+			try {
+				await interaction.deferReply({ ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				return;
+			}
+		}
+
 		logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
@@ -25,6 +92,135 @@ module.exports = {
 
 		if (!developers.includes(msg.author.id) && !salesmen.includes(msg.author.id) && !discordUser) {
 			return msg.reply('Earlyaccess commands are reserved for developers and patreons. As soon as they are up to standard for release you will be able to use them.');
+		}
+
+		if (interaction && interaction.options.getSubcommand() === 'tournamentdifficulty') {
+			let beatmapId = interaction.options.getString('beatmapid');
+			let modpool = interaction.options.getString('modpool');
+
+			let modBits = 0;
+
+			if (modpool === 'HD') {
+				modBits = 8;
+			} else if (modpool === 'HR') {
+				modBits = 16;
+			} else if (modpool === 'DT') {
+				modBits = 64;
+			}
+
+			let beatmap = await getOsuBeatmap({ beatmapId: beatmapId, modBits: modBits });
+
+			if (!beatmap) {
+				return await interaction.editReply('Beatmap not found');
+			}
+
+			//Get all the scores for the map
+			logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiScores tournamentDifficulty');
+			let scores = await DBOsuMultiScores.findAll({
+				where: {
+					beatmapId: beatmapId,
+					freeMod: false,
+				}
+			});
+
+			let plays = [];
+
+			// grab the player IDs, scores, mods, and month
+			for (let i = 0; i < scores.length; i++) {
+				if (scores[i].warmup) {
+					continue;
+				}
+
+				if (parseInt(scores[i].gameRawMods) % 2 === 1) {
+					scores[i].gameRawMods = parseInt(scores[i].gameRawMods) - 1;
+				}
+				if (parseInt(scores[i].rawMods) % 2 === 1) {
+					scores[i].rawMods = parseInt(scores[i].rawMods) - 1;
+				}
+
+				if (parseInt(modBits) !== parseInt(scores[i].rawMods) + parseInt(scores[i].gameRawMods)) {
+					continue;
+				}
+
+				plays.push({
+					osuUserId: scores[i].osuUserId,
+					score: scores[i].score,
+					month: new Date(scores[i].gameStartDate).getUTCMonth(),
+					year: new Date(scores[i].gameStartDate).getUTCFullYear(),
+				});
+			}
+
+			logDatabaseQueries(4, 'commands/earlyaccess.js DBDuelRatingHistory tournamentDifficulty');
+			let allDuelRatingHistories = await DBDuelRatingHistory.findAll({
+				where: {
+					osuUserId: {
+						[Op.in]: plays.map(p => p.osuUserId),
+					},
+				}
+			});
+
+			for (let i = 0; i < plays.length; i++) {
+				let duelRatingHistory = allDuelRatingHistories.find(d => d.osuUserId === plays[i].osuUserId && d.month === plays[i].month && d.year === plays[i].year);
+
+				if (!duelRatingHistory) {
+					plays.splice(i, 1);
+					i--;
+					continue;
+				}
+
+				if (modpool === 'NM') {
+					plays[i].score = plays[i].score / 1;
+					plays[i].duelRating = duelRatingHistory.osuNoModDuelStarRating;
+				} else if (modpool === 'HD') {
+					plays[i].score = plays[i].score / 1.06;
+					plays[i].duelRating = duelRatingHistory.osuHiddenDuelStarRating;
+				} else if (modpool === 'HR') {
+					plays[i].score = plays[i].score / 1.1;
+					plays[i].duelRating = duelRatingHistory.osuHardRockDuelStarRating;
+				} else if (modpool === 'DT') {
+					plays[i].score = plays[i].score / 1.2;
+					plays[i].duelRating = duelRatingHistory.osuDoubleTimeDuelStarRating;
+				}
+
+				if (!plays[i].duelRating) {
+					plays.splice(i, 1);
+					i--;
+					continue;
+				}
+
+				plays[i].duelRating = parseFloat(plays[i].duelRating);
+
+				if (plays[i].score < 20000) {
+					plays[i].score = 20000;
+				}
+
+				// calculate the expected SR
+				// y=a (x + (b-r))²+c
+				// r = (ab+sqrt(-a(c-y))+ax)/a
+				// y = plays[i].score
+				// x = plays[i].duelRating
+				// r = ? (the expected duel rating)
+				const a = 120000;
+				const b = -1.67;
+				const c = 20000;
+
+				let helpRating = (a * b + Math.sqrt(-a * (c - plays[i].score)) + a * plays[i].duelRating) / a;
+
+				plays[i].expectedDuelRating = plays[i].duelRating - (helpRating - plays[i].duelRating);
+			}
+
+			if (plays.length === 0) {
+				return await interaction.editReply('No plays found');
+			}
+
+			// Get the average expected duel rating
+			let averageExpectedDuelRating = 0;
+			for (let i = 0; i < plays.length; i++) {
+				averageExpectedDuelRating += plays[i].expectedDuelRating;
+			}
+			averageExpectedDuelRating /= plays.length;
+
+			return await interaction.editReply(`The tournament difficulty for ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] with ${modpool} is ${averageExpectedDuelRating.toFixed(2)} based on ${plays.length} plays.`);
 		}
 
 		if (args[0] === 'duelRatingDevelopment') {
