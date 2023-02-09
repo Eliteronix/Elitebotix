@@ -533,6 +533,8 @@ module.exports = {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
 				}
+				const timestamps = interaction.client.cooldowns.get(this.name);
+				timestamps.delete(interaction.user.id);
 				return;
 			}
 
@@ -803,6 +805,8 @@ module.exports = {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
 				}
+				const timestamps = interaction.client.cooldowns.get(this.name);
+				timestamps.delete(interaction.user.id);
 				return;
 			}
 
@@ -1010,6 +1014,8 @@ module.exports = {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
 				}
+				const timestamps = interaction.client.cooldowns.get(this.name);
+				timestamps.delete(interaction.user.id);
 				return;
 			}
 
@@ -1210,6 +1216,8 @@ module.exports = {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
 				}
+				const timestamps = interaction.client.cooldowns.get(this.name);
+				timestamps.delete(interaction.user.id);
 				return;
 			}
 
@@ -1252,6 +1260,8 @@ module.exports = {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
 				}
+				const timestamps = interaction.client.cooldowns.get(this.name);
+				timestamps.delete(interaction.user.id);
 				return;
 			}
 

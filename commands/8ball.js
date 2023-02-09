@@ -1,6 +1,5 @@
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
-const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	name: '8ball',
@@ -46,6 +45,8 @@ module.exports = {
 			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 				console.error(error);
 			}
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
 			return;
 		}
 
@@ -74,6 +75,6 @@ module.exports = {
 		];
 
 		//Send the 8ball answer to the user
-		return interaction.editReply(answers[Math.floor(Math.random() * answers.length)]);
+		return await interaction.editReply(answers[Math.floor(Math.random() * answers.length)]);
 	},
 };
