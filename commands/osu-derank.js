@@ -44,7 +44,6 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-
 		try {
 			await interaction.deferReply();
 		} catch (error) {
