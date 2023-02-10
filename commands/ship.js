@@ -1,4 +1,3 @@
-const { getMessageUserDisplayname, populateMsgFromInteraction } = require('../utils.js');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -23,7 +22,7 @@ module.exports = {
 			'en-US': 'Lets you check how compatible two users are.',
 		})
 		.setDMPermission(true)
-		.addUserOption(option =>
+		.addStringOption(option =>
 			option.setName('user')
 				.setNameLocalizations({
 					'de': 'nutzer',
@@ -38,7 +37,7 @@ module.exports = {
 				})
 				.setRequired(true)
 		)
-		.addUserOption(option =>
+		.addStringOption(option =>
 			option.setName('user2')
 				.setNameLocalizations({
 					'de': 'nutzer2',
@@ -55,7 +54,6 @@ module.exports = {
 		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		//TODO: Remove message code and replace with interaction code
 		try {
 			await interaction.deferReply();
 		} catch (error) {
@@ -67,22 +65,14 @@ module.exports = {
 			return;
 		}
 
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
+		let firstName = await getName(interaction, `<@${interaction.user.id}>`);
+		let secondName = await getName(interaction, interaction.options.getString('user'));
 
-			args = [];
-
-			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-				args.push(interaction.options._hoistedOptions[i].value);
-			}
+		if (interaction.options.getString('user2')) {
+			firstName = await getName(interaction, interaction.options.getString('user'));
+			secondName = await getName(interaction, interaction.options.getString('user2'));
 		}
-		let firstName = await getName(msg, args[0]);
-		let secondName = await getName(msg, args[1]);
 
-		if (args.length < 2) {
-			firstName = await getName(msg);
-			secondName = await getName(msg, args[0]);
-		}
 		const compatibility = Math.floor(Math.random() * 100) + 1;
 
 		let data = [];
@@ -93,28 +83,24 @@ module.exports = {
 		data.push(`Shipping name: \`${shipname.replace(/`/g, '')}\``);
 		data.push(`Compatibility: ${compatibility}%`);
 
-		if (msg.id) {
-			return msg.reply(data.join('\n'));
-		}
-
-		interaction.reply(data.join('\n'));
+		await interaction.editReply(data.join('\n'));
 	},
 };
 
-async function getName(msg, argument) {
+async function getName(interaction, argument) {
 	let name = argument;
 
-	if (argument) {
-		let mentions = [];
-		msg.mentions.users.each(mention => mentions.push(mention));
-		for (let i = 0; i < mentions.length; i++) {
-			if (`<@${mentions[i].id}>` === argument || `<@!${mentions[i].id}>` === argument) {
-				name = mentions[i].username;
-				i = mentions.length;
+	if (name.replace('!', '').match(/<@\d+>/gm)) {
+		let id = name.replace('!', '').replace('<@', '').replace('>', '');
+
+		name = interaction.client.users.fetch(id);
+
+		if (interaction.guild) {
+			const member = await interaction.guild.members.fetch(id);
+			if (member && member.displayName) {
+				name = member.displayName;
 			}
 		}
-	} else {
-		name = await getMessageUserDisplayname(msg);
 	}
 
 	return name;
