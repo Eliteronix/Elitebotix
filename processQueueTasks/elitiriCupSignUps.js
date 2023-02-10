@@ -21,7 +21,6 @@ module.exports = {
 		processQueueEntry.destroy();
 	},
 };
-//TODO: add proper logdatabasequeries
 
 async function updateSheet(spreadsheetID, bracketName) {
 	// eslint-disable-next-line no-undef
@@ -136,6 +135,7 @@ async function updateSheet(spreadsheetID, bracketName) {
 			if (!task) {
 				let date = new Date();
 				date.setUTCMinutes(date.getUTCMinutes() + 1);
+				logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 1 create');
 				DBProcessQueue.create({ guildId: 'None', task: 'elitiriCupSignUps', priority: 3, additions: bracketName, date: date });
 			}
 		} else {
@@ -149,6 +149,7 @@ async function updateSheet(spreadsheetID, bracketName) {
 	});
 	if (!task) {
 		let date = new Date();
+		logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 2 ');
 		DBProcessQueue.create({
 			guildId: 'None', task: 'elitiriRoleAssignment', priority: 3, date: date
 		});
