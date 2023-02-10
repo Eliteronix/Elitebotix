@@ -1,6 +1,6 @@
 const { DBGuilds } = require('../dbObjects');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { logDatabaseQueries } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -87,126 +87,69 @@ module.exports = {
 				)
 		),
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		if (interaction) {
-			try {
-				await interaction.deferReply({ ephemeral: true });
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
+		try {
+			await interaction.deferReply({ ephemeral: true });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
-			msg = await populateMsgFromInteraction(interaction);
-
-			if (interaction.options.getSubcommand() === 'set') {
-				args.push(interaction.options._hoistedOptions[0].value);
-			} else {
-				args = [interaction.options.getSubcommand()];
-			}
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
+			return;
 		}
-		//Check first argument of the command
-		if (args[0] === 'current') {
-			logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds current');
-			//get guild from db
-			const guild = await DBGuilds.findOne({
-				where: { guildId: msg.guildId },
-			});
 
-			//Check if the guild was found in the db
-			if (guild) {
-				//Check if there is a welcome message set
-				if (guild.sendWelcomeMessage) {
-					//get the channel id
-					const guildWelcomeMessageChannelId = guild.welcomeMessageChannel;
-					//get the channel object by the id
-					const guildWelcomeMessageChannel = msg.guild.channels.cache.find(channel => channel.id === guildWelcomeMessageChannelId);
-					if (msg.id) {
-						return msg.reply(`The current welcome message is set to channel \`${guildWelcomeMessageChannel.name}\`: \`${guild.welcomeMessageText.replace(/`/g, '')}\``);
-					}
-					return interaction.editReply(`The current welcome message is set to channel \`${guildWelcomeMessageChannel.name}\`: \`${guild.welcomeMessageText.replace(/`/g, '')}\``);
-				} else {
-					//if no welcome message is set
-					if (msg.id) {
-						return msg.reply('There is currently no welcome message set.');
-					}
-					return interaction.editReply('There is currently no welcome message set.');
-				}
-			} else {
-				//Create guild in the db in case the guild is not in the db yet
+		logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds');
+		const guild = await DBGuilds.findOne({
+			where: { guildId: interaction.guildId },
+		});
+
+		if (interaction.options.getSubcommand() === 'current') {
+			if (!guild) {
 				logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds current create');
-				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendWelcomeMessage: false });
-				//Send that no welcome message is set
-				if (msg.id) {
-					return msg.reply('There is currently no welcome message set.');
-				}
+				await DBGuilds.create({ guildId: interaction.guildId, guildName: interaction.guild.name, sendWelcomeMessage: false });
 				return interaction.editReply('There is currently no welcome message set.');
 			}
-			//Check first argument of the command
-		} else if (args[0] === 'disable') {
-			logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds disable');
-			//get guild from db
-			const guild = await DBGuilds.findOne({
-				where: { guildId: msg.guildId },
-			});
 
-			//Check if the guild was found in the db
-			if (guild) {
-				//Check if there is a welcome message set
-				if (guild.sendWelcomeMessage) {
-					//Set the dataset to no welcome message
-					guild.sendWelcomeMessage = false;
-					//Save the dataset
-					guild.save();
-					if (msg.id) {
-						return msg.reply('Welcome messages have been disabled for this server.');
-					}
-					return interaction.editReply('Welcome messages have been disabled for this server.');
-				} else {
-					//if welcome messages are already disabled
-					if (msg.id) {
-						return msg.reply('Welcome messages are already disabled for this server.');
-					}
-					return interaction.editReply('Welcome messages are already disabled for this server.');
-				}
-			} else {
-				//Create guild in the db in case the guild is not in the db yet
+			if (!guild.sendWelcomeMessage) {
+				return interaction.editReply('There is currently no welcome message set.');
+			}
+
+			return interaction.editReply(`The current welcome message is set to channel <#${guild.welcomeMessageChannel}>: \`${guild.welcomeMessageText.replace(/`/g, '')}\``);
+
+		} else if (interaction.options.getSubcommand() === 'disable') {
+			if (!guild) {
 				logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds disable create');
-				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendWelcomeMessage: false });
-				//Send that no welcome message is set
-				if (msg.id) {
-					return msg.reply('Welcome messages are already disabled for this server.');
-				}
-				return interaction.editReply('Welcome messages are already disabled for this server.');
+				await DBGuilds.create({ guildId: interaction.guildId, guildName: interaction.guild.name, sendWelcomeMessage: false });
+				return interaction.editReply('There is currently no welcome message set.');
 			}
-			//If not specified keyword for the command
-		} else {
-			//Define welcome message from the rest of the arguments
-			let welcomeMessage = args.join(' ');
-			logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds else');
-			//get guild from db
-			const guild = await DBGuilds.findOne({
-				where: { guildId: msg.guildId },
-			});
 
-			//Check if the guild was found in the db
+			if (!guild.sendWelcomeMessage) {
+				return interaction.editReply('There is currently no welcome message set.');
+			}
+
+			guild.sendWelcomeMessage = false;
+			await guild.save();
+			return interaction.editReply('Welcome messages have been disabled for this server.');
+		} else if (interaction.options.getSubcommand() === 'set') {
+			let message = interaction.options.getString('message');
+
 			if (guild) {
-				//Set welcome message fields and save the dataset
 				guild.sendWelcomeMessage = true;
-				guild.welcomeMessageChannel = msg.channel.id;
-				guild.welcomeMessageText = welcomeMessage;
-				guild.save();
+				guild.welcomeMessageChannel = interaction.channelId;
+				guild.welcomeMessageText = message;
+				await guild.save();
 			} else {
-				//if guild was not found, create it in db
-				logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds else create');
-				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, sendWelcomeMessage: true, welcomeMessageChannel: msg.channel.id, welcomeMessageText: welcomeMessage });
+				logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds set create');
+				await DBGuilds.create({
+					guildId: interaction.guildId,
+					guildName: interaction.guild.name,
+					sendWelcomeMessage: true,
+					welcomeMessageChannel: interaction.channelId,
+					welcomeMessageText: message
+				});
 			}
-			if (msg.id) {
-				return msg.reply(`The new message \`${welcomeMessage.replace(/`/g, '')}\` has been set for welcoming new members in the channel \`${msg.channel.name}\`.`);
-			}
-			return interaction.editReply(`The new message \`${welcomeMessage.replace(/`/g, '')}\` has been set for welcoming new members in the channel \`${msg.channel.name}\`.`);
+
+			return interaction.editReply(`The new message \`${message.replace(/`/g, '')}\` has been set for welcoming new members in the channel \`${interaction.channel.name}\`.`);
 		}
 	},
 };
