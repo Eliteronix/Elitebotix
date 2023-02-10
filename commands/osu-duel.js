@@ -1552,8 +1552,14 @@ module.exports = {
 					files = files.concat(csvFiles);
 				}
 
+				let serverHint = '';
+
+				if (interaction.guild) {
+					serverHint = ' from the server';
+				}
+
 				//Send attachment
-				let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:1064502370710605836> to connect your osu! account.\nData is being updated once a day or when </osu-duel rating:1023849629932064828> is being used.`, files: files });
+				let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players${serverHint} that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:1064502370710605836> to connect your osu! account.\nData is being updated once a day or when </osu-duel rating:1023849629932064828> is being used.`, files: files });
 
 				if (page) {
 					if (page > 1) {
