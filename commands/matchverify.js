@@ -3,6 +3,7 @@ const { showUnknownInteractionError, developers } = require('../config.json');
 const { Op } = require('sequelize');
 const { getIDFromPotentialOsuLink, humanReadable, getOsuPlayerName, createLeaderboard, getOsuBeatmap, logDatabaseQueries, pause } = require('../utils');
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const matchIdsGettingProcessed = [];
 
 module.exports = {
 	name: 'matchverify',
@@ -169,6 +170,9 @@ module.exports = {
 					},
 					verifiedAt: null,
 					tourneyMatch: true,
+					matchId: {
+						[Op.notIn]: matchIdsGettingProcessed,
+					},
 				},
 				group: ['matchName'],
 				limit: 25000,
@@ -204,6 +208,9 @@ module.exports = {
 					},
 					verifiedAt: null,
 					tourneyMatch: true,
+					matchId: {
+						[Op.notIn]: matchIdsGettingProcessed,
+					},
 					[Op.or]: [
 						{
 							matchName: {
@@ -333,6 +340,9 @@ module.exports = {
 						[Op.not]: null,
 					},
 					verifiedAt: null,
+					matchId: {
+						[Op.notIn]: matchIdsGettingProcessed,
+					},
 				},
 				group: ['matchId'],
 			});
@@ -378,6 +388,10 @@ module.exports = {
 			}
 
 			await interaction.editReply('Processing...');
+
+			for (let i = 0; i < matchIds.length; i++) {
+				matchIdsGettingProcessed.push(getIDFromPotentialOsuLink(matchIds[i]));
+			}
 
 			for (let matchIndex = 0; matchIndex < matchIds.length; matchIndex++) {
 				try {
