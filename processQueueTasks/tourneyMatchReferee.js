@@ -1,6 +1,7 @@
 const { DBDiscordUsers, DBOsuBeatmaps, DBProcessQueue } = require('../dbObjects');
 const { pause, saveOsuMultiScores, logDatabaseQueries, logMatchCreation, addMatchMessage } = require('../utils');
 const osu = require('node-osu');
+const Discord = require('discord.js');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -510,8 +511,11 @@ module.exports = {
 					players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
 				}
 
+				// Attach match log
+				let attachment = new Discord.AttachmentBuilder(`./matchLogs/${channel.lobby.id}.txt`, { name: `${channel.lobby.id}.txt` });
+
 				let user = await client.users.fetch(args[0]);
-				user.send(`The scheduled Qualifier match has finished. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`);
+				user.send({ content: `The scheduled Qualifier match has finished. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`, files: [attachment] });
 
 				return await channel.leave();
 
