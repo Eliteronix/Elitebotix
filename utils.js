@@ -508,7 +508,7 @@ module.exports = {
 			}
 		}
 
-		await new Promise(resolve => setTimeout(resolve, 25000));
+		await new Promise(resolve => setTimeout(resolve, 30000));
 
 		let lastMonth = new Date();
 		lastMonth.setUTCDate(lastMonth.getUTCMonth() - 1);

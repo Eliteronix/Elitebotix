@@ -267,7 +267,7 @@ setTimeout(() => {
 
 	setInterval(() => checkForBirthdays(client), 300000);
 
-	setInterval(() => refreshOsuRank(client), 50000);
+	setInterval(() => refreshOsuRank(client), 60000);
 }, 60000);
 
 async function executeProcessQueue(client, bancho) {
