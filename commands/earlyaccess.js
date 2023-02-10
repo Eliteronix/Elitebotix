@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores, DBDuelRatingHistory } = require('../db
 const osu = require('node-osu');
 const { developers, salesmen, showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
-const { getUserDuelStarRating, getMessageUserDisplayname, logDatabaseQueries, getOsuBeatmap } = require('../utils');
+const { getUserDuelStarRating, getMessageUserDisplayname, logDatabaseQueries, getOsuBeatmap, getIDFromPotentialOsuLink } = require('../utils');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const Discord = require('discord.js');
 const { SlashCommandBuilder } = require('discord.js');
@@ -101,7 +101,7 @@ module.exports = {
 		}
 
 		if (interaction && interaction.options.getSubcommand() === 'tournamentdifficulty') {
-			let beatmapId = interaction.options.getString('beatmapid');
+			let beatmapId = getIDFromPotentialOsuLink(interaction.options.getString('beatmapid'));
 			let modpool = interaction.options.getString('modpool');
 
 			let modBits = 0;
