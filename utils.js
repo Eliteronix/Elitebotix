@@ -2809,7 +2809,7 @@ module.exports = {
 						}
 
 						//Grab recent events and send it in
-						if (osuUser.osuUser && osuUser.osuUser.events.length > 0) {
+						if (osuUser.osuUser.events.length > 0) {
 							for (let j = 0; j < osuUser.osuUser.events.length; j++) {
 								//Remove older scores on the map to avoid duplicates if its a score
 								if (osuUser.osuUser.events[j].beatmapId) {
