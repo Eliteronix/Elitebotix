@@ -4968,7 +4968,7 @@ async function getOsuBeatmapFunction(input) {
 					.catch(async (error) => {
 						//Nothing
 						//Map is already saved; Delay next check until 7 days
-						if (dbBeatmap) {
+						if (dbBeatmap && error.message === 'Not found') {
 							dbBeatmap.approvalStatus = 'Not found';
 							dbBeatmap.changed('updatedAt', true);
 							await dbBeatmap.save();
