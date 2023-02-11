@@ -565,8 +565,6 @@ async function getResultImage(event, users) {
 	//Draw mods
 	for (let i = 0; i < event.game.mods.length; i++) {
 		event.game.mods[i] = getModImage(event.game.mods[i]);
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
 		const modImage = await Canvas.loadImage(event.game.mods[i]);
 		ctx.drawImage(modImage, 960 - ((event.game.mods.length - i) * 48), 35, 45, 32);
 	}
@@ -688,8 +686,6 @@ async function getResultImage(event, users) {
 		// Draw the mods
 		for (let j = 0; j < mods.length; j++) {
 			mods[j] = getModImage(mods[j]);
-			// eslint-disable-next-line no-undef
-			process.send('osu! website');
 			const modImage = await Canvas.loadImage(mods[j]);
 			ctx.drawImage(modImage, 475 - ((mods.length - j) * 48), 305 + i * 75, 45, 32);
 		}
@@ -870,8 +866,6 @@ async function getPlayingImage(event) {
 	//Draw mods
 	for (let i = 0; i < event.game.mods.length; i++) {
 		event.game.mods[i] = getModImage(event.game.mods[i]);
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
 		const modImage = await Canvas.loadImage(event.game.mods[i]);
 		ctx.drawImage(modImage, 960 - ((event.game.mods.length - i) * 48), 35, 45, 32);
 	}

@@ -1136,8 +1136,6 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 		//Write mods per map
 		for (let j = 0; j < mods.length; j++) {
-			// eslint-disable-next-line no-undef
-			process.send('osu! website');
 			const modImage = await Canvas.loadImage(getModImage(mods[mods.length - j - 1]));
 			ctx.drawImage(modImage, (canvas.width / 28) * 24.75 - (canvas.width / 1000 * 23) * (j + 1), 500 / 8 + (500 / 12) * i + (500 / 12) / 5, canvas.width / 1000 * 23, 500 / 125 * 4);
 		}

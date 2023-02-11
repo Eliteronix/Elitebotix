@@ -831,8 +831,6 @@ async function drawCover(input, mode) {
 
 	//mods
 	for (let i = 0; i < mods.length; i++) {
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
 		const modImage = await Canvas.loadImage(getModImage(mods[i]));
 		ctx.drawImage(modImage, canvas.width / 900 * 300 + canvas.width / 1000 * 40 * i, (background.height / background.width * canvas.width) / 250 * 28 + canvas.height / 6.25, canvas.width / 1000 * 33, canvas.height / 500 * 23);
 	}

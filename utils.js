@@ -76,53 +76,13 @@ module.exports = {
 		return path;
 	},
 	getModImage: function (mod) {
-		let URL = 'https://osu.ppy.sh/assets/images/mod_no-mod.d04b9d35.png';
+		let path = 'other/mods/NM.png';
 
-		if (mod === 'NF') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_no-fail.ca1a6374.png';
-		} else if (mod === 'EZ') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_easy.076c7e8c.png';
-		} else if (mod === 'HT') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_half.3e707fd4.png';
-		} else if (mod === 'HR') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_hard-rock.52c35a3a.png';
-		} else if (mod === 'SD') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_sudden-death.d0df65c7.png';
-		} else if (mod === 'PF') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_perfect.460b6e49.png';
-		} else if (mod === 'DT') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_double-time.348a64d3.png';
-		} else if (mod === 'NC') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_nightcore.240c22f2.png';
-		} else if (mod === 'HD') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_hidden.cfc32448.png';
-		} else if (mod === 'FL') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_flashlight.be8ff220.png';
-		} else if (mod === 'SO') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_spun-out.989be71e.png';
-		} else if (mod === 'TD') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_touchdevice.e5fa4271.png';
-		} else if (mod === 'FI') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_fader@2x.03843f9a.png';
-		} else if (mod === 'MI') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_mirror@2x.3f255fca.png';
-		} else if (mod === '4K') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_4K.fb93bec4.png';
-		} else if (mod === '5K') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_5K.c5928e1c.png';
-		} else if (mod === '6K') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_6K.1050cc50.png';
-		} else if (mod === '7K') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_7K.f8a7b7cc.png';
-		} else if (mod === '8K') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_8K.13caafe8.png';
-		} else if (mod === '9K') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_9K.ffde81fe.png';
-		} else if (mod === 'RX') {
-			URL = 'https://osu.ppy.sh/assets/images/mod_relax.dbcfb8d8.png';
+		if (mod) {
+			path = `other/mods/${mod}.png`;
 		}
 
-		return URL;
+		return path;
 	},
 	getBeatmapApprovalStatusImage: function (beatmap) {
 
