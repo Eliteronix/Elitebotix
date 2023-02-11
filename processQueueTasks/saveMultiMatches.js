@@ -453,7 +453,165 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					}
 				});
 			} else {
+				// let date = new Date();
+				// date.setUTCDate(date.getUTCDate() - 14);
+
+				// logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores find match to verify');
+				// let matchToVerify = await DBOsuMultiScores.findOne({
+				// 	where: {
+				// 		verifiedBy: null,
+				// 		matchEndDate: {
+				// 			[Op.lte]: date,
+				// 		},
+				// 	},
+				// });
+
+				// if (matchToVerify) {
+				// 	await osuApi.getMatch({ mp: incompleteMatch.matchId })
+				// 		.then(async (match) => {
+				// 			try {
+				// 				await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
+				// 					.then(async (res) => {
+				// 						let htmlCode = await res.text();
+				// 						htmlCode = htmlCode.replace(/&quot;/gm, '"');
+				// 						const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
+				// 						const matchesPaused = matchPausedRegex.exec(htmlCode);
+
+				// 						let regexMatch = null;
+
+				// 						if (matchesPaused && matchesPaused[0]) {
+				// 							regexMatch = matchesPaused[0];
+				// 						}
+
+				// 						if (regexMatch) {
+				// 							let json = JSON.parse(regexMatch);
+
+				// 							while (json.first_event_id !== json.events[0].id) {
+				// 								let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
+				// 									.then(async (res) => {
+				// 										let htmlCode = await res.text();
+				// 										htmlCode = htmlCode.replace(/&quot;/gm, '"');
+				// 										const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
+				// 										const matchesPaused = matchPausedRegex.exec(htmlCode);
+
+				// 										if (matchesPaused && matchesPaused[0]) {
+				// 											regexMatch = matchesPaused[0];
+				// 										}
+
+				// 										let json = JSON.parse(regexMatch);
+
+				// 										return json.events;
+				// 									});
+
+				// 								json.events = earlierEvents.concat(json.events);
+				// 							}
+
+				// 							if (json.events[0].detail.type === 'match-created') {
+				// 								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Find a score by the match creator');
+				// 								let score = await DBOsuMultiScores.findOne({
+				// 									where: {
+				// 										matchId: match.id,
+				// 										userId: json.events[0].user_id,
+				// 									},
+				// 								});
+
+				// 								if (score) {
+				// 									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Match creator played a round - Not determined if valid');
+				// 									await DBOsuMultiScores.update({
+				// 										verifiedBy: 31050083, // Elitebotix
+				// 										verificationComment: 'Match creator played a round - Not determined if valid',
+				// 									}, {
+				// 										where: {
+				// 											matchId: match.id,
+				// 										},
+				// 									});
+				// 								} else {
+				// 									console.log(matchToVerify);
+				// 									// logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update maidbot match');
+				// 									// await DBOsuMultiScores.update({
+				// 									// 	tourneyMatch: true,
+				// 									// 	verifiedAt: new Date(),
+				// 									// 	verifiedBy: 31050083, // Elitebotix
+				// 									// 	verificationComment: 'Match created by MaidBot',
+				// 									// }, {
+				// 									// 	where: {
+				// 									// 		matchId: match.id,
+				// 									// 	},
+				// 									// });
+
+				// 									// let guildId = '727407178499096597';
+				// 									// let channelId = '1068905937219362826';
+
+				// 									// // eslint-disable-next-line no-undef
+				// 									// if (process.env.SERVER === 'Dev') {
+				// 									// 	guildId = '800641468321759242';
+				// 									// 	channelId = '1070013925334204516';
+				// 									// }
+
+				// 									// client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
+				// 									// 	let guild = await c.guilds.cache.get(guildId);
+
+				// 									// 	if (!guild) {
+				// 									// 		return;
+				// 									// 	}
+
+				// 									// 	let channel = await guild.channels.cache.get(channelId);
+
+				// 									// 	if (!channel) {
+				// 									// 		return;
+				// 									// 	}
+
+				// 									// 	await channel.send(message);
+				// 									// }, {
+				// 									// 	context: {
+				// 									// 		guildId: guildId,
+				// 									// 		channelId: channelId,
+				// 									// 		message: `\`\`\`diff\n+ Valid: True\nComment: Match created by MaidBot\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
+				// 									// 	}
+				// 									// });
+				// 								}
+				// 							} else {
+				// 								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update not determinable maidbot match');
+				// 								await DBOsuMultiScores.update({
+				// 									verifiedBy: 31050083, // Elitebotix
+				// 									verificationComment: 'Not determinable if match was created by MaidBot',
+				// 								}, {
+				// 									where: {
+				// 										matchId: match.id,
+				// 									},
+				// 								});
+				// 							}
+				// 						}
+				// 					});
+				// 			} catch (e) {
+				// 				if (!e.message.endsWith('reason: Client network socket disconnected before secure TLS connection was established')
+				// 					&& !e.message.endsWith('reason: read ECONNRESET')) {
+				// 					console.error(e);
+				// 				}
+				// 				// Go same if error
+				// 				secondsToWait = secondsToWait + 60;
+				// 			}
+				// 		})
+				// 		.catch(async (err) => {
+				// 			if (err.message === 'Not found') {
+				// 				//If its not found anymore it should be fake because it must be created in a different way
+				// 				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update fake maidbot match');
+				// 				await DBOsuMultiScores.update({
+				// 					verifiedBy: 31050083, // Elitebotix
+				// 					verificationComment: 'match not found - can\'t be determined if fake or not',
+				// 				}, {
+				// 					where: {
+				// 						matchId: incompleteMatch.matchId,
+				// 					},
+				// 				});
+				// 			} else {
+				// 				// Go same if error
+				// 				secondsToWait = secondsToWait + 60;
+				// 			}
+				// 		});
+				// } else {
 				secondsToWait = secondsToWait + 60;
+				// }
 			}
 		}
 	}
