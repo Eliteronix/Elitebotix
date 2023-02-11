@@ -447,7 +447,7 @@ module.exports = {
 							&& !e.message.endsWith('reason: read ECONNRESET')) {
 							console.error(e);
 						}
-						await pause(20000);
+						await pause(60000);
 					}
 				}
 			})
