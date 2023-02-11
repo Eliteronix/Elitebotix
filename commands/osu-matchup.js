@@ -1293,9 +1293,13 @@ module.exports = {
 
 		//Draw a shape onto the main canvas
 		try {
+			// eslint-disable-next-line no-undef
+			process.send('osu! website');
 			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${team1[0]}`);
 			ctx.drawImage(avatar, 10, 10, 160, 160);
 		} catch (error) {
+			// eslint-disable-next-line no-undef
+			process.send('osu! website');
 			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
 			ctx.drawImage(avatar, 10, 10, 160, 160);
 		}
@@ -1318,9 +1322,13 @@ module.exports = {
 
 		//Draw a shape onto the main canvas
 		try {
+			// eslint-disable-next-line no-undef
+			process.send('osu! website');
 			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${team2[0]}`);
 			ctx.drawImage(avatar, 830, 10, 160, 160);
 		} catch (error) {
+			// eslint-disable-next-line no-undef
+			process.send('osu! website');
 			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
 			ctx.drawImage(avatar, 830, 10, 160, 160);
 		}

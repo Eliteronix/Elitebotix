@@ -671,6 +671,8 @@ async function drawBadges(input, server) {
 
 	if (server === 'bancho') {
 		const badgeURLs = [];
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		await fetch(`https://osu.ppy.sh/users/${user.id}/osu`)
 			.then(async (res) => {
 				let htmlCode = await res.text();
@@ -694,6 +696,8 @@ async function drawBadges(input, server) {
 			xOffset = xOffset + (8 - badgeURLs.length) * 44;
 		}
 		for (let i = 0; i < badgeURLs.length && i < 8; i++) {
+			// eslint-disable-next-line no-undef
+			process.send('osu! website');
 			const badge = await Canvas.loadImage(badgeURLs[i].replace(/\\/gm, ''));
 			ctx.drawImage(badge, xOffset + (i * 88), 290, 86, 40);
 		}
@@ -770,9 +774,13 @@ async function drawAvatar(input) {
 
 	//Draw a shape onto the main canvas in the middle 
 	try {
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${user.id}`);
 		ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 4, canvas.height / 4 + yOffset, canvas.height / 2, canvas.height / 2);
 	} catch (error) {
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
 		ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 4, canvas.height / 4 + yOffset, canvas.height / 2, canvas.height / 2);
 	}
@@ -789,6 +797,8 @@ async function getRankHistoryGraph(osuUserId, mode) {
 		mode = 'fruits';
 	}
 
+	// eslint-disable-next-line no-undef
+	process.send('osu! website');
 	let history = await fetch(`https://osu.ppy.sh/users/${osuUserId}/${mode}`)
 		.then(async (res) => {
 			let htmlCode = await res.text();

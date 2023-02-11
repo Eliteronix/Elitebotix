@@ -436,6 +436,8 @@ async function drawMode(input) {
 
 	for (let i = 0; i < mods.length; i++) {
 		mods[i] = getModImage(mods[i]);
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		const modImage = await Canvas.loadImage(mods[i]);
 		ctx.drawImage(modImage, 150, 385 + i * 40 - ((mods.length - 1) * 40) / 2, 45, 32);
 	}
@@ -600,9 +602,13 @@ async function drawBackground(input) {
 
 	//Draw a shape onto the main canvas in the top left
 	try {
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		const background = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapsetId}/covers/cover.jpg`);
 		ctx.drawImage(background, background.width / 2 - background.height / 2, 0, background.height, background.height, 0, 0, canvas.height / 3 * 2, canvas.height / 3 * 2);
 	} catch (error) {
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		const background = await Canvas.loadImage('https://osu.ppy.sh/assets/images/default-bg.7594e945.png');
 		ctx.drawImage(background, background.width / 2 - background.height / 2, 0, background.height, background.height, 0, 0, canvas.height / 3 * 2, canvas.height / 3 * 2);
 	}

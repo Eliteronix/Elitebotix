@@ -183,6 +183,8 @@ module.exports = {
 
 				while (!stop) {
 					try {
+						// eslint-disable-next-line no-undef
+						process.send('osu! website');
 						await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 							.then(async (res) => {
 								let htmlCode = await res.text();
@@ -209,6 +211,8 @@ module.exports = {
 									}
 
 									while (json.first_event_id !== json.events[0].id) {
+										// eslint-disable-next-line no-undef
+										process.send('osu! website');
 										let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
 											.then(async (res) => {
 												let htmlCode = await res.text();
@@ -547,6 +551,8 @@ async function getResultImage(event, users) {
 	}
 
 	try {
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		const beatmapCover = await Canvas.loadImage(event.game.beatmap.beatmapset.covers.slimcover);
 
 		ctx.drawImage(beatmapCover, 25, 25, 950, 178);
@@ -559,6 +565,8 @@ async function getResultImage(event, users) {
 	//Draw mods
 	for (let i = 0; i < event.game.mods.length; i++) {
 		event.game.mods[i] = getModImage(event.game.mods[i]);
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		const modImage = await Canvas.loadImage(event.game.mods[i]);
 		ctx.drawImage(modImage, 960 - ((event.game.mods.length - i) * 48), 35, 45, 32);
 	}
@@ -595,6 +603,8 @@ async function getResultImage(event, users) {
 		ctx.clip();
 
 		try {
+			// eslint-disable-next-line no-undef
+			process.send('osu! website');
 			const avatar = await Canvas.loadImage(user.avatar_url);
 
 			ctx.drawImage(avatar, 35, 305 + i * 75, 55, 55);
@@ -671,6 +681,8 @@ async function getResultImage(event, users) {
 
 		let grade = calculateGrade(mode, counts, modBits);
 
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		let gradeImage = await Canvas.loadImage(getRankImage(grade));
 
 		ctx.drawImage(gradeImage, 927, 338 + i * 75, gradeImage.width, gradeImage.height);
@@ -678,6 +690,8 @@ async function getResultImage(event, users) {
 		// Draw the mods
 		for (let j = 0; j < mods.length; j++) {
 			mods[j] = getModImage(mods[j]);
+			// eslint-disable-next-line no-undef
+			process.send('osu! website');
 			const modImage = await Canvas.loadImage(mods[j]);
 			ctx.drawImage(modImage, 475 - ((mods.length - j) * 48), 305 + i * 75, 45, 32);
 		}
@@ -844,6 +858,8 @@ async function getPlayingImage(event) {
 	}
 
 	try {
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		const beatmapCover = await Canvas.loadImage(event.game.beatmap.beatmapset.covers.slimcover);
 
 		ctx.drawImage(beatmapCover, 25, 25, 950, 178);
@@ -856,6 +872,8 @@ async function getPlayingImage(event) {
 	//Draw mods
 	for (let i = 0; i < event.game.mods.length; i++) {
 		event.game.mods[i] = getModImage(event.game.mods[i]);
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		const modImage = await Canvas.loadImage(event.game.mods[i]);
 		ctx.drawImage(modImage, 960 - ((event.game.mods.length - i) * 48), 35, 45, 32);
 	}

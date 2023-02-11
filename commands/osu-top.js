@@ -1014,6 +1014,8 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 		roundedRect(ctx, canvas.width / 70, 500 / 8 + (500 / 12) * i, canvas.width - canvas.width / 35, 500 / 13, 500 / 70, '70', '57', '63', 0.75);
 
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		const rankImage = await Canvas.loadImage(getRankImage(sortedScores[i].rank));
 		ctx.drawImage(rankImage, canvas.width / 35, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 - 500 / 31.25 / 2, canvas.width / 31.25, 500 / 31.25);
 
@@ -1136,6 +1138,8 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 		//Write mods per map
 		for (let j = 0; j < mods.length; j++) {
+			// eslint-disable-next-line no-undef
+			process.send('osu! website');
 			const modImage = await Canvas.loadImage(getModImage(mods[mods.length - j - 1]));
 			ctx.drawImage(modImage, (canvas.width / 28) * 24.75 - (canvas.width / 1000 * 23) * (j + 1), 500 / 8 + (500 / 12) * i + (500 / 12) / 5, canvas.width / 1000 * 23, 500 / 125 * 4);
 		}

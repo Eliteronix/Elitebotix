@@ -368,9 +368,13 @@ module.exports = {
 			ctx.clip();
 			ctx.globalCompositeOperation = 'source-over';
 			try {
+				// eslint-disable-next-line no-undef
+				process.send('osu! website');
 				beatmapImage = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapsetId}/covers/cover.jpg`);
 				ctx.drawImage(beatmapImage, 0, canvas.height / 6.25, canvas.width, beatmapImage.height / beatmapImage.width * canvas.width);
 			} catch (error) {
+				// eslint-disable-next-line no-undef
+				process.send('osu! website');
 				beatmapImage = await Canvas.loadImage('https://osu.ppy.sh/assets/images/default-bg.7594e945.png');
 				ctx.drawImage(beatmapImage, 0, canvas.height / 6.25, canvas.width, beatmapImage.height / beatmapImage.width * canvas.width);
 			}
@@ -410,6 +414,8 @@ module.exports = {
 			let mods = getMods(beatmap.mods);
 			for (let i = 0; i < mods.length; i++) {
 				mods[i] = getModImage(mods[i]);
+				// eslint-disable-next-line no-undef
+				process.send('osu! website');
 				const modImage = await Canvas.loadImage(mods[i]);
 				ctx.drawImage(modImage, 860 - ((mods.length - i) * 48), 35, 45, 32);
 			}
@@ -428,8 +434,12 @@ module.exports = {
 
 			let topScoreUserImage;
 			try {
+				// eslint-disable-next-line no-undef
+				process.send('osu! website');
 				topScoreUserImage = await Canvas.loadImage(`https://s.ppy.sh/a/${topScore.user.id}`);
 			} catch (error) {
+				// eslint-disable-next-line no-undef
+				process.send('osu! website');
 				topScoreUserImage = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
 			}
 
@@ -509,6 +519,8 @@ module.exports = {
 			ctx.fillText(`${topScore.maxCombo}`, 780, 195);
 			//mods
 			for (let i = 0; i < mods.length; i++) {
+				// eslint-disable-next-line no-undef
+				process.send('osu! website');
 				const modImage = await Canvas.loadImage(getModImage(mods[i]));
 				let xOffset = 28;
 				ctx.drawImage(modImage, 720 + xOffset * i, 220, modImage.width / 1.8, modImage.height / 1.8);
@@ -556,8 +568,12 @@ module.exports = {
 
 				let topScoreUserImage;
 				try {
+					// eslint-disable-next-line no-undef
+					process.send('osu! website');
 					topScoreUserImage = await Canvas.loadImage(`https://s.ppy.sh/a/${topScore.user.id}`);
 				} catch (error) {
+					// eslint-disable-next-line no-undef
+					process.send('osu! website');
 					topScoreUserImage = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
 				}
 
@@ -646,6 +662,8 @@ module.exports = {
 				ctx.fillText(`${topScore.maxCombo}`, 780, 195 + 90);
 				//mods
 				for (let i = 0; i < mods.length; i++) {
+					// eslint-disable-next-line no-undef
+					process.send('osu! website');
 					const modImage = await Canvas.loadImage(getModImage(mods[i]));
 					let xOffset = 28;
 					ctx.drawImage(modImage, 720 + xOffset * i, 220 + 90, modImage.width / 2, modImage.height / 2);
@@ -725,6 +743,8 @@ module.exports = {
 				// mods
 				let mods = getMods(scoresArray[i].raw_mods);
 				for (let j = 0; j < mods.length; j++) {
+					// eslint-disable-next-line no-undef
+					process.send('osu! website');
 					const modImage = await Canvas.loadImage(getModImage(mods[j]));
 					let xOffset = 28;
 					let v = 2;

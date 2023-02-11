@@ -694,9 +694,13 @@ async function drawCover(input, mode) {
 	ctx.globalAlpha = 0.6;
 	//Draw a shape onto the main canvas in the top left
 	try {
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		background = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapsetId}/covers/cover.jpg`);
 		ctx.drawImage(background, 0, canvas.height / 6.25, canvas.width, background.height / background.width * canvas.width);
 	} catch (error) {
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		background = await Canvas.loadImage('https://osu.ppy.sh/assets/images/default-bg.7594e945.png');
 		ctx.drawImage(background, 0, canvas.height / 6.25, canvas.width, background.height / background.width * canvas.width);
 	}
@@ -827,6 +831,8 @@ async function drawCover(input, mode) {
 
 	//mods
 	for (let i = 0; i < mods.length; i++) {
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		const modImage = await Canvas.loadImage(getModImage(mods[i]));
 		ctx.drawImage(modImage, canvas.width / 900 * 300 + canvas.width / 1000 * 40 * i, (background.height / background.width * canvas.width) / 250 * 28 + canvas.height / 6.25, canvas.width / 1000 * 33, canvas.height / 500 * 23);
 	}
@@ -1127,6 +1133,8 @@ async function drawUserInfo(input, server) {
 		ctx.restore();
 	}
 
+	// eslint-disable-next-line no-undef
+	process.send('osu! website');
 	const userBackground = await Canvas.loadImage('https://osu.ppy.sh/images/headers/profile-covers/c3.jpg');
 
 	roundedImage(ctx, userBackground, canvas.width / 900 * 50, canvas.height / 500 * 375, userBackground.width / 10 * 2, userBackground.height / 10 * 2, 5);
@@ -1134,8 +1142,12 @@ async function drawUserInfo(input, server) {
 	let userAvatar;
 
 	try {
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		userAvatar = await Canvas.loadImage(`http://s.ppy.sh/a/${user.id}`);
 	} catch (error) {
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		userAvatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
 	}
 

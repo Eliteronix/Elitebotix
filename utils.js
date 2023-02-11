@@ -2565,6 +2565,8 @@ module.exports = {
 		await updateQueueChannelsFunction(client);
 	},
 	async createNewForumPostRecords(client) {
+		// eslint-disable-next-line no-undef
+		process.send('osu! website');
 		await fetch('https://osu.ppy.sh/community/forums/55')
 			.then(async (res) => {
 				let htmlCode = await res.text();
@@ -3334,6 +3336,8 @@ module.exports = {
 
 		try {
 			if (forceDownload || !fs.existsSync(path)) {
+				// eslint-disable-next-line no-undef
+				process.send('osu! website');
 				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`);
 				await new Promise((resolve, reject) => {
 					const fileStream = fs.createWriteStream(`./listcovers/${beatmapsetId}.jpg`);
@@ -4443,6 +4447,8 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, dep
 
 	try {
 		if (forceDownload || !fs.existsSync(path)) {
+			// eslint-disable-next-line no-undef
+			process.send('osu! website');
 			const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
 			await new Promise((resolve, reject) => {
 				const fileStream = fs.createWriteStream(`./maps/${beatmapId}.osu`);
@@ -4500,6 +4506,8 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, dep
 }
 
 async function getOsuBadgeNumberByIdFunction(osuUserId) {
+	// eslint-disable-next-line no-undef
+	process.send('osu! website');
 	return await fetch(`https://osu.ppy.sh/users/${osuUserId}/osu`)
 		.then(async (res) => {
 			let htmlCode = await res.text();
@@ -4538,6 +4546,8 @@ async function getOsuBadgeNumberByIdFunction(osuUserId) {
 }
 
 async function getOsuTournamentBansByIdFunction(osuUserId) {
+	// eslint-disable-next-line no-undef
+	process.send('osu! website');
 	return await fetch(`https://osu.ppy.sh/users/${osuUserId}/`)
 		.then(async (res) => {
 			let htmlCode = await res.text();

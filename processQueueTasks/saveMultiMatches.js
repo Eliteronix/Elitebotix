@@ -134,6 +134,8 @@ module.exports = {
 					try {
 						// Check using node fetch
 						const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+						// eslint-disable-next-line no-undef
+						process.send('osu! website');
 						let response = await fetch(`https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
 						let htmlCode = await response.text();
 						let isolatedContent = htmlCode.replace(/[\s\S]+<script id="json-events" type="application\/json">/gm, '').replace(/<\/script>[\s\S]+/gm, '');
@@ -248,6 +250,8 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 			await osuApi.getMatch({ mp: incompleteMatch.matchId })
 				.then(async (match) => {
 					try {
+						// eslint-disable-next-line no-undef
+						process.send('osu! website');
 						await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 							.then(async (res) => {
 								let htmlCode = await res.text();
@@ -467,9 +471,13 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				// });
 
 				// if (matchToVerify) {
+				// // eslint-disable-next-line no-undef
+				// process.send('osu! API');
 				// 	await osuApi.getMatch({ mp: incompleteMatch.matchId })
 				// 		.then(async (match) => {
 				// 			try {
+				// // eslint-disable-next-line no-undef
+				// process.send('osu! website');
 				// 				await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 				// 					.then(async (res) => {
 				// 						let htmlCode = await res.text();
@@ -487,6 +495,8 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				// 							let json = JSON.parse(regexMatch);
 
 				// 							while (json.first_event_id !== json.events[0].id) {
+				// // eslint-disable-next-line no-undef
+				// process.send('osu! website');
 				// 								let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
 				// 									.then(async (res) => {
 				// 										let htmlCode = await res.text();

@@ -1218,6 +1218,8 @@ module.exports = {
 
 				//Draw badges onto the canvas
 				const badgeURLs = [];
+				// eslint-disable-next-line no-undef
+				process.send('osu! website');
 				await fetch(`https://osu.ppy.sh/users/${osuUser.id}/osu`)
 					.then(async (res) => {
 						let htmlCode = await res.text();
@@ -1241,6 +1243,8 @@ module.exports = {
 					yOffset = yOffset + (6 - badgeURLs.length) * 22;
 				}
 				for (let i = 0; i < badgeURLs.length && i < 6; i++) {
+					// eslint-disable-next-line no-undef
+					process.send('osu! website');
 					const badge = await Canvas.loadImage(badgeURLs[i].replace(/\\/gm, ''));
 					ctx.drawImage(badge, 10, 60 + i * 44 + yOffset, 86, 40);
 				}
@@ -1268,9 +1272,13 @@ module.exports = {
 
 				//Draw a shape onto the main canvas
 				try {
+					// eslint-disable-next-line no-undef
+					process.send('osu! website');
 					const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.id}`);
 					ctx.drawImage(avatar, 110, 90, 160, 160);
 				} catch (error) {
+					// eslint-disable-next-line no-undef
+					process.send('osu! website');
 					const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
 					ctx.drawImage(avatar, 110, 90, 160, 160);
 				}
