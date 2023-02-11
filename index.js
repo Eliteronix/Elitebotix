@@ -23,6 +23,18 @@ const amountOfApiRequestsInTheLast24Hours = new client.Gauge({
 });
 register.registerMetric(amountOfApiRequestsInTheLast24Hours);
 
+const amountOfOsuWebRequestsInTheLast24Hours = new client.Gauge({
+	name: 'osu_web_requests_in_the_last_24_hours',
+	help: 'Osu web requests in the last 24 hours',
+});
+register.registerMetric(amountOfOsuWebRequestsInTheLast24Hours);
+
+const amountOfApiOrOsuWebRequestsInTheLast24Hours = new client.Gauge({
+	name: 'osu_api_or_web_requests_in_the_last_24_hours',
+	help: 'Osu api or web requests in the last 24 hours',
+});
+register.registerMetric(amountOfApiOrOsuWebRequestsInTheLast24Hours);
+
 const timeBehindMatchCreation = new client.Gauge({
 	name: 'time_behind_match_creation',
 	help: 'The time behind match creation in seconds',
@@ -140,6 +152,21 @@ manager.spawn()
 					amountOfApiRequestsInTheLast24Hours.inc();
 					setTimeout(() => {
 						amountOfApiRequestsInTheLast24Hours.dec();
+					}, 86400000);
+
+					amountOfApiOrOsuWebRequestsInTheLast24Hours.inc();
+					setTimeout(() => {
+						amountOfApiOrOsuWebRequestsInTheLast24Hours.dec();
+					}, 86400000);
+				} else if (message === 'osu! website') {
+					amountOfOsuWebRequestsInTheLast24Hours.inc();
+					setTimeout(() => {
+						amountOfOsuWebRequestsInTheLast24Hours.dec();
+					}, 86400000);
+
+					amountOfApiOrOsuWebRequestsInTheLast24Hours.inc();
+					setTimeout(() => {
+						amountOfApiOrOsuWebRequestsInTheLast24Hours.dec();
 					}, 86400000);
 				} else if (typeof message === 'string' && message.startsWith('saveMultiMatches')) {
 					const timeBehind = message.split(' ')[1];
