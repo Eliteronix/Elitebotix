@@ -327,5 +327,5 @@ async function checkOsuTracks(client) {
 
 	setTimeout(() => {
 		checkOsuTracks(client);
-	}, 7500);
+	}, 10000);
 }
