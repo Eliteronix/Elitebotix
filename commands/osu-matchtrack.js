@@ -681,8 +681,6 @@ async function getResultImage(event, users) {
 
 		let grade = calculateGrade(mode, counts, modBits);
 
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
 		let gradeImage = await Canvas.loadImage(getRankImage(grade));
 
 		ctx.drawImage(gradeImage, 927, 338 + i * 75, gradeImage.width, gradeImage.height);

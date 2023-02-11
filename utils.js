@@ -56,24 +56,24 @@ module.exports = {
 		ctx.fill();
 	},
 	getRankImage: function (rank) {
-		let URL = 'https://osu.ppy.sh/assets/images/GradeSmall-D.6b170c4c.svg'; //D Rank
+		let path = 'other/rank_pictures/D_Rank.png'; //D Rank
 
 		if (rank === 'XH') {
-			URL = 'https://osu.ppy.sh/assets/images/GradeSmall-SS-Silver.6681366c.svg';
+			path = 'other/rank_pictures/XH_Rank.png';
 		} else if (rank === 'X') {
-			URL = 'https://osu.ppy.sh/assets/images/GradeSmall-SS.a21de890.svg';
+			path = 'other/rank_pictures/X_Rank.png';
 		} else if (rank === 'SH') {
-			URL = 'https://osu.ppy.sh/assets/images/GradeSmall-S-Silver.811ae28c.svg';
+			path = 'other/rank_pictures/SH_Rank.png';
 		} else if (rank === 'S') {
-			URL = 'https://osu.ppy.sh/assets/images/GradeSmall-S.3b4498a9.svg';
+			path = 'other/rank_pictures/S_Rank.png';
 		} else if (rank === 'A') {
-			URL = 'https://osu.ppy.sh/assets/images/GradeSmall-A.d785e824.svg';
+			path = 'other/rank_pictures/A_Rank.png';
 		} else if (rank === 'B') {
-			URL = 'https://osu.ppy.sh/assets/images/GradeSmall-B.e19fc91b.svg';
+			path = 'other/rank_pictures/B_Rank.png';
 		} else if (rank === 'C') {
-			URL = 'https://osu.ppy.sh/assets/images/GradeSmall-C.6bb75adc.svg';
+			path = 'other/rank_pictures/C_Rank.png';
 		}
-		return URL;
+		return path;
 	},
 	getModImage: function (mod) {
 		let URL = 'https://osu.ppy.sh/assets/images/mod_no-mod.d04b9d35.png';
