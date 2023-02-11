@@ -407,6 +407,7 @@ module.exports = {
 							beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 						}
 
+						await channel.sendMessage('!mp abort');
 						await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
 						await lobby.updateSettings();
@@ -665,6 +666,7 @@ module.exports = {
 						beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 					}
 
+					await channel.sendMessage('!mp abort');
 					await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
 					await lobby.updateSettings();
@@ -732,6 +734,7 @@ module.exports = {
 					beatmap = await getPoolBeatmap(nextModPool, nmStarRating, hdStarRating, hrStarRating, dtStarRating, fmStarRating, avoidMaps);
 				}
 
+				await channel.sendMessage('!mp abort');
 				await channel.sendMessage(`!mp map ${beatmap.beatmapId}`);
 				await new Promise(resolve => setTimeout(resolve, 5000));
 				await lobby.updateSettings();

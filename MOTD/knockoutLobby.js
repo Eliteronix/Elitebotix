@@ -101,6 +101,7 @@ module.exports = {
 		await pause(60000);
 
 		while (lobby._beatmapId != mappool[mapIndex].id) {
+			await channel.sendMessage('!mp abort');
 			await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 			await pause(5000);
 		}
@@ -388,6 +389,7 @@ module.exports = {
 				}
 
 				while (lobby._beatmapId != mappool[mapIndex].id) {
+					await channel.sendMessage('!mp abort');
 					await channel.sendMessage(`!mp map ${mappool[mapIndex].id} 0`);
 					await pause(5000);
 				}

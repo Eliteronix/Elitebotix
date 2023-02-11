@@ -2246,6 +2246,7 @@ module.exports = {
 							avoidMaps.push(nextMap.beatmapId);
 						}
 
+						await channel.sendMessage('!mp abort');
 						await channel.sendMessage(`!mp map ${nextMap.beatmapId}`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
 						await lobby.updateSettings();
@@ -2418,6 +2419,7 @@ module.exports = {
 						avoidMaps.push(nextMap.beatmapId);
 					}
 
+					await channel.sendMessage('!mp abort');
 					await channel.sendMessage(`!mp map ${nextMap.beatmapId}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
 					await lobby.updateSettings();
