@@ -2799,6 +2799,11 @@ module.exports = {
 									guildTrackers.splice(i, 1);
 									i--;
 									continue;
+								} else {
+									console.error(err);
+									await new Promise(resolve => setTimeout(resolve, 60000));
+									i--;
+									continue;
 								}
 							}
 						}
