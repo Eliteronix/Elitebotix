@@ -1015,7 +1015,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		roundedRect(ctx, canvas.width / 70, 500 / 8 + (500 / 12) * i, canvas.width - canvas.width / 35, 500 / 13, 500 / 70, '70', '57', '63', 0.75);
 
 		const rankImage = await Canvas.loadImage(getRankImage(sortedScores[i].rank));
-		ctx.drawImage(rankImage, canvas.width / 35, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 - 500 / 31.25 / 2, canvas.width / 31.25, 500 / 31.25);
+		ctx.drawImage(rankImage, canvas.width / 35, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 - 500 / 31.25 / 2, 32, 16);
 
 		ctx.font = 'bold 18px comfortaa, sans-serif';
 		ctx.fillStyle = '#FF66AB';

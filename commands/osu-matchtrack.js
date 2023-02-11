@@ -681,7 +681,7 @@ async function getResultImage(event, users) {
 
 		let gradeImage = await Canvas.loadImage(getRankImage(grade));
 
-		ctx.drawImage(gradeImage, 927, 338 + i * 75, gradeImage.width, gradeImage.height);
+		ctx.drawImage(gradeImage, 927, 338 + i * 75, 32, 16);
 
 		// Draw the mods
 		for (let j = 0; j < mods.length; j++) {
