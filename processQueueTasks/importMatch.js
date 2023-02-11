@@ -102,7 +102,7 @@ module.exports = {
 				console.error(error, `going same importMatch.js https://osu.ppy.sh/community/matches/${parseInt(matchId)}`);
 				//Go same if error
 				let date = new Date();
-				date.setUTCMinutes(date.getUTCMinutes() + 1);
+				date.setUTCMinutes(date.getUTCMinutes() + 5);
 				processQueueEntry.date = date;
 				processQueueEntry.beingExecuted = false;
 				return await processQueueEntry.save();
