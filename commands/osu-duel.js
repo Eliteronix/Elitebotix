@@ -1,12 +1,11 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName } = require('../utils');
+const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 const ObjectsToCsv = require('objects-to-csv');
@@ -1216,36 +1215,16 @@ module.exports = {
 					}
 				}
 
-				//Draw badges onto the canvas
-				const badgeURLs = [];
-				// eslint-disable-next-line no-undef
-				process.send('osu! website');
-				await fetch(`https://osu.ppy.sh/users/${osuUser.id}/osu`)
-					.then(async (res) => {
-						let htmlCode = await res.text();
-						htmlCode = htmlCode.replace(/&quot;/gm, '"');
-						const badgesRegex = /,"badges".+,"comments_count":/gm;
-						const matches = badgesRegex.exec(htmlCode);
-						if (matches && matches[0]) {
-							const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"comments_count":', '');
-							const rawBadgesArray = cleanedMatch.split('},{');
-							for (let i = 0; i < rawBadgesArray.length; i++) {
-								if (rawBadgesArray[i] !== '') {
-									const badgeArray = rawBadgesArray[i].split('","');
-									badgeURLs.push(badgeArray[2].substring(12));
-								}
-							}
-						}
-					});
+				//Draw badges onto the canvas				
+				let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
 
 				let yOffset = -2;
-				if (badgeURLs.length < 6) {
-					yOffset = yOffset + (6 - badgeURLs.length) * 22;
+				if (additionalInfo.badges.length < 6) {
+					yOffset = yOffset + (6 - additionalInfo.badges.length) * 22;
 				}
-				for (let i = 0; i < badgeURLs.length && i < 6; i++) {
-					// eslint-disable-next-line no-undef
-					process.send('osu! website');
-					const badge = await Canvas.loadImage(badgeURLs[i].replace(/\\/gm, ''));
+
+				for (let i = 0; i < additionalInfo.badges.length && i < 6; i++) {
+					const badge = await getBadgeImage(additionalInfo.badges[i].image_url.replace('https://assets.ppy.sh/profile-badges/', ''));
 					ctx.drawImage(badge, 10, 60 + i * 44 + yOffset, 86, 40);
 				}
 

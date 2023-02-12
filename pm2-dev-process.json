@@ -9,7 +9,8 @@
 		"matchLogs",
 		"node_modules",
 		"listcovers",
-		"beatmapcovers"
+		"beatmapcovers",
+		"badges"
 	],
 	"watch_options": {
 		"followSymlinks": false

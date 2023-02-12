@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague } = require('../utils');
+const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague, getAdditionalOsuInfo, getBadgeImage } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -670,35 +670,14 @@ async function drawBadges(input, server) {
 	let user = input[2];
 
 	if (server === 'bancho') {
-		const badgeURLs = [];
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
-		await fetch(`https://osu.ppy.sh/users/${user.id}/osu`)
-			.then(async (res) => {
-				let htmlCode = await res.text();
-				htmlCode = htmlCode.replace(/&quot;/gm, '"');
-				const badgesRegex = /,"badges".+,"comments_count":/gm;
-				const matches = badgesRegex.exec(htmlCode);
-				if (matches && matches[0]) {
-					const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"comments_count":', '');
-					const rawBadgesArray = cleanedMatch.split('},{');
-					for (let i = 0; i < rawBadgesArray.length; i++) {
-						if (rawBadgesArray[i] !== '') {
-							const badgeArray = rawBadgesArray[i].split('","');
-							badgeURLs.push(badgeArray[2].substring(12));
-						}
-					}
-				}
-			});
+		let additionalInfo = await getAdditionalOsuInfo(user.id);
 
 		let xOffset = -2;
-		if (badgeURLs.length < 8) {
-			xOffset = xOffset + (8 - badgeURLs.length) * 44;
+		if (additionalInfo.badges.length < 8) {
+			xOffset = xOffset + (8 - additionalInfo.badges.length) * 44;
 		}
-		for (let i = 0; i < badgeURLs.length && i < 8; i++) {
-			// eslint-disable-next-line no-undef
-			process.send('osu! website');
-			const badge = await Canvas.loadImage(badgeURLs[i].replace(/\\/gm, ''));
+		for (let i = 0; i < additionalInfo.badges.length && i < 8; i++) {
+			const badge = await getBadgeImage(additionalInfo.badges[i].image_url.replace('https://assets.ppy.sh/profile-badges/', ''));
 			ctx.drawImage(badge, xOffset + (i * 88), 290, 86, 40);
 		}
 	}

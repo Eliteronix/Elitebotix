@@ -3374,6 +3374,39 @@ module.exports = {
 			return await Canvas.loadImage('./other/defaultMapCover.png');
 		}
 	},
+	async getBadgeImage(badgeName) {
+		const fs = require('fs');
+
+		//Check if the maps folder exists and create it if necessary
+		if (!fs.existsSync('./badges')) {
+			fs.mkdirSync('./badges');
+		}
+
+		//Check if the map is already downloaded and download if necessary
+		const path = `./badges/${badgeName}`;
+
+		try {
+			if (!fs.existsSync(path)) {
+				// eslint-disable-next-line no-undef
+				process.send('osu! website');
+				const res = await fetch(`https://assets.ppy.sh/profile-badges/${badgeName}`);
+				await new Promise((resolve, reject) => {
+					const fileStream = fs.createWriteStream(`./badges/${badgeName}`);
+					res.body.pipe(fileStream);
+					res.body.on('error', (err) => {
+						reject(err);
+					});
+					fileStream.on('finish', function () {
+						resolve();
+					});
+				});
+			}
+		} catch (err) {
+			console.error(err);
+		}
+
+		return await Canvas.loadImage(path);
+	},
 	async updateTwitchNames(client) {
 		logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers updateTwitchNames');
 		let twitchUsers = await DBDiscordUsers.findAll({
