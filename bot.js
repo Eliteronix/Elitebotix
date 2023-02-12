@@ -268,6 +268,46 @@ setTimeout(() => {
 	setInterval(() => checkForBirthdays(client), 300000);
 
 	setInterval(() => refreshOsuRank(client), 60000);
+
+	const { REST, Routes } = require('discord.js');
+	const fs = require('node:fs');
+
+	const commands = [];
+	// Grab all the command files from the commands directory you created earlier
+	const commandFiles = fs.readdirSync('./commands');
+
+	// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
+	for (const file of commandFiles) {
+		if (!file.endsWith('.js')) {
+			continue;
+		}
+
+		const command = require(`./commands/${file}`);
+
+		if (command.tags !== 'debug' && command.data || command.name === 'admin') {
+			commands.push(command.data.toJSON());
+		}
+	}
+
+	// eslint-disable-next-line no-undef
+	const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN);
+
+	(async () => {
+		try {
+			// eslint-disable-next-line no-console
+			console.log(`Started refreshing ${commands.length} application (/) commands.`);
+
+			const data = await rest.put(
+				Routes.applicationCommands(client.user.id),
+				{ body: commands },
+			);
+
+			// eslint-disable-next-line no-console
+			console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+		} catch (error) {
+			console.error(error);
+		}
+	})();
 }, 60000);
 
 async function executeProcessQueue(client, bancho) {

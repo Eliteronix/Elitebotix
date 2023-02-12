@@ -1,135 +1,93 @@
 const { DBOsuMultiScores, DBProcessQueue, DBDiscordUsers, DBElitiriCupSignUp, DBElitiriCupSubmissions, DBOsuForumPosts, DBDuelRatingHistory } = require('../dbObjects');
 const { logDatabaseQueries, getUserDuelStarRating, cleanUpDuplicateEntries, humanReadable } = require('../utils');
 const osu = require('node-osu');
-const { developers, currentElitiriCup } = require('../config.json');
+const { developers, currentElitiriCup, showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
+const { SlashCommandBuilder } = require('discord.js');
+const fs = require('node:fs');
 
 module.exports = {
 	name: 'admin',
 	description: 'Sends a message with the bots server',
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
-	cooldown: 5,
+	cooldown: 1,
 	tags: 'debug',
+	data: new SlashCommandBuilder()
+		.setName('admin')
+		.setDescription('Admin commands')
+		.setDMPermission(true)
+		.setDefaultMemberPermissions('0')
+		.addStringOption(option =>
+			option.setName('command')
+				.setDescription('Command to run')
+				.setRequired(true)
+				.setAutocomplete(true)
+		)
+		.addStringOption(option =>
+			option.setName('argument')
+				.setDescription('Argument for the command')
+				.setRequired(false)
+		),
+	async autocomplete(interaction) {
+		const focusedValue = interaction.options.getFocused();
+
+		const adminCommands = fs.readdirSync('./commands/admin');
+
+		let filtered = adminCommands.filter(filename => filename.includes(focusedValue));
+
+		filtered = filtered.slice(0, 25);
+
+		try {
+			await interaction.respond(
+				filtered.map(file => {
+					const command = require(`./admin/${file}`);
+
+					return { name: `${command.name} | ${command.usage}`, value: command.name };
+				}),
+			);
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+		}
+	},
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		if (!developers.includes(msg.author.id)) {
+		if (!developers.includes(interaction.user.id)) {
+			try {
+				return await interaction.reply({ content: 'Only developers may use this command.', ephemeral: true });
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				const timestamps = interaction.client.cooldowns.get(this.name);
+				timestamps.delete(interaction.user.id);
+				return;
+			}
+		}
+
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
 			return;
 		}
 
-		if (args[0] === 'guildCommands') {
-			const { REST, Routes } = require('discord.js');
-			const fs = require('fs');
+		try {
+			const command = require(`./admin/${interaction.options.getString('command')}.js`);
 
-			const commands = [];
-			// Grab all the command files from the commands directory you created earlier
-			const commandFiles = fs.readdirSync('./commands');
+			return await command.execute(interaction);
+		} catch (error) {
+			interaction.editReply('There was an error trying to execute that command!');
+			return console.error(error);
+		}
 
-			// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
-			for (const file of commandFiles) {
-				const command = require(`./${file}`);
-
-				if (args.includes(command.name)) {
-					commands.push(command.data.toJSON());
-				}
-			}
-
-			// Construct and prepare an instance of the REST module
-			// eslint-disable-next-line no-undef
-			const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN);
-
-			// and deploy your commands!
-			return (async () => {
-				try {
-					await msg.reply(`Started adding ${commands.length} application (/) commands.`);
-
-					// The put method is used to fully refresh all commands in the guild with the current set
-					await rest.put(
-						Routes.applicationGuildCommands(msg.client.user.id, msg.guildId),
-						{ body: commands },
-					);
-
-					await msg.reply(`Successfully added ${commands.length} application (/) commands.`);
-				} catch (error) {
-					// And of course, make sure you catch and log any errors!
-					console.error(error);
-				}
-			})();
-		} else if (args[0] === 'globalCommands') {
-			const { REST, Routes } = require('discord.js');
-			const fs = require('node:fs');
-
-			const commands = [];
-			// Grab all the command files from the commands directory you created earlier
-			const commandFiles = fs.readdirSync('./commands');
-
-			// Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
-			for (const file of commandFiles) {
-				const command = require(`./${file}`);
-
-				if (command.tags !== 'debug' && command.data) {
-					commands.push(command.data.toJSON());
-				}
-			}
-
-			// Construct and prepare an instance of the REST module
-			// eslint-disable-next-line no-undef
-			const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN);
-
-			// and deploy your commands!
-			return (async () => {
-				try {
-					await msg.reply(`Started refreshing ${commands.length} application (/) commands.`);
-
-					// The put method is used to fully refresh all commands in the guild with the current set
-					const data = await rest.put(
-						Routes.applicationCommands(msg.client.user.id),
-						{ body: commands },
-					);
-
-					await msg.reply(`Successfully reloaded ${data.length} application (/) commands.`);
-				} catch (error) {
-					// And of course, make sure you catch and log any errors!
-					console.error(error);
-				}
-			})();
-		} else if (args[0] === 'saveMultiMatches') {
-			logDatabaseQueries(4, 'commands/admin.js DBProcessQueue saveMultiMatches');
-			const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'saveMultiMatches' } });
-			for (let i = 0; i < processQueueTasks.length; i++) {
-				await processQueueTasks[i].destroy();
-			}
-
-			let now = new Date();
-			logDatabaseQueries(4, 'commands/admin.js DBProcessQueue saveMultiMatches create');
-			DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: `${args[1]}`, priority: 2, date: now });
-		} else if (args[0] === 'removeOsuUserConnection') {
-			logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers removeOsuUserConnection');
-			let DBDiscordUser = await DBDiscordUsers.findOne({
-				where: { osuUserId: args[1], osuVerified: true }
-			});
-
-			if (DBDiscordUser) {
-				DBDiscordUser.osuUserId = null;
-				DBDiscordUser.osuVerificationCode = null;
-				DBDiscordUser.osuVerified = false;
-				DBDiscordUser.osuName = null;
-				DBDiscordUser.osuBadges = 0;
-				DBDiscordUser.osuPP = null;
-				DBDiscordUser.osuRank = null;
-				DBDiscordUser.taikoPP = null;
-				DBDiscordUser.taikoRank = null;
-				DBDiscordUser.catchPP = null;
-				DBDiscordUser.catchRank = null;
-				DBDiscordUser.maniaPP = null;
-				DBDiscordUser.maniaRank = null;
-				DBDiscordUser.save();
-				// eslint-disable-next-line no-console
-				console.log('Removed osuUserId and verification for:', args[1]);
-			} else {
-				msg.reply('User not found');
-			}
-		} else if (args[0] === 'deleteElitiriSignup') {
+		if (args[0] === 'deleteElitiriSignup') {
 			logDatabaseQueries(4, 'commands/admin.js DBElitiriCupSignUp deleteElitiriSignup');
 			let DBElitiriSignup = await DBElitiriCupSignUp.findOne({
 				where: { id: args[1] }
@@ -354,52 +312,6 @@ module.exports = {
 			let averageRating = totalRating / totalPlayers;
 
 			return msg.reply(`The average rating for players ranked ${args[1]} to ${args[2]} is ${averageRating.toFixed(2)}`);
-		} else if (args[0] === 'restart') {
-			let guildSizes = await msg.client.shard.fetchClientValues('guilds.cache.size');
-			let startDates = await msg.client.shard.fetchClientValues('startDate');
-			let duels = await msg.client.shard.fetchClientValues('duels');
-			let other = await msg.client.shard.fetchClientValues('otherMatches');
-			let matchtracks = await msg.client.shard.fetchClientValues('matchTracks');
-			let bingoMatches = await msg.client.shard.fetchClientValues('bingoMatches');
-			let update = await msg.client.shard.fetchClientValues('update');
-
-			// eslint-disable-next-line no-console
-			console.log('duels', duels);
-			// eslint-disable-next-line no-console
-			console.log('other', other);
-			// eslint-disable-next-line no-console
-			console.log('matchtracks', matchtracks);
-
-			let output = `Options: \`all\`, \`free\`, \`shardId\`, \`update\`\n\`\`\`Cur.: ${msg.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | Update\n`;
-			for (let i = 0; i < guildSizes.length; i++) {
-				output = output + '--------|------------------|--------|-------|-------|------------|-------|--------\n';
-				let startDate = new Date(startDates[i]);
-				let startedString = `${startDate.getUTCHours().toString().padStart(2, '0')}:${startDate.getUTCMinutes().toString().padStart(2, '0')} ${startDate.getUTCDate().toString().padStart(2, '0')}.${(startDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${startDate.getUTCFullYear()}`;
-				let guildSize = guildSizes[i].toString().padStart(6, ' ');
-				let duelSize = duels[i].length.toString().padStart(5, ' ');
-				let otherSize = other[i].length.toString().padStart(5, ' ');
-				let matchtrackSize = matchtracks[i].length.toString().padStart(10, ' ');
-				let bingoMatchSize = bingoMatches[i].toString().padStart(5, ' ');
-				let updateString = update[i].toString().padStart(6, ' ');
-				output = output + `Shard ${i} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize} | ${updateString}\n`;
-			}
-			output = output + '```';
-			await msg.reply(output);
-
-			// Restart relevant ones
-			await msg.client.shard.broadcastEval(async (c, { condition }) => {
-				if (condition === 'all' ||
-					condition === 'free' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches === 0 ||
-					!isNaN(condition) && c.shardId === parseInt(condition) ||
-					condition === 'update' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches === 0) {
-
-					// eslint-disable-next-line no-undef
-					process.exit();
-				} else if (condition === 'update') {
-					c.update = 1;
-				}
-			}, { context: { condition: args[1] } });
-			return;
 		} else if (args[0] === 'resetSavedRatings') {
 			logDatabaseQueries(4, 'commands/admin.js DBDuelRatingHistory resetSavedRatings');
 			let deleted = await DBDuelRatingHistory.destroy({
@@ -425,62 +337,6 @@ module.exports = {
 			});
 
 			return await msg.reply(`Updated ${updated} discord users.`);
-		} else if (args[0] === 'removeProcessQueueTask') {
-			logDatabaseQueries(4, 'commands/admin.js DBProcessQueue removeProcessQueueTask');
-			await DBProcessQueue.destroy({
-				where: {
-					id: args[1],
-				}
-			});
-
-			return await msg.reply('Deleted the processqueue entry.');
-		} else if (args[0] === 'remainingUsers') {
-			logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers remainingUsers');
-			let count = await DBDiscordUsers.count({
-				where: {
-					osuUserId: {
-						[Op.not]: null
-					},
-					userId: null,
-					osuRank: null,
-					nextOsuPPUpdate: {
-						[Op.eq]: null
-					},
-				},
-			});
-
-			return msg.reply(`Remaining users: ${count}`);
-		} else if (args[0] === 'warmupnull') {
-			logDatabaseQueries(4, 'commands/admin.js DBOsuMultiScores warmupnull');
-			let count = await DBOsuMultiScores.count({
-				where: {
-					warmup: null,
-				},
-			});
-
-			return msg.reply(`Warmup null: ${count}`);
-		} else if (args[0] === 'tournamentBanned') {
-			logDatabaseQueries(4, 'commands/admin.js DBDiscordUsers tournamentBanned');
-			let discordUsers = await DBDiscordUsers.findAll({
-				where: {
-					tournamentBannedUntil: {
-						[Op.gte]: new Date(),
-					},
-				},
-			});
-
-			for (let i = 0; i < discordUsers.length; i++) {
-				await msg.reply(`${discordUsers[i].osuName} | <https://osu.ppy.sh/users/${discordUsers[i].osuUserId}>`);
-			}
-		} else if (args[0] === 'removeUpdateFlag') {
-			// eslint-disable-next-line no-empty-pattern
-			await msg.client.shard.broadcastEval(async (c, { }) => {
-				c.update = 0;
-			}, { context: {} });
-		} else {
-			msg.reply('Invalid command');
 		}
-
-		msg.reply('Done.');
 	},
 };
