@@ -3435,7 +3435,7 @@ module.exports = {
 		}
 
 		//Check if the map is already downloaded and download if necessary
-		const path = `./badges/${badgeName}`;
+		const path = `./badges/${badgeName.replaceAll('/', '_')}`;
 
 		try {
 			if (!fs.existsSync(path)) {
@@ -3443,7 +3443,7 @@ module.exports = {
 				process.send('osu! website');
 				const res = await fetch(`https://assets.ppy.sh/profile-badges/${badgeName}`);
 				await new Promise((resolve, reject) => {
-					const fileStream = fs.createWriteStream(`./badges/${badgeName}`);
+					const fileStream = fs.createWriteStream(`./badges/${badgeName.replaceAll('/', '_')}`);
 					res.body.pipe(fileStream);
 					res.body.on('error', (err) => {
 						reject(err);
