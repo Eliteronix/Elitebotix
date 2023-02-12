@@ -10,7 +10,8 @@
 		"node_modules",
 		"listcovers",
 		"beatmapcovers",
-		"badges"
+		"badges",
+		"slimcovers"
 	],
 	"watch_options": {
 		"followSymlinks": false

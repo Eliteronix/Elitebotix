@@ -3374,6 +3374,58 @@ module.exports = {
 			return await Canvas.loadImage('./other/defaultMapCover.png');
 		}
 	},
+	async getBeatmapSlimcover(beatmapsetId, beatmapId) {
+		const fs = require('fs');
+
+		//Check if the maps folder exists and create it if necessary
+		if (!fs.existsSync('./slimcovers')) {
+			fs.mkdirSync('./slimcovers');
+		}
+
+		//Check if the map is already downloaded and download if necessary
+		const path = `./slimcovers/${beatmapsetId}.jpg`;
+
+		//Force download if the map is recently updated in the database and therefore probably updated
+		const dbBeatmap = await getOsuBeatmapFunction({ beatmapId: beatmapId, modBits: 0 });
+
+		if (dbBeatmap.approvalStatus === 'Not found') {
+			return null;
+		}
+
+		const recent = new Date();
+		recent.setUTCMinutes(recent.getUTCMinutes() - 3);
+
+		let forceDownload = false;
+		if (recent < dbBeatmap.updatedAt) {
+			forceDownload = true;
+		}
+
+		try {
+			if (forceDownload || !fs.existsSync(path)) {
+				// eslint-disable-next-line no-undef
+				process.send('osu! website');
+				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`);
+				await new Promise((resolve, reject) => {
+					const fileStream = fs.createWriteStream(`./slimcovers/${beatmapsetId}.jpg`);
+					res.body.pipe(fileStream);
+					res.body.on('error', (err) => {
+						reject(err);
+					});
+					fileStream.on('finish', function () {
+						resolve();
+					});
+				});
+			}
+		} catch (err) {
+			console.error(err);
+		}
+
+		try {
+			return await Canvas.loadImage(path);
+		} catch (err) {
+			return await Canvas.loadImage('./other/defaultMapCover.png');
+		}
+	},
 	async getBadgeImage(badgeName) {
 		const fs = require('fs');
 

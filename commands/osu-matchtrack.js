@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap } = require('../utils');
+const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap, getBeatmapSlimcover } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
@@ -539,9 +539,7 @@ async function getResultImage(event, users) {
 	if (!event.game.beatmap) {
 		event.game.beatmap = {
 			beatmapset: {
-				covers: {
-					slimcover: 'https://assets.ppy.sh/beatmaps/0/covers/cover.jpg?1530000000',
-				},
+				id: '0',
 				title: 'Unavailable',
 				artist: 'Unavailable',
 			},
@@ -551,9 +549,7 @@ async function getResultImage(event, users) {
 	}
 
 	try {
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
-		const beatmapCover = await Canvas.loadImage(event.game.beatmap.beatmapset.covers.slimcover);
+		const beatmapCover = await getBeatmapSlimcover(event.game.beatmap.beatmapset.id, event.game.beatmap.id);
 
 		ctx.drawImage(beatmapCover, 25, 25, 950, 178);
 	} catch (e) {
@@ -840,9 +836,7 @@ async function getPlayingImage(event) {
 	if (!event.game.beatmap) {
 		event.game.beatmap = {
 			beatmapset: {
-				covers: {
-					slimcover: 'https://assets.ppy.sh/beatmaps/0/covers/cover.jpg?1530000000',
-				},
+				id: '0',
 				title: 'Unavailable',
 				artist: 'Unavailable',
 			},
@@ -852,9 +846,7 @@ async function getPlayingImage(event) {
 	}
 
 	try {
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
-		const beatmapCover = await Canvas.loadImage(event.game.beatmap.beatmapset.covers.slimcover);
+		const beatmapCover = await getBeatmapSlimcover(event.game.beatmap.beatmapset.id, event.game.beatmap.id);
 
 		ctx.drawImage(beatmapCover, 25, 25, 950, 178);
 	} catch (e) {
