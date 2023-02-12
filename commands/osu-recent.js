@@ -538,33 +538,17 @@ async function drawCover(input, mode) {
 	const mods = getMods(score.raw_mods);
 
 	if (mods.includes('HD')) {
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
-		gradeSS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS-Silver.6681366c.svg');
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
-		gradeS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-S-Silver.811ae28c.svg');
+		gradeSS = await Canvas.loadImage('./other/rank_pictures/XH_Rank.png');
+		gradeS = await Canvas.loadImage('./other/rank_pictures/SH_Rank.png');
 	} else {
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
-		gradeSS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-SS.a21de890.svg');
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
-		gradeS = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-S.3b4498a9.svg');
+		gradeSS = await Canvas.loadImage('./other/rank_pictures/X_Rank.png');
+		gradeS = await Canvas.loadImage('./other/rank_pictures/S_Rank.png');
 	}
 
-	// eslint-disable-next-line no-undef
-	process.send('osu! website');
-	const gradeA = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-A.d785e824.svg');
-	// eslint-disable-next-line no-undef
-	process.send('osu! website');
-	const gradeB = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-B.e19fc91b.svg');
-	// eslint-disable-next-line no-undef
-	process.send('osu! website');
-	const gradeC = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-C.6bb75adc.svg');
-	// eslint-disable-next-line no-undef
-	process.send('osu! website');
-	const gradeD = await Canvas.loadImage('https://osu.ppy.sh/assets/images/GradeSmall-D.6b170c4c.svg');
+	const gradeA = await Canvas.loadImage('./other/rank_pictures/A_Rank.png');
+	const gradeB = await Canvas.loadImage('./other/rank_pictures/B_Rank.png');
+	const gradeC = await Canvas.loadImage('./other/rank_pictures/C_Rank.png');
+	const gradeD = await Canvas.loadImage('./other/rank_pictures/D_Rank.png');
 
 	ctx.globalAlpha = 0.2;
 
