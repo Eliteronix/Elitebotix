@@ -2,7 +2,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getBeatmapApprovalStatusImage, logDatabaseQueries, getGameModeName, getOsuPP } = require('../utils');
+const { humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getBeatmapApprovalStatusImage, logDatabaseQueries, getGameModeName, getOsuPP, getBeatmapCover } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -518,18 +518,11 @@ async function drawCover(input, mode) {
 	let background;
 
 	ctx.globalAlpha = 0.6;
+
 	//Draw a shape onto the main canvas in the top left
-	try {
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
-		background = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapsetId}/covers/cover.jpg`);
-		ctx.drawImage(background, 0, canvas.height / 6.25, canvas.width, background.height / background.width * canvas.width);
-	} catch (error) {
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
-		background = await Canvas.loadImage('https://osu.ppy.sh/assets/images/default-bg.7594e945.png');
-		ctx.drawImage(background, 0, canvas.height / 6.25, canvas.width, background.height / background.width * canvas.width);
-	}
+	background = await getBeatmapCover(beatmap.beatmapsetId, beatmap.beatmapId);
+	ctx.drawImage(background, 0, canvas.height / 6.25, canvas.width, background.height / background.width * canvas.width);
+
 	ctx.globalAlpha = 1;
 
 	let gradeSS;
@@ -966,9 +959,7 @@ async function drawUserInfo(input, server) {
 		ctx.restore();
 	}
 
-	// eslint-disable-next-line no-undef
-	process.send('osu! website');
-	const userBackground = await Canvas.loadImage('https://osu.ppy.sh/images/headers/profile-covers/c3.jpg');
+	const userBackground = await Canvas.loadImage('./other/defaultBanner.jpg');
 
 	roundedImage(ctx, userBackground, canvas.width / 900 * 50, canvas.height / 500 * 375, userBackground.width / 10 * 2, userBackground.height / 10 * 2, 5);
 

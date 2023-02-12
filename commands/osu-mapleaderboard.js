@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits, logDatabaseQueries } = require('../utils');
+const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits, logDatabaseQueries, getBeatmapCover } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -367,17 +367,10 @@ module.exports = {
 			ctx.save();
 			ctx.clip();
 			ctx.globalCompositeOperation = 'source-over';
-			try {
-				// eslint-disable-next-line no-undef
-				process.send('osu! website');
-				beatmapImage = await Canvas.loadImage(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapsetId}/covers/cover.jpg`);
-				ctx.drawImage(beatmapImage, 0, canvas.height / 6.25, canvas.width, beatmapImage.height / beatmapImage.width * canvas.width);
-			} catch (error) {
-				// eslint-disable-next-line no-undef
-				process.send('osu! website');
-				beatmapImage = await Canvas.loadImage('https://osu.ppy.sh/assets/images/default-bg.7594e945.png');
-				ctx.drawImage(beatmapImage, 0, canvas.height / 6.25, canvas.width, beatmapImage.height / beatmapImage.width * canvas.width);
-			}
+
+			beatmapImage = await getBeatmapCover(beatmap.beatmapsetId, beatmap.beatmapId);
+			ctx.drawImage(beatmapImage, 0, canvas.height / 6.25, canvas.width, beatmapImage.height / beatmapImage.width * canvas.width);
+
 			ctx.drawImage(beatmapImage, 0, 0);
 			ctx.restore();
 			roundedRect(ctx, 20, 20, 860, 120, 500 / 70, '0', '0', '0', 0.65);
