@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { getOsuBadgeNumberById, logDatabaseQueries, getUserDuelStarRating, getDerankStats, getOsuTournamentBansById } = require('../utils.js');
+const { logDatabaseQueries, getUserDuelStarRating, getDerankStats, getAdditionalOsuInfo } = require('../utils.js');
 const osu = require('node-osu');
 const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.json');
 
@@ -147,17 +147,13 @@ module.exports = {
 				discordUser.maniaTotalScore = maniaUser.scores.total;
 			}
 
-			let badges = await getOsuBadgeNumberById(discordUser.osuUserId);
+			let additionalInfo = await getAdditionalOsuInfo(discordUser.osuUserId);
 
-			if (parseInt(badges) > -1) {
-				discordUser.osuBadges = badges;
-			}
+			discordUser.osuBadges = additionalInfo.tournamentBadges.length;
 
-			let tournamentBan = await getOsuTournamentBansById(discordUser.osuUserId);
-
-			if (tournamentBan) {
-				discordUser.tournamentBannedReason = tournamentBan.description;
-				discordUser.tournamentBannedUntil = tournamentBan.tournamentBannedUntil;
+			if (additionalInfo.tournamentBan) {
+				discordUser.tournamentBannedReason = additionalInfo.tournamentBan.description;
+				discordUser.tournamentBannedUntil = additionalInfo.tournamentBan.tournamentBannedUntil;
 			}
 
 			await discordUser.save();

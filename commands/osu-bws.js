@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { humanReadable, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getOsuBadgeNumberById, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { humanReadable, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getAdditionalOsuInfo } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -187,7 +187,9 @@ async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 		.then(async (user) => {
 			updateOsuDetailsforUser(user, mode);
 
-			let badgeAmount = await getOsuBadgeNumberById(user.id);
+			let additionalInfo = await getAdditionalOsuInfo(user.id);
+
+			let badgeAmount = additionalInfo.tournamentBadges.length;
 
 			logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers 2');
 			const discordUser = await DBDiscordUsers.findOne({

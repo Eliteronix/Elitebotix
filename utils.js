@@ -306,13 +306,13 @@ module.exports = {
 						discordUser.maniaTotalScore = user.scores.total;
 					}
 
-					discordUser.badges = await getOsuBadgeNumberByIdFunction(discordUser.osuUserId);
+					let additionalInfo = await getAdditionalOsuInfoFunction(discordUser.osuUserId);
 
-					let tournamentBan = await getOsuTournamentBansByIdFunction(discordUser.osuUserId);
+					discordUser.badges = additionalInfo.badgeNumber;
 
-					if (tournamentBan) {
-						discordUser.tournamentBannedReason = tournamentBan.description;
-						discordUser.tournamentBannedUntil = tournamentBan.tournamentBannedUntil;
+					if (additionalInfo.tournamentBan) {
+						discordUser.tournamentBannedReason = additionalInfo.tournamentBan.description;
+						discordUser.tournamentBannedUntil = additionalInfo.tournamentBan.tournamentBannedUntil;
 					}
 
 					discordUser.save();
@@ -751,8 +751,8 @@ module.exports = {
 		//Create as an attachment and return
 		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: filename });
 	},
-	async getOsuBadgeNumberById(osuUserId) {
-		return await getOsuBadgeNumberByIdFunction(osuUserId);
+	async getAdditionalOsuInfo(osuUserId) {
+		return await getAdditionalOsuInfoFunction(osuUserId);
 	},
 	async restartProcessQueueTask() {
 		logDatabaseQueriesFunction(5, 'utils.js DBProcessQueue restartProcessQueueTask');
@@ -3370,9 +3370,6 @@ module.exports = {
 			}
 		}
 	},
-	async getOsuTournamentBansById(osuUserId) {
-		return await getOsuTournamentBansByIdFunction(osuUserId);
-	}
 };
 
 async function getUserDuelStarRatingFunction(input) {
@@ -4467,58 +4464,25 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, dep
 	}
 }
 
-async function getOsuBadgeNumberByIdFunction(osuUserId) {
-	// eslint-disable-next-line no-undef
-	process.send('osu! website');
-	return await fetch(`https://osu.ppy.sh/users/${osuUserId}/osu`)
-		.then(async (res) => {
-			let htmlCode = await res.text();
-			htmlCode = htmlCode.replace(/&quot;/gm, '"');
-			// console.log(htmlCode);
-			const badgesRegex = /,"badges".+,"comments_count":/gm;
-			const matches = badgesRegex.exec(htmlCode);
-			if (matches && matches[0]) {
-				const cleanedMatch = matches[0].replace(',"badges":[', '').replace('],"comments_count":', '');
-				const rawBadgesArray = cleanedMatch.split('},{');
-				const badgeNameArray = [];
-				for (let i = 0; i < rawBadgesArray.length; i++) {
-					if (rawBadgesArray[i] !== '') {
-						const badgeArray = rawBadgesArray[i].split('","');
-						const badgeName = badgeArray[1].replace('description":"', '');
-						if (!badgeName.startsWith('Beatmap Spotlights: ')
-							&& !badgeName.includes(' contribution to the ')
-							&& !badgeName.includes(' contributor')
-							&& !badgeName.includes('Mapper\'s Favourite ')
-							&& !badgeName.includes('Community Favourite ')
-							&& !badgeName.includes('Mapping')
-							&& !badgeName.includes('Aspire')
-							&& !badgeName.includes('Beatmapping')
-							&& !badgeName.includes('osu!idol')
-							&& badgeName !== 'The official voice behind osu!'
-							&& !badgeName.includes('Newspaper ')
-							&& !badgeName.includes('Pending Cup ')) {
-							badgeNameArray.push(badgeName);
-						}
-					}
-				}
-				return badgeNameArray.length;
-			}
-			return -1;
-		});
-}
-
-async function getOsuTournamentBansByIdFunction(osuUserId) {
+async function getAdditionalOsuInfoFunction(osuUserId) {
 	// eslint-disable-next-line no-undef
 	process.send('osu! website');
 	return await fetch(`https://osu.ppy.sh/users/${osuUserId}/`)
 		.then(async (res) => {
 			let htmlCode = await res.text();
 			htmlCode = htmlCode.replace(/&quot;/gm, '"');
+
+			const additionalInfo = {
+				tournamentBan: false,
+				badges: [],
+				tournamentBadges: [],
+			};
+
 			// console.log(htmlCode);
 			const accountHistoryRegex = /,"account_history".+,"active_tournament_banner":/gm;
-			const matches = accountHistoryRegex.exec(htmlCode);
-			if (matches && matches[0]) {
-				const cleanedMatch = matches[0].replace(',"account_history":', '').replace(',"active_tournament_banner":', '');
+			const tournamentBanMatches = accountHistoryRegex.exec(htmlCode);
+			if (tournamentBanMatches && tournamentBanMatches[0]) {
+				const cleanedMatch = tournamentBanMatches[0].replace(',"account_history":', '').replace(',"active_tournament_banner":', '');
 				const rawAccountHistoryNotices = JSON.parse(cleanedMatch);
 				const tournamentBans = rawAccountHistoryNotices.filter((notice) => notice.type === 'tournament_ban');
 
@@ -4531,10 +4495,39 @@ async function getOsuTournamentBansByIdFunction(osuUserId) {
 						tournamentBans[0].tournamentBannedUntil.setUTCSeconds(tournamentBans[0].tournamentBannedUntil.getUTCSeconds() + tournamentBans[0].length);
 					}
 
-					return tournamentBans[0];
+					additionalInfo.tournamentBan = tournamentBans[0];
 				}
 			}
-			return false;
+
+			const badgesRegex = /,"badges".+,"comments_count":/gm;
+			const badgeMatches = badgesRegex.exec(htmlCode);
+			if (badgeMatches && badgeMatches[0]) {
+				const cleanedMatch = badgeMatches[0].replace(',"badges":', '').replace(',"comments_count":', '');
+
+				additionalInfo.badges = JSON.parse(cleanedMatch);
+
+				for (let i = 0; i < additionalInfo.badges.length; i++) {
+					additionalInfo.badges[i].description = additionalInfo.badges[i].description.replace('&#039;', '\'');
+
+					const badge = additionalInfo.badges[i];
+					if (!badge.description.startsWith('Beatmap Spotlights: ')
+						&& !badge.description.includes(' contribution to the ')
+						&& !badge.description.includes(' contributor')
+						&& !badge.description.includes('Mapper\'s Favourite ')
+						&& !badge.description.includes('Community Favourite ')
+						&& !badge.description.includes('Mapping')
+						&& !badge.description.includes('Aspire')
+						&& !badge.description.includes('Beatmapping')
+						&& !badge.description.includes('osu!idol')
+						&& badge.description !== 'The official voice behind osu!'
+						&& !badge.description.includes('Newspaper ')
+						&& !badge.description.includes('Pending Cup ')) {
+						additionalInfo.tournamentBadges.push(badge);
+					}
+				}
+			}
+
+			return additionalInfo;
 		});
 }
 

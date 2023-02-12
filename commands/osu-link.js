@@ -1,6 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-const { getOsuBadgeNumberById, getIDFromPotentialOsuLink, logDatabaseQueries } = require('../utils');
+const { getIDFromPotentialOsuLink, logDatabaseQueries, getAdditionalOsuInfo } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -225,7 +225,10 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 					discordUser.osuName = osuUser.name;
 					discordUser.osuPP = osuUser.pp.raw;
 					discordUser.osuRank = osuUser.pp.rank;
-					discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
+
+					let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+					discordUser.badges = additionalInfo.tournamentBadges.length;
+
 					discordUser.save();
 
 					try {
@@ -246,7 +249,7 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 						verificationCode = Math.random().toString(36).substring(8);
 					}
 
-					let badges = await getOsuBadgeNumberById(osuUser.id);
+					let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
 
 					logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers 4');
 					let existingDiscordUser = await DBDiscordUsers.findOne({
@@ -258,13 +261,13 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 						existingDiscordUser.userId = interaction.user.id;
 						existingDiscordUser.osuVerificationCode = verificationCode;
 						existingDiscordUser.osuName = osuUser.name;
-						existingDiscordUser.osuBadges = badges;
+						existingDiscordUser.osuBadges = additionalInfo.tournamentBadges.length;
 						existingDiscordUser.osuPP = osuUser.pp.raw;
 						existingDiscordUser.osuRank = osuUser.pp.rank;
 						existingDiscordUser.save();
 					} else {
 						logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers create');
-						DBDiscordUsers.create({ userId: interaction.user.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuName: osuUser.name, osuBadges: badges, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
+						DBDiscordUsers.create({ userId: interaction.user.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuName: osuUser.name, osuBadges: additionalInfo.tournamentBadges.length, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
 					}
 
 					try {
@@ -306,7 +309,10 @@ async function current(osuApi, interaction, additionalObjects, discordUser) {
 				discordUser.osuName = osuUser.name;
 				discordUser.osuPP = osuUser.pp.raw;
 				discordUser.osuRank = osuUser.pp.rank;
-				discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
+
+				let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+				discordUser.badges = additionalInfo.tournamentBadges.length;
+
 				discordUser.save();
 
 				return interaction.editReply(`Currently linked osu! account: \`${osuUser.name}\`.\nVerified: \`${verified}\``);
@@ -357,7 +363,10 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 						discordUser.osuName = osuUser.name;
 						discordUser.osuPP = osuUser.pp.raw;
 						discordUser.osuRank = osuUser.pp.rank;
-						discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
+
+						let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+						discordUser.badges = additionalInfo.tournamentBadges.length;
+
 						discordUser.save();
 						return interaction.editReply(`Your osu! account \`${osuUser.name}\` is already verified\nIf you need to connect a different account use </osu-link disconnect:1064502370710605836> first.`);
 					})
@@ -384,7 +393,10 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 							discordUser.osuName = osuUser.name;
 							discordUser.osuPP = osuUser.pp.raw;
 							discordUser.osuRank = osuUser.pp.rank;
-							discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
+
+							let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+							discordUser.badges = additionalInfo.tournamentBadges.length;
+
 							discordUser.save();
 
 							try {
@@ -424,7 +436,10 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 						discordUser.osuName = osuUser.name;
 						discordUser.osuPP = osuUser.pp.raw;
 						discordUser.osuRank = osuUser.pp.rank;
-						discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
+
+						let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+						discordUser.badges = additionalInfo.tournamentBadges.length;
+
 						discordUser.save();
 						return interaction.editReply(`Your connection to the osu! account \`${osuUser.name}\` is now verified.`);
 					})
@@ -443,7 +458,10 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 						discordUser.osuName = osuUser.name;
 						discordUser.osuPP = osuUser.pp.raw;
 						discordUser.osuRank = osuUser.pp.rank;
-						discordUser.badges = await getOsuBadgeNumberById(discordUser.osuUserId);
+
+						let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+						discordUser.badges = additionalInfo.tournamentBadges.length;
+
 						discordUser.save();
 						return interaction.editReply(`The sent code \`${args[1].replace(/`/g, '')}\` is not the same code which was sent to \`${osuUser.name}\`.\nUse </osu-link verify:1064502370710605836> to resend the code.`);
 					})
