@@ -441,13 +441,13 @@ module.exports = {
 								}
 							});
 
-						await pause(20000);
+						await pause(30000);
 					} catch (e) {
 						if (!e.message.endsWith('reason: Client network socket disconnected before secure TLS connection was established')
 							&& !e.message.endsWith('reason: read ECONNRESET')) {
 							console.error(e);
 						}
-						await pause(60000);
+						await pause(180000);
 					}
 				}
 			})
