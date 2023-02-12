@@ -159,7 +159,7 @@ module.exports = {
 						console.error(error, `going same saveMultiMatches.js https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
 						//Go same if error
 						let date = new Date();
-						date.setUTCMinutes(date.getUTCMinutes() + 1);
+						date.setUTCMinutes(date.getUTCMinutes() + 5);
 						processQueueEntry.date = date;
 						processQueueEntry.beingExecuted = false;
 						return await processQueueEntry.save();
@@ -457,171 +457,298 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					}
 				});
 			} else {
-				// let date = new Date();
-				// date.setUTCDate(date.getUTCDate() - 14);
+				let date = new Date();
+				date.setUTCDate(date.getUTCDate() - 14);
 
-				// logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores find match to verify');
-				// let matchToVerify = await DBOsuMultiScores.findOne({
-				// 	where: {
-				// 		verifiedBy: null,
-				// 		matchEndDate: {
-				// 			[Op.lte]: date,
-				// 		},
-				// 	},
-				// });
+				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores find match to verify');
+				let matchToVerify = await DBOsuMultiScores.findOne({
+					where: {
+						verifiedBy: null,
+						matchEndDate: {
+							[Op.lte]: date,
+						},
+					},
+				});
 
-				// if (matchToVerify) {
-				// // eslint-disable-next-line no-undef
-				// process.send('osu! API');
-				// 	await osuApi.getMatch({ mp: incompleteMatch.matchId })
-				// 		.then(async (match) => {
-				// 			try {
-				// // eslint-disable-next-line no-undef
-				// process.send('osu! website');
-				// 				await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
-				// 					.then(async (res) => {
-				// 						let htmlCode = await res.text();
-				// 						htmlCode = htmlCode.replace(/&quot;/gm, '"');
-				// 						const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
-				// 						const matchesPaused = matchPausedRegex.exec(htmlCode);
+				if (matchToVerify) {
+					// eslint-disable-next-line no-undef
+					process.send('osu! API');
+					await osuApi.getMatch({ mp: matchToVerify.matchId })
+						.then(async (match) => {
+							try {
+								// eslint-disable-next-line no-undef
+								process.send('osu! website');
+								await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
+									.then(async (res) => {
+										let htmlCode = await res.text();
+										htmlCode = htmlCode.replace(/&quot;/gm, '"');
+										const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
+										const matchesPaused = matchPausedRegex.exec(htmlCode);
 
-				// 						let regexMatch = null;
+										let regexMatch = null;
 
-				// 						if (matchesPaused && matchesPaused[0]) {
-				// 							regexMatch = matchesPaused[0];
-				// 						}
+										if (matchesPaused && matchesPaused[0]) {
+											regexMatch = matchesPaused[0];
+										}
 
-				// 						if (regexMatch) {
-				// 							let json = JSON.parse(regexMatch);
+										if (regexMatch) {
+											let json = JSON.parse(regexMatch);
 
-				// 							while (json.first_event_id !== json.events[0].id) {
-				// // eslint-disable-next-line no-undef
-				// process.send('osu! website');
-				// 								let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
-				// 									.then(async (res) => {
-				// 										let htmlCode = await res.text();
-				// 										htmlCode = htmlCode.replace(/&quot;/gm, '"');
-				// 										const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
-				// 										const matchesPaused = matchPausedRegex.exec(htmlCode);
+											while (json.first_event_id !== json.events[0].id) {
+												// eslint-disable-next-line no-undef
+												process.send('osu! website');
+												let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
+													.then(async (res) => {
+														let htmlCode = await res.text();
+														htmlCode = htmlCode.replace(/&quot;/gm, '"');
+														const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
+														const matchesPaused = matchPausedRegex.exec(htmlCode);
 
-				// 										if (matchesPaused && matchesPaused[0]) {
-				// 											regexMatch = matchesPaused[0];
-				// 										}
+														if (matchesPaused && matchesPaused[0]) {
+															regexMatch = matchesPaused[0];
+														}
 
-				// 										let json = JSON.parse(regexMatch);
+														let json = JSON.parse(regexMatch);
 
-				// 										return json.events;
-				// 									});
+														return json.events;
+													});
 
-				// 								json.events = earlierEvents.concat(json.events);
-				// 							}
+												json.events = earlierEvents.concat(json.events);
+											}
 
-				// 							if (json.events[0].detail.type === 'match-created') {
-				// 								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Find a score by the match creator');
-				// 								let score = await DBOsuMultiScores.findOne({
-				// 									where: {
-				// 										matchId: match.id,
-				// 										userId: json.events[0].user_id,
-				// 									},
-				// 								});
+											if (json.events[0].detail.type === 'match-created') {
+												logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Find a score by the match creator');
+												let score = await DBOsuMultiScores.findOne({
+													where: {
+														matchId: match.id,
+														osuUserId: json.events[0].user_id,
+													},
+												});
 
-				// 								if (score) {
-				// 									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Match creator played a round - Not determined if valid');
-				// 									await DBOsuMultiScores.update({
-				// 										verifiedBy: 31050083, // Elitebotix
-				// 										verificationComment: 'Match creator played a round - Not determined if valid',
-				// 									}, {
-				// 										where: {
-				// 											matchId: match.id,
-				// 										},
-				// 									});
-				// 								} else {
-				// 									console.log(matchToVerify);
-				// 									// logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update maidbot match');
-				// 									// await DBOsuMultiScores.update({
-				// 									// 	tourneyMatch: true,
-				// 									// 	verifiedAt: new Date(),
-				// 									// 	verifiedBy: 31050083, // Elitebotix
-				// 									// 	verificationComment: 'Match created by MaidBot',
-				// 									// }, {
-				// 									// 	where: {
-				// 									// 		matchId: match.id,
-				// 									// 	},
-				// 									// });
+												if (score) {
+													logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Match creator played a round - Not determined if valid');
+													await DBOsuMultiScores.update({
+														verifiedBy: 31050083, // Elitebotix
+														verificationComment: 'Match creator played a round - Not determined if valid',
+													}, {
+														where: {
+															matchId: match.id,
+														},
+													});
+												} else {
+													let matchToVerify = await DBOsuMultiScores.findAll({
+														where: {
+															matchId: match.id,
+														},
+													});
 
-				// 									// let guildId = '727407178499096597';
-				// 									// let channelId = '1068905937219362826';
+													let mapsPlayed = [];
+													let players = [];
 
-				// 									// // eslint-disable-next-line no-undef
-				// 									// if (process.env.SERVER === 'Dev') {
-				// 									// 	guildId = '800641468321759242';
-				// 									// 	channelId = '1070013925334204516';
-				// 									// }
+													for (let i = 0; i < matchToVerify.length; i++) {
+														let score = matchToVerify[i];
 
-				// 									// client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-				// 									// 	let guild = await c.guilds.cache.get(guildId);
+														let map = mapsPlayed.find((map) => map.beatmapId === score.beatmapId);
 
-				// 									// 	if (!guild) {
-				// 									// 		return;
-				// 									// 	}
+														if (!map) {
+															mapsPlayed.push({ beatmapId: score.beatmapId, amount: 0 });
+														}
 
-				// 									// 	let channel = await guild.channels.cache.get(channelId);
+														if (!players.includes(score.osuUserId)) {
+															players.push(score.osuUserId);
+														}
+													}
 
-				// 									// 	if (!channel) {
-				// 									// 		return;
-				// 									// 	}
+													let acronym = matchToVerify[0].matchName.replace(/:.*/gm, '');
 
-				// 									// 	await channel.send(message);
-				// 									// }, {
-				// 									// 	context: {
-				// 									// 		guildId: guildId,
-				// 									// 		channelId: channelId,
-				// 									// 		message: `\`\`\`diff\n+ Valid: True\nComment: Match created by MaidBot\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
-				// 									// 	}
-				// 									// });
-				// 								}
-				// 							} else {
-				// 								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update not determinable maidbot match');
-				// 								await DBOsuMultiScores.update({
-				// 									verifiedBy: 31050083, // Elitebotix
-				// 									verificationComment: 'Not determinable if match was created by MaidBot',
-				// 								}, {
-				// 									where: {
-				// 										matchId: match.id,
-				// 									},
-				// 								});
-				// 							}
-				// 						}
-				// 					});
-				// 			} catch (e) {
-				// 				if (!e.message.endsWith('reason: Client network socket disconnected before secure TLS connection was established')
-				// 					&& !e.message.endsWith('reason: read ECONNRESET')) {
-				// 					console.error(e);
-				// 				}
-				// 				// Go same if error
-				// 				secondsToWait = secondsToWait + 60;
-				// 			}
-				// 		})
-				// 		.catch(async (err) => {
-				// 			if (err.message === 'Not found') {
-				// 				//If its not found anymore it should be fake because it must be created in a different way
-				// 				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update fake maidbot match');
-				// 				await DBOsuMultiScores.update({
-				// 					verifiedBy: 31050083, // Elitebotix
-				// 					verificationComment: 'match not found - can\'t be determined if fake or not',
-				// 				}, {
-				// 					where: {
-				// 						matchId: incompleteMatch.matchId,
-				// 					},
-				// 				});
-				// 			} else {
-				// 				// Go same if error
-				// 				secondsToWait = secondsToWait + 60;
-				// 			}
-				// 		});
-				// } else {
-				secondsToWait = secondsToWait + 60;
-				// }
+													let weeksBeforeMatch = new Date(matchToVerify[0].matchStartDate);
+													weeksBeforeMatch.setDate(weeksBeforeMatch.getDate() - 49);
+
+													let weeksAfterMatch = new Date(matchToVerify[0].matchStartDate);
+													weeksAfterMatch.setDate(weeksAfterMatch.getDate() + 21);
+
+													logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Match creator did not play a round');
+													let relatedScores = await DBOsuMultiScores.findAll({
+														where: {
+															[Op.or]: [
+																{
+																	beatmapId: {
+																		[Op.in]: mapsPlayed.map((map) => map.beatmapId),
+																	},
+																},
+																{
+																	osuUserId: {
+																		[Op.in]: players,
+																	},
+																},
+															],
+															matchStartDate: {
+																[Op.between]: [weeksBeforeMatch, weeksAfterMatch],
+															},
+															matchName: {
+																[Op.like]: `${acronym}:%`,
+															},
+														},
+													});
+
+													console.log('relatedScores', relatedScores);
+
+													let playersInTheOriginalLobby = [...new Set(matchToVerify.map((score) => score.osuUserId))];
+
+													console.log('playersInTheOriginalLobby', playersInTheOriginalLobby);
+
+													let otherPlayersOutsideOfTheLobbyThatPlayedTheSameMaps = [];
+													let otherMatchesWithTheSamePlayers = [];
+
+													for (let i = 0; i < relatedScores.length; i++) {
+														let score = relatedScores[i];
+
+														if (score.matchId === match.id) {
+															continue;
+														}
+
+														let map = mapsPlayed.find((map) => map.beatmapId === score.beatmapId);
+
+														if (map) {
+															if (!otherPlayersOutsideOfTheLobbyThatPlayedTheSameMaps.includes(score.osuUserId)) {
+																otherPlayersOutsideOfTheLobbyThatPlayedTheSameMaps.push(score.osuUserId);
+															}
+
+															map.amount++;
+														}
+
+														if (players.includes(score.osuUserId)) {
+															let otherMatch = otherMatchesWithTheSamePlayers.find((match) => match.matchId === score.matchId);
+
+															if (!otherMatch) {
+																otherMatchesWithTheSamePlayers.push({ matchId: score.matchId, matchName: score.matchName });
+															}
+														}
+
+
+													}
+
+													console.log('otherPlayersOutsideOfTheLobbyThatPlayedTheSameMaps', otherPlayersOutsideOfTheLobbyThatPlayedTheSameMaps);
+
+													let playersThatAreOnlyInOtherMatches = otherPlayersOutsideOfTheLobbyThatPlayedTheSameMaps.filter((player) => !playersInTheOriginalLobby.includes(player));
+
+													console.log('playersThatAreOnlyInOtherMatches', playersThatAreOnlyInOtherMatches);
+
+													console.log('otherMatchesWithTheSamePlayers', otherMatchesWithTheSamePlayers);
+
+													console.log('mapsPlayed', mapsPlayed);
+
+													if (matchToVerify[0].matchName.includes('(Qualifiers)') || matchToVerify[0].matchName.includes('(Quals)')) {
+														if (mapsPlayed.every((map) => map.amount >= 20)) {
+															logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Qualifiers all maps played more than 20 times');
+															await DBOsuMultiScores.update({
+																tourneyMatch: true,
+																verifiedAt: new Date(),
+																verifiedBy: 31050083, // Elitebotix
+																verificationComment: 'Match reffed by someone else - Qualifiers - All maps played more than 20 times outside of the lobby',
+															}, {
+																where: {
+																	matchId: match.id,
+																},
+															});
+
+															let guildId = '727407178499096597';
+															let channelId = '1068905937219362826';
+
+															// eslint-disable-next-line no-undef
+															if (process.env.SERVER === 'Dev') {
+																guildId = '800641468321759242';
+																channelId = '1070013925334204516';
+															}
+
+															client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
+																let guild = await c.guilds.cache.get(guildId);
+
+																if (!guild) {
+																	return;
+																}
+
+																let channel = await guild.channels.cache.get(channelId);
+
+																if (!channel) {
+																	return;
+																}
+
+																await channel.send(message);
+															}, {
+																context: {
+																	guildId: guildId,
+																	channelId: channelId,
+																	message: `\`\`\`diff\n+ Valid: True\nComment: Match reffed by someone else - Qualifiers - All maps played more than 20 times outside of the lobby\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
+																}
+															});
+														} else {
+															logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Qualifiers not all maps played more than 20 times');
+															await DBOsuMultiScores.update({
+																verifiedBy: 31050083, // Elitebotix
+																verificationComment: 'Match reffed by someone else - Qualifiers - Not all maps played more than 20 times outside of the lobby',
+															}, {
+																where: {
+																	matchId: match.id,
+																},
+															});
+														}
+													} else if (otherMatchesWithTheSamePlayers.length) {
+														console.log(match.id, matchToVerify[0].matchName);
+													} else {
+														logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores verification status not determinable');
+														await DBOsuMultiScores.update({
+															verifiedBy: 31050083, // Elitebotix
+															verificationComment: 'Match reffed by someone else - Verification status not determinable',
+														}, {
+															where: {
+																matchId: match.id,
+															},
+														});
+													}
+												}
+											} else {
+												logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update not determinable maidbot match');
+												await DBOsuMultiScores.update({
+													verifiedBy: 31050083, // Elitebotix
+													verificationComment: 'Not determinable if match was created by MaidBot',
+												}, {
+													where: {
+														matchId: match.id,
+													},
+												});
+											}
+										}
+									});
+							} catch (e) {
+								if (!e.message.endsWith('reason: Client network socket disconnected before secure TLS connection was established')
+									&& !e.message.endsWith('reason: read ECONNRESET')) {
+									console.error(e);
+								}
+								// Go same if error
+								secondsToWait = secondsToWait + 60;
+							}
+						})
+						.catch(async (err) => {
+							if (err.message === 'Not found') {
+								//If its not found anymore it should be fake because it must be created in a different way
+								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update fake maidbot match');
+								await DBOsuMultiScores.update({
+									verifiedBy: 31050083, // Elitebotix
+									verificationComment: 'match not found - can\'t be determined if fake or not',
+								}, {
+									where: {
+										matchId: matchToVerify.matchId,
+									},
+								});
+							} else {
+								// Go same if error
+								secondsToWait = secondsToWait + 60;
+							}
+						});
+				} else {
+					secondsToWait = secondsToWait + 60;
+				}
 			}
 		}
 	}
