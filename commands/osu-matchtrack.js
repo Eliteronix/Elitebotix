@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap, getBeatmapSlimcover } = require('../utils');
+const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap, getBeatmapSlimcover, getAvatar } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
@@ -597,9 +597,7 @@ async function getResultImage(event, users) {
 		ctx.clip();
 
 		try {
-			// eslint-disable-next-line no-undef
-			process.send('osu! website');
-			const avatar = await Canvas.loadImage(user.avatar_url);
+			const avatar = await getAvatar(user.id);
 
 			ctx.drawImage(avatar, 35, 305 + i * 75, 55, 55);
 		} catch (e) {

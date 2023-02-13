@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage } = require('../utils');
+const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage, getAvatar } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
@@ -1250,17 +1250,8 @@ module.exports = {
 				ctx.clip();
 
 				//Draw a shape onto the main canvas
-				try {
-					// eslint-disable-next-line no-undef
-					process.send('osu! website');
-					const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.id}`);
-					ctx.drawImage(avatar, 110, 90, 160, 160);
-				} catch (error) {
-					// eslint-disable-next-line no-undef
-					process.send('osu! website');
-					const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-					ctx.drawImage(avatar, 110, 90, 160, 160);
-				}
+				const avatar = await getAvatar(osuUser.id);
+				ctx.drawImage(avatar, 110, 90, 160, 160);
 
 				//Create as an attachment
 				const leagueRatings = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-league-ratings-${osuUser.id}.png` });

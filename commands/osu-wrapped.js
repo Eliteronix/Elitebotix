@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
-const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague } = require('../utils');
+const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getAvatar } = require('../utils');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 
@@ -567,17 +567,8 @@ module.exports = {
 		ctx.clip();
 
 		//Draw a shape onto the main canvas in the middle 
-		try {
-			// eslint-disable-next-line no-undef
-			process.send('osu! website');
-			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${osuUser.osuUserId}`);
-			ctx.drawImage(avatar, 475 - canvas.height / 4, canvas.height / 4, canvas.height / 2, canvas.height / 2);
-		} catch (error) {
-			// eslint-disable-next-line no-undef
-			process.send('osu! website');
-			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-			ctx.drawImage(avatar, 475 - canvas.height / 4, canvas.height / 4, canvas.height / 2, canvas.height / 2);
-		}
+		const avatar = await getAvatar(osuUser.osuUserId);
+		ctx.drawImage(avatar, 475 - canvas.height / 4, canvas.height / 4, canvas.height / 2, canvas.height / 2);
 
 		//Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-wrapped-${osuUser.osuUserId}-${year}.png` })];

@@ -11,7 +11,8 @@
 		"listcovers",
 		"beatmapcovers",
 		"badges",
-		"slimcovers"
+		"slimcovers",
+		"avatars"
 	],
 	"watch_options": {
 		"followSymlinks": false

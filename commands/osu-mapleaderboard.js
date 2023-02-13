@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits, logDatabaseQueries, getBeatmapCover } = require('../utils');
+const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits, logDatabaseQueries, getBeatmapCover, getAvatar } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -423,16 +423,7 @@ module.exports = {
 			let topScore = mapScores[0];
 			roundedRect(ctx, 50, 165, 800, 80, 500 / 70, '70', '57', '63', 0.75);
 
-			let topScoreUserImage;
-			try {
-				// eslint-disable-next-line no-undef
-				process.send('osu! website');
-				topScoreUserImage = await Canvas.loadImage(`https://s.ppy.sh/a/${topScore.user.id}`);
-			} catch (error) {
-				// eslint-disable-next-line no-undef
-				process.send('osu! website');
-				topScoreUserImage = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-			}
+			let topScoreUserImage = await getAvatar(topScore.user.id);
 
 			roundedRect(ctx, 100, 175, 60.39, 60.39, 500 / 70, '0', '0', '0', 0.75);
 			ctx.save();
@@ -555,16 +546,7 @@ module.exports = {
 				let topScore = userScore.score;
 				roundedRect(ctx, 50, 255, 800, 80, 500 / 70, '70', '57', '63', 0.75);
 
-				let topScoreUserImage;
-				try {
-					// eslint-disable-next-line no-undef
-					process.send('osu! website');
-					topScoreUserImage = await Canvas.loadImage(`https://s.ppy.sh/a/${topScore.user.id}`);
-				} catch (error) {
-					// eslint-disable-next-line no-undef
-					process.send('osu! website');
-					topScoreUserImage = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-				}
+				let topScoreUserImage = await getAvatar(topScore.user.id);
 
 				roundedRect(ctx, 100, 175 + 90, 60.39, 60.39, 500 / 70, '0', '0', '0', 0.75);
 				ctx.save();

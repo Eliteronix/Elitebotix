@@ -3426,6 +3426,44 @@ module.exports = {
 			return await Canvas.loadImage('./other/defaultMapCover.png');
 		}
 	},
+	async getAvatar(osuUserId) {
+		const fs = require('fs');
+
+		//Check if the maps folder exists and create it if necessary
+		if (!fs.existsSync('./avatars')) {
+			fs.mkdirSync('./avatars');
+		}
+
+		//Check if the map is already downloaded and download if necessary
+		const path = `./avatars/${osuUserId}.png`;
+
+		try {
+			// Doesn't exist or older than 6 hours
+			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).birthtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 6)) {
+				// eslint-disable-next-line no-undef
+				process.send('osu! website');
+				const res = await fetch(`http://s.ppy.sh/a/${osuUserId}`);
+				await new Promise((resolve, reject) => {
+					const fileStream = fs.createWriteStream(`./avatars/${osuUserId}.png`);
+					res.body.pipe(fileStream);
+					res.body.on('error', (err) => {
+						reject(err);
+					});
+					fileStream.on('finish', function () {
+						resolve();
+					});
+				});
+			}
+		} catch (err) {
+			console.error(err);
+		}
+
+		try {
+			return await Canvas.loadImage(path);
+		} catch (err) {
+			return await Canvas.loadImage('./other/defaultAvatar.png');
+		}
+	},
 	async getBadgeImage(badgeName) {
 		const fs = require('fs');
 

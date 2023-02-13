@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
-const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap } = require('../utils');
+const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap, getAvatar } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
@@ -1292,17 +1292,8 @@ module.exports = {
 		ctx.clip();
 
 		//Draw a shape onto the main canvas
-		try {
-			// eslint-disable-next-line no-undef
-			process.send('osu! website');
-			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${team1[0]}`);
-			ctx.drawImage(avatar, 10, 10, 160, 160);
-		} catch (error) {
-			// eslint-disable-next-line no-undef
-			process.send('osu! website');
-			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-			ctx.drawImage(avatar, 10, 10, 160, 160);
-		}
+		let avatar = await getAvatar(team1[0]);
+		ctx.drawImage(avatar, 10, 10, 160, 160);
 
 		//Restore old context
 		ctx.restore();
@@ -1321,17 +1312,8 @@ module.exports = {
 		ctx.clip();
 
 		//Draw a shape onto the main canvas
-		try {
-			// eslint-disable-next-line no-undef
-			process.send('osu! website');
-			const avatar = await Canvas.loadImage(`http://s.ppy.sh/a/${team2[0]}`);
-			ctx.drawImage(avatar, 830, 10, 160, 160);
-		} catch (error) {
-			// eslint-disable-next-line no-undef
-			process.send('osu! website');
-			const avatar = await Canvas.loadImage('https://osu.ppy.sh/images/layout/avatar-guest@2x.png');
-			ctx.drawImage(avatar, 830, 10, 160, 160);
-		}
+		avatar = await getAvatar(team2[0]);
+		ctx.drawImage(avatar, 830, 10, 160, 160);
 
 		let files = [];
 		//Create as an attachment
