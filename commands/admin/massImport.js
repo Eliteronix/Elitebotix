@@ -1,4 +1,4 @@
-const { getIDFromPotentialOsuLink, saveOsuMultiScores } = require('../../utils');
+const { getIDFromPotentialOsuLink, saveOsuMultiScores, pause } = require('../../utils');
 const osu = require('node-osu');
 
 module.exports = {
@@ -25,8 +25,14 @@ module.exports = {
 				.catch(async () => {
 					//Nothing
 				});
+
+			await pause(1000);
 		}
 
-		await interaction.followUp(`Imported ${matchIds.length} matches.`);
+		try {
+			await interaction.followUp(`Imported ${matchIds.length} matches.`);
+		} catch (error) {
+			await interaction.channel.send(`Imported ${matchIds.length} matches.`);
+		}
 	},
 };
