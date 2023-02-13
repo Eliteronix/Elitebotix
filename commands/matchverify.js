@@ -361,9 +361,16 @@ module.exports = {
 				}
 
 				let score = orderedUnverifiedScores[i];
+
+				let comment = '';
+
+				if (score.comment) {
+					comment = `\n${score.verificationComment}`;
+				}
+
 				unverifiedScoresEmbed.fields.push({
 					name: score.matchName,
-					value: `https://osu.ppy.sh/mp/${score.matchId}`,
+					value: `https://osu.ppy.sh/mp/${score.matchId}${comment}`,
 					inline: false,
 				});
 			}

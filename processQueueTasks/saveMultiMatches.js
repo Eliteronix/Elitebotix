@@ -974,6 +974,16 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															});
 														} else {
 															console.log('No quals match of the same players - other', otherMatchesWithTheSamePlayers.length);
+
+															logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update No quals match of the same players - not verifyable');
+															await DBOsuMultiScores.update({
+																verifiedBy: 31050083, // Elitebotix
+																verificationComment: 'Match reffed by someone else - Not Qualifiers - No quals match of the same players - not verifyable',
+															}, {
+																where: {
+																	matchId: match.id,
+																},
+															});
 														}
 													} else {
 														logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores verification status not determinable');
