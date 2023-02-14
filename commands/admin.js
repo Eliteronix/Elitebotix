@@ -13,7 +13,6 @@ module.exports = {
 		.setName('admin')
 		.setDescription('Admin commands')
 		.setDMPermission(true)
-		.setDefaultMemberPermissions('0')
 		.addStringOption(option =>
 			option.setName('command')
 				.setDescription('Command to run')
