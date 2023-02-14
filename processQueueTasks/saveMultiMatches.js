@@ -225,7 +225,10 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					}
 				}
 			});
-	} else {
+	}
+	// else
+
+	if (true) {
 		// Verify matches instead
 		logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores verify matches');
 		let incompleteMatch = await DBOsuMultiScores.findOne({
@@ -471,12 +474,6 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					},
 				});
 
-				console.log('matchToVerify', matchToVerify);
-
-				if (matchToVerify) {
-					console.log(matchToVerify.matchName);
-				}
-
 				if (matchToVerify && (matchToVerify.matchName.startsWith('ETX') || matchToVerify.matchName.startsWith('o!mm'))) {
 					logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Last step of verification - ETX or o!mm not verifyable');
 					await DBOsuMultiScores.update({
@@ -616,11 +613,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 														},
 													});
 
-													console.log('relatedScores', relatedScores);
-
 													let playersInTheOriginalLobby = [...new Set(matchToVerify.map((score) => score.osuUserId))];
-
-													console.log('playersInTheOriginalLobby', playersInTheOriginalLobby);
 
 													let otherPlayersOutsideOfTheLobbyThatPlayedTheSameMaps = [];
 													let otherMatchesWithTheSamePlayers = [];
@@ -649,19 +642,10 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																otherMatchesWithTheSamePlayers.push({ matchId: score.matchId, matchName: score.matchName, verifiedAt: score.verifiedAt, verifiedBy: score.verifiedBy });
 															}
 														}
-
-
 													}
 
-													console.log('otherPlayersOutsideOfTheLobbyThatPlayedTheSameMaps', otherPlayersOutsideOfTheLobbyThatPlayedTheSameMaps);
-
-													let playersThatAreOnlyInOtherMatches = otherPlayersOutsideOfTheLobbyThatPlayedTheSameMaps.filter((player) => !playersInTheOriginalLobby.includes(player));
-
-													console.log('playersThatAreOnlyInOtherMatches', playersThatAreOnlyInOtherMatches);
-
-													console.log('otherMatchesWithTheSamePlayers', otherMatchesWithTheSamePlayers);
-
-													console.log('mapsPlayed', mapsPlayed);
+													//TODO: ?
+													// let playersThatAreOnlyInOtherMatches = otherPlayersOutsideOfTheLobbyThatPlayedTheSameMaps.filter((player) => !playersInTheOriginalLobby.includes(player));
 
 													let qualsMatchOfTheSamePlayers = otherMatchesWithTheSamePlayers.find((match) => match.matchName.includes('(Qualifiers)') || match.matchName.includes('(Quals)'));
 
@@ -735,8 +719,6 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															});
 														}
 													} else if (otherMatchesWithTheSamePlayers.length && playersInTheOriginalLobby.length > 1) {
-														console.log(match.id, matchToVerify[0].matchName, qualsMatchOfTheSamePlayers);
-
 														if (qualsMatchOfTheSamePlayers && qualsMatchOfTheSamePlayers.verifiedAt) {
 															logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was verified');
 															await DBOsuMultiScores.update({
@@ -973,8 +955,6 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																}
 															});
 														} else {
-															console.log('No quals match of the same players - other', otherMatchesWithTheSamePlayers.length);
-
 															logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update No quals match of the same players - not verifyable');
 															await DBOsuMultiScores.update({
 																verifiedBy: 31050083, // Elitebotix
