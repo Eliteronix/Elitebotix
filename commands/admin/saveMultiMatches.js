@@ -15,6 +15,6 @@ module.exports = {
 		logDatabaseQueries(4, 'commands/admin/saveMultiMatches.js DBProcessQueue create');
 		await DBProcessQueue.create({ guildId: 'None', task: 'saveMultiMatches', additions: interaction.options.getString('argument'), priority: 2, date: now });
 
-		await interaction.reply('Added new saveMultiMatches task to process queue.');
+		await interaction.editReply('Added new saveMultiMatches task to process queue.');
 	},
 };
