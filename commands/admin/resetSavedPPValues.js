@@ -6,7 +6,7 @@ module.exports = {
 	name: 'resetSavedPPValues',
 	usage: 'None',
 	async execute(interaction) {
-		logDatabaseQueries(4, 'commands/admin.js DBOsuMultiScores resetSavedPPValues');
+		logDatabaseQueries(4, 'commands/admin/resetSavedPPValues.js DBOsuMultiScores');
 		let count = await DBOsuMultiScores.update({
 			pp: null,
 		}, {
@@ -17,6 +17,6 @@ module.exports = {
 			}
 		});
 
-		return interaction.editReply(`Reset ${humanReadable(count)} scores' pp values`);
+		return await interaction.editReply(`Reset ${humanReadable(count)} scores' pp values`);
 	},
 };

@@ -1,5 +1,5 @@
 const { developers, showUnknownInteractionError } = require('../config.json');
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const fs = require('node:fs');
 
 module.exports = {
@@ -13,6 +13,7 @@ module.exports = {
 		.setName('admin')
 		.setDescription('Admin commands')
 		.setDMPermission(true)
+		.setDefaultMemberPermissions(PermissionFlagsBits.Everyone)
 		.addStringOption(option =>
 			option.setName('command')
 				.setDescription('Command to run')
@@ -29,7 +30,7 @@ module.exports = {
 
 		const adminCommands = fs.readdirSync('./commands/admin');
 
-		let filtered = adminCommands.filter(filename => filename.includes(focusedValue));
+		let filtered = adminCommands.filter(filename => filename.toLowerCase().includes(focusedValue.toLowerCase()));
 
 		filtered = filtered.slice(0, 25);
 

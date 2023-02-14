@@ -1,6 +1,6 @@
 const { DBOsuMultiScores } = require('../../dbObjects');
 const { Op } = require('sequelize');
-const { getOsuPlayerName } = require('../../utils');
+const { getOsuPlayerName, logDatabaseQueries } = require('../../utils');
 
 module.exports = {
 	name: 'resetVerified',
@@ -13,7 +13,8 @@ module.exports = {
 		const argument = interaction.options.getString('argument');
 
 		if (argument === 'incomplete') {
-			let count = DBOsuMultiScores.update({
+			logDatabaseQueries(4, 'commands/admin/resetVerified.js DBOsuMultiScores incomplete');
+			let count = await DBOsuMultiScores.update({
 				verifiedBy: null,
 				verificationComment: null,
 			}, {
@@ -27,7 +28,8 @@ module.exports = {
 
 			return await interaction.editReply(`Reset all ${count} incomplete Elitebotix verifications.`);
 		} else if (argument === 'all') {
-			let count = DBOsuMultiScores.update({
+			logDatabaseQueries(4, 'commands/admin/resetVerified.js DBOsuMultiScores all');
+			let count = await DBOsuMultiScores.update({
 				verifiedBy: null,
 				verifiedAt: null,
 				verificationComment: null,
@@ -41,7 +43,8 @@ module.exports = {
 
 			return await interaction.editReply(`Reset all ${count} Elitebotix verifications.`);
 		} else {
-			let count = DBOsuMultiScores.update({
+			logDatabaseQueries(4, 'commands/admin/resetVerified.js DBOsuMultiScores osuUserId');
+			let count = await DBOsuMultiScores.update({
 				verifiedBy: null,
 				verifiedAt: null,
 				verificationComment: null,
