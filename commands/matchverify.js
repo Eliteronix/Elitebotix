@@ -364,7 +364,7 @@ module.exports = {
 
 				let comment = '';
 
-				if (score.comment) {
+				if (score.verificationComment) {
 					comment = `\n${score.verificationComment}`;
 				}
 
