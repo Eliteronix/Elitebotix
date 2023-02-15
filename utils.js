@@ -605,7 +605,7 @@ module.exports = {
 			}
 		}
 	},
-	async createLeaderboard(data, backgroundFile, title, filename, page) {
+	async createLeaderboard(data, backgroundFile, title, filename, page, teamMatchscore) {
 		if (page && (page - 1) * leaderboardEntriesPerPage > data.length) {
 			page = null;
 		}
@@ -632,18 +632,29 @@ module.exports = {
 		let rows = data.length;
 		if (data.length > 63) {
 			columns = 5;
-			rows = 2 + Math.floor((data.length - 3) / columns) + 1;
 		} else if (data.length > 48) {
 			columns = 4;
-			rows = 2 + Math.floor((data.length - 3) / columns) + 1;
 		} else if (data.length > 33) {
 			columns = 3;
-			rows = 2 + Math.floor((data.length - 3) / columns) + 1;
 		} else if (data.length > 15) {
 			columns = 2;
+		}
+
+		if (teamMatchscore) {
+			columns = 2;
+		}
+
+		if (columns > 1) {
 			rows = 2 + Math.floor((data.length - 3) / columns) + 1;
 		}
-		canvasWidth = canvasWidth * columns;
+
+		let percentage = 1;
+
+		if (teamMatchscore) {
+			percentage = 0.66;
+		}
+
+		canvasWidth = canvasWidth * columns * percentage;
 		const canvasHeight = 125 + 20 + rows * 90;
 
 		//Create Canvas
@@ -669,20 +680,22 @@ module.exports = {
 		// Write the data
 		ctx.textAlign = 'center';
 
+		let placement = dataStart;
+
 		for (let i = 0; i < data.length && dataStart + i < dataEnd; i++) {
 			let xPosition = canvas.width / 2;
 			let yPositionName = 125 + i * 90;
 			let yPositionValue = 160 + i * 90;
 			if (columns > 1) {
-				if (i + dataStart === 0) {
+				if (i + dataStart === 0 && !teamMatchscore) {
 					xPosition = canvas.width / 2;
-				} else if (i + dataStart === 1) {
+				} else if (i + dataStart === 1 && !teamMatchscore) {
 					if (columns === 2) {
 						xPosition = canvas.width / 3;
 					} else {
 						xPosition = canvas.width / 4;
 					}
-				} else if (i + dataStart === 2) {
+				} else if (i + dataStart === 2 && !teamMatchscore) {
 					if (columns === 2) {
 						xPosition = (canvas.width / 3) * 2;
 					} else {
@@ -691,7 +704,7 @@ module.exports = {
 					yPositionName = 125 + (Math.floor((i - 3) / columns) + 2) * 90;
 					yPositionValue = 160 + (Math.floor((i - 3) / columns) + 2) * 90;
 				} else {
-					if (dataStart === 0) {
+					if (dataStart === 0 && !teamMatchscore) {
 						//Create standard xPosition
 						xPosition = (canvas.width / (columns + 1)) * (((i - 3) % columns) + 1);
 						//Stretch it
@@ -729,10 +742,13 @@ module.exports = {
 				ctx.fillStyle = '#ffffff';
 			}
 
-			ctx.font = 'bold 25px comfortaa, sans-serif';
-			ctx.fillText(`${i + 1 + dataStart}. ${data[i].name}`, xPosition, yPositionName);
-			ctx.font = '25px comfortaa, sans-serif';
-			ctx.fillText(data[i].value, xPosition, yPositionValue);
+			if (data[i].name || data[i].value) {
+				placement++;
+				ctx.font = 'bold 25px comfortaa, sans-serif';
+				ctx.fillText(`${placement}. ${data[i].name}`, xPosition, yPositionName);
+				ctx.font = '25px comfortaa, sans-serif';
+				ctx.fillText(data[i].value, xPosition, yPositionValue);
+			}
 		}
 
 		let today = new Date().toLocaleDateString();
