@@ -374,9 +374,9 @@ module.exports = {
 
 					for (let i = 0; i < leaderboardData.length; i = i + 2) {
 						if (leaderboardData[i].color === '#3498DB') {
-							leaderboardData.splice(i + 1, 0, { name: null, value: null });
-						} else {
 							leaderboardData.splice(i, 0, { name: null, value: null });
+						} else {
+							leaderboardData.splice(i + 1, 0, { name: null, value: null });
 						}
 					}
 				}
