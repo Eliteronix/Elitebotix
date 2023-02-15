@@ -234,11 +234,13 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 		let incompleteMatch = await DBOsuMultiScores.findOne({
 			where: {
 				tourneyMatch: true,
-				warmup: false,
 				verifiedAt: null,
 				verifiedBy: null,
 				matchName: {
 					[Op.startsWith]: 'o!mm'
+				},
+				matchEndDate: {
+					[Op.not]: null,
 				},
 			},
 			order: [
@@ -411,6 +413,9 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					verifiedAt: null,
 					matchId: {
 						[Op.in]: matchLogsToVerify,
+					},
+					matchEndDate: {
+						[Op.not]: null,
 					},
 				},
 			});
