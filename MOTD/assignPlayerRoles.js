@@ -56,7 +56,6 @@ module.exports = {
 						//Iterate through all members
 						for (let i = 0; i < members.length; i++) {
 							//Find out if they are registered or not
-							logDatabaseQueries(2, 'MOTD/assignPlayerRoles.js DBDiscordUsers');
 							const registeredPlayer = registeredPlayers.find(player => player.userId === members[i].user.id);
 
 							if (registeredPlayer && registeredPlayer.osuMOTDMuted && registeredPlayer.osuMOTDmutedUntil === null) {

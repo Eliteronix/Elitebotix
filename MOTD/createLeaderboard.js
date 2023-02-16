@@ -153,9 +153,9 @@ module.exports = {
 			async function getPlayers(c) {
 				// eslint-disable-next-line no-undef
 				const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
-				logDatabaseQueries(2, 'MOTD/createLeaderboard.js DBDiscordUsers');
 				// eslint-disable-next-line no-undef
 				const { DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+				logDatabaseQueries(2, 'MOTD/createLeaderboard.js DBDiscordUsers');
 				const registeredUsers = await DBDiscordUsers.findAll({
 					where: { osuMOTDRegistered: 1 }
 				});
