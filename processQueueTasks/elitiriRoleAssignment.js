@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(client, bancho, processQueueEntry) {
@@ -26,6 +28,38 @@ module.exports = {
 						//Filter members and push into array
 						const members = [];
 						guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
+
+						logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupSignUp');
+						const registeredPlayers = await DBElitiriCupSignUp.findAll({
+							where: {
+								tournamentName: currentElitiriCup,
+								userId: {
+									[Op.in]: members.map(member => member.user.id),
+								},
+							}
+						});
+
+						logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBDiscordUsers');
+						const discordUsers = await DBDiscordUsers.findAll({
+							where: {
+								userId: {
+									[Op.in]: members.map(member => member.user.id),
+								},
+								osuUserId: {
+									[Op.ne]: null,
+								},
+								osuVerified: true,
+							}
+						});
+
+						logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupStaff');
+						const staffSignups = await DBElitiriCupStaff.findAll({
+							where: {
+								osuUserId: {
+									[Op.in]: discordUsers.map(discordUser => discordUser.osuUserId),
+								},
+							}
+						});
 
 						//Set all 4 bracket role ids as a reference
 						const bracketRoles = [
@@ -66,11 +100,8 @@ module.exports = {
 
 						//Iterate through all members
 						for (let i = 0; i < members.length; i++) {
-							logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupSignUp');
 							//Find out if they are registered or not
-							const registeredPlayer = await DBElitiriCupSignUp.findOne({
-								where: { userId: members[i].user.id, tournamentName: currentElitiriCup }
-							});
+							const registeredPlayer = registeredPlayers.find(player => player.userId === members[i].user.id);
 
 							//check for registration
 							if (registeredPlayer) {
@@ -136,20 +167,14 @@ module.exports = {
 								}
 							}
 
-							logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBDiscordUsers');
-							//Get the user from the DBDiscordUsers
-							const discordUser = await DBDiscordUsers.findOne({
-								where: { userId: members[i].user.id }
-							});
+							//Get the user from the discordUsers
+							const discordUser = discordUsers.find(user => user.userId === members[i].user.id);
 
-							if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
+							if (discordUser) {
 								//Find out if they are registered or not
-								logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupStaff');
-								const staffSignups = await DBElitiriCupStaff.findAll({
-									where: { osuUserId: discordUser.osuUserId }
-								});
+								const userSignups = staffSignups.filter(signup => signup.osuUserId === discordUser.osuUserId);
 
-								if (staffSignups.length > 0) {
+								if (userSignups.length > 0) {
 									//Assign Alumni role if not there yet
 									try {
 										if (!members[i].roles.cache.has(alumniRole.id)) {
@@ -163,10 +188,10 @@ module.exports = {
 
 								let currentIterationRecordExists = false;
 
-								for (let j = 0; j < staffSignups.length; j++) {
-									if (staffSignups[j].tournamentName === currentElitiriCup) {
+								for (let j = 0; j < userSignups.length; j++) {
+									if (userSignups[j].tournamentName === currentElitiriCup) {
 										currentIterationRecordExists = true;
-										if (staffSignups[j].host) {
+										if (userSignups[j].host) {
 											//Assign host role if not there yet
 											try {
 												if (!members[i].roles.cache.has(hostRole.id)) {
@@ -188,7 +213,7 @@ module.exports = {
 											}
 										}
 
-										if (staffSignups[j].streamer) {
+										if (userSignups[j].streamer) {
 											//Assign streamer role if not there yet
 											try {
 												if (!members[i].roles.cache.has(streamerRole.id)) {
@@ -210,7 +235,7 @@ module.exports = {
 											}
 										}
 
-										if (staffSignups[j].commentator) {
+										if (userSignups[j].commentator) {
 											//Assign commentator role if not there yet
 											try {
 												if (!members[i].roles.cache.has(commentatorRole.id)) {
@@ -232,7 +257,7 @@ module.exports = {
 											}
 										}
 
-										if (staffSignups[j].referee) {
+										if (userSignups[j].referee) {
 											//Assign referee role if not there yet
 											try {
 												if (!members[i].roles.cache.has(refereeRole.id)) {
@@ -254,7 +279,7 @@ module.exports = {
 											}
 										}
 
-										if (staffSignups[j].replayer) {
+										if (userSignups[j].replayer) {
 											//Assign replayer role if not there yet
 											try {
 												if (!members[i].roles.cache.has(replayerRole.id)) {
