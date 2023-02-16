@@ -95,6 +95,70 @@ const runningTournamentMatches = new client.Gauge({
 });
 register.registerMetric(runningTournamentMatches);
 
+let uniqueDiscordUsersList = [];
+
+const uniqueDiscordUsersInTheLastMinute = new client.Gauge({
+	name: 'unique_discord_users_in_the_last_minute',
+	help: 'Unique discord users in the last minute',
+});
+register.registerMetric(uniqueDiscordUsersInTheLastMinute);
+
+const uniqueDiscordUsersInTheLastHour = new client.Gauge({
+	name: 'unique_discord_users_in_the_last_hour',
+	help: 'Unique discord users in the last hour',
+});
+register.registerMetric(uniqueDiscordUsersInTheLastHour);
+
+const uniqueDiscordUsersInTheLastDay = new client.Gauge({
+	name: 'unique_discord_users_in_the_last_day',
+	help: 'Unique discord users in the last day',
+});
+register.registerMetric(uniqueDiscordUsersInTheLastDay);
+
+const uniqueDiscordUsersInTheLastWeek = new client.Gauge({
+	name: 'unique_discord_users_in_the_last_week',
+	help: 'Unique discord users in the last week',
+});
+register.registerMetric(uniqueDiscordUsersInTheLastWeek);
+
+const uniqueDiscordUsers = new client.Gauge({
+	name: 'unique_discord_users',
+	help: 'Unique discord users',
+});
+register.registerMetric(uniqueDiscordUsers);
+
+let uniqueOsuUsersList = [];
+
+const uniqueOsuUsersInTheLastMinute = new client.Gauge({
+	name: 'unique_osu_users_in_the_last_minute',
+	help: 'Unique osu users in the last minute',
+});
+register.registerMetric(uniqueOsuUsersInTheLastMinute);
+
+const uniqueOsuUsersInTheLastHour = new client.Gauge({
+	name: 'unique_osu_users_in_the_last_hour',
+	help: 'Unique osu users in the last hour',
+});
+register.registerMetric(uniqueOsuUsersInTheLastHour);
+
+const uniqueOsuUsersInTheLastDay = new client.Gauge({
+	name: 'unique_osu_users_in_the_last_day',
+	help: 'Unique osu users in the last day',
+});
+register.registerMetric(uniqueOsuUsersInTheLastDay);
+
+const uniqueOsuUsersInTheLastWeek = new client.Gauge({
+	name: 'unique_osu_users_in_the_last_week',
+	help: 'Unique osu users in the last week',
+});
+register.registerMetric(uniqueOsuUsersInTheLastWeek);
+
+const uniqueOsuUsers = new client.Gauge({
+	name: 'unique_osu_users',
+	help: 'Unique osu users',
+});
+register.registerMetric(uniqueOsuUsers);
+
 // Define the HTTP server
 const server = http.createServer(async (req, res) => {
 	// Retrieve route from request object
@@ -143,6 +207,8 @@ manager.on('shardCreate', shard => {
 		});
 	});
 });
+
+
 
 manager.spawn()
 	.then(shards => {
@@ -239,8 +305,45 @@ manager.spawn()
 							runningTournamentMatches.set(processQueueTasks);
 						})
 						.catch(console.error);
+				} else if (typeof message === 'string' && message.startsWith('discorduser')) {
+					let discordUser = uniqueDiscordUsersList.find(user => user.id === message.split(' ')[1]);
+					if (discordUser) {
+						discordUser.lastRequest = Date.now();
+					} else {
+						uniqueDiscordUsersList.push({
+							id: message.split(' ')[1],
+							lastRequest: Date.now()
+						});
+					}
+				} else if (typeof message === 'string' && message.startsWith('osuuser')) {
+					let osuUser = uniqueOsuUsersList.find(user => user.id === message.split(' ')[1]);
+					if (osuUser) {
+						osuUser.lastRequest = Date.now();
+					} else {
+						uniqueOsuUsersList.push({
+							id: message.split(' ')[1],
+							lastRequest: Date.now()
+						});
+					}
 				}
 			});
 		});
 	})
 	.catch(console.error);
+
+setInterval(() => {
+	uniqueDiscordUsersInTheLastMinute.set(uniqueDiscordUsersList.filter(user => Date.now() - user.lastRequest < 60000).length);
+	uniqueOsuUsersInTheLastMinute.set(uniqueOsuUsersList.filter(user => Date.now() - user.lastRequest < 60000).length);
+
+	uniqueDiscordUsersInTheLastHour.set(uniqueDiscordUsersList.filter(user => Date.now() - user.lastRequest < 3600000).length);
+	uniqueOsuUsersInTheLastHour.set(uniqueOsuUsersList.filter(user => Date.now() - user.lastRequest < 3600000).length);
+
+	uniqueDiscordUsersInTheLastDay.set(uniqueDiscordUsersList.filter(user => Date.now() - user.lastRequest < 86400000).length);
+	uniqueOsuUsersInTheLastDay.set(uniqueOsuUsersList.filter(user => Date.now() - user.lastRequest < 86400000).length);
+
+	uniqueDiscordUsersInTheLastWeek.set(uniqueDiscordUsersList.filter(user => Date.now() - user.lastRequest < 604800000).length);
+	uniqueOsuUsersInTheLastWeek.set(uniqueOsuUsersList.filter(user => Date.now() - user.lastRequest < 604800000).length);
+
+	uniqueDiscordUsers.set(uniqueDiscordUsersList.length);
+	uniqueOsuUsers.set(uniqueOsuUsersList.length);
+}, 5000);

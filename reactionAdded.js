@@ -29,6 +29,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 		return;
 	}
 
+	// eslint-disable-next-line no-undef
+	process.send(`discorduser ${user.id}}`);
+
 	if (reaction._emoji.name === '⭐') {
 		logDatabaseQueries(2, 'reactionAdded.js DBGuilds Starboard');
 		const guild = await DBGuilds.findOne({

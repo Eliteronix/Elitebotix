@@ -5,6 +5,9 @@ const { PermissionsBitField } = require('discord.js');
 const { developers, salesmen } = require('./config.json');
 
 module.exports = async function (client, bancho, interaction) {
+	// eslint-disable-next-line no-undef
+	process.send(`discorduser ${interaction.user.id}}`);
+
 	//Create a collection for the commands
 	client.commands = new Discord.Collection();
 

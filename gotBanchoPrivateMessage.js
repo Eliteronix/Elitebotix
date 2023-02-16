@@ -2,6 +2,9 @@ const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, getUserDuelStarRat
 const { DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
 
 module.exports = async function (client, bancho, message) {
+	// eslint-disable-next-line no-undef
+	process.send(`osuuser ${message.user.id}}`);
+
 	if (message.message === '!help') {
 		await message.user.sendMessage('/ /np - Get the pp values for the current beatmap with the current mods');
 		await message.user.sendMessage('!acc - Get the last map\'s pp value with the given accuracy');
