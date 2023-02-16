@@ -5,6 +5,8 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 const Discord = require('discord.js');
 const Canvas = require('canvas');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
+const { DBOsuMultiScores } = require('../dbObjects');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-matchtrack',
@@ -150,6 +152,42 @@ module.exports = {
 						.catch(() => {
 							//Nothing
 						});
+
+					let warmups = await DBOsuMultiScores.findAll({
+						attributes: ['gameId'],
+						where: {
+							matchId: matchID,
+							warmup: {
+								[Op.ne]: false,
+							}
+						},
+						group: ['gameId'],
+					});
+
+					let matchScoreCommand = require('./osu-matchscore.js');
+
+					await matchScoreCommand.execute(null, null, {
+						id: null,
+						options: {
+							getString: (string) => {
+								if (string === 'match') {
+									return matchID.toString();
+								}
+							},
+							getInteger: (string) => {
+								if (string === 'warmups') {
+									return warmups.length;
+								}
+							},
+							getNumber: () => {
+
+							},
+						},
+						deferReply: () => { },
+						editReply: async (input) => {
+							return await msg.channel.send(input);
+						},
+					});
 
 					if (msg.id) {
 						if (msg.client.update === 1 && msg.client.duels.length === 0 && msg.client.otherMatches.length === 0 && msg.client.matchTracks.length === 0 && msg.client.bingoMatches === 0) {
