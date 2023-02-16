@@ -1,7 +1,7 @@
 //Log message upon starting the bot
 // eslint-disable-next-line no-console
 console.log('Bot is starting...');
-const { twitchConnect, wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack } = require('./utils');
+const { twitchConnect, wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack, logDatabaseQueries } = require('./utils');
 require('dotenv').config();
 
 //require the discord.js module
@@ -117,6 +117,7 @@ const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cl
 const { initializeMOTD } = require('./MOTD/initializeMOTD');
 
 const Banchojs = require('bancho.js');
+const { DBProcessQueue } = require('./dbObjects');
 // eslint-disable-next-line no-undef
 const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterTimespan: 60000, limiterPrivate: 45, limiterPublic: 9 });
 
@@ -262,6 +263,7 @@ setTimeout(() => {
 	getForumPosts(client);
 	checkOsuTracks(client);
 	updateTwitchNames(client);
+	resetSaveMultiMatches();
 
 	setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
 
@@ -367,5 +369,31 @@ async function checkOsuTracks(client) {
 
 	setTimeout(() => {
 		checkOsuTracks(client);
+	}, 10000);
+}
+
+async function resetSaveMultiMatches() {
+	try {
+		logDatabaseQueries(2, 'bot.js DBProcessQueue');
+		const task = await DBProcessQueue.findOne({
+			where: {
+				task: 'saveMultiMatches',
+				beingExecuted: true,
+			},
+		});
+
+		let date = new Date();
+		date.setMinutes(date.getMinutes() - 2);
+
+		if (task && task.updatedAt < date) {
+			task.beingExecuted = false;
+			await task.save();
+		}
+	} catch (e) {
+		console.error(e);
+	}
+
+	setTimeout(() => {
+		resetSaveMultiMatches();
 	}, 10000);
 }
