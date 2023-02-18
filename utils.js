@@ -3304,29 +3304,35 @@ module.exports = {
 			return null;
 		}
 
-		const recent = new Date();
-		recent.setUTCMinutes(recent.getUTCMinutes() - 3);
-
-		let forceDownload = false;
-		if (recent < dbBeatmap.updatedAt) {
-			forceDownload = true;
-		}
-
 		try {
-			if (forceDownload || !fs.existsSync(path)) {
+			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
 				// eslint-disable-next-line no-undef
 				process.send('osu! website');
 				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`);
-				await new Promise((resolve, reject) => {
-					const fileStream = fs.createWriteStream(`./listcovers/${beatmapsetId}.jpg`);
-					res.body.pipe(fileStream);
-					res.body.on('error', (err) => {
-						reject(err);
+
+				if (res.status === 404) {
+					await new Promise((resolve, reject) => {
+						const fileStream = fs.createWriteStream(`./listcovers/${beatmapsetId}.jpg`);
+						fs.createReadStream('./other/defaultListCover.png').pipe(fileStream);
+						fileStream.on('finish', function () {
+							resolve();
+						});
+						fileStream.on('error', (err) => {
+							reject(err);
+						});
 					});
-					fileStream.on('finish', function () {
-						resolve();
+				} else {
+					await new Promise((resolve, reject) => {
+						const fileStream = fs.createWriteStream(`./listcovers/${beatmapsetId}.jpg`);
+						res.body.pipe(fileStream);
+						res.body.on('error', (err) => {
+							reject(err);
+						});
+						fileStream.on('finish', function () {
+							resolve();
+						});
 					});
-				});
+				}
 			}
 		} catch (err) {
 			console.error(err);
