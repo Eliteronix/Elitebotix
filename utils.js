@@ -3471,7 +3471,7 @@ module.exports = {
 
 		try {
 			// Doesn't exist or older than 24 hours
-			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 24)) {
+			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 6)) {
 				// eslint-disable-next-line no-undef
 				process.send('osu! website');
 				const res = await fetch(`http://s.ppy.sh/a/${osuUserId}`);
