@@ -3356,39 +3356,42 @@ module.exports = {
 			return null;
 		}
 
-		const recent = new Date();
-		recent.setUTCMinutes(recent.getUTCMinutes() - 3);
-
-		let forceDownload = false;
-		if (recent < dbBeatmap.updatedAt) {
-			forceDownload = true;
-		}
-
 		try {
-			if (forceDownload || !fs.existsSync(path)) {
+			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
 				// eslint-disable-next-line no-undef
 				process.send('osu! website');
 				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`);
-				await new Promise((resolve, reject) => {
-					const fileStream = fs.createWriteStream(`./beatmapcovers/${beatmapsetId}.jpg`);
-					res.body.pipe(fileStream);
-					res.body.on('error', (err) => {
-						reject(err);
+
+				if (res.status === 404) {
+					// Save the default map cover as the map cover from ./other/defaultMapCover.png
+					await new Promise((resolve, reject) => {
+						const fileStream = fs.createWriteStream(`./beatmapcovers/${beatmapsetId}.jpg`);
+						fs.createReadStream('./other/defaultMapCover.png').pipe(fileStream);
+						fileStream.on('finish', function () {
+							resolve();
+						});
+						fileStream.on('error', (err) => {
+							reject(err);
+						});
 					});
-					fileStream.on('finish', function () {
-						resolve();
+				} else {
+					await new Promise((resolve, reject) => {
+						const fileStream = fs.createWriteStream(`./beatmapcovers/${beatmapsetId}.jpg`);
+						res.body.pipe(fileStream);
+						res.body.on('error', (err) => {
+							reject(err);
+						});
+						fileStream.on('finish', function () {
+							resolve();
+						});
 					});
-				});
+				}
 			}
 		} catch (err) {
 			console.error(err);
 		}
 
-		try {
-			return await Canvas.loadImage(path);
-		} catch (err) {
-			return await Canvas.loadImage('./other/defaultMapCover.png');
-		}
+		return await Canvas.loadImage(path);
 	},
 	async getBeatmapSlimcover(beatmapsetId, beatmapId) {
 		const fs = require('fs');
@@ -3454,7 +3457,7 @@ module.exports = {
 		const path = `./avatars/${osuUserId}.png`;
 
 		try {
-			// Doesn't exist or older than 6 hours
+			// Doesn't exist or older than 24 hours
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).birthtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 24)) {
 				// eslint-disable-next-line no-undef
 				process.send('osu! website');
@@ -4922,7 +4925,7 @@ async function getOsuBeatmapFunction(input) {
 
 				try {
 					const fs = require('fs');
-					await fs.unlinkSync(path);
+					fs.unlinkSync(path);
 				} catch (err) {
 					//console.error(err);
 				}
