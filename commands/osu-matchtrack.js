@@ -249,6 +249,7 @@ module.exports = {
 									}
 
 									while (json.first_event_id !== json.events[0].id) {
+										await pause(15000);
 										// eslint-disable-next-line no-undef
 										process.send('osu! website');
 										let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
