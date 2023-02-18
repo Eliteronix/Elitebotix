@@ -2879,6 +2879,7 @@ module.exports = {
 										// eslint-disable-next-line no-undef
 										let scoreCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-score.js`);
 										scoreCommand.execute(msg, newArgs);
+										await new Promise(resolve => setTimeout(resolve, 5000));
 									}
 								}
 							}
@@ -2924,6 +2925,7 @@ module.exports = {
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
 							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].osuNumberTopPlays}`, '--tracking']);
+							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
 					}
 
@@ -2966,6 +2968,7 @@ module.exports = {
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
 							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].taikoNumberTopPlays}`, '--tracking', '--t']);
+							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
 					}
 
@@ -3008,6 +3011,7 @@ module.exports = {
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
 							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].catchNumberTopPlays}`, '--tracking', '--c']);
+							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
 					}
 
@@ -3050,6 +3054,7 @@ module.exports = {
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
 							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].maniaNumberTopPlays}`, '--tracking', '--m']);
+							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
 					}
 
@@ -3139,6 +3144,7 @@ module.exports = {
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
 							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].tournamentNumberTopPlays}`, '--tracking', '--tournaments']);
+							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
 					}
 
