@@ -10,7 +10,7 @@ module.exports = {
 			let players = args[3].split(',');
 
 			for (let i = 0; i < players.length; i++) {
-				players[i] = getOsuPlayerName(players[i]);
+				players[i] = await getOsuPlayerName(players[i]);
 			}
 
 			let message = `Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\nhttps://osu.ppy.sh/community/matches/${args[2]}`;
