@@ -269,7 +269,7 @@ setTimeout(() => {
 
 	setInterval(() => checkForBirthdays(client), 300000);
 
-	setInterval(() => refreshOsuRank(client), 60000);
+	setInterval(() => refreshOsuRank(client), 90000);
 
 	const { REST, Routes } = require('discord.js');
 	const fs = require('node:fs');

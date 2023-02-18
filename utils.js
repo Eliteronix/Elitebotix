@@ -535,7 +535,7 @@ module.exports = {
 			}
 		}
 
-		await new Promise(resolve => setTimeout(resolve, 30000));
+		await new Promise(resolve => setTimeout(resolve, 45000));
 
 		let lastMonth = new Date();
 		lastMonth.setUTCDate(lastMonth.getUTCMonth() - 1);
@@ -3455,7 +3455,7 @@ module.exports = {
 
 		try {
 			// Doesn't exist or older than 6 hours
-			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).birthtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 6)) {
+			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).birthtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 24)) {
 				// eslint-disable-next-line no-undef
 				process.send('osu! website');
 				const res = await fetch(`http://s.ppy.sh/a/${osuUserId}`);
