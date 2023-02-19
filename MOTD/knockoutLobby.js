@@ -85,6 +85,9 @@ module.exports = {
 		}
 
 		channel.on('message', async (msg) => {
+			// eslint-disable-next-line no-undef
+			process.send(`osuuser ${msg.user.id}}`);
+
 			addMatchMessage(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
 		});
 
@@ -244,6 +247,11 @@ module.exports = {
 			}
 		});
 		lobby.on('matchFinished', async (results) => {
+			for (let i = 0; i < results.length; i++) {
+				// eslint-disable-next-line no-undef
+				process.send(`osuuser ${results[i].player.user.id}}`);
+			}
+
 			//Calculate the amount of knockouts needed
 			let knockoutNumber = calculateKnockoutNumber(players, mapIndex);
 

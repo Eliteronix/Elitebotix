@@ -2085,6 +2085,9 @@ module.exports = {
 		let usersOnline = [];
 
 		channel.on('message', async (msg) => {
+			// eslint-disable-next-line no-undef
+			process.send(`osuuser ${msg.user.id}}`);
+
 			addMatchMessageFunction(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
 
 			if (usersToCheck.length && msg.user.ircUsername === 'BanchoBot') {
@@ -2229,7 +2232,7 @@ module.exports = {
 		lobby.on('playerJoined', async (obj) => {
 			// eslint-disable-next-line no-undef
 			process.send(`osuuser ${obj.player.user.id}}`);
-			
+
 			orderMatchPlayers(lobby, channel, [...users]);
 
 			//Add to an array of joined users for requeueing
@@ -2370,6 +2373,9 @@ module.exports = {
 			let firstTeam = team1.map(user => user.osuUserId);
 
 			for (let i = 0; i < results.length; i++) {
+				// eslint-disable-next-line no-undef
+				process.send(`osuuser ${results[i].player.user.id}}`);
+
 				if (firstTeam.includes(results[i].player.user.id.toString())) {
 					scoreTeam1 += parseFloat(results[i].score);
 				} else {
