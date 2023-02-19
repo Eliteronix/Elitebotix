@@ -484,9 +484,9 @@ module.exports = {
 							&& !e.message.endsWith('reason: read ECONNRESET')) {
 							console.error(e);
 						}
-						await pause(150000);
+						await pause(165000);
 					}
-					await pause(30000);
+					await pause(15000);
 				}
 			})
 			.catch(err => {
