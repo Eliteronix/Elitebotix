@@ -91,10 +91,10 @@ module.exports = {
 						},
 					});
 
-					let minutes = 3 + importTasks * 0.25;
+					let seconds = 180 + importTasks * 15;
 
 					let date = new Date();
-					date.setUTCMinutes(date.getUTCMinutes() + minutes);
+					date.setUTCSeconds(date.getUTCSeconds() + seconds);
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
 					return await processQueueEntry.save();
