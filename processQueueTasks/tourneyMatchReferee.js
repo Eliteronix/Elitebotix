@@ -320,6 +320,9 @@ module.exports = {
 		});
 
 		lobby.on('playerJoined', async (obj) => {
+			// eslint-disable-next-line no-undef
+			process.send(`osuuser ${obj.player.user.id}}`);
+
 			if (!playerIds.includes(obj.player.user.id.toString())) {
 				channel.sendMessage(`!mp kick #${obj.player.user.id}`);
 			} else if (lobbyStatus === 'Joining phase') {

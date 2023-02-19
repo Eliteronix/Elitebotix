@@ -643,6 +643,9 @@ module.exports = {
 		});
 
 		lobby.on('playerJoined', async (obj) => {
+			// eslint-disable-next-line no-undef
+			process.send(`osuuser ${obj.player.user.id}}`);
+
 			if (commandUser.osuUserId === obj.player.user.id.toString()) {
 				await channel.sendMessage('!commands - Sends the list of commands.');
 				await channel.sendMessage('!abort - Aborts the currently playing map.');

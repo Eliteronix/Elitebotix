@@ -2227,6 +2227,9 @@ module.exports = {
 		});
 
 		lobby.on('playerJoined', async (obj) => {
+			// eslint-disable-next-line no-undef
+			process.send(`osuuser ${obj.player.user.id}}`);
+			
 			orderMatchPlayers(lobby, channel, [...users]);
 
 			//Add to an array of joined users for requeueing
