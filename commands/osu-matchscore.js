@@ -1,7 +1,7 @@
 const osu = require('node-osu');
 const { createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, getMods, getOsuPlayerName } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { showUnknownInteractionError } = require('../config.json');
+const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
 module.exports = {
 	name: 'osu-matchscore',
@@ -389,8 +389,17 @@ module.exports = {
 					finalScore = `\n\n**Final score:** \`${redScore} - ${blueScore}\``;
 				}
 
+				let sharedLink = `<https://osu.ppy.sh/mp/${match.id}>`;
+
+				let hideQualifiers = new Date();
+				hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+
+				if (match.name.toLowerCase().includes('qualifier') && new Date(match.raw_start) > hideQualifiers) {
+					sharedLink = `MP Link hidden for ${daysHidingQualifiers} days (Qualifiers)`;
+				}
+
 				//Send attachment
-				return await interaction.editReply({ content: `The leaderboard shows the evaluation of the players that participated in the match.\n${warmupsReason}\n${skiplastReason}${valueHint}\n<https://osu.ppy.sh/community/matches/${match.id}>${finalScore}`, files: [attachment] });
+				return await interaction.editReply({ content: `The leaderboard shows the evaluation of the players that participated in the match.\n${warmupsReason}\n${skiplastReason}${valueHint}\n${sharedLink} ${finalScore}`, files: [attachment] });
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
