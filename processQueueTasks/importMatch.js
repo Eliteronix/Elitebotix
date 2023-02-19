@@ -87,7 +87,7 @@ module.exports = {
 				if (playedRound) {
 					let importTasks = await DBProcessQueue.count({
 						where: {
-							type: 'importMatch',
+							task: 'importMatch',
 						},
 					});
 
