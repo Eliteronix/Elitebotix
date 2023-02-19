@@ -1,6 +1,6 @@
 const { saveOsuMultiScores, logDatabaseQueries } = require('../utils');
 const osu = require('node-osu');
-const { DBOsuMultiScores } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -85,8 +85,16 @@ module.exports = {
 				});
 
 				if (playedRound) {
+					let importTasks = await DBProcessQueue.count({
+						where: {
+							type: 'importMatch',
+						},
+					});
+
+					let minutes = 3 + importTasks * 0.25;
+
 					let date = new Date();
-					date.setUTCMinutes(date.getUTCMinutes() + 15);
+					date.setUTCMinutes(date.getUTCMinutes() + minutes);
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
 					return await processQueueEntry.save();
