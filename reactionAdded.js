@@ -671,6 +671,50 @@ module.exports = async function (reaction, user, additionalObjects) {
 				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
 				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 			}
+		} else if (reaction.message.attachments.first().name.startsWith('osu-game-')) {
+			//get the osuUserId used
+			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+
+			const beatmapId = reaction.message.attachments.first().name.replace(`-${modBits}.png`, '').replace(/.+-/gm, '');
+
+			const command = require('./commands/osu-mapleaderboard.js');
+
+			let args = [beatmapId, modBits];
+
+			if (checkCooldown(reaction, command, user, args) !== undefined) {
+				return;
+			}
+
+			//Setup artificial interaction
+			let interaction = {
+				id: null,
+				user: user,
+				options: {
+					getString: (string) => {
+						if (string === 'id') {
+							return beatmapId;
+						} else if (string === 'server') {
+							return 'tournaments';
+						} else if (string === 'mods') {
+							return getMods(modBits).join('');
+						}
+					},
+					getInteger: () => { },
+				},
+				deferReply: () => { },
+				followUp: async (input) => {
+					return await reaction.message.channel.send(input);
+				},
+			};
+
+			try {
+				command.execute(null, null, interaction, additionalObjects);
+			} catch (error) {
+				console.error(error);
+				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+			}
 		}
 	}
 

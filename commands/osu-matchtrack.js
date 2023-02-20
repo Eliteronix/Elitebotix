@@ -403,6 +403,7 @@ module.exports = {
 
 													await lastMessage.react('<:COMPARE:827974793365159997>');
 													await lastMessage.react('🗺️');
+													await lastMessage.react('🥇');
 												} else if (json.events[i].detail.type === 'other') {
 													if (lastMessageType !== 'playing') {
 														let modBits = getModBits(json.events[i].game.mods.join(''));
@@ -433,6 +434,7 @@ module.exports = {
 
 														await lastMessage.react('<:COMPARE:827974793365159997>');
 														await lastMessage.react('🗺️');
+														await lastMessage.react('🥇');
 													}
 												} else if (json.events[i].detail.type !== 'other') {
 													let embed = new Discord.EmbedBuilder()
