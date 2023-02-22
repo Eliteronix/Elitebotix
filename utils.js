@@ -604,9 +604,8 @@ module.exports = {
 				console.log('create new task');
 				let now = new Date();
 				logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBProcessQueue create');
-				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId, date: now });
-			} else {
-				console.log('task already exists');
+				let task = await DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId, date: now });
+				console.log(task);
 			}
 		}
 	},
