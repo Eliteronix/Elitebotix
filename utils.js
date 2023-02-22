@@ -596,6 +596,8 @@ module.exports = {
 		});
 
 		if (discordUser) {
+			console.log(discordUser.osuUserId);
+
 			logDatabaseQueriesFunction(2, 'utils.js refreshOsuRank DBProcessQueue');
 			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
 			if (!existingTask) {
