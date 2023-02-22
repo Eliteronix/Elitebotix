@@ -180,6 +180,7 @@ module.exports = {
 			discordUser.osuNotFoundFirstOccurence = null;
 			await discordUser.save();
 		} catch (error) {
+			console.log(processQueueEntry.additions, error);
 			if (error.message === 'Not found') {
 				let sendLogMessage = false;
 
