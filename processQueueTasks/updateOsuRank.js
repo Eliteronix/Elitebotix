@@ -35,9 +35,13 @@ module.exports = {
 
 		for (let i = 0; i < duplicates.length; i++) {
 			if (duplicates[i].userId) {
+				// eslint-disable-next-line no-console
+				console.log('Deleting duplicate', discordUser.userId, discordUser.osuUserId, discordUser.osuName, discordUser.updatedAt);
 				await discordUser.destroy();
 				discordUser = duplicates[i];
 			} else {
+				// eslint-disable-next-line no-console
+				console.log('Deleting duplicate', duplicates[i].userId, duplicates[i].osuUserId, duplicates[i].osuName, duplicates[i].updatedAt);
 				await duplicates[i].destroy();
 			}
 		}
