@@ -24,6 +24,7 @@ module.exports = {
 		discordUser.changed('updatedAt', true);
 
 		try {
+			console.log('updateOsuRank lastOsuPlayCountChange', discordUser.osuUserId, discordUser.lastOsuPlayCountChange);
 			if (discordUser.lastOsuPlayCountChange === null) {
 				console.log('updateOsuRank', 'lastOsuPlayCountChange is null', discordUser.osuUserId);
 				discordUser.nextOsuPPUpdate = new Date();
