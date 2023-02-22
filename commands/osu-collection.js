@@ -219,6 +219,15 @@ function getInt(amount, ULEB128) {
 		// Pad the hex with 0s to make it a multiple of 2
 		amount = amount.padStart(Math.ceil(amount.length / 2) * 2, '0');
 
+		// Chunk the hex into 2 character chunks
+		amount = amount.match(/.{1,2}/g);
+
+		// Reverse the chunks
+		amount = amount.reverse();
+
+		// Join the chunks together
+		amount = amount.join('');
+
 		// Pad the hex with 0s to make it 4 bytes / 8 hex characters
 		amount = amount.padEnd(8, '0');
 

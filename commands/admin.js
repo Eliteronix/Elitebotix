@@ -24,6 +24,11 @@ module.exports = {
 			option.setName('argument')
 				.setDescription('Argument for the command')
 				.setRequired(false)
+		)
+		.addAttachmentOption(option =>
+			option.setName('file')
+				.setDescription('The file for the command')
+				.setRequired(false)
 		),
 	async autocomplete(interaction) {
 		const focusedValue = interaction.options.getFocused();
