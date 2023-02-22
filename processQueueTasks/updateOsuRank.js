@@ -201,6 +201,7 @@ module.exports = {
 			} catch (e) {
 				if (e.message === 'No standard plays') {
 					discordUser.osuDuelStarRating = null;
+					discordUser.lastDuelRatingUpdate = new Date();
 				} else {
 					console.error(e);
 				}
