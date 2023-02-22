@@ -21,7 +21,7 @@ module.exports = {
 			where: { osuUserId: discordUserId }
 		});
 
-		console.log('updateOsuRank user found', discordUser.osuUserId);
+		console.log('updateOsuRank user found', discordUser.osuUserId, discordUser.updatedAt);
 
 		discordUser.changed('updatedAt', true);
 
