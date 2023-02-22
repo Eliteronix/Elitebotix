@@ -5,7 +5,7 @@ const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.jso
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
-		console.log('updateOsuRank', processQueueEntry.additions);
+		// console.log('updateOsuRank', processQueueEntry.additions);
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -21,15 +21,10 @@ module.exports = {
 			where: { osuUserId: discordUserId }
 		});
 
-		console.log('updateOsuRank user found', discordUser.osuUserId, discordUser.updatedAt);
-
 		discordUser.changed('updatedAt', true);
-
-		console.log('marked as changed', discordUser.osuUserId);
 
 		try {
 			if (!discordUser.lastOsuPlayCountChange) {
-				console.log('lastOsuPlayCountChange was not set', discordUser.osuUserId);
 				discordUser.nextOsuPPUpdate = new Date();
 				discordUser.lastOsuPPChange = new Date();
 				discordUser.lastOsuPlayCountChange = new Date();
@@ -48,7 +43,6 @@ module.exports = {
 			}
 
 			if (discordUser.nextOsuPPUpdate <= new Date()) {
-				console.log('nextOsuPPUpdate', discordUser.osuUserId);
 				// eslint-disable-next-line no-undef
 				process.send('osu!API');
 				const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
@@ -76,7 +70,6 @@ module.exports = {
 			}
 
 			if (discordUser.nextTaikoPPUpdate <= new Date()) {
-				console.log('nextTaikoPPUpdate', discordUser.osuUserId);
 				// eslint-disable-next-line no-undef
 				process.send('osu!API');
 				const taikoUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 1 });
@@ -103,7 +96,6 @@ module.exports = {
 			}
 
 			if (discordUser.nextCatchPPUpdate <= new Date()) {
-				console.log('nextCatchPPUpdate', discordUser.osuUserId);
 				// eslint-disable-next-line no-undef
 				process.send('osu!API');
 				const catchUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 2 });
@@ -130,7 +122,6 @@ module.exports = {
 			}
 
 			if (discordUser.nextManiaPPUpdate <= new Date()) {
-				console.log('nextManiaPPUpdate', discordUser.osuUserId);
 				// eslint-disable-next-line no-undef
 				process.send('osu!API');
 				const maniaUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 3 });
@@ -156,48 +147,28 @@ module.exports = {
 				discordUser.maniaTotalScore = maniaUser.scores.total;
 			}
 
-			console.log('getAdditionalOsuInfo', discordUser.osuUserId);
-
 			let additionalInfo = await getAdditionalOsuInfo(discordUser.osuUserId);
 
-			console.log('got getAdditionalOsuInfo', discordUser.osuUserId);
-
 			discordUser.osuBadges = additionalInfo.tournamentBadges.length;
-
-			console.log('osuBadges', discordUser.osuUserId);
 
 			if (additionalInfo.tournamentBan) {
 				discordUser.tournamentBannedReason = additionalInfo.tournamentBan.description;
 				discordUser.tournamentBannedUntil = additionalInfo.tournamentBan.tournamentBannedUntil;
 			}
 
-			console.log('tournamentBan', discordUser.osuUserId);
-
 			await discordUser.save();
 
-			console.log('saved', discordUser.osuUserId);
-
 			try {
-				console.log('getUserDuelStarRating', discordUser.osuUserId);
-
 				await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: client });
-
-				console.log('got getUserDuelStarRating', discordUser.osuUserId);
 
 				logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBDiscordUsers 2');
 				discordUser = await DBDiscordUsers.findOne({
 					where: { osuUserId: discordUserId }
 				});
 
-				console.log('got user again', discordUser.osuUserId);
-
 				let derankStats = await getDerankStats(discordUser);
 
-				console.log('got derankStats', discordUser.osuUserId);
-
 				discordUser.osuDerankRank = derankStats.expectedPpRankOsu;
-
-				console.log('set derankStats', discordUser.osuUserId);
 			} catch (e) {
 				if (e.message === 'No standard plays') {
 					discordUser.osuDuelStarRating = null;
@@ -207,14 +178,9 @@ module.exports = {
 				}
 			}
 
-			console.log('osuNotFoundFirstOccurence', discordUser.osuUserId);
-
 			discordUser.osuNotFoundFirstOccurence = null;
 			await discordUser.save();
-
-			console.log('saved again', discordUser.osuUserId);
 		} catch (error) {
-			console.log(processQueueEntry.additions, error);
 			if (error.message === 'Not found') {
 				let sendLogMessage = false;
 
