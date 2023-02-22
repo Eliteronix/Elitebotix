@@ -24,7 +24,7 @@ module.exports = {
 		discordUser.changed('updatedAt', true);
 
 		try {
-			if (!discordUser.lastOsuPlayCountChange) {
+			if (discordUser.lastOsuPlayCountChange === null) {
 				discordUser.nextOsuPPUpdate = new Date();
 				discordUser.lastOsuPPChange = new Date();
 				discordUser.lastOsuPlayCountChange = new Date();
