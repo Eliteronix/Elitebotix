@@ -2,6 +2,7 @@ const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissi
 const { logDatabaseQueries, getUserDuelStarRating, getDerankStats, getAdditionalOsuInfo } = require('../utils.js');
 const osu = require('node-osu');
 const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.json');
+const { Op } = require('sequelize');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -21,14 +22,30 @@ module.exports = {
 			where: { osuUserId: discordUserId }
 		});
 
-		console.log('updateOsuRank', discordUser.osuUserId, discordUser.id);
+		// Try to find duplicate users
+		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBDiscordUsers duplicates');
+		let duplicates = await DBDiscordUsers.findAll({
+			where: {
+				id: {
+					[Op.ne]: discordUser.id
+				},
+				osuUserId: discordUser.osuUserId
+			}
+		});
+
+		for (let i = 0; i < duplicates.length; i++) {
+			if (duplicates[i].userId) {
+				await discordUser.destroy();
+				discordUser = duplicates[i];
+			} else {
+				await duplicates[i].destroy();
+			}
+		}
 
 		discordUser.changed('updatedAt', true);
 
 		try {
-			console.log('updateOsuRank lastOsuPlayCountChange', discordUser.osuUserId, discordUser.lastOsuPlayCountChange);
 			if (discordUser.lastOsuPlayCountChange === null) {
-				console.log('updateOsuRank', 'lastOsuPlayCountChange is null', discordUser.osuUserId);
 				discordUser.nextOsuPPUpdate = new Date();
 				discordUser.lastOsuPPChange = new Date();
 				discordUser.lastOsuPlayCountChange = new Date();
