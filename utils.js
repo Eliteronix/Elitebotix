@@ -368,7 +368,7 @@ module.exports = {
 										channel.send(message);
 									}
 								}
-							}, { context: { message: `\`${discordUser.osuName}\` has received a tournament ban for \`${additionalInfo.tournamentBan.description}\`. (${bannedUntilString}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
+							}, { context: { message: `\`${discordUser.osuName}\` has received a tournament ban at <t:${Math.floor(new Date(additionalInfo.tournamentBan.timestamp).getTime() / 1000)}:f> for \`${additionalInfo.tournamentBan.description}\`. (${bannedUntilString}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
 						}
 
 						discordUser.tournamentBannedReason = additionalInfo.tournamentBan.description;
