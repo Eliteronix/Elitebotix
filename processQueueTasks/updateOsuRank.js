@@ -198,7 +198,7 @@ module.exports = {
 							channel.send(message);
 						}
 					}
-				}, { context: { message: `\`${discordUser.osuName}\` gained ${additionalInfo.tournamentBadges.length - discordUser.osuBadges} badge(s). (${discordUser.osuBadges} -> ${additionalInfo.tournamentBadges.length})` } });
+				}, { context: { message: `\`${discordUser.osuName}\` gained ${additionalInfo.tournamentBadges.length - discordUser.osuBadges} badge(s). (${discordUser.osuBadges} -> ${additionalInfo.tournamentBadges.length}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
 			}
 
 			discordUser.osuBadges = additionalInfo.tournamentBadges.length;
@@ -234,7 +234,7 @@ module.exports = {
 								channel.send(message);
 							}
 						}
-					}, { context: { message: `\`${discordUser.osuName}\` has received a tournament ban for \`${additionalInfo.tournamentBan.description}\`. (${bannedUntilString})` } });
+					}, { context: { message: `\`${discordUser.osuName}\` has received a tournament ban for \`${additionalInfo.tournamentBan.description}\`. (${bannedUntilString}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
 				}
 
 				discordUser.tournamentBannedReason = additionalInfo.tournamentBan.description;
