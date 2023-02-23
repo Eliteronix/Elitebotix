@@ -2,7 +2,7 @@ const { DBOsuMultiScores, DBDiscordUsers, DBDuelRatingHistory } = require('../db
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { Op } = require('sequelize');
 const { getIDFromPotentialOsuLink, humanReadable, getOsuPlayerName, createLeaderboard, getOsuBeatmap, logDatabaseQueries, pause } = require('../utils');
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const matchIdsGettingProcessed = [];
 
 module.exports = {
@@ -348,7 +348,7 @@ module.exports = {
 			});
 
 			for (let i = 0; i < orderedUnverifiedScores.length; i++) {
-				if (i % 25 === 0 || i === orderedUnverifiedScores.length - 1) {
+				if (i % 25 === 0) {
 					if (i !== 0) {
 						await interaction.followUp({ embeds: [unverifiedScoresEmbed] });
 					}
@@ -373,7 +373,16 @@ module.exports = {
 					value: `https://osu.ppy.sh/mp/${score.matchId}${comment}`,
 					inline: false,
 				});
+
+				if (i === orderedUnverifiedScores.length - 1) {
+					await interaction.followUp({ embeds: [unverifiedScoresEmbed] });
+				}
 			}
+
+			unverifiedScores = unverifiedScores.map(score => `https://osu.ppy.sh/mp/${score.matchId}`);
+
+			// eslint-disable-next-line no-undef
+			await interaction.followUp({ files: [new AttachmentBuilder(Buffer.from(unverifiedScores.join('\n'), 'utf-8'), { name: 'unverified-scores.txt' })] });
 		} else if (interaction.options.getSubcommand() === 'update') {
 			let matchIds = interaction.options.getString('id').split(/ +/);
 			let valid = interaction.options.getBoolean('valid');
