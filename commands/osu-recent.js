@@ -253,7 +253,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 				// eslint-disable-next-line no-undef
 				process.send('osu!API');
 				const user = await osuApi.getUser({ u: username, m: mode });
-				updateOsuDetailsforUser(user, mode);
+				updateOsuDetailsforUser(msg.client, user, mode);
 
 				let mapRank = 0;
 				//Get the map leaderboard and fill the maprank if found

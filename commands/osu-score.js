@@ -318,7 +318,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 						// eslint-disable-next-line no-undef
 						process.send('osu!API');
 						const user = await osuApi.getUser({ u: username, m: mode });
-						updateOsuDetailsforUser(user, mode);
+						updateOsuDetailsforUser(msg.client, user, mode);
 
 						//Get the map leaderboard and fill the maprank if found
 						if (!mapRank) {
@@ -540,7 +540,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 			userScores[i] = await multiToBanchoScore(userScores[i]);
 			userScores[i].mapRank = `${userScores[i].mapRank}/${beatmapScores.length - userScoreAmount + 1}`;
 
-			updateOsuDetailsforUser(osuUser, mode);
+			updateOsuDetailsforUser(msg.client, osuUser, mode);
 
 			let processingMessage = await msg.channel.send(`[${osuUser.name}] Processing...`);
 

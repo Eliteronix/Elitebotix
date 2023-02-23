@@ -724,7 +724,7 @@ module.exports = {
 					process.send('osu!API');
 					const response = await osuApi.getUser({ u: getIDFromPotentialOsuLink(teams[i].split(',')[j]), m: 0 })
 						.then(async (user) => {
-							updateOsuDetailsforUser(user, 0);
+							updateOsuDetailsforUser(interaction.client, user, 0);
 
 							logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 1');
 							const dbDiscordUser = await DBDiscordUsers.findOne({

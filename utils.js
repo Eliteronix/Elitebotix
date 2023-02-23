@@ -225,7 +225,7 @@ module.exports = {
 
 		return outputUser;
 	},
-	updateOsuDetailsforUser: async function (user, mode) {
+	updateOsuDetailsforUser: async function (client, user, mode) {
 		logDatabaseQueriesFunction(4, 'utils.js DBDiscordUsers updateOsuDetailsforUser');
 		//get discordUser from db to update pp and rank
 		DBDiscordUsers.findOne({
@@ -308,9 +308,69 @@ module.exports = {
 
 					let additionalInfo = await getAdditionalOsuInfoFunction(discordUser.osuUserId);
 
-					discordUser.badges = additionalInfo.badgeNumber;
+					if (discordUser.osuBadges !== additionalInfo.tournamentBadges.length) {
+						client.shard.broadcastEval(async (c, { message }) => {
+							let guildId = '727407178499096597';
+
+							// eslint-disable-next-line no-undef
+							if (process.env.SERVER === 'Dev') {
+								guildId = '800641468321759242';
+							}
+
+							const guild = await c.guilds.cache.get(guildId);
+							if (guild) {
+								let channelId = '1078318144914985050';
+
+								// eslint-disable-next-line no-undef
+								if (process.env.SERVER === 'Dev') {
+									channelId = '1078318144914985050';
+								}
+
+								const channel = await guild.channels.cache.get(channelId);
+
+								if (channel) {
+									channel.send(message);
+								}
+							}
+						}, { context: { message: `\`${discordUser.osuName}\` gained ${additionalInfo.tournamentBadges.length - discordUser.osuBadges} badge(s). (${discordUser.osuBadges} -> ${additionalInfo.tournamentBadges.length})` } });
+					}
+
+					discordUser.osuBadges = additionalInfo.tournamentBadges.length;
 
 					if (additionalInfo.tournamentBan) {
+						if (discordUser.tournamentBannedReason !== additionalInfo.tournamentBan.description || new Date(discordUser.tournamentBannedUntil).getTime() !== additionalInfo.tournamentBan.tournamentBannedUntil.getTime()) {
+							let bannedUntilString = 'permanent';
+
+							if (additionalInfo.tournamentBan.tournamentBannedUntil.getUTCFullYear() !== 9999) {
+								bannedUntilString = `over <t:${Math.floor(additionalInfo.tournamentBan.tournamentBannedUntil.getTime() / 1000)}:R>`;
+							}
+
+							client.shard.broadcastEval(async (c, { message }) => {
+								let guildId = '727407178499096597';
+
+								// eslint-disable-next-line no-undef
+								if (process.env.SERVER === 'Dev') {
+									guildId = '800641468321759242';
+								}
+
+								const guild = await c.guilds.cache.get(guildId);
+								if (guild) {
+									let channelId = '1078318437408968804';
+
+									// eslint-disable-next-line no-undef
+									if (process.env.SERVER === 'Dev') {
+										channelId = '1078318180302323842';
+									}
+
+									const channel = await guild.channels.cache.get(channelId);
+
+									if (channel) {
+										channel.send(message);
+									}
+								}
+							}, { context: { message: `\`${discordUser.osuName}\` has received a tournament ban for \`${additionalInfo.tournamentBan.description}\`. (${bannedUntilString})` } });
+						}
+
 						discordUser.tournamentBannedReason = additionalInfo.tournamentBan.description;
 						discordUser.tournamentBannedUntil = additionalInfo.tournamentBan.tournamentBannedUntil;
 					}
@@ -4717,6 +4777,12 @@ async function getAdditionalOsuInfoFunction(osuUserId) {
 					tournamentBans[0].tournamentBannedUntil = new Date(tournamentBans[0].timestamp);
 
 					if (tournamentBans[0].permanent) {
+						tournamentBans[0].tournamentBannedUntil.setUTCMilliseconds(999);
+						tournamentBans[0].tournamentBannedUntil.setUTCSeconds(59);
+						tournamentBans[0].tournamentBannedUntil.setUTCMinutes(59);
+						tournamentBans[0].tournamentBannedUntil.setUTCHours(23);
+						tournamentBans[0].tournamentBannedUntil.setUTCDate(31);
+						tournamentBans[0].tournamentBannedUntil.setUTCMonth(11);
 						tournamentBans[0].tournamentBannedUntil.setUTCFullYear(9999);
 					} else {
 						tournamentBans[0].tournamentBannedUntil.setUTCSeconds(tournamentBans[0].tournamentBannedUntil.getUTCSeconds() + tournamentBans[0].length);

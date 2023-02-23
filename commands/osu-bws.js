@@ -185,7 +185,7 @@ async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 	process.send('osu!API');
 	osuApi.getUser({ u: username, m: mode })
 		.then(async (user) => {
-			updateOsuDetailsforUser(user, mode);
+			updateOsuDetailsforUser(msg.client, user, mode);
 
 			let additionalInfo = await getAdditionalOsuInfo(user.id);
 

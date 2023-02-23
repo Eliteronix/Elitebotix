@@ -384,7 +384,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 		process.send('osu!API');
 		osuApi.getUser({ u: username, m: mode })
 			.then(async (user) => {
-				updateOsuDetailsforUser(user, mode);
+				updateOsuDetailsforUser(msg.client, user, mode);
 
 				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
@@ -538,7 +538,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 		process.send('osu!API');
 		osuApi.getUser({ u: username, m: mode })
 			.then(async (user) => {
-				updateOsuDetailsforUser(user, mode);
+				updateOsuDetailsforUser(msg.client, user, mode);
 
 				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
