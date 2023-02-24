@@ -391,7 +391,8 @@ module.exports = {
 							const channel = await guild.channels.cache.get(channelId);
 
 							if (channel) {
-								channel.send(message);
+								let sentMessage = await channel.send(message);
+								sentMessage.crosspost();
 							}
 						}
 					}, { context: { message: message } });
