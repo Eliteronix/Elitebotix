@@ -6226,6 +6226,7 @@ async function saveOsuMultiScoresFunction(match) {
 						playersToUpdate.push(match.games[gameIndex].scores[scoreIndex].userId);
 					}
 
+					// TODO: Bulkcreate
 					logDatabaseQueriesFunction(4, 'utils.js DBOsuMultiScores create');
 					let score = await DBOsuMultiScores.create({
 						osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
