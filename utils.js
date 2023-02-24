@@ -329,7 +329,8 @@ module.exports = {
 								const channel = await guild.channels.cache.get(channelId);
 
 								if (channel) {
-									channel.send(message);
+									let sentMessage = await channel.send(message);
+									sentMessage.crosspost();
 								}
 							}
 						}, { context: { message: `\`${discordUser.osuName}\` gained ${additionalInfo.tournamentBadges.length - discordUser.osuBadges} badge(s). (${discordUser.osuBadges} -> ${additionalInfo.tournamentBadges.length}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
@@ -365,7 +366,8 @@ module.exports = {
 									const channel = await guild.channels.cache.get(channelId);
 
 									if (channel) {
-										channel.send(message);
+										let sentMessage = await channel.send(message);
+										sentMessage.crosspost();
 									}
 								}
 							}, { context: { message: `\`${discordUser.osuName}\` has received a tournament ban at <t:${Math.floor(new Date(additionalInfo.tournamentBan.timestamp).getTime() / 1000)}:f> for \`${additionalInfo.tournamentBan.description}\`. (${bannedUntilString}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
