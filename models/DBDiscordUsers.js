@@ -94,6 +94,9 @@ module.exports = (sequelize, DataTypes) => {
 		osuRank: {
 			type: DataTypes.INTEGER,
 		},
+		osuRankPeak: {
+			type: DataTypes.INTEGER,
+		},
 		oldOsuRank: {
 			type: DataTypes.INTEGER,
 		},
@@ -125,6 +128,9 @@ module.exports = (sequelize, DataTypes) => {
 		taikoRank: {
 			type: DataTypes.INTEGER,
 		},
+		taikoRankPeak: {
+			type: DataTypes.INTEGER,
+		},
 		taikoPlayCount: {
 			type: DataTypes.INTEGER,
 			defaultValue: 0,
@@ -150,6 +156,9 @@ module.exports = (sequelize, DataTypes) => {
 		catchRank: {
 			type: DataTypes.INTEGER,
 		},
+		catchRankPeak: {
+			type: DataTypes.INTEGER,
+		},
 		catchPlayCount: {
 			type: DataTypes.INTEGER,
 			defaultValue: 0,
@@ -173,6 +182,9 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.DATE,
 		},
 		maniaRank: {
+			type: DataTypes.INTEGER,
+		},
+		maniaRankPeak: {
 			type: DataTypes.INTEGER,
 		},
 		maniaPlayCount: {
