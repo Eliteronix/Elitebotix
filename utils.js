@@ -1882,6 +1882,26 @@ module.exports = {
 
 		// eslint-disable-next-line no-console
 		console.log(`Updated ${updated[0]} Mania scores that were in the wrong mode`);
+
+		// Reset unverified scores that were checked by Elitebotix
+		let weeksAgo = new Date();
+		weeksAgo.setDate(weeksAgo.getDate() - 58);
+
+		logDatabaseQueriesFunction(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries reset unverified');
+		updated = await DBOsuMultiScores.update({
+			verifiedBy: null,
+		}, {
+			where: {
+				verifiedBy: '31050083', // Elitebotix
+				verifiedAt: null,
+				matchStartDate: {
+					[Op.gte]: weeksAgo
+				}
+			}
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Reset ${updated[0]} unverified scores that were checked by Elitebotix`);
 	},
 	wrongCluster(client, id) {
 		return wrongClusterFunction(client, id);
