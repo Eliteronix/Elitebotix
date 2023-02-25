@@ -226,7 +226,7 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 					discordUser.osuPP = osuUser.pp.raw;
 					discordUser.osuRank = osuUser.pp.rank;
 
-					let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+					let additionalInfo = await getAdditionalOsuInfo(osuUser.id, interaction.client);
 					discordUser.badges = additionalInfo.tournamentBadges.length;
 
 					discordUser.save();
@@ -249,7 +249,7 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 						verificationCode = Math.random().toString(36).substring(8);
 					}
 
-					let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+					let additionalInfo = await getAdditionalOsuInfo(osuUser.id, interaction.client);
 
 					logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers 4');
 					let existingDiscordUser = await DBDiscordUsers.findOne({
@@ -310,7 +310,7 @@ async function current(osuApi, interaction, additionalObjects, discordUser) {
 				discordUser.osuPP = osuUser.pp.raw;
 				discordUser.osuRank = osuUser.pp.rank;
 
-				let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+				let additionalInfo = await getAdditionalOsuInfo(osuUser.id, interaction.client);
 				discordUser.badges = additionalInfo.tournamentBadges.length;
 
 				discordUser.save();
@@ -364,7 +364,7 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 						discordUser.osuPP = osuUser.pp.raw;
 						discordUser.osuRank = osuUser.pp.rank;
 
-						let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+						let additionalInfo = await getAdditionalOsuInfo(osuUser.id, interaction.client);
 						discordUser.badges = additionalInfo.tournamentBadges.length;
 
 						discordUser.save();
@@ -394,7 +394,7 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 							discordUser.osuPP = osuUser.pp.raw;
 							discordUser.osuRank = osuUser.pp.rank;
 
-							let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+							let additionalInfo = await getAdditionalOsuInfo(osuUser.id, interaction.client);
 							discordUser.badges = additionalInfo.tournamentBadges.length;
 
 							discordUser.save();
@@ -437,7 +437,7 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 						discordUser.osuPP = osuUser.pp.raw;
 						discordUser.osuRank = osuUser.pp.rank;
 
-						let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+						let additionalInfo = await getAdditionalOsuInfo(osuUser.id, interaction.client);
 						discordUser.badges = additionalInfo.tournamentBadges.length;
 
 						discordUser.save();
@@ -459,7 +459,7 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 						discordUser.osuPP = osuUser.pp.raw;
 						discordUser.osuRank = osuUser.pp.rank;
 
-						let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+						let additionalInfo = await getAdditionalOsuInfo(osuUser.id, interaction.client);
 						discordUser.badges = additionalInfo.tournamentBadges.length;
 
 						discordUser.save();

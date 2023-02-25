@@ -1216,7 +1216,7 @@ module.exports = {
 				}
 
 				//Draw badges onto the canvas				
-				let additionalInfo = await getAdditionalOsuInfo(osuUser.id);
+				let additionalInfo = await getAdditionalOsuInfo(osuUser.id, interaction.client);
 
 				let yOffset = -2;
 				if (additionalInfo.badges.length < 6) {

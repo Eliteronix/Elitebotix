@@ -187,7 +187,7 @@ async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 		.then(async (user) => {
 			updateOsuDetailsforUser(msg.client, user, mode);
 
-			let additionalInfo = await getAdditionalOsuInfo(user.id);
+			let additionalInfo = await getAdditionalOsuInfo(user.id, msg.client);
 
 			let badgeAmount = additionalInfo.tournamentBadges.length;
 

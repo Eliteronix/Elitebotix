@@ -172,7 +172,7 @@ module.exports = {
 				discordUser.maniaTotalScore = maniaUser.scores.total;
 			}
 
-			let additionalInfo = await getAdditionalOsuInfo(discordUser.osuUserId);
+			let additionalInfo = await getAdditionalOsuInfo(discordUser.osuUserId, client);
 
 			if (discordUser.osuBadges !== additionalInfo.tournamentBadges.length) {
 				client.shard.broadcastEval(async (c, { message }) => {

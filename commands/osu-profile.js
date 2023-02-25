@@ -260,7 +260,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 
 				elements = await drawPlays(elements, server);
 
-				elements = await drawBadges(elements, server);
+				elements = await drawBadges(elements, server, msg.client);
 
 				elements = await drawFooter(elements, server);
 
@@ -366,7 +366,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 
 				elements = await drawPlays(elements, server);
 
-				elements = await drawBadges(elements, server);
+				elements = await drawBadges(elements, server, msg.client);
 
 				elements = await drawFooter(elements, server);
 
@@ -664,13 +664,13 @@ async function drawPlays(input, server) {
 	return output;
 }
 
-async function drawBadges(input, server) {
+async function drawBadges(input, server, client) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
 
 	if (server === 'bancho') {
-		let additionalInfo = await getAdditionalOsuInfo(user.id);
+		let additionalInfo = await getAdditionalOsuInfo(user.id, client);
 
 		let xOffset = -2;
 		if (additionalInfo.badges.length < 8) {
