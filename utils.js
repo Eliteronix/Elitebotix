@@ -6077,6 +6077,7 @@ async function saveOsuMultiScoresFunction(match) {
 	let newMatchPlayers = [];
 	let existingMatchPlayers = [];
 	let playersToUpdate = [];
+	let newScores = [];
 
 	let tourneyMatch = false;
 	if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
@@ -6226,21 +6227,19 @@ async function saveOsuMultiScoresFunction(match) {
 						playersToUpdate.push(match.games[gameIndex].scores[scoreIndex].userId);
 					}
 
-					// TODO: Bulkcreate
-					logDatabaseQueriesFunction(4, 'utils.js DBOsuMultiScores create');
-					let score = await DBOsuMultiScores.create({
+					newScores.push({
 						osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
 						matchId: match.id,
 						matchName: match.name,
 						gameId: match.games[gameIndex].id,
 						scoringType: match.games[gameIndex].scoringType,
 						mode: match.games[gameIndex].mode,
-						beatmapId: match.games[gameIndex].beatmapId,
+						beatmapId: match.games[gameIndex].beatmapId.toString(),
 						tourneyMatch: tourneyMatch,
 						evaluation: evaluation,
 						score: match.games[gameIndex].scores[scoreIndex].score,
-						gameRawMods: match.games[gameIndex].raw_mods,
-						rawMods: scoreMods,
+						gameRawMods: match.games[gameIndex].raw_mods.toString(),
+						rawMods: scoreMods.toString(),
 						matchStartDate: match.raw_start,
 						matchEndDate: match.raw_end,
 						gameStartDate: match.games[gameIndex].raw_start,
@@ -6260,54 +6259,6 @@ async function saveOsuMultiScoresFunction(match) {
 						teamType: match.games[gameIndex].teamType,
 						team: match.games[gameIndex].scores[scoreIndex].team,
 					});
-
-					//Set the tournament flags on the corresponding beatmap
-					if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
-						logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuBeatmaps tourney flags new score');
-						let dbBeatmaps = await DBOsuBeatmaps.findAll({
-							where: {
-								beatmapId: match.games[gameIndex].beatmapId,
-							}
-						});
-
-						for (let i = 0; i < dbBeatmaps.length; i++) {
-							if (!dbBeatmaps[i].tourneyMap) {
-								dbBeatmaps[i].tourneyMap = true;
-								await dbBeatmaps[i].save({ silent: true });
-							}
-
-							if (getScoreModpoolFunction(score) === 'NM' && !dbBeatmaps[i].noModMap) {
-								dbBeatmaps[i].noModMap = true;
-								await dbBeatmaps[i].save({ silent: true });
-							} else if (getScoreModpoolFunction(score) === 'HD' && !dbBeatmaps[i].hiddenMap) {
-								dbBeatmaps[i].hiddenMap = true;
-								await dbBeatmaps[i].save({ silent: true });
-							} else if (getScoreModpoolFunction(score) === 'HR' && !dbBeatmaps[i].hardRockMap) {
-								dbBeatmaps[i].hardRockMap = true;
-								await dbBeatmaps[i].save({ silent: true });
-							} else if (getScoreModpoolFunction(score) === 'DT' && !dbBeatmaps[i].doubleTimeMap) {
-								dbBeatmaps[i].doubleTimeMap = true;
-								await dbBeatmaps[i].save({ silent: true });
-							} else if (getScoreModpoolFunction(score) === 'FM' && !dbBeatmaps[i].freeModMap) {
-								dbBeatmaps[i].freeModMap = true;
-								await dbBeatmaps[i].save({ silent: true });
-							}
-						}
-					}
-
-					//Set back warmup flag if it was set by amount
-					if (scoreIndex === 0 && tourneyMatch) {
-						for (let i = 0; i < sameTournamentMatches.length; i++) {
-							if (sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup !== null
-								&& sameTournamentMatches[i].beatmapId == match.games[gameIndex].beatmapId
-								&& sameTournamentMatches[i].matchId != match.id
-								|| sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup === false
-								&& sameTournamentMatches[i].matchId != match.id) {
-								sameTournamentMatches[i].warmup = null;
-								await sameTournamentMatches[i].save();
-							}
-						}
-					}
 				} else if (existingScore.warmup === null) {
 					if (!existingMatchPlayers.includes(match.games[gameIndex].scores[scoreIndex].userId)) {
 						existingMatchPlayers.push(match.games[gameIndex].scores[scoreIndex].userId);
@@ -6390,6 +6341,138 @@ async function saveOsuMultiScoresFunction(match) {
 				scoreIndex--;
 			}
 		}
+	}
+
+	// Bulkcreate the new scores
+	if (newScores.length) {
+		logDatabaseQueriesFunction(4, 'utils.js DBOsuMultiScores create');
+		DBOsuMultiScores.bulkCreate(newScores)
+			.then(async (scores) => {
+				let beatmapModPools = [];
+
+				for (let i = 0; i < scores.length; i++) {
+					if (tourneyMatch && !match.name.startsWith('MOTD:') && scores[i].warmup === false) {
+						let existingEntry = beatmapModPools.find(x => x.beatmapId === scores[i].beatmapId && x.modPool === getScoreModpoolFunction(scores[i]));
+
+						if (!existingEntry) {
+							beatmapModPools.push({
+								beatmapId: scores[i].beatmapId,
+								modPool: getScoreModpoolFunction(scores[i]),
+							});
+						}
+					}
+				}
+
+				//Set the tournament flags on the corresponding beatmaps
+				for (let i = 0; i < beatmapModPools.length; i++) {
+					let NMBeatmaps = beatmapModPools.filter(x => x.modPool === 'NM').map(x => x.beatmapId);
+
+					if (NMBeatmaps.length) {
+						logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuBeatmaps NM tourney flags new score');
+						DBOsuBeatmaps.update({
+							noModMap: true,
+						}, {
+							where: {
+								beatmapId: {
+									[Op.in]: NMBeatmaps,
+								},
+								noModMap: {
+									[Op.not]: true,
+								}
+							},
+							silent: true,
+						});
+					}
+
+					let HDBeatmaps = beatmapModPools.filter(x => x.modPool === 'HD').map(x => x.beatmapId);
+
+					if (HDBeatmaps.length) {
+						logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuBeatmaps HD tourney flags new score');
+						DBOsuBeatmaps.update({
+							hiddenMap: true,
+						}, {
+							where: {
+								beatmapId: {
+									[Op.in]: HDBeatmaps,
+								},
+								hiddenMap: {
+									[Op.not]: true,
+								}
+							},
+							silent: true,
+						});
+					}
+
+					let HRBeatmaps = beatmapModPools.filter(x => x.modPool === 'HR').map(x => x.beatmapId);
+
+					if (HRBeatmaps.length) {
+						logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuBeatmaps HR tourney flags new score');
+						DBOsuBeatmaps.update({
+							hardRockMap: true,
+						}, {
+							where: {
+								beatmapId: {
+									[Op.in]: HRBeatmaps,
+								},
+								hardRockMap: {
+									[Op.not]: true,
+								}
+							},
+							silent: true,
+						});
+					}
+
+					let DTBeatmaps = beatmapModPools.filter(x => x.modPool === 'DT').map(x => x.beatmapId);
+
+					if (DTBeatmaps.length) {
+						logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuBeatmaps DT tourney flags new score');
+						DBOsuBeatmaps.update({
+							doubleTimeMap: true,
+						}, {
+							where: {
+								beatmapId: {
+									[Op.in]: DTBeatmaps,
+								},
+								doubleTimeMap: {
+									[Op.not]: true,
+								}
+							},
+							silent: true,
+						});
+					}
+
+					let FMBeatmaps = beatmapModPools.filter(x => x.modPool === 'FM').map(x => x.beatmapId);
+
+					if (FMBeatmaps.length) {
+						logDatabaseQueriesFunction(2, 'saveOsuMultiScores.js DBOsuBeatmaps FM tourney flags new score');
+						DBOsuBeatmaps.update({
+							freeModMap: true,
+						}, {
+							where: {
+								beatmapId: {
+									[Op.in]: FMBeatmaps,
+								},
+								freeModMap: {
+									[Op.not]: true,
+								}
+							},
+							silent: true,
+						});
+					}
+				}
+
+				//Set back warmup flag if it was set by amount
+				for (let i = 0; i < sameTournamentMatches.length; i++) {
+					if (sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup !== null
+						&& beatmapModPools.map(x => x.beatmapId).includes(sameTournamentMatches[i].beatmapId)
+						&& sameTournamentMatches[i].matchId != match.id
+						|| sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup === false
+						&& sameTournamentMatches[i].matchId != match.id) {
+						sameTournamentMatches[i].warmup = null;
+						await sameTournamentMatches[i].save();
+					}
+				}
+			});
 	}
 
 	if (tourneyMatch) {
