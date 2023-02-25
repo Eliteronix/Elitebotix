@@ -666,7 +666,12 @@ async function getResultImage(event, users) {
 		ctx.font = 'bold 25px comfortaa, sans-serif';
 		ctx.textAlign = 'left';
 		ctx.fillStyle = '#F0DBE4';
-		ctx.fillText(user.username, 100, 330 + i * 75);
+		try {
+			ctx.fillText(user.username, 100, 330 + i * 75);
+		} catch (e) {
+			console.log(user, scores[i]);
+			console.error(e);
+		}
 
 		// Draw the flag
 		try {
