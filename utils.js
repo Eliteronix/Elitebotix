@@ -1668,7 +1668,11 @@ module.exports = {
 						console.log('#', deleted, 'iteration', iterations, 'beatmapId', duplicate.beatmapId, 'mods', duplicate.mods, 'updatedAt', duplicate.updatedAt);
 
 						await new Promise(resolve => setTimeout(resolve, 500));
-						await duplicate.destroy();
+						try {
+							await duplicate.destroy();
+						} catch (e) {
+							console.error(e);
+						}
 					}
 				}
 			}
@@ -1725,7 +1729,11 @@ module.exports = {
 						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'osuUserId', duplicate.osuUserId, 'matchStartDate', duplicate.matchStartDate, 'updatedAt', duplicate.updatedAt);
 
 						await new Promise(resolve => setTimeout(resolve, 500));
-						await duplicate.destroy();
+						try {
+							await duplicate.destroy();
+						} catch (e) {
+							console.error(e);
+						}
 					}
 				}
 			}
