@@ -42,14 +42,12 @@ module.exports = {
 		const canvas = Canvas.createCanvas(261, 128);
 		const ctx = canvas.getContext('2d');
 
-
-		const eliteAvatar = await Canvas.loadImage(eliteronixUser.displayAvatarURL({ format: 'jpg' }));
+		const eliteAvatar = await Canvas.loadImage(eliteronixUser.displayAvatarURL().replace('.webp', '.png'));
 		ctx.drawImage(eliteAvatar, 0, 0, 128, canvas.height);
-		const roddyAvatar = await Canvas.loadImage(roddyUser.displayAvatarURL({ format: 'jpg' }));
+		const roddyAvatar = await Canvas.loadImage(roddyUser.displayAvatarURL().replace('.webp', '.png'));
 		ctx.drawImage(roddyAvatar, 133, 0, 128, canvas.height);
 
 		const file = new AttachmentBuilder(canvas.toBuffer(), { name: 'profileImages.jpg' });
-
 
 		//Create new embed
 		const creatorInfoEmbed = new EmbedBuilder()
