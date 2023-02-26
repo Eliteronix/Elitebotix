@@ -637,7 +637,7 @@ async function getResultImage(event, users) {
 		ctx.clip();
 
 		try {
-			const avatar = await getAvatar(user.id);
+			const avatar = await getAvatar(scores[i].user_id);
 
 			ctx.drawImage(avatar, 35, 305 + i * 75, 55, 55);
 		} catch (e) {
@@ -669,8 +669,9 @@ async function getResultImage(event, users) {
 		try {
 			ctx.fillText(user.username, 100, 330 + i * 75);
 		} catch (e) {
-			console.log(user, scores[i]);
-			console.error(e);
+			let username = await getOsuPlayerName(scores[i].user_id);
+
+			ctx.fillText(username, 100, 330 + i * 75);
 		}
 
 		// Draw the flag
