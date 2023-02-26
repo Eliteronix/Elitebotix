@@ -5556,20 +5556,20 @@ async function logDatabaseQueriesFunction(level, output) {
 		console.log('traceDatabaseQueries: ', new Date(), output);
 	}
 
-	const os = require('os');
+	// const os = require('os');
 
-	let startTotal = os.freemem() / 1000000;
+	// let startTotal = os.freemem() / 1000000;
 
-	for (let i = 0; i < 10; i++) {
-		await new Promise(resolve => setTimeout(resolve, 1000));
+	// for (let i = 0; i < 10; i++) {
+	// 	await new Promise(resolve => setTimeout(resolve, 1000));
 
-		//if 2500MiB descrease, log it
-		if (startTotal - 2500 > (os.freemem() / 1000000)) {
-			// eslint-disable-next-line no-console
-			console.log('traceDatabaseQueries: Memory usage increased by 2500MB', new Date(), (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now', output);
-			break;
-		}
-	}
+	// 	//if 2500MiB descrease, log it
+	// 	if (startTotal - 2500 > (os.freemem() / 1000000)) {
+	// 		// eslint-disable-next-line no-console
+	// 		console.log('traceDatabaseQueries: Memory usage increased by 2500MB', new Date(), (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now', output);
+	// 		break;
+	// 	}
+	// }
 }
 
 function getScoreModpoolFunction(dbScore) {
