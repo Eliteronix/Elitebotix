@@ -157,7 +157,9 @@ module.exports = {
 		process.send('osu!API');
 		osuApi.getMatch({ mp: matchId })
 			.then(async (match) => {
-				saveOsuMultiScores(match);
+				if (interaction.id) {
+					saveOsuMultiScores(match);
+				}
 				let warmups = 2;
 				let warmupsReason = `Assumed ${warmups} warmups.`;
 				if (customWarmups !== null) {
