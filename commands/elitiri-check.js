@@ -278,6 +278,9 @@ async function getBeatmap(msg, args, interaction) {
 	let command = require('./osu-beatmap.js');
 	let newArgs = [args[1]];
 	try {
+		// eslint-disable-next-line no-undef
+		process.send(`command ${command.name}`);
+
 		command.execute(msg, newArgs, interaction);
 	} catch (error) {
 		console.error(error);

@@ -2571,8 +2571,7 @@ module.exports = {
 		await updateQueueChannelsFunction(client);
 	},
 	async createNewForumPostRecords(client) {
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
+		await awaitWebRequestPermissionFunction();
 		await fetch('https://osu.ppy.sh/community/forums/55')
 			.then(async (res) => {
 				let htmlCode = await res.text();
@@ -2906,6 +2905,10 @@ module.exports = {
 										}
 										// eslint-disable-next-line no-undef
 										let scoreCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-score.js`);
+
+										// eslint-disable-next-line no-undef
+										process.send(`command ${scoreCommand.name}`);
+
 										scoreCommand.execute(msg, newArgs);
 										await new Promise(resolve => setTimeout(resolve, 5000));
 									}
@@ -2952,6 +2955,10 @@ module.exports = {
 							};
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
+
+							// eslint-disable-next-line no-undef
+							process.send(`command ${topCommand.name}`);
+
 							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].osuNumberTopPlays}`, '--tracking']);
 							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
@@ -2995,6 +3002,10 @@ module.exports = {
 							};
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
+
+							// eslint-disable-next-line no-undef
+							process.send(`command ${topCommand.name}`);
+
 							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].taikoNumberTopPlays}`, '--tracking', '--t']);
 							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
@@ -3038,6 +3049,10 @@ module.exports = {
 							};
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
+
+							// eslint-disable-next-line no-undef
+							process.send(`command ${topCommand.name}`);
+
 							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].catchNumberTopPlays}`, '--tracking', '--c']);
 							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
@@ -3081,6 +3096,10 @@ module.exports = {
 							};
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
+
+							// eslint-disable-next-line no-undef
+							process.send(`command ${topCommand.name}`);
+
 							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].maniaNumberTopPlays}`, '--tracking', '--m']);
 							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
@@ -3171,6 +3190,10 @@ module.exports = {
 							};
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
+
+							// eslint-disable-next-line no-undef
+							process.send(`command ${topCommand.name}`);
+
 							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].tournamentNumberTopPlays}`, '--tracking', '--tournaments']);
 							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
@@ -3340,8 +3363,7 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
-				// eslint-disable-next-line no-undef
-				process.send('osu! website');
+				await awaitWebRequestPermissionFunction();
 				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`);
 
 				if (res.status === 404) {
@@ -3398,8 +3420,7 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
-				// eslint-disable-next-line no-undef
-				process.send('osu! website');
+				await awaitWebRequestPermissionFunction();
 				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`);
 
 				if (res.status === 404) {
@@ -3452,8 +3473,7 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
-				// eslint-disable-next-line no-undef
-				process.send('osu! website');
+				await awaitWebRequestPermissionFunction();
 				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`);
 
 				if (res.status === 404) {
@@ -3500,8 +3520,7 @@ module.exports = {
 		try {
 			// Doesn't exist or older than 24 hours
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 6)) {
-				// eslint-disable-next-line no-undef
-				process.send('osu! website');
+				await awaitWebRequestPermissionFunction();
 				const res = await fetch(`http://s.ppy.sh/a/${osuUserId}`);
 
 				if (res.status === 404) {
@@ -3547,8 +3566,7 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path)) {
-				// eslint-disable-next-line no-undef
-				process.send('osu! website');
+				await awaitWebRequestPermissionFunction();
 				const res = await fetch(`https://assets.ppy.sh/profile-badges/${badgeName}`);
 
 				await new Promise((resolve, reject) => {
@@ -3616,7 +3634,33 @@ module.exports = {
 			}
 		}
 	},
+	async awaitWebRequestPermission() {
+		await awaitWebRequestPermissionFunction();
+	},
 };
+
+async function awaitWebRequestPermissionFunction() {
+	let randomString = Math.random().toString(36);
+
+	// eslint-disable-next-line no-undef
+	process.webRequestsWaiting.push(randomString);
+
+
+	let iterator = 0;
+	// eslint-disable-next-line no-undef
+	while (process.webRequestsWaiting.includes(randomString)) {
+		//Every 3 seconds send a message to the parent process to let it know that the bot is still waiting for a web request permission
+		if (iterator % 100 === 0) {
+			// eslint-disable-next-line no-undef
+			process.send(`osu! website ${randomString}`);
+		}
+
+		await new Promise(resolve => setTimeout(resolve, 100));
+		iterator++;
+	}
+
+	return;
+}
 
 async function getUserDuelStarRatingFunction(input) {
 	// console.log('-------------------------------------------------------------------------------------------------------------------');
@@ -4652,8 +4696,7 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, dep
 
 	try {
 		if (forceDownload || !fs.existsSync(path)) {
-			// eslint-disable-next-line no-undef
-			process.send('osu! website');
+			await awaitWebRequestPermissionFunction();
 			const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
 			await new Promise((resolve, reject) => {
 				const fileStream = fs.createWriteStream(`./maps/${beatmapId}.osu`);
@@ -4711,8 +4754,7 @@ async function getOsuPPFunction(beatmapId, modBits, accuracy, misses, combo, dep
 }
 
 async function getAdditionalOsuInfoFunction(osuUserId, client) {
-	// eslint-disable-next-line no-undef
-	process.send('osu! website');
+	await awaitWebRequestPermissionFunction();
 	return await fetch(`https://osu.ppy.sh/users/${osuUserId}/`)
 		.then(async (res) => {
 			let htmlCode = await res.text();

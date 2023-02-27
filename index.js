@@ -1,5 +1,6 @@
 const { ShardingManager } = require('discord.js');
 require('dotenv').config();
+const fs = require('fs');
 
 const http = require('http');
 const url = require('url');
@@ -159,6 +160,36 @@ const uniqueOsuUsers = new client.Gauge({
 });
 register.registerMetric(uniqueOsuUsers);
 
+const osuWebRequestsQueueLength = new client.Gauge({
+	name: 'osu_web_requests_queue_length',
+	help: 'osu! Web requests queue length',
+});
+register.registerMetric(osuWebRequestsQueueLength);
+
+const totalCommandsUsed = new client.Counter({
+	name: 'total_commands_used',
+	help: 'Total commands used',
+});
+register.registerMetric(totalCommandsUsed);
+
+const commandSpecificMetrics = [];
+
+//get all command files
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+
+//Add the commands from the command files to the client.commands collection
+for (const file of commandFiles) {
+	const commandMetrics = new client.Counter({
+		name: `command_${file.replace('.js', '').replaceAll('-', '_')}`,
+		help: `Command ${file.replace('.js', '').replaceAll('-', '_')} used`,
+		labelNames: ['command'],
+	});
+	register.registerMetric(commandMetrics);
+
+	// set a new item in the Array
+	commandSpecificMetrics.push({ command: file.replace('.js', '').replaceAll('-', '_'), counter: commandMetrics });
+}
+
 // Define the HTTP server
 const server = http.createServer(async (req, res) => {
 	// Retrieve route from request object
@@ -173,6 +204,8 @@ const server = http.createServer(async (req, res) => {
 
 // Start the HTTP server which exposes the metrics on http://localhost:8080/metrics
 server.listen(8080);
+
+let osuWebRequestQueue = [];
 
 let manager = new ShardingManager('./bot.js', {
 	// eslint-disable-next-line no-undef
@@ -208,8 +241,6 @@ manager.on('shardCreate', shard => {
 	});
 });
 
-
-
 manager.spawn()
 	.then(shards => {
 		shards.forEach(shard => {
@@ -224,16 +255,8 @@ manager.spawn()
 					setTimeout(() => {
 						amountOfApiOrOsuWebRequestsInTheLast24Hours.dec();
 					}, 86400000);
-				} else if (message === 'osu! website') {
-					amountOfOsuWebRequestsInTheLast24Hours.inc();
-					setTimeout(() => {
-						amountOfOsuWebRequestsInTheLast24Hours.dec();
-					}, 86400000);
-
-					amountOfApiOrOsuWebRequestsInTheLast24Hours.inc();
-					setTimeout(() => {
-						amountOfApiOrOsuWebRequestsInTheLast24Hours.dec();
-					}, 86400000);
+				} else if (typeof message === 'string' && message.startsWith('osu! website')) {
+					osuWebRequestQueue.push(message.replace('osu! website ', ''));
 				} else if (typeof message === 'string' && message.startsWith('saveMultiMatches')) {
 					const timeBehind = message.split(' ')[1];
 					timeBehindMatchCreation.set(parseInt(timeBehind));
@@ -325,6 +348,25 @@ manager.spawn()
 							lastRequest: Date.now()
 						});
 					}
+				} else if (typeof message === 'string' && message.startsWith('command')) {
+					let command = message.replace('command ', '').replaceAll('-', '_');
+					let commandCounter = commandSpecificMetrics.find(counter => counter.command === command);
+
+					totalCommandsUsed.inc();
+
+					if (commandCounter) {
+						commandCounter.counter.inc();
+					} else {
+						commandSpecificMetrics.push({
+							command: command,
+							counter: new client.Gauge({
+								name: `command_${command}`,
+								help: `Command ${command} used`
+							})
+						});
+
+						commandSpecificMetrics[commandSpecificMetrics.length - 1].counter.inc();
+					}
 				}
 			});
 		});
@@ -347,3 +389,25 @@ setInterval(() => {
 	uniqueDiscordUsers.set(uniqueDiscordUsersList.length);
 	uniqueOsuUsers.set(uniqueOsuUsersList.length);
 }, 5000);
+
+setInterval(() => {
+	osuWebRequestsQueueLength.set([...new Set(osuWebRequestQueue)].length);
+
+	if (osuWebRequestQueue.length) {
+		amountOfOsuWebRequestsInTheLast24Hours.inc();
+		setTimeout(() => {
+			amountOfOsuWebRequestsInTheLast24Hours.dec();
+		}, 86400000);
+
+		amountOfApiOrOsuWebRequestsInTheLast24Hours.inc();
+		setTimeout(() => {
+			amountOfApiOrOsuWebRequestsInTheLast24Hours.dec();
+		}, 86400000);
+
+		manager.shards.forEach(shard => {
+			shard.send({ type: 'osuWebRequest', data: osuWebRequestQueue[0] });
+		});
+
+		osuWebRequestQueue = osuWebRequestQueue.filter(item => item !== osuWebRequestQueue[0]);
+	}
+}, 1000);

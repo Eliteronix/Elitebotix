@@ -190,6 +190,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 					author: user,
 					channel: reaction.message.channel,
 				};
+
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(message, [page, `--${mode}`], null, additionalObjects);
 			} else {
 				message = {
@@ -199,6 +203,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 					author: user,
 					channel: reaction.message.channel,
 				};
+
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(message, [page], null, additionalObjects);
 			}
 		} else {
@@ -220,6 +228,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			const command = require('./commands/osu-duel.js');
+
+			// eslint-disable-next-line no-undef
+			process.send(`command ${command.name}`);
 
 			command.execute(null, [page], interaction, additionalObjects);
 		}
@@ -284,6 +295,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -318,6 +332,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -352,6 +369,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -403,6 +423,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -446,6 +469,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -491,6 +517,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -533,6 +562,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -580,6 +612,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -622,6 +657,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -664,6 +702,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -708,6 +749,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(null, null, interaction, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -751,6 +795,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -795,6 +842,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -841,6 +891,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(null, args, interaction, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -925,6 +978,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -985,6 +1041,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);
@@ -1045,6 +1104,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 			};
 
 			try {
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
 				command.execute(tempMessage, args, null, additionalObjects);
 			} catch (error) {
 				console.error(error);

@@ -118,6 +118,9 @@ module.exports = {
 
 		args.shift();
 
+		// eslint-disable-next-line no-undef
+		process.send(`command ${command.name}`);
+
 		command.execute(msg, args, interaction, additionalObjects);
 	},
 };

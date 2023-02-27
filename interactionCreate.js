@@ -78,6 +78,9 @@ module.exports = async function (client, bancho, interaction) {
 
 		interaction.client.cooldowns = cooldowns;
 
+		// eslint-disable-next-line no-undef
+		process.send(`command ${command.name}`);
+
 		command.execute(null, [], interaction, [client, bancho]);
 	} else if (interaction.isAutocomplete()) {
 		const command = interaction.client.commands.get(interaction.commandName);

@@ -43,6 +43,9 @@ module.exports = {
 						newArgs.push(locationArguments[i]);
 					}
 
+					// eslint-disable-next-line no-undef
+					process.send(`command ${command.name}`);
+
 					command.execute(messagesArray[messagesArray.length - 1], newArgs, null, [c, null]);
 
 					await pause(60000);
