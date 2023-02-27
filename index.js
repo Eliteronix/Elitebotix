@@ -182,7 +182,6 @@ for (const file of commandFiles) {
 	const commandMetrics = new client.Counter({
 		name: `command_${file.replace('.js', '').replaceAll('-', '_')}`,
 		help: `Command ${file.replace('.js', '').replaceAll('-', '_')} used`,
-		labelNames: ['command'],
 	});
 	register.registerMetric(commandMetrics);
 
