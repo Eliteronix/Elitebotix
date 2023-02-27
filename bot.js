@@ -130,6 +130,8 @@ client.twitchClient = null;
 
 //Get manager messages
 // eslint-disable-next-line no-undef
+process.webRequestsWaiting = [];
+// eslint-disable-next-line no-undef
 process.on('message', message => {
 	if (!message.type) return false;
 
@@ -162,6 +164,14 @@ process.on('message', message => {
 		// eslint-disable-next-line no-console
 		console.log(`[${client.shardId}] The total amount of shards is: ${message.data.totalShards}`);
 		client.totalShards = message.data.totalShards;
+	} else if (message.type == 'osuWebRequest') {
+		// eslint-disable-next-line no-undef
+		if (process.webRequestsWaiting.includes(message.data)) {
+			// Remove all instances of the message
+
+			// eslint-disable-next-line no-undef
+			process.webRequestsWaiting = process.webRequestsWaiting.filter(item => item !== message.data);
+		}
 	}
 });
 

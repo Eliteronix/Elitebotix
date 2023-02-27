@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap, getMapListCover } = require('../utils');
+const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap, getMapListCover, awaitWebRequestPermission } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -732,8 +732,7 @@ async function drawMostPlayed(input, server, mode, limit) {
 	let link;
 	let showLimit = limit;
 	if (server === 'bancho') {
-		// eslint-disable-next-line no-undef
-		process.send('osu! website');
+		await awaitWebRequestPermission();
 		link = await fetch(`https://osu.ppy.sh/users/${user.id}/beatmapsets/most_played?limit=${limit}`).then(res => res.json());
 
 		for (let i = 0; i < link.length && i < showLimit; i++) {

@@ -37,6 +37,10 @@ module.exports = {
 				if (autoTrack === 'true') {
 					// eslint-disable-next-line no-undef
 					let trackCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-matchtrack.js`);
+
+					// eslint-disable-next-line no-undef
+					process.send(`command ${trackCommand.name}`);
+
 					trackCommand.execute({ id: 1, channel: channel, author: { id: 1 }, client: c }, [matchId, '--tracking']);
 				}
 			}, {

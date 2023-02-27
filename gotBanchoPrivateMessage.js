@@ -289,6 +289,10 @@ module.exports = async function (client, bancho, message) {
 		let args = message.message.slice(9).trim().split(/ +/);
 
 		const command = require('./commands/osu-autohost.js');
+
+		// eslint-disable-next-line no-undef
+		process.send(`command ${command.name}`);
+
 		command.execute(message, args, null, [client, bancho]);
 	} else if (message.message === '!discord') {
 		message.user.sendMessage('Feel free to join the [https://discord.gg/Asz5Gfe Discord]');

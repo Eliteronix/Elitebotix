@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap, getBeatmapSlimcover, getAvatar } = require('../utils');
+const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap, getBeatmapSlimcover, getAvatar, awaitWebRequestPermission } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
@@ -166,6 +166,9 @@ module.exports = {
 
 					let matchScoreCommand = require('./osu-matchscore.js');
 
+					// eslint-disable-next-line no-undef
+					process.send(`command ${matchScoreCommand.name}`);
+
 					await matchScoreCommand.execute(null, null, {
 						id: null,
 						options: {
@@ -221,8 +224,7 @@ module.exports = {
 
 				while (!stop) {
 					try {
-						// eslint-disable-next-line no-undef
-						process.send('osu! website');
+						await awaitWebRequestPermission();
 						await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 							.then(async (res) => {
 								let htmlCode = await res.text();
@@ -249,9 +251,7 @@ module.exports = {
 									}
 
 									while (json.first_event_id !== json.events[0].id) {
-										await pause(30000);
-										// eslint-disable-next-line no-undef
-										process.send('osu! website');
+										await awaitWebRequestPermission();
 										let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
 											.then(async (res) => {
 												let htmlCode = await res.text();
@@ -488,7 +488,7 @@ module.exports = {
 						}
 						await pause(165000);
 					}
-					await pause(30000);
+					await pause(10000);
 				}
 			})
 			.catch(err => {
