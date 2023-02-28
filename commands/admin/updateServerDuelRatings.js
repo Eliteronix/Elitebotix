@@ -5,7 +5,7 @@ module.exports = {
 	name: 'updateServerDuelRatings',
 	usage: 'None',
 	async execute(interaction) {
-		await interaction.reply('Updating server duel ratings...');
+		await interaction.editReply('Updating server duel ratings...');
 		const sentMessage = await interaction.channel.send('Fetching members...');
 		await interaction.guild.members.fetch()
 			.then(async (guildMembers) => {
