@@ -526,7 +526,7 @@ module.exports = {
 			}
 		}
 
-		await new Promise(resolve => setTimeout(resolve, 30000));
+		await new Promise(resolve => setTimeout(resolve, 25000));
 
 		let lastMonth = new Date();
 		lastMonth.setUTCDate(lastMonth.getUTCMonth() - 1);
@@ -3959,10 +3959,6 @@ async function getUserDuelStarRatingFunction(input) {
 
 				let mapStarRating = adjustStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate, dbBeatmap.mods);
 
-				if (mapStarRating !== dbBeatmap.starRating) {
-					console.log(`Adjusted ${dbBeatmap.beatmapId} from ${dbBeatmap.starRating} to ${mapStarRating} with mods ${dbBeatmap.mods} (AR ${dbBeatmap.approachRate})`);
-				}
-
 				userMaps[i].starRating = mapStarRating;
 
 				userMaps[i].expectedRating = getExpectedDuelRating(userMaps[i]);
@@ -5081,6 +5077,13 @@ async function getOsuBeatmapFunction(input) {
 				lastRework.setUTCDate(13);
 			}
 
+			//Date of reworked EZ / HR + DT / HT values
+			if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('HT')) {
+				lastRework.setUTCFullYear(2023);
+				lastRework.setUTCMonth(2);
+				lastRework.setUTCDate(1);
+			}
+
 			//Fucked up Not found partially, this should make the process faster
 			if (dbBeatmap && dbBeatmap.approvalStatus === 'Not found') {
 				lastRework.setUTCFullYear(2022);
@@ -5136,10 +5139,26 @@ async function getOsuBeatmapFunction(input) {
 						let drainLength = beatmaps[0].length.drain;
 						let totalLength = beatmaps[0].length.total;
 
+						//EZ
+						if (getModsFunction(modBits).includes('EZ')) {
+							cs = parseFloat(cs) / 2;
+							ar = parseFloat(ar) / 2;
+							od = parseFloat(od) / 2;
+							hpDrain = parseFloat(hpDrain) / 2;
+						}
+
+						//HR
+						if (getModsFunction(modBits).includes('HR')) {
+							cs = parseFloat(cs) * 1.3;
+							ar = parseFloat(ar) * 1.4;
+							od = parseFloat(od) * 1.4;
+							hpDrain = parseFloat(hpDrain) * 1.4;
+						}
+
 						if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('NC')) {
-							bpm = parseFloat(beatmaps[0].bpm) * 1.5;
-							drainLength = parseFloat(beatmaps[0].length.drain) / 1.5;
-							totalLength = parseFloat(beatmaps[0].length.total) / 1.5;
+							bpm = parseFloat(bpm) * 1.5;
+							drainLength = parseFloat(drainLength) / 1.5;
+							totalLength = parseFloat(totalLength) / 1.5;
 							let ms;
 							if (ar > 5) {
 								ms = 200 + (11 - ar) * 100;
@@ -5170,17 +5189,9 @@ async function getOsuBeatmapFunction(input) {
 							if (ar <= 5) ar = (ar0_ms - ar_ms) / ar_ms_step1;
 							else ar = 5 + (ar5_ms - ar_ms) / ar_ms_step2;
 
-							bpm = parseFloat(beatmaps[0].bpm) * 0.75;
-							drainLength = parseFloat(beatmaps[0].length.drain) / 0.75;
-							totalLength = parseFloat(beatmaps[0].length.total) / 0.75;
-						}
-
-						//HR
-						if (getModsFunction(modBits).includes('HR')) {
-							cs = parseFloat(beatmaps[0].difficulty.size) * 1.3;
-							ar = parseFloat(beatmaps[0].difficulty.approach) * 1.4;
-							od = parseFloat(beatmaps[0].difficulty.overall) * 1.4;
-							hpDrain = parseFloat(beatmaps[0].difficulty.drain) * 1.4;
+							bpm = parseFloat(bpm) * 0.75;
+							drainLength = parseFloat(drainLength) / 0.75;
+							totalLength = parseFloat(totalLength) / 0.75;
 						}
 
 						//Limit AR to 10 if not DT or NC
@@ -5196,14 +5207,6 @@ async function getOsuBeatmapFunction(input) {
 						//Limit HP to 10 if not DT or NC
 						if (hpDrain > 10 && !getModsFunction(modBits).includes('DT') && !getModsFunction(modBits).includes('NC')) {
 							hpDrain = 10;
-						}
-
-						//EZ
-						if (getModsFunction(modBits).includes('EZ')) {
-							cs = parseFloat(beatmaps[0].difficulty.size) / 2;
-							ar = parseFloat(beatmaps[0].difficulty.approach) / 2;
-							od = parseFloat(beatmaps[0].difficulty.overall) / 2;
-							hpDrain = parseFloat(beatmaps[0].difficulty.drain) / 2;
 						}
 
 						cs = Math.min(Math.round(cs * 100) / 100, 10);
@@ -7143,6 +7146,8 @@ async function getValidTournamentBeatmapFunction(input) {
 		// refresh the map
 		if (modPool == 'NM') {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 0 });
+
+			randomBeatmap.starRating = adjustStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate, 0);
 		} else if (modPool == 'HD') {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 8 });
 
@@ -7154,10 +7159,14 @@ async function getValidTournamentBeatmapFunction(input) {
 			randomBeatmap.starRating = adjustStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate, 8);
 		} else if (modPool == 'HR') {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 16 });
+
+			randomBeatmap.starRating = adjustStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate, 16);
 		} else if (modPool == 'DT') {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 64 });
+
+			randomBeatmap.starRating = adjustStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate, 64);
 		} else if (modPool == 'FM') {
-			randomBeatmap = await getOsuBeatmapFunction({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 8 });
+			randomBeatmap = await getOsuBeatmapFunction({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 0 });
 
 			if (!randomBeatmap) {
 				beatmaps.splice(index, 1);
@@ -7171,6 +7180,8 @@ async function getValidTournamentBeatmapFunction(input) {
 				beatmaps.splice(index, 1);
 				continue;
 			}
+
+			randomBeatmapHR.starRating = adjustStarRatingFunction(randomBeatmapHR.starRating, randomBeatmapHR.approachRate, 16);
 
 			randomBeatmap.starRating = (HDStarRating + randomBeatmapHR.starRating) / 2;
 		}
