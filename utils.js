@@ -6588,7 +6588,10 @@ async function saveOsuMultiScoresFunction(match) {
 					});
 			} catch (e) {
 				if (retries === 4) {
-					console.error(e);
+					// Create an import task again
+					let date = new Date();
+					date.setMinutes(date.getMinutes() + 5);
+					await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: match.id, priority: 1, date: date });
 				}
 			}
 		}
