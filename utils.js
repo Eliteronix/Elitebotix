@@ -1008,9 +1008,6 @@ module.exports = {
 			return { name: 'Unranked', imageName: 'unranked', color: '#FF6552' };
 		}
 	},
-	adjustHDStarRating(starRating, approachRate) {
-		return adjustHDStarRatingFunction(starRating, approachRate);
-	},
 	async twitchConnect(client, bancho) {
 		if (wrongClusterFunction(client)) {
 			return;
@@ -3890,16 +3887,14 @@ async function getUserDuelStarRatingFunction(input) {
 			// NM: 0, HD: 0, HR: 16, DT: 64, FM: Calculated
 			let mods = 0;
 
-			if (modPools[modIndex] === 'HR') {
+			if (modPools[modIndex] === 'HD') {
+				mods = 8;
+			} else if (modPools[modIndex] === 'HR') {
 				mods = 16;
 			} else if (modPools[modIndex] === 'DT') {
 				mods = 64;
 			} else if (modPools[modIndex] === 'FM') {
 				mods = getModsFunction(userMaps[i].modBits);
-
-				if (mods.includes('EZ')) {
-					mods.splice(mods.indexOf('EZ'), 1);
-				}
 
 				if (mods.length === 0) {
 					mods = 0;
@@ -3962,12 +3957,7 @@ async function getUserDuelStarRatingFunction(input) {
 				userMaps[i].underPerformWeight = underPerformWeight;
 				userMaps[i].weight = Math.abs(overPerformWeight + underPerformWeight - 1);
 
-				let mapStarRating = dbBeatmap.starRating;
-				if (modPools[modIndex] === 'HD') {
-					mapStarRating = adjustHDStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate);
-				} else if (modPools[modIndex] === 'FM' && getModsFunction(dbBeatmap.mods).includes('HD') && !getModsFunction(dbBeatmap.mods).includes('DT')) {
-					mapStarRating = adjustHDStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate);
-				}
+				let mapStarRating = adjustStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate, dbBeatmap.mods);
 
 				userMaps[i].starRating = mapStarRating;
 
@@ -5695,19 +5685,49 @@ function applyOsuDuelStarratingCorrection(rating, score, weight) {
 	return newRating;
 }
 
-function adjustHDStarRatingFunction(starRating, approachRate) {
-
-	//Adapt starRating from 0.2 to 0.75 depending on the AR for the HD modpool only
+function adjustStarRatingFunction(starRating, approachRate, mods) {
 	approachRate = parseFloat(approachRate);
-	if (approachRate < 7.5) {
-		approachRate = 7.5;
-	} else if (approachRate > 9) {
-		approachRate = 9;
+
+	if (getModsFunction(mods).includes('HD') && approachRate <= 10) {
+		// Adapt star rating from 0.0 to 0.2 depending on the AR for the HD modpool only
+		if (approachRate > 9) {
+			let starRatingAdjust = 0.2 * (10 - approachRate);
+
+			return parseFloat(starRating) + starRatingAdjust;
+		}
+
+
+		//Adapt starRating from 0.2 to 1.5 depending on the AR for the HD modpool only
+		//Cap at AR 5
+		if (approachRate < 5) {
+			approachRate = 5;
+		}
+
+		let starRatingAdjust = 0.2 + (1.3 * (9 - approachRate) / 4);
+
+		return parseFloat(starRating) + starRatingAdjust;
 	}
 
-	let starRatingAdjust = (0.55 / 1.5 * Math.abs(approachRate - 9)) + 0.2;
+	// Does not include HD
+	// Adapt star rating from 0.0 to 0.5 depending on the AR
+	if (approachRate > 10) {
+		let starRatingAdjust = 0.5 * (11 - approachRate);
 
-	return parseFloat(starRating) + starRatingAdjust;
+		return parseFloat(starRating) + starRatingAdjust;
+	}
+
+	//Adapt starRating from 0.0 to 1.0 depending on the AR
+	if (approachRate < 9) {
+		if (approachRate < 5) {
+			approachRate = 5;
+		}
+
+		let starRatingAdjust = 1.0 * (9 - approachRate) / 4;
+
+		return parseFloat(starRating) + starRatingAdjust;
+	}
+
+	return parseFloat(starRating);
 }
 
 function getAccuracyFunction(score, mode) {
@@ -7120,27 +7140,27 @@ async function getValidTournamentBeatmapFunction(input) {
 		if (modPool == 'NM') {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 0 });
 		} else if (modPool == 'HD') {
-			randomBeatmap = await getOsuBeatmapFunction({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 0 });
+			randomBeatmap = await getOsuBeatmapFunction({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 8 });
 
 			if (!randomBeatmap) {
 				beatmaps.splice(index, 1);
 				continue;
 			}
 
-			randomBeatmap.starRating = adjustHDStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate);
+			randomBeatmap.starRating = adjustStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate, 8);
 		} else if (modPool == 'HR') {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 16 });
 		} else if (modPool == 'DT') {
 			randomBeatmap = await getOsuBeatmapFunction({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 64 });
 		} else if (modPool == 'FM') {
-			randomBeatmap = await getOsuBeatmapFunction({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 0 });
+			randomBeatmap = await getOsuBeatmapFunction({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 8 });
 
 			if (!randomBeatmap) {
 				beatmaps.splice(index, 1);
 				continue;
 			}
 
-			let HDStarRating = adjustHDStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate);
+			let HDStarRating = adjustStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate, 8);
 			let randomBeatmapHR = await getOsuBeatmapFunction({ beatmapId: randomBeatmap.beatmapId, modBits: 16 });
 
 			if (!randomBeatmapHR) {
