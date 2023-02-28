@@ -5078,7 +5078,7 @@ async function getOsuBeatmapFunction(input) {
 			}
 
 			//Date of reworked EZ / HR + DT / HT values
-			if (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('HT')) {
+			if ((getModsFunction(modBits).includes('EZ') || getModsFunction(modBits).includes('HR')) && (getModsFunction(modBits).includes('DT') || getModsFunction(modBits).includes('NC') || getModsFunction(modBits).includes('HT'))) {
 				lastRework.setUTCFullYear(2023);
 				lastRework.setUTCMonth(2);
 				lastRework.setUTCDate(1);
