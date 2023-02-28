@@ -3959,6 +3959,10 @@ async function getUserDuelStarRatingFunction(input) {
 
 				let mapStarRating = adjustStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate, dbBeatmap.mods);
 
+				if (mapStarRating !== dbBeatmap.starRating) {
+					console.log(`Adjusted ${dbBeatmap.beatmapId} from ${dbBeatmap.starRating} to ${mapStarRating} with mods ${dbBeatmap.mods} (AR ${dbBeatmap.approachRate})`);
+				}
+
 				userMaps[i].starRating = mapStarRating;
 
 				userMaps[i].expectedRating = getExpectedDuelRating(userMaps[i]);
@@ -5709,9 +5713,9 @@ function adjustStarRatingFunction(starRating, approachRate, mods) {
 	}
 
 	// Does not include HD
-	// Adapt star rating from 0.0 to 0.5 depending on the AR
+	// Adapt star rating from 0.0 to 0.75 depending on the AR
 	if (approachRate > 10) {
-		let starRatingAdjust = 0.5 * (11 - approachRate);
+		let starRatingAdjust = 0.75 - (0.75 * (11 - approachRate));
 
 		return parseFloat(starRating) + starRatingAdjust;
 	}
