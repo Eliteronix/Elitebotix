@@ -449,7 +449,7 @@ module.exports = {
 														embed.setURL(`https://osu.ppy.sh/mp/${match.id}`);
 													}
 
-													lastMessage.edit({ embeds: [embed] });
+													await lastMessage.edit({ embeds: [embed] });
 												}
 
 
