@@ -6454,7 +6454,8 @@ async function saveOsuMultiScoresFunction(match) {
 
 	// Bulkcreate the new scores
 	if (newScores.length) {
-		for (let retries = 0; retries < 5; retries++) {
+		let created = false;
+		while (!created) {
 			try {
 				logDatabaseQueriesFunction(4, 'utils.js DBOsuMultiScores create');
 				await DBOsuMultiScores.bulkCreate(newScores)
@@ -6584,15 +6585,10 @@ async function saveOsuMultiScoresFunction(match) {
 							}
 						}
 
-						retries = Infinity;
+						created = true;
 					});
 			} catch (e) {
-				if (retries === 4) {
-					// Create an import task again
-					let date = new Date();
-					date.setMinutes(date.getMinutes() + 5);
-					await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: match.id, priority: 1, date: date });
-				}
+				await new Promise(resolve => setTimeout(resolve, 5000));
 			}
 		}
 	}
