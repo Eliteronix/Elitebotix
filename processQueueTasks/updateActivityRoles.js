@@ -101,7 +101,7 @@ module.exports = {
 											await member.roles.add(activityRoleObjects[j]);
 										}
 									} catch (e) {
-										if (e.message === 'Missing Access') {
+										if (e.message === 'Missing Access' || e.message === 'Missing Permissions') {
 											if (!missingPermissionsMessage) {
 												const owner = await member.client.users.fetch(member.guild.ownerId);
 												if (owner) {
@@ -121,7 +121,7 @@ module.exports = {
 											await member.roles.remove(activityRoleObjects[j]);
 										}
 									} catch (e) {
-										if (e.message === 'Missing Access') {
+										if (e.message === 'Missing Access' || e.message === 'Missing Permissions') {
 											if (!missingPermissionsMessage) {
 												const owner = await member.client.users.fetch(member.guild.ownerId);
 												if (owner) {
