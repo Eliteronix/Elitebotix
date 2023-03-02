@@ -105,7 +105,7 @@ module.exports = {
 											if (!missingPermissionsMessage) {
 												const owner = await member.client.users.fetch(member.guild.ownerId);
 												if (owner) {
-													owner.send(`I could not assign an activityrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
+													owner.send(`I could not assign an activityrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\` or because the role is higher than my highest role.`);
 													missingPermissionsMessage = true;
 												}
 											}
@@ -125,7 +125,7 @@ module.exports = {
 											if (!missingPermissionsMessage) {
 												const owner = await member.client.users.fetch(member.guild.ownerId);
 												if (owner) {
-													owner.send(`I could not remove an activityrole from an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
+													owner.send(`I could not remove an activityrole from an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\` or because the role is higher than my highest role.`);
 													missingPermissionsMessage = true;
 												}
 											}
