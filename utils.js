@@ -1257,19 +1257,23 @@ module.exports = {
 
 						let dbBeatmap = await getOsuBeatmapFunction({ beatmapId: map, modBits: 0 });
 
-						bancho.lastUserMaps.set(discordUser.osuUserId, { beatmapId: map, modBits: 0 });
+						if (dbBeatmap) {
+							bancho.lastUserMaps.set(discordUser.osuUserId, { beatmapId: map, modBits: 0 });
 
-						let mainMessage = `${prefix}${context['display-name']} -> [${dbBeatmap.approvalStatus}] [https://osu.ppy.sh/b/${dbBeatmap.beatmapId} ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}]] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`;
-						await IRCUser.sendMessage(mainMessage);
-						if (message) {
-							let comment = `${prefix}${context['display-name']} -> Comment: ${message}`;
-							await IRCUser.sendMessage(comment);
-							bancho.sentRequests.push({ osuUserId: discordUser.osuUserId, main: mainMessage, comment: comment });
+							let mainMessage = `${prefix}${context['display-name']} -> [${dbBeatmap.approvalStatus}] [https://osu.ppy.sh/b/${dbBeatmap.beatmapId} ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}]] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`;
+							await IRCUser.sendMessage(mainMessage);
+							if (message) {
+								let comment = `${prefix}${context['display-name']} -> Comment: ${message}`;
+								await IRCUser.sendMessage(comment);
+								bancho.sentRequests.push({ osuUserId: discordUser.osuUserId, main: mainMessage, comment: comment });
+							} else {
+								bancho.sentRequests.push({ osuUserId: discordUser.osuUserId, main: mainMessage });
+							}
+
+							twitchClient.say(target.substring(1), `${context['display-name']} -> [${dbBeatmap.approvalStatus}] ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);
 						} else {
-							bancho.sentRequests.push({ osuUserId: discordUser.osuUserId, main: mainMessage });
+							twitchClient.say(target.substring(1), `${context['display-name']} -> Map not found.`);
 						}
-
-						twitchClient.say(target.substring(1), `${context['display-name']} -> [${dbBeatmap.approvalStatus}] ${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}] (mapped by ${dbBeatmap.mapper}) | ${Math.round(dbBeatmap.starRating * 100) / 100}* | ${dbBeatmap.bpm} BPM`);
 					}
 				} catch (error) {
 					if (error.message !== 'Currently disconnected!') {
