@@ -330,8 +330,12 @@ module.exports = {
 				}
 			}
 
-			if (!tourneysPlayed.includes(multiScores[i].matchName.replace(/:.*/gm, ''))) {
-				tourneysPlayed.push(multiScores[i].matchName.replace(/:.*/gm, ''));
+			if (multiScores[i].matchName.startsWith('ETX:') || multiScores[i].matchName.startsWith('ETX Teams:') || multiScores[i].matchName.startsWith('o!mm Ranked:') || multiScores[i].matchName.startsWith('o!mm Team Ranked:') || multiScores[i].matchName.startsWith('o!mm Private:') || multiScores[i].matchName.startsWith('o!mm Team Private:')) {
+				continue;
+			}
+
+			if (!tourneysPlayed.includes(multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, ''))) {
+				tourneysPlayed.push(multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, ''));
 			}
 		}
 

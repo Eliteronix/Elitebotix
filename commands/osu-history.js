@@ -200,6 +200,10 @@ module.exports = {
 		hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
 
 		for (let i = 0; i < multiScores.length; i++) {
+			if (parseInt(multiScores[i].score) <= 10000) {
+				continue;
+			}
+
 			if (new Date() - lastUpdate > 15000) {
 				interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
 				lastUpdate = new Date();
@@ -414,7 +418,7 @@ module.exports = {
 					}
 				}
 			} else {
-				if (parseInt(multiScores[i].score) > 10000 && multiScores[i].teamType !== 'Tag Team vs' && multiScores[i].teamType !== 'Tag Co-op') {
+				if (multiScores[i].teamType !== 'Tag Team vs' && multiScores[i].teamType !== 'Tag Co-op') {
 					if (parseInt(multiScores[i].gameRawMods) % 2 === 1) {
 						multiScores[i].gameRawMods = parseInt(multiScores[i].gameRawMods) - 1;
 					}
@@ -430,9 +434,86 @@ module.exports = {
 				}
 			}
 
-			if (!tourneysPlayed.includes(multiScores[i].matchName.replace(/:.*/gm, ''))) {
-				tourneysPlayed.push(multiScores[i].matchName.replace(/:.*/gm, ''));
+			if (multiScores[i].matchName.startsWith('ETX:') || multiScores[i].matchName.startsWith('ETX Teams:') || multiScores[i].matchName.startsWith('o!mm Ranked:') || multiScores[i].matchName.startsWith('o!mm Team Ranked:') || multiScores[i].matchName.startsWith('o!mm Private:') || multiScores[i].matchName.startsWith('o!mm Team Private:')) {
+				continue;
 			}
+
+			let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, '').toLowerCase());
+
+			if (!tourneyEntry) {
+				tourneysPlayed.push({ acronym: multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, ''), matches: [multiScores[i].matchId], teammates: [], date: multiScores[i].matchStartDate });
+			} else if (!tourneyEntry.matches.includes(multiScores[i].matchId)) {
+				tourneyEntry.matches.push(multiScores[i].matchId);
+			}
+
+			if (multiScores[i].teamType === 'Team vs') {
+				let matchScores = multiScores.filter(score => score.matchId === multiScores[i].matchId);
+
+				let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
+
+				let team = ownScores[0].team;
+
+				let currentUserScores = matchScores.filter(score => score.osuUserId === multiScores[i].osuUserId);
+
+				let currentUserTeam = currentUserScores[0].team;
+
+				if (team === currentUserTeam) {
+					let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, '').toLowerCase());
+
+					if (!tourneyEntry.teammates.includes(multiScores[i].osuUserId)) {
+						tourneyEntry.teammates.push(multiScores[i].osuUserId);
+					}
+				}
+			}
+		}
+
+		for (let i = 0; i < tourneysPlayed.length; i++) {
+			continue;
+			let team = tourneysPlayed[i].teammates;
+
+			for (let j = 0; j < team.length; j++) {
+				team[j] = await getOsuPlayerName(team[j]);
+
+				if (team[j] === null) {
+					team[j] = '[Redacted]';
+				}
+			}
+
+			let teamString = 'Team: Unknown';
+
+			if (team.length) {
+				teamString = `Team: ${team.join(', ')}`;
+			} else if (team.length === 0 && tourneysPlayed[i].matches.length > 1) {
+				teamString = 'Solo';
+			} else {
+				let daysBefore = new Date(tourneysPlayed[i].date);
+				daysBefore.setDate(daysBefore.getDate() - 7);
+
+				let daysAfter = new Date(tourneysPlayed[i].date);
+				daysAfter.setDate(daysAfter.getDate() + 7);
+
+				let tourneyScores = await DBOsuMultiScores.findAll({
+					where: {
+						matchName: {
+							[Op.like]: `${tourneysPlayed[i].acronym}:%`,
+						},
+						matchStartDate: {
+							[Op.between]: [daysBefore, daysAfter],
+						},
+					},
+					order: [['matchStartDate', 'DESC']],
+				});
+
+				let matchesToFindOutFormat = tourneyScores.filter(score => !score.matchName.includes('Qualifiers'));
+
+				if (matchesToFindOutFormat.length > 0) {
+					if (matchesToFindOutFormat[0].teamType === 'Head to Head') {
+						teamString = 'Solo';
+					}
+				}
+			}
+
+			console.log(`${tourneysPlayed[i].acronym} - ${teamString} - ${tourneysPlayed[i].matches.length} matches`);
 		}
 
 		if (!onlymatchhistory) {
