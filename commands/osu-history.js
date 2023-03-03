@@ -58,11 +58,24 @@ module.exports = {
 					'en-US': 'Only show the match history',
 				})
 				.setRequired(false)
+		)
+		.addBooleanOption(option =>
+			option.setName('showtournamentdetails')
+				.setNameLocalizations({
+					'de': 'zeigeturnierdetails',
+					'en-GB': 'showtournamentdetails',
+					'en-US': 'showtournamentdetails',
+				})
+				.setDescription('Show the details of the tournaments')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt die Details der Turniere an',
+					'en-GB': 'Show the details of the tournaments',
+					'en-US': 'Show the details of the tournaments',
+				})
+				.setRequired(false)
 		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
-		//TODO: all tournaments and their results
-
 		try {
 			await interaction.deferReply();
 		} catch (error) {
@@ -324,7 +337,6 @@ module.exports = {
 					}
 				} else {
 					mostPlayedWith.push({
-						osuName: await getOsuPlayerName(multiScores[i].osuUserId),
 						osuUserId: multiScores[i].osuUserId,
 						amount: 1,
 						matches: [multiScores[i].matchId],
@@ -392,7 +404,6 @@ module.exports = {
 							}
 						} else {
 							mostWonAgainst.push({
-								osuName: await getOsuPlayerName(multiScores[i].osuUserId),
 								osuUserId: multiScores[i].osuUserId,
 								amount: 1,
 								matches: [multiScores[i].matchId],
@@ -409,7 +420,6 @@ module.exports = {
 							}
 						} else {
 							mostLostAgainst.push({
-								osuName: await getOsuPlayerName(multiScores[i].osuUserId),
 								osuUserId: multiScores[i].osuUserId,
 								amount: 1,
 								matches: [multiScores[i].matchId],
@@ -467,77 +477,118 @@ module.exports = {
 			}
 		}
 
-		for (let i = 0; i < tourneysPlayed.length; i++) {
-			continue;
-			let team = tourneysPlayed[i].teammates;
+		let players = [...new Set(multiScores.map(score => score.osuUserId))];
 
-			for (let j = 0; j < team.length; j++) {
-				team[j] = await getOsuPlayerName(team[j]);
-
-				if (team[j] === null) {
-					team[j] = '[Redacted]';
+		let discordUsers = await DBDiscordUsers.findAll({
+			where: {
+				osuUserId: {
+					[Op.in]: players,
 				}
-			}
+			},
+		});
 
-			let teamString = 'Team: Unknown';
+		for (let i = 0; i < players.length; i++) {
+			players[i] = {
+				osuUserId: players[i],
+				osuName: discordUsers.find(user => user.osuUserId === players[i]) ? discordUsers.find(user => user.osuUserId === players[i]).osuName : await getOsuPlayerName(players[i]),
+			};
+		}
 
-			if (team.length) {
-				teamString = `Team: ${team.join(', ')}`;
-			} else if (team.length === 0 && tourneysPlayed[i].matches.length > 1) {
-				teamString = 'Solo';
-			} else {
-				let daysBefore = new Date(tourneysPlayed[i].date);
-				daysBefore.setDate(daysBefore.getDate() - 7);
+		if (interaction.options.getBoolean('showtournamentdetails')) {
+			for (let i = 0; i < tourneysPlayed.length; i++) {
+				let team = tourneysPlayed[i].teammates;
 
-				let daysAfter = new Date(tourneysPlayed[i].date);
-				daysAfter.setDate(daysAfter.getDate() + 7);
+				let weeksAgo = new Date();
+				weeksAgo.setDate(weeksAgo.getDate() - 14);
 
-				let tourneyScores = await DBOsuMultiScores.findAll({
-					where: {
-						matchName: {
-							[Op.like]: `${tourneysPlayed[i].acronym}:%`,
-						},
-						matchStartDate: {
-							[Op.between]: [daysBefore, daysAfter],
-						},
-					},
-					order: [['matchStartDate', 'DESC']],
-				});
+				if (tourneysPlayed[i].date > weeksAgo) {
+					tourneysPlayed[i].result = 'Ongoing';
+				}
 
-				let matchesToFindOutFormat = tourneyScores.filter(score => !score.matchName.includes('Qualifiers'));
+				for (let j = 0; j < team.length; j++) {
+					team[j] = players.find(player => player.osuUserId === team[j]).osuName;
 
-				if (matchesToFindOutFormat.length > 0) {
-					if (matchesToFindOutFormat[0].teamType === 'Head to Head') {
-						teamString = 'Solo';
+					if (team[j] === null) {
+						team[j] = '<Redacted>';
 					}
 				}
-			}
 
-			console.log(`${tourneysPlayed[i].acronym} - ${teamString} - ${tourneysPlayed[i].matches.length} matches`);
+				if (team.length > 1) {
+					tourneysPlayed[i].team = `Team: ${team.join(', ')}`;
+				} else if (team.length === 0 && tourneysPlayed[i].matches.length > 1 || team.length === 1) {
+					tourneysPlayed[i].team = 'Solo';
+				} else {
+					let daysBefore = new Date(tourneysPlayed[i].date);
+					daysBefore.setDate(daysBefore.getDate() - 7);
+
+					let daysAfter = new Date(tourneysPlayed[i].date);
+					daysAfter.setDate(daysAfter.getDate() + 7);
+
+					let tourneyScores = await DBOsuMultiScores.findAll({
+						where: {
+							matchName: {
+								[Op.like]: `${tourneysPlayed[i].acronym}:%`,
+							},
+							matchStartDate: {
+								[Op.between]: [daysBefore, daysAfter],
+							},
+						},
+						order: [['matchStartDate', 'DESC']],
+					});
+
+					let matchesToFindOutFormat = tourneyScores.filter(score => !score.matchName.includes('Qualifiers'));
+
+					if (matchesToFindOutFormat.length > 0) {
+						if (matchesToFindOutFormat[0].teamType === 'Head to Head') {
+							tourneysPlayed[i].team = 'Solo';
+						}
+
+						tourneysPlayed[i].team = 'Team: unknown';
+					} else {
+						if (!tourneysPlayed[i].result) {
+							tourneysPlayed[i].result = 'No matches past qualifiers found';
+						}
+					}
+				}
+
+				if (!tourneysPlayed[i].team) {
+					tourneysPlayed[i].team = 'Format & Team unknown';
+				}
+
+				if (!tourneysPlayed[i].result) {
+					tourneysPlayed[i].result = 'Unknown';
+				}
+			}
 		}
 
 		if (!onlymatchhistory) {
 			mostPlayedWith.sort((a, b) => b.amount - a.amount);
 
 			for (let i = 0; i < mostPlayedWith.length; i++) {
+				mostPlayedWith[i].osuName = players.find(player => player.osuUserId === mostPlayedWith[i].osuUserId).osuName;
+
 				if (mostPlayedWith[i].osuName === null) {
-					mostPlayedWith[i].osuName = '[Redacted]';
+					mostPlayedWith[i].osuName = '<Redacted>';
 				}
 			}
 
 			mostWonAgainst.sort((a, b) => b.amount - a.amount);
 
 			for (let i = 0; i < mostWonAgainst.length; i++) {
+				mostWonAgainst[i].osuName = players.find(player => player.osuUserId === mostWonAgainst[i].osuUserId).osuName;
+
 				if (mostWonAgainst[i].osuName === null) {
-					mostWonAgainst[i].osuName = '[Redacted]';
+					mostWonAgainst[i].osuName = '<Redacted>';
 				}
 			}
 
 			mostLostAgainst.sort((a, b) => b.amount - a.amount);
 
 			for (let i = 0; i < mostLostAgainst.length; i++) {
+				mostLostAgainst[i].osuName = players.find(player => player.osuUserId === mostLostAgainst[i].osuUserId).osuName;
+
 				if (mostLostAgainst[i].osuName === null) {
-					mostLostAgainst[i].osuName = '[Redacted]';
+					mostLostAgainst[i].osuName = '<Redacted>';
 				}
 			}
 
@@ -642,9 +693,15 @@ module.exports = {
 				bronzeHistory.push(bronzeRating);
 			}
 
+			let additionalHeight = 0;
+
+			if (interaction.options.getBoolean('showtournamentdetails')) {
+				additionalHeight = tourneysPlayed.length * 70 + 50;
+			}
+
 			// Draw the image
 			const canvasWidth = 1000;
-			const canvasHeight = 775;
+			const canvasHeight = 775 + additionalHeight;
 
 			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
 
@@ -759,6 +816,17 @@ module.exports = {
 			ctx.textAlign = 'left';
 			let today = new Date().toLocaleDateString();
 			ctx.fillText(`Made by Elitebotix on ${today}`, 10, canvas.height - 10);
+
+			if (interaction.options.getBoolean('showtournamentdetails')) {
+				for (let i = 0; i < tourneysPlayed.length; i++) {
+					ctx.font = '22px comfortaa, sans-serif';
+					ctx.fillStyle = '#ffffff';
+					ctx.textAlign = 'left';
+					ctx.fillText(`${tourneysPlayed[i].acronym} - ${tourneysPlayed[i].result}`, 50, 775 + i * 70, 900);
+					ctx.font = '20px comfortaa, sans-serif';
+					ctx.fillText(tourneysPlayed[i].team, 50, 800 + i * 70, 900);
+				}
+			}
 
 			//Get a circle in the middle for inserting the player avatar
 			ctx.beginPath();

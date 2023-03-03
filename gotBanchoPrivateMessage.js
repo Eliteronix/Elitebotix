@@ -15,6 +15,7 @@ module.exports = async function (client, bancho, message) {
 		await message.user.sendMessage('!lastrequests - Shows the last 5 twitch requests again');
 		await message.user.sendMessage('!leave / !leave1v1 / !queue1v1-leave - Leave the queue for 1v1 matches');
 		await message.user.sendMessage('!r [mod] [StarRating] - Get a beatmap recommendation for your current duel StarRating. If you don\'t have your account connected to the bot (can be done by using /osu-link command in discord) nor didn\'t specify desired Star Rating, it will use default value of 4.5*');
+		await message.user.sendMessage('!unlink - Unlink your discord account from your osu! account');
 
 		//Listen to now playing / now listening and send pp info
 	} else if (message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)) {
@@ -382,5 +383,22 @@ module.exports = async function (client, bancho, message) {
 		mods = mods.join('');
 
 		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] [${mods}] | ${acc}%: ${Math.round(accPP)}pp`);
+	} else if (message.message === '!unlink') {
+		await message.user.fetchFromAPI();
+		let discordUser = await DBDiscordUsers.findOne({
+			where: {
+				osuUserId: message.user.id
+			}
+		});
+
+		if (discordUser && discordUser.userId) {
+			discordUser.userId = null;
+			discordUser.osuVerified = false;
+			await discordUser.save();
+
+			return await message.user.sendMessage('Your discord account has been unlinked from your osu! account.');
+		} else {
+			await message.user.sendMessage('You have no discord account linked to your osu! account.');
+		}
 	}
 };

@@ -199,7 +199,7 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 						return interaction.editReply(`You already connected and verified your connection of your discord account to the osu! account \`${args[0].replace(/`/g, '')}\``);
 					}
 
-					return interaction.editReply(`There is already a discord account linked and verified for \`${args[0].replace(/`/g, '')}\``);
+					return interaction.editReply(`There is already a discord account linked and verified for \`${args[0].replace(/`/g, '')}\`. If this is your osu! account send \`!unlink\` to \`Elitebotix\` ingame.`);
 				}
 
 				if (discordUser) {

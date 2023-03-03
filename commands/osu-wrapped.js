@@ -151,7 +151,7 @@ module.exports = {
 				osuUser.osuUserId = user.id;
 				osuUser.osuName = user.name;
 			} catch (error) {
-				return interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+				return await interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 			}
 		}
 
