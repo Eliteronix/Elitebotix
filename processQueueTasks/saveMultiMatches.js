@@ -175,11 +175,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 	let incompleteMatchScore = await DBOsuMultiScores.findOne({
 		where: {
 			tourneyMatch: true,
-			[Op.or]: [
-				{
-					warmup: null
-				},
-			],
+			warmup: null
 		},
 		order: [
 			['updatedAt', 'ASC']
