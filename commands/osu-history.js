@@ -66,11 +66,11 @@ module.exports = {
 					'en-GB': 'showtournamentdetails',
 					'en-US': 'showtournamentdetails',
 				})
-				.setDescription('Show the details of the tournaments')
+				.setDescription('Show the details of the tournaments (WIP)')
 				.setDescriptionLocalizations({
-					'de': 'Zeigt die Details der Turniere an',
-					'en-GB': 'Show the details of the tournaments',
-					'en-US': 'Show the details of the tournaments',
+					'de': 'Zeigt die Details der Turniere an (WIP)',
+					'en-GB': 'Show the details of the tournaments (WIP)',
+					'en-US': 'Show the details of the tournaments (WIP)',
 				})
 				.setRequired(false)
 		),
@@ -213,7 +213,7 @@ module.exports = {
 		hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
 
 		for (let i = 0; i < multiScores.length; i++) {
-			if (parseInt(multiScores[i].score) <= 10000) {
+			if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].matchName.toLowerCase().includes('scrim')) {
 				continue;
 			}
 
@@ -961,7 +961,6 @@ module.exports = {
 		files.push(matchesPlayed);
 
 		if (!onlymatchhistory) {
-
 			mostPlayedWith = mostPlayedWith.map((user) => {
 				return `${user.amount} times - ${user.osuName} (${user.osuUserId})`;
 			});
@@ -972,19 +971,19 @@ module.exports = {
 				return `${user.amount} times - ${user.osuName} (${user.osuUserId})`;
 			});
 
-			mostWonAgainst.unshift('');
-			mostWonAgainst.unshift('');
-			mostWonAgainst.unshift('');
 			mostWonAgainst.unshift('Most won against:');
+			mostWonAgainst.unshift('');
+			mostWonAgainst.unshift('');
+			mostWonAgainst.unshift('');
 
 			mostLostAgainst = mostLostAgainst.map((user) => {
 				return `${user.amount} times - ${user.osuName} (${user.osuUserId})`;
 			});
 
-			mostLostAgainst.unshift('');
-			mostLostAgainst.unshift('');
-			mostLostAgainst.unshift('');
 			mostLostAgainst.unshift('Most lost against:');
+			mostLostAgainst.unshift('');
+			mostLostAgainst.unshift('');
+			mostLostAgainst.unshift('');
 
 			let mostPlayedWonLost = mostPlayedWith.concat(mostWonAgainst, mostLostAgainst);
 
@@ -993,6 +992,12 @@ module.exports = {
 			files.push(mostPlayedWonLost);
 		}
 
-		return interaction.editReply({ content: ' ', files: files });
+		let content = ' ';
+
+		if (interaction.options.getBoolean('showtournamentdetails')) {
+			content = 'Tournament details are currently still in development. This is an early but public release.';
+		}
+
+		return interaction.editReply({ content: content, files: files });
 	},
 };
