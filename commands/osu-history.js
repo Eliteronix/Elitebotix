@@ -510,15 +510,27 @@ module.exports = {
 		}
 
 		if (interaction.options.getBoolean('showtournamentdetails')) {
+			let acronyms = [...new Set(tourneysPlayed.map(tourney => tourney.acronym))];
+
+			let tourneyScores = await DBOsuMultiScores.findAll({
+				attributes: ['matchId', 'matchName', 'teamType', 'beatmapId', 'matchStartDate'],
+				where: {
+					matchName: {
+						[Op.or]: eval('[' + acronyms.map(acronym => `{[Op.like]: '${acronym}:%'}`).join(', ') + ']'),
+					},
+				},
+				order: [['matchStartDate', 'DESC']],
+			});
+
 			for (let i = 0; i < tourneysPlayed.length; i++) {
 				if (new Date() - lastUpdate > 15000) {
 					interaction.editReply(`Processing ${i}/${tourneysPlayed.length} tournaments...`);
 					lastUpdate = new Date();
 				}
 
-				const util = require('util');
+				// const util = require('util');
 
-				console.log(util.inspect(tourneysPlayed[i], { showHidden: false, depth: null, colors: true }));
+				// console.log(util.inspect(tourneysPlayed[i], { showHidden: false, depth: null, colors: true }));
 
 				let daysBefore = new Date(tourneysPlayed[i].date);
 				daysBefore.setDate(daysBefore.getDate() - 21);
@@ -526,21 +538,7 @@ module.exports = {
 				let daysAfter = new Date(tourneysPlayed[i].date);
 				daysAfter.setDate(daysAfter.getDate() + 21);
 
-				let tourneyScores = await DBOsuMultiScores.findAll({
-					where: {
-						matchName: {
-							[Op.like]: `${tourneysPlayed[i].acronym}:%`,
-						},
-						matchStartDate: {
-							[Op.between]: [daysBefore, daysAfter],
-						},
-					},
-					order: [['matchStartDate', 'DESC']],
-				});
-
-				let matchesWithTheLastMatchBeatmaps = [...new Set(tourneyScores.filter(score => tourneysPlayed[i].matches[0].beatmapIds.includes(score.beatmapId)).map(score => score.matchId))];
-
-				console.log(matchesWithTheLastMatchBeatmaps.length);
+				let matchesWithTheLastMatchBeatmaps = [...new Set(tourneyScores.filter(score => tourneysPlayed[i].matches[0].beatmapIds.includes(score.beatmapId) && new Date(score.matchStartDate) < daysAfter && new Date(score.matchStartDate) > daysBefore).map(score => score.matchId))];
 
 				if (matchesWithTheLastMatchBeatmaps.length > 1) {
 					if (tourneysPlayed[i].matches[0].matchName.includes('Qualifiers')) {
