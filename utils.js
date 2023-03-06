@@ -6187,76 +6187,86 @@ async function saveOsuMultiScoresFunction(match, client) {
 	let waitForADifferentImport = false;
 
 	while (matchAlreadyGetsImported) {
-		let sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId, games }) => {
-			if (c.shardId === 0) {
-				if (c.matchesGettingImported === undefined) {
-					c.matchesGettingImported = [];
+		try {
+			let sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId, games }) => {
+				if (c.shardId === 0) {
+					if (c.matchesGettingImported === undefined) {
+						c.matchesGettingImported = [];
+					}
+
+					let minutesAgo = new Date();
+					minutesAgo.setMinutes(minutesAgo.getMinutes() - 5);
+
+					let match = c.matchesGettingImported.find(m => m.matchId === matchId && m.date > minutesAgo);
+
+					if (match) {
+						return match.games;
+					} else {
+						c.matchesGettingImported.push({
+							matchId: matchId,
+							games: games,
+							date: new Date()
+						});
+						return false;
+					}
 				}
-
-				let minutesAgo = new Date();
-				minutesAgo.setMinutes(minutesAgo.getMinutes() - 5);
-
-				let match = c.matchesGettingImported.find(m => m.matchId === matchId && m.date > minutesAgo);
-
-				if (match) {
-					return match.games;
-				} else {
-					c.matchesGettingImported.push({
-						matchId: matchId,
-						games: games,
-						date: new Date()
-					});
-					return false;
+			}, {
+				context: {
+					matchId: match.id,
+					games: match.games.length
 				}
+			});
+
+			sameMatchGettingImported = sameMatchGettingImported[0];
+
+			if (sameMatchGettingImported === false) {
+				matchAlreadyGetsImported = false;
+			} else if (sameMatchGettingImported > match.games.length) {
+				waitForADifferentImport = true;
+				matchAlreadyGetsImported = false;
 			}
-		}, {
-			context: {
-				matchId: match.id,
-				games: match.games.length
+
+			if (matchAlreadyGetsImported) {
+				await new Promise(resolve => setTimeout(resolve, 5000));
 			}
-		});
-
-		sameMatchGettingImported = sameMatchGettingImported[0];
-
-		if (sameMatchGettingImported === false) {
-			matchAlreadyGetsImported = false;
-		} else if (sameMatchGettingImported > match.games.length) {
-			waitForADifferentImport = true;
-			matchAlreadyGetsImported = false;
-		}
-
-		if (matchAlreadyGetsImported) {
+		} catch (error) {
+			console.error(error);
 			await new Promise(resolve => setTimeout(resolve, 5000));
 		}
 	}
 
 	while (waitForADifferentImport) {
-		let sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId }) => {
-			if (c.shardId === 0) {
-				if (c.matchesGettingImported === undefined) {
-					c.matchesGettingImported = [];
+		try {
+			let sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId }) => {
+				if (c.shardId === 0) {
+					if (c.matchesGettingImported === undefined) {
+						c.matchesGettingImported = [];
+					}
+
+					let match = c.matchesGettingImported.find(m => m.matchId === matchId);
+					if (match) {
+						return true;
+					} else {
+						return false;
+					}
 				}
-
-				let match = c.matchesGettingImported.find(m => m.matchId === matchId);
-				if (match) {
-					return true;
-				} else {
-					return false;
+			}, {
+				context: {
+					matchId: match.id,
 				}
-			}
-		}, {
-			context: {
-				matchId: match.id,
-			}
-		});
+			});
 
-		sameMatchGettingImported = sameMatchGettingImported[0];
+			sameMatchGettingImported = sameMatchGettingImported[0];
 
-		if (sameMatchGettingImported === false) {
-			return;
+			if (sameMatchGettingImported === false) {
+				return;
+			}
+
+			await new Promise(resolve => setTimeout(resolve, 5000));
+		} catch (error) {
+			console.error(error);
+			await new Promise(resolve => setTimeout(resolve, 5000));
 		}
-
-		await new Promise(resolve => setTimeout(resolve, 5000));
 	}
 
 	let tourneyMatchPlayers = [];
@@ -6836,15 +6846,19 @@ async function saveOsuMultiScoresFunction(match, client) {
 	}
 
 	// Remove the match from the getting imported list
-	await client.shard.broadcastEval(async (c, { matchId }) => {
-		if (c.shardId === 0) {
-			c.matchesGettingImported = c.matchesGettingImported.filter(m => m.matchId !== matchId);
-		}
-	}, {
-		context: {
-			matchId: match.id,
-		}
-	});
+	try {
+		await client.shard.broadcastEval(async (c, { matchId }) => {
+			if (c.shardId === 0) {
+				c.matchesGettingImported = c.matchesGettingImported.filter(m => m.matchId !== matchId);
+			}
+		}, {
+			context: {
+				matchId: match.id,
+			}
+		});
+	} catch (err) {
+		//Ignore
+	}
 }
 
 async function getValidTournamentBeatmapFunction(input) {
