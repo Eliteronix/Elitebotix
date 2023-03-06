@@ -763,7 +763,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	}
 
 	//Check if reacted for matchup information
-	if (reaction._emoji.name === '🆚') {
+	if (reaction._emoji.name === '🆚' && reaction.message.attachments.first()) {
 		//Check if it is a profile
 		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-ratings')) {
 			//get the osuUserId used
