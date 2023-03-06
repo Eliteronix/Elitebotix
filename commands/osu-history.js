@@ -454,12 +454,21 @@ module.exports = {
 				continue;
 			}
 
-			let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, '').toLowerCase());
+			let inMonths = new Date(multiScores[i].matchStartDate);
+			inMonths.setMonth(inMonths.getMonth() + 3);
+
+			let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, '').toLowerCase() && tourney.date < inMonths);
 
 			if (!tourneyEntry) {
-				tourneysPlayed.push({ acronym: multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, ''), matches: [multiScores[i].matchId], teammates: [], date: multiScores[i].matchStartDate });
+				tourneysPlayed.push({ acronym: multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, ''), matches: [{ matchId: multiScores[i].matchId, matchName: multiScores[i].matchName, beatmapIds: [multiScores[i].beatmapId] }], teammates: [], date: multiScores[i].matchStartDate });
 			} else if (!tourneyEntry.matches.includes(multiScores[i].matchId)) {
-				tourneyEntry.matches.push(multiScores[i].matchId);
+				let matchEntry = tourneyEntry.matches.find(match => match.matchId === multiScores[i].matchId);
+
+				if (!matchEntry) {
+					tourneyEntry.matches.push({ matchId: multiScores[i].matchId, matchName: multiScores[i].matchName, beatmapIds: [multiScores[i].beatmapId] });
+				} else if (!matchEntry.beatmapIds.includes(multiScores[i].beatmapId)) {
+					matchEntry.beatmapIds.push(multiScores[i].beatmapId);
+				}
 			}
 
 			if (multiScores[i].teamType === 'Team vs') {
@@ -502,6 +511,66 @@ module.exports = {
 
 		if (interaction.options.getBoolean('showtournamentdetails')) {
 			for (let i = 0; i < tourneysPlayed.length; i++) {
+				if (new Date() - lastUpdate > 15000) {
+					interaction.editReply(`Processing ${i}/${tourneysPlayed.length} tournaments...`);
+					lastUpdate = new Date();
+				}
+
+				const util = require('util');
+
+				console.log(util.inspect(tourneysPlayed[i], { showHidden: false, depth: null, colors: true }));
+
+				let daysBefore = new Date(tourneysPlayed[i].date);
+				daysBefore.setDate(daysBefore.getDate() - 21);
+
+				let daysAfter = new Date(tourneysPlayed[i].date);
+				daysAfter.setDate(daysAfter.getDate() + 21);
+
+				let tourneyScores = await DBOsuMultiScores.findAll({
+					where: {
+						matchName: {
+							[Op.like]: `${tourneysPlayed[i].acronym}:%`,
+						},
+						matchStartDate: {
+							[Op.between]: [daysBefore, daysAfter],
+						},
+					},
+					order: [['matchStartDate', 'DESC']],
+				});
+
+				let matchesWithTheLastMatchBeatmaps = [...new Set(tourneyScores.filter(score => tourneysPlayed[i].matches[0].beatmapIds.includes(score.beatmapId)).map(score => score.matchId))];
+
+				console.log(matchesWithTheLastMatchBeatmaps.length);
+
+				if (matchesWithTheLastMatchBeatmaps.length > 1) {
+					if (tourneysPlayed[i].matches[0].matchName.includes('Qualifiers')) {
+						tourneysPlayed[i].result = 'Did not qualify';
+					} else if (tourneysPlayed[i].matches[0].matchName.includes('Tryouts')) {
+						tourneysPlayed[i].result = 'Did not make the team';
+					} else {
+						// Ro16 has 24 matches, Ro32 has 48 matches, Ro64 has 96 matches, Ro128 has 192 matches
+						// GF has 2 + 1 matches, F has 4 matches, SF has 8 matches, QF has 16 matches
+
+						if (matchesWithTheLastMatchBeatmaps.length > 96) {
+							tourneysPlayed[i].result = 'Round of 128';
+						} else if (matchesWithTheLastMatchBeatmaps.length > 48) {
+							tourneysPlayed[i].result = 'Round of 64';
+						} else if (matchesWithTheLastMatchBeatmaps.length > 24) {
+							tourneysPlayed[i].result = 'Round of 32';
+						} else if (matchesWithTheLastMatchBeatmaps.length > 16) {
+							tourneysPlayed[i].result = 'Round of 16';
+						} else if (matchesWithTheLastMatchBeatmaps.length > 8) {
+							tourneysPlayed[i].result = 'Quarter Finals';
+						} else if (matchesWithTheLastMatchBeatmaps.length > 4) {
+							tourneysPlayed[i].result = 'Semi Finals';
+						} else if (matchesWithTheLastMatchBeatmaps.length > 2) {
+							tourneysPlayed[i].result = 'Finals';
+						} else {
+							tourneysPlayed[i].result = 'Grand Finals';
+						}
+					}
+				}
+
 				let team = tourneysPlayed[i].teammates;
 
 				let weeksAgo = new Date();
@@ -524,23 +593,6 @@ module.exports = {
 				} else if (team.length === 0 && tourneysPlayed[i].matches.length > 1 || team.length === 1) {
 					tourneysPlayed[i].team = 'Solo';
 				} else {
-					let daysBefore = new Date(tourneysPlayed[i].date);
-					daysBefore.setDate(daysBefore.getDate() - 7);
-
-					let daysAfter = new Date(tourneysPlayed[i].date);
-					daysAfter.setDate(daysAfter.getDate() + 7);
-
-					let tourneyScores = await DBOsuMultiScores.findAll({
-						where: {
-							matchName: {
-								[Op.like]: `${tourneysPlayed[i].acronym}:%`,
-							},
-							matchStartDate: {
-								[Op.between]: [daysBefore, daysAfter],
-							},
-						},
-						order: [['matchStartDate', 'DESC']],
-					});
 
 					let matchesToFindOutFormat = tourneyScores.filter(score => !score.matchName.includes('Qualifiers'));
 
