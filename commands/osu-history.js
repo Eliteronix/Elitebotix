@@ -163,6 +163,9 @@ module.exports = {
 				matchName: {
 					[Op.notLike]: 'MOTD:%',
 				},
+				warmup: {
+					[Op.not]: true,
+				}
 			},
 			group: ['matchId'],
 		});

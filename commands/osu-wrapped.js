@@ -174,6 +174,9 @@ module.exports = {
 					}
 				},
 				tourneyMatch: true,
+				warmup: {
+					[Op.not]: true,
+				}
 			},
 			group: ['matchId'],
 		});
