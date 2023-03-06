@@ -146,6 +146,36 @@ module.exports = {
 					'en-GB': 'Show a leaderboard of hardest working verifiers',
 					'en-US': 'Show a leaderboard of hardest working verifiers',
 				})
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('tournament')
+				.setNameLocalizations({
+					'de': 'turnier',
+					'en-GB': 'tournament',
+					'en-US': 'tournament',
+				})
+				.setDescription('Shows all unverified matches of a tournament')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt alle unverifizierten Matches eines Turniers',
+					'en-GB': 'Shows all unverified matches of a tournament',
+					'en-US': 'Shows all unverified matches of a tournament',
+				})
+				.addStringOption(option =>
+					option.setName('acronym')
+						.setNameLocalizations({
+							'de': 'akronym',
+							'en-GB': 'acronym',
+							'en-US': 'acronym',
+						})
+						.setDescription('The acronym of the tournament')
+						.setDescriptionLocalizations({
+							'de': 'Das Akronym des Turniers',
+							'en-GB': 'The acronym of the tournament',
+							'en-US': 'The acronym of the tournament',
+						})
+						.setRequired(true)
+				)
 		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
@@ -421,12 +451,11 @@ module.exports = {
 					});
 
 					if (!developers.includes(interaction.user.id)) {
-						for (let i = 0; i < scores.length; i++) {
-							let score = scores[i];
-							if (score.osuUserId === discordUser.osuUserId) {
-								await interaction.followUp('You cannot verify your own scores.');
-								continue;
-							}
+						let ownScore = scores.find(score => score.osuUserId === discordUser.osuUserId);
+
+						if (ownScore) {
+							await interaction.followUp('You cannot verify your own scores.');
+							continue;
 						}
 					}
 
@@ -724,6 +753,73 @@ module.exports = {
 			const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', 'Top Match Verifiers', 'top-match-verifiers.png');
 
 			await interaction.editReply({ files: [attachment] });
+		} else if (interaction.options.getSubcommand() === 'tournament') {
+			let acronym = interaction.options.getString('acronym', true);
+
+			if (acronym.toLowerCase() === 'o!mm ranked'
+				|| acronym.toLowerCase() === 'o!mm private'
+				|| acronym.toLowerCase() === 'o!mm team ranked'
+				|| acronym.toLowerCase() === 'o!mm team private'
+				|| acronym.toLowerCase() === 'etx'
+				|| acronym.toLowerCase() === 'etx teams') {
+				return await interaction.editReply(`The acronym \`${acronym.replace(/`/g, '')}\` can't be used for this command.`);
+			}
+
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores tournament');
+			let userScores = await DBOsuMultiScores.findAll({
+				where: {
+					[Op.or]: [
+						{
+							matchName: {
+								[Op.like]: `${acronym}:%`,
+							},
+						}, {
+							matchName: {
+								[Op.like]: `${acronym} :%`,
+							}
+						}
+					],
+					tourneyMatch: true,
+					verifiedAt: null,
+					matchEndDate: {
+						[Op.not]: null,
+					},
+					matchId: {
+						[Op.notIn]: matchIdsGettingProcessed,
+					},
+				},
+				group: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
+			});
+
+			if (userScores.length === 0) {
+				return await interaction.editReply(`No scores found for the acronym \`${acronym.replace(/`/g, '')}\`.`);
+			}
+
+			//Bubblesort userscores by matchId property descending
+			userScores.sort((a, b) => {
+				if (parseInt(a.matchId) > parseInt(b.matchId)) {
+					return -1;
+				}
+				if (parseInt(a.matchId) < parseInt(b.matchId)) {
+					return 1;
+				}
+				return 0;
+			});
+
+			let matchesPlayed = userScores.map((score) => `${(new Date(score.matchStartDate).getUTCMonth() + 1).toString().padStart(2, '0')}-${new Date(score.matchStartDate).getUTCFullYear()} - ${score.matchName} - ${score.verificationComment} ----- https://osu.ppy.sh/community/matches/${score.matchId}`);
+			for (let i = 0; i < userScores.length; i++) {
+				//Push matches for the history txt
+				let date = new Date(userScores[i].matchStartDate);
+
+				if (!matchesPlayed.includes(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`)) {
+					matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`);
+				}
+			}
+
+			// eslint-disable-next-line no-undef
+			matchesPlayed = new AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${acronym}.txt` });
+
+			await interaction.editReply({ content: `All matches found for the acronym \`${acronym.replace(/`/g, '')}\` are attached.`, files: [matchesPlayed] });
 		}
 	}
 };
