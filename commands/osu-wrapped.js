@@ -188,6 +188,9 @@ module.exports = {
 		let multiScores = await DBOsuMultiScores.findAll({
 			where: {
 				matchId: multiMatches,
+				warmup: {
+					[Op.not]: true,
+				}
 			},
 			order: [
 				['gameEndDate', 'DESC'],
