@@ -340,8 +340,13 @@ module.exports = {
 				continue;
 			}
 
-			if (!tourneysPlayed.includes(multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, ''))) {
-				tourneysPlayed.push(multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, ''));
+			let inMonths = new Date(multiScores[i].matchStartDate);
+			inMonths.setMonth(inMonths.getMonth() + 3);
+
+			let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, '').toLowerCase() && tourney.date < inMonths);
+
+			if (!tourneyEntry) {
+				tourneysPlayed.push({ acronym: multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, ''), date: multiScores[i].matchStartDate });
 			}
 		}
 

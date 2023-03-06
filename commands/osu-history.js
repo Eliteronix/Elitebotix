@@ -483,7 +483,7 @@ module.exports = {
 				let currentUserTeam = currentUserScores[0].team;
 
 				if (team === currentUserTeam) {
-					let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, '').toLowerCase());
+					let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, '').toLowerCase() && tourney.date < inMonths);
 
 					if (!tourneyEntry.teammates.includes(multiScores[i].osuUserId)) {
 						tourneyEntry.teammates.push(multiScores[i].osuUserId);
