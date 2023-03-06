@@ -878,8 +878,8 @@ module.exports = {
 		}
 		return link.replace(/.+\//g, '');
 	},
-	async saveOsuMultiScores(match) {
-		await saveOsuMultiScoresFunction(match);
+	async saveOsuMultiScores(match, client) {
+		await saveOsuMultiScoresFunction(match, client);
 	},
 	async populateMsgFromInteraction(interaction) {
 		let userMentions = new Discord.Collection();
@@ -1168,7 +1168,7 @@ module.exports = {
 				process.send('osu!API');
 				await osuApi.getMatch({ mp: matchID })
 					.then(async (match) => {
-						await saveOsuMultiScoresFunction(match);
+						await saveOsuMultiScoresFunction(match, client);
 					})
 					.catch(async () => {
 						//Nothing
@@ -2428,7 +2428,7 @@ module.exports = {
 				process.send('osu!API');
 				osuApi.getMatch({ mp: lobby.id })
 					.then(async (match) => {
-						saveOsuMultiScoresFunction(match);
+						saveOsuMultiScoresFunction(match, client);
 					})
 					.catch(() => {
 						//Nothing
@@ -2526,7 +2526,7 @@ module.exports = {
 				process.send('osu!API');
 				osuApi.getMatch({ mp: lobby.id })
 					.then(async (match) => {
-						await saveOsuMultiScoresFunction(match);
+						await saveOsuMultiScoresFunction(match, client);
 
 						for (let i = 0; i < users.length; i++) {
 							let userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: users[i].osuUserId, client: client });
@@ -6163,7 +6163,7 @@ function humanReadableFunction(input) {
 	return output;
 }
 
-async function saveOsuMultiScoresFunction(match) {
+async function saveOsuMultiScoresFunction(match, client) {
 	// let stringifiedMatch = JSON.stringify(match);
 
 	// //Move the match by spawning child process
@@ -6183,6 +6183,81 @@ async function saveOsuMultiScoresFunction(match) {
 	// await new Promise((resolve) => {
 	// 	child.on('close', resolve);
 	// });
+	let matchAlreadyGetsImported = true;
+	let waitForADifferentImport = false;
+
+	while (matchAlreadyGetsImported) {
+		let sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId, games }) => {
+			if (c.shardId === 0) {
+				if (c.matchesGettingImported === undefined) {
+					c.matchesGettingImported = [];
+				}
+
+				let minutesAgo = new Date();
+				minutesAgo.setMinutes(minutesAgo.getMinutes() - 5);
+
+				let match = c.matchesGettingImported.find(m => m.matchId === matchId && m.date > minutesAgo);
+
+				if (match) {
+					return match.games;
+				} else {
+					c.matchesGettingImported.push({
+						matchId: matchId,
+						games: games,
+						date: new Date()
+					});
+					return false;
+				}
+			}
+		}, {
+			context: {
+				matchId: match.id,
+				games: match.games.length
+			}
+		});
+
+		sameMatchGettingImported = sameMatchGettingImported[0];
+
+		if (sameMatchGettingImported === false) {
+			matchAlreadyGetsImported = false;
+		} else if (sameMatchGettingImported > match.games.length) {
+			waitForADifferentImport = true;
+			matchAlreadyGetsImported = false;
+		}
+
+		if (matchAlreadyGetsImported) {
+			await new Promise(resolve => setTimeout(resolve, 5000));
+		}
+	}
+
+	while (waitForADifferentImport) {
+		let sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId }) => {
+			if (c.shardId === 0) {
+				if (c.matchesGettingImported === undefined) {
+					c.matchesGettingImported = [];
+				}
+
+				let match = c.matchesGettingImported.find(m => m.matchId === matchId);
+				if (match) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}, {
+			context: {
+				matchId: match.id,
+			}
+		});
+
+		sameMatchGettingImported = sameMatchGettingImported[0];
+
+		if (sameMatchGettingImported === false) {
+			return;
+		}
+
+		await new Promise(resolve => setTimeout(resolve, 5000));
+	}
 
 	let tourneyMatchPlayers = [];
 	let newMatchPlayers = [];
@@ -6759,6 +6834,17 @@ async function saveOsuMultiScoresFunction(match) {
 			}
 		}
 	}
+
+	// Remove the match from the getting imported list
+	await client.shard.broadcastEval(async (c, { matchId }) => {
+		if (c.shardId === 0) {
+			c.matchesGettingImported = c.matchesGettingImported.filter(m => m.matchId !== matchId);
+		}
+	}, {
+		context: {
+			matchId: match.id,
+		}
+	});
 }
 
 async function getValidTournamentBeatmapFunction(input) {

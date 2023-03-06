@@ -53,7 +53,7 @@ module.exports = {
 				fiveMinutesAgo.setUTCMinutes(fiveMinutesAgo.getUTCMinutes() - 5);
 				if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
 					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
-						await saveOsuMultiScores(match);
+						await saveOsuMultiScores(match, client);
 						let now = new Date();
 						let minutesBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60) % 60;
 						let hoursBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60) % 24;
@@ -103,7 +103,7 @@ module.exports = {
 					return await processQueueEntry.save();
 				} else if (Date.parse(match.raw_start) < fiveMinutesAgo) {
 					if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
-						await saveOsuMultiScores(match);
+						await saveOsuMultiScores(match, client);
 						let date = new Date();
 						date.setUTCMinutes(date.getUTCMinutes() + 5);
 						logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBProcessQueue create');
@@ -197,7 +197,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				incompleteMatchScore.changed('updatedAt', true);
 				await incompleteMatchScore.save();
 
-				await saveOsuMultiScores(match);
+				await saveOsuMultiScores(match, client);
 			})
 			.catch(async (err) => {
 				logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores incomplete scores backup');

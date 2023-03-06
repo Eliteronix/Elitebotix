@@ -147,7 +147,11 @@ module.exports = {
 					process.send('osu!API');
 					await osuApi.getMatch({ mp: matchID })
 						.then(async (match) => {
-							await saveOsuMultiScores(match);
+							if (msg.id) {
+								await saveOsuMultiScores(match, msg.client);
+							} else {
+								await saveOsuMultiScores(match, interaction.client);
+							}
 						})
 						.catch(() => {
 							//Nothing

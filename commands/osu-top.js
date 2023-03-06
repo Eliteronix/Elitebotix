@@ -786,7 +786,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 			process.send('osu!API');
 			await osuApi.getMatch({ mp: multisToUpdate[i] })
 				.then(async (match) => {
-					await saveOsuMultiScores(match);
+					await saveOsuMultiScores(match, msg.client);
 				})
 				.catch(() => {
 					//Nothing

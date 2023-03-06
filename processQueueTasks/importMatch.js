@@ -28,7 +28,7 @@ module.exports = {
 				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
 				if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
 					//Match completed / 6 hours since start
-					await saveOsuMultiScores(match);
+					await saveOsuMultiScores(match, client);
 					let now = new Date();
 					let minutesBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60) % 60;
 					let hoursBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60) % 24;
@@ -75,7 +75,7 @@ module.exports = {
 				}
 
 				//Match has not been completed yet / 6 hours didn't pass
-				await saveOsuMultiScores(match);
+				await saveOsuMultiScores(match, client);
 
 				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores');
 				let playedRound = DBOsuMultiScores.findOne({

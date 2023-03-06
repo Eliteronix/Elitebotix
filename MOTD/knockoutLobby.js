@@ -348,7 +348,7 @@ module.exports = {
 				process.send('osu!API');
 				osuApi.getMatch({ mp: lobby.id })
 					.then(async (match) => {
-						saveOsuMultiScores(match);
+						saveOsuMultiScores(match, client);
 					})
 					.catch(() => {
 						//Nothing
@@ -371,7 +371,7 @@ module.exports = {
 				process.send('osu!API');
 				osuApi.getMatch({ mp: lobby.id })
 					.then(async (match) => {
-						saveOsuMultiScores(match);
+						saveOsuMultiScores(match, client);
 					})
 					.catch(() => {
 						//Nothing

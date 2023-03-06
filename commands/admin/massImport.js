@@ -18,7 +18,7 @@ module.exports = {
 		for (let i = 0; i < matchIds.length; i++) {
 			await osuApi.getMatch({ mp: getIDFromPotentialOsuLink(matchIds[i]) })
 				.then(async (match) => {
-					await saveOsuMultiScores(match);
+					await saveOsuMultiScores(match, interaction.client);
 
 					await interaction.followUp(`Saved match https://osu.ppy.sh/mp/${match.id}`);
 				})
