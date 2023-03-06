@@ -220,10 +220,9 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					}
 				}
 			});
-	}
-	// else
+	} else {
 
-	if (true) {
+		// if (true) { //TODO: Remove this
 		// Verify matches instead
 		logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores verify matches');
 		let incompleteMatch = await DBOsuMultiScores.findOne({
