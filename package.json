@@ -2,9 +2,9 @@
 	"name": "elitebotix",
 	"version": "1.0.0",
 	"description": "",
-	"main": "bot.js",
+	"main": "index.js",
 	"scripts": {
-		"start": "node --unhandled-rejections=warn bot.js",
+		"start": "node --unhandled-rejections=warn --use_strict index.js",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"lint": "eslint"
 	},

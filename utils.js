@@ -2383,7 +2383,10 @@ module.exports = {
 				}
 			}
 
-			quicksort(results);
+			//Sort the results descending
+			results.sort((a, b) => {
+				return b.score - a.score;
+			});
 
 			let scoreTeam1 = 0;
 			let scoreTeam2 = 0;
@@ -3754,7 +3757,6 @@ async function getUserDuelStarRatingFunction(input) {
 		duelRatings.freeModLimited = savedStats.osuFreeModDuelStarRatingLimited;
 		duelRatings.provisional = savedStats.osuDuelProvisional;
 		duelRatings.outdated = savedStats.osuDuelOutdated;
-
 		return duelRatings;
 	}
 
@@ -3843,9 +3845,11 @@ async function getUserDuelStarRatingFunction(input) {
 	duelRatings.outdated = outdated;
 
 	//Sort it by game ID
-	quicksortGameId(userScores);
+	userScores.sort((a, b) => {
+		return a.gameId - b.gameId;
+	});
 
-	// console.log(`getUserDuelStarRatingFunction: quicksort: ${new Date() - startTime}ms`);
+	// console.log(`getUserDuelStarRatingFunction: sort: ${new Date() - startTime}ms`);
 
 	let scoresPerMod = 35;
 	let outliersPerMod = 3;
@@ -4557,7 +4561,7 @@ async function getDerankStatsFunction(discordUser) {
 		]
 	});
 
-	quicksortOsuPP(ppDiscordUsers);
+	ppDiscordUsers.sort((a, b) => parseFloat(b.osuPP) - parseFloat(a.osuPP));
 
 	logDatabaseQueriesFunction(2, 'utils.js DBDiscordUsers getDerankStatsFunction osuDuelStarRating');
 	let duelDiscordUsers = await DBDiscordUsers.findAll({
@@ -5630,31 +5634,6 @@ function getScoreModpoolFunction(dbScore) {
 	}
 }
 
-function partitionGameId(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseInt(list[j].gameId) >= parseInt(pivot.gameId)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksortGameId(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionGameId(list, start, end);
-		quicksortGameId(list, start, p - 1);
-		quicksortGameId(list, p + 1, end);
-	}
-	return list;
-}
-
 function applyOsuDuelStarratingCorrection(rating, score, weight) {
 	//Get the expected score for the starrating
 	//https://www.desmos.com/calculator/oae69zr9ze
@@ -5882,31 +5861,6 @@ async function executeFoundTask(client, bancho, nextTask) {
 	}
 }
 
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].score) >= parseFloat(pivot.score)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
-}
-
 function getMiddleScore(scores) {
 	if (scores.length % 2) {
 		//Odd amount of scores
@@ -6027,31 +5981,6 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 
 	// console.log('Warmup status unclear');
 	return { warmup: null, byAmount: false };
-}
-
-function partitionOsuPP(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].osuPP) >= parseFloat(pivot.osuPP)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksortOsuPP(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionOsuPP(list, start, end);
-		quicksortOsuPP(list, start, p - 1);
-		quicksortOsuPP(list, p + 1, end);
-	}
-	return list;
 }
 
 function getExpectedDuelRating(score) {
@@ -6361,7 +6290,9 @@ async function saveOsuMultiScoresFunction(match, client) {
 			}
 
 			if (gameScores.length > 1) {
-				quicksort(gameScores);
+				gameScores.sort((a, b) => {
+					return parseInt(b.score) - parseInt(a.score);
+				});
 
 				for (let i = 0; i < gameScores.length; i++) {
 					if (parseInt(gameScores[i].score) < 10000) {
