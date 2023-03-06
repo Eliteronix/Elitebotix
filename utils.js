@@ -2526,9 +2526,7 @@ module.exports = {
 				process.send('osu!API');
 				osuApi.getMatch({ mp: lobby.id })
 					.then(async (match) => {
-						saveOsuMultiScoresFunction(match);
-
-						await new Promise(resolve => setTimeout(resolve, 15000));
+						await saveOsuMultiScoresFunction(match);
 
 						for (let i = 0; i < users.length; i++) {
 							let userDuelStarRating = await getUserDuelStarRatingFunction({ osuUserId: users[i].osuUserId, client: client });
