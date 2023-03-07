@@ -782,7 +782,7 @@ module.exports = {
 				}
 			}
 
-			quicksort(scoresTeam1[i]);
+			scoresTeam1[i].sort((a, b) => parseInt(b.gameId) - parseInt(a.gameId));
 		}
 
 		//Loop throught team two and get all their multi scores
@@ -816,7 +816,7 @@ module.exports = {
 				}
 			}
 
-			quicksort(scoresTeam2[i]);
+			scoresTeam2[i].sort((a, b) => parseInt(b.gameId) - parseInt(a.gameId));
 		}
 
 		//Create arrays of standings for each player/Mod/Score
@@ -907,8 +907,8 @@ module.exports = {
 			}
 
 			//Sort the scores for each team
-			quicksortScore(team1GameScores);
-			quicksortScore(team2GameScores);
+			team1GameScores.sort((a, b) => parseInt(b.score) - parseInt(a.score));
+			team2GameScores.sort((a, b) => parseInt(b.score) - parseInt(a.score));
 
 			//Add the best scores together
 			let team1Score = 0;
@@ -1083,8 +1083,8 @@ module.exports = {
 			}
 
 			//Sort the scores for each team
-			quicksortScore(team1MapScores);
-			quicksortScore(team2MapScores);
+			team1MapScores.sort((a, b) => parseInt(b.score) - parseInt(a.score));
+			team2MapScores.sort((a, b) => parseInt(b.score) - parseInt(a.score));
 
 			//Add the best scores together
 			let team1Score = 0;
@@ -1172,12 +1172,14 @@ module.exports = {
 
 		for (let i = 0; i < mapsPlayedReadable.length; i++) {
 			for (let j = 0; j < mapsPlayedReadable[i].length; j++) {
-				quicksortMapsPlayedReadable(mapsPlayedReadable[i][j]);
+				mapsPlayedReadable[i][j].sort((a, b) => {
+					return parseInt(`${b.substring(3, 7)}${b.substring(0, 2)}`) - parseInt(`${a.substring(3, 7)}${a.substring(0, 2)}`);
+				});
 			}
 		}
 
 		//Sort the rounds for the graph
-		quicksortMatchId(rounds);
+		rounds.sort((a, b) => parseInt(b.matchId) - parseInt(a.matchId));
 
 		const canvasWidth = 1000;
 		const canvasHeight = 700;
@@ -1752,106 +1754,6 @@ module.exports = {
 		return;
 	},
 };
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].gameId) >= parseFloat(pivot.gameId)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
-}
-
-function partitionMatchId(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].matchId) >= parseFloat(pivot.matchId)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksortMatchId(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionMatchId(list, start, end);
-		quicksortMatchId(list, start, p - 1);
-		quicksortMatchId(list, p + 1, end);
-	}
-	return list;
-}
-
-function partitionScore(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseInt(list[j].score) >= parseInt(pivot.score)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksortScore(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionScore(list, start, end);
-		quicksortScore(list, start, p - 1);
-		quicksortScore(list, p + 1, end);
-	}
-	return list;
-}
-
-function partitionMapsPlayedReadable(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseInt(`${list[j].substring(3, 7)}${list[j].substring(0, 2)}`) >= parseInt(`${pivot.substring(3, 7)}${pivot.substring(0, 2)}`)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksortMapsPlayedReadable(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionMapsPlayedReadable(list, start, end);
-		quicksortMapsPlayedReadable(list, start, p - 1);
-		quicksortMapsPlayedReadable(list, p + 1, end);
-	}
-	return list;
-}
 
 function getColor(array) {
 	let color = '#ffffff';

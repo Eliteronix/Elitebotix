@@ -1154,7 +1154,7 @@ module.exports = {
 					nomodMaps.push(beatmap);
 				}
 
-				quicksort(nomodMaps);
+				nomodMaps.sort((a, b) => parseFloat(a.difficulty.rating) - parseFloat(b.difficulty.rating));
 
 				//Remove maps if more than enough to make it scale better
 				while (nomodMaps.length > 9) {
@@ -1263,7 +1263,7 @@ module.exports = {
 					doubleTimeMaps.push(beatmap);
 				}
 
-				quicksort(doubleTimeMaps);
+				doubleTimeMaps.sort((a, b) => parseFloat(a.difficulty.rating) - parseFloat(b.difficulty.rating));
 
 				// Max 16 players join the lobby
 				//Push first map twice to simulate the qualifier map existing
@@ -1477,7 +1477,7 @@ module.exports = {
 					nomodMaps.push(beatmap);
 				}
 
-				quicksort(nomodMaps);
+				nomodMaps.sort((a, b) => parseFloat(a.difficulty.rating) - parseFloat(b.difficulty.rating));
 
 				//Remove maps if more than enough to make it scale better
 				while (nomodMaps.length > 9) {
@@ -1586,7 +1586,7 @@ module.exports = {
 					doubleTimeMaps.push(beatmap);
 				}
 
-				quicksort(doubleTimeMaps);
+				doubleTimeMaps.sort((a, b) => parseFloat(a.difficulty.rating) - parseFloat(b.difficulty.rating));
 
 				// Max 16 players join the lobby
 				//Push first map twice to simulate the qualifier map existing
@@ -1765,29 +1765,4 @@ function sendMessage(msg, content) {
 		.catch(() => {
 			msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
 		});
-}
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].difficulty.rating) <= parseFloat(pivot.difficulty.rating)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
 }

@@ -128,9 +128,13 @@ module.exports = {
 					}
 
 					//Sort the maps by difficulty each
-					quicksort(NMBeatmaps);
+					NMBeatmaps.sort((a, b) => {
+						return parseFloat(a.difficulty.rating) - parseFloat(b.difficulty.rating);
+					});
 
-					quicksort(DTBeatmaps);
+					DTBeatmaps.sort((a, b) => {
+						return parseFloat(a.difficulty.rating) - parseFloat(b.difficulty.rating);
+					});
 
 					// eslint-disable-next-line no-undef
 					if (process.env.SERVER !== 'Dev') {
@@ -203,31 +207,6 @@ module.exports = {
 		}
 	}
 };
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].difficulty.rating) <= parseFloat(pivot.difficulty.rating)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
-}
 
 async function getPlayers(client) {
 	logDatabaseQueries(2, 'MOTD/initializeMOTD.js DBDiscordUsers');

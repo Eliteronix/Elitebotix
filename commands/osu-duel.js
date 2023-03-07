@@ -1376,7 +1376,7 @@ module.exports = {
 					}
 				}
 
-				quicksortDuelStarRating(osuAccounts);
+				osuAccounts.sort((a, b) => b.osuDuelStarRating - a.osuDuelStarRating);
 
 				let leaderboardData = [];
 
@@ -1652,7 +1652,7 @@ module.exports = {
 				];
 
 				for (let i = 0; i < stepData.length; i++) {
-					quicksortStep(stepData[i]);
+					stepData[i].sort((a, b) => a.step - b.step);
 
 					for (let j = 0; j < stepData[i].length; j++) {
 						stepData[i][j] = `${stepData[i][j].step.toFixed(1)}*: ${(Math.round(stepData[i][j].averageWeight * 1000) / 1000).toFixed(3)} weight`;
@@ -1692,7 +1692,7 @@ module.exports = {
 					}
 				}
 
-				quicksortMatchId(multiMatches);
+				multiMatches.sort((a, b) => parseInt(b.matchId) - parseInt(a.matchId));
 
 				let hideQualifiers = new Date();
 				hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
@@ -1840,7 +1840,7 @@ module.exports = {
 				files.push(attachment);
 
 				for (let i = 0; i < scores.length; i++) {
-					quicksortScore(scores[i]);
+					scores[i].sort((a, b) => a.score - b.score);
 
 					for (let j = 0; j < scores[i].length; j++) {
 						let outlierText = '';
@@ -2280,103 +2280,3 @@ module.exports = {
 		}
 	},
 };
-
-function partitionDuelStarRating(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (list[j].osuDuelStarRating >= pivot.osuDuelStarRating) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksortDuelStarRating(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionDuelStarRating(list, start, end);
-		quicksortDuelStarRating(list, start, p - 1);
-		quicksortDuelStarRating(list, p + 1, end);
-	}
-	return list;
-}
-
-function partitionStep(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (list[j].step < pivot.step) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksortStep(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionStep(list, start, end);
-		quicksortStep(list, start, p - 1);
-		quicksortStep(list, p + 1, end);
-	}
-	return list;
-}
-
-function partitionScore(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (list[j].score < pivot.score) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksortScore(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionScore(list, start, end);
-		quicksortScore(list, start, p - 1);
-		quicksortScore(list, p + 1, end);
-	}
-	return list;
-}
-
-function partitionMatchId(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseInt(list[j].matchId) > parseInt(pivot.matchId)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksortMatchId(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionMatchId(list, start, end);
-		quicksortMatchId(list, start, p - 1);
-		quicksortMatchId(list, p + 1, end);
-	}
-	return list;
-}

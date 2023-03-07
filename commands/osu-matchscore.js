@@ -253,7 +253,7 @@ module.exports = {
 							}
 						}
 
-						quicksort(gameScores);
+						gameScores.sort((a, b) => parseFloat(b.score) - parseFloat(a.score));
 
 						for (let j = 0; j < gameScores.length; j++) {
 							if (parseInt(gameScores[j].score) < 10000) {
@@ -344,7 +344,7 @@ module.exports = {
 					return await interaction.editReply('No rounds with at least 2 players found in the match.');
 				}
 
-				quicksort(playerMatchResults);
+				playerMatchResults.sort((a, b) => parseFloat(b.score) - parseFloat(a.score));
 
 				let sortedPlayerMatchResults = [];
 				for (let i = 0; i < playerMatchResults.length; i++) {
@@ -412,31 +412,6 @@ module.exports = {
 			});
 	},
 };
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].score) >= parseFloat(pivot.score)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
-}
 
 function getMiddleScore(scores) {
 	if (scores.length % 2) {
