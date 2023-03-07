@@ -88,7 +88,7 @@ module.exports = {
 					}
 				}
 
-				quicksort(discordUsers);
+				discordUsers.sort((a, b) => parseInt(b.points) - parseInt(a.points));
 
 				let leaderboardData = [];
 
@@ -182,28 +182,3 @@ module.exports = {
 			});
 	},
 };
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].points) >= parseFloat(pivot.points)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
-}

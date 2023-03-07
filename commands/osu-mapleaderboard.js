@@ -269,7 +269,9 @@ module.exports = {
 				}
 			});
 
-			quicksort(multiScores);
+			multiScores = multiScores.sort((a, b) => {
+				return parseInt(b.score) - parseInt(a.score);
+			});
 
 			let addedUserScores = [];
 
@@ -776,29 +778,4 @@ function getDate(topScore) {
 	const formattedSubmitDate = `${topScore.raw_date.substring(8, 10)} ${month} ${topScore.raw_date.substring(0, 4)} ${topScore.raw_date.substring(11, 16)}`;
 
 	return formattedSubmitDate;
-}
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].score) >= parseFloat(pivot.score)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
 }

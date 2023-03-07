@@ -40,7 +40,7 @@ module.exports = {
 			let results = await getQualifierResults(mappool[0], players);
 
 			//Sort results
-			quicksort(results);
+			results.sort((a, b) => parseInt(b.score) - parseInt(a.score));
 
 			//Sort players and users by the results order
 			const playersUsers = sortPlayersByResults(results, players, users);
@@ -209,31 +209,6 @@ function sortPlayersByResults(results, playersInput, usersInput) {
 	output.push(usersOutput);
 
 	return output;
-}
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].score) >= parseFloat(pivot.score)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
 }
 
 async function messageUserWithRetries(client, user, content, attachment) {

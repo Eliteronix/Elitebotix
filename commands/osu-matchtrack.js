@@ -290,8 +290,8 @@ module.exports = {
 
 												if (blueScores.length || redScores.length) {
 													//Team vs
-													quicksort(blueScores);
-													quicksort(redScores);
+													blueScores.sort((a, b) => b.score - a.score);
+													redScores.sort((a, b) => b.score - a.score);
 
 													let blueTotalScore = 0;
 													for (let i = 0; i < blueScores.length; i++) {
@@ -517,14 +517,14 @@ async function getResultImage(event, users) {
 
 	if (event.game.scores && event.game.scores[0] && event.game.scores[0].match.team === 'none') {
 		scores = event.game.scores;
-		quicksort(scores);
+		scores.sort((a, b) => b.score - a.score);
 	} else {
 		teamModeHeight = 75;
 		let blueScores = event.game.scores.filter(score => score.match.team === 'blue');
 		let redScores = event.game.scores.filter(score => score.match.team === 'red');
 
-		quicksort(blueScores);
-		quicksort(redScores);
+		blueScores.sort((a, b) => b.score - a.score);
+		redScores.sort((a, b) => b.score - a.score);
 
 		for (let i = 0; i < blueScores.length; i++) {
 			blueScore += blueScores[i].score;
@@ -940,29 +940,4 @@ async function getPlayingImage(event) {
 
 	//Create as an attachment
 	return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
-}
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseInt(list[j].score) >= parseInt(pivot.score)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
 }

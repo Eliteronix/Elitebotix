@@ -933,7 +933,7 @@ module.exports = {
 				return msg.reply('Please specify for which bracket the pools should be created. (`top`, `middle`, `lower`, `beginner`)');
 			}
 
-			quicksort(allMaps);
+			allMaps.sort((a, b) => parseFloat(a.starRating) - parseFloat(b.starRating));
 
 			let allNMMaps = [];
 			let allHDMaps = [];
@@ -1548,31 +1548,6 @@ function removeAllMapDuplicates(map) {
 			i--;
 		}
 	}
-}
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].starRating) <= parseFloat(pivot.starRating)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
 }
 
 async function createElitiriRoleAssignmentTask() {

@@ -52,7 +52,7 @@ async function updateSheet(spreadsheetID, bracketName) {
 			}
 		});
 
-		quicksort(bracketPlayers);
+		bracketPlayers.sort((a, b) => parseInt(a.osuRank) - parseInt(b.osuRank));
 
 		await sheet.loadCells('B4:J500');
 		for (let i = 0; i < 496; i++) {
@@ -154,29 +154,4 @@ async function updateSheet(spreadsheetID, bracketName) {
 			guildId: 'None', task: 'elitiriRoleAssignment', priority: 3, date: date
 		});
 	}
-}
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].osuRank) <= parseFloat(pivot.osuRank)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
 }

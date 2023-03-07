@@ -45,7 +45,7 @@ module.exports = {
 					resultsMaxLength = args[2].length;
 				}
 
-				quicksort(results);
+				results.sort((a, b) => b.votes - a.votes);
 
 				const canvasWidth = 200 + 15 * resultsMaxLength;
 				let canvasHeight = 100 + results.length * 100;
@@ -93,31 +93,6 @@ module.exports = {
 				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'vote.png' });
 
 				await msg.channel.send({ content: `Results for: \`${args[2]}\``, files: [attachment] });
-			}
-
-			function partition(list, start, end) {
-				const pivot = list[end];
-				let i = start;
-				for (let j = start; j < end; j += 1) {
-					if (parseFloat(list[j].votes) >= parseFloat(pivot.votes)) {
-						[list[j], list[i]] = [list[i], list[j]];
-						i++;
-					}
-				}
-				[list[i], list[end]] = [list[end], list[i]];
-				return i;
-			}
-
-			function quicksort(list, start = 0, end = undefined) {
-				if (end === undefined) {
-					end = list.length - 1;
-				}
-				if (start < end) {
-					const p = partition(list, start, end);
-					quicksort(list, start, p - 1);
-					quicksort(list, p + 1, end);
-				}
-				return list;
 			}
 		}, { context: { args: args } });
 		processQueueEntry.destroy();

@@ -47,7 +47,7 @@ module.exports = {
 							bracketPlayers.splice(j, 1);
 							j--;
 						} else {
-							quicksort(playerResults);
+							playerResults.sort((a, b) => parseFloat(b.totalPoints) - parseFloat(a.totalPoints));
 
 							let totalPlayerPoints = 0;
 							let qualifierPlayerPoints = 0;
@@ -75,7 +75,7 @@ module.exports = {
 						}
 					}
 
-					quicksort(bracketPlayerResults);
+					bracketPlayerResults.sort((a, b) => parseFloat(b.totalPoints) - parseFloat(a.totalPoints));
 
 					let leaderboardData = [];
 
@@ -123,31 +123,6 @@ module.exports = {
 					//Send attachment
 					await channel.send({ content: content, files: [attachment] });
 				}
-			}
-
-			function partition(list, start, end) {
-				const pivot = list[end];
-				let i = start;
-				for (let j = start; j < end; j += 1) {
-					if (parseFloat(list[j].totalPoints) >= parseFloat(pivot.totalPoints)) {
-						[list[j], list[i]] = [list[i], list[j]];
-						i++;
-					}
-				}
-				[list[i], list[end]] = [list[end], list[i]];
-				return i;
-			}
-
-			function quicksort(list, start = 0, end = undefined) {
-				if (end === undefined) {
-					end = list.length - 1;
-				}
-				if (start < end) {
-					const p = partition(list, start, end);
-					quicksort(list, start, p - 1);
-					quicksort(list, p + 1, end);
-				}
-				return list;
 			}
 
 			async function getPlayers(c) {

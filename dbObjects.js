@@ -10,6 +10,9 @@ const guilds = new Sequelize('database', 'username', 'password', {
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
+	pool: {
+		max: 7,
+	}
 });
 
 const discordUsers = new Sequelize('database', 'username', 'password', {
@@ -22,6 +25,9 @@ const discordUsers = new Sequelize('database', 'username', 'password', {
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
+	pool: {
+		max: 7,
+	}
 });
 
 const serverActivity = new Sequelize('database', 'username', 'password', {
@@ -34,6 +40,9 @@ const serverActivity = new Sequelize('database', 'username', 'password', {
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
+	pool: {
+		max: 7,
+	}
 });
 
 const processQueue = new Sequelize('database', 'username', 'password', {
@@ -46,6 +55,9 @@ const processQueue = new Sequelize('database', 'username', 'password', {
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
+	pool: {
+		max: 7,
+	}
 });
 
 const osuData = new Sequelize('database', 'username', 'password', {
@@ -58,6 +70,9 @@ const osuData = new Sequelize('database', 'username', 'password', {
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
+	pool: {
+		max: 7,
+	}
 });
 
 const elitiriData = new Sequelize('database', 'username', 'password', {
@@ -70,6 +85,9 @@ const elitiriData = new Sequelize('database', 'username', 'password', {
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
+	pool: {
+		max: 7,
+	}
 });
 
 const multiScores = new Sequelize('database', 'username', 'password', {
@@ -82,6 +100,9 @@ const multiScores = new Sequelize('database', 'username', 'password', {
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
+	pool: {
+		max: 7,
+	}
 });
 
 const beatmaps = new Sequelize('database', 'username', 'password', {
@@ -94,6 +115,9 @@ const beatmaps = new Sequelize('database', 'username', 'password', {
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
+	pool: {
+		max: 7,
+	}
 });
 
 const DBGuilds = require('./models/DBGuilds')(guilds, Sequelize.DataTypes);

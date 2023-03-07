@@ -158,7 +158,8 @@ module.exports = {
 						players[i] = [players[i], roll];
 					}
 				}
-				quicksort(players);
+
+				players.sort((a, b) => b[1] - a[1]);
 
 				//Do match procedure
 				let rounds = [];
@@ -221,31 +222,6 @@ async function updateEmbed(embedMessage, players, rounds, instructions, edit) {
 		setTimeout(() => embedMessage.delete(), 80);
 		return await embedMessage.channel.send({ embeds: [rollgameEmbed] });
 	}
-}
-
-function partition(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j][1]) >= parseFloat(pivot[1])) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksort(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partition(list, start, end);
-		quicksort(list, start, p - 1);
-		quicksort(list, p + 1, end);
-	}
-	return list;
 }
 
 async function rollRound(msg, sentMessage, players, rounds) {
