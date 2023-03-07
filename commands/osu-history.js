@@ -488,20 +488,22 @@ module.exports = {
 				}
 			}
 
-			if (multiScores[i].teamType === 'Team vs' && (!tourneyEntry || !tourneyEntry.teammates.includes(multiScores[i].osuUserId))) {
-				let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
+			if (interaction.options.getBoolean('showtournamentdetails')) {
+				if (multiScores[i].teamType === 'Team vs' && (!tourneyEntry || !tourneyEntry.teammates.includes(multiScores[i].osuUserId))) {
+					let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
 
-				let team = ownScores[0].team;
+					let team = ownScores[0].team;
 
-				let currentUserScores = matchScores.filter(score => score.osuUserId === multiScores[i].osuUserId);
+					let currentUserScores = matchScores.filter(score => score.osuUserId === multiScores[i].osuUserId);
 
-				let currentUserTeam = currentUserScores[0].team;
+					let currentUserTeam = currentUserScores[0].team;
 
-				if (team === currentUserTeam) {
-					let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, '').toLowerCase() && tourney.date < inMonths);
+					if (team === currentUserTeam) {
+						let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, '').toLowerCase() && tourney.date < inMonths);
 
-					if (!tourneyEntry.teammates.includes(multiScores[i].osuUserId)) {
-						tourneyEntry.teammates.push(multiScores[i].osuUserId);
+						if (!tourneyEntry.teammates.includes(multiScores[i].osuUserId)) {
+							tourneyEntry.teammates.push(multiScores[i].osuUserId);
+						}
 					}
 				}
 			}
