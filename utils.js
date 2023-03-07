@@ -5621,17 +5621,27 @@ async function logDatabaseQueriesFunction(level, output) {
 
 function getScoreModpoolFunction(dbScore) {
 	//Evaluate with which mods the game was played
-	if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '0' || dbScore.gameRawMods === '1')) {
-		return 'NM';
-	} else if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '8' || dbScore.gameRawMods === '9')) {
-		return 'HD';
-	} else if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '16' || dbScore.gameRawMods === '17')) {
-		return 'HR';
-	} else if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '64' || dbScore.gameRawMods === '65' || dbScore.gameRawMods === '576' || dbScore.gameRawMods === '577')) {
-		return 'DT';
-	} else {
+	if (dbScore.freeMod) {
 		return 'FM';
 	}
+
+	if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '0' || dbScore.gameRawMods === '1')) {
+		return 'NM';
+	}
+
+	if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '8' || dbScore.gameRawMods === '9')) {
+		return 'HD';
+	}
+
+	if (!dbScore.freeMod && dbScore.rawMods === '0' && (dbScore.gameRawMods === '16' || dbScore.gameRawMods === '17')) {
+		return 'HR';
+	}
+
+	if (!dbScore.freeMod && dbScore.rawMods === '0' && parseInt(dbScore.gameRawMods) > 63 && (dbScore.gameRawMods === '64' || dbScore.gameRawMods === '65' || dbScore.gameRawMods === '576' || dbScore.gameRawMods === '577')) {
+		return 'DT';
+	}
+
+	return 'FM';
 }
 
 function applyOsuDuelStarratingCorrection(rating, score, weight) {
