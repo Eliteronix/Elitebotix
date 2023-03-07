@@ -3846,7 +3846,7 @@ async function getUserDuelStarRatingFunction(input) {
 
 	//Sort it by game ID
 	userScores.sort((a, b) => {
-		return a.gameId - b.gameId;
+		return b.gameId - a.gameId;
 	});
 
 	// console.log(`getUserDuelStarRatingFunction: sort: ${new Date() - startTime}ms`);
