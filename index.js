@@ -219,7 +219,7 @@ if (process.env.SERVER === 'Dev') {
 		// eslint-disable-next-line no-undef
 		token: process.env.BOTTOKEN,
 		execArgv: ['--use_strict', '--unhandled-rejections=warn'],
-		totalShards: 2
+		totalShards: 1
 	});
 }
 
