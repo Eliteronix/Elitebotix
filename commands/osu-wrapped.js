@@ -196,7 +196,7 @@ module.exports = {
 				}
 			},
 			order: [
-				['gameEndDate', 'DESC'],
+				['matchStartDate', 'DESC'],
 			],
 		});
 
@@ -214,17 +214,38 @@ module.exports = {
 
 		let lastUpdate = new Date();
 
+		let matchScores = multiScores.filter(score => score.matchId === multiScores[0].matchId);
+		let gameScores = null;
+		let matchId = multiScores[0].matchId;
+		let gameId = multiScores[0].gameId;
+
 		for (let i = 0; i < multiScores.length; i++) {
+			if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].matchName.toLowerCase().includes('scrim')) {
+				continue;
+			}
+
 			if (new Date() - lastUpdate > 15000) {
 				interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
 				lastUpdate = new Date();
+			}
+
+			if (matchId !== multiScores[i].matchId) {
+				matchId = multiScores[i].matchId;
+				matchScores = multiScores.filter(score => score.matchId === multiScores[i].matchId);
+			}
+
+			if (gameId !== multiScores[i].gameId) {
+				gameId = multiScores[i].gameId;
+				gameScores = null;
 			}
 
 			if (!matchesChecked.includes(multiScores[i].matchId)) {
 				matchesChecked.push(multiScores[i].matchId);
 
 				// Get all the scores for this game
-				let gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
+				if (!gameScores) {
+					gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
+				}
 
 				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
 
@@ -237,8 +258,6 @@ module.exports = {
 						matchesLost++;
 					}
 				} else if (gameScores[0].teamType === 'Team vs') {
-					let matchScores = multiScores.filter(score => score.matchId === multiScores[i].matchId);
-
 					let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
 
 					let team = ownScores[0].team;
@@ -266,7 +285,9 @@ module.exports = {
 				gamesChecked.push(multiScores[i].gameId);
 
 				// Get all the scores for this game
-				let gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
+				if (!gameScores) {
+					gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
+				}
 
 				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
 

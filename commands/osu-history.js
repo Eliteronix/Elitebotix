@@ -185,7 +185,7 @@ module.exports = {
 				}
 			},
 			order: [
-				['gameEndDate', 'DESC'],
+				['matchStartDate', 'DESC'],
 			],
 		});
 
@@ -218,6 +218,11 @@ module.exports = {
 		let hideQualifiers = new Date();
 		hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
 
+		let matchScores = multiScores.filter(score => score.matchId === multiScores[0].matchId);
+		let gameScores = null;
+		let matchId = multiScores[0].matchId;
+		let gameId = multiScores[0].gameId;
+
 		for (let i = 0; i < multiScores.length; i++) {
 			if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].matchName.toLowerCase().includes('scrim')) {
 				continue;
@@ -226,6 +231,16 @@ module.exports = {
 			if (new Date() - lastUpdate > 15000) {
 				interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
 				lastUpdate = new Date();
+			}
+
+			if (matchId !== multiScores[i].matchId) {
+				matchId = multiScores[i].matchId;
+				matchScores = multiScores.filter(score => score.matchId === multiScores[i].matchId);
+			}
+
+			if (gameId !== multiScores[i].gameId) {
+				gameId = multiScores[i].gameId;
+				gameScores = null;
 			}
 
 			let date = new Date(multiScores[i].matchStartDate);
@@ -246,7 +261,9 @@ module.exports = {
 				matchesChecked.push(multiScores[i].matchId);
 
 				// Get all the scores for this game
-				let gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
+				if (!gameScores) {
+					gameScores = matchScores.filter(score => score.gameId === multiScores[i].gameId);
+				}
 
 				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
 
@@ -263,8 +280,6 @@ module.exports = {
 						console.error(error, ownScore, otherScore, multiScores[i].matchId);
 					}
 				} else if (gameScores[0].teamType === 'Team vs') {
-					let matchScores = multiScores.filter(score => score.matchId === multiScores[i].matchId);
-
 					let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
 
 					let team = ownScores[0].team;
@@ -292,7 +307,9 @@ module.exports = {
 				gamesChecked.push(multiScores[i].gameId);
 
 				// Get all the scores for this game
-				let gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
+				if (!gameScores) {
+					gameScores = matchScores.filter(score => score.gameId === multiScores[i].gameId);
+				}
 
 				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
 
@@ -356,7 +373,9 @@ module.exports = {
 					let matchLostAgainst = false;
 
 					// Get all the scores for this game
-					let gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
+					if (!gameScores) {
+						gameScores = matchScores.filter(score => score.gameId === multiScores[i].gameId);
+					}
 
 					let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
 
@@ -373,8 +392,6 @@ module.exports = {
 							console.error(error, ownScore, otherScore, multiScores[i].matchId);
 						}
 					} else if (gameScores[0].teamType === 'Team vs') {
-						let matchScores = multiScores.filter(score => score.matchId === multiScores[i].matchId);
-
 						let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
 
 						let team = ownScores[0].team;
@@ -471,9 +488,7 @@ module.exports = {
 				}
 			}
 
-			if (multiScores[i].teamType === 'Team vs') {
-				let matchScores = multiScores.filter(score => score.matchId === multiScores[i].matchId);
-
+			if (multiScores[i].teamType === 'Team vs' && (!tourneyEntry || !tourneyEntry.teammates.includes(multiScores[i].osuUserId))) {
 				let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
 
 				let team = ownScores[0].team;
