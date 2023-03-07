@@ -834,7 +834,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		}
 
 		//Sort scores by pp
-		quicksortPP(multiScores);
+		multiScores.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
 
 		//Remove duplicates by beatmapId
 		for (let i = 0; i < multiScores.length; i++) {
@@ -900,7 +900,10 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		for (let i = 0; i < scores.length; i++) {
 			scores[i].best = i + 1;
 		}
-		quicksortRecent(scores);
+
+		scores.sort((a, b) => {
+			return Date.parse(b.raw_date) - Date.parse(a.raw_date);
+		});
 	} else if (sorting && sorting == 'acc') {
 		scores = scores.sort((a, b) => {
 			return parseFloat(b.acc) - parseFloat(a.acc);
@@ -924,19 +927,33 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 	if (sorting) {
 		if (sorting == 'ar') {
-			quicksortAR(beatmaps);
+			beatmaps.sort((a, b) => {
+				return parseFloat(b.approachRate) - parseFloat(a.approachRate);
+			});
 		} else if (sorting == 'cs') {
-			quicksortCS(beatmaps);
+			beatmaps.sort((a, b) => {
+				return parseFloat(b.circleSize) - parseFloat(a.circleSize);
+			});
 		} else if (sorting == 'od') {
-			quicksortOD(beatmaps);
+			beatmaps.sort((a, b) => {
+				return parseFloat(b.overallDifficulty) - parseFloat(a.overallDifficulty);
+			});
 		} else if (sorting == 'drain') {
-			quicksortHP(beatmaps);
+			beatmaps.sort((a, b) => {
+				return parseFloat(b.hpDrain) - parseFloat(a.hpDrain);
+			});
 		} else if (sorting == 'bpm') {
-			quicksortBPM(beatmaps);
+			beatmaps.sort((a, b) => {
+				return parseFloat(b.bpm) - parseFloat(a.bpm);
+			});
 		} else if (sorting == 'length') {
-			quicksortLength(beatmaps);
+			beatmaps.sort((a, b) => {
+				return parseFloat(b.totalLength) - parseFloat(a.totalLength);
+			});
 		} else if (sorting == 'sr') {
-			bubblesortSR(beatmaps);
+			beatmaps.sort((a, b) => {
+				return parseFloat(b.difficultyRating) - parseFloat(a.difficultyRating);
+			});
 		}
 	}
 
@@ -1186,213 +1203,5 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 	const output = [canvas, ctx, user, exportScores];
 	return output;
-}
-
-function partitionRecent(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (Date.parse(list[j].raw_date) >= Date.parse(pivot.raw_date)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function quicksortRecent(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionRecent(list, start, end);
-		quicksortRecent(list, start, p - 1);
-		quicksortRecent(list, p + 1, end);
-	}
-	return list;
-}
-
-function partitionAR(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].approachRate) >= parseFloat(pivot.approachRate)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-function quicksortAR(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionAR(list, start, end);
-		quicksortAR(list, start, p - 1);
-		quicksortAR(list, p + 1, end);
-	}
-	return list;
-}
-
-function partitionCS(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].circleSize) >= parseFloat(pivot.circleSize)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-function quicksortCS(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionCS(list, start, end);
-		quicksortCS(list, start, p - 1);
-		quicksortCS(list, p + 1, end);
-	}
-	return list;
-}
-
-function partitionOD(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].overallDifficulty) >= parseFloat(pivot.overallDifficulty)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-function quicksortOD(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionOD(list, start, end);
-		quicksortOD(list, start, p - 1);
-		quicksortOD(list, p + 1, end);
-	}
-	return list;
-}
-
-function partitionHP(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].hpDrain) >= parseFloat(pivot.hpDrain)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-function quicksortHP(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionHP(list, start, end);
-		quicksortHP(list, start, p - 1);
-		quicksortHP(list, p + 1, end);
-	}
-	return list;
-}
-
-function partitionBPM(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].bpm) >= parseFloat(pivot.bpm)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-function quicksortBPM(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionBPM(list, start, end);
-		quicksortBPM(list, start, p - 1);
-		quicksortBPM(list, p + 1, end);
-	}
-	return list;
-}
-
-function partitionLength(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].totalLength) >= parseFloat(pivot.totalLength)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-function quicksortLength(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionLength(list, start, end);
-		quicksortLength(list, start, p - 1);
-		quicksortLength(list, p + 1, end);
-	}
-	return list;
-}
-
-function quicksortPP(list, start = 0, end = undefined) {
-	if (end === undefined) {
-		end = list.length - 1;
-	}
-	if (start < end) {
-		const p = partitionPP(list, start, end);
-		quicksortPP(list, start, p - 1);
-		quicksortPP(list, p + 1, end);
-	}
-	return list;
-}
-
-function partitionPP(list, start, end) {
-	const pivot = list[end];
-	let i = start;
-	for (let j = start; j < end; j += 1) {
-		if (parseFloat(list[j].pp) >= parseFloat(pivot.pp)) {
-			[list[j], list[i]] = [list[i], list[j]];
-			i++;
-		}
-	}
-	[list[i], list[end]] = [list[end], list[i]];
-	return i;
-}
-
-function bubblesortSR(list) {
-	let swapped = true;
-	while (swapped) {
-		swapped = false;
-		for (let i = 0; i < list.length - 1; i++) {
-			if (parseFloat(list[i].starRating) < parseFloat(list[i + 1].starRating)) {
-				[list[i], list[i + 1]] = [list[i + 1], list[i]];
-				swapped = true;
-			}
-		}
-	}
-	return list;
 }
 

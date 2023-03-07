@@ -32,7 +32,7 @@ module.exports = {
 		for (let i = 0; i < discordUsers.length; i++) {
 			let discordUser = discordUsers[i];
 
-			if (discordUser.osuRank && parseInt(discordUser.osuRank) >= parseInt(args[0]) && parseInt(discordUser.osuRank) <= parseInt(args[1])) {
+			if (discordUser.osuRank && parseInt(discordUser.osuRank) >= parseInt(args[0]) && parseInt(discordUser.osuRank) <= parseInt(args[1]) && discordUser.osuDuelStarRating) {
 				totalRating += parseFloat(discordUser.osuDuelStarRating);
 				totalPlayers++;
 			}
