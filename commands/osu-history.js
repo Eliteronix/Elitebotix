@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores, DBDuelRatingHistory } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
@@ -690,6 +690,12 @@ module.exports = {
 			date.setUTCDate(date.getUTCDate() - 1);
 			date.setUTCHours(23, 59, 59, 999);
 
+			let existingDuelRatings = await DBDuelRatingHistory.findAll({
+				where: {
+					osuUserId: osuUser.osuUserId,
+				},
+			});
+
 			let iterator = 0;
 			let startTime = date - oldestScore.gameEndDate;
 
@@ -699,8 +705,15 @@ module.exports = {
 					interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
 					lastUpdate = new Date();
 				}
-				let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: date });
-				duelRatings.push({ rating: duelRating.total, date: `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}.${date.getUTCFullYear()}` });
+
+				let existingRating = existingDuelRatings.find(rating => rating.year === date.getUTCFullYear() && rating.month === date.getUTCMonth() + 1 && rating.date === date.getUTCDate());
+
+				if (existingRating) {
+					duelRatings.push({ rating: parseFloat(existingRating.osuDuelStarRating), date: `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}.${date.getUTCFullYear()}` });
+				} else {
+					let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: date });
+					duelRatings.push({ rating: duelRating.total, date: `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}.${date.getUTCFullYear()}` });
+				}
 				date.setUTCDate(1);
 				date.setUTCDate(date.getUTCDate() - 1);
 			}

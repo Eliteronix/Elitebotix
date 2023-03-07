@@ -3680,7 +3680,8 @@ async function getUserDuelStarRatingFunction(input) {
 
 	//Check if it is the last moment of a month
 	let completeMonth = false;
-	if (endDate.getUTCDate() === 31
+	let lastDayOfTheMonth = new Date(endDate.getUTCFullYear(), endDate.getUTCMonth() + 1, 0);
+	if (endDate.getUTCDate() === lastDayOfTheMonth.getDate()
 		&& endDate.getUTCHours() === 23
 		&& endDate.getUTCMinutes() === 59
 		&& endDate.getUTCSeconds() === 59
