@@ -17,7 +17,7 @@ module.exports = {
 
 			const command = require(`../${file}`);
 
-			if (interaction.options.getString('argument').includes(command.name)) {
+			if (interaction.options.getString('argument').split(/ +/).includes(command.name)) {
 				commands.push(command.data.toJSON());
 			}
 		}
