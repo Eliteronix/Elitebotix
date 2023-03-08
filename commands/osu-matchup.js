@@ -1113,14 +1113,16 @@ module.exports = {
 				scoreVersion = 1;
 			}
 
+			let modPool = getScoreModpool(team1MapScores[0]);
+
 			//Evaluate with which mods the game was played
-			if (getScoreModpool(team1MapScores[0]) === 'NM') {
+			if (modPool === 'NM') {
 				indirectNoModWins[scoreVersion][winner]++;
-			} else if (getScoreModpool(team1MapScores[0]) === 'HD') {
+			} else if (modPool === 'HD') {
 				indirectHiddenWins[scoreVersion][winner]++;
-			} else if (getScoreModpool(team1MapScores[0]) === 'HR') {
+			} else if (modPool === 'HR') {
 				indirectHardRockWins[scoreVersion][winner]++;
-			} else if (getScoreModpool(team1MapScores[0]) === 'DT') {
+			} else if (modPool === 'DT') {
 				indirectDoubleTimeWins[scoreVersion][winner]++;
 			} else {
 				indirectFreeModWins[scoreVersion][winner]++;
@@ -1128,7 +1130,7 @@ module.exports = {
 
 			//For the graph
 			rounds.push({
-				mod: getScoreModpool(team1MapScores[0]),
+				mod: modPool,
 				winner: winner,
 				score: team1Score / team2Score,
 				matchId: matchId,
@@ -1138,15 +1140,15 @@ module.exports = {
 
 			//For the maps played txt
 			let modPoolNumber = 0;
-			if (getScoreModpool(team1MapScores[0]) === 'NM') {
+			if (modPool === 'NM') {
 				modPoolNumber = 0;
-			} else if (getScoreModpool(team1MapScores[0]) === 'HD') {
+			} else if (modPool === 'HD') {
 				modPoolNumber = 1;
-			} else if (getScoreModpool(team1MapScores[0]) === 'HR') {
+			} else if (modPool === 'HR') {
 				modPoolNumber = 2;
-			} else if (getScoreModpool(team1MapScores[0]) === 'DT') {
+			} else if (modPool === 'DT') {
 				modPoolNumber = 3;
-			} else if (getScoreModpool(team1MapScores[0]) === 'FM') {
+			} else if (modPool === 'FM') {
 				modPoolNumber = 4;
 			}
 
@@ -1164,9 +1166,9 @@ module.exports = {
 			}
 
 			if (winner === 0) {
-				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(team1MapScores[0])} - Won by: ${team1Players.join(', ')} against ${team2Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)} - ${beatmapString}`);
+				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${modPool} - Won by: ${team1Players.join(', ')} against ${team2Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)} - ${beatmapString}`);
 			} else {
-				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${getScoreModpool(team1MapScores[0])} - Won by: ${team2Players.join(', ')} against ${team1Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)} - ${beatmapString}`);
+				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${modPool} - Won by: ${team2Players.join(', ')} against ${team1Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)} - ${beatmapString}`);
 			}
 		}
 
