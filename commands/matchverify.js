@@ -795,26 +795,9 @@ module.exports = {
 				return await interaction.editReply(`No scores found for the acronym \`${acronym.replace(/`/g, '')}\`.`);
 			}
 
-			//Bubblesort userscores by matchId property descending
-			userScores.sort((a, b) => {
-				if (parseInt(a.matchId) > parseInt(b.matchId)) {
-					return -1;
-				}
-				if (parseInt(a.matchId) < parseInt(b.matchId)) {
-					return 1;
-				}
-				return 0;
-			});
+			userScores.sort((a, b) => parseInt(b.matchId) - parseInt(a.matchId));
 
 			let matchesPlayed = userScores.map((score) => `${(new Date(score.matchStartDate).getUTCMonth() + 1).toString().padStart(2, '0')}-${new Date(score.matchStartDate).getUTCFullYear()} - ${score.matchName} - ${score.verificationComment} ----- https://osu.ppy.sh/community/matches/${score.matchId}`);
-			for (let i = 0; i < userScores.length; i++) {
-				//Push matches for the history txt
-				let date = new Date(userScores[i].matchStartDate);
-
-				if (!matchesPlayed.includes(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`)) {
-					matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`);
-				}
-			}
 
 			// eslint-disable-next-line no-undef
 			matchesPlayed = new AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${acronym}.txt` });
