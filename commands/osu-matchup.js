@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
 const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap, getAvatar } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
@@ -751,6 +751,8 @@ module.exports = {
 		let scoresTeam1 = [];
 		let scoresTeam2 = [];
 
+		let beatmaps = [];
+
 		//Loop throught team one and get all their multi scores
 		for (let i = 0; i < team1.length; i++) {
 			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiScores 1User${i + 1}`);
@@ -768,7 +770,8 @@ module.exports = {
 					gameEndDate: {
 						[Op.gte]: timeframe
 					}
-				}
+				},
+				order: [['gameEndDate', 'DESC']],
 			}));
 
 			//Remove userScores which don't fit the criteria
@@ -782,13 +785,39 @@ module.exports = {
 				}
 			}
 
-			scoresTeam1[i].sort((a, b) => parseInt(b.gameId) - parseInt(a.gameId));
-
 			//Set the modPool for the scores
 			for (let j = 0; j < scoresTeam1[i].length; j++) {
-				scoresTeam1[i][j].modPool = getScoreModpool(scoresTeam1[i][j]);
+				let modPool = getScoreModpool(scoresTeam1[i][j]);
+
+				let scoreVersion = 'V1';
+				if (scoresTeam1[i][j].scoringType === 'Score v2') {
+					scoreVersion = 'V2';
+				}
+
+				//Add the beatmap to the beatmap array
+				let beatmap = beatmaps.find(b => b.beatmapId === scoresTeam1[i][j].beatmapId && b.modPool === modPool && b.scoreVersion === scoreVersion);
+
+				if (!beatmap) {
+					beatmap = {
+						beatmapId: scoresTeam1[i][j].beatmapId,
+						modPool: modPool,
+						scoreVersion: scoreVersion,
+						team1Players: [scoresTeam1[i][j].osuUserId],
+						team2Players: [],
+						team1Scores: [scoresTeam1[i][j]],
+						team2Scores: []
+					};
+					beatmaps.push(beatmap);
+				} else {
+					if (!beatmap.team1Players.includes(scoresTeam1[i][j].osuUserId)) {
+						beatmap.team1Scores.push(scoresTeam1[i][j]);
+						beatmap.team1Players.push(scoresTeam1[i][j].osuUserId);
+					}
+				}
 			}
 		}
+
+		beatmaps = beatmaps.filter(b => b.team1Players.length >= teamsize);
 
 		//Loop throught team two and get all their multi scores
 		for (let i = 0; i < team2.length; i++) {
@@ -806,8 +835,12 @@ module.exports = {
 					],
 					gameEndDate: {
 						[Op.gte]: timeframe
+					},
+					beatmapId: {
+						[Op.in]: beatmaps.map(b => b.beatmapId)
 					}
-				}
+				},
+				order: [['gameEndDate', 'DESC']],
 			}));
 
 			//Remove userScores which don't fit the criteria
@@ -821,13 +854,38 @@ module.exports = {
 				}
 			}
 
-			scoresTeam2[i].sort((a, b) => parseInt(b.gameId) - parseInt(a.gameId));
-
 			//Set the modPool for the scores
 			for (let j = 0; j < scoresTeam2[i].length; j++) {
-				scoresTeam2[i][j].modPool = getScoreModpool(scoresTeam2[i][j]);
+				let modPool = getScoreModpool(scoresTeam2[i][j]);
+
+				let scoreVersion = 'V1';
+				if (scoresTeam2[i][j].scoringType === 'Score v2') {
+					scoreVersion = 'V2';
+				}
+
+				//Add the beatmap to the beatmap array
+				let beatmap = beatmaps.find(b => b.beatmapId === scoresTeam2[i][j].beatmapId && b.modPool === modPool && b.scoreVersion === scoreVersion);
+
+				if (beatmap) {
+					if (!beatmap.team2Players.includes(scoresTeam2[i][j].osuUserId)) {
+						beatmap.team2Scores.push(scoresTeam2[i][j]);
+						beatmap.team2Players.push(scoresTeam2[i][j].osuUserId);
+					}
+				}
 			}
 		}
+
+		beatmaps = beatmaps.filter(b => b.team2Players.length >= teamsize);
+
+		// Fetch all beatmaps from the database
+		let dbBeatmaps = await DBOsuBeatmaps.findAll({
+			where: {
+				beatmapId: {
+					[Op.in]: beatmaps.map(b => b.beatmapId)
+				},
+				mods: 0
+			}
+		});
 
 		//Create arrays of standings for each player/Mod/Score
 		//[ScoreV1[User1Wins, User2Wins], ScoreV2[User1Wins, User2Wins]]
@@ -844,76 +902,33 @@ module.exports = {
 		let indirectFreeModWins = [[0, 0], [0, 0]];
 
 		//Direct matchups
-		//Get a list of all games played by both teams
-		let gamesPlayed = [];
-		for (let i = 0; i < scoresTeam1.length; i++) {
-			for (let j = 0; j < scoresTeam1[i].length; j++) {
-				if (gamesPlayed.indexOf(scoresTeam1[i][j].gameId) === -1) {
-					gamesPlayed.push(scoresTeam1[i][j].gameId);
-				}
-			}
-		}
+		let team1Scores = beatmaps.flatMap(b => b.team1Scores);
+		let team2Scores = beatmaps.flatMap(b => b.team2Scores);
 
-		for (let i = 0; i < scoresTeam2.length; i++) {
-			for (let j = 0; j < scoresTeam2[i].length; j++) {
-				if (gamesPlayed.indexOf(scoresTeam2[i][j].gameId) === -1) {
-					gamesPlayed.push(scoresTeam2[i][j].gameId);
-				}
-			}
-		}
+		//Get a list of all games played by both teams
+		let gamesPlayed = [...new Set(team1Scores.map(s => s.gameId).concat(team2Scores.map(s => s.gameId)))];
 
 		//Loop through all games played and check if on both team sides at least teamsize players played the game aswell
-		for (let i = 0; i < gamesPlayed.length; i++) {
-			let team1Count = 0;
-			let team2Count = 0;
-
-			for (let j = 0; j < scoresTeam1.length; j++) {
-				for (let k = 0; k < scoresTeam1[j].length; k++) {
-					if (scoresTeam1[j][k].gameId === gamesPlayed[i]) {
-						team1Count++;
-					}
-				}
-			}
-
-			for (let j = 0; j < scoresTeam2.length; j++) {
-				for (let k = 0; k < scoresTeam2[j].length; k++) {
-					if (scoresTeam2[j][k].gameId === gamesPlayed[i]) {
-						team2Count++;
-					}
-				}
-			}
-
-			if (team1Count < teamsize || team2Count < teamsize) {
-				gamesPlayed.splice(i, 1);
-				i--;
-			}
-		}
-
 		//Loop through all games, get the score for each player and add the teamsize best scores together and compare
 		let matchesPlayed = [];
 
 		let hideQualifiers = new Date();
 		hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
 		for (let i = 0; i < gamesPlayed.length; i++) {
-			let team1GameScores = [];
-			let team2GameScores = [];
+			let team1GameScores = team1Scores.filter(s => s.gameId === gamesPlayed[i]);
 
-			//Get all game scores for team 1
-			for (let j = 0; j < scoresTeam1.length; j++) {
-				for (let k = 0; k < scoresTeam1[j].length; k++) {
-					if (scoresTeam1[j][k].gameId === gamesPlayed[i]) {
-						team1GameScores.push(scoresTeam1[j][k]);
-					}
-				}
+			if (team1GameScores.length < teamsize) {
+				gamesPlayed.splice(i, 1);
+				i--;
+				continue;
 			}
 
-			//Get all game scores for team 2
-			for (let j = 0; j < scoresTeam2.length; j++) {
-				for (let k = 0; k < scoresTeam2[j].length; k++) {
-					if (scoresTeam2[j][k].gameId === gamesPlayed[i]) {
-						team2GameScores.push(scoresTeam2[j][k]);
-					}
-				}
+			let team2GameScores = team2Scores.filter(s => s.gameId === gamesPlayed[i]);
+
+			if (team2GameScores.length < teamsize) {
+				gamesPlayed.splice(i, 1);
+				i--;
+				continue;
 			}
 
 			//Sort the scores for each team
@@ -967,78 +982,7 @@ module.exports = {
 		}
 
 		//Indirect matchups
-		//Get a list of all maps played for each modPool by all players from both teams
-		let mapsPlayed = [];
-		for (let i = 0; i < scoresTeam1.length; i++) {
-			for (let j = 0; j < scoresTeam1[i].length; j++) {
-				let scoreVersion = 'V1';
-				if (scoresTeam1[i][j].scoringType === 'Score v2') {
-					scoreVersion = 'V2';
-				}
-
-				if (mapsPlayed.indexOf(`${scoreVersion}${scoresTeam1[i][j].modPool}${scoresTeam1[i][j].beatmapId}`) === -1) {
-					mapsPlayed.push(`${scoreVersion}${scoresTeam1[i][j].modPool}${scoresTeam1[i][j].beatmapId}`);
-				}
-			}
-		}
-
-		for (let i = 0; i < scoresTeam2.length; i++) {
-			for (let j = 0; j < scoresTeam2[i].length; j++) {
-				let scoreVersion = 'V1';
-				if (scoresTeam2[i][j].scoringType === 'Score v2') {
-					scoreVersion = 'V2';
-				}
-
-				if (mapsPlayed.indexOf(`${scoreVersion}${scoresTeam2[i][j]}${scoresTeam2[i][j].beatmapId}`) === -1) {
-					mapsPlayed.push(`${scoreVersion}${scoresTeam2[i][j]}${scoresTeam2[i][j].beatmapId}`);
-				}
-			}
-		}
-
-		//Loop through all maps played and check if on both team sides at least teamsize players played the map aswell
-		for (let i = 0; i < mapsPlayed.length; i++) {
-			let team1Count = 0;
-			let team2Count = 0;
-
-			for (let j = 0; j < scoresTeam1.length && team1Count < teamsize; j++) {
-				for (let k = 0; k < scoresTeam1[j].length; k++) {
-					let scoreVersion = 'V1';
-					if (scoresTeam1[j][k].scoringType === 'Score v2') {
-						scoreVersion = 'V2';
-					}
-					if (`${scoreVersion}${scoresTeam1[j][k].modPool}${scoresTeam1[j][k].beatmapId}` === mapsPlayed[i]) {
-						team1Count++;
-						break;
-					}
-				}
-			}
-
-			if (team1Count < teamsize) {
-				mapsPlayed.splice(i, 1);
-				i--;
-				continue;
-			}
-
-			for (let j = 0; j < scoresTeam2.length && team2Count < teamsize; j++) {
-				for (let k = 0; k < scoresTeam2[j].length; k++) {
-					let scoreVersion = 'V1';
-					if (scoresTeam2[j][k].scoringType === 'Score v2') {
-						scoreVersion = 'V2';
-					}
-					if (`${scoreVersion}${scoresTeam2[j][k].modPool}${scoresTeam2[j][k].beatmapId}` === mapsPlayed[i]) {
-						team2Count++;
-						break;
-					}
-				}
-			}
-
-			if (team2Count < teamsize) {
-				mapsPlayed.splice(i, 1);
-				i--;
-				continue;
-			}
-		}
-
+		//The beatmaps array contains all maps played by both teams with enough players
 		//Loop through all maps, get the most recent score for each player and add the teamsize best scores together and compare
 		//For the graph
 		let rounds = [];
@@ -1047,56 +991,16 @@ module.exports = {
 		//[won by team1 array[NM[], HD[], HR[], DT[], FM[]], won by team2 array[NM[], HD[], HR[], DT[], FM[]]]]
 		//divided by player who won -> divided by modpool
 		let mapsPlayedReadable = [[[], [], [], [], []], [[], [], [], [], []]];
-		for (let i = 0; i < mapsPlayed.length; i++) {
-			let team1MapScores = [];
-			let team2MapScores = [];
-
+		for (let i = 0; i < beatmaps.length; i++) {
 			//For the round array
-			let matchId = null;
+			//Get the earliest date of the map
+			let matchId = Infinity;
 			let date = null;
 			let dateReadable = null;
 
-			//Get all map scores for team 1 | Scores are already sorted by matchID descending so the first score is the most recent
-			for (let j = 0; j < scoresTeam1.length; j++) {
-				for (let k = 0; k < scoresTeam1[j].length; k++) {
-					let scoreVersion = 'V1';
-					if (scoresTeam1[j][k].scoringType === 'Score v2') {
-						scoreVersion = 'V2';
-					}
-					if (`${scoreVersion}${scoresTeam1[j][k].modPool}${scoresTeam1[j][k].beatmapId}` === mapsPlayed[i]) {
-						team1MapScores.push(scoresTeam1[j][k]);
-						if (!matchId || matchId < scoresTeam1[j][k].matchId) {
-							matchId = scoresTeam1[j][k].matchId;
-							date = new Date(scoresTeam1[j][k].matchStartDate);
-							dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
-						}
-						break;
-					}
-				}
-			}
-
-			//Get all map scores for team 2 | Scores are already sorted by matchID descending so the first score is the most recent
-			for (let j = 0; j < scoresTeam2.length; j++) {
-				for (let k = 0; k < scoresTeam2[j].length; k++) {
-					let scoreVersion = 'V1';
-					if (scoresTeam2[j][k].scoringType === 'Score v2') {
-						scoreVersion = 'V2';
-					}
-					if (`${scoreVersion}${scoresTeam2[j][k].modPool}${scoresTeam2[j][k].beatmapId}` === mapsPlayed[i]) {
-						team2MapScores.push(scoresTeam2[j][k]);
-						if (!matchId || parseInt(matchId) < parseInt(scoresTeam2[j][k].matchId)) {
-							matchId = scoresTeam2[j][k].matchId;
-							date = new Date(scoresTeam2[j][k].matchStartDate);
-							dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
-						}
-						break;
-					}
-				}
-			}
-
 			//Sort the scores for each team
-			team1MapScores.sort((a, b) => parseInt(b.score) - parseInt(a.score));
-			team2MapScores.sort((a, b) => parseInt(b.score) - parseInt(a.score));
+			beatmaps[i].team1Scores.sort((a, b) => parseInt(b.score) - parseInt(a.score));
+			beatmaps[i].team2Scores.sort((a, b) => parseInt(b.score) - parseInt(a.score));
 
 			//Add the best scores together
 			let team1Score = 0;
@@ -1106,11 +1010,23 @@ module.exports = {
 			let team2Players = [];
 
 			for (let j = 0; j < teamsize; j++) {
-				team1Score += parseInt(team1MapScores[j].score);
-				team2Score += parseInt(team2MapScores[j].score);
+				team1Score += parseInt(beatmaps[i].team1Scores[j].score);
+				team2Score += parseInt(beatmaps[i].team2Scores[j].score);
 
-				team1Players.push(team1Names[team1.indexOf(team1MapScores[j].osuUserId)]);
-				team2Players.push(team2Names[team2.indexOf(team2MapScores[j].osuUserId)]);
+				team1Players.push(team1Names[team1.indexOf(beatmaps[i].team1Scores[j].osuUserId)]);
+				team2Players.push(team2Names[team2.indexOf(beatmaps[i].team2Scores[j].osuUserId)]);
+
+				if (beatmaps[i].team1Scores[j].matchId < matchId) {
+					matchId = beatmaps[i].team1Scores[j].matchId;
+					date = new Date(beatmaps[i].team1Scores[j].matchStartDate);
+					dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
+				}
+
+				if (beatmaps[i].team2Scores[j].matchId < matchId) {
+					matchId = beatmaps[i].team2Scores[j].matchId;
+					date = new Date(beatmaps[i].team2Scores[j].matchStartDate);
+					dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
+				}
 			}
 
 			//Compare the scores | Winner is by default team 1 | If team 2 is better, change winner
@@ -1121,18 +1037,18 @@ module.exports = {
 
 			//Evaluate if it was played with Score v2 or not (0 = v1, 1 = v2)
 			let scoreVersion = 0;
-			if (team1MapScores[0].scoringType === 'Score v2') {
+			if (beatmaps[i].scoreVersion === 'V2') {
 				scoreVersion = 1;
 			}
 
 			//Evaluate with which mods the game was played
-			if (team1MapScores[0].modPool === 'NM') {
+			if (beatmaps[i].modPool === 'NM') {
 				indirectNoModWins[scoreVersion][winner]++;
-			} else if (team1MapScores[0].modPool === 'HD') {
+			} else if (beatmaps[i].modPool === 'HD') {
 				indirectHiddenWins[scoreVersion][winner]++;
-			} else if (team1MapScores[0].modPool === 'HR') {
+			} else if (beatmaps[i].modPool === 'HR') {
 				indirectHardRockWins[scoreVersion][winner]++;
-			} else if (team1MapScores[0].modPool === 'DT') {
+			} else if (beatmaps[i].modPool === 'DT') {
 				indirectDoubleTimeWins[scoreVersion][winner]++;
 			} else {
 				indirectFreeModWins[scoreVersion][winner]++;
@@ -1140,7 +1056,7 @@ module.exports = {
 
 			//For the graph
 			rounds.push({
-				mod: team1MapScores[0].modPool,
+				mod: beatmaps[i].modPool,
 				winner: winner,
 				score: team1Score / team2Score,
 				matchId: matchId,
@@ -1150,35 +1066,32 @@ module.exports = {
 
 			//For the maps played txt
 			let modPoolNumber = 0;
-			if (team1MapScores[0].modPool === 'NM') {
+			if (beatmaps[i].modPool === 'NM') {
 				modPoolNumber = 0;
-			} else if (team1MapScores[0].modPool === 'HD') {
+			} else if (beatmaps[i].modPool === 'HD') {
 				modPoolNumber = 1;
-			} else if (team1MapScores[0].modPool === 'HR') {
+			} else if (beatmaps[i].modPool === 'HR') {
 				modPoolNumber = 2;
-			} else if (team1MapScores[0].modPool === 'DT') {
+			} else if (beatmaps[i].modPool === 'DT') {
 				modPoolNumber = 3;
-			} else if (team1MapScores[0].modPool === 'FM') {
+			} else if (beatmaps[i].modPool === 'FM') {
 				modPoolNumber = 4;
 			}
 
-			let scoringType = 'V1';
-			if (team1MapScores[0].scoringType === 'Score v2') {
-				scoringType = 'V2';
-			}
+			let dbBeatmap = dbBeatmaps.find((dbBeatmap) => dbBeatmap.beatmapId === beatmaps[i].beatmapId);
 
-			let dbBeatmap = await getOsuBeatmap({ beatmapId: team1MapScores[0].beatmapId });
+			dbBeatmap = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, beatmap: dbBeatmap });
 
-			let beatmapString = `https://osu.ppy.sh/b/${team1MapScores[0].beatmapId}`;
+			let beatmapString = `https://osu.ppy.sh/b/${beatmaps[i].beatmapId}`;
 
 			if (dbBeatmap) {
 				beatmapString += ` (${dbBeatmap.artist} - ${dbBeatmap.title} [${dbBeatmap.difficulty}])`;
 			}
 
 			if (winner === 0) {
-				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${team1MapScores[0].modPool} - Won by: ${team1Players.join(', ')} against ${team2Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)} - ${beatmapString}`);
+				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${beatmaps[i].modPool} - Won by: ${team1Players.join(', ')} against ${team2Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)} - ${beatmapString}`);
 			} else {
-				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${team1MapScores[0].modPool} - Won by: ${team2Players.join(', ')} against ${team1Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)} - ${beatmapString}`);
+				mapsPlayedReadable[winner][modPoolNumber].push(`${dateReadable} - ${scoringType} ${beatmaps[i].modPool} - Won by: ${team2Players.join(', ')} against ${team1Players.join(', ')} (by ${humanReadable(Math.abs(team1Score - team2Score))}) - ${humanReadable(team1Score)} vs ${humanReadable(team2Score)} - ${beatmapString}`);
 			}
 		}
 
@@ -1342,7 +1255,7 @@ module.exports = {
 
 		let content = `Matchup analysis for \`${team1Names.join(' | ')}\` vs \`${team2Names.join(' | ')}\` (Teamsize: ${teamsize}; Score ${scoringType}${tourneyMatchText}; ${timeframeText})`;
 
-		if (mapsPlayed.length) {
+		if (beatmaps.length) {
 			content += `\nWinrate chart for \`${team1Names.join(' | ')}\` against \`${team2Names.join(' | ')}\` (Teamsize: ${teamsize}) attached.`;
 
 			//Fill an array of labels for the rounds won
