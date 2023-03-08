@@ -377,7 +377,7 @@ module.exports = async function (oldMember, newMember) {
 		const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
 		try {
 			if (textChannel) {
-				await textChannel.permissionOverwrites.edit(newUser, { VIEW_CHANNEL: true, CREATE_INSTANT_INVITE: true, SEND_MESSAGES: true, EMBED_LINKS: true, ATTACH_FILES: true, ADD_REACTIONS: true, USE_EXTERNAL_EMOJIS: true, READ_MESSAGE_HISTORY: true });
+				await textChannel.permissionOverwrites.edit(newUser, { ViewChannel: true, CreateInstantInvite: true, SendMessages: true, EmbedLinks: true, AttachFiles: true, AddReactions: true, UseExternalEmojis: true, ReadMessageHistory: true });
 			}
 		} catch (e) {
 			if (e.message === 'Missing Access') {
@@ -451,7 +451,7 @@ module.exports = async function (oldMember, newMember) {
 				const newUser = newMember.client.users.cache.find(user => user.id === newMember.id);
 				try {
 					if (textChannel) {
-						await textChannel.permissionOverwrites.edit(newUser, { VIEW_CHANNEL: false });
+						await textChannel.permissionOverwrites.edit(newUser, { ViewChannel: false });
 					}
 				} catch (e) {
 					if (e.message === 'Missing Access') {
