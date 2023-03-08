@@ -7128,8 +7128,6 @@ function adjustStarRating(starRating, approachRate, circleSize, mods) {
 	if (circleSize > 5.5) {
 		let starRatingAdjust = 1.5 * (circleSize - 5) / 4.5;
 
-		console.log(circleSize, parseFloat(starRating), parseFloat(starRating) + starRatingAdjust);
-
 		starRating = parseFloat(starRating) + starRatingAdjust;
 	}
 
