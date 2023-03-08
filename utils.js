@@ -7122,7 +7122,7 @@ function applyOsuDuelStarratingCorrection(rating, score, weight) {
 }
 
 function adjustStarRating(starRating, approachRate, circleSize, mods) {
-	// Adapt star rating from 0.0 to 1.7 depending on the CS
+	// Adapt star rating from 0.0 to 1.5 depending on the CS
 	circleSize = parseFloat(circleSize);
 
 	if (circleSize > 5.5) {
