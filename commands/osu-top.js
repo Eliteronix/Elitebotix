@@ -1,8 +1,8 @@
-const { DBDiscordUsers, DBOsuMultiScores, DBOsuGuildTrackers } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores, DBOsuGuildTrackers, DBOsuBeatmaps } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, saveOsuMultiScores, pause } = require('../utils');
+const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -767,49 +767,6 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		});
 
 		for (let i = 0; i < multiScores.length; i++) {
-			if (parseInt(multiScores[i].score) <= 10000) {
-				multiScores.splice(i, 1);
-				i--;
-			}
-		}
-
-		let multisToUpdate = [];
-		for (let i = 0; i < multiScores.length; i++) {
-			if (!multiScores[i].maxCombo && !multisToUpdate.includes(multiScores[i].matchId)) {
-				multisToUpdate.push(multiScores[i].matchId);
-			}
-		}
-
-		for (let i = 0; i < multisToUpdate.length; i++) {
-			processingMessage.edit(`[One time process] Updating legacy scores for ${user.name}... ${i + 1}/${multisToUpdate.length}`);
-			// eslint-disable-next-line no-undef
-			process.send('osu!API');
-			await osuApi.getMatch({ mp: multisToUpdate[i] })
-				.then(async (match) => {
-					await saveOsuMultiScores(match, msg.client);
-				})
-				.catch(() => {
-					//Nothing
-				});
-			await pause(5000);
-		}
-
-		if (multisToUpdate.length) {
-			//Get all scores from tournaments
-			logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores 2');
-			multiScores = await DBOsuMultiScores.findAll({
-				where: {
-					osuUserId: user.id,
-					mode: modeName,
-					tourneyMatch: true,
-					score: {
-						[Op.gte]: 10000
-					}
-				}
-			});
-		}
-
-		for (let i = 0; i < multiScores.length; i++) {
 			if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].teamType === 'Tag Team vs' || multiScores[i].teamType === 'Tag Co-op') {
 				multiScores.splice(i, 1);
 				i--;
@@ -853,8 +810,20 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		let rankedPP = 0;
 		let unrankedPlayCounter = 1;
 		let rankedPlayCounter = 1;
+
+		let dbBeatmaps = await DBOsuBeatmaps.findAll({
+			where: {
+				beatmapId: {
+					[Op.in]: multiScores.map(score => score.beatmapId)
+				},
+				mods: 0
+			}
+		});
+
 		for (let i = 0; i < multiScores.length; i++) {
-			multiScores[i].beatmap = await getOsuBeatmap({ beatmapId: multiScores[i].beatmapId });
+			let dbBeatmap = dbBeatmaps.find(dbBeatmap => dbBeatmap.beatmapId === multiScores[i].beatmapId);
+
+			multiScores[i].beatmap = await getOsuBeatmap({ beatmapId: multiScores[i].beatmapId, beatmap: dbBeatmap });
 
 			if (multiScores[i].beatmap && !beatmapSets.includes(multiScores[i].beatmap.beatmapsetId)) {
 				beatmapSets.push(multiScores[i].beatmap.beatmapsetId);
