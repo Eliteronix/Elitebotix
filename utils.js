@@ -251,7 +251,81 @@ module.exports = {
 		return mods.reverse();
 	},
 	getModBits: function (input, noVisualMods) {
-		return getModBitsFunction(input, noVisualMods);
+		let modBits = 0;
+
+		if (input === 'NM') {
+			return modBits;
+		}
+
+		for (let i = 0; i < input.length; i += 2) {
+			if (input.substring(i, i + 2) === 'MI' && !noVisualMods) {
+				modBits += 1073741824;
+			} else if (input.substring(i, i + 2) === 'V2') {
+				modBits += 536870912;
+			} else if (input.substring(i, i + 2) === '2K') {
+				modBits += 268435456;
+			} else if (input.substring(i, i + 2) === '3K') {
+				modBits += 134217728;
+			} else if (input.substring(i, i + 2) === '1K') {
+				modBits += 67108864;
+			} else if (input.substring(i, i + 2) === 'KC') {
+				modBits += 33554432;
+			} else if (input.substring(i, i + 2) === '9K') {
+				modBits += 16777216;
+			} else if (input.substring(i, i + 2) === 'TG') {
+				modBits += 8388608;
+			} else if (input.substring(i, i + 2) === 'CI') {
+				modBits += 4194304;
+			} else if (input.substring(i, i + 2) === 'RD') {
+				modBits += 2097152;
+			} else if (input.substring(i, i + 2) === 'FI' && !noVisualMods) {
+				modBits += 1048576;
+			} else if (input.substring(i, i + 2) === '8K') {
+				modBits += 524288;
+			} else if (input.substring(i, i + 2) === '7K') {
+				modBits += 262144;
+			} else if (input.substring(i, i + 2) === '6K') {
+				modBits += 131072;
+			} else if (input.substring(i, i + 2) === '5K') {
+				modBits += 65536;
+			} else if (input.substring(i, i + 2) === '4K') {
+				modBits += 32768;
+			} else if (input.substring(i, i + 2) === 'PF' && !noVisualMods) {
+				modBits += 16384;
+				modBits += 32;
+			} else if (input.substring(i, i + 2) === 'AP') {
+				modBits += 8192;
+			} else if (input.substring(i, i + 2) === 'SO' && !noVisualMods) {
+				modBits += 4096;
+			} else if (input.substring(i, i + 2) === 'FL') {
+				modBits += 1024;
+			} else if (input.substring(i, i + 2) === 'NC') {
+				if (!noVisualMods) {
+					modBits += 512;
+				}
+				modBits += 64;
+			} else if (input.substring(i, i + 2) === 'HT') {
+				modBits += 256;
+			} else if (input.substring(i, i + 2) === 'RX') {
+				modBits += 128;
+			} else if (input.substring(i, i + 2) === 'DT') {
+				modBits += 64;
+			} else if (input.substring(i, i + 2) === 'SD' && !noVisualMods) {
+				modBits += 32;
+			} else if (input.substring(i, i + 2) === 'HR') {
+				modBits += 16;
+			} else if (input.substring(i, i + 2) === 'HD' && (input.includes('FL') || !input.includes('FL') && !noVisualMods)) {
+				modBits += 8;
+			} else if (input.substring(i, i + 2) === 'TD') {
+				modBits += 4;
+			} else if (input.substring(i, i + 2) === 'EZ') {
+				modBits += 2;
+			} else if (input.substring(i, i + 2) === 'NF' && !noVisualMods) {
+				modBits += 1;
+			}
+		}
+
+		return modBits;
 	},
 	getLinkModeName: function (ID) {
 		let gameMode = 'osu';
@@ -305,7 +379,17 @@ module.exports = {
 		ctx.drawImage(image, x, y, width, height);
 	},
 	getBeatmapModeId: function (beatmap) {
-		return getBeatmapModeIdFunction(beatmap);
+		let gameMode;
+		if (beatmap.mode === 'Standard') {
+			gameMode = 0;
+		} else if (beatmap.mode === 'Taiko') {
+			gameMode = 1;
+		} else if (beatmap.mode === 'Mania') {
+			gameMode = 3;
+		} else if (beatmap.mode === 'Catch the Beat') {
+			gameMode = 2;
+		}
+		return gameMode;
 	},
 	rippleToBanchoScore: function (inputScore) {
 		let outputScore = {
@@ -906,7 +990,158 @@ module.exports = {
 		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: filename });
 	},
 	async getAdditionalOsuInfo(osuUserId, client) {
-		return await getAdditionalOsuInfoFunction(osuUserId, client);
+		await module.exports.awaitWebRequestPermission();
+		return await fetch(`https://osu.ppy.sh/users/${osuUserId}/`)
+			.then(async (res) => {
+				let htmlCode = await res.text();
+				htmlCode = htmlCode.replace(/&quot;/gm, '"');
+
+				const additionalInfo = {
+					tournamentBan: false,
+					badges: [],
+					tournamentBadges: [],
+				};
+
+				// console.log(htmlCode);
+				const accountHistoryRegex = /,"account_history".+,"active_tournament_banner":/gm;
+				const tournamentBanMatches = accountHistoryRegex.exec(htmlCode);
+				if (tournamentBanMatches && tournamentBanMatches[0]) {
+					const cleanedMatch = tournamentBanMatches[0].replace(',"account_history":', '').replace(',"active_tournament_banner":', '');
+					const rawAccountHistoryNotices = JSON.parse(cleanedMatch);
+					const tournamentBans = rawAccountHistoryNotices.filter((notice) => notice.type === 'tournament_ban');
+
+					if (tournamentBans.length) {
+						tournamentBans[0].tournamentBannedUntil = new Date(tournamentBans[0].timestamp);
+
+						if (tournamentBans[0].permanent) {
+							tournamentBans[0].tournamentBannedUntil.setUTCMilliseconds(999);
+							tournamentBans[0].tournamentBannedUntil.setUTCSeconds(59);
+							tournamentBans[0].tournamentBannedUntil.setUTCMinutes(59);
+							tournamentBans[0].tournamentBannedUntil.setUTCHours(23);
+							tournamentBans[0].tournamentBannedUntil.setUTCDate(31);
+							tournamentBans[0].tournamentBannedUntil.setUTCMonth(11);
+							tournamentBans[0].tournamentBannedUntil.setUTCFullYear(9999);
+						} else {
+							tournamentBans[0].tournamentBannedUntil.setUTCSeconds(tournamentBans[0].tournamentBannedUntil.getUTCSeconds() + tournamentBans[0].length);
+						}
+
+						additionalInfo.tournamentBan = tournamentBans[0];
+					}
+				}
+
+				const badgesRegex = /,"badges".+,"comments_count":/gm;
+				const badgeMatches = badgesRegex.exec(htmlCode);
+				if (badgeMatches && badgeMatches[0]) {
+					const cleanedMatch = badgeMatches[0].replace(',"badges":', '').replace(',"comments_count":', '');
+
+					additionalInfo.badges = JSON.parse(cleanedMatch);
+
+					for (let i = 0; i < additionalInfo.badges.length; i++) {
+						additionalInfo.badges[i].description = additionalInfo.badges[i].description.replace('&#039;', '\'');
+
+						const badge = additionalInfo.badges[i];
+						if (!badge.description.startsWith('Beatmap Spotlights: ')
+							&& !badge.description.includes(' contribution to the ')
+							&& !badge.description.includes(' contributor')
+							&& !badge.description.includes('Mapper\'s Favourite ')
+							&& !badge.description.includes('Community Favourite ')
+							&& !badge.description.includes('Mapping')
+							&& !badge.description.includes('Aspire')
+							&& !badge.description.includes('Beatmapping')
+							&& !badge.description.includes('osu!idol')
+							&& badge.description !== 'The official voice behind osu!'
+							&& !badge.description.includes('Newspaper ')
+							&& !badge.description.includes('Pending Cup ')) {
+							additionalInfo.tournamentBadges.push(badge);
+						}
+					}
+				}
+
+				module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers updateOsuDetailsforUser');
+				//get discordUser from db to update pp and rank
+				DBDiscordUsers.findOne({
+					where: { osuUserId: osuUserId },
+				})
+					.then(async (discordUser) => {
+						if (discordUser) {
+							if (discordUser.osuBadges !== additionalInfo.tournamentBadges.length) {
+								client.shard.broadcastEval(async (c, { message }) => {
+									let guildId = '727407178499096597';
+
+									// eslint-disable-next-line no-undef
+									if (process.env.SERVER === 'Dev') {
+										guildId = '800641468321759242';
+									}
+
+									const guild = await c.guilds.cache.get(guildId);
+									if (guild) {
+										let channelId = '1078318144914985050';
+
+										// eslint-disable-next-line no-undef
+										if (process.env.SERVER === 'Dev') {
+											channelId = '1078318144914985050';
+										}
+
+										const channel = await guild.channels.cache.get(channelId);
+
+										if (channel) {
+											let sentMessage = await channel.send(message);
+											sentMessage.crosspost();
+										}
+									}
+								}, { context: { message: `\`${discordUser.osuName}\` gained ${additionalInfo.tournamentBadges.length - discordUser.osuBadges} badge(s). (${discordUser.osuBadges} -> ${additionalInfo.tournamentBadges.length}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
+							}
+
+							discordUser.osuBadges = additionalInfo.tournamentBadges.length;
+
+							if (additionalInfo.tournamentBan) {
+								if (discordUser.tournamentBannedReason !== additionalInfo.tournamentBan.description || new Date(discordUser.tournamentBannedUntil).getTime() !== additionalInfo.tournamentBan.tournamentBannedUntil.getTime()) {
+									let bannedUntilString = 'permanent';
+
+									if (additionalInfo.tournamentBan.tournamentBannedUntil.getUTCFullYear() !== 9999) {
+										bannedUntilString = `over <t:${Math.floor(additionalInfo.tournamentBan.tournamentBannedUntil.getTime() / 1000)}:R>`;
+									}
+
+									client.shard.broadcastEval(async (c, { message }) => {
+										let guildId = '727407178499096597';
+
+										// eslint-disable-next-line no-undef
+										if (process.env.SERVER === 'Dev') {
+											guildId = '800641468321759242';
+										}
+
+										const guild = await c.guilds.cache.get(guildId);
+										if (guild) {
+											let channelId = '1078318437408968804';
+
+											// eslint-disable-next-line no-undef
+											if (process.env.SERVER === 'Dev') {
+												channelId = '1078318180302323842';
+											}
+
+											const channel = await guild.channels.cache.get(channelId);
+
+											if (channel) {
+												let sentMessage = await channel.send(message);
+												sentMessage.crosspost();
+											}
+										}
+									}, { context: { message: `\`${discordUser.osuName}\` has received a tournament ban at <t:${Math.floor(new Date(additionalInfo.tournamentBan.timestamp).getTime() / 1000)}:f> for \`${additionalInfo.tournamentBan.description}\`. (${bannedUntilString}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
+								}
+
+								discordUser.tournamentBannedReason = additionalInfo.tournamentBan.description;
+								discordUser.tournamentBannedUntil = additionalInfo.tournamentBan.tournamentBannedUntil;
+							}
+
+							await discordUser.save();
+						}
+					})
+					.catch(err => {
+						console.error(err);
+					});
+
+				return additionalInfo;
+			});
 	},
 	async restartProcessQueueTask() {
 		module.exports.logDatabaseQueries(5, 'utils.js DBProcessQueue restartProcessQueueTask');
@@ -1210,7 +1445,7 @@ module.exports = {
 							j--;
 						}
 					}
-					scoreMods = getModBitsFunction(scoreMods.join(''));
+					scoreMods = module.exports.getModBits(scoreMods.join(''));
 
 					if (scoreMods <= 1) {
 						forceMod = false;
@@ -1276,7 +1511,7 @@ module.exports = {
 							i--;
 						}
 					}
-					scoreMods = getModBitsFunction(scoreMods.join(''));
+					scoreMods = module.exports.getModBits(scoreMods.join(''));
 
 					let existingScore = null;
 
@@ -1385,19 +1620,21 @@ module.exports = {
 									await dbBeatmaps[i].save({ silent: true });
 								}
 
-								if (getScoreModpoolFunction(existingScore) === 'NM' && !dbBeatmaps[i].noModMap) {
+								let modPool = module.exports.getScoreModpool(existingScore);
+
+								if (modPool === 'NM' && !dbBeatmaps[i].noModMap) {
 									dbBeatmaps[i].noModMap = true;
 									await dbBeatmaps[i].save({ silent: true });
-								} else if (getScoreModpoolFunction(existingScore) === 'HD' && !dbBeatmaps[i].hiddenMap) {
+								} else if (modPool === 'HD' && !dbBeatmaps[i].hiddenMap) {
 									dbBeatmaps[i].hiddenMap = true;
 									await dbBeatmaps[i].save({ silent: true });
-								} else if (getScoreModpoolFunction(existingScore) === 'HR' && !dbBeatmaps[i].hardRockMap) {
+								} else if (modPool === 'HR' && !dbBeatmaps[i].hardRockMap) {
 									dbBeatmaps[i].hardRockMap = true;
 									await dbBeatmaps[i].save({ silent: true });
-								} else if (getScoreModpoolFunction(existingScore) === 'DT' && !dbBeatmaps[i].doubleTimeMap) {
+								} else if (modPool === 'DT' && !dbBeatmaps[i].doubleTimeMap) {
 									dbBeatmaps[i].doubleTimeMap = true;
 									await dbBeatmaps[i].save({ silent: true });
-								} else if (getScoreModpoolFunction(existingScore) === 'FM' && !dbBeatmaps[i].freeModMap) {
+								} else if (modPool === 'FM' && !dbBeatmaps[i].freeModMap) {
 									dbBeatmaps[i].freeModMap = true;
 									await dbBeatmaps[i].save({ silent: true });
 								}
@@ -1426,12 +1663,14 @@ module.exports = {
 
 							for (let i = 0; i < scores.length; i++) {
 								if (tourneyMatch && !match.name.startsWith('MOTD:') && scores[i].warmup === false) {
-									let existingEntry = beatmapModPools.find(x => x.beatmapId === scores[i].beatmapId && x.modPool === getScoreModpoolFunction(scores[i]));
+									let modPool = module.exports.getScoreModpool(scores[i]);
+
+									let existingEntry = beatmapModPools.find(x => x.beatmapId === scores[i].beatmapId && x.modPool === modPool);
 
 									if (!existingEntry) {
 										beatmapModPools.push({
 											beatmapId: scores[i].beatmapId,
-											modPool: getScoreModpoolFunction(scores[i]),
+											modPool: modPool,
 										});
 									}
 								}
@@ -1926,7 +2165,7 @@ module.exports = {
 						.then(async (beatmaps) => {
 							let noVisualModBeatmap = beatmaps[0];
 							if (mods.includes('MI') || mods.includes('HD') && !mods.includes('FL') || mods.includes('FI') || mods.includes('NF') || mods.includes('NC') || mods.includes('PF') || mods.includes('SD') || mods.includes('SO')) {
-								let realNoVisualModBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: getModBitsFunction(mods.join(''), true) });
+								let realNoVisualModBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: module.exports.getModBits(mods.join(''), true) });
 								noVisualModBeatmap.difficulty.rating = realNoVisualModBeatmap.starRating;
 								noVisualModBeatmap.difficulty.aim = realNoVisualModBeatmap.aimRating;
 								noVisualModBeatmap.difficulty.speed = realNoVisualModBeatmap.speedRating;
@@ -2085,15 +2324,17 @@ module.exports = {
 								}
 
 								for (let i = 0; i < tourneyScores.length; i++) {
-									if (getScoreModpoolFunction(tourneyScores[i]) === 'NM') {
+									let modPool = module.exports.getScoreModpool(tourneyScores[i]);
+
+									if (modPool === 'NM') {
 										noModMap = true;
-									} else if (getScoreModpoolFunction(tourneyScores[i]) === 'HD') {
+									} else if (modPool === 'HD') {
 										hiddenMap = true;
-									} else if (getScoreModpoolFunction(tourneyScores[i]) === 'HR') {
+									} else if (modPool === 'HR') {
 										hardRockMap = true;
-									} else if (getScoreModpoolFunction(tourneyScores[i]) === 'DT') {
+									} else if (modPool === 'DT') {
 										doubleTimeMap = true;
-									} else if (getScoreModpoolFunction(tourneyScores[i]) === 'FM') {
+									} else if (modPool === 'FM') {
 										freeModMap = true;
 									}
 								}
@@ -2214,10 +2455,116 @@ module.exports = {
 		return fontsize;
 	},
 	getScoreModpool(dbScore) {
-		return getScoreModpoolFunction(dbScore);
+		//Evaluate with which mods the game was played
+		if (dbScore.freeMod || dbScore.rawMods !== '0') {
+			return 'FM';
+		}
+
+		if (dbScore.gameRawMods === '0' || dbScore.gameRawMods === '1') {
+			return 'NM';
+		}
+
+		if (dbScore.gameRawMods === '8' || dbScore.gameRawMods === '9') {
+			return 'HD';
+		}
+
+		if (dbScore.gameRawMods === '16' || dbScore.gameRawMods === '17') {
+			return 'HR';
+		}
+
+		if (parseInt(dbScore.gameRawMods) > 63 && (dbScore.gameRawMods === '64' || dbScore.gameRawMods === '65' || dbScore.gameRawMods === '576' || dbScore.gameRawMods === '577')) {
+			return 'DT';
+		}
+
+		return 'FM';
 	},
-	checkForBirthdays(client) {
-		return checkForBirthdaysFunction(client);
+	async checkForBirthdays(client) {
+		//get current date
+		const currentDate = new Date();
+
+		if (module.exports.wrongCluster(client)) {
+			return;
+		}
+
+		//get birthday dates from DBBirthdayGuilds for all users in the database that have a birthday set
+		module.exports.logDatabaseQueries(2, 'utils.js DBBirthdayGuilds checkForBirthdays');
+		let birthdayAnnouncements = await DBBirthdayGuilds.findAll({
+			where: {
+				birthdayTime: {
+					[Op.lte]: currentDate
+				},
+			}
+		});
+
+
+		// iterate through all users and check if the current date is the same as the birthday date 
+		for (let i = 0; i < birthdayAnnouncements.length; i++) {
+
+			//Check if the birthday announcement is enabled on the guild
+			module.exports.logDatabaseQueries(2, 'utils.js DBGuilds checkForBirthdays');
+			let dbGuild = await DBGuilds.findOne({
+				where: {
+					guildId: birthdayAnnouncements[i].guildId
+				}
+			});
+
+			if (dbGuild && dbGuild.birthdayEnabled) {
+				//Fetch the channel
+				let channelFound = await client.shard.broadcastEval(async (c, { channelId, userId }) => {
+					const birthdayMessageChannel = await c.channels.cache.get(channelId);
+
+					if (birthdayMessageChannel) {
+						// send a birthday gif from tenor 
+						let index;
+						const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+						// eslint-disable-next-line no-undef
+						const birthdayGif = await fetch(`https://api.tenor.com/v1/search?q=anime_birthday&key=${process.env.TENORTOKEN}&limit=30&contentfilter=medium`)
+							.then(async (res) => {
+								let gifs = await res.json();
+								index = Math.floor(Math.random() * gifs.results.length);
+								return gifs.results[index].media[0].gif.url;
+							});
+
+						// send the birthday message
+						birthdayMessageChannel.send(`<@${userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
+						return true;
+					}
+					return false;
+				}, { context: { channelId: dbGuild.birthdayMessageChannel, userId: birthdayAnnouncements[i].userId } });
+
+				channelFound = channelFound.some(channel => channel);
+				if (channelFound) {
+					let date = new Date(birthdayAnnouncements[i].birthdayTime);
+					date.setUTCFullYear(date.getUTCFullYear() + 1);
+					date.setUTCHours(0);
+					date.setUTCMinutes(0);
+					date.setUTCSeconds(0);
+					birthdayAnnouncements[i].birthdayTime = date;
+					await birthdayAnnouncements[i].save();
+					continue;
+				}
+			} else if (dbGuild) {
+				//Guild was found but birthdays are disabled; Delay by a year
+				let date = new Date(birthdayAnnouncements[i].birthdayTime);
+				date.setUTCFullYear(date.getUTCFullYear() + 1);
+				date.setUTCHours(0);
+				date.setUTCMinutes(0);
+				date.setUTCSeconds(0);
+				birthdayAnnouncements[i].birthdayTime = date;
+				await birthdayAnnouncements[i].save();
+				continue;
+			}
+
+			//Guild or Channel was not found; Delay by 5 minutes unless its after 12 UTC already
+			if (currentDate.getUTCHours() < 12) {
+				let date = new Date(birthdayAnnouncements[i].birthdayTime);
+				date.setUTCMinutes(date.getUTCMinutes() + 5);
+				birthdayAnnouncements[i].birthdayTime = date;
+				birthdayAnnouncements[i].save();
+			} else {
+				birthdayAnnouncements[i].destroy();
+			}
+		}
 	},
 	async getUserDuelStarRating(input) {
 		// console.log('-------------------------------------------------------------------------------------------------------------------');
@@ -2412,7 +2759,7 @@ module.exports = {
 				//Check if the map is already in; the score is above 10k and the map is not an aspire map
 				if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && parseInt(userScores[i].score) > 10000 && userScores[i].beatmapId !== '1033882' && userScores[i].beatmapId !== '529285') {
 					checkedMapIds.push(userScores[i].beatmapId);
-					if (getScoreModpoolFunction(userScores[i]) === modPools[modIndex]) {
+					if (module.exports.getScoreModpool(userScores[i]) === modPools[modIndex]) {
 						if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
 							userMapIds.push(userScores[i].beatmapId);
 							userMaps.push({ beatmapId: userScores[i].beatmapId, score: parseInt(userScores[i].score), matchId: userScores[i].matchId, matchName: userScores[i].matchName, matchStartDate: userScores[i].matchStartDate, modBits: parseInt(userScores[i].gameRawMods) + parseInt(userScores[i].rawMods) });
@@ -2449,7 +2796,7 @@ module.exports = {
 					if (mods.length === 0) {
 						mods = 0;
 					} else {
-						mods = getModBitsFunction(mods.join(''));
+						mods = module.exports.getModBits(mods.join(''));
 					}
 				}
 
@@ -2505,7 +2852,7 @@ module.exports = {
 					userMaps[i].underPerformWeight = underPerformWeight;
 					userMaps[i].weight = Math.abs(overPerformWeight + underPerformWeight - 1);
 
-					let mapStarRating = adjustStarRatingFunction(dbBeatmap.starRating, dbBeatmap.approachRate, dbBeatmap.mods);
+					let mapStarRating = adjustStarRating(dbBeatmap.starRating, dbBeatmap.approachRate, dbBeatmap.mods);
 
 					userMaps[i].starRating = mapStarRating;
 
@@ -2517,8 +2864,6 @@ module.exports = {
 					i--;
 				}
 			}
-
-			// console.log(`----------getUserDuelRatingFunction: Got the relevant maps for ${modIndex} - ${Date.now() - startTime}ms`);
 
 			//Get rid of the outliersPerMod best maps by expectedRating
 			if (relevantMaps.length < 10) {
@@ -2564,8 +2909,6 @@ module.exports = {
 				relevantMaps.splice(relevantMaps.indexOf(worstBeatmap), 1);
 				relevantMaps.splice(relevantMaps.indexOf(bestBeatmap), 1);
 			}
-
-			// console.log(`----------getUserDuelRatingFunction: Got the outliers for ${modIndex} - ${Date.now() - startTime}ms`);
 
 			//Group the maps into steps of 0.1 of difficulty
 			const steps = [];
@@ -2615,8 +2958,6 @@ module.exports = {
 				}
 			}
 
-			// console.log(`----------getUserDuelRatingFunction: Got the steps for ${modIndex} - ${Date.now() - startTime}ms`);
-
 			//Calculate the starrating for the modpool
 			let totalWeight = 0;
 			let totalWeightedStarRating = 0;
@@ -2626,8 +2967,6 @@ module.exports = {
 					totalWeightedStarRating += stepData[i].weightedStarRating;
 				}
 			}
-
-			// console.log(`----------getUserDuelRatingFunction: Calculated the totalWeight and totalWeightedStarRating for ${modIndex} - ${Date.now() - startTime}ms`);
 
 			if (relevantMaps.length < 5) {
 				duelRatings.provisional = true;
@@ -2748,7 +3087,7 @@ module.exports = {
 			const modPoolAmounts = [0, 0, 0, 0, 0];
 			for (let i = 0; i < userScores.length && i < 100; i++) {
 				if (parseInt(userScores[i].score) > 10000) {
-					modPoolAmounts[modPools.indexOf(getScoreModpoolFunction(userScores[i]))]++;
+					modPoolAmounts[modPools.indexOf(module.exports.getScoreModpool(userScores[i]))]++;
 				} else {
 					userScores.splice(i, 1);
 					i--;
@@ -2841,7 +3180,7 @@ module.exports = {
 							message.push(`Outdated: ${discordUser.osuDuelOutdated} -> ${duelRatings.outdated}`);
 						}
 
-						let oldDerankStats = await getDerankStatsFunction(discordUser);
+						let oldDerankStats = await module.exports.getDerankStats(discordUser);
 						//Setting the new values even tho it does that later just to get the new derank values
 						discordUser.osuDuelStarRating = Math.round(duelRatings.total * 100000000000000) / 100000000000000;
 						discordUser.osuNoModDuelStarRating = duelRatings.noMod;
@@ -2851,7 +3190,7 @@ module.exports = {
 						discordUser.osuFreeModDuelStarRating = duelRatings.freeMod;
 						discordUser.osuDuelProvisional = duelRatings.provisional;
 						discordUser.osuDuelOutdated = duelRatings.outdated;
-						let newDerankStats = await getDerankStatsFunction(discordUser);
+						let newDerankStats = await module.exports.getDerankStats(discordUser);
 
 						if (oldDerankStats.expectedPpRankOsu !== newDerankStats.expectedPpRankOsu) {
 							message.push(`Deranked Rank change: #${oldDerankStats.expectedPpRankOsu} -> #${newDerankStats.expectedPpRankOsu} (${newDerankStats.expectedPpRankOsu - oldDerankStats.expectedPpRankOsu})`);
@@ -4000,10 +4339,126 @@ module.exports = {
 		return true;
 	},
 	async getDerankStats(discordUser) {
-		return await getDerankStatsFunction(discordUser);
+		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getDerankStats osuPP');
+		let ppDiscordUsers = await DBDiscordUsers.findAll({
+			where: {
+				osuUserId: {
+					[Op.gt]: 0
+				},
+				osuPP: {
+					[Op.gt]: 0
+				},
+				osuDuelStarRating: {
+					[Op.gt]: 0
+				},
+				osuDuelProvisional: {
+					[Op.not]: true,
+				}
+			},
+			order: [
+				['osuPP', 'DESC']
+			]
+		});
+
+		ppDiscordUsers.sort((a, b) => parseFloat(b.osuPP) - parseFloat(a.osuPP));
+
+		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getDerankStats osuDuelStarRating');
+		let duelDiscordUsers = await DBDiscordUsers.findAll({
+			where: {
+				osuUserId: {
+					[Op.gt]: 0
+				},
+				osuPP: {
+					[Op.gt]: 0
+				},
+				osuDuelStarRating: {
+					[Op.gt]: 0
+				},
+				osuDuelProvisional: {
+					[Op.not]: true,
+				}
+			},
+			order: [
+				['osuDuelStarRating', 'DESC']
+			]
+		});
+
+		//Get the user's position in the list
+		let ppRank = null;
+
+		for (let i = 0; i < ppDiscordUsers.length; i++) {
+			if (Number(discordUser.osuPP) >= Number(ppDiscordUsers[i].osuPP)) {
+				ppRank = i;
+				break;
+			}
+		}
+
+		if (ppRank === null) {
+			ppRank = ppDiscordUsers.length - 1;
+		}
+
+		//Get the user's position in the list
+		let duelRank = null;
+
+		for (let i = 0; i < duelDiscordUsers.length; i++) {
+			if (Number(discordUser.osuDuelStarRating).toFixed(4) >= Number(duelDiscordUsers[i].osuDuelStarRating).toFixed(4)) {
+				duelRank = i;
+				break;
+			}
+		}
+
+		if (duelRank === null) {
+			duelRank = duelDiscordUsers.length - 1;
+		}
+
+		//Get expected pp rank
+		let expectedPpRank = Math.round(duelRank / duelDiscordUsers.length * ppDiscordUsers.length);
+
+		let expectedPpRankPercentageDifference = Math.round((100 / ppDiscordUsers.length * ppRank - 100 / ppDiscordUsers.length * expectedPpRank) * 100) / 100;
+
+		let expectedPpRankOsu = ppDiscordUsers[expectedPpRank].osuRank;
+
+		try {
+			return {
+				ppRank: ppRank,
+				ppUsersLength: ppDiscordUsers.length,
+				duelRank: duelRank,
+				duelUsersLength: duelDiscordUsers.length,
+				expectedPpRank: expectedPpRank,
+				expectedPpRankPercentageDifference: expectedPpRankPercentageDifference,
+				expectedPpRankOsu: expectedPpRankOsu,
+				expectedDuelRating: duelDiscordUsers[duelRank].osuDuelStarRating,
+				expectedCurrentDuelRating: duelDiscordUsers[ppRank].osuDuelStarRating
+			};
+		} catch (error) {
+			console.error(duelDiscordUsers.length, ppRank, discordUser.osuUserId, discordUser.osuName);
+			throw error;
+		}
 	},
 	logMatchCreation(client, name, matchId) {
-		logMatchCreationFunction(client, name, matchId);
+		client.shard.broadcastEval(async (c, { message }) => {
+			let guildId = null;
+			let channelId = null;
+			// eslint-disable-next-line no-undef
+			if (process.env.SERVER === 'Dev') {
+				guildId = '800641468321759242';
+				channelId = '980119563381383228';
+				// eslint-disable-next-line no-undef
+			} else if (process.env.SERVER === 'QA') {
+				guildId = '800641367083974667';
+				channelId = '980119465998037084';
+			} else {
+				guildId = '727407178499096597';
+				channelId = '980119218047549470';
+			}
+
+			const guild = await c.guilds.cache.get(guildId);
+			if (guild) {
+				const channel = await guild.channels.cache.get(channelId);
+
+				channel.send(message);
+			}
+		}, { context: { message: `https://osu.ppy.sh/mp/${matchId}` } });
 	},
 	async syncJiraCards(client) {
 		// eslint-disable-next-line no-undef
@@ -4114,7 +4569,39 @@ module.exports = {
 		}, { context: { issues: issues } });
 	},
 	async getOsuPlayerName(osuUserId) {
-		return await getOsuPlayerNameFunction(osuUserId);
+		let playerName = osuUserId;
+		module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers getOsuPlayerName');
+		let discordUser = await DBDiscordUsers.findOne({
+			where: { osuUserId: osuUserId }
+		});
+
+		if (discordUser) {
+			playerName = discordUser.osuName;
+		} else {
+			// eslint-disable-next-line no-undef
+			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+			});
+
+			try {
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
+				const osuUser = await osuApi.getUser({ u: osuUserId });
+				if (osuUser) {
+					playerName = osuUser.name;
+
+					module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers getOsuPlayerName create');
+					await DBDiscordUsers.create({ osuUserId: osuUserId, osuName: osuUser.name });
+				}
+			} catch (err) {
+				//Nothing
+			}
+		}
+
+		return playerName;
 	},
 	calculateGrade(mode, counts, modBits) {
 		if (mode === 'Standard') {
@@ -4374,7 +4861,7 @@ module.exports = {
 		});
 
 		const lobby = channel.lobby;
-		logMatchCreationFunction(client, lobby.name, lobby.id);
+		module.exports.logMatchCreation(client, lobby.name, lobby.id);
 
 		const password = Math.random().toString(36).substring(8);
 
@@ -4535,9 +5022,9 @@ module.exports = {
 					while (tries === 0 || lobby._beatmapId != nextMap.beatmapId) {
 						if (tries % 5 === 0) {
 							if (bestOf === 1) {
-								nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
+								nextMap = await module.exports.getNextMap('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
 							} else {
-								nextMap = await getNextMapFunction(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
+								nextMap = await module.exports.getNextMap(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
 							}
 							avoidMaps.push(nextMap.beatmapId);
 						}
@@ -4713,9 +5200,9 @@ module.exports = {
 				while (tries === 0 || lobby._beatmapId != nextMap.beatmapId) {
 					if (tries % 5 === 0) {
 						if (scores[0] + scores[1] === bestOf - 1) {
-							nextMap = await getNextMapFunction('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
+							nextMap = await module.exports.getNextMap('TieBreaker', lowerBound, upperBound, onlyRanked, avoidMaps);
 						} else {
-							nextMap = await getNextMapFunction(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
+							nextMap = await module.exports.getNextMap(modPools[mapIndex], lowerBound, upperBound, onlyRanked, avoidMaps);
 						}
 
 						avoidMaps.push(nextMap.beatmapId);
@@ -5433,7 +5920,7 @@ module.exports = {
 			if (modPool == 'NM') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 0 });
 
-				randomBeatmap.starRating = adjustStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate, 0);
+				randomBeatmap.starRating = adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, 0);
 			} else if (modPool == 'HD') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 8 });
 
@@ -5442,15 +5929,15 @@ module.exports = {
 					continue;
 				}
 
-				randomBeatmap.starRating = adjustStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate, 8);
+				randomBeatmap.starRating = adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, 8);
 			} else if (modPool == 'HR') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 16 });
 
-				randomBeatmap.starRating = adjustStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate, 16);
+				randomBeatmap.starRating = adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, 16);
 			} else if (modPool == 'DT') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 64 });
 
-				randomBeatmap.starRating = adjustStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate, 64);
+				randomBeatmap.starRating = adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, 64);
 			} else if (modPool == 'FM') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 0 });
 
@@ -5459,7 +5946,7 @@ module.exports = {
 					continue;
 				}
 
-				let HDStarRating = adjustStarRatingFunction(randomBeatmap.starRating, randomBeatmap.approachRate, 8);
+				let HDStarRating = adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, 8);
 				let randomBeatmapHR = await module.exports.getOsuBeatmap({ beatmapId: randomBeatmap.beatmapId, modBits: 16 });
 
 				if (!randomBeatmapHR) {
@@ -5467,7 +5954,7 @@ module.exports = {
 					continue;
 				}
 
-				randomBeatmapHR.starRating = adjustStarRatingFunction(randomBeatmapHR.starRating, randomBeatmapHR.approachRate, 16);
+				randomBeatmapHR.starRating = adjustStarRating(randomBeatmapHR.starRating, randomBeatmapHR.approachRate, 16);
 
 				randomBeatmap.starRating = (HDStarRating + randomBeatmapHR.starRating) / 2;
 			}
@@ -6139,7 +6626,153 @@ module.exports = {
 		}
 	},
 	async getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps) {
-		return await getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, avoidMaps);
+		let nextMap = null;
+		if (modPool === 'NM') {
+			nextMap = await module.exports.getValidTournamentBeatmap({
+				modPool: 'NM',
+				lowerBound: lowerBound,
+				upperBound: upperBound,
+				mode: 'Standard',
+				upperDrain: 270,
+				lowerDrain: 100,
+				avoidMaps: avoidMaps,
+				onlyRanked: onlyRanked,
+			});
+		}
+
+		if (modPool === 'HD') {
+			if (Math.random() > 0.3) {
+				//70% not HD2
+				nextMap = await module.exports.getValidTournamentBeatmap({
+					modPool: 'HD',
+					lowerBound: lowerBound,
+					upperBound: upperBound,
+					mode: 'Standard',
+					upperDrain: 270,
+					lowerDrain: 100,
+					lowerApproach: 8.5,
+					avoidMaps: avoidMaps,
+					onlyRanked: onlyRanked,
+				});
+			} else {
+				//30% HD2
+				nextMap = await module.exports.getValidTournamentBeatmap({
+					modPool: 'HD',
+					lowerBound: lowerBound,
+					upperBound: upperBound,
+					mode: 'Standard',
+					upperDrain: 270,
+					lowerDrain: 100,
+					upperApproach: 8,
+					avoidMaps: avoidMaps,
+					onlyRanked: onlyRanked,
+				});
+			}
+		}
+
+		if (modPool === 'HR') {
+			if (Math.random() > 0.3) {
+				//70% not HR2
+				nextMap = await module.exports.getValidTournamentBeatmap({
+					modPool: 'HR',
+					lowerBound: lowerBound,
+					upperBound: upperBound,
+					mode: 'Standard',
+					upperDrain: 270,
+					lowerDrain: 100,
+					lowerCircleSize: 4.5,
+					upperCircleSize: 6,
+					avoidMaps: avoidMaps,
+					onlyRanked: onlyRanked,
+				});
+			} else {
+				//30% HR2
+				nextMap = await module.exports.getValidTournamentBeatmap({
+					modPool: 'HR',
+					lowerBound: lowerBound,
+					upperBound: upperBound,
+					mode: 'Standard',
+					upperDrain: 270,
+					lowerDrain: 100,
+					lowerCircleSize: 6.5,
+					avoidMaps: avoidMaps,
+					onlyRanked: onlyRanked,
+				});
+			}
+		}
+
+		if (modPool === 'DT') {
+			let upperApproach = 11;
+			if (Math.random() > 0.4) {
+				// 60% not over AR10
+				upperApproach = 10;
+			}
+
+			nextMap = await module.exports.getValidTournamentBeatmap({
+				modPool: 'DT',
+				lowerBound: lowerBound,
+				upperBound: upperBound,
+				mode: 'Standard',
+				upperDrain: 270,
+				lowerDrain: 100,
+				avoidMaps: avoidMaps,
+				onlyRanked: onlyRanked,
+				upperApproach: upperApproach,
+			});
+		}
+
+		if (modPool === 'FreeMod' || modPool === 'FM') {
+			if (Math.random() > 0.5) {
+				//50% FM2
+				nextMap = await module.exports.getValidTournamentBeatmap({
+					modPool: 'FM',
+					lowerBound: lowerBound,
+					upperBound: upperBound,
+					mode: 'Standard',
+					upperDrain: 270,
+					lowerDrain: 100,
+					lowerCircleSize: 5,
+					upperApproach: 8,
+					avoidMaps: avoidMaps,
+					onlyRanked: onlyRanked,
+				});
+			} else {
+				//50% not FM2 (and not too low cs only, AR can go for whatever)
+				nextMap = await module.exports.getValidTournamentBeatmap({
+					modPool: 'FM',
+					lowerBound: lowerBound,
+					upperBound: upperBound,
+					mode: 'Standard',
+					upperDrain: 270,
+					lowerDrain: 100,
+					upperCircleSize: 4.5,
+					avoidMaps: avoidMaps,
+					onlyRanked: onlyRanked,
+				});
+			}
+		}
+
+		if (modPool === 'TieBreaker') {
+			nextMap = await module.exports.getValidTournamentBeatmap({
+				modPool: 'FM',
+				lowerBound: lowerBound + 0.25,
+				upperBound: upperBound + 0.25,
+				mode: 'Standard',
+				upperDrain: 360,
+				lowerDrain: 270,
+				upperCircleSize: 5,
+				lowerApproach: 8,
+				avoidMaps: avoidMaps,
+				onlyRanked: onlyRanked,
+			});
+		}
+
+		//Retry if no map
+		if (!nextMap) {
+			nextMap = await module.exports.getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps);
+		}
+
+		return nextMap;
 	},
 	async addMatchMessage(matchId, array, user, message) {
 		let now = new Date();
@@ -6475,477 +7108,6 @@ module.exports = {
 	},
 };
 
-async function logMatchCreationFunction(client, name, matchId) {
-	client.shard.broadcastEval(async (c, { message }) => {
-		let guildId = null;
-		let channelId = null;
-		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'Dev') {
-			guildId = '800641468321759242';
-			channelId = '980119563381383228';
-			// eslint-disable-next-line no-undef
-		} else if (process.env.SERVER === 'QA') {
-			guildId = '800641367083974667';
-			channelId = '980119465998037084';
-		} else {
-			guildId = '727407178499096597';
-			channelId = '980119218047549470';
-		}
-
-		const guild = await c.guilds.cache.get(guildId);
-		if (guild) {
-			const channel = await guild.channels.cache.get(channelId);
-
-			channel.send(message);
-		}
-	}, { context: { message: `https://osu.ppy.sh/mp/${matchId}` } });
-}
-
-async function getDerankStatsFunction(discordUser) {
-	module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getDerankStatsFunction osuPP');
-	let ppDiscordUsers = await DBDiscordUsers.findAll({
-		where: {
-			osuUserId: {
-				[Op.gt]: 0
-			},
-			osuPP: {
-				[Op.gt]: 0
-			},
-			osuDuelStarRating: {
-				[Op.gt]: 0
-			},
-			osuDuelProvisional: {
-				[Op.not]: true,
-			}
-		},
-		order: [
-			['osuPP', 'DESC']
-		]
-	});
-
-	ppDiscordUsers.sort((a, b) => parseFloat(b.osuPP) - parseFloat(a.osuPP));
-
-	module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getDerankStatsFunction osuDuelStarRating');
-	let duelDiscordUsers = await DBDiscordUsers.findAll({
-		where: {
-			osuUserId: {
-				[Op.gt]: 0
-			},
-			osuPP: {
-				[Op.gt]: 0
-			},
-			osuDuelStarRating: {
-				[Op.gt]: 0
-			},
-			osuDuelProvisional: {
-				[Op.not]: true,
-			}
-		},
-		order: [
-			['osuDuelStarRating', 'DESC']
-		]
-	});
-
-	//Get the user's position in the list
-	let ppRank = null;
-
-	for (let i = 0; i < ppDiscordUsers.length; i++) {
-		if (Number(discordUser.osuPP) >= Number(ppDiscordUsers[i].osuPP)) {
-			ppRank = i;
-			break;
-		}
-	}
-
-	if (ppRank === null) {
-		ppRank = ppDiscordUsers.length - 1;
-	}
-
-	//Get the user's position in the list
-	let duelRank = null;
-
-	for (let i = 0; i < duelDiscordUsers.length; i++) {
-		if (Number(discordUser.osuDuelStarRating).toFixed(4) >= Number(duelDiscordUsers[i].osuDuelStarRating).toFixed(4)) {
-			duelRank = i;
-			break;
-		}
-	}
-
-	if (duelRank === null) {
-		duelRank = duelDiscordUsers.length - 1;
-	}
-
-	//Get expected pp rank
-	let expectedPpRank = Math.round(duelRank / duelDiscordUsers.length * ppDiscordUsers.length);
-
-	let expectedPpRankPercentageDifference = Math.round((100 / ppDiscordUsers.length * ppRank - 100 / ppDiscordUsers.length * expectedPpRank) * 100) / 100;
-
-	let expectedPpRankOsu = ppDiscordUsers[expectedPpRank].osuRank;
-
-	try {
-		return {
-			ppRank: ppRank,
-			ppUsersLength: ppDiscordUsers.length,
-			duelRank: duelRank,
-			duelUsersLength: duelDiscordUsers.length,
-			expectedPpRank: expectedPpRank,
-			expectedPpRankPercentageDifference: expectedPpRankPercentageDifference,
-			expectedPpRankOsu: expectedPpRankOsu,
-			expectedDuelRating: duelDiscordUsers[duelRank].osuDuelStarRating,
-			expectedCurrentDuelRating: duelDiscordUsers[ppRank].osuDuelStarRating
-		};
-	} catch (error) {
-		console.error(duelDiscordUsers.length, ppRank, discordUser.osuUserId, discordUser.osuName);
-		throw error;
-	}
-}
-
-async function getAdditionalOsuInfoFunction(osuUserId, client) {
-	await module.exports.awaitWebRequestPermission();
-	return await fetch(`https://osu.ppy.sh/users/${osuUserId}/`)
-		.then(async (res) => {
-			let htmlCode = await res.text();
-			htmlCode = htmlCode.replace(/&quot;/gm, '"');
-
-			const additionalInfo = {
-				tournamentBan: false,
-				badges: [],
-				tournamentBadges: [],
-			};
-
-			// console.log(htmlCode);
-			const accountHistoryRegex = /,"account_history".+,"active_tournament_banner":/gm;
-			const tournamentBanMatches = accountHistoryRegex.exec(htmlCode);
-			if (tournamentBanMatches && tournamentBanMatches[0]) {
-				const cleanedMatch = tournamentBanMatches[0].replace(',"account_history":', '').replace(',"active_tournament_banner":', '');
-				const rawAccountHistoryNotices = JSON.parse(cleanedMatch);
-				const tournamentBans = rawAccountHistoryNotices.filter((notice) => notice.type === 'tournament_ban');
-
-				if (tournamentBans.length) {
-					tournamentBans[0].tournamentBannedUntil = new Date(tournamentBans[0].timestamp);
-
-					if (tournamentBans[0].permanent) {
-						tournamentBans[0].tournamentBannedUntil.setUTCMilliseconds(999);
-						tournamentBans[0].tournamentBannedUntil.setUTCSeconds(59);
-						tournamentBans[0].tournamentBannedUntil.setUTCMinutes(59);
-						tournamentBans[0].tournamentBannedUntil.setUTCHours(23);
-						tournamentBans[0].tournamentBannedUntil.setUTCDate(31);
-						tournamentBans[0].tournamentBannedUntil.setUTCMonth(11);
-						tournamentBans[0].tournamentBannedUntil.setUTCFullYear(9999);
-					} else {
-						tournamentBans[0].tournamentBannedUntil.setUTCSeconds(tournamentBans[0].tournamentBannedUntil.getUTCSeconds() + tournamentBans[0].length);
-					}
-
-					additionalInfo.tournamentBan = tournamentBans[0];
-				}
-			}
-
-			const badgesRegex = /,"badges".+,"comments_count":/gm;
-			const badgeMatches = badgesRegex.exec(htmlCode);
-			if (badgeMatches && badgeMatches[0]) {
-				const cleanedMatch = badgeMatches[0].replace(',"badges":', '').replace(',"comments_count":', '');
-
-				additionalInfo.badges = JSON.parse(cleanedMatch);
-
-				for (let i = 0; i < additionalInfo.badges.length; i++) {
-					additionalInfo.badges[i].description = additionalInfo.badges[i].description.replace('&#039;', '\'');
-
-					const badge = additionalInfo.badges[i];
-					if (!badge.description.startsWith('Beatmap Spotlights: ')
-						&& !badge.description.includes(' contribution to the ')
-						&& !badge.description.includes(' contributor')
-						&& !badge.description.includes('Mapper\'s Favourite ')
-						&& !badge.description.includes('Community Favourite ')
-						&& !badge.description.includes('Mapping')
-						&& !badge.description.includes('Aspire')
-						&& !badge.description.includes('Beatmapping')
-						&& !badge.description.includes('osu!idol')
-						&& badge.description !== 'The official voice behind osu!'
-						&& !badge.description.includes('Newspaper ')
-						&& !badge.description.includes('Pending Cup ')) {
-						additionalInfo.tournamentBadges.push(badge);
-					}
-				}
-			}
-
-			module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers updateOsuDetailsforUser');
-			//get discordUser from db to update pp and rank
-			DBDiscordUsers.findOne({
-				where: { osuUserId: osuUserId },
-			})
-				.then(async (discordUser) => {
-					if (discordUser) {
-						if (discordUser.osuBadges !== additionalInfo.tournamentBadges.length) {
-							client.shard.broadcastEval(async (c, { message }) => {
-								let guildId = '727407178499096597';
-
-								// eslint-disable-next-line no-undef
-								if (process.env.SERVER === 'Dev') {
-									guildId = '800641468321759242';
-								}
-
-								const guild = await c.guilds.cache.get(guildId);
-								if (guild) {
-									let channelId = '1078318144914985050';
-
-									// eslint-disable-next-line no-undef
-									if (process.env.SERVER === 'Dev') {
-										channelId = '1078318144914985050';
-									}
-
-									const channel = await guild.channels.cache.get(channelId);
-
-									if (channel) {
-										let sentMessage = await channel.send(message);
-										sentMessage.crosspost();
-									}
-								}
-							}, { context: { message: `\`${discordUser.osuName}\` gained ${additionalInfo.tournamentBadges.length - discordUser.osuBadges} badge(s). (${discordUser.osuBadges} -> ${additionalInfo.tournamentBadges.length}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
-						}
-
-						discordUser.osuBadges = additionalInfo.tournamentBadges.length;
-
-						if (additionalInfo.tournamentBan) {
-							if (discordUser.tournamentBannedReason !== additionalInfo.tournamentBan.description || new Date(discordUser.tournamentBannedUntil).getTime() !== additionalInfo.tournamentBan.tournamentBannedUntil.getTime()) {
-								let bannedUntilString = 'permanent';
-
-								if (additionalInfo.tournamentBan.tournamentBannedUntil.getUTCFullYear() !== 9999) {
-									bannedUntilString = `over <t:${Math.floor(additionalInfo.tournamentBan.tournamentBannedUntil.getTime() / 1000)}:R>`;
-								}
-
-								client.shard.broadcastEval(async (c, { message }) => {
-									let guildId = '727407178499096597';
-
-									// eslint-disable-next-line no-undef
-									if (process.env.SERVER === 'Dev') {
-										guildId = '800641468321759242';
-									}
-
-									const guild = await c.guilds.cache.get(guildId);
-									if (guild) {
-										let channelId = '1078318437408968804';
-
-										// eslint-disable-next-line no-undef
-										if (process.env.SERVER === 'Dev') {
-											channelId = '1078318180302323842';
-										}
-
-										const channel = await guild.channels.cache.get(channelId);
-
-										if (channel) {
-											let sentMessage = await channel.send(message);
-											sentMessage.crosspost();
-										}
-									}
-								}, { context: { message: `\`${discordUser.osuName}\` has received a tournament ban at <t:${Math.floor(new Date(additionalInfo.tournamentBan.timestamp).getTime() / 1000)}:f> for \`${additionalInfo.tournamentBan.description}\`. (${bannedUntilString}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
-							}
-
-							discordUser.tournamentBannedReason = additionalInfo.tournamentBan.description;
-							discordUser.tournamentBannedUntil = additionalInfo.tournamentBan.tournamentBannedUntil;
-						}
-
-						await discordUser.save();
-					}
-				})
-				.catch(err => {
-					console.error(err);
-				});
-
-			return additionalInfo;
-		});
-}
-
-async function checkForBirthdaysFunction(client) {
-	//get current date
-	const currentDate = new Date();
-
-	if (module.exports.wrongCluster(client)) {
-		return;
-	}
-
-	//get birthday dates from DBBirthdayGuilds for all users in the database that have a birthday set
-	module.exports.logDatabaseQueries(2, 'utils.js DBBirthdayGuilds checkForBirthdaysFunction');
-	let birthdayAnnouncements = await DBBirthdayGuilds.findAll({
-		where: {
-			birthdayTime: {
-				[Op.lte]: currentDate
-			},
-		}
-	});
-
-
-	// iterate through all users and check if the current date is the same as the birthday date 
-	for (let i = 0; i < birthdayAnnouncements.length; i++) {
-
-		//Check if the birthday announcement is enabled on the guild
-		module.exports.logDatabaseQueries(2, 'utils.js DBGuilds checkForBirthdaysFunction');
-		let dbGuild = await DBGuilds.findOne({
-			where: {
-				guildId: birthdayAnnouncements[i].guildId
-			}
-		});
-
-		if (dbGuild && dbGuild.birthdayEnabled) {
-			//Fetch the channel
-			let channelFound = await client.shard.broadcastEval(async (c, { channelId, userId }) => {
-				const birthdayMessageChannel = await c.channels.cache.get(channelId);
-
-				if (birthdayMessageChannel) {
-					// send a birthday gif from tenor 
-					let index;
-					const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-					// eslint-disable-next-line no-undef
-					const birthdayGif = await fetch(`https://api.tenor.com/v1/search?q=anime_birthday&key=${process.env.TENORTOKEN}&limit=30&contentfilter=medium`)
-						.then(async (res) => {
-							let gifs = await res.json();
-							index = Math.floor(Math.random() * gifs.results.length);
-							return gifs.results[index].media[0].gif.url;
-						});
-
-					// send the birthday message
-					birthdayMessageChannel.send(`<@${userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
-					return true;
-				}
-				return false;
-			}, { context: { channelId: dbGuild.birthdayMessageChannel, userId: birthdayAnnouncements[i].userId } });
-
-			channelFound = channelFound.some(channel => channel);
-			if (channelFound) {
-				let date = new Date(birthdayAnnouncements[i].birthdayTime);
-				date.setUTCFullYear(date.getUTCFullYear() + 1);
-				date.setUTCHours(0);
-				date.setUTCMinutes(0);
-				date.setUTCSeconds(0);
-				birthdayAnnouncements[i].birthdayTime = date;
-				await birthdayAnnouncements[i].save();
-				continue;
-			}
-		} else if (dbGuild) {
-			//Guild was found but birthdays are disabled; Delay by a year
-			let date = new Date(birthdayAnnouncements[i].birthdayTime);
-			date.setUTCFullYear(date.getUTCFullYear() + 1);
-			date.setUTCHours(0);
-			date.setUTCMinutes(0);
-			date.setUTCSeconds(0);
-			birthdayAnnouncements[i].birthdayTime = date;
-			await birthdayAnnouncements[i].save();
-			continue;
-		}
-
-		//Guild or Channel was not found; Delay by 5 minutes unless its after 12 UTC already
-		if (currentDate.getUTCHours() < 12) {
-			let date = new Date(birthdayAnnouncements[i].birthdayTime);
-			date.setUTCMinutes(date.getUTCMinutes() + 5);
-			birthdayAnnouncements[i].birthdayTime = date;
-			birthdayAnnouncements[i].save();
-		} else {
-			birthdayAnnouncements[i].destroy();
-		}
-	}
-}
-
-function getModBitsFunction(input, noVisualMods) {
-	let modBits = 0;
-
-	if (input === 'NM') {
-		return modBits;
-	}
-
-	for (let i = 0; i < input.length; i += 2) {
-		if (input.substring(i, i + 2) === 'MI' && !noVisualMods) {
-			modBits += 1073741824;
-		} else if (input.substring(i, i + 2) === 'V2') {
-			modBits += 536870912;
-		} else if (input.substring(i, i + 2) === '2K') {
-			modBits += 268435456;
-		} else if (input.substring(i, i + 2) === '3K') {
-			modBits += 134217728;
-		} else if (input.substring(i, i + 2) === '1K') {
-			modBits += 67108864;
-		} else if (input.substring(i, i + 2) === 'KC') {
-			modBits += 33554432;
-		} else if (input.substring(i, i + 2) === '9K') {
-			modBits += 16777216;
-		} else if (input.substring(i, i + 2) === 'TG') {
-			modBits += 8388608;
-		} else if (input.substring(i, i + 2) === 'CI') {
-			modBits += 4194304;
-		} else if (input.substring(i, i + 2) === 'RD') {
-			modBits += 2097152;
-		} else if (input.substring(i, i + 2) === 'FI' && !noVisualMods) {
-			modBits += 1048576;
-		} else if (input.substring(i, i + 2) === '8K') {
-			modBits += 524288;
-		} else if (input.substring(i, i + 2) === '7K') {
-			modBits += 262144;
-		} else if (input.substring(i, i + 2) === '6K') {
-			modBits += 131072;
-		} else if (input.substring(i, i + 2) === '5K') {
-			modBits += 65536;
-		} else if (input.substring(i, i + 2) === '4K') {
-			modBits += 32768;
-		} else if (input.substring(i, i + 2) === 'PF' && !noVisualMods) {
-			modBits += 16384;
-			modBits += 32;
-		} else if (input.substring(i, i + 2) === 'AP') {
-			modBits += 8192;
-		} else if (input.substring(i, i + 2) === 'SO' && !noVisualMods) {
-			modBits += 4096;
-		} else if (input.substring(i, i + 2) === 'FL') {
-			modBits += 1024;
-		} else if (input.substring(i, i + 2) === 'NC') {
-			if (!noVisualMods) {
-				modBits += 512;
-			}
-			modBits += 64;
-		} else if (input.substring(i, i + 2) === 'HT') {
-			modBits += 256;
-		} else if (input.substring(i, i + 2) === 'RX') {
-			modBits += 128;
-		} else if (input.substring(i, i + 2) === 'DT') {
-			modBits += 64;
-		} else if (input.substring(i, i + 2) === 'SD' && !noVisualMods) {
-			modBits += 32;
-		} else if (input.substring(i, i + 2) === 'HR') {
-			modBits += 16;
-		} else if (input.substring(i, i + 2) === 'HD' && (input.includes('FL') || !input.includes('FL') && !noVisualMods)) {
-			modBits += 8;
-		} else if (input.substring(i, i + 2) === 'TD') {
-			modBits += 4;
-		} else if (input.substring(i, i + 2) === 'EZ') {
-			modBits += 2;
-		} else if (input.substring(i, i + 2) === 'NF' && !noVisualMods) {
-			modBits += 1;
-		}
-	}
-
-	return modBits;
-}
-
-function getScoreModpoolFunction(dbScore) {
-	//Evaluate with which mods the game was played
-	if (dbScore.freeMod || dbScore.rawMods !== '0') {
-		return 'FM';
-	}
-
-	if (dbScore.gameRawMods === '0' || dbScore.gameRawMods === '1') {
-		return 'NM';
-	}
-
-	if (dbScore.gameRawMods === '8' || dbScore.gameRawMods === '9') {
-		return 'HD';
-	}
-
-	if (dbScore.gameRawMods === '16' || dbScore.gameRawMods === '17') {
-		return 'HR';
-	}
-
-	if (parseInt(dbScore.gameRawMods) > 63 && (dbScore.gameRawMods === '64' || dbScore.gameRawMods === '65' || dbScore.gameRawMods === '576' || dbScore.gameRawMods === '577')) {
-		return 'DT';
-	}
-
-	return 'FM';
-}
-
 function applyOsuDuelStarratingCorrection(rating, score, weight) {
 	//Get the expected score for the starrating
 	//https://www.desmos.com/calculator/oae69zr9ze
@@ -6985,7 +7147,7 @@ function applyOsuDuelStarratingCorrection(rating, score, weight) {
 	return newRating;
 }
 
-function adjustStarRatingFunction(starRating, approachRate, mods) {
+function adjustStarRating(starRating, approachRate, mods) {
 	approachRate = parseFloat(approachRate);
 
 	if (module.exports.getMods(mods).includes('HD') && approachRate <= 10) {
@@ -7269,206 +7431,6 @@ async function getOsuMapInfo(dbBeatmap) {
 	}
 
 	return `https://osu.ppy.sh/b/${dbBeatmap.beatmapId} | https://beatconnect.io/b/${dbBeatmap.beatmapsetId} | Map played ${mapScores.length} times in: ${tournaments.join(', ')}`;
-}
-
-function getBeatmapModeIdFunction(beatmap) {
-	let gameMode;
-	if (beatmap.mode === 'Standard') {
-		gameMode = 0;
-	} else if (beatmap.mode === 'Taiko') {
-		gameMode = 1;
-	} else if (beatmap.mode === 'Mania') {
-		gameMode = 3;
-	} else if (beatmap.mode === 'Catch the Beat') {
-		gameMode = 2;
-	}
-	return gameMode;
-}
-
-async function getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, avoidMaps) {
-	let nextMap = null;
-	if (modPool === 'NM') {
-		nextMap = await module.exports.getValidTournamentBeatmap({
-			modPool: 'NM',
-			lowerBound: lowerBound,
-			upperBound: upperBound,
-			mode: 'Standard',
-			upperDrain: 270,
-			lowerDrain: 100,
-			avoidMaps: avoidMaps,
-			onlyRanked: onlyRanked,
-		});
-	}
-
-	if (modPool === 'HD') {
-		if (Math.random() > 0.3) {
-			//70% not HD2
-			nextMap = await module.exports.getValidTournamentBeatmap({
-				modPool: 'HD',
-				lowerBound: lowerBound,
-				upperBound: upperBound,
-				mode: 'Standard',
-				upperDrain: 270,
-				lowerDrain: 100,
-				lowerApproach: 8.5,
-				avoidMaps: avoidMaps,
-				onlyRanked: onlyRanked,
-			});
-		} else {
-			//30% HD2
-			nextMap = await module.exports.getValidTournamentBeatmap({
-				modPool: 'HD',
-				lowerBound: lowerBound,
-				upperBound: upperBound,
-				mode: 'Standard',
-				upperDrain: 270,
-				lowerDrain: 100,
-				upperApproach: 8,
-				avoidMaps: avoidMaps,
-				onlyRanked: onlyRanked,
-			});
-		}
-	}
-
-	if (modPool === 'HR') {
-		if (Math.random() > 0.3) {
-			//70% not HR2
-			nextMap = await module.exports.getValidTournamentBeatmap({
-				modPool: 'HR',
-				lowerBound: lowerBound,
-				upperBound: upperBound,
-				mode: 'Standard',
-				upperDrain: 270,
-				lowerDrain: 100,
-				lowerCircleSize: 4.5,
-				upperCircleSize: 6,
-				avoidMaps: avoidMaps,
-				onlyRanked: onlyRanked,
-			});
-		} else {
-			//30% HR2
-			nextMap = await module.exports.getValidTournamentBeatmap({
-				modPool: 'HR',
-				lowerBound: lowerBound,
-				upperBound: upperBound,
-				mode: 'Standard',
-				upperDrain: 270,
-				lowerDrain: 100,
-				lowerCircleSize: 6.5,
-				avoidMaps: avoidMaps,
-				onlyRanked: onlyRanked,
-			});
-		}
-	}
-
-	if (modPool === 'DT') {
-		let upperApproach = 11;
-		if (Math.random() > 0.4) {
-			// 60% not over AR10
-			upperApproach = 10;
-		}
-
-		nextMap = await module.exports.getValidTournamentBeatmap({
-			modPool: 'DT',
-			lowerBound: lowerBound,
-			upperBound: upperBound,
-			mode: 'Standard',
-			upperDrain: 270,
-			lowerDrain: 100,
-			avoidMaps: avoidMaps,
-			onlyRanked: onlyRanked,
-			upperApproach: upperApproach,
-		});
-	}
-
-	if (modPool === 'FreeMod' || modPool === 'FM') {
-		if (Math.random() > 0.5) {
-			//50% FM2
-			nextMap = await module.exports.getValidTournamentBeatmap({
-				modPool: 'FM',
-				lowerBound: lowerBound,
-				upperBound: upperBound,
-				mode: 'Standard',
-				upperDrain: 270,
-				lowerDrain: 100,
-				lowerCircleSize: 5,
-				upperApproach: 8,
-				avoidMaps: avoidMaps,
-				onlyRanked: onlyRanked,
-			});
-		} else {
-			//50% not FM2 (and not too low cs only, AR can go for whatever)
-			nextMap = await module.exports.getValidTournamentBeatmap({
-				modPool: 'FM',
-				lowerBound: lowerBound,
-				upperBound: upperBound,
-				mode: 'Standard',
-				upperDrain: 270,
-				lowerDrain: 100,
-				upperCircleSize: 4.5,
-				avoidMaps: avoidMaps,
-				onlyRanked: onlyRanked,
-			});
-		}
-	}
-
-	if (modPool === 'TieBreaker') {
-		nextMap = await module.exports.getValidTournamentBeatmap({
-			modPool: 'FM',
-			lowerBound: lowerBound + 0.25,
-			upperBound: upperBound + 0.25,
-			mode: 'Standard',
-			upperDrain: 360,
-			lowerDrain: 270,
-			upperCircleSize: 5,
-			lowerApproach: 8,
-			avoidMaps: avoidMaps,
-			onlyRanked: onlyRanked,
-		});
-	}
-
-	//Retry if no map
-	if (!nextMap) {
-		nextMap = await getNextMapFunction(modPool, lowerBound, upperBound, onlyRanked, avoidMaps);
-	}
-
-	return nextMap;
-}
-
-async function getOsuPlayerNameFunction(osuUserId) {
-	let playerName = osuUserId;
-	module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers getOsuPlayerName');
-	let discordUser = await DBDiscordUsers.findOne({
-		where: { osuUserId: osuUserId }
-	});
-
-	if (discordUser) {
-		playerName = discordUser.osuName;
-	} else {
-		// eslint-disable-next-line no-undef
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
-
-		try {
-			// eslint-disable-next-line no-undef
-			process.send('osu!API');
-			const osuUser = await osuApi.getUser({ u: osuUserId });
-			if (osuUser) {
-				playerName = osuUser.name;
-
-				module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers getOsuPlayerName create');
-				await DBDiscordUsers.create({ osuUserId: osuUserId, osuName: osuUser.name });
-			}
-		} catch (err) {
-			//Nothing
-		}
-	}
-
-	return playerName;
 }
 
 async function orderMatchPlayers(lobby, channel, players) {
