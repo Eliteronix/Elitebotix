@@ -2826,7 +2826,7 @@ module.exports = {
 					userMaps[i].underPerformWeight = underPerformWeight;
 					userMaps[i].weight = Math.abs(overPerformWeight + underPerformWeight - 1);
 
-					let mapStarRating = adjustStarRating(dbBeatmap.starRating, dbBeatmap.approachRate, dbBeatmap.circleSize, dbBeatmap.mods);
+					let mapStarRating = module.exports.adjustStarRating(dbBeatmap.starRating, dbBeatmap.approachRate, dbBeatmap.circleSize, dbBeatmap.mods);
 
 					userMaps[i].starRating = mapStarRating;
 
@@ -5894,7 +5894,7 @@ module.exports = {
 			if (modPool == 'NM') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 0 });
 
-				randomBeatmap.starRating = adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 0);
+				randomBeatmap.starRating = module.exports.adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 0);
 			} else if (modPool == 'HD') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 8 });
 
@@ -5903,15 +5903,15 @@ module.exports = {
 					continue;
 				}
 
-				randomBeatmap.starRating = adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 8);
+				randomBeatmap.starRating = module.exports.adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 8);
 			} else if (modPool == 'HR') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 16 });
 
-				randomBeatmap.starRating = adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 16);
+				randomBeatmap.starRating = module.exports.adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 16);
 			} else if (modPool == 'DT') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 64 });
 
-				randomBeatmap.starRating = adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 64);
+				randomBeatmap.starRating = module.exports.adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 64);
 			} else if (modPool == 'FM') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 0 });
 
@@ -5920,7 +5920,7 @@ module.exports = {
 					continue;
 				}
 
-				let HDStarRating = adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 8);
+				let HDStarRating = module.exports.adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 8);
 				let randomBeatmapHR = await module.exports.getOsuBeatmap({ beatmapId: randomBeatmap.beatmapId, modBits: 16 });
 
 				if (!randomBeatmapHR) {
@@ -5928,7 +5928,7 @@ module.exports = {
 					continue;
 				}
 
-				randomBeatmapHR.starRating = adjustStarRating(randomBeatmapHR.starRating, randomBeatmapHR.approachRate, randomBeatmapHR.circleSize, 16);
+				randomBeatmapHR.starRating = module.exports.adjustStarRating(randomBeatmapHR.starRating, randomBeatmapHR.approachRate, randomBeatmapHR.circleSize, 16);
 
 				randomBeatmap.starRating = (HDStarRating + randomBeatmapHR.starRating) / 2;
 			}
@@ -7080,6 +7080,59 @@ module.exports = {
 
 		return;
 	},
+	adjustStarRating(starRating, approachRate, circleSize, mods) {
+		// Adapt star rating from 0.0 to 1.5 depending on the CS
+		circleSize = parseFloat(circleSize);
+
+		if (circleSize > 5.5) {
+			let starRatingAdjust = 1.5 * (circleSize - 5) / 4.5;
+
+			starRating = parseFloat(starRating) + starRatingAdjust;
+		}
+
+		approachRate = parseFloat(approachRate);
+
+		if (module.exports.getMods(mods).includes('HD') && approachRate <= 10) {
+			// Adapt star rating from 0.0 to 0.2 depending on the AR for the HD modpool only
+			if (approachRate > 9) {
+				let starRatingAdjust = 0.2 * (10 - approachRate);
+
+				return parseFloat(starRating) + starRatingAdjust;
+			}
+
+
+			//Adapt starRating from 0.2 to 1.5 depending on the AR for the HD modpool only
+			//Cap at AR 5
+			if (approachRate < 5) {
+				approachRate = 5;
+			}
+
+			let starRatingAdjust = 0.2 + (1.3 * (9 - approachRate) / 4);
+
+			return parseFloat(starRating) + starRatingAdjust;
+		}
+
+		// Does not include HD
+		// Adapt star rating from 0.0 to 0.75 depending on the AR
+		if (approachRate > 10) {
+			let starRatingAdjust = 0.75 - (0.75 * (11 - approachRate));
+
+			return parseFloat(starRating) + starRatingAdjust;
+		}
+
+		//Adapt starRating from 0.0 to 1.0 depending on the AR
+		if (approachRate < 9) {
+			if (approachRate < 5) {
+				approachRate = 5;
+			}
+
+			let starRatingAdjust = 1.0 * (9 - approachRate) / 4;
+
+			return parseFloat(starRating) + starRatingAdjust;
+		}
+
+		return parseFloat(starRating);
+	}
 };
 
 function applyOsuDuelStarratingCorrection(rating, score, weight) {
@@ -7119,60 +7172,6 @@ function applyOsuDuelStarratingCorrection(rating, score, weight) {
 	const newRating = rating + (starRatingChange * weight);
 
 	return newRating;
-}
-
-function adjustStarRating(starRating, approachRate, circleSize, mods) {
-	// Adapt star rating from 0.0 to 1.5 depending on the CS
-	circleSize = parseFloat(circleSize);
-
-	if (circleSize > 5.5) {
-		let starRatingAdjust = 1.5 * (circleSize - 5) / 4.5;
-
-		starRating = parseFloat(starRating) + starRatingAdjust;
-	}
-
-	approachRate = parseFloat(approachRate);
-
-	if (module.exports.getMods(mods).includes('HD') && approachRate <= 10) {
-		// Adapt star rating from 0.0 to 0.2 depending on the AR for the HD modpool only
-		if (approachRate > 9) {
-			let starRatingAdjust = 0.2 * (10 - approachRate);
-
-			return parseFloat(starRating) + starRatingAdjust;
-		}
-
-
-		//Adapt starRating from 0.2 to 1.5 depending on the AR for the HD modpool only
-		//Cap at AR 5
-		if (approachRate < 5) {
-			approachRate = 5;
-		}
-
-		let starRatingAdjust = 0.2 + (1.3 * (9 - approachRate) / 4);
-
-		return parseFloat(starRating) + starRatingAdjust;
-	}
-
-	// Does not include HD
-	// Adapt star rating from 0.0 to 0.75 depending on the AR
-	if (approachRate > 10) {
-		let starRatingAdjust = 0.75 - (0.75 * (11 - approachRate));
-
-		return parseFloat(starRating) + starRatingAdjust;
-	}
-
-	//Adapt starRating from 0.0 to 1.0 depending on the AR
-	if (approachRate < 9) {
-		if (approachRate < 5) {
-			approachRate = 5;
-		}
-
-		let starRatingAdjust = 1.0 * (9 - approachRate) / 4;
-
-		return parseFloat(starRating) + starRatingAdjust;
-	}
-
-	return parseFloat(starRating);
 }
 
 async function executeFoundTask(client, bancho, nextTask) {

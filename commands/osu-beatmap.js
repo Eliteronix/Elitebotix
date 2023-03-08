@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries, getScoreModpool, humanReadable, getBeatmapCover } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries, getScoreModpool, humanReadable, getBeatmapCover, adjustStarRating } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBOsuMultiScores } = require('../dbObjects');
 const { Op } = require('sequelize');
@@ -487,8 +487,17 @@ async function drawStats(input, accuracy) {
 
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('Difficulty Rating', canvas.width / 1000 * 330, canvas.height / 500 * 230);
+
+	let adjustedStarRating = adjustStarRating(beatmap.starRating, beatmap.approachRate, beatmap.circleSize, beatmap.mods);
+
+	let adjustedRatingString = '';
+
+	if (Math.round(adjustedStarRating * 100) / 100 !== Math.round(beatmap.starRating * 100) / 100) {
+		adjustedRatingString = ` (${Math.round(adjustedStarRating * 100) / 100}* ETX)`;
+	}
+
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100} ★`, canvas.width / 1000 * 330, canvas.height / 500 * 260);
+	ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100}*${adjustedRatingString}`, canvas.width / 1000 * 330, canvas.height / 500 * 260, 220);
 
 	let beatmapMapper = beatmap.mapper;
 	const maxSizeMapper = parseInt(canvas.width / 1000 * 12);
