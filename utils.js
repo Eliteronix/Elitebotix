@@ -5867,7 +5867,7 @@ module.exports = {
 			if (input.lowerBound < 3.5) {
 				input.lowerBound = 3.5;
 			}
-			input.upperBound = upperBound + 0.05;
+			input.upperBound = upperBound + 0.25;
 			if (input.upperBound > 9.9) {
 				input.upperBound = 9.9;
 			}
