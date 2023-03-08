@@ -18,9 +18,11 @@ module.exports = async function (reaction, user, additionalObjects) {
 		try {
 			await reaction.fetch();
 		} catch (error) {
-			console.error('Something went wrong when fetching the message: ', error);
-			// Return as `reaction.message.author` may be undefined/null
-			return;
+			if (error.message !== 'Unknown Message') {
+				console.error('Something went wrong when fetching the message: ', error);
+				// Return as `reaction.message.author` may be undefined/null
+				return;
+			}
 		}
 	}
 

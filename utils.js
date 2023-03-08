@@ -1382,6 +1382,7 @@ module.exports = {
 		let existingMatchPlayers = [];
 		let playersToUpdate = [];
 		let newScores = [];
+		let beatmapModPools = [];
 
 		let tourneyMatch = false;
 		if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
@@ -1607,37 +1608,12 @@ module.exports = {
 
 						//Set the tournament flags on the corresponding beatmap
 						if (tourneyMatch && !match.name.startsWith('MOTD:') && warmup === false) {
-							module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps tourney flags old score');
-							let dbBeatmaps = await DBOsuBeatmaps.findAll({
-								where: {
-									beatmapId: match.games[gameIndex].beatmapId,
-								}
-							});
+							let modPool = module.exports.getScoreModpool(existingScore);
 
-							for (let i = 0; i < dbBeatmaps.length; i++) {
-								if (!dbBeatmaps[i].tourneyMap) {
-									dbBeatmaps[i].tourneyMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								}
+							let existingEntry = beatmapModPools.find(x => x.beatmapId === existingScore.beatmapId && x.modPool === modPool);
 
-								let modPool = module.exports.getScoreModpool(existingScore);
-
-								if (modPool === 'NM' && !dbBeatmaps[i].noModMap) {
-									dbBeatmaps[i].noModMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								} else if (modPool === 'HD' && !dbBeatmaps[i].hiddenMap) {
-									dbBeatmaps[i].hiddenMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								} else if (modPool === 'HR' && !dbBeatmaps[i].hardRockMap) {
-									dbBeatmaps[i].hardRockMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								} else if (modPool === 'DT' && !dbBeatmaps[i].doubleTimeMap) {
-									dbBeatmaps[i].doubleTimeMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								} else if (modPool === 'FM' && !dbBeatmaps[i].freeModMap) {
-									dbBeatmaps[i].freeModMap = true;
-									await dbBeatmaps[i].save({ silent: true });
-								}
+							if (!existingEntry) {
+								beatmapModPools.push({ modPool: modPool, beatmapId: match.games[gameIndex].beatmapId });
 							}
 						}
 					} else {
@@ -1659,8 +1635,6 @@ module.exports = {
 					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiScores create');
 					await DBOsuMultiScores.bulkCreate(newScores)
 						.then(async (scores) => {
-							let beatmapModPools = [];
-
 							for (let i = 0; i < scores.length; i++) {
 								if (tourneyMatch && !match.name.startsWith('MOTD:') && scores[i].warmup === false) {
 									let modPool = module.exports.getScoreModpool(scores[i]);
@@ -1673,104 +1647,6 @@ module.exports = {
 											modPool: modPool,
 										});
 									}
-								}
-							}
-
-							//Set the tournament flags on the corresponding beatmaps
-							for (let i = 0; i < beatmapModPools.length; i++) {
-								let NMBeatmaps = beatmapModPools.filter(x => x.modPool === 'NM').map(x => x.beatmapId);
-
-								if (NMBeatmaps.length) {
-									module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps NM tourney flags new score');
-									await DBOsuBeatmaps.update({
-										noModMap: true,
-									}, {
-										where: {
-											beatmapId: {
-												[Op.in]: NMBeatmaps,
-											},
-											noModMap: {
-												[Op.not]: true,
-											}
-										},
-										silent: true,
-									});
-								}
-
-								let HDBeatmaps = beatmapModPools.filter(x => x.modPool === 'HD').map(x => x.beatmapId);
-
-								if (HDBeatmaps.length) {
-									module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps HD tourney flags new score');
-									await DBOsuBeatmaps.update({
-										hiddenMap: true,
-									}, {
-										where: {
-											beatmapId: {
-												[Op.in]: HDBeatmaps,
-											},
-											hiddenMap: {
-												[Op.not]: true,
-											}
-										},
-										silent: true,
-									});
-								}
-
-								let HRBeatmaps = beatmapModPools.filter(x => x.modPool === 'HR').map(x => x.beatmapId);
-
-								if (HRBeatmaps.length) {
-									module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps HR tourney flags new score');
-									await DBOsuBeatmaps.update({
-										hardRockMap: true,
-									}, {
-										where: {
-											beatmapId: {
-												[Op.in]: HRBeatmaps,
-											},
-											hardRockMap: {
-												[Op.not]: true,
-											}
-										},
-										silent: true,
-									});
-								}
-
-								let DTBeatmaps = beatmapModPools.filter(x => x.modPool === 'DT').map(x => x.beatmapId);
-
-								if (DTBeatmaps.length) {
-									module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps DT tourney flags new score');
-									await DBOsuBeatmaps.update({
-										doubleTimeMap: true,
-									}, {
-										where: {
-											beatmapId: {
-												[Op.in]: DTBeatmaps,
-											},
-											doubleTimeMap: {
-												[Op.not]: true,
-											}
-										},
-										silent: true,
-									});
-								}
-
-								let FMBeatmaps = beatmapModPools.filter(x => x.modPool === 'FM').map(x => x.beatmapId);
-
-								if (FMBeatmaps.length) {
-									module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps FM tourney flags new score');
-									await DBOsuBeatmaps.update({
-										freeModMap: true,
-									}, {
-										where: {
-											beatmapId: {
-												[Op.in]: FMBeatmaps,
-											},
-											freeModMap: {
-												[Op.not]: true,
-											}
-										},
-										silent: true,
-									});
 								}
 							}
 
@@ -1791,6 +1667,104 @@ module.exports = {
 				} catch (e) {
 					await new Promise(resolve => setTimeout(resolve, 5000));
 				}
+			}
+		}
+
+		//Set the tournament flags on the corresponding beatmaps
+		for (let i = 0; i < beatmapModPools.length; i++) {
+			let NMBeatmaps = beatmapModPools.filter(x => x.modPool === 'NM').map(x => x.beatmapId);
+
+			if (NMBeatmaps.length) {
+				module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps NM tourney flags new score');
+				await DBOsuBeatmaps.update({
+					noModMap: true,
+				}, {
+					where: {
+						beatmapId: {
+							[Op.in]: NMBeatmaps,
+						},
+						noModMap: {
+							[Op.not]: true,
+						}
+					},
+					silent: true,
+				});
+			}
+
+			let HDBeatmaps = beatmapModPools.filter(x => x.modPool === 'HD').map(x => x.beatmapId);
+
+			if (HDBeatmaps.length) {
+				module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps HD tourney flags new score');
+				await DBOsuBeatmaps.update({
+					hiddenMap: true,
+				}, {
+					where: {
+						beatmapId: {
+							[Op.in]: HDBeatmaps,
+						},
+						hiddenMap: {
+							[Op.not]: true,
+						}
+					},
+					silent: true,
+				});
+			}
+
+			let HRBeatmaps = beatmapModPools.filter(x => x.modPool === 'HR').map(x => x.beatmapId);
+
+			if (HRBeatmaps.length) {
+				module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps HR tourney flags new score');
+				await DBOsuBeatmaps.update({
+					hardRockMap: true,
+				}, {
+					where: {
+						beatmapId: {
+							[Op.in]: HRBeatmaps,
+						},
+						hardRockMap: {
+							[Op.not]: true,
+						}
+					},
+					silent: true,
+				});
+			}
+
+			let DTBeatmaps = beatmapModPools.filter(x => x.modPool === 'DT').map(x => x.beatmapId);
+
+			if (DTBeatmaps.length) {
+				module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps DT tourney flags new score');
+				await DBOsuBeatmaps.update({
+					doubleTimeMap: true,
+				}, {
+					where: {
+						beatmapId: {
+							[Op.in]: DTBeatmaps,
+						},
+						doubleTimeMap: {
+							[Op.not]: true,
+						}
+					},
+					silent: true,
+				});
+			}
+
+			let FMBeatmaps = beatmapModPools.filter(x => x.modPool === 'FM').map(x => x.beatmapId);
+
+			if (FMBeatmaps.length) {
+				module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps FM tourney flags new score');
+				await DBOsuBeatmaps.update({
+					freeModMap: true,
+				}, {
+					where: {
+						beatmapId: {
+							[Op.in]: FMBeatmaps,
+						},
+						freeModMap: {
+							[Op.not]: true,
+						}
+					},
+					silent: true,
+				});
 			}
 		}
 
