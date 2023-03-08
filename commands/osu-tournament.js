@@ -118,6 +118,12 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		matchesPlayed = new Discord.AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${acronym}.txt` });
 
-		await interaction.editReply({ content: `All matches found for the acronym \`${acronym.replace(/`/g, '')}\` are attached.`, files: [matchesPlayed] });
+		try {
+			await interaction.editReply({ content: `All matches found for the acronym \`${acronym.replace(/`/g, '')}\` are attached.`, files: [matchesPlayed] });
+		} catch (error) {
+			if (error.message !== 'Unknown Message') {
+				console.error(error);
+			}
+		}
 	}
 };
