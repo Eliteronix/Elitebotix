@@ -634,7 +634,7 @@ module.exports = {
 					}
 				}
 			} catch (err) {
-				console.log(osuUser.osuUserId, [...new Set(tourneysPlayed.map(tourney => tourney.acronym))])
+				console.log(osuUser.osuUserId, [...new Set(tourneysPlayed.map(tourney => tourney.acronym))]);
 				console.error(err);
 			}
 		}
