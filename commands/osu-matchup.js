@@ -957,13 +957,15 @@ module.exports = {
 			}
 
 			//Evaluate with which mods the game was played
-			if (team1GameScores[0].modPool === 'NM') {
+			let modPool = getScoreModpool(team1GameScores[0]);
+
+			if (modPool === 'NM') {
 				directNoModWins[scoreVersion][winner]++;
-			} else if (team1GameScores[0].modPool === 'HD') {
+			} else if (modPool === 'HD') {
 				directHiddenWins[scoreVersion][winner]++;
-			} else if (team1GameScores[0].modPool === 'HR') {
+			} else if (modPool === 'HR') {
 				directHardRockWins[scoreVersion][winner]++;
-			} else if (team1GameScores[0].modPool === 'DT') {
+			} else if (modPool === 'DT') {
 				directDoubleTimeWins[scoreVersion][winner]++;
 			} else {
 				directFreeModWins[scoreVersion][winner]++;
