@@ -279,76 +279,78 @@ async function getBeatmap(msg, interaction, beatmap, tournament, accuracy) {
 		processingMessage.delete();
 	}
 
-	logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
-	const mapScores = await DBOsuMultiScores.findAll({
-		where: {
-			beatmapId: beatmap.beatmapId,
-			tourneyMatch: true,
-			matchName: {
-				[Op.notLike]: 'MOTD:%',
-			},
-			[Op.or]: [
-				{ warmup: false },
-				{ warmup: null }
-			],
-		}
-	});
-
-	//Bubblesort mapScores by matchId property descending
-	mapScores.sort((a, b) => {
-		if (parseInt(a.matchId) > parseInt(b.matchId)) {
-			return -1;
-		}
-		if (parseInt(a.matchId) < parseInt(b.matchId)) {
-			return 1;
-		}
-		return 0;
-	});
-
-	let tournaments = [];
-	let matches = [];
-	let matchMakingScores = 0;
-
-	let hideQualifiers = new Date();
-	hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
-
-	for (let i = 0; i < mapScores.length; i++) {
-		let acronym = mapScores[i].matchName.replace(/:.+/gm, '').replace(/`/g, '');
-
-		if (mapScores[i].matchName.startsWith('ETX') || mapScores[i].matchName.startsWith('o!mm')) {
-			matchMakingScores++;
-		}
-
-		if (tournaments.indexOf(acronym) === -1) {
-			tournaments.push(acronym);
-		}
-
-		let modPool = getScoreModpool(mapScores[i]);
-
-		let date = new Date(mapScores[i].matchStartDate);
-		let dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
-
-		if (date > hideQualifiers && mapScores[i].matchName.toLowerCase().includes('qualifier')) {
-			mapScores[i].matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
-			mapScores[i].score = 'XXXXXX';
-		}
-
-		matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`);
-	}
-
-	let tournamentOccurences = `The map was played ${mapScores.length} times (${mapScores.length - matchMakingScores} times without ETX / o!mm) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
-
-	if (tournaments.length === 0) {
-		tournamentOccurences = 'The map was never played in any tournaments.';
-	}
-
-	if (tournamentOccurences.length > 2000) {
-		tournamentOccurences = tournamentOccurences.substring(0, 1897) + '...';
-	}
-
 	let files = [attachment];
 
+	let tournamentOccurences = '';
+
 	if (tournament) {
+		logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
+		const mapScores = await DBOsuMultiScores.findAll({
+			where: {
+				beatmapId: beatmap.beatmapId,
+				tourneyMatch: true,
+				matchName: {
+					[Op.notLike]: 'MOTD:%',
+				},
+				[Op.or]: [
+					{ warmup: false },
+					{ warmup: null }
+				],
+			}
+		});
+
+		//Bubblesort mapScores by matchId property descending
+		mapScores.sort((a, b) => {
+			if (parseInt(a.matchId) > parseInt(b.matchId)) {
+				return -1;
+			}
+			if (parseInt(a.matchId) < parseInt(b.matchId)) {
+				return 1;
+			}
+			return 0;
+		});
+
+		let tournaments = [];
+		let matches = [];
+		let matchMakingScores = 0;
+
+		let hideQualifiers = new Date();
+		hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+
+		for (let i = 0; i < mapScores.length; i++) {
+			let acronym = mapScores[i].matchName.replace(/:.+/gm, '').replace(/`/g, '');
+
+			if (mapScores[i].matchName.startsWith('ETX') || mapScores[i].matchName.startsWith('o!mm')) {
+				matchMakingScores++;
+			}
+
+			if (tournaments.indexOf(acronym) === -1) {
+				tournaments.push(acronym);
+			}
+
+			let modPool = getScoreModpool(mapScores[i]);
+
+			let date = new Date(mapScores[i].matchStartDate);
+			let dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
+
+			if (date > hideQualifiers && mapScores[i].matchName.toLowerCase().includes('qualifier')) {
+				mapScores[i].matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
+				mapScores[i].score = 'XXXXXX';
+			}
+
+			matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`);
+		}
+
+		tournamentOccurences = `The map was played ${mapScores.length} times (${mapScores.length - matchMakingScores} times without ETX / o!mm) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
+
+		if (tournaments.length === 0) {
+			tournamentOccurences = 'The map was never played in any tournaments.';
+		}
+
+		if (tournamentOccurences.length > 2000) {
+			tournamentOccurences = tournamentOccurences.substring(0, 1897) + '...';
+		}
+
 		// eslint-disable-next-line no-undef
 		matches = new Discord.AttachmentBuilder(Buffer.from(matches.join('\n'), 'utf-8'), { name: `tourney-scores-${beatmap.beatmapId}.txt` });
 		files.push(matches);
