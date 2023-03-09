@@ -1,6 +1,31 @@
+const { showUnknownInteractionError } = require('../../config.json');
+
 module.exports = {
 	name: 'restart',
 	usage: '<all|free|shardId|update>',
+	async autocomplete(interaction) {
+		const focusedValue = interaction.options.getFocused(true);
+
+		const options = [{ name: 'all', value: 'all' }, { name: 'free', value: 'free' }, { name: 'update', value: 'update' }];
+
+		for (let i = 0; i < interaction.client.totalShards; i++) {
+			options.push({ name: `Shard: ${i}`, value: i.toString() });
+		}
+
+		let filtered = options.filter(choice => choice.name.toLowerCase().includes(focusedValue.value.toLowerCase()));
+
+		filtered = filtered.slice(0, 25);
+
+		try {
+			await interaction.respond(
+				filtered.map(choice => ({ name: choice.name, value: choice.value })),
+			);
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+		}
+	},
 	async execute(interaction) {
 		let guildSizes = await interaction.client.shard.fetchClientValues('guilds.cache.size');
 		let startDates = await interaction.client.shard.fetchClientValues('startDate');
