@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBDiscordUsers, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
-const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap, getAvatar } = require('../utils');
+const { getIDFromPotentialOsuLink, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap, getAvatar } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
@@ -115,9 +115,9 @@ module.exports = {
 						})
 						.setRequired(false)
 						.addChoices(
-							{ name: 'Only Score v2', value: '--v2' },
-							{ name: 'Only Score v1', value: '--v1' },
-							{ name: 'All Scores', value: '--vx' },
+							{ name: 'Only Score v2', value: 'v2' },
+							{ name: 'Only Score v1', value: 'v1' },
+							{ name: 'All Scores', value: 'vx' },
 						)
 				)
 				.addBooleanOption(option =>
@@ -463,9 +463,9 @@ module.exports = {
 						})
 						.setRequired(false)
 						.addChoices(
-							{ name: 'Only Score v2', value: '--v2' },
-							{ name: 'Only Score v1', value: '--v1' },
-							{ name: 'All Scores', value: '--vx' },
+							{ name: 'Only Score v2', value: 'v2' },
+							{ name: 'Only Score v1', value: 'v1' },
+							{ name: 'All Scores', value: 'vx' },
 						)
 				)
 				.addBooleanOption(option =>
@@ -486,166 +486,178 @@ module.exports = {
 				)
 		),
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
+			return;
+		}
+
 		let teamsize = 1;
-		let team1 = [];
-		let team2 = [];
+
+		if (interaction.options.getInteger('teamsize')) {
+			teamsize = interaction.options.getInteger('teamsize');
+		}
+
+		let tourneyMatch = true;
+
+		if (interaction.options.getBoolean('tourney') === false) {
+			tourneyMatch = false;
+		}
+
 		let timeframe = new Date();
 		timeframe = timeframe.setFullYear(timeframe.getFullYear() - 1);
 		let timeframeText = 'last 1 year';
 
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
+		if (interaction.options.getString('timeframe')) {
+			let customTimeframe = interaction.options.getString('timeframe');
 
-			try {//TODO: Deferreply
-				//await interaction.deferReply();
-				await interaction.reply('Processing...');
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
-			}
-
-			args = [];
-
-			if (interaction.options._hoistedOptions && interaction.options.getSubcommand() === '1v1') {
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					if (interaction.options._hoistedOptions[i].name === 'tourney') {
-						if (interaction.options._hoistedOptions[i].value) {
-							args.push('--tourney');
-						} else {
-							args.push('--all');
-						}
-					} else if (interaction.options._hoistedOptions[i].name === 'timeframe') {
-						if (interaction.options._hoistedOptions[i].value === '1m') {
-							timeframe = new Date();
-							timeframe.setMonth(timeframe.getMonth() - 1);
-							timeframeText = 'last 1 month';
-						} else if (interaction.options._hoistedOptions[i].value === '3m') {
-							timeframe = new Date();
-							timeframe.setMonth(timeframe.getMonth() - 3);
-							timeframeText = 'last 3 months';
-						} else if (interaction.options._hoistedOptions[i].value === '6m') {
-							timeframe = new Date();
-							timeframe.setMonth(timeframe.getMonth() - 6);
-							timeframeText = 'last 6 months';
-						} else if (interaction.options._hoistedOptions[i].value === '1y') {
-							timeframe = new Date();
-							timeframe.setFullYear(timeframe.getFullYear() - 1);
-							timeframeText = 'last 1 year';
-						} else if (interaction.options._hoistedOptions[i].value === '2y') {
-							timeframe = new Date();
-							timeframe.setFullYear(timeframe.getFullYear() - 2);
-							timeframeText = 'last 2 years';
-						} else if (interaction.options._hoistedOptions[i].value === 'all') {
-							timeframe = new Date(0);
-							timeframeText = 'all time';
-						}
-					} else {
-						args.push(interaction.options._hoistedOptions[i].value);
-					}
-				}
-			} else if (interaction.options._hoistedOptions && interaction.options.getSubcommand() === 'teamvs') {
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					if (interaction.options._hoistedOptions[i].name === 'teamsize') {
-						teamsize = interaction.options._hoistedOptions[i].value;
-					} else if (interaction.options._hoistedOptions[i].name.startsWith('team1')) {
-						team1.push(interaction.options._hoistedOptions[i].value);
-					} else if (interaction.options._hoistedOptions[i].name === 'tourney') {
-						if (interaction.options._hoistedOptions[i].value) {
-							args.push('--tourney');
-						} else {
-							args.push('--all');
-						}
-					} else if (interaction.options._hoistedOptions[i].name === 'scores') {
-						args.push(interaction.options._hoistedOptions[i].value);
-					} else if (interaction.options._hoistedOptions[i].name === 'timeframe') {
-						if (interaction.options._hoistedOptions[i].value === '1m') {
-							timeframe = new Date();
-							timeframe.setMonth(timeframe.getMonth() - 1);
-							timeframeText = 'last 1 month';
-						} else if (interaction.options._hoistedOptions[i].value === '3m') {
-							timeframe = new Date();
-							timeframe.setMonth(timeframe.getMonth() - 3);
-							timeframeText = 'last 3 months';
-						} else if (interaction.options._hoistedOptions[i].value === '6m') {
-							timeframe = new Date();
-							timeframe.setMonth(timeframe.getMonth() - 6);
-							timeframeText = 'last 6 months';
-						} else if (interaction.options._hoistedOptions[i].value === '1y') {
-							timeframe = new Date();
-							timeframe.setFullYear(timeframe.getFullYear() - 1);
-							timeframeText = 'last 1 year';
-						} else if (interaction.options._hoistedOptions[i].value === '2y') {
-							timeframe = new Date();
-							timeframe.setFullYear(timeframe.getFullYear() - 2);
-							timeframeText = 'last 2 years';
-						} else if (interaction.options._hoistedOptions[i].value === 'all') {
-							timeframe = new Date(0);
-							timeframeText = 'all time';
-						}
-					} else {
-						team2.push(interaction.options._hoistedOptions[i].value);
-					}
-				}
+			if (customTimeframe === '1m') {
+				timeframe = new Date();
+				timeframe.setMonth(timeframe.getMonth() - 1);
+				timeframeText = 'last 1 month';
+			} else if (customTimeframe === '3m') {
+				timeframe = new Date();
+				timeframe.setMonth(timeframe.getMonth() - 3);
+				timeframeText = 'last 3 months';
+			} else if (customTimeframe === '6m') {
+				timeframe = new Date();
+				timeframe.setMonth(timeframe.getMonth() - 6);
+				timeframeText = 'last 6 months';
+			} else if (customTimeframe === '1y') {
+				timeframe = new Date();
+				timeframe.setFullYear(timeframe.getFullYear() - 1);
+				timeframeText = 'last 1 year';
+			} else if (customTimeframe === '2y') {
+				timeframe = new Date();
+				timeframe.setFullYear(timeframe.getFullYear() - 2);
+				timeframeText = 'last 2 years';
+			} else if (customTimeframe === 'all') {
+				timeframe = new Date(0);
+				timeframeText = 'all time';
 			}
 		}
-
-		const commandConfig = await getOsuUserServerMode(msg, args);
-		const commandUser = commandConfig[0];
 
 		let scoringType = 'v2';
-		let tourneyMatch = true;
-		for (let i = 0; i < args.length; i++) {
-			if (args[i].toLowerCase().startsWith('--v2')) {
-				scoringType = 'v2';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].toLowerCase().startsWith('--v1')) {
-				scoringType = 'v1';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].toLowerCase().startsWith('--tourney')) {
-				tourneyMatch = true;
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].toLowerCase().startsWith('--all')) {
-				tourneyMatch = false;
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].toLowerCase().startsWith('--vx')) {
-				scoringType = 'vx';
-				args.splice(i, 1);
-				i--;
-			}
+
+		if (interaction.options.getString('scores')) {
+			scoringType = interaction.options.getString('scores');
 		}
 
-		//Teamvs subcommand is the only occasion that args is empty
-		if (!interaction || interaction && interaction.options.getSubcommand() !== 'teamvs') {
-			//If only one player got specified the author wants to see the matchup between them and themselves
-			if (!args[1]) {
-				if (commandUser && commandUser.osuUserId) {
-					team1.push(commandUser.osuUserId);
-				} else {
-					const userDisplayName = await getMessageUserDisplayname(msg);
-					team1.push(userDisplayName);
+		let team1 = [];
+
+		if (interaction.options.getString('username')) {
+			team1.push(interaction.options.getString('username'));
+		}
+
+		if (interaction.options.getString('team1player1')) {
+			team1.push(interaction.options.getString('team1player1'));
+		}
+
+		if (interaction.options.getString('team1player2')) {
+			team1.push(interaction.options.getString('team1player2'));
+		}
+
+		if (interaction.options.getString('team1player3')) {
+			team1.push(interaction.options.getString('team1player3'));
+		}
+
+		if (interaction.options.getString('team1player4')) {
+			team1.push(interaction.options.getString('team1player4'));
+		}
+
+		if (interaction.options.getString('team1player5')) {
+			team1.push(interaction.options.getString('team1player5'));
+		}
+
+		if (interaction.options.getString('team1player6')) {
+			team1.push(interaction.options.getString('team1player6'));
+		}
+
+		if (interaction.options.getString('team1player7')) {
+			team1.push(interaction.options.getString('team1player7'));
+		}
+
+		if (interaction.options.getString('team1player8')) {
+			team1.push(interaction.options.getString('team1player8'));
+		}
+
+		let team2 = [];
+
+		if (interaction.options.getString('username2')) {
+			team2.push(interaction.options.getString('username2'));
+		}
+
+		if (interaction.options.getString('team2player1')) {
+			team2.push(interaction.options.getString('team2player1'));
+		}
+
+		if (interaction.options.getString('team2player2')) {
+			team2.push(interaction.options.getString('team2player2'));
+		}
+
+		if (interaction.options.getString('team2player3')) {
+			team2.push(interaction.options.getString('team2player3'));
+		}
+
+		if (interaction.options.getString('team2player4')) {
+			team2.push(interaction.options.getString('team2player4'));
+		}
+
+		if (interaction.options.getString('team2player5')) {
+			team2.push(interaction.options.getString('team2player5'));
+		}
+
+		if (interaction.options.getString('team2player6')) {
+			team2.push(interaction.options.getString('team2player6'));
+		}
+
+		if (interaction.options.getString('team2player7')) {
+			team2.push(interaction.options.getString('team2player7'));
+		}
+
+		if (interaction.options.getString('team2player8')) {
+			team2.push(interaction.options.getString('team2player8'));
+		}
+
+		//If no players got specified the author wants to see his own matchup
+		if (!team2.length) {
+			team2.push(team1[0]);
+
+			team1 = [];
+
+			logDatabaseQueries(4, 'commands/osu-matchup.js DBDiscordUsers0');
+			const user = await DBDiscordUsers.findOne({
+				where: {
+					userId: interaction.user.id,
+				}
+			});
+
+			if (user && user.osuUserId) {
+				team1.push(user.osuUserId);
+			} else {
+				let username = interaction.user.username;
+
+				if (interaction.guild) {
+					let member = interaction.guild.members.cache.get(interaction.user.id);
+
+					if (member) {
+						username = member.displayName;
+					}
 				}
 
-				team2.push(args[0]);
-			} else {
-				//If two players got specified the author wants to see the matchup between them
-				team1.push(args[0]);
-				team2.push(args[1]);
+				team1.push(username);
 			}
 		}
 
 		if (team1.length < teamsize) {
-			return msg.channel.send('You did not specify enough players for team 1.');
+			return await interaction.followUp('You did not specify enough players for team 1.');
 		} else if (team2.length < teamsize) {
-			return msg.channel.send('You did not specify enough players for team 2.');
+			return await interaction.editReply('You did not specify enough players for team 2.');
 		}
 
 		// eslint-disable-next-line no-undef
@@ -673,7 +685,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						team1[i] = discordUser.osuUserId;
 					} else {
-						msg.channel.send(`\`${team1[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
+						await interaction.followUp(`\`${team1[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
 						team1.splice(i, 1);
 						i--;
 						continue;
@@ -689,9 +701,9 @@ module.exports = {
 						team1[i] = user.id;
 						team1Names.push(user.name);
 					})
-					.catch(err => {
+					.catch(async (err) => {
 						if (err.message === 'Not found') {
-							msg.channel.send(`Could not find user \`${team1[i].replace(/`/g, '')}\`.`);
+							await interaction.followUp(`Could not find user \`${team1[i].replace(/`/g, '')}\`.`);
 							team1.splice(i, 1);
 							i--;
 						} else {
@@ -713,7 +725,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						team2[i] = discordUser.osuUserId;
 					} else {
-						msg.channel.send(`\`${team2[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
+						await interaction.followUp(`\`${team2[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
 						team2.splice(i, 1);
 						i--;
 						continue;
@@ -729,9 +741,9 @@ module.exports = {
 						team2[i] = user.id;
 						team2Names.push(user.name);
 					})
-					.catch(err => {
+					.catch(async (err) => {
 						if (err.message === 'Not found') {
-							msg.channel.send(`Could not find user \`${team2[i].replace(/`/g, '')}\`.`);
+							await interaction.followUp(`Could not find user \`${team2[i].replace(/`/g, '')}\`.`);
 							team2.splice(i, 1);
 							i--;
 						} else {
@@ -742,16 +754,10 @@ module.exports = {
 		}
 
 		if (team1.length < teamsize || team2.length < teamsize) {
-			return msg.channel.send('Not enough users left for the matchup.');
+			return await interaction.followUp('Not enough users left for the matchup.');
 		}
 
-		let processingMessage = null;
-
-		if (interaction && interaction.id) {
-			await interaction.editReply(`[\`${team1Names.join(' ')}\` vs \`${team2Names.join(' ')}\`] Processing...`);
-		} else {
-			processingMessage = await msg.channel.send(`[\`${team1Names.join(' ')}\` vs \`${team2Names.join(' ')}\`] Processing...`);
-		}
+		await interaction.editReply(`[\`${team1Names.join(' ')}\` vs \`${team2Names.join(' ')}\`] Processing...`);
 
 		//Add all multiscores from both teams to an array
 		let scoresTeam1 = [];
@@ -1667,26 +1673,12 @@ module.exports = {
 			files.push(matchesPlayed);
 		}
 
-		if (processingMessage) {
-			await processingMessage.delete();
-		}
+		let sentMessage = await interaction.editReply({ content: content, files: files });
 
-		let sentMessage;
-		if (msg.id) {
-			if (msg.id === 1) {
-				sentMessage = await msg.channel.send({ content: content, files: files });
-			} else {
-				sentMessage = await msg.reply({ content: content, files: files });
-			}
-		} else {
-			sentMessage = await interaction.editReply({ content: content, files: files });
-		}
-
-		if (!interaction || interaction && interaction.options.getSubcommand() !== 'teamvs') {
+		if (team1.length === 1 && team2.length === 1) {
 			sentMessage.react('🔵');
 			sentMessage.react('🔴');
 		}
-		return;
 	},
 };
 
