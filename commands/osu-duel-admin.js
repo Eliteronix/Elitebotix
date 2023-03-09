@@ -108,9 +108,74 @@ module.exports = {
 						.setName('ranked')
 						.setDescription('Should only ranked maps be played?')
 				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('createduel3v3')
+				.setDescription('Creates a duel match')
+				.addUserOption(option =>
+					option
+						.setName('firstplayer')
+						.setDescription('The first player')
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('secondplayer')
+						.setDescription('The second player')
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('thirdplayer')
+						.setDescription('The third player')
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('fourthplayer')
+						.setDescription('The fourth player')
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('fifthplayer')
+						.setDescription('The fifth player')
+						.setRequired(true)
+				)
+				.addUserOption(option =>
+					option
+						.setName('sixthplayer')
+						.setDescription('The sixth player')
+						.setRequired(true)
+				)
+				.addNumberOption(option =>
+					option
+						.setName('starrating')
+						.setDescription('The star rating to play on')
+				)
+				.addIntegerOption(option =>
+					option
+						.setName('bestof')
+						.setDescription('The best of')
+						.addChoices(
+							{ name: 'Best of 13', value: 13 },
+							{ name: 'Best of 11', value: 11 },
+							{ name: 'Best of 9', value: 9 },
+							{ name: 'Best of 7 (Default)', value: 7 },
+							{ name: 'Best of 5', value: 5 },
+							{ name: 'Best of 3', value: 3 },
+							{ name: 'Best of 1', value: 1 }
+						)
+				)
+				.addBooleanOption(option =>
+					option
+						.setName('ranked')
+						.setDescription('Should only ranked maps be played?')
+				)
 		),
 	async execute(msg, args, interaction, additionalObjects) {
-		if (interaction.options.getSubcommand() === 'createduel1v1' || interaction.options.getSubcommand() === 'createduel2v2') {
+		if (interaction.options.getSubcommand() === 'createduel1v1' || interaction.options.getSubcommand() === 'createduel2v2' || interaction.options.getSubcommand() === 'createduel3v3') {
 			try {
 				await interaction.deferReply();
 			} catch (error) {
@@ -150,26 +215,34 @@ module.exports = {
 			}
 
 			// Get the firstTeam
-			let team = [];
+			let players = [];
 
 			if (interaction.options.getUser('firstplayer')) {
-				team.push(interaction.options.getUser('firstplayer').id);
+				players.push(interaction.options.getUser('firstplayer').id);
 			}
 
 			if (interaction.options.getUser('secondplayer')) {
-				team.push(interaction.options.getUser('secondplayer').id);
+				players.push(interaction.options.getUser('secondplayer').id);
 			}
 
 			if (interaction.options.getUser('thirdplayer')) {
-				team.push(interaction.options.getUser('thirdplayer').id);
+				players.push(interaction.options.getUser('thirdplayer').id);
 			}
 
 			if (interaction.options.getUser('fourthplayer')) {
-				team.push(interaction.options.getUser('fourthplayer').id);
+				players.push(interaction.options.getUser('fourthplayer').id);
+			}
+
+			if (interaction.options.getUser('fifthplayer')) {
+				players.push(interaction.options.getUser('fifthplayer').id);
+			}
+
+			if (interaction.options.getUser('sixthplayer')) {
+				players.push(interaction.options.getUser('sixthplayer').id);
 			}
 
 			//Cross check that commandUser.userId, teammates and opponents are all unique
-			const allUsers = [...team];
+			const allUsers = [...players];
 			const everyUser = [];
 
 			// Collect the star ratings to calculate the average & update the duel ratings for the users
