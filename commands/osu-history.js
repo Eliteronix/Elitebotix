@@ -527,115 +527,110 @@ module.exports = {
 		}
 
 		if (interaction.options.getBoolean('showtournamentdetails')) {
-			try {
-				let acronyms = [...new Set(tourneysPlayed.map(tourney => tourney.acronym))];
+			let acronyms = [...new Set(tourneysPlayed.map(tourney => tourney.acronym.replaceAll('\'', '\\\'')))].filter(acronym => acronym.length > 0);
 
-				let tourneyScores = await DBOsuMultiScores.findAll({
-					attributes: ['matchId', 'matchName', 'teamType', 'beatmapId', 'matchStartDate'],
-					where: {
-						matchName: {
-							[Op.or]: eval('[' + acronyms.map(acronym => `{[Op.like]: '${acronym}:%'}`).join(', ') + ']'),
-						},
+			let tourneyScores = await DBOsuMultiScores.findAll({
+				attributes: ['matchId', 'matchName', 'teamType', 'beatmapId', 'matchStartDate'],
+				where: {
+					matchName: {
+						[Op.or]: eval('[' + acronyms.map(acronym => `{[Op.like]: '${acronym}:%'}`).join(', ') + ']'),
 					},
-					order: [['matchStartDate', 'DESC']],
-				});
+				},
+				order: [['matchStartDate', 'DESC']],
+			});
 
-				for (let i = 0; i < tourneysPlayed.length; i++) {
-					if (new Date() - lastUpdate > 15000) {
-						interaction.editReply(`Processing ${i}/${tourneysPlayed.length} tournaments...`);
-						lastUpdate = new Date();
-					}
+			for (let i = 0; i < tourneysPlayed.length; i++) {
+				if (new Date() - lastUpdate > 15000) {
+					interaction.editReply(`Processing ${i}/${tourneysPlayed.length} tournaments...`);
+					lastUpdate = new Date();
+				}
 
-					// const util = require('util');
+				// const util = require('util');
 
-					// console.log(util.inspect(tourneysPlayed[i], { showHidden: false, depth: null, colors: true }));
+				// console.log(util.inspect(tourneysPlayed[i], { showHidden: false, depth: null, colors: true }));
 
-					let daysBefore = new Date(tourneysPlayed[i].date);
-					daysBefore.setDate(daysBefore.getDate() - 21);
+				let daysBefore = new Date(tourneysPlayed[i].date);
+				daysBefore.setDate(daysBefore.getDate() - 21);
 
-					let daysAfter = new Date(tourneysPlayed[i].date);
-					daysAfter.setDate(daysAfter.getDate() + 21);
+				let daysAfter = new Date(tourneysPlayed[i].date);
+				daysAfter.setDate(daysAfter.getDate() + 21);
 
-					let matchesWithTheLastMatchBeatmaps = [...new Set(tourneyScores.filter(score => tourneysPlayed[i].matches[0].beatmapIds.includes(score.beatmapId) && new Date(score.matchStartDate) < daysAfter && new Date(score.matchStartDate) > daysBefore).map(score => score.matchId))];
+				let matchesWithTheLastMatchBeatmaps = [...new Set(tourneyScores.filter(score => tourneysPlayed[i].matches[0].beatmapIds.includes(score.beatmapId) && new Date(score.matchStartDate) < daysAfter && new Date(score.matchStartDate) > daysBefore).map(score => score.matchId))];
 
-					if (matchesWithTheLastMatchBeatmaps.length > 1) {
-						if (tourneysPlayed[i].matches[0].matchName.includes('Qualifiers')) {
-							tourneysPlayed[i].result = 'Did not qualify';
-						} else if (tourneysPlayed[i].matches[0].matchName.includes('Tryouts')) {
-							tourneysPlayed[i].result = 'Did not make the team';
-						} else {
-							// Ro16 has 24 matches, Ro32 has 48 matches, Ro64 has 96 matches, Ro128 has 192 matches
-							// GF has 2 + 1 matches, F has 4 matches, SF has 8 matches, QF has 16 matches
-
-							if (matchesWithTheLastMatchBeatmaps.length > 96) {
-								tourneysPlayed[i].result = 'Round of 128';
-							} else if (matchesWithTheLastMatchBeatmaps.length > 48) {
-								tourneysPlayed[i].result = 'Round of 64';
-							} else if (matchesWithTheLastMatchBeatmaps.length > 24) {
-								tourneysPlayed[i].result = 'Round of 32';
-							} else if (matchesWithTheLastMatchBeatmaps.length > 16) {
-								tourneysPlayed[i].result = 'Round of 16';
-							} else if (matchesWithTheLastMatchBeatmaps.length > 8) {
-								tourneysPlayed[i].result = 'Quarter Finals';
-							} else if (matchesWithTheLastMatchBeatmaps.length > 4) {
-								tourneysPlayed[i].result = 'Semi Finals';
-							} else if (matchesWithTheLastMatchBeatmaps.length > 2) {
-								tourneysPlayed[i].result = 'Finals';
-							} else {
-								tourneysPlayed[i].result = 'Grand Finals';
-							}
-						}
-					}
-
-					let team = tourneysPlayed[i].teammates;
-
-					let weeksAgo = new Date();
-					weeksAgo.setDate(weeksAgo.getDate() - 14);
-
-					if (tourneysPlayed[i].date > weeksAgo) {
-						tourneysPlayed[i].result = 'Ongoing';
-					}
-
-					for (let j = 0; j < team.length; j++) {
-						team[j] = players.find(player => player.osuUserId === team[j]).osuName;
-
-						if (team[j] === null) {
-							team[j] = '<Redacted>';
-						}
-					}
-
-					if (team.length > 1) {
-						tourneysPlayed[i].team = `Team: ${team.join(', ')}`;
-					} else if (team.length === 0 && tourneysPlayed[i].matches.length > 1 || team.length === 1) {
-						tourneysPlayed[i].team = 'Solo';
+				if (matchesWithTheLastMatchBeatmaps.length > 1) {
+					if (tourneysPlayed[i].matches[0].matchName.includes('Qualifiers')) {
+						tourneysPlayed[i].result = 'Did not qualify';
+					} else if (tourneysPlayed[i].matches[0].matchName.includes('Tryouts')) {
+						tourneysPlayed[i].result = 'Did not make the team';
 					} else {
+						// Ro16 has 24 matches, Ro32 has 48 matches, Ro64 has 96 matches, Ro128 has 192 matches
+						// GF has 2 + 1 matches, F has 4 matches, SF has 8 matches, QF has 16 matches
 
-						let matchesToFindOutFormat = tourneyScores.filter(score => !score.matchName.includes('Qualifiers'));
-
-						if (matchesToFindOutFormat.length > 0) {
-							if (matchesToFindOutFormat[0].teamType === 'Head to Head') {
-								tourneysPlayed[i].team = 'Solo';
-							}
-
-							tourneysPlayed[i].team = 'Team: unknown';
+						if (matchesWithTheLastMatchBeatmaps.length > 96) {
+							tourneysPlayed[i].result = 'Round of 128';
+						} else if (matchesWithTheLastMatchBeatmaps.length > 48) {
+							tourneysPlayed[i].result = 'Round of 64';
+						} else if (matchesWithTheLastMatchBeatmaps.length > 24) {
+							tourneysPlayed[i].result = 'Round of 32';
+						} else if (matchesWithTheLastMatchBeatmaps.length > 16) {
+							tourneysPlayed[i].result = 'Round of 16';
+						} else if (matchesWithTheLastMatchBeatmaps.length > 8) {
+							tourneysPlayed[i].result = 'Quarter Finals';
+						} else if (matchesWithTheLastMatchBeatmaps.length > 4) {
+							tourneysPlayed[i].result = 'Semi Finals';
+						} else if (matchesWithTheLastMatchBeatmaps.length > 2) {
+							tourneysPlayed[i].result = 'Finals';
 						} else {
-							if (!tourneysPlayed[i].result) {
-								tourneysPlayed[i].result = 'No matches past qualifiers found';
-							}
+							tourneysPlayed[i].result = 'Grand Finals';
 						}
-					}
-
-					if (!tourneysPlayed[i].team) {
-						tourneysPlayed[i].team = 'Format & Team unknown';
-					}
-
-					if (!tourneysPlayed[i].result) {
-						tourneysPlayed[i].result = 'Unknown';
 					}
 				}
-			} catch (err) {
-				console.log(osuUser.osuUserId, [...new Set(tourneysPlayed.map(tourney => tourney.acronym))]);
-				console.error(err);
+
+				let team = tourneysPlayed[i].teammates;
+
+				let weeksAgo = new Date();
+				weeksAgo.setDate(weeksAgo.getDate() - 14);
+
+				if (tourneysPlayed[i].date > weeksAgo) {
+					tourneysPlayed[i].result = 'Ongoing';
+				}
+
+				for (let j = 0; j < team.length; j++) {
+					team[j] = players.find(player => player.osuUserId === team[j]).osuName;
+
+					if (team[j] === null) {
+						team[j] = '<Redacted>';
+					}
+				}
+
+				if (team.length > 1) {
+					tourneysPlayed[i].team = `Team: ${team.join(', ')}`;
+				} else if (team.length === 0 && tourneysPlayed[i].matches.length > 1 || team.length === 1) {
+					tourneysPlayed[i].team = 'Solo';
+				} else {
+
+					let matchesToFindOutFormat = tourneyScores.filter(score => !score.matchName.includes('Qualifiers'));
+
+					if (matchesToFindOutFormat.length > 0) {
+						if (matchesToFindOutFormat[0].teamType === 'Head to Head') {
+							tourneysPlayed[i].team = 'Solo';
+						}
+
+						tourneysPlayed[i].team = 'Team: unknown';
+					} else {
+						if (!tourneysPlayed[i].result) {
+							tourneysPlayed[i].result = 'No matches past qualifiers found';
+						}
+					}
+				}
+
+				if (!tourneysPlayed[i].team) {
+					tourneysPlayed[i].team = 'Format & Team unknown';
+				}
+
+				if (!tourneysPlayed[i].result) {
+					tourneysPlayed[i].result = 'Unknown';
+				}
 			}
 		}
 
