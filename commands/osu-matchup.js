@@ -745,7 +745,13 @@ module.exports = {
 			return msg.channel.send('Not enough users left for the matchup.');
 		}
 
-		let processingMessage = await msg.channel.send(`[\`${team1Names.join(' ')}\` vs \`${team2Names.join(' ')}\`] Processing...`);
+		let processingMessage = null;
+
+		if (interaction.id) {
+			await interaction.editReply(`[\`${team1Names.join(' ')}\` vs \`${team2Names.join(' ')}\`] Processing...`);
+		} else {
+			processingMessage = await msg.channel.send(`[\`${team1Names.join(' ')}\` vs \`${team2Names.join(' ')}\`] Processing...`);
+		}
 
 		//Add all multiscores from both teams to an array
 		let scoresTeam1 = [];
@@ -1661,7 +1667,9 @@ module.exports = {
 			files.push(matchesPlayed);
 		}
 
-		await processingMessage.delete();
+		if (processingMessage) {
+			await processingMessage.delete();
+		}
 
 		let sentMessage;
 		if (msg.id) {
