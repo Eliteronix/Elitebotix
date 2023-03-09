@@ -747,7 +747,7 @@ module.exports = {
 
 		let processingMessage = null;
 
-		if (interaction.id) {
+		if (interaction && interaction.id) {
 			await interaction.editReply(`[\`${team1Names.join(' ')}\` vs \`${team2Names.join(' ')}\`] Processing...`);
 		} else {
 			processingMessage = await msg.channel.send(`[\`${team1Names.join(' ')}\` vs \`${team2Names.join(' ')}\`] Processing...`);
