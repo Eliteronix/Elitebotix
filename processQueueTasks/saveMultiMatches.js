@@ -221,8 +221,6 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				}
 			});
 	} else {
-
-		// if (true) { //TODO: Remove this
 		// Verify matches instead
 		logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores verify matches');
 		let incompleteMatch = await DBOsuMultiScores.findOne({
@@ -640,7 +638,6 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 														}
 													}
 
-													//TODO: ?
 													// let playersThatAreOnlyInOtherMatches = otherPlayersOutsideOfTheLobbyThatPlayedTheSameMaps.filter((player) => !playersInTheOriginalLobby.includes(player));
 
 													let qualsMatchOfTheSamePlayers = otherMatchesWithTheSamePlayers.find((match) => match.matchName.includes('(Qualifiers)') || match.matchName.includes('(Quals)'));
