@@ -24,6 +24,7 @@ module.exports = {
 			option.setName('argument')
 				.setDescription('Argument for the command')
 				.setRequired(false)
+				.setAutocomplete(true)
 		)
 		.addAttachmentOption(option =>
 			option.setName('file')
@@ -31,25 +32,41 @@ module.exports = {
 				.setRequired(false)
 		),
 	async autocomplete(interaction) {
-		const focusedValue = interaction.options.getFocused();
+		const focusedOption = interaction.options.getFocused(true);
 
-		const adminCommands = fs.readdirSync('./commands/admin');
+		if (focusedOption.name === 'command') {
+			const adminCommands = fs.readdirSync('./commands/admin');
 
-		let filtered = adminCommands.filter(filename => filename.toLowerCase().includes(focusedValue.toLowerCase()));
+			let filtered = adminCommands.filter(filename => filename.toLowerCase().includes(focusedOption.value.toLowerCase()));
 
-		filtered = filtered.slice(0, 25);
+			filtered = filtered.slice(0, 25);
 
-		try {
-			await interaction.respond(
-				filtered.map(file => {
-					const command = require(`./admin/${file}`);
+			try {
+				await interaction.respond(
+					filtered.map(file => {
+						const command = require(`./admin/${file}`);
 
-					return { name: `${command.name} | ${command.usage}`, value: command.name };
-				}),
-			);
-		} catch (error) {
-			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-				console.error(error);
+						return { name: `${command.name} | ${command.usage}`, value: command.name };
+					}),
+				);
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+			}
+		} else if (focusedOption.name === 'argument') {
+			const command = interaction.options.getString('command').split(' | ')[0];
+
+			const commandModule = require(`./admin/${command}.js`);
+
+			if (commandModule.autocomplete) {
+				try {
+					await commandModule.autocomplete(interaction);
+				} catch (error) {
+					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+						console.error(error);
+					}
+				}
 			}
 		}
 	},
