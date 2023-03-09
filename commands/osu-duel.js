@@ -1278,7 +1278,7 @@ module.exports = {
 						await sentMessage.react('📊');
 					}
 				} catch (error) {
-					if (error.message !== 'Unknown Message') {
+					if (error.message !== 'Unknown Message' && error.message !== 'Missing Permissions') {
 						console.error(error);
 					}
 				}
