@@ -105,6 +105,18 @@ const beatmaps = new Sequelize('database', 'username', 'password', {
 	},
 });
 
+const soloScores = new Sequelize('database', 'username', 'password', {
+	host: 'localhost',
+	dialect: 'sqlite',
+	logging: false,
+	storage: 'databases/soloScores.sqlite',
+	retry: {
+		max: 15, // Maximum retry 15 times
+		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+	},
+});
+
 require('./models/DBGuilds')(guilds, Sequelize.DataTypes);
 require('./models/DBReactionRoles')(guilds, Sequelize.DataTypes);
 require('./models/DBReactionRolesHeader')(guilds, Sequelize.DataTypes);
@@ -136,6 +148,8 @@ require('./models/DBElitiriCupLobbies')(elitiriData, Sequelize.DataTypes);
 require('./models/DBOsuMultiScores')(multiScores, Sequelize.DataTypes);
 
 require('./models/DBOsuBeatmaps')(beatmaps, Sequelize.DataTypes);
+
+require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
 
 guilds.sync({ alter: true })
 	.then(async () => {
@@ -198,5 +212,13 @@ beatmaps.sync({ alter: true })
 		// eslint-disable-next-line no-console
 		console.log('beatmaps database synced');
 		beatmaps.close();
+	})
+	.catch(console.error);
+
+soloScores.sync({ alter: true })
+	.then(async () => {
+		// eslint-disable-next-line no-console
+		console.log('soloScores database synced');
+		soloScores.close();
 	})
 	.catch(console.error);

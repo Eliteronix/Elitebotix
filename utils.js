@@ -2807,22 +2807,24 @@ module.exports = {
 					} else if (modPools[modIndex] === 'DT') {
 						userMaps[i].score = userMaps[i].score / 1.2;
 					} else if (modPools[modIndex] === 'FM') {
-						if (module.exports.getMods(userMaps[i].modBits).includes('HD')) {
+						let scoreMods = module.exports.getMods(userMaps[i].modBits);
+
+						if (scoreMods.includes('HD')) {
 							userMaps[i].score = userMaps[i].score / 1.06;
 						}
-						if (module.exports.getMods(userMaps[i].modBits).includes('HR')) {
+						if (scoreMods.includes('HR')) {
 							userMaps[i].score = userMaps[i].score / 1.1;
 						}
-						if (module.exports.getMods(userMaps[i].modBits).includes('FL')) {
+						if (scoreMods.includes('FL')) {
 							userMaps[i].score = userMaps[i].score / 1.12;
 						}
-						if (module.exports.getMods(userMaps[i].modBits).includes('DT')) {
+						if (scoreMods.includes('DT')) {
 							userMaps[i].score = userMaps[i].score / 1.2;
 						}
-						if (module.exports.getMods(userMaps[i].modBits).includes('EZ')) {
+						if (scoreMods.includes('EZ')) {
 							userMaps[i].score = userMaps[i].score / 0.5;
 						}
-						if (module.exports.getMods(userMaps[i].modBits).includes('HT')) {
+						if (scoreMods.includes('HT')) {
 							userMaps[i].score = userMaps[i].score / 0.3;
 						}
 					}
