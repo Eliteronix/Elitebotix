@@ -455,6 +455,11 @@ module.exports = {
 
 						if (ownScore) {
 							await interaction.followUp('You cannot verify your own scores.');
+
+							while (matchIdsGettingProcessed.includes(matchId)) {
+								matchIdsGettingProcessed.splice(matchIdsGettingProcessed.indexOf(matchId), 1);
+							}
+
 							continue;
 						}
 					}
