@@ -2,7 +2,7 @@ const { DBDiscordUsers } = require('../../dbObjects');
 
 module.exports = {
 	name: 'updateTwitchSettings',
-	usage: '<discordId> <toggleosumapsync/togglemp>',
+	usage: '<discordId> <togglemapsync/togglemp>',
 	async execute(interaction) {
 		let args = interaction.options.getString('argument').split(/ +/);
 
