@@ -3769,18 +3769,18 @@ module.exports = {
 				const path = `./maps/${beatmapId}.osu`;
 
 				try {
-					await fs.unlinkSync(path);
+					fs.unlinkSync(path);
 				} catch (err) {
 					// Nothing
 				}
 
 				depth++;
 
-				return await module.exports.wrongCluster(beatmapId, modBits, accuracy, misses, combo, depth);
-			} else if (e.message !== 'Failed to parse beatmap: expected `osu file format v` at file begin' &&
-				e.message !== 'internal error in Neon module: index out of bounds: the len is 299 but the index is 299' &&
-				parseInt(beatmapId) !== 2568364) {
+				return await module.exports.getOsuPP(beatmapId, modBits, accuracy, misses, combo, depth);
+			} else if (e.message !== 'Failed to parse beatmap: expected `osu file format v` at file begin') {
 				console.error(`error with map ${beatmapId}`, e);
+				return null;
+			} else {
 				return null;
 			}
 		}
@@ -3820,7 +3820,7 @@ module.exports = {
 			if (!outputScore.pp && outputScore.maxCombo) {
 				const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: outputScore.beatmapId, modBits: 0 });
 				if (dbBeatmap) {
-					let pp = await module.exports.wrongCluster(outputScore.beatmapId, outputScore.raw_mods, module.exports.getAccuracy(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
+					let pp = await module.exports.getOsuPP(outputScore.beatmapId, outputScore.raw_mods, module.exports.getAccuracy(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
 
 					module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores pp update');
 					DBOsuMultiScores.update({ pp: pp }, { where: { id: inputScore.id } });
