@@ -1025,6 +1025,8 @@ module.exports = {
 							tournamentBans[0].tournamentBannedUntil.setUTCSeconds(tournamentBans[0].tournamentBannedUntil.getUTCSeconds() + tournamentBans[0].length);
 						}
 
+						tournamentBans[0].description = tournamentBans[0].description.replace('&#039;', '\'').replace('&amp;', '&');
+
 						additionalInfo.tournamentBan = tournamentBans[0];
 					}
 				}
