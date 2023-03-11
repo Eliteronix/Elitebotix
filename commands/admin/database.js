@@ -30,14 +30,16 @@ module.exports = {
 		let data = [];
 
 		let dbTableName = interaction.options.getString('argument');
-		let dbList = null;
+		let dbListPromise = null;
 
 		try {
 			logDatabaseQueries(4, `commands/db.js ${dbTableName}`);
-			dbList = eval(`const { ${dbTableName} } = require('../../dbObjects'); ${dbTableName}.findAll()`);
+			dbListPromise = eval(`const { ${dbTableName} } = require('../../dbObjects'); ${dbTableName}.findAll()`);
 		} catch (error) {
 			return await interaction.editReply(`Table ${dbTableName} not found`);
 		}
+
+		let dbList = await dbListPromise;
 
 		if (dbList.length === 0) {
 			return await interaction.editReply(`No entries found in ${dbTableName}`);
