@@ -50,6 +50,7 @@ module.exports = {
 					inviteSendTime = Date.parse(now) / 1000;
 				}
 
+				console.log(`[${c.shardId}] Sending match notification to ${dbPlayers.join(', ')} for match ${args[5]} at ${matchTime} (invite send time: ${inviteSendTime})`);
 				// eslint-disable-next-line no-undef
 				channel.send(`Hi, I will be reffing your match <@${dbPlayers.join('>, <@')}>!\nYour match starts <t:${Date.parse(matchTime) / 1000}:R>. Invites will be sent <t:${inviteSendTime}:R>.\nIngame invites will be sent out by \`${process.env.OSUNAME}\` - be sure to allow DMs on discord as a backup.`);
 				logDatabaseQueries(2, 'processQueueTasks/tourneyFollow.js DBProcessQueue create');

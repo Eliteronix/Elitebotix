@@ -156,6 +156,7 @@ module.exports = {
 		client.shard.broadcastEval(async (c, { channelId, message }) => {
 			let channel = await c.channels.cache.get(channelId);
 			if (channel) {
+				console.log(`[Shard ${c.shard.ids[0]}] Sending message to ${channelId} [${message}]`);
 				channel.send(message);
 			}
 			// eslint-disable-next-line no-undef
