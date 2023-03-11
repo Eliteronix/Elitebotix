@@ -2059,11 +2059,13 @@ module.exports = {
 			dbBeatmap = input.beatmap;
 		}
 
+		//TODO: Update before merging to master
 		let lastRework = new Date();
-		lastRework.setUTCFullYear(2022);
-		lastRework.setUTCMonth(11);
+		lastRework.setUTCFullYear(2023);
+		lastRework.setUTCMonth(2);
 		lastRework.setUTCDate(10);
-		lastRework.setUTCHours(20);
+		lastRework.setUTCHours(23);
+
 		let lastWeek = new Date();
 		lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
 
@@ -2286,6 +2288,7 @@ module.exports = {
 								dbBeatmap.userRating = beatmaps[0].rating;
 								dbBeatmap.notDownloadable = notDownloadable;
 								dbBeatmap.audioUnavailable = audioUnavailable;
+								dbBeatmap.hash = beatmaps[0].hash;
 								dbBeatmap.changed('updatedAt', true);
 								await dbBeatmap.save();
 							} else { // Map has to be added new
@@ -2366,6 +2369,7 @@ module.exports = {
 									freeModMap: freeModMap,
 									notDownloadable: notDownloadable,
 									audioUnavailable: audioUnavailable,
+									hash: beatmaps[0].hash,
 								});
 							}
 						})

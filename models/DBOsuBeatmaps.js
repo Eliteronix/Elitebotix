@@ -107,6 +107,9 @@ module.exports = (sequelize, DataTypes) => {
 		audioUnavailable: {
 			type: DataTypes.BOOLEAN,
 		},
+		hash: {
+			type: DataTypes.STRING,
+		},
 		paranoid: true,
 	}, {
 		indexes: [
