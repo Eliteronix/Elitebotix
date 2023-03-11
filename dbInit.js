@@ -139,6 +139,7 @@ require('./models/DBOsuTourneyFollows')(osuData, Sequelize.DataTypes);
 require('./models/DBDuelRatingHistory')(osuData, Sequelize.DataTypes);
 require('./models/DBOsuForumPosts')(osuData, Sequelize.DataTypes);
 require('./models/DBOsuTrackingUsers')(osuData, Sequelize.DataTypes);
+require('./models/DBOsuMappools')(osuData, Sequelize.DataTypes);
 
 require('./models/DBElitiriCupSignUp')(elitiriData, Sequelize.DataTypes);
 require('./models/DBElitiriCupStaff')(elitiriData, Sequelize.DataTypes);

@@ -185,6 +185,7 @@ module.exports = {
 		}
 
 		// Create the scores in the database
+		logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuSoloScores findAll');
 		let uploaderScores = await DBOsuSoloScores.findAll({
 			where: {
 				uploaderId: discordUser.osuUserId,

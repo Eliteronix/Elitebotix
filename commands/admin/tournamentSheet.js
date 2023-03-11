@@ -113,6 +113,7 @@ module.exports = {
 		}
 
 		for (let i = 0; i < players.length; i++) {
+			logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBOsuSoloScores');
 			let playerScores = await DBOsuSoloScores.findAll({
 				where: {
 					uploaderId: players[i].osuUserId,
@@ -264,27 +265,52 @@ module.exports = {
 
 				correctModPlayerScores = correctModPlayerScores.sort((a, b) => b.score - a.score);
 
-				if (correctModPlayerScores[0]) {
-					correctModPlayerScores[0].score = Number(correctModPlayerScores[0].score);
+				let averageScore = 0;
 
-					lineup.push({ score: correctModPlayerScores[0].score, player: players[j].player.osuName });
+				for (let k = 0; k < correctModPlayerScores.length && k < 3; k++) {
+					averageScore += Number(correctModPlayerScores[k].score);
 
-					let colour = getGradientColour(correctModPlayerScores[0].score / 10000);
+					let score = Number(correctModPlayerScores[k].score);
+
+					// Draw the background
+					let colour = getGradientColour(score / 10000);
 
 					ctx.fillStyle = colour;
-					ctx.fillRect(404 + 400 * j, 4 + 100 * (i + 1), 400, 100);
+					ctx.fillRect(404 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 150, 33);
+
+					// Draw the player's score
+					ctx.fillStyle = '#FFFFFF';
+					ctx.font = 'bold 20px comfortaa';
+					ctx.textAlign = 'left';
+					ctx.fillText(humanReadable(score), 404 + 25 + 400 * j, 4 + 100 * (i + 1) + 25 + (k * 33), 100);
+
+					// Draw the border
+					ctx.strokeStyle = '#FFFFFF';
+					ctx.lineWidth = 4;
+					ctx.strokeRect(404 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 150, 33);
+				}
+
+				averageScore = Math.round(averageScore / Math.min(correctModPlayerScores.length, 3));
+
+				if (averageScore) {
+					lineup.push({ score: averageScore, player: players[j].player.osuName });
+
+					let colour = getGradientColour(averageScore / 10000);
+
+					ctx.fillStyle = colour;
+					ctx.fillRect(554 + 400 * j, 4 + 100 * (i + 1), 250, 100);
 
 					// Draw the player's score
 					ctx.fillStyle = '#FFFFFF';
 					ctx.font = 'bold 60px comfortaa';
-					ctx.textAlign = 'center';
-					ctx.fillText(humanReadable(correctModPlayerScores[0].score), 404 + 200 + 400 * j, 4 + 100 * (i + 1) + 75, 375);
+					ctx.textAlign = 'right';
+					ctx.fillText(humanReadable(averageScore), 404 + 375 + 400 * j, 4 + 100 * (i + 1) + 75, 200);
 				}
 
 				// Draw a white border
 				ctx.strokeStyle = '#FFFFFF';
 				ctx.lineWidth = 4;
-				ctx.strokeRect(404 + 400 * j, 4 + 100 * (i + 1), 400, 100);
+				ctx.strokeRect(554 + 400 * j, 4 + 100 * (i + 1), 250, 100);
 			}
 
 			// Draw the lineups

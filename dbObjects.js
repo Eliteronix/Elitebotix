@@ -157,6 +157,7 @@ const DBOsuTourneyFollows = require('./models/DBOsuTourneyFollows')(osuData, Seq
 const DBDuelRatingHistory = require('./models/DBDuelRatingHistory')(osuData, Sequelize.DataTypes);
 const DBOsuForumPosts = require('./models/DBOsuForumPosts')(osuData, Sequelize.DataTypes);
 const DBOsuTrackingUsers = require('./models/DBOsuTrackingUsers')(osuData, Sequelize.DataTypes);
+const DBOsuMappools = require('./models/DBOsuMappools')(osuData, Sequelize.DataTypes);
 
 const DBElitiriCupSignUp = require('./models/DBElitiriCupSignUp')(elitiriData, Sequelize.DataTypes);
 const DBElitiriCupStaff = require('./models/DBElitiriCupStaff')(elitiriData, Sequelize.DataTypes);
@@ -194,5 +195,6 @@ module.exports = {
 	DBOsuForumPosts,
 	DBOsuTrackingUsers,
 	DBOsuGuildTrackers,
-	DBOsuSoloScores
+	DBOsuSoloScores,
+	DBOsuMappools,
 };
