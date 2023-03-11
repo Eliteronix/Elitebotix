@@ -891,12 +891,22 @@ module.exports = {
 			}
 
 			if (!scheduledMatches.length) {
-				scheduledMatches = 'No matches scheduled.';
+				return interaction.followUp('No matches scheduled.');
 			} else {
-				scheduledMatches = scheduledMatches.join('\n');
-			}
+				let scheduledMatchString = '';
 
-			return interaction.followUp(`Your scheduled matches:\n${scheduledMatches}`);
+				for (let i = 0; i < scheduledMatches.length; i++) {
+					if (scheduledMatchString.length + scheduledMatches[i].length > 2000) {
+						await interaction.followUp(scheduledMatchString);
+						scheduledMatchString = '';
+					}
+					scheduledMatchString += scheduledMatches[i];
+				}
+
+				if (scheduledMatchString.length) {
+					await interaction.followUp(scheduledMatchString);
+				}
+			}
 		} else if (interaction.options.getSubcommand() === 'remove') {
 			const internalId = interaction.options._hoistedOptions[0].value;
 			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 3');
