@@ -25,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			allowNullValue: false,
 		},
+		tieBreaker: {
+			type: DataTypes.BOOLEAN,
+			allowNullValue: false,
+		},
 		modPoolNumber: {
 			type: DataTypes.INTEGER,
 			allowNullValue: false,

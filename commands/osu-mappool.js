@@ -280,6 +280,7 @@ module.exports = {
 				let checkingResult = checkViableModpool(modPools[i].mod);
 				modPools[i].modBits = checkingResult.mods;
 				modPools[i].FM = checkingResult.FM;
+				modPools[i].TB = checkingResult.TB;
 
 				if (modPools[i].modBits === false) {
 					return await interaction.editReply({ content: `\`${modPools[i].mod.replace(/`/g, '')}\` is not a valid modpool.` });
@@ -302,7 +303,7 @@ module.exports = {
 						return await interaction.editReply({ content: `\`${modPools[i].maps[j].replace(/`/g, '')}\` is not a valid map.` });
 					}
 
-					maps.push({ beatmapId: mapId, modBits: modPools[i].modBits, modIndex: i + 1, FM: modPools[i].FM });
+					maps.push({ beatmapId: mapId, modBits: modPools[i].modBits, modIndex: i + 1, FM: modPools[i].FM, TB: modPools[i].TB });
 				}
 			}
 
@@ -334,6 +335,7 @@ module.exports = {
 					number: map.index,
 					modPool: map.modBits,
 					freeMod: map.FM,
+					tieBreaker: map.TB,
 					modPoolNumber: map.modIndex,
 					beatmapId: map.beatmapId,
 				};
@@ -347,6 +349,10 @@ module.exports = {
 function checkViableModpool(modPool) {
 	if (modPool === null) {
 		return null;
+	}
+
+	if (modPool === 'TB') {
+		return { mods: 0, FM: true, TB: true };
 	}
 
 	let FM = false;
@@ -368,5 +374,5 @@ function checkViableModpool(modPool) {
 		return false;
 	}
 
-	return { mods: getModBits(modPool), FM: FM };
+	return { mods: getModBits(modPool), FM: FM, TB: false };
 }
