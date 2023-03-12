@@ -367,7 +367,7 @@ module.exports = {
 			let lastUpdate = new Date();
 
 			for (let i = 0; i < file.length; i++) {
-				let osuUserId = file[i];
+				let osuUserId = file[i].trim();
 
 				if (new Date() - lastUpdate > 15000) {
 					let osuName = await getOsuPlayerName(osuUserId);
