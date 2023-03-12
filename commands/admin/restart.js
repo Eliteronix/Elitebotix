@@ -45,17 +45,21 @@ module.exports = {
 
 		let output = `\`\`\`Cur.: ${interaction.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | HostCmd | Update\n`;
 		for (let i = 0; i < guildSizes.length; i++) {
-			output = output + '--------|------------------|--------|-------|-------|------------|-------|---------|--------\n';
-			let startDate = new Date(startDates[i]);
-			let startedString = `${startDate.getUTCHours().toString().padStart(2, '0')}:${startDate.getUTCMinutes().toString().padStart(2, '0')} ${startDate.getUTCDate().toString().padStart(2, '0')}.${(startDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${startDate.getUTCFullYear()}`;
-			let guildSize = guildSizes[i].toString().padStart(6, ' ');
-			let duelSize = duels[i].length.toString().padStart(5, ' ');
-			let otherSize = other[i].length.toString().padStart(5, ' ');
-			let matchtrackSize = matchtracks[i].length.toString().padStart(10, ' ');
-			let bingoMatchSize = bingoMatches[i].length.toString().padStart(5, ' ');
-			let hostCommandSize = hostCommands[i].length.toString().padStart(7, ' ');
-			let updateString = update[i].toString().padStart(6, ' ');
-			output = output + `Shard ${i} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize} | ${hostCommandSize} | ${updateString}\n`;
+			try {
+				output = output + '--------|------------------|--------|-------|-------|------------|-------|---------|--------\n';
+				let startDate = new Date(startDates[i]);
+				let startedString = `${startDate.getUTCHours().toString().padStart(2, '0')}:${startDate.getUTCMinutes().toString().padStart(2, '0')} ${startDate.getUTCDate().toString().padStart(2, '0')}.${(startDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${startDate.getUTCFullYear()}`;
+				let guildSize = guildSizes[i].toString().padStart(6, ' ');
+				let duelSize = duels[i].length.toString().padStart(5, ' ');
+				let otherSize = other[i].length.toString().padStart(5, ' ');
+				let matchtrackSize = matchtracks[i].length.toString().padStart(10, ' ');
+				let bingoMatchSize = bingoMatches[i].length.toString().padStart(5, ' ');
+				let hostCommandSize = hostCommands[i].length.toString().padStart(7, ' ');
+				let updateString = update[i].toString().padStart(6, ' ');
+				output = output + `Shard ${i} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize} | ${hostCommandSize} | ${updateString}\n`;
+			} catch (error) {
+				output = output + `Shard ${i} | Error ${error.message}\n`;
+			}
 		}
 		output = output + '```';
 		await interaction.editReply(output);
