@@ -188,7 +188,8 @@ function readyDiscord() {
 	client.duels = [];
 	client.otherMatches = [];
 	client.matchTracks = [];
-	client.bingoMatches = 0;
+	client.bingoMatches = [];
+	client.hostCommands = [];
 	client.update = 0;
 
 	client.user.setPresence({

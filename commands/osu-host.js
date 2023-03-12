@@ -168,6 +168,10 @@ module.exports = {
 
 			let processingMessage = await interaction.channel.send('Processing...');
 
+			let randomString = Math.random().toString(36);
+
+			interaction.client.hostCommands.push(randomString);
+
 			let tourneyTops = [];
 
 			let lastUpdate = new Date();
@@ -332,6 +336,10 @@ module.exports = {
 					data = [];
 				}
 			}
+
+			if (interaction.client.hostCommands.includes(randomString)) {
+				interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
+			}
 		} else if (interaction.options.getSubcommand() === 'duelratings') {
 			let attachedFile = interaction.options.getAttachment('file');
 
@@ -362,6 +370,10 @@ module.exports = {
 			await interaction.editReply({ content: 'A proper file has been provided. Processing may take a while, depending on how many players you provided and how many of them have to be calculated (again)...' });
 
 			let processingMessage = await interaction.channel.send('Processing...');
+
+			let randomString = Math.random().toString(36);
+
+			interaction.client.hostCommands.push(randomString);
 
 			let csvData = [];
 
@@ -432,6 +444,10 @@ module.exports = {
 					await interaction.channel.send({ content: 'Duel Ratings', files: [attachment] });
 					data = [];
 				}
+			}
+
+			if (interaction.client.hostCommands.includes(randomString)) {
+				interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
 			}
 		}
 	},

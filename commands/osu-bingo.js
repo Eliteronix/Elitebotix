@@ -638,7 +638,9 @@ module.exports = {
 
 		await interaction.followUp(reply);
 
-		interaction.client.bingoMatches++;
+		let randomString = Math.random().toString(36);
+
+		interaction.client.bingoMatches.push('randomString');
 
 		let message = await interaction.channel.send('Creating the bingo card...');
 
@@ -680,7 +682,9 @@ module.exports = {
 
 					//Stop the interval
 					clearInterval(interval);
-					interaction.client.bingoMatches--;
+					if (interaction.client.bingoMatches.includes(randomString)) {
+						interaction.client.bingoMatches.splice(interaction.client.bingoMatches.indexOf(randomString), 1);
+					}
 				} else if (lastRefresh.lastScore.getTime() + 1800000 < new Date().getTime()) {
 					// Stop the interval if the match has been going on for more than 30 minutes without scores
 					refreshCollector.stop();
@@ -688,7 +692,9 @@ module.exports = {
 
 					//Stop the interval
 					clearInterval(interval);
-					interaction.client.bingoMatches--;
+					if (interaction.client.bingoMatches.includes(randomString)) {
+						interaction.client.bingoMatches.splice(interaction.client.bingoMatches.indexOf(randomString), 1);
+					}
 				}
 			}
 		}, 5000);

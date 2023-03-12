@@ -197,13 +197,13 @@ module.exports = {
 					});
 
 					if (msg.id) {
-						if (msg.client.update === 1 && msg.client.duels.length === 0 && msg.client.otherMatches.length === 0 && msg.client.matchTracks.length === 0 && msg.client.bingoMatches === 0) {
+						if (msg.client.update === 1 && msg.client.duels.length === 0 && msg.client.otherMatches.length === 0 && msg.client.matchTracks.length === 0 && msg.client.bingoMatches.length === 0 && msg.client.hostCommands.length === 0) {
 
 							// eslint-disable-next-line no-undef
 							process.exit();
 						}
 					} else {
-						if (interaction.client.update === 1 && interaction.client.duels.length === 0 && interaction.client.otherMatches.length === 0 && interaction.client.matchTracks.length === 0 && interaction.client.bingoMatches === 0) {
+						if (interaction.client.update === 1 && interaction.client.duels.length === 0 && interaction.client.otherMatches.length === 0 && interaction.client.matchTracks.length === 0 && interaction.client.bingoMatches.length === 0 && interaction.client.hostCommands.length === 0) {
 
 							// eslint-disable-next-line no-undef
 							process.exit();

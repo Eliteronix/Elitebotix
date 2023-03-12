@@ -33,6 +33,7 @@ module.exports = {
 		let other = await interaction.client.shard.fetchClientValues('otherMatches');
 		let matchtracks = await interaction.client.shard.fetchClientValues('matchTracks');
 		let bingoMatches = await interaction.client.shard.fetchClientValues('bingoMatches');
+		let hostCommands = await interaction.client.shard.fetchClientValues('hostCommands');
 		let update = await interaction.client.shard.fetchClientValues('update');
 
 		// eslint-disable-next-line no-console
@@ -42,18 +43,19 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log('matchtracks', matchtracks);
 
-		let output = `\`\`\`Cur.: ${interaction.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | Update\n`;
+		let output = `\`\`\`Cur.: ${interaction.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | HostCmd | Update\n`;
 		for (let i = 0; i < guildSizes.length; i++) {
-			output = output + '--------|------------------|--------|-------|-------|------------|-------|--------\n';
+			output = output + '--------|------------------|--------|-------|-------|------------|-------|---------|--------\n';
 			let startDate = new Date(startDates[i]);
 			let startedString = `${startDate.getUTCHours().toString().padStart(2, '0')}:${startDate.getUTCMinutes().toString().padStart(2, '0')} ${startDate.getUTCDate().toString().padStart(2, '0')}.${(startDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${startDate.getUTCFullYear()}`;
 			let guildSize = guildSizes[i].toString().padStart(6, ' ');
 			let duelSize = duels[i].length.toString().padStart(5, ' ');
 			let otherSize = other[i].length.toString().padStart(5, ' ');
 			let matchtrackSize = matchtracks[i].length.toString().padStart(10, ' ');
-			let bingoMatchSize = bingoMatches[i].toString().padStart(5, ' ');
+			let bingoMatchSize = bingoMatches[i].length.toString().padStart(5, ' ');
+			let hostCommandSize = hostCommands[i].length.toString().padStart(7, ' ');
 			let updateString = update[i].toString().padStart(6, ' ');
-			output = output + `Shard ${i} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize} | ${updateString}\n`;
+			output = output + `Shard ${i} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize} | ${hostCommandSize} | ${updateString}\n`;
 		}
 		output = output + '```';
 		await interaction.editReply(output);
@@ -61,9 +63,9 @@ module.exports = {
 		// Restart relevant ones
 		await interaction.client.shard.broadcastEval(async (c, { condition }) => {
 			if (condition === 'all' ||
-				condition === 'free' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches === 0 ||
+				condition === 'free' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0 ||
 				!isNaN(condition) && c.shardId === parseInt(condition) ||
-				condition === 'update' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches === 0) {
+				condition === 'update' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0) {
 
 				// eslint-disable-next-line no-undef
 				process.exit();
