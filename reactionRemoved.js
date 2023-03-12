@@ -50,7 +50,22 @@ module.exports = async function (reaction, user) {
 			//Check if deleted role
 			if (reactionRoleObject) {
 				//Get member
-				const member = await reaction.message.guild.members.fetch(user.id);
+				let member = null;
+
+				while (!member) {
+					try {
+						member = await reaction.message.guild.members.fetch(user.id)
+							.catch((err) => {
+								throw new Error(err);
+							});
+					} catch (e) {
+						if (e.message !== '[GuildMembersTimeout]: Members didn\'t arrive in time.') {
+							console.error('reactionRemoved.js | Reactionrole remove 1', e);
+							return;
+						}
+					}
+				}
+
 				try {
 					//Assign role
 					await member.roles.remove(reactionRoleObject);
@@ -83,7 +98,22 @@ module.exports = async function (reaction, user) {
 				//Check if deleted role
 				if (reactionRoleBackupObject) {
 					//Get member
-					const member = await reaction.message.guild.members.fetch(user.id);
+					let member = null;
+
+					while (!member) {
+						try {
+							member = await reaction.message.guild.members.fetch(user.id)
+								.catch((err) => {
+									throw new Error(err);
+								});
+						} catch (e) {
+							if (e.message !== '[GuildMembersTimeout]: Members didn\'t arrive in time.') {
+								console.error('reactionRemoved.js | Reactionrole remove 2', e);
+								return;
+							}
+						}
+					}
+
 					try {
 						//Assign role
 						await member.roles.remove(reactionRoleBackupObject);

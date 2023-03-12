@@ -63,7 +63,23 @@ module.exports = async function (msg, bancho) {
 
 	//Check permissions of the bot
 	if (msg.channel.type !== Discord.ChannelType.DM) {
-		const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch(msg.client.user.id));
+		let member = null;
+
+		while (!member) {
+			try {
+				member = await msg.guild.members.fetch(msg.author.id)
+					.catch((err) => {
+						throw new Error(err);
+					});
+			} catch (e) {
+				if (e.message !== '[GuildMembersTimeout]: Members didn\'t arrive in time.') {
+					console.error('gotMessage.js | Check bot permissions', e);
+					return;
+				}
+			}
+		}
+
+		const botPermissions = msg.channel.permissionsFor(member);
 		if (!botPermissions || !botPermissions.has(PermissionsBitField.Flags.SendMessages) || !botPermissions.has(PermissionsBitField.Flags.ReadMessageHistory)) {
 			//The bot can't possibly answer the message
 			return;

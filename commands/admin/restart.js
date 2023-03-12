@@ -58,7 +58,7 @@ module.exports = {
 				let updateString = update[i].toString().padStart(6, ' ');
 				output = output + `Shard ${i} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize} | ${hostCommandSize} | ${updateString}\n`;
 			} catch (error) {
-				output = output + `Shard ${i} | Error ${error.message}\n`;
+				output = output + `Shard ${i} | Error: ${error.message}\n`;
 			}
 		}
 		output = output + '```';
