@@ -361,7 +361,18 @@ module.exports = {
 
 		let links = tourneyMaps.map(map => `[${map.modPool}${map.modPoolCount}](<https://osu.ppy.sh/b/${map.beatmapId}>)`);
 
-		await interaction.followUp({ content: links.join(' | '), files: files });
+		let content = '';
+
+		for (let i = 0; i < links.length; i++) {
+			if (tourneyMaps[i].modPool != currentMod || i === 0) {
+				currentMod = tourneyMaps[i].modPool;
+				content += '\n' + links[i];
+			} else {
+				content += ' | ' + links[i];
+			}
+		}
+
+		await interaction.followUp({ content: content, files: files });
 	},
 };
 

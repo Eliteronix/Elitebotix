@@ -13,8 +13,16 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 			allowNullValue: false,
 		},
+		number: {
+			type: DataTypes.INTEGER,
+			allowNullValue: false,
+		},
 		modPool: {
 			type: DataTypes.INTEGER,
+			allowNullValue: false,
+		},
+		freeMod: {
+			type: DataTypes.BOOLEAN,
 			allowNullValue: false,
 		},
 		modPoolNumber: {
@@ -25,6 +33,5 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 			allowNullValue: false,
 		},
-		paranoid: true,
 	});
 };

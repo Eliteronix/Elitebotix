@@ -1,6 +1,8 @@
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
-const { getMods, getModBits } = require('../utils.js');
+const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMappools } = require('../dbObjects');
+const { getMods, getModBits, getIDFromPotentialOsuLink, getOsuBeatmap } = require('../utils.js');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-mappool',
@@ -244,38 +246,101 @@ module.exports = {
 			return;
 		}
 
-		let modPools = [];
-
-		for (let i = 0; i < 6; i++) {
-			modPools.push({
-				mod: interaction.options.getString(`modpool${i + 1}`),
-				maps: interaction.options.getString(`modpool${i + 1}maps`),
+		if (interaction.options.getSubcommand() === 'create') {
+			let discordUser = await DBDiscordUsers.findOne({
+				where: {
+					userId: interaction.user.id
+				}
 			});
-		}
 
-		modPools = modPools.filter(modPool => modPool.mod !== null || modPool.maps !== null);
-
-		let uniqueModPools = [...new Set(modPools.map(modPool => modPool.mod))];
-
-		if (uniqueModPools.length !== modPools.length) {
-			return interaction.editReply({ content: 'You can\'t have the same modpool twice!' });
-		}
-
-		for (let i = 0; i < modPools.length; i++) {
-			if (checkViableModpool(modPools[i].mod) === false) {
-				return await interaction.editReply({ content: `\`${modPools.mod.replace(/`/g, '')}\` is not a valid modpool.` });
+			if (!discordUser || !discordUser.osuUserId || !discordUser.osuVerified) {
+				return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
 			}
 
-			if (modPools[i].maps === null) {
-				return await interaction.editReply({ content: `You need to specify the maps for \`${modPools[i].mod.replace(/`/g, '')}\`` });
+			let modPools = [];
+
+			for (let i = 0; i < 6; i++) {
+				modPools.push({
+					mod: interaction.options.getString(`modpool${i + 1}`),
+					maps: interaction.options.getString(`modpool${i + 1}maps`),
+				});
 			}
 
-			if (modPools[i].mod === null) {
-				return await interaction.editReply({ content: `You need to specify the modpool for \`${modPools[i].maps.replace(/`/g, '')}\`` });
+			modPools = modPools.filter(modPool => modPool.mod !== null || modPool.maps !== null);
+
+			let uniqueModPools = [...new Set(modPools.map(modPool => modPool.mod))];
+
+			if (uniqueModPools.length !== modPools.length) {
+				return interaction.editReply({ content: 'You can\'t have the same modpool twice!' });
 			}
+
+			let maps = [];
+
+			for (let i = 0; i < modPools.length; i++) {
+				let checkingResult = checkViableModpool(modPools[i].mod);
+				modPools[i].modBits = checkingResult.mods;
+				modPools[i].FM = checkingResult.FM;
+
+				if (modPools[i].modBits === false) {
+					return await interaction.editReply({ content: `\`${modPools[i].mod.replace(/`/g, '')}\` is not a valid modpool.` });
+				}
+
+				if (modPools[i].maps === null) {
+					return await interaction.editReply({ content: `You need to specify the maps for \`${modPools[i].mod.replace(/`/g, '')}\`` });
+				}
+
+				if (modPools[i].mod === null) {
+					return await interaction.editReply({ content: `You need to specify the modpool for \`${modPools[i].maps.replace(/`/g, '')}\`` });
+				}
+
+				modPools[i].maps = modPools[i].maps.trim().split(/ +/);
+
+				for (let j = 0; j < modPools[i].maps.length; j++) {
+					let mapId = getIDFromPotentialOsuLink(modPools[i].maps[j]);
+
+					if (mapId === '') {
+						return await interaction.editReply({ content: `\`${modPools[i].maps[j].replace(/`/g, '')}\` is not a valid map.` });
+					}
+
+					maps.push({ beatmapId: mapId, modBits: modPools[i].modBits, modIndex: i + 1, FM: modPools[i].FM });
+				}
+			}
+
+			let beatmaps = await DBOsuBeatmaps.findAll({
+				where: {
+					beatmapId: {
+						[Op.in]: maps.map(map => map.beatmapId),
+					},
+				},
+			});
+
+			for (let i = 0; i < maps.length; i++) {
+				let beatmap = beatmaps.find(beatmap => beatmap.beatmapId === maps[i].beatmapId && beatmap.mods === maps[i].modBits);
+
+				beatmap = await getOsuBeatmap({ beatmapId: maps[i].beatmapId, modBits: maps[i].modBits, beatmap: beatmap });
+
+				if (beatmap === null) {
+					return await interaction.editReply({ content: `Could not find \`${maps[i].beatmapId.replace(/`/g, '')}\`.` });
+				}
+
+				maps[i].beatmap = beatmap;
+				maps[i].index = i + 1;
+			}
+
+			let mappool = maps.map(map => {
+				return {
+					creatorId: discordUser.osuUserId,
+					name: interaction.options.getString('name'),
+					number: map.index,
+					modPool: map.modBits,
+					freeMod: map.FM,
+					modPoolNumber: map.modIndex,
+					beatmapId: map.beatmapId,
+				};
+			});
+
+			await DBOsuMappools.bulkCreate(mappool);
 		}
-
-
 	},
 };
 
@@ -284,11 +349,24 @@ function checkViableModpool(modPool) {
 		return null;
 	}
 
+	let FM = false;
+
+	if (modPool.endsWith('FM')) {
+		modPool = modPool.slice(0, -2);
+		FM = true;
+	}
+
 	modPool = modPool.toUpperCase();
 
-	if (getMods(getModBits(modPool)).join(' ') !== modPool) {
+	let mods = getMods(getModBits(modPool));
+
+	if (mods.length === 0 && !FM) {
+		mods.push('NM');
+	}
+
+	if (mods.join('') !== modPool) {
 		return false;
 	}
 
-	return modPool;
+	return { mods: getModBits(modPool), FM: FM };
 }
