@@ -46,7 +46,7 @@ module.exports = async function (client, bancho, interaction) {
 				}
 			}
 
-			const botPermissions = interaction.channel.permissionsFor(member);
+			const botPermissions = interaction.channel.permissionsFor(member.first());
 			if (!botPermissions || !botPermissions.has(PermissionsBitField.Flags.ViewChannel)) {
 				//The bot can't possibly answer the message
 				return interaction.reply({ content: 'I can\'t view this channel.', ephemeral: true });

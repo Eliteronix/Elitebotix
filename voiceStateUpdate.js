@@ -44,6 +44,8 @@ module.exports = async function (oldMember, newMember) {
 				}
 			}
 
+			member = member.first();
+
 			const changeEmbed = new Discord.EmbedBuilder()
 				.setColor('#0099ff')
 				.setAuthor({ name: `${member.user.username}#${member.user.discriminator}`, iconURL: member.user.displayAvatarURL() })
@@ -94,6 +96,8 @@ module.exports = async function (oldMember, newMember) {
 					}
 				}
 			}
+
+			member = member.first();
 
 			const changeEmbed = new Discord.EmbedBuilder()
 				.setColor('#0099ff')
@@ -146,6 +150,8 @@ module.exports = async function (oldMember, newMember) {
 				}
 			}
 
+			member = member.first();
+
 			const changeEmbed = new Discord.EmbedBuilder()
 				.setColor('#0099ff')
 				.setAuthor({ name: `${member.user.username}#${member.user.discriminator}`, iconURL: member.user.displayAvatarURL() })
@@ -189,6 +195,8 @@ module.exports = async function (oldMember, newMember) {
 					}
 				}
 			}
+
+			member = member.first();
 
 			const changeEmbed = new Discord.EmbedBuilder()
 				.setColor('#0099ff')
@@ -289,6 +297,8 @@ module.exports = async function (oldMember, newMember) {
 						}
 					}
 				}
+
+				member = member.first();
 
 				//Get the name of the user
 				let memberName = member.user.username;

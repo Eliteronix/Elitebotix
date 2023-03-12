@@ -97,7 +97,10 @@ async function getName(interaction, argument) {
 
 		if (interaction.guild) {
 			// TODO: Fetch error handling
-			const member = await interaction.guild.members.fetch({ user: [id], time: 300000 });
+			let member = await interaction.guild.members.fetch({ user: [id], time: 300000 });
+
+			member = member.first();
+
 			if (member && member.displayName) {
 				name = member.displayName;
 			}

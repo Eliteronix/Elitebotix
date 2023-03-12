@@ -1176,6 +1176,8 @@ module.exports = async function (reaction, user, additionalObjects) {
 					}
 				}
 
+				member = member.first();
+
 				try {
 					//Assign role
 					await member.roles.add(reactionRoleObject);
@@ -1224,6 +1226,8 @@ module.exports = async function (reaction, user, additionalObjects) {
 							}
 						}
 					}
+
+					member = member.first();
 
 					try {
 						//Assign role

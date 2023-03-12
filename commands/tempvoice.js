@@ -148,7 +148,7 @@ module.exports = {
 				if (args[1] === 'enable') {
 					//Check permissions of the bot
 					//TODO: Fetch error handling
-					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch({ user: [msg.client.user.id], time: 300000 }));
+					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch({ user: [msg.client.user.id], time: 300000 }).first());
 					if (!botPermissions.has('ADMINISTRATOR')) {
 						return msg.reply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');
 					}
@@ -198,7 +198,7 @@ module.exports = {
 				if (args[1] === 'enable') {
 					//Check permissions of the bot´
 					//TODO: Fetch error handling
-					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch({ user: [msg.client.user.id], time: 300000 }));
+					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch({ user: [msg.client.user.id], time: 300000 }).first());
 					if (!botPermissions.has('ADMINISTRATOR')) {
 						if (msg.id) {
 							return msg.reply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');

@@ -103,7 +103,9 @@ module.exports = {
 					}
 
 					//TODO: Fetch error handling
-					const member = await msg.guild.members.fetch({ user: [discordUsers[i].userId], time: 300000 });
+					let member = await msg.guild.members.fetch({ user: [discordUsers[i].userId], time: 300000 });
+
+					member = member.first();
 
 					let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
 

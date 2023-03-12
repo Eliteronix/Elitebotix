@@ -79,7 +79,7 @@ module.exports = async function (msg, bancho) {
 			}
 		}
 
-		const botPermissions = msg.channel.permissionsFor(member);
+		const botPermissions = msg.channel.permissionsFor(member.first());
 		if (!botPermissions || !botPermissions.has(PermissionsBitField.Flags.SendMessages) || !botPermissions.has(PermissionsBitField.Flags.ReadMessageHistory)) {
 			//The bot can't possibly answer the message
 			return;

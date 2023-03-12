@@ -669,6 +669,8 @@ module.exports = {
 				}
 			}
 
+			member = member.first();
+
 			const guildDisplayName = member.displayName;
 			if (guildDisplayName) {
 				userDisplayName = guildDisplayName;

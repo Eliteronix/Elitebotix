@@ -445,7 +445,7 @@ module.exports = {
 				if (guild) {
 					try {
 						// TODO: Fetch error handling
-						const member = await guild.members.fetch({ user: [discordUserId], time: 300000 });
+						const member = await guild.members.fetch({ user: [discordUserId], time: 300000 }).first();
 
 						const ecs2021ParticipantRoleId = '875031092921532416';
 						const ecs2021ParticipantRole = await guild.roles.fetch(ecs2021ParticipantRoleId);
@@ -502,7 +502,7 @@ module.exports = {
 				if (guild) {
 					try {
 						// TODO: Fetch error handling
-						const member = await guild.members.fetch({ user: [discordUserId], time: 300000 });
+						const member = await guild.members.fetch({ user: [discordUserId], time: 300000 }).first();
 
 						const ecw2022ParticipantRoleId = '922203822313586748';
 						const ecw2022ParticipantRole = await guild.roles.fetch(ecw2022ParticipantRoleId);

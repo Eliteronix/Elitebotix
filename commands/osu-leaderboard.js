@@ -159,7 +159,9 @@ module.exports = {
 
 					// TODO: Fetch error handling
 					// TODO: Why the fuck do you fetch again you literally fetched everyone just above just find the member in the guildMembers collection
-					const member = await msg.guild.members.fetch(osuAccounts[i].userId);
+					let member = await msg.guild.members.fetch(osuAccounts[i].userId);
+
+					member = member.first();
 
 					let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
 

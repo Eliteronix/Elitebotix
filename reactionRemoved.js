@@ -66,6 +66,8 @@ module.exports = async function (reaction, user) {
 					}
 				}
 
+				member = member.first();
+
 				try {
 					//Assign role
 					await member.roles.remove(reactionRoleObject);
@@ -113,6 +115,8 @@ module.exports = async function (reaction, user) {
 							}
 						}
 					}
+
+					member = member.first();
 
 					try {
 						//Assign role

@@ -40,7 +40,9 @@ module.exports = {
 
 		//Get bot member
 		//TODO: Fetch error handling
-		const member = await interaction.guild.members.fetch({ user: [interaction.client.user.id], time: 300000 });
+		let member = await interaction.guild.members.fetch({ user: [interaction.client.user.id], time: 300000 });
+
+		member = member.first();
 
 		const user = await interaction.client.users.fetch(interaction.client.user.id);
 

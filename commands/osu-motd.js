@@ -1037,6 +1037,9 @@ module.exports = {
 			for (let i = 0; i < discordUsers.length; i++) {
 				//TODO: Members timeout error handling
 				let user = await interaction.guild.members.fetch({ user: [discordUsers[i].userId], time: 300000 });
+
+				user = user.first();
+
 				if (user) {
 					users.push(user);
 				} else {
