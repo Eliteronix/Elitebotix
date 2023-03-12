@@ -67,7 +67,7 @@ module.exports = async function (msg, bancho) {
 
 		while (!member) {
 			try {
-				member = await msg.guild.members.fetch(msg.author.id)
+				member = await msg.guild.members.fetch({ user: [msg.author.id], time: 300000 })
 					.catch((err) => {
 						throw new Error(err);
 					});

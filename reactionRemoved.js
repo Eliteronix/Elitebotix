@@ -54,7 +54,7 @@ module.exports = async function (reaction, user) {
 
 				while (!member) {
 					try {
-						member = await reaction.message.guild.members.fetch(user.id)
+						member = await reaction.message.guild.members.fetch({ user: [user.id], time: 300000 })
 							.catch((err) => {
 								throw new Error(err);
 							});
@@ -102,7 +102,7 @@ module.exports = async function (reaction, user) {
 
 					while (!member) {
 						try {
-							member = await reaction.message.guild.members.fetch(user.id)
+							member = await reaction.message.guild.members.fetch({ user: [user.id], time: 300000 })
 								.catch((err) => {
 									throw new Error(err);
 								});

@@ -28,15 +28,20 @@ module.exports = async function (oldMember, newMember) {
 				console.error(error);
 			}
 
-			let member;
-			try {
-				member = await newMember.guild.members.fetch(newMember.id);
-			} catch (error) {
-				//nothing
-			}
+			let member = null;
 
-			if (!member) {
-				return;
+			while (!member) {
+				try {
+					member = await newMember.guild.members.fetch({ user: [newMember.id], time: 300000 })
+						.catch((err) => {
+							throw new Error(err);
+						});
+				} catch (e) {
+					if (e.message !== '[GuildMembersTimeout]: Members didn\'t arrive in time.') {
+						console.error('voiceStateUpdate.js | server mute', e);
+						return;
+					}
+				}
 			}
 
 			const changeEmbed = new Discord.EmbedBuilder()
@@ -74,15 +79,20 @@ module.exports = async function (oldMember, newMember) {
 				console.error(error);
 			}
 
-			let member;
-			try {
-				member = await newMember.guild.members.fetch(newMember.id);
-			} catch (error) {
-				//nothing
-			}
+			let member = null;
 
-			if (!member) {
-				return;
+			while (!member) {
+				try {
+					member = await newMember.guild.members.fetch({ user: [newMember.id], time: 300000 })
+						.catch((err) => {
+							throw new Error(err);
+						});
+				} catch (e) {
+					if (e.message !== '[GuildMembersTimeout]: Members didn\'t arrive in time.') {
+						console.error('voiceStateUpdate.js | server deafened', e);
+						return;
+					}
+				}
 			}
 
 			const changeEmbed = new Discord.EmbedBuilder()
@@ -120,15 +130,20 @@ module.exports = async function (oldMember, newMember) {
 				console.error(error);
 			}
 
-			let member;
-			try {
-				member = await newMember.guild.members.fetch(newMember.id);
-			} catch (error) {
-				//nothing
-			}
+			let member = null;
 
-			if (!member) {
-				return;
+			while (!member) {
+				try {
+					member = await newMember.guild.members.fetch({ user: [newMember.id], time: 300000 })
+						.catch((err) => {
+							throw new Error(err);
+						});
+				} catch (e) {
+					if (e.message !== '[GuildMembersTimeout]: Members didn\'t arrive in time.') {
+						console.error('voiceStateUpdate.js | joined voice', e);
+						return;
+					}
+				}
 			}
 
 			const changeEmbed = new Discord.EmbedBuilder()
@@ -159,15 +174,20 @@ module.exports = async function (oldMember, newMember) {
 				console.error(error);
 			}
 
-			let member;
-			try {
-				member = await newMember.guild.members.fetch(newMember.id);
-			} catch (error) {
-				//nothing
-			}
+			let member = null;
 
-			if (!member) {
-				return;
+			while (!member) {
+				try {
+					member = await newMember.guild.members.fetch({ user: [newMember.id], time: 300000 })
+						.catch((err) => {
+							throw new Error(err);
+						});
+				} catch (e) {
+					if (e.message !== '[GuildMembersTimeout]: Members didn\'t arrive in time.') {
+						console.error('voiceStateUpdate.js | left voice', e);
+						return;
+					}
+				}
 			}
 
 			const changeEmbed = new Discord.EmbedBuilder()
@@ -251,10 +271,24 @@ module.exports = async function (oldMember, newMember) {
 					DBTemporaryVoices.create({ guildId: createdChannel.guild.id, channelId: createdChannel.id, creatorId: newMember.id });
 				}
 
-				//Get Member Id
+				//Get Member Id //???????
 				const newMemberId = newMember.id;
-				//Get member
-				const member = await newMember.guild.members.fetch(newMemberId);
+				//Get member			
+				let member = null;
+
+				while (!member) {
+					try {
+						member = await newMember.guild.members.fetch({ user: [newMember.id], time: 300000 })
+							.catch((err) => {
+								throw new Error(err);
+							});
+					} catch (e) {
+						if (e.message !== '[GuildMembersTimeout]: Members didn\'t arrive in time.') {
+							console.error('voiceStateUpdate.js | temp channel', e);
+							return;
+						}
+					}
+				}
 
 				//Get the name of the user
 				let memberName = member.user.username;

@@ -132,7 +132,21 @@ module.exports = {
 
 			interaction.editReply(`${role.name} has been added as an autorole.`);
 
-			const guildMembers = await interaction.guild.members.fetch();
+			let guildMembers = null;
+
+			while (!guildMembers) {
+				try {
+					guildMembers = await interaction.guild.members.fetch({ time: 300000 })
+						.catch((err) => {
+							throw new Error(err);
+						});
+				} catch (e) {
+					if (e.message !== '[GuildMembersTimeout]: Members didn\'t arrive in time.') {
+						console.error('autorole.js | Adding roles to all members', e);
+						return;
+					}
+				}
+			}
 
 			//Assign the role to every member
 			guildMembers.forEach(autoRole => {

@@ -39,7 +39,8 @@ module.exports = {
 		}
 
 		//Get bot member
-		const member = await interaction.guild.members.fetch(interaction.client.user.id);
+		//TODO: Fetch error handling
+		const member = await interaction.guild.members.fetch({ user: [interaction.client.user.id], time: 300000 });
 
 		const user = await interaction.client.users.fetch(interaction.client.user.id);
 

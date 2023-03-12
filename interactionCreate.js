@@ -34,7 +34,7 @@ module.exports = async function (client, bancho, interaction) {
 
 			while (!member) {
 				try {
-					member = await interaction.guild.members.fetch(client.user.id)
+					member = await interaction.guild.members.fetch({ user: [client.user.id], time: 300000 })
 						.catch((err) => {
 							throw new Error(err);
 						});

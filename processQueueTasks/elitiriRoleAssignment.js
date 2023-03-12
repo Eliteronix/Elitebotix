@@ -23,7 +23,8 @@ module.exports = {
 				const { currentElitiriCup } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\config.json`);
 
 				//Fetch all members
-				await guild.members.fetch()
+				//TODO: Fetch error handling
+				await guild.members.fetch({ time: 300000 })
 					.then(async (guildMembers) => {
 						//Filter members and push into array
 						const members = [];

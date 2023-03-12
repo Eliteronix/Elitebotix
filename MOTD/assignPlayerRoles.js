@@ -17,7 +17,8 @@ module.exports = {
 				const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 				const { Op } = require('sequelize');
 				//Fetch all members
-				await guild.members.fetch()
+				// TODO: Fetch error handling
+				await guild.members.fetch({ time: 300000 })
 					.then(async (guildMembers) => {
 
 						//Filter members and push into array

@@ -71,7 +71,8 @@ module.exports = {
 			processingMessage = await msg.reply('Processing guild leaderboard...');
 		}
 
-		msg.guild.members.fetch()
+		//TODO: Fetch error handling
+		await msg.guild.members.fetch({ time: 300000 })
 			.then(async (guildMembers) => {
 				const members = [];
 				guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
@@ -100,7 +101,9 @@ module.exports = {
 						messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
 						authorPlacement = i + 1;
 					}
-					const member = await msg.guild.members.fetch(discordUsers[i].userId);
+
+					//TODO: Fetch error handling
+					const member = await msg.guild.members.fetch({ user: [discordUsers[i].userId], time: 300000 });
 
 					let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
 

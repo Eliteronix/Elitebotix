@@ -24,7 +24,8 @@ module.exports = {
 
 			if (guild) {
 				//Fetch all members
-				await guild.members.fetch()
+				//TODO: Fetch error handling
+				await guild.members.fetch({ time: 300000 })
 					.then(async (guildMembers) => {
 						const members = [];
 						guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));

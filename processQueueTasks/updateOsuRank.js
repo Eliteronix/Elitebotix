@@ -444,7 +444,8 @@ module.exports = {
 				const guild = await c.guilds.cache.get('727407178499096597');
 				if (guild) {
 					try {
-						const member = await guild.members.fetch(discordUserId);
+						// TODO: Fetch error handling
+						const member = await guild.members.fetch({ user: [discordUserId], time: 300000 });
 
 						const ecs2021ParticipantRoleId = '875031092921532416';
 						const ecs2021ParticipantRole = await guild.roles.fetch(ecs2021ParticipantRoleId);
@@ -500,7 +501,8 @@ module.exports = {
 				const guild = await c.guilds.cache.get('727407178499096597');
 				if (guild) {
 					try {
-						const member = await guild.members.fetch(discordUserId);
+						// TODO: Fetch error handling
+						const member = await guild.members.fetch({ user: [discordUserId], time: 300000 });
 
 						const ecw2022ParticipantRoleId = '922203822313586748';
 						const ecw2022ParticipantRole = await guild.roles.fetch(ecw2022ParticipantRoleId);

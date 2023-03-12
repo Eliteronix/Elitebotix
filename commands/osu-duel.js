@@ -1300,7 +1300,8 @@ module.exports = {
 				let osuAccounts = [];
 
 				if (interaction.guild) {
-					await interaction.guild.members.fetch()
+					//TODO: Fetch error handling
+					await interaction.guild.members.fetch({ time: 300000 })
 						.then(async (guildMembers) => {
 							const members = [];
 							guildMembers.each(member => members.push(member.id));
@@ -1390,7 +1391,7 @@ module.exports = {
 					}
 
 					if (interaction.guild) {
-						const member = await interaction.guild.members.fetch(osuAccounts[i].userId);
+						const member = await interaction.guild.members.cache.get(osuAccounts[i].userId);
 
 						let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
 
@@ -1950,7 +1951,8 @@ module.exports = {
 				let osuAccounts = [];
 
 				if (interaction.guild) {
-					await interaction.guild.members.fetch()
+					// TODO: Fetch error handling
+					await interaction.guild.members.fetch({ time: 300000 })
 						.then(async (guildMembers) => {
 							const members = [];
 							guildMembers.each(member => members.push(member.id));

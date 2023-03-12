@@ -162,7 +162,7 @@ process.on('message', message => {
 		}
 	} else if (message.type == 'totalShards') {
 		// eslint-disable-next-line no-console
-		console.log(`[${client.shardId}] The total amount of shards is: ${message.data.totalShards}`);
+		// console.log(`[${client.shardId}] The total amount of shards is: ${message.data.totalShards}`);
 		client.totalShards = message.data.totalShards;
 	} else if (message.type == 'osuWebRequest') {
 		// eslint-disable-next-line no-undef

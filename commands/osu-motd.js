@@ -1035,7 +1035,8 @@ module.exports = {
 			let unreachableUsers = [];
 
 			for (let i = 0; i < discordUsers.length; i++) {
-				let user = await interaction.guild.members.fetch(discordUsers[i].userId);
+				//TODO: Members timeout error handling
+				let user = await interaction.guild.members.fetch({ user: [discordUsers[i].userId], time: 300000 });
 				if (user) {
 					users.push(user);
 				} else {

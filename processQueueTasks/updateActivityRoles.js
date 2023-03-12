@@ -42,7 +42,8 @@ module.exports = {
 					}
 				}
 
-				await guild.members.fetch()
+				// TODO: Fetch error handling
+				await guild.members.fetch({ time: 300000 })
 					.then(async (guildMembers) => {
 
 						const members = [];

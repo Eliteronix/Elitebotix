@@ -7,7 +7,8 @@ module.exports = {
 	async execute(interaction) {
 		await interaction.editReply('Updating server duel ratings...');
 		const sentMessage = await interaction.channel.send('Fetching members...');
-		await interaction.guild.members.fetch()
+		//TODO: Fetch error handling
+		await interaction.guild.members.fetch({ time: 300000 })
 			.then(async (guildMembers) => {
 
 				const members = [];

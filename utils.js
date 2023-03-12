@@ -653,7 +653,22 @@ module.exports = {
 	getMessageUserDisplayname: async function (msg) {
 		let userDisplayName = msg.author.username;
 		if (msg.channel.type !== Discord.ChannelType.DM) {
-			const member = await msg.guild.members.fetch(msg.author.id);
+			let member = null;
+
+			while (!member) {
+				try {
+					member = await msg.guild.members.fetch({ user: [msg.author.id], time: 300000 })
+						.catch((err) => {
+							throw new Error(err);
+						});
+				} catch (e) {
+					if (e.message !== '[GuildMembersTimeout]: Members didn\'t arrive in time.') {
+						console.error('utils.js | getMessageUserDisplayname', e);
+						return;
+					}
+				}
+			}
+
 			const guildDisplayName = member.displayName;
 			if (guildDisplayName) {
 				userDisplayName = guildDisplayName;

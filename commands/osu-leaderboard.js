@@ -84,7 +84,9 @@ module.exports = {
 
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const mode = commandConfig[2];
-		msg.guild.members.fetch()
+
+		// TODO: Fetch error handling
+		await msg.guild.members.fetch({ time: 300000 })
 			.then(async (guildMembers) => {
 				const members = [];
 				guildMembers.each(member => members.push(member.id));
@@ -154,6 +156,9 @@ module.exports = {
 						messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
 						authorPlacement = i + 1;
 					}
+
+					// TODO: Fetch error handling
+					// TODO: Why the fuck do you fetch again you literally fetched everyone just above just find the member in the guildMembers collection
 					const member = await msg.guild.members.fetch(osuAccounts[i].userId);
 
 					let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
