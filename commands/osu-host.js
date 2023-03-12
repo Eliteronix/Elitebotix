@@ -175,11 +175,6 @@ module.exports = {
 			for (let i = 0; i < file.length; i++) {
 				let osuUserId = file[i].trim();
 
-				if (isNaN(osuUserId)) {
-					await interaction.followUp({ content: `The provided player id \`${osuUserId.replace(/`/g, '')}\` is not a number. Skipping...`, ephemeral: true });
-					continue;
-				}
-
 				let osuName = await getOsuPlayerName(osuUserId);
 
 				if (new Date() - lastUpdate > 15000) {
@@ -374,11 +369,6 @@ module.exports = {
 
 			for (let i = 0; i < file.length; i++) {
 				let osuUserId = file[i].trim();
-
-				if (isNaN(osuUserId)) {
-					await interaction.followUp({ content: `The provided player id \`${osuUserId.replace(/`/g, '')}\` is not a number. Skipping...`, ephemeral: true });
-					continue;
-				}
 
 				if (new Date() - lastUpdate > 15000) {
 					let osuName = await getOsuPlayerName(osuUserId);
