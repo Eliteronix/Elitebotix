@@ -9,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 			allowNullValue: false,
 		},
+		spreadsheetId: {
+			type: DataTypes.STRING,
+		},
 		name: {
 			type: DataTypes.STRING,
 			allowNullValue: false,

@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBOsuSoloScores, DBOsuMultiScores } = require('../../dbObjects.js');
-const { getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, getMods, getAccuracy, humanReadable, getMapListCover } = require('../../utils.js');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, getMods, getAccuracy, humanReadable, getMapListCover, getAvatar } = require('../../utils.js');
 const { Op } = require('sequelize');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -138,23 +138,33 @@ module.exports = {
 		for (let i = 0; i < players.length; i++) {
 			let multiPlayerScores = multiScores.filter(score => score.osuUserId === players[i].osuUserId);
 
-			// TODO: Check since when v2 mod gets added by the multiplayer
-			// TODO: Something about multiple maps kills the way this works
-			let playerScores = localScores.filter(score => {
-				if (score.uploaderId !== players[i].osuUserId) {
-					return false;
+			let soloPlayerScores = localScores.filter(score => {
+				if (score.uploaderId === players[i].osuUserId) {
+					return true;
 				}
 
-				let map = tourneyMaps.find(map => map.beatmapHash === score.hash);
-
-				let existingMultiPlayerScore = multiPlayerScores.find(multiScore => multiScore.beatmapId === map.beatmapId && parseInt(multiScore.count50) === score.count50 && parseInt(multiScore.count100) === score.count100 && parseInt(multiScore.count300) === score.count300 && parseInt(multiScore.countMiss) === score.countMiss && parseInt(multiScore.score) === score.score && (parseInt(multiScore.rawMods) + parseInt(multiScore.gameRawMods) === score.mods || parseInt(multiScore.rawMods) + parseInt(multiScore.gameRawMods) + 536870912 === score.mods));
-
-				if (existingMultiPlayerScore) {
-					return false;
-				}
-
-				return true;
+				return false;
 			});
+
+			let playerScores = [];
+
+			for (let j = 0; j < tourneyMaps.length; j++) {
+				let soloScores = soloPlayerScores.filter(score => score.beatmapHash === tourneyMaps[j].hash);
+
+				let soloScoresWithoutMultiScores = soloScores.filter(score => {
+					let existingMultiPlayerScoresForMap = multiPlayerScores.filter(multiScore => multiScore.beatmapId === tourneyMaps[j].beatmapId);
+
+					let existingMultiPlayerScore = existingMultiPlayerScoresForMap.find(multiScore => parseInt(multiScore.count50) === score.count50 && parseInt(multiScore.count100) === score.count100 && parseInt(multiScore.count300) === score.count300 && parseInt(multiScore.countMiss) === score.countMiss && parseInt(multiScore.score) === score.score && (parseInt(multiScore.rawMods) + parseInt(multiScore.gameRawMods) === score.mods || parseInt(multiScore.rawMods) + parseInt(multiScore.gameRawMods) + 536870912 === score.mods));
+
+					if (existingMultiPlayerScore) {
+						return false;
+					}
+
+					return true;
+				});
+
+				playerScores = playerScores.concat(soloScoresWithoutMultiScores);
+			}
 
 			multiPlayerScores = multiPlayerScores.filter(score => score.scoringType === 'Score v2');
 
@@ -174,15 +184,54 @@ module.exports = {
 				return soloScoreFormat;
 			});
 
-			// TODO: If the player has no local v2 scores, use v1 scores
-
 			players[i] = {
 				player: players[i],
 				scores: playerScores.concat(multiPlayerScores),
 			};
+
+			for (let j = 0; j < tourneyMaps.length; j++) {
+				let scores = players[i].scores.filter(score => score.beatmapHash === tourneyMaps[j].hash);
+
+				if (scores.length > 0) {
+					continue;
+				}
+
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
+				await osuApi.getScores({ b: tourneyMaps[j].beatmapId, u: players[i].player.osuUserId, m: 0 })
+					.then(async scores => {
+						if (scores.length === 0) {
+							return null;
+						}
+
+						for (let k = 0; k < scores.length; k++) {
+							// combo*0.7+log(acc^10)*0.3
+							scores[k].convertedScore = Math.round(((scores[k].maxCombo / tourneyMaps[j].maxCombo) * 0.7 + Math.log10(getAccuracy(scores[k])) * 10 * 0.3) * 1000000);
+						}
+
+						scores.sort((a, b) => b.convertedScore - a.convertedScore);
+
+						let bestScore = scores[0];
+
+						// TODO: Add a flag that its a converted score
+						players[i].scores.push({
+							beatmapId: tourneyMaps[j].beatmapId,
+							score: bestScore.convertedScore,
+							beatmapHash: tourneyMaps[j].hash,
+							mods: bestScore.raw_mods,
+							count50: bestScore.counts[50],
+							count100: bestScore.counts[100],
+							count300: bestScore.counts[300],
+							countMiss: bestScore.counts.miss,
+						});
+					})
+					.catch(async err => {
+						if (err.message !== 'Not found') {
+							console.error(err);
+						}
+					});
+			}
 		}
-
-
 
 		// Create the sheet
 		const canvasWidth = 1408 + 400 * players.length;
@@ -220,9 +269,11 @@ module.exports = {
 			ctx.font = 'bold 60px comfortaa';
 			ctx.fillStyle = '#FFFFFF';
 			ctx.textAlign = 'center';
-			ctx.fillText(players[i].player.osuName, 604 + 200 + 400 * i, 75, 375);
+			ctx.fillText(players[i].player.osuName, 604 + 240 + 400 * i, 75, 275);
 
-			// TODO: Draw the avatar
+			// Draw the avatar
+			let avatar = await getAvatar(players[i].player.osuUserId);
+			ctx.drawImage(avatar, 604 + 400 * i + 10, 4 + 10, 80, 80);
 		}
 
 		// Draw a rectangle

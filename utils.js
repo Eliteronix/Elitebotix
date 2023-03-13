@@ -1268,7 +1268,6 @@ module.exports = {
 		return accuracy;
 	},
 	fitTextOnLeftCanvas(ctx, text, startingSize, fontface, yPosition, width, xOffset) {
-
 		// start with a large font size
 		var fontsize = startingSize;
 
@@ -2063,8 +2062,8 @@ module.exports = {
 		let lastRework = new Date();
 		lastRework.setUTCFullYear(2023);
 		lastRework.setUTCMonth(2);
-		lastRework.setUTCDate(10);
-		lastRework.setUTCHours(23);
+		lastRework.setUTCDate(14);
+		lastRework.setUTCHours(1);
 
 		let lastWeek = new Date();
 		lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
