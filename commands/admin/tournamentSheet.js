@@ -1,5 +1,5 @@
-const { DBDiscordUsers, DBOsuSoloScores } = require('../../dbObjects.js');
-const { getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, getMods, getAccuracy, humanReadable } = require('../../utils.js');
+const { DBDiscordUsers, DBOsuSoloScores, DBOsuMultiScores } = require('../../dbObjects.js');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, getMods, getAccuracy, humanReadable, getMapListCover } = require('../../utils.js');
 const { Op } = require('sequelize');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -112,22 +112,80 @@ module.exports = {
 			tourneyMaps.push(dbBeatmap);
 		}
 
-		for (let i = 0; i < players.length; i++) {
-			logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBOsuSoloScores');
-			let playerScores = await DBOsuSoloScores.findAll({
-				where: {
-					uploaderId: players[i].osuUserId,
+		logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBOsuSoloScores');
+		let localScores = await DBOsuSoloScores.findAll({
+			where: {
+				uploaderId: {
+					[Op.in]: players.map(player => player.osuUserId),
 				},
+				beatmapHash: {
+					[Op.in]: tourneyMaps.map(map => map.hash),
+				},
+			},
+		});
+
+		let multiScores = await DBOsuMultiScores.findAll({
+			where: {
+				osuUserId: {
+					[Op.in]: players.map(player => player.osuUserId),
+				},
+				beatmapId: {
+					[Op.in]: tourneyMaps.map(map => map.beatmapId),
+				},
+			},
+		});
+
+		for (let i = 0; i < players.length; i++) {
+			let multiPlayerScores = multiScores.filter(score => score.osuUserId === players[i].osuUserId);
+
+			// TODO: Check since when v2 mod gets added by the multiplayer
+			// TODO: Something about multiple maps kills the way this works
+			let playerScores = localScores.filter(score => {
+				if (score.uploaderId !== players[i].osuUserId) {
+					return false;
+				}
+
+				let map = tourneyMaps.find(map => map.beatmapHash === score.hash);
+
+				let existingMultiPlayerScore = multiPlayerScores.find(multiScore => multiScore.beatmapId === map.beatmapId && parseInt(multiScore.count50) === score.count50 && parseInt(multiScore.count100) === score.count100 && parseInt(multiScore.count300) === score.count300 && parseInt(multiScore.countMiss) === score.countMiss && parseInt(multiScore.score) === score.score && (parseInt(multiScore.rawMods) + parseInt(multiScore.gameRawMods) === score.mods || parseInt(multiScore.rawMods) + parseInt(multiScore.gameRawMods) + 536870912 === score.mods));
+
+				if (existingMultiPlayerScore) {
+					return false;
+				}
+
+				return true;
 			});
+
+			multiPlayerScores = multiPlayerScores.filter(score => score.scoringType === 'Score v2');
+
+			multiPlayerScores = multiPlayerScores.map(score => {
+				let soloScoreFormat = {
+					beatmapId: score.beatmapId,
+					score: score.score,
+					beatmapHash: tourneyMaps.find(map => map.beatmapId === score.beatmapId).hash,
+					mods: parseInt(score.gameRawMods) + parseInt(score.rawMods),
+					count50: score.count50,
+					count100: score.count100,
+					count300: score.count300,
+					countMiss: score.countMiss,
+					scoringType: score.scoringType,
+				};
+
+				return soloScoreFormat;
+			});
+
+			// TODO: If the player has no local v2 scores, use v1 scores
 
 			players[i] = {
 				player: players[i],
-				scores: playerScores,
+				scores: playerScores.concat(multiPlayerScores),
 			};
 		}
 
+
+
 		// Create the sheet
-		const canvasWidth = 1208 + 400 * players.length;
+		const canvasWidth = 1408 + 400 * players.length;
 		const canvasHeight = 108 + 100 * tourneyMaps.length;
 
 		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
@@ -141,28 +199,30 @@ module.exports = {
 		// Draw the header
 		// Draw a rectangle
 		ctx.fillStyle = '#1E1E1E';
-		ctx.fillRect(4, 4, 400, 100);
+		ctx.fillRect(4, 4, 600, 100);
 
 		// Draw a white border
 		ctx.strokeStyle = '#FFFFFF';
 		ctx.lineWidth = 4;
-		ctx.strokeRect(4, 4, 400, 100);
+		ctx.strokeRect(4, 4, 600, 100);
 
 		for (let i = 0; i < players.length; i++) {
 			// Draw a rectangle
 			ctx.fillStyle = '#1E1E1E';
-			ctx.fillRect(404 + 400 * i, 4, 400, 100);
+			ctx.fillRect(604 + 400 * i, 4, 400, 100);
 
 			// Draw a white border
 			ctx.strokeStyle = '#FFFFFF';
 			ctx.lineWidth = 4;
-			ctx.strokeRect(404 + 400 * i, 4, 400, 100);
+			ctx.strokeRect(604 + 400 * i, 4, 400, 100);
 
 			// Write the text
 			ctx.font = 'bold 60px comfortaa';
 			ctx.fillStyle = '#FFFFFF';
 			ctx.textAlign = 'center';
-			ctx.fillText(players[i].player.osuName, 404 + 200 + 400 * i, 75, 375);
+			ctx.fillText(players[i].player.osuName, 604 + 200 + 400 * i, 75, 375);
+
+			// TODO: Draw the avatar
 		}
 
 		// Draw a rectangle
@@ -197,35 +257,61 @@ module.exports = {
 
 		// Loop through the maps and draw them
 		for (let i = 0; i < tourneyMaps.length; i++) {
+			let modColour = '#FFFFFF';
+
+			if (tourneyMaps[i].modPool === 'NM') {
+				modColour = '#6d9eeb';
+			} else if (tourneyMaps[i].modPool === 'HD') {
+				modColour = '#ffd966';
+			} else if (tourneyMaps[i].modPool === 'HR') {
+				modColour = '#e06666';
+			} else if (tourneyMaps[i].modPool === 'DT') {
+				modColour = '#b4a7d6';
+			} else if (tourneyMaps[i].modPool === 'FM') {
+				modColour = '#93c47d';
+			} else if (tourneyMaps[i].modPool === 'TB') {
+				modColour = '#76a5af';
+			}
+
 			// Draw a rectangle
 			ctx.fillStyle = '#1E1E1E';
-			ctx.fillRect(4, 4 + 100 * (i + 1), 400, 100);
+			ctx.fillRect(4, 4 + 100 * (i + 1), 100, 100);
 
 			// Draw a white border
 			ctx.strokeStyle = '#FFFFFF';
 			ctx.lineWidth = 4;
-			ctx.strokeRect(4, 4 + 100 * (i + 1), 400, 100);
+			ctx.strokeRect(4, 4 + 100 * (i + 1), 100, 100);
+
+			// Write the text
+			ctx.font = 'bold 30px comfortaa';
+			ctx.fillStyle = modColour;
+			ctx.textAlign = 'center';
+			ctx.fillText(`${tourneyMaps[i].modPool}${tourneyMaps[i].modPoolCount}`, 54, 66 + 100 * (i + 1), 75);
+
+			// Draw the map image
+			const mapImage = await getMapListCover(tourneyMaps[i].beatmapsetId, tourneyMaps[i].beatmapId);
+			ctx.drawImage(mapImage, 106, 6 + 100 * (i + 1), 96, 96);
+
+			// Draw a white border
+			ctx.strokeStyle = '#FFFFFF';
+			ctx.lineWidth = 4;
+			ctx.strokeRect(104, 4 + 100 * (i + 1), 100, 100);
+
+			// Draw a rectangle
+			ctx.fillStyle = '#1E1E1E';
+			ctx.fillRect(204, 4 + 100 * (i + 1), 400, 100);
+
+			// Draw a white border
+			ctx.strokeStyle = '#FFFFFF';
+			ctx.lineWidth = 4;
+			ctx.strokeRect(204, 4 + 100 * (i + 1), 400, 100);
 
 			// Draw the map title
-			if (tourneyMaps[i].modPool === 'NM') {
-				ctx.fillStyle = '#6d9eeb';
-			} else if (tourneyMaps[i].modPool === 'HD') {
-				ctx.fillStyle = '#ffd966';
-			} else if (tourneyMaps[i].modPool === 'HR') {
-				ctx.fillStyle = '#e06666';
-			} else if (tourneyMaps[i].modPool === 'DT') {
-				ctx.fillStyle = '#b4a7d6';
-			} else if (tourneyMaps[i].modPool === 'FM') {
-				ctx.fillStyle = '#93c47d';
-			} else if (tourneyMaps[i].modPool === 'TB') {
-				ctx.fillStyle = '#76a5af';
-			} else {
-				ctx.fillStyle = '#FFFFFF';
-			}
+			ctx.fillStyle = modColour;
 			ctx.font = '22px comfortaa';
 			ctx.textAlign = 'center';
-			ctx.fillText(`${tourneyMaps[i].artist} - ${tourneyMaps[i].title}`, 205, 4 + 100 * (i + 1) + 40, 375);
-			ctx.fillText(`[${tourneyMaps[i].difficulty}]`, 205, 4 + 100 * (i + 1) + 80, 375);
+			ctx.fillText(`${tourneyMaps[i].artist} - ${tourneyMaps[i].title}`, 405, 4 + 100 * (i + 1) + 40, 375);
+			ctx.fillText(`[${tourneyMaps[i].difficulty}]`, 405, 4 + 100 * (i + 1) + 80, 375);
 
 			let lineup = [];
 
@@ -233,7 +319,7 @@ module.exports = {
 			for (let j = 0; j < players.length; j++) {
 				// Draw a rectangle
 				ctx.fillStyle = '#1E1E1E';
-				ctx.fillRect(404 + 400 * j, 4 + 100 * (i + 1), 400, 100);
+				ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1), 400, 100);
 
 				// Draw the player's score
 				let playerScores = players[j].scores.filter(score => score.beatmapHash === tourneyMaps[i].hash);
@@ -276,18 +362,18 @@ module.exports = {
 					let colour = getGradientColour(score / 10000);
 
 					ctx.fillStyle = colour;
-					ctx.fillRect(404 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 150, 33);
+					ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 150, 33);
 
 					// Draw the player's score
 					ctx.fillStyle = '#FFFFFF';
 					ctx.font = 'bold 20px comfortaa';
-					ctx.textAlign = 'left';
-					ctx.fillText(humanReadable(score), 404 + 25 + 400 * j, 4 + 100 * (i + 1) + 25 + (k * 33), 100);
+					ctx.textAlign = 'center';
+					ctx.fillText(humanReadable(score), 679 + 400 * j, 4 + 100 * (i + 1) + 25 + (k * 33), 100);
 
 					// Draw the border
 					ctx.strokeStyle = '#FFFFFF';
 					ctx.lineWidth = 4;
-					ctx.strokeRect(404 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 150, 33);
+					ctx.strokeRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 150, 33);
 				}
 
 				averageScore = Math.round(averageScore / Math.min(correctModPlayerScores.length, 3));
@@ -298,25 +384,25 @@ module.exports = {
 					let colour = getGradientColour(averageScore / 10000);
 
 					ctx.fillStyle = colour;
-					ctx.fillRect(554 + 400 * j, 4 + 100 * (i + 1), 250, 100);
+					ctx.fillRect(754 + 400 * j, 4 + 100 * (i + 1), 250, 100);
 
 					// Draw the player's score
 					ctx.fillStyle = '#FFFFFF';
 					ctx.font = 'bold 60px comfortaa';
-					ctx.textAlign = 'right';
-					ctx.fillText(humanReadable(averageScore), 404 + 375 + 400 * j, 4 + 100 * (i + 1) + 75, 200);
+					ctx.textAlign = 'center';
+					ctx.fillText(humanReadable(averageScore), 604 + 275 + 400 * j, 4 + 100 * (i + 1) + 75, 200);
 				}
 
 				// Draw a white border
 				ctx.strokeStyle = '#FFFFFF';
 				ctx.lineWidth = 4;
-				ctx.strokeRect(554 + 400 * j, 4 + 100 * (i + 1), 250, 100);
+				ctx.strokeRect(754 + 400 * j, 4 + 100 * (i + 1), 250, 100);
 			}
 
 			// Draw the lineups
 			// Draw the rectangle
 			ctx.fillStyle = '#1E1E1E';
-			ctx.fillRect(4 + 400 * (players.length + 1), 4 + 100 * (i + 1), 400, 100);
+			ctx.fillRect(204 + 400 * (players.length + 1), 4 + 100 * (i + 1), 400, 100);
 
 			// Draw the player names
 			lineup.sort((a, b) => b.score - a.score);
@@ -328,32 +414,47 @@ module.exports = {
 				finalLineupScore += lineup[j].score;
 			}
 
-			ctx.fillStyle = '#FFFFFF';
+			ctx.fillStyle = modColour;
 			ctx.font = 'bold 60px comfortaa';
 			ctx.textAlign = 'center';
-			ctx.fillText(finalLineup.join(', '), 4 + 200 + 400 * (players.length + 1), 4 + 100 * (i + 1) + 75, 375);
+			ctx.fillText(finalLineup.join(', '), 204 + 200 + 400 * (players.length + 1), 4 + 100 * (i + 1) + 75, 375);
 
 			// Draw a white border
 			ctx.strokeStyle = '#FFFFFF';
 			ctx.lineWidth = 4;
-			ctx.strokeRect(4 + 400 * (players.length + 1), 4 + 100 * (i + 1), 400, 100);
+			ctx.strokeRect(204 + 400 * (players.length + 1), 4 + 100 * (i + 1), 400, 100);
 
 			// Draw the rectangle
-			let colour = getGradientColour(finalLineupScore / 10000 / teamsize);
+			ctx.fillStyle = '#1E1E1E';
+			ctx.fillRect(204 + 400 * (players.length + 2), 4 + 100 * (i + 1), 400, 100);
 
-			ctx.fillStyle = colour;
-			ctx.fillRect(4 + 400 * (players.length + 2), 4 + 100 * (i + 1), 400, 100);
+			if (finalLineupScore) {
+				// Draw the rectangle
+				let colour = getGradientColour(finalLineupScore / 10000 / teamsize);
 
-			// Draw the lineup score
-			ctx.fillStyle = '#FFFFFF';
-			ctx.font = 'bold 60px comfortaa';
-			ctx.textAlign = 'center';
-			ctx.fillText(humanReadable(finalLineupScore), 4 + 200 + 400 * (players.length + 2), 4 + 100 * (i + 1) + 75, 375);
+				ctx.fillStyle = colour;
+				ctx.fillRect(204 + 400 * (players.length + 2), 4 + 100 * (i + 1), 400, 100);
+
+				// Draw the lineup score
+				ctx.fillStyle = '#FFFFFF';
+				ctx.font = 'bold 60px comfortaa';
+				ctx.textAlign = 'center';
+				ctx.fillText(humanReadable(finalLineupScore), 204 + 200 + 400 * (players.length + 2), 4 + 100 * (i + 1) + 75, 375);
+			}
 
 			// Draw a white border
 			ctx.strokeStyle = '#FFFFFF';
 			ctx.lineWidth = 4;
-			ctx.strokeRect(4 + 400 * (players.length + 2), 4 + 100 * (i + 1), 400, 100);
+			ctx.strokeRect(204 + 400 * (players.length + 2), 4 + 100 * (i + 1), 400, 100);
+		}
+
+
+
+		for (let i = 0; i < players.length; i++) {
+			// Draw the border around the whole column on the left side
+			ctx.strokeStyle = '#FFFFFF';
+			ctx.lineWidth = 4;
+			ctx.strokeRect(604 + 400 * i, 104, 150, 100 * tourneyMaps.length);
 		}
 
 		// Create as an attachment

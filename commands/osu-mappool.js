@@ -257,6 +257,19 @@ module.exports = {
 				return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
 			}
 
+			let mappoolName = interaction.options.getString('name');
+
+			let existingMappool = await DBOsuMappools.findOne({
+				where: {
+					creatorId: discordUser.osuUserId,
+					name: mappoolName,
+				},
+			});
+
+			if (existingMappool) {
+				return await interaction.editReply({ content: `You already have a mappool with the name \`${mappoolName.replace(/`/g, '')}\`. Please remove it first if you want to create a mappool with this name again.` });
+			}
+
 			let modPools = [];
 
 			for (let i = 0; i < 6; i++) {
@@ -303,7 +316,7 @@ module.exports = {
 						return await interaction.editReply({ content: `\`${modPools[i].maps[j].replace(/`/g, '')}\` is not a valid map.` });
 					}
 
-					maps.push({ beatmapId: mapId, modBits: modPools[i].modBits, modIndex: i + 1, FM: modPools[i].FM, TB: modPools[i].TB });
+					maps.push({ beatmapId: mapId, modBits: modPools[i].modBits, modIndex: j + 1, FM: modPools[i].FM, TB: modPools[i].TB });
 				}
 			}
 
