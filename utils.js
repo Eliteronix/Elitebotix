@@ -1268,7 +1268,6 @@ module.exports = {
 		return accuracy;
 	},
 	fitTextOnLeftCanvas(ctx, text, startingSize, fontface, yPosition, width, xOffset) {
-
 		// start with a large font size
 		var fontsize = startingSize;
 
@@ -2059,11 +2058,13 @@ module.exports = {
 			dbBeatmap = input.beatmap;
 		}
 
+		//TODO: Update before merging to master
 		let lastRework = new Date();
-		lastRework.setUTCFullYear(2022);
-		lastRework.setUTCMonth(11);
-		lastRework.setUTCDate(10);
-		lastRework.setUTCHours(20);
+		lastRework.setUTCFullYear(2023);
+		lastRework.setUTCMonth(2);
+		lastRework.setUTCDate(14);
+		lastRework.setUTCHours(1);
+
 		let lastWeek = new Date();
 		lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
 
@@ -2286,6 +2287,7 @@ module.exports = {
 								dbBeatmap.userRating = beatmaps[0].rating;
 								dbBeatmap.notDownloadable = notDownloadable;
 								dbBeatmap.audioUnavailable = audioUnavailable;
+								dbBeatmap.hash = beatmaps[0].hash;
 								dbBeatmap.changed('updatedAt', true);
 								await dbBeatmap.save();
 							} else { // Map has to be added new
@@ -2366,6 +2368,7 @@ module.exports = {
 									freeModMap: freeModMap,
 									notDownloadable: notDownloadable,
 									audioUnavailable: audioUnavailable,
+									hash: beatmaps[0].hash,
 								});
 							}
 						})
@@ -2807,22 +2810,24 @@ module.exports = {
 					} else if (modPools[modIndex] === 'DT') {
 						userMaps[i].score = userMaps[i].score / 1.2;
 					} else if (modPools[modIndex] === 'FM') {
-						if (module.exports.getMods(userMaps[i].modBits).includes('HD')) {
+						let scoreMods = module.exports.getMods(userMaps[i].modBits);
+
+						if (scoreMods.includes('HD')) {
 							userMaps[i].score = userMaps[i].score / 1.06;
 						}
-						if (module.exports.getMods(userMaps[i].modBits).includes('HR')) {
+						if (scoreMods.includes('HR')) {
 							userMaps[i].score = userMaps[i].score / 1.1;
 						}
-						if (module.exports.getMods(userMaps[i].modBits).includes('FL')) {
+						if (scoreMods.includes('FL')) {
 							userMaps[i].score = userMaps[i].score / 1.12;
 						}
-						if (module.exports.getMods(userMaps[i].modBits).includes('DT')) {
+						if (scoreMods.includes('DT')) {
 							userMaps[i].score = userMaps[i].score / 1.2;
 						}
-						if (module.exports.getMods(userMaps[i].modBits).includes('EZ')) {
+						if (scoreMods.includes('EZ')) {
 							userMaps[i].score = userMaps[i].score / 0.5;
 						}
-						if (module.exports.getMods(userMaps[i].modBits).includes('HT')) {
+						if (scoreMods.includes('HT')) {
 							userMaps[i].score = userMaps[i].score / 0.3;
 						}
 					}

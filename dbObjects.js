@@ -120,6 +120,21 @@ const beatmaps = new Sequelize('database', 'username', 'password', {
 	}
 });
 
+const soloScores = new Sequelize('database', 'username', 'password', {
+	host: 'localhost',
+	dialect: 'sqlite',
+	logging: false,
+	storage: 'databases/soloScores.sqlite',
+	retry: {
+		max: 25, // Maximum retry 15 times
+		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+	},
+	pool: {
+		max: 7,
+	}
+});
+
 const DBGuilds = require('./models/DBGuilds')(guilds, Sequelize.DataTypes);
 const DBReactionRoles = require('./models/DBReactionRoles')(guilds, Sequelize.DataTypes);
 const DBReactionRolesHeader = require('./models/DBReactionRolesHeader')(guilds, Sequelize.DataTypes);
@@ -142,6 +157,8 @@ const DBOsuTourneyFollows = require('./models/DBOsuTourneyFollows')(osuData, Seq
 const DBDuelRatingHistory = require('./models/DBDuelRatingHistory')(osuData, Sequelize.DataTypes);
 const DBOsuForumPosts = require('./models/DBOsuForumPosts')(osuData, Sequelize.DataTypes);
 const DBOsuTrackingUsers = require('./models/DBOsuTrackingUsers')(osuData, Sequelize.DataTypes);
+const DBOsuMappools = require('./models/DBOsuMappools')(osuData, Sequelize.DataTypes);
+const DBOsuPoolAccess = require('./models/DBOsuPoolAccess')(osuData, Sequelize.DataTypes);
 
 const DBElitiriCupSignUp = require('./models/DBElitiriCupSignUp')(elitiriData, Sequelize.DataTypes);
 const DBElitiriCupStaff = require('./models/DBElitiriCupStaff')(elitiriData, Sequelize.DataTypes);
@@ -152,6 +169,7 @@ const DBOsuMultiScores = require('./models/DBOsuMultiScores')(multiScores, Seque
 
 const DBOsuBeatmaps = require('./models/DBOsuBeatmaps')(beatmaps, Sequelize.DataTypes);
 
+const DBOsuSoloScores = require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
 
 module.exports = {
 	DBGuilds,
@@ -177,5 +195,8 @@ module.exports = {
 	DBDuelRatingHistory,
 	DBOsuForumPosts,
 	DBOsuTrackingUsers,
-	DBOsuGuildTrackers
+	DBOsuGuildTrackers,
+	DBOsuSoloScores,
+	DBOsuMappools,
+	DBOsuPoolAccess,
 };

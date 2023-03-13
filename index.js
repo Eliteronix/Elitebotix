@@ -90,6 +90,12 @@ const serverActivityAccessInTheLastMinute = new client.Gauge({
 });
 register.registerMetric(serverActivityAccessInTheLastMinute);
 
+const soloScoresAccessInTheLastMinute = new client.Gauge({
+	name: 'solo_scores_access_in_the_last_minute',
+	help: 'Solo scores access in the last minute',
+});
+register.registerMetric(soloScoresAccessInTheLastMinute);
+
 const runningTournamentMatches = new client.Gauge({
 	name: 'running_tournament_matches',
 	help: 'Running tournament matches',
@@ -315,6 +321,11 @@ manager.spawn()
 						serverActivityAccessInTheLastMinute.inc();
 						setTimeout(() => {
 							serverActivityAccessInTheLastMinute.dec();
+						}, 60000);
+					} else if (message.includes('DBOsuSoloScores')) {
+						soloScoresAccessInTheLastMinute.inc();
+						setTimeout(() => {
+							soloScoresAccessInTheLastMinute.dec();
 						}, 60000);
 					}
 				} else if (message === 'importMatch') {

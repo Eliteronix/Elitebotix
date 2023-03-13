@@ -1,5 +1,4 @@
-const osu = require('node-osu');
-const { getIDFromPotentialOsuLink } = require('../utils');
+const { getIDFromPotentialOsuLink, getOsuBeatmap } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -120,27 +119,13 @@ module.exports = {
 
 		const collectionMaps = interaction.options.getString('maps').split(/ +/gm);
 
-		// eslint-disable-next-line no-undef
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
-
 		for (let i = 0; i < collectionMaps.length; i++) {
 			collectionMaps[i] = getIDFromPotentialOsuLink(collectionMaps[i]);
 
 			let originalMap = collectionMaps[i];
 
 			// Get the beatmap
-			collectionMaps[i] = await osuApi.getBeatmaps({ b: collectionMaps[i] })
-				.then(beatmaps => {
-					return beatmaps[0];
-				})
-				.catch(() => {
-					return null;
-				});
+			collectionMaps[i] = await getOsuBeatmap({ beatmapId: collectionMaps[i] });
 
 			if (collectionMaps[i] === null) {
 				await interaction.followUp({ content: `The beatmap \`${originalMap.replace(/`/g, '')}\` could not be found` });

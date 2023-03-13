@@ -1,4 +1,4 @@
-const osu = require('node-osu');
+const { getOsuBeatmap } = require('../../utils');
 
 module.exports = {
 	name: 'tourneyCollections',
@@ -24,14 +24,6 @@ module.exports = {
 
 		let currentMod = null;
 
-		// eslint-disable-next-line no-undef
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
-
 		for (let i = 0; i < args.length; i++) {
 			if (mods.includes(args[i])) {
 				currentMod = args[i];
@@ -41,13 +33,7 @@ module.exports = {
 				}
 
 				// Get the beatmap
-				args[i] = await osuApi.getBeatmaps({ b: args[i] })
-					.then(beatmaps => {
-						return beatmaps[0];
-					})
-					.catch(() => {
-						return null;
-					});
+				args[i] = await getOsuBeatmap({ beatmapId: args[i] });
 
 				if (args[i] === null) {
 					await interaction.editReply({ content: `The beatmap \`${args[i].replace(/`/g, '')}\` could not be found` });
