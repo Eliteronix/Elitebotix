@@ -30,7 +30,7 @@ module.exports = async function (client, bancho, interaction) {
 
 		//Check permissions of the bot
 		if (interaction.guildId) {
-			let member = null;
+			let member = interaction.guild.members.cache.get(client.user.id);
 
 			while (!member) {
 				try {
@@ -38,15 +38,17 @@ module.exports = async function (client, bancho, interaction) {
 						.catch((err) => {
 							throw new Error(err);
 						});
+
+					member = member.first();
 				} catch (e) {
-					if (e.message !== '[GuildMembersTimeout]: Members didn\'t arrive in time.') {
+					if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
 						console.error('interactionCreate.js | Check bot permissions', e);
 						return;
 					}
 				}
 			}
 
-			const botPermissions = interaction.channel.permissionsFor(member.first());
+			const botPermissions = interaction.channel.permissionsFor(member);
 			if (!botPermissions || !botPermissions.has(PermissionsBitField.Flags.ViewChannel)) {
 				//The bot can't possibly answer the message
 				return interaction.reply({ content: 'I can\'t view this channel.', ephemeral: true });

@@ -662,7 +662,7 @@ module.exports = {
 							throw new Error(err);
 						});
 				} catch (e) {
-					if (e.message !== '[GuildMembersTimeout]: Members didn\'t arrive in time.') {
+					if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
 						console.error('utils.js | getMessageUserDisplayname', e);
 						return;
 					}
