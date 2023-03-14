@@ -405,7 +405,7 @@ module.exports = {
 
 			players[i] = {
 				player: players[i],
-				scores: []//playerScores.concat(multiPlayerScores),
+				scores: playerScores.concat(multiPlayerScores),
 			};
 
 			for (let j = 0; j < tourneyMaps.length; j++) {
