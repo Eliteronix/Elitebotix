@@ -467,6 +467,12 @@ module.exports = {
 		ctx.fillStyle = '#1E1E1E';
 		ctx.fillRect(4, 4, 600, 100);
 
+		// Write the pool name
+		ctx.font = 'bold 60px comfortaa';
+		ctx.fillStyle = '#FFFFFF';
+		ctx.textAlign = 'center';
+		ctx.fillText(mappoolName, 304, 75, 575);
+
 		// Draw a white border
 		ctx.strokeStyle = '#FFFFFF';
 		ctx.lineWidth = 4;
