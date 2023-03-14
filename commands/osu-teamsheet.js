@@ -405,7 +405,7 @@ module.exports = {
 
 			players[i] = {
 				player: players[i],
-				scores: playerScores.concat(multiPlayerScores),
+				scores: []//playerScores.concat(multiPlayerScores),
 			};
 
 			for (let j = 0; j < tourneyMaps.length; j++) {
@@ -432,7 +432,6 @@ module.exports = {
 
 						let bestScore = scores[0];
 
-						// TODO: Add a flag that its a converted score
 						players[i].scores.push({
 							beatmapId: tourneyMaps[j].beatmapId,
 							score: bestScore.convertedScore,
@@ -442,6 +441,7 @@ module.exports = {
 							count100: bestScore.counts[100],
 							count300: bestScore.counts[300],
 							countMiss: bestScore.counts.miss,
+							scoringType: 'Converted'
 						});
 					})
 					.catch(async err => {
@@ -454,7 +454,7 @@ module.exports = {
 
 		// Create the sheet
 		const canvasWidth = 1408 + 400 * players.length;
-		const canvasHeight = 108 + 100 * tourneyMaps.length;
+		const canvasHeight = 208 + 100 * tourneyMaps.length;
 
 		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
 
@@ -463,6 +463,14 @@ module.exports = {
 
 		// Get context and load the image
 		const ctx = canvas.getContext('2d');
+
+		const background = await Canvas.loadImage('./other/osu-background.png');
+
+		for (let i = 0; i < canvas.height / background.height; i++) {
+			for (let j = 0; j < canvas.width / background.width; j++) {
+				ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+			}
+		}
 
 		// Draw the header
 		// Draw a rectangle
@@ -640,6 +648,17 @@ module.exports = {
 					ctx.fillStyle = colour;
 					ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 150, 33);
 
+					if (correctModPlayerScores[k].scoringType === 'Converted') {
+						// Draw a purple rectangle
+						ctx.fillStyle = '#A800FF';
+						ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
+
+						// Draw a white border
+						ctx.strokeStyle = '#FFFFFF';
+						ctx.lineWidth = 4;
+						ctx.strokeRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
+					}
+
 					// Draw the player's score
 					ctx.fillStyle = '#FFFFFF';
 					ctx.font = 'bold 20px comfortaa';
@@ -690,6 +709,7 @@ module.exports = {
 				finalLineupScore += lineup[j].score;
 			}
 
+			// TODO: Adjust line up text size and split to different lines if it's too long
 			ctx.fillStyle = modColour;
 			ctx.font = 'bold 60px comfortaa';
 			ctx.textAlign = 'center';
@@ -724,14 +744,39 @@ module.exports = {
 			ctx.strokeRect(204 + 400 * (players.length + 2), 4 + 100 * (i + 1), 400, 100);
 		}
 
-
-
 		for (let i = 0; i < players.length; i++) {
 			// Draw the border around the whole column on the left side
 			ctx.strokeStyle = '#FFFFFF';
 			ctx.lineWidth = 4;
 			ctx.strokeRect(604 + 400 * i, 104, 150, 100 * tourneyMaps.length);
 		}
+
+		// Draw a legend
+		ctx.fillStyle = '#1E1E1E';
+		ctx.fillRect(24, 128 + 100 * tourneyMaps.length, 200, 60);
+
+		// Draw the text
+		ctx.fillStyle = '#FFFFFF';
+		ctx.font = 'bold 18px comfortaa';
+		ctx.textAlign = 'center';
+		ctx.fillText('Converted v1 Score', 24 + 100, 128 + 100 * tourneyMaps.length + 37, 150);
+
+		// Draw a purple rectangle
+		ctx.fillStyle = '#A800FF';
+		ctx.fillRect(24, 128 + 100 * tourneyMaps.length, 14, 60);
+
+		// Draw a white border
+		ctx.strokeStyle = '#FFFFFF';
+		ctx.lineWidth = 4;
+		ctx.strokeRect(24, 128 + 100 * tourneyMaps.length, 14, 60);
+
+		// Draw a white border
+		ctx.strokeStyle = '#FFFFFF';
+		ctx.lineWidth = 4;
+		ctx.strokeRect(24, 128 + 100 * tourneyMaps.length, 200, 60);
+
+		// TODO: Draw a legend for the colours
+		// TODO: Draw a legend for old scores
 
 		// Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'teamsheet.png' })];
