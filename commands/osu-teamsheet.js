@@ -775,8 +775,8 @@ module.exports = {
 		ctx.lineWidth = 4;
 		ctx.strokeRect(24, 128 + 100 * tourneyMaps.length, 200, 60);
 
-		// TODO: Draw a legend for the colours
-		// TODO: Draw a legend for old scores
+		// Draw a legend for estimated score
+		// TODO: Draw a legend for calculated from duel rating
 
 		// Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'teamsheet.png' })];

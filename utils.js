@@ -1070,7 +1070,9 @@ module.exports = {
 							&& !badge.description.includes('osu!idol')
 							&& badge.description !== 'The official voice behind osu!'
 							&& !badge.description.includes('Newspaper ')
-							&& !badge.description.includes('Pending Cup ')) {
+							&& !badge.description.includes('Pending Cup ')
+							&& !badge.description.includes('Mapper\'s Choice ')
+							&& !badge.description.includes('Exemplary performance in')) {
 							additionalInfo.tournamentBadges.push(badge);
 						}
 					}
