@@ -1078,7 +1078,7 @@ module.exports = {
 
 				module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers updateOsuDetailsforUser');
 				//get discordUser from db to update pp and rank
-				DBDiscordUsers.findOne({
+				await DBDiscordUsers.findOne({
 					where: { osuUserId: osuUserId },
 				})
 					.then(async (discordUser) => {
