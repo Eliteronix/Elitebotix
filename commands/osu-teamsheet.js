@@ -111,8 +111,8 @@ module.exports = {
 				if (filtered.length === 0) {
 					try {
 						await interaction.respond([{
-							name: 'No results found | Create a mappool with /osu-mappool',
-							value: 'No results found | Create a mappool with /osu-mappool',
+							name: 'No results found | Create a mappool with /osu-mappool or wait a few seconds if you just created one',
+							value: 'No results found | Create a mappool with /osu-mappool or wait a few seconds if you just created one',
 						}]);
 					} catch (error) {
 						if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction' && error.message !== 'The reply to this interaction has already been sent or deferred.') {
@@ -132,7 +132,7 @@ module.exports = {
 					}
 				}
 			}
-		}, 2500);
+		}, 2000);
 
 		const mappools = await DBOsuMappools.findAll({
 			attributes: ['name'],
@@ -160,8 +160,8 @@ module.exports = {
 		if (filtered.length === 0) {
 			try {
 				await interaction.respond([{
-					name: 'No results found | Create a mappool with /osu-mappool',
-					value: 'No results found | Create a mappool with /osu-mappool',
+					name: 'No results found | Create a mappool with /osu-mappool or wait a few seconds if you just created one',
+					value: 'No results found | Create a mappool with /osu-mappool or wait a few seconds if you just created one',
 				}]);
 
 				gotResponse = true;
@@ -208,6 +208,16 @@ module.exports = {
 			const timestamps = interaction.client.cooldowns.get(this.name);
 			timestamps.delete(interaction.user.id);
 			return;
+		}
+
+		let commandUser = await DBDiscordUsers.findOne({
+			where: {
+				userId: interaction.user.id
+			}
+		});
+
+		if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
+			return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
 		}
 
 		let teamsize = interaction.options.getNumber('teamsize');
@@ -272,37 +282,41 @@ module.exports = {
 			await interaction.followUp(`User \`${username.replace(/`/g, '')}\` has been skipped.`);
 		}
 
-		let tourneyMaps = [];
+		let mappoolName = interaction.options.getString('mappool');
 
-		let currentMod = null;
-		let currentModCount = 0;
-
-		// eslint-disable-next-line no-undef
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+		logDatabaseQueries(4, 'commands/osu-teamsheet.js DBOsuMappools');
+		let mappool = await DBOsuMappools.findAll({
+			where: {
+				name: mappoolName,
+				creatorId: commandUser.osuUserId
+			},
+			order: [
+				['number', 'ASC']
+			]
 		});
 
-		while (args.length) {
-			// Mappool
-			// New Modpool
-			if (isNaN(args[0])) {
-				currentMod = args.shift();
-				currentModCount = 0;
-				continue;
+		let tourneyMaps = [];
+
+		for (let i = 0; i < mappool.length; i++) {
+			let map = mappool[i];
+
+			let dbBeatmap = await getOsuBeatmap({ beatmapId: map.beatmapId });
+
+			if (map.tieBreaker) {
+				dbBeatmap.modPool = 'TB';
+			} else {
+				let mods = getMods(map.modPool);
+
+				if (mods.length === 0 && map.freeMod) {
+					dbBeatmap.modPool = 'FM';
+				} else if (mods.length === 0) {
+					dbBeatmap.modPool = 'NM';
+				} else {
+					dbBeatmap.modPool = mods.join('');
+				}
 			}
 
-			// MapId / URL
-			let mapId = getIDFromPotentialOsuLink(args.shift());
-
-			let dbBeatmap = await getOsuBeatmap({ beatmapId: mapId });
-
-			currentModCount++;
-
-			dbBeatmap.modPool = currentMod;
-			dbBeatmap.modPoolCount = currentModCount;
+			dbBeatmap.modPoolCount = map.modPoolNumber;
 
 			tourneyMaps.push(dbBeatmap);
 		}
@@ -328,6 +342,14 @@ module.exports = {
 					[Op.in]: tourneyMaps.map(map => map.beatmapId),
 				},
 			},
+		});
+
+		// eslint-disable-next-line no-undef
+		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
 		for (let i = 0; i < players.length; i++) {
@@ -387,7 +409,7 @@ module.exports = {
 			for (let j = 0; j < tourneyMaps.length; j++) {
 				let scores = players[i].scores.filter(score => score.beatmapHash === tourneyMaps[j].hash);
 
-				if (scores.length > 0) {
+				if (scores.length > 0 || tourneyMaps[j].approvalStatus === 'Graveyard' || tourneyMaps[j].approvalStatus === 'WIP' || tourneyMaps[j].approvalStatus === 'Pending') {
 					continue;
 				}
 
@@ -709,6 +731,7 @@ module.exports = {
 		let links = tourneyMaps.map(map => `[${map.modPool}${map.modPoolCount}](<https://osu.ppy.sh/b/${map.beatmapId}>)`);
 
 		let content = '';
+		let currentMod = tourneyMaps[0].modPool;
 
 		for (let i = 0; i < links.length; i++) {
 			if (tourneyMaps[i].modPool != currentMod || i === 0) {
