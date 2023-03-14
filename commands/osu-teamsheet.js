@@ -795,6 +795,8 @@ module.exports = {
 			}
 		}
 
+		content += '\n\n Use </osu-scoreupload:1084953371435356291> to upload your local scores.';
+
 		await interaction.followUp({ content: content, files: files });
 	},
 };
