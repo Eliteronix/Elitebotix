@@ -1094,7 +1094,7 @@ module.exports = {
 
 									const guild = await c.guilds.cache.get(guildId);
 									if (guild) {
-										let channelId = '1078318144914985050';
+										let channelId = '1078318397688926260';
 
 										// eslint-disable-next-line no-undef
 										if (process.env.SERVER === 'Dev') {
