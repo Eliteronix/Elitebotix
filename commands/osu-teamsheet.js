@@ -226,6 +226,14 @@ module.exports = {
 
 		let players = [];
 
+		// eslint-disable-next-line no-undef
+		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+		});
+
 		for (let i = 0; i < rawPlayers.length; i++) {
 			let username = rawPlayers[i].trim();
 
@@ -245,6 +253,8 @@ module.exports = {
 				continue;
 			}
 
+			// eslint-disable-next-line no-undef
+			process.send('osu!API');
 			let osuUser = await osuApi.getUser({ u: username })
 				.then(osuUser => {
 					return osuUser;
@@ -342,14 +352,6 @@ module.exports = {
 					[Op.in]: tourneyMaps.map(map => map.beatmapId),
 				},
 			},
-		});
-
-		// eslint-disable-next-line no-undef
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
 		for (let i = 0; i < players.length; i++) {
