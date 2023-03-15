@@ -320,6 +320,10 @@ module.exports = {
 			]
 		});
 
+		if (mappool.length === 0) {
+			return await interaction.editReply(`Could not find mappool \`${mappoolName.replace(/`/g, '')}\`.`);
+		}
+
 		let tourneyMaps = [];
 
 		for (let i = 0; i < mappool.length; i++) {
@@ -989,7 +993,7 @@ module.exports = {
 				text = 'Estimated by player';
 				colour = '#FFA800';
 			} else if (legendItems[i] === 'Duel Rating') {
-				text = 'Duel Rating';
+				text = 'Duel Rating Estimate';
 				colour = '#FF0000';
 			} else if (legendItems[i] === 'Score v2') {
 				text = 'Tournament Score';
