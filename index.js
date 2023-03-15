@@ -172,6 +172,18 @@ const osuWebRequestsQueueLength = new client.Gauge({
 });
 register.registerMetric(osuWebRequestsQueueLength);
 
+const osuTrackUsersQueueLength = new client.Gauge({
+	name: 'osu_track_users_queue_length',
+	help: 'osu! Track users queue length',
+});
+register.registerMetric(osuTrackUsersQueueLength);
+
+const osuUpdateUsersQueueLength = new client.Gauge({
+	name: 'osu_update_users_queue_length',
+	help: 'osu! Update users queue length',
+});
+register.registerMetric(osuUpdateUsersQueueLength);
+
 const totalCommandsUsed = new client.Counter({
 	name: 'total_commands_used',
 	help: 'Total commands used',
@@ -358,6 +370,10 @@ manager.spawn()
 							lastRequest: Date.now()
 						});
 					}
+				} else if (typeof message === 'string' && message.startsWith('osuTrackQueue')) {
+					osuTrackUsersQueueLength.set(Number(message.split(' ')[1]));
+				} else if (typeof message === 'string' && message.startsWith('osuUpdateQueue')) {
+					osuUpdateUsersQueueLength.set(Number(message.split(' ')[1]));
 				} else if (typeof message === 'string' && message.startsWith('command')) {
 					let command = message.replace('command ', '').replaceAll('-', '_');
 					let commandCounter = commandSpecificMetrics.find(counter => counter.command === command);

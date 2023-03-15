@@ -711,8 +711,115 @@ module.exports = {
 		}
 
 		let now = new Date();
+
 		let yesterday = new Date();
 		yesterday.setUTCHours(yesterday.getUTCHours() - 24);
+
+		let lastMonth = new Date();
+		lastMonth.setUTCDate(lastMonth.getUTCMonth() - 1);
+
+		// Update queue length
+		module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBDiscordUsers 3');
+		let osuUpdateQueueLength = await DBDiscordUsers.count({
+			where: {
+				[Op.or]: [
+					{
+						osuUserId: {
+							[Op.not]: null
+						},
+						userId: {
+							[Op.not]: null
+						},
+						updatedAt: {
+							[Op.lt]: yesterday
+						},
+						[Op.or]: [
+							{
+								nextOsuPPUpdate: {
+									[Op.eq]: null
+								}
+							},
+							{
+								lastDuelRatingUpdate: {
+									[Op.eq]: null
+								}
+							},
+							{
+								nextOsuPPUpdate: {
+									[Op.lt]: now
+								}
+							},
+							{
+								nextTaikoPPUpdate: {
+									[Op.lt]: now
+								}
+							},
+							{
+								nextCatchPPUpdate: {
+									[Op.lt]: now
+								}
+							},
+							{
+								nextManiaPPUpdate: {
+									[Op.lt]: now
+								}
+							}
+						]
+					},
+					{
+						osuUserId: {
+							[Op.not]: null
+						},
+						userId: null,
+						[Op.or]: [
+							{
+								updatedAt: {
+									[Op.lt]: lastMonth
+								}
+							},
+							{
+								osuRank: null
+							}
+						],
+						[Op.or]: [
+							{
+								nextOsuPPUpdate: {
+									[Op.eq]: null
+								}
+							},
+							{
+								lastDuelRatingUpdate: {
+									[Op.eq]: null
+								}
+							},
+							{
+								nextOsuPPUpdate: {
+									[Op.lt]: now
+								}
+							},
+							{
+								nextTaikoPPUpdate: {
+									[Op.lt]: now
+								}
+							},
+							{
+								nextCatchPPUpdate: {
+									[Op.lt]: now
+								}
+							},
+							{
+								nextManiaPPUpdate: {
+									[Op.lt]: now
+								}
+							}
+						]
+					},
+				]
+			},
+		});
+
+		// eslint-disable-next-line no-undef
+		process.send(`osuUpdateQueue ${osuUpdateQueueLength}`);
 
 		module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
@@ -775,9 +882,6 @@ module.exports = {
 		}
 
 		await new Promise(resolve => setTimeout(resolve, 30000));
-
-		let lastMonth = new Date();
-		lastMonth.setUTCDate(lastMonth.getUTCMonth() - 1);
 
 		module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBDiscordUsers 2');
 		discordUser = await DBDiscordUsers.findOne({
@@ -6032,6 +6136,18 @@ module.exports = {
 				['nextCheck', 'ASC'],
 			],
 		});
+
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuTrackingUsers processOsuTrack count');
+		let osuTrackQueueLength = await DBOsuTrackingUsers.count({
+			where: {
+				nextCheck: {
+					[Op.lte]: now,
+				},
+			},
+		});
+
+		// eslint-disable-next-line no-undef
+		process.send(`osuTrackQueue ${osuTrackQueueLength}`);
 
 		if (osuTracker) {
 			let osuUser = { osuUserId: osuTracker.osuUserId };
