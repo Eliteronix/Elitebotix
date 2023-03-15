@@ -321,7 +321,7 @@ module.exports = {
 		});
 
 		if (mappool.length === 0) {
-			return await interaction.editReply(`Could not find mappool \`${mappoolName.replace(/`/g, '')}\`.`);
+			return await interaction.editReply(`Could not find mappool \`${mappoolName.replace(/`/g, '')}\`.\nMake sure you have the correct name and that you are the creator of the mappool.\nYou can check your mappools with </osu-mappool list:1084953371435356290>.`);
 		}
 
 		let tourneyMaps = [];
