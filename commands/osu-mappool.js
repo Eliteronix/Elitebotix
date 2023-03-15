@@ -369,6 +369,8 @@ module.exports = {
 
 			await DBOsuMappools.bulkCreate(mappool);
 
+
+			//TODO: Add proper output image
 			await interaction.editReply({ content: `Successfully created mappool \`${interaction.options.getString('name').replace(/`/g, '')}\`.` });
 		}
 	},

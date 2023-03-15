@@ -1,7 +1,7 @@
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuMultiScores } = require('../dbObjects');
-const { pause, getAvatar, logDatabaseQueries, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable } = require('../utils');
+const { pause, getAvatar, logDatabaseQueries, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating } = require('../utils');
 const { Op } = require('sequelize');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -76,6 +76,21 @@ module.exports = {
 				})
 				.setRequired(true)
 				.setAutocomplete(true)
+		)
+		.addBooleanOption(option =>
+			option.setName('duelratingestimate')
+				.setNameLocalizations({
+					'de': 'duelratingschätzung',
+					'en-GB': 'duelratingestimate',
+					'en-US': 'duelratingestimate',
+				})
+				.setDescription('Whether to fill with an estimate using the duel rating or not')
+				.setDescriptionLocalizations({
+					'de': 'Ob mit einer Schätzung mittels Duel Ratings gefüllt werden soll oder nicht',
+					'en-GB': 'Whether to fill with an estimate using the duel rating or not',
+					'en-US': 'Whether to fill with an estimate using the duel rating or not',
+				})
+				.setRequired(false)
 		),
 	async autocomplete(interaction) {
 		const focusedValue = interaction.options.getFocused();
@@ -132,7 +147,7 @@ module.exports = {
 					}
 				}
 			}
-		}, 2000);
+		}, 1000);
 
 		const mappools = await DBOsuMappools.findAll({
 			attributes: ['name'],
@@ -310,7 +325,7 @@ module.exports = {
 		for (let i = 0; i < mappool.length; i++) {
 			let map = mappool[i];
 
-			let dbBeatmap = await getOsuBeatmap({ beatmapId: map.beatmapId });
+			let dbBeatmap = await getOsuBeatmap({ beatmapId: map.beatmapId, modBits: map.modPool });
 
 			if (map.tieBreaker) {
 				dbBeatmap.modPool = 'TB';
@@ -351,11 +366,30 @@ module.exports = {
 				beatmapId: {
 					[Op.in]: tourneyMaps.map(map => map.beatmapId),
 				},
+				scoringType: 'Score v2',
 			},
 		});
 
 		for (let i = 0; i < players.length; i++) {
 			let multiPlayerScores = multiScores.filter(score => score.osuUserId === players[i].osuUserId);
+
+			let finalMultiPlayerScores = multiPlayerScores.map(score => {
+				let soloScoreFormat = {
+					beatmapId: score.beatmapId,
+					score: score.score,
+					beatmapHash: tourneyMaps.find(map => map.beatmapId === score.beatmapId).hash,
+					mods: parseInt(score.gameRawMods) + parseInt(score.rawMods),
+					count50: score.count50,
+					count100: score.count100,
+					count300: score.count300,
+					countMiss: score.countMiss,
+					scoringType: score.scoringType,
+				};
+
+				return soloScoreFormat;
+			});
+
+			finalMultiPlayerScores = finalMultiPlayerScores.filter(score => scoreIsCorrectMods(score, tourneyMaps.find(map => map.beatmapId === score.beatmapId).modPool));
 
 			let soloPlayerScores = localScores.filter(score => {
 				if (score.uploaderId === players[i].osuUserId) {
@@ -382,73 +416,196 @@ module.exports = {
 					return true;
 				});
 
+				soloScoresWithoutMultiScores = soloScoresWithoutMultiScores.filter(score => scoreIsCorrectMods(score, tourneyMaps[j].modPool));
+
+				soloScoresWithoutMultiScores = soloScoresWithoutMultiScores.map(score => {
+					score.scoringType = 'Local';
+
+					if (!getMods(score.mods).includes('V2')) {
+						let accuracy = getAccuracy({ counts: { 300: score.count300, 100: score.count100, 50: score.count50, miss: score.countMiss } });
+
+						let multiplier = 1;
+
+						if (tourneyMaps[i].modPool.includes('DT') || tourneyMaps[i].modPool.includes('NC')) {
+							multiplier *= 1.2;
+						}
+
+						if (tourneyMaps[i].modPool.includes('HT')) {
+							multiplier *= 0.3;
+						}
+
+						if (tourneyMaps[i].modPool.includes('FL')) {
+							multiplier *= 1.12;
+						}
+
+						if (tourneyMaps[i].modPool.includes('HD')) {
+							multiplier *= 1.06;
+						}
+
+						if (tourneyMaps[i].modPool.includes('HR')) {
+							multiplier *= 1.10;
+						}
+
+						if (tourneyMaps[i].modPool.includes('EZ')) {
+							multiplier *= 0.5;
+						}
+
+						if (tourneyMaps[i].modPool.includes('S0')) {
+							multiplier *= 0.9;
+						}
+
+						score.scoringType = 'Converted';
+
+						score.score = Math.round((700000 * score.maxCombo / tourneyMaps[j].maxCombo) + (300000 * Math.pow(accuracy, 10)) * multiplier);
+					}
+
+					return score;
+				});
+
+				let localV2Scores = soloScoresWithoutMultiScores.filter(score => score.scoringType === 'Local');
+
+				let existingMultiPlayerScoresForMap = multiPlayerScores.filter(multiScore => multiScore.beatmapId === tourneyMaps[j].beatmapId);
+
+				if (localV2Scores.length > 0 || existingMultiPlayerScoresForMap.length > 0) {
+					soloScoresWithoutMultiScores = soloScoresWithoutMultiScores.filter(score => score.scoringType === 'Local');
+				}
+
 				playerScores = playerScores.concat(soloScoresWithoutMultiScores);
 			}
 
-			multiPlayerScores = multiPlayerScores.filter(score => score.scoringType === 'Score v2');
-
-			multiPlayerScores = multiPlayerScores.map(score => {
-				let soloScoreFormat = {
-					beatmapId: score.beatmapId,
-					score: score.score,
-					beatmapHash: tourneyMaps.find(map => map.beatmapId === score.beatmapId).hash,
-					mods: parseInt(score.gameRawMods) + parseInt(score.rawMods),
-					count50: score.count50,
-					count100: score.count100,
-					count300: score.count300,
-					countMiss: score.countMiss,
-					scoringType: score.scoringType,
-				};
-
-				return soloScoreFormat;
-			});
-
 			players[i] = {
 				player: players[i],
-				scores: playerScores.concat(multiPlayerScores),
+				scores: playerScores.concat(finalMultiPlayerScores),
 			};
 
 			for (let j = 0; j < tourneyMaps.length; j++) {
 				let scores = players[i].scores.filter(score => score.beatmapHash === tourneyMaps[j].hash);
 
-				if (scores.length > 0 || tourneyMaps[j].approvalStatus === 'Graveyard' || tourneyMaps[j].approvalStatus === 'WIP' || tourneyMaps[j].approvalStatus === 'Pending') {
+				if (scores.length > 0) {
 					continue;
 				}
 
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
-				await osuApi.getScores({ b: tourneyMaps[j].beatmapId, u: players[i].player.osuUserId, m: 0 })
-					.then(async scores => {
-						if (scores.length === 0) {
-							return null;
-						}
+				if (!['Graveyard', 'WIP', 'Pending'].includes(tourneyMaps[j].approvalStatus)) {
+					// eslint-disable-next-line no-undef
+					process.send('osu!API');
+					await osuApi.getScores({ b: tourneyMaps[j].beatmapId, u: players[i].player.osuUserId, m: 0 })
+						.then(async mapScores => {
+							if (mapScores.length === 0) {
+								return null;
+							}
 
-						for (let k = 0; k < scores.length; k++) {
-							// combo*0.7+log(acc^10)*0.3
-							scores[k].convertedScore = Math.round(((scores[k].maxCombo / tourneyMaps[j].maxCombo) * 0.7 + Math.log10(getAccuracy(scores[k])) * 10 * 0.3) * 1000000);
-						}
+							for (let k = 0; k < mapScores.length; k++) {
+								let multiplier = 1;
 
-						scores.sort((a, b) => b.convertedScore - a.convertedScore);
+								let mods = getMods(mapScores[k].raw_mods);
 
-						let bestScore = scores[0];
+								if (mods.includes('DT') || mods.includes('NC')) {
+									multiplier *= 1.2;
+								}
 
-						players[i].scores.push({
-							beatmapId: tourneyMaps[j].beatmapId,
-							score: bestScore.convertedScore,
-							beatmapHash: tourneyMaps[j].hash,
-							mods: bestScore.raw_mods,
-							count50: bestScore.counts[50],
-							count100: bestScore.counts[100],
-							count300: bestScore.counts[300],
-							countMiss: bestScore.counts.miss,
-							scoringType: 'Converted'
+								if (mods.includes('HT')) {
+									multiplier *= 0.3;
+								}
+
+								if (mods.includes('FL')) {
+									multiplier *= 1.12;
+								}
+
+								if (mods.includes('HD')) {
+									multiplier *= 1.06;
+								}
+
+								if (mods.includes('HR')) {
+									multiplier *= 1.10;
+								}
+
+								if (mods.includes('EZ')) {
+									multiplier *= 0.5;
+								}
+
+								if (mods.includes('S0')) {
+									multiplier *= 0.9;
+								}
+
+								// Score = ((700000 * combo_bonus / max_combo_bonus) + (300000 * ((accuracy_percentage / 100) ^ 10)) * mod_multiplier
+								mapScores[k].convertedScore = Math.round((700000 * mapScores[k].maxCombo / tourneyMaps[j].maxCombo) + (300000 * Math.pow(getAccuracy(mapScores[k]), 10)) * multiplier);
+							}
+
+							mapScores.sort((a, b) => b.convertedScore - a.convertedScore);
+
+							mapScores = mapScores.map(score => {
+								return {
+									beatmapId: tourneyMaps[j].beatmapId,
+									score: score.convertedScore,
+									beatmapHash: tourneyMaps[j].hash,
+									mods: score.raw_mods,
+									count50: score.counts[50],
+									count100: score.counts[100],
+									count300: score.counts[300],
+									countMiss: score.counts.miss,
+									scoringType: 'Converted'
+								};
+							});
+
+							mapScores = mapScores.filter(score => scoreIsCorrectMods(score, tourneyMaps[j].modPool));
+
+							players[i].scores = players[i].scores.concat(mapScores);
+						})
+						.catch(async err => {
+							if (err.message !== 'Not found') {
+								console.error(err);
+							}
 						});
-					})
-					.catch(async err => {
-						if (err.message !== 'Not found') {
-							console.error(err);
-						}
-					});
+
+					scores = players[i].scores.filter(score => score.beatmapHash === tourneyMaps[j].hash);
+				}
+
+				if (scores.length > 0 || !interaction.options.getBoolean('duelratingestimate')) {
+					continue;
+				}
+
+				let duelRating = null;
+
+				if (tourneyMaps[j].modPool === 'NM') {
+					duelRating = players[i].player.osuNoModDuelStarRating;
+				} else if (tourneyMaps[j].modPool === 'HD') {
+					duelRating = players[i].player.osuHiddenDuelStarRating;
+				} else if (tourneyMaps[j].modPool === 'HR') {
+					duelRating = players[i].player.osuHardRockDuelStarRating;
+				} else if (tourneyMaps[j].modPool === 'DT') {
+					duelRating = players[i].player.osuDoubleTimeDuelStarRating;
+				} else {
+					duelRating = players[i].player.osuFreeModDuelStarRating;
+				}
+
+				if (duelRating === null) {
+					duelRating = players[i].player.osuDuelStarRating;
+				}
+
+				// Get an estimate using the duel rating
+				//Get the expected score for the starrating just like the duel rating calculation
+				//https://www.desmos.com/calculator/oae69zr9ze
+				const a = 120000;
+				const b = -1.67;
+				const c = 20000;
+
+				let starRating = adjustStarRating(tourneyMaps[j].starRating, tourneyMaps[j].approachRate, tourneyMaps[j].circleSize, tourneyMaps[j].mods);
+
+				let expectedScore = Math.round(a * Math.pow(starRating + (b - duelRating), 2) + c);
+
+				//Set the score to the lowest expected of c if a really high starrating occurs
+				if (expectedScore < c) {
+					expectedScore = c;
+				} else if (expectedScore > 950000) {
+					expectedScore = 950000;
+				}
+
+				players[i].scores.push({
+					beatmapId: tourneyMaps[j].beatmapId,
+					score: expectedScore,
+					beatmapHash: tourneyMaps[j].hash,
+					scoringType: 'Duel Rating'
+				});
 			}
 		}
 
@@ -539,6 +696,8 @@ module.exports = {
 		ctx.textAlign = 'center';
 		ctx.fillText('Score', canvas.width - 204, 75);
 
+		let legendItems = [];
+
 		// Loop through the maps and draw them
 		for (let i = 0; i < tourneyMaps.length; i++) {
 			let modColour = '#FFFFFF';
@@ -608,39 +767,14 @@ module.exports = {
 				// Draw the player's score
 				let playerScores = players[j].scores.filter(score => score.beatmapHash === tourneyMaps[i].hash);
 
-				let correctModPlayerScores = [];
-
-				if (tourneyMaps[i].modPool === 'FM' || tourneyMaps[i].modPool === 'TB') {
-					correctModPlayerScores = playerScores;
-				} else {
-					for (let k = 0; k < playerScores.length; k++) {
-						let modsReadable = getMods(playerScores[k].mods).filter(mod => mod !== 'V2' && mod !== 'NF').join('');
-
-						if (modsReadable === '') {
-							modsReadable = 'NM';
-						}
-
-						modsReadable = modsReadable.replace('NC', 'DT');
-
-						if (modsReadable === tourneyMaps[i].modPool) {
-							correctModPlayerScores.push(playerScores[k]);
-						}
-					}
-				}
-
-				correctModPlayerScores = correctModPlayerScores.filter(score => {
-					let accuracy = getAccuracy({ counts: { 300: score.count300, 100: score.count100, 50: score.count50, miss: score.countMiss } });
-					return Number(score.score) < 1300000 && accuracy >= 0.9 || Number(score.score) < 1000000 && accuracy < 0.9;
-				});
-
-				correctModPlayerScores = correctModPlayerScores.sort((a, b) => b.score - a.score);
+				playerScores = playerScores.sort((a, b) => b.score - a.score);
 
 				let averageScore = 0;
 
-				for (let k = 0; k < correctModPlayerScores.length && k < 3; k++) {
-					averageScore += Number(correctModPlayerScores[k].score);
+				for (let k = 0; k < playerScores.length && k < 3; k++) {
+					averageScore += Number(playerScores[k].score);
 
-					let score = Number(correctModPlayerScores[k].score);
+					let score = Number(playerScores[k].score);
 
 					// Draw the background
 					let colour = getGradientColour(score / 10000);
@@ -648,9 +782,52 @@ module.exports = {
 					ctx.fillStyle = colour;
 					ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 150, 33);
 
-					if (correctModPlayerScores[k].scoringType === 'Converted') {
+					if (playerScores[k].scoringType === 'Converted') {
+						if (!legendItems.includes('Converted')) {
+							legendItems.push('Converted');
+						}
+
 						// Draw a purple rectangle
 						ctx.fillStyle = '#A800FF';
+						ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
+
+						// Draw a white border
+						ctx.strokeStyle = '#FFFFFF';
+						ctx.lineWidth = 4;
+						ctx.strokeRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
+					} else if (playerScores[k].scoringType === 'Score v2') {
+						if (!legendItems.includes('Score v2')) {
+							legendItems.push('Score v2');
+						}
+
+						// Draw a blue rectangle
+						ctx.fillStyle = '#0000FF';
+						ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
+
+						// Draw a white border
+						ctx.strokeStyle = '#FFFFFF';
+						ctx.lineWidth = 4;
+						ctx.strokeRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
+					} else if (playerScores[k].scoringType === 'Local') {
+						if (!legendItems.includes('Local')) {
+							legendItems.push('Local');
+						}
+
+						// Draw a green rectangle
+						ctx.fillStyle = '#00FF00';
+						ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
+
+						// Draw a white border
+						ctx.strokeStyle = '#FFFFFF';
+						ctx.lineWidth = 4;
+						ctx.strokeRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
+					} else if (playerScores[k].scoringType === 'Duel Rating') {
+						if (!legendItems.includes('Duel Rating')) {
+							legendItems.push('Duel Rating');
+						}
+
+						// Draw a red rectangle
+						ctx.fillStyle = '#FF0000';
 						ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
 
 						// Draw a white border
@@ -663,7 +840,7 @@ module.exports = {
 					ctx.fillStyle = '#FFFFFF';
 					ctx.font = 'bold 20px comfortaa';
 					ctx.textAlign = 'center';
-					ctx.fillText(humanReadable(score), 679 + 400 * j, 4 + 100 * (i + 1) + 25 + (k * 33), 100);
+					ctx.fillText(humanReadable(score), 686 + 400 * j, 4 + 100 * (i + 1) + 25 + (k * 33), 100);
 
 					// Draw the border
 					ctx.strokeStyle = '#FFFFFF';
@@ -671,7 +848,7 @@ module.exports = {
 					ctx.strokeRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 150, 33);
 				}
 
-				averageScore = Math.round(averageScore / Math.min(correctModPlayerScores.length, 3));
+				averageScore = Math.round(averageScore / Math.min(playerScores.length, 3));
 
 				if (averageScore) {
 					lineup.push({ score: averageScore, player: players[j].player.osuName });
@@ -709,11 +886,57 @@ module.exports = {
 				finalLineupScore += lineup[j].score;
 			}
 
-			// TODO: Adjust line up text size and split to different lines if it's too long
+			// Adjust line up text size and split to different lines if it's too long
 			ctx.fillStyle = modColour;
-			ctx.font = 'bold 60px comfortaa';
 			ctx.textAlign = 'center';
-			ctx.fillText(finalLineup.join(', '), 204 + 200 + 400 * (players.length + 1), 4 + 100 * (i + 1) + 75, 375);
+
+			let finalLineUpStrings = [finalLineup.join(', ')];
+			ctx.font = 'bold 60px comfortaa';
+			let doesNotFit = ctx.measureText(finalLineup.join(', ')).width > 375;
+
+			// start with a large font size
+			let fontsize = 60;
+
+			// lower the font size until the text fits the canvas
+			do {
+				fontsize--;
+				ctx.font = fontsize + 'px comfortaa';
+
+				// split the text into multiple lines
+				let metrics = ctx.measureText(finalLineup.join(', '));
+				let fontHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+
+				finalLineUpStrings = [];
+				let line = finalLineup[0];
+				for (let j = 0; j < finalLineup.length; j++) {
+					if (j !== 0) {
+						let testNextItemIncluded = line + ', ' + finalLineup[j];
+
+						if (ctx.measureText(testNextItemIncluded).width > 375) {
+							finalLineUpStrings.push(line);
+							line = finalLineup[j];
+						} else {
+							line = testNextItemIncluded;
+						}
+					}
+
+					if (j === finalLineup.length - 1) {
+						finalLineUpStrings.push(line);
+					}
+				}
+
+				doesNotFit = fontHeight * finalLineUpStrings.length > 75;
+			} while (doesNotFit);
+
+			// draw the text
+			let oneLineMetrics = ctx.measureText(finalLineUpStrings.join(', '));
+			let oneLineHeight = oneLineMetrics.actualBoundingBoxAscent + oneLineMetrics.actualBoundingBoxDescent;
+
+			ctx.textBaseline = 'top';
+			for (let j = 0; j < finalLineUpStrings.length; j++) {
+				ctx.fillText(finalLineUpStrings[j], 204 + 200 + 400 * (players.length + 1), 4 + 100 * (i + 1) + (100 - oneLineHeight * finalLineUpStrings.length) / 2 + oneLineHeight * j, 375);
+			}
+			ctx.textBaseline = 'alphabetic';
 
 			// Draw a white border
 			ctx.strokeStyle = '#FFFFFF';
@@ -751,32 +974,53 @@ module.exports = {
 			ctx.strokeRect(604 + 400 * i, 104, 150, 100 * tourneyMaps.length);
 		}
 
-		// Draw a legend
-		ctx.fillStyle = '#1E1E1E';
-		ctx.fillRect(24, 128 + 100 * tourneyMaps.length, 200, 60);
+		for (let i = 0; i < legendItems.length; i++) {
+			// Draw a legend
+			ctx.fillStyle = '#1E1E1E';
+			ctx.fillRect(24 + i * 250, 128 + 100 * tourneyMaps.length, 200, 60);
 
-		// Draw the text
-		ctx.fillStyle = '#FFFFFF';
-		ctx.font = 'bold 18px comfortaa';
-		ctx.textAlign = 'center';
-		ctx.fillText('Converted v1 Score', 24 + 100, 128 + 100 * tourneyMaps.length + 37, 150);
+			let text = null;
+			let colour = null;
 
-		// Draw a purple rectangle
-		ctx.fillStyle = '#A800FF';
-		ctx.fillRect(24, 128 + 100 * tourneyMaps.length, 14, 60);
+			if (legendItems[i] === 'Converted') {
+				text = 'Converted v1 Score';
+				colour = '#A800FF';
+			} else if (legendItems[i] === 'Estimated') {
+				text = 'Estimated by player';
+				colour = '#FFA800';
+			} else if (legendItems[i] === 'Duel Rating') {
+				text = 'Duel Rating';
+				colour = '#FF0000';
+			} else if (legendItems[i] === 'Score v2') {
+				text = 'Tournament Score';
+				colour = '#0000FF';
+			} else if (legendItems[i] === 'Local') {
+				text = 'Local Score';
+				colour = '#00FF00';
+			}
 
-		// Draw a white border
-		ctx.strokeStyle = '#FFFFFF';
-		ctx.lineWidth = 4;
-		ctx.strokeRect(24, 128 + 100 * tourneyMaps.length, 14, 60);
+			// Draw the text
+			ctx.fillStyle = '#FFFFFF';
+			ctx.font = 'bold 18px comfortaa';
+			ctx.textAlign = 'center';
+			ctx.fillText(text, 31 + 100 + i * 250, 128 + 100 * tourneyMaps.length + 37, 150);
 
-		// Draw a white border
-		ctx.strokeStyle = '#FFFFFF';
-		ctx.lineWidth = 4;
-		ctx.strokeRect(24, 128 + 100 * tourneyMaps.length, 200, 60);
+			// Draw a rectangle
+			ctx.fillStyle = colour;
+			ctx.fillRect(24 + i * 250, 128 + 100 * tourneyMaps.length, 14, 60);
 
-		// Draw a legend for estimated score
-		// TODO: Draw a legend for calculated from duel rating
+			// Draw a white border
+			ctx.strokeStyle = '#FFFFFF';
+			ctx.lineWidth = 4;
+			ctx.strokeRect(24 + i * 250, 128 + 100 * tourneyMaps.length, 14, 60);
+
+			// Draw a white border
+			ctx.strokeStyle = '#FFFFFF';
+			ctx.lineWidth = 4;
+			ctx.strokeRect(24 + i * 250, 128 + 100 * tourneyMaps.length, 200, 60);
+		}
+
+		// TODO: Draw a legend for estimated score
 
 		// Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'teamsheet.png' })];
@@ -798,6 +1042,11 @@ module.exports = {
 		content += '\n\n Use </osu-scoreupload:1084953371435356291> to upload your local scores.';
 
 		await interaction.followUp({ content: content, files: files });
+
+		//TODO: Reset reaction
+		//TODO: Auto update on score upload
+		//TODO: Match tracking
+		//TODO: Mark which mod was used for FM
 	},
 };
 
@@ -859,4 +1108,24 @@ function getGradientColour(percentage) {
 	blue = Math.round(blue);
 
 	return `#${red.toString(16).padStart(2, '0')}${green.toString(16).padStart(2, '0')}${blue.toString(16).padStart(2, '0')}`;
+}
+
+function scoreIsCorrectMods(score, modPool) {
+	if (modPool === 'FM' || modPool === 'TB') {
+		return true;
+	}
+
+	let modsReadable = getMods(score.mods).filter(mod => mod !== 'V2' && mod !== 'NF').join('');
+
+	if (modsReadable === '') {
+		modsReadable = 'NM';
+	}
+
+	modsReadable = modsReadable.replace('NC', 'DT');
+
+	if (modsReadable === modPool) {
+		return true;
+	}
+
+	return false;
 }
