@@ -256,8 +256,7 @@ module.exports = {
 			}
 
 			// Delete the message of the teamsheet and create a new one
-			await interaction.client.shard.broadcastEval(async (c, { guildId, channelId, messageId, teamsize, creatorId, players, mappool, duelratingestimate, updateUntil }) => {
-
+			await interaction.client.shard.broadcastEval(async (c, { guildId, channelId, messageId, teamsize, poolCreatorId, players, mappool, duelratingestimate, updateUntil }) => {
 				const guild = await c.guilds.fetch(guildId);
 				if (!guild) return;
 
@@ -273,7 +272,7 @@ module.exports = {
 					//Nothing
 				}
 				// eslint-disable-next-line no-undef
-				const { DBOsuTeamSheets } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+				const { DBOsuTeamSheets, DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 
 				DBOsuTeamSheets.destroy({
 					where: {
@@ -285,11 +284,13 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 				const command = require((`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-teamsheet.js`));
 
-				console.log(creatorId);
+				let discordUser = await DBDiscordUsers.findOne({
+					where: {
+						osuUserId: poolCreatorId,
+					}
+				});
 
-				let creator = await guild.members.fetch(creatorId);
-
-				console.log(creator);
+				let creator = await guild.members.fetch(discordUser.userId);
 
 				//Setup artificial interaction
 				let interaction = {
@@ -306,7 +307,7 @@ module.exports = {
 								return mappool;
 							}
 						},
-						getInteger: (string) => {
+						getNumber: (string) => {
 							if (string === 'teamsize') {
 								return teamsize;
 							} else if (string === 'updatefor') {
@@ -338,7 +339,7 @@ module.exports = {
 					channelId: teamsheet.channelId,
 					messageId: teamsheet.messageId,
 					teamsize: teamsheet.teamsize,
-					creatorId: teamsheet.creatorId,
+					poolCreatorId: teamsheet.poolCreatorId,
 					players: teamsheet.players,
 					mappool: teamsheet.poolName,
 					duelratingestimate: teamsheet.duelratingestimate,
