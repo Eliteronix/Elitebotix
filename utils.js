@@ -1168,6 +1168,7 @@ module.exports = {
 							&& !badge.description.includes(' contributor')
 							&& !badge.description.includes('Mapper\'s Favourite ')
 							&& !badge.description.includes('Community Favourite ')
+							&& !badge.description.includes('Community Choice ')
 							&& !badge.description.includes('Mapping')
 							&& !badge.description.includes('Aspire')
 							&& !badge.description.includes('Beatmapping')
@@ -1176,7 +1177,8 @@ module.exports = {
 							&& !badge.description.includes('Newspaper ')
 							&& !badge.description.includes('Pending Cup ')
 							&& !badge.description.includes('Mapper\'s Choice ')
-							&& !badge.description.includes('Exemplary performance in')) {
+							&& !badge.description.includes('Exemplary performance')
+							&& !badge.description.toLowerCase().includes('contribution')) {
 							additionalInfo.tournamentBadges.push(badge);
 						}
 					}
