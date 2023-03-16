@@ -118,6 +118,7 @@ const { initializeMOTD } = require('./MOTD/initializeMOTD');
 
 const Banchojs = require('bancho.js');
 const { DBProcessQueue } = require('./dbObjects');
+
 // eslint-disable-next-line no-undef
 const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterTimespan: 60000, limiterPrivate: 45, limiterPublic: 9 });
 
@@ -150,8 +151,11 @@ process.on('message', message => {
 
 		//Connect for the first shard
 		// eslint-disable-next-line no-undef
-		if (!wrongCluster(client) && process.env.SERVER !== 'QA') {
-			bancho.connect();
+		if (!wrongCluster(client)) {
+			// eslint-disable-next-line no-undef
+			if (process.env.SERVER === 'Live') {
+				bancho.connect();
+			}
 
 			bancho.lastUserMaps = new Discord.Collection();
 

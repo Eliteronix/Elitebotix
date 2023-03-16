@@ -1,7 +1,8 @@
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
-const { DBOsuSoloScores, DBDiscordUsers } = require('../dbObjects');
+const { DBOsuSoloScores, DBDiscordUsers, DBOsuTeamSheets, DBOsuMappools, DBOsuBeatmaps } = require('../dbObjects');
 const { getMods, logDatabaseQueries } = require('../utils.js');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-scoreupload',
@@ -209,6 +210,143 @@ module.exports = {
 		await DBOsuSoloScores.bulkCreate(newScores);
 
 		await interaction.editReply(`Successfully uploaded ${newScores.length} new score(s)!`);
+
+		// Update teamsheets
+		logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuTeamsheets update');
+		let teamsheets = await DBOsuTeamSheets.findAll({
+			where: {
+				players: {
+					[Op.like]: `%${discordUser.osuUserId}%`,
+				},
+			},
+		});
+
+		let newScoreMaps = await DBOsuBeatmaps.findAll({
+			where: {
+				hash: {
+					[Op.in]: newScores.map(score => score.beatmapHash),
+				},
+			},
+		});
+
+		for (let i = 0; i < teamsheets.length; i++) {
+			const teamsheet = teamsheets[i];
+
+			logDatabaseQueries(4, 'commands/osu-teamsheet.js DBOsuMappools');
+			let mappool = await DBOsuMappools.findAll({
+				where: {
+					creatorId: teamsheet.poolCreatorId,
+					name: teamsheet.poolName,
+					beatmapId: {
+						[Op.in]: newScoreMaps.map(map => map.beatmapId),
+					},
+				},
+				order: [
+					['number', 'ASC']
+				]
+			});
+
+			if (mappool.length === 0) {
+				continue;
+			}
+
+			if (new Date() > new Date(teamsheet.updateUntil)) {
+				teamsheet.destroy();
+				continue;
+			}
+
+			// Delete the message of the teamsheet and create a new one
+			await interaction.client.shard.broadcastEval(async (c, { guildId, channelId, messageId, teamsize, creatorId, players, mappool, duelratingestimate, updateUntil }) => {
+
+				const guild = await c.guilds.fetch(guildId);
+				if (!guild) return;
+
+				const channel = await guild.channels.fetch(channelId);
+				if (!channel) return;
+
+				const message = await channel.messages.fetch(messageId);
+				if (!message) return;
+
+				try {
+					await message.delete();
+				} catch (e) {
+					//Nothing
+				}
+				// eslint-disable-next-line no-undef
+				const { DBOsuTeamSheets } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+
+				DBOsuTeamSheets.destroy({
+					where: {
+						messageId: messageId,
+					}
+				});
+
+				// Create the new message
+				// eslint-disable-next-line no-undef
+				const command = require((`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-teamsheet.js`));
+
+				console.log(creatorId);
+
+				let creator = await guild.members.fetch(creatorId);
+
+				console.log(creator);
+
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					channel: channel,
+					client: c,
+					guild: guild,
+					user: creator.user,
+					options: {
+						getString: (string) => {
+							if (string === 'players') {
+								return players;
+							} else if (string === 'mappool') {
+								return mappool;
+							}
+						},
+						getInteger: (string) => {
+							if (string === 'teamsize') {
+								return teamsize;
+							} else if (string === 'updatefor') {
+								return Math.ceil(updateUntil / 1000 / 60);
+							}
+						},
+						getBoolean: (string) => {
+							if (string === 'duelratingestimate') {
+								return duelratingestimate;
+							}
+						}
+					},
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await channel.send(input);
+					},
+					editReply: async (input) => {
+						return await channel.send(input);
+					},
+					reply: async (input) => {
+						return await channel.send(input);
+					}
+				};
+
+				command.execute(null, null, interaction);
+			}, {
+				context: {
+					guildId: teamsheet.guildId,
+					channelId: teamsheet.channelId,
+					messageId: teamsheet.messageId,
+					teamsize: teamsheet.teamsize,
+					creatorId: teamsheet.creatorId,
+					players: teamsheet.players,
+					mappool: teamsheet.poolName,
+					duelratingestimate: teamsheet.duelratingestimate,
+					updatefor: teamsheet.updateUntil.getTime(),
+				}
+			});
+
+		}
 	},
 };
 

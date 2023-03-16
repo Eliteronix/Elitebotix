@@ -1,6 +1,6 @@
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, developers } = require('../config.json');
-const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuMultiScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuMultiScores, DBOsuTeamSheets } = require('../dbObjects');
 const { pause, getAvatar, logDatabaseQueries, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating } = require('../utils');
 const { Op } = require('sequelize');
 const Canvas = require('canvas');
@@ -30,7 +30,7 @@ module.exports = {
 			'en-GB': 'Allows you to create a teamsheet for your team',
 			'en-US': 'Allows you to create a teamsheet for your team',
 		})
-		.setDMPermission(true)
+		.setDMPermission(false)
 		.addNumberOption(option =>
 			option.setName('teamsize')
 				.setNameLocalizations({
@@ -76,6 +76,29 @@ module.exports = {
 				})
 				.setRequired(true)
 				.setAutocomplete(true)
+		)
+		.addNumberOption(option =>
+			option.setName('updatefor')
+				.setNameLocalizations({
+					'de': 'updatefür',
+					'en-GB': 'updatefor',
+					'en-US': 'updatefor',
+				})
+				.setDescription('The amount of time the teamsheet should be automatically updated for')
+				.setDescriptionLocalizations({
+					'de': 'Die Zeit, für die das Teamsheet automatisch aktualisiert werden soll',
+					'en-GB': 'The amount of time the teamsheet should be automatically updated for',
+					'en-US': 'The amount of time the teamsheet should be automatically updated for',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Next 3 hours', value: 180 },
+					{ name: 'Next 12 hours', value: 720 },
+					{ name: 'Next day', value: 1440 },
+					{ name: 'Next 3 days', value: 4320 },
+					{ name: 'Next week', value: 10080 },
+					{ name: 'Next 2 weeks', value: 20160 },
+				)
 		)
 		.addBooleanOption(option =>
 			option.setName('duelratingestimate')
@@ -1045,7 +1068,30 @@ module.exports = {
 
 		content += '\n\n Use </osu-scoreupload:1084953371435356291> to upload your local scores.';
 
-		await interaction.followUp({ content: content, files: files });
+		if (interaction.options.getNumber('updatefor')) {
+			if (interaction.id) {
+				await interaction.editReply('Sending teamsheet...');
+			}
+
+			let sentMessage = await interaction.channel.send({ content: content, files: files });
+
+			let date = new Date();
+			date.setMinutes(date.getMinutes() + interaction.options.getNumber('updatefor'));
+
+			await DBOsuTeamSheets.create({
+				guildId: interaction.guild.id,
+				channelId: interaction.channel.id,
+				messageId: sentMessage.id,
+				updateUntil: date,
+				players: players.map(player => player.player.osuUserId).join(','),
+				poolName: interaction.options.getString('mappool'),
+				poolCreatorId: commandUser.osuUserId,
+				teamsize: teamsize,
+				duelRatingEstimate: interaction.options.getBoolean('duelratingestimate'),
+			});
+		} else {
+			await interaction.followUp({ content: content, files: files });
+		}
 
 		//TODO: Reset reaction
 		//TODO: Auto update on score upload
