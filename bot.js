@@ -384,7 +384,7 @@ async function checkOsuTracks(client) {
 
 	setTimeout(() => {
 		checkOsuTracks(client);
-	}, 10000);
+	}, 1000);
 }
 
 async function resetSaveMultiMatches() {
