@@ -6196,6 +6196,8 @@ module.exports = {
 							await guildTrackers[i].destroy();
 							continue;
 						}
+
+						console.error(err);
 					}
 
 					if (guildTrackers[i].medals || guildTrackers[i].osuLeaderboard || guildTrackers[i].taikoLeaderboard || guildTrackers[i].catchLeaderboard || guildTrackers[i].maniaLeaderboard) {
