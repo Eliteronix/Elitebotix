@@ -3344,7 +3344,9 @@ module.exports = {
 										let guild = await c.guilds.cache.get(guildId);
 										if (guild) {
 											let channel = await guild.channels.cache.get(channelId);
-											channel.send(message);
+											if (channel) {
+												await channel.send(message);
+											}
 										}
 									}, { context: { guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, message: `\`\`\`${message.join('\n')}\`\`\`` } });
 								} catch (err) {
@@ -6200,8 +6202,6 @@ module.exports = {
 						console.error(err);
 					}
 
-					console.log(1, guildTrackers[i].channel);
-
 					if (guildTrackers[i].medals || guildTrackers[i].osuLeaderboard || guildTrackers[i].taikoLeaderboard || guildTrackers[i].catchLeaderboard || guildTrackers[i].maniaLeaderboard) {
 						if (!osuUser.osuUser) {
 							try {
@@ -6225,8 +6225,6 @@ module.exports = {
 							}
 						}
 
-						console.log(2);
-
 						//Grab recent events and send it in
 						if (osuUser.osuUser.events.length > 0) {
 							for (let j = 0; j < osuUser.osuUser.events.length; j++) {
@@ -6239,8 +6237,6 @@ module.exports = {
 										}
 									}
 								}
-
-								console.log(3);
 
 								if (osuUser.osuUser.events[j].html.includes('medal')) {
 									if (!guildTrackers[i].medals) {
@@ -6288,8 +6284,6 @@ module.exports = {
 										}
 									}
 								} else {
-
-									console.log(4);
 									let mapRank = osuUser.osuUser.events[j].html.replace(/.+<\/a><\/b> achieved rank #/gm, '').replace(/.+<\/a><\/b> achieved .+rank #/gm, '').replace(/ on <a href='\/b\/.+/gm, '').replace('</b>', '');
 									let modeName = osuUser.osuUser.events[j].html.replace(/.+<\/a> \(osu!/gm, '');
 									modeName = modeName.substring(0, modeName.length - 1);
@@ -6332,8 +6326,6 @@ module.exports = {
 							}
 						}
 					}
-
-					console.log(5);
 
 					if (guildTrackers[i].osuTopPlays) {
 						if (guildTrackers[i].osuNumberTopPlays === undefined) {
@@ -6382,8 +6374,6 @@ module.exports = {
 						}
 					}
 
-					console.log(6);
-
 					if (guildTrackers[i].taikoTopPlays) {
 						if (guildTrackers[i].taikoNumberTopPlays === undefined) {
 							// eslint-disable-next-line no-undef
@@ -6430,8 +6420,6 @@ module.exports = {
 							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
 					}
-
-					console.log(7);
 
 					if (guildTrackers[i].catchTopPlays) {
 						if (guildTrackers[i].catchNumberTopPlays === undefined) {
@@ -6480,8 +6468,6 @@ module.exports = {
 						}
 					}
 
-					console.log(8);
-
 					if (guildTrackers[i].maniaTopPlays) {
 						if (guildTrackers[i].maniaNumberTopPlays === undefined) {
 							// eslint-disable-next-line no-undef
@@ -6528,8 +6514,6 @@ module.exports = {
 							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
 					}
-
-					console.log(9);
 
 					if (guildTrackers[i].tournamentTopPlays) {
 						if (guildTrackers[i].tournamentNumberTopPlays === undefined) {
@@ -6625,8 +6609,6 @@ module.exports = {
 						}
 					}
 
-					console.log(10);
-
 					if (guildTrackers[i].osuAmeobea) {
 						try {
 							if (!guildTrackers[i].osuAmeobeaUpdated) {
@@ -6652,8 +6634,6 @@ module.exports = {
 							//Nothing
 						}
 					}
-
-					console.log(11);
 
 					if (guildTrackers[i].taikoAmeobea) {
 						try {
@@ -6681,8 +6661,6 @@ module.exports = {
 						}
 					}
 
-					console.log(12);
-
 					if (guildTrackers[i].catchAmeobea) {
 						try {
 							if (!guildTrackers[i].catchAmeobeaUpdated) {
@@ -6708,8 +6686,6 @@ module.exports = {
 							//Nothing
 						}
 					}
-
-					console.log(13);
 
 					if (guildTrackers[i].maniaAmeobea) {
 						try {
@@ -6737,8 +6713,6 @@ module.exports = {
 						}
 					}
 				}
-
-				console.log(14);
 
 				return recentActivity;
 			}, { context: { osuUser: osuUser, lastUpdated: osuTracker.updatedAt } });
