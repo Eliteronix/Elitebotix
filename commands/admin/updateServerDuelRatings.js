@@ -9,14 +9,12 @@ module.exports = {
 		const sentMessage = await interaction.channel.send('Fetching members...');
 
 		try {
-			let guildMembers = await interaction.guild.members.fetch({ time: 300000 })
+			let members = await interaction.guild.members.fetch({ time: 300000 })
 				.catch((err) => {
 					throw new Error(err);
 				});
 
-			let members = [];
-
-			guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
+			members = members.filter(member => member.user.bot !== true).map(member => member);
 
 			for (let i = 0; i < members.length; i++) {
 				if (i % 25 === 0) {

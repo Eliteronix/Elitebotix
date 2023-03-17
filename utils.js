@@ -5479,6 +5479,11 @@ module.exports = {
 		});
 	},
 	async updateQueueChannels(client) {
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting utils.js updateQueueChannels to shards...');
+		}
+
 		// eslint-disable-next-line no-empty-pattern
 		client.shard.broadcastEval(async (c, { }) => {
 			let voiceChannelId = '1010093794714189865';
