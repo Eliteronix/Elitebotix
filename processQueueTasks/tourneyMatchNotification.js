@@ -1,10 +1,16 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
+const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
 		// console.log('tourneyMatchNotification');
 		let args = processQueueEntry.additions.split(';');
+
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting commands/changelog.js to shards...');
+		}
 
 		let foundChannel = await client.shard.broadcastEval(async (c, { channelId, processQueueEntryId }) => {
 			// eslint-disable-next-line no-undef

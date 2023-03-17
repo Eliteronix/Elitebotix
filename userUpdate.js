@@ -1,5 +1,6 @@
 const { DBGuilds } = require('./dbObjects');
 const { logDatabaseQueries } = require('./utils');
+const { logBroadcastEval } = require('../config.json');
 
 module.exports = async function (oldUser, newUser) {
 	if (oldUser.username !== newUser.username) {
@@ -10,6 +11,11 @@ module.exports = async function (oldUser, newUser) {
 
 		guilds.forEach(async (guild) => {
 			if (guild.loggingChannel && correctEnvironment(guild)) {
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting userUpdate.js Username to shards...');
+				}
+
 				let found = await newUser.client.shard.broadcastEval(async (c, { guildId, newUser, oldUser }) => {
 					let discordGuild;
 					try {
@@ -83,6 +89,11 @@ module.exports = async function (oldUser, newUser) {
 
 		guilds.forEach(async (guild) => {
 			if (guild.loggingChannel && correctEnvironment(guild)) {
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting userUpdate.js Discriminator to shards...');
+				}
+
 				let found = await newUser.client.shard.broadcastEval(async (c, { guildId, newUser, oldUser }) => {
 					let discordGuild;
 					try {
@@ -156,6 +167,11 @@ module.exports = async function (oldUser, newUser) {
 
 		guilds.forEach(async (guild) => {
 			if (guild.loggingChannel && correctEnvironment(guild)) {
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting userUpdate.js Avatar to shards...');
+				}
+
 				let found = await newUser.client.shard.broadcastEval(async (c, { guildId, newUser, oldUser }) => {
 					let discordGuild;
 					try {

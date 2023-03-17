@@ -1,6 +1,7 @@
 const { saveOsuMultiScores, logDatabaseQueries } = require('../utils');
 const osu = require('node-osu');
 const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
+const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -33,6 +34,12 @@ module.exports = {
 					let minutesBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60) % 60;
 					let hoursBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60) % 24;
 					let daysBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60 / 24);
+
+					if (logBroadcastEval) {
+						// eslint-disable-next-line no-console
+						console.log('Broadcasting processQueueTasks/importMatch.js to shards...');
+					}
+
 					client.shard.broadcastEval(async (c, { message, matchID }) => {
 						// Remove match from client
 						while (c.duels.indexOf(matchID) > -1) {

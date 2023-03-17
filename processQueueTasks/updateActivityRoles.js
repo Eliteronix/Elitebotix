@@ -1,5 +1,7 @@
 const { logDatabaseQueries } = require('../utils');
 const { DBActivityRoles } = require('../dbObjects');
+const { logBroadcastEval } = require('../config.json');
+
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
 		// console.log('updateActivityRoles');
@@ -11,6 +13,11 @@ module.exports = {
 		if (!activityRoles.length) {
 			processQueueEntry.destroy();
 			return;
+		}
+
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting processQueueTasks/updateActivtyRoles.js to shards...');
 		}
 
 		client.shard.broadcastEval(async (c, { guildId, activityRoles }) => {

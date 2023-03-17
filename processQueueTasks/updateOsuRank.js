@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
 const { logDatabaseQueries, getUserDuelStarRating, getDerankStats, getAdditionalOsuInfo } = require('../utils.js');
 const osu = require('node-osu');
-const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.json');
+const { currentElitiriCup, currentElitiriCupEndOfRegs, logBroadcastEval } = require('../config.json');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -330,6 +330,11 @@ module.exports = {
 				}
 
 				if (sendLogMessage) {
+					if (logBroadcastEval) {
+						// eslint-disable-next-line no-console
+						console.log('Broadcasting processQueueTasks/updateOsuRank.js banned-users log to shards...');
+					}
+
 					client.shard.broadcastEval(async (c, { message }) => {
 						let guildId = '727407178499096597';
 
@@ -371,6 +376,11 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (ecs2021SignUp && process.env.SERVER === 'Live') {
+			if (logBroadcastEval) {
+				// eslint-disable-next-line no-console
+				console.log('Broadcasting processQueueTasks/updateOsuRank.js elitiri summer 2021 roles to shards...');
+			}
+
 			client.shard.broadcastEval(async (c, { discordUserId, rankAchieved }) => {
 				const guild = await c.guilds.cache.get('727407178499096597');
 				if (guild) {
@@ -428,6 +438,11 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (ecw2022SignUp && process.env.SERVER === 'Live') {
+			if (logBroadcastEval) {
+				// eslint-disable-next-line no-console
+				console.log('Broadcasting processQueueTasks/updateOsuRank.js elitiri winter 2022 roles to shards...');
+			}
+
 			client.shard.broadcastEval(async (c, { discordUserId, rankAchieved }) => {
 				const guild = await c.guilds.cache.get('727407178499096597');
 				if (guild) {
@@ -500,6 +515,11 @@ module.exports = {
 
 			// eslint-disable-next-line no-undef
 			if (elitiriSignUp.osuName !== discordUser.osuName && !elitiriSignUp.rankAchieved && process.env.SERVER === 'Live') {
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting processQueueTasks/updateOsuRank.js elitiri host name change message log to shards...');
+				}
+
 				client.shard.broadcastEval(async (c, { message }) => {
 					const guild = await c.guilds.cache.get('727407178499096597');
 					if (guild) {

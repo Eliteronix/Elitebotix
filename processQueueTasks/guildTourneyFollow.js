@@ -1,5 +1,6 @@
 const { DBOsuGuildTrackers } = require('../dbObjects');
 const { logDatabaseQueries, getOsuPlayerName } = require('../utils');
+const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -17,6 +18,11 @@ module.exports = {
 
 			if (args[5].toLowerCase().includes('qualifier')) {
 				message = `Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\n${args[5]}\n(Qualifier MP Links are hidden)`;
+			}
+
+			if (logBroadcastEval) {
+				// eslint-disable-next-line no-console
+				console.log('Broadcasting processQueueTasks/guildTourneyFollow.js to shards...');
 			}
 
 			client.shard.broadcastEval(async (c, { guildId, channelId, message, autoTrack, matchId }) => {

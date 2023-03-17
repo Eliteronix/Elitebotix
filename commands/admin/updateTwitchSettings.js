@@ -1,4 +1,5 @@
 const { DBDiscordUsers } = require('../../dbObjects');
+const { logBroadcastEval } = require('../../config.json');
 
 module.exports = {
 	name: 'updateTwitchSettings',
@@ -40,6 +41,11 @@ module.exports = {
 		}
 
 		if (enabledSomething) {
+			if (logBroadcastEval) {
+				// eslint-disable-next-line no-console
+				console.log('Broadcasting commands/admin/updateTwitchSettings.js to shards...');
+			}
+
 			await interaction.client.shard.broadcastEval(async (c, { channelName }) => {
 				if (c.shardId === 0) {
 					c.twitchClient.join(channelName);

@@ -3,6 +3,7 @@ const { knockoutLobby } = require('./knockoutLobby.js');
 const { assignQualifierPoints } = require('./givePointsToPlayers.js');
 const { getMods, humanReadable, createMOTDAttachment, pause, logDatabaseQueries } = require('../utils.js');
 const { DBDiscordUsers } = require('../dbObjects.js');
+const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	qualifier: async function (client, bancho, bracketName, mappool, players) {
@@ -266,6 +267,11 @@ async function messageUserWithRetries(client, user, content, attachment) {
 						discordUser.osuMOTDerrorFirstOccurence = now;
 						discordUser.save();
 
+						if (logBroadcastEval) {
+							// eslint-disable-next-line no-console
+							console.log('Broadcasting MOTD/qualifiers.js DM issues 1 to shards...');
+						}
+
 						client.shard.broadcastEval(async (c, { message }) => {
 							const channel = await c.channels.cache.get('833803740162949191');
 							if (channel) {
@@ -280,6 +286,11 @@ async function messageUserWithRetries(client, user, content, attachment) {
 						discordUser.osuMOTDmutedUntil = null;
 						discordUser.save();
 					} else {
+						if (logBroadcastEval) {
+							// eslint-disable-next-line no-console
+							console.log('Broadcasting MOTD/qualifiers.js DM issues 2 to shards...');
+						}
+
 						client.shard.broadcastEval(async (c, { message }) => {
 							const channel = await c.channels.cache.get('833803740162949191');
 							if (channel) {

@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { developers } = require('../config.json');
+const { developers, logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	name: 'changelog',
@@ -61,6 +61,11 @@ module.exports = {
 				msg.reply({ content: '**Elitebotix has been updated** - Please report any bugs by using </feedback:1064502027591364649>.', files: [attachment] });
 				// eslint-disable-next-line no-undef
 			} else if (process.env.SERVER === 'Live') {
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting commands/changelog.js to shards...');
+				}
+
 				msg.client.shard.broadcastEval(async (c, { args }) => {
 					const changelogChannel = await c.channels.cache.get('804658828883787784');
 					if (changelogChannel) {

@@ -1,5 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers } = require('./dbObjects');
-const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries } = require('./config.json');
+const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -1192,6 +1192,12 @@ module.exports = {
 					.then(async (discordUser) => {
 						if (discordUser) {
 							if (discordUser.osuBadges !== additionalInfo.tournamentBadges.length) {
+
+								if (logBroadcastEval) {
+									// eslint-disable-next-line no-console
+									console.log('Broadcasting utils.js tournamentbadges to shards...');
+								}
+
 								client.shard.broadcastEval(async (c, { message }) => {
 									let guildId = '727407178499096597';
 
@@ -1227,6 +1233,11 @@ module.exports = {
 
 									if (additionalInfo.tournamentBan.tournamentBannedUntil.getUTCFullYear() !== 9999) {
 										bannedUntilString = `over <t:${Math.floor(additionalInfo.tournamentBan.tournamentBannedUntil.getTime() / 1000)}:R>`;
+									}
+
+									if (logBroadcastEval) {
+										// eslint-disable-next-line no-console
+										console.log('Broadcasting utils.js tournamentban to shards...');
 									}
 
 									client.shard.broadcastEval(async (c, { message }) => {
@@ -1422,6 +1433,11 @@ module.exports = {
 
 		while (matchAlreadyGetsImported) {
 			try {
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting utils.js sameMatchGettingImported to shards...');
+				}
+
 				let sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId, games }) => {
 					if (c.shardId === 0) {
 						if (c.matchesGettingImported === undefined) {
@@ -1471,6 +1487,11 @@ module.exports = {
 
 		while (waitForADifferentImport) {
 			try {
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting utils.js waitForADifferentImport to shards...');
+				}
+
 				let sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId }) => {
 					if (c.shardId === 0) {
 						if (c.matchesGettingImported === undefined) {
@@ -2061,6 +2082,11 @@ module.exports = {
 
 		// Remove the match from the getting imported list
 		try {
+			if (logBroadcastEval) {
+				// eslint-disable-next-line no-console
+				console.log('Broadcasting utils.js remove sameMatchesGettingImported to shards...');
+			}
+
 			await client.shard.broadcastEval(async (c, { matchId }) => {
 				if (c.shardId === 0) {
 					c.matchesGettingImported = c.matchesGettingImported.filter(m => m.matchId !== matchId);
@@ -2614,6 +2640,11 @@ module.exports = {
 
 			if (dbGuild && dbGuild.birthdayEnabled) {
 				//Fetch the channel
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting utils.js birthdayAnnouncement to shards...');
+				}
+
 				let channelFound = await client.shard.broadcastEval(async (c, { channelId, userId }) => {
 					const birthdayMessageChannel = await c.channels.cache.get(channelId);
 
@@ -3303,6 +3334,11 @@ module.exports = {
 						}
 
 						if (message.length > 1) {
+							if (logBroadcastEval) {
+								// eslint-disable-next-line no-console
+								console.log('Broadcasting utils.js duel Rating change for official server to shards...');
+							}
+
 							input.client.shard.broadcastEval(async (c, { message }) => {
 								let guildId = '727407178499096597';
 								let channelId = '946150632128135239';
@@ -3340,6 +3376,11 @@ module.exports = {
 
 							for (let i = 0; i < guildTrackers.length; i++) {
 								try {
+									if (logBroadcastEval) {
+										// eslint-disable-next-line no-console
+										console.log('Broadcasting utils.js duel Rating change for guilds to shards...');
+									}
+
 									input.client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 										let guild = await c.guilds.cache.get(guildId);
 										if (guild) {
@@ -4544,6 +4585,11 @@ module.exports = {
 		}
 	},
 	logMatchCreation(client, name, matchId) {
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting utils.js log match creation to shards...');
+		}
+
 		client.shard.broadcastEval(async (c, { message }) => {
 			let guildId = null;
 			let channelId = null;
@@ -4593,6 +4639,11 @@ module.exports = {
 		let issues = responseJson.issues;
 
 		client.shard.broadcastEval(async (c, { issues }) => {
+			if (logBroadcastEval) {
+				// eslint-disable-next-line no-console
+				console.log('Broadcasting utils.js jira cards to shards...');
+			}
+
 			const backlogChannel = await c.channels.cache.get('1000372560552276028');
 			if (backlogChannel) {
 				const selectedForDevChannel = await c.channels.cache.get('1000372600251351070');
@@ -5613,6 +5664,11 @@ module.exports = {
 								notes: notes,
 							});
 
+							if (logBroadcastEval) {
+								// eslint-disable-next-line no-console
+								console.log('Broadcasting utils.js new tourney posts to shards...');
+							}
+
 							client.shard.broadcastEval(async (c, { message }) => {
 								let guildId = '727407178499096597';
 
@@ -6155,6 +6211,11 @@ module.exports = {
 
 		if (osuTracker) {
 			let osuUser = { osuUserId: osuTracker.osuUserId };
+
+			if (logBroadcastEval) {
+				// eslint-disable-next-line no-console
+				console.log('Broadcasting utils.js osu! track activity to shards...');
+			}
 
 			let recentActivities = await client.shard.broadcastEval(async (c, { osuUser, lastUpdated }) => {
 				const osu = require('node-osu');
@@ -7192,6 +7253,11 @@ module.exports = {
 				let json = await response.json();
 				if (json.data.length > 0) {
 					if (twitchUsers[i].twitchName !== json.data[0].login) {
+						if (logBroadcastEval) {
+							// eslint-disable-next-line no-console
+							console.log('Broadcasting utils.js join twitch channel to shards...');
+						}
+
 						await client.shard.broadcastEval(async (c, { channelName }) => {
 							if (c.shardId === 0) {
 								c.twitchClient.join(channelName);

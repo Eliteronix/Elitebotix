@@ -1,6 +1,7 @@
 const osu = require('node-osu');
 const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause, saveOsuMultiScores, logMatchCreation, addMatchMessage } = require('../utils.js');
 const { assignKnockoutPoints } = require('./givePointsToPlayers.js');
+const { logBroadcastEval } = require('../../config.json');
 
 module.exports = {
 	knockoutLobby: async function (client, bancho, bracketName, mappool, lobbyNumber, players, users, isFirstRound, scoreversion) {
@@ -125,6 +126,11 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER !== 'Dev' && lobbyNumber !== 'custom') {
 			try {
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting MOTD/knockoutLobby.js share match link to shards...');
+				}
+
 				client.shard.broadcastEval(async (c, { message }) => {
 					const announceChannel = await c.channels.cache.get('893215604503351386');
 					if (announceChannel) {
@@ -774,6 +780,11 @@ async function messageUserWithRetries(client, user, content, attachment) {
 		} catch (error) {
 			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
 				if (i === 2) {
+					if (logBroadcastEval) {
+						// eslint-disable-next-line no-console
+						console.log('Broadcasting MOTD/knockoutLobby.js DM issues to shards...');
+					}
+
 					client.shard.broadcastEval(async (c, { message }) => {
 						const channel = await c.channels.cache.get('833803740162949191');
 						if (channel) {

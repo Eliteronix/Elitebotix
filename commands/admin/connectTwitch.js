@@ -1,4 +1,5 @@
 const { DBDiscordUsers } = require('../../dbObjects');
+const { logBroadcastEval } = require('../../config.json');
 
 module.exports = {
 	name: 'connectTwitch',
@@ -50,6 +51,11 @@ module.exports = {
 				discordUser.twitchId = json.data[0].id;
 				discordUser.twitchVerified = true;
 				await discordUser.save();
+
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting commands/admin/connectTwitch.js to shards...');
+				}
 
 				await interaction.client.shard.broadcastEval(async (c, { channelName }) => {
 					if (c.shardId === 0) {

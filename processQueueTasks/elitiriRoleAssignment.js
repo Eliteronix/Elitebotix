@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
@@ -7,6 +8,11 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER !== 'Live') {
 			return processQueueEntry.destroy();
+		}
+
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting processQueueTasks/elitiriRoleAssignment.js to shards...');
 		}
 
 		// eslint-disable-next-line no-empty-pattern

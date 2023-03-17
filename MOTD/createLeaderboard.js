@@ -1,5 +1,12 @@
+const { logBroadcastEval } = require('../config.json');
+
 module.exports = {
 	createLeaderboard: async function (client, since, topAmount, title, channelId) {
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting MOTD/createLeaderboard.js to shards...');
+		}
+
 		client.shard.broadcastEval(async (c, { channelId, since, topAmount, title }) => {
 			const channel = await c.channels.cache.get(channelId);
 			if (channel) {

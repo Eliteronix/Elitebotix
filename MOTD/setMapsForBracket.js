@@ -3,6 +3,7 @@ const { qualifier } = require('./qualifier.js');
 const { DBOsuBeatmaps, DBOsuMultiScores } = require('../dbObjects.js');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
+const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	setMapsForBracket: async function (client, bancho, bracketName, SRLimit, NMBeatmaps, DTBeatmaps, upperRank, lowerRank, channelId, roleId, players) {
@@ -385,6 +386,11 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER !== 'Dev') {
+			if (logBroadcastEval) {
+				// eslint-disable-next-line no-console
+				console.log('Broadcasting MOTD/setMapsForBracket.js to shards...');
+			}
+
 			client.shard.broadcastEval(async (c, { channelId, title, description, footer, mappoolInOrder, playerAmount }) => {
 				//Send official message into the correct channel
 				const mapsOfTheDayChannel = await c.channels.cache.get(channelId);

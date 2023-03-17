@@ -1,5 +1,6 @@
 const { DBOsuGuildTrackers } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
+const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -11,6 +12,11 @@ module.exports = {
 
 			if (args[5].toLowerCase().includes('qualifier')) {
 				message = `Follow Notification:\nA match under the \`${args[3].replace(/`/g, '')}\` acronym has been played.\n${args[5]}\n(Qualifier MP Links are hidden)`;
+			}
+
+			if (logBroadcastEval) {
+				// eslint-disable-next-line no-console
+				console.log('Broadcasting processQueueTasks/guildTourneyAcronymFollow.js to shards...');
 			}
 
 			client.shard.broadcastEval(async (c, { guildId, channelId, message, autoTrack, matchId }) => {

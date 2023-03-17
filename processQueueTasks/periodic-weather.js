@@ -1,7 +1,14 @@
+const { logBroadcastEval } = require('../config.json');
+
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
 		// console.log('periodic-weather');
 		let args = processQueueEntry.additions.split(';');
+
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting processQueueTasks/periodic-weather.js to shards...');
+		}
 
 		let channelFound = await client.shard.broadcastEval(async (c, { channelId, processQueueEntryId }) => {
 			const channel = await c.channels.cache.get(channelId);

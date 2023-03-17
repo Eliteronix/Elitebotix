@@ -1,6 +1,13 @@
+const { logBroadcastEval } = require('../config.json');
+
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
 		// console.log('nameSync');
+
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting processQueueTasks/nameSync.js to shards...');
+		}
 
 		client.shard.broadcastEval(async (c, { guildId, processQueueEntryId, setting }) => {
 			// eslint-disable-next-line no-undef

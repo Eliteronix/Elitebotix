@@ -1,5 +1,5 @@
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { showUnknownInteractionError } = require('../config.json');
+const { showUnknownInteractionError, logBroadcastEval } = require('../config.json');
 const { DBOsuSoloScores, DBDiscordUsers, DBOsuTeamSheets, DBOsuMappools, DBOsuBeatmaps } = require('../dbObjects');
 const { getMods, logDatabaseQueries } = require('../utils.js');
 const { Op } = require('sequelize');
@@ -253,6 +253,11 @@ module.exports = {
 			if (new Date() > new Date(teamsheet.updateUntil)) {
 				teamsheet.destroy();
 				continue;
+			}
+
+			if (logBroadcastEval) {
+				// eslint-disable-next-line no-console
+				console.log('Broadcasting commands/osu-scoreupload.js to shards...');
 			}
 
 			// Delete the message of the teamsheet and create a new one

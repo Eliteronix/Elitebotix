@@ -1,8 +1,15 @@
+const { logBroadcastEval } = require('../config.json');
+
 module.exports = {
 	assignPlayerRoles: async function (client) {
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER !== 'Live') {
 			return;
+		}
+
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting MOTD/assignPlayerRoles.js to shards...');
 		}
 
 		// eslint-disable-next-line no-empty-pattern

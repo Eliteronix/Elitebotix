@@ -1,4 +1,4 @@
-const { showUnknownInteractionError } = require('../../config.json');
+const { showUnknownInteractionError, logBroadcastEval } = require('../../config.json');
 
 module.exports = {
 	name: 'restart',
@@ -63,6 +63,11 @@ module.exports = {
 		}
 		output = output + '```';
 		await interaction.editReply(output);
+
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting commands/admin/restart.js to shards...');
+		}
 
 		// Restart relevant ones
 		await interaction.client.shard.broadcastEval(async (c, { condition }) => {

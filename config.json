@@ -12,6 +12,7 @@
 	],
 	"traceDatabaseQueries": 6,
 	"showUnknownInteractionError": false,
+	"logBroadcastEval": true,
 	"currentElitiriCup": "Elitiri Winter Cup 2022",
 	"currentElitiriCupHostSheetId": "1TlQQK4vSXxkAwxNQNfhSG0W1y85CRYNWZggwIuCgwDo",
 	"currentElitiriCupTopSheetId": "1R75yDt6RQ1qcjWDvUoVq55THIXB42ZObQ0nAYXvSYf8",

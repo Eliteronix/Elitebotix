@@ -1,7 +1,14 @@
+const { logBroadcastEval } = require('../config.json');
+
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
 		// console.log('closePoll');
 		let args = processQueueEntry.additions.split(';');
+
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting processQueueTasks/closePoll.js to shards...');
+		}
 
 		client.shard.broadcastEval(async (c, { args }) => {
 			const Discord = require('discord.js');

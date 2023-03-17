@@ -1,6 +1,7 @@
 const { DBTickets } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
 const Discord = require('discord.js');
+const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -11,6 +12,11 @@ module.exports = {
 		});
 
 		if (ticket && ticket.statusId === 100) {
+			if (logBroadcastEval) {
+				// eslint-disable-next-line no-console
+				console.log('Broadcasting processQueueTasks/closeTicket.js to shards...');
+			}
+
 			client.shard.broadcastEval(async (c, { channelId }) => {
 				const channel = await c.channels.cache.get(channelId);
 

@@ -2,6 +2,7 @@ const { DBDiscordUsers, DBOsuBeatmaps, DBProcessQueue } = require('../dbObjects'
 const { pause, saveOsuMultiScores, logDatabaseQueries, logMatchCreation, addMatchMessage } = require('../utils');
 const osu = require('node-osu');
 const Discord = require('discord.js');
+const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -50,6 +51,12 @@ module.exports = {
 					}
 					let user = await client.users.fetch(args[0]);
 					user.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`);
+
+					if (logBroadcastEval) {
+						// eslint-disable-next-line no-console
+						console.log('Broadcasting processQueueTasks/tourneyMatchReferee.js issues creating lobby to shards...');
+					}
+
 					client.shard.broadcastEval(async (c, { channelId, message }) => {
 						let channel = await c.channels.cache.get(channelId);
 						if (channel) {
@@ -151,6 +158,11 @@ module.exports = {
 				await channel.sendMessage(`!mp invite #${teams[i][j].osuUserId}`);
 				await messageUserWithRetries(client, teams[i][j].user, args[1], `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 			}
+		}
+
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting processQueueTasks/tourneyMatchReferee.js match created invite sent to shards...');
 		}
 
 		client.shard.broadcastEval(async (c, { channelId, message }) => {
@@ -309,6 +321,11 @@ module.exports = {
 							if (!lobby.playersById[teams[i][j].osuUserId.toString()]) {
 								await channel.sendMessage(`!mp invite #${teams[i][j].osuUserId}`);
 								await messageUserWithRetries(client, teams[i][j].user, args[1], `Your match is about to start. Please join as soon as possible. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
+
+								if (logBroadcastEval) {
+									// eslint-disable-next-line no-console
+									console.log('Broadcasting processQueueTasks/tourneyMatchReferee.js about to start, another invite to shards...');
+								}
 
 								client.shard.broadcastEval(async (c, { channelId, message }) => {
 									const channel = c.channels.cache.get(channelId);
@@ -537,6 +554,11 @@ async function messageUserWithRetries(client, user, channelId, content) {
 		} catch (error) {
 			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
 				if (i === 2) {
+					if (logBroadcastEval) {
+						// eslint-disable-next-line no-console
+						console.log('Broadcasting processQueueTasks/tourneyMatchReferee.js DM issues to shards...');
+					}
+
 					client.shard.broadcastEval(async (c, { channelId, message }) => {
 						const channel = await c.channels.cache.get(channelId);
 						if (channel) {

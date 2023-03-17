@@ -2,6 +2,7 @@ const osu = require('node-osu');
 const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { saveOsuMultiScores, logDatabaseQueries, awaitWebRequestPermission } = require('../utils');
 const { Op } = require('sequelize');
+const { logBroadcastEval } = require('../config.json');
 
 //Archiving started around 40000000
 
@@ -58,6 +59,12 @@ module.exports = {
 						let minutesBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60) % 60;
 						let hoursBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60) % 24;
 						let daysBehindToday = parseInt((now.getTime() - Date.parse(match.raw_start)) / 1000 / 60 / 60 / 24);
+
+						if (logBroadcastEval) {
+							// eslint-disable-next-line no-console
+							console.log('Broadcasting processQueueTasks/saveMultiMatches.js current match to shards...');
+						}
+
 						client.shard.broadcastEval(async (c, { message, matchID }) => {
 							// Remove all instances of the match from client
 							while (c.duels.indexOf(matchID) > -1) {
@@ -187,6 +194,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 		process.send('osu!API');
 		await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
 			.then(async (match) => {
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting processQueueTasks/saveMultiMatches.js incompleteMatchScore to shards...');
+				}
+
 				client.shard.broadcastEval(async (c, { channelId, message }) => {
 					let channel = await c.channels.cache.get(channelId);
 					if (channel) {
@@ -291,6 +303,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 											channelId = '1070013925334204516';
 										}
 
+										if (logBroadcastEval) {
+											// eslint-disable-next-line no-console
+											console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match created by MaidBot to shards...');
+										}
+
 										client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 											let guild = await c.guilds.cache.get(guildId);
 
@@ -356,6 +373,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 						if (process.env.SERVER === 'Dev') {
 							guildId = '800641468321759242';
 							channelId = '1070013925334204516';
+						}
+
+						if (logBroadcastEval) {
+							// eslint-disable-next-line no-console
+							console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n- Valid: False\nComment: o!mm not found - Fake because MaidBot uses !mp make to create matches to shards...');
 						}
 
 						client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
@@ -432,6 +454,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				if (process.env.SERVER === 'Dev') {
 					guildId = '800641468321759242';
 					channelId = '1070013925334204516';
+				}
+
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Elitebotix Duel Match to shards...');
 				}
 
 				client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
@@ -679,6 +706,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																channelId = '1070013925334204516';
 															}
 
+															if (logBroadcastEval) {
+																// eslint-disable-next-line no-console
+																console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match reffed by someone else - Qualifiers - All maps played more than 20 times outside of the lobby to shards...');
+															}
+
 															client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 																let guild = await c.guilds.cache.get(guildId);
 
@@ -732,6 +764,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															if (process.env.SERVER === 'Dev') {
 																guildId = '800641468321759242';
 																channelId = '1070013925334204516';
+															}
+
+															if (logBroadcastEval) {
+																// eslint-disable-next-line no-console
+																console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was verified to shards...');
 															}
 
 															client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
@@ -797,6 +834,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																channelId = '1070013925334204516';
 															}
 
+															if (logBroadcastEval) {
+																// eslint-disable-next-line no-console
+																console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 2 matches by the same players - some maps played more than 20 times in other matches of the same acronym to shards...');
+															}
+
 															client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 																let guild = await c.guilds.cache.get(guildId);
 
@@ -838,6 +880,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															if (process.env.SERVER === 'Dev') {
 																guildId = '800641468321759242';
 																channelId = '1070013925334204516';
+															}
+
+															if (logBroadcastEval) {
+																// eslint-disable-next-line no-console
+																console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 4 matches by the same players - some maps played more than 15 times in other matches of the same acronym to shards...');
 															}
 
 															client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
@@ -883,6 +930,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																channelId = '1070013925334204516';
 															}
 
+															if (logBroadcastEval) {
+																// eslint-disable-next-line no-console
+																console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 6 matches by the same players - some maps played more than 10 times in other matches of the same acronym to shards...');
+															}
+
 															client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 																let guild = await c.guilds.cache.get(guildId);
 
@@ -924,6 +976,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															if (process.env.SERVER === 'Dev') {
 																guildId = '800641468321759242';
 																channelId = '1070013925334204516';
+															}
+
+															if (logBroadcastEval) {
+																// eslint-disable-next-line no-console
+																console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 8 matches by the same players - some maps played more than 5 times in other matches of the same acronym to shards...');
 															}
 
 															client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
