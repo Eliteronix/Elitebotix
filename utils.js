@@ -4613,11 +4613,14 @@ module.exports = {
 			}
 
 			const guild = await c.guilds.cache.get(guildId);
-			if (guild) {
-				const channel = await guild.channels.cache.get(channelId);
 
-				channel.send(message);
-			}
+			if (!guild) return;
+
+			const channel = await guild.channels.cache.get(channelId);
+
+			if (!channel) return;
+
+			await channel.send(message);
 		}, { context: { message: `https://osu.ppy.sh/mp/${matchId}` } });
 	},
 	async syncJiraCards(client) {
@@ -4644,11 +4647,12 @@ module.exports = {
 
 		let issues = responseJson.issues;
 
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting utils.js jira cards to shards...');
+		}
+
 		client.shard.broadcastEval(async (c, { issues }) => {
-			if (logBroadcastEval) {
-				// eslint-disable-next-line no-console
-				console.log('Broadcasting utils.js jira cards to shards...');
-			}
 
 			const backlogChannel = await c.channels.cache.get('1000372560552276028');
 			if (backlogChannel) {
