@@ -1048,6 +1048,7 @@ module.exports = {
 		}
 
 		// TODO: Draw a legend for estimated score
+		// TODO: Manual lineup
 
 		// Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'teamsheet.png' })];
