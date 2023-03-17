@@ -1,7 +1,7 @@
 const osu = require('node-osu');
 const { getMods, humanReadable, createMOTDAttachment, getAccuracy, pause, saveOsuMultiScores, logMatchCreation, addMatchMessage } = require('../utils.js');
 const { assignKnockoutPoints } = require('./givePointsToPlayers.js');
-const { logBroadcastEval } = require('../../config.json');
+const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	knockoutLobby: async function (client, bancho, bracketName, mappool, lobbyNumber, players, users, isFirstRound, scoreversion) {

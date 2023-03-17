@@ -1,6 +1,6 @@
 const { DBGuilds } = require('./dbObjects');
 const { logDatabaseQueries } = require('./utils');
-const { logBroadcastEval } = require('../config.json');
+const { logBroadcastEval } = require('./config.json');
 
 module.exports = async function (oldUser, newUser) {
 	if (oldUser.username !== newUser.username) {
