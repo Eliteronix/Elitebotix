@@ -3355,10 +3355,14 @@ module.exports = {
 								}
 
 								const guild = await c.guilds.cache.get(guildId);
-								if (guild) {
-									const channel = await guild.channels.cache.get(channelId);
-									channel.send(message);
-								}
+
+								if (!guild) return;
+
+								const channel = await guild.channels.cache.get(channelId);
+
+								if (!channel) return;
+
+								channel.send(message);
 							}, { context: { message: `\`\`\`${message.join('\n')}\`\`\`` } });
 
 							if (discordUser.osuDuelRatingUpdates) {
