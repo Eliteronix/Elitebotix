@@ -118,6 +118,7 @@ const { initializeMOTD } = require('./MOTD/initializeMOTD');
 
 const Banchojs = require('bancho.js');
 const { DBProcessQueue } = require('./dbObjects');
+const { Op } = require('sequelize');
 
 // eslint-disable-next-line no-undef
 const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterTimespan: 60000, limiterPrivate: 45, limiterPublic: 9 });
@@ -389,10 +390,14 @@ async function checkOsuTracks(client) {
 
 async function resetSaveMultiMatches() {
 	try {
+		const tasksToReset = ['saveMultiMatches', 'importMatch'];
+
 		logDatabaseQueries(2, 'bot.js DBProcessQueue');
 		const task = await DBProcessQueue.findOne({
 			where: {
-				task: 'saveMultiMatches',
+				task: {
+					[Op.in]: tasksToReset,
+				},
 				beingExecuted: true,
 			},
 		});
