@@ -2194,7 +2194,6 @@ module.exports = {
 			dbBeatmap = input.beatmap;
 		}
 
-		//TODO: Update before merging to master
 		let lastRework = new Date();
 		lastRework.setUTCFullYear(2023);
 		lastRework.setUTCMonth(2);

@@ -1035,13 +1035,28 @@ module.exports = {
 			let unreachableUsers = [];
 
 			for (let i = 0; i < discordUsers.length; i++) {
-				//TODO: Members timeout error handling
-				let user = await interaction.guild.members.fetch({ user: [discordUsers[i].userId], time: 300000 });
+				let member = interaction.guild.members.cache.get(discordUsers[i].userId);
 
-				user = user.first();
+				let iterator = 0;
+				while (!member && iterator < 3) {
+					iterator++;
+					try {
+						member = await interaction.guild.members.fetch({ user: [discordUsers[i].userId], time: 300000 })
+							.catch((err) => {
+								throw new Error(err);
+							});
 
-				if (user) {
-					users.push(user);
+						member = member.first();
+					} catch (e) {
+						if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+							console.error('commands/osu-motd.js | Get members for custom-fixed-players', e);
+							return;
+						}
+					}
+				}
+
+				if (member) {
+					users.push(member);
 				} else {
 					unreachableUsers.push(discordUsers[i].userId);
 				}

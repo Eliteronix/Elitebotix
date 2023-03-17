@@ -39,10 +39,21 @@ module.exports = {
 		}
 
 		//Get bot member
-		//TODO: Fetch error handling
-		let member = await interaction.guild.members.fetch({ user: [interaction.client.user.id], time: 300000 });
+		let member = null;
 
-		member = member.first();
+		try {
+			member = await interaction.guild.members.fetch({ user: [interaction.client.user.id], time: 300000 })
+				.catch((err) => {
+					throw new Error(err);
+				});
+
+			member = member.first();
+		} catch (e) {
+			if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+				console.error('commands/settings.js | Get bot member', e);
+				return;
+			}
+		}
 
 		const user = await interaction.client.users.fetch(interaction.client.user.id);
 

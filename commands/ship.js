@@ -96,10 +96,22 @@ async function getName(interaction, argument) {
 		name = interaction.client.users.fetch(id);
 
 		if (interaction.guild) {
-			// TODO: Fetch error handling
-			let member = await interaction.guild.members.fetch({ user: [id], time: 300000 });
+			//Get bot member
+			let member = null;
 
-			member = member.first();
+			try {
+				member = await interaction.guild.members.fetch({ user: [id], time: 300000 })
+					.catch((err) => {
+						throw new Error(err);
+					});
+
+				member = member.first();
+			} catch (e) {
+				if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+					console.error('commands/ship.js | Get ship member', e);
+					return;
+				}
+			}
 
 			if (member && member.displayName) {
 				name = member.displayName;

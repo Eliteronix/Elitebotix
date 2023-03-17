@@ -147,8 +147,23 @@ module.exports = {
 			} else if (args[0] === 'text') {
 				if (args[1] === 'enable') {
 					//Check permissions of the bot
-					//TODO: Fetch error handling
-					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch({ user: [msg.client.user.id], time: 300000 }).first());
+					let member = null;
+
+					try {
+						member = await guild.members.fetch({ user: [msg.client.user.id], time: 300000 })
+							.catch((err) => {
+								throw new Error(err);
+							});
+
+						member = member.first();
+					} catch (e) {
+						if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+							console.error('commands/tempvoice.js | text enable guild exists check bot permissions', e);
+							return;
+						}
+					}
+
+					const botPermissions = msg.channel.permissionsFor(member);
 					if (!botPermissions.has('ADMINISTRATOR')) {
 						return msg.reply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');
 					}
@@ -196,9 +211,24 @@ module.exports = {
 				return interaction.editReply('Temporary channels have been disabled.');
 			} else if (args[0] === 'text') {
 				if (args[1] === 'enable') {
-					//Check permissions of the bot´
-					//TODO: Fetch error handling
-					const botPermissions = msg.channel.permissionsFor(await msg.guild.members.fetch({ user: [msg.client.user.id], time: 300000 }).first());
+					//Check permissions of the bot
+					let member = null;
+
+					try {
+						member = await guild.members.fetch({ user: [msg.client.user.id], time: 300000 })
+							.catch((err) => {
+								throw new Error(err);
+							});
+
+						member = member.first();
+					} catch (e) {
+						if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+							console.error('commands/tempvoice.js | text enable guild doesn\'t exist check bot permissions', e);
+							return;
+						}
+					}
+
+					const botPermissions = msg.channel.permissionsFor(member);
 					if (!botPermissions.has('ADMINISTRATOR')) {
 						if (msg.id) {
 							return msg.reply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');
