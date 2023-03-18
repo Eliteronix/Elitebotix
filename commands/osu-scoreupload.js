@@ -194,16 +194,17 @@ module.exports = {
 		});
 
 		// Remove scores that are already in the database
-		let highestTimestamp = 0;
 		for (let i = 0; i < uploaderScores.length; i++) {
 			const score = uploaderScores[i];
 
-			if (Number(score.timestamp) > highestTimestamp) {
-				highestTimestamp = Number(score.timestamp);
+			const existingScoreIndex = scoreData.findIndex(scoreData => scoreData.replayHash === score.replayHash);
+
+			if (existingScoreIndex) {
+				scoreData.splice(existingScoreIndex, 1);
 			}
 		}
 
-		const newScores = scoreData.filter(score => score.timestamp > highestTimestamp);
+		const newScores = scoreData;
 
 		// Add the new scores to the database
 		logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuSoloScores create');
