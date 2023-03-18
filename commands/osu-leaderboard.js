@@ -85,161 +85,158 @@ module.exports = {
 		const commandConfig = await getOsuUserServerMode(msg, args);
 		const mode = commandConfig[2];
 
-		// TODO: Fetch error handling
-		await msg.guild.members.fetch({ time: 300000 })
-			.then(async (guildMembers) => {
-				const members = [];
-				guildMembers.each(member => members.push(member.id));
-				logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
-				const discordUsers = await DBDiscordUsers.findAll({
-					where: {
-						userId: {
-							[Op.in]: members,
-						}
-					},
-				});
+		let discordUsers = [];
 
-				let osuAccounts = [];
-				for (let i = 0; i < discordUsers.length; i++) {
-					if (discordUsers[i].osuUserId) {
-						if (mode === 0 && parseInt(discordUsers[i].osuPP) > 0) {
-							osuAccounts.push({
-								userId: discordUsers[i].userId,
-								osuUserId: discordUsers[i].osuUserId,
-								osuName: discordUsers[i].osuName,
-								osuVerified: discordUsers[i].osuVerified,
-								rank: discordUsers[i].osuRank,
-								pp: discordUsers[i].osuPP,
-							});
-						} else if (mode === 1 && parseInt(discordUsers[i].taikoPP) > 0) {
-							osuAccounts.push({
-								userId: discordUsers[i].userId,
-								osuUserId: discordUsers[i].osuUserId,
-								osuName: discordUsers[i].osuName,
-								osuVerified: discordUsers[i].osuVerified,
-								rank: discordUsers[i].taikoRank,
-								pp: discordUsers[i].taikoPP,
-							});
-						} else if (mode === 2 && parseInt(discordUsers[i].catchPP) > 0) {
-							osuAccounts.push({
-								userId: discordUsers[i].userId,
-								osuUserId: discordUsers[i].osuUserId,
-								osuName: discordUsers[i].osuName,
-								osuVerified: discordUsers[i].osuVerified,
-								rank: discordUsers[i].catchRank,
-								pp: discordUsers[i].catchPP,
-							});
-						} else if (mode === 3 && parseInt(discordUsers[i].maniaPP) > 0) {
-							osuAccounts.push({
-								userId: discordUsers[i].userId,
-								osuUserId: discordUsers[i].osuUserId,
-								osuName: discordUsers[i].osuName,
-								osuVerified: discordUsers[i].osuVerified,
-								rank: discordUsers[i].maniaRank,
-								pp: discordUsers[i].maniaPP,
-							});
-						}
+		try {
+			let members = await msg.guild.members.fetch({ time: 300000 });
+
+			members = members.map(member => member.id);
+
+			logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
+			discordUsers = await DBDiscordUsers.findAll({
+				where: {
+					userId: {
+						[Op.in]: members,
 					}
-				}
-
-				osuAccounts.sort((a, b) => {
-					return parseFloat(b.pp) - parseFloat(a.pp);
-				});
-
-				let leaderboardData = [];
-
-				let messageToAuthor = '';
-				let authorPlacement = 0;
-
-				for (let i = 0; i < osuAccounts.length; i++) {
-					if (msg.author.id === osuAccounts[i].userId) {
-						messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
-						authorPlacement = i + 1;
-					}
-
-					// TODO: Fetch error handling
-					// TODO: Why the fuck do you fetch again you literally fetched everyone just above just find the member in the guildMembers collection
-					let member = await msg.guild.members.fetch(osuAccounts[i].userId);
-
-					member = member.first();
-
-					let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
-
-					if (member.nickname) {
-						userDisplayName = `${member.nickname} / ${userDisplayName}`;
-					}
-
-					let verified = 'x';
-
-					if (osuAccounts[i].osuVerified) {
-						verified = '✔';
-					}
-
-					let dataset = {
-						name: userDisplayName
-					};
-
-					dataset.value = `#${humanReadable(osuAccounts[i].rank)} | ${humanReadable(Math.floor(osuAccounts[i].pp).toString())}pp | ${verified} ${osuAccounts[i].osuName}`;
-
-					leaderboardData.push(dataset);
-				}
-
-				let totalPages = Math.floor(leaderboardData.length / leaderboardEntriesPerPage) + 1;
-
-				let page;
-
-				if (args[0] && !isNaN(args[0])) {
-					page = Math.abs(parseInt(args[0]));
-				}
-
-				if (!page && leaderboardData.length > 150) {
-					page = 1;
-					if (authorPlacement) {
-						page = Math.floor(authorPlacement / leaderboardEntriesPerPage) + 1;
-					}
-				}
-
-				if (totalPages === 1) {
-					page = null;
-				}
-
-				let filename = `osu-leaderboard-${msg.author.id}-mode-${getGameModeName(mode)}-${msg.guild.name}.png`;
-
-				if (page) {
-					filename = `osu-leaderboard-${msg.author.id}-mode-${getGameModeName(mode)}-${msg.guild.name}-page${page}.png`;
-				}
-
-				const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${msg.guild.name}'s osu! ${getGameModeName(mode)} leaderboard`, filename, page);
-
-				//Send attachment
-				let leaderboardMessage;
-				if (msg.id) {
-					leaderboardMessage = await msg.reply({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:1064502370710605836> to connect your osu! account.\nData is being updated once a day or when </osu-profile:1064502472044970004> is being used.`, files: [attachment] });
-				} else if (interaction) {
-					leaderboardMessage = await interaction.followUp({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:1064502370710605836> to connect your osu! account.\nData is being updated once a day or when </osu-profile:1064502472044970004> is being used.`, files: [attachment] });
-				} else {
-					leaderboardMessage = await msg.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:1064502370710605836> to connect your osu! account.\nData is being updated once a day or when </osu-profile:1064502472044970004> is being used.`, files: [attachment] });
-				}
-
-				if (page) {
-					if (page > 1) {
-						await leaderboardMessage.react('◀️');
-					}
-
-					if (page < totalPages) {
-						await leaderboardMessage.react('▶️');
-					}
-				}
-
-				if (processingMessage) {
-					processingMessage.delete();
-				}
-			})
-			.catch(err => {
-				if (processingMessage) {
-					processingMessage.edit('Error');
-				}
-				console.error(err);
+				},
 			});
+		} catch (e) {
+			if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+				console.error('commands/osu-leaderboard.js | Get members', e);
+				return;
+			}
+		}
+
+		let osuAccounts = [];
+		for (let i = 0; i < discordUsers.length; i++) {
+			if (discordUsers[i].osuUserId) {
+				if (mode === 0 && parseInt(discordUsers[i].osuPP) > 0) {
+					osuAccounts.push({
+						userId: discordUsers[i].userId,
+						osuUserId: discordUsers[i].osuUserId,
+						osuName: discordUsers[i].osuName,
+						osuVerified: discordUsers[i].osuVerified,
+						rank: discordUsers[i].osuRank,
+						pp: discordUsers[i].osuPP,
+					});
+				} else if (mode === 1 && parseInt(discordUsers[i].taikoPP) > 0) {
+					osuAccounts.push({
+						userId: discordUsers[i].userId,
+						osuUserId: discordUsers[i].osuUserId,
+						osuName: discordUsers[i].osuName,
+						osuVerified: discordUsers[i].osuVerified,
+						rank: discordUsers[i].taikoRank,
+						pp: discordUsers[i].taikoPP,
+					});
+				} else if (mode === 2 && parseInt(discordUsers[i].catchPP) > 0) {
+					osuAccounts.push({
+						userId: discordUsers[i].userId,
+						osuUserId: discordUsers[i].osuUserId,
+						osuName: discordUsers[i].osuName,
+						osuVerified: discordUsers[i].osuVerified,
+						rank: discordUsers[i].catchRank,
+						pp: discordUsers[i].catchPP,
+					});
+				} else if (mode === 3 && parseInt(discordUsers[i].maniaPP) > 0) {
+					osuAccounts.push({
+						userId: discordUsers[i].userId,
+						osuUserId: discordUsers[i].osuUserId,
+						osuName: discordUsers[i].osuName,
+						osuVerified: discordUsers[i].osuVerified,
+						rank: discordUsers[i].maniaRank,
+						pp: discordUsers[i].maniaPP,
+					});
+				}
+			}
+		}
+
+		osuAccounts.sort((a, b) => {
+			return parseFloat(b.pp) - parseFloat(a.pp);
+		});
+
+		let leaderboardData = [];
+
+		let messageToAuthor = '';
+		let authorPlacement = 0;
+
+		for (let i = 0; i < osuAccounts.length; i++) {
+			if (msg.author.id === osuAccounts[i].userId) {
+				messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
+				authorPlacement = i + 1;
+			}
+
+			let member = await msg.guild.members.cache.get(osuAccounts[i].userId);
+
+			let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
+
+			if (member.nickname) {
+				userDisplayName = `${member.nickname} / ${userDisplayName}`;
+			}
+
+			let verified = 'x';
+
+			if (osuAccounts[i].osuVerified) {
+				verified = '✔';
+			}
+
+			let dataset = {
+				name: userDisplayName
+			};
+
+			dataset.value = `#${humanReadable(osuAccounts[i].rank)} | ${humanReadable(Math.floor(osuAccounts[i].pp).toString())}pp | ${verified} ${osuAccounts[i].osuName}`;
+
+			leaderboardData.push(dataset);
+		}
+
+		let totalPages = Math.floor(leaderboardData.length / leaderboardEntriesPerPage) + 1;
+
+		let page;
+
+		if (args[0] && !isNaN(args[0])) {
+			page = Math.abs(parseInt(args[0]));
+		}
+
+		if (!page && leaderboardData.length > 150) {
+			page = 1;
+			if (authorPlacement) {
+				page = Math.floor(authorPlacement / leaderboardEntriesPerPage) + 1;
+			}
+		}
+
+		if (totalPages === 1) {
+			page = null;
+		}
+
+		let filename = `osu-leaderboard-${msg.author.id}-mode-${getGameModeName(mode)}-${msg.guild.name}.png`;
+
+		if (page) {
+			filename = `osu-leaderboard-${msg.author.id}-mode-${getGameModeName(mode)}-${msg.guild.name}-page${page}.png`;
+		}
+
+		const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${msg.guild.name}'s osu! ${getGameModeName(mode)} leaderboard`, filename, page);
+
+		//Send attachment
+		let leaderboardMessage;
+		if (msg.id) {
+			leaderboardMessage = await msg.reply({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:1064502370710605836> to connect your osu! account.\nData is being updated once a day or when </osu-profile:1064502472044970004> is being used.`, files: [attachment] });
+		} else if (interaction) {
+			leaderboardMessage = await interaction.followUp({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:1064502370710605836> to connect your osu! account.\nData is being updated once a day or when </osu-profile:1064502472044970004> is being used.`, files: [attachment] });
+		} else {
+			leaderboardMessage = await msg.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:1064502370710605836> to connect your osu! account.\nData is being updated once a day or when </osu-profile:1064502472044970004> is being used.`, files: [attachment] });
+		}
+
+		if (page) {
+			if (page > 1) {
+				await leaderboardMessage.react('◀️');
+			}
+
+			if (page < totalPages) {
+				await leaderboardMessage.react('▶️');
+			}
+		}
+
+		if (processingMessage) {
+			processingMessage.delete();
+		}
 	},
 };

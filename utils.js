@@ -6275,6 +6275,7 @@ module.exports = {
 						}
 
 						console.error(err);
+						continue;
 					}
 
 					if (guildTrackers[i].medals || guildTrackers[i].osuLeaderboard || guildTrackers[i].taikoLeaderboard || guildTrackers[i].catchLeaderboard || guildTrackers[i].maniaLeaderboard) {

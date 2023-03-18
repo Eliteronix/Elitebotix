@@ -31,58 +31,63 @@ module.exports = {
 
 			if (guild) {
 				//Fetch all members
-				//TODO: Fetch error handling
-				await guild.members.fetch({ time: 300000 })
-					.then(async (guildMembers) => {
-						const members = [];
-						guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
+				let members = null;
+				try {
+					members = await guild.members.fetch({ time: 300000 });
 
-						logDatabaseQueries(2, 'processQueueTasks/nameSync.js DBDiscordUsers');
-						let discordUsers = await DBDiscordUsers.findAll({
-							where: {
-								userId: {
-									[Op.in]: members.map(member => member.user.id),
-								},
+					members = members.filter(member => member.user.bot !== true).map(member => member);
+				} catch (e) {
+					if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+						console.error('processQueueTasks/nameSync.js | Get members', e);
+						return;
+					}
+				}
+
+				logDatabaseQueries(2, 'processQueueTasks/nameSync.js DBDiscordUsers');
+				let discordUsers = await DBDiscordUsers.findAll({
+					where: {
+						userId: {
+							[Op.in]: members.map(member => member.user.id),
+						},
+					}
+				});
+
+				for (let i = 0; i < members.length; i++) {
+					//Get the user
+					let discordUser = discordUsers.find(user => user.userId === members[i].user.id);
+
+					if (members[i].user.id !== guild.ownerId && discordUser && discordUser.osuUserId && discordUser.osuVerified) {
+						try {
+							//Get the users displayname
+							let userDisplayName = members[i].user.username;
+
+							if (members[i].nickname) {
+								userDisplayName = members[i].nickname;
 							}
-						});
 
-						for (let i = 0; i < members.length; i++) {
-							//Get the user
-							let discordUser = discordUsers.find(user => user.userId === members[i].user.id);
-
-							if (members[i].user.id !== guild.ownerId && discordUser && discordUser.osuUserId && discordUser.osuVerified) {
-								try {
-									//Get the users displayname
-									let userDisplayName = members[i].user.username;
-
-									if (members[i].nickname) {
-										userDisplayName = members[i].nickname;
-									}
-
-									//Set what the user's nickname should be
-									let nickname = '';
-									if (setting === 'osuname') {
-										nickname = discordUser.osuName;
-									} else if (setting === 'osunameandrank') {
-										let rank = discordUser.osuRank;
-										if (rank.length > 4) {
-											rank = `${rank.substring(0, rank.length - 3)}k`;
-										}
-
-										nickname = `${discordUser.osuName} [${rank}]`;
-									}
-									//Set nickname if needed
-									if (userDisplayName !== nickname) {
-										await members[i].setNickname(nickname);
-									}
-								} catch (e) {
-									if (!e.message === 'Missing Permissions') {
-										return console.error('processQueueTasks/nameSync.js setNickname', e);
-									}
+							//Set what the user's nickname should be
+							let nickname = '';
+							if (setting === 'osuname') {
+								nickname = discordUser.osuName;
+							} else if (setting === 'osunameandrank') {
+								let rank = discordUser.osuRank;
+								if (rank.length > 4) {
+									rank = `${rank.substring(0, rank.length - 3)}k`;
 								}
+
+								nickname = `${discordUser.osuName} [${rank}]`;
+							}
+							//Set nickname if needed
+							if (userDisplayName !== nickname) {
+								await members[i].setNickname(nickname);
+							}
+						} catch (e) {
+							if (!e.message === 'Missing Permissions') {
+								return console.error('processQueueTasks/nameSync.js setNickname', e);
 							}
 						}
-					});
+					}
+				}
 			}
 		}, { context: { guildId: processQueueEntry.guildId, processQueueEntryId: processQueueEntry.id, setting: processQueueEntry.additions } });
 

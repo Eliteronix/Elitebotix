@@ -2,6 +2,7 @@ const { DBServerUserActivity } = require('../dbObjects');
 const { createLeaderboard, humanReadable, populateMsgFromInteraction, logDatabaseQueries } = require('../utils.js');
 const { leaderboardEntriesPerPage, showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'guild-leaderboard',
@@ -71,119 +72,120 @@ module.exports = {
 			processingMessage = await msg.reply('Processing guild leaderboard...');
 		}
 
-		//TODO: Fetch error handling
-		await msg.guild.members.fetch({ time: 300000 })
-			.then(async (guildMembers) => {
-				const members = [];
-				guildMembers.filter(member => member.user.bot !== true).each(member => members.push(member));
-				let discordUsers = [];
-				for (let i = 0; i < members.length; i++) {
-					logDatabaseQueries(4, 'commands/guild-leaderboard.js DBServerUserActivity');
-					const serverUserActivity = await DBServerUserActivity.findOne({
-						where: { userId: members[i].id, guildId: msg.guildId },
-					});
+		let discordUsers = [];
 
-					if (serverUserActivity) {
-						serverUserActivity.displayColor = members[i].displayHexColor;
-						discordUsers.push(serverUserActivity);
-					}
-				}
+		try {
+			let members = await msg.guild.members.fetch({ time: 300000 });
 
-				discordUsers.sort((a, b) => parseInt(b.points) - parseInt(a.points));
+			members = members.map(member => member);
 
-				let leaderboardData = [];
-
-				let messageToAuthor = '';
-				let authorPlacement = 0;
-
-				for (let i = 0; i < discordUsers.length; i++) {
-					if (msg.author.id === discordUsers[i].userId) {
-						messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
-						authorPlacement = i + 1;
-					}
-
-					//TODO: Fetch error handling
-					let member = await msg.guild.members.fetch({ user: [discordUsers[i].userId], time: 300000 });
-
-					member = member.first();
-
-					let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
-
-					if (member.nickname) {
-						userDisplayName = `${member.nickname} / ${userDisplayName}`;
-					}
-
-					let dataset = {
-						name: userDisplayName,
-						value: `${humanReadable(discordUsers[i].points)} point(s)`,
-						color: discordUsers[i].displayColor
-					};
-
-					leaderboardData.push(dataset);
-				}
-
-				let totalPages = Math.floor(leaderboardData.length / leaderboardEntriesPerPage) + 1;
-
-				let page;
-
-				if (args[0] && !isNaN(args[0])) {
-					page = Math.abs(parseInt(args[0]));
-				}
-
-				if (!page && leaderboardData.length > 150) {
-					page = 1;
-					if (authorPlacement) {
-						page = Math.floor(authorPlacement / leaderboardEntriesPerPage) + 1;
-					}
-				}
-
-				if (totalPages === 1) {
-					page = null;
-				}
-
-				let filename = `guild-leaderboard-${msg.author.id}-${msg.guild.name}.png`;
-
-				if (page) {
-					filename = `guild-leaderboard-${msg.author.id}-${msg.guild.name}-page${page}.png`;
-				}
-
-				//Remove trailing s if guild name stops with s or x
-				let title = `${msg.guild.name}'s activity leaderboard`;
-				if (msg.guild.name.endsWith('s') || msg.guild.name.endsWith('x')) {
-					title = `${msg.guild.name}' activity leaderboard`;
-				}
-
-				const attachment = await createLeaderboard(leaderboardData, 'discord-background.png', title, filename, page);
-
-				//Send attachment
-				let leaderboardMessage;
-				if (msg.id) {
-					leaderboardMessage = await msg.reply({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
-				} else if (interaction) {
-					leaderboardMessage = await interaction.followUp({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
-				} else {
-					leaderboardMessage = await msg.channel.send({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
-				}
-
-				if (page) {
-					if (page > 1) {
-						await leaderboardMessage.react('◀️');
-					}
-
-					if (page < totalPages) {
-						await leaderboardMessage.react('▶️');
-					}
-				}
-
-				if (processingMessage) {
-					processingMessage.delete();
-				}
-			})
-			.catch(err => {
-				if (processingMessage) {
-					processingMessage.edit('Error');
-				}
-				console.error(err);
+			logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
+			discordUsers = await DBServerUserActivity.findAll({
+				where: {
+					userId: {
+						[Op.in]: members.map(member => member.id),
+					},
+					guildId: msg.guildId,
+				},
 			});
+
+			for (let i = 0; i < discordUsers.length; i++) {
+				let member = members.find(member => member.id === discordUsers[i].userId);
+
+				discordUsers[i].displayColor = member.displayHexColor;
+			}
+		} catch (e) {
+			if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+				console.error('commands/guild-leaderboard.js | Get members', e);
+				return;
+			}
+		}
+
+		discordUsers.sort((a, b) => parseInt(b.points) - parseInt(a.points));
+
+		let leaderboardData = [];
+
+		let messageToAuthor = '';
+		let authorPlacement = 0;
+
+		for (let i = 0; i < discordUsers.length; i++) {
+			if (msg.author.id === discordUsers[i].userId) {
+				messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
+				authorPlacement = i + 1;
+			}
+
+			let member = await msg.guild.members.cache.get(discordUsers[i].userId);
+
+			let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
+
+			if (member.nickname) {
+				userDisplayName = `${member.nickname} / ${userDisplayName}`;
+			}
+
+			let dataset = {
+				name: userDisplayName,
+				value: `${humanReadable(discordUsers[i].points)} point(s)`,
+				color: discordUsers[i].displayColor
+			};
+
+			leaderboardData.push(dataset);
+		}
+
+		let totalPages = Math.floor(leaderboardData.length / leaderboardEntriesPerPage) + 1;
+
+		let page;
+
+		if (args[0] && !isNaN(args[0])) {
+			page = Math.abs(parseInt(args[0]));
+		}
+
+		if (!page && leaderboardData.length > 150) {
+			page = 1;
+			if (authorPlacement) {
+				page = Math.floor(authorPlacement / leaderboardEntriesPerPage) + 1;
+			}
+		}
+
+		if (totalPages === 1) {
+			page = null;
+		}
+
+		let filename = `guild-leaderboard-${msg.author.id}-${msg.guild.name}.png`;
+
+		if (page) {
+			filename = `guild-leaderboard-${msg.author.id}-${msg.guild.name}-page${page}.png`;
+		}
+
+		//Remove trailing s if guild name stops with s or x
+		let title = `${msg.guild.name}'s activity leaderboard`;
+		if (msg.guild.name.endsWith('s') || msg.guild.name.endsWith('x')) {
+			title = `${msg.guild.name}' activity leaderboard`;
+		}
+
+		const attachment = await createLeaderboard(leaderboardData, 'discord-background.png', title, filename, page);
+
+		//Send attachment
+		let leaderboardMessage;
+		if (msg.id) {
+			leaderboardMessage = await msg.reply({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
+		} else if (interaction) {
+			leaderboardMessage = await interaction.followUp({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
+		} else {
+			leaderboardMessage = await msg.channel.send({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
+		}
+
+		if (page) {
+			if (page > 1) {
+				await leaderboardMessage.react('◀️');
+			}
+
+			if (page < totalPages) {
+				await leaderboardMessage.react('▶️');
+			}
+		}
+
+		if (processingMessage) {
+			processingMessage.delete();
+		}
 	},
 };

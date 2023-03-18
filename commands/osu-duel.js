@@ -1298,53 +1298,40 @@ module.exports = {
 				}
 
 				let osuAccounts = [];
+				let discordUsers = [];
 
 				if (interaction.guild) {
-					//TODO: Fetch error handling
-					await interaction.guild.members.fetch({ time: 300000 })
-						.then(async (guildMembers) => {
-							const members = [];
-							guildMembers.each(member => members.push(member.id));
-
-							logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard');
-							const discordUsers = await DBDiscordUsers.findAll({
-								where: {
-									userId: {
-										[Op.in]: members
-									},
-									osuUserId: {
-										[Op.not]: null,
-									},
-									osuDuelStarRating: {
-										[Op.not]: null,
-									}
-								},
+					try {
+						let members = await interaction.guild.members.fetch({ time: 300000 })
+							.catch((err) => {
+								throw new Error(err);
 							});
 
-							for (let i = 0; i < discordUsers.length; i++) {
-								osuAccounts.push({
-									userId: discordUsers[i].userId,
-									osuUserId: discordUsers[i].osuUserId,
-									osuName: discordUsers[i].osuName,
-									osuVerified: discordUsers[i].osuVerified,
-									osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
-									osuNoModDuelStarRating: parseFloat(discordUsers[i].osuNoModDuelStarRating),
-									osuHiddenDuelStarRating: parseFloat(discordUsers[i].osuHiddenDuelStarRating),
-									osuHardRockDuelStarRating: parseFloat(discordUsers[i].osuHardRockDuelStarRating),
-									osuDoubleTimeDuelStarRating: parseFloat(discordUsers[i].osuDoubleTimeDuelStarRating),
-									osuFreeModDuelStarRating: parseFloat(discordUsers[i].osuFreeModDuelStarRating),
-									osuDuelProvisional: discordUsers[i].osuDuelProvisional,
-									osuDuelOutdated: discordUsers[i].osuDuelOutdated,
-									osuRank: discordUsers[i].osuRank,
-								});
-							}
-						})
-						.catch(err => {
-							console.error(err);
+						members = members.map(member => member.id);
+
+						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard');
+						discordUsers = await DBDiscordUsers.findAll({
+							where: {
+								userId: {
+									[Op.in]: members
+								},
+								osuUserId: {
+									[Op.not]: null,
+								},
+								osuDuelStarRating: {
+									[Op.not]: null,
+								}
+							},
 						});
+					} catch (e) {
+						if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+							console.error('commands/osu-duel.js | rating-leaderboard', e);
+							return;
+						}
+					}
 				} else {
 					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard 2');
-					const discordUsers = await DBDiscordUsers.findAll({
+					discordUsers = await DBDiscordUsers.findAll({
 						where: {
 							osuUserId: {
 								[Op.not]: null,
@@ -1357,24 +1344,24 @@ module.exports = {
 							}
 						},
 					});
+				}
 
-					for (let i = 0; i < discordUsers.length; i++) {
-						osuAccounts.push({
-							userId: discordUsers[i].userId,
-							osuUserId: discordUsers[i].osuUserId,
-							osuName: discordUsers[i].osuName,
-							osuVerified: discordUsers[i].osuVerified,
-							osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
-							osuNoModDuelStarRating: parseFloat(discordUsers[i].osuNoModDuelStarRating),
-							osuHiddenDuelStarRating: parseFloat(discordUsers[i].osuHiddenDuelStarRating),
-							osuHardRockDuelStarRating: parseFloat(discordUsers[i].osuHardRockDuelStarRating),
-							osuDoubleTimeDuelStarRating: parseFloat(discordUsers[i].osuDoubleTimeDuelStarRating),
-							osuFreeModDuelStarRating: parseFloat(discordUsers[i].osuFreeModDuelStarRating),
-							osuDuelProvisional: discordUsers[i].osuDuelProvisional,
-							osuDuelOutdated: discordUsers[i].osuDuelOutdated,
-							osuRank: discordUsers[i].osuRank,
-						});
-					}
+				for (let i = 0; i < discordUsers.length; i++) {
+					osuAccounts.push({
+						userId: discordUsers[i].userId,
+						osuUserId: discordUsers[i].osuUserId,
+						osuName: discordUsers[i].osuName,
+						osuVerified: discordUsers[i].osuVerified,
+						osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
+						osuNoModDuelStarRating: parseFloat(discordUsers[i].osuNoModDuelStarRating),
+						osuHiddenDuelStarRating: parseFloat(discordUsers[i].osuHiddenDuelStarRating),
+						osuHardRockDuelStarRating: parseFloat(discordUsers[i].osuHardRockDuelStarRating),
+						osuDoubleTimeDuelStarRating: parseFloat(discordUsers[i].osuDoubleTimeDuelStarRating),
+						osuFreeModDuelStarRating: parseFloat(discordUsers[i].osuFreeModDuelStarRating),
+						osuDuelProvisional: discordUsers[i].osuDuelProvisional,
+						osuDuelOutdated: discordUsers[i].osuDuelOutdated,
+						osuRank: discordUsers[i].osuRank,
+					});
 				}
 
 				osuAccounts.sort((a, b) => b.osuDuelStarRating - a.osuDuelStarRating);
@@ -1949,48 +1936,43 @@ module.exports = {
 				let leagueAmounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 				let osuAccounts = [];
+				let discordUsers = [];
 
 				if (interaction.guild) {
-					// TODO: Fetch error handling
-					await interaction.guild.members.fetch({ time: 300000 })
-						.then(async (guildMembers) => {
-							const members = [];
-							guildMembers.each(member => members.push(member.id));
-
-							logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread');
-							const discordUsers = await DBDiscordUsers.findAll({
-								where: {
-									userId: {
-										[Op.in]: members
-									},
-									osuUserId: {
-										[Op.not]: null,
-									},
-									osuDuelStarRating: {
-										[Op.not]: null,
-									},
-									osuDuelProvisional: {
-										[Op.not]: true,
-									}
-								},
+					try {
+						let members = await interaction.guild.members.fetch({ time: 300000 })
+							.catch((err) => {
+								throw new Error(err);
 							});
 
-							for (let i = 0; i < discordUsers.length; i++) {
-								osuAccounts.push({
-									userId: discordUsers[i].userId,
-									osuUserId: discordUsers[i].osuUserId,
-									osuName: discordUsers[i].osuName,
-									osuVerified: discordUsers[i].osuVerified,
-									osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
-								});
-							}
-						})
-						.catch(err => {
-							console.error(err);
+						members = members.map(member => member.id);
+
+						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread');
+						discordUsers = discordUsers = await DBDiscordUsers.findAll({
+							where: {
+								userId: {
+									[Op.in]: members
+								},
+								osuUserId: {
+									[Op.not]: null,
+								},
+								osuDuelStarRating: {
+									[Op.not]: null,
+								},
+								osuDuelProvisional: {
+									[Op.not]: true,
+								}
+							},
 						});
+					} catch (e) {
+						if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+							console.error('commands/osu-duel.js | rating spread', e);
+							return;
+						}
+					}
 				} else {
 					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread 2');
-					const discordUsers = await DBDiscordUsers.findAll({
+					discordUsers = await DBDiscordUsers.findAll({
 						where: {
 							osuUserId: {
 								[Op.not]: null,
@@ -2003,20 +1985,18 @@ module.exports = {
 							}
 						},
 					});
-
-					for (let i = 0; i < discordUsers.length; i++) {
-						osuAccounts.push({
-							userId: discordUsers[i].userId,
-							osuUserId: discordUsers[i].osuUserId,
-							osuName: discordUsers[i].osuName,
-							osuVerified: discordUsers[i].osuVerified,
-							osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
-						});
-					}
 				}
 
-				for (let i = 0; i < osuAccounts.length; i++) {
-					leagueAmounts[labels.indexOf(getOsuDuelLeague(osuAccounts[i].osuDuelStarRating).name)]++;
+				for (let i = 0; i < discordUsers.length; i++) {
+					osuAccounts.push({
+						userId: discordUsers[i].userId,
+						osuUserId: discordUsers[i].osuUserId,
+						osuName: discordUsers[i].osuName,
+						osuVerified: discordUsers[i].osuVerified,
+						osuDuelStarRating: parseFloat(discordUsers[i].osuDuelStarRating),
+					});
+
+					leagueAmounts[labels.indexOf(getOsuDuelLeague(parseFloat(discordUsers[i].osuDuelStarRating)).name)]++;
 				}
 
 				let finalAmounts = [];
