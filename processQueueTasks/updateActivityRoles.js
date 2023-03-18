@@ -53,7 +53,7 @@ module.exports = {
 				let members = null;
 				try {
 					console.log(1);
-					members = await guild.members.fetch({ time: 300000 });
+					members = await guild.members.fetch();
 
 					console.log(2);
 
