@@ -1,4 +1,5 @@
 const { showUnknownInteractionError, logBroadcastEval } = require('../../config.json');
+const { DBProcessQueue } = require('../../dbObjects');
 
 module.exports = {
 	name: 'restart',
@@ -38,6 +39,23 @@ module.exports = {
 
 		// eslint-disable-next-line no-console
 		console.log('duels', duels);
+
+		let matches = duels.flat();
+		for (let i = 0; i < matches.length; i++) {
+			let processQueueTask = await DBProcessQueue.findOne({
+				where: {
+					task: 'importMatch',
+					additions: matches[i],
+				},
+			});
+
+			if (processQueueTask) {
+				continue;
+			}
+
+			let date = new Date();
+			await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: matches[i], priority: 1, date: date });
+		}
 		// eslint-disable-next-line no-console
 		console.log('other', other);
 		// eslint-disable-next-line no-console
