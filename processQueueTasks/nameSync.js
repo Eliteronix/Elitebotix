@@ -38,6 +38,7 @@ module.exports = {
 					members = members.filter(member => member.user.bot !== true).map(member => member);
 				} catch (e) {
 					if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+						console.log(e.message);
 						console.error('processQueueTasks/nameSync.js | Get members', e);
 						return;
 					}
