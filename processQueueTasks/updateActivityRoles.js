@@ -27,7 +27,7 @@ module.exports = {
 			let guild;
 
 			try {
-				guild = await c.guilds.cache.get(guildId);
+				guild = await c.guilds.fetch(guildId);
 			} catch (e) {
 				if (e.message === 'Missing Access') {
 					return;
@@ -53,7 +53,7 @@ module.exports = {
 				let members = null;
 				try {
 					console.log(1);
-					members = await guild.members.fetch();
+					members = await guild.members.fetch({ time: 300000 });
 
 					console.log(2);
 
