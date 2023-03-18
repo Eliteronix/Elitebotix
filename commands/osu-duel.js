@@ -1324,7 +1324,7 @@ module.exports = {
 							},
 						});
 					} catch (e) {
-						if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+						if (e.message !== 'Members didn\'t arrive in time.') {
 							console.error('commands/osu-duel.js | rating-leaderboard', e);
 							return;
 						}
@@ -1965,7 +1965,7 @@ module.exports = {
 							},
 						});
 					} catch (e) {
-						if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+						if (e.message !== 'Members didn\'t arrive in time.') {
 							console.error('commands/osu-duel.js | rating spread', e);
 							return;
 						}

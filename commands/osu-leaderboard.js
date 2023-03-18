@@ -101,7 +101,7 @@ module.exports = {
 				},
 			});
 		} catch (e) {
-			if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+			if (e.message !== 'Members didn\'t arrive in time.') {
 				console.error('commands/osu-leaderboard.js | Get members', e);
 				return;
 			}

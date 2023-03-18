@@ -34,7 +34,7 @@ module.exports = {
 
 					members = members.filter(member => member.user.bot !== true).map(member => member);
 				} catch (e) {
-					if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+					if (e.message !== 'Members didn\'t arrive in time.') {
 						console.error('MOTD/assignPlayerRoles.js | Get members', e);
 						return;
 					}

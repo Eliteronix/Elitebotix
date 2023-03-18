@@ -40,7 +40,7 @@ module.exports = {
 
 			sentMessage.edit(`Updated ${members.length} members`);
 		} catch (e) {
-			if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+			if (e.message !== 'Members didn\'t arrive in time.') {
 				console.error('commands/tempvoice.js | text enable guild exists check bot permissions', e);
 				return;
 			}

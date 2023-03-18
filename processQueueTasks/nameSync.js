@@ -33,11 +33,13 @@ module.exports = {
 				//Fetch all members
 				let members = null;
 				try {
+					console.log('nameSync', guild);
+
 					members = await guild.members.fetch({ time: 300000 });
 
 					members = members.filter(member => member.user.bot !== true).map(member => member);
 				} catch (e) {
-					if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+					if (e.message !== 'Members didn\'t arrive in time.') {
 						console.log(e.message);
 						console.error('processQueueTasks/nameSync.js | Get members', e);
 						return;

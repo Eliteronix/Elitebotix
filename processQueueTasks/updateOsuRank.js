@@ -395,7 +395,7 @@ module.exports = {
 
 							member = member.first();
 						} catch (e) {
-							if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+							if (e.message !== 'Members didn\'t arrive in time.') {
 								console.error('processQueueTasks/updateOsuRank.js | get ecs2021 member', e);
 								return;
 							}
@@ -472,7 +472,7 @@ module.exports = {
 
 							member = member.first();
 						} catch (e) {
-							if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+							if (e.message !== 'Members didn\'t arrive in time.') {
 								console.error('processQueueTasks/updateOsuRank.js | get ecw2022 member', e);
 								return;
 							}

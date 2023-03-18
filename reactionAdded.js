@@ -1169,7 +1169,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 								throw new Error(err);
 							});
 					} catch (e) {
-						if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+						if (e.message !== 'Members didn\'t arrive in time.') {
 							console.error('reactionAdded.js | Reactionrole assign 1', e);
 							return;
 						}
@@ -1220,7 +1220,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 									throw new Error(err);
 								});
 						} catch (e) {
-							if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+							if (e.message !== 'Members didn\'t arrive in time.') {
 								console.error('reactionAdded.js | Reactionrole assign 2', e);
 								return;
 							}

@@ -107,7 +107,7 @@ async function getName(interaction, argument) {
 
 				member = member.first();
 			} catch (e) {
-				if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+				if (e.message !== 'Members didn\'t arrive in time.') {
 					console.error('commands/ship.js | Get ship member', e);
 					return;
 				}

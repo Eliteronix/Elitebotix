@@ -37,7 +37,7 @@ module.exports = async function (oldMember, newMember) {
 							throw new Error(err);
 						});
 				} catch (e) {
-					if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+					if (e.message !== 'Members didn\'t arrive in time.') {
 						console.error('voiceStateUpdate.js | server mute', e);
 						return;
 					}
@@ -90,7 +90,7 @@ module.exports = async function (oldMember, newMember) {
 							throw new Error(err);
 						});
 				} catch (e) {
-					if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+					if (e.message !== 'Members didn\'t arrive in time.') {
 						console.error('voiceStateUpdate.js | server deafened', e);
 						return;
 					}
@@ -143,7 +143,7 @@ module.exports = async function (oldMember, newMember) {
 							throw new Error(err);
 						});
 				} catch (e) {
-					if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+					if (e.message !== 'Members didn\'t arrive in time.') {
 						console.error('voiceStateUpdate.js | joined voice', e);
 						return;
 					}
@@ -189,7 +189,7 @@ module.exports = async function (oldMember, newMember) {
 							throw new Error(err);
 						});
 				} catch (e) {
-					if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+					if (e.message !== 'Members didn\'t arrive in time.') {
 						console.error('voiceStateUpdate.js | left voice', e);
 						return;
 					}
@@ -291,7 +291,7 @@ module.exports = async function (oldMember, newMember) {
 								throw new Error(err);
 							});
 					} catch (e) {
-						if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+						if (e.message !== 'Members didn\'t arrive in time.') {
 							console.error('voiceStateUpdate.js | temp channel', e);
 							return;
 						}

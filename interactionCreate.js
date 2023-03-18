@@ -41,7 +41,7 @@ module.exports = async function (client, bancho, interaction) {
 
 					member = member.first();
 				} catch (e) {
-					if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+					if (e.message !== 'Members didn\'t arrive in time.') {
 						console.error('interactionCreate.js | Check bot permissions', e);
 						return;
 					}

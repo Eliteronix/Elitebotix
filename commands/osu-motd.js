@@ -1048,7 +1048,7 @@ module.exports = {
 
 						member = member.first();
 					} catch (e) {
-						if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+						if (e.message !== 'Members didn\'t arrive in time.') {
 							console.error('commands/osu-motd.js | Get members for custom-fixed-players', e);
 							return;
 						}

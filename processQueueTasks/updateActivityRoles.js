@@ -61,7 +61,7 @@ module.exports = {
 
 					console.log(3);
 				} catch (e) {
-					if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+					if (e.message !== 'Members didn\'t arrive in time.') {
 						console.error('processQueueTasks/updateActivityRoles.js | Get members', e);
 						return;
 					}
