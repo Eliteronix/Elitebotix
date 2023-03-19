@@ -3642,6 +3642,7 @@ module.exports = {
 				} catch (e) {
 					console.error(e);
 				}
+				return;
 			}
 
 			if (msg === '!mp') {
@@ -3719,7 +3720,7 @@ module.exports = {
 					});
 
 				module.exports.logDatabaseQueries(2, 'utils.js DBProcessQueue importMatch twitch chat');
-				DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: new Date() });
+				return await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: new Date() });
 			}
 
 			const longRegex = /https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm;
@@ -3748,7 +3749,7 @@ module.exports = {
 				});
 
 				if (discordUser && context['display-name'].toLowerCase() !== discordUser.twitchName.toLowerCase()) {
-					twitchClient.say(target.substring(1), `${context['display-name']} -> Please select a difficulty of the mapset.`);
+					return await twitchClient.say(target.substring(1), `${context['display-name']} -> Please select a difficulty of the mapset.`);
 				}
 			}
 
@@ -3822,6 +3823,59 @@ module.exports = {
 				} catch (error) {
 					if (error.message !== 'Currently disconnected!') {
 						console.error(error);
+					}
+				}
+
+				return;
+			}
+
+			const fishhChannels = ['54068428'];
+
+			if (msg.includes('fishh') && fishhChannels.includes(context['room-id'])) {
+				const catches = [
+					{ name: 'Joel', weight: 250 },
+					{ name: 'Christopher', weight: 250 },
+					{ name: 'jol', weight: 250 },
+					{ name: 'Noah', weight: 250 },
+					{ name: 'Muhammed', weight: 250 },
+					{ name: 'Damien', weight: 250 },
+					{ name: 'Max', weight: 250 },
+					{ name: 'COD', weight: 250 },
+					{ name: 'Harold', weight: 250 },
+					{ name: 'FishMoley', weight: 250 },
+					{ name: 'fishJAM', weight: 100 },
+					{ name: 'jellyfishJam', weight: 100 },
+					{ name: 'JoelPride', weight: 100 },
+					{ name: 'JUSSY', weight: 50 },
+					{ name: 'Sharkge', weight: 50 },
+					{ name: 'JoelJAM', weight: 25 },
+					{ name: 'Joeler', weight: 10 },
+					{ name: 'fishShy', weight: 10 },
+					{ name: 'PogFish', weight: 10 },
+					{ name: 'JoelbutmywindowsXPiscrashing', weight: 10 },
+					{ name: 'JoelerRAVE', weight: 10 },
+					{ name: 'JoelTeachingHisSonJolHowToSpinWhileWideBorisPassesBy', weight: 10 },
+					{ name: 'Robert was saved from the water!', weight: 1 }
+				];
+
+				let totalWeight = 0;
+				for (let i = 0; i < catches.length; i++) {
+					totalWeight += catches[i].weight;
+				}
+
+				let random = Math.floor(Math.random() * totalWeight);
+
+				let currentWeight = 0;
+
+				for (let i = 0; i < catches.length; i++) {
+					currentWeight += catches[i].weight;
+					if (random < currentWeight) {
+						if (catches[i].name === 'Robert') {
+							twitchClient.say(target.substring(1), `${context['display-name']} saved Robert from the water!`);
+							return;
+						}
+						twitchClient.say(target.substring(1), `${context['display-name']} caught ${catches[i].name} !`);
+						return;
 					}
 				}
 			}
