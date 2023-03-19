@@ -3829,7 +3829,8 @@ module.exports = {
 				return;
 			}
 
-			const fishhChannels = ['54068428'];
+			const fishhChannels = ['54068428', '640238356', '860369226', '217355740', '82273365', '236370675', '269391990'];
+			// Eliteronix, Lunepie, Lunepieoffline, eneques, kaitiri, MaryLiOsu, Laan_c
 
 			if (msg.includes('fishh') && fishhChannels.includes(context['room-id'])) {
 				const catches = [
