@@ -55,14 +55,9 @@ module.exports = {
 			//Fetch all members
 			let members = null;
 			try {
-				console.log(1);
 				members = await guild.members.fetch({ time: 300000 });
 
-				console.log(2);
-
 				members = members.filter(member => member.user.bot !== true).map(member => member);
-
-				console.log(3);
 			} catch (e) {
 				if (e.message !== 'Members didn\'t arrive in time.') {
 					console.error('processQueueTasks/updateActivityRoles.js | Get members', e);
