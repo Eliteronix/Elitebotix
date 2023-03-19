@@ -1473,7 +1473,7 @@ module.exports = {
 
 				if (sameMatchGettingImported === false) {
 					matchAlreadyGetsImported = false;
-				} else if (sameMatchGettingImported > match.games.length) {
+				} else if (sameMatchGettingImported >= match.games.length) {
 					waitForADifferentImport = true;
 					matchAlreadyGetsImported = false;
 				}
