@@ -202,10 +202,6 @@ module.exports = {
 			if (error.message === 'Not found') {
 				let sendLogMessage = false;
 
-				if (discordUser.osuName) {
-					sendLogMessage = true;
-				}
-
 				let message = `Could not find osu! user \`${discordUser.osuName}\` (\`${discordUser.osuUserId}\` | https://osu.ppy.sh/users/${discordUser.osuUserId}) anymore (repeatedly)`;
 
 				let now = new Date();
@@ -214,10 +210,19 @@ module.exports = {
 				if (discordUser.osuNotFoundFirstOccurence === null) {
 					message = `Could not find osu! user \`${discordUser.osuName}\` (\`${discordUser.osuUserId}\` | https://osu.ppy.sh/users/${discordUser.osuUserId}) anymore (first time)`;
 
+					if (discordUser.osuName) {
+						sendLogMessage = true;
+					}
+
 					discordUser.osuNotFoundFirstOccurence = now;
 					discordUser.save();
 				} else if (discordUser.osuNotFoundFirstOccurence && weekAgo > discordUser.osuNotFoundFirstOccurence) {
 					message = `Could not find osu! user \`${discordUser.osuName}\` (\`${discordUser.osuUserId}\` | https://osu.ppy.sh/users/${discordUser.osuUserId}) anymore (deleting user)`;
+
+					if (discordUser.osuName) {
+						sendLogMessage = true;
+					}
+
 					const user = await client.users.fetch(discordUser.userId).catch(async () => {
 						//Nothing
 					});
