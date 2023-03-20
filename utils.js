@@ -6333,7 +6333,7 @@ module.exports = {
 						//Fetch the guild
 						guildTrackers[i].guild = await c.guilds.cache.get(guildTrackers[i].guildId);
 
-						if (!guildTrackers[i].guild) {
+						if (!guildTrackers[i].guild || guildTrackers[i].guild.shardId !== c.shardId) {
 							continue;
 						}
 
