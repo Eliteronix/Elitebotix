@@ -199,7 +199,7 @@ module.exports = {
 
 			const existingScoreIndex = scoreData.findIndex(scoreData => scoreData.replayHash === score.replayHash);
 
-			if (existingScoreIndex) {
+			if (existingScoreIndex !== -1) {
 				scoreData.splice(existingScoreIndex, 1);
 			}
 		}
