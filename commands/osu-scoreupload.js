@@ -264,7 +264,10 @@ module.exports = {
 			// Delete the message of the teamsheet and create a new one
 			await interaction.client.shard.broadcastEval(async (c, { guildId, channelId, messageId, teamsize, poolCreatorId, players, mappool, duelratingestimate, updateUntil }) => {
 				const guild = await c.guilds.fetch(guildId);
-				if (!guild) return;
+
+				if (!guild || guild.shardId !== c.shardId) {
+					return;
+				}
 
 				const channel = await guild.channels.fetch(channelId);
 				if (!channel) return;

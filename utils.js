@@ -1209,20 +1209,23 @@ module.exports = {
 									}
 
 									const guild = await c.guilds.cache.get(guildId);
-									if (guild) {
-										let channelId = '1078318397688926260';
 
-										// eslint-disable-next-line no-undef
-										if (process.env.SERVER === 'Dev') {
-											channelId = '1078318144914985050';
-										}
+									if (!guild || guild.shardId !== c.shardId) {
+										return;
+									}
 
-										const channel = await guild.channels.cache.get(channelId);
+									let channelId = '1078318397688926260';
 
-										if (channel) {
-											let sentMessage = await channel.send(message);
-											sentMessage.crosspost();
-										}
+									// eslint-disable-next-line no-undef
+									if (process.env.SERVER === 'Dev') {
+										channelId = '1078318144914985050';
+									}
+
+									const channel = await guild.channels.cache.get(channelId);
+
+									if (channel) {
+										let sentMessage = await channel.send(message);
+										sentMessage.crosspost();
 									}
 								}, { context: { message: `\`${discordUser.osuName}\` gained ${additionalInfo.tournamentBadges.length - discordUser.osuBadges} badge(s). (${discordUser.osuBadges} -> ${additionalInfo.tournamentBadges.length}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
 							}
@@ -1251,20 +1254,23 @@ module.exports = {
 										}
 
 										const guild = await c.guilds.cache.get(guildId);
-										if (guild) {
-											let channelId = '1078318437408968804';
 
-											// eslint-disable-next-line no-undef
-											if (process.env.SERVER === 'Dev') {
-												channelId = '1078318180302323842';
-											}
+										if (!guild || guild.shardId !== c.shardId) {
+											return;
+										}
 
-											const channel = await guild.channels.cache.get(channelId);
+										let channelId = '1078318437408968804';
 
-											if (channel) {
-												let sentMessage = await channel.send(message);
-												sentMessage.crosspost();
-											}
+										// eslint-disable-next-line no-undef
+										if (process.env.SERVER === 'Dev') {
+											channelId = '1078318180302323842';
+										}
+
+										const channel = await guild.channels.cache.get(channelId);
+
+										if (channel) {
+											let sentMessage = await channel.send(message);
+											sentMessage.crosspost();
 										}
 									}, { context: { message: `\`${discordUser.osuName}\` has received a tournament ban at <t:${Math.floor(new Date(additionalInfo.tournamentBan.timestamp).getTime() / 1000)}:f> for \`${additionalInfo.tournamentBan.description}\`. (${bannedUntilString}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
 								}
@@ -3355,7 +3361,9 @@ module.exports = {
 
 								const guild = await c.guilds.cache.get(guildId);
 
-								if (!guild) return;
+								if (!guild || guild.shardId !== c.shardId) {
+									return;
+								}
 
 								const channel = await guild.channels.cache.get(channelId);
 
@@ -3388,11 +3396,14 @@ module.exports = {
 
 									input.client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 										let guild = await c.guilds.cache.get(guildId);
-										if (guild) {
-											let channel = await guild.channels.cache.get(channelId);
-											if (channel) {
-												await channel.send(message);
-											}
+
+										if (!guild || guild.shardId !== c.shardId) {
+											return;
+										}
+
+										let channel = await guild.channels.cache.get(channelId);
+										if (channel) {
+											await channel.send(message);
 										}
 									}, { context: { guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, message: `\`\`\`${message.join('\n')}\`\`\`` } });
 								} catch (err) {
@@ -4668,7 +4679,9 @@ module.exports = {
 
 			const guild = await c.guilds.cache.get(guildId);
 
-			if (!guild) return;
+			if (!guild || guild.shardId !== c.shardId) {
+				return;
+			}
 
 			const channel = await guild.channels.cache.get(channelId);
 
@@ -5747,19 +5760,22 @@ module.exports = {
 								}
 
 								const guild = await c.guilds.cache.get(guildId);
-								if (guild) {
-									let channelId = '1062637410594340874';
 
-									// eslint-disable-next-line no-undef
-									if (process.env.SERVER === 'Dev') {
-										channelId = '1062644551271075930';
-									}
+								if (!guild || guild.shardId !== c.shardId) {
+									return;
+								}
 
-									const channel = await guild.channels.cache.get(channelId);
+								let channelId = '1062637410594340874';
 
-									if (channel) {
-										channel.send(message);
-									}
+								// eslint-disable-next-line no-undef
+								if (process.env.SERVER === 'Dev') {
+									channelId = '1062644551271075930';
+								}
+
+								const channel = await guild.channels.cache.get(channelId);
+
+								if (channel) {
+									channel.send(message);
 								}
 							}, { context: { message: `There is a new tournament post: ${uniqueTopics[i]}` } });
 						});

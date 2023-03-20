@@ -28,7 +28,7 @@ module.exports = {
 			client.shard.broadcastEval(async (c, { guildId, channelId, message, autoTrack, matchId }) => {
 				const guild = await c.guilds.cache.get(guildId);
 
-				if (!guild) {
+				if (!guild || guild.shardId !== c.shardId) {
 					return;
 				}
 

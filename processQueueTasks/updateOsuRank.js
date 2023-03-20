@@ -344,20 +344,23 @@ module.exports = {
 						}
 
 						const guild = await c.guilds.cache.get(guildId);
-						if (guild) {
-							let channelId = '1061942415864385536';
 
-							// eslint-disable-next-line no-undef
-							if (process.env.SERVER === 'Dev') {
-								channelId = '1061942304979566614';
-							}
+						if (!guild || guild.shardId !== c.shardId) {
+							return;
+						}
 
-							const channel = await guild.channels.cache.get(channelId);
+						let channelId = '1061942415864385536';
 
-							if (channel) {
-								let sentMessage = await channel.send(message);
-								sentMessage.crosspost();
-							}
+						// eslint-disable-next-line no-undef
+						if (process.env.SERVER === 'Dev') {
+							channelId = '1061942304979566614';
+						}
+
+						const channel = await guild.channels.cache.get(channelId);
+
+						if (channel) {
+							let sentMessage = await channel.send(message);
+							sentMessage.crosspost();
 						}
 					}, { context: { message: message } });
 				}
@@ -383,65 +386,68 @@ module.exports = {
 
 			client.shard.broadcastEval(async (c, { discordUserId, rankAchieved }) => {
 				const guild = await c.guilds.cache.get('727407178499096597');
-				if (guild) {
+
+				if (!guild || guild.shardId !== c.shardId) {
+					return;
+				}
+
+				try {
+					let member = null;
+
 					try {
-						let member = null;
+						member = await guild.members.fetch({ user: [discordUserId], time: 300000 })
+							.catch((err) => {
+								throw new Error(err);
+							});
 
-						try {
-							member = await guild.members.fetch({ user: [discordUserId], time: 300000 })
-								.catch((err) => {
-									throw new Error(err);
-								});
-
-							member = member.first();
-						} catch (e) {
-							if (e.message !== 'Members didn\'t arrive in time.') {
-								console.error('processQueueTasks/updateOsuRank.js | get ecs2021 member', e);
-								return;
-							}
+						member = member.first();
+					} catch (e) {
+						if (e.message !== 'Members didn\'t arrive in time.') {
+							console.error('processQueueTasks/updateOsuRank.js | get ecs2021 member', e);
+							return;
 						}
-
-						if (member) {
-							const ecs2021ParticipantRoleId = '875031092921532416';
-							const ecs2021ParticipantRole = await guild.roles.fetch(ecs2021ParticipantRoleId);
-
-							if (rankAchieved !== 'Forfeit') {
-								try {
-									if (!member.roles.cache.has(ecs2021ParticipantRole)) {
-										//Assign role if not there yet
-										await member.roles.add(ecs2021ParticipantRole);
-									}
-								} catch (e) {
-									console.error(e);
-								}
-							} else {
-								try {
-									if (member.roles.cache.has(ecs2021ParticipantRole)) {
-										//Remove role if not removed yet
-										await member.roles.remove(ecs2021ParticipantRole);
-									}
-								} catch (e) {
-									console.error(e);
-								}
-							}
-
-							if (rankAchieved === 'Winner') {
-								const ecs2021WinnerRoleId = '875031510288306267';
-								const ecs2021WinnerRole = await guild.roles.fetch(ecs2021WinnerRoleId);
-
-								try {
-									if (!member.roles.cache.has(ecs2021WinnerRole)) {
-										//Assign role if not there yet
-										await member.roles.add(ecs2021WinnerRole);
-									}
-								} catch (e) {
-									console.error(e);
-								}
-							}
-						}
-					} catch (error) {
-						//nothing
 					}
+
+					if (member) {
+						const ecs2021ParticipantRoleId = '875031092921532416';
+						const ecs2021ParticipantRole = await guild.roles.fetch(ecs2021ParticipantRoleId);
+
+						if (rankAchieved !== 'Forfeit') {
+							try {
+								if (!member.roles.cache.has(ecs2021ParticipantRole)) {
+									//Assign role if not there yet
+									await member.roles.add(ecs2021ParticipantRole);
+								}
+							} catch (e) {
+								console.error(e);
+							}
+						} else {
+							try {
+								if (member.roles.cache.has(ecs2021ParticipantRole)) {
+									//Remove role if not removed yet
+									await member.roles.remove(ecs2021ParticipantRole);
+								}
+							} catch (e) {
+								console.error(e);
+							}
+						}
+
+						if (rankAchieved === 'Winner') {
+							const ecs2021WinnerRoleId = '875031510288306267';
+							const ecs2021WinnerRole = await guild.roles.fetch(ecs2021WinnerRoleId);
+
+							try {
+								if (!member.roles.cache.has(ecs2021WinnerRole)) {
+									//Assign role if not there yet
+									await member.roles.add(ecs2021WinnerRole);
+								}
+							} catch (e) {
+								console.error(e);
+							}
+						}
+					}
+				} catch (error) {
+					//nothing
 				}
 			}, { context: { discordUserId: discordUserId, rankAchieved: ecs2021SignUp.rankAchieved } });
 		}
@@ -460,65 +466,68 @@ module.exports = {
 
 			client.shard.broadcastEval(async (c, { discordUserId, rankAchieved }) => {
 				const guild = await c.guilds.cache.get('727407178499096597');
-				if (guild) {
+
+				if (!guild || guild.shardId !== c.shardId) {
+					return;
+				}
+
+				try {
+					let member = null;
+
 					try {
-						let member = null;
+						member = await guild.members.fetch({ user: [discordUserId], time: 300000 })
+							.catch((err) => {
+								throw new Error(err);
+							});
 
-						try {
-							member = await guild.members.fetch({ user: [discordUserId], time: 300000 })
-								.catch((err) => {
-									throw new Error(err);
-								});
-
-							member = member.first();
-						} catch (e) {
-							if (e.message !== 'Members didn\'t arrive in time.') {
-								console.error('processQueueTasks/updateOsuRank.js | get ecw2022 member', e);
-								return;
-							}
+						member = member.first();
+					} catch (e) {
+						if (e.message !== 'Members didn\'t arrive in time.') {
+							console.error('processQueueTasks/updateOsuRank.js | get ecw2022 member', e);
+							return;
 						}
-
-						if (member) {
-							const ecw2022ParticipantRoleId = '922203822313586748';
-							const ecw2022ParticipantRole = await guild.roles.fetch(ecw2022ParticipantRoleId);
-
-							if (rankAchieved !== 'Forfeit') {
-								try {
-									if (!member.roles.cache.has(ecw2022ParticipantRole)) {
-										//Assign role if not there yet
-										await member.roles.add(ecw2022ParticipantRole);
-									}
-								} catch (e) {
-									console.error(e);
-								}
-							} else {
-								try {
-									if (member.roles.cache.has(ecw2022ParticipantRole)) {
-										//Remove role if not removed yet
-										await member.roles.remove(ecw2022ParticipantRole);
-									}
-								} catch (e) {
-									console.error(e);
-								}
-							}
-
-							if (rankAchieved === 'Winner') {
-								const ecw2022WinnerRoleId = '922202798110691329';
-								const ecw2022WinnerRole = await guild.roles.fetch(ecw2022WinnerRoleId);
-
-								try {
-									if (!member.roles.cache.has(ecw2022WinnerRole)) {
-										//Assign role if not there yet
-										await member.roles.add(ecw2022WinnerRole);
-									}
-								} catch (e) {
-									console.error(e);
-								}
-							}
-						}
-					} catch (error) {
-						//nothing
 					}
+
+					if (member) {
+						const ecw2022ParticipantRoleId = '922203822313586748';
+						const ecw2022ParticipantRole = await guild.roles.fetch(ecw2022ParticipantRoleId);
+
+						if (rankAchieved !== 'Forfeit') {
+							try {
+								if (!member.roles.cache.has(ecw2022ParticipantRole)) {
+									//Assign role if not there yet
+									await member.roles.add(ecw2022ParticipantRole);
+								}
+							} catch (e) {
+								console.error(e);
+							}
+						} else {
+							try {
+								if (member.roles.cache.has(ecw2022ParticipantRole)) {
+									//Remove role if not removed yet
+									await member.roles.remove(ecw2022ParticipantRole);
+								}
+							} catch (e) {
+								console.error(e);
+							}
+						}
+
+						if (rankAchieved === 'Winner') {
+							const ecw2022WinnerRoleId = '922202798110691329';
+							const ecw2022WinnerRole = await guild.roles.fetch(ecw2022WinnerRoleId);
+
+							try {
+								if (!member.roles.cache.has(ecw2022WinnerRole)) {
+									//Assign role if not there yet
+									await member.roles.add(ecw2022WinnerRole);
+								}
+							} catch (e) {
+								console.error(e);
+							}
+						}
+					}
+				} catch (error) {
+					//nothing
 				}
 			}, { context: { discordUserId: discordUserId, rankAchieved: ecw2022SignUp.rankAchieved } });
 		}
@@ -552,10 +561,13 @@ module.exports = {
 
 				client.shard.broadcastEval(async (c, { message }) => {
 					const guild = await c.guilds.cache.get('727407178499096597');
-					if (guild) {
-						const channel = await guild.channels.cache.get('830534251757174824');
-						channel.send(message);
+
+					if (!guild || guild.shardId !== c.shardId) {
+						return;
 					}
+
+					const channel = await guild.channels.cache.get('830534251757174824');
+					channel.send(message);
 				}, { context: { message: `<@&851356668415311963> The player \`${elitiriSignUp.osuName}\` from \`${elitiriSignUp.bracketName}\` changed their osu! name to \`${discordUser.osuName}\`.` } });
 
 			}

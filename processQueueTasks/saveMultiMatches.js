@@ -311,7 +311,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 										client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 											let guild = await c.guilds.cache.get(guildId);
 
-											if (!guild) {
+											if (!guild || guild.shardId !== c.shardId) {
 												return;
 											}
 
@@ -383,7 +383,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 						client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 							let guild = await c.guilds.cache.get(guildId);
 
-							if (!guild) {
+							if (!guild || guild.shardId !== c.shardId) {
 								return;
 							}
 
@@ -464,7 +464,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 					let guild = await c.guilds.cache.get(guildId);
 
-					if (!guild) {
+					if (!guild || guild.shardId !== c.shardId) {
 						return;
 					}
 
@@ -714,7 +714,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 																let guild = await c.guilds.cache.get(guildId);
 
-																if (!guild) {
+																if (!guild || guild.shardId !== c.shardId) {
 																	return;
 																}
 
@@ -774,7 +774,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 																let guild = await c.guilds.cache.get(guildId);
 
-																if (!guild) {
+																if (!guild || guild.shardId !== c.shardId) {
 																	return;
 																}
 
@@ -842,7 +842,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 																let guild = await c.guilds.cache.get(guildId);
 
-																if (!guild) {
+																if (!guild || guild.shardId !== c.shardId) {
 																	return;
 																}
 
@@ -890,7 +890,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 																let guild = await c.guilds.cache.get(guildId);
 
-																if (!guild) {
+																if (!guild || guild.shardId !== c.shardId) {
 																	return;
 																}
 
@@ -938,7 +938,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 																let guild = await c.guilds.cache.get(guildId);
 
-																if (!guild) {
+																if (!guild || guild.shardId !== c.shardId) {
 																	return;
 																}
 
@@ -986,7 +986,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 																let guild = await c.guilds.cache.get(guildId);
 
-																if (!guild) {
+																if (!guild || guild.shardId !== c.shardId) {
 																	return;
 																}
 

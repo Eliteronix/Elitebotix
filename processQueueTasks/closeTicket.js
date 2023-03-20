@@ -25,6 +25,10 @@ module.exports = {
 
 					const guild = await c.guilds.cache.get(channel.guild.id);
 
+					if (!guild || guild.shardId !== c.shardId) {
+						return;
+					}
+
 					let openCategory = guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Open');
 					if (openCategory && !openCategory.children.first()) {
 						openCategory.delete();
