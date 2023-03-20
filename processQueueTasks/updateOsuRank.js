@@ -217,7 +217,7 @@ module.exports = {
 					discordUser.osuNotFoundFirstOccurence = now;
 					discordUser.save();
 				} else if (discordUser.osuNotFoundFirstOccurence && weekAgo > discordUser.osuNotFoundFirstOccurence) {
-					message = `Could not find osu! user \`${discordUser.osuName}\` (\`${discordUser.osuUserId}\` | https://osu.ppy.sh/users/${discordUser.osuUserId}) anymore (deleting user)`;
+					message = `Could not find osu! user \`${discordUser.osuName}\` (\`${discordUser.osuUserId}\` | https://osu.ppy.sh/users/${discordUser.osuUserId}) anymore (deleting user | could not find for more than a week)`;
 
 					if (discordUser.osuName) {
 						sendLogMessage = true;
