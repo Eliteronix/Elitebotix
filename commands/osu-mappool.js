@@ -4,6 +4,7 @@ const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMappools } = require('../dbObjects')
 const { getMods, getModBits, getIDFromPotentialOsuLink, getOsuBeatmap, getBeatmapSlimcover, pause } = require('../utils.js');
 const { Op } = require('sequelize');
 const Canvas = require('canvas');
+const { GoogleSpreadsheet } = require('google-spreadsheet');
 
 const discordUsers = {};
 const userMappools = [];
@@ -57,6 +58,50 @@ module.exports = {
 						})
 						.setRequired(true)
 						.setAutocomplete(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand.setName('createfromsheet')
+				.setNameLocalizations({
+					'de': 'aussheeterstellen',
+					'en-GB': 'createfromsheet',
+					'en-US': 'createfromsheet',
+				})
+				.setDescription('Creates new mappools from a google sheet')
+				.setDescriptionLocalizations({
+					'de': 'Erstellt neue Mappools aus einem Google Sheet',
+					'en-GB': 'Creates new mappools from a google sheet',
+					'en-US': 'Creates new mappools from a google sheet',
+				})
+				.addStringOption(option =>
+					option.setName('sheetid')
+						.setNameLocalizations({
+							'de': 'sheetid',
+							'en-GB': 'sheetid',
+							'en-US': 'sheetid',
+						})
+						.setDescription('The ID of the google sheet')
+						.setDescriptionLocalizations({
+							'de': 'Die ID des Google Sheets',
+							'en-GB': 'The ID of the google sheet',
+							'en-US': 'The ID of the google sheet',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option.setName('sheetname')
+						.setNameLocalizations({
+							'de': 'sheetname',
+							'en-GB': 'sheetname',
+							'en-US': 'sheetname',
+						})
+						.setDescription('The name of the sheet')
+						.setDescriptionLocalizations({
+							'de': 'Der Name des Sheets',
+							'en-GB': 'The name of the sheet',
+							'en-US': 'The name of the sheet',
+						})
+						.setRequired(true)
 				)
 		)
 		.addSubcommand(subcommand =>
@@ -663,7 +708,33 @@ module.exports = {
 
 			const mappoolImage = await createMappoolImage(mappool);
 
-			await interaction.editReply({ content: `Successfully created mappool \`${interaction.options.getString('name').replace(/`/g, '')}\`.`, files: [mappoolImage] });
+			let links = mappool.map(map => {
+				let modPool = getMods(map.modPool);
+
+				if (map.tieBreaker) {
+					modPool = ['TB'];
+				} else if (modPool.length === 0 && !map.freeMod) {
+					modPool.push('NM');
+				} else if (map.freeMod) {
+					modPool.push('FM');
+				}
+
+				return `[${modPool.join('')}${map.modPoolNumber}](<https://osu.ppy.sh/b/${map.beatmapId}>)`;
+			});
+
+			let content = '';
+			let currentPoolNumber = mappool[0].modPoolNumber;
+
+			for (let i = 0; i < links.length; i++) {
+				if (mappool[i].modPoolNumber <= currentPoolNumber || i === 0) {
+					currentPoolNumber = mappool[i].modPoolNumber;
+					content += '\n' + links[i];
+				} else {
+					content += ' | ' + links[i];
+				}
+			}
+
+			await interaction.editReply({ content: `Successfully created mappool \`${interaction.options.getString('name').replace(/`/g, '')}\`\n${content}`, files: [mappoolImage] });
 		} else if (interaction.options.getSubcommand() === 'remove') {
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -724,7 +795,299 @@ module.exports = {
 
 			const mappoolImage = await createMappoolImage(mappool);
 
-			await interaction.editReply({ content: `Mappool \`${mappoolName.replace(/`/g, '')}\``, files: [mappoolImage] });
+			let links = mappool.map(map => {
+				let modPool = getMods(map.modPool);
+
+				if (map.tieBreaker) {
+					modPool = ['TB'];
+				} else if (modPool.length === 0 && !map.freeMod) {
+					modPool.push('NM');
+				} else if (map.freeMod) {
+					modPool.push('FM');
+				}
+
+				return `[${modPool.join('')}${map.modPoolNumber}](<https://osu.ppy.sh/b/${map.beatmapId}>)`;
+			});
+
+			let content = '';
+			let currentPoolNumber = mappool[0].modPoolNumber;
+
+			for (let i = 0; i < links.length; i++) {
+				if (mappool[i].modPoolNumber <= currentPoolNumber || i === 0) {
+					currentPoolNumber = mappool[i].modPoolNumber;
+					content += '\n' + links[i];
+				} else {
+					content += ' | ' + links[i];
+				}
+			}
+
+			await interaction.editReply({ content: `Mappool \`${mappoolName.replace(/`/g, '')}\`\n${content}`, files: [mappoolImage] });
+		} else if (interaction.options.getSubcommand() === 'createfromsheet') {
+			let discordUser = await DBDiscordUsers.findOne({
+				where: {
+					userId: interaction.user.id
+				}
+			});
+
+			if (!discordUser || !discordUser.osuUserId || !discordUser.osuVerified) {
+				return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
+			}
+
+			let sheetId = interaction.options.getString('sheetid').replace('https://docs.google.com/spreadsheets/d/', '').replace(/\/.*/g, '');
+
+			// Initialize the sheet - doc ID is the long id in the sheets URL
+			const doc = new GoogleSpreadsheet(sheetId);
+
+			// Initialize Auth - see more available options at https://theoephraim.github.io/node-google-spreadsheet/#/getting-started/authentication
+			await doc.useServiceAccountAuth({
+				// eslint-disable-next-line no-undef
+				client_email: process.env.GOOGLESHEETSSERVICEACCOUNTMAIL,
+				// eslint-disable-next-line no-undef
+				private_key: process.env.GOOGLESHEETSSERVICEACCOUNTPRIVATEKEY.replace(/\\n/g, '\n'),
+			});
+
+			await doc.loadInfo(); // loads document properties and worksheet
+
+			const sheet = doc.sheetsByTitle[interaction.options.getString('sheetname')];
+
+			if (!sheet) {
+				return await interaction.editReply(`Could not find sheet \`${interaction.options.getString('sheetname').replace(/`/g, '')}\`.`);
+			}
+
+			await sheet.loadCells(`A1:${sheet.lastColumnLetter}${sheet.rowCount}`);
+
+			let headerRow = [];
+			let headerRowFound = false;
+
+			let dataRows = [];
+
+			for (let i = 0; i < sheet.rowCount; i++) {
+				let currentRow = [];
+				let currentRowHasData = false;
+
+				for (let j = 0; j < sheet.columnCount; j++) {
+					currentRow.push(sheet.getCell(i, j).value);
+
+					if (sheet.getCell(i, j).value !== null) {
+						currentRowHasData = true;
+					}
+
+					if (sheet.getCell(i, j).value === 'NM1') {
+						headerRowFound = true;
+					}
+				}
+
+				if (!headerRowFound && currentRowHasData) {
+					headerRow = [...currentRow];
+				}
+
+				if (currentRowHasData) {
+					dataRows.push(currentRow);
+				}
+			}
+
+			const modPoolHeaders = ['pick', 'mod'];
+
+			let modPoolIndex = headerRow.findIndex(header => header && modPoolHeaders.includes(header.toLowerCase()));
+
+			if (modPoolIndex === -1) {
+				return await interaction.editReply('Could not find the mod pool column.');
+			}
+
+			const beatmapHeaders = ['map id'];
+
+			let beatmapIndex = headerRow.findIndex(header => header && beatmapHeaders.includes(header.toLowerCase()));
+
+			if (beatmapIndex === -1) {
+				return await interaction.editReply('Could not find the beatmap column.');
+			}
+
+			let mappools = [];
+
+			let currentMappool = {
+				name: null,
+				maps: [],
+			};
+
+			let invalidModpools = [];
+
+			for (let i = 0; i < dataRows.length; i++) {
+				let currentMap = {
+					beatmapId: null,
+					modPool: null,
+				};
+
+				for (let j = 0; j < dataRows[i].length; j++) {
+					let data = dataRows[i][j];
+
+					if (data === null || data === undefined) {
+						continue;
+					}
+
+					if (data.toString().toLowerCase() === 'qualifiers' ||
+						data.toString().toLowerCase() === 'group stage' ||
+						data.toString().toLowerCase().startsWith('round of') ||
+						data.toString().toLowerCase().endsWith('finals') ||
+						data.toString().toLowerCase() === 'ql' ||
+						data.toString().toLowerCase() === 'gs' ||
+						data.toString().toLowerCase() === 'ro64' ||
+						data.toString().toLowerCase() === 'ro32' ||
+						data.toString().toLowerCase() === 'ro16' ||
+						data.toString().toLowerCase() === 'qf' ||
+						data.toString().toLowerCase() === 'sf' ||
+						data.toString().toLowerCase() === 'f' ||
+						data.toString().toLowerCase() === 'gf') {
+						if (currentMappool.name !== null) {
+							mappools.push(currentMappool);
+						}
+
+						currentMappool = {
+							name: `${doc.title} ${data}`,
+							maps: [],
+						};
+
+						continue;
+					}
+
+					if (j === modPoolIndex && data.toString().toUpperCase().match(/[A-Z]+\d+/g)) {
+						let modPool = data.toString().toUpperCase().replace(/\d+/g, '');
+
+						modPool = checkViableModpool(modPool);
+
+						if (modPool === false) {
+							invalidModpools.push(`\`${data.toString().replace(/`/g, '')}\``);
+
+							modPool = {
+								mods: 0,
+								FM: true,
+								TB: false,
+							};
+						}
+
+						currentMap.modPool = modPool;
+						continue;
+					}
+
+					if (j === beatmapIndex && data.toString().match(/\d+/g)) {
+						currentMap.beatmapId = data;
+						continue;
+					}
+				}
+
+				if (currentMap.beatmapId !== null) {
+					currentMappool.maps.push(currentMap);
+				}
+			}
+
+			await interaction.followUp({ content: `${invalidModpools.length} invalid modpool(s) have been replaced with FM ${invalidModpools.join(', ')}` });
+
+			for (let i = 0; i < mappools.length; i++) {
+				if (mappools[i].maps.length === 0) {
+					continue;
+				}
+
+				let beatmaps = await DBOsuBeatmaps.findAll({
+					where: {
+						beatmapId: {
+							[Op.in]: mappools[i].maps.map(map => map.beatmapId),
+						},
+					},
+				});
+
+				let modPoolNumber = 0;
+				let currentModPool = null;
+				let freeMod = null;
+				let tieBreaker = null;
+
+				for (let j = 0; j < mappools[i].maps.length; j++) {
+					if (currentModPool !== mappools[i].maps[j].modPool.mods || freeMod !== mappools[i].maps[j].modPool.FM || tieBreaker !== mappools[i].maps[j].modPool.TB) {
+						modPoolNumber = 1;
+						currentModPool = mappools[i].maps[j].modPool.mods;
+						freeMod = mappools[i].maps[j].modPool.FM;
+						tieBreaker = mappools[i].maps[j].modPool.TB;
+					}
+
+					let modPoolData = mappools[i].maps[j].modPool;
+
+					let beatmap = beatmaps.find(beatmap => beatmap.beatmapId === mappools[i].maps[j].beatmapId && beatmap.mods === mappools[i].maps[j].modPool.mods);
+
+					beatmap = await getOsuBeatmap({ beatmapId: mappools[i].maps[j].beatmapId, modBits: mappools[i].maps[j].modPool.mods, beatmap: beatmap });
+
+					if (beatmap === null) {
+						await interaction.followUp({ content: `Could not find \`${mappools[i].maps[j].beatmapId.replace(/`/g, '')}\` for mappool \`${mappools[i].name.replace(/`/g, '')}\`.` });
+						continue;
+					}
+
+					mappools[i].maps[j].beatmap = beatmap;
+					mappools[i].maps[j].index = i + 1;
+					mappools[i].maps[j].FM = modPoolData.FM;
+					mappools[i].maps[j].TB = modPoolData.TB;
+					mappools[i].maps[j].modBits = modPoolData.mods;
+					mappools[i].maps[j].modIndex = modPoolNumber;
+
+					modPoolNumber++;
+				}
+
+				let mappool = mappools[i].maps.map(map => {
+					return {
+						creatorId: discordUser.osuUserId,
+						name: mappools[i].name,
+						number: map.index,
+						modPool: map.modBits,
+						freeMod: map.FM,
+						tieBreaker: map.TB,
+						modPoolNumber: map.modIndex,
+						beatmapId: map.beatmapId,
+						spreadsheetId: sheetId,
+					};
+				});
+
+				let existingMappool = await DBOsuMappools.findOne({
+					where: {
+						creatorId: discordUser.osuUserId,
+						name: mappools[i].name,
+					},
+				});
+
+				if (existingMappool) {
+					await interaction.followUp({ content: `Mappool \`${mappools[i].name.replace(/`/g, '')}\` was already saved.` });
+					continue;
+				}
+
+				await DBOsuMappools.bulkCreate(mappool);
+
+				let mappoolImage = await createMappoolImage(mappool);
+
+				let links = mappool.map(map => {
+					let modPool = getMods(map.modPool);
+
+					if (map.tieBreaker) {
+						modPool = ['TB'];
+					} else if (modPool.length === 0 && !map.freeMod) {
+						modPool.push('NM');
+					} else if (map.freeMod) {
+						modPool.push('FM');
+					}
+
+					return `[${modPool.join('')}${map.modPoolNumber}](<https://osu.ppy.sh/b/${map.beatmapId}>)`;
+				});
+
+				let content = '';
+				let currentPoolNumber = mappool[0].modPoolNumber;
+
+				for (let i = 0; i < links.length; i++) {
+					if (mappool[i].modPoolNumber <= currentPoolNumber || i === 0) {
+						currentPoolNumber = mappool[i].modPoolNumber;
+						content += '\n' + links[i];
+					} else {
+						content += ' | ' + links[i];
+					}
+				}
+
+				await interaction.followUp({ content: `Mappool \`${mappools[i].name.replace(/`/g, '')}\` was saved in the database.\n\n${content}`, files: [mappoolImage] });
+			}
+
+			await interaction.followUp({ content: 'Done. Any missing pools will need to be imported manually.' });
 		}
 	},
 };
