@@ -178,9 +178,9 @@ module.exports = {
 			};
 		});
 
-		let compareUser = null;
+		let compareUsers = [];
 
-		while (discordUsers.length > 0 && !compareUser) {
+		while (discordUsers.length > 0 && compareUsers.length < 5) {
 			let index = 0;
 			let difference = Infinity;
 
@@ -200,24 +200,36 @@ module.exports = {
 					discordUsers.splice(index, 1);
 				} else {
 					discordUsers[index].osuRank = Number(updatedUserToCompare.pp.rank);
-					compareUser = discordUsers[index];
+					compareUsers.push(discordUsers[index]);
+					discordUsers.splice(index, 1);
 				}
 			} catch (error) {
 				// Do nothing
 			}
 		}
 
-		if (!compareUser) {
+		if (compareUsers.length === 0) {
 			return await interaction.editReply(`There was an error finding a user to compare to ${user.name}.`);
 		}
 
-		let decayTimeDifference = Math.abs(new Date() - compareUser.lastOsuPPChange);
+		// Get the average decay per week
+		let totalDecay = 0;
 
-		let decayRankDifference = compareUser.osuRank - compareUser.oldOsuRank;
+		for (let i = 0; i < compareUsers.length; i++) {
+			let compareUser = compareUsers[i];
+
+			let decayTimeDifference = Math.abs(new Date() - compareUser.lastOsuPPChange);
+
+			let decayRankDifference = compareUser.osuRank - compareUser.oldOsuRank;
+
+			totalDecay += decayRankDifference / decayTimeDifference * 7 * 24 * 60 * 60 * 1000;
+		}
+
+		let averageDecayPerWeek = totalDecay / compareUsers.length;
 
 		let currentRankDifference = decayRank - Number(user.pp.rank);
 
-		let decayTime = Math.round(decayTimeDifference / decayRankDifference * currentRankDifference);
+		let decayTime = Math.round(7 * 24 * 60 * 60 * 1000 / averageDecayPerWeek * currentRankDifference);
 
 		return await interaction.editReply(`${user.name} would reach rank #${humanReadable(decayRank)} <t:${Math.round((decayTime + new Date().getTime()) / 1000)}:R> (Currently #${humanReadable(user.pp.rank)}).`);
 	},
