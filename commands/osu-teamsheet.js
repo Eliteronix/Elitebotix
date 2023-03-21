@@ -99,22 +99,22 @@ module.exports = {
 					{ name: 'Next week', value: 10080 },
 					{ name: 'Next 2 weeks', value: 20160 },
 				)
-		)
-		.addBooleanOption(option =>
-			option.setName('duelratingestimate')
-				.setNameLocalizations({
-					'de': 'duelratingschätzung',
-					'en-GB': 'duelratingestimate',
-					'en-US': 'duelratingestimate',
-				})
-				.setDescription('Whether to fill with an estimate using the duel rating or not')
-				.setDescriptionLocalizations({
-					'de': 'Ob mit einer Schätzung mittels Duel Ratings gefüllt werden soll oder nicht',
-					'en-GB': 'Whether to fill with an estimate using the duel rating or not',
-					'en-US': 'Whether to fill with an estimate using the duel rating or not',
-				})
-				.setRequired(false)
 		),
+	// .addBooleanOption(option =>
+	// 	option.setName('duelratingestimate')
+	// 		.setNameLocalizations({
+	// 			'de': 'duelratingschätzung',
+	// 			'en-GB': 'duelratingestimate',
+	// 			'en-US': 'duelratingestimate',
+	// 		})
+	// 		.setDescription('Whether to fill with an estimate using the duel rating or not')
+	// 		.setDescriptionLocalizations({
+	// 			'de': 'Ob mit einer Schätzung mittels Duel Ratings gefüllt werden soll oder nicht',
+	// 			'en-GB': 'Whether to fill with an estimate using the duel rating or not',
+	// 			'en-US': 'Whether to fill with an estimate using the duel rating or not',
+	// 		})
+	// 		.setRequired(false)
+	// ),
 	async autocomplete(interaction) {
 		const focusedValue = interaction.options.getFocused();
 
