@@ -262,7 +262,7 @@ module.exports = {
 			}
 
 			// Delete the message of the teamsheet and create a new one
-			await interaction.client.shard.broadcastEval(async (c, { guildId, channelId, messageId, teamsize, poolCreatorId, players, mappool, duelratingestimate, updateUntil }) => {
+			await interaction.client.shard.broadcastEval(async (c, { guildId, channelId, messageId, teamsize, poolCreatorId, players, mappool, duelratingestimate, updatefor }) => {
 				const guild = await c.guilds.fetch(guildId);
 
 				if (!guild || guild.shardId !== c.shardId) {
@@ -320,7 +320,7 @@ module.exports = {
 							if (string === 'teamsize') {
 								return teamsize;
 							} else if (string === 'updatefor') {
-								return Math.ceil(updateUntil / 1000 / 60);
+								return updatefor;
 							}
 						},
 						getBoolean: (string) => {
