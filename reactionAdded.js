@@ -503,26 +503,31 @@ module.exports = async function (reaction, user, additionalObjects) {
 				return;
 			}
 
-			//Set author of a temporary message copy to the reacting user to not break the commands
-			let guildId = null;
-
-			if (reaction.message.guild) {
-				guildId = reaction.message.guild.id;
-			}
-
-			let tempMessage = {
-				guild: reaction.message.guild,
-				guildId: guildId,
-				content: `e!osu-skills ${osuUserId}`,
-				author: user,
+			//Setup artificial interaction
+			let interaction = {
+				id: null,
+				client: reaction.message.client,
 				channel: reaction.message.channel,
+				user: user,
+				options: {
+					getString: (string) => {
+						if (string === 'username') {
+							return osuUserId.toString();
+						}
+					},
+					getBoolean: () => { },
+				},
+				deferReply: () => { },
+				followUp: async (input) => {
+					return await reaction.message.channel.send(input);
+				},
 			};
 
 			try {
 				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
-				command.execute(tempMessage, args, null, additionalObjects);
+				command.execute(null, null, interaction, additionalObjects);
 			} catch (error) {
 				console.error(error);
 				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');

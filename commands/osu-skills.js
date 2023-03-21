@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, getOsuBeatmap, getMods, getAccuracy, pause, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar } = require('../utils');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
 const { Op } = require('sequelize');
@@ -134,9 +134,9 @@ module.exports = {
 				})
 				.setRequired(false)
 				.addChoices(
-					{ name: 'Only Score v2', value: '--v2' },
-					{ name: 'Only Score v1', value: '--v1' },
-					{ name: 'All Scores', value: '--vx' },
+					{ name: 'Only Score v2', value: 'v2' },
+					{ name: 'Only Score v1', value: 'v1' },
+					{ name: 'All Scores', value: 'vx' },
 				)
 		)
 		.addBooleanOption(option =>
@@ -170,138 +170,106 @@ module.exports = {
 				.setRequired(false)
 		),
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			try {
-				//TODO:await interaction.deferReply();
-				await interaction.reply('Players are being processed');
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
-
-			args = [];
-
-			if (interaction.options._hoistedOptions) {
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					if (interaction.options._hoistedOptions[i].name === 'scaled') {
-						if (interaction.options._hoistedOptions[i].value) {
-							args.push('--scaled');
-						} else {
-							args.push('--noscale');
-						}
-					} else if (interaction.options._hoistedOptions[i].name === 'tourney') {
-						if (interaction.options._hoistedOptions[i].value) {
-							args.push('--tourney');
-						} else {
-							args.push('--all');
-						}
-					} else if (interaction.options._hoistedOptions[i].name === 'runningaverage') {
-						if (interaction.options._hoistedOptions[i].value) {
-							args.push('--runningavg');
-						} else {
-							args.push('--norunningavg');
-						}
-					} else {
-						args.push(interaction.options._hoistedOptions[i].value);
-					}
-				}
-			}
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
+			return;
 		}
-
-		const commandConfig = await getOsuUserServerMode(msg, args);
-		const commandUser = commandConfig[0];
 
 		let scaled = true;
-		let scoringType = 'v2';
-		let tourneyMatch = true;
-		let runningAverage = true;
-		for (let i = 0; i < args.length; i++) {
-			if (args[i].toLowerCase().startsWith('--scaled')) {
-				scaled = true;
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].toLowerCase().startsWith('--noscale')) {
-				scaled = false;
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].toLowerCase().startsWith('--v2')) {
-				scoringType = 'v2';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].toLowerCase().startsWith('--v1')) {
-				scoringType = 'v1';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].toLowerCase().startsWith('--tourney')) {
-				tourneyMatch = true;
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].toLowerCase().startsWith('--all')) {
-				tourneyMatch = false;
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].toLowerCase().startsWith('--vx')) {
-				scoringType = 'vx';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].toLowerCase().startsWith('--runningavg')) {
-				runningAverage = true;
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].toLowerCase().startsWith('--norunningavg')) {
-				runningAverage = false;
-				args.splice(i, 1);
-				i--;
-			}
+
+		if (interaction.options.getBoolean('scaled') === false) {
+			scaled = false;
 		}
 
-		if (!args[0]) {//Get profile by author if no argument
+		let tourneyMatch = true;
+
+		if (interaction.options.getBoolean('tourney') === false) {
+			tourneyMatch = false;
+		}
+
+		let runningAverage = true;
+
+		if (interaction.options.getBoolean('runningaverage') === false) {
+			runningAverage = false;
+		}
+
+		let scoringType = 'v2';
+
+		if (interaction.options.getString('scores')) {
+			scoringType = interaction.options.getString('scores');
+		}
+
+		let usernames = [];
+
+		if (interaction.options.getString('username')) {
+			usernames.push(interaction.options.getString('username'));
+		}
+
+		if (interaction.options.getString('username2')) {
+			usernames.push(interaction.options.getString('username2'));
+		}
+
+		if (interaction.options.getString('username3')) {
+			usernames.push(interaction.options.getString('username3'));
+		}
+
+		if (interaction.options.getString('username4')) {
+			usernames.push(interaction.options.getString('username4'));
+		}
+
+		if (interaction.options.getString('username5')) {
+			usernames.push(interaction.options.getString('username5'));
+		}
+
+		if (usernames.length === 0) {//Get profile by author if no argument
+			let commandUser = await DBDiscordUsers.findOne({
+				where: {
+					userId: interaction.user.id
+				},
+			});
+
 			if (commandUser && commandUser.osuUserId) {
-				getOsuSkills(msg, args, commandUser.osuUserId, scaled, scoringType, tourneyMatch, runningAverage);
+				getOsuSkills(interaction, commandUser.osuUserId, scaled, scoringType, tourneyMatch, runningAverage);
 			} else {
-				const userDisplayName = await getMessageUserDisplayname(msg);
-				getOsuSkills(msg, args, userDisplayName, scaled, scoringType, tourneyMatch, runningAverage);
+				let userDisplayName = interaction.user.username;
+
+				if (interaction.member) {
+					userDisplayName = interaction.member.displayName;
+				}
+				getOsuSkills(interaction, userDisplayName, scaled, scoringType, tourneyMatch, runningAverage);
 			}
 		} else {
 			//Get profiles by arguments
-			for (let i = 0; i < args.length; i++) {
-				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
+			for (let i = 0; i < usernames.length; i++) {
+				if (usernames[i].startsWith('<@') && usernames[i].endsWith('>')) {
 					logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers');
 					const discordUser = await DBDiscordUsers.findOne({
-						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
+						where: {
+							userId: usernames[i].replace('<@', '').replace('>', '').replace('!', '')
+						},
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getOsuSkills(msg, args, discordUser.osuUserId, scaled, scoringType, tourneyMatch, runningAverage);
+						getOsuSkills(interaction, discordUser.osuUserId, scaled, scoringType, tourneyMatch, runningAverage);
 					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
-						getOsuSkills(msg, args, args[i], scaled, scoringType, tourneyMatch, runningAverage);
+						await interaction.followUp(`\`${usernames[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
+						continue;
 					}
 				} else {
-
-					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
-						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getOsuSkills(msg, args, getIDFromPotentialOsuLink(args[i]), scaled, scoringType, tourneyMatch, runningAverage);
-						} else {
-							getOsuSkills(msg, args, getIDFromPotentialOsuLink(args[i]), scaled, scoringType, tourneyMatch, runningAverage);
-						}
-					} else {
-						getOsuSkills(msg, args, getIDFromPotentialOsuLink(args[i]), scaled, scoringType, tourneyMatch, runningAverage);
-					}
+					getOsuSkills(interaction, getIDFromPotentialOsuLink(usernames[i]), scaled, scoringType, tourneyMatch, runningAverage);
 				}
 			}
 		}
 	},
 };
 
-async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMatch, runningAverage) {
+async function getOsuSkills(interaction, username, scaled, scoringType, tourneyMatch, runningAverage) {
 	// eslint-disable-next-line no-undef
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -322,8 +290,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 						console.error(err);
 					}
 				});
-
-			let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 			let mods = [];
 			let mappers = [];
@@ -442,7 +408,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					outdated: discordUser.osuDuelOutdated
 				};
 			} else {
-				userDuelStarRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
+				userDuelStarRating = await getUserDuelStarRating({ osuUserId: user.id, client: interaction.client });
 			}
 
 			let duelLeague = getOsuDuelLeague(userDuelStarRating.total);
@@ -629,10 +595,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 				}
 
 				if (!userScores.length) {
-					await processingMessage.delete();
-
 					content = `${content}; No multi/tourney-scores found in the database for ${user.name} - skipping modpool evaluation\n${user.name}: <https://osu.ppy.sh/users/${user.id}>`;
-
 				} else {
 					let oldestDate = new Date();
 					oldestDate.setUTCDate(1);
@@ -959,8 +922,6 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 
 					files.push(attachment);
 
-					await processingMessage.delete();
-
 					let scaledText = '';
 					if (scaled) {
 						scaledText = ' (Scaled by total evaluation)';
@@ -983,7 +944,7 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					content = `${content} and Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}${runningAverageText}\n${user.name}: <https://osu.ppy.sh/users/${user.id}>`;
 				}
 
-				let sentMessage = await msg.channel.send({ content: content, files: files });
+				let sentMessage = await interaction.followUp({ content: content, files: files });
 				await sentMessage.react('👤');
 				await sentMessage.react('🥇');
 				if (userScores.length) {
@@ -991,21 +952,13 @@ async function getOsuSkills(msg, args, username, scaled, scoringType, tourneyMat
 					await sentMessage.react('🆚');
 					await sentMessage.react('📊');
 				}
-
-				//Save the maps locally
-				for (let i = 0; i < userScores.length; i++) {
-					let dbBeatmap = await getOsuBeatmap({ beatmapId: userScores[i].beatmapId, modBits: userScores[i].gameRawMods });
-					if (dbBeatmap && dbBeatmap.approvalStatus !== 'Approved' && dbBeatmap.approvalStatus !== 'Ranked') {
-						await pause(500);
-					}
-				}
 			})();
 		})
-		.catch(err => {
+		.catch(async (err) => {
 			if (err.message === 'Not found') {
-				msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+				await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 			} else if (err.message === 'No standard plays') {
-				msg.channel.send(`Could not find any standard plays for user \`${username.replace(/`/g, '')}\`.`);
+				await interaction.followUp(`Could not find any standard plays for user \`${username.replace(/`/g, '')}\`.`);
 			} else {
 				console.error(err);
 			}

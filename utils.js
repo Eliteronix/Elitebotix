@@ -7633,7 +7633,7 @@ function getExpectedDuelRating(score) {
 	let rating = score.starRating;
 	let oldRating = 0;
 
-	while (oldRating.toFixed(5) !== rating.toFixed(5)) {
+	while (oldRating.toFixed(3) !== rating.toFixed(3)) {
 		oldRating = rating;
 		rating = applyOsuDuelStarratingCorrection(rating, score, 1);
 	}
