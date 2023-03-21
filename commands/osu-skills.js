@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
-const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
+const { DBOsuMultiScores, DBDiscordUsers, DBOsuBeatmaps } = require('../dbObjects');
 const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
@@ -299,6 +299,13 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			let speed = [];
 			let acc = [];
 			let bpm = [];
+
+			let dbBeatmaps = await DBOsuBeatmaps.findAll({
+				where: {
+					beatmapId: topScores.map(score => score.beatmapId)
+				},
+			});
+
 			for (let i = 0; i < topScores.length; i++) {
 				//Add and count mods
 				let modAdded = false;
@@ -325,7 +332,11 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 
 				//Add and count mappers
 				let mapperAdded = false;
-				const dbBeatmap = await getOsuBeatmap({ beatmapId: topScores[i].beatmapId, modBits: topScores[i].raw_mods });
+
+				let dbBeatmap = dbBeatmaps.find(beatmap => beatmap.beatmapId === topScores[i].beatmapId && beatmap.mods === topScores[i].raw_mods);
+
+				dbBeatmap = await getOsuBeatmap({ beatmap: dbBeatmap, beatmapId: topScores[i].beatmapId, modBits: topScores[i].raw_mods });
+
 				for (let j = 0; j < mappers.length && !mapperAdded; j++) {
 					if (mappers[j] && dbBeatmap && mappers[j].mapper === dbBeatmap.mapper) {
 						mappers[j].amount++;
