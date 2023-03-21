@@ -1094,7 +1094,6 @@ module.exports = {
 			await interaction.followUp({ content: content, files: files });
 		}
 
-		//TODO: Reset reaction
 		//TODO: Auto update on score upload
 		//TODO: Match tracking
 		//TODO: Mark which mod was used for FM
