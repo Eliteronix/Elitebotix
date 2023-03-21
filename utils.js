@@ -881,7 +881,7 @@ module.exports = {
 			}
 		}
 
-		await new Promise(resolve => setTimeout(resolve, 30000));
+		await new Promise(resolve => setTimeout(resolve, 25000));
 
 		module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBDiscordUsers 2');
 		discordUser = await DBDiscordUsers.findOne({
