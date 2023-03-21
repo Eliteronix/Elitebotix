@@ -352,7 +352,7 @@ module.exports = {
 					players: teamsheet.players,
 					mappool: teamsheet.poolName,
 					duelratingestimate: teamsheet.duelratingestimate,
-					updatefor: teamsheet.updateUntil.getTime(),
+					updatefor: Math.round((teamsheet.updateUntil.getTime() - new Date().getTime()) / 1000 / 60),
 				}
 			});
 
