@@ -1193,7 +1193,7 @@ module.exports = {
 				})
 					.then(async (discordUser) => {
 						if (discordUser) {
-							if (discordUser.osuBadges !== additionalInfo.tournamentBadges.length) {
+							if (discordUser.osuBadges < additionalInfo.tournamentBadges.length) {
 
 								if (logBroadcastEval) {
 									// eslint-disable-next-line no-console
