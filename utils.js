@@ -3778,9 +3778,9 @@ module.exports = {
 			}
 
 			if (msg === '!mp') {
-				//TODO: Attributes
 				module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers twitchConnect 2');
 				let discordUser = await DBDiscordUsers.findOne({
+					attributes: ['osuUserId', 'osuName'],
 					where: {
 						twitchName: target.substring(1),
 						twitchVerified: true,
@@ -3795,9 +3795,9 @@ module.exports = {
 					return;
 				}
 
-				//TODO: Attributes
 				module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores lastMultiScore');
 				let lastMultiScore = await DBOsuMultiScores.findOne({
+					attributes: ['matchId', 'matchName', 'matchEndDate'],
 					where: {
 						osuUserId: discordUser.osuUserId
 					},
@@ -7458,9 +7458,9 @@ module.exports = {
 		return await Canvas.loadImage(path);
 	},
 	async updateTwitchNames(client) {
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers updateTwitchNames');
 		let twitchUsers = await DBDiscordUsers.findAll({
+			attributes: ['id', 'twitchName', 'twitchId'],
 			where: {
 				twitchId: {
 					[Op.not]: null,
