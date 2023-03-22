@@ -1610,6 +1610,7 @@ module.exports = {
 		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores warmup detection same tourney');
 		let sameTournamentMatches = await DBOsuMultiScores.findAll({
+			attributes: ['id', 'osuUserId', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
 			where: {
 				[Op.or]: [
 					{
