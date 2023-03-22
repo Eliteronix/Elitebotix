@@ -5,6 +5,7 @@ module.exports = {
 	name: 'patreon',
 	usage: '<userId>',
 	async execute(interaction) {
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/admin/patreon.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: {

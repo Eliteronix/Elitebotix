@@ -726,6 +726,7 @@ module.exports = {
 						.then(async (user) => {
 							updateOsuDetailsforUser(interaction.client, user, 0);
 
+							//TODO: add attributes and logdatabasequeries
 							logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 1');
 							const dbDiscordUser = await DBDiscordUsers.findOne({
 								where: {
@@ -819,6 +820,7 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() === 'scheduled') {
 			let scheduledMatches = [];
 			//Get all scheduled matches that still need to notify
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 1');
 			const tourneyMatchNotifications = await DBProcessQueue.findAll({
 				where: {
@@ -833,6 +835,7 @@ module.exports = {
 				let players = additions[3].replaceAll('|', ',').split(',');
 				let dbPlayers = [];
 				for (let j = 0; j < players.length; j++) {
+					//TODO: add attributes and logdatabasequeries
 					logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 2');
 					const dbDiscordUser = await DBDiscordUsers.findOne({
 						where: { id: players[j] }
@@ -856,6 +859,7 @@ module.exports = {
 				scheduledMatches.push(`\`\`\`Scheduled:\nInternal ID: ${tourneyMatchNotifications[i].id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${players}\nMappool: ${additions[6]}\`\`\``);
 			}
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 2');
 			const tourneyMatchReferees = await DBProcessQueue.findAll({
 				where: {
@@ -869,6 +873,7 @@ module.exports = {
 				let players = additions[3].replaceAll('|', ',').split(',');
 				let dbPlayers = [];
 				for (let j = 0; j < players.length; j++) {
+					//TODO: add attributes and logdatabasequeries
 					logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 3');
 					const dbDiscordUser = await DBDiscordUsers.findOne({
 						where: { id: players[j] }
@@ -909,6 +914,7 @@ module.exports = {
 			}
 		} else if (interaction.options.getSubcommand() === 'remove') {
 			const internalId = interaction.options._hoistedOptions[0].value;
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 3');
 			const processQueueTask = await DBProcessQueue.findOne({
 				where: {
@@ -922,6 +928,7 @@ module.exports = {
 				let players = additions[3].replaceAll('|', ',').split(',');
 				let dbPlayers = [];
 				for (let j = 0; j < players.length; j++) {
+					//TODO: add attributes and logdatabasequeries
 					logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 4');
 					const dbDiscordUser = await DBDiscordUsers.findOne({
 						where: { id: players[j] }

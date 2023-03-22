@@ -216,6 +216,7 @@ module.exports = {
 		}
 		let timePeriod = '';
 		if (args[0].toLowerCase() === 'list') {
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/weather-track.js DBProcessQueue list');
 			const trackingList = await DBProcessQueue.findAll({
 				where: { task: 'periodic-weather' }
@@ -239,6 +240,7 @@ module.exports = {
 			return interaction.editReply(trackingListString || 'No weather tracking tasks found in this channel.');
 		} else if (args[0].toLowerCase() === 'remove') {
 			args.shift();
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/weather-track.js DBProcessQueue remove');
 			const trackingList = await DBProcessQueue.findAll({
 				where: { task: 'periodic-weather' }
@@ -308,6 +310,7 @@ module.exports = {
 				date.setUTCDate(date.getUTCDate() + 1);
 			}
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/weather-track.js DBProcessQueue duplicate');
 			const duplicate = await DBProcessQueue.findOne({
 				where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}` }
@@ -321,6 +324,7 @@ module.exports = {
 			}
 
 			if (timePeriod === 'hourly') {
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/weather-track.js DBProcessQueue dailyDuplicate');
 				const dailyDuplicate = await DBProcessQueue.findOne({
 					where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};daily;${degreeType};${args.join(' ')}` }
@@ -336,6 +340,7 @@ module.exports = {
 					return interaction.editReply(`The weather for ${args.join(' ')} will now be provided hourly instead of daily.`);
 				}
 			} else {
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/weather-track.js DBProcessQueue hourlyDuplicate');
 				const hourlyDuplicate = await DBProcessQueue.findOne({
 					where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};hourly;${degreeType};${args.join(' ')}` }

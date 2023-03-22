@@ -7,6 +7,7 @@ module.exports = async function (oldGuild, newGuild) {
 		return;
 	}
 
+	//TODO: Attributes
 	logDatabaseQueries(2, 'guildUpdate.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({

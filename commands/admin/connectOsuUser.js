@@ -8,6 +8,7 @@ module.exports = {
 
 		let discordId = args[0];
 
+		//TODO: add attributes and logdatabasequeries
 		let discordUsers = await DBDiscordUsers.findAll({
 			where: {
 				userId: discordId
@@ -16,6 +17,7 @@ module.exports = {
 
 		let osuUserId = args[1];
 
+		//TODO: add attributes and logdatabasequeries
 		let osuUsers = await DBDiscordUsers.findAll({
 			where: {
 				osuUserId: osuUserId

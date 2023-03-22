@@ -7,6 +7,7 @@ module.exports = async function (guildBan) {
 		return;
 	}
 
+	//TODO: Attributes
 	logDatabaseQueries(2, 'guildBanRemove.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({

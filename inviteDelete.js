@@ -7,6 +7,7 @@ module.exports = async function (invite) {
 		return;
 	}
 
+	//TODO: Attributes
 	logDatabaseQueries(2, 'inviteDelete.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({

@@ -228,6 +228,7 @@ module.exports = {
 		}
 
 		if (usernames.length === 0) {//Get profile by author if no argument
+			//TODO: add attributes and logdatabasequeries
 			let commandUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.user.id
@@ -248,6 +249,7 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < usernames.length; i++) {
 				if (usernames[i].startsWith('<@') && usernames[i].endsWith('>')) {
+					//TODO: add attributes and logdatabasequeries
 					logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers');
 					const discordUser = await DBDiscordUsers.findOne({
 						where: {
@@ -300,6 +302,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			let acc = [];
 			let bpm = [];
 
+			//TODO: add attributes and logdatabasequeries
 			let dbBeatmaps = await DBOsuBeatmaps.findAll({
 				where: {
 					beatmapId: topScores.map(score => score.beatmapId)
@@ -403,6 +406,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			ctx.font = 'bold 15px comfortaa, sans-serif';
 			ctx.fillText('Duel Rating', 90, 195);
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers duelrating');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -572,6 +576,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			const canvasRenderService = new ChartJSNodeCanvas({ width, height });
 
 			(async () => {
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiScores');
 				const userScores = await DBOsuMultiScores.findAll({
 					where: {

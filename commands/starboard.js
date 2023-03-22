@@ -136,6 +136,7 @@ module.exports = {
 		}
 		const guildPrefix = await getGuildPrefix(msg);
 		logDatabaseQueries(4, 'commands/starboard.js DBGuilds');
+		//TODO: add attributes and logdatabasequeries
 		const guild = await DBGuilds.findOne({
 			where: { guildId: msg.guildId }
 		});

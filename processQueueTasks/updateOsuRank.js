@@ -17,11 +17,13 @@ module.exports = {
 
 		const discordUserId = processQueueEntry.additions;
 
+		//TODO: Attributes
 		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBDiscordUsers 1');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: { osuUserId: discordUserId }
 		});
 
+		//TODO: Attributes
 		// Try to find duplicate users
 		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBDiscordUsers duplicates');
 		let duplicates = await DBDiscordUsers.findAll({
@@ -179,6 +181,7 @@ module.exports = {
 			try {
 				await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: client });
 
+				//TODO: Attributes
 				logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBDiscordUsers 2');
 				discordUser = await DBDiscordUsers.findOne({
 					where: { osuUserId: discordUserId }
@@ -297,12 +300,14 @@ module.exports = {
 						}
 					}
 
+					//TODO: Attributes
 					logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBElitiriCupSignUp 1');
 					const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 						where: { osuUserId: discordUser.osuUserId, tournamentName: currentElitiriCup }
 					});
 
 					if (elitiriSignUp) {
+						//TODO: Attributes
 						logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBProcessQueue 1');
 						const task = await DBProcessQueue.findOne({
 							where: { guildId: 'None', task: 'refreshElitiriSignUp', additions: discordUser.osuUserId }
@@ -313,6 +318,7 @@ module.exports = {
 							DBProcessQueue.create({ guildId: 'None', task: 'refreshElitiriSignUp', priority: 3, additions: discordUser.osuUserId });
 						}
 
+						//TODO: Attributes
 						logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBElitiriCupSubmissions');
 						const allSubmissions = await DBElitiriCupSubmissions.findAll({
 							where: { osuUserId: elitiriSignUp.osuUserId, tournamentName: currentElitiriCup }
@@ -377,6 +383,7 @@ module.exports = {
 			}
 		}
 
+		//TODO: Attributes
 		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBElitiriCupSignUp 2');
 		const ecs2021SignUp = await DBElitiriCupSignUp.findOne({
 			where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Cup Summer 2021' }
@@ -457,6 +464,7 @@ module.exports = {
 			}, { context: { discordUserId: discordUserId, rankAchieved: ecs2021SignUp.rankAchieved } });
 		}
 
+		//TODO: Attributes
 		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBElitiriCupSignUp 3');
 		const ecw2022SignUp = await DBElitiriCupSignUp.findOne({
 			where: { osuUserId: discordUser.osuUserId, tournamentName: 'Elitiri Winter Cup 2022' }
@@ -537,6 +545,7 @@ module.exports = {
 			}, { context: { discordUserId: discordUserId, rankAchieved: ecw2022SignUp.rankAchieved } });
 		}
 
+		//TODO: Attributes
 		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBElitiriCupSignUp 4');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { osuUserId: discordUser.osuUserId, tournamentName: currentElitiriCup }
@@ -608,6 +617,7 @@ module.exports = {
 				}
 
 				if (elitiriSignUp.bracketName !== bracketName) {
+					//TODO: Attributes
 					logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBProcessQueue 2');
 					const task = await DBProcessQueue.findOne({
 						where: { guildId: 'None', task: 'elitiriCupSignUps', additions: elitiriSignUp.bracketName }
@@ -634,6 +644,7 @@ module.exports = {
 
 			await elitiriSignUp.save();
 
+			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBProcessQueue 3');
 			const task = await DBProcessQueue.findOne({
 				where: { guildId: 'None', task: 'elitiriCupSignUps', additions: elitiriSignUp.bracketName }

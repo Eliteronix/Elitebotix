@@ -94,6 +94,7 @@ module.exports = {
 		let discordUser = null;
 
 		if (username === null) {
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-wrapped.js DBDiscordUsers 1');
 			discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -112,6 +113,7 @@ module.exports = {
 
 		//Get the user from the database if possible
 		if (discordUser === null) {
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-wrapped.js DBDiscordUsers 2');
 			discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -162,6 +164,7 @@ module.exports = {
 			year = interaction.options.getInteger('year');
 		}
 
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiScores 1');
 		let multiMatches = await DBOsuMultiScores.findAll({
 			attributes: ['matchId'],
@@ -187,6 +190,7 @@ module.exports = {
 			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches in ${year}.`);
 		}
 
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiScores 2');
 		let multiScores = await DBOsuMultiScores.findAll({
 			where: {

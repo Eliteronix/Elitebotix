@@ -477,6 +477,7 @@ module.exports = {
 
 		let everyUser = [];
 		for (let i = 0; i < allUsers.length; i++) {
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/osu-bingo.js DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -569,6 +570,7 @@ module.exports = {
 		// Get the map pool
 		let mappool = [];
 
+		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/osu-bingo.js DBOsuBeatmaps');
 		let beatmaps = await DBOsuBeatmaps.findAll({
 			where: {

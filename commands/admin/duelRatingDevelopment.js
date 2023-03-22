@@ -14,6 +14,7 @@ module.exports = {
 		let username = null;
 		if (interaction.options.getString('arguments')) {
 			username = interaction.options.getString('arguments');
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers duelRatingDevelopment 1');
 			discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -28,6 +29,7 @@ module.exports = {
 				}
 			});
 		} else {
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers duelRatingDevelopment 2');
 			discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -77,6 +79,7 @@ module.exports = {
 
 		let processingMessage = await interaction.editReply('Processing...');
 
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiScores duelRatingDevelopment');
 		let oldestScore = await DBOsuMultiScores.findOne({
 			where: {

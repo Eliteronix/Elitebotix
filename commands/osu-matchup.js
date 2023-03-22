@@ -630,6 +630,7 @@ module.exports = {
 
 			team1 = [];
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-matchup.js DBDiscordUsers0');
 			const user = await DBDiscordUsers.findOne({
 				where: {
@@ -678,6 +679,7 @@ module.exports = {
 			if (team1[i]) {
 				if (team1[i].startsWith('<@') && team1[i].endsWith('>')) {
 					logDatabaseQueries(4, 'commands/osu-matchup.js DBDiscordUsers1');
+					//TODO: add attributes and logdatabasequeries
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: team1[i].replace('<@', '').replace('>', '').replace('!', '') },
 					});
@@ -718,6 +720,7 @@ module.exports = {
 			if (team2[i]) {
 				if (team2[i].startsWith('<@') && team2[i].endsWith('>')) {
 					logDatabaseQueries(4, 'commands/osu-matchup.js DBDiscordUsers2');
+					//TODO: add attributes and logdatabasequeries
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: team2[i].replace('<@', '').replace('>', '').replace('!', '') },
 					});
@@ -767,6 +770,7 @@ module.exports = {
 
 		//Loop throught team one and get all their multi scores
 		for (let i = 0; i < team1.length; i++) {
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiScores 1User${i + 1}`);
 			scoresTeam1.push(await DBOsuMultiScores.findAll({
 				where: {
@@ -833,6 +837,7 @@ module.exports = {
 
 		//Loop throught team two and get all their multi scores
 		for (let i = 0; i < team2.length; i++) {
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiScores 2User${i + 1}`);
 			scoresTeam2.push(await DBOsuMultiScores.findAll({
 				where: {
@@ -890,6 +895,7 @@ module.exports = {
 		beatmaps = beatmaps.filter(b => b.team2Players.length >= teamsize);
 
 		// Fetch all beatmaps from the database
+		//TODO: add attributes and logdatabasequeries
 		let dbBeatmaps = await DBOsuBeatmaps.findAll({
 			where: {
 				beatmapId: {

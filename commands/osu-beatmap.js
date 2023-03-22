@@ -284,6 +284,7 @@ async function getBeatmap(msg, interaction, beatmap, tournament, accuracy) {
 	let tournamentOccurences = '';
 
 	if (tournament) {
+		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
 		const mapScores = await DBOsuMultiScores.findAll({
 			where: {

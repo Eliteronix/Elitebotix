@@ -42,6 +42,7 @@ module.exports = {
 
 		let matches = duels.flat();
 		for (let i = 0; i < matches.length; i++) {
+			//TODO: add attributes and logdatabasequeries
 			let processQueueTask = await DBProcessQueue.findOne({
 				where: {
 					task: 'importMatch',

@@ -178,6 +178,7 @@ module.exports = {
 async function processIncompleteScores(osuApi, client, processQueueEntry, channelId, secondsToWait) {
 	//Go same if match found and not ended / too long going already
 	//Reimport an old match to clean up the database
+	//TODO: Attributes
 	logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores incomplete scores');
 	let incompleteMatchScore = await DBOsuMultiScores.findOne({
 		where: {
@@ -212,6 +213,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				await saveOsuMultiScores(match, client);
 			})
 			.catch(async (err) => {
+				//TODO: Attributes
 				logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores incomplete scores backup');
 				let incompleteScores = await DBOsuMultiScores.findAll({
 					where: {
@@ -234,6 +236,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 			});
 	} else {
 		// Verify matches instead
+		//TODO: Attributes
 		logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores verify matches');
 		let incompleteMatch = await DBOsuMultiScores.findOne({
 			where: {
@@ -420,6 +423,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				}
 			}
 
+			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores');
 			let matchToVerify = await DBOsuMultiScores.findOne({
 				where: {
@@ -486,6 +490,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				let date = new Date();
 				date.setUTCDate(date.getUTCDate() - 21);
 
+				//TODO: Attributes
 				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores find match to verify');
 				let matchToVerify = await DBOsuMultiScores.findOne({
 					where: {
@@ -557,6 +562,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 											}
 
 											if (json.events[0].detail.type === 'match-created') {
+												//TODO: Attributes
 												logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Find a score by the match creator');
 												let scores = await DBOsuMultiScores.findAll({
 													where: {
@@ -578,6 +584,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 														},
 													});
 												} else {
+													//TODO: Attributes and logdatabasequeries
 													let matchToVerify = await DBOsuMultiScores.findAll({
 														where: {
 															matchId: match.id,
@@ -609,6 +616,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 													let weeksAfterMatch = new Date(matchToVerify[0].matchStartDate);
 													weeksAfterMatch.setDate(weeksAfterMatch.getDate() + 56);
 
+													//TODO: Attributes
 													logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Match creator did not play a round');
 													let relatedScores = await DBOsuMultiScores.findAll({
 														where: {

@@ -123,6 +123,7 @@ module.exports = {
 		let cachedUser = discordUsers[interaction.user.id];
 
 		if (!cachedUser) {
+			//TODO: add attributes and logdatabasequeries
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.user.id
@@ -172,6 +173,7 @@ module.exports = {
 			}
 		}, 1000);
 
+		//TODO: add attributes and logdatabasequeries
 		const mappools = await DBOsuMappools.findAll({
 			attributes: ['name'],
 			where: {
@@ -248,6 +250,7 @@ module.exports = {
 			return;
 		}
 
+		//TODO: add attributes and logdatabasequeries
 		let commandUser = await DBDiscordUsers.findOne({
 			where: {
 				userId: interaction.user.id
@@ -275,6 +278,7 @@ module.exports = {
 		for (let i = 0; i < rawPlayers.length; i++) {
 			let username = rawPlayers[i].trim();
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -308,6 +312,7 @@ module.exports = {
 				});
 
 			if (osuUser) {
+				//TODO: add attributes and logdatabasequeries
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						osuUserId: osuUser.id,
@@ -332,6 +337,7 @@ module.exports = {
 
 		let mappoolName = interaction.options.getString('mappool');
 
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-teamsheet.js DBOsuMappools');
 		let mappool = await DBOsuMappools.findAll({
 			where: {
@@ -373,6 +379,7 @@ module.exports = {
 			tourneyMaps.push(dbBeatmap);
 		}
 
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBOsuSoloScores');
 		let localScores = await DBOsuSoloScores.findAll({
 			where: {
@@ -385,6 +392,7 @@ module.exports = {
 			},
 		});
 
+		//TODO: add attributes and logdatabasequeries
 		let multiScores = await DBOsuMultiScores.findAll({
 			where: {
 				osuUserId: {

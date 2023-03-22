@@ -61,6 +61,7 @@ module.exports = {
 			processQueueEntry.destroy();
 		} catch (err) {
 			if (err.message === 'Missing Access') {
+				//TODO: Attributes
 				logDatabaseQueries(2, 'processQueueTasks/guildTourneyFollow.js DBOsuGuildTrackers');
 				let guildTrackers = await DBOsuGuildTrackers.findAll({
 					where: {

@@ -11,6 +11,7 @@ module.exports = async function (member) {
 		return;
 	}
 
+	//TODO: Attributes
 	logDatabaseQueries(2, 'guildMemberRemove.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({

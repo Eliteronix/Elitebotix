@@ -220,6 +220,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 					.then(async () => {
 						i = Infinity;
 
+						//TODO: Attributes
 						logDatabaseQueries(2, 'MOTD/qualifier.js DBDiscordUsers 1');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: { userId: user.id }
@@ -238,6 +239,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 					.then(async () => {
 						i = Infinity;
 
+						//TODO: Attributes
 						logDatabaseQueries(2, 'MOTD/qualifier.js DBDiscordUsers 2');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: { userId: user.id }
@@ -255,6 +257,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 		} catch (error) {
 			if (error.message === 'Cannot send messages to this user' || error.message === 'Internal Server Error') {
 				if (i === 2) {
+					//TODO: Attributes
 					logDatabaseQueries(2, 'MOTD/qualifier.js DBDiscordUsers 3');
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: user.id }

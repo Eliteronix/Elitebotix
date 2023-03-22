@@ -5,6 +5,7 @@ module.exports = {
 	name: 'removeOsuUserConnection',
 	usage: '<osuUserId>',
 	async execute(interaction) {
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/admin/removeOsuUserConnection.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {

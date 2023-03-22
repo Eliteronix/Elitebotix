@@ -52,6 +52,7 @@ module.exports = {
 			return;
 		}
 
+		//TODO: add attributes and logdatabasequeries
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
 				userId: interaction.user.id
@@ -186,6 +187,7 @@ module.exports = {
 		}
 
 		// Create the scores in the database
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuSoloScores findAll');
 		let uploaderScores = await DBOsuSoloScores.findAll({
 			where: {
@@ -213,6 +215,7 @@ module.exports = {
 		await interaction.editReply(`Successfully uploaded ${newScores.length} new score(s)!`);
 
 		// Update teamsheets
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuTeamsheets update');
 		let teamsheets = await DBOsuTeamSheets.findAll({
 			where: {
@@ -222,6 +225,7 @@ module.exports = {
 			},
 		});
 
+		//TODO: add attributes and logdatabasequeries
 		let newScoreMaps = await DBOsuBeatmaps.findAll({
 			where: {
 				hash: {
@@ -233,6 +237,7 @@ module.exports = {
 		for (let i = 0; i < teamsheets.length; i++) {
 			const teamsheet = teamsheets[i];
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-teamsheet.js DBOsuMappools');
 			let mappool = await DBOsuMappools.findAll({
 				where: {
@@ -293,6 +298,7 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 				const command = require((`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-teamsheet.js`));
 
+				//TODO: add attributes and logdatabasequeries
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						osuUserId: poolCreatorId,

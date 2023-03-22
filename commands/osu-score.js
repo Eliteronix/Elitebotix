@@ -257,6 +257,7 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < args.length; i++) {
 				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
+					//TODO: add attributes and logdatabasequeries
 					logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
@@ -295,6 +296,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 	});
 
 	if (server === 'bancho') {
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers 2');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { osuUserId: username }
@@ -370,6 +372,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						let sentMessage;
 
+						//TODO: add attributes and logdatabasequeries
 						logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers 3');
 						const linkedUser = await DBDiscordUsers.findOne({
 							where: { osuUserId: user.id }
@@ -490,6 +493,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 		process.send('osu!API');
 		const osuUser = await osuApi.getUser({ u: username, m: mode });
 
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-score.js DBOsuMultiScores');
 		const beatmapScores = await DBOsuMultiScores.findAll({
 			where: {
@@ -574,6 +578,7 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 			let sentMessage;
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers 4');
 			const linkedUser = await DBDiscordUsers.findOne({
 				where: { osuUserId: osuUser.id }

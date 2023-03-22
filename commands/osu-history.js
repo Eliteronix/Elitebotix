@@ -92,6 +92,7 @@ module.exports = {
 		let discordUser = null;
 
 		if (username === null) {
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/osu-history.js DBDiscordUsers 1');
 			discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -110,6 +111,7 @@ module.exports = {
 
 		//Get the user from the database if possible
 		if (discordUser === null) {
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/osu-history.js DBDiscordUsers 2');
 			discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -154,6 +156,7 @@ module.exports = {
 		}
 
 		// Gather all the data
+		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 1');
 		let multiMatches = await DBOsuMultiScores.findAll({
 			attributes: ['matchId'],
@@ -176,6 +179,7 @@ module.exports = {
 			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches.`);
 		}
 
+		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 2');
 		let multiScores = await DBOsuMultiScores.findAll({
 			where: {
@@ -511,6 +515,7 @@ module.exports = {
 
 		let players = [...new Set(multiScores.map(score => score.osuUserId))];
 
+		//TODO: Attributes and logdatabasequeries
 		let discordUsers = await DBDiscordUsers.findAll({
 			where: {
 				osuUserId: {
@@ -530,6 +535,7 @@ module.exports = {
 			let acronyms = [...new Set(tourneysPlayed.map(tourney => tourney.acronym.replaceAll('\'', '\\\'')))].filter(acronym => acronym.length > 0);
 
 			try {
+				//TODO: Attributes and logdatabasequeries
 				let tourneyScores = await DBOsuMultiScores.findAll({
 					attributes: ['matchId', 'matchName', 'teamType', 'beatmapId', 'matchStartDate'],
 					where: {
@@ -672,6 +678,7 @@ module.exports = {
 			tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
 
 			// Create rank history graph
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 3');
 			let oldestScore = await DBOsuMultiScores.findOne({
 				where: {
@@ -696,6 +703,7 @@ module.exports = {
 			date.setUTCDate(date.getUTCDate() - 1);
 			date.setUTCHours(23, 59, 59, 999);
 
+			//TODO: Attributes and logDatabaseQueries
 			let existingDuelRatings = await DBDuelRatingHistory.findAll({
 				where: {
 					osuUserId: osuUser.osuUserId,

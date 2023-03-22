@@ -223,6 +223,7 @@ module.exports = {
 			}
 		} else {
 			await msg.user.fetchFromAPI();
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/name-sync.js DBDiscordUsers');
 			commandUser = await DBDiscordUsers.findOne({
 				where: {
@@ -356,6 +357,7 @@ module.exports = {
 		let threeMonthsAgo = new Date();
 		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
+		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/osu-autohost.js DBOsuMultiScores');
 		const player1Scores = await DBOsuMultiScores.findAll({
 			where: {

@@ -21,6 +21,7 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 				let command = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\weather.js`);
 
+				//TODO: Attributes
 				logDatabaseQueries(2, 'processQueueTasks/periodic-weather.js DBProcessQueue');
 				let processQueueEntry = await DBProcessQueue.findOne({ where: { id: processQueueEntryId } });
 				let args = processQueueEntry.additions.split(';');

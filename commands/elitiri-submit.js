@@ -37,6 +37,7 @@ module.exports = {
 				args = [modpool, id];
 			}
 		}
+		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSignUp');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { tournamentName: currentElitiriCup, userId: msg.author.id }
@@ -50,6 +51,7 @@ module.exports = {
 		}
 
 		if (args[0].toLowerCase() === 'list') {
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSubmissions 1');
 			const submissions = await DBElitiriCupSubmissions.findAll({
 				where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUp.osuUserId }
@@ -200,6 +202,7 @@ module.exports = {
 			.then(async (beatmaps) => {
 				getBeatmap(msg, args, interaction);
 
+				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSubmissions 2');
 				const existingMap = await DBElitiriCupSubmissions.findOne({
 					where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUp.osuUserId, beatmapId: beatmaps[0].id }
@@ -391,6 +394,7 @@ module.exports = {
 
 				if (viabilityEmbed.title.startsWith('You have submitted the beatmap for the tournament')) {
 					logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSubmissions 3');
+					//TODO: Attributes
 					const submittedModMap = await DBElitiriCupSubmissions.findOne({
 						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUp.osuUserId, modPool: args[0].toUpperCase() }
 					});

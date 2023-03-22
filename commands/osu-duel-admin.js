@@ -329,6 +329,7 @@ module.exports = {
 				let starRating = 4;
 				let discordUser = null;
 
+				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-duel-admin.js DBDiscordUsers');
 				discordUser = await DBDiscordUsers.findOne({
 					where: {
@@ -369,6 +370,7 @@ module.exports = {
 			let upperBound = averageStarRating + 0.125;
 
 			//Remove the users from the queue
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/osu-duel-admin.js DBProcessQueue');
 			let existingQueueTasks = await DBProcessQueue.findAll({
 				where: {

@@ -11,6 +11,7 @@ module.exports = async function (channel) {
 		return;
 	}
 
+	//TODO: Attributes
 	logDatabaseQueries(2, 'channelDelete.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
@@ -75,11 +76,13 @@ module.exports = async function (channel) {
 	}
 
 	await pause(5000);
+	//TODO: Attributes
 	logDatabaseQueries(2, 'channelDelete.js DBTemporaryVoices 1');
 	const temporaryVoice = await DBTemporaryVoices.findOne({
 		where: { guildId: channel.guild.id, channelId: channel.id }
 	});
 
+	//TODO: Attributes
 	logDatabaseQueries(2, 'channelDelete.js DBTemporaryVoices 2');
 	const temporaryText = await DBTemporaryVoices.findOne({
 		where: { guildId: channel.guild.id, textChannelId: channel.id }

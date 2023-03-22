@@ -98,6 +98,7 @@ module.exports = {
 			return;
 		}
 
+		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/goodbye-message.js DBGuilds');
 		const guild = await DBGuilds.findOne({
 			where: { guildId: interaction.guildId },

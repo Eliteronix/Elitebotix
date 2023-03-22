@@ -5,6 +5,7 @@ module.exports = {
 	name: 'clearForumPosts',
 	usage: 'None',
 	async execute(interaction) {
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/admin/clearForumPosts.js DBOsuForumPosts clearForumPosts');
 		let forumPosts = await DBOsuForumPosts.findAll();
 		for (let i = 0; i < forumPosts.length; i++) {

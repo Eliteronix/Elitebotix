@@ -32,6 +32,7 @@ module.exports = {
 					let bracketPlayerResults = [];
 
 					for (let j = 0; j < bracketPlayers.length; j++) {
+						//TODO: Attributes
 						logDatabaseQueries(2, 'MOTD/createLeaderboard.js DBMOTDPoints');
 						let playerResults = await DBMOTDPoints.findAll({
 							where: { userId: bracketPlayers[j].userId, osuUserId: bracketPlayers[j].osuUserId }
@@ -137,6 +138,7 @@ module.exports = {
 				const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 				// eslint-disable-next-line no-undef
 				const { DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+				//TODO: Attributes
 				logDatabaseQueries(2, 'MOTD/createLeaderboard.js DBDiscordUsers');
 				const registeredUsers = await DBDiscordUsers.findAll({
 					where: { osuMOTDRegistered: 1 }

@@ -157,6 +157,7 @@ module.exports = {
 							//Nothing
 						});
 
+					//TODO: add attributes and logdatabasequeries
 					let warmups = await DBOsuMultiScores.findAll({
 						attributes: ['gameId'],
 						where: {

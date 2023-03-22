@@ -37,6 +37,7 @@ module.exports = {
 			timestamps.delete(interaction.user.id);
 			return;
 		}
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/toggletickets.js DBGuilds');
 		//get guild from db
 		const guild = await DBGuilds.findOne({

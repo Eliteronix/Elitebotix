@@ -44,6 +44,7 @@ module.exports = {
 				}
 			}
 
+			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupSignUp');
 			const registeredPlayers = await DBElitiriCupSignUp.findAll({
 				where: {
@@ -54,6 +55,7 @@ module.exports = {
 				}
 			});
 
+			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBDiscordUsers');
 			const discordUsers = await DBDiscordUsers.findAll({
 				where: {
@@ -67,6 +69,7 @@ module.exports = {
 				}
 			});
 
+			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupStaff');
 			const staffSignups = await DBElitiriCupStaff.findAll({
 				where: {

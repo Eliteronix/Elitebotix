@@ -471,6 +471,7 @@ module.exports = {
 		let cachedUser = discordUsers[interaction.user.id];
 
 		if (!cachedUser) {
+			//TODO: add attributes and logdatabasequeries
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.user.id
@@ -520,6 +521,7 @@ module.exports = {
 			}
 		}, 1000);
 
+		//TODO: add attributes and logdatabasequeries
 		const mappools = await DBOsuMappools.findAll({
 			attributes: ['name'],
 			where: {
@@ -597,6 +599,7 @@ module.exports = {
 		}
 
 		if (interaction.options.getSubcommand() === 'create') {
+			//TODO: add attributes and logdatabasequeries
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.user.id
@@ -609,6 +612,7 @@ module.exports = {
 
 			let mappoolName = interaction.options.getString('name');
 
+			//TODO: add attributes and logdatabasequeries
 			let existingMappool = await DBOsuMappools.findOne({
 				where: {
 					creatorId: discordUser.osuUserId,
@@ -670,6 +674,7 @@ module.exports = {
 				}
 			}
 
+			//TODO: add attributes and logdatabasequeries
 			let beatmaps = await DBOsuBeatmaps.findAll({
 				where: {
 					beatmapId: {
@@ -736,6 +741,7 @@ module.exports = {
 
 			await interaction.editReply({ content: `Successfully created mappool \`${interaction.options.getString('name').replace(/`/g, '')}\`\n${content}`, files: [mappoolImage] });
 		} else if (interaction.options.getSubcommand() === 'remove') {
+			//TODO: add attributes and logdatabasequeries
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.user.id
@@ -767,6 +773,7 @@ module.exports = {
 
 			await interaction.editReply(`Successfully removed mappool \`${mappoolName.replace(/`/g, '')}\`.`);
 		} else if (interaction.options.getSubcommand() === 'view') {
+			//TODO: add attributes and logdatabasequeries
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.user.id
@@ -779,6 +786,7 @@ module.exports = {
 
 			let mappoolName = interaction.options.getString('name');
 
+			//TODO: add attributes and logdatabasequeries
 			let mappool = await DBOsuMappools.findAll({
 				where: {
 					creatorId: discordUser.osuUserId,
@@ -823,6 +831,7 @@ module.exports = {
 
 			await interaction.editReply({ content: `Mappool \`${mappoolName.replace(/`/g, '')}\`\n${content}`, files: [mappoolImage] });
 		} else if (interaction.options.getSubcommand() === 'createfromsheet') {
+			//TODO: add attributes and logdatabasequeries
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.user.id
@@ -986,6 +995,7 @@ module.exports = {
 					continue;
 				}
 
+				//TODO: add attributes and logdatabasequeries
 				let beatmaps = await DBOsuBeatmaps.findAll({
 					where: {
 						beatmapId: {
@@ -1042,6 +1052,7 @@ module.exports = {
 					};
 				});
 
+				//TODO: add attributes and logdatabasequeries
 				let existingMappool = await DBOsuMappools.findOne({
 					where: {
 						creatorId: discordUser.osuUserId,
@@ -1145,6 +1156,7 @@ async function createMappoolImage(mappool) {
 
 	let tourneyMaps = [];
 
+	//TODO: add attributes and logdatabasequeries
 	let dbBeatmaps = await DBOsuBeatmaps.findAll({
 		where: {
 			beatmapId: mappool.map(map => map.beatmapId)

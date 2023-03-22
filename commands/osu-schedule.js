@@ -350,6 +350,7 @@ module.exports = {
 		for (let i = 0; i < teams.length; i++) {
 			for (let j = 0; j < teams[i].length; j++) {
 				if (teams[i][j].startsWith('<@') && teams[i][j].endsWith('>')) {
+					//TODO: add attributes and logdatabasequeries
 					logDatabaseQueries(4, 'commands/osu-schedule.js DBDiscordUsers');
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: teams[i][j].replace('<@', '').replace('>', '').replace('!', '') },
@@ -459,6 +460,7 @@ module.exports = {
 		for (let i = 0; i < users.length; i++) {
 			let data = [];
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-schedule.js DBOsuMultiScores');
 			const allMatches = await DBOsuMultiScores.findAll({
 				where: {

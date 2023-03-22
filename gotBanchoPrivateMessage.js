@@ -78,6 +78,7 @@ module.exports = async function (client, bancho, message) {
 		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] [${mods}] | 95%: ${Math.round(firstPP)}pp | 98%: ${Math.round(secondPP)}pp | 99%: ${Math.round(thirdPP)}pp | 100%: ${Math.round(fourthPP)}pp | ♫${beatmap.bpm} CS${beatmap.circleSize} AR${beatmap.approachRate} OD${beatmap.overallDifficulty} HP${beatmap.hpDrain}`);
 	} else if (message.message === '!queue1v1' || message.message === '!play1v1' || message.message === '!play') {
 		await message.user.fetchFromAPI();
+		//TODO: Attributes
 		logDatabaseQueries(4, 'gotBanchoPrivateMessage.js DBDiscordUsers !queue1v1');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
@@ -90,6 +91,7 @@ module.exports = async function (client, bancho, message) {
 			return message.user.sendMessage(`Please connect and verify your account with the bot on discord as a backup by using: '/osu-link connect username:${message.user.username}' [https://discord.gg/Asz5Gfe Discord]`);
 		}
 
+		//TODO: Attributes
 		logDatabaseQueries(4, 'gotBanchoPrivateMessage.js DBProcessQueue check queue task');
 		let existingQueueTasks = await DBProcessQueue.findAll({
 			where: {
@@ -122,6 +124,7 @@ module.exports = async function (client, bancho, message) {
 			}
 		}
 
+		//TODO: Attributes
 		logDatabaseQueries(4, 'gotBanchoPrivateMessage.js DBProcessQueue check queue task again');
 		//Check again in case the user spammed the command
 		existingQueueTasks = await DBProcessQueue.findAll({
@@ -161,6 +164,7 @@ module.exports = async function (client, bancho, message) {
 		return await message.user.sendMessage(`You are now queued up for a 1v1 duel. There are ${existingQueueTasks.length} opponents in the queue (${tasksInReach.length} in reach).`);
 	} else if (message.message === '!queue1v1-leave' || message.message === '!leave1v1' || message.message === '!leave' || message.message === '!quit' || message.message === '!exit' || message.message === '!stop' || message.message === '!cancel') {
 		await message.user.fetchFromAPI();
+		//TODO: Attributes
 		logDatabaseQueries(4, 'gotBanchoPrivateMessage.js DBProcessQueue !queue1v1-leave');
 		let existingQueueTasks = await DBProcessQueue.findAll({
 			where: {
@@ -240,6 +244,7 @@ module.exports = async function (client, bancho, message) {
 				//
 			});
 
+		//TODO: Attributes
 		logDatabaseQueries(4, 'gotBanchoPrivateMessage.js DBDiscordUsers !r');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: {
@@ -385,6 +390,7 @@ module.exports = async function (client, bancho, message) {
 		message.user.sendMessage(`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}]] [${mods}] | ${acc}%: ${Math.round(accPP)}pp`);
 	} else if (message.message === '!unlink') {
 		await message.user.fetchFromAPI();
+		//TODO: Attributes and logdatabasequeries
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
 				osuUserId: message.user.id

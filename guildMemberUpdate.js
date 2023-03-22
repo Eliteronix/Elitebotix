@@ -8,6 +8,7 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (oldMember.nickname !== newMember.nickname) {
+		//TODO: Attributes
 		logDatabaseQueries(2, 'guildMemberUpdate.js DBGuilds Nickname');
 		const guild = await DBGuilds.findOne({
 			where: { guildId: newMember.guild.id }
@@ -61,6 +62,7 @@ module.exports = async function (oldMember, newMember) {
 		}
 	}
 	if (!sameRoles) {
+		//TODO: Attributes
 		logDatabaseQueries(2, 'guildMemberUpdate.js DBGuilds Roles');
 		const guild = await DBGuilds.findOne({
 			where: { guildId: newMember.guild.id }

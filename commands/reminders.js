@@ -45,6 +45,7 @@ module.exports = {
 
 		logDatabaseQueries(4, 'commands/reminders.js DBProcessQueue');
 		//Get all the reminders by the user
+		//TODO: add attributes and logdatabasequeries
 		const reminders = await DBProcessQueue.findAll({
 			where: {
 				task: 'remind',

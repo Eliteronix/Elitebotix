@@ -405,6 +405,7 @@ module.exports = {
 					const embedName = args.join(' ');
 					logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader embed add');
 					//Get the last created record for the next embedId
+					//TODO: add attributes and logdatabasequeries
 					const reactionRolesHeader = await DBReactionRolesHeader.findOne({
 						order: [
 							['id', 'DESC'],
@@ -443,6 +444,7 @@ module.exports = {
 				if (!(isNaN(args[2]))) {
 					logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader embed remove');
 					//Get the embed which should get deleted
+					//TODO: add attributes and logdatabasequeries
 					const reactionRolesHeader = await DBReactionRolesHeader.findOne({
 						where: { guildId: msg.guildId, id: args[2] },
 					});
@@ -497,6 +499,7 @@ module.exports = {
 					if (args[3].toLowerCase() === 'title') {
 						logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader embed change title');
 						//Get embed from the db
+						//TODO: add attributes and logdatabasequeries
 						const reactionRolesHeader = await DBReactionRolesHeader.findOne({
 							where: { guildId: msg.guildId, id: args[2] },
 						});
@@ -525,6 +528,7 @@ module.exports = {
 					} else if (args[3].toLowerCase() === 'description') {
 						logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader embed change description');
 						//Get embed from the db
+						//TODO: add attributes and logdatabasequeries
 						const reactionRolesHeader = await DBReactionRolesHeader.findOne({
 							where: { guildId: msg.guildId, id: args[2] },
 						});
@@ -557,6 +561,7 @@ module.exports = {
 
 							logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader embed change color');
 							//Get embed from the db
+							//TODO: add attributes and logdatabasequeries
 							const reactionRolesHeader = await DBReactionRolesHeader.findOne({
 								where: { guildId: msg.guildId, id: args[2] },
 							});
@@ -594,6 +599,7 @@ module.exports = {
 
 						logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader embed image');
 						//Get embed from the db
+						//TODO: add attributes and logdatabasequeries
 						const reactionRolesHeader = await DBReactionRolesHeader.findOne({
 							where: { guildId: msg.guildId, id: args[2] },
 						});
@@ -647,16 +653,19 @@ module.exports = {
 
 							logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader role add');
 							//Get embed from the db
+							//TODO: add attributes and logdatabasequeries
 							const reactionRolesHeader = await DBReactionRolesHeader.findOne({
 								where: { guildId: msg.guildId, id: headerId },
 							});
 
 							if (reactionRolesHeader) {
+								//TODO: add attributes and logdatabasequeries
 								logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRoles role add 1');
 								const reactionRolesEmoji = await DBReactionRoles.findOne({
 									where: { dbReactionRolesHeaderId: headerId, emoji: args[3] },
 								});
 
+								//TODO: add attributes and logdatabasequeries
 								logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRoles role add 2');
 								const reactionRolesRole = await DBReactionRoles.findOne({
 									where: { dbReactionRolesHeaderId: headerId, roleId: roleMentioned },
@@ -733,6 +742,7 @@ module.exports = {
 
 						logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader role remove');
 						//Get embed from the db
+						//TODO: add attributes and logdatabasequeries
 						const reactionRolesHeader = await DBReactionRolesHeader.findOne({
 							where: { guildId: msg.guildId, id: headerId },
 						});
@@ -771,6 +781,7 @@ module.exports = {
 
 					logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader role change');
 					//Get embed from the db
+					//TODO: add attributes and logdatabasequeries
 					const reactionRolesHeader = await DBReactionRolesHeader.findOne({
 						where: { guildId: msg.guildId, id: headerId },
 					});
@@ -780,6 +791,7 @@ module.exports = {
 						//Get emoji
 						const emoji = args[3];
 						logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRoles role change');
+						//TODO: add attributes and logdatabasequeries
 						//Try to get a reactionRole from the db where there is the same emoji for the embed
 						const reactionRolesEmoji = await DBReactionRoles.findOne({
 							where: { dbReactionRolesHeaderId: headerId, emoji: emoji },
@@ -856,6 +868,7 @@ async function editEmbed(msg, reactionRolesHeader, client) {
 
 	logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRoles editEmbed');
 	//Get roles from db
+	//TODO: add attributes and logdatabasequeries
 	const reactionRoles = await DBReactionRoles.findAll({
 		where: { dbReactionRolesHeaderId: reactionRolesHeader.id }
 	});

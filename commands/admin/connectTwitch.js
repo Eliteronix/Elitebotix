@@ -9,6 +9,7 @@ module.exports = {
 
 		let discordId = args[0];
 
+		//TODO: add attributes and logdatabasequeries
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
 				userId: discordId

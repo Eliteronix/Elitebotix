@@ -11,6 +11,7 @@ module.exports = async function (msg) {
 		return;
 	}
 
+	//TODO: Attributes
 	logDatabaseQueries(2, 'messageDelete.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({

@@ -702,6 +702,7 @@ module.exports = {
 					let starRating = 4;
 					let discordUser = null;
 
+					//TODO: Attributes
 					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers');
 					discordUser = await DBDiscordUsers.findOne({
 						where: {
@@ -791,6 +792,7 @@ module.exports = {
 					}
 				}
 
+				//TODO: Attributes
 				//Remove the users from the queue
 				logDatabaseQueries(4, 'commands/osu-duel.js DBProcessQueue existingQueueTasks');
 				let existingQueueTasks = await DBProcessQueue.findAll({
@@ -855,6 +857,7 @@ module.exports = {
 				if (username) {
 					//Get the user by the argument given
 					if (username.startsWith('<@') && username.endsWith('>')) {
+						//TODO: Attributes
 						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: { userId: username.replace('<@', '').replace('>', '').replace('!', '') },
@@ -1229,6 +1232,7 @@ module.exports = {
 				}
 
 				//Draw the Player derank rank
+				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating 2');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
@@ -1309,6 +1313,7 @@ module.exports = {
 
 						members = members.map(member => member.id);
 
+						//TODO: Attributes
 						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard');
 						discordUsers = await DBDiscordUsers.findAll({
 							where: {
@@ -1330,6 +1335,7 @@ module.exports = {
 						}
 					}
 				} else {
+					//TODO: Attributes
 					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard 2');
 					discordUsers = await DBDiscordUsers.findAll({
 						where: {
@@ -1556,6 +1562,7 @@ module.exports = {
 				if (interaction.options._hoistedOptions[0]) {
 					//Get the user by the argument given
 					if (interaction.options._hoistedOptions[0].value.startsWith('<@') && interaction.options._hoistedOptions[0].value.endsWith('>')) {
+						//TODO: Attributes
 						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers data');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: { userId: interaction.options._hoistedOptions[0].value.replace('<@', '').replace('>', '').replace('!', '') },
@@ -1947,6 +1954,7 @@ module.exports = {
 
 						members = members.map(member => member.id);
 
+						//TODO: Attributes
 						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread');
 						discordUsers = discordUsers = await DBDiscordUsers.findAll({
 							where: {
@@ -1971,6 +1979,7 @@ module.exports = {
 						}
 					}
 				} else {
+					//TODO: Attributes
 					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread 2');
 					discordUsers = await DBDiscordUsers.findAll({
 						where: {
@@ -2099,6 +2108,7 @@ module.exports = {
 					enable = true;
 				}
 
+				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-updates');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
@@ -2150,6 +2160,7 @@ module.exports = {
 					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:1064502370710605836>.');
 				}
 
+				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers queue1v1 1');
 				let existingQueueTasks = await DBProcessQueue.findAll({
 					where: {
@@ -2182,6 +2193,7 @@ module.exports = {
 					}
 				}
 
+				//TODO: Attributes
 				//Check again in case the cooldown had passed and it was triggered again
 				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers queue1v1 2');
 				existingQueueTasks = await DBProcessQueue.findAll({
@@ -2240,6 +2252,7 @@ module.exports = {
 					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:1064502370710605836>.');
 				}
 
+				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers queue1v1-leave');
 				let existingQueueTasks = await DBProcessQueue.findAll({
 					where: {

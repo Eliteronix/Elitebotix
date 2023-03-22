@@ -5,6 +5,7 @@ module.exports = {
 	name: 'updateOsuPlayer',
 	usage: '<osuUserId>',
 	async execute(interaction) {
+		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/admin/updateElitiriPlayer.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
@@ -12,6 +13,7 @@ module.exports = {
 			}
 		});
 
+		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/admin/updateElitiriPlayer.js updateElitiriRanks DBProcessQueue');
 		const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
 		if (!existingTask) {

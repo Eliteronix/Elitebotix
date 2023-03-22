@@ -81,6 +81,7 @@ module.exports = {
 			}
 		}
 
+		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
@@ -117,6 +118,7 @@ module.exports = {
 				return await interaction.editReply('Beatmap not found');
 			}
 
+			//TODO: Attributes
 			//Get all the scores for the map
 			logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiScores tournamentDifficulty');
 			let scores = await DBOsuMultiScores.findAll({
@@ -153,6 +155,7 @@ module.exports = {
 				});
 			}
 
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/earlyaccess.js DBDuelRatingHistory tournamentDifficulty');
 			let allDuelRatingHistories = await DBDuelRatingHistory.findAll({
 				where: {

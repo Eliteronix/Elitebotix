@@ -39,6 +39,7 @@ module.exports = {
 				args.push(bracket);
 			}
 		}
+		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/elitiri-check.js DBElitiriCupSignUp');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { tournamentName: currentElitiriCup, userId: msg.author.id }

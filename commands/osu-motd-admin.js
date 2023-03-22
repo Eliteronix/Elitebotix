@@ -18,6 +18,7 @@ module.exports = {
 		const bancho = additionalObjects[1];
 
 		if (args[0] === 'recalculate') {
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-motd-admin.js DBMOTDPoints');
 			const pointDatasets = await DBMOTDPoints.findAll();
 

@@ -64,6 +64,7 @@ module.exports = {
 		let discordUser = null;
 
 		if (username) {
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/osu-derank.js DBDiscordUsers 1');
 			discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -131,6 +132,7 @@ module.exports = {
 					osuDuelStarRating: duelRating.total,
 				};
 
+				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-derank.js DBDiscordUsers 2');
 				discordUser = await DBDiscordUsers.findOne({
 					where: {

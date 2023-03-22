@@ -113,6 +113,7 @@ module.exports = {
 		}
 		logDatabaseQueries(4, 'commands/tempvoice.js DBGuilds');
 		//get guild from db
+		//TODO: add attributes and logdatabasequeries
 		const guild = await DBGuilds.findOne({
 			where: { guildId: msg.guildId },
 		});

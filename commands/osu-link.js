@@ -147,6 +147,7 @@ module.exports = {
 		});
 
 		//get discordUser from db
+		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers 1');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: { userId: interaction.user.id },
@@ -188,6 +189,7 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 		osuApi.getUser({ u: getIDFromPotentialOsuLink(args[0]) })
 			.then(async (osuUser) => {
 				//get discordUser from db
+				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers 2');
 				const existingVerifiedDiscordUser = await DBDiscordUsers.findOne({
 					where: { osuUserId: osuUser.id, osuVerified: true },
@@ -210,6 +212,7 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 					}
 
 					//Remove duplicate discord user if existing and not the same record
+					//TODO: Attributes
 					logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers 3');
 					let existingDiscordUser = await DBDiscordUsers.findOne({
 						where: { osuUserId: osuUser.id },
@@ -251,6 +254,7 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 
 					let additionalInfo = await getAdditionalOsuInfo(osuUser.id, interaction.client);
 
+					//TODO: Attributes
 					logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers 4');
 					let existingDiscordUser = await DBDiscordUsers.findOne({
 						where: { osuUserId: osuUser.id },

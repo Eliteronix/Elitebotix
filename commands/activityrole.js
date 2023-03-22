@@ -166,6 +166,7 @@ module.exports = {
 			let percentage = interaction.options.getInteger('percentage');
 			let points = interaction.options.getInteger('points');
 
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles add');
 			const activityRole = await DBActivityRoles.findOne({
 				where: {
@@ -185,6 +186,7 @@ module.exports = {
 			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles add create');
 			await DBActivityRoles.create({ guildId: interaction.guildId, roleId: role.id, percentageCutoff: percentage, pointsCutoff: points, rankCutoff: rank });
 
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/activityrole.js DBProcessQueue add');
 			const existingTask = await DBProcessQueue.findOne({ where: { guildId: interaction.guildId, task: 'updateActivityRoles', priority: 5 } });
 			if (!existingTask) {
@@ -209,6 +211,7 @@ module.exports = {
 				return interaction.editReply(`${role.name} was no activityrole.`);
 			}
 		} else if (interaction.options.getSubcommand() === 'list') {
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles list');
 			const activityRolesList = await DBActivityRoles.findAll({
 				where: {

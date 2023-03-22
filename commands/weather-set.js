@@ -116,6 +116,7 @@ module.exports = {
 
 			args = [];
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/weather-set.js DBDiscordUsers');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {

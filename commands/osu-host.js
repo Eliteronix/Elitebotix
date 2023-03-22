@@ -187,6 +187,7 @@ module.exports = {
 				}
 
 				//Get all scores from tournaments
+				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiScores');
 				let multiScores = await DBOsuMultiScores.findAll({
 					where: {

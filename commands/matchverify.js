@@ -190,6 +190,7 @@ module.exports = {
 			return;
 		}
 
+		//TODO: Attributes
 		if (interaction.options.getSubcommand() === 'list') {
 			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores list');
 			let matchNames = await DBOsuMultiScores.findAll({
@@ -229,6 +230,7 @@ module.exports = {
 				return a.count - b.count;
 			});
 
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores list unverifiedScores');
 			let unverifiedScores = await DBOsuMultiScores.findAll({
 				Attributes: ['matchId', 'matchName'],
@@ -418,6 +420,7 @@ module.exports = {
 			let valid = interaction.options.getBoolean('valid');
 			let comment = interaction.options.getString('comment');
 
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/matchverify.js DBDiscordUsers update discordUser');
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -443,6 +446,7 @@ module.exports = {
 				try {
 					let matchId = getIDFromPotentialOsuLink(matchIds[matchIndex]);
 
+					//TODO: Attributes
 					logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores update scores');
 					let scores = await DBOsuMultiScores.findAll({
 						where: {
@@ -504,6 +508,7 @@ module.exports = {
 					});
 
 					if (tourneyMatchChanged) {
+						//TODO: Attributes
 						logDatabaseQueries(4, 'commands/matchverify.js DBDuelRatingHistory update ratingHistories');
 						let ratingHistories = await DBDuelRatingHistory.findAll({
 							where: {
@@ -573,6 +578,7 @@ module.exports = {
 			let matchId = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 			let acronym = interaction.options.getString('acronym');
 
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores check');
 			let scores = await DBOsuMultiScores.findAll({
 				where: {
@@ -613,6 +619,7 @@ module.exports = {
 			let weeksAfterMatch = new Date(scores[0].matchStartDate);
 			weeksAfterMatch.setDate(weeksAfterMatch.getDate() + 21);
 
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores check relatedScores');
 			let relatedScores = await DBOsuMultiScores.findAll({
 				where: {
@@ -701,6 +708,7 @@ module.exports = {
 
 			await interaction.followUp({ embeds: [embed] });
 		} else if (interaction.options.getSubcommand() === 'leaderboard') {
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores leaderboard');
 			let counts = await DBOsuMultiScores.findAll({
 				attributes: ['verifiedBy', 'matchId'],
@@ -770,6 +778,7 @@ module.exports = {
 				return await interaction.editReply(`The acronym \`${acronym.replace(/`/g, '')}\` can't be used for this command.`);
 			}
 
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores tournament');
 			let userScores = await DBOsuMultiScores.findAll({
 				where: {

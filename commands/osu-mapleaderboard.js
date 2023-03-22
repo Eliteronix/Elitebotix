@@ -204,6 +204,7 @@ module.exports = {
 		let scoresArray = [];
 		let userScore = null;
 
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBDiscordUsers');
 		const user = await DBDiscordUsers.findOne({
 			where: {
@@ -260,6 +261,7 @@ module.exports = {
 				}
 			}
 		} else if (server === 'tournaments') {
+			//TODO: add attributes
 			logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBOsuMultiScores');
 			let multiScores = await DBOsuMultiScores.findAll({
 				where: {

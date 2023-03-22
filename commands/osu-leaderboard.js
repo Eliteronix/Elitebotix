@@ -92,6 +92,7 @@ module.exports = {
 
 			members = members.map(member => member.id);
 
+			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
 			discordUsers = await DBDiscordUsers.findAll({
 				where: {

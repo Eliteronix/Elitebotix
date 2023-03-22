@@ -17,6 +17,7 @@ module.exports = {
 			const { DBDiscordUsers, DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 			// eslint-disable-next-line no-undef
 			const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/tourneyFollow.js DBProcessQueue');
 			let processQueueEntry = await DBProcessQueue.findOne({ where: { id: processQueueEntryId } });
 			let args = processQueueEntry.additions.split(';');
@@ -26,6 +27,7 @@ module.exports = {
 				let players = args[3].replaceAll('|', ',').split(',');
 				let dbPlayers = [];
 				for (let i = 0; i < players.length; i++) {
+					//TODO: Attributes
 					logDatabaseQueries(2, 'processQueueTasks/tourneyMatchNotification.js DBDiscordUsers 1');
 					const dbDiscordUser = await DBDiscordUsers.findOne({
 						where: { id: players[i] }
@@ -70,6 +72,7 @@ module.exports = {
 			let players = args[3].split(',');
 			let dbPlayers = [];
 			for (let i = 0; i < players.length; i++) {
+				//TODO: Attributes
 				logDatabaseQueries(2, 'processQueueTasks/tourneyMatchNotification.js DBDiscordUsers 2');
 				const dbDiscordUser = await DBDiscordUsers.findOne({
 					where: { id: players[i] }

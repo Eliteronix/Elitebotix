@@ -349,6 +349,7 @@ module.exports = {
 				//Get profiles by arguments
 				for (let i = 0; i < args.length; i++) {
 					if (args[i].startsWith('<@') && args[i].endsWith('>')) {
+						//TODO: add attributes and logdatabasequeries
 						logDatabaseQueries(4, 'commands/osu-mostplayed.js DBDiscordUsers 1');
 						const discordUser = await DBDiscordUsers.findOne({
 							where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
@@ -409,6 +410,7 @@ module.exports = {
 			let mostplayed = null;
 
 			if (interaction.options.getBoolean('dontfiltermm')) {
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiScores 1');
 				mostplayed = await DBOsuMultiScores.findAll({
 					attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
@@ -422,6 +424,7 @@ module.exports = {
 					order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
 				});
 			} else {
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiScores 2');
 				mostplayed = await DBOsuMultiScores.findAll({
 					attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
@@ -646,6 +649,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				//Create as an attachment
 				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-mostplayed-${user.id}.png` });
 
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBDiscordUsers Bancho linkedUser');
 				const linkedUser = await DBDiscordUsers.findOne({
 					where: { osuUserId: user.id }
@@ -830,6 +834,7 @@ async function drawMostPlayed(input, server, mode, limit) {
 			}
 		}
 	} else if (server === 'tournaments') {
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiScores 3');
 		let multiScores = await DBOsuMultiScores.findAll({
 			where: { osuUserId: user.id },

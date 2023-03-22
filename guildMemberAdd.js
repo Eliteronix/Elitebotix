@@ -7,6 +7,7 @@ module.exports = async function (member) {
 		return;
 	}
 
+	//TODO: Attributes
 	logDatabaseQueries(2, 'guildMemberAdd.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
@@ -65,6 +66,7 @@ module.exports = async function (member) {
 		}
 	}
 
+	//TODO: Attributes
 	logDatabaseQueries(2, 'guildMemberAdd.js DBAutoRoles');
 	//get all autoroles for the guild
 	const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: member.guild.id } });

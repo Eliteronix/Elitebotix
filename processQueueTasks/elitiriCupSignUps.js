@@ -44,6 +44,7 @@ async function updateSheet(spreadsheetID, bracketName) {
 
 		const sheet = doc.sheetsByTitle['Player List'];
 
+		//TODO: Attributes
 		logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBElitiriCupSignUp');
 		let bracketPlayers = await DBElitiriCupSignUp.findAll({
 			where: {
@@ -127,6 +128,7 @@ async function updateSheet(spreadsheetID, bracketName) {
 		if (error.message === 'Google API error - [503] The service is currently unavailable.'
 			|| error.message === 'Request failed with status code 502'
 			|| error.message === 'Google API error - [500] Internal error encountered.') {
+			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 1');
 			const task = await DBProcessQueue.findOne({
 				where: { guildId: 'None', task: 'elitiriCupSignUps', additions: bracketName }
@@ -143,6 +145,7 @@ async function updateSheet(spreadsheetID, bracketName) {
 		}
 	}
 
+	//TODO: Attributes
 	logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 2');
 	const task = await DBProcessQueue.findOne({
 		where: { task: 'elitiriRoleAssignment' }

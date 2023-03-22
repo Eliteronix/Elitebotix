@@ -194,6 +194,7 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < args.length; i++) {
 				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
+					//TODO: add attributes and logdatabasequeries
 					logDatabaseQueries(4, 'commands/osu-recent.js DBDiscordUsers');
 					const discordUser = await DBDiscordUsers.findOne({
 						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
@@ -320,6 +321,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 
 				let sentMessage;
 
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-recent.js DBDiscordUsers Bancho linkedUser');
 				const linkedUser = await DBDiscordUsers.findOne({
 					where: { osuUserId: user.id }

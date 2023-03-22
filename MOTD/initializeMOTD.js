@@ -209,6 +209,7 @@ module.exports = {
 };
 
 async function getPlayers(client) {
+	//TODO: Attributes
 	logDatabaseQueries(2, 'MOTD/initializeMOTD.js DBDiscordUsers');
 	const registeredUsers = await DBDiscordUsers.findAll({
 		where: { osuMOTDRegistered: 1 }

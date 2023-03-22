@@ -98,6 +98,7 @@ module.exports = {
 			return;
 		}
 
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds');
 		const guild = await DBGuilds.findOne({
 			where: { guildId: interaction.guildId },

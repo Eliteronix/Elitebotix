@@ -41,6 +41,7 @@ module.exports = {
 				}
 			}
 
+			//TODO: Attributes
 			logDatabaseQueries(2, 'MOTD/assignPlayerRoles.js DBDiscordUsers');
 			const registeredPlayers = await DBDiscordUsers.findAll({
 				where: {

@@ -83,6 +83,7 @@ module.exports = {
 				while (!beatmap) {
 					const index = Math.floor(Math.random() * amountOfMapsInDB);
 
+					//TODO: Attributes
 					logDatabaseQueries(2, 'MOTD/setMapsForBracket.js DBOsuBeatmaps 1');
 					const dbBeatmap = await DBOsuBeatmaps.findOne({
 						where: { id: index }
@@ -95,6 +96,7 @@ module.exports = {
 						&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
 						&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 						backupBeatmapIds.push(dbBeatmap.beatmapId);
+						//TODO: Attributes
 						logDatabaseQueries(2, 'MOTD/setMapsForBracket.js DBOsuMultiScores 1');
 						const multiScores = await DBOsuMultiScores.findAll({
 							where: {
@@ -169,6 +171,7 @@ module.exports = {
 				while (!beatmap) {
 					const index = Math.floor(Math.random() * amountOfMapsInDB);
 
+					//TODO: Attributes
 					logDatabaseQueries(2, 'MOTD/setMapsForBracket.js DBOsuBeatmaps 2');
 					const dbBeatmap = await DBOsuBeatmaps.findOne({
 						where: { id: index }

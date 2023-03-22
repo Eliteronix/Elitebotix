@@ -108,6 +108,7 @@ module.exports = {
 			return;
 		}
 
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-set.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
 			where: {

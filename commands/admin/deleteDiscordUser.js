@@ -5,6 +5,7 @@ module.exports = {
 	name: 'deleteDiscordUser',
 	usage: '<userId>',
 	async execute(interaction) {
+		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/admin/deleteDiscordUser.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {

@@ -326,6 +326,7 @@ module.exports = {
 		}
 
 		if (interaction.options.getSubcommand() === 'list') {
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(2, 'commands/tournamentfeed-admin.js DBOsuForumPosts 1');
 			let forumPosts = await DBOsuForumPosts.findAll({
 				where: {
@@ -408,6 +409,7 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() === 'ping') {
 			let id = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(2, 'commands/tournamentfeed-admin.js DBOsuForumPosts 2');
 			let forumPost = await DBOsuForumPosts.findOne({
 				where: {
@@ -482,6 +484,7 @@ module.exports = {
 				sentMessage.crosspost();
 			}
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(2, 'commands/tournamentfeed-admin.js DBDiscordUsers');
 			let pingUsers = await DBDiscordUsers.findAll({
 				where: {
@@ -641,6 +644,7 @@ module.exports = {
 			let outdated = interaction.options.getBoolean('outdated');
 			let notournament = interaction.options.getBoolean('notournament');
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(2, 'commands/tournamentfeed-admin.js DBOsuForumPosts 3');
 			let forumPost = await DBOsuForumPosts.findOne({
 				where: {
@@ -753,6 +757,7 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() === 'delete') {
 			let id = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(2, 'commands/tournamentfeed-admin.js DBOsuForumPosts 4');
 			let forumPost = await DBOsuForumPosts.findOne({
 				where: {

@@ -35,6 +35,7 @@ module.exports = {
 					let players = args[3].replaceAll('|', ',').split(',');
 					let dbPlayers = [];
 					for (let j = 0; j < players.length; j++) {
+						//TODO: Attributes
 						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 1');
 						const dbDiscordUser = await DBDiscordUsers.findOne({
 							where: { id: players[j] }
@@ -76,6 +77,7 @@ module.exports = {
 		for (let i = 0; i < teams.length; i++) {
 			teams[i] = teams[i].split(',');
 			for (let j = 0; j < teams[i].length; j++) {
+				//TODO: Attributes
 				logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 2');
 				const dbDiscordUser = await DBDiscordUsers.findOne({
 					where: { id: teams[i][j] }
@@ -115,6 +117,7 @@ module.exports = {
 		let dbMaps = [];
 
 		for (let i = 0; i < maps.length; i++) {
+			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBOsuBeatmaps');
 			const dbOsuBeatmap = await DBOsuBeatmaps.findOne({
 				where: { id: maps[i] }
@@ -132,6 +135,7 @@ module.exports = {
 			let players = args[3].replaceAll('|', ',').split(',');
 			let dbPlayers = [];
 			for (let j = 0; j < players.length; j++) {
+				//TODO: Attributes
 				logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 3');
 				const dbDiscordUser = await DBDiscordUsers.findOne({
 					where: { id: players[j] }
@@ -248,6 +252,7 @@ module.exports = {
 					let players = args[3].replaceAll('|', ',').split(',');
 					let dbPlayers = [];
 					for (let j = 0; j < players.length; j++) {
+						//TODO: Attributes
 						logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 4');
 						const dbDiscordUser = await DBDiscordUsers.findOne({
 							where: { id: players[j] }
@@ -513,6 +518,7 @@ module.exports = {
 				let players = args[3].replaceAll('|', ',').split(',');
 				let dbPlayers = [];
 				for (let j = 0; j < players.length; j++) {
+					//TODO: Attributes
 					logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 5');
 					const dbDiscordUser = await DBDiscordUsers.findOne({
 						where: { id: players[j] }

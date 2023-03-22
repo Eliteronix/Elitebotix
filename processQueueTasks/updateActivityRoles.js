@@ -5,6 +5,7 @@ const { logBroadcastEval } = require('../config.json');
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
 		// console.log('updateActivityRoles');
+		//TODO: Attributes
 		logDatabaseQueries(2, 'processQueueTasks/updateActivityRoles.js DBActivityRoles');
 		const activityRoles = await DBActivityRoles.findAll({
 			where: { guildId: processQueueEntry.guildId }
@@ -69,6 +70,7 @@ module.exports = {
 			for (let i = 0; i < members.length; i++) {
 				// eslint-disable-next-line no-undef
 				const { DBServerUserActivity } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+				//TODO: Attributes
 				logDatabaseQueries(2, 'processQueueTasks/updateActivityRoles.js DBServerUserActivity');
 				const serverUserActivity = await DBServerUserActivity.findOne({
 					where: { userId: members[i].id, guildId: guild.id },

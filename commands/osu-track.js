@@ -551,6 +551,7 @@ module.exports = {
 				let username = usernames[i];
 
 				//Get the user from the database if possible
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-track.js DBDiscordUsers 1');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
@@ -596,6 +597,7 @@ module.exports = {
 				}
 
 				//Create the timer for checking the user if needed
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-track.js DBOsuTrackingUsers 1');
 				let userTimer = await DBOsuTrackingUsers.findOne({
 					where: {
@@ -615,6 +617,7 @@ module.exports = {
 				}
 
 				//Create or update the guild tracker
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-track.js DBOsuGuildTrackers 1');
 				let guildTracker = await DBOsuGuildTrackers.findOne({
 					where: {
@@ -782,6 +785,7 @@ module.exports = {
 				// If nothing is tracked, delete the tracker
 				await guildTracker.destroy();
 
+				//TODO: add attributes and logdatabasequeries
 				// Find other guild trackers, if none exsist, delete the user tracker
 				logDatabaseQueries(4, 'commands/osu-track.js enable DBOsuGuildTrackers 2');
 				const guildTrackers = await DBOsuGuildTrackers.findAll({
@@ -819,6 +823,7 @@ module.exports = {
 				let username = usernames[i];
 
 				//Get the user from the database if possible
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-track.js DBDiscordUsers 2');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
@@ -864,6 +869,7 @@ module.exports = {
 				}
 
 				//Create the timer for checking the user if needed
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-track.js DBOsuTrackingUsers 2');
 				let userTimer = await DBOsuTrackingUsers.findOne({
 					where: {
@@ -877,6 +883,7 @@ module.exports = {
 				}
 
 				//Create or update the guild tracker
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-track.js disable DBOsuGuildTrackers 1');
 				let guildTracker = await DBOsuGuildTrackers.findOne({
 					where: {
@@ -992,6 +999,7 @@ module.exports = {
 				await guildTracker.destroy();
 
 				// Find other guild trackers, if none exsist, delete the user tracker
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-track.js disable DBOsuGuildTrackers 2');
 				const guildTrackers = await DBOsuGuildTrackers.findAll({
 					where: {
@@ -1019,6 +1027,7 @@ module.exports = {
 				return;
 			}
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-track.js list DBOsuGuildTrackers users');
 			let guildTrackers = await DBOsuGuildTrackers.findAll({
 				where: {
@@ -1039,6 +1048,7 @@ module.exports = {
 				let username = guildTrackers[i].osuUserId;
 
 				//Get the user from the database if possible
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-track.js DBDiscordUsers 3');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
@@ -1176,6 +1186,7 @@ module.exports = {
 
 			output.push('\n');
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-track.js list DBOsuGuildTrackers users');
 			guildTrackers = await DBOsuGuildTrackers.findAll({
 				where: {
@@ -1225,6 +1236,7 @@ module.exports = {
 
 			let tracking = interaction.options.getString('matchactivity');
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-track.js DBOsuGuildTrackers tourneyenable');
 			let guildTracker = await DBOsuGuildTrackers.findOne({
 				where: {
@@ -1267,6 +1279,7 @@ module.exports = {
 
 			let acronym = interaction.options.getString('acronym');
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-track.js DBOsuGuildTrackers tourneydisable');
 			let guildTracker = await DBOsuGuildTrackers.findOne({
 				where: {

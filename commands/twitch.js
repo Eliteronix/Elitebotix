@@ -116,6 +116,7 @@ module.exports = {
 		}
 
 		if (interaction.options.getSubcommand() === 'connect') {
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(2, 'twitch.js DBDiscordUsers connect');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -133,6 +134,7 @@ module.exports = {
 				return await interaction.editReply('Your twitch account is already connected and verified to this discord account.');
 			}
 
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(2, 'twitch.js DBDiscordUsers connect existingLinkedAccount');
 			let existingLinkedAccount = await DBDiscordUsers.findOne({
 				where: {
@@ -194,6 +196,7 @@ module.exports = {
 				await interaction.editReply('There was an error connecting your twitch account. Please try again later.');
 			}
 		} else if (interaction.options.getSubcommand() === 'disconnect') {
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(2, 'twitch.js DBDiscordUsers disconnect');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -212,6 +215,7 @@ module.exports = {
 
 			await interaction.editReply('Your twitch account has been disconnected.');
 		} else if (interaction.options.getSubcommand() === 'togglemp') {
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(2, 'twitch.js DBDiscordUsers togglemp');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
@@ -251,6 +255,7 @@ module.exports = {
 			}
 			discordUser.save();
 		} else if (interaction.options.getSubcommand() === 'togglemapsync') {
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(2, 'twitch.js DBDiscordUsers togglemapsync');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {

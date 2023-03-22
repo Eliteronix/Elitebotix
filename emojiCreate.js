@@ -7,6 +7,7 @@ module.exports = async function (emoji) {
 		return;
 	}
 
+	//TODO: Attributes
 	logDatabaseQueries(2, 'emojiCreate.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({

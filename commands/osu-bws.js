@@ -252,6 +252,7 @@ module.exports = {
 		}
 
 		if (usernames.length === 0) {//Get profile by author if no argument
+			//TODO: Attributes and logdatabasequeries
 			const commandUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.user.id
@@ -273,6 +274,7 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < usernames.length; i++) {
 				if (usernames[i].startsWith('<@') && usernames[i].endsWith('>')) {
+					//TODO: Attributes
 					logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
 						where: {

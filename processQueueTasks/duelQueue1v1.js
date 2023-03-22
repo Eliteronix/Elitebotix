@@ -10,6 +10,7 @@ module.exports = {
 		let starRating = parseFloat(args[1]);
 		let difficultyArea = parseFloat(args[2]);
 
+		//TODO: Attributes
 		logDatabaseQueries(2, 'processQueueTasks/duelQueue1v1.js DBProcessQueue');
 		let otherQueueTasks = await DBProcessQueue.findAll({
 			where: {
@@ -56,6 +57,7 @@ module.exports = {
 				}
 			}
 
+			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/duelQueue1v1.js DBDiscordUsers 1');
 			let firstUser = await DBDiscordUsers.findOne({
 				where: {
@@ -63,6 +65,7 @@ module.exports = {
 				}
 			});
 
+			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/duelQueue1v1.js DBDiscordUsers 2');
 			let secondUser = await DBDiscordUsers.findOne({
 				where: {

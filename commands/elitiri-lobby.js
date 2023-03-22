@@ -49,6 +49,7 @@ module.exports = {
 
 		if (args[0].toLowerCase() === 'claim') {
 			args.shift();
+			//TODO: Attributes
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: {
 					tournamentName: currentElitiriCup,
@@ -104,6 +105,7 @@ module.exports = {
 				date = new Date(roundOverCheck(elitiriSignUp.bracketName, lobbyId.replace(/\D+/, ''))).toUTCString();
 			}
 			// eslint-disable-next-line no-unused-vars
+			//TODO: Attributes
 			const tournamentLobby = await DBElitiriCupLobbies.findOne({
 				where: {
 					tournamentName: currentElitiriCup,
@@ -161,6 +163,7 @@ module.exports = {
 			const sheet = doc.sheetsByTitle[scheduleSheetId];
 			await sheet.loadCells('A1:U29');
 
+			//TODO: Attributes
 			//search for players in the lobby with given ID
 			let lobbyPlayers = await DBElitiriCupSignUp.findAll({
 				where: {
@@ -168,6 +171,7 @@ module.exports = {
 					tournamentLobbyId: lobbyId
 				}
 			});
+			//TODO: Attributes
 			// eslint-disable-next-line no-unused-vars
 			let previousLobbyPlayers = await DBElitiriCupSignUp.findAll({
 				where: {
@@ -283,6 +287,7 @@ module.exports = {
 			const sheet = doc.sheetsByTitle[scheduleSheetId];
 			await sheet.loadCells('A1:U29');
 
+			//TODO: Attributes
 			let potentialLobby = await DBElitiriCupLobbies.findOne({
 				where: {
 					lobbyId: lobbyId
@@ -296,12 +301,14 @@ module.exports = {
 				k++;
 			}
 
+			//TODO: Attributes
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: msg.author.id
 				}
 			});
 
+			//TODO: Attributes
 			let potentialReferee = await DBElitiriCupStaff.findOne({
 				where: {
 					tournamentName: currentElitiriCup,
@@ -310,6 +317,7 @@ module.exports = {
 				}
 			});
 
+			//TODO: Attributes
 			let elitirisignup = await DBElitiriCupSignUp.findOne({
 				where: {
 					tournamentName: currentElitiriCup,
@@ -355,6 +363,7 @@ module.exports = {
 					return interaction.editReply({ content: `You're not a referee for the ${currentElitiriCup}. If you think this is a mistake, please contact head staff of the tournament` });
 				}
 			}
+			//TODO: Attributes
 			potentialLobby = await DBElitiriCupLobbies.findOne({
 				where: {
 					lobbyId: lobbyId
@@ -393,6 +402,7 @@ module.exports = {
 			} else {
 				user = interaction.member.user.id;
 			}
+			//TODO: Attributes
 			// get players from DBElitiriCupSignUp with the same tournamentName and lobbyId then push it to the array
 			let players = await DBElitiriCupSignUp.findAll({
 				where: {
@@ -439,6 +449,7 @@ module.exports = {
 					return interaction.editReply({ content: 'Please provide a valid lobby ID' });
 				}
 			}
+			//TODO: Attributes
 			let potentialLobby = await DBElitiriCupLobbies.findOne({
 				where: {
 					lobbyId: lobbyId
@@ -453,6 +464,7 @@ module.exports = {
 				}
 			}
 
+			//TODO: Attributes
 			const discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: msg.author.id
@@ -488,6 +500,7 @@ module.exports = {
 			}
 
 			// Delete notification task
+			//TODO: Attributes
 			let date = new Date(roundOverCheck(potentialLobby.bracketName, lobbyId.replace(/\D+/, '')) - 1800000).toUTCString();
 			const task = await DBProcessQueue.findOne({
 				where: {

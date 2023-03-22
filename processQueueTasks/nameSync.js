@@ -46,6 +46,7 @@ module.exports = {
 				}
 			}
 
+			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/nameSync.js DBDiscordUsers');
 			let discordUsers = await DBDiscordUsers.findAll({
 				where: {

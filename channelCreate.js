@@ -11,6 +11,7 @@ module.exports = async function (channel) {
 		return;
 	}
 
+	//TODO: Attributes
 	logDatabaseQueries(2, 'channelCreate.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({

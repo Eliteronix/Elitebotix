@@ -760,6 +760,7 @@ module.exports = {
 			return interaction.followUp({ content: 'The discord server for the competition can be found here: <https://discord.com/invite/Asz5Gfe>\nAfter joining be sure to head to <#801000891750547496> and assign yourself the MOTD role!\nEverything else will be done automatically when you registered!', ephemeral: true });
 		} else if (args[0].toLowerCase() === 'register') {
 			//get discordUser from db
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 1');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: { userId: msg.author.id },
@@ -797,6 +798,7 @@ module.exports = {
 			}
 		} else if (args[0].toLowerCase() === 'unregister') {
 			//get discordUser from db
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 2');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: { userId: msg.author.id },
@@ -817,6 +819,7 @@ module.exports = {
 			}
 		} else if (args[0].toLowerCase() === 'mute') {
 			//get discordUser from db
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 3');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: { userId: msg.author.id },
@@ -928,6 +931,7 @@ module.exports = {
 			}
 		} else if (args[0].toLowerCase() === 'unmute') {
 			//get discordUser from db
+			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 4');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: { userId: msg.author.id },
@@ -1008,6 +1012,7 @@ module.exports = {
 			let playersNotConnected = [];
 
 			for (let i = 0; i < players.length; i++) {
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 5');
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
@@ -1105,6 +1110,7 @@ module.exports = {
 						i++;
 						const index = Math.floor(Math.random() * amountOfMapsInDB);
 
+						//TODO: add attributes and logdatabasequeries
 						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 1');
 						const dbBeatmap = await DBOsuBeatmaps.findOne({
 							where: { id: index }
@@ -1115,6 +1121,7 @@ module.exports = {
 							&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
 							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 							backupBeatmapIds.push(dbBeatmap.beatmapId);
+							//TODO: add attributes and logdatabasequeries
 							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 1');
 							const multiScores = await DBOsuMultiScores.findAll({
 								where: {
@@ -1214,6 +1221,7 @@ module.exports = {
 
 						const index = Math.floor(Math.random() * amountOfMapsInDB);
 
+						//TODO: add attributes and logdatabasequeries
 						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 2');
 						const dbBeatmap = await DBOsuBeatmaps.findOne({
 							where: { id: index }
@@ -1224,6 +1232,7 @@ module.exports = {
 							&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
 							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 							backupBeatmapIds.push(dbBeatmap.beatmapId);
+							//TODO: add attributes and logdatabasequeries
 							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 2');
 							const multiScores = await DBOsuMultiScores.findAll({
 								where: {
@@ -1428,6 +1437,7 @@ module.exports = {
 						i++;
 						const index = Math.floor(Math.random() * amountOfMapsInDB);
 
+						//TODO: add attributes and logdatabasequeries
 						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 3');
 						const dbBeatmap = await DBOsuBeatmaps.findOne({
 							where: { id: index }
@@ -1438,6 +1448,7 @@ module.exports = {
 							&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
 							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 							backupBeatmapIds.push(dbBeatmap.beatmapId);
+							//TODO: add attributes and logdatabasequeries
 							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 3');
 							const multiScores = await DBOsuMultiScores.findAll({
 								where: {
@@ -1537,6 +1548,7 @@ module.exports = {
 
 						const index = Math.floor(Math.random() * amountOfMapsInDB);
 
+						//TODO: add attributes and logdatabasequeries
 						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 4');
 						const dbBeatmap = await DBOsuBeatmaps.findOne({
 							where: { id: index }
@@ -1547,6 +1559,7 @@ module.exports = {
 							&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
 							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 							backupBeatmapIds.push(dbBeatmap.beatmapId);
+							//TODO: add attributes and logdatabasequeries
 							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 4');
 							const multiScores = await DBOsuMultiScores.findAll({
 								where: {
@@ -1694,6 +1707,7 @@ module.exports = {
 			const collector = embedMessage.createReactionCollector({ filter, time: 120000, max: 16 });
 
 			collector.on('collect', async (reaction, user) => {
+				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 6');
 				const dbDiscordUser = await DBDiscordUsers.findOne({
 					where: { userId: user.id }
