@@ -2070,9 +2070,9 @@ module.exports = {
 					}
 				}
 
-				//TODO: Attributes
 				module.exports.logDatabaseQueries(4, 'utils.js DBOsuGuildTrackers saveOsuMultiScores existingMatchPlayerTrackers');
 				let existingMatchPlayerTrackers = await DBOsuGuildTrackers.findAll({
+					attributes: ['channelId'],
 					where: {
 						osuUserId: {
 							[Op.in]: existingMatchPlayers
@@ -2502,9 +2502,9 @@ module.exports = {
 								let doubleTimeMap = false;
 								let freeModMap = false;
 
-								//TODO: Attributes
 								module.exports.logDatabaseQueries(1, 'utils.js DBOsuMultiScores getOsuBeatmap');
 								let tourneyScores = await DBOsuMultiScores.findAll({
+									attributes: ['gameRawMods', 'rawMods', 'freeMod'],
 									where: {
 										beatmapId: beatmaps[0].id,
 										tourneyMatch: true,
