@@ -178,9 +178,9 @@ module.exports = {
 async function processIncompleteScores(osuApi, client, processQueueEntry, channelId, secondsToWait) {
 	//Go same if match found and not ended / too long going already
 	//Reimport an old match to clean up the database
-	//TODO: Attributes
 	logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores incomplete scores');
 	let incompleteMatchScore = await DBOsuMultiScores.findOne({
+		attributes: ['id', 'matchId', 'updatedAt'],
 		where: {
 			tourneyMatch: true,
 			warmup: null

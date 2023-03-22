@@ -2686,10 +2686,10 @@ module.exports = {
 			return;
 		}
 
-		//TODO: Attributes
 		//get birthday dates from DBBirthdayGuilds for all users in the database that have a birthday set
 		module.exports.logDatabaseQueries(2, 'utils.js DBBirthdayGuilds checkForBirthdays');
 		let birthdayAnnouncements = await DBBirthdayGuilds.findAll({
+			attributes: ['id', 'userId', 'guildId', 'birthdayTime'],
 			where: {
 				birthdayTime: {
 					[Op.lte]: currentDate
