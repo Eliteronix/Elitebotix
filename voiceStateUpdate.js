@@ -9,10 +9,12 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (oldMember.serverMute !== null && oldMember.serverMute !== newMember.serverMute) {
-		//TODO: Attributes
 		logDatabaseQueries(4, 'voiceStateUpdate.js DBGuilds 1');
 		const guild = await DBGuilds.findOne({
-			where: { guildId: newMember.guild.id }
+			attributes: ['id', 'loggingChannel', 'loggingServerMute'],
+			where: {
+				guildId: newMember.guild.id
+			}
 		});
 
 		if (guild && guild.loggingChannel && guild.loggingServerMute) {
@@ -63,10 +65,12 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (oldMember.serverDeaf !== newMember.serverDeaf) {
-		//TODO: Attributes
 		logDatabaseQueries(4, 'voiceStateUpdate.js DBGuilds 2');
 		const guild = await DBGuilds.findOne({
-			where: { guildId: newMember.guild.id }
+			attributes: ['id', 'loggingChannel', 'loggingServerDeaf'],
+			where: {
+				guildId: newMember.guild.id
+			}
 		});
 
 		if (guild && guild.loggingChannel && guild.loggingServerDeaf) {
@@ -117,10 +121,12 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (oldMember.channelId !== newMember.channelId) {
-		//TODO: Attributes
 		logDatabaseQueries(4, 'voiceStateUpdate.js DBGuilds 3');
 		const guild = await DBGuilds.findOne({
-			where: { guildId: newMember.guild.id }
+			attributes: ['id', 'loggingChannel', 'loggingJoinVoice'],
+			where: {
+				guildId: newMember.guild.id
+			}
 		});
 
 		if (guild && newMember.channelId && guild.loggingChannel && guild.loggingJoinVoice) {
@@ -225,19 +231,22 @@ module.exports = async function (oldMember, newMember) {
 	let dbTemporaryVoicesNew;
 
 	if (newUserChannel) {
-		//TODO: Attributes
 		logDatabaseQueries(4, 'voiceStateUpdate.js DBTemporaryVoices 1');
 		dbTemporaryVoicesNew = await DBTemporaryVoices.findOne({
-			where: { guildId: newUserChannel.guild.id, channelId: newUserChannel.id }
+			attributes: ['textChannelId', 'creatorId', 'channelId'],
+			where: {
+				guildId: newUserChannel.guild.id, channelId: newUserChannel.id
+			}
 		});
 	}
 
-	if (newUserChannel && newUserChannel.name.startsWith('➕') && !(dbTemporaryVoicesNew) && newUserChannel !== oldUserChannel) {
-
-		//TODO: Attributes
+	if (newUserChannel && newUserChannel.name.startsWith('➕') && !dbTemporaryVoicesNew && newUserChannel !== oldUserChannel) {
 		logDatabaseQueries(4, 'voiceStateUpdate.js DBGuilds 4');
 		const dbGuild = await DBGuilds.findOne({
-			where: { guildId: newMember.guild.id }
+			attributes: ['temporaryVoices', 'addTemporaryText'],
+			where: {
+				guildId: newMember.guild.id
+			}
 		});
 
 		if (dbGuild) {
@@ -442,11 +451,12 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (oldUserChannel && newUserChannel !== oldUserChannel) {
-
-		//TODO: Attributes
 		logDatabaseQueries(4, 'voiceStateUpdate.js DBTemporaryVoices 2');
 		const dbTemporaryVoices = await DBTemporaryVoices.findOne({
-			where: { guildId: oldUserChannel.guild.id, channelId: oldUserChannel.id }
+			attributes: ['id', 'channelId', 'textChannelId', 'creatorId'],
+			where: {
+				guildId: oldUserChannel.guild.id, channelId: oldUserChannel.id
+			}
 		});
 
 		if (dbTemporaryVoices) {
