@@ -341,7 +341,10 @@ async function getProfile(interaction, username, formula, rank, desiredrank, bad
 
 				let resultingRank = expr.evaluate({ rank: Math.round((maxRank + minRank) / 2), badges: badgeAmount });
 
-				while (resultingRank !== desiredrank) {
+				let iterator = 0;
+				while (resultingRank !== desiredrank && iterator < 100) {
+					iterator++;
+
 					if (resultingRank > desiredrank) {
 						maxRank = Math.round((maxRank + minRank) / 2);
 					} else {
@@ -376,7 +379,10 @@ async function getProfile(interaction, username, formula, rank, desiredrank, bad
 
 				let resultingRank = Math.round(expr.evaluate({ rank: Math.round((maxRank + minRank) / 2), badges: badges }));
 
-				while (resultingRank !== desiredrank) {
+				let iterator = 0;
+				while (resultingRank !== desiredrank && iterator < 100) {
+					iterator++;
+
 					if (resultingRank > desiredrank) {
 						maxRank = Math.round((maxRank + minRank) / 2);
 					} else {
