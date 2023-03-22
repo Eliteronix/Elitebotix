@@ -1607,7 +1607,6 @@ module.exports = {
 		let weeksAfter = new Date(match.raw_start);
 		weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores warmup detection same tourney');
 		let sameTournamentMatches = await DBOsuMultiScores.findAll({
 			attributes: ['id', 'osuUserId', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
@@ -2004,9 +2003,9 @@ module.exports = {
 
 			if (newMatchPlayers.length) {
 				//Get all follows for the players in the match
-				//TODO: Attributes
 				module.exports.logDatabaseQueries(4, 'utils.js DBOsuTourneyFollows saveOsuMultiScores');
 				let follows = await DBOsuTourneyFollows.findAll({
+					attributes: ['userId', 'osuUserId'],
 					where: {
 						osuUserId: {
 							[Op.in]: newMatchPlayers
@@ -2038,9 +2037,9 @@ module.exports = {
 			//Manage osu-track follows for guilds
 			if (newMatchPlayers.length) {
 				//Get all follows for the players in the match
-				//TODO: Attributes
 				module.exports.logDatabaseQueries(4, 'utils.js DBOsuGuildTrackers saveOsuMultiScores');
 				let guildTrackers = await DBOsuGuildTrackers.findAll({
+					attributes: ['guildId', 'osuUserId', 'acronym', 'channelId', 'matchActivityAutoTrack'],
 					where: {
 						osuUserId: {
 							[Op.in]: newMatchPlayers
@@ -2701,11 +2700,10 @@ module.exports = {
 
 		// iterate through all users and check if the current date is the same as the birthday date 
 		for (let i = 0; i < birthdayAnnouncements.length; i++) {
-
-			//TODO: Attributes
 			//Check if the birthday announcement is enabled on the guild
 			module.exports.logDatabaseQueries(2, 'utils.js DBGuilds checkForBirthdays');
 			let dbGuild = await DBGuilds.findOne({
+				attributes: ['birthdayEnabled', 'birthdayMessageChannel'],
 				where: {
 					guildId: birthdayAnnouncements[i].guildId
 				}
