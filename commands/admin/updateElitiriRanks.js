@@ -7,19 +7,18 @@ module.exports = {
 	name: 'updateElitiriRanks',
 	usage: 'None',
 	async execute(interaction) {
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/admin.js updateElitiriRanks DBElitiriCupSignUp');
 		let DBElitiriSignups = await DBElitiriCupSignUp.findAll({
+			attributes: ['userId'],
 			where: {
 				tournamentName: currentElitiriCup
 			}
 		});
 
 		for (let i = 0; i < DBElitiriSignups.length; i++) {
-			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/admin.js updateElitiriRanks DBProcessQueue');
-			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: DBElitiriSignups[i].userId } });
-			if (!existingTask) {
+			const existingTasks = await DBProcessQueue.count({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: DBElitiriSignups[i].userId } });
+			if (existingTasks === 0) {
 				logDatabaseQueries(4, 'commands/admin.js updateElitiriRanks DBProcessQueue create');
 				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: DBElitiriSignups[i].userId });
 			}
