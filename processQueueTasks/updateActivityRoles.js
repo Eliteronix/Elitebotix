@@ -8,7 +8,7 @@ module.exports = {
 
 		logDatabaseQueries(2, 'processQueueTasks/updateActivityRoles.js DBActivityRoles');
 		const activityRoles = await DBActivityRoles.findAll({
-			attributes: ['roleId'],
+			attributes: ['roleId', 'pointsCutoff', 'rankCutoff', 'percentageCutoff'],
 			where: {
 				guildId: processQueueEntry.guildId
 			}

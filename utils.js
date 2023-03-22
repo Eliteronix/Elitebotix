@@ -17,12 +17,12 @@ module.exports = {
 			//Set prefix to standard prefix
 			guildPrefix = prefix;
 		} else {
-			//TODO: Attributes
 			module.exports.logDatabaseQueries(3, 'utils.js DBGuilds getGuildPrefix');
-
-			//Get guild from the db
 			const guild = await DBGuilds.findOne({
-				where: { guildId: msg.guildId },
+				attributes: ['customPrefixUsed', 'customPrefix'],
+				where: {
+					guildId: msg.guildId
+				},
 			});
 
 			//Check if a guild record was found
@@ -2076,9 +2076,9 @@ module.exports = {
 			//Manage osu-track follows for guilds for acronyms
 			if (newMatchPlayers.length && existingMatchPlayers.length === 0) {
 				//Get all follows for the players in the match
-				//TODO: Attributes
 				module.exports.logDatabaseQueries(4, 'utils.js DBOsuGuildTrackers saveOsuMultiScores no existing match players');
 				let guildTrackers = await DBOsuGuildTrackers.findAll({
+					attributes: ['guildId', 'channelId', 'matchActivityAutoTrack'],
 					where: {
 						osuUserId: null,
 						acronym: match.name.replace(/:.*/gm, ''),
@@ -3870,9 +3870,9 @@ module.exports = {
 			}
 
 			if (!map && msg.includes('https://osu.ppy.sh/beatmapsets/')) {
-				//TODO: Attributes
 				module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers no map selected');
 				let discordUser = await DBDiscordUsers.findOne({
+					attributes: ['twitchName'],
 					where: {
 						twitchName: target.substring(1),
 						twitchVerified: true,
@@ -3884,8 +3884,9 @@ module.exports = {
 				});
 
 				if (discordUser && context['display-name'].toLowerCase() !== discordUser.twitchName.toLowerCase()) {
-					return await twitchClient.say(target.substring(1), `${context['display-name']} -> Please select a difficulty of the mapset.`);
+					await twitchClient.say(target.substring(1), `${context['display-name']} -> Please select a difficulty of the mapset.`);
 				}
+				return;
 			}
 
 			if (map) {
@@ -4380,7 +4381,6 @@ module.exports = {
 
 		deleted = 0;
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries userId 1');
 		duplicates = await DBDiscordUsers.findAll({
 			attributes: ['userId', [Sequelize.fn('COUNT', Sequelize.col('userId')), 'amount']],
@@ -4396,9 +4396,9 @@ module.exports = {
 		duplicates = duplicates.filter(user => user.dataValues.amount > 1);
 
 		for (let i = 0; i < duplicates.length; i++) {
-			//TODO: Attributes
 			module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries userId 2');
 			let results = await DBDiscordUsers.findAll({
+				attributes: ['id', 'userId', 'osuUserId', 'osuName', 'updatedAt'],
 				where: {
 					userId: duplicates[i].userId
 				},
