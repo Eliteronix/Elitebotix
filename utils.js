@@ -595,8 +595,22 @@ module.exports = {
 		//Check user settings
 		const discordUser = await DBDiscordUsers.findOne({
 			attributes: [
+				'id',
+				'userId',
+				'osuName',
+				'osuUserId',
+				'osuVerified',
 				'osuMainServer',
 				'osuMainMode',
+				'tournamentPings',
+				'tournamentPingsMode',
+				'tournamentPingsBadged',
+				'tournamentPingsStartingFrom',
+				'osuNoModDuelStarRating',
+				'osuHiddenDuelStarRating',
+				'osuHardRockDuelStarRating',
+				'osuDoubleTimeDuelStarRating',
+				'osuFreeModDuelStarRating',
 			],
 			where: {
 				userId: msg.author.id
