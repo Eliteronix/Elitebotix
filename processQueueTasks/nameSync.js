@@ -46,9 +46,9 @@ module.exports = {
 				}
 			}
 
-			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/nameSync.js DBDiscordUsers');
 			let discordUsers = await DBDiscordUsers.findAll({
+				attributes: ['userId', 'osuUserId', 'osuName', 'osuRank', 'osuVerified'],
 				where: {
 					userId: {
 						[Op.in]: members.map(member => member.user.id),
