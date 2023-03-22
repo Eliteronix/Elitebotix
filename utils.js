@@ -591,11 +591,16 @@ module.exports = {
 		let server = 'bancho';
 		let mode = 0;
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers getOsuUserServerMode');
 		//Check user settings
 		const discordUser = await DBDiscordUsers.findOne({
-			where: { userId: msg.author.id },
+			attributes: [
+				'osuMainServer',
+				'osuMainMode',
+			],
+			where: {
+				userId: msg.author.id
+			},
 		});
 
 		if (discordUser && discordUser.osuMainServer) {
@@ -646,25 +651,31 @@ module.exports = {
 			if (msg.channel.type !== Discord.ChannelType.DM) {
 				const now = new Date();
 				now.setSeconds(now.getSeconds() - 15);
-				//TODO: Attributes
+
 				module.exports.logDatabaseQueries(3, 'utils.js DBServerUserActivity');
 				const serverUserActivity = await DBServerUserActivity.findOne({
-					where: { guildId: msg.guildId, userId: msg.author.id },
+					attributes: [
+						'id',
+						'updatedAt',
+						'points',
+					],
+					where: {
+						guildId: msg.guildId, userId: msg.author.id
+					},
 				});
 
 				if (serverUserActivity && serverUserActivity.updatedAt < now) {
 					serverUserActivity.points = serverUserActivity.points + 1;
 					await serverUserActivity.save();
-					//TODO: Attributes
+
 					module.exports.logDatabaseQueries(3, 'utils.js DBActivityRoles old updateServerUserActivity activityRoles');
-					const activityRoles = await DBActivityRoles.findAll({
+					const activityRoles = await DBActivityRoles.count({
 						where: { guildId: msg.guildId }
 					});
-					if (activityRoles.length) {
-						//TODO: Attributes
+					if (activityRoles) {
 						module.exports.logDatabaseQueries(3, 'utils.js old updateServerUserActivity DBProcessQueue');
-						const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
-						if (!existingTask) {
+						const existingTask = await DBProcessQueue.count({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
+						if (existingTask === 0) {
 							let date = new Date();
 							date.setUTCMinutes(date.getUTCMinutes() + 5);
 							module.exports.logDatabaseQueries(3, 'utils.js old updateServerUserActivity DBProcessQueue create');
@@ -676,16 +687,15 @@ module.exports = {
 				if (!serverUserActivity) {
 					module.exports.logDatabaseQueries(3, 'utils.js DBServerUserActivity new ServerUserActivity create');
 					await DBServerUserActivity.create({ guildId: msg.guildId, userId: msg.author.id });
-					//TODO: Attributes
+
 					module.exports.logDatabaseQueries(3, 'utils.js new updateServerUserActivity DBActivityRoles');
-					const activityRoles = await DBActivityRoles.findAll({
+					const activityRoles = await DBActivityRoles.count({
 						where: { guildId: msg.guildId }
 					});
-					if (activityRoles.length) {
-						//TODO: Attributes
+					if (activityRoles) {
 						module.exports.logDatabaseQueries(3, 'utils.js new updateServerUserActivity DBProcessQueue');
-						const existingTask = await DBProcessQueue.findOne({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
-						if (!existingTask) {
+						const existingTask = await DBProcessQueue.count({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
+						if (existingTask === 0) {
 							let date = new Date();
 							date.setUTCMinutes(date.getUTCMinutes() + 5);
 							module.exports.logDatabaseQueries(3, 'utils.js new updateServerUserActivity DBProcessQueue create');
@@ -729,7 +739,6 @@ module.exports = {
 	},
 	executeNextProcessQueueTask: async function (client, bancho) {
 		let now = new Date();
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(1, 'utils.js DBProcessQueue nextTask');
 		let nextTasks = await DBProcessQueue.findAll({
 			where: {
@@ -870,9 +879,9 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		process.send(`osuUpdateQueue ${osuUpdateQueueLength}`);
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
+			attributes: ['osuUserId'],
 			where: {
 				osuUserId: {
 					[Op.not]: null
@@ -922,10 +931,9 @@ module.exports = {
 		});
 
 		if (discordUser) {
-			//TODO: Attributes
 			module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBProcessQueue');
-			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
-			if (!existingTask) {
+			const existingTask = await DBProcessQueue.count({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
+			if (existingTask === 0) {
 				let now = new Date();
 				module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBProcessQueue create');
 				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId, date: now });
@@ -934,9 +942,9 @@ module.exports = {
 
 		await new Promise(resolve => setTimeout(resolve, 25000));
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBDiscordUsers 2');
 		discordUser = await DBDiscordUsers.findOne({
+			attributes: ['osuUserId'],
 			where: {
 				osuUserId: {
 					[Op.not]: null
@@ -991,10 +999,9 @@ module.exports = {
 		});
 
 		if (discordUser) {
-			//TODO: Attributes
 			module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBProcessQueue');
-			const existingTask = await DBProcessQueue.findOne({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
-			if (!existingTask) {
+			const existingTask = await DBProcessQueue.count({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
+			if (existingTask === 0) {
 				let now = new Date();
 				module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBProcessQueue create');
 				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId, date: now });
@@ -1239,11 +1246,13 @@ module.exports = {
 					}
 				}
 
-				//TODO: Attributes
 				module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers updateOsuDetailsforUser');
 				//get discordUser from db to update pp and rank
 				await DBDiscordUsers.findOne({
-					where: { osuUserId: osuUserId },
+					attributes: ['id', 'osuBadges', 'osuName', 'osuUserId', 'tournamentBannedReason', 'tournamentBannedUntil'],
+					where: {
+						osuUserId: osuUserId
+					},
 				})
 					.then(async (discordUser) => {
 						if (discordUser) {
@@ -1344,10 +1353,12 @@ module.exports = {
 			});
 	},
 	async restartProcessQueueTask() {
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(5, 'utils.js DBProcessQueue restartProcessQueueTask');
 		const tasksInWork = await DBProcessQueue.findAll({
-			where: { beingExecuted: true }
+			attributes: ['id', 'beingExecuted'],
+			where: {
+				beingExecuted: true
+			}
 		});
 		tasksInWork.forEach(task => {
 			task.beingExecuted = 0;
@@ -3790,9 +3801,9 @@ module.exports = {
 					return;
 				}
 
-				//TODO: Attributes
 				module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers twitchConnect 1');
 				let dbDiscordUser = await DBDiscordUsers.findOne({
+					attributes: ['id', 'twitchVerified', 'twitchName'],
 					where: {
 						userId: discordUser.id,
 						twitchName: target.substring(1).toLowerCase(),
@@ -3943,9 +3954,9 @@ module.exports = {
 				}
 
 				try {
-					//TODO: Attributes
 					module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers twitchConnect 2');
 					let discordUser = await DBDiscordUsers.findOne({
+						attributes: ['twitchName', 'osuName', 'osuUserId'],
 						where: {
 							twitchName: target.substring(1),
 							twitchVerified: true,
@@ -4466,21 +4477,14 @@ module.exports = {
 		let dateLimit = new Date();
 		dateLimit.setMonth(dateLimit.getMonth() - 6);
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'utils.js DBDuelRatingHistory cleanUpDuplicateEntries oldData');
-		let oldData = await DBDuelRatingHistory.findAll({
+		deleted = await DBDuelRatingHistory.destroy({
 			where: {
 				updatedAt: {
 					[Op.lt]: dateLimit
 				}
 			}
 		});
-
-		for (let i = 0; i < oldData.length; i++) {
-			await new Promise(resolve => setTimeout(resolve, 2000));
-			await oldData[i].destroy();
-			deleted++;
-		}
 
 		// eslint-disable-next-line no-console
 		console.log(`Cleaned up ${deleted} old duel rating histories`);
@@ -4519,9 +4523,9 @@ module.exports = {
 
 						await new Promise(resolve => setTimeout(resolve, 500));
 
-						//TODO: Attributes
 						module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries duplicates delete');
 						let duplicate = await DBOsuBeatmaps.findOne({
+							attributes: ['id', 'beatmapId', 'mods', 'updatedAt'],
 							where: {
 								id: result[0][i].id
 							}
@@ -4581,9 +4585,9 @@ module.exports = {
 
 						await new Promise(resolve => setTimeout(resolve, 500));
 
-						//TODO: Attributes
 						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries duplicates delete');
 						let duplicate = await DBOsuMultiScores.findOne({
+							attributes: ['id', 'matchId', 'gameId', 'osuUserId', 'matchStartDate', 'updatedAt'],
 							where: {
 								id: result[0][i].id
 							}
@@ -4978,10 +4982,13 @@ module.exports = {
 	},
 	async getOsuPlayerName(osuUserId) {
 		let playerName = osuUserId;
-		//TODO: Attributes
+
 		module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers getOsuPlayerName');
 		let discordUser = await DBDiscordUsers.findOne({
-			where: { osuUserId: osuUserId }
+			attributes: ['osuName'],
+			where: {
+				osuUserId: osuUserId
+			}
 		});
 
 		if (discordUser) {
@@ -6469,9 +6476,10 @@ module.exports = {
 	},
 	async processOsuTrack(client) {
 		let now = new Date();
-		//TODO: Attributes
+
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuTrackingUsers processOsuTrack');
 		let osuTracker = await DBOsuTrackingUsers.findOne({
+			attributes: ['id', 'osuUserId', 'nextCheck', 'updatedAt', 'minutesBetweenChecks'],
 			where: {
 				nextCheck: {
 					[Op.lte]: now,
@@ -7066,15 +7074,14 @@ module.exports = {
 				return recentActivity;
 			}, { context: { osuUser: osuUser, lastUpdated: osuTracker.updatedAt } });
 
-			//TODO: Attributes
 			module.exports.logDatabaseQueries(2, 'utils.js DBOsuGuildTrackers processOsuTrack updateActivity');
-			let guildTrackers = await DBOsuGuildTrackers.findAll({
+			let guildTrackers = await DBOsuGuildTrackers.count({
 				where: {
 					osuUserId: osuUser.osuUserId,
 				},
 			});
 
-			if (guildTrackers.length) {
+			if (guildTrackers) {
 				// set variable recentActivity true if any of the recentActivities are true
 				const recentActivity = recentActivities.some(activity => activity);
 
