@@ -3867,7 +3867,7 @@ module.exports = {
 					{ name: 'JoelbutmywindowsXPiscrashing', weight: 10 },
 					{ name: 'JoelerRAVE', weight: 10 },
 					{ name: 'JoelTeachingHisSonJolHowToSpinWhileWideBorisPassesBy', weight: 10 },
-					{ name: 'Robert was saved from the water!', weight: 1 }
+					{ name: 'Robert', weight: 1 }
 				];
 
 				let totalWeight = 0;
@@ -4956,33 +4956,37 @@ module.exports = {
 		let threeMonthsAgo = new Date();
 		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
+		module.exports.logDatabaseQueries(4, 'utils.js createDuelMatch DBOsuMultiScores player scores');
+		const playerScores = await DBOsuMultiScores.findAll({
+			where: {
+				osuUserId: {
+					[Op.in]: users.map(user => user.osuUserId),
+				},
+				tourneyMatch: true,
+				matchName: {
+					[Op.notLike]: 'MOTD:%',
+				},
+				mode: 'Standard',
+				[Op.or]: [
+					{ warmup: false },
+					{ warmup: null }
+				],
+			}
+		});
+
 		for (let i = 0; i < users.length; i++) {
-			module.exports.logDatabaseQueries(4, 'utils.js createDuelMatch DBOsuMultiScores player scores');
-			const playerScores = await DBOsuMultiScores.findAll({
-				where: {
-					osuUserId: users[i].osuUserId,
-					tourneyMatch: true,
-					matchName: {
-						[Op.notLike]: 'MOTD:%',
-					},
-					mode: 'Standard',
-					[Op.or]: [
-						{ warmup: false },
-						{ warmup: null }
-					],
-				}
-			});
+			const currentPlayerScores = playerScores.filter(score => score.osuUserId === users[i].osuUserId);
 
-			for (let j = 0; j < playerScores.length; j++) {
-				if (playerScores[j].gameStartDate > threeMonthsAgo && !avoidMaps.includes(playerScores[j].beatmapId)) {
-					avoidMaps.push(playerScores[j].beatmapId);
+			for (let j = 0; j < currentPlayerScores.length; j++) {
+				if (currentPlayerScores[j].gameStartDate > threeMonthsAgo && !avoidMaps.includes(currentPlayerScores[j].beatmapId)) {
+					avoidMaps.push(currentPlayerScores[j].beatmapId);
 				}
 
-				if (beatmapIds.includes(playerScores[j].beatmapId)) {
-					beatmaps[beatmapIds.indexOf(playerScores[j].beatmapId)].count++;
+				if (beatmapIds.includes(currentPlayerScores[j].beatmapId)) {
+					beatmaps[beatmapIds.indexOf(currentPlayerScores[j].beatmapId)].count++;
 				} else {
-					beatmapIds.push(playerScores[j].beatmapId);
-					beatmaps.push({ beatmapId: playerScores[j].beatmapId, count: 1 });
+					beatmapIds.push(currentPlayerScores[j].beatmapId);
+					beatmaps.push({ beatmapId: currentPlayerScores[j].beatmapId, count: 1 });
 				}
 			}
 		}
@@ -5042,6 +5046,7 @@ module.exports = {
 		if (interaction) {
 			await interaction.editReply(`Creating match lobby for ${teamname1} vs ${teamname2}`);
 		}
+
 		for (let i = 0; i < 5; i++) {
 			try {
 				try {
