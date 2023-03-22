@@ -17,16 +17,87 @@ module.exports = {
 
 		const discordUserId = processQueueEntry.additions;
 
-		//TODO: Attributes
+		let discordUserAttributes = [
+			'id',
+			'osuUserId',
+			'osuName',
+			'updatedAt',
+			'lastOsuPlayCountChange',
+			'nextOsuPPUpdate',
+			'lastOsuPPChange',
+			'nextTaikoPPUpdate',
+			'lastTaikoPPChange',
+			'lastTaikoPlayCountChange',
+			'nextCatchPPUpdate',
+			'lastCatchPPChange',
+			'lastCatchPlayCountChange',
+			'nextManiaPPUpdate',
+			'lastManiaPPChange',
+			'lastManiaPlayCountChange',
+			'country',
+			'osuRank',
+			'osuPP',
+			'oldOsuRank',
+			'osuPlayCount',
+			'osuRankedScore',
+			'osuTotalScore',
+			'taikoRank',
+			'taikoPP',
+			'taikoPlayCount',
+			'taikoRankedScore',
+			'taikoTotalScore',
+			'catchRank',
+			'catchPP',
+			'catchPlayCount',
+			'catchRankedScore',
+			'catchTotalScore',
+			'maniaRank',
+			'maniaPP',
+			'maniaPlayCount',
+			'maniaRankedScore',
+			'maniaTotalScore',
+			'osuDerankRank',
+			'osuDuelStarRating',
+			'lastDuelRatingUpdate',
+			'osuNotFoundFirstOccurence',
+			'osuVerificationCode',
+			'osuVerified',
+			'osuBadges',
+			'osuNoModDuelStarRating',
+			'osuNoModDuelStarRatingLimited',
+			'osuHiddenDuelStarRating',
+			'osuHiddenDuelStarRatingLimited',
+			'osuHardRockDuelStarRating',
+			'osuHardRockDuelStarRatingLimited',
+			'osuDoubleTimeDuelStarRating',
+			'osuDoubleTimeDuelStarRatingLimited',
+			'osuFreeModDuelStarRating',
+			'osuFreeModDuelStarRatingLimited',
+			'osuDuelProvisional',
+			'osuDuelOutdated',
+			'tournamentBannedReason',
+			'tournamentBannedUntil',
+			'userId',
+			'osuMOTDRegistered',
+			'osuMOTDMuted',
+			'osuMOTDLastRoundPlayed',
+			'osuMOTDerrorFirstOccurence',
+			'osuMOTDmutedUntil',
+
+		];
+
 		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBDiscordUsers 1');
 		let discordUser = await DBDiscordUsers.findOne({
-			where: { osuUserId: discordUserId }
+			attributes: discordUserAttributes,
+			where: {
+				osuUserId: discordUserId
+			}
 		});
 
-		//TODO: Attributes
 		// Try to find duplicate users
 		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBDiscordUsers duplicates');
 		let duplicates = await DBDiscordUsers.findAll({
+			attributes: discordUserAttributes,
 			where: {
 				id: {
 					[Op.ne]: discordUser.id
@@ -181,10 +252,12 @@ module.exports = {
 			try {
 				await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: client });
 
-				//TODO: Attributes
 				logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBDiscordUsers 2');
 				discordUser = await DBDiscordUsers.findOne({
-					where: { osuUserId: discordUserId }
+					attributes: discordUserAttributes,
+					where: {
+						osuUserId: discordUserId
+					}
 				});
 
 				let derankStats = await getDerankStats(discordUser);
