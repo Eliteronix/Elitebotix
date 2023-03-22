@@ -1,8 +1,9 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { humanReadable, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getAdditionalOsuInfo } = require('../utils');
+const { humanReadable, updateOsuDetailsforUser, getIDFromPotentialOsuLink, logDatabaseQueries, getAdditionalOsuInfo } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
+const Parser = require('expr-eval').Parser;
 
 module.exports = {
 	name: 'osu-bws',
@@ -25,6 +26,70 @@ module.exports = {
 			'en-US': 'Sends info about the BWS rank of the specified player',
 		})
 		.setDMPermission(true)
+		.addIntegerOption(option =>
+			option.setName('desiredrank')
+				.setNameLocalizations({
+					'de': 'gewünschterrang',
+					'en-GB': 'desiredrank',
+					'en-US': 'desiredrank',
+				})
+				.setDescription('The desired rank to calculate')
+				.setDescriptionLocalizations({
+					'de': 'Der gewünschte Rang, der berechnet werden soll',
+					'en-GB': 'The desired rank to calculate',
+					'en-US': 'The desired rank to calculate',
+				})
+				.setRequired(false)
+				.setMinValue(1)
+		)
+		.addIntegerOption(option =>
+			option.setName('badges')
+				.setNameLocalizations({
+					'de': 'badges',
+					'en-GB': 'badges',
+					'en-US': 'badges',
+				})
+				.setDescription('The badges to calculate with')
+				.setDescriptionLocalizations({
+					'de': 'Die badges, mit denen berechnet werden soll',
+					'en-GB': 'The badges to calculate with',
+					'en-US': 'The badges to calculate with',
+				})
+				.setRequired(false)
+				.setMinValue(0)
+		)
+		.addIntegerOption(option =>
+			option.setName('rank')
+				.setNameLocalizations({
+					'de': 'rang',
+					'en-GB': 'rank',
+					'en-US': 'rank',
+				})
+				.setDescription('The rank to calculate with')
+				.setDescriptionLocalizations({
+					'de': 'Der Rang, mit dem berechnet werden soll',
+					'en-GB': 'The rank to calculate with',
+					'en-US': 'The rank to calculate with',
+				})
+				.setRequired(false)
+				.setMinValue(1)
+		)
+		.addStringOption(option =>
+			option.setName('formula')
+				.setNameLocalizations({
+					'de': 'formel',
+					'en-GB': 'formula',
+					'en-US': 'formula',
+				})
+				.setDescription('The formula to calculate with')
+				.setDescriptionLocalizations({
+					'de': 'Die Formel, mit der berechnet werden soll',
+					'en-GB': 'The formula to calculate with',
+					'en-US': 'The formula to calculate with',
+				})
+				.setRequired(false)
+				.setAutocomplete(true)
+		)
 		.addStringOption(option =>
 			option.setName('username')
 				.setNameLocalizations({
@@ -100,79 +165,136 @@ module.exports = {
 				})
 				.setRequired(false)
 		),
+	async autocomplete(interaction) {
+		const focusedValue = interaction.options.getFocused();
+
+		const formulas = [
+			'rank^(0.9937^(badges^2))',
+			'rank^(0.99^(badges^2))',
+			'rank^((0.9937^((badges^2)/0.75)))',
+			'Write your own formula here',
+		];
+
+		let filtered = formulas.filter(choice => choice.includes(focusedValue));
+
+		filtered = filtered.slice(0, 25);
+
+		try {
+			await interaction.respond(
+				filtered.map(choice => ({ name: choice, value: choice })),
+			);
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			return;
+		}
+	},
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		if (interaction) {
-			try {
-				await interaction.deferReply();
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
+			}
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
+			return;
+		}
+
+		let rank = interaction.options.getInteger('rank');
+		let desiredrank = interaction.options.getInteger('desiredrank');
+		let badges = interaction.options.getInteger('badges');
+
+		let formula = 'rank^(0.9937^(badges^2))';
+
+		if (interaction.options.getString('formula')) {
+			formula = interaction.options.getString('formula').toLowerCase();
+
+			if (formula.replaceAll('rank', '').replaceAll('badges', '').replace(/\W/gm, '').replace(/\d/gm, '')) {
+				return await interaction.editReply('Invalid formula');
 			}
 
-			msg = await populateMsgFromInteraction(interaction);
+			if (!formula.includes('rank') || !formula.includes('badges')) {
+				return await interaction.editReply('Your formula must include the `rank` and `badges` variables');
+			}
 
-			args = [];
+			try {
+				const parser = new Parser();
+				let expr = parser.parse(formula);
 
-			if (interaction.options._hoistedOptions) {
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					args.push(interaction.options._hoistedOptions[i].value);
-				}
+				expr.evaluate({ rank: 25000, badges: 1 });
+			} catch (error) {
+				return await interaction.editReply('Invalid formula');
 			}
 		}
 
-		const commandConfig = await getOsuUserServerMode(msg, args);
-		const commandUser = commandConfig[0];
-		const mode = commandConfig[2];
+		let usernames = [];
 
-		if (!args[0]) {//Get profile by author if no argument
+		if (interaction.options.getString('username')) {
+			usernames.push(interaction.options.getString('username'));
+		}
+
+		if (interaction.options.getString('username2')) {
+			usernames.push(interaction.options.getString('username2'));
+		}
+
+		if (interaction.options.getString('username3')) {
+			usernames.push(interaction.options.getString('username3'));
+		}
+
+		if (interaction.options.getString('username4')) {
+			usernames.push(interaction.options.getString('username4'));
+		}
+
+		if (interaction.options.getString('username5')) {
+			usernames.push(interaction.options.getString('username5'));
+		}
+
+		if (usernames.length === 0) {//Get profile by author if no argument
+			const commandUser = await DBDiscordUsers.findOne({
+				where: {
+					userId: interaction.user.id
+				},
+			});
 
 			if (commandUser && commandUser.osuUserId) {
-				getProfile(msg, interaction, commandUser.osuUserId, mode);
+				getProfile(interaction, commandUser.osuUserId, formula, rank, desiredrank, badges);
 			} else {
-				const userDisplayName = await getMessageUserDisplayname(msg);
-				getProfile(msg, interaction, userDisplayName, mode);
+				let userDisplayName = interaction.user.username;
+
+				if (interaction.member) {
+					userDisplayName = interaction.member.displayName;
+				}
+
+				getProfile(interaction, userDisplayName, formula, rank, desiredrank, badges);
 			}
 		} else {
 			//Get profiles by arguments
-			for (let i = 0; i < args.length; i++) {
-				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
+			for (let i = 0; i < usernames.length; i++) {
+				if (usernames[i].startsWith('<@') && usernames[i].endsWith('>')) {
 					logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
-						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
+						where: {
+							userId: usernames[i].replace('<@', '').replace('>', '').replace('!', '')
+						},
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getProfile(msg, interaction, discordUser.osuUserId, mode);
+						getProfile(interaction, discordUser.osuUserId, formula, rank, desiredrank, badges);
 					} else {
-						if (msg.id) {
-							return msg.reply(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
-						}
-
-						return interaction.followUp(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
+						await interaction.followUp(`\`${usernames[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
+						continue;
 					}
 				} else {
-
-					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
-						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getProfile(msg, interaction, getIDFromPotentialOsuLink(args[i]), mode, true);
-						} else {
-							getProfile(msg, interaction, getIDFromPotentialOsuLink(args[i]), mode);
-						}
-					} else {
-						getProfile(msg, interaction, getIDFromPotentialOsuLink(args[i]), mode);
-					}
+					getProfile(interaction, getIDFromPotentialOsuLink(usernames[i]), formula, rank, desiredrank, badges);
 				}
 			}
 		}
 	},
 };
 
-async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
+async function getProfile(interaction, username, formula, rank, desiredrank, badges) {
 	// eslint-disable-next-line no-undef
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -183,64 +305,99 @@ async function getProfile(msg, interaction, username, mode, noLinkedAccount) {
 
 	// eslint-disable-next-line no-undef
 	process.send('osu!API');
-	osuApi.getUser({ u: username, m: mode })
+	osuApi.getUser({ u: username, m: 0 })
 		.then(async (user) => {
-			updateOsuDetailsforUser(msg.client, user, mode);
+			updateOsuDetailsforUser(interaction.client, user, 0);
 
-			let additionalInfo = await getAdditionalOsuInfo(user.id, msg.client);
+			let additionalInfo = await getAdditionalOsuInfo(user.id, interaction.client);
 
 			let badgeAmount = additionalInfo.tournamentBadges.length;
 
-			logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers 2');
-			const discordUser = await DBDiscordUsers.findOne({
-				where: { osuUserId: user.id }
-			});
+			const parser = new Parser();
+			let expr = parser.parse(formula);
 
-			if (discordUser) {
-				discordUser.osuBadges = badgeAmount;
-				await discordUser.save();
-			} else {
-				logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers create');
-				DBDiscordUsers.create({ osuName: user.name, osuUserId: user.id });
+			let content = `${user.name} is currently rank #${humanReadable(user.pp.rank)} and has ${badgeAmount} badges.\n`;
+			content += `Using \`${formula}\` their BWS rank is currently #${humanReadable(expr.evaluate({ rank: user.pp.rank, badges: badgeAmount }))}\n`;
+			content += '``` Badges |      Rank |  BWS Rank\n';
+			content += '--------------------------------\n';
+			for (let i = 0; i < 6; i++) {
+				content += `${(badgeAmount + i).toString().padStart(7, ' ')} | ${humanReadable(user.pp.rank).padStart(9, ' ')} | ${humanReadable(Math.round(expr.evaluate({ rank: user.pp.rank, badges: badgeAmount + i }))).padStart(9, ' ')}\n`;
 			}
 
-			let BWSRank = Math.round(Math.pow(user.pp.rank, Math.pow(0.9937, Math.pow(badgeAmount, 2))));
-
-			let data = [];
-			data.push(`${user.name} is rank #${humanReadable(user.pp.rank)}`);
-			if (badgeAmount > 0) {
-				data.push(`${user.name} has ${badgeAmount} badges.`);
-				data.push(`Using \`rank^(0.9937^(badges^2))\` their BWS rank is #${humanReadable(BWSRank)}`);
-			} else {
-				data.push(`${user.name} has ${badgeAmount} badges and their rank will therefore stay the same using BWS.`);
+			if (rank) {
+				content += '--------------------------------\n';
+				content += `${badgeAmount.toString().padStart(7, ' ')} | ${humanReadable(rank).padStart(9, ' ')} | ${humanReadable(Math.round(expr.evaluate({ rank: rank, badges: badgeAmount }))).padStart(9, ' ')} | Specified rank\n`;
 			}
 
-			logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers linkedUser');
-			const linkedUser = await DBDiscordUsers.findOne({
-				where: { osuUserId: user.id }
-			});
+			if (desiredrank) {
+				content += '--------------------------------\n';
 
-			if (linkedUser && linkedUser.userId) {
-				noLinkedAccount = false;
+				let minRank = 1;
+				let maxRank = user.pp.rank;
+
+				if (rank) {
+					maxRank = rank;
+				}
+
+				let resultingRank = expr.evaluate({ rank: Math.round((maxRank + minRank) / 2), badges: badgeAmount });
+
+				while (resultingRank !== desiredrank) {
+					if (resultingRank > desiredrank) {
+						maxRank = Math.round((maxRank + minRank) / 2);
+					} else {
+						minRank = Math.round((maxRank + minRank) / 2);
+					}
+
+					resultingRank = expr.evaluate({ rank: Math.round((maxRank + minRank) / 2), badges: badgeAmount });
+				}
+
+				content += `${badgeAmount.toString().padStart(7, ' ')} | ${humanReadable(Math.round((maxRank + minRank) / 2)).padStart(9, ' ')} | ${humanReadable(Math.round(expr.evaluate({ rank: Math.round((maxRank + minRank) / 2), badges: badgeAmount }))).padStart(9, ' ')} | Specified desired rank\n`;
 			}
 
-			if (noLinkedAccount) {
-				data.push('Feel free to use </osu-link connect:1064502370710605836> to connect your account.');
+			if (badges) {
+				content += '--------------------------------\n';
+				content += `${badges.toString().padStart(7, ' ')} | ${humanReadable(user.pp.rank).padStart(9, ' ')} | ${humanReadable(Math.round(expr.evaluate({ rank: user.pp.rank, badges: badges }))).padStart(9, ' ')} | Specified badges\n`;
 			}
-			if (msg.id) {
-				return msg.reply(data.join('\n'), { split: true });
+
+			if (rank && badges) {
+				content += '--------------------------------\n';
+				content += `${badges.toString().padStart(7, ' ')} | ${humanReadable(rank).padStart(9, ' ')} | ${humanReadable(Math.round(expr.evaluate({ rank: rank, badges: badges }))).padStart(9, ' ')} | Specified rank & badges\n`;
 			}
-			return interaction.followUp(data.join('\n'), { split: true });
+
+			if (desiredrank && badges) {
+				content += '--------------------------------\n';
+
+				let minRank = 1;
+				let maxRank = user.pp.rank;
+
+				if (rank) {
+					maxRank = rank;
+				}
+
+				let resultingRank = Math.round(expr.evaluate({ rank: Math.round((maxRank + minRank) / 2), badges: badges }));
+
+				while (resultingRank !== desiredrank) {
+					if (resultingRank > desiredrank) {
+						maxRank = Math.round((maxRank + minRank) / 2);
+					} else {
+						minRank = Math.round((maxRank + minRank) / 2);
+					}
+
+					resultingRank = Math.round(expr.evaluate({ rank: Math.round((maxRank + minRank) / 2), badges: badges }));
+				}
+
+				content += `${badges.toString().padStart(7, ' ')} | ${humanReadable(Math.round((maxRank + minRank) / 2)).padStart(9, ' ')} | ${humanReadable(Math.round(expr.evaluate({ rank: Math.round((maxRank + minRank) / 2), badges: badges }))).padStart(9, ' ')} | Specified desired rank & badges\n`;
+			}
+
+			content += '```';
+
+			return await interaction.followUp(content);
 		})
 		.catch(err => {
 			if (err.message === 'Not found') {
-				if (msg.id) {
-					return msg.reply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
-				}
 				return interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 			} else {
 				console.error(err);
 			}
 		});
-
 }
