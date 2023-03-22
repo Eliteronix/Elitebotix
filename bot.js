@@ -394,7 +394,7 @@ async function resetSaveMultiMatches() {
 
 		logDatabaseQueries(2, 'bot.js DBProcessQueue');
 		const task = await DBProcessQueue.findOne({
-			attributes: ['beingExecuted', 'updatedAt'],
+			attributes: ['id', 'beingExecuted', 'updatedAt'],
 			where: {
 				task: {
 					[Op.in]: tasksToReset,

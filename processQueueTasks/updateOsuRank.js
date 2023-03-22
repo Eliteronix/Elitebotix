@@ -375,7 +375,7 @@ module.exports = {
 
 					logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBElitiriCupSignUp 1');
 					const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-						attributes: ['osuUserId'],
+						attributes: ['id', 'osuUserId'],
 						where: {
 							osuUserId: discordUser.osuUserId, tournamentName: currentElitiriCup
 						}
@@ -620,7 +620,7 @@ module.exports = {
 
 		logDatabaseQueries(2, 'processQueueTasks/updateOsuRank.js DBElitiriCupSignUp 4');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
-			attributes: ['rankAchieved', 'osuName', 'bracketName', 'osuBadges', 'osuPP', 'osuRank', 'discordTag'],
+			attributes: ['id', 'rankAchieved', 'osuName', 'bracketName', 'osuBadges', 'osuPP', 'osuRank', 'discordTag'],
 			where: {
 				osuUserId: discordUser.osuUserId, tournamentName: currentElitiriCup
 			}

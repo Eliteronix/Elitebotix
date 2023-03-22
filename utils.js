@@ -2255,7 +2255,9 @@ module.exports = {
 			if (!dbBeatmap) {
 				module.exports.logDatabaseQueries(1, 'utils.js DBOsuBeatmaps getOsuBeatmap');
 				dbBeatmap = await DBOsuBeatmaps.findOne({
-					where: { beatmapId: beatmapId, mods: modBits }
+					where: {
+						beatmapId: beatmapId, mods: modBits
+					}
 				});
 			}
 
@@ -2798,9 +2800,23 @@ module.exports = {
 
 		let savedStats = null;
 		if (completeMonth || completeWeek) {
-			//TODO: Attributes
 			module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBDuelRatingHistory');
 			savedStats = await DBDuelRatingHistory.findOne({
+				attributes: [
+					'osuDuelStarRating',
+					'osuNoModDuelStarRating',
+					'osuNoModDuelStarRatingLimited',
+					'osuHiddenDuelStarRating',
+					'osuHiddenDuelStarRatingLimited',
+					'osuHardRockDuelStarRating',
+					'osuHardRockDuelStarRatingLimited',
+					'osuDoubleTimeDuelStarRating',
+					'osuDoubleTimeDuelStarRatingLimited',
+					'osuFreeModDuelStarRating',
+					'osuFreeModDuelStarRatingLimited',
+					'osuDuelProvisional',
+					'osuDuelOutdated'
+				],
 				where: {
 					osuUserId: input.osuUserId,
 					year: endDate.getUTCFullYear(),
@@ -2827,9 +2843,24 @@ module.exports = {
 			return duelRatings;
 		}
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBDiscordUsers savedStats');
 		let discordUser = await DBDiscordUsers.findOne({
+			attributes: [
+				'lastDuelRatingUpdate',
+				'osuDuelStarRating',
+				'osuNoModDuelStarRating',
+				'osuNoModDuelStarRatingLimited',
+				'osuHiddenDuelStarRating',
+				'osuHiddenDuelStarRatingLimited',
+				'osuHardRockDuelStarRating',
+				'osuHardRockDuelStarRatingLimited',
+				'osuDoubleTimeDuelStarRating',
+				'osuDoubleTimeDuelStarRatingLimited',
+				'osuFreeModDuelStarRating',
+				'osuFreeModDuelStarRatingLimited',
+				'osuDuelProvisional',
+				'osuDuelOutdated'
+			],
 			where: {
 				osuUserId: input.osuUserId
 			}
@@ -2854,10 +2885,19 @@ module.exports = {
 			return duelRatings;
 		}
 
-		//TODO: Attributes
 		//Get the tournament data either limited by the date
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores getUserDuelStarRating');
 		userScores = await DBOsuMultiScores.findAll({
+			attributes: [
+				'gameId',
+				'beatmapId',
+				'score',
+				'matchId',
+				'matchName',
+				'matchStartDate',
+				'gameRawMods',
+				'rawMods',
+			],
 			where: {
 				osuUserId: input.osuUserId,
 				tourneyMatch: true,
@@ -2936,9 +2976,19 @@ module.exports = {
 				}
 			}
 
-			//TODO: Attributes
 			module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBOsuBeatmaps beatmaps');
 			let beatmaps = await DBOsuBeatmaps.findAll({
+				attributes: [
+					'beatmapId',
+					'mods',
+					'starRating',
+					'approvalStatus',
+					'popular',
+					'approachRate',
+					'circleSize',
+					'updatedAt',
+					'maxCombo',
+				],
 				where: {
 					beatmapId: {
 						[Op.in]: userMapIds
@@ -3178,9 +3228,16 @@ module.exports = {
 		newEndDate.setUTCSeconds(0);
 		newEndDate.setUTCMilliseconds(-1);
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBDuelRatingHistory lastMonthStats');
 		let lastMonthStats = await DBDuelRatingHistory.findOne({
+			attributes: [
+				'osuDuelProvisional',
+				'osuNoModDuelStarRating',
+				'osuHiddenDuelStarRating',
+				'osuHardRockDuelStarRating',
+				'osuDoubleTimeDuelStarRating',
+				'osuFreeModDuelStarRating'
+			],
 			where: {
 				osuUserId: input.osuUserId,
 				year: newEndDate.getUTCFullYear(),
@@ -3309,10 +3366,29 @@ module.exports = {
 				});
 			}
 
-			//TODO: Attributes
 			//Log the values in the discords if they changed and the user is connected to the bot
 			module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getUserDuelStarRating');
 			let discordUser = await DBDiscordUsers.findOne({
+				attributes: [
+					'id',
+					'userId',
+					'osuName',
+					'osuUserId',
+					'osuDuelStarRating',
+					'osuNoModDuelStarRating',
+					'osuNoModDuelStarRatingLimited',
+					'osuHiddenDuelStarRating',
+					'osuHiddenDuelStarRatingLimited',
+					'osuHardRockDuelStarRating',
+					'osuHardRockDuelStarRatingLimited',
+					'osuDoubleTimeDuelStarRating',
+					'osuDoubleTimeDuelStarRatingLimited',
+					'osuFreeModDuelStarRating',
+					'osuFreeModDuelStarRatingLimited',
+					'osuDuelProvisional',
+					'osuDuelOutdated',
+					'lastDuelRatingUpdate',
+				],
 				where: {
 					osuUserId: input.osuUserId
 				}
@@ -3408,9 +3484,9 @@ module.exports = {
 								}
 							}
 
-							//TODO: Attributes
 							module.exports.logDatabaseQueries(2, 'utils.js DBOsuGuildTrackers getUserDuelStarRating');
 							let guildTrackers = await DBOsuGuildTrackers.findAll({
+								attributes: ['guildId', 'channelId'],
 								where: {
 									osuUserId: discordUser.osuUserId,
 									duelRating: true,
@@ -3530,9 +3606,19 @@ module.exports = {
 		duelRatings.freeMod = null;
 		duelRatings.provisional = true;
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getUserDuelRatings backup');
 		discordUser = await DBDiscordUsers.findOne({
+			attributes: [
+				'id',
+				'osuDuelStarRating',
+				'osuNoModDuelStarRating',
+				'osuHiddenDuelStarRating',
+				'osuHardRockDuelStarRating',
+				'osuDoubleTimeDuelStarRating',
+				'osuFreeModDuelStarRating',
+				'osuDuelProvisional',
+				'lastDuelRatingUpdate',
+			],
 			where: {
 				osuUserId: input.osuUserId
 			}
@@ -4124,7 +4210,6 @@ module.exports = {
 	async cleanUpDuplicateEntries(manually) {
 		const Sequelize = require('sequelize');
 		// Automatically add missing players to the database
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries existingUsers');
 		let existingUsers = await DBDiscordUsers.findAll({
 			attributes: ['osuUserId']
@@ -4135,7 +4220,6 @@ module.exports = {
 		// Remove null values
 		existingUsers = existingUsers.filter(user => user !== null);
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries missingUsers');
 		let missingUsers = await DBOsuMultiScores.findAll({
 			attributes: ['osuUserId'],
@@ -4270,7 +4354,7 @@ module.exports = {
 		for (let i = 0; i < duplicates.length; i++) {
 			module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries osuUserId 2');
 			let results = await DBDiscordUsers.findAll({
-				attributes: ['userId', 'osuUserId', 'osuName', 'updatedAt'],
+				attributes: ['id', 'userId', 'osuUserId', 'osuName', 'updatedAt'],
 				where: {
 					osuUserId: duplicates[i].osuUserId
 				},
@@ -4484,7 +4568,6 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log(`Cleaned up ${deleted} duplicate scores`);
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries wrong mode scores');
 		let beatmapsOtherModes = await DBOsuBeatmaps.findAll({
 			attributes: ['beatmapId', 'mode'],
