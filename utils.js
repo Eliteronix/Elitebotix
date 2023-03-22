@@ -4177,7 +4177,6 @@ module.exports = {
 			return;
 		}
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries mostplayed');
 		let mostplayed = await DBOsuMultiScores.findAll({
 			attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
@@ -4251,7 +4250,6 @@ module.exports = {
 		// Remove duplicate discorduser entries
 		let deleted = 0;
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries osuUserId 1');
 		let duplicates = await DBDiscordUsers.findAll({
 			attributes: ['osuUserId', [Sequelize.fn('COUNT', Sequelize.col('osuUserId')), 'amount']],
@@ -4270,9 +4268,9 @@ module.exports = {
 		duplicates = duplicates.filter(user => user.dataValues.amount > 1);
 
 		for (let i = 0; i < duplicates.length; i++) {
-			//TODO: Attributes
 			module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries osuUserId 2');
 			let results = await DBDiscordUsers.findAll({
+				attributes: ['userId', 'osuUserId', 'osuName', 'updatedAt'],
 				where: {
 					osuUserId: duplicates[i].osuUserId
 				},
@@ -4607,9 +4605,9 @@ module.exports = {
 		return true;
 	},
 	async getDerankStats(discordUser) {
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getDerankStats osuPP');
 		let ppDiscordUsers = await DBDiscordUsers.findAll({
+			attributes: ['osuPP', 'osuRank'],
 			where: {
 				osuUserId: {
 					[Op.gt]: 0
@@ -4631,9 +4629,9 @@ module.exports = {
 
 		ppDiscordUsers.sort((a, b) => parseFloat(b.osuPP) - parseFloat(a.osuPP));
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getDerankStats osuDuelStarRating');
 		let duelDiscordUsers = await DBDiscordUsers.findAll({
+			attributes: ['osuDuelStarRating'],
 			where: {
 				osuUserId: {
 					[Op.gt]: 0
@@ -5007,9 +5005,9 @@ module.exports = {
 		let threeMonthsAgo = new Date();
 		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(4, 'utils.js createDuelMatch DBOsuMultiScores player scores');
 		const playerScores = await DBOsuMultiScores.findAll({
+			attributes: ['osuUserId', 'beatmapId', 'gameStartDate'],
 			where: {
 				osuUserId: {
 					[Op.in]: users.map(user => user.osuUserId),
