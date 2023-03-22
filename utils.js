@@ -3684,10 +3684,12 @@ module.exports = {
 		if (module.exports.wrongCluster(client)) {
 			return;
 		}
+
 		bancho.sentRequests = [];
-		//TODO: Attributes
+
 		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers twitchConnect');
 		let twitchSyncUsers = await DBDiscordUsers.findAll({
+			attributes: ['twitchName'],
 			where: {
 				twitchName: {
 					[Op.not]: null,
@@ -7838,9 +7840,9 @@ async function messageUserWithRetries(user, interaction, content) {
 }
 
 async function getOsuMapInfo(dbBeatmap) {
-	//TODO: Attributes
 	module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiScores getOsuMapInfo');
 	const mapScores = await DBOsuMultiScores.findAll({
+		attributes: ['matchName'],
 		where: {
 			beatmapId: dbBeatmap.beatmapId,
 			tourneyMatch: true,
