@@ -458,11 +458,51 @@ module.exports = {
 		return outputUser;
 	},
 	updateOsuDetailsforUser: async function (client, user, mode) {
-		//TODO: Attributes
 		module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers updateOsuDetailsforUser');
 		//get discordUser from db to update pp and rank
 		DBDiscordUsers.findOne({
-			where: { osuUserId: user.id },
+			attributes: [
+				'id',
+				'osuUserId',
+				'osuName',
+				'country',
+				'osuPP',
+				'osuPlayCount',
+				'oldOsuRank',
+				'lastOsuPPChange',
+				'lastOsuPlayCountChange',
+				'nextOsuPPUpdate',
+				'osuRank',
+				'osuRankedScore',
+				'osuTotalScore',
+				'taikoPP',
+				'lastTaikoPPChange',
+				'nextTaikoPPUpdate',
+				'taikoPlayCount',
+				'lastTaikoPlayCountChange',
+				'taikoRank',
+				'taikoRankedScore',
+				'taikoTotalScore',
+				'catchPP',
+				'lastCatchPPChange',
+				'nextCatchPPUpdate',
+				'catchPlayCount',
+				'lastCatchPlayCountChange',
+				'catchRank',
+				'catchRankedScore',
+				'catchTotalScore',
+				'maniaPP',
+				'lastManiaPPChange',
+				'nextManiaPPUpdate',
+				'maniaPlayCount',
+				'lastManiaPlayCountChange',
+				'maniaRank',
+				'maniaRankedScore',
+				'maniaTotalScore',
+			],
+			where: {
+				osuUserId: user.id
+			},
 		})
 			.then(async (discordUser) => {
 				if (discordUser && discordUser.osuUserId) {
@@ -5709,9 +5749,9 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 				const { getOsuPlayerName, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
-				//TODO: Attributes
 				logDatabaseQueries(4, 'utils.js DBProcessQueue existingQueueTasks');
 				let existingQueueTasks = await DBProcessQueue.findAll({
+					attributes: ['additions', 'createdAt'],
 					where: {
 						task: 'duelQueue1v1',
 					},
@@ -5775,9 +5815,8 @@ module.exports = {
 				}
 
 				for (let i = 0; i < uniqueTopics.length; i++) {
-					//TODO: Attributes
 					module.exports.logDatabaseQueries(2, 'utils.js DBOsuForumPosts existingForumPost');
-					let existingForumPost = await DBOsuForumPosts.findOne({
+					let existingForumPost = await DBOsuForumPosts.count({
 						where: {
 							forumPost: uniqueTopics[i]
 						}
@@ -6035,11 +6074,24 @@ module.exports = {
 			rankedStatus = ['Ranked', 'Approved'];
 		}
 
+		const beatmapAttributes = [
+			'beatmapId',
+			'mods',
+			'starRating',
+			'approvalStatus',
+			'popular',
+			'approachRate',
+			'circleSize',
+			'updatedAt',
+			'maxCombo',
+			'drainLength',
+		];
+
 		let beatmaps = null;
 		if (modPool === 'NM') {
-			//TODO: Attributes
 			module.exports.logDatabaseQueries(4, 'utils.js getValidTournamentBeatmap NM');
 			beatmaps = await DBOsuBeatmaps.findAll({
+				attributes: beatmapAttributes,
 				where: {
 					noModMap: true,
 					mode: mode,
@@ -6085,11 +6137,11 @@ module.exports = {
 				limit: 2500,
 			});
 		} else if (modPool === 'HD') {
-			//TODO: Attributes
 			module.exports.logDatabaseQueries(4, 'utils.js getValidTournamentBeatmap HD');
 			let HDLowerBound = lowerBound - 0.8;
 			let HDUpperBound = upperBound - 0.1;
 			beatmaps = await DBOsuBeatmaps.findAll({
+				attributes: beatmapAttributes,
 				where: {
 					hiddenMap: true,
 					mode: mode,
@@ -6135,9 +6187,9 @@ module.exports = {
 				limit: 2500,
 			});
 		} else if (modPool === 'HR') {
-			//TODO: Attributes
 			module.exports.logDatabaseQueries(4, 'utils.js getValidTournamentBeatmap HR');
 			beatmaps = await DBOsuBeatmaps.findAll({
+				attributes: beatmapAttributes,
 				where: {
 					hardRockMap: true,
 					mode: mode,
@@ -6183,9 +6235,9 @@ module.exports = {
 				limit: 2500,
 			});
 		} else if (modPool === 'DT') {
-			//TODO: Attributes
 			module.exports.logDatabaseQueries(4, 'utils.js getValidTournamentBeatmap DT');
 			beatmaps = await DBOsuBeatmaps.findAll({
+				attributes: beatmapAttributes,
 				where: {
 					doubleTimeMap: true,
 					mode: mode,
@@ -6231,9 +6283,9 @@ module.exports = {
 				limit: 2500,
 			});
 		} else if (modPool === 'FM') {
-			//TODO: Attributes
 			module.exports.logDatabaseQueries(4, 'utils.js getValidTournamentBeatmap FM');
 			beatmaps = await DBOsuBeatmaps.findAll({
+				attributes: beatmapAttributes,
 				where: {
 					freeModMap: true,
 					mode: mode,
