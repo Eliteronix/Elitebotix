@@ -10,9 +10,9 @@ module.exports = {
 		let starRating = parseFloat(args[1]);
 		let difficultyArea = parseFloat(args[2]);
 
-		//TODO: Attributes
 		logDatabaseQueries(2, 'processQueueTasks/duelQueue1v1.js DBProcessQueue');
 		let otherQueueTasks = await DBProcessQueue.findAll({
+			attributes: ['id', 'createdAt', 'additions'],
 			where: {
 				task: 'duelQueue1v1',
 			}
@@ -57,17 +57,29 @@ module.exports = {
 				}
 			}
 
-			//TODO: Attributes
+			const userAttributes = [
+				'userId',
+				'osuUserId',
+				'osuDuelStarRating',
+				'osuName',
+				'osuNoModDuelStarRating',
+				'osuHiddenDuelStarRating',
+				'osuHardRockDuelStarRating',
+				'osuDoubleTimeDuelStarRating',
+				'osuFreeModDuelStarRating'
+			];
+
 			logDatabaseQueries(2, 'processQueueTasks/duelQueue1v1.js DBDiscordUsers 1');
 			let firstUser = await DBDiscordUsers.findOne({
+				attributes: userAttributes,
 				where: {
 					osuUserId: currentUser
 				}
 			});
 
-			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/duelQueue1v1.js DBDiscordUsers 2');
 			let secondUser = await DBDiscordUsers.findOne({
+				attributes: userAttributes,
 				where: {
 					osuUserId: otherQueueTask.additions.split(';')[0]
 				}
