@@ -646,7 +646,7 @@ module.exports = {
 
 		let message = await interaction.channel.send('Creating the bingo card...');
 
-		await refreshMessage(message, mappool, lastRefresh);
+		await refreshMessage(message, mappool, lastRefresh, randomString);
 
 		let matchStart = new Date();
 
@@ -657,7 +657,7 @@ module.exports = {
 
 		refreshCollector.on('collect', async (reaction, user) => {
 			if (reaction.emoji.name === '🔄' && allUsers.includes(user.id)) {
-				await refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh);
+				await refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh, randomString);
 			}
 
 			// Remove the reaction unless its the bot
@@ -675,7 +675,7 @@ module.exports = {
 		// Refresh the message every 30 seconds
 		let interval = setInterval(async () => {
 			if (lastRefresh.date.getTime() + 30000 < new Date().getTime()) {
-				await refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh);
+				await refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh, randomString);
 
 				let winningTeam = await checkWin(mappool);
 				if (winningTeam) {
@@ -684,9 +684,6 @@ module.exports = {
 
 					//Stop the interval
 					clearInterval(interval);
-					if (interaction.client.bingoMatches.includes(randomString)) {
-						interaction.client.bingoMatches.splice(interaction.client.bingoMatches.indexOf(randomString), 1);
-					}
 				} else if (lastRefresh.lastScore.getTime() + 1800000 < new Date().getTime()) {
 					// Stop the interval if the match has been going on for more than 30 minutes without scores
 					refreshCollector.stop();
@@ -694,16 +691,13 @@ module.exports = {
 
 					//Stop the interval
 					clearInterval(interval);
-					if (interaction.client.bingoMatches.includes(randomString)) {
-						interaction.client.bingoMatches.splice(interaction.client.bingoMatches.indexOf(randomString), 1);
-					}
 				}
 			}
 		}, 5000);
 	},
 };
 
-async function refreshMessage(message, mappool, lastRefresh) {
+async function refreshMessage(message, mappool, lastRefresh, randomString) {
 	lastRefresh.date = new Date();
 	let reply = `\n\nLast updated: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:R>`;
 
@@ -845,6 +839,10 @@ async function refreshMessage(message, mappool, lastRefresh) {
 	try {
 		await message.fetch();
 		await message.edit({ content: reply, files: [bingoCard] });
+
+		if (message.client.bingoMatches.includes(randomString)) {
+			message.client.bingoMatches.splice(message.client.bingoMatches.indexOf(randomString), 1);
+		}
 	} catch (e) {
 		if (e.message !== 'Unknown Message') {
 			console.error(e);
@@ -852,7 +850,7 @@ async function refreshMessage(message, mappool, lastRefresh) {
 	}
 }
 
-async function refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh) {
+async function refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh, randomString) {
 
 	lastRefresh.date = new Date();
 
@@ -987,7 +985,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 		await pause(1000);
 	}
 
-	await refreshMessage(message, mappool, lastRefresh);
+	await refreshMessage(message, mappool, lastRefresh, randomString);
 
 	lastRefresh.date = new Date();
 }
