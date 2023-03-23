@@ -234,7 +234,9 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					}
 				}
 			});
-	} else {
+	}
+	// else
+	if (true) {
 		let logVerificationProcess = false;
 
 		// Verify matches instead
