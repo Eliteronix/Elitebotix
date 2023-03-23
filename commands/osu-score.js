@@ -257,10 +257,12 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < args.length; i++) {
 				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
-					//TODO: add attributes and logdatabasequeries
 					logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
-						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
+						attributes: ['osuUserId'],
+						where: {
+							userId: args[i].replace('<@', '').replace('>', '').replace('!', '')
+						},
 					});
 
 					if (discordUser && discordUser.osuUserId) {
@@ -296,10 +298,12 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 	});
 
 	if (server === 'bancho') {
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers 2');
 		const discordUser = await DBDiscordUsers.findOne({
-			where: { osuUserId: username }
+			attributes: ['osuName', 'osuUserId'],
+			where: {
+				osuUserId: username
+			}
 		});
 
 		if (discordUser && discordUser.osuUserId) {
@@ -372,10 +376,12 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						let sentMessage;
 
-						//TODO: add attributes and logdatabasequeries
 						logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers 3');
 						const linkedUser = await DBDiscordUsers.findOne({
-							where: { osuUserId: user.id }
+							attributes: ['userId'],
+							where: {
+								osuUserId: user.id
+							}
 						});
 
 						if (linkedUser && linkedUser.userId) {
@@ -599,10 +605,12 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 			let sentMessage;
 
-			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-score.js DBDiscordUsers 4');
 			const linkedUser = await DBDiscordUsers.findOne({
-				where: { osuUserId: osuUser.id }
+				attributes: ['userId'],
+				where: {
+					osuUserId: osuUser.id
+				}
 			});
 
 			if (linkedUser && linkedUser.userId) {

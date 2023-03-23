@@ -702,9 +702,19 @@ module.exports = {
 					let starRating = 4;
 					let discordUser = null;
 
-					//TODO: Attributes
 					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers');
 					discordUser = await DBDiscordUsers.findOne({
+						attributes: [
+							'osuUserId',
+							'osuName',
+							'userId',
+							'osuDuelStarRating',
+							'osuNoModDuelStarRating',
+							'osuHiddenDuelStarRating',
+							'osuHardRockDuelStarRating',
+							'osuDoubleTimeDuelStarRating',
+							'osuFreeModDuelStarRating',
+						],
 						where: {
 							userId: allUsers[i],
 							osuVerified: true
@@ -792,10 +802,10 @@ module.exports = {
 					}
 				}
 
-				//TODO: Attributes
 				//Remove the users from the queue
 				logDatabaseQueries(4, 'commands/osu-duel.js DBProcessQueue existingQueueTasks');
 				let existingQueueTasks = await DBProcessQueue.findAll({
+					attributes: ['id', 'additions'],
 					where: {
 						task: 'duelQueue1v1',
 					},
@@ -857,10 +867,12 @@ module.exports = {
 				if (username) {
 					//Get the user by the argument given
 					if (username.startsWith('<@') && username.endsWith('>')) {
-						//TODO: Attributes
 						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating');
 						const discordUser = await DBDiscordUsers.findOne({
-							where: { userId: username.replace('<@', '').replace('>', '').replace('!', '') },
+							attributes: ['osuUserId', 'osuName'],
+							where: {
+								userId: username.replace('<@', '').replace('>', '').replace('!', '')
+							},
 						});
 
 						if (discordUser && discordUser.osuUserId) {
@@ -1232,9 +1244,9 @@ module.exports = {
 				}
 
 				//Draw the Player derank rank
-				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating 2');
 				let discordUser = await DBDiscordUsers.findOne({
+					attributes: ['osuPP', 'osuDuelStarRating', 'osuUserId', 'osuName'],
 					where: {
 						osuUserId: osuUser.id
 					}
@@ -1313,9 +1325,23 @@ module.exports = {
 
 						members = members.map(member => member.id);
 
-						//TODO: Attributes
 						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard');
 						discordUsers = await DBDiscordUsers.findAll({
+							attributes: [
+								'userId',
+								'osuUserId',
+								'osuName',
+								'osuVerified',
+								'osuDuelStarRating',
+								'osuNoModDuelStarRating',
+								'osuHiddenDuelStarRating',
+								'osuHardRockDuelStarRating',
+								'osuDoubleTimeDuelStarRating',
+								'osuFreeModDuelStarRating',
+								'osuDuelProvisional',
+								'osuDuelOutdated',
+								'osuRank',
+							],
 							where: {
 								userId: {
 									[Op.in]: members
@@ -1335,9 +1361,23 @@ module.exports = {
 						}
 					}
 				} else {
-					//TODO: Attributes
 					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard 2');
 					discordUsers = await DBDiscordUsers.findAll({
+						attributes: [
+							'userId',
+							'osuUserId',
+							'osuName',
+							'osuVerified',
+							'osuDuelStarRating',
+							'osuNoModDuelStarRating',
+							'osuHiddenDuelStarRating',
+							'osuHardRockDuelStarRating',
+							'osuDoubleTimeDuelStarRating',
+							'osuFreeModDuelStarRating',
+							'osuDuelProvisional',
+							'osuDuelOutdated',
+							'osuRank',
+						],
 						where: {
 							osuUserId: {
 								[Op.not]: null,
@@ -1562,10 +1602,12 @@ module.exports = {
 				if (interaction.options._hoistedOptions[0]) {
 					//Get the user by the argument given
 					if (interaction.options._hoistedOptions[0].value.startsWith('<@') && interaction.options._hoistedOptions[0].value.endsWith('>')) {
-						//TODO: Attributes
 						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers data');
 						const discordUser = await DBDiscordUsers.findOne({
-							where: { userId: interaction.options._hoistedOptions[0].value.replace('<@', '').replace('>', '').replace('!', '') },
+							attributes: ['osuUserId', 'osuName'],
+							where: {
+								userId: interaction.options._hoistedOptions[0].value.replace('<@', '').replace('>', '').replace('!', '')
+							},
 						});
 
 						if (discordUser && discordUser.osuUserId) {
@@ -1954,9 +1996,9 @@ module.exports = {
 
 						members = members.map(member => member.id);
 
-						//TODO: Attributes
 						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread');
 						discordUsers = discordUsers = await DBDiscordUsers.findAll({
+							attributes: ['userId', 'osuUserId', 'osuName', 'osuVerified', 'osuDuelStarRating'],
 							where: {
 								userId: {
 									[Op.in]: members
@@ -1979,9 +2021,9 @@ module.exports = {
 						}
 					}
 				} else {
-					//TODO: Attributes
 					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread 2');
 					discordUsers = await DBDiscordUsers.findAll({
+						attributes: ['userId', 'osuUserId', 'osuName', 'osuVerified', 'osuDuelStarRating'],
 						where: {
 							osuUserId: {
 								[Op.not]: null,
@@ -2108,9 +2150,9 @@ module.exports = {
 					enable = true;
 				}
 
-				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-updates');
 				let discordUser = await DBDiscordUsers.findOne({
+					attributes: ['id', 'osuUserId', 'osuDuelRatingUpdates'],
 					where: {
 						userId: interaction.user.id,
 					},
@@ -2160,9 +2202,9 @@ module.exports = {
 					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:1064502370710605836>.');
 				}
 
-				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers queue1v1 1');
 				let existingQueueTasks = await DBProcessQueue.findAll({
+					attributes: ['additions'],
 					where: {
 						task: 'duelQueue1v1',
 					},
@@ -2193,10 +2235,10 @@ module.exports = {
 					}
 				}
 
-				//TODO: Attributes
 				//Check again in case the cooldown had passed and it was triggered again
 				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers queue1v1 2');
 				existingQueueTasks = await DBProcessQueue.findAll({
+					attributes: ['additions'],
 					where: {
 						task: 'duelQueue1v1',
 					},
@@ -2252,9 +2294,9 @@ module.exports = {
 					return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:1064502370710605836>.');
 				}
 
-				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers queue1v1-leave');
 				let existingQueueTasks = await DBProcessQueue.findAll({
+					attributes: ['id', 'additions'],
 					where: {
 						task: 'duelQueue1v1',
 					},
