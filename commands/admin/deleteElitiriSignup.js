@@ -5,9 +5,9 @@ module.exports = {
 	name: 'deleteElitiriSignup',
 	usage: '<id>',
 	async execute(interaction) {
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/admin/deleteElitiriSignup.js DBElitiriCupSignUp');
 		let DBElitiriSignup = await DBElitiriCupSignUp.findOne({
+			attributes: ['id'],
 			where: {
 				id: interaction.options.getString('argument')
 			}

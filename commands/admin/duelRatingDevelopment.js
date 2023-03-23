@@ -12,11 +12,11 @@ module.exports = {
 	async execute(interaction) {
 		let discordUser = null;
 		let username = null;
-		if (interaction.options.getString('arguments')) {
-			username = interaction.options.getString('arguments');
-			//TODO: add attributes and logdatabasequeries
+		if (interaction.options.getString('argument')) {
+			username = interaction.options.getString('argument');
 			logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers duelRatingDevelopment 1');
 			discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId', 'osuName'],
 				where: {
 					osuUserId: {
 						[Op.ne]: null
@@ -29,9 +29,9 @@ module.exports = {
 				}
 			});
 		} else {
-			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers duelRatingDevelopment 2');
 			discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId', 'osuName'],
 				where: {
 					userId: interaction.user.id,
 					osuUserId: {
@@ -79,9 +79,9 @@ module.exports = {
 
 		let processingMessage = await interaction.editReply('Processing...');
 
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiScores duelRatingDevelopment');
 		let oldestScore = await DBOsuMultiScores.findOne({
+			attributes: ['gameEndDate'],
 			where: {
 				osuUserId: osuUser.osuUserId,
 				tourneyMatch: true,

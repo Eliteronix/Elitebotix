@@ -5,9 +5,24 @@ module.exports = {
 	name: 'removeOsuUserConnection',
 	usage: '<osuUserId>',
 	async execute(interaction) {
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/admin/removeOsuUserConnection.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
+			attributes: [
+				'id',
+				'osuUserId',
+				'osuVerificationCode',
+				'osuVerified',
+				'osuName',
+				'osuBadges',
+				'osuPP',
+				'osuRank',
+				'taikoPP',
+				'taikoRank',
+				'catchPP',
+				'catchRank',
+				'maniaPP',
+				'maniaRank'
+			],
 			where: {
 				osuUserId: interaction.options.getString('argument'),
 				osuVerified: true
