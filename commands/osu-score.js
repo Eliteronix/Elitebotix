@@ -493,9 +493,30 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 		process.send('osu!API');
 		const osuUser = await osuApi.getUser({ u: username, m: mode });
 
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-score.js DBOsuMultiScores');
 		const beatmapScores = await DBOsuMultiScores.findAll({
+			attributes: [
+				'id',
+				'score',
+				'gameRawMods',
+				'rawMods',
+				'teamType',
+				'pp',
+				'beatmapId',
+				'createdAt',
+				'gameStartDate',
+				'osuUserId',
+				'count50',
+				'count100',
+				'count300',
+				'countGeki',
+				'countKatu',
+				'countMiss',
+				'maxCombo',
+				'perfect',
+				'matchName',
+				'mode',
+			],
 			where: {
 				beatmapId: beatmap.beatmapId,
 				scoringType: 'Score v2'

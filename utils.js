@@ -6543,9 +6543,29 @@ module.exports = {
 
 				let recentActivity = false;
 
-				//TODO: Attributes
 				logDatabaseQueries(2, 'utils.js DBOsuGuildTrackers processOsuTrack');
 				let guildTrackers = await DBOsuGuildTrackers.findAll({
+					attributes: [
+						'id',
+						'guildId',
+						'channelId',
+						'osuUserId',
+						'medals',
+						'osuLeaderboard',
+						'taikoLeaderboard',
+						'catchLeaderboard',
+						'maniaLeaderboard',
+						'osuTopPlays',
+						'taikoTopPlays',
+						'catchTopPlays',
+						'maniaTopPlays',
+						'tournamentTopPlays',
+						'showAmeobeaUpdates',
+						'osuAmeobea',
+						'taikoAmeobea',
+						'catchAmeobea',
+						'maniaAmeobea',
+					],
 					where: {
 						osuUserId: osuUser.osuUserId,
 					},
@@ -6888,9 +6908,30 @@ module.exports = {
 					if (guildTrackers[i].tournamentTopPlays) {
 						if (guildTrackers[i].tournamentNumberTopPlays === undefined) {
 							//Get all scores from tournaments
-							//TODO: Attributes
 							logDatabaseQueries(2, 'utils.js DBOsuMultiScores processOsuTrack tournamentTopPlays');
 							let multiScores = await DBOsuMultiScores.findAll({
+								attributes: [
+									'id',
+									'score',
+									'gameRawMods',
+									'rawMods',
+									'teamType',
+									'pp',
+									'beatmapId',
+									'createdAt',
+									'gameStartDate',
+									'osuUserId',
+									'count50',
+									'count100',
+									'count300',
+									'countGeki',
+									'countKatu',
+									'countMiss',
+									'maxCombo',
+									'perfect',
+									'matchName',
+									'mode',
+								],
 								where: {
 									osuUserId: osuUser.osuUserId,
 									mode: 'Standard',

@@ -187,9 +187,30 @@ module.exports = {
 				}
 
 				//Get all scores from tournaments
-				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiScores');
 				let multiScores = await DBOsuMultiScores.findAll({
+					attributes: [
+						'id',
+						'score',
+						'gameRawMods',
+						'rawMods',
+						'teamType',
+						'pp',
+						'beatmapId',
+						'createdAt',
+						'gameStartDate',
+						'osuUserId',
+						'count50',
+						'count100',
+						'count300',
+						'countGeki',
+						'countKatu',
+						'countMiss',
+						'maxCombo',
+						'perfect',
+						'matchName',
+						'mode',
+					],
 					where: {
 						osuUserId: osuUserId,
 						mode: 'Standard',

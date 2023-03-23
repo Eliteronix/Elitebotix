@@ -342,10 +342,12 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < args.length; i++) {
 				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
-					//TODO: add attributes and logdatabasequeries
 					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
-						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
+						attributes: ['osuUserId'],
+						where: {
+							userId: args[i].replace('<@', '').replace('>', '').replace('!', '')
+						},
 					});
 
 					if (discordUser && discordUser.osuUserId) {
@@ -432,10 +434,12 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				if (tracking) {
 					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
 				} else {
-					//TODO: add attributes and logdatabasequeries
 					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 2');
 					const linkedUser = await DBDiscordUsers.findOne({
-						where: { osuUserId: user.id }
+						attributes: ['userId'],
+						where: {
+							osuUserId: user.id
+						}
 					});
 
 					if (linkedUser && linkedUser.userId) {
@@ -587,10 +591,12 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				if (tracking) {
 					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
 				} else {
-					//TODO: add attributes and logdatabasequeries
 					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 3');
 					const linkedUser = await DBDiscordUsers.findOne({
-						where: { osuUserId: user.id }
+						attributes: ['userId'],
+						where: {
+							osuUserId: user.id
+						}
 					});
 
 					if (linkedUser && linkedUser.userId) {
@@ -757,9 +763,30 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		}
 
 		//Get all scores from tournaments
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores 1');
 		let multiScores = await DBOsuMultiScores.findAll({
+			attributes: [
+				'id',
+				'score',
+				'gameRawMods',
+				'rawMods',
+				'teamType',
+				'pp',
+				'beatmapId',
+				'createdAt',
+				'gameStartDate',
+				'osuUserId',
+				'count50',
+				'count100',
+				'count300',
+				'countGeki',
+				'countKatu',
+				'countMiss',
+				'maxCombo',
+				'perfect',
+				'matchName',
+				'mode',
+			],
 			where: {
 				osuUserId: user.id,
 				mode: modeName,
@@ -815,8 +842,18 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		let unrankedPlayCounter = 1;
 		let rankedPlayCounter = 1;
 
-		//TODO: add attributes and logdatabasequeries
+		logDatabaseQueries(4, 'commands/osu-top.js DBOsuBeatmaps 1');
 		let dbBeatmaps = await DBOsuBeatmaps.findAll({
+			attributes: [
+				'beatmapId',
+				'beatmapsetId',
+				'approvalStatus',
+				'mods',
+				'updatedAt',
+				'starRating',
+				'maxCombo',
+				'mode',
+			],
 			where: {
 				beatmapId: {
 					[Op.in]: multiScores.map(score => score.beatmapId)
@@ -1134,9 +1171,10 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 
 	//Write the tournament pp
 	if (server === 'tournaments') {
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 4');
-		let discordUsers = await DBDiscordUsers.findAll();
+		let discordUsers = await DBDiscordUsers.findAll({
+			attributes: ['osuPP', 'taikoPP', 'catchPP', 'maniaPP', 'osuRank'],
+		});
 
 		//Find the closest users to the PP values
 		let closestUnrankedPPUser = discordUsers[0];

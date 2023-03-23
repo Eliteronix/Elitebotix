@@ -261,9 +261,30 @@ module.exports = {
 				}
 			}
 		} else if (server === 'tournaments') {
-			//TODO: add attributes
 			logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBOsuMultiScores');
 			let multiScores = await DBOsuMultiScores.findAll({
+				attributes: [
+					'id',
+					'score',
+					'gameRawMods',
+					'rawMods',
+					'teamType',
+					'pp',
+					'beatmapId',
+					'createdAt',
+					'gameStartDate',
+					'osuUserId',
+					'count50',
+					'count100',
+					'count300',
+					'countGeki',
+					'countKatu',
+					'countMiss',
+					'maxCombo',
+					'perfect',
+					'matchName',
+					'mode',
+				],
 				where: {
 					beatmapId: dbBeatmap.beatmapId,
 					scoringType: 'Score v2',

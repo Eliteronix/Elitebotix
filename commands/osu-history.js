@@ -179,9 +179,34 @@ module.exports = {
 			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches.`);
 		}
 
-		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 2');
 		let multiScores = await DBOsuMultiScores.findAll({
+			attributes: [
+				'id',
+				'score',
+				'gameRawMods',
+				'rawMods',
+				'teamType',
+				'pp',
+				'beatmapId',
+				'createdAt',
+				'gameStartDate',
+				'osuUserId',
+				'count50',
+				'count100',
+				'count300',
+				'countGeki',
+				'countKatu',
+				'countMiss',
+				'maxCombo',
+				'perfect',
+				'matchName',
+				'mode',
+				'matchId',
+				'gameId',
+				'matchStartDate',
+				'team',
+			],
 			where: {
 				matchId: multiMatches,
 				warmup: {
@@ -535,7 +560,7 @@ module.exports = {
 			let acronyms = [...new Set(tourneysPlayed.map(tourney => tourney.acronym.replaceAll('\'', '\\\'')))].filter(acronym => acronym.length > 0);
 
 			try {
-				//TODO: Attributes and logdatabasequeries
+				logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 3');
 				let tourneyScores = await DBOsuMultiScores.findAll({
 					attributes: ['matchId', 'matchName', 'teamType', 'beatmapId', 'matchStartDate'],
 					where: {
