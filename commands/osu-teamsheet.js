@@ -123,8 +123,9 @@ module.exports = {
 		let cachedUser = discordUsers[interaction.user.id];
 
 		if (!cachedUser) {
-			//TODO: add attributes and logdatabasequeries
+			logDatabaseQueries(4, 'commands/osu-teamsheet.js (autocomplete) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId', 'osuVerified'],
 				where: {
 					userId: interaction.user.id
 				}
@@ -173,7 +174,7 @@ module.exports = {
 			}
 		}, 1000);
 
-		//TODO: add attributes and logdatabasequeries
+		logDatabaseQueries(4, 'commands/osu-teamsheet.js (autocomplete) DBOsuMappools');
 		const mappools = await DBOsuMappools.findAll({
 			attributes: ['name'],
 			where: {
