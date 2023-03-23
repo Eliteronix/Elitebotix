@@ -8,9 +8,9 @@ module.exports = {
 	async execute(interaction) {
 		const args = interaction.options.getString('argument').split(' ');
 
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/admin/averageRating.js DBDiscordUsers averageRating');
 		let discordUsers = await DBDiscordUsers.findAll({
+			attributes: ['osuDuelStarRating', 'osuRank'],
 			where: {
 				osuUserId: {
 					[Op.gt]: 0
