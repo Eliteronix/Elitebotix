@@ -38,7 +38,7 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
-			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 10);
+			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 0);
 		}
 
 		// eslint-disable-next-line no-undef
@@ -213,9 +213,9 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				await saveOsuMultiScores(match, client);
 			})
 			.catch(async (err) => {
-				//TODO: Attributes
 				logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores incomplete scores backup');
 				let incompleteScores = await DBOsuMultiScores.findAll({
+					attributes: ['id', 'warmup', 'maxCombo', 'pp', 'updatedAt'],
 					where: {
 						matchId: incompleteMatchScore.matchId
 					}
@@ -235,10 +235,12 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				}
 			});
 	} else {
+		let logVerificationProcess = false;
+
 		// Verify matches instead
-		//TODO: Attributes
 		logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores verify matches');
 		let incompleteMatch = await DBOsuMultiScores.findOne({
+			attributes: ['matchId'],
 			where: {
 				tourneyMatch: true,
 				verifiedAt: null,
@@ -297,6 +299,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 											},
 										});
 
+										if (logVerificationProcess) {
+											// eslint-disable-next-line no-console
+											console.log(`Match ${match.id} verified - Match created by MaidBot`);
+										}
+
 										let guildId = '727407178499096597';
 										let channelId = '1068905937219362826';
 
@@ -342,6 +349,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 												matchId: match.id,
 											},
 										});
+
+										if (logVerificationProcess) {
+											// eslint-disable-next-line no-console
+											console.log(`Match ${match.id} not verified - Not determinable if match was created by MaidBot`);
+										}
 									}
 								}
 							});
@@ -368,6 +380,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 								matchId: incompleteMatch.matchId,
 							},
 						});
+
+						if (logVerificationProcess) {
+							// eslint-disable-next-line no-console
+							console.log(`Match ${incompleteMatch.matchId} verified as fake - o!mm not found - Fake because MaidBot uses !mp make to create matches`);
+						}
 
 						let guildId = '727407178499096597';
 						let channelId = '1068905937219362826';
@@ -423,9 +440,9 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				}
 			}
 
-			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores');
 			let matchToVerify = await DBOsuMultiScores.findOne({
+				attributes: ['matchId'],
 				where: {
 					verifiedAt: null,
 					matchId: {
@@ -450,6 +467,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 						matchId: matchToVerify.matchId,
 					},
 				});
+
+				if (logVerificationProcess) {
+					// eslint-disable-next-line no-console
+					console.log(`Match ${matchToVerify.matchId} verified - Elitebotix Duel Match`);
+				}
 
 				let guildId = '727407178499096597';
 				let channelId = '1068905937219362826';
@@ -487,17 +509,14 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					}
 				});
 			} else {
-				let date = new Date();
-				date.setUTCDate(date.getUTCDate() - 21);
-
-				//TODO: Attributes
 				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores find match to verify');
 				let matchToVerify = await DBOsuMultiScores.findOne({
+					attributes: ['matchId', 'matchName', 'osuUserId'],
 					where: {
 						tourneyMatch: true,
 						verifiedBy: null,
 						matchEndDate: {
-							[Op.lte]: date,
+							[Op.not]: null,
 						},
 					},
 				});
@@ -512,6 +531,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 							matchId: matchToVerify.matchId,
 						},
 					});
+
+					if (logVerificationProcess) {
+						// eslint-disable-next-line no-console
+						console.log(`Match ${matchToVerify.matchId} verified - Last step of verification - ETX or o!mm not verifyable`);
+					}
 				} else if (matchToVerify) {
 					// eslint-disable-next-line no-undef
 					process.send('osu! API');
@@ -562,16 +586,16 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 											}
 
 											if (json.events[0].detail.type === 'match-created') {
-												//TODO: Attributes
 												logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Find a score by the match creator');
 												let scores = await DBOsuMultiScores.findAll({
+													attributes: ['score'],
 													where: {
 														matchId: match.id,
 														osuUserId: json.events[0].user_id,
 													},
 												});
 
-												scores = scores.filter((score) => parseInt(score.score) >= 0);
+												scores = scores.filter((score) => parseInt(score.score) > 0);
 
 												if (scores.length) {
 													logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Match creator played a round - Not determined if valid');
@@ -583,9 +607,15 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															matchId: match.id,
 														},
 													});
+
+													if (logVerificationProcess) {
+														// eslint-disable-next-line no-console
+														console.log(`Match ${matchToVerify.matchId} unverified - Match creator played a round - Not determined if valid`);
+													}
 												} else {
-													//TODO: Attributes and logdatabasequeries
+													logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Match creator did not play a round - Not determined if valid');
 													let matchToVerify = await DBOsuMultiScores.findAll({
+														attributes: ['matchId', 'matchName', 'osuUserId', 'beatmapId', 'matchStartDate'],
 														where: {
 															matchId: match.id,
 														},
@@ -616,9 +646,9 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 													let weeksAfterMatch = new Date(matchToVerify[0].matchStartDate);
 													weeksAfterMatch.setDate(weeksAfterMatch.getDate() + 56);
 
-													//TODO: Attributes
 													logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Match creator did not play a round');
 													let relatedScores = await DBOsuMultiScores.findAll({
+														attributes: ['matchId', 'matchName', 'osuUserId', 'beatmapId', 'verifiedAt', 'verifiedBy'],
 														where: {
 															[Op.or]: [
 																{
@@ -691,6 +721,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																},
 															});
 
+															if (logVerificationProcess) {
+																// eslint-disable-next-line no-console
+																console.log(`Match ${match.id} verified - Match reffed by someone else - Qualifiers - All maps played more than 20 times outside of the lobby`);
+															}
+
 															logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was not yet verified');
 															await DBOsuMultiScores.update({
 																verifiedBy: null,
@@ -704,6 +739,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																	verificationComment: 'Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was not yet verified',
 																},
 															});
+
+															if (logVerificationProcess) {
+																// eslint-disable-next-line no-console
+																console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was not yet verified`);
+															}
 
 															let guildId = '727407178499096597';
 															let channelId = '1068905937219362826';
@@ -750,6 +790,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																	matchId: match.id,
 																},
 															});
+
+															if (logVerificationProcess) {
+																// eslint-disable-next-line no-console
+																console.log(`Match ${match.id} verified - Match reffed by someone else - Qualifiers - Not all maps played more than 20 times outside of the lobby`);
+															}
 														}
 													} else if (otherMatchesWithTheSamePlayers.length && playersInTheOriginalLobby.length > 1) {
 														if (qualsMatchOfTheSamePlayers && qualsMatchOfTheSamePlayers.verifiedAt) {
@@ -764,6 +809,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																	matchId: match.id,
 																},
 															});
+
+															if (logVerificationProcess) {
+																// eslint-disable-next-line no-console
+																console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was verified`);
+															}
 
 															let guildId = '727407178499096597';
 															let channelId = '1068905937219362826';
@@ -810,6 +860,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																	matchId: match.id,
 																},
 															});
+
+															if (logVerificationProcess) {
+																// eslint-disable-next-line no-console
+																console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that could not be verified`);
+															}
 														} else if (qualsMatchOfTheSamePlayers) {
 															logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was not yet verified');
 															await DBOsuMultiScores.update({
@@ -820,6 +875,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																	matchId: match.id,
 																},
 															});
+
+															if (logVerificationProcess) {
+																// eslint-disable-next-line no-console
+																console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was not yet verified`);
+															}
 														} else if (otherMatchesWithTheSamePlayers.length > 2 && mapsPlayed.some(map => map.amount > 20)) {
 															logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 2 matches by the same players - some maps played more than 20 times in other matches of the same acronym');
 															await DBOsuMultiScores.update({
@@ -832,6 +892,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																	matchId: match.id,
 																},
 															});
+
+															if (logVerificationProcess) {
+																// eslint-disable-next-line no-console
+																console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 2 matches by the same players - some maps played more than 20 times in other matches of the same acronym`);
+															}
 
 															let guildId = '727407178499096597';
 															let channelId = '1068905937219362826';
@@ -881,6 +946,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																},
 															});
 
+															if (logVerificationProcess) {
+																// eslint-disable-next-line no-console
+																console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 4 matches by the same players - some maps played more than 15 times in other matches of the same acronym`);
+															}
+
 															let guildId = '727407178499096597';
 															let channelId = '1068905937219362826';
 
@@ -928,6 +998,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																	matchId: match.id,
 																},
 															});
+
+															if (logVerificationProcess) {
+																// eslint-disable-next-line no-console
+																console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 6 matches by the same players - some maps played more than 10 times in other matches of the same acronym`);
+															}
 
 															let guildId = '727407178499096597';
 															let channelId = '1068905937219362826';
@@ -977,6 +1052,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																},
 															});
 
+															if (logVerificationProcess) {
+																// eslint-disable-next-line no-console
+																console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 8 matches by the same players - some maps played more than 5 times in other matches of the same acronym`);
+															}
+
 															let guildId = '727407178499096597';
 															let channelId = '1068905937219362826';
 
@@ -1022,6 +1102,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																	matchId: match.id,
 																},
 															});
+
+															if (logVerificationProcess) {
+																// eslint-disable-next-line no-console
+																console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - No quals match of the same players - not verifyable`);
+															}
 														}
 													} else {
 														logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores verification status not determinable');
@@ -1033,6 +1118,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																matchId: match.id,
 															},
 														});
+
+														if (logVerificationProcess) {
+															// eslint-disable-next-line no-console
+															console.log(`Match ${match.id} verified - Match reffed by someone else - Verification status not determinable`);
+														}
 													}
 												}
 											} else {
@@ -1045,6 +1135,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 														matchId: match.id,
 													},
 												});
+
+												if (logVerificationProcess) {
+													// eslint-disable-next-line no-console
+													console.log(`Match ${match.id} verified - Not determinable if match was created by MaidBot`);
+												}
 											}
 										}
 									});
@@ -1069,6 +1164,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 										matchId: matchToVerify.matchId,
 									},
 								});
+
+								if (logVerificationProcess) {
+									// eslint-disable-next-line no-console
+									console.log(`Match ${matchToVerify.matchId} verified - match not found - can't be determined if fake or not`);
+								}
 							} else {
 								// Go same if error
 								secondsToWait = secondsToWait + 60;
@@ -1076,6 +1176,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 						});
 				} else {
 					secondsToWait = secondsToWait + 60;
+
+					if (logVerificationProcess) {
+						// eslint-disable-next-line no-console
+						console.log(`No match to verify - waiting ${secondsToWait} seconds`);
+					}
 				}
 			}
 		}
