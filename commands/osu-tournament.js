@@ -65,9 +65,9 @@ module.exports = {
 			return await interaction.editReply(`The acronym \`${acronym.replace(/`/g, '')}\` can't be used for this command.`);
 		}
 
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-tournament.js DBOsuMultiScores');
 		let userScores = await DBOsuMultiScores.findAll({
+			attributes: ['matchId', 'matchName', 'matchStartDate'],
 			where: {
 				[Op.or]: [
 					{

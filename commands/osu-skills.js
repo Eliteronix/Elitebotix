@@ -228,8 +228,9 @@ module.exports = {
 		}
 
 		if (usernames.length === 0) {//Get profile by author if no argument
-			//TODO: add attributes and logdatabasequeries
+			logDatabaseQueries(4, 'commands/osu-skills.js DiscordUsers 1');
 			let commandUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId'],
 				where: {
 					userId: interaction.user.id
 				},
@@ -249,9 +250,9 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < usernames.length; i++) {
 				if (usernames[i].startsWith('<@') && usernames[i].endsWith('>')) {
-					//TODO: add attributes and logdatabasequeries
-					logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers');
+					logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers 2');
 					const discordUser = await DBDiscordUsers.findOne({
+						attributes: ['osuUserId'],
 						where: {
 							userId: usernames[i].replace('<@', '').replace('>', '').replace('!', '')
 						},
@@ -302,8 +303,23 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			let acc = [];
 			let bpm = [];
 
-			//TODO: add attributes and logdatabasequeries
+			logDatabaseQueries(4, 'commands/osu-skills.js DBOsuBeatmaps');
 			let dbBeatmaps = await DBOsuBeatmaps.findAll({
+				attributes: [
+					'beatmapId',
+					'mods',
+					'starRating',
+					'approvalStatus',
+					'popular',
+					'approachRate',
+					'circleSize',
+					'updatedAt',
+					'maxCombo',
+					'mapper',
+					'aimRating',
+					'speedRating',
+					'bpm',
+				],
 				where: {
 					beatmapId: topScores.map(score => score.beatmapId)
 				},
@@ -406,9 +422,9 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			ctx.font = 'bold 15px comfortaa, sans-serif';
 			ctx.fillText('Duel Rating', 90, 195);
 
-			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers duelrating');
 			const discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuDuelStarRating', 'osuDuelProvisional', 'osuDuelOutdated'],
 				where: {
 					osuUserId: user.id
 				}
@@ -576,9 +592,21 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			const canvasRenderService = new ChartJSNodeCanvas({ width, height });
 
 			(async () => {
-				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiScores');
 				const userScores = await DBOsuMultiScores.findAll({
+					attributes: [
+						'score',
+						'mode',
+						'scoringType',
+						'warmup',
+						'tourneyMatch',
+						'evaluation',
+						'matchStartDate',
+						'matchName',
+						'matchId',
+						'gameRawMods',
+						'rawMods',
+					],
 					where: {
 						osuUserId: user.id,
 						score: {
@@ -669,22 +697,24 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 							matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`);
 						}
 
+						let modPool = getScoreModpool(userScores[i]);
+
 						for (let j = 0; j < rawModsData.length; j++) {
 							if (rawModsData[j].label === `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`) {
 								rawModsData[j].totalEvaluation += parseFloat(userScores[i].evaluation);
 								rawModsData[j].totalCount++;
 
 								//Add values to Mods
-								if (getScoreModpool(userScores[i]) === 'NM') {
+								if (modPool === 'NM') {
 									rawModsData[j].NMEvaluation += parseFloat(userScores[i].evaluation);
 									rawModsData[j].NMCount++;
-								} else if (getScoreModpool(userScores[i]) === 'HD') {
+								} else if (modPool === 'HD') {
 									rawModsData[j].HDEvaluation += parseFloat(userScores[i].evaluation);
 									rawModsData[j].HDCount++;
-								} else if (getScoreModpool(userScores[i]) === 'HR') {
+								} else if (modPool === 'HR') {
 									rawModsData[j].HREvaluation += parseFloat(userScores[i].evaluation);
 									rawModsData[j].HRCount++;
-								} else if (getScoreModpool(userScores[i]) === 'DT') {
+								} else if (modPool === 'DT') {
 									rawModsData[j].DTEvaluation += parseFloat(userScores[i].evaluation);
 									rawModsData[j].DTCount++;
 								} else {
@@ -701,25 +731,25 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 									if (rawModsData[j].label !== uncompletedMonths[k].label) {
 
 										//Add values to Mods
-										if (uncompletedMonths[k].NMCount < runningAverageAmount / 5 && getScoreModpool(userScores[i]) === 'NM') {
+										if (uncompletedMonths[k].NMCount < runningAverageAmount / 5 && modPool === 'NM') {
 											uncompletedMonths[k].NMEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].NMCount++;
 											//add to total evaluation
 											uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].totalCount++;
-										} else if (uncompletedMonths[k].HDCount < runningAverageAmount / 5 && getScoreModpool(userScores[i]) === 'HD') {
+										} else if (uncompletedMonths[k].HDCount < runningAverageAmount / 5 && modPool === 'HD') {
 											uncompletedMonths[k].HDEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].HDCount++;
 											//add to total evaluation
 											uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].totalCount++;
-										} else if (uncompletedMonths[k].HRCount < runningAverageAmount / 5 && getScoreModpool(userScores[i]) === 'HR') {
+										} else if (uncompletedMonths[k].HRCount < runningAverageAmount / 5 && modPool === 'HR') {
 											uncompletedMonths[k].HREvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].HRCount++;
 											//add to total evaluation
 											uncompletedMonths[k].totalEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].totalCount++;
-										} else if (uncompletedMonths[k].DTCount < runningAverageAmount / 5 && getScoreModpool(userScores[i]) === 'DT') {
+										} else if (uncompletedMonths[k].DTCount < runningAverageAmount / 5 && modPool === 'DT') {
 											uncompletedMonths[k].DTEvaluation += parseFloat(userScores[i].evaluation);
 											uncompletedMonths[k].DTCount++;
 											//add to total evaluation
