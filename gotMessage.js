@@ -102,10 +102,13 @@ module.exports = async function (msg, bancho) {
 };
 
 async function handleTicketStatus(msg) {
-	//TODO: Attributes
 	logDatabaseQueries(3, 'gotMessage.js DBTickets');
 	const ticket = await DBTickets.findOne({
-		where: { channelId: msg.channel.id, creatorId: msg.author.id }
+		attributes: ['id', 'statusId', 'statusName', 'creatorId', 'additionalParties'],
+		where: {
+			channelId: msg.channel.id,
+			creatorId: msg.author.id
+		}
 	});
 
 	if (ticket && ticket.statusId !== 0 && ticket.statusId !== 75 && ticket.statusId !== 100) {

@@ -4,10 +4,12 @@ const { logBroadcastEval } = require('./config.json');
 
 module.exports = async function (oldUser, newUser) {
 	if (oldUser.username !== newUser.username) {
-		//TODO: Attributes
 		logDatabaseQueries(2, 'userUpdate.js DBGuilds Username');
 		const guilds = await DBGuilds.findAll({
-			where: { loggingUsernames: true }
+			attributes: ['id', 'guildId', 'loggingChannel'],
+			where: {
+				loggingUsernames: true
+			}
 		});
 
 		guilds.forEach(async (guild) => {
@@ -83,10 +85,12 @@ module.exports = async function (oldUser, newUser) {
 	}
 
 	if (oldUser.discriminator !== newUser.discriminator) {
-		//TODO: Attributes
 		logDatabaseQueries(2, 'userUpdate.js DBGuilds Discriminator');
 		const guilds = await DBGuilds.findAll({
-			where: { loggingDiscriminators: true }
+			attributes: ['id', 'guildId', 'loggingChannel'],
+			where: {
+				loggingDiscriminators: true
+			}
 		});
 
 		guilds.forEach(async (guild) => {
@@ -162,10 +166,12 @@ module.exports = async function (oldUser, newUser) {
 	}
 
 	if (oldUser.displayAvatarURL() !== newUser.displayAvatarURL()) {
-		//TODO: Attributes
 		logDatabaseQueries(2, 'userUpdate.js DBGuilds Avatar');
 		const guilds = await DBGuilds.findAll({
-			where: { loggingAvatars: true }
+			attributes: ['id', 'guildId', 'loggingChannel'],
+			where: {
+				loggingAvatars: true
+			}
 		});
 
 		guilds.forEach(async (guild) => {
