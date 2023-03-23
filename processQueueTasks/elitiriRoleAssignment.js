@@ -44,9 +44,9 @@ module.exports = {
 				}
 			}
 
-			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupSignUp');
 			const registeredPlayers = await DBElitiriCupSignUp.findAll({
+				attributes: ['userId', 'rankAchieved', 'bracketName'],
 				where: {
 					tournamentName: currentElitiriCup,
 					userId: {
@@ -55,9 +55,9 @@ module.exports = {
 				}
 			});
 
-			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBDiscordUsers');
 			const discordUsers = await DBDiscordUsers.findAll({
+				attributes: ['userId', 'osuUserId'],
 				where: {
 					userId: {
 						[Op.in]: members.map(member => member.user.id),
@@ -69,9 +69,9 @@ module.exports = {
 				}
 			});
 
-			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupStaff');
 			const staffSignups = await DBElitiriCupStaff.findAll({
+				attributes: ['osuUserId', 'tournamentName', 'host', 'streamer', 'commentator', 'referee', 'replayer'],
 				where: {
 					osuUserId: {
 						[Op.in]: discordUsers.map(discordUser => discordUser.osuUserId),

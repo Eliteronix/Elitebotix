@@ -11,11 +11,13 @@ module.exports = async function (member) {
 		return;
 	}
 
-	//TODO: Attributes
 	logDatabaseQueries(2, 'guildMemberRemove.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
-		where: { guildId: member.guild.id },
+		attributes: ['id', 'sendGoodbyeMessage', 'goodbyeMessageChannel', 'goodbyeMessageText', 'loggingChannel', 'loggingMemberRemove'],
+		where: {
+			guildId: member.guild.id
+		},
 	});
 
 	//check if a guild was found in the db

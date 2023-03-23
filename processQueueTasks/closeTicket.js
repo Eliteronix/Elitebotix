@@ -6,10 +6,13 @@ const { logBroadcastEval } = require('../config.json');
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
 		// console.log('closeTicket');
-		//TODO: Attributes
+
 		logDatabaseQueries(2, 'processQueueTasks/closeTicket.js DBTickets');
 		const ticket = await DBTickets.findOne({
-			where: { channelId: processQueueEntry.additions }
+			attributes: ['statusId'],
+			where: {
+				channelId: processQueueEntry.additions
+			}
 		});
 
 		if (ticket && ticket.statusId === 100) {

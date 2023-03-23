@@ -44,9 +44,9 @@ async function updateSheet(spreadsheetID, bracketName) {
 
 		const sheet = doc.sheetsByTitle['Player List'];
 
-		//TODO: Attributes
 		logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBElitiriCupSignUp');
 		let bracketPlayers = await DBElitiriCupSignUp.findAll({
+			attributes: ['osuName', 'osuUserId', 'osuRank', 'discordTag', 'saturdayEarlyAvailability', 'saturdayLateAvailability', 'sundayEarlyAvailability', 'sundayLateAvailability', 'osuBadges'],
 			where: {
 				tournamentName: currentElitiriCup,
 				bracketName: bracketName
@@ -128,13 +128,16 @@ async function updateSheet(spreadsheetID, bracketName) {
 		if (error.message === 'Google API error - [503] The service is currently unavailable.'
 			|| error.message === 'Request failed with status code 502'
 			|| error.message === 'Google API error - [500] Internal error encountered.') {
-			//TODO: Attributes
 			logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 1');
-			const task = await DBProcessQueue.findOne({
-				where: { guildId: 'None', task: 'elitiriCupSignUps', additions: bracketName }
+			const task = await DBProcessQueue.count({
+				where: {
+					guildId: 'None',
+					task: 'elitiriCupSignUps',
+					additions: bracketName
+				}
 			});
 
-			if (!task) {
+			if (task === 0) {
 				let date = new Date();
 				date.setUTCMinutes(date.getUTCMinutes() + 1);
 				logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 1 create');
@@ -145,12 +148,14 @@ async function updateSheet(spreadsheetID, bracketName) {
 		}
 	}
 
-	//TODO: Attributes
 	logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 2');
-	const task = await DBProcessQueue.findOne({
-		where: { task: 'elitiriRoleAssignment' }
+	const task = await DBProcessQueue.count({
+		where: {
+			task: 'elitiriRoleAssignment'
+		}
 	});
-	if (!task) {
+
+	if (task === 0) {
 		let date = new Date();
 		logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 2 ');
 		DBProcessQueue.create({

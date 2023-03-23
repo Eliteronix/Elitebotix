@@ -8,10 +8,12 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (oldMember.nickname !== newMember.nickname) {
-		//TODO: Attributes
 		logDatabaseQueries(2, 'guildMemberUpdate.js DBGuilds Nickname');
 		const guild = await DBGuilds.findOne({
-			where: { guildId: newMember.guild.id }
+			attributes: ['id', 'loggingChannel', 'loggingNicknames'],
+			where: {
+				guildId: newMember.guild.id
+			}
 		});
 
 		if (guild && guild.loggingChannel && guild.loggingNicknames) {
@@ -62,9 +64,9 @@ module.exports = async function (oldMember, newMember) {
 		}
 	}
 	if (!sameRoles) {
-		//TODO: Attributes
 		logDatabaseQueries(2, 'guildMemberUpdate.js DBGuilds Roles');
 		const guild = await DBGuilds.findOne({
+			attributes: ['id', 'loggingChannel', 'loggingUserroles'],
 			where: { guildId: newMember.guild.id }
 		});
 
