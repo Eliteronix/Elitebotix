@@ -1,5 +1,6 @@
 const { showUnknownInteractionError, logBroadcastEval } = require('../../config.json');
 const { DBProcessQueue } = require('../../dbObjects');
+const { logDatabaseQueries } = require('../../utils');
 
 module.exports = {
 	name: 'restart',
@@ -42,8 +43,8 @@ module.exports = {
 
 		let matches = duels.flat();
 		for (let i = 0; i < matches.length; i++) {
-			//TODO: add attributes and logdatabasequeries
-			let processQueueTask = await DBProcessQueue.findOne({
+			logDatabaseQueries(4, 'commands/admin/restart.js DBProcessQueue');
+			let processQueueTask = await DBProcessQueue.count({
 				where: {
 					task: 'importMatch',
 					additions: matches[i],

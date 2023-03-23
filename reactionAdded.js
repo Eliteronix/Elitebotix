@@ -35,17 +35,21 @@ module.exports = async function (reaction, user, additionalObjects) {
 	process.send(`discorduser ${user.id}}`);
 
 	if (reaction._emoji.name === '⭐') {
-		//TODO: Attributes
 		logDatabaseQueries(2, 'reactionAdded.js DBGuilds Starboard');
 		const guild = await DBGuilds.findOne({
-			where: { guildId: reaction.message.guild.id }
+			attributes: ['id', 'starBoardEnabled', 'starBoardMinimum', 'starBoardChannel'],
+			where: {
+				guildId: reaction.message.guild.id
+			}
 		});
 
 		if (guild && guild.starBoardEnabled && parseInt(guild.starBoardMinimum) <= reaction.count && guild.starBoardChannel !== reaction.message.channel.id) {
-			//TODO: Attributes
 			logDatabaseQueries(2, 'reactionAdded.js DBStarBoardMessages Starboardmessage');
 			const starBoardedMessage = await DBStarBoardMessages.findOne({
-				where: { originalMessageId: reaction.message.id }
+				attributes: ['id', 'starBoardMessageId', 'starBoardChannelId', 'starBoardMessageStarsQuantityMax'],
+				where: {
+					originalMessageId: reaction.message.id
+				}
 			});
 
 			if (starBoardedMessage) {
@@ -1144,10 +1148,10 @@ module.exports = async function (reaction, user, additionalObjects) {
 		return;
 	}
 
-	//TODO: Attributes
-	logDatabaseQueries(2, 'reactionAdded.js DBReactionRolesHeader');
 	//Get the header message from the db
+	logDatabaseQueries(2, 'reactionAdded.js DBReactionRolesHeader');
 	const dbReactionRolesHeader = await DBReactionRolesHeader.findOne({
+		attributes: ['id'],
 		where: {
 			guildId: reaction.message.guild.id,
 			reactionHeaderId: reaction.message.id
@@ -1155,11 +1159,14 @@ module.exports = async function (reaction, user, additionalObjects) {
 	});
 
 	if (dbReactionRolesHeader) {
-		//TODO: Attributes
 		logDatabaseQueries(2, 'reactionAdded.js DBReactionRoles 1');
 		//Get the reactionRole from the db by all the string (works for general emojis)
 		const dbReactionRole = await DBReactionRoles.findOne({
-			where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, emoji: reaction._emoji.name }
+			attributes: ['roleId'],
+			where: {
+				dbReactionRolesHeaderId: dbReactionRolesHeader.id,
+				emoji: reaction._emoji.name
+			}
 		});
 
 		if (dbReactionRole) {
@@ -1207,11 +1214,16 @@ module.exports = async function (reaction, user, additionalObjects) {
 			//Put the emoji name into the correct format for comparing it in case it's an guild emoji
 			let emoji = '<:' + reaction._emoji.name + ':';
 
-			//TODO: Attributes
 			logDatabaseQueries(2, 'reactionAdded.js DBReactionRoles 2');
 			//Get the reactionRole from the db by all the string (works for general emojis)
 			const dbReactionRoleBackup = await DBReactionRoles.findOne({
-				where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, emoji: { [Op.like]: emoji + '%' } }
+				attributes: ['roleId'],
+				where: {
+					dbReactionRolesHeaderId: dbReactionRolesHeader.id,
+					emoji: {
+						[Op.like]: emoji + '%'
+					}
+				}
 			});
 
 			if (dbReactionRoleBackup) {
@@ -1275,11 +1287,13 @@ async function editEmbed(msg, reactionRolesHeader) {
 		reactionRoleEmbed.setDescription(reactionRolesHeader.reactionDescription);
 	}
 
-	//TODO: Attributes
 	logDatabaseQueries(2, 'reactionAdded.js DBReactionRoles 3');
 	//Get roles from db
 	const reactionRoles = await DBReactionRoles.findAll({
-		where: { dbReactionRolesHeaderId: reactionRolesHeader.id }
+		attributes: ['emoji', 'roleId', 'description'],
+		where: {
+			dbReactionRolesHeaderId: reactionRolesHeader.id
+		}
 	});
 
 	//Add roles to embed
