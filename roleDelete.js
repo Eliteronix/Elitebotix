@@ -7,11 +7,14 @@ module.exports = async function (role) {
 		return;
 	}
 
-	//TODO: Attributes
 	logDatabaseQueries(2, 'roleDelete.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
-		where: { guildId: role.guild.id, loggingRoleDelete: true },
+		attributes: ['id', 'loggingChannel'],
+		where: {
+			guildId: role.guild.id,
+			loggingRoleDelete: true
+		},
 	});
 
 	if (guild && guild.loggingChannel) {

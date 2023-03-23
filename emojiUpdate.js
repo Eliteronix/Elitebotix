@@ -7,11 +7,14 @@ module.exports = async function (oldEmoji, newEmoji) {
 		return;
 	}
 
-	//TODO: Attributes
 	logDatabaseQueries(2, 'emojiUpdate.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
-		where: { guildId: newEmoji.guild.id, loggingEmojiUpdate: true },
+		attributes: ['id', 'loggingChannel'],
+		where: {
+			guildId: newEmoji.guild.id,
+			loggingEmojiUpdate: true
+		},
 	});
 
 	if (guild && guild.loggingChannel) {

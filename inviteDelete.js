@@ -7,11 +7,14 @@ module.exports = async function (invite) {
 		return;
 	}
 
-	//TODO: Attributes
 	logDatabaseQueries(2, 'inviteDelete.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
-		where: { guildId: invite.guild.id, loggingInviteDelete: true },
+		attributes: ['id', 'loggingChannel'],
+		where: {
+			guildId: invite.guild.id,
+			loggingInviteDelete: true
+		},
 	});
 
 	if (guild && guild.loggingChannel) {

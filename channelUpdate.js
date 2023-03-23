@@ -11,11 +11,14 @@ module.exports = async function (oldChannel, newChannel) {
 		return;
 	}
 
-	//TODO: Attributes
 	logDatabaseQueries(2, 'channelUpdate.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
-		where: { guildId: newChannel.guild.id, loggingChannelUpdate: true },
+		attributes: ['id', 'loggingChannel'],
+		where: {
+			guildId: newChannel.guild.id,
+			loggingChannelUpdate: true
+		},
 	});
 
 	if (guild && guild.loggingChannel) {
