@@ -606,6 +606,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 						'matchId',
 						'gameRawMods',
 						'rawMods',
+						'freeMod',
 					],
 					where: {
 						osuUserId: user.id,

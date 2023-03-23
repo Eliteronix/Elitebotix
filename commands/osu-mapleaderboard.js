@@ -204,9 +204,9 @@ module.exports = {
 		let scoresArray = [];
 		let userScore = null;
 
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBDiscordUsers');
 		const user = await DBDiscordUsers.findOne({
+			attributes: ['userId', 'osuUserId'],
 			where: {
 				userId: interaction.user.id,
 			}
