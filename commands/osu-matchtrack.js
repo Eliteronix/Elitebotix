@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap, getBeatmapSlimcover, getAvatar, awaitWebRequestPermission } = require('../utils');
+const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap, getBeatmapSlimcover, getAvatar, awaitWebRequestPermission, logDatabaseQueries } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
@@ -157,7 +157,7 @@ module.exports = {
 							//Nothing
 						});
 
-					//TODO: add attributes and logdatabasequeries
+					logDatabaseQueries(4, 'commands/osu-matchtrack.js DBOsuMultiScores');
 					let warmups = await DBOsuMultiScores.findAll({
 						attributes: ['gameId'],
 						where: {
