@@ -140,14 +140,14 @@ module.exports = {
 			logDatabaseQueries(4, 'commands/birthday.js DBDiscordUsers set');
 			let user = await DBDiscordUsers.findOne({
 				where: {
-					userId: interaction.member.user.id,
+					userId: interaction.user.id,
 				},
 			});
 
 			if (!user) {
 				logDatabaseQueries(4, 'commands/birthday.js DBDiscordUsers set create');
 				user = await DBDiscordUsers.create({
-					userId: interaction.member.user.id,
+					userId: interaction.user.id,
 				});
 			}
 
@@ -158,7 +158,7 @@ module.exports = {
 			logDatabaseQueries(4, 'commands/birthday.js DBBirthdayGuilds set');
 			let guilds = await DBBirthdayGuilds.findAll({
 				where: {
-					userId: interaction.member.user.id,
+					userId: interaction.user.id,
 				}
 			});
 
@@ -185,7 +185,7 @@ module.exports = {
 			let currentGuild = await DBBirthdayGuilds.findOne({
 				where: {
 					guildId: interaction.guild.id,
-					userId: interaction.member.user.id,
+					userId: interaction.user.id,
 				},
 			});
 
@@ -197,7 +197,7 @@ module.exports = {
 			logDatabaseQueries(4, 'commands/birthday.js DBDiscordUsers enable');
 			let dbDiscordUser = await DBDiscordUsers.findOne({
 				where: {
-					userId: interaction.member.user.id,
+					userId: interaction.user.id,
 					birthday: {
 						[Op.ne]: null,
 					}
@@ -218,7 +218,7 @@ module.exports = {
 			logDatabaseQueries(4, 'commands/birthday.js DBBirthdayGuilds enable create');
 			await DBBirthdayGuilds.create({
 				guildId: interaction.guild.id,
-				userId: interaction.member.user.id,
+				userId: interaction.user.id,
 				birthdayTime: nextBirthday,
 			});
 
@@ -229,7 +229,7 @@ module.exports = {
 			let currentGuild = await DBBirthdayGuilds.findOne({
 				where: {
 					guildId: interaction.guild.id,
-					userId: interaction.member.user.id,
+					userId: interaction.user.id,
 				},
 			});
 
