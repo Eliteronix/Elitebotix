@@ -944,20 +944,20 @@ module.exports = {
 					ctx.lineWidth = 4;
 					ctx.strokeRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 150, 33);
 
-					// if (tourneyMaps[i].modPool.includes('FM')) {
-					// 	const freeModMods = ['HD', 'HR', 'FL', 'EZ'];
+					if (tourneyMaps[i].modPool.includes('FM')) {
+						const freeModMods = ['HD', 'HR', 'FL', 'EZ'];
 
-					// 	// Draw the mods
-					// 	let mods = getMods(playerScores[k].mods).filter(mod => freeModMods.includes(mod));
+						// Draw the mods
+						let mods = getMods(playerScores[k].mods).filter(mod => freeModMods.includes(mod));
 
-					// 	for (let l = 0; l < mods.length; l++) {
-					// 		let mod = mods[l];
+						for (let l = mods.length - 1; l >= 0; l--) {
+							let mod = mods[l];
 
-					// 		let modImage = await Canvas.loadImage(`./other/mods/ingame/${mod}.png`);
+							let modImage = await Canvas.loadImage(`./other/mods/ingame/${mod}.png`);
 
-					// 		ctx.drawImage(modImage, 604 + 400 * j + 150 + (l * 30), 4 + 100 * (i + 1) + (k * 33) + 5, 25, 25);
-					// 	}
-					// }
+							ctx.drawImage(modImage, 604 + 400 * j + 121 - ((mods.length - 1) * 10) + (l * 10), 4 + 100 * (i + 1) + (k * 33) + 4, 25, 25);
+						}
+					}
 				}
 
 				averageScore = Math.round(averageScore / Math.min(playerScores.length, 3));
@@ -1191,7 +1191,6 @@ module.exports = {
 		}
 
 		//TODO: Match tracking
-		//TODO: Mark which mod was used for FM
 	},
 };
 

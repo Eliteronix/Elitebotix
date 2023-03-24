@@ -881,7 +881,7 @@ module.exports = {
 						currentRowHasData = true;
 					}
 
-					if (sheet.getCell(i, j).value === 'NM1') {
+					if (sheet.getCell(i, j).value === 'NM1' || sheet.getCell(i, j).value === 'NM 1') {
 						headerRowFound = true;
 					}
 				}
@@ -897,7 +897,7 @@ module.exports = {
 
 			const modPoolHeaders = ['pick', 'mod'];
 
-			let modPoolIndex = headerRow.findIndex(header => header && modPoolHeaders.includes(header.toLowerCase()));
+			let modPoolIndex = headerRow.findIndex(header => header && modPoolHeaders.includes(header.toString().toLowerCase()));
 
 			if (modPoolIndex === -1) {
 				return await interaction.editReply('Could not find the mod pool column.');
@@ -905,7 +905,7 @@ module.exports = {
 
 			const beatmapHeaders = ['map id'];
 
-			let beatmapIndex = headerRow.findIndex(header => header && beatmapHeaders.includes(header.toLowerCase()));
+			let beatmapIndex = headerRow.findIndex(header => header && beatmapHeaders.includes(header.toString().toLowerCase()));
 
 			if (beatmapIndex === -1) {
 				return await interaction.editReply('Could not find the beatmap column.');
@@ -934,7 +934,7 @@ module.exports = {
 					}
 
 					if (data.toString().toLowerCase() === 'qualifiers' ||
-						data.toString().toLowerCase() === 'group stage' ||
+						data.toString().toLowerCase().startsWith('group stage') ||
 						data.toString().toLowerCase().startsWith('round of') ||
 						data.toString().toLowerCase().endsWith('finals') ||
 						data.toString().toLowerCase() === 'ql' ||
@@ -958,8 +958,8 @@ module.exports = {
 						continue;
 					}
 
-					if (j === modPoolIndex && data.toString().toUpperCase().match(/[A-Z]+\d+/g)) {
-						let modPool = data.toString().toUpperCase().replace(/\d+/g, '');
+					if (j === modPoolIndex && (data.toString().toUpperCase().match(/[A-Z]+ *\d+/g) || data.toString().toUpperCase() === 'TB')) {
+						let modPool = data.toString().toUpperCase().replaceAll(' ', '').replace(/\d+/g, '');
 
 						modPool = checkViableModpool(modPool);
 

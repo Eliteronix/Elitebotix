@@ -600,6 +600,7 @@ module.exports = {
 				'osuName',
 				'osuUserId',
 				'osuRank',
+				'osuPP',
 				'osuVerified',
 				'osuMainServer',
 				'osuMainMode',
