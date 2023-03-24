@@ -20,9 +20,10 @@ module.exports = {
 				if (i % 25 === 0) {
 					sentMessage.edit(`${i} out of ${members.length} done`);
 				}
-				//TODO: Attributes
+
 				logDatabaseQueries(4, 'commands/admin/updateServerDuelRatings.js DBDiscordUsers');
 				const discordUser = await DBDiscordUsers.findOne({
+					attributes: ['osuUserId'],
 					where: {
 						userId: members[i].id
 					},

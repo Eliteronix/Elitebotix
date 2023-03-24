@@ -5,9 +5,9 @@ module.exports = {
 	name: 'runningMatches',
 	usage: 'None',
 	async execute(interaction) {
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/admin/runningMatches.js DBProcessQueue runningMatches');
 		let importMatchTasks = await DBProcessQueue.findAll({
+			attributes: ['additions'],
 			where: {
 				task: 'importMatch',
 			}

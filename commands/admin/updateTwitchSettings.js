@@ -1,5 +1,6 @@
 const { DBDiscordUsers } = require('../../dbObjects');
 const { logBroadcastEval } = require('../../config.json');
+const { logDatabaseQueries } = require('../../utils');
 
 module.exports = {
 	name: 'updateTwitchSettings',
@@ -9,8 +10,9 @@ module.exports = {
 
 		let discordId = args[0];
 
-		//TODO: Attributes and logdatabasequeries
+		logDatabaseQueries(4, 'commands/admin/updateTwitchSettings.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
+			attributes: ['id', 'twitchOsuMapSync', 'twitchOsuMatchCommand', 'twitchName'],
 			where: {
 				userId: discordId,
 				twitchVerified: true
@@ -36,7 +38,7 @@ module.exports = {
 			await discordUser.save();
 			await interaction.followUp(`Twitch mp is now ${discordUser.twitchOsuMatchCommand ? 'enabled' : 'disabled'} for discord user <@${discordId}>`);
 
-			if (discordUser.twitchMP) {
+			if (discordUser.twitchOsuMatchCommand) {
 				enabledSomething = true;
 			}
 		}

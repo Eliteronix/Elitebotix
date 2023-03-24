@@ -5,12 +5,8 @@ module.exports = {
 	name: 'saveMultiMatches',
 	usage: '<matchId>',
 	async execute(interaction) {
-		//TODO: add attributes and logdatabasequeries
-		logDatabaseQueries(4, 'commands/admin/saveMultiMatches.js DBProcessQueue');
-		const processQueueTasks = await DBProcessQueue.findAll({ where: { task: 'saveMultiMatches' } });
-		for (let i = 0; i < processQueueTasks.length; i++) {
-			await processQueueTasks[i].destroy();
-		}
+		logDatabaseQueries(4, 'commands/admin/saveMultiMatches.js DBProcessQueue destroy');
+		await DBProcessQueue.destroy({ where: { task: 'saveMultiMatches' } });
 
 		let now = new Date();
 		logDatabaseQueries(4, 'commands/admin/saveMultiMatches.js DBProcessQueue create');

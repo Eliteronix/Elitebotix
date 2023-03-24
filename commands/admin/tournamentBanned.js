@@ -6,9 +6,9 @@ module.exports = {
 	name: 'tournamentBanned',
 	usage: 'None',
 	async execute(interaction) {
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/admin/tournamentBanned.js DBDiscordUsers');
 		let discordUsers = await DBDiscordUsers.findAll({
+			attributes: ['osuUserId', 'osuName'],
 			where: {
 				tournamentBannedUntil: {
 					[Op.gte]: new Date(),
