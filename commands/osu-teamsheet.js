@@ -483,8 +483,6 @@ module.exports = {
 				return false;
 			});
 
-			let playerScores = [];
-
 			for (let j = 0; j < tourneyMaps.length; j++) {
 				let soloScores = soloPlayerScores.filter(score => score.beatmapHash === tourneyMaps[j].hash);
 
@@ -553,8 +551,6 @@ module.exports = {
 				if (localV2Scores.length > 0 || existingMultiPlayerScoresForMap.length > 0) {
 					soloScoresWithoutMultiScores = soloScoresWithoutMultiScores.filter(score => score.scoringType === 'Local');
 				}
-
-				playerScores = playerScores.concat(soloScoresWithoutMultiScores);
 
 				let finalMapMultiPlayerScores = finalMultiPlayerScores.filter(score => scoreIsCorrectMods(score, tourneyMaps[j].modPool) && score.beatmapId === tourneyMaps[j].beatmapId);
 
