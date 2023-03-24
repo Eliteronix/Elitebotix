@@ -1,7 +1,7 @@
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, logBroadcastEval } = require('../config.json');
 const { DBOsuSoloScores, DBDiscordUsers, DBOsuTeamSheets, DBOsuMappools, DBOsuBeatmaps } = require('../dbObjects');
-const { getMods, logDatabaseQueries, getOsuBeatmap, getModBits } = require('../utils.js');
+const { getMods, logDatabaseQueries, getOsuBeatmap, getModBits, getIDFromPotentialOsuLink } = require('../utils.js');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -291,7 +291,11 @@ module.exports = {
 
 			updateTeamSheets(interaction, discordUser, newScores);
 		} else if (interaction.options.getSubcommand() === 'guesstimate') {
-			let beatmap = await getOsuBeatmap({ beatmapId: interaction.options.getString('beatmap') });
+			let beatmap = await getOsuBeatmap({ beatmapId: getIDFromPotentialOsuLink(interaction.options.getString('beatmap')) });
+
+			if (beatmap === null) {
+				return await interaction.followUp('Beatmap not found');
+			}
 
 			let mods = interaction.options.getString('mods');
 
