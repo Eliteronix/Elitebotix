@@ -75,7 +75,7 @@ module.exports = async function (member) {
 		await DBBirthdayGuilds.destroy({
 			where: {
 				userId: member.user.username,
-				guildId: guild.guildId
+				guildId: member.guild.id
 			}
 		});
 	}
