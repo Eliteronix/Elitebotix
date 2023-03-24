@@ -92,9 +92,9 @@ module.exports = {
 		let discordUser = null;
 
 		if (username === null) {
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/osu-history.js DBDiscordUsers 1');
 			discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId', 'osuName'],
 				where: {
 					userId: interaction.user.id,
 				}
@@ -111,9 +111,9 @@ module.exports = {
 
 		//Get the user from the database if possible
 		if (discordUser === null) {
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/osu-history.js DBDiscordUsers 2');
 			discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId', 'osuName'],
 				where: {
 					[Op.or]: {
 						osuUserId: getIDFromPotentialOsuLink(username),
@@ -156,7 +156,6 @@ module.exports = {
 		}
 
 		// Gather all the data
-		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 1');
 		let multiMatches = await DBOsuMultiScores.findAll({
 			attributes: ['matchId'],
@@ -540,8 +539,9 @@ module.exports = {
 
 		let players = [...new Set(multiScores.map(score => score.osuUserId))];
 
-		//TODO: Attributes and logdatabasequeries
+		logDatabaseQueries(4, 'commands/osu-history.js DBDiscordUsers osuNames');
 		let discordUsers = await DBDiscordUsers.findAll({
+			attributes: ['osuUserId', 'osuName'],
 			where: {
 				osuUserId: {
 					[Op.in]: players,
@@ -703,9 +703,9 @@ module.exports = {
 			tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
 
 			// Create rank history graph
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 3');
 			let oldestScore = await DBOsuMultiScores.findOne({
+				attributes: ['gameEndDate'],
 				where: {
 					osuUserId: osuUser.osuUserId,
 					tourneyMatch: true,
@@ -728,8 +728,9 @@ module.exports = {
 			date.setUTCDate(date.getUTCDate() - 1);
 			date.setUTCHours(23, 59, 59, 999);
 
-			//TODO: Attributes and logDatabaseQueries
+			logDatabaseQueries(4, 'commands/osu-history.js DBDuelRatingHistory 1');
 			let existingDuelRatings = await DBDuelRatingHistory.findAll({
+				attributes: ['osuDuelStarRating', 'year', 'month', 'date'],
 				where: {
 					osuUserId: osuUser.osuUserId,
 				},
