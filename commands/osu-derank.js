@@ -64,9 +64,9 @@ module.exports = {
 		let discordUser = null;
 
 		if (username) {
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/osu-derank.js DBDiscordUsers 1');
 			discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuName', 'osuUserId', 'osuPP', 'osuRank', 'osuDuelStarRating'],
 				where: {
 					[Op.or]: {
 						osuUserId: getIDFromPotentialOsuLink(username),
@@ -132,9 +132,9 @@ module.exports = {
 					osuDuelStarRating: duelRating.total,
 				};
 
-				//TODO: Attributes
 				logDatabaseQueries(4, 'commands/osu-derank.js DBDiscordUsers 2');
 				discordUser = await DBDiscordUsers.findOne({
+					attributes: ['osuName', 'osuUserId', 'osuPP', 'osuRank', 'osuDuelStarRating'],
 					where: {
 						osuUserId: user.id
 					}
