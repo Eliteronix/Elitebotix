@@ -1150,7 +1150,7 @@ module.exports = {
 			}
 		}
 
-		content += '\n\n Use </osu-scoreupload:1084953371435356291> to upload your local scores.';
+		content += '\n\n Use </osu-scoreupload fileupload:1084953371435356291> to upload your local scores.\nUse </osu-scoreupload guesstimate:1084953371435356291> to add a guesstimate.';
 
 		if (interaction.options.getNumber('updatefor')) {
 			if (interaction.id) {
