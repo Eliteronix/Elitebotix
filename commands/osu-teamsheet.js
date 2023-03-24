@@ -413,6 +413,7 @@ module.exports = {
 				'count300',
 				'countMiss',
 				'uploaderId',
+				'maxCombo',
 			],
 			where: {
 				uploaderId: {
@@ -1108,6 +1109,7 @@ module.exports = {
 		// TODO: Manual lineup
 		// TODO: EZ Multiplier
 		// TODO: FL Multiplier
+		// TODO: FM Lineup (Mods)
 
 		// Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'teamsheet.png' })];
