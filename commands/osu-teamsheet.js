@@ -943,6 +943,21 @@ module.exports = {
 					ctx.strokeStyle = '#FFFFFF';
 					ctx.lineWidth = 4;
 					ctx.strokeRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 150, 33);
+
+					// if (tourneyMaps[i].modPool.includes('FM')) {
+					// 	const freeModMods = ['HD', 'HR', 'FL', 'EZ'];
+
+					// 	// Draw the mods
+					// 	let mods = getMods(playerScores[k].mods).filter(mod => freeModMods.includes(mod));
+
+					// 	for (let l = 0; l < mods.length; l++) {
+					// 		let mod = mods[l];
+
+					// 		let modImage = await Canvas.loadImage(`./other/mods/ingame/${mod}.png`);
+
+					// 		ctx.drawImage(modImage, 604 + 400 * j + 150 + (l * 30), 4 + 100 * (i + 1) + (k * 33) + 5, 25, 25);
+					// 	}
+					// }
 				}
 
 				averageScore = Math.round(averageScore / Math.min(playerScores.length, 3));

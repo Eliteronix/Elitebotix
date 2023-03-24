@@ -607,6 +607,7 @@ module.exports = {
 				'tournamentPingsMode',
 				'tournamentPingsBadged',
 				'tournamentPingsStartingFrom',
+				'osuDuelStarRating',
 				'osuNoModDuelStarRating',
 				'osuHiddenDuelStarRating',
 				'osuHardRockDuelStarRating',
