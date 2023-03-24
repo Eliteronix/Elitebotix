@@ -1,7 +1,7 @@
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, logBroadcastEval } = require('../config.json');
 const { DBOsuSoloScores, DBDiscordUsers, DBOsuTeamSheets, DBOsuMappools, DBOsuBeatmaps } = require('../dbObjects');
-const { getMods, logDatabaseQueries } = require('../utils.js');
+const { getMods, logDatabaseQueries, getOsuBeatmap, getModBits } = require('../utils.js');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -25,20 +25,93 @@ module.exports = {
 			'en-US': 'Allows you to upload your solo scores to the database',
 		})
 		.setDMPermission(true)
-		.addAttachmentOption(option =>
-			option.setName('file')
+		.addSubcommand(subcommand =>
+			subcommand.setName('fileupload')
 				.setNameLocalizations({
-					'de': 'datei',
-					'en-GB': 'file',
-					'en-US': 'file',
+					'de': 'dateiupload',
+					'en-GB': 'fileupload',
+					'en-US': 'fileupload',
 				})
-				.setDescription('The scores.db file from your osu! folder')
+				.setDescription('Upload your scores.db file')
 				.setDescriptionLocalizations({
-					'de': 'Die scores.db Datei aus deinem osu! Ordner',
-					'en-GB': 'The scores.db file from your osu! folder',
-					'en-US': 'The scores.db file from your osu! folder',
+					'de': 'Lade deine scores.db Datei hoch',
+					'en-GB': 'Upload your scores.db file',
+					'en-US': 'Upload your scores.db file',
 				})
-				.setRequired(true)
+				.addAttachmentOption(option =>
+					option.setName('file')
+						.setNameLocalizations({
+							'de': 'datei',
+							'en-GB': 'file',
+							'en-US': 'file',
+						})
+						.setDescription('The scores.db file from your osu! folder')
+						.setDescriptionLocalizations({
+							'de': 'Die scores.db Datei aus deinem osu! Ordner',
+							'en-GB': 'The scores.db file from your osu! folder',
+							'en-US': 'The scores.db file from your osu! folder',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand.setName('guesstimate')
+				.setNameLocalizations({
+					'de': 'schätzen',
+					'en-GB': 'guesstimate',
+					'en-US': 'guesstimate',
+				})
+				.setDescription('Add a score by guesstimating the score')
+				.setDescriptionLocalizations({
+					'de': 'Füge einen Score hinzu, indem du den Score schätzt',
+					'en-GB': 'Add a score by guesstimating the score',
+					'en-US': 'Add a score by guesstimating the score',
+				})
+				.addStringOption(option =>
+					option.setName('beatmap')
+						.setNameLocalizations({
+							'de': 'beatmap',
+							'en-GB': 'beatmap',
+							'en-US': 'beatmap',
+						})
+						.setDescription('The beatmap id or link of the beatmap you want to add a score to')
+						.setDescriptionLocalizations({
+							'de': 'Die Beatmap ID der Beatmap, zu der du einen Score hinzufügen möchtest',
+							'en-GB': 'The beatmap id of the beatmap you want to add a score to',
+							'en-US': 'The beatmap id of the beatmap you want to add a score to',
+						})
+						.setRequired(true)
+				)
+				.addIntegerOption(option =>
+					option.setName('score')
+						.setNameLocalizations({
+							'de': 'score',
+							'en-GB': 'score',
+							'en-US': 'score',
+						})
+						.setDescription('The score you want to add')
+						.setDescriptionLocalizations({
+							'de': 'Der Score, den du hinzufügen möchtest',
+							'en-GB': 'The score you want to add',
+							'en-US': 'The score you want to add',
+						})
+						.setRequired(true)
+				)
+				.addStringOption(option =>
+					option.setName('mods')
+						.setNameLocalizations({
+							'de': 'mods',
+							'en-GB': 'mods',
+							'en-US': 'mods',
+						})
+						.setDescription('The mods you want to add')
+						.setDescriptionLocalizations({
+							'de': 'Die Mods, die du hinzufügen möchtest',
+							'en-GB': 'The mods you want to add',
+							'en-US': 'The mods you want to add',
+						})
+						.setRequired(false)
+				)
 		),
 	async execute(msg, args, interaction) {
 		try {
@@ -52,8 +125,9 @@ module.exports = {
 			return;
 		}
 
-		//TODO: add attributes and logdatabasequeries
+		logDatabaseQueries(4, 'commands/osu-scoreupload.js DBDiscordUsers 1');
 		let discordUser = await DBDiscordUsers.findOne({
+			attributes: ['osuUserId', 'osuVerified', 'userId', 'osuName'],
 			where: {
 				userId: interaction.user.id
 			}
@@ -63,305 +137,211 @@ module.exports = {
 			return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
 		}
 
-		let attachedFile = interaction.options.getAttachment('file');
+		if (interaction.options.getSubcommand() === 'fileupload') {
+			let attachedFile = interaction.options.getAttachment('file');
 
-		if (attachedFile.name !== 'scores.db') {
-			return await interaction.editReply('The attached file is not a scores.db file');
-		}
+			if (attachedFile.name !== 'scores.db') {
+				return await interaction.editReply('The attached file is not a scores.db file');
+			}
 
-		let file = await fetch(attachedFile.url);
+			let file = await fetch(attachedFile.url);
 
-		// Get the file in hex
-		file = await file.arrayBuffer();
+			// Get the file in hex
+			file = await file.arrayBuffer();
 
-		file = buf2hex(file);
+			file = buf2hex(file);
 
-		// First int is the version
-		// const version = convertHexIntToDecimal(file.substring(0, 8));
-		file = file.slice(8);
-
-		// Second int is the amount of beatmaps
-		const amountOfBeatmaps = convertHexIntToDecimal(file.substring(0, 8));
-		file = file.slice(8);
-
-		const scoreData = [];
-
-		// Loop through the beatmaps
-		for (let i = 0; i < amountOfBeatmaps; i++) {
-			// String	MD5 hash of the beatmap
-			// const beatmapHash = getNextString(file).string;
-			file = getNextString(file).newFile;
-
-			// Int	Amount of scores
-			const scores = convertHexIntToDecimal(file.substring(0, 8));
+			// First int is the version
+			// const version = convertHexIntToDecimal(file.substring(0, 8));
 			file = file.slice(8);
 
-			for (let j = 0; j < scores; j++) {
-				const score = {
-					uploaderId: discordUser.osuUserId,
-				};
+			// Second int is the amount of beatmaps
+			const amountOfBeatmaps = convertHexIntToDecimal(file.substring(0, 8));
+			file = file.slice(8);
 
-				// Byte	osu! gameplay mode (0x00 = osu!，0x01 = osu!taiko，0x02 = osu!catch，0x03 = osu!mania)
-				score.mode = file.slice(0, 2);
-				file = file.slice(2);
+			const scoreData = [];
 
-				// Int	Version of this score/replay (e.g. 20150203)
-				score.version = convertHexIntToDecimal(file.substring(0, 8));
-				file = file.slice(8);
-
-				// String	Beatmap MD5 hash
-				score.beatmapHash = getNextString(file).string;
+			// Loop through the beatmaps
+			for (let i = 0; i < amountOfBeatmaps; i++) {
+				// String	MD5 hash of the beatmap
+				// const beatmapHash = getNextString(file).string;
 				file = getNextString(file).newFile;
 
-				// String	Player name
-				score.playerName = getNextString(file).string;
-				file = getNextString(file).newFile;
-
-				// String	Replay MD5 hash
-				score.replayHash = getNextString(file).string;
-				file = getNextString(file).newFile;
-
-				// Short	Number of 300's
-				score.count300 = convertHexIntToDecimal(file.substring(0, 4));
-				file = file.slice(4);
-
-				// Short	Number of 100's in osu!, 150's in osu!taiko, 100's in osu!catch, 100's in osu!mania
-				score.count100 = convertHexIntToDecimal(file.substring(0, 4));
-				file = file.slice(4);
-
-				// Short	Number of 50's in osu!, small fruit in osu!catch, 50's in osu!mania
-				score.count50 = convertHexIntToDecimal(file.substring(0, 4));
-				file = file.slice(4);
-
-				// Short	Number of Gekis in osu!, Max 300's in osu!mania
-				score.countGeki = convertHexIntToDecimal(file.substring(0, 4));
-				file = file.slice(4);
-
-				// Short	Number of Katus in osu!, 200's in osu!mania
-				score.countKatu = convertHexIntToDecimal(file.substring(0, 4));
-				file = file.slice(4);
-
-				// Short	Number of misses
-				score.countMiss = convertHexIntToDecimal(file.substring(0, 4));
-				file = file.slice(4);
-
-				// Int	Replay score
-				score.score = convertHexIntToDecimal(file.substring(0, 8));
+				// Int	Amount of scores
+				const scores = convertHexIntToDecimal(file.substring(0, 8));
 				file = file.slice(8);
 
-				// Short	Max Combo
-				score.maxCombo = convertHexIntToDecimal(file.substring(0, 4));
-				file = file.slice(4);
+				for (let j = 0; j < scores; j++) {
+					const score = {
+						uploaderId: discordUser.osuUserId,
+					};
 
-				// Boolean	Perfect combo
-				score.perfectCombo = file.slice(0, 2) !== '00';
-				file = file.slice(2);
+					// Byte	osu! gameplay mode (0x00 = osu!，0x01 = osu!taiko，0x02 = osu!catch，0x03 = osu!mania)
+					score.mode = file.slice(0, 2);
+					file = file.slice(2);
 
-				// Int	Bitwise combination of mods used. See Osr (file format) for more information.
-				score.mods = convertHexIntToDecimal(file.substring(0, 8));
-				file = file.slice(8);
+					// Int	Version of this score/replay (e.g. 20150203)
+					score.version = convertHexIntToDecimal(file.substring(0, 8));
+					file = file.slice(8);
 
-				// String	Should always be empty
-				// const emptyString = getNextString(file).string;
-				file = getNextString(file).newFile;
+					// String	Beatmap MD5 hash
+					score.beatmapHash = getNextString(file).string;
+					file = getNextString(file).newFile;
 
-				// Long	Timestamp of replay, in Windows ticks
-				score.timestamp = convertHexIntToDecimal(file.substring(0, 16));
-				file = file.slice(16);
+					// String	Player name
+					score.playerName = getNextString(file).string;
+					file = getNextString(file).newFile;
 
-				// Int	Should always be 0xffffffff (-1).
-				// const negativeOne = convertHexIntToDecimal(file.substring(0, 8));
-				file = file.slice(8);
+					// String	Replay MD5 hash
+					score.replayHash = getNextString(file).string;
+					file = getNextString(file).newFile;
 
-				// Long	Online Score ID
-				score.onlineScoreId = convertHexIntToDecimal(file.substring(0, 16));
-				file = file.slice(16);
+					// Short	Number of 300's
+					score.count300 = convertHexIntToDecimal(file.substring(0, 4));
+					file = file.slice(4);
 
-				// Double	Additional mod information. Only present if Target Practice is enabled.
-				if (getMods(score.mods).includes('TG')) {
+					// Short	Number of 100's in osu!, 150's in osu!taiko, 100's in osu!catch, 100's in osu!mania
+					score.count100 = convertHexIntToDecimal(file.substring(0, 4));
+					file = file.slice(4);
+
+					// Short	Number of 50's in osu!, small fruit in osu!catch, 50's in osu!mania
+					score.count50 = convertHexIntToDecimal(file.substring(0, 4));
+					file = file.slice(4);
+
+					// Short	Number of Gekis in osu!, Max 300's in osu!mania
+					score.countGeki = convertHexIntToDecimal(file.substring(0, 4));
+					file = file.slice(4);
+
+					// Short	Number of Katus in osu!, 200's in osu!mania
+					score.countKatu = convertHexIntToDecimal(file.substring(0, 4));
+					file = file.slice(4);
+
+					// Short	Number of misses
+					score.countMiss = convertHexIntToDecimal(file.substring(0, 4));
+					file = file.slice(4);
+
+					// Int	Replay score
+					score.score = convertHexIntToDecimal(file.substring(0, 8));
+					file = file.slice(8);
+
+					// Short	Max Combo
+					score.maxCombo = convertHexIntToDecimal(file.substring(0, 4));
+					file = file.slice(4);
+
+					// Boolean	Perfect combo
+					score.perfectCombo = file.slice(0, 2) !== '00';
+					file = file.slice(2);
+
+					// Int	Bitwise combination of mods used. See Osr (file format) for more information.
+					score.mods = convertHexIntToDecimal(file.substring(0, 8));
+					file = file.slice(8);
+
+					// String	Should always be empty
+					// const emptyString = getNextString(file).string;
+					file = getNextString(file).newFile;
+
+					// Long	Timestamp of replay, in Windows ticks
+					score.timestamp = convertHexIntToDecimal(file.substring(0, 16));
 					file = file.slice(16);
+
+					// Int	Should always be 0xffffffff (-1).
+					// const negativeOne = convertHexIntToDecimal(file.substring(0, 8));
+					file = file.slice(8);
+
+					// Long	Online Score ID
+					score.onlineScoreId = convertHexIntToDecimal(file.substring(0, 16));
+					file = file.slice(16);
+
+					// Double	Additional mod information. Only present if Target Practice is enabled.
+					if (getMods(score.mods).includes('TG')) {
+						file = file.slice(16);
+					}
+
+					scoreData.push(score);
 				}
-
-				scoreData.push(score);
 			}
-		}
 
-		// Create the scores in the database
-		//TODO: add attributes and logdatabasequeries
-		logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuSoloScores findAll');
-		let uploaderScores = await DBOsuSoloScores.findAll({
-			where: {
-				uploaderId: discordUser.osuUserId,
-			},
-		});
-
-		// Remove scores that are already in the database
-		for (let i = 0; i < uploaderScores.length; i++) {
-			const score = uploaderScores[i];
-
-			const existingScoreIndex = scoreData.findIndex(scoreData => scoreData.replayHash === score.replayHash);
-
-			if (existingScoreIndex !== -1) {
-				scoreData.splice(existingScoreIndex, 1);
-			}
-		}
-
-		const newScores = scoreData;
-
-		// Add the new scores to the database
-		logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuSoloScores create');
-		await DBOsuSoloScores.bulkCreate(newScores);
-
-		await interaction.editReply(`Successfully uploaded ${newScores.length} new score(s)!`);
-
-		// Update teamsheets
-		//TODO: add attributes and logdatabasequeries
-		logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuTeamsheets update');
-		let teamsheets = await DBOsuTeamSheets.findAll({
-			where: {
-				players: {
-					[Op.like]: `%${discordUser.osuUserId}%`,
-				},
-			},
-		});
-
-		//TODO: add attributes and logdatabasequeries
-		let newScoreMaps = await DBOsuBeatmaps.findAll({
-			where: {
-				hash: {
-					[Op.in]: newScores.map(score => score.beatmapHash),
-				},
-			},
-		});
-
-		for (let i = 0; i < teamsheets.length; i++) {
-			const teamsheet = teamsheets[i];
-
+			// Create the scores in the database
 			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(4, 'commands/osu-teamsheet.js DBOsuMappools');
-			let mappool = await DBOsuMappools.findAll({
+			logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuSoloScores findAll');
+			let uploaderScores = await DBOsuSoloScores.findAll({
 				where: {
-					creatorId: teamsheet.poolCreatorId,
-					name: teamsheet.poolName,
-					beatmapId: {
-						[Op.in]: newScoreMaps.map(map => map.beatmapId),
-					},
+					uploaderId: discordUser.osuUserId,
 				},
-				order: [
-					['number', 'ASC']
-				]
 			});
 
-			if (mappool.length === 0) {
-				continue;
-			}
+			// Remove scores that are already in the database
+			for (let i = 0; i < uploaderScores.length; i++) {
+				const score = uploaderScores[i];
 
-			if (new Date() > new Date(teamsheet.updateUntil)) {
-				teamsheet.destroy();
-				continue;
-			}
+				const existingScoreIndex = scoreData.findIndex(scoreData => scoreData.replayHash === score.replayHash);
 
-			if (logBroadcastEval) {
-				// eslint-disable-next-line no-console
-				console.log('Broadcasting commands/osu-scoreupload.js to shards...');
-			}
-
-			// Delete the message of the teamsheet and create a new one
-			await interaction.client.shard.broadcastEval(async (c, { guildId, channelId, messageId, teamsize, poolCreatorId, players, mappool, duelratingestimate, updatefor }) => {
-				const guild = await c.guilds.fetch(guildId);
-
-				if (!guild || guild.shardId !== c.shardId) {
-					return;
+				if (existingScoreIndex !== -1) {
+					scoreData.splice(existingScoreIndex, 1);
 				}
+			}
 
-				const channel = await guild.channels.fetch(channelId);
-				if (!channel) return;
+			const newScores = scoreData;
 
-				const message = await channel.messages.fetch(messageId);
-				if (!message) return;
+			// Add the new scores to the database
+			logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuSoloScores create');
+			await DBOsuSoloScores.bulkCreate(newScores);
 
-				try {
-					await message.delete();
-				} catch (e) {
-					//Nothing
-				}
-				// eslint-disable-next-line no-undef
-				const { DBOsuTeamSheets, DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+			await interaction.editReply(`Successfully uploaded ${newScores.length} new score(s)!`);
 
-				DBOsuTeamSheets.destroy({
-					where: {
-						messageId: messageId,
-					}
-				});
+			updateTeamSheets(interaction, discordUser, newScores);
+		} else if (interaction.options.getSubcommand() === 'guesstimate') {
+			let beatmap = await getOsuBeatmap({ beatmapId: interaction.options.getString('beatmap') });
 
-				// Create the new message
-				// eslint-disable-next-line no-undef
-				const command = require((`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-teamsheet.js`));
+			let mods = interaction.options.getString('mods');
 
-				//TODO: add attributes and logdatabasequeries
-				let discordUser = await DBDiscordUsers.findOne({
-					where: {
-						osuUserId: poolCreatorId,
-					}
-				});
+			if (mods === null) {
+				mods = '';
+			}
 
-				let creator = await guild.members.fetch(discordUser.userId);
+			if (!mods.includes('V2')) {
+				mods += 'V2';
+			}
 
-				//Setup artificial interaction
-				let interaction = {
-					id: null,
-					channel: channel,
-					client: c,
-					guild: guild,
-					user: creator.user,
-					options: {
-						getString: (string) => {
-							if (string === 'players') {
-								return players;
-							} else if (string === 'mappool') {
-								return mappool;
-							}
-						},
-						getNumber: (string) => {
-							if (string === 'teamsize') {
-								return teamsize;
-							} else if (string === 'updatefor') {
-								return updatefor;
-							}
-						},
-						getBoolean: (string) => {
-							if (string === 'duelratingestimate') {
-								return duelratingestimate;
-							}
-						}
-					},
-					deferReply: () => { },
-					followUp: async (input) => {
-						return await channel.send(input);
-					},
-					editReply: async (input) => {
-						return await channel.send(input);
-					},
-					reply: async (input) => {
-						return await channel.send(input);
-					}
-				};
+			let modBits = getModBits(mods);
 
-				command.execute(null, null, interaction);
-			}, {
-				context: {
-					guildId: teamsheet.guildId,
-					channelId: teamsheet.channelId,
-					messageId: teamsheet.messageId,
-					teamsize: teamsheet.teamsize,
-					poolCreatorId: teamsheet.poolCreatorId,
-					players: teamsheet.players,
-					mappool: teamsheet.poolName,
-					duelratingestimate: teamsheet.duelratingestimate,
-					updatefor: Math.round((teamsheet.updateUntil.getTime() - new Date().getTime()) / 1000 / 60),
+			if (mods !== getMods(modBits).join('')) {
+				return await interaction.followUp('Invalid mods');
+			}
+
+			let guesstimate = {
+				beatmapHash: beatmap.hash,
+				score: interaction.options.getInteger('score'),
+				uploaderId: discordUser.osuUserId,
+				mods: modBits,
+				mode: '00',
+				playerName: discordUser.osuName,
+			};
+
+			// Delete existing guesstimate
+			let deleted = await DBOsuSoloScores.destroy({
+				where: {
+					uploaderId: discordUser.osuUserId,
+					beatmapHash: beatmap.hash,
+					mods: modBits,
+					mode: '00',
+					timestamp: null,
 				}
 			});
 
+			if (deleted > 0) {
+				await interaction.followUp('Deleted existing guesstimate');
+			}
+
+			// Create new guesstimate
+			let newScores = [guesstimate];
+
+			logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuSoloScores create');
+			await DBOsuSoloScores.bulkCreate(newScores);
+
+			await interaction.followUp({ content: `Successfully uploaded ${newScores.length} new guesstimate!`, ephemeral: true });
+
+			updateTeamSheets(interaction, discordUser, newScores);
 		}
 	},
 };
@@ -421,4 +401,155 @@ function getNextString(file) {
 	file = file.slice(stringLength * 2);
 
 	return { string: outputString, newFile: file };
+}
+
+async function updateTeamSheets(interaction, discordUser, newScores) {
+	// Update teamsheets
+	//TODO: add attributes and logdatabasequeries
+	logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuTeamsheets update');
+	let teamsheets = await DBOsuTeamSheets.findAll({
+		where: {
+			players: {
+				[Op.like]: `%${discordUser.osuUserId}%`,
+			},
+		},
+	});
+
+	//TODO: add attributes and logdatabasequeries
+	let newScoreMaps = await DBOsuBeatmaps.findAll({
+		where: {
+			hash: {
+				[Op.in]: newScores.map(score => score.beatmapHash),
+			},
+		},
+	});
+
+	for (let i = 0; i < teamsheets.length; i++) {
+		const teamsheet = teamsheets[i];
+
+		//TODO: add attributes and logdatabasequeries
+		logDatabaseQueries(4, 'commands/osu-teamsheet.js DBOsuMappools');
+		let mappool = await DBOsuMappools.findAll({
+			where: {
+				creatorId: teamsheet.poolCreatorId,
+				name: teamsheet.poolName,
+				beatmapId: {
+					[Op.in]: newScoreMaps.map(map => map.beatmapId),
+				},
+			},
+			order: [
+				['number', 'ASC']
+			]
+		});
+
+		if (mappool.length === 0) {
+			continue;
+		}
+
+		if (new Date() > new Date(teamsheet.updateUntil)) {
+			teamsheet.destroy();
+			continue;
+		}
+
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting commands/osu-scoreupload.js to shards...');
+		}
+
+		// Delete the message of the teamsheet and create a new one
+		await interaction.client.shard.broadcastEval(async (c, { guildId, channelId, messageId, teamsize, poolCreatorId, players, mappool, duelratingestimate, updatefor }) => {
+			const guild = await c.guilds.fetch(guildId);
+
+			if (!guild || guild.shardId !== c.shardId) {
+				return;
+			}
+
+			const channel = await guild.channels.fetch(channelId);
+			if (!channel) return;
+
+			const message = await channel.messages.fetch(messageId);
+			if (!message) return;
+
+			try {
+				await message.delete();
+			} catch (e) {
+				//Nothing
+			}
+			// eslint-disable-next-line no-undef
+			const { DBOsuTeamSheets, DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+
+			DBOsuTeamSheets.destroy({
+				where: {
+					messageId: messageId,
+				}
+			});
+
+			// Create the new message
+			// eslint-disable-next-line no-undef
+			const command = require((`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-teamsheet.js`));
+
+			//TODO: add attributes and logdatabasequeries
+			let discordUser = await DBDiscordUsers.findOne({
+				where: {
+					osuUserId: poolCreatorId,
+				}
+			});
+
+			let creator = await guild.members.fetch(discordUser.userId);
+
+			//Setup artificial interaction
+			let interaction = {
+				id: null,
+				channel: channel,
+				client: c,
+				guild: guild,
+				user: creator.user,
+				options: {
+					getString: (string) => {
+						if (string === 'players') {
+							return players;
+						} else if (string === 'mappool') {
+							return mappool;
+						}
+					},
+					getNumber: (string) => {
+						if (string === 'teamsize') {
+							return teamsize;
+						} else if (string === 'updatefor') {
+							return updatefor;
+						}
+					},
+					getBoolean: (string) => {
+						if (string === 'duelratingestimate') {
+							return duelratingestimate;
+						}
+					}
+				},
+				deferReply: () => { },
+				followUp: async (input) => {
+					return await channel.send(input);
+				},
+				editReply: async (input) => {
+					return await channel.send(input);
+				},
+				reply: async (input) => {
+					return await channel.send(input);
+				}
+			};
+
+			command.execute(null, null, interaction);
+		}, {
+			context: {
+				guildId: teamsheet.guildId,
+				channelId: teamsheet.channelId,
+				messageId: teamsheet.messageId,
+				teamsize: teamsheet.teamsize,
+				poolCreatorId: teamsheet.poolCreatorId,
+				players: teamsheet.players,
+				mappool: teamsheet.poolName,
+				duelratingestimate: teamsheet.duelratingestimate,
+				updatefor: Math.round((teamsheet.updateUntil.getTime() - new Date().getTime()) / 1000 / 60),
+			}
+		});
+	}
 }

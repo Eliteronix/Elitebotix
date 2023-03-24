@@ -414,6 +414,7 @@ module.exports = {
 				'countMiss',
 				'uploaderId',
 				'maxCombo',
+				'timestamp',
 			],
 			where: {
 				uploaderId: {
@@ -893,13 +894,26 @@ module.exports = {
 						ctx.strokeStyle = '#FFFFFF';
 						ctx.lineWidth = 4;
 						ctx.strokeRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
-					} else if (playerScores[k].scoringType === 'Local') {
+					} else if (playerScores[k].scoringType === 'Local' && playerScores[k].timestamp) {
 						if (!legendItems.includes('Local')) {
 							legendItems.push('Local');
 						}
 
 						// Draw a green rectangle
 						ctx.fillStyle = '#00FF00';
+						ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
+
+						// Draw a white border
+						ctx.strokeStyle = '#FFFFFF';
+						ctx.lineWidth = 4;
+						ctx.strokeRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
+					} else if (playerScores[k].scoringType === 'Local') {
+						if (!legendItems.includes('Guesstimate')) {
+							legendItems.push('Guesstimate');
+						}
+
+						// Draw a yellow rectangle
+						ctx.fillStyle = '#FF0000';
 						ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
 
 						// Draw a white border
@@ -1082,6 +1096,9 @@ module.exports = {
 			} else if (legendItems[i] === 'Local') {
 				text = 'Local Score';
 				colour = '#00FF00';
+			} else if (legendItems[i] === 'Guesstimate') {
+				text = 'Guesstimate';
+				colour = '#FF0000';
 			}
 
 			// Draw the text
@@ -1105,7 +1122,6 @@ module.exports = {
 			ctx.strokeRect(24 + i * 250, 128 + 100 * tourneyMaps.length, 200, 60);
 		}
 
-		// TODO: Draw a legend for estimated score
 		// TODO: Manual lineup
 		// TODO: EZ Multiplier
 		// TODO: FL Multiplier
