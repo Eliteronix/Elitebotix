@@ -382,6 +382,7 @@ module.exports = {
 			}
 
 			dbBeatmap.modPoolCount = map.modPoolNumber;
+			dbBeatmap.scores = [];
 
 			tourneyMaps.push(dbBeatmap);
 
@@ -390,6 +391,7 @@ module.exports = {
 
 				dbBeatmapHD.modPool = 'FMHD';
 				dbBeatmapHD.modPoolCount = map.modPoolNumber;
+				dbBeatmapHD.scores = [];
 
 				tourneyMaps.push(dbBeatmapHD);
 
@@ -397,6 +399,7 @@ module.exports = {
 
 				dbBeatmapHR.modPool = 'FMHR';
 				dbBeatmapHR.modPoolCount = map.modPoolNumber;
+				dbBeatmapHR.scores = [];
 
 				tourneyMaps.push(dbBeatmapHR);
 			}
@@ -552,15 +555,14 @@ module.exports = {
 				}
 
 				playerScores = playerScores.concat(soloScoresWithoutMultiScores);
-			}
 
-			players[i] = {
-				player: players[i],
-				scores: playerScores.concat(finalMultiPlayerScores),
-			};
+				let finalMapMultiPlayerScores = finalMultiPlayerScores.filter(score => scoreIsCorrectMods(score, tourneyMaps[j].modPool) && score.beatmapId === tourneyMaps[j].beatmapId);
 
-			for (let j = 0; j < tourneyMaps.length; j++) {
-				let scores = players[i].scores.filter(score => score.beatmapHash === tourneyMaps[j].hash);
+				let playerMapScores = soloScoresWithoutMultiScores.concat(finalMapMultiPlayerScores);
+
+				tourneyMaps[j].scores.push(playerMapScores);
+
+				let scores = tourneyMaps[j].scores[i].filter(score => score.beatmapHash === tourneyMaps[j].hash);
 
 				if (scores.length > 0) {
 					continue;
@@ -569,7 +571,7 @@ module.exports = {
 				if (!['Graveyard', 'WIP', 'Pending'].includes(tourneyMaps[j].approvalStatus)) {
 					// eslint-disable-next-line no-undef
 					process.send('osu!API');
-					await osuApi.getScores({ b: tourneyMaps[j].beatmapId, u: players[i].player.osuUserId, m: 0 })
+					await osuApi.getScores({ b: tourneyMaps[j].beatmapId, u: players[i].osuUserId, m: 0 })
 						.then(async mapScores => {
 							if (mapScores.length === 0) {
 								return null;
@@ -630,7 +632,7 @@ module.exports = {
 
 							mapScores = mapScores.filter(score => scoreIsCorrectMods(score, tourneyMaps[j].modPool));
 
-							players[i].scores = players[i].scores.concat(mapScores);
+							tourneyMaps[j].scores[i] = tourneyMaps[j].scores[i].concat(mapScores);
 						})
 						.catch(async err => {
 							if (err.message !== 'Not found') {
@@ -638,7 +640,7 @@ module.exports = {
 							}
 						});
 
-					scores = players[i].scores.filter(score => score.beatmapHash === tourneyMaps[j].hash);
+					scores = tourneyMaps[j].scores[i].filter(score => score.beatmapHash === tourneyMaps[j].hash);
 				}
 
 				if (scores.length > 0 || !interaction.options.getBoolean('duelratingestimate')) {
@@ -648,19 +650,19 @@ module.exports = {
 				let duelRating = null;
 
 				if (tourneyMaps[j].modPool === 'NM') {
-					duelRating = players[i].player.osuNoModDuelStarRating;
+					duelRating = players[i].osuNoModDuelStarRating;
 				} else if (tourneyMaps[j].modPool === 'HD') {
-					duelRating = players[i].player.osuHiddenDuelStarRating;
+					duelRating = players[i].osuHiddenDuelStarRating;
 				} else if (tourneyMaps[j].modPool === 'HR') {
-					duelRating = players[i].player.osuHardRockDuelStarRating;
+					duelRating = players[i].osuHardRockDuelStarRating;
 				} else if (tourneyMaps[j].modPool === 'DT') {
-					duelRating = players[i].player.osuDoubleTimeDuelStarRating;
+					duelRating = players[i].osuDoubleTimeDuelStarRating;
 				} else {
-					duelRating = players[i].player.osuFreeModDuelStarRating;
+					duelRating = players[i].osuFreeModDuelStarRating;
 				}
 
 				if (duelRating === null) {
-					duelRating = players[i].player.osuDuelStarRating;
+					duelRating = players[i].osuDuelStarRating;
 				}
 
 				// Get an estimate using the duel rating
@@ -681,7 +683,7 @@ module.exports = {
 					expectedScore = 950000;
 				}
 
-				players[i].scores.push({
+				tourneyMaps[j].scores[i].push({
 					beatmapId: tourneyMaps[j].beatmapId,
 					score: expectedScore,
 					beatmapHash: tourneyMaps[j].hash,
@@ -740,10 +742,10 @@ module.exports = {
 			ctx.font = 'bold 60px comfortaa';
 			ctx.fillStyle = '#FFFFFF';
 			ctx.textAlign = 'center';
-			ctx.fillText(players[i].player.osuName, 604 + 240 + 400 * i, 75, 275);
+			ctx.fillText(players[i].osuName, 604 + 240 + 400 * i, 75, 275);
 
 			// Draw the avatar
-			let avatar = await getAvatar(players[i].player.osuUserId);
+			let avatar = await getAvatar(players[i].osuUserId);
 			ctx.drawImage(avatar, 604 + 400 * i + 10, 4 + 10, 80, 80);
 		}
 
@@ -851,7 +853,7 @@ module.exports = {
 				ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1), 400, 100);
 
 				// Draw the player's score
-				let playerScores = players[j].scores.filter(score => score.beatmapHash === tourneyMaps[i].hash && scoreIsCorrectMods(score, tourneyMaps[i].modPool));
+				let playerScores = tourneyMaps[i].scores[j];
 
 				playerScores = playerScores.sort((a, b) => b.score - a.score);
 
@@ -950,7 +952,7 @@ module.exports = {
 				averageScore = Math.round(averageScore / Math.min(playerScores.length, 3));
 
 				if (averageScore) {
-					lineup.push({ score: averageScore, player: players[j].player.osuName });
+					lineup.push({ score: averageScore, player: players[j].osuName });
 
 					let colour = getGradientColour(averageScore / 10000);
 
@@ -1167,7 +1169,7 @@ module.exports = {
 				channelId: interaction.channel.id,
 				messageId: sentMessage.id,
 				updateUntil: date,
-				players: players.map(player => player.player.osuUserId).join(','),
+				players: players.map(player => player.osuUserId).join(','),
 				poolName: interaction.options.getString('mappool'),
 				poolCreatorId: commandUser.osuUserId,
 				teamsize: teamsize,
