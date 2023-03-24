@@ -92,9 +92,22 @@ module.exports = {
 
 			members = members.map(member => member.id);
 
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
 			discordUsers = await DBDiscordUsers.findAll({
+				attributes: [
+					'userId',
+					'osuUserId',
+					'osuName',
+					'osuVerified',
+					'osuRank',
+					'osuPP',
+					'taikoRank',
+					'taikoPP',
+					'catchRank',
+					'catchPP',
+					'maniaRank',
+					'maniaPP'
+				],
 				where: {
 					userId: {
 						[Op.in]: members,
