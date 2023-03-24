@@ -186,13 +186,13 @@ require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
 // 	})
 // 	.catch(console.error);
 
-// osuData.sync({ alter: true })
-// 	.then(async () => {
-// 		// eslint-disable-next-line no-console
-// 		console.log('osuData database synced');
-// 		osuData.close();
-// 	})
-// 	.catch(console.error);
+osuData.sync({ alter: true })
+	.then(async () => {
+		// eslint-disable-next-line no-console
+		console.log('osuData database synced');
+		osuData.close();
+	})
+	.catch(console.error);
 
 // elitiriData.sync({ alter: true })
 // 	.then(async () => {
@@ -202,13 +202,13 @@ require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
 // 	})
 // 	.catch(console.error);
 
-multiScores.sync({ alter: true })
-	.then(async () => {
-		// eslint-disable-next-line no-console
-		console.log('multiScores database synced');
-		multiScores.close();
-	})
-	.catch(console.error);
+// multiScores.sync({ alter: true })
+// 	.then(async () => {
+// 		// eslint-disable-next-line no-console
+// 		console.log('multiScores database synced');
+// 		multiScores.close();
+// 	})
+// 	.catch(console.error);
 
 // beatmaps.sync({ alter: true })
 // 	.then(async () => {

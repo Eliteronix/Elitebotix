@@ -99,6 +99,40 @@ module.exports = {
 					{ name: 'Next week', value: 10080 },
 					{ name: 'Next 2 weeks', value: 20160 },
 				)
+		)
+		.addNumberOption(option =>
+			option.setName('ezmultiplier')
+				.setNameLocalizations({
+					'de': 'ezmultiplikator',
+					'en-GB': 'ezmultiplier',
+					'en-US': 'ezmultiplier',
+				})
+				.setDescription('The EZ multiplier for the tournament')
+				.setDescriptionLocalizations({
+					'de': 'Der EZ Multiplikator für das Turnier',
+					'en-GB': 'The EZ multiplier for the tournament',
+					'en-US': 'The EZ multiplier for the tournament',
+				})
+				.setRequired(false)
+				.setMinValue(0)
+				.setMaxValue(5)
+		)
+		.addNumberOption(option =>
+			option.setName('flmultiplier')
+				.setNameLocalizations({
+					'de': 'flmultiplikator',
+					'en-GB': 'flmultiplier',
+					'en-US': 'flmultiplier',
+				})
+				.setDescription('The FL multiplier for the tournament')
+				.setDescriptionLocalizations({
+					'de': 'Der FL Multiplikator für das Turnier',
+					'en-GB': 'The FL multiplier for the tournament',
+					'en-US': 'The FL multiplier for the tournament',
+				})
+				.setRequired(false)
+				.setMinValue(0)
+				.setMaxValue(5)
 		),
 	// .addBooleanOption(option =>
 	// 	option.setName('duelratingestimate')
@@ -264,6 +298,18 @@ module.exports = {
 		}
 
 		let teamsize = interaction.options.getNumber('teamsize');
+
+		let ezmultiplier = 1.75;
+
+		if (interaction.options.getNumber('ezmultiplier')) {
+			ezmultiplier = interaction.options.getNumber('ezmultiplier');
+		}
+
+		let flmultiplier = 1.5;
+
+		if (interaction.options.getNumber('flmultiplier')) {
+			flmultiplier = interaction.options.getNumber('flmultiplier');
+		}
 
 		let rawPlayers = interaction.options.getString('players').split(',');
 
@@ -518,6 +564,8 @@ module.exports = {
 
 						if (tourneyMaps[i].modPool.includes('FL')) {
 							multiplier *= 1.12;
+
+							multiplier *= flmultiplier;
 						}
 
 						if (tourneyMaps[i].modPool.includes('HD')) {
@@ -530,6 +578,8 @@ module.exports = {
 
 						if (tourneyMaps[i].modPool.includes('EZ')) {
 							multiplier *= 0.5;
+
+							multiplier *= ezmultiplier;
 						}
 
 						if (tourneyMaps[i].modPool.includes('S0')) {
@@ -588,6 +638,8 @@ module.exports = {
 
 								if (mods.includes('FL')) {
 									multiplier *= 1.12;
+
+									multiplier *= flmultiplier;
 								}
 
 								if (mods.includes('HD')) {
@@ -600,6 +652,8 @@ module.exports = {
 
 								if (mods.includes('EZ')) {
 									multiplier *= 0.5;
+
+									multiplier *= ezmultiplier;
 								}
 
 								if (mods.includes('S0')) {
@@ -851,14 +905,31 @@ module.exports = {
 				// Draw the player's score
 				let playerScores = tourneyMaps[i].scores[j];
 
+				//Apply EZ and FL multipliers
+				if (tourneyMaps[i].modPool !== 'FMHD' && tourneyMaps[i].modPool !== 'FMHR') {
+					for (let k = 0; k < playerScores.length; k++) {
+						let mods = getMods(playerScores[k].mods);
+
+						if (mods.includes('EZ')) {
+							playerScores[k].score *= ezmultiplier;
+						}
+
+						if (mods.includes('FL')) {
+							playerScores[k].score *= flmultiplier;
+						}
+
+						playerScores[k].score = Math.round(playerScores[k].score);
+					}
+				}
+
 				playerScores = playerScores.sort((a, b) => b.score - a.score);
 
 				let averageScore = 0;
 
 				for (let k = 0; k < playerScores.length && k < 3; k++) {
-					averageScore += Number(playerScores[k].score);
-
 					let score = Number(playerScores[k].score);
+
+					averageScore += score;
 
 					// Draw the background
 					let colour = getGradientColour(score / 10000);
@@ -936,8 +1007,11 @@ module.exports = {
 					// Draw the player's score
 					ctx.fillStyle = '#FFFFFF';
 					ctx.font = 'bold 20px comfortaa';
-					ctx.textAlign = 'center';
-					ctx.fillText(humanReadable(score), 686 + 400 * j, 4 + 100 * (i + 1) + 25 + (k * 33), 100);
+					ctx.textAlign = 'left';
+					ctx.strokeStyle = 'black';
+					ctx.lineWidth = 1;
+					ctx.strokeText(humanReadable(score), 625 + 400 * j, 4 + 100 * (i + 1) + 25 + (k * 33), 100);
+					ctx.fillText(humanReadable(score), 625 + 400 * j, 4 + 100 * (i + 1) + 25 + (k * 33), 100);
 
 					// Draw the border
 					ctx.strokeStyle = '#FFFFFF';
@@ -974,6 +1048,9 @@ module.exports = {
 					ctx.fillStyle = '#FFFFFF';
 					ctx.font = 'bold 60px comfortaa';
 					ctx.textAlign = 'center';
+					ctx.strokeStyle = 'black';
+					ctx.lineWidth = 3;
+					ctx.strokeText(humanReadable(averageScore), 604 + 275 + 400 * j, 4 + 100 * (i + 1) + 75, 200);
 					ctx.fillText(humanReadable(averageScore), 604 + 275 + 400 * j, 4 + 100 * (i + 1) + 75, 200);
 				}
 
@@ -1070,6 +1147,9 @@ module.exports = {
 				ctx.fillStyle = '#FFFFFF';
 				ctx.font = 'bold 60px comfortaa';
 				ctx.textAlign = 'center';
+				ctx.strokeStyle = 'black';
+				ctx.lineWidth = 3;
+				ctx.strokeText(humanReadable(finalLineupScore), 204 + 200 + 400 * (players.length + 2), 4 + 100 * (i + 1) + 75, 375);
 				ctx.fillText(humanReadable(finalLineupScore), 204 + 200 + 400 * (players.length + 2), 4 + 100 * (i + 1) + 75, 375);
 			}
 
@@ -1136,9 +1216,8 @@ module.exports = {
 		}
 
 		// TODO: Manual lineup
-		// TODO: EZ Multiplier
-		// TODO: FL Multiplier
 		// TODO: FM Lineup (Mods)
+		// TODO: Match tracking
 
 		// Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'teamsheet.png' })];
@@ -1163,7 +1242,7 @@ module.exports = {
 			}
 		}
 
-		content += '\n\n Use </osu-scoreupload fileupload:1084953371435356291> to upload your local scores.\nUse </osu-scoreupload guesstimate:1084953371435356291> to add a guesstimate.';
+		content += `\n\nEZ Multiplier: ${ezmultiplier}\nFL Multiplier: ${flmultiplier}\n\n Use </osu-scoreupload fileupload:1084953371435356291> to upload your local scores.\nUse </osu-scoreupload guesstimate:1084953371435356291> to add a guesstimate.`;
 
 		if (interaction.options.getNumber('updatefor')) {
 			if (interaction.id) {
@@ -1189,13 +1268,11 @@ module.exports = {
 		} else {
 			await interaction.followUp({ content: content, files: files });
 		}
-
-		//TODO: Match tracking
 	},
 };
 
 function getGradientColour(percentage) {
-	// #630000 = 0% -> Gradient -> #990000 = 20% -> Gradient -> #b58800 = 50% -> Gradient -> #e2af15 = 59% | #2b6114 = 60% -> Gradient -> #93f06b = 79% | #1155cc is anything above 80%
+	// #630000 = 0% -> Gradient -> #990000 = 20% -> Gradient -> #b58800 = 40% -> Gradient -> #e2af15 = 50% | #224c10 = 50% -> Gradient -> #51b526 = 79% | #1155cc is anything above 80%
 	let red = 0;
 	let green = 0;
 	let blue = 0;
@@ -1209,33 +1286,33 @@ function getGradientColour(percentage) {
 
 		// 00 hex at 0 score, 00 hex at 20%
 		blue = 0 + 0 * (percentage / 20);
+	} else if (percentage < 40) {
+		// 99 hex at 20%, b5 hex at 40%
+		red = 153 + 42 * ((percentage - 20) / 20);
+
+		// 00 hex at 20%, 88 hex at 40%
+		green = 0 + 136 * ((percentage - 20) / 20);
+
+		// 00 hex at 20%, 00 hex at 40%
+		blue = 0 + 0 * ((percentage - 20) / 20);
 	} else if (percentage < 50) {
-		// 99 hex at 20%, b5 hex at 50%
-		red = 153 + 42 * ((percentage - 20) / 30);
+		// b5 hex at 40%, e2 hex at 50%
+		red = 181 + 45 * ((percentage - 40) / 10);
 
-		// 00 hex at 20%, 88 hex at 50%
-		green = 0 + 136 * ((percentage - 20) / 30);
+		// 88 hex at 40%, af hex at 50%
+		green = 136 + 47 * ((percentage - 40) / 10);
 
-		// 00 hex at 20%, 00 hex at 50%
-		blue = 0 + 0 * ((percentage - 20) / 30);
-	} else if (percentage < 60) {
-		// b5 hex at 40%, e2 hex at 60%
-		red = 181 + 27 * ((percentage - 40) / 20);
-
-		// 88 hex at 40%, af hex at 60%
-		green = 136 + 47 * ((percentage - 40) / 20);
-
-		// 00 hex at 40%, 15 hex at 60%
-		blue = 0 + 21 * ((percentage - 40) / 20);
+		// 00 hex at 40%, 15 hex at 50%
+		blue = 0 + 21 * ((percentage - 40) / 10);
 	} else if (percentage < 80) {
-		// 2b hex at 60%, 93 hex at 80%
-		red = 43 + 76 * ((percentage - 60) / 20);
+		// 22 hex at 50%, 51 hex at 79%
+		red = 34 + 29 * ((percentage - 50) / 29);
 
-		// 61 hex at 60%, f0 hex at 80%
-		green = 97 + 111 * ((percentage - 60) / 20);
+		// 4c hex at 50%, b5 hex at 79%
+		green = 76 + 73 * ((percentage - 50) / 29);
 
-		// 14 hex at 60%, 6b hex at 80%
-		blue = 20 + 75 * ((percentage - 60) / 20);
+		// 10 hex at 50%, 26 hex at 79%
+		blue = 16 + 10 * ((percentage - 50) / 29);
 	} else {
 		// 11 hex
 		red = 17;

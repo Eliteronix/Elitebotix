@@ -461,7 +461,7 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 		}
 
 		// Delete the message of the teamsheet and create a new one
-		await interaction.client.shard.broadcastEval(async (c, { guildId, channelId, messageId, teamsize, poolCreatorId, players, mappool, duelratingestimate, updatefor }) => {
+		await interaction.client.shard.broadcastEval(async (c, { guildId, channelId, messageId, teamsize, poolCreatorId, players, mappool, duelratingestimate, EZMultiplier, FLMultiplier, updatefor }) => {
 			const guild = await c.guilds.fetch(guildId);
 
 			if (!guild || guild.shardId !== c.shardId) {
@@ -521,6 +521,10 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 							return teamsize;
 						} else if (string === 'updatefor') {
 							return updatefor;
+						} else if (string === 'ezmultiplier') {
+							return EZMultiplier;
+						} else if (string === 'flmultiplier') {
+							return FLMultiplier;
 						}
 					},
 					getBoolean: (string) => {
@@ -552,6 +556,8 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 				players: teamsheet.players,
 				mappool: teamsheet.poolName,
 				duelratingestimate: teamsheet.duelratingestimate,
+				EZMultiplier: teamsheet.EZMultiplier,
+				FLMultiplier: teamsheet.FLMultiplier,
 				updatefor: Math.round((teamsheet.updateUntil.getTime() - new Date().getTime()) / 1000 / 60),
 			}
 		});

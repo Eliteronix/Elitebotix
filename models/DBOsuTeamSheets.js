@@ -17,6 +17,14 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
 		},
+		EZMultiplier: {
+			type: DataTypes.DECIMAL(10, 2),
+			defaultValue: 1.75,
+		},
+		FLMultiplier: {
+			type: DataTypes.DECIMAL(10, 2),
+			defaultValue: 1.5,
+		},
 		paranoid: true,
 	});
 };
