@@ -251,8 +251,9 @@ module.exports = {
 			return;
 		}
 
-		//TODO: add attributes and logdatabasequeries
+		logDatabaseQueries(4, 'commands/osu-teamsheet.js (execute) DBDiscordUsers commandUser');
 		let commandUser = await DBDiscordUsers.findOne({
+			attributes: ['osuUserId', 'osuVerified'],
 			where: {
 				userId: interaction.user.id
 			}
@@ -279,9 +280,9 @@ module.exports = {
 		for (let i = 0; i < rawPlayers.length; i++) {
 			let username = rawPlayers[i].trim();
 
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBDiscordUsers');
+			logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBDiscordUsers findOne');
 			let discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId', 'osuName'],
 				where: {
 					[Op.or]: {
 						osuUserId: getIDFromPotentialOsuLink(username),
@@ -313,8 +314,9 @@ module.exports = {
 				});
 
 			if (osuUser) {
-				//TODO: add attributes and logdatabasequeries
+				logDatabaseQueries(4, 'commands/osu-teamsheet.js DBDiscordUsers (osuUser)');
 				let discordUser = await DBDiscordUsers.findOne({
+					attributes: ['osuUserId', 'osuName'],
 					where: {
 						osuUserId: osuUser.id,
 					}
@@ -338,9 +340,9 @@ module.exports = {
 
 		let mappoolName = interaction.options.getString('mappool');
 
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-teamsheet.js DBOsuMappools');
 		let mappool = await DBOsuMappools.findAll({
+			attributes: ['beatmapId', 'modPool', 'tieBreaker', 'freeMod', 'modPoolNumber'],
 			where: {
 				name: mappoolName,
 				creatorId: commandUser.osuUserId
@@ -371,6 +373,10 @@ module.exports = {
 				} else if (mods.length === 0) {
 					dbBeatmap.modPool = 'NM';
 				} else {
+					if (map.freeMod) {
+						mods.push('FM');
+					}
+
 					dbBeatmap.modPool = mods.join('');
 				}
 			}
@@ -378,11 +384,36 @@ module.exports = {
 			dbBeatmap.modPoolCount = map.modPoolNumber;
 
 			tourneyMaps.push(dbBeatmap);
+
+			if (dbBeatmap.modPool === 'FM') {
+				let dbBeatmapHD = await getOsuBeatmap({ beatmapId: map.beatmapId, modBits: 8 });
+
+				dbBeatmapHD.modPool = 'FMHD';
+				dbBeatmapHD.modPoolCount = map.modPoolNumber;
+
+				tourneyMaps.push(dbBeatmapHD);
+
+				let dbBeatmapHR = await getOsuBeatmap({ beatmapId: map.beatmapId, modBits: 16 });
+
+				dbBeatmapHR.modPool = 'FMHR';
+				dbBeatmapHR.modPoolCount = map.modPoolNumber;
+
+				tourneyMaps.push(dbBeatmapHR);
+			}
 		}
 
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBOsuSoloScores');
 		let localScores = await DBOsuSoloScores.findAll({
+			attributes: [
+				'score',
+				'mods',
+				'beatmapHash',
+				'count50',
+				'count100',
+				'count300',
+				'countMiss',
+				'uploaderId',
+			],
 			where: {
 				uploaderId: {
 					[Op.in]: players.map(player => player.osuUserId),
@@ -393,8 +424,20 @@ module.exports = {
 			},
 		});
 
-		//TODO: add attributes and logdatabasequeries
+		logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBOsuMultiScores');
 		let multiScores = await DBOsuMultiScores.findAll({
+			attributes: [
+				'osuUserId',
+				'beatmapId',
+				'score',
+				'gameRawMods',
+				'rawMods',
+				'scoringType',
+				'count50',
+				'count100',
+				'count300',
+				'countMiss',
+			],
 			where: {
 				osuUserId: {
 					[Op.in]: players.map(player => player.osuUserId),
@@ -746,7 +789,7 @@ module.exports = {
 				modColour = '#e06666';
 			} else if (tourneyMaps[i].modPool === 'DT') {
 				modColour = '#b4a7d6';
-			} else if (tourneyMaps[i].modPool === 'FM') {
+			} else if (tourneyMaps[i].modPool === 'FM' || tourneyMaps[i].modPool === 'FMHD' || tourneyMaps[i].modPool === 'FMHR') {
 				modColour = '#93c47d';
 			} else if (tourneyMaps[i].modPool === 'TB') {
 				modColour = '#76a5af';
@@ -790,6 +833,11 @@ module.exports = {
 			ctx.font = '22px comfortaa';
 			ctx.textAlign = 'center';
 			ctx.fillText(`${tourneyMaps[i].artist} - ${tourneyMaps[i].title}`, 405, 4 + 100 * (i + 1) + 40, 375);
+			if (tourneyMaps[i].modPool === 'FMHD') {
+				ctx.fillStyle = '#ffd966';
+			} else if (tourneyMaps[i].modPool === 'FMHR') {
+				ctx.fillStyle = '#e06666';
+			}
 			ctx.fillText(`[${tourneyMaps[i].difficulty}]`, 405, 4 + 100 * (i + 1) + 80, 375);
 
 			let lineup = [];
@@ -801,7 +849,7 @@ module.exports = {
 				ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1), 400, 100);
 
 				// Draw the player's score
-				let playerScores = players[j].scores.filter(score => score.beatmapHash === tourneyMaps[i].hash);
+				let playerScores = players[j].scores.filter(score => score.beatmapHash === tourneyMaps[i].hash && scoreIsCorrectMods(score, tourneyMaps[i].modPool));
 
 				playerScores = playerScores.sort((a, b) => b.score - a.score);
 
@@ -1058,6 +1106,8 @@ module.exports = {
 
 		// TODO: Draw a legend for estimated score
 		// TODO: Manual lineup
+		// TODO: EZ Multiplier
+		// TODO: FL Multiplier
 
 		// Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'teamsheet.png' })];
@@ -1066,8 +1116,14 @@ module.exports = {
 
 		let content = '';
 		let currentMod = tourneyMaps[0].modPool;
+		let currentMap = null;
 
 		for (let i = 0; i < links.length; i++) {
+			if (currentMap === tourneyMaps[i].beatmapId) {
+				continue;
+			}
+			currentMap = tourneyMaps[i].beatmapId;
+
 			if (tourneyMaps[i].modPool != currentMod || i === 0) {
 				currentMod = tourneyMaps[i].modPool;
 				content += '\n' + links[i];
@@ -1103,7 +1159,6 @@ module.exports = {
 			await interaction.followUp({ content: content, files: files });
 		}
 
-		//TODO: Auto update on score upload
 		//TODO: Match tracking
 		//TODO: Mark which mod was used for FM
 	},
@@ -1174,7 +1229,25 @@ function scoreIsCorrectMods(score, modPool) {
 		return true;
 	}
 
-	let modsReadable = getMods(score.mods).filter(mod => mod !== 'V2' && mod !== 'NF').join('');
+	let mods = getMods(score.mods);
+
+	if ((modPool === 'FMHD' || modPool === 'FMHR') && (mods.includes('DT') && mods.includes('NC'))) {
+		return false;
+	}
+
+	if (modPool === 'FMHD' && !mods.includes('HR') && (mods.includes('HD') || mods.includes('EZ'))) {
+		return true;
+	}
+
+	if (modPool === 'FMHR' && mods.includes('HR')) {
+		return true;
+	}
+
+	if (modPool === 'FMHD' || modPool === 'FMHR') {
+		return false;
+	}
+
+	let modsReadable = mods.filter(mod => mod !== 'V2' && mod !== 'NF').join('');
 
 	if (modsReadable === '') {
 		modsReadable = 'NM';
