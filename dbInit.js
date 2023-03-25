@@ -117,6 +117,18 @@ const soloScores = new Sequelize('database', 'username', 'password', {
 	},
 });
 
+const battlePass = new Sequelize('database', 'username', 'password', {
+	host: 'localhost',
+	dialect: 'sqlite',
+	logging: false,
+	storage: 'databases/battlePass.sqlite',
+	retry: {
+		max: 15, // Maximum retry 15 times
+		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+	},
+});
+
 require('./models/DBGuilds')(guilds, Sequelize.DataTypes);
 require('./models/DBReactionRoles')(guilds, Sequelize.DataTypes);
 require('./models/DBReactionRolesHeader')(guilds, Sequelize.DataTypes);
@@ -154,6 +166,10 @@ require('./models/DBOsuBeatmaps')(beatmaps, Sequelize.DataTypes);
 
 require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
 
+require('./models/DBInventory')(battlePass, Sequelize.DataTypes);
+require('./models/DBOsuBattlePass')(battlePass, Sequelize.DataTypes);
+require('./models/DBOsuQuests')(battlePass, Sequelize.DataTypes);
+
 // guilds.sync({ alter: true })
 // 	.then(async () => {
 // 		// eslint-disable-next-line no-console
@@ -186,13 +202,13 @@ require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
 // 	})
 // 	.catch(console.error);
 
-osuData.sync({ alter: true })
-	.then(async () => {
-		// eslint-disable-next-line no-console
-		console.log('osuData database synced');
-		osuData.close();
-	})
-	.catch(console.error);
+// osuData.sync({ alter: true })
+// 	.then(async () => {
+// 		// eslint-disable-next-line no-console
+// 		console.log('osuData database synced');
+// 		osuData.close();
+// 	})
+// 	.catch(console.error);
 
 // elitiriData.sync({ alter: true })
 // 	.then(async () => {
@@ -225,3 +241,11 @@ osuData.sync({ alter: true })
 // 		soloScores.close();
 // 	})
 // 	.catch(console.error);
+
+battlePass.sync({ alter: true })
+	.then(async () => {
+		// eslint-disable-next-line no-console
+		console.log('battlePass database synced');
+		battlePass.close();
+	})
+	.catch(console.error);
