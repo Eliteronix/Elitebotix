@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBOsuBeatmaps, DBProcessQueue } = require('../dbObjects');
-const { pause, saveOsuMultiScores, logDatabaseQueries, logMatchCreation, addMatchMessage } = require('../utils');
+const { pause, saveOsuMultiScores, logDatabaseQueries, logMatchCreation, addMatchMessage, updateCurrentMatchesChannel } = require('../utils');
 const osu = require('node-osu');
 const Discord = require('discord.js');
 const { logBroadcastEval } = require('../config.json');
@@ -23,8 +23,14 @@ module.exports = {
 				channel = await bancho.createLobby(args[5]);
 				client.otherMatches.push(parseInt(channel.lobby.id));
 
+				let tourneyMatch = 0;
+				if (args[5].toLowerCase().match(/.+:.+vs.+/g)) {
+					tourneyMatch = 1;
+				}
+
 				logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBProcessQueue create');
-				DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${channel.lobby.id}`, priority: 1, date: new Date() });
+				DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${channel.lobby.id};${tourneyMatch};${new Date().getTime()};${args[5]}`, priority: 1, date: new Date() });
+				updateCurrentMatchesChannel(client);
 
 				processQueueEntry.destroy();
 				break;

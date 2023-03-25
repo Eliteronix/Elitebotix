@@ -56,7 +56,7 @@ module.exports = {
 			}
 
 			let date = new Date();
-			await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: matches[i], priority: 1, date: date });
+			await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matches[i]};0`, priority: 1, date: date });
 		}
 		// eslint-disable-next-line no-console
 		console.log('other', other);

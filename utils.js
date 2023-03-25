@@ -3912,16 +3912,26 @@ module.exports = {
 
 				// eslint-disable-next-line no-undef
 				process.send('osu!API');
-				await osuApi.getMatch({ mp: matchID })
+				let match = await osuApi.getMatch({ mp: matchID })
 					.then(async (match) => {
 						await module.exports.saveOsuMultiScores(match, client);
+
+						return match;
 					})
 					.catch(async () => {
 						//Nothing
+						return { name: 'Error' };
 					});
 
+				let tourneyMatch = 0;
+				if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
+					tourneyMatch = 1;
+				}
+
 				module.exports.logDatabaseQueries(2, 'utils.js DBProcessQueue importMatch twitch chat');
-				return await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: new Date() });
+				await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID};${tourneyMatch};${Date.parse(match.raw_start)};${match.name}`, priority: 1, date: new Date() });
+
+				return module.exports.updateCurrentMatchesChannel(client);
 			}
 
 			const longRegex = /https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm;
@@ -5819,6 +5829,88 @@ module.exports = {
 
 				textChannel.send(`There ${verb} currently ${existingQueueTasks.length} user${multipleString} in the 1v1 queue!\nRead <#1042938217684541551> for more information.\n\n${players.join('\n')}`);
 			}
+		}, { context: {} });
+	},
+	async updateCurrentMatchesChannel(client) {
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting utils.js updateCurrentMatchesChannel to shards...');
+		}
+
+		// eslint-disable-next-line no-empty-pattern
+		client.shard.broadcastEval(async (c, { }) => {
+			let textChannelId = '1089269685259866242';
+			// eslint-disable-next-line no-undef
+			if (process.env.SERVER === 'Dev') {
+				textChannelId = '1089272362869985390';
+			}
+
+			let textChannel = await c.channels.cache.get(textChannelId);
+			if (!textChannel || !textChannel.guildId) {
+				return;
+			}
+
+			// eslint-disable-next-line no-undef
+			const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+			// eslint-disable-next-line no-undef
+			const { getOsuPlayerName, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+
+			logDatabaseQueries(4, 'utils.js DBProcessQueue updateCurrentMatchesChannel existingQueueTasks');
+			let existingQueueTasks = await DBProcessQueue.findAll({
+				attributes: ['additions', 'createdAt'],
+				where: {
+					task: 'importMatch',
+				},
+			});
+
+			let multipleString = 'es';
+			let verb = 'are';
+			if (existingQueueTasks.length === 1) {
+				multipleString = '';
+				verb = 'is';
+			}
+
+			textChannel.edit({ name: `${existingQueueTasks.length} current match${multipleString}` });
+
+			// Get all messages and delete
+			let messages = await textChannel.messages.fetch({ limit: 100 });
+
+			await textChannel.bulkDelete(messages);
+
+			// Send new message
+			let matches = [];
+
+			for (let i = 0; i < existingQueueTasks.length; i++) {
+				let args = existingQueueTasks[i].additions.split(';');
+
+				let tourneyMatch = parseInt(args[1]);
+
+				if (tourneyMatch === 0) {
+					continue;
+				}
+
+				let matchId = args[0];
+
+				let matchCreation = args[2];
+
+				let matchName = args[3];
+
+				let players = '';
+
+				if (args[4]) {
+					players = args[4].split(',');
+
+					for (let j = 0; j < players.length; j++) {
+						players[j] = await getOsuPlayerName(players[j]);
+					}
+
+					players = ` - \`${players.join('`, `')}\``;
+				}
+
+				matches.push(`<https://osu.ppy.sh/mp/${matchId}> - <t:${matchCreation / 1000}:R> - \`${matchName.replace(/`/g, '')}\`${players}`);
+			}
+
+			textChannel.send(`There ${verb} currently ${existingQueueTasks.length} match${multipleString} running:\n\n${matches.join('\n')}`);
 		}, { context: {} });
 	},
 	async createNewForumPostRecords(client) {

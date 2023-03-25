@@ -1,4 +1,4 @@
-const { saveOsuMultiScores, logDatabaseQueries } = require('../utils');
+const { saveOsuMultiScores, logDatabaseQueries, updateCurrentMatchesChannel } = require('../utils');
 const osu = require('node-osu');
 const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { logBroadcastEval } = require('../config.json');
@@ -77,6 +77,8 @@ module.exports = {
 					}, { context: { message: `<https://osu.ppy.sh/mp/${matchId}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done`, matchID: parseInt(matchId) } });
 
 					await processQueueEntry.destroy();
+					updateCurrentMatchesChannel(client);
+
 					// eslint-disable-next-line no-undef
 					return process.send('importMatch');
 				}
@@ -91,6 +93,11 @@ module.exports = {
 					}
 				});
 
+				let tourneyMatch = 0;
+				if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
+					tourneyMatch = 1;
+				}
+
 				if (playedRounds) {
 					let importTasks = await DBProcessQueue.count({
 						where: {
@@ -100,12 +107,26 @@ module.exports = {
 
 					let seconds = 180 + importTasks * 20;
 
+					let players = [];
+
+					for (let i = 0; i < match.games.length; i++) {
+						for (let j = 0; j < match.games[i].scores.length; j++) {
+							if (players.indexOf(match.games[i].scores[j].userId) === -1) {
+								players.push(match.games[i].scores[j].userId);
+							}
+						}
+					}
+
+					processQueueEntry.additions = `${matchId};${tourneyMatch};${Date.parse(match.raw_start)};${match.name};${players.join(',')}`;
+
 					let date = new Date();
 					date.setUTCSeconds(date.getUTCSeconds() + seconds);
 					processQueueEntry.date = date;
 					processQueueEntry.beingExecuted = false;
 					return await processQueueEntry.save();
 				}
+
+				processQueueEntry.additions = `${matchId};${tourneyMatch};${Date.parse(match.raw_start)};${match.name}`;
 
 				let date = new Date();
 				date.setUTCMinutes(date.getUTCMinutes() + 1);

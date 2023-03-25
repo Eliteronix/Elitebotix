@@ -1,6 +1,6 @@
 const osu = require('node-osu');
 const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
-const { saveOsuMultiScores, logDatabaseQueries, awaitWebRequestPermission } = require('../utils');
+const { saveOsuMultiScores, logDatabaseQueries, awaitWebRequestPermission, updateCurrentMatchesChannel } = require('../utils');
 const { Op } = require('sequelize');
 const { logBroadcastEval } = require('../config.json');
 
@@ -114,7 +114,9 @@ module.exports = {
 						let date = new Date();
 						date.setUTCMinutes(date.getUTCMinutes() + 5);
 						logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBProcessQueue create');
-						await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID}`, priority: 1, date: date });
+						await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID};1;${Date.parse(match.raw_start)};${match.name.toLowerCase()}`, priority: 1, date: date });
+						updateCurrentMatchesChannel(client);
+
 						// eslint-disable-next-line no-undef
 						process.send('importMatch');
 					}
