@@ -98,7 +98,7 @@ module.exports = {
 						},
 					});
 
-					let seconds = 180 + importTasks * 30;
+					let seconds = 180 + importTasks * 20;
 
 					let date = new Date();
 					date.setUTCSeconds(date.getUTCSeconds() + seconds);
