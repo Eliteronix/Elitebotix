@@ -5907,6 +5907,10 @@ module.exports = {
 					players = ` - \`${players.join('`, `')}\``;
 				}
 
+				if (matchName.includes('Qualifiers')) {
+					matchId = 'XXXXXXXXX';
+				}
+
 				matches.push(`<https://osu.ppy.sh/mp/${matchId}> - <t:${matchCreation / 1000}:R> - \`${matchName.replace(/`/g, '')}\`${players}`);
 			}
 
