@@ -1264,6 +1264,8 @@ module.exports = {
 				poolCreatorId: commandUser.osuUserId,
 				teamsize: teamsize,
 				duelRatingEstimate: interaction.options.getBoolean('duelratingestimate'),
+				EZMultiplier: ezmultiplier,
+				FLMultiplier: flmultiplier,
 			});
 		} else {
 			await interaction.followUp({ content: content, files: files });
