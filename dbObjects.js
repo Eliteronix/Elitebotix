@@ -135,6 +135,21 @@ const soloScores = new Sequelize('database', 'username', 'password', {
 	}
 });
 
+const battlePass = new Sequelize('database', 'username', 'password', {
+	host: 'localhost',
+	dialect: 'sqlite',
+	logging: false,
+	storage: 'databases/battlePass.sqlite',
+	retry: {
+		max: 25, // Maximum retry 15 times
+		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+	},
+	pool: {
+		max: 7,
+	}
+});
+
 const DBGuilds = require('./models/DBGuilds')(guilds, Sequelize.DataTypes);
 const DBReactionRoles = require('./models/DBReactionRoles')(guilds, Sequelize.DataTypes);
 const DBReactionRolesHeader = require('./models/DBReactionRolesHeader')(guilds, Sequelize.DataTypes);
@@ -172,6 +187,10 @@ const DBOsuBeatmaps = require('./models/DBOsuBeatmaps')(beatmaps, Sequelize.Data
 
 const DBOsuSoloScores = require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
 
+const DBInventory = require('./models/DBInventory')(battlePass, Sequelize.DataTypes);
+const DBOsuBattlePass = require('./models/DBOsuBattlePass')(battlePass, Sequelize.DataTypes);
+const DBOsuQuests = require('./models/DBOsuQuests')(battlePass, Sequelize.DataTypes);
+
 module.exports = {
 	DBGuilds,
 	DBReactionRoles,
@@ -201,4 +220,7 @@ module.exports = {
 	DBOsuMappools,
 	DBOsuPoolAccess,
 	DBOsuTeamSheets,
+	DBInventory,
+	DBOsuBattlePass,
+	DBOsuQuests,
 };
