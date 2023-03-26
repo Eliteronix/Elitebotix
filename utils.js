@@ -5878,7 +5878,7 @@ module.exports = {
 			await textChannel.bulkDelete(messages);
 
 			// Send new message
-			let matches = [];
+			let matches = [`There ${verb} currently ${existingQueueTasks.length} match${multipleString} running:\n`];
 
 			for (let i = 0; i < existingQueueTasks.length; i++) {
 				let args = existingQueueTasks[i].additions.split(';');
@@ -5912,9 +5912,14 @@ module.exports = {
 				}
 
 				matches.push(`<https://osu.ppy.sh/mp/${matchId}> - <t:${matchCreation / 1000}:R> - \`${matchName.replace(/`/g, '')}\`${players}`);
+
+				if (matches.join('\n').length > 2000) {
+					await textChannel.send(matches.join('\n'));
+					matches = [];
+				}
 			}
 
-			textChannel.send(`There ${verb} currently ${existingQueueTasks.length} match${multipleString} running:\n\n${matches.join('\n')}`);
+			await textChannel.send(matches.join('\n'));
 		}, { context: {} });
 	},
 	async createNewForumPostRecords(client) {
