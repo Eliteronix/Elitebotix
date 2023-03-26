@@ -5886,6 +5886,8 @@ module.exports = {
 				let tourneyMatch = parseInt(args[1]);
 
 				if (tourneyMatch === 0) {
+					existingQueueTasks.splice(i, 1);
+					i--;
 					continue;
 				}
 
