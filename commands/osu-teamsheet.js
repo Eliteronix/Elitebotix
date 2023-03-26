@@ -133,6 +133,36 @@ module.exports = {
 				.setRequired(false)
 				.setMinValue(0)
 				.setMaxValue(5)
+		)
+		.addStringOption(option =>
+			option.setName('bans')
+				.setNameLocalizations({
+					'de': 'bans',
+					'en-GB': 'bans',
+					'en-US': 'bans',
+				})
+				.setDescription('The banned maps seperated by a comma')
+				.setDescriptionLocalizations({
+					'de': 'Die gebannten Maps getrennt durch ein Komma',
+					'en-GB': 'The banned maps seperated by a comma',
+					'en-US': 'The banned maps seperated by a comma',
+				})
+				.setRequired(false)
+		)
+		.addStringOption(option =>
+			option.setName('matchlink')
+				.setNameLocalizations({
+					'de': 'matchlink',
+					'en-GB': 'matchlink',
+					'en-US': 'matchlink',
+				})
+				.setDescription('The link to the match to automatically remove played maps')
+				.setDescriptionLocalizations({
+					'de': 'Der Link zum Match um gespielte Maps automatisch zu entfernen',
+					'en-GB': 'The link to the match to automatically remove played maps',
+					'en-US': 'The link to the match to automatically remove played maps',
+				})
+				.setRequired(false)
 		),
 	// .addBooleanOption(option =>
 	// 	option.setName('duelratingestimate')
@@ -297,6 +327,10 @@ module.exports = {
 			return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
 		}
 
+		if (interaction.options.getNumber('updatefor') && (interaction.options.getString('bans') || interaction.options.getString('matchlink'))) {
+			return await interaction.editReply('You can\'t use the updatefor option with bans or matchlink.');
+		}
+
 		let teamsize = interaction.options.getNumber('teamsize');
 
 		let ezmultiplier = 1.75;
@@ -404,6 +438,14 @@ module.exports = {
 
 		let tourneyMaps = [];
 
+		let remove = interaction.options.getString('bans');
+
+		if (remove) {
+			remove = [...new Set(remove.split(','))];
+		} else {
+			remove = [];
+		}
+
 		for (let i = 0; i < mappool.length; i++) {
 			let map = mappool[i];
 
@@ -430,6 +472,10 @@ module.exports = {
 			dbBeatmap.modPoolCount = map.modPoolNumber;
 			dbBeatmap.scores = [];
 
+			if (remove.includes(`${dbBeatmap.modPool}${dbBeatmap.modPoolCount}`)) {
+				continue;
+			}
+
 			tourneyMaps.push(dbBeatmap);
 
 			if (dbBeatmap.modPool === 'FM') {
@@ -448,6 +494,36 @@ module.exports = {
 				dbBeatmapHR.scores = [];
 
 				tourneyMaps.push(dbBeatmapHR);
+			}
+		}
+
+		let beatmapsPlayed = [];
+
+		if (interaction.options.getString('matchlink')) {
+			let matchLink = getIDFromPotentialOsuLink(interaction.options.getString('matchlink'));
+
+			try {
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
+				let match = await osuApi.getMatch({ mp: matchLink });
+
+				for (let i = 0; i < match.games.length; i++) {
+					beatmapsPlayed.push(match.games[i].beatmapId);
+				}
+			} catch (err) {
+				console.error(err);
+				return await interaction.editReply(`Could not find match for \`${matchLink.replace(/`/g, '')}\`.`);
+			}
+		}
+
+		beatmapsPlayed = [...new Set(beatmapsPlayed)];
+
+		for (let i = 0; i < tourneyMaps.length; i++) {
+			let map = tourneyMaps[i];
+
+			if (beatmapsPlayed.includes(map.beatmapId)) {
+				tourneyMaps.splice(i, 1);
+				i--;
 			}
 		}
 
@@ -1217,7 +1293,6 @@ module.exports = {
 
 		// TODO: Manual lineup
 		// TODO: FM Lineup (Mods)
-		// TODO: Match tracking
 
 		// Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'teamsheet.png' })];
@@ -1269,6 +1344,95 @@ module.exports = {
 			});
 		} else {
 			await interaction.followUp({ content: content, files: files });
+
+			// Wait for the match to be over or for a new map to be played
+			let loop = true;
+
+			while (loop) {
+				await pause(15000);
+
+				let currentMapsPlayed = [];
+
+				let matchLink = getIDFromPotentialOsuLink(interaction.options.getString('matchlink'));
+
+				try {
+					// eslint-disable-next-line no-undef
+					process.send('osu!API');
+					let match = await osuApi.getMatch({ mp: matchLink });
+
+					for (let i = 0; i < match.games.length; i++) {
+						currentMapsPlayed.push(match.games[i].beatmapId);
+					}
+
+					currentMapsPlayed = [...new Set(currentMapsPlayed)];
+
+					let sixHoursAgo = new Date();
+					sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
+
+					if (match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
+						beatmapsPlayed = currentMapsPlayed;
+						loop = false;
+						return;
+					}
+
+					if (currentMapsPlayed.length > beatmapsPlayed.length || match.raw_end || Date.parse(match.raw_start) < sixHoursAgo) {
+						beatmapsPlayed = currentMapsPlayed;
+						loop = false;
+					}
+				} catch (err) {
+					console.error(err);
+				}
+			}
+
+			//Setup artificial interaction
+			let newInteraction = {
+				id: null,
+				channel: interaction.channel,
+				client: interaction.client,
+				guild: interaction.guild,
+				user: interaction.user,
+				options: {
+					getString: (string) => {
+						if (string === 'players') {
+							return interaction.options.getString('players');
+						} else if (string === 'mappool') {
+							return interaction.options.getString('mappool');
+						} else if (string === 'bans') {
+							return interaction.options.getString('bans');
+						} else if (string === 'matchlink') {
+							return interaction.options.getString('matchlink');
+						}
+					},
+					getNumber: (string) => {
+						if (string === 'teamsize') {
+							return interaction.options.getNumber('teamsize');
+						} else if (string === 'updatefor') {
+							return interaction.options.getNumber('updatefor');
+						} else if (string === 'ezmultiplier') {
+							return interaction.options.getNumber('ezmultiplier');
+						} else if (string === 'flmultiplier') {
+							return interaction.options.getNumber('flmultiplier');
+						}
+					},
+					getBoolean: (string) => {
+						if (string === 'duelratingestimate') {
+							return interaction.options.getBoolean('duelratingestimate');
+						}
+					}
+				},
+				deferReply: () => { },
+				followUp: async (input) => {
+					return await interaction.channel.send(input);
+				},
+				editReply: async (input) => {
+					return await interaction.channel.send(input);
+				},
+				reply: async (input) => {
+					return await interaction.channel.send(input);
+				}
+			};
+
+			module.exports.execute(null, null, newInteraction);
 		}
 	},
 };
