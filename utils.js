@@ -5870,8 +5870,6 @@ module.exports = {
 				verb = 'is';
 			}
 
-			textChannel.edit({ name: `${existingQueueTasks.length} current match${multipleString}` });
-
 			// Get all messages and delete
 			let messages = await textChannel.messages.fetch({ limit: 100 });
 
@@ -5928,6 +5926,8 @@ module.exports = {
 			}
 
 			await textChannel.send(matches.join('\n'));
+
+			textChannel.edit({ name: `${existingQueueTasks.length} current match${multipleString}` });
 		}, { context: {} });
 	},
 	async createNewForumPostRecords(client) {
