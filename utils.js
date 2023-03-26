@@ -5902,7 +5902,10 @@ module.exports = {
 
 					for (let j = 0; j < players.length; j++) {
 						players[j] = await getOsuPlayerName(players[j]);
-						players[j] = players[j].toString();
+
+						if (players[j] === null) {
+							players[j] = '[Unknown Player]';
+						}
 					}
 
 					players = ` - \`${players.join('`, `')}\``;
