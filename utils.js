@@ -5911,12 +5911,14 @@ module.exports = {
 					matchId = 'XXXXXXXXX';
 				}
 
-				if (matches.join('\n').length > 2000) {
+				let newEntry = `<https://osu.ppy.sh/mp/${matchId}> - <t:${matchCreation / 1000}:R> - \`${matchName.replace(/`/g, '')}\`${players}`;
+
+				if (`${matches.join('\n')}\n${newEntry}`.length > 2000) {
 					await textChannel.send(matches.join('\n'));
 					matches = [];
 				}
 
-				matches.push(`<https://osu.ppy.sh/mp/${matchId}> - <t:${matchCreation / 1000}:R> - \`${matchName.replace(/`/g, '')}\`${players}`);
+				matches.push(newEntry);
 			}
 
 			await textChannel.send(matches.join('\n'));
