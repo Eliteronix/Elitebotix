@@ -3441,6 +3441,7 @@ module.exports = {
 					'userId',
 					'osuName',
 					'osuUserId',
+					'osuDuelRatingUpdates',
 					'osuDuelStarRating',
 					'osuNoModDuelStarRating',
 					'osuNoModDuelStarRatingLimited',
