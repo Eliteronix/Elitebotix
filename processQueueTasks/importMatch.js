@@ -2,6 +2,7 @@ const { saveOsuMultiScores, logDatabaseQueries, updateCurrentMatchesChannel } = 
 const osu = require('node-osu');
 const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { logBroadcastEval } = require('../config.json');
+const { Op } = require('sequelize');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -9,6 +10,25 @@ module.exports = {
 		let args = processQueueEntry.additions.split(';');
 
 		let matchId = args[0];
+
+		let importMatchTasks = await DBProcessQueue.count({
+			where: {
+				id: {
+					[Op.lt]: processQueueEntry.id,
+				},
+				task: 'importMatch',
+				additions: {
+					[Op.like]: `${matchId};%`,
+				}
+			},
+		});
+
+		if (importMatchTasks > 0) {
+			await processQueueEntry.destroy();
+			updateCurrentMatchesChannel(client);
+			// eslint-disable-next-line no-undef
+			return process.send('importMatch');
+		}
 
 		// eslint-disable-next-line no-undef
 		let APItoken = process.env.OSUTOKENSV1.split('-')[parseInt(matchId) % process.env.OSUTOKENSV1.split('-').length];
