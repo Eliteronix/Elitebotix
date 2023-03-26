@@ -5907,7 +5907,7 @@ module.exports = {
 					players = ` - \`${players.join('`, `')}\``;
 				}
 
-				if (matchName.includes('Qualifiers')) {
+				if (matchName.toLowerCase().includes('qualifiers')) {
 					matchId = 'XXXXXXXXX';
 				}
 
