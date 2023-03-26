@@ -5898,13 +5898,13 @@ module.exports = {
 				let players = '';
 
 				if (args[4]) {
-					// players = args[4].split(',');
+					players = args[4].split(',');
 
-					// for (let j = 0; j < players.length; j++) {
-					// 	players[j] = await getOsuPlayerName(players[j]);
-					// }
+					for (let j = 0; j < players.length; j++) {
+						players[j] = await getOsuPlayerName(players[j]).toString();
+					}
 
-					// players = ` - \`${players.join('`, `')}\``;
+					players = ` - \`${players.join('`, `')}\``;
 				}
 
 				if (matchName.toLowerCase().includes('qualifiers')) {
