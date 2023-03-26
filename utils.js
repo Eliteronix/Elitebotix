@@ -5901,7 +5901,8 @@ module.exports = {
 					players = args[4].split(',');
 
 					for (let j = 0; j < players.length; j++) {
-						players[j] = await getOsuPlayerName(players[j]).toString();
+						players[j] = await getOsuPlayerName(players[j]);
+						players[j] = players[j].toString();
 					}
 
 					players = ` - \`${players.join('`, `')}\``;
