@@ -188,7 +188,7 @@ const DBOsuBeatmaps = require('./models/DBOsuBeatmaps')(beatmaps, Sequelize.Data
 const DBOsuSoloScores = require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
 
 const DBInventory = require('./models/DBInventory')(battlePass, Sequelize.DataTypes);
-const DBOsuBattlePass = require('./models/DBOsuBattlePass')(battlePass, Sequelize.DataTypes);
+const DBOsuBattlepass = require('./models/DBOsuBattlepass')(battlePass, Sequelize.DataTypes);
 const DBOsuQuests = require('./models/DBOsuQuests')(battlePass, Sequelize.DataTypes);
 
 module.exports = {
@@ -221,6 +221,6 @@ module.exports = {
 	DBOsuPoolAccess,
 	DBOsuTeamSheets,
 	DBInventory,
-	DBOsuBattlePass,
+	DBOsuBattlepass,
 	DBOsuQuests,
 };

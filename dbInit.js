@@ -167,7 +167,7 @@ require('./models/DBOsuBeatmaps')(beatmaps, Sequelize.DataTypes);
 require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
 
 require('./models/DBInventory')(battlePass, Sequelize.DataTypes);
-require('./models/DBOsuBattlePass')(battlePass, Sequelize.DataTypes);
+require('./models/DBOsuBattlepass')(battlePass, Sequelize.DataTypes);
 require('./models/DBOsuQuests')(battlePass, Sequelize.DataTypes);
 
 // guilds.sync({ alter: true })
