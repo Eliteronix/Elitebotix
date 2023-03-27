@@ -4087,10 +4087,21 @@ module.exports = {
 					currentWeight += catches[i].weight;
 					if (random < currentWeight) {
 						if (catches[i].name === 'Robert') {
-							twitchClient.say(target.substring(1), `${context['display-name']} saved Robert from the water!`);
+							twitchClient.say(target.substring(1), `${context['display-name']} saved Robert from the water! (Legendary)`);
 							return;
 						}
-						twitchClient.say(target.substring(1), `${context['display-name']} caught ${catches[i].name} !`);
+
+						let rarity = 'Common';
+
+						if (catches[i].weight > 25) {
+							rarity = 'Epic';
+						} else if (catches[i].weight > 100) {
+							rarity = 'Rare';
+						} else if (catches[i].weight > 250) {
+							rarity = 'Uncommon';
+						}
+
+						twitchClient.say(target.substring(1), `${context['display-name']} caught ${catches[i].name} ! (${rarity})`);
 						return;
 					}
 				}
