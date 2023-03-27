@@ -989,6 +989,10 @@ module.exports = {
 				}
 			}
 
+			if (currentMappool.name !== null) {
+				mappools.push(currentMappool);
+			}
+
 			await interaction.followUp({ content: `${invalidModpools.length} invalid modpool(s) have been replaced with FM ${invalidModpools.join(', ')}` });
 
 			for (let i = 0; i < mappools.length; i++) {
