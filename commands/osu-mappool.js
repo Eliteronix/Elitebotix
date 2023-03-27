@@ -934,6 +934,7 @@ module.exports = {
 					}
 
 					if (data.toString().toLowerCase() === 'qualifiers' ||
+						data.toString().toLowerCase() === 'quals' ||
 						data.toString().toLowerCase().startsWith('group stage') ||
 						data.toString().toLowerCase().startsWith('round of') ||
 						data.toString().toLowerCase().endsWith('finals') ||
