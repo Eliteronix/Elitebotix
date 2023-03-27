@@ -870,6 +870,10 @@ module.exports = {
 
 			let dataRows = [];
 
+			const modPoolHeaders = ['pick', 'mod'];
+
+			const beatmapHeaders = ['map id'];
+
 			for (let i = 0; i < sheet.rowCount; i++) {
 				let currentRow = [];
 				let currentRowHasData = false;
@@ -881,12 +885,12 @@ module.exports = {
 						currentRowHasData = true;
 					}
 
-					if (sheet.getCell(i, j).value === 'NM1' || sheet.getCell(i, j).value === 'NM 1') {
+					if (sheet.getCell(i, j).value && modPoolHeaders.concat(beatmapHeaders).includes(sheet.getCell(i, j).value.toString().toLowerCase())) {
 						headerRowFound = true;
 					}
 				}
 
-				if (!headerRowFound && currentRowHasData) {
+				if (headerRowFound && currentRowHasData && headerRow.length === 0) {
 					headerRow = [...currentRow];
 				}
 
@@ -895,15 +899,11 @@ module.exports = {
 				}
 			}
 
-			const modPoolHeaders = ['pick', 'mod'];
-
 			let modPoolIndex = headerRow.findIndex(header => header && modPoolHeaders.includes(header.toString().toLowerCase()));
 
 			if (modPoolIndex === -1) {
 				return await interaction.editReply('Could not find the mod pool column.');
 			}
-
-			const beatmapHeaders = ['map id'];
 
 			let beatmapIndex = headerRow.findIndex(header => header && beatmapHeaders.includes(header.toString().toLowerCase()));
 
