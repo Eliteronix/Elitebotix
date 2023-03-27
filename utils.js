@@ -3765,7 +3765,7 @@ module.exports = {
 			},
 		});
 
-		let twitchChannels = [];
+		let twitchChannels = ['lunepie'];
 
 		for (let i = 0; i < twitchSyncUsers.length; i++) {
 			twitchChannels.push(twitchSyncUsers[i].twitchName);
