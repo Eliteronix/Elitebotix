@@ -4093,11 +4093,11 @@ module.exports = {
 
 						let rarity = 'Common';
 
-						if (catches[i].weight > 25) {
+						if (catches[i].weight < 25) {
 							rarity = 'Epic';
-						} else if (catches[i].weight > 100) {
+						} else if (catches[i].weight < 100) {
 							rarity = 'Rare';
-						} else if (catches[i].weight > 250) {
+						} else if (catches[i].weight < 250) {
 							rarity = 'Uncommon';
 						}
 
