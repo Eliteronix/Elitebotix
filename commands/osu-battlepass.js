@@ -1,6 +1,6 @@
 const { PermissionsBitField, SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const { showUnknownInteractionError, developers } = require('../config.json');
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuBattlepass } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils.js');
 const Canvas = require('canvas');
 
@@ -80,6 +80,27 @@ module.exports = {
 				ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
 			}
 		}
+
+		logDatabaseQueries(4, 'commands/osu-battlepass.js DBOsuBattlepass');
+		let battlepass = await DBOsuBattlepass.findOne({
+			where: {
+				osuUserId: discordUser.osuUserId
+			}
+		});
+
+		if (!battlepass) {
+			// Create a new battlepass
+			logDatabaseQueries(4, 'commands/osu-battlepass.js DBOsuBattlepass create');
+			battlepass = await DBOsuBattlepass.create({
+				osuUserId: discordUser.osuUserId,
+				experience: 0,
+			});
+		}
+
+		// Draw the next levels
+
+
+
 
 		// Create as an attachment
 		const files = [new AttachmentBuilder(canvas.toBuffer(), { name: 'battlepass.png' })];
