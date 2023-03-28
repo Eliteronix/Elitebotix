@@ -183,7 +183,7 @@ module.exports = {
 
 		logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
-			attributes: ['osuUserId', 'osuVerified', 'osuName'],
+			attributes: ['osuUserId', 'osuVerified'],
 			where: {
 				userId: interaction.user.id
 			}

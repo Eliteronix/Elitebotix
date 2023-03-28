@@ -1,5 +1,6 @@
-const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, getUserDuelStarRating, updateQueueChannels, getValidTournamentBeatmap, getModBits } = require('./utils');
-const { DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
+const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, getUserDuelStarRating, updateQueueChannels, getValidTournamentBeatmap, getModBits, awardBattlepassExperience } = require('./utils');
+const { DBDiscordUsers, DBProcessQueue, DBOsuQuests } = require('./dbObjects');
+const { Op } = require('sequelize');
 
 module.exports = async function (client, bancho, message) {
 	// eslint-disable-next-line no-undef
@@ -19,6 +20,43 @@ module.exports = async function (client, bancho, message) {
 
 		//Listen to now playing / now listening and send pp info
 	} else if (message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)) {
+		let osuUserId = await message.user.fetchFromAPI()
+			.then((user) => {
+				return user.id;
+				// eslint-disable-next-line no-unused-vars
+			}).catch((e) => {
+				//
+			});
+
+		logDatabaseQueries(4, 'gotBanchoPrivateMessage.js DBDiscordUsers !r');
+		const discordUser = await DBDiscordUsers.findOne({
+			attributes: ['osuUserId', 'osuVerified',],
+			where: {
+				osuUserId: osuUserId
+			},
+		});
+
+		if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
+			logDatabaseQueries(4, 'gotBanchoPrivateMessage.js DBOsuQuests !r');
+			let runningQuest = await DBOsuQuests.findOne({
+				attributes: ['id', 'progress'],
+				where: {
+					osuUserId: discordUser.osuUserId,
+					type: 'Send /np to the bot ingame to get pp values',
+					progress: {
+						[Op.lt]: 100
+					}
+				}
+			});
+
+			if (runningQuest) {
+				runningQuest.progress = 100;
+				await runningQuest.save();
+
+				awardBattlepassExperience(discordUser.osuUserId, 5, client, 'Quest completed: Send `/np` to the bot ingame to get pp values');
+			}
+		}
+
 		let beatmapId = message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)[0].replace(/.+\//gm, '');
 
 		let modBits = 0;
@@ -244,13 +282,44 @@ module.exports = async function (client, bancho, message) {
 				//
 			});
 
-		//TODO: Attributes
 		logDatabaseQueries(4, 'gotBanchoPrivateMessage.js DBDiscordUsers !r');
 		const discordUser = await DBDiscordUsers.findOne({
+			attributes: [
+				'osuUserId',
+				'osuVerified',
+				'osuDuelProvisional',
+				'osuDuelStarRating',
+				'osuNoModDuelStarRating',
+				'osuHiddenDuelStarRating',
+				'osuHardRockDuelStarRating',
+				'osuDoubleTimeDuelStarRating',
+				'osuFreeModDuelStarRating',
+			],
 			where: {
 				osuUserId: osuUserId
 			},
 		});
+
+		if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
+			logDatabaseQueries(4, 'gotBanchoPrivateMessage.js DBOsuQuests !r');
+			let runningQuest = await DBOsuQuests.findOne({
+				attributes: ['id', 'progress'],
+				where: {
+					osuUserId: discordUser.osuUserId,
+					type: 'Send !r to the bot ingame to get a random map',
+					progress: {
+						[Op.lt]: 100
+					}
+				}
+			});
+
+			if (runningQuest) {
+				runningQuest.progress = 100;
+				await runningQuest.save();
+
+				awardBattlepassExperience(discordUser.osuUserId, 5, client, 'Quest completed: Send !r to the bot ingame to get a random map');
+			}
+		}
 
 		if (!discordUser && !userStarRating) {
 			userStarRating = 4.5;

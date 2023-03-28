@@ -7917,19 +7917,19 @@ module.exports = {
 		if (user) {
 			//Message the user about the quest completion
 			try {
-				await user.send(notification);
+				await user.send(`${notification} | You have been awarded ${experience} exp!`);
 			} catch (error) {
 				console.error(error);
 			}
 		}
 
-		let originalLevel = Math.floor(battlepass.experience / 100);
+		let originalLevel = Math.ceil(battlepass.experience / 100);
 
 		battlepass.experience += experience;
 
 		await battlepass.save();
 
-		let newLevel = Math.floor(battlepass.experience / 100);
+		let newLevel = Math.ceil(battlepass.experience / 100);
 
 		if (newLevel > originalLevel) {
 			//Message the user about the level up
