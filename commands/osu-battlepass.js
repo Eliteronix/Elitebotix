@@ -1,5 +1,5 @@
 const { PermissionsBitField, SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
-const { showUnknownInteractionError, developers } = require('../config.json');
+const { showUnknownInteractionError } = require('../config.json');
 const { DBDiscordUsers, DBOsuBattlepass, DBOsuQuests } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils.js');
 const Canvas = require('canvas');
@@ -27,19 +27,6 @@ module.exports = {
 		})
 		.setDMPermission(true),
 	async execute(msg, args, interaction) {
-		if (!developers.includes(interaction.user.id)) {
-			try {
-				return await interaction.reply({ content: 'Only developers may use this command at the moment. As soon as development is finished it will be made public.', ephemeral: true });
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
-			}
-		}
-
 		try {
 			await interaction.deferReply();
 		} catch (error) {
@@ -188,13 +175,13 @@ module.exports = {
 				'Play HR on 3 maps in ETX matches', // TODO:
 				'Play DT on 2 maps in ETX matches', // TODO:
 				'Win 4 maps in ETX matches', // TODO:
-				'Use /osu-duel rating', // TODO:
-				'Follow somebody using \'/osu-follow follow\'', // TODO:
-				'Play a round in an autohost lobby using \'/osu-autohost\'', // TODO:
+				'Use \'/osu-duel rating\'',
+				'Follow somebody using \'/osu-follow follow\'',
+				'Play a round in an autohost lobby using \'/osu-autohost\'',
 				'Check your skills with \'/osu-skills\'',
-				'Get most recent play using \'/osu-recent\' (You can type \'/rec\')', // TODO:
-				'Send /np to the bot ingame to get pp values', // TODO:
-				'Send !r to the bot ingame to get a random map', // TODO:
+				'Get a most recent play using \'/osu-recent\' (You can type \'/rec\')',
+				'Send /np to the bot ingame to get pp values',
+				'Send !r to the bot ingame to get a random map',
 				'/hug another user',
 			];
 

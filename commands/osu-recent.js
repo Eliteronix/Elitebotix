@@ -1,11 +1,12 @@
-﻿const { DBDiscordUsers } = require('../dbObjects');
+﻿const { DBDiscordUsers, DBOsuQuests } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getBeatmapApprovalStatusImage, logDatabaseQueries, getGameModeName, getOsuPP, getBeatmapCover, getAvatar } = require('../utils');
+const { humanReadable, roundedRect, getModImage, getLinkModeName, getMods, getGameMode, roundedImage, getBeatmapModeId, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getBeatmapApprovalStatusImage, logDatabaseQueries, getGameModeName, getOsuPP, getBeatmapCover, getAvatar, awardBattlepassExperience } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-recent',
@@ -174,6 +175,35 @@ module.exports = {
 				pass = true;
 				args.splice(i, 1);
 				i--;
+			}
+		}
+
+		logDatabaseQueries(4, 'commands/osu-recent.js DBDiscordUsers quest');
+		let discordUser = await DBDiscordUsers.findOne({
+			attributes: ['osuUserId', 'osuVerified'],
+			where: {
+				userId: interaction.user.id
+			}
+		});
+
+		if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
+			logDatabaseQueries(4, 'commands/osu-recent.js DBOsuQuests');
+			let runningQuest = await DBOsuQuests.findOne({
+				attributes: ['id', 'progress'],
+				where: {
+					osuUserId: discordUser.osuUserId,
+					type: 'Get a most recent play using \'/osu-recent\' (You can type \'/rec\')',
+					progress: {
+						[Op.lt]: 100
+					}
+				}
+			});
+
+			if (runningQuest) {
+				runningQuest.progress = 100;
+				await runningQuest.save();
+
+				awardBattlepassExperience(discordUser.osuUserId, 5, interaction.client, 'Quest completed: Get a most recent play using </osu-recent:1064502477061365800>');
 			}
 		}
 
