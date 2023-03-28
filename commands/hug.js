@@ -1,6 +1,9 @@
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
+const { DBDiscordUsers, DBOsuQuests } = require('../dbObjects');
+const { logDatabaseQueries, awardBattlepassExperience } = require('../utils');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'hug',
@@ -114,6 +117,35 @@ module.exports = {
 			const timestamps = interaction.client.cooldowns.get(this.name);
 			timestamps.delete(interaction.user.id);
 			return;
+		}
+
+		logDatabaseQueries(4, 'commands/hug.js DBDiscordUsers');
+		let discordUser = await DBDiscordUsers.findOne({
+			attributes: ['osuUserId', 'osuVerified', 'osuName'],
+			where: {
+				userId: interaction.user.id
+			}
+		});
+
+		if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
+			logDatabaseQueries(4, 'commands/hug.js DBOsuQuests');
+			let runningQuest = await DBOsuQuests.findOne({
+				attributes: ['id', 'progress'],
+				where: {
+					osuUserId: discordUser.osuUserId,
+					type: '/hug another user',
+					progress: {
+						[Op.lt]: 100
+					}
+				}
+			});
+
+			if (runningQuest) {
+				runningQuest.progress = 100;
+				await runningQuest.save();
+
+				awardBattlepassExperience(discordUser.osuUserId, 10, interaction.client, 'Quest completed: </hug:1064502109019590657> another user');
+			}
 		}
 
 		let users = [];

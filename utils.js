@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuBattlepass } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -7886,6 +7886,59 @@ module.exports = {
 		}
 
 		return parseFloat(starRating);
+	},
+	async awardBattlepassExperience(osuUserId, experience, client, notification) {
+		module.exports.logDatabaseQueries('awardBattlepassExperience DBOsuBattlepass');
+		let battlepass = await DBOsuBattlepass.findOne({
+			attributes: ['id', 'experience'],
+			where: {
+				osuUserId: osuUserId,
+			},
+		});
+
+		module.exports.logDatabaseQueries('awardBattlepassExperience DBDiscordUsers');
+		let discordUser = await DBDiscordUsers.findOne({
+			attributes: ['userId'],
+			where: {
+				userId: {
+					[Op.not]: null,
+				},
+				osuUserId: osuUserId,
+				osuVerified: true,
+			},
+		});
+
+		let user = null;
+
+		if (discordUser) {
+			user = await client.users.fetch(discordUser.userId);
+		}
+
+		if (user) {
+			//Message the user about the quest completion
+			try {
+				await user.send(notification);
+			} catch (error) {
+				console.error(error);
+			}
+		}
+
+		let originalLevel = Math.floor(battlepass.experience / 100);
+
+		battlepass.experience += experience;
+
+		await battlepass.save();
+
+		let newLevel = Math.floor(battlepass.experience / 100);
+
+		if (newLevel > originalLevel) {
+			//Message the user about the level up
+			try {
+				await user.send(`You have leveled up to level ${newLevel}!`);
+			} catch (error) {
+				console.error(error);
+			}
+		}
 	}
 };
 
