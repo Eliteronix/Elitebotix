@@ -1,8 +1,8 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
-const { DBOsuMultiScores, DBDiscordUsers, DBOsuBeatmaps } = require('../dbObjects');
-const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar } = require('../utils');
+const { DBOsuMultiScores, DBDiscordUsers, DBOsuBeatmaps, DBOsuQuests } = require('../dbObjects');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar, awardBattlepassExperience } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
 const { Op } = require('sequelize');
@@ -179,6 +179,35 @@ module.exports = {
 			const timestamps = interaction.client.cooldowns.get(this.name);
 			timestamps.delete(interaction.user.id);
 			return;
+		}
+
+		logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers');
+		let discordUser = await DBDiscordUsers.findOne({
+			attributes: ['osuUserId', 'osuVerified', 'osuName'],
+			where: {
+				userId: interaction.user.id
+			}
+		});
+
+		if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
+			logDatabaseQueries(4, 'commands/osu-skills.js DBOsuQuests');
+			let runningQuest = await DBOsuQuests.findOne({
+				attributes: ['id', 'progress'],
+				where: {
+					osuUserId: discordUser.osuUserId,
+					type: 'Check your skills with \'/osu-skills\'',
+					progress: {
+						[Op.lt]: 100
+					}
+				}
+			});
+
+			if (runningQuest) {
+				runningQuest.progress = 100;
+				await runningQuest.save();
+
+				awardBattlepassExperience(discordUser.osuUserId, 5, interaction.client, 'Quest completed: Check your skills with </osu-skills:1064502585819668521>');
+			}
 		}
 
 		let scaled = true;
