@@ -5626,7 +5626,7 @@ module.exports = {
 					} else if (results[i].player.mods[j].enumValue === 16) {
 						module.exports.processQuestProgression(client, results[i].player.user.id, 'Play HR on 3 maps in ETX matches', 34, 20, 'Play HR on 3 maps in ETX matches');
 					} else if (results[i].player.mods[j].enumValue === 64) {
-						module.exports.processQuestProgression(client, results[i].player.user.id, 'Play DT on 2 maps in ETX matches', 34, 20, 'Play DT on 3 maps in ETX matches');
+						module.exports.processQuestProgression(client, results[i].player.user.id, 'Play DT on 2 maps in ETX matches', 50, 20, 'Play DT on 3 maps in ETX matches');
 					}
 				}
 

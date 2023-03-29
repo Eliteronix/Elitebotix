@@ -168,13 +168,13 @@ module.exports = {
 				// 'Use 3 items', // TODO:
 				'Queue for and play a 1v1 ETX match',
 				'Queue for and play a 1v1 ETX match', // TODO: Test
-				'Win a 1v1 ETX match', // TODO: Test
-				'Play 7 maps in ETX matches', // TODO: Test
-				'Play 3 maps NM in ETX matches', // TODO: Test
-				'Play HD on 3 maps in ETX matches', // TODO: Test
-				'Play HR on 3 maps in ETX matches', // TODO: Test
-				'Play DT on 2 maps in ETX matches', // TODO: Test
-				'Win 4 maps in ETX matches', // TODO: Test
+				'Win a 1v1 ETX match',
+				'Play 7 maps in ETX matches',
+				'Play 3 maps NM in ETX matches',
+				'Play HD on 3 maps in ETX matches',
+				'Play HR on 3 maps in ETX matches',
+				'Play DT on 2 maps in ETX matches',
+				'Win 4 maps in ETX matches',
 				'Use \'/osu-duel rating\'',
 				'Follow somebody using \'/osu-follow follow\'',
 				'Play a round in an autohost lobby using \'/osu-autohost\'',
