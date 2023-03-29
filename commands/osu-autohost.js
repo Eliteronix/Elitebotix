@@ -1,6 +1,6 @@
-const { populateMsgFromInteraction, logMatchCreation, getOsuUserServerMode, logDatabaseQueries, getNextMap, addMatchMessage, awardBattlepassExperience } = require('../utils');
+const { populateMsgFromInteraction, logMatchCreation, getOsuUserServerMode, logDatabaseQueries, getNextMap, addMatchMessage, processQuestProgression } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { DBDiscordUsers, DBOsuMultiScores, DBProcessQueue, DBOsuQuests, } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores, DBProcessQueue, } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -737,24 +737,7 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 				process.send(`osuuser ${results[i].player.user.id}}`);
 
-				logDatabaseQueries(4, 'commands/osu-autohost.js results DBOsuQuests');
-				let runningQuest = await DBOsuQuests.findOne({
-					attributes: ['id', 'progress'],
-					where: {
-						osuUserId: results[i].player.user.id,
-						type: 'Play a round in an autohost lobby using \'/osu-autohost\'',
-						progress: {
-							[Op.lt]: 100
-						}
-					}
-				});
-
-				if (runningQuest) {
-					runningQuest.progress = 100;
-					await runningQuest.save();
-
-					awardBattlepassExperience(results[i].player.user.id, 15, msg.client, 'Quest completed: Play a round in an autohost lobby using </osu-autohost:1064502198593146910>');
-				}
+				processQuestProgression(msg.client, results[i].player.user.id, 'Play a round in an autohost lobby using \'/osu-autohost\'', 100, 15, 'Play a round in an autohost lobby using </osu-autohost:1064502198593146910>');
 			}
 
 			let nextModPool = getNextModPool(true);

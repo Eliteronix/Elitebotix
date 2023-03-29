@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuBattlepass } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuBattlepass, DBOsuQuests } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -5610,6 +5610,26 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 				process.send(`osuuser ${results[i].player.user.id}}`);
 
+				if (i === 0) {
+					module.exports.processQuestProgression(client, results[i].player.user.id, 'Win 4 maps in ETX matches', 25, 20, 'Win 4 maps in ETX matches');
+				}
+
+				module.exports.processQuestProgression(client, results[i].player.user.id, 'Play 7 maps in ETX matches', 15, 20, 'Play 7 maps in ETX matches');
+
+				if (!results[i].player.mods || results[i].player.mods.length === 0 || results[i].player.mods.length === 1 && results[i].player.mods[0].enumValue === 1) {
+					module.exports.processQuestProgression(client, results[i].player.user.id, 'Play 3 maps NM in ETX matches', 34, 20, 'Play 3 maps NM in ETX matches');
+				}
+
+				for (let j = 0; j < results[i].player.mods.length; j++) {
+					if (results[i].player.mods[j].enumValue === 8) {
+						module.exports.processQuestProgression(client, results[i].player.user.id, 'Play HD on 3 maps in ETX matches', 34, 20, 'Play HD on 3 maps in ETX matches');
+					} else if (results[i].player.mods[j].enumValue === 16) {
+						module.exports.processQuestProgression(client, results[i].player.user.id, 'Play HR on 3 maps in ETX matches', 34, 20, 'Play HR on 3 maps in ETX matches');
+					} else if (results[i].player.mods[j].enumValue === 64) {
+						module.exports.processQuestProgression(client, results[i].player.user.id, 'Play DT on 2 maps in ETX matches', 34, 20, 'Play DT on 3 maps in ETX matches');
+					}
+				}
+
 				if (firstTeam.includes(results[i].player.user.id.toString())) {
 					scoreTeam1 += parseFloat(results[i].score);
 				} else {
@@ -5722,11 +5742,25 @@ module.exports = {
 
 				if (scores[0] === (bestOf + 1) / 2) {
 					await channel.sendMessage(`Congratulations ${teamname1} for winning the match!`);
+
+					if (users.length === 2) {
+						module.exports.processQuestProgression(client, users[0].osuUserId, 'Win a 1v1 ETX match', 100, 20, 'Win a 1v1 ETX match');
+					}
 				} else {
 					await channel.sendMessage(`Congratulations ${teamname2} for winning the match!`);
+
+					if (users.length === 2) {
+						module.exports.processQuestProgression(client, users[1].osuUserId, 'Win a 1v1 ETX match', 100, 20, 'Win a 1v1 ETX match');
+					}
 				}
 				await channel.sendMessage('Thank you for playing! The lobby will automatically close in one minute.');
 				await new Promise(resolve => setTimeout(resolve, 5000));
+
+				if (queued) {
+					for (let i = 0; i < users.length; i++) {
+						module.exports.processQuestProgression(client, users[i].osuUserId, 'Queue for and play a 1v1 ETX match', 100, 20, 'Queue for and play a 1v1 ETX match');
+					}
+				}
 
 				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -7937,6 +7971,28 @@ module.exports = {
 				await user.send(`You have leveled up to level ${newLevel}!`);
 			} catch (error) {
 				console.error(error);
+			}
+		}
+	},
+	async processQuestProgression(client, osuUserId, type, progressGain, experienceGain, completionText) {
+		module.exports.logDatabaseQueries(4, 'utils.js processQuestProgression');
+		let runningQuest = await DBOsuQuests.findOne({
+			attributes: ['id', 'progress'],
+			where: {
+				osuUserId: osuUserId,
+				type: type,
+				progress: {
+					[Op.lt]: 100
+				}
+			}
+		});
+
+		if (runningQuest) {
+			runningQuest.progress = runningQuest.progress + progressGain;
+			await runningQuest.save();
+
+			if (runningQuest.progress >= 100) {
+				module.exports.awardBattlepassExperience(osuUserId, experienceGain, client, `Quest completed: ${completionText}`);
 			}
 		}
 	}
