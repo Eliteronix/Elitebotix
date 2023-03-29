@@ -164,10 +164,10 @@ module.exports = {
 		// Create new quests if needed
 		while (quests.length < 3) {
 			let questTypes = [
-				'Use an item', // TODO:
-				'Use 3 items', // TODO:
-				'Queue for and play a 1v1 ETX match', // TODO:
-				'Queue for and play a 1v1 ETX match', // TODO:
+				// 'Use an item', // TODO:
+				// 'Use 3 items', // TODO:
+				'Queue for and play a 1v1 ETX match',
+				'Queue for and play a 1v1 ETX match', // TODO: Test
 				'Win a 1v1 ETX match', // TODO: Test
 				'Play 7 maps in ETX matches', // TODO: Test
 				'Play 3 maps NM in ETX matches', // TODO: Test
