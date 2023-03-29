@@ -1,9 +1,8 @@
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
-const { DBDiscordUsers, DBOsuQuests } = require('../dbObjects');
-const { logDatabaseQueries, awardBattlepassExperience } = require('../utils');
-const { Op } = require('sequelize');
+const { DBDiscordUsers } = require('../dbObjects');
+const { logDatabaseQueries, processQuestProgression } = require('../utils');
 
 module.exports = {
 	name: 'hug',
@@ -128,24 +127,7 @@ module.exports = {
 		});
 
 		if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
-			logDatabaseQueries(4, 'commands/hug.js DBOsuQuests');
-			let runningQuest = await DBOsuQuests.findOne({
-				attributes: ['id', 'progress'],
-				where: {
-					osuUserId: discordUser.osuUserId,
-					type: '/hug another user',
-					progress: {
-						[Op.lt]: 100
-					}
-				}
-			});
-
-			if (runningQuest) {
-				runningQuest.progress = 100;
-				await runningQuest.save();
-
-				awardBattlepassExperience(discordUser.osuUserId, 10, interaction.client, 'Quest completed: </hug:1064502109019590657> another user');
-			}
+			processQuestProgression(interaction.client, discordUser.osuUserId, '/hug another user', 100, 10, '</hug:1064502109019590657> another user');
 		}
 
 		let users = [];

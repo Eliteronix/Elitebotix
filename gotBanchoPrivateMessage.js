@@ -1,6 +1,5 @@
-const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, getUserDuelStarRating, updateQueueChannels, getValidTournamentBeatmap, getModBits, awardBattlepassExperience } = require('./utils');
-const { DBDiscordUsers, DBProcessQueue, DBOsuQuests } = require('./dbObjects');
-const { Op } = require('sequelize');
+const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, getUserDuelStarRating, updateQueueChannels, getValidTournamentBeatmap, getModBits, processQuestProgression } = require('./utils');
+const { DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
 
 module.exports = async function (client, bancho, message) {
 	// eslint-disable-next-line no-undef
@@ -37,24 +36,7 @@ module.exports = async function (client, bancho, message) {
 		});
 
 		if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
-			logDatabaseQueries(4, 'gotBanchoPrivateMessage.js DBOsuQuests !r');
-			let runningQuest = await DBOsuQuests.findOne({
-				attributes: ['id', 'progress'],
-				where: {
-					osuUserId: discordUser.osuUserId,
-					type: 'Send /np to the bot ingame to get pp values',
-					progress: {
-						[Op.lt]: 100
-					}
-				}
-			});
-
-			if (runningQuest) {
-				runningQuest.progress = 100;
-				await runningQuest.save();
-
-				awardBattlepassExperience(discordUser.osuUserId, 5, client, 'Quest completed: Send `/np` to the bot ingame to get pp values');
-			}
+			processQuestProgression(client, discordUser.osuUserId, 'Send /np to the bot ingame to get pp values', 100, 5, 'Send `/np` to the bot ingame to get pp values');
 		}
 
 		let beatmapId = message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)[0].replace(/.+\//gm, '');
@@ -301,24 +283,7 @@ module.exports = async function (client, bancho, message) {
 		});
 
 		if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
-			logDatabaseQueries(4, 'gotBanchoPrivateMessage.js DBOsuQuests !r');
-			let runningQuest = await DBOsuQuests.findOne({
-				attributes: ['id', 'progress'],
-				where: {
-					osuUserId: discordUser.osuUserId,
-					type: 'Send !r to the bot ingame to get a random map',
-					progress: {
-						[Op.lt]: 100
-					}
-				}
-			});
-
-			if (runningQuest) {
-				runningQuest.progress = 100;
-				await runningQuest.save();
-
-				awardBattlepassExperience(discordUser.osuUserId, 5, client, 'Quest completed: Send !r to the bot ingame to get a random map');
-			}
+			processQuestProgression(client, discordUser.osuUserId, 'Send !r to the bot ingame to get a random map', 100, 5, 'Send !r to the bot ingame to get a random map');
 		}
 
 		if (!discordUser && !userStarRating) {

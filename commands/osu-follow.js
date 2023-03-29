@@ -1,8 +1,8 @@
-const { DBDiscordUsers, DBOsuTourneyFollows, DBOsuQuests } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuTourneyFollows } = require('../dbObjects');
 const osu = require('node-osu');
 const { showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { getOsuPlayerName, logDatabaseQueries, awardBattlepassExperience } = require('../utils');
+const { getOsuPlayerName, logDatabaseQueries, processQuestProgression } = require('../utils');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -218,24 +218,7 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
-						logDatabaseQueries(4, 'commands/osu-follow.js follow DBOsuQuests');
-						let runningQuest = await DBOsuQuests.findOne({
-							attributes: ['id', 'progress'],
-							where: {
-								osuUserId: discordUser.osuUserId,
-								type: 'Follow somebody using \'/osu-follow follow\'',
-								progress: {
-									[Op.lt]: 100
-								}
-							}
-						});
-
-						if (runningQuest) {
-							runningQuest.progress = 100;
-							await runningQuest.save();
-
-							awardBattlepassExperience(discordUser.osuUserId, 10, interaction.client, 'Quest completed: Follow somebody using </osu-follow follow:1066502331014844427>');
-						}
+						processQuestProgression(interaction.client, discordUser.osuUserId, 'Follow somebody using \'/osu-follow follow\'', 100, 10, 'Follow somebody using </osu-follow follow:1066502331014844427>');
 					}
 
 					return await interaction.editReply(`You are now following ${osuUser.name}`);

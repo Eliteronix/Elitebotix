@@ -1,6 +1,6 @@
-const { DBDiscordUsers, DBProcessQueue, DBOsuQuests } = require('../dbObjects');
+const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage, getAvatar, awardBattlepassExperience } = require('../utils');
+const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage, getAvatar, processQuestProgression } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
@@ -849,24 +849,7 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
-						logDatabaseQueries(4, 'commands/osu-duel.js rating DBOsuQuests');
-						let runningQuest = await DBOsuQuests.findOne({
-							attributes: ['id', 'progress'],
-							where: {
-								osuUserId: discordUser.osuUserId,
-								type: 'Use \'/osu-duel rating\'',
-								progress: {
-									[Op.lt]: 100
-								}
-							}
-						});
-
-						if (runningQuest) {
-							runningQuest.progress = 100;
-							await runningQuest.save();
-
-							awardBattlepassExperience(discordUser.osuUserId, 5, interaction.client, 'Quest completed: Use </osu-duel rating:1064502289357881405>');
-						}
+						processQuestProgression(interaction.client, discordUser.osuUserId, 'Use \'/osu-duel rating\'', 100, 5, 'Use </osu-duel rating:1064502289357881405>');
 					}
 				} else {
 					let playerName = await getOsuPlayerName(interaction.options._hoistedOptions[0].value);
