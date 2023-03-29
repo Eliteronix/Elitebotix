@@ -6220,12 +6220,14 @@ module.exports = {
 
 		const beatmapAttributes = [
 			'beatmapId',
+			'beatmapsetId',
 			'mods',
 			'starRating',
 			'approvalStatus',
 			'popular',
 			'approachRate',
 			'circleSize',
+			'overallDifficulty',
 			'updatedAt',
 			'maxCombo',
 			'drainLength',
