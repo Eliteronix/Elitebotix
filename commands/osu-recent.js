@@ -186,7 +186,7 @@ module.exports = {
 		});
 
 		if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
-			processQuestProgression(interaction.client, discordUser.osuUserId, 'Get a most recent play using \'/osu-recent\' (You can type \'/rec\')', 100, 5, 'Get a most recent play using </osu-recent:1064502477061365800>');
+			processQuestProgression(interaction.client, discordUser.osuUserId, 'Get a most recent play using \'/osu-recent\' (You can type \'/rec\')', 100, 25, 'Get a most recent play using </osu-recent:1064502477061365800>');
 		}
 
 		const commandConfig = await getOsuUserServerMode(msg, args);

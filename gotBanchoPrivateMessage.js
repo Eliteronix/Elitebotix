@@ -36,7 +36,7 @@ module.exports = async function (client, bancho, message) {
 		});
 
 		if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
-			processQuestProgression(client, discordUser.osuUserId, 'Send /np to the bot ingame to get pp values', 100, 5, 'Send `/np` to the bot ingame to get pp values');
+			processQuestProgression(client, discordUser.osuUserId, 'Send /np to the bot ingame to get pp values', 100, 25, 'Send `/np` to the bot ingame to get pp values');
 		}
 
 		let beatmapId = message.message.match(/https?:\/\/osu\.ppy\.sh\/beatmapsets\/.+\/\d+/gm)[0].replace(/.+\//gm, '');
@@ -283,7 +283,7 @@ module.exports = async function (client, bancho, message) {
 		});
 
 		if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
-			processQuestProgression(client, discordUser.osuUserId, 'Send !r to the bot ingame to get a random map', 100, 5, 'Send !r to the bot ingame to get a random map');
+			processQuestProgression(client, discordUser.osuUserId, 'Send !r to the bot ingame to get a random map', 100, 25, 'Send !r to the bot ingame to get a random map');
 		}
 
 		if (!discordUser && !userStarRating) {
