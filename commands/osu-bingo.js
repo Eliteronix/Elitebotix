@@ -477,9 +477,9 @@ module.exports = {
 
 		let everyUser = [];
 		for (let i = 0; i < allUsers.length; i++) {
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/osu-bingo.js DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId', 'userId'],
 				where: {
 					userId: allUsers[i],
 					osuVerified: true
@@ -570,9 +570,18 @@ module.exports = {
 		// Get the map pool
 		let mappool = [];
 
-		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/osu-bingo.js DBOsuBeatmaps');
 		let beatmaps = await DBOsuBeatmaps.findAll({
+			attributes: [
+				'beatmapId',
+				'starRating',
+				'drainLength',
+				'beatmapsetId',
+				'artist',
+				'title',
+				'difficulty',
+				'maxCombo',
+			],
 			where: {
 				mode: 'Standard',
 				mods: 0,
@@ -642,7 +651,7 @@ module.exports = {
 
 		let randomString = Math.random().toString(36);
 
-		interaction.client.bingoMatches.push('randomString');
+		interaction.client.bingoMatches.push(randomString);
 
 		let message = await interaction.channel.send('Creating the bingo card...');
 
@@ -655,9 +664,40 @@ module.exports = {
 		// Refresh the message when the refresh button is pressed
 		const refreshCollector = message.createReactionCollector();
 
+		// Refresh the message every 30 seconds
+		let interval = setInterval(async () => {
+			if (lastRefresh.date.getTime() + 30000 < new Date().getTime()) {
+				await refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh, randomString, interval);
+
+				let winningTeam = await checkWin(mappool);
+				if (winningTeam) {
+					refreshCollector.stop();
+					message.reactions.removeAll().catch(() => { });
+
+					//Stop the interval
+					clearInterval(interval);
+
+					if (message.client.bingoMatches.includes(randomString)) {
+						message.client.bingoMatches.splice(message.client.bingoMatches.indexOf(randomString), 1);
+					}
+				} else if (lastRefresh.lastScore.getTime() + 1800000 < new Date().getTime()) {
+					// Stop the interval if the match has been going on for more than 30 minutes without scores
+					refreshCollector.stop();
+					message.reactions.removeAll().catch(() => { });
+
+					//Stop the interval
+					clearInterval(interval);
+
+					if (message.client.bingoMatches.includes(randomString)) {
+						message.client.bingoMatches.splice(message.client.bingoMatches.indexOf(randomString), 1);
+					}
+				}
+			}
+		}, 5000);
+
 		refreshCollector.on('collect', async (reaction, user) => {
 			if (reaction.emoji.name === '🔄' && allUsers.includes(user.id)) {
-				await refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh, randomString);
+				await refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh, randomString, interval);
 			}
 
 			// Remove the reaction unless its the bot
@@ -671,33 +711,10 @@ module.exports = {
 				message.reactions.removeAll().catch(() => { });
 			}
 		});
-
-		// Refresh the message every 30 seconds
-		let interval = setInterval(async () => {
-			if (lastRefresh.date.getTime() + 30000 < new Date().getTime()) {
-				await refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh, randomString);
-
-				let winningTeam = await checkWin(mappool);
-				if (winningTeam) {
-					refreshCollector.stop();
-					message.reactions.removeAll().catch(() => { });
-
-					//Stop the interval
-					clearInterval(interval);
-				} else if (lastRefresh.lastScore.getTime() + 1800000 < new Date().getTime()) {
-					// Stop the interval if the match has been going on for more than 30 minutes without scores
-					refreshCollector.stop();
-					message.reactions.removeAll().catch(() => { });
-
-					//Stop the interval
-					clearInterval(interval);
-				}
-			}
-		}, 5000);
 	},
 };
 
-async function refreshMessage(message, mappool, lastRefresh, randomString) {
+async function refreshMessage(message, mappool, lastRefresh, randomString, interval) {
 	lastRefresh.date = new Date();
 	let reply = `\n\nLast updated: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:R>`;
 
@@ -840,6 +857,9 @@ async function refreshMessage(message, mappool, lastRefresh, randomString) {
 		await message.fetch();
 		await message.edit({ content: reply, files: [bingoCard] });
 
+		//Stop the interval
+		clearInterval(interval);
+
 		if (message.client.bingoMatches.includes(randomString)) {
 			message.client.bingoMatches.splice(message.client.bingoMatches.indexOf(randomString), 1);
 		}
@@ -850,7 +870,7 @@ async function refreshMessage(message, mappool, lastRefresh, randomString) {
 	}
 }
 
-async function refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh, randomString) {
+async function refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh, randomString, interval) {
 
 	lastRefresh.date = new Date();
 
@@ -985,7 +1005,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 		await pause(1000);
 	}
 
-	await refreshMessage(message, mappool, lastRefresh, randomString);
+	await refreshMessage(message, mappool, lastRefresh, randomString, interval);
 
 	lastRefresh.date = new Date();
 }
