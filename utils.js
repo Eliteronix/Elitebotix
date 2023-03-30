@@ -6645,14 +6645,14 @@ module.exports = {
 		if (osuTracker) {
 			let osuUser = { osuUserId: osuTracker.osuUserId };
 
-			console.log(`Processing osu! track for ${osuTracker.osuUserId}...`);
+			// console.log(`Processing osu! track for ${osuTracker.osuUserId}...`);
 
 			if (logBroadcastEval) {
 				// eslint-disable-next-line no-console
 				console.log('Broadcasting utils.js osu! track activity to shards...');
 			}
 
-			let recentActivities = await client.shard.broadcastEval(async (c, { osuUser, lastUpdated }) => {
+			let recentActivities = client.shard.broadcastEval(async (c, { osuUser, lastUpdated }) => {
 				const osu = require('node-osu');
 				const { Op } = require('sequelize');
 				const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -6722,7 +6722,7 @@ module.exports = {
 
 					if (guildTrackers[i].medals || guildTrackers[i].osuLeaderboard || guildTrackers[i].taikoLeaderboard || guildTrackers[i].catchLeaderboard || guildTrackers[i].maniaLeaderboard) {
 						if (!osuUser.osuUser) {
-							console.log(`Grabbing osu! user for ${osuUser.osuUserId}...`);
+							// console.log(`Grabbing osu! user for ${osuUser.osuUserId}...`);
 							try {
 								// eslint-disable-next-line no-undef
 								process.send('osu!API');
@@ -6774,7 +6774,7 @@ module.exports = {
 										continue;
 									}
 
-									console.log(`Sending medal for ${osuUser.osuUserId}...`);
+									// console.log(`Sending medal for ${osuUser.osuUserId}...`);
 
 									let medalName = osuUser.osuUser.events[j].html.replace('</b>" medal!', '').replace(/.+<b>/gm, '');
 
@@ -6822,7 +6822,7 @@ module.exports = {
 									//This only works if the local timezone is UTC
 									if (parseInt(mapRank) <= 50 && new Date(lastUpdated) <= new Date(osuUser.osuUser.events[j].raw_date)) {
 
-										console.log(`Sending leaderboard scores for ${osuUser.osuUserId}...`);
+										// console.log(`Sending leaderboard scores for ${osuUser.osuUserId}...`);
 
 										recentActivity = true;
 										let msg = {
@@ -6853,7 +6853,7 @@ module.exports = {
 
 					if (guildTrackers[i].osuTopPlays) {
 						if (guildTrackers[i].osuNumberTopPlays === undefined) {
-							console.log(`Getting osu! top plays for ${osuUser.osuUserId}...`);
+							// console.log(`Getting osu! top plays for ${osuUser.osuUserId}...`);
 							// eslint-disable-next-line no-undef
 							process.send('osu!API');
 							guildTrackers[i].osuNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 0 })
@@ -6879,7 +6879,7 @@ module.exports = {
 						}
 
 						if (!isNaN(guildTrackers[i].osuNumberTopPlays) && guildTrackers[i].osuNumberTopPlays > 0) {
-							console.log(`Sending osu! top plays for ${osuUser.osuUserId}...`);
+							// console.log(`Sending osu! top plays for ${osuUser.osuUserId}...`);
 
 							recentActivity = true;
 							let msg = {
@@ -6903,7 +6903,7 @@ module.exports = {
 
 					if (guildTrackers[i].taikoTopPlays) {
 						if (guildTrackers[i].taikoNumberTopPlays === undefined) {
-							console.log(`Getting taiko top plays for ${osuUser.osuUserId}...`);
+							// console.log(`Getting taiko top plays for ${osuUser.osuUserId}...`);
 							// eslint-disable-next-line no-undef
 							process.send('osu!API');
 							guildTrackers[i].taikoNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 1 })
@@ -6929,7 +6929,7 @@ module.exports = {
 						}
 
 						if (!isNaN(guildTrackers[i].taikoNumberTopPlays) && guildTrackers[i].taikoNumberTopPlays > 0) {
-							console.log(`Sending taiko top plays for ${osuUser.osuUserId}...`);
+							// console.log(`Sending taiko top plays for ${osuUser.osuUserId}...`);
 
 							recentActivity = true;
 							let msg = {
@@ -6953,7 +6953,7 @@ module.exports = {
 
 					if (guildTrackers[i].catchTopPlays) {
 						if (guildTrackers[i].catchNumberTopPlays === undefined) {
-							console.log(`Getting catch top plays for ${osuUser.osuUserId}...`);
+							// console.log(`Getting catch top plays for ${osuUser.osuUserId}...`);
 
 							// eslint-disable-next-line no-undef
 							process.send('osu!API');
@@ -6980,7 +6980,7 @@ module.exports = {
 						}
 
 						if (!isNaN(guildTrackers[i].catchNumberTopPlays) && guildTrackers[i].catchNumberTopPlays > 0) {
-							console.log(`Sending catch top plays for ${osuUser.osuUserId}...`);
+							// console.log(`Sending catch top plays for ${osuUser.osuUserId}...`);
 
 							recentActivity = true;
 							let msg = {
@@ -7004,7 +7004,7 @@ module.exports = {
 
 					if (guildTrackers[i].maniaTopPlays) {
 						if (guildTrackers[i].maniaNumberTopPlays === undefined) {
-							console.log(`Getting mania top plays for ${osuUser.osuUserId}...`);
+							// console.log(`Getting mania top plays for ${osuUser.osuUserId}...`);
 
 							// eslint-disable-next-line no-undef
 							process.send('osu!API');
@@ -7031,7 +7031,7 @@ module.exports = {
 						}
 
 						if (!isNaN(guildTrackers[i].maniaNumberTopPlays) && guildTrackers[i].maniaNumberTopPlays > 0) {
-							console.log(`Sending mania top plays for ${osuUser.osuUserId}...`);
+							// console.log(`Sending mania top plays for ${osuUser.osuUserId}...`);
 
 							recentActivity = true;
 							let msg = {
@@ -7055,7 +7055,7 @@ module.exports = {
 
 					if (guildTrackers[i].tournamentTopPlays) {
 						if (guildTrackers[i].tournamentNumberTopPlays === undefined) {
-							console.log(`Getting tournament top plays for ${osuUser.osuUserId}...`);
+							// console.log(`Getting tournament top plays for ${osuUser.osuUserId}...`);
 							//Get all scores from tournaments
 							logDatabaseQueries(2, 'utils.js DBOsuMultiScores processOsuTrack tournamentTopPlays');
 							let multiScores = await DBOsuMultiScores.findAll({
@@ -7150,7 +7150,7 @@ module.exports = {
 						}
 
 						if (!isNaN(guildTrackers[i].tournamentNumberTopPlays) && guildTrackers[i].tournamentNumberTopPlays > 0) {
-							console.log(`Sending tournament top plays for ${osuUser.osuUserId}...`);
+							// console.log(`Sending tournament top plays for ${osuUser.osuUserId}...`);
 
 							recentActivity = true;
 							let msg = {
@@ -7175,7 +7175,7 @@ module.exports = {
 					if (guildTrackers[i].osuAmeobea) {
 						try {
 							if (!guildTrackers[i].osuAmeobeaUpdated) {
-								console.log(`Updating osu! Ameobea for ${osuUser.osuUserId}...`);
+								// console.log(`Updating osu! Ameobea for ${osuUser.osuUserId}...`);
 
 								await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=0`, { method: 'POST', body: 'a=1' });
 								guildTrackers[i].osuAmeobeaUpdated = true;
@@ -7203,7 +7203,7 @@ module.exports = {
 					if (guildTrackers[i].taikoAmeobea) {
 						try {
 							if (!guildTrackers[i].taikoAmeobeaUpdated) {
-								console.log(`Updating taiko Ameobea for ${osuUser.osuUserId}...`);
+								// console.log(`Updating taiko Ameobea for ${osuUser.osuUserId}...`);
 
 								await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=1`, { method: 'POST', body: 'a=1' });
 								guildTrackers[i].taikoAmeobeaUpdated = true;
@@ -7231,7 +7231,7 @@ module.exports = {
 					if (guildTrackers[i].catchAmeobea) {
 						try {
 							if (!guildTrackers[i].catchAmeobeaUpdated) {
-								console.log(`Updating catch Ameobea for ${osuUser.osuUserId}...`);
+								// console.log(`Updating catch Ameobea for ${osuUser.osuUserId}...`);
 
 								await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=2`, { method: 'POST', body: 'a=1' });
 								guildTrackers[i].catchAmeobeaUpdated = true;
@@ -7259,7 +7259,7 @@ module.exports = {
 					if (guildTrackers[i].maniaAmeobea) {
 						try {
 							if (!guildTrackers[i].maniaAmeobeaUpdated) {
-								console.log(`Updating mania Ameobea for ${osuUser.osuUserId}...`);
+								// console.log(`Updating mania Ameobea for ${osuUser.osuUserId}...`);
 
 								await fetch(`https://osutrack-api.ameo.dev/update?user=${osuUser.osuUserId}&mode=3`, { method: 'POST', body: 'a=1' });
 								guildTrackers[i].maniaAmeobeaUpdated = true;
@@ -7288,7 +7288,22 @@ module.exports = {
 				return recentActivity;
 			}, { context: { osuUser: osuUser, lastUpdated: osuTracker.updatedAt } });
 
-			console.log(`Finished processing ${osuTracker.osuUserId}...`);
+			// console.log(`Finished processing ${osuTracker.osuUserId}...`);
+
+			// wait for either the recentactivities to resolve or reject after a 180s timeout
+			await new Promise((resolve, reject) => {
+				setTimeout(() => {
+					reject();
+				}, 180000);
+
+				Promise.all([recentActivities]).then(() => {
+					resolve();
+				}).catch(() => {
+					reject();
+				});
+			});
+
+			recentActivities = await recentActivities;
 
 			module.exports.logDatabaseQueries(2, 'utils.js DBOsuGuildTrackers processOsuTrack updateActivity');
 			let guildTrackers = await DBOsuGuildTrackers.count({
