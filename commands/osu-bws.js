@@ -319,7 +319,7 @@ async function getProfile(interaction, username, formula, rank, desiredrank, bad
 			let expr = parser.parse(formula);
 
 			let content = `${user.name} is currently rank #${humanReadable(user.pp.rank)} and has ${badgeAmount} badges.\n`;
-			content += `Using \`${formula}\` their BWS rank is currently #${humanReadable(expr.evaluate({ rank: user.pp.rank, badges: badgeAmount }))}\n`;
+			content += `Using \`${formula}\` their BWS rank is currently #${humanReadable(Math.round(expr.evaluate({ rank: user.pp.rank, badges: badgeAmount })))}\n`;
 			content += '``` Badges |      Rank |  BWS Rank\n';
 			content += '--------------------------------\n';
 			for (let i = 0; i < 6; i++) {
