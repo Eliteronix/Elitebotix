@@ -655,7 +655,7 @@ module.exports = {
 
 		let message = await interaction.channel.send('Creating the bingo card...');
 
-		await refreshMessage(message, mappool, lastRefresh, randomString);
+		await refreshMessage(message, mappool, lastRefresh);
 
 		let matchStart = new Date();
 
@@ -714,7 +714,7 @@ module.exports = {
 	},
 };
 
-async function refreshMessage(message, mappool, lastRefresh, randomString, interval) {
+async function refreshMessage(message, mappool, lastRefresh) {
 	lastRefresh.date = new Date();
 	let reply = `\n\nLast updated: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:R>`;
 
@@ -856,13 +856,6 @@ async function refreshMessage(message, mappool, lastRefresh, randomString, inter
 	try {
 		await message.fetch();
 		await message.edit({ content: reply, files: [bingoCard] });
-
-		//Stop the interval
-		clearInterval(interval);
-
-		if (message.client.bingoMatches.includes(randomString)) {
-			message.client.bingoMatches.splice(message.client.bingoMatches.indexOf(randomString), 1);
-		}
 	} catch (e) {
 		if (e.message !== 'Unknown Message') {
 			console.error(e);
@@ -870,7 +863,7 @@ async function refreshMessage(message, mappool, lastRefresh, randomString, inter
 	}
 }
 
-async function refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh, randomString, interval) {
+async function refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh) {
 
 	lastRefresh.date = new Date();
 
@@ -1005,7 +998,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 		await pause(1000);
 	}
 
-	await refreshMessage(message, mappool, lastRefresh, randomString, interval);
+	await refreshMessage(message, mappool, lastRefresh);
 
 	lastRefresh.date = new Date();
 }
