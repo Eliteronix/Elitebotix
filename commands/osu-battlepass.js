@@ -124,6 +124,23 @@ module.exports = {
 			ctx.fillStyle = '#FFFFFF';
 			ctx.textAlign = 'center';
 			ctx.fillText(i + 1 + levelOffset, 60 + 185 * i, 175);
+
+			// Draw the level reward
+			ctx.font = '20px comfortaa';
+			ctx.fillStyle = '#FFFFFF';
+			ctx.textAlign = 'center';
+			ctx.fillText('Reward:', 37.5 + 185 * i + 90, 210);
+
+			let reward1 = 'Random Profile';
+			let reward2 = 'Border';
+
+			if ((i + 1 + levelOffset) % 5 === 0) {
+				reward1 = 'Random Rating';
+				reward2 = 'Boost';
+			}
+
+			ctx.fillText(reward1, 37.5 + 185 * i + 90, 235);
+			ctx.fillText(reward2, 37.5 + 185 * i + 90, 260);
 		}
 
 		ctx.fillStyle = '#00FFFF';
@@ -167,7 +184,7 @@ module.exports = {
 				// 'Use an item', // TODO:
 				// 'Use 3 items', // TODO:
 				'Queue for and play a 1v1 ETX match',
-				'Queue for and play a 1v1 ETX match', // TODO: Test
+				'Queue for and play a 1v1 ETX match',
 				'Win a 1v1 ETX match',
 				'Play 7 maps in ETX matches',
 				'Play 3 maps NM in ETX matches',

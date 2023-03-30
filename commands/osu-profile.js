@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores, DBInventory } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
@@ -687,7 +687,7 @@ async function drawBadges(input, server, client) {
 		}
 		for (let i = 0; i < additionalInfo.badges.length && i < 8; i++) {
 			const badge = await getBadgeImage(additionalInfo.badges[i].image_url.replace('https://assets.ppy.sh/profile-badges/', ''));
-			ctx.drawImage(badge, xOffset + (i * 88), 290, 86, 40);
+			ctx.drawImage(badge, xOffset + (i * 88), 292, 86, 40);
 		}
 	}
 
@@ -753,6 +753,27 @@ async function drawAvatar(input) {
 	let user = input[2];
 
 	const yOffset = 25;
+
+	//Draw a potential profile border
+	logDatabaseQueries('commands/osu-profile.js DBInventory');
+	let border = await DBInventory.findOne({
+		attributes: ['property'],
+		where: {
+			osuUserId: user.id,
+			item: 'profile border',
+			active: true,
+		}
+	});
+
+	if (border) {
+		// Draw a circle around the avatar
+		ctx.beginPath();
+		ctx.arc(canvas.width / 2, canvas.height / 2 + yOffset, 90, 0, Math.PI * 2, true);
+		ctx.closePath();
+		ctx.strokeStyle = border.property;
+		ctx.lineWidth = 4;
+		ctx.stroke();
+	}
 
 	//Get a circle in the middle for inserting the player avatar
 	ctx.beginPath();
