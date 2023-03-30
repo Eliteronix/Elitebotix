@@ -189,10 +189,12 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < args.length; i++) {
 				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
-					//TODO: add attributes and logdatabasequeries
 					logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
-						where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
+						attributes: ['osuUserId'],
+						where: {
+							userId: args[i].replace('<@', '').replace('>', '').replace('!', '')
+						},
 					});
 
 					if (discordUser && discordUser.osuUserId) {
@@ -277,10 +279,12 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 					}
 				}
 
-				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers 2');
 				const linkedUser = await DBDiscordUsers.findOne({
-					where: { osuUserId: user.id }
+					attributes: ['userId'],
+					where: {
+						osuUserId: user.id
+					}
 				});
 
 				if (linkedUser && linkedUser.userId) {
@@ -298,9 +302,9 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
 
-				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores 1');
 				let userScores = await DBOsuMultiScores.findAll({
+					attributes: ['score'],
 					where: {
 						osuUserId: user.id,
 						score: {
@@ -325,7 +329,6 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 					await sentMessage.react('🆚');
 					await sentMessage.react('📊');
 				}
-				userScores = null;
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
@@ -384,9 +387,9 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
 
-				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores 2');
 				let userScores = await DBOsuMultiScores.findAll({
+					attributes: ['score'],
 					where: {
 						osuUserId: user.id,
 						score: {
@@ -411,7 +414,6 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 					await sentMessage.react('🆚');
 					await sentMessage.react('📊');
 				}
-				userScores = null;
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
@@ -445,13 +447,14 @@ async function drawTitle(input, server, mode) {
 	ctx.textAlign = 'center';
 	ctx.fillText(title, canvas.width / 2, 35);
 
-	//TODO: add attributes and logdatabasequeries
 	logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers 3');
 	const discordUser = await DBDiscordUsers.findOne({
+		attributes: ['userId', 'patreon'],
 		where: {
 			osuUserId: user.id
 		}
 	});
+
 	if (discordUser && discordUser.patreon) {
 		const patreonLogo = await Canvas.loadImage('./other/patreonLogo.png');
 		ctx.drawImage(patreonLogo, 10, 10, 30, 30);
@@ -488,9 +491,9 @@ async function drawRank(input, msg) {
 	ctx.fillText(`PP: ${pp}`, canvas.width / 2, 83 + yOffset);
 
 	try {
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers 4');
 		const discordUser = await DBDiscordUsers.findOne({
+			attributes: ['osuDuelStarRating'],
 			where: {
 				osuUserId: user.id
 			}
