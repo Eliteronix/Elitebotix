@@ -6645,7 +6645,7 @@ module.exports = {
 		if (osuTracker) {
 			let osuUser = { osuUserId: osuTracker.osuUserId };
 
-			// console.log(`Processing osu! track for ${osuTracker.osuUserId}...`);
+			console.log(`Processing osu! track for ${osuTracker.osuUserId}...`);
 
 			if (logBroadcastEval) {
 				// eslint-disable-next-line no-console
