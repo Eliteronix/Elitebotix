@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuBattlepass, DBOsuQuests } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuBattlepass, DBOsuQuests, DBInventory } = require('./dbObjects');
 const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -7968,9 +7968,27 @@ module.exports = {
 		if (newLevel > originalLevel) {
 			//Message the user about the level up
 			try {
-				await user.send(`You have leveled up to level ${newLevel}!`);
+				await user.send(`You have leveled up to level ${newLevel}!\nCheck your inventory for your new rewards by using \`/inventory\`!`);
 			} catch (error) {
 				console.error(error);
+			}
+
+			//Award the user their rewards
+			let reward = 'Random Profile Border';
+
+			if (reward === 'Random Profile Border') {
+				let red = Math.floor(Math.random() * 256);
+				let green = Math.floor(Math.random() * 256);
+				let blue = Math.floor(Math.random() * 256);
+
+				let color = `rgb(${red}, ${green}, ${blue})`;
+
+				DBInventory.create({
+					osuUserId: osuUserId,
+					item: 'profile border',
+					property: color,
+					amount: 1,
+				});
 			}
 		}
 	},

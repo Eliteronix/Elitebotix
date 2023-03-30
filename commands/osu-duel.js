@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
+const { DBDiscordUsers, DBProcessQueue, DBInventory } = require('../dbObjects');
 const osu = require('node-osu');
 const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage, getAvatar, processQuestProgression } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
@@ -1269,6 +1269,27 @@ module.exports = {
 
 					ctx.font = 'bold 25px comfortaa, sans-serif';
 					ctx.fillText(`Duel Rank: #${humanReadable(derankStats.expectedPpRankOsu)}`, 190, 287);
+				}
+
+				//Draw a potential profile border
+				logDatabaseQueries('commands/osu-duel.js DBInventory');
+				let border = await DBInventory.findOne({
+					attributes: ['property'],
+					where: {
+						osuUserId: osuUser.id,
+						item: 'profile border',
+						active: true,
+					}
+				});
+
+				if (border) {
+					// Draw a circle around the avatar
+					ctx.beginPath();
+					ctx.arc(190, 170, 82.5, 0, Math.PI * 2, true);
+					ctx.closePath();
+					ctx.strokeStyle = border.property;
+					ctx.lineWidth = 4;
+					ctx.stroke();
 				}
 
 				//Get a circle for inserting the player avatar
