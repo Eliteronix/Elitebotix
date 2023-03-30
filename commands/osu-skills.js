@@ -190,7 +190,7 @@ module.exports = {
 		});
 
 		if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
-			processQuestProgression(interaction.client, discordUser.osuUserId, 'Check your skills with \'/osu-skills\'', 100, 5, 'Check your skills with </osu-skills:1064502585819668521>');
+			processQuestProgression(interaction.client, discordUser.osuUserId, 'Check your skills with \'/osu-skills\'', 100, 25, 'Check your skills with </osu-skills:1064502585819668521>');
 		}
 
 		let scaled = true;

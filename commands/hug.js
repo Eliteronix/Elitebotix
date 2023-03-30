@@ -127,7 +127,7 @@ module.exports = {
 		});
 
 		if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
-			processQuestProgression(interaction.client, discordUser.osuUserId, '/hug another user', 100, 10, '</hug:1064502109019590657> another user');
+			processQuestProgression(interaction.client, discordUser.osuUserId, '/hug another user', 100, 50, '</hug:1064502109019590657> another user');
 		}
 
 		let users = [];

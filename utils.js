@@ -5611,22 +5611,22 @@ module.exports = {
 				process.send(`osuuser ${results[i].player.user.id}}`);
 
 				if (i === 0) {
-					module.exports.processQuestProgression(client, results[i].player.user.id, 'Win 4 maps in ETX matches', 25, 20, 'Win 4 maps in ETX matches');
+					module.exports.processQuestProgression(client, results[i].player.user.id, 'Win 4 maps in ETX matches', 25, 100, 'Win 4 maps in ETX matches');
 				}
 
-				module.exports.processQuestProgression(client, results[i].player.user.id, 'Play 7 maps in ETX matches', 15, 20, 'Play 7 maps in ETX matches');
+				module.exports.processQuestProgression(client, results[i].player.user.id, 'Play 7 maps in ETX matches', 15, 100, 'Play 7 maps in ETX matches');
 
 				if (!results[i].player.mods || results[i].player.mods.length === 0 || results[i].player.mods.length === 1 && results[i].player.mods[0].enumValue === 1) {
-					module.exports.processQuestProgression(client, results[i].player.user.id, 'Play 3 maps NM in ETX matches', 34, 20, 'Play 3 maps NM in ETX matches');
+					module.exports.processQuestProgression(client, results[i].player.user.id, 'Play 3 maps NM in ETX matches', 34, 100, 'Play 3 maps NM in ETX matches');
 				}
 
 				for (let j = 0; j < results[i].player.mods.length; j++) {
 					if (results[i].player.mods[j].enumValue === 8) {
-						module.exports.processQuestProgression(client, results[i].player.user.id, 'Play HD on 3 maps in ETX matches', 34, 20, 'Play HD on 3 maps in ETX matches');
+						module.exports.processQuestProgression(client, results[i].player.user.id, 'Play HD on 3 maps in ETX matches', 34, 100, 'Play HD on 3 maps in ETX matches');
 					} else if (results[i].player.mods[j].enumValue === 16) {
-						module.exports.processQuestProgression(client, results[i].player.user.id, 'Play HR on 3 maps in ETX matches', 34, 20, 'Play HR on 3 maps in ETX matches');
+						module.exports.processQuestProgression(client, results[i].player.user.id, 'Play HR on 3 maps in ETX matches', 34, 100, 'Play HR on 3 maps in ETX matches');
 					} else if (results[i].player.mods[j].enumValue === 64) {
-						module.exports.processQuestProgression(client, results[i].player.user.id, 'Play DT on 2 maps in ETX matches', 50, 20, 'Play DT on 3 maps in ETX matches');
+						module.exports.processQuestProgression(client, results[i].player.user.id, 'Play DT on 2 maps in ETX matches', 50, 100, 'Play DT on 3 maps in ETX matches');
 					}
 				}
 
@@ -5744,13 +5744,13 @@ module.exports = {
 					await channel.sendMessage(`Congratulations ${teamname1} for winning the match!`);
 
 					if (users.length === 2) {
-						module.exports.processQuestProgression(client, users[0].osuUserId, 'Win a 1v1 ETX match', 100, 20, 'Win a 1v1 ETX match');
+						module.exports.processQuestProgression(client, users[0].osuUserId, 'Win a 1v1 ETX match', 100, 100, 'Win a 1v1 ETX match');
 					}
 				} else {
 					await channel.sendMessage(`Congratulations ${teamname2} for winning the match!`);
 
 					if (users.length === 2) {
-						module.exports.processQuestProgression(client, users[1].osuUserId, 'Win a 1v1 ETX match', 100, 20, 'Win a 1v1 ETX match');
+						module.exports.processQuestProgression(client, users[1].osuUserId, 'Win a 1v1 ETX match', 100, 100, 'Win a 1v1 ETX match');
 					}
 				}
 				await channel.sendMessage('Thank you for playing! The lobby will automatically close in one minute.');
@@ -5758,7 +5758,7 @@ module.exports = {
 
 				if (queued) {
 					for (let i = 0; i < users.length; i++) {
-						module.exports.processQuestProgression(client, users[i].osuUserId, 'Queue for and play a 1v1 ETX match', 100, 20, 'Queue for and play a 1v1 ETX match');
+						module.exports.processQuestProgression(client, users[i].osuUserId, 'Queue for and play a 1v1 ETX match', 100, 100, 'Queue for and play a 1v1 ETX match');
 					}
 				}
 
@@ -7976,7 +7976,7 @@ module.exports = {
 			//Award the user their rewards
 			let reward = 'Random Profile Border';
 
-			if (originalLevel % 3 === 0) {
+			if (originalLevel % 2 === 0) {
 				reward = 'Random Rating Boost';
 			}
 

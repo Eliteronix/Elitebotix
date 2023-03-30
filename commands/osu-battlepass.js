@@ -134,7 +134,7 @@ module.exports = {
 			let reward1 = 'Random Profile';
 			let reward2 = 'Border';
 
-			if ((i + 1 + levelOffset) % 3 === 0) {
+			if ((i + 1 + levelOffset) % 2 === 0) {
 				reward1 = 'Random Rating';
 				reward2 = 'Boost';
 			}
@@ -181,8 +181,6 @@ module.exports = {
 		// Create new quests if needed
 		while (quests.length < 3) {
 			let questTypes = [
-				// 'Use an item', // TODO:
-				// 'Use 3 items', // TODO:
 				'Queue for and play a 1v1 ETX match',
 				'Queue for and play a 1v1 ETX match',
 				'Win a 1v1 ETX match',

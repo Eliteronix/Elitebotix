@@ -218,7 +218,7 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
-						processQuestProgression(interaction.client, discordUser.osuUserId, 'Follow somebody using \'/osu-follow follow\'', 100, 10, 'Follow somebody using </osu-follow follow:1066502331014844427>');
+						processQuestProgression(interaction.client, discordUser.osuUserId, 'Follow somebody using \'/osu-follow follow\'', 100, 50, 'Follow somebody using </osu-follow follow:1066502331014844427>');
 					}
 
 					return await interaction.editReply(`You are now following ${osuUser.name}`);

@@ -737,7 +737,7 @@ module.exports = {
 				// eslint-disable-next-line no-undef
 				process.send(`osuuser ${results[i].player.user.id}}`);
 
-				processQuestProgression(msg.client, results[i].player.user.id, 'Play a round in an autohost lobby using \'/osu-autohost\'', 100, 15, 'Play a round in an autohost lobby using </osu-autohost:1064502198593146910>');
+				processQuestProgression(msg.client, results[i].player.user.id, 'Play a round in an autohost lobby using \'/osu-autohost\'', 100, 75, 'Play a round in an autohost lobby using </osu-autohost:1064502198593146910>');
 			}
 
 			let nextModPool = getNextModPool(true);

@@ -849,7 +849,7 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId && discordUser.osuVerified) {
-						processQuestProgression(interaction.client, discordUser.osuUserId, 'Use \'/osu-duel rating\'', 100, 5, 'Use </osu-duel rating:1064502289357881405>');
+						processQuestProgression(interaction.client, discordUser.osuUserId, 'Use \'/osu-duel rating\'', 100, 25, 'Use </osu-duel rating:1064502289357881405>');
 					}
 				} else {
 					let playerName = await getOsuPlayerName(interaction.options._hoistedOptions[0].value);
@@ -1052,6 +1052,37 @@ module.exports = {
 
 				ctx.font = 'bold 18px comfortaa, sans-serif';
 
+				logDatabaseQueries(4, 'commands/osu-duel.js DBInventory');
+				let boosts = await DBInventory.findAll({
+					attributes: ['property', 'amount'],
+					where: {
+						osuUserId: osuUser.id,
+						item: 'rating boost',
+					},
+				});
+
+				let NMBoost = 0;
+				let HDBoost = 0;
+				let HRBoost = 0;
+				let DTBoost = 0;
+				let FMBoost = 0;
+
+				let boostRate = 0.2;
+
+				for (let i = 0; i < boosts.length; i++) {
+					if (boosts[i].property === 'NM') {
+						NMBoost += boosts[i].amount * boostRate;
+					} else if (boosts[i].property === 'HD') {
+						HDBoost += boosts[i].amount * boostRate;
+					} else if (boosts[i].property === 'HR') {
+						HRBoost += boosts[i].amount * boostRate;
+					} else if (boosts[i].property === 'DT') {
+						DTBoost += boosts[i].amount * boostRate;
+					} else if (boosts[i].property === 'FM') {
+						FMBoost += boosts[i].amount * boostRate;
+					}
+				}
+
 				//Current NoMod Rating
 				ctx.fillText('NoMod', 100, 350);
 				duelLeague = getOsuDuelLeague(userDuelStarRating.noMod);
@@ -1067,7 +1098,7 @@ module.exports = {
 					if (userDuelStarRating.noModLimited) {
 						limited = '~';
 					}
-					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.noMod * 1000) / 1000}*)`, 100, 500);
+					ctx.fillText(`(${limited}${Math.round((userDuelStarRating.noMod + NMBoost) * 1000) / 1000}*)`, 100, 500);
 				}
 
 				//Current Hidden Rating
@@ -1085,7 +1116,7 @@ module.exports = {
 					if (userDuelStarRating.hiddenLimited) {
 						limited = '~';
 					}
-					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.hidden * 1000) / 1000}*)`, 225, 500);
+					ctx.fillText(`(${limited}${Math.round((userDuelStarRating.hidden + HDBoost) * 1000) / 1000}*)`, 225, 500);
 				}
 
 				//Current HardRock Rating
@@ -1103,7 +1134,7 @@ module.exports = {
 					if (userDuelStarRating.hardRockLimited) {
 						limited = '~';
 					}
-					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.hardRock * 1000) / 1000}*)`, 350, 500);
+					ctx.fillText(`(${limited}${Math.round((userDuelStarRating.hardRock + HRBoost) * 1000) / 1000}*)`, 350, 500);
 				}
 
 				//Current DoubleTime Rating
@@ -1121,7 +1152,7 @@ module.exports = {
 					if (userDuelStarRating.doubleTimeLimited) {
 						limited = '~';
 					}
-					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}*)`, 475, 500);
+					ctx.fillText(`(${limited}${Math.round((userDuelStarRating.doubleTime + DTBoost) * 1000) / 1000}*)`, 475, 500);
 				}
 
 				//Current FreeMod Rating
@@ -1139,7 +1170,7 @@ module.exports = {
 					if (userDuelStarRating.freeModLimited) {
 						limited = '~';
 					}
-					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.freeMod * 1000) / 1000}*)`, 600, 500);
+					ctx.fillText(`(${limited}${Math.round((userDuelStarRating.freeMod + FMBoost) * 1000) / 1000}*)`, 600, 500);
 				}
 
 				for (let i = 0; i < historicalUserDuelStarRatings.length; i++) {
