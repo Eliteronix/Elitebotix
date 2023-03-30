@@ -6219,6 +6219,9 @@ module.exports = {
 		}
 
 		const beatmapAttributes = [
+			'artist',
+			'title',
+			'difficulty',
 			'beatmapId',
 			'beatmapsetId',
 			'mods',
@@ -6231,6 +6234,8 @@ module.exports = {
 			'updatedAt',
 			'maxCombo',
 			'drainLength',
+			'totalLength',
+			'bpm',
 		];
 
 		let beatmaps = null;
