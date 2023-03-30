@@ -165,6 +165,8 @@ module.exports = {
 						item: 'profile border',
 					},
 				});
+			} else if (inventory.item === 'rating boost') {
+				return await interaction.editReply('Rating boosts are enabled by default.');
 			}
 
 			inventory.active = !inventory.active;

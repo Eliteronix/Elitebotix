@@ -7976,6 +7976,10 @@ module.exports = {
 			//Award the user their rewards
 			let reward = 'Random Profile Border';
 
+			if (originalLevel % 3 === 0) {
+				reward = 'Random Rating Boost';
+			}
+
 			if (reward === 'Random Profile Border') {
 				let red = Math.floor(Math.random() * 256);
 				let green = Math.floor(Math.random() * 256);
@@ -7989,6 +7993,33 @@ module.exports = {
 					property: color,
 					amount: 1,
 				});
+			} else if (reward === 'Random Rating Boost') {
+				const modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
+
+				const modPool = modPools[Math.floor(Math.random() * modPools.length)];
+
+				let existingBoost = await DBInventory.findOne({
+					attributes: ['id', 'amount'],
+					where: {
+						osuUserId: osuUserId,
+						item: 'rating boost',
+						property: modPool,
+					},
+				});
+
+				if (existingBoost) {
+					existingBoost.amount += 1;
+
+					await existingBoost.save();
+				} else {
+					DBInventory.create({
+						osuUserId: osuUserId,
+						item: 'rating boost',
+						property: modPool,
+						amount: 1,
+						active: true,
+					});
+				}
 			}
 		}
 	},

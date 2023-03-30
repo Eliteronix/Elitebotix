@@ -134,7 +134,7 @@ module.exports = {
 			let reward1 = 'Random Profile';
 			let reward2 = 'Border';
 
-			if ((i + 1 + levelOffset) % 5 === 0) {
+			if ((i + 1 + levelOffset) % 3 === 0) {
 				reward1 = 'Random Rating';
 				reward2 = 'Boost';
 			}
