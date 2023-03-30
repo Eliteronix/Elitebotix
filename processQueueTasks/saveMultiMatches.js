@@ -25,18 +25,6 @@ module.exports = {
 		});
 
 		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'Live' && matchID === '90305374') {
-			matchID = '90305375';
-		}
-
-		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'QA' && matchID === '56267496') {
-			// eslint-disable-next-line no-undef, no-console
-			console.log(`Manually deleted task for saving Multi Matches for ${matchID} ${process.env.SERVER}`);
-			return await processQueueEntry.destroy();
-		}
-
-		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
 			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 0);
 		}
