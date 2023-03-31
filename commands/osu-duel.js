@@ -1075,7 +1075,27 @@ module.exports = {
 					}
 				}
 
-				let totalRating = userDuelStarRating.total + NMBoost + HDBoost + HRBoost + DTBoost + FMBoost;
+				let noModRating = userDuelStarRating.noMod + NMBoost;
+
+				if (isNaN(noModRating)) noModRating = 0;
+
+				let hiddenRating = userDuelStarRating.hidden + HDBoost;
+
+				if (isNaN(hiddenRating)) hiddenRating = 0;
+
+				let hardRockRating = userDuelStarRating.hardRock + HRBoost;
+
+				if (isNaN(hardRockRating)) hardRockRating = 0;
+
+				let doubleTimeRating = userDuelStarRating.doubleTime + DTBoost;
+
+				if (isNaN(doubleTimeRating)) doubleTimeRating = 0;
+
+				let freeModRating = userDuelStarRating.freeMod + FMBoost;
+
+				if (isNaN(freeModRating)) freeModRating = 0;
+
+				let totalRating = (noModRating + hiddenRating + hardRockRating + doubleTimeRating + freeModRating) / 5;
 
 				let duelLeague = getOsuDuelLeague(totalRating);
 
@@ -1097,8 +1117,6 @@ module.exports = {
 
 				//Current NoMod Rating
 				ctx.fillText('NoMod', 100, 350);
-
-				let noModRating = userDuelStarRating.noMod + NMBoost;
 
 				duelLeague = getOsuDuelLeague(noModRating);
 
@@ -1123,8 +1141,6 @@ module.exports = {
 				//Current Hidden Rating
 				ctx.fillText('Hidden', 225, 350);
 
-				let hiddenRating = userDuelStarRating.hidden + HDBoost;
-
 				duelLeague = getOsuDuelLeague(hiddenRating);
 
 				leagueText = duelLeague.name;
@@ -1147,8 +1163,6 @@ module.exports = {
 
 				//Current HardRock Rating
 				ctx.fillText('HardRock', 350, 350);
-
-				let hardRockRating = userDuelStarRating.hardRock + HRBoost;
 
 				duelLeague = getOsuDuelLeague(hardRockRating);
 
@@ -1173,8 +1187,6 @@ module.exports = {
 				//Current DoubleTime Rating
 				ctx.fillText('DoubleTime', 475, 350);
 
-				let doubleTimeRating = userDuelStarRating.doubleTime + DTBoost;
-
 				duelLeague = getOsuDuelLeague(doubleTimeRating);
 
 				leagueText = duelLeague.name;
@@ -1197,8 +1209,6 @@ module.exports = {
 
 				//Current FreeMod Rating
 				ctx.fillText('FreeMod', 600, 350);
-
-				let freeModRating = userDuelStarRating.freeMod + FMBoost;
 
 				duelLeague = getOsuDuelLeague(freeModRating);
 
