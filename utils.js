@@ -5946,8 +5946,6 @@ module.exports = {
 			}
 
 			await textChannel.send(matches.join('\n'));
-
-			textChannel.edit({ name: `${existingQueueTasks.length} current match${multipleString}` });
 		}, { context: {} });
 	},
 	async createNewForumPostRecords(client) {
