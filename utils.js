@@ -4110,6 +4110,10 @@ module.exports = {
 					}
 				}
 			}
+
+			if (msg === '!whatishappiness') {
+				return twitchClient.say(target.substring(1), 'Happiness is when Elitebotix rating up widepeepoHappy');
+			}
 		}
 
 		// Called every time the bot connects to Twitch chat
