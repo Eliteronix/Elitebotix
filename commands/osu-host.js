@@ -119,7 +119,39 @@ module.exports = {
 						})
 						.setRequired(true)
 				)
-		),
+		)
+	// 	.addSubcommand(subcommand =>
+	// 		subcommand
+	// 			.setName('ppwithtournamenttopplays')
+	// 			.setNameLocalizations({
+	// 				'de': 'ppmitturniertopplays',
+	// 				'en-GB': 'ppwithtournamenttopplays',
+	// 				'en-US': 'ppwithtournamenttopplays',
+	// 			})
+	// 			.setDescription('Provides the pp with bancho and tournament top plays of the provided tournament players')
+	// 			.setDescriptionLocalizations({
+	// 				'de': 'Liefert die pp mit Bancho und Turnier Top Plays der bereitgestellten Turnierspieler',
+	// 				'en-GB': 'Provides the pp with bancho and tournament top plays of the provided tournament players',
+	// 				'en-US': 'Provides the pp with bancho and tournament top plays of the provided tournament players',
+	// 			})
+	// 			.addAttachmentOption(option =>
+	// 				option
+	// 					.setName('file')
+	// 					.setNameLocalizations({
+	// 						'de': 'datei',
+	// 						'en-GB': 'file',
+	// 						'en-US': 'file',
+	// 					})
+	// 					.setDescription('The .txt file containing the tournament players, one player id per line')
+	// 					.setDescriptionLocalizations({
+	// 						'de': 'Die .txt Datei, die die Turnierspieler enthält, eine Spieler ID pro Zeile',
+	// 						'en-GB': 'The .txt file containing the tournament players, one player id per line',
+	// 						'en-US': 'The .txt file containing the tournament players, one player id per line',
+	// 					})
+	// 					.setRequired(true)
+	// 			)
+	// )
+	,
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {
