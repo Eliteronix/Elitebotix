@@ -1062,10 +1062,15 @@ module.exports = {
 				});
 
 				let NMBoost = 0;
+				let NMBoostAmount = 0;
 				let HDBoost = 0;
+				let HDBoostAmount = 0;
 				let HRBoost = 0;
+				let HRBoostAmount = 0;
 				let DTBoost = 0;
+				let DTBoostAmount = 0;
 				let FMBoost = 0;
+				let FMBoostAmount = 0;
 
 				let boostRate = 0.2;
 
@@ -1085,7 +1090,10 @@ module.exports = {
 
 				//Current NoMod Rating
 				ctx.fillText('NoMod', 100, 350);
-				duelLeague = getOsuDuelLeague(userDuelStarRating.noMod);
+
+				let noModRating = userDuelStarRating.noMod + NMBoost;
+
+				duelLeague = getOsuDuelLeague(noModRating);
 
 				leagueText = duelLeague.name;
 				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
@@ -1098,12 +1106,19 @@ module.exports = {
 					if (userDuelStarRating.noModLimited) {
 						limited = '~';
 					}
-					ctx.fillText(`(${limited}${Math.round((userDuelStarRating.noMod + NMBoost) * 1000) / 1000}*)`, 100, 500);
+					ctx.fillText(`(${limited}${Math.round(noModRating * 1000) / 1000}*)`, 100, 500);
+
+					if (NMBoostAmount) {
+						ctx.fillText(`(${NMBoostAmount} Boost(s))`, 100, 525);
+					}
 				}
 
 				//Current Hidden Rating
 				ctx.fillText('Hidden', 225, 350);
-				duelLeague = getOsuDuelLeague(userDuelStarRating.hidden);
+
+				let hiddenRating = userDuelStarRating.hidden + HDBoost;
+
+				duelLeague = getOsuDuelLeague(hiddenRating);
 
 				leagueText = duelLeague.name;
 				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
@@ -1116,12 +1131,19 @@ module.exports = {
 					if (userDuelStarRating.hiddenLimited) {
 						limited = '~';
 					}
-					ctx.fillText(`(${limited}${Math.round((userDuelStarRating.hidden + HDBoost) * 1000) / 1000}*)`, 225, 500);
+					ctx.fillText(`(${limited}${Math.round(hiddenRating * 1000) / 1000}*)`, 225, 500);
+
+					if (HDBoostAmount) {
+						ctx.fillText(`(${HDBoostAmount} Boost(s))`, 225, 525);
+					}
 				}
 
 				//Current HardRock Rating
 				ctx.fillText('HardRock', 350, 350);
-				duelLeague = getOsuDuelLeague(userDuelStarRating.hardRock);
+
+				let hardRockRating = userDuelStarRating.hardRock + HRBoost;
+
+				duelLeague = getOsuDuelLeague(hardRockRating);
 
 				leagueText = duelLeague.name;
 				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
@@ -1134,12 +1156,19 @@ module.exports = {
 					if (userDuelStarRating.hardRockLimited) {
 						limited = '~';
 					}
-					ctx.fillText(`(${limited}${Math.round((userDuelStarRating.hardRock + HRBoost) * 1000) / 1000}*)`, 350, 500);
+					ctx.fillText(`(${limited}${Math.round(hardRockRating * 1000) / 1000}*)`, 350, 500);
+
+					if (HRBoostAmount) {
+						ctx.fillText(`(${HRBoostAmount} Boost(s))`, 350, 525);
+					}
 				}
 
 				//Current DoubleTime Rating
 				ctx.fillText('DoubleTime', 475, 350);
-				duelLeague = getOsuDuelLeague(userDuelStarRating.doubleTime);
+
+				let doubleTimeRating = userDuelStarRating.doubleTime + DTBoost;
+
+				duelLeague = getOsuDuelLeague(doubleTimeRating);
 
 				leagueText = duelLeague.name;
 				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
@@ -1152,12 +1181,19 @@ module.exports = {
 					if (userDuelStarRating.doubleTimeLimited) {
 						limited = '~';
 					}
-					ctx.fillText(`(${limited}${Math.round((userDuelStarRating.doubleTime + DTBoost) * 1000) / 1000}*)`, 475, 500);
+					ctx.fillText(`(${limited}${Math.round(doubleTimeRating * 1000) / 1000}*)`, 475, 500);
+
+					if (DTBoostAmount) {
+						ctx.fillText(`(${DTBoostAmount} Boost(s))`, 475, 525);
+					}
 				}
 
 				//Current FreeMod Rating
 				ctx.fillText('FreeMod', 600, 350);
-				duelLeague = getOsuDuelLeague(userDuelStarRating.freeMod);
+
+				let freeModRating = userDuelStarRating.freeMod + FMBoost;
+
+				duelLeague = getOsuDuelLeague(freeModRating);
 
 				leagueText = duelLeague.name;
 				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
@@ -1170,7 +1206,11 @@ module.exports = {
 					if (userDuelStarRating.freeModLimited) {
 						limited = '~';
 					}
-					ctx.fillText(`(${limited}${Math.round((userDuelStarRating.freeMod + FMBoost) * 1000) / 1000}*)`, 600, 500);
+					ctx.fillText(`(${limited}${Math.round(freeModRating * 1000) / 1000}*)`, 600, 500);
+
+					if (FMBoostAmount) {
+						ctx.fillText(`(${FMBoostAmount} Boost(s))`, 600, 525);
+					}
 				}
 
 				for (let i = 0; i < historicalUserDuelStarRatings.length; i++) {
