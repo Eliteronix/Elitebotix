@@ -1260,6 +1260,7 @@ module.exports = {
 							&& !badge.description.includes('Mapper\'s Choice ')
 							&& !badge.description.includes('Exemplary performance')
 							&& !badge.description.toLowerCase().includes('contribution')
+							&& !badge.description.toLowerCase().includes('elite mapper')
 							&& !badge.description.toLowerCase().includes('outstanding commitment')
 							&& !badge.description.toLowerCase().includes('featured artist playlist')) {
 							additionalInfo.tournamentBadges.push(badge);
