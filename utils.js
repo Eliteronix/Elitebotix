@@ -657,6 +657,10 @@ module.exports = {
 				server = 'tournaments';
 				args.splice(i, 1);
 				i--;
+			} else if (args[i] === '--mixed') {
+				server = 'mixed';
+				args.splice(i, 1);
+				i--;
 			}
 
 		}

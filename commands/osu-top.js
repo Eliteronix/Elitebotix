@@ -128,6 +128,7 @@ module.exports = {
 					{ name: 'Bancho', value: 'b' },
 					{ name: 'Ripple', value: 'r' },
 					{ name: 'Tournaments', value: 'tournaments' },
+					{ name: 'Mixed (Bancho & Tournaments)', value: 'mixed' },
 				)
 		)
 		.addStringOption(option =>
@@ -531,7 +532,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 					console.error(err);
 				}
 			});
-	} else if (server === 'tournaments') {
+	} else if (server === 'tournaments' || server === 'mixed') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -755,150 +756,58 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 			scores.push(score);
 		}
 	} else if (server === 'tournaments') {
-		let modeName = getGameModeName(mode);
-		modeName = modeName.substring(0, 1).toUpperCase() + modeName.substring(1);
+		let topPlayData = await getTournamentTopPlayData(user.id, mode);
 
-		if (modeName === 'Catch') {
-			modeName = 'Catch the Beat';
-		}
+		totalRankedPP = topPlayData.totalRankedPP;
+		rankedBonusPP = topPlayData.rankedBonusPP;
+		totalUnrankedPP = topPlayData.totalUnrankedPP;
+		unrankedBonusPP = topPlayData.unrankedBonusPP;
+		scores = topPlayData.scores;
+	} else if (server === 'mixed') {
+		let banchoTopPlays = await osuApi.getUserBest({ u: user.name, m: mode, limit: 100 });
 
-		//Get all scores from tournaments
-		logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores 1');
-		let multiScores = await DBOsuMultiScores.findAll({
-			attributes: [
-				'id',
-				'score',
-				'gameRawMods',
-				'rawMods',
-				'teamType',
-				'pp',
-				'beatmapId',
-				'createdAt',
-				'gameStartDate',
-				'osuUserId',
-				'count50',
-				'count100',
-				'count300',
-				'countGeki',
-				'countKatu',
-				'countMiss',
-				'maxCombo',
-				'perfect',
-				'matchName',
-				'mode',
-			],
-			where: {
-				osuUserId: user.id,
-				mode: modeName,
-				tourneyMatch: true,
-				score: {
-					[Op.gte]: 10000
-				}
-			}
+		let topPlayData = await getTournamentTopPlayData(user.id, mode, true);
+
+		let tournamentTopPlays = topPlayData.scores;
+
+		scores = banchoTopPlays.concat(tournamentTopPlays);
+
+		scores.sort((a, b) => {
+			return parseFloat(b.pp) - parseFloat(a.pp);
 		});
 
-		for (let i = 0; i < multiScores.length; i++) {
-			if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].teamType === 'Tag Team vs' || multiScores[i].teamType === 'Tag Co-op') {
-				multiScores.splice(i, 1);
-				i--;
-			}
-		}
-
-		//Translate the scores to bancho scores
-		for (let i = 0; i < multiScores.length; i++) {
-			if (parseInt(multiScores[i].gameRawMods) % 2 === 1) {
-				multiScores[i].gameRawMods = parseInt(multiScores[i].gameRawMods) - 1;
-			}
-			if (parseInt(multiScores[i].rawMods) % 2 === 1) {
-				multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
-			}
-			multiScores[i] = await multiToBanchoScore(multiScores[i]);
-
-			if (!multiScores[i].pp || parseFloat(multiScores[i].pp) > 2000 || !parseFloat(multiScores[i].pp)) {
-				multiScores.splice(i, 1);
-				i--;
-				continue;
-			}
-		}
-
-		//Sort scores by pp
-		multiScores.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
-
-		//Remove duplicates by beatmapId
-		for (let i = 0; i < multiScores.length; i++) {
-			for (let j = i + 1; j < multiScores.length; j++) {
-				if (multiScores[i].beatmapId === multiScores[j].beatmapId) {
-					multiScores.splice(j, 1);
+		// Remove duplicates
+		for (let i = 0; i < scores.length; i++) {
+			for (let j = i + 1; j < scores.length; j++) {
+				if (scores[i].beatmapId == scores[j].beatmapId) {
+					scores.splice(j, 1);
 					j--;
 				}
 			}
 		}
 
-		//Calculate total pp values
-		let beatmapSets = [];
-		let rankedBeatmapSets = [];
-		let unrankedPP = 0;
-		let rankedPP = 0;
-		let unrankedPlayCounter = 1;
-		let rankedPlayCounter = 1;
+		// Calculate total pp
+		let banchoTotalPP = parseFloat(user.pp.raw);
 
-		logDatabaseQueries(4, 'commands/osu-top.js DBOsuBeatmaps 1');
-		let dbBeatmaps = await DBOsuBeatmaps.findAll({
-			attributes: [
-				'beatmapId',
-				'beatmapsetId',
-				'approvalStatus',
-				'mods',
-				'updatedAt',
-				'starRating',
-				'maxCombo',
-				'mode',
-			],
-			where: {
-				beatmapId: {
-					[Op.in]: multiScores.map(score => score.beatmapId)
-				},
-				mods: 0
-			}
-		});
+		// Calculate the part of the pp that is coming from the bancho top 100
+		let banchoTopPlaysPP = 0;
 
-		for (let i = 0; i < multiScores.length; i++) {
-			let dbBeatmap = dbBeatmaps.find(dbBeatmap => dbBeatmap.beatmapId === multiScores[i].beatmapId);
-
-			multiScores[i].beatmap = await getOsuBeatmap({ beatmapId: multiScores[i].beatmapId, beatmap: dbBeatmap });
-
-			if (multiScores[i].beatmap && !beatmapSets.includes(multiScores[i].beatmap.beatmapsetId)) {
-				beatmapSets.push(multiScores[i].beatmap.beatmapsetId);
-
-				if (multiScores[i].beatmap.approvalStatus === 'Approved' || multiScores[i].beatmap.approvalStatus === 'Ranked') {
-					rankedBeatmapSets.push(multiScores[i].beatmap.beatmapsetId);
-				}
-			}
-
-			if (multiScores[i].pp) {
-				unrankedPP += parseFloat(multiScores[i].pp) * Math.pow(0.95, (unrankedPlayCounter - 1));
-				unrankedPlayCounter++;
-
-				if (multiScores[i].beatmap && !getMods(multiScores[i].raw_mods).includes('RX') && (multiScores[i].beatmap.approvalStatus === 'Approved' || multiScores[i].beatmap.approvalStatus === 'Ranked')) {
-					rankedPP += parseFloat(multiScores[i].pp) * Math.pow(0.95, (rankedPlayCounter - 1));
-					rankedPlayCounter++;
-				}
-			}
+		for (let i = 0; i < banchoTopPlays.length; i++) {
+			banchoTopPlaysPP += parseFloat(banchoTopPlays[i].pp) * Math.pow(0.95, (i));
 		}
 
-		unrankedBonusPP = 416.6667 * (1 - (Math.pow(0.9994, beatmapSets.length)));
-		rankedBonusPP = 416.6667 * (1 - (Math.pow(0.9994, rankedBeatmapSets.length)));
+		let additionalPP = banchoTotalPP - banchoTopPlaysPP;
 
-		totalRankedPP = rankedPP + rankedBonusPP;
-		totalUnrankedPP = unrankedPP + unrankedBonusPP;
+		// Calculate the pp with the new scores
+		let newScoresPP = 0;
 
-		//Feed the scores into the array
-		for (let i = 0; i < multiScores.length && i < 100; i++) {
-			if (multiScores[i].pp) {
-				scores.push(multiScores[i]);
-			}
+		for (let i = 0; i < scores.length && i < 100; i++) {
+			newScoresPP += parseFloat(scores[i].pp) * Math.pow(0.95, (i));
 		}
+
+		totalRankedPP = newScoresPP + additionalPP;
 	}
+
 
 	let sortedScores = [];
 	let beatmaps = [];
@@ -1013,7 +922,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 	let exportScores = [];
 
 	for (let i = 0; i < sortedScores.length && i < showLimit; i++) {
-		if (server === 'tournaments' && sortedScores[i].beatmap) {
+		if ((server === 'tournaments' || server === 'mixed') && sortedScores[i].beatmap) {
 			exportScores.push({
 				score: sortedScores[i].score,
 				osuUserId: sortedScores[i].user.id,
@@ -1040,7 +949,17 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 			});
 		}
 
-		roundedRect(ctx, canvas.width / 70, 500 / 8 + (500 / 12) * i, canvas.width - canvas.width / 35, 500 / 13, 500 / 70, '70', '57', '63', 0.75);
+		let red = '70';
+		let green = '57';
+		let blue = '63';
+
+		if (sortedScores[i].matchName) {
+			red = '63';
+			green = '78';
+			blue = '96';
+		}
+
+		roundedRect(ctx, canvas.width / 70, 500 / 8 + (500 / 12) * i, canvas.width - canvas.width / 35, 500 / 13, 500 / 70, red, green, blue, 0.75);
 
 		const rankImage = await Canvas.loadImage(getRankImage(sortedScores[i].rank));
 		ctx.drawImage(rankImage, canvas.width / 35, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 - 500 / 31.25 / 2, 32, 16);
@@ -1090,8 +1009,10 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.fillStyle = '#A08C95';
 		ctx.textAlign = 'left';
-		if (server === 'tournaments') {
+		if (server === 'tournaments' || server === 'mixed' && sortedScores[i].matchName) {
 			ctx.fillText(`${achievedTime} in ${sortedScores[i].matchName}`, (canvas.width / 35) * 3 + ctx.measureText(beatmaps[i].difficulty).width + canvas.width / 100, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
+		} else if (server === 'mixed') {
+			ctx.fillText(`${achievedTime} on bancho`, (canvas.width / 35) * 3 + ctx.measureText(beatmaps[i].difficulty).width + canvas.width / 100, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 		} else {
 			ctx.fillText(achievedTime, (canvas.width / 35) * 3 + ctx.measureText(beatmaps[i].difficulty).width + canvas.width / 100, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 		}
@@ -1170,7 +1091,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 	}
 
 	//Write the tournament pp
-	if (server === 'tournaments') {
+	if (server === 'tournaments' || server === 'mixed') {
 		logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 4');
 		let discordUsers = await DBDiscordUsers.findAll({
 			attributes: ['osuPP', 'taikoPP', 'catchPP', 'maniaPP', 'osuRank'],
@@ -1210,11 +1131,185 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		ctx.font = '15px comfortaa, sans-serif';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'left';
-		ctx.fillText(`Total pp from tournaments (including unranked): ${humanReadable(Math.round(totalUnrankedPP))}pp (Bonus pp: ${humanReadable(Math.round(unrankedBonusPP))}) -> ~#${closestUnrankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 50);
-		ctx.fillText(`Total pp from tournaments (only ranked): ${humanReadable(Math.round(totalRankedPP))}pp (Bonus pp: ${humanReadable(Math.round(rankedBonusPP))}) -> ~#${closestRankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 25);
+		if (server === 'tournaments') {
+			ctx.fillText(`Total pp from tournaments (including unranked): ${humanReadable(Math.round(totalUnrankedPP))}pp (Bonus pp: ${humanReadable(Math.round(unrankedBonusPP))}) -> ~#${closestUnrankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 50);
+			ctx.fillText(`Total pp from tournaments (only ranked): ${humanReadable(Math.round(totalRankedPP))}pp (Bonus pp: ${humanReadable(Math.round(rankedBonusPP))}) -> ~#${closestRankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 25);
+		} else if (server === 'mixed') {
+			ctx.fillText(`Total pp on bancho: ${humanReadable(Math.round(user.pp.raw))}pp -> ~#${user.pp.rank}`, canvas.width / 140, canvas.height - 50);
+			ctx.fillText(`Total pp from bancho & tournaments (only ranked): ${humanReadable(Math.round(totalRankedPP))}pp -> ~#${closestRankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 25);
+		}
 	}
 
 	const output = [canvas, ctx, user, exportScores];
 	return output;
 }
 
+async function getTournamentTopPlayData(osuUserId, mode, mixed = false) {
+	let modeName = getGameModeName(mode);
+	modeName = modeName.substring(0, 1).toUpperCase() + modeName.substring(1);
+
+	if (modeName === 'Catch') {
+		modeName = 'Catch the Beat';
+	}
+
+	let where = {
+		osuUserId: osuUserId,
+		mode: modeName,
+		tourneyMatch: true,
+		score: {
+			[Op.gte]: 10000,
+		},
+	};
+
+	if (mixed) {
+		where.scoringType = 'Score v2';
+	}
+
+	//Get all scores from tournaments
+	logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores 1');
+	let multiScores = await DBOsuMultiScores.findAll({
+		attributes: [
+			'id',
+			'score',
+			'gameRawMods',
+			'rawMods',
+			'teamType',
+			'pp',
+			'beatmapId',
+			'createdAt',
+			'gameStartDate',
+			'osuUserId',
+			'count50',
+			'count100',
+			'count300',
+			'countGeki',
+			'countKatu',
+			'countMiss',
+			'maxCombo',
+			'perfect',
+			'matchName',
+			'mode',
+		],
+		where: where
+	});
+
+	for (let i = 0; i < multiScores.length; i++) {
+		if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].teamType === 'Tag Team vs' || multiScores[i].teamType === 'Tag Co-op') {
+			multiScores.splice(i, 1);
+			i--;
+		}
+	}
+
+	//Translate the scores to bancho scores
+	for (let i = 0; i < multiScores.length; i++) {
+		if (parseInt(multiScores[i].gameRawMods) % 2 === 1) {
+			multiScores[i].gameRawMods = parseInt(multiScores[i].gameRawMods) - 1;
+		}
+		if (parseInt(multiScores[i].rawMods) % 2 === 1) {
+			multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
+		}
+		multiScores[i] = await multiToBanchoScore(multiScores[i]);
+
+		if (!multiScores[i].pp || parseFloat(multiScores[i].pp) > 2000 || !parseFloat(multiScores[i].pp)) {
+			multiScores.splice(i, 1);
+			i--;
+			continue;
+		}
+	}
+
+	//Sort scores by pp
+	multiScores.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
+
+	//Remove duplicates by beatmapId
+	for (let i = 0; i < multiScores.length; i++) {
+		for (let j = i + 1; j < multiScores.length; j++) {
+			if (multiScores[i].beatmapId === multiScores[j].beatmapId) {
+				multiScores.splice(j, 1);
+				j--;
+			}
+		}
+	}
+
+	//Calculate total pp values
+	let beatmapSets = [];
+	let rankedBeatmapSets = [];
+	let unrankedPP = 0;
+	let rankedPP = 0;
+	let unrankedPlayCounter = 1;
+	let rankedPlayCounter = 1;
+
+	logDatabaseQueries(4, 'commands/osu-top.js DBOsuBeatmaps 1');
+	let dbBeatmaps = await DBOsuBeatmaps.findAll({
+		attributes: [
+			'beatmapId',
+			'beatmapsetId',
+			'approvalStatus',
+			'mods',
+			'updatedAt',
+			'starRating',
+			'maxCombo',
+			'mode',
+		],
+		where: {
+			beatmapId: {
+				[Op.in]: multiScores.map(score => score.beatmapId)
+			},
+			mods: 0
+		}
+	});
+
+	for (let i = 0; i < multiScores.length; i++) {
+		let dbBeatmap = dbBeatmaps.find(dbBeatmap => dbBeatmap.beatmapId === multiScores[i].beatmapId);
+
+		multiScores[i].beatmap = await getOsuBeatmap({ beatmapId: multiScores[i].beatmapId, beatmap: dbBeatmap });
+
+		if (mixed) {
+			if (!multiScores[i].beatmap || multiScores[i].beatmap.approvalStatus !== 'Approved' && multiScores[i].beatmap.approvalStatus !== 'Ranked') {
+				multiScores.splice(i, 1);
+				i--;
+				continue;
+			}
+		}
+
+		if (multiScores[i].beatmap && !beatmapSets.includes(multiScores[i].beatmap.beatmapsetId)) {
+			beatmapSets.push(multiScores[i].beatmap.beatmapsetId);
+
+			if (multiScores[i].beatmap.approvalStatus === 'Approved' || multiScores[i].beatmap.approvalStatus === 'Ranked') {
+				rankedBeatmapSets.push(multiScores[i].beatmap.beatmapsetId);
+			}
+		}
+
+		if (multiScores[i].pp) {
+			unrankedPP += parseFloat(multiScores[i].pp) * Math.pow(0.95, (unrankedPlayCounter - 1));
+			unrankedPlayCounter++;
+
+			if (multiScores[i].beatmap && !getMods(multiScores[i].raw_mods).includes('RX') && (multiScores[i].beatmap.approvalStatus === 'Approved' || multiScores[i].beatmap.approvalStatus === 'Ranked')) {
+				rankedPP += parseFloat(multiScores[i].pp) * Math.pow(0.95, (rankedPlayCounter - 1));
+				rankedPlayCounter++;
+			}
+		}
+	}
+
+	let unrankedBonusPP = 416.6667 * (1 - (Math.pow(0.9994, beatmapSets.length)));
+	let rankedBonusPP = 416.6667 * (1 - (Math.pow(0.9994, rankedBeatmapSets.length)));
+
+	let totalRankedPP = rankedPP + rankedBonusPP;
+	let totalUnrankedPP = unrankedPP + unrankedBonusPP;
+
+	let data = {
+		unrankedBonusPP: unrankedBonusPP,
+		rankedBonusPP: rankedBonusPP,
+		totalRankedPP: totalRankedPP,
+		totalUnrankedPP: totalUnrankedPP,
+		scores: []
+	};
+
+	//Feed the scores into the array
+	for (let i = 0; i < multiScores.length && i < 100; i++) {
+		if (multiScores[i].pp) {
+			data.scores.push(multiScores[i]);
+		}
+	}
+
+	return data;
+}
