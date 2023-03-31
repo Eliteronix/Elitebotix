@@ -953,7 +953,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		let green = '57';
 		let blue = '63';
 
-		if (sortedScores[i].matchName) {
+		if (server === 'mixed' && sortedScores[i].matchName) {
 			red = '63';
 			green = '78';
 			blue = '96';
