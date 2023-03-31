@@ -1034,24 +1034,6 @@ module.exports = {
 					}
 				}
 
-				let duelLeague = getOsuDuelLeague(userDuelStarRating.total);
-
-				let leagueText = duelLeague.name;
-				let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
-
-				ctx.drawImage(leagueImage, 400, 100, 150, 150);
-
-				if (userDuelStarRating.provisional) {
-					leagueText = 'Provisional: ' + leagueText;
-				} else if (userDuelStarRating.outdated) {
-					leagueText = 'Outdated: ' + leagueText;
-				}
-
-				ctx.fillText(leagueText, 475, 275);
-				ctx.fillText(`(${Math.round(userDuelStarRating.total * 1000) / 1000}*)`, 475, 300);
-
-				ctx.font = 'bold 18px comfortaa, sans-serif';
-
 				logDatabaseQueries(4, 'commands/osu-duel.js DBInventory');
 				let boosts = await DBInventory.findAll({
 					attributes: ['property', 'amount'],
@@ -1087,6 +1069,26 @@ module.exports = {
 						FMBoost += boosts[i].amount * boostRate;
 					}
 				}
+
+				let totalRating = userDuelStarRating.total + NMBoost + HDBoost + HRBoost + DTBoost + FMBoost;
+
+				let duelLeague = getOsuDuelLeague(totalRating);
+
+				let leagueText = duelLeague.name;
+				let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+
+				ctx.drawImage(leagueImage, 400, 100, 150, 150);
+
+				if (userDuelStarRating.provisional) {
+					leagueText = 'Provisional: ' + leagueText;
+				} else if (userDuelStarRating.outdated) {
+					leagueText = 'Outdated: ' + leagueText;
+				}
+
+				ctx.fillText(leagueText, 475, 275);
+				ctx.fillText(`(${Math.round(totalRating * 1000) / 1000}*)`, 475, 300);
+
+				ctx.font = 'bold 18px comfortaa, sans-serif';
 
 				//Current NoMod Rating
 				ctx.fillText('NoMod', 100, 350);
