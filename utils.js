@@ -3889,6 +3889,10 @@ module.exports = {
 				return twitchClient.say(target.substring(1), `Current match with ${discordUser.osuName}: ${lastMultiScore.matchName} | https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
 			}
 
+			if (msg === '!whatishappiness') {
+				return twitchClient.say(target.substring(1), 'Happiness is when Elitebotix rating up widepeepoHappy');
+			}
+
 			if (msg.startsWith('!')) { return; } // Ignore other messages starting with !
 
 			if (msg.includes('https://osu.ppy.sh/community/matches/') || msg.includes('https://osu.ppy.sh/mp/')) {
@@ -4109,10 +4113,6 @@ module.exports = {
 						return;
 					}
 				}
-			}
-
-			if (msg === '!whatishappiness') {
-				return twitchClient.say(target.substring(1), 'Happiness is when Elitebotix rating up widepeepoHappy');
 			}
 		}
 
