@@ -371,25 +371,30 @@ async function getBeatmap(msg, interaction, beatmap, tournament, accuracy) {
 	if (interaction && interaction.commandName !== 'osu-beatmap') {
 		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files, ephemeral: true });
 	} else {
-		const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files });
-		if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
-			sentMessage.react('<:COMPARE:827974793365159997>');
-		}
-		sentMessage.react('<:HD:918922015182827531>');
-		sentMessage.react('<:HR:918938816377671740>');
-		sentMessage.react('<:DT:918920670023397396>');
-		if (beatmap.mode === 'Standard') {
-			sentMessage.react('<:HDHR:918935327215861760>');
-			sentMessage.react('<:HDDT:918935350125142036>');
-		}
-		if (beatmap.mode === 'Mania') {
-			sentMessage.react('<:FI:918922047994880010>');
-		}
-		sentMessage.react('<:EZ:918920760586805259>');
-		sentMessage.react('<:HT:918921193426411544>');
-		sentMessage.react('<:FL:918920836755382343>');
+		try {
+			const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files });
+			if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
+				sentMessage.react('<:COMPARE:827974793365159997>');
+			}
+			sentMessage.react('<:HD:918922015182827531>');
+			sentMessage.react('<:HR:918938816377671740>');
+			sentMessage.react('<:DT:918920670023397396>');
+			if (beatmap.mode === 'Standard') {
+				sentMessage.react('<:HDHR:918935327215861760>');
+				sentMessage.react('<:HDDT:918935350125142036>');
+			}
+			if (beatmap.mode === 'Mania') {
+				sentMessage.react('<:FI:918922047994880010>');
+			}
+			sentMessage.react('<:EZ:918920760586805259>');
+			sentMessage.react('<:HT:918921193426411544>');
+			sentMessage.react('<:FL:918920836755382343>');
 
-		return;
+			return;
+		} catch (error) {
+			console.error(error, msg, interaction, beatmap, tournament, accuracy);
+			return;
+		}
 	}
 }
 
