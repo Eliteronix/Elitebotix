@@ -176,6 +176,36 @@ module.exports = {
 						})
 						.setRequired(true)
 				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('player')
+				.setNameLocalizations({
+					'de': 'spieler',
+					'en-GB': 'player',
+					'en-US': 'player',
+				})
+				.setDescription('Shows all unverified matches of a player')
+				.setDescriptionLocalizations({
+					'de': 'Zeigt alle unverifizierten Matches eines Spielers',
+					'en-GB': 'Shows all unverified matches of a player',
+					'en-US': 'Shows all unverified matches of a player',
+				})
+				.addStringOption(option =>
+					option.setName('player')
+						.setNameLocalizations({
+							'de': 'spieler',
+							'en-GB': 'player',
+							'en-US': 'player',
+						})
+						.setDescription('The name of the player')
+						.setDescriptionLocalizations({
+							'de': 'Der Name des Spielers',
+							'en-GB': 'The name of the player',
+							'en-US': 'The name of the player',
+						})
+						.setRequired(true)
+				)
 		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
@@ -814,6 +844,56 @@ module.exports = {
 			matchesPlayed = new AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${acronym}.txt` });
 
 			await interaction.editReply({ content: `All matches found for the acronym \`${acronym.replace(/`/g, '')}\` are attached.`, files: [matchesPlayed] });
+		} else if (interaction.options.getSubcommand() === 'user') {
+			let player = getIDFromPotentialOsuLink(interaction.options.getString('player', true));
+
+			// eslint-disable-next-line no-undef
+			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+			});
+
+			let user = null;
+
+			try {
+				// eslint-disable-next-line no-undef
+				process.send('osu!API');
+				user = await osuApi.getUser({ u: player });
+			} catch (error) {
+				return await interaction.editReply(`Could not find user \`${player.replace(/`/g, '')}\`.`);
+			}
+
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores tournament');
+			let userScores = await DBOsuMultiScores.findAll({
+				attributes: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
+				where: {
+					osuUserId: user.id,
+					tourneyMatch: true,
+					verifiedAt: null,
+					matchEndDate: {
+						[Op.not]: null,
+					},
+					matchId: {
+						[Op.notIn]: matchIdsGettingProcessed,
+					},
+				},
+				group: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
+			});
+
+			if (userScores.length === 0) {
+				return await interaction.editReply(`No scores found for the player \`${player.replace(/`/g, '')}\`.`);
+			}
+
+			userScores.sort((a, b) => parseInt(b.matchId) - parseInt(a.matchId));
+
+			let matchesPlayed = userScores.map((score) => `${(new Date(score.matchStartDate).getUTCMonth() + 1).toString().padStart(2, '0')}-${new Date(score.matchStartDate).getUTCFullYear()} - ${score.matchName} - ${score.verificationComment} ----- https://osu.ppy.sh/community/matches/${score.matchId}`);
+
+			// eslint-disable-next-line no-undef
+			matchesPlayed = new AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${acronym}.txt` });
+
+			await interaction.editReply({ content: `All matches found for the player \`${player.replace(/`/g, '')}\` are attached.`, files: [matchesPlayed] });
 		}
 	}
 };
