@@ -1059,14 +1059,19 @@ module.exports = {
 				for (let i = 0; i < boosts.length; i++) {
 					if (boosts[i].property === 'NM') {
 						NMBoost += boosts[i].amount * boostRate;
+						NMBoostAmount += boosts[i].amount;
 					} else if (boosts[i].property === 'HD') {
 						HDBoost += boosts[i].amount * boostRate;
+						HDBoostAmount += boosts[i].amount;
 					} else if (boosts[i].property === 'HR') {
 						HRBoost += boosts[i].amount * boostRate;
+						HRBoostAmount += boosts[i].amount;
 					} else if (boosts[i].property === 'DT') {
 						DTBoost += boosts[i].amount * boostRate;
+						DTBoostAmount += boosts[i].amount;
 					} else if (boosts[i].property === 'FM') {
 						FMBoost += boosts[i].amount * boostRate;
+						FMBoostAmount += boosts[i].amount;
 					}
 				}
 
