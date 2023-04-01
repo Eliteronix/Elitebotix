@@ -870,7 +870,7 @@ module.exports = {
 
 			let dataRows = [];
 
-			const modPoolHeaders = ['pick', 'mod'];
+			const modPoolHeaders = ['pick', 'mod', 'identifier'];
 
 			const beatmapHeaders = ['map id'];
 
@@ -939,6 +939,7 @@ module.exports = {
 						data.toString().toLowerCase().startsWith('round of') ||
 						data.toString().toLowerCase().endsWith('finals') ||
 						data.toString().toLowerCase() === 'ql' ||
+						data.toString().toLowerCase() === 'q' ||
 						data.toString().toLowerCase() === 'gs' ||
 						data.toString().toLowerCase() === 'ro64' ||
 						data.toString().toLowerCase() === 'ro32' ||
