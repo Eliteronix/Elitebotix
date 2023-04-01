@@ -104,6 +104,9 @@ module.exports = {
 				where: {
 					osuUserId: discordUser.osuUserId,
 				},
+				order: [
+					['id', 'ASC'],
+				],
 			});
 
 			if (!inventory || inventory.length === 0) {
@@ -144,6 +147,9 @@ module.exports = {
 				where: {
 					osuUserId: discordUser.osuUserId,
 				},
+				order: [
+					['id', 'ASC'],
+				],
 			});
 
 			if (!inventory || inventory.length === 0) {
