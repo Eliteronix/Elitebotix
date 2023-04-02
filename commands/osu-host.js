@@ -1,6 +1,6 @@
 const { showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { getOsuPlayerName, logDatabaseQueries, getMods, multiToBanchoScore, getOsuBeatmap, getUserDuelStarRating, getGameModeName } = require('../utils');
+const { getOsuPlayerName, logDatabaseQueries, getMods, multiToBanchoScore, getOsuBeatmap, getUserDuelStarRating, getGameModeName, getAdditionalOsuInfo } = require('../utils');
 const { DBOsuMultiScores, DBOsuBeatmaps, DBDiscordUsers } = require('../dbObjects');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
@@ -135,6 +135,37 @@ module.exports = {
 					'de': 'Liefert die pp mit Bancho und Turnier Top Plays der bereitgestellten Turnierspieler',
 					'en-GB': 'Provides the pp with bancho and tournament top plays of the provided tournament players',
 					'en-US': 'Provides the pp with bancho and tournament top plays of the provided tournament players',
+				})
+				.addAttachmentOption(option =>
+					option
+						.setName('file')
+						.setNameLocalizations({
+							'de': 'datei',
+							'en-GB': 'file',
+							'en-US': 'file',
+						})
+						.setDescription('The .txt file containing the tournament players, one player id per line')
+						.setDescriptionLocalizations({
+							'de': 'Die .txt Datei, die die Turnierspieler enthält, eine Spieler ID pro Zeile',
+							'en-GB': 'The .txt file containing the tournament players, one player id per line',
+							'en-US': 'The .txt file containing the tournament players, one player id per line',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('tournamentbanned')
+				.setNameLocalizations({
+					'de': 'tournamentbanned',
+					'en-GB': 'tournamentbanned',
+					'en-US': 'tournamentbanned',
+				})
+				.setDescription('Provides the tournament banned players of the provided tournament players')
+				.setDescriptionLocalizations({
+					'de': 'Liefert die Turnier gebannten Spieler der bereitgestellten Turnierspieler',
+					'en-GB': 'Provides the tournament banned players of the provided tournament players',
+					'en-US': 'Provides the tournament banned players of the provided tournament players',
 				})
 				.addAttachmentOption(option =>
 					option
@@ -605,7 +636,7 @@ module.exports = {
 					newScoresPP += parseFloat(scores[i].pp) * Math.pow(0.95, (i));
 				}
 
-				logDatabaseQueries(4, 'commands/osu-host.js DBDiscordUsers');
+				logDatabaseQueries(4, 'commands/osu-host.js DBDiscordUsers 1');
 				let discordUsers = await DBDiscordUsers.findAll({
 					attributes: ['osuPP', 'osuRank'],
 				});
@@ -647,6 +678,108 @@ module.exports = {
 					const attachment = new Discord.AttachmentBuilder(buffer, { name: 'tournamentpp.csv' });
 
 					await interaction.channel.send({ content: 'PP with tournament top plays', files: [attachment] });
+					data = [];
+				}
+			}
+
+			if (interaction.client.hostCommands.includes(randomString)) {
+				interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
+			}
+		} else if (interaction.options.getSubcommand() === 'tournamentbanned') {
+			let attachedFile = interaction.options.getAttachment('file');
+
+			if (!attachedFile.contentType.startsWith('text/plain')) {
+				return await interaction.editReply({ content: 'The attached file is not a .txt file.' });
+			}
+
+			// fetch the file
+			let file = await fetch(attachedFile.url);
+
+			// parse the file
+			file = await file.text();
+
+			// split the file into an array
+			file = file.split('\n');
+
+			// remove empty lines
+			file = file.filter(line => line !== '');
+
+			// remove duplicates
+			file = [...new Set(file)];
+
+			// check if the file contains only numbers
+			if (file.some(line => isNaN(line))) {
+				return await interaction.editReply({ content: 'The attached file contains invalid player ids. Be sure to only provide playerIds; one for each line.' });
+			}
+
+			await interaction.editReply({ content: 'A proper file has been provided. Processing may take a while, depending on how many scores haven\'t been calculated since they have been set or the last pp update...' });
+
+			let processingMessage = await interaction.channel.send('Processing...');
+
+			let randomString = Math.random().toString(36);
+
+			interaction.client.hostCommands.push(randomString);
+
+			let csvData = [];
+
+			let lastUpdate = new Date();
+
+			for (let i = 0; i < file.length; i++) {
+				let osuUserId = file[i].trim();
+
+				if (new Date() - lastUpdate > 15000) {
+					let osuName = await getOsuPlayerName(osuUserId);
+					processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+					lastUpdate = new Date();
+				}
+
+				logDatabaseQueries(4, 'commands/osu-host.js DBDiscordUsers 2');
+				let discordUser = await DBDiscordUsers.findOne({
+					where: {
+						osuUserId: osuUserId,
+					},
+				});
+
+				if (discordUser && discordUser.tournamentBannedUntil && discordUser.tournamentBannedUntil > new Date()) {
+					csvData.push({
+						osuUserId: osuUserId,
+						tournamentBannedUntil: new Date(discordUser.tournamentBannedUntil).toLocaleDateString('en-GB', { timeZone: 'UTC' }),
+						tournamentBannedReason: discordUser.tournamentBannedReason,
+					});
+
+					continue;
+				}
+
+				let additionalInfo = await getAdditionalOsuInfo(osuUserId);
+
+				if (additionalInfo.tournamentBan && additionalInfo.tournamentBan.tournamentBannedUntil > new Date()) {
+					csvData.push({
+						osuUserId: osuUserId,
+						tournamentBannedUntil: new Date(additionalInfo.tournamentBan.tournamentBannedUntil).toLocaleDateString('en-GB', { timeZone: 'UTC' }),
+						tournamentBannedReason: additionalInfo.tournamentBan.description,
+					});
+				}
+			}
+
+			processingMessage.delete();
+
+			if (csvData.length === 0) {
+				return await interaction.channel.send({ content: 'No tournament banned users found.' });
+			}
+
+			let data = [];
+			for (let i = 0; i < csvData.length; i++) {
+				data.push(csvData[i]);
+
+				if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
+					let csv = new ObjectsToCsv(data);
+					csv = await csv.toString();
+					// eslint-disable-next-line no-undef
+					const buffer = Buffer.from(csv);
+					//Create as an attachment
+					const attachment = new Discord.AttachmentBuilder(buffer, { name: 'tournamentbans.csv' });
+
+					await interaction.channel.send({ content: 'Tournament banned users', files: [attachment] });
 					data = [];
 				}
 			}
