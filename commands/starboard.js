@@ -136,9 +136,11 @@ module.exports = {
 		}
 		const guildPrefix = await getGuildPrefix(msg);
 		logDatabaseQueries(4, 'commands/starboard.js DBGuilds');
-		//TODO: add attributes and logdatabasequeries
 		const guild = await DBGuilds.findOne({
-			where: { guildId: msg.guildId }
+			attributes: ['id', 'starBoardEnabled', 'starBoardChannel', 'starBoardMinimum'],
+			where: {
+				guildId: msg.guildId
+			}
 		});
 		if (args[0].toLowerCase() === 'enable') {
 			if (guild) {
