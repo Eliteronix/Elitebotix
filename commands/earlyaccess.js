@@ -68,31 +68,24 @@ module.exports = {
 		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		if (interaction) {
-			try {
-				await interaction.deferReply();
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
+			return;
 		}
 
-		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
-				userId: interaction ? interaction.user.id : msg.author.id,
+				userId: interaction.user.id,
 				patreon: true
 			}
 		});
-
-		if (msg && !developers.includes(msg.author.id) && !salesmen.includes(msg.author.id) && !discordUser) {
-			return msg.reply('Earlyaccess commands are reserved for developers and patreons. As soon as they are up to standard for release you will be able to use them.');
-		}
 
 		if (interaction && !developers.includes(interaction.user.id) && !salesmen.includes(interaction.user.id) && !discordUser) {
 			return await interaction.editReply('Earlyaccess commands are reserved for developers and patreons. As soon as they are up to standard for release you will be able to use them.');
@@ -118,10 +111,10 @@ module.exports = {
 				return await interaction.editReply('Beatmap not found');
 			}
 
-			//TODO: Attributes
 			//Get all the scores for the map
 			logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiScores tournamentDifficulty');
 			let scores = await DBOsuMultiScores.findAll({
+				attributes: ['osuUserId', 'score', 'rawMods', 'gameRawMods', 'warmup', 'gameStartDate'],
 				where: {
 					beatmapId: beatmapId,
 					freeMod: false,
@@ -155,9 +148,16 @@ module.exports = {
 				});
 			}
 
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/earlyaccess.js DBDuelRatingHistory tournamentDifficulty');
 			let allDuelRatingHistories = await DBDuelRatingHistory.findAll({
+				attributes: [
+					'osuUserId',
+					'osuNoModDuelStarRating',
+					'osuHiddenDuelStarRating',
+					'osuHardRockDuelStarRating',
+					'osuDoubleTimeDuelStarRating',
+					'month',
+					'year'],
 				where: {
 					osuUserId: {
 						[Op.in]: plays.map(p => p.osuUserId),
