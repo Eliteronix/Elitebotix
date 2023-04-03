@@ -98,10 +98,12 @@ module.exports = {
 			return;
 		}
 
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds');
 		const guild = await DBGuilds.findOne({
-			where: { guildId: interaction.guildId },
+			attributes: ['id', 'sendWelcomeMessage', 'welcomeMessageChannel', 'welcomeMessageText'],
+			where: {
+				guildId: interaction.guildId
+			},
 		});
 
 		if (interaction.options.getSubcommand() === 'current') {
