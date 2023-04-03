@@ -6,6 +6,7 @@ const { Op } = require('sequelize');
 const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getAvatar } = require('../utils');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
+const fs = require('fs');
 
 module.exports = {
 	name: 'osu-wrapped',
@@ -164,7 +165,6 @@ module.exports = {
 			year = interaction.options.getInteger('year');
 		}
 
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiScores 1');
 		let multiMatches = await DBOsuMultiScores.findAll({
 			attributes: ['matchId'],
@@ -634,6 +634,20 @@ module.exports = {
 		//Draw a shape onto the main canvas in the middle 
 		const avatar = await getAvatar(osuUser.osuUserId);
 		ctx.drawImage(avatar, 475 - canvas.height / 4, canvas.height / 4, canvas.height / 2, canvas.height / 2);
+
+		// Save the image locally
+		const buffer = canvas.toBuffer('image/png');
+
+		//Check if the folder exists and create it if necessary
+		if (!fs.existsSync('./wrappedcards')) {
+			fs.mkdirSync('./wrappedcards');
+		}
+
+		if (!fs.existsSync(`./wrappedcards/${year}`)) {
+			fs.mkdirSync(`./wrappedcards/${year}`);
+		}
+
+		fs.writeFileSync(`./wrappedcards/${year}/${osuUser.osuUserId}.png`, buffer);
 
 		//Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-wrapped-${osuUser.osuUserId}-${year}.png` })];

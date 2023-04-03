@@ -64,6 +64,33 @@ const browserSourceServer = http.createServer(async (req, res) => {
 		// Send the image from the duelratingcards folder
 		res.setHeader('Content-Type', 'image/png');
 		res.end(fs.readFileSync(`./historycardswithdetails/${osuUserId}.png`));
+	} else if (route.startsWith('/wrapped/')) {
+		const year = route.replace('/wrapped/', '').split('/')[0];
+
+		if (isNaN(year)) {
+			res.setHeader('Content-Type', 'text/plain');
+			res.end('Invalid year');
+			return;
+		}
+
+		const osuUserId = route.replace('/wrapped/', '').split('/')[1];
+
+		if (isNaN(osuUserId)) {
+			res.setHeader('Content-Type', 'text/plain');
+			res.end('Invalid osu! user id');
+			return;
+		}
+
+		// Check if the image exists
+		if (!fs.existsSync(`./wrappedcards/${year}/${osuUserId}.png`)) {
+			res.setHeader('Content-Type', 'text/plain');
+			res.end(`Please create the image using /osu-wrapped year:${year}`);
+			return;
+		}
+
+		// Send the image from the duelratingcards folder
+		res.setHeader('Content-Type', 'image/png');
+		res.end(fs.readFileSync(`./wrappedcards/${year}/${osuUserId}.png`));
 	}
 });
 
