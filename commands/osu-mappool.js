@@ -604,21 +604,26 @@ module.exports = {
 		}
 
 		if (interaction.options.getSubcommand() === 'create') {
-			//TODO: add attributes and logdatabasequeries
+			logDatabaseQueries(4, 'commands/osu-mappool.js (create) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId'],
 				where: {
-					userId: interaction.user.id
+					userId: interaction.user.id,
+					osuUserId: {
+						[Op.not]: null,
+					},
+					osuVerified: true,
 				}
 			});
 
-			if (!discordUser || !discordUser.osuUserId || !discordUser.osuVerified) {
+			if (!discordUser) {
 				return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
 			}
 
 			let mappoolName = interaction.options.getString('name');
 
-			//TODO: add attributes and logdatabasequeries
-			let existingMappool = await DBOsuMappools.findOne({
+			logDatabaseQueries(4, 'commands/osu-mappool.js (create) DBOsuMappools');
+			let existingMappool = await DBOsuMappools.count({
 				where: {
 					creatorId: discordUser.osuUserId,
 					name: mappoolName,
@@ -679,8 +684,21 @@ module.exports = {
 				}
 			}
 
-			//TODO: add attributes and logdatabasequeries
+			logDatabaseQueries(4, 'commands/osu-mappool.js (create) DBOsuBeatmaps');
 			let beatmaps = await DBOsuBeatmaps.findAll({
+				attributes: [
+					'beatmapId',
+					'beatmapsetId',
+					'approvalStatus',
+					'mods',
+					'updatedAt',
+					'starRating',
+					'maxCombo',
+					'mode',
+					'artist',
+					'title',
+					'difficulty',
+				],
 				where: {
 					beatmapId: {
 						[Op.in]: maps.map(map => map.beatmapId),
@@ -746,14 +764,19 @@ module.exports = {
 
 			await interaction.editReply({ content: `Successfully created mappool \`${interaction.options.getString('name').replace(/`/g, '')}\`\n${content}`, files: [mappoolImage] });
 		} else if (interaction.options.getSubcommand() === 'remove') {
-			//TODO: add attributes and logdatabasequeries
+			logDatabaseQueries(1, 'commands/osu-mappool.js (remove) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId'],
 				where: {
-					userId: interaction.user.id
-				}
+					userId: interaction.user.id,
+					osuUserId: {
+						[Op.not]: null,
+					},
+					osuVerified: true,
+				},
 			});
 
-			if (!discordUser || !discordUser.osuUserId || !discordUser.osuVerified) {
+			if (!discordUser) {
 				return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
 			}
 
@@ -778,21 +801,27 @@ module.exports = {
 
 			await interaction.editReply(`Successfully removed mappool \`${mappoolName.replace(/`/g, '')}\`.`);
 		} else if (interaction.options.getSubcommand() === 'view') {
-			//TODO: add attributes and logdatabasequeries
+			logDatabaseQueries(1, 'commands/osu-mappool.js (view) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId'],
 				where: {
-					userId: interaction.user.id
+					userId: interaction.user.id,
+					osuUserId: {
+						[Op.not]: null,
+					},
+					osuVerified: true,
 				}
 			});
 
-			if (!discordUser || !discordUser.osuUserId || !discordUser.osuVerified) {
+			if (!discordUser) {
 				return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
 			}
 
 			let mappoolName = interaction.options.getString('name');
 
-			//TODO: add attributes and logdatabasequeries
+			logDatabaseQueries(4, 'commands/osu-mappool.js (view) DBOsuMappools');
 			let mappool = await DBOsuMappools.findAll({
+				attributes: ['number', 'modPool', 'freeMod', 'tieBreaker', 'modPoolNumber', 'beatmapId'],
 				where: {
 					creatorId: discordUser.osuUserId,
 					name: mappoolName,
@@ -836,14 +865,19 @@ module.exports = {
 
 			await interaction.editReply({ content: `Mappool \`${mappoolName.replace(/`/g, '')}\`\n${content}`, files: [mappoolImage] });
 		} else if (interaction.options.getSubcommand() === 'createfromsheet') {
-			//TODO: add attributes and logdatabasequeries
+			logDatabaseQueries(4, 'commands/osu-mappool.js (createfromsheet) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId'],
 				where: {
-					userId: interaction.user.id
-				}
+					userId: interaction.user.id,
+					osuUserId: {
+						[Op.not]: null,
+					},
+					osuVerified: true,
+				},
 			});
 
-			if (!discordUser || !discordUser.osuUserId || !discordUser.osuVerified) {
+			if (!discordUser) {
 				return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
 			}
 
@@ -1006,8 +1040,21 @@ module.exports = {
 					continue;
 				}
 
-				//TODO: add attributes and logdatabasequeries
+				logDatabaseQueries(4, 'commands/osu-mappool.js (createfromsheet) DBOsuBeatmaps 1');
 				let beatmaps = await DBOsuBeatmaps.findAll({
+					attributes: [
+						'beatmapId',
+						'beatmapsetId',
+						'approvalStatus',
+						'mods',
+						'updatedAt',
+						'starRating',
+						'maxCombo',
+						'mode',
+						'artist',
+						'title',
+						'difficulty',
+					],
 					where: {
 						beatmapId: {
 							[Op.in]: mappools[i].maps.map(map => map.beatmapId),
@@ -1063,8 +1110,8 @@ module.exports = {
 					};
 				});
 
-				//TODO: add attributes and logdatabasequeries
-				let existingMappool = await DBOsuMappools.findOne({
+				logDatabaseQueries(4, 'commands/osu-mappool.js (createfromsheet) DBOsuMappools 2');
+				let existingMappool = await DBOsuMappools.count({
 					where: {
 						creatorId: discordUser.osuUserId,
 						name: mappools[i].name,
@@ -1167,8 +1214,21 @@ async function createMappoolImage(mappool) {
 
 	let tourneyMaps = [];
 
-	//TODO: add attributes and logdatabasequeries
+	logDatabaseQueries(4, 'commands/osu-mappool.js (createMappoolImage) DBOsuBeatmaps');
 	let dbBeatmaps = await DBOsuBeatmaps.findAll({
+		attributes: [
+			'beatmapId',
+			'beatmapsetId',
+			'approvalStatus',
+			'mods',
+			'updatedAt',
+			'starRating',
+			'maxCombo',
+			'mode',
+			'artist',
+			'title',
+			'difficulty',
+		],
 		where: {
 			beatmapId: mappool.map(map => map.beatmapId)
 		}
