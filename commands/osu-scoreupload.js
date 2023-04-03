@@ -262,9 +262,9 @@ module.exports = {
 			}
 
 			// Create the scores in the database
-			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuSoloScores findAll');
 			let uploaderScores = await DBOsuSoloScores.findAll({
+				attributes: ['replayHash'],
 				where: {
 					uploaderId: discordUser.osuUserId,
 				},
@@ -409,9 +409,22 @@ function getNextString(file) {
 
 async function updateTeamSheets(interaction, discordUser, newScores) {
 	// Update teamsheets
-	//TODO: add attributes and logdatabasequeries
 	logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuTeamsheets update');
 	let teamsheets = await DBOsuTeamSheets.findAll({
+		attributes: [
+			'id',
+			'poolCreatorId',
+			'poolName',
+			'updateUntil',
+			'players',
+			'guildId',
+			'channelId',
+			'messageId',
+			'teamsize',
+			'duelratingestimate',
+			'EZMultiplier',
+			'FLMultiplier',
+		],
 		where: {
 			players: {
 				[Op.like]: `%${discordUser.osuUserId}%`,
@@ -419,8 +432,9 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 		},
 	});
 
-	//TODO: add attributes and logdatabasequeries
+	logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuBeatmaps');
 	let newScoreMaps = await DBOsuBeatmaps.findAll({
+		attributes: ['beatmapId'],
 		where: {
 			hash: {
 				[Op.in]: newScores.map(score => score.beatmapHash),
@@ -431,9 +445,8 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 	for (let i = 0; i < teamsheets.length; i++) {
 		const teamsheet = teamsheets[i];
 
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/osu-teamsheet.js DBOsuMappools');
-		let mappool = await DBOsuMappools.findAll({
+		let mappool = await DBOsuMappools.count({
 			where: {
 				creatorId: teamsheet.poolCreatorId,
 				name: teamsheet.poolName,
@@ -441,12 +454,9 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 					[Op.in]: newScoreMaps.map(map => map.beatmapId),
 				},
 			},
-			order: [
-				['number', 'ASC']
-			]
 		});
 
-		if (mappool.length === 0) {
+		if (mappool === 0) {
 			continue;
 		}
 
@@ -482,6 +492,9 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 			// eslint-disable-next-line no-undef
 			const { DBOsuTeamSheets, DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 
+			// eslint-disable-next-line no-undef
+			const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+
 			DBOsuTeamSheets.destroy({
 				where: {
 					messageId: messageId,
@@ -492,8 +505,9 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 			// eslint-disable-next-line no-undef
 			const command = require((`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-teamsheet.js`));
 
-			//TODO: add attributes and logdatabasequeries
+			logDatabaseQueries(4, 'commands/osu-scoreupload.js DBDiscordUsers 2');
 			let discordUser = await DBDiscordUsers.findOne({
+				attributes: ['userId'],
 				where: {
 					osuUserId: poolCreatorId,
 				}
