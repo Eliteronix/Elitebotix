@@ -26,6 +26,44 @@ const browserSourceServer = http.createServer(async (req, res) => {
 		// Send the image from the duelratingcards folder
 		res.setHeader('Content-Type', 'image/png');
 		res.end(fs.readFileSync(`./duelratingcards/${osuUserId}.png`));
+	} else if (route.startsWith('/history/')) {
+		const osuUserId = route.replace('/history/', '');
+
+		if (isNaN(osuUserId)) {
+			res.setHeader('Content-Type', 'text/plain');
+			res.end('Invalid osu! user id');
+			return;
+		}
+
+		// Check if the image exists
+		if (!fs.existsSync(`./historycards/${osuUserId}.png`)) {
+			res.setHeader('Content-Type', 'text/plain');
+			res.end('Please create the image using /osu-history');
+			return;
+		}
+
+		// Send the image from the duelratingcards folder
+		res.setHeader('Content-Type', 'image/png');
+		res.end(fs.readFileSync(`./historycards/${osuUserId}.png`));
+	} else if (route.startsWith('/historywithdetails/')) {
+		const osuUserId = route.replace('/historywithdetails/', '');
+
+		if (isNaN(osuUserId)) {
+			res.setHeader('Content-Type', 'text/plain');
+			res.end('Invalid osu! user id');
+			return;
+		}
+
+		// Check if the image exists
+		if (!fs.existsSync(`./historycardswithdetails/${osuUserId}.png`)) {
+			res.setHeader('Content-Type', 'text/plain');
+			res.end('Please create the image using /osu-history showtournamentdetails:true');
+			return;
+		}
+
+		// Send the image from the duelratingcards folder
+		res.setHeader('Content-Type', 'image/png');
+		res.end(fs.readFileSync(`./historycardswithdetails/${osuUserId}.png`));
 	}
 });
 
