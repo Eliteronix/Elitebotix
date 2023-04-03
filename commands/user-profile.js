@@ -147,10 +147,12 @@ module.exports = {
 };
 
 async function sendUserEmbed(interaction, user) {
-	//TODO: add attributes and logdatabasequeries
 	logDatabaseQueries(4, 'commands/user-profile.js DBDiscordUsers');
 	const discordUser = await DBDiscordUsers.findOne({
-		where: { userId: user.id },
+		attributes: ['patreon', 'osuUserId', 'osuVerified', 'twitchName', 'twitchVerified'],
+		where: {
+			userId: user.id
+		},
 	});
 
 	let customEmoji = '';
@@ -255,8 +257,6 @@ async function sendUserEmbed(interaction, user) {
 			);
 		}
 	}
-	logDatabaseQueries(4, 'commands/user-profile.js DBDiscordUsers');
-	//get discordUser from db
 
 	if (discordUser && discordUser.osuUserId) {
 		let username = await getOsuPlayerName(discordUser.osuUserId);
