@@ -95,9 +95,9 @@ module.exports = {
 		let discordUser = null;
 
 		if (username === null) {
-			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-wrapped.js DBDiscordUsers 1');
 			discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId', 'osuName'],
 				where: {
 					userId: interaction.user.id,
 				}
@@ -114,9 +114,9 @@ module.exports = {
 
 		//Get the user from the database if possible
 		if (discordUser === null) {
-			//TODO: add attributes and logdatabasequeries
 			logDatabaseQueries(4, 'commands/osu-wrapped.js DBDiscordUsers 2');
 			discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId', 'osuName'],
 				where: {
 					[Op.or]: {
 						osuUserId: username,
