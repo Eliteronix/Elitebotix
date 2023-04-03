@@ -7,11 +7,13 @@ module.exports = async function (member) {
 		return;
 	}
 
-	//TODO: Attributes
 	logDatabaseQueries(2, 'guildMemberAdd.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
-		where: { guildId: member.guild.id },
+		attributes: ['id', 'sendWelcomeMessage', 'welcomeMessageChannel', 'welcomeMessageText', 'loggingChannel', 'loggingMemberAdd'],
+		where: {
+			guildId: member.guild.id
+		},
 	});
 
 	//check if a guild was found in the db
@@ -66,10 +68,14 @@ module.exports = async function (member) {
 		}
 	}
 
-	//TODO: Attributes
 	logDatabaseQueries(2, 'guildMemberAdd.js DBAutoRoles');
 	//get all autoroles for the guild
-	const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: member.guild.id } });
+	const autoRolesList = await DBAutoRoles.findAll({
+		attributes: ['roleId'],
+		where: {
+			guildId: member.guild.id
+		}
+	});
 	//iterate for every autorole gathered
 	for (let i = 0; i < autoRolesList.length; i++) {
 		//get the role object from the array
