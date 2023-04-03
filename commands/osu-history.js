@@ -7,6 +7,7 @@ const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelSta
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const fs = require('fs');
 
 module.exports = {
 	name: 'osu-history',
@@ -964,6 +965,28 @@ module.exports = {
 
 			//Create as an attachment
 			files.push(new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-history-${osuUser.osuUserId}.png` }));
+
+			if (interaction.options.getBoolean('showtournamentdetails')) {
+				// Save the image locally
+				const buffer = canvas.toBuffer('image/png');
+
+				//Check if the maps folder exists and create it if necessary
+				if (!fs.existsSync('./historycardswithdetails')) {
+					fs.mkdirSync('./historycardswithdetails');
+				}
+
+				fs.writeFileSync(`./historycardswithdetails/${osuUser.osuUserId}.png`, buffer);
+			} else {
+				// Save the image locally
+				const buffer = canvas.toBuffer('image/png');
+
+				//Check if the maps folder exists and create it if necessary
+				if (!fs.existsSync('./historycards')) {
+					fs.mkdirSync('./historycards');
+				}
+
+				fs.writeFileSync(`./historycards/${osuUser.osuUserId}.png`, buffer);
+			}
 
 			//Create chart
 			const width = 1500; //px

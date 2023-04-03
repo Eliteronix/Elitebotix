@@ -1270,15 +1270,17 @@ module.exports = {
 				const avatar = await getAvatar(osuUser.id);
 				ctx.drawImage(avatar, 110, 90, 160, 160);
 
-				// Save the image locally
-				const buffer = canvas.toBuffer('image/png');
+				if (historicalUserDuelStarRatings.length < 2) {
+					// Save the image locally
+					const buffer = canvas.toBuffer('image/png');
 
-				//Check if the maps folder exists and create it if necessary
-				if (!fs.existsSync('./duelratingcards')) {
-					fs.mkdirSync('./duelratingcards');
+					//Check if the maps folder exists and create it if necessary
+					if (!fs.existsSync('./duelratingcards')) {
+						fs.mkdirSync('./duelratingcards');
+					}
+
+					fs.writeFileSync(`./duelratingcards/${osuUser.id}.png`, buffer);
 				}
-
-				fs.writeFileSync(`./duelratingcards/${osuUser.id}.png`, buffer);
 
 				//Create as an attachment
 				const leagueRatings = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-league-ratings-${osuUser.id}.png` });
