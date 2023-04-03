@@ -1,7 +1,7 @@
 const { PermissionsBitField, SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMappools } = require('../dbObjects');
-const { getMods, getModBits, getIDFromPotentialOsuLink, getOsuBeatmap, getBeatmapSlimcover, pause } = require('../utils.js');
+const { getMods, getModBits, getIDFromPotentialOsuLink, getOsuBeatmap, getBeatmapSlimcover, pause, logDatabaseQueries } = require('../utils.js');
 const { Op } = require('sequelize');
 const Canvas = require('canvas');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
@@ -471,14 +471,19 @@ module.exports = {
 		let cachedUser = discordUsers[interaction.user.id];
 
 		if (!cachedUser) {
-			//TODO: add attributes and logdatabasequeries
+			logDatabaseQueries(4, 'commands/osu-mappool.js (autocomplete) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId'],
 				where: {
-					userId: interaction.user.id
+					userId: interaction.user.id,
+					osuUserId: {
+						[Op.not]: null
+					},
+					osuVerified: true,
 				}
 			});
 
-			if (!discordUser || !discordUser.osuUserId || !discordUser.osuVerified) {
+			if (!discordUser) {
 				return await interaction.respond({
 					name: 'You need to link your osu! account first!',
 					value: 'You need to link your osu! account first!',
@@ -521,7 +526,7 @@ module.exports = {
 			}
 		}, 1000);
 
-		//TODO: add attributes and logdatabasequeries
+		logDatabaseQueries(4, 'commands/osu-mappool.js (autocomplete) DBOsuMappools');
 		const mappools = await DBOsuMappools.findAll({
 			attributes: ['name'],
 			where: {

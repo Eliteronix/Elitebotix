@@ -85,9 +85,9 @@ module.exports = {
 			}
 		}
 
-		//TODO: add attributes and logdatabasequeries
 		logDatabaseQueries(4, 'commands/weather.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
+			attributes: ['weatherLocation', 'weatherDegreeType'],
 			where: {
 				userId: msg.author.id
 			}

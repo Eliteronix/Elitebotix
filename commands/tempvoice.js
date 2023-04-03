@@ -111,11 +111,14 @@ module.exports = {
 				args = ['text', 'disable'];
 			}
 		}
-		logDatabaseQueries(4, 'commands/tempvoice.js DBGuilds');
+
 		//get guild from db
-		//TODO: add attributes and logdatabasequeries
+		logDatabaseQueries(4, 'commands/tempvoice.js DBGuilds');
 		const guild = await DBGuilds.findOne({
-			where: { guildId: msg.guildId },
+			attributes: ['id', 'temporaryVoices', 'addTemporaryText'],
+			where: {
+				guildId: msg.guildId
+			},
 		});
 
 		//Check if guild exists in db
