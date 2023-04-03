@@ -110,9 +110,9 @@ module.exports = {
 			return;
 		}
 
-		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/birthday-admin.js DBGuilds');
 		let guild = await DBGuilds.findOne({
+			attributes: ['id', 'birthdayEnabled', 'birthdayMessageChannel'],
 			where: {
 				guildId: interaction.guild.id,
 			},
@@ -151,9 +151,9 @@ module.exports = {
 			guild.save();
 			return interaction.editReply({ content: 'Birthday announcements have been disabled.', ephemeral: true });
 		} else if (interaction.options.getSubcommand() === 'list') {
-			//TODO: Attributes
 			logDatabaseQueries(2, 'birthday-admin.js DBBirthdayGuilds list');
 			let birthdayAnnouncements = await DBBirthdayGuilds.findAll({
+				attributes: ['userId', 'birthdayTime'],
 				where: {
 					guildId: interaction.guild.id,
 				},
