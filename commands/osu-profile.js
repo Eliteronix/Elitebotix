@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague, getAdditionalOsuInfo, getBadgeImage, getAvatar, awaitWebRequestPermission } = require('../utils');
+const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague, getAdditionalOsuInfo, getBadgeImage, getAvatar, awaitWebRequestPermission } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -60,7 +60,7 @@ module.exports = {
 				})
 				.setRequired(false)
 		)
-		.addStringOption(option =>
+		.addNumberOption(option =>
 			option.setName('gamemode')
 				.setNameLocalizations({
 					'de': 'spielmodus',
@@ -75,10 +75,29 @@ module.exports = {
 				})
 				.setRequired(false)
 				.addChoices(
-					{ name: 'Standard', value: '--s' },
-					{ name: 'Mania', value: '--m' },
-					{ name: 'Catch The Beat', value: '--c' },
-					{ name: 'Taiko', value: '--t' },
+					{ name: 'Standard', value: 0 },
+					{ name: 'Taiko', value: 1 },
+					{ name: 'Catch The Beat', value: 2 },
+					{ name: 'Mania', value: 3 },
+				)
+		)
+		.addStringOption(option =>
+			option.setName('server')
+				.setNameLocalizations({
+					'de': 'server',
+					'en-GB': 'server',
+					'en-US': 'server',
+				})
+				.setDescription('The osu! server')
+				.setDescriptionLocalizations({
+					'de': 'Der osu! Server',
+					'en-GB': 'The osu! server',
+					'en-US': 'The osu! server',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Bancho', value: 'bancho' },
+					{ name: 'Ripple', value: 'ripple' },
 				)
 		)
 		.addStringOption(option =>
@@ -142,77 +161,109 @@ module.exports = {
 				.setRequired(false)
 		),
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		let showGraph = false;
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			try {//TODO: Deferreply
-				// await interaction.deferReply();
-				await interaction.reply('Processing...');
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
+			return;
+		}
 
-			args = [];
+		let showGraph = interaction.options.getBoolean('showgraph');
 
-			if (interaction.options._hoistedOptions) {
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					if (interaction.options._hoistedOptions[i].name === 'showgraph') {
-						showGraph = interaction.options._hoistedOptions[i].value;
-					} else {
-						args.push(interaction.options._hoistedOptions[i].value);
-					}
-				}
+		let usernames = [];
+
+		if (interaction.options.getString('username')) {
+			usernames.push(interaction.options.getString('username'));
+		}
+
+		if (interaction.options.getString('username2')) {
+			usernames.push(interaction.options.getString('username2'));
+		}
+
+		if (interaction.options.getString('username3')) {
+			usernames.push(interaction.options.getString('username3'));
+		}
+
+		if (interaction.options.getString('username4')) {
+			usernames.push(interaction.options.getString('username4'));
+		}
+
+		if (interaction.options.getString('username5')) {
+			usernames.push(interaction.options.getString('username5'));
+		}
+
+		logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers commandUser');
+		const commandUser = await DBDiscordUsers.findOne({
+			attributes: ['osuUserId', 'osuMainMode', 'osuMainServer'],
+			where: {
+				userId: interaction.user.id
+			},
+		});
+
+		let gamemode = interaction.options.getNumber('gamemode');
+
+		if (!gamemode) {
+			if (commandUser && commandUser.osuMainMode) {
+				gamemode = commandUser.osuMainMode;
+			} else {
+				gamemode = 0;
 			}
 		}
 
-		const commandConfig = await getOsuUserServerMode(msg, args);
-		const commandUser = commandConfig[0];
-		const server = commandConfig[1];
-		const mode = commandConfig[2];
+		let server = interaction.options.getString('server');
 
-		if (!args[0]) {//Get profile by author if no argument
-
-			if (commandUser && commandUser.osuUserId) {
-				getProfile(msg, commandUser.osuUserId, server, mode, showGraph);
+		if (!server) {
+			if (commandUser && commandUser.osuMainServer) {
+				server = commandUser.osuMainServer;
 			} else {
-				const userDisplayName = await getMessageUserDisplayname(msg);
-				getProfile(msg, userDisplayName, server, mode, showGraph);
+				server = 'bancho';
+			}
+		}
+
+		if (!usernames[0]) {//Get profile by author if no argument
+			if (commandUser && commandUser.osuUserId) {
+				getProfile(interaction, commandUser.osuUserId, server, gamemode, showGraph);
+			} else {
+				let userDisplayName = interaction.user.username;
+
+				if (interaction.member) {
+					userDisplayName = interaction.member.displayName;
+				}
+
+				getProfile(interaction, userDisplayName, server, gamemode, showGraph);
 			}
 		} else {
 			//Get profiles by arguments
-			for (let i = 0; i < args.length; i++) {
-				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
+			for (let i = 0; i < usernames.length; i++) {
+				if (usernames[i].startsWith('<@') && usernames[i].endsWith('>')) {
 					logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
 						attributes: ['osuUserId'],
 						where: {
-							userId: args[i].replace('<@', '').replace('>', '').replace('!', '')
+							userId: usernames[i].replace('<@', '').replace('>', '').replace('!', '')
 						},
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getProfile(msg, discordUser.osuUserId, server, mode, showGraph);
+						getProfile(interaction, discordUser.osuUserId, server, gamemode, showGraph);
 					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
-						getProfile(msg, args[i], server, mode, showGraph);
+						await interaction.followUp(`\`${usernames[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
+						getProfile(interaction, usernames[i], server, gamemode, showGraph);
 					}
 				} else {
 
-					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
+					if (usernames.length === 1 && !(usernames[0].startsWith('<@')) && !(usernames[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode, showGraph, true);
+							getProfile(interaction, getIDFromPotentialOsuLink(usernames[i]), server, gamemode, showGraph, true);
 						} else {
-							getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode, showGraph);
+							getProfile(interaction, getIDFromPotentialOsuLink(usernames[i]), server, gamemode, showGraph);
 						}
 					} else {
-						getProfile(msg, getIDFromPotentialOsuLink(args[i]), server, mode, showGraph);
+						getProfile(interaction, getIDFromPotentialOsuLink(usernames[i]), server, gamemode, showGraph);
 					}
 				}
 			}
@@ -220,7 +271,7 @@ module.exports = {
 	},
 };
 
-async function getProfile(msg, username, server, mode, showGraph, noLinkedAccount) {
+async function getProfile(interaction, username, server, mode, showGraph, noLinkedAccount) {
 	if (server === 'bancho') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -234,9 +285,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 		process.send('osu!API');
 		osuApi.getUser({ u: username, m: mode })
 			.then(async (user) => {
-				updateOsuDetailsforUser(msg.client, user, mode);
-
-				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
+				updateOsuDetailsforUser(interaction.client, user, mode);
 
 				const canvasWidth = 700;
 				const canvasHeight = 350;
@@ -255,7 +304,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 
 				elements = await drawTitle(elements, server, mode);
 
-				elements = await drawRank(elements, msg);
+				elements = await drawRank(elements, interaction);
 
 				elements = await drawLevel(elements, server);
 
@@ -263,7 +312,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 
 				elements = await drawPlays(elements, server);
 
-				elements = await drawBadges(elements, server, msg.client);
+				elements = await drawBadges(elements, server, interaction.client);
 
 				elements = await drawFooter(elements, server);
 
@@ -294,11 +343,11 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 				//Send attachment
 				let sentMessage = null;
 				if (noLinkedAccount) {
-					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:1064502370710605836> if the specified account is yours.`, files: files });
+					sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:1064502370710605836> if the specified account is yours.`, files: files });
 				} else {
-					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
+					sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
 				}
-				processingMessage.delete();
+
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
 
@@ -332,7 +381,7 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else {
 					console.error(err);
 				}
@@ -342,12 +391,10 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					return await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				}
 
 				let user = rippleToBanchoUser(responseJson[0]);
-
-				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
 
 				const canvasWidth = 700;
 				const canvasHeight = 350;
@@ -366,13 +413,13 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 
 				elements = await drawTitle(elements, server, mode);
 
-				elements = await drawRank(elements, msg);
+				elements = await drawRank(elements, interaction);
 
 				elements = await drawLevel(elements, server);
 
 				elements = await drawPlays(elements, server);
 
-				elements = await drawBadges(elements, server, msg.client);
+				elements = await drawBadges(elements, server, interaction.client);
 
 				elements = await drawFooter(elements, server);
 
@@ -382,8 +429,8 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
 
 				//Send attachment
-				let sentMessage = await msg.channel.send({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
-				processingMessage.delete();
+				let sentMessage = await interaction.followUp({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
+
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
 
@@ -415,9 +462,9 @@ async function getProfile(msg, username, server, mode, showGraph, noLinkedAccoun
 					await sentMessage.react('📊');
 				}
 			})
-			.catch(err => {
+			.catch(async (err) => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else {
 					console.error(err);
 				}
@@ -469,7 +516,7 @@ async function drawTitle(input, server, mode) {
 	return output;
 }
 
-async function drawRank(input, msg) {
+async function drawRank(input, interaction) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -509,7 +556,7 @@ async function drawRank(input, msg) {
 		if (discordUser && discordUser.osuDuelStarRating) {
 			userDuelStarRating = discordUser.osuDuelStarRating;
 		} else {
-			userDuelStarRating = await getUserDuelStarRating({ osuUserId: user.id, client: msg.client });
+			userDuelStarRating = await getUserDuelStarRating({ osuUserId: user.id, client: interaction.client });
 			userDuelStarRating = userDuelStarRating.total;
 		}
 

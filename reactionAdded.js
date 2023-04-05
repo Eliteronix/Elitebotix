@@ -563,46 +563,35 @@ module.exports = async function (reaction, user, additionalObjects) {
 				return;
 			}
 
-			//Set author of a temporary message copy to the reacting user to not break the commands
-			let guildId = null;
-
-			if (reaction.message.guild) {
-				guildId = reaction.message.guild.id;
-			}
-
-			let tempMessage = {
-				guild: reaction.message.guild,
-				guildId: guildId,
-				content: `e!osu-profile ${osuUserId}`,
-				author: user,
+			//Setup artificial interaction
+			let interaction = {
+				id: null,
+				client: reaction.message.client,
 				channel: reaction.message.channel,
+				user: user,
+				options: {
+					getString: (string) => {
+						if (string === 'username') {
+							return osuUserId.toString();
+						}
+					},
+					getNumber: () => { },
+					getBoolean: () => { },
+				},
+				deferReply: () => { },
+				followUp: async (input) => {
+					return await reaction.message.channel.send(input);
+				},
 			};
 
-			try {
-				// eslint-disable-next-line no-undef
-				process.send(`command ${command.name}`);
+			// eslint-disable-next-line no-undef
+			process.send(`command ${command.name}`);
 
-				command.execute(tempMessage, args, null, additionalObjects);
-			} catch (error) {
-				console.error(error);
-				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
-				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
-			}
+			command.execute(null, null, interaction, additionalObjects);
 		} else if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-top')) {
 			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace(/.mode./gm, '').replace('.png', '').replace(/.*-/, '');
 			let mode = reaction.message.attachments.first().name.replace(/.+.mode/gm, '').replace('.png', '');
-
-			if (mode == 0) {
-				mode = '--s';
-			} else if (mode == 1) {
-				mode = '--t';
-			} else if (mode == 2) {
-				mode = '--c';
-			} else if (mode == 3) {
-				mode = '--m';
-			}
 
 			//Setup artificial arguments
 			let args = [osuUserId, mode];
@@ -613,32 +602,35 @@ module.exports = async function (reaction, user, additionalObjects) {
 				return;
 			}
 
-			//Set author of a temporary message copy to the reacting user to not break the commands
-			let guildId = null;
-
-			if (reaction.message.guild) {
-				guildId = reaction.message.guild.id;
-			}
-
-			let tempMessage = {
-				guild: reaction.message.guild,
-				guildId: guildId,
-				content: `e!osu-profile ${osuUserId} ${mode}`,
-				author: user,
+			//Setup artificial interaction
+			let interaction = {
+				id: null,
+				client: reaction.message.client,
 				channel: reaction.message.channel,
+				user: user,
+				options: {
+					getString: (string) => {
+						if (string === 'username') {
+							return osuUserId.toString();
+						}
+					},
+					getNumber: (string) => {
+						if (string === 'gamemode') {
+							return mode;
+						}
+					},
+					getBoolean: () => { },
+				},
+				deferReply: () => { },
+				followUp: async (input) => {
+					return await reaction.message.channel.send(input);
+				},
 			};
 
-			try {
-				// eslint-disable-next-line no-undef
-				process.send(`command ${command.name}`);
+			// eslint-disable-next-line no-undef
+			process.send(`command ${command.name}`);
 
-				command.execute(tempMessage, args, null, additionalObjects);
-			} catch (error) {
-				console.error(error);
-				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
-				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
-			}
+			command.execute(null, null, interaction, additionalObjects);
 		}
 	}
 
@@ -858,31 +850,31 @@ module.exports = async function (reaction, user, additionalObjects) {
 				return;
 			}
 
-			//Set author of a temporary message copy to the reacting user to not break the commands
-			let guildId = null;
-
-			if (reaction.message.guild) {
-				guildId = reaction.message.guild.id;
-			}
-			let tempMessage = {
-				guild: reaction.message.guild,
-				guildId: guildId,
-				content: `e!osu-profile ${args}`,
-				author: user,
+			//Setup artificial interaction
+			let interaction = {
+				id: null,
+				client: reaction.message.client,
 				channel: reaction.message.channel,
+				user: user,
+				options: {
+					getString: (string) => {
+						if (string === 'username') {
+							return osuUserId.toString();
+						}
+					},
+					getNumber: () => { },
+					getBoolean: () => { },
+				},
+				deferReply: () => { },
+				followUp: async (input) => {
+					return await reaction.message.channel.send(input);
+				},
 			};
 
-			try {
-				// eslint-disable-next-line no-undef
-				process.send(`command ${command.name}`);
+			// eslint-disable-next-line no-undef
+			process.send(`command ${command.name}`);
 
-				command.execute(tempMessage, args, null, additionalObjects);
-			} catch (error) {
-				console.error(error);
-				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
-				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
-			}
+			command.execute(null, null, interaction, additionalObjects);
 		}
 	}
 
