@@ -86,7 +86,7 @@ module.exports = {
 		process.send('osu!API');
 		osuApi.getBeatmaps({ b: getIDFromPotentialOsuLink(args[1]) })
 			.then(async (beatmaps) => {
-				getBeatmap(msg, args, interaction);
+				getBeatmap(interaction);
 
 				const viabilityEmbed = new Discord.EmbedBuilder()
 					.setColor('#00FF00')
@@ -275,18 +275,11 @@ module.exports = {
 	}
 };
 
-async function getBeatmap(msg, args, interaction) {
+async function getBeatmap(interaction) {
 	let command = require('./osu-beatmap.js');
-	let newArgs = [args[1]];
-	try {
-		// eslint-disable-next-line no-undef
-		process.send(`command ${command.name}`);
 
-		command.execute(msg, newArgs, interaction);
-	} catch (error) {
-		console.error(error);
-		const eliteronixUser = await msg.client.users.cache.find(user => user.id === '138273136285057025');
-		msg.reply('There was an error trying to execute that command. The developers have been alerted.');
-		eliteronixUser.send(`There was an error trying to execute a command.\n\nMessage by ${msg.author.username}#${msg.author.discriminator}: \`${msg.content}\`\n\n${error}`);
-	}
+	// eslint-disable-next-line no-undef
+	process.send(`command ${command.name}`);
+
+	command.execute(interaction);
 }

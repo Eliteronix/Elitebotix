@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('canvas');
-const { getGameMode, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries, getScoreModpool, humanReadable, getBeatmapCover, adjustStarRating } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries, getScoreModpool, humanReadable, getBeatmapCover, adjustStarRating } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBOsuMultiScores } = require('../dbObjects');
 const { Op } = require('sequelize');
@@ -148,104 +148,89 @@ module.exports = {
 				.setRequired(false)
 		),
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		let tournament = false;
-		let accuracy = 95;
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			if (interaction.commandName === 'osu-beatmap') {
-				try {
-					await interaction.reply('Beatmaps are being processed');
-				} catch (error) {
-					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-						console.error(error);
-					}
-					const timestamps = interaction.client.cooldowns.get(this.name);
-					timestamps.delete(interaction.user.id);
-					return;
+		if (interaction.commandName === 'osu-beatmap') {
+			try {
+				await interaction.deferReply();
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
 				}
+				const timestamps = interaction.client.cooldowns.get(this.name);
+				timestamps.delete(interaction.user.id);
+				return;
 			}
-
-			accuracy = interaction.options.getNumber('accuracy') || 95;
-
-			args = [];
-
-			if (interaction.commandName !== 'osu-beatmap') {
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					if (interaction.options._hoistedOptions[i].name === 'modpool') {
-						args.push(`--${interaction.options._hoistedOptions[i].value}`);
-					} else if (interaction.options._hoistedOptions[i].name === 'id') {
-						args.push(interaction.options._hoistedOptions[i].value);
-					}
-				}
-			} else {
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					if (interaction.options._hoistedOptions[i].name === 'mods') {
-						args.push(`--${interaction.options._hoistedOptions[i].value.toUpperCase()}`);
-					} else if (interaction.options._hoistedOptions[i].name === 'tourney') {
-						if (interaction.options._hoistedOptions[i].value) {
-							tournament = true;
-						}
-					} else if (interaction.options._hoistedOptions[i].name !== 'accuracy') {
-						args.push(interaction.options._hoistedOptions[i].value);
-					}
-				}
-			}
-
 		}
+
+		let accuracy = interaction.options.getNumber('accuracy') || 95;
 
 		accuracy = Math.min(accuracy, 100);
 		accuracy = Math.max(accuracy, 0);
 		accuracy = Math.round(accuracy * 100) / 100;
 
-		let mods = 0;
+		let mods = 'NM';
 
-		for (let i = 0; i < args.length; i++) {
-			if (args[i].startsWith('--NM') || args[i].startsWith('--NF') || args[i].startsWith('--HT') || args[i].startsWith('--EZ')
-				|| args[i].startsWith('--HR') || args[i].startsWith('--HD') || args[i].startsWith('--SD') || args[i].startsWith('--DT')
-				|| args[i].startsWith('--NC') || args[i].startsWith('--FL') || args[i].startsWith('--SO') || args[i].startsWith('--PF')
-				|| args[i].startsWith('--K4') || args[i].startsWith('--K5') || args[i].startsWith('--K6') || args[i].startsWith('--K7')
-				|| args[i].startsWith('--K8') || args[i].startsWith('--FI') || args[i].startsWith('--RD') || args[i].startsWith('--K9')
-				|| args[i].startsWith('--KC') || args[i].startsWith('--K1') || args[i].startsWith('--K2') || args[i].startsWith('--K3')
-				|| args[i].startsWith('--MR')) {
-				mods = args[i].substring(2);
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].startsWith('--FM')) {
-				args.splice(i, 1);
-				i--;
+		if (interaction.options.getString('mods')) {
+			mods = interaction.options.getString('mods').toUpperCase();
+		} else if (interaction.options.getString('modpool')) {
+			mods = interaction.options.getString('modpool').toUpperCase();
+
+			if (mods === 'FM') {
+				mods = 'NM';
 			}
 		}
 
-
 		let modBits = getModBits(mods);
 
-		args.forEach(async (arg) => {
-			let modCompatibility = await checkModsCompatibility(modBits, getIDFromPotentialOsuLink(arg));
+		let tournament = false;
+
+		if (interaction.options.getBoolean('tourney')) {
+			tournament = interaction.options.getBoolean('tourney');
+		}
+
+		let maps = [];
+
+		if (interaction.options.getString('id')) {
+			maps.push(interaction.options.getString('id'));
+		}
+
+		if (interaction.options.getString('id2')) {
+			maps.push(interaction.options.getString('id2'));
+		}
+
+		if (interaction.options.getString('id3')) {
+			maps.push(interaction.options.getString('id3'));
+		}
+
+		if (interaction.options.getString('id4')) {
+			maps.push(interaction.options.getString('id4'));
+		}
+
+		if (interaction.options.getString('id5')) {
+			maps.push(interaction.options.getString('id5'));
+		}
+
+		maps.forEach(async (map) => {
+			let modCompatibility = await checkModsCompatibility(modBits, getIDFromPotentialOsuLink(map));
 			if (!modCompatibility) {
 				modBits = 0;
 			}
-			const dbBeatmap = await getOsuBeatmap({ beatmapId: getIDFromPotentialOsuLink(arg), modBits: modBits });
+
+			const dbBeatmap = await getOsuBeatmap({ beatmapId: getIDFromPotentialOsuLink(map), modBits: modBits });
 			if (dbBeatmap) {
-				getBeatmap(msg, interaction, dbBeatmap, tournament, accuracy);
+				getBeatmap(interaction, dbBeatmap, tournament, accuracy);
 			} else {
-				if (msg.id) {
-					await msg.reply({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
+				if (interaction.commandName === 'osu-beatmap') {
+					await interaction.followUp({ content: `Could not find beatmap \`${map.replace(/`/g, '')}\`.` });
 				} else {
-					await interaction.followUp({ content: `Could not find beatmap \`${arg.replace(/`/g, '')}\`.` });
+					await interaction.followUp({ content: `Could not find beatmap \`${map.replace(/`/g, '')}\`.`, ephemeral: true });
 				}
 			}
 		});
 	},
 };
 
-async function getBeatmap(msg, interaction, beatmap, tournament, accuracy) {
+async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	let processingMessage = null;
-
-	if (!interaction) {
-		processingMessage = await msg.channel.send(`[${beatmap.beatmapId}] Processing...`);
-	}
 
 	const canvasWidth = 1000;
 	const canvasHeight = 500;
@@ -368,11 +353,11 @@ async function getBeatmap(msg, interaction, beatmap, tournament, accuracy) {
 	}
 
 	//Send attachment
-	if (interaction && interaction.commandName !== 'osu-beatmap') {
+	if (interaction.commandName !== 'osu-beatmap') {
 		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files, ephemeral: true });
 	} else {
 		try {
-			const sentMessage = await msg.channel.send({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files });
+			const sentMessage = await interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files });
 			if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
 				sentMessage.react('<:COMPARE:827974793365159997>');
 			}
@@ -392,7 +377,7 @@ async function getBeatmap(msg, interaction, beatmap, tournament, accuracy) {
 
 			return;
 		} catch (error) {
-			console.error(error, msg, interaction, beatmap, tournament, accuracy);
+			console.error(error, interaction, beatmap, tournament, accuracy);
 			return;
 		}
 	}
