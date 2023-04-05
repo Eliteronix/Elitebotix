@@ -4293,7 +4293,11 @@ module.exports = {
 					let pp = await module.exports.getOsuPP(outputScore.beatmapId, outputScore.raw_mods, module.exports.getAccuracy(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
 
 					module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores pp update');
-					await DBOsuMultiScores.update({ pp: pp }, { where: { id: inputScore.id } });
+					try {
+						await DBOsuMultiScores.update({ pp: pp }, { where: { id: inputScore.id } });
+					} catch (e) {
+						console.error(e);
+					}
 
 					outputScore.pp = pp;
 				}
