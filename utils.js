@@ -4296,7 +4296,7 @@ module.exports = {
 					try {
 						await DBOsuMultiScores.update({ pp: pp }, { where: { id: inputScore.id } });
 					} catch (e) {
-						console.error(e);
+						//Nothing
 					}
 
 					outputScore.pp = pp;
