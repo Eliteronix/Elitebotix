@@ -197,45 +197,50 @@ module.exports = {
 			return;
 		}
 
-		if (interaction.options.getSubcommand() === 'tournamenttopplays') {
-			let attachedFile = interaction.options.getAttachment('file');
+		let attachedFile = interaction.options.getAttachment('file');
 
+		try {
 			if (!attachedFile.contentType.startsWith('text/plain')) {
 				return await interaction.editReply({ content: 'The attached file is not a .txt file.' });
 			}
+		} catch (error) {
+			console.error(attachedFile);
+			console.error(error);
+		}
 
-			// fetch the file
-			let file = await fetch(attachedFile.url);
+		// fetch the file
+		let file = await fetch(attachedFile.url);
 
-			// parse the file
-			file = await file.text();
+		// parse the file
+		file = await file.text();
 
-			// split the file into an array
-			file = file.split('\n');
+		// split the file into an array
+		file = file.split('\n');
 
-			// remove empty lines
-			file = file.filter(line => line !== '');
+		// remove empty lines
+		file = file.filter(line => line !== '');
 
-			// remove duplicates
-			file = [...new Set(file)];
+		// remove duplicates
+		file = [...new Set(file)];
 
-			// check if the file contains only numbers
-			if (file.some(line => isNaN(line))) {
-				return await interaction.editReply({ content: 'The attached file contains invalid player ids. Be sure to only provide playerIds; one for each line.' });
-			}
+		// check if the file contains only numbers
+		if (file.some(line => isNaN(line))) {
+			return await interaction.editReply({ content: 'The attached file contains invalid player ids. Be sure to only provide playerIds; one for each line.' });
+		}
 
-			// get the top plays of the players
-			let amountPerPlayer = interaction.options.getInteger('amount');
-			let onlyRanked = interaction.options.getBoolean('onlyranked');
+		// get the top plays of the players
+		let amountPerPlayer = interaction.options.getInteger('amount');
+		let onlyRanked = interaction.options.getBoolean('onlyranked');
 
-			await interaction.editReply({ content: 'A proper file has been provided. Processing may take a while, depending on how many scores haven\'t been calculated since they have been set or the last pp update...' });
+		await interaction.editReply({ content: 'A proper file has been provided. Processing may take a while, depending on how many scores haven\'t been calculated since they have been set or the last pp update...' });
 
-			let processingMessage = await interaction.channel.send('Processing...');
+		let processingMessage = await interaction.channel.send('Processing...');
 
-			let randomString = Math.random().toString(36);
+		let randomString = Math.random().toString(36);
 
-			interaction.client.hostCommands.push(randomString);
+		interaction.client.hostCommands.push(randomString);
 
+		if (interaction.options.getSubcommand() === 'tournamenttopplays') {
 			let tourneyTops = [];
 
 			let lastUpdate = new Date();
@@ -427,40 +432,6 @@ module.exports = {
 				interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
 			}
 		} else if (interaction.options.getSubcommand() === 'duelratings') {
-			let attachedFile = interaction.options.getAttachment('file');
-
-			if (!attachedFile.contentType.startsWith('text/plain')) {
-				return await interaction.editReply({ content: 'The attached file is not a .txt file.' });
-			}
-
-			// fetch the file
-			let file = await fetch(attachedFile.url);
-
-			// parse the file
-			file = await file.text();
-
-			// split the file into an array
-			file = file.split('\n');
-
-			// remove empty lines
-			file = file.filter(line => line !== '');
-
-			// remove duplicates
-			file = [...new Set(file)];
-
-			// check if the file contains only numbers
-			if (file.some(line => isNaN(line))) {
-				return await interaction.editReply({ content: 'The attached file contains invalid player ids. Be sure to only provide playerIds; one for each line.' });
-			}
-
-			await interaction.editReply({ content: 'A proper file has been provided. Processing may take a while, depending on how many players you provided and how many of them have to be calculated (again)...' });
-
-			let processingMessage = await interaction.channel.send('Processing...');
-
-			let randomString = Math.random().toString(36);
-
-			interaction.client.hostCommands.push(randomString);
-
 			let csvData = [];
 
 			let lastUpdate = new Date();
@@ -536,40 +507,6 @@ module.exports = {
 				interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
 			}
 		} else if (interaction.options.getSubcommand() === 'ppwithtournamenttopplays') {
-			let attachedFile = interaction.options.getAttachment('file');
-
-			if (!attachedFile.contentType.startsWith('text/plain')) {
-				return await interaction.editReply({ content: 'The attached file is not a .txt file.' });
-			}
-
-			// fetch the file
-			let file = await fetch(attachedFile.url);
-
-			// parse the file
-			file = await file.text();
-
-			// split the file into an array
-			file = file.split('\n');
-
-			// remove empty lines
-			file = file.filter(line => line !== '');
-
-			// remove duplicates
-			file = [...new Set(file)];
-
-			// check if the file contains only numbers
-			if (file.some(line => isNaN(line))) {
-				return await interaction.editReply({ content: 'The attached file contains invalid player ids. Be sure to only provide playerIds; one for each line.' });
-			}
-
-			await interaction.editReply({ content: 'A proper file has been provided. Processing may take a while, depending on how many scores haven\'t been calculated since they have been set or the last pp update...' });
-
-			let processingMessage = await interaction.channel.send('Processing...');
-
-			let randomString = Math.random().toString(36);
-
-			interaction.client.hostCommands.push(randomString);
-
 			let csvData = [];
 
 			let lastUpdate = new Date();
@@ -686,40 +623,6 @@ module.exports = {
 				interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
 			}
 		} else if (interaction.options.getSubcommand() === 'tournamentbanned') {
-			let attachedFile = interaction.options.getAttachment('file');
-
-			if (!attachedFile.contentType.startsWith('text/plain')) {
-				return await interaction.editReply({ content: 'The attached file is not a .txt file.' });
-			}
-
-			// fetch the file
-			let file = await fetch(attachedFile.url);
-
-			// parse the file
-			file = await file.text();
-
-			// split the file into an array
-			file = file.split('\n');
-
-			// remove empty lines
-			file = file.filter(line => line !== '');
-
-			// remove duplicates
-			file = [...new Set(file)];
-
-			// check if the file contains only numbers
-			if (file.some(line => isNaN(line))) {
-				return await interaction.editReply({ content: 'The attached file contains invalid player ids. Be sure to only provide playerIds; one for each line.' });
-			}
-
-			await interaction.editReply({ content: 'A proper file has been provided. Processing may take a while, depending on how many scores haven\'t been calculated since they have been set or the last pp update...' });
-
-			let processingMessage = await interaction.channel.send('Processing...');
-
-			let randomString = Math.random().toString(36);
-
-			interaction.client.hostCommands.push(randomString);
-
 			let csvData = [];
 
 			let lastUpdate = new Date();
