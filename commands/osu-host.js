@@ -667,6 +667,10 @@ module.exports = {
 			processingMessage.delete();
 
 			if (csvData.length === 0) {
+				if (interaction.client.hostCommands.includes(randomString)) {
+					interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
+				}
+
 				return await interaction.channel.send({ content: 'No tournament banned users found.' });
 			}
 
