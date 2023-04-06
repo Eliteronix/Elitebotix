@@ -6898,21 +6898,50 @@ module.exports = {
 							// console.log(`Sending osu! top plays for ${osuUser.osuUserId}...`);
 
 							recentActivity = true;
-							let msg = {
-								guild: guildTrackers[i].guild,
-								channel: guildTrackers[i].channel,
-								guildId: guildTrackers[i].guild.id,
-								author: {
-									id: 0
-								}
-							};
+
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
+
+							//Setup artificial interaction
+							let interaction = {
+								id: null,
+								client: c,
+								channel: guildTrackers[i].channel,
+								user: {
+									id: c.user.id
+								},
+								options: {
+									getString: (string) => {
+										if (string === 'username') {
+											return osuUser.osuUserId.toString();
+										} else if (string === 'sorting') {
+											return 'recent';
+										}
+									},
+									getNumber: () => { },
+									getInteger: (string) => {
+										if (string === 'amount') {
+											return parseInt(guildTrackers[i].osuNumberTopPlays);
+										} else if (string === 'gamemode') {
+											return 0;
+										}
+									},
+									getBoolean: (string) => {
+										if (string === 'tracking') {
+											return true;
+										}
+									},
+								},
+								deferReply: () => { },
+								followUp: async (input) => {
+									return await guildTrackers[i].channel.send(input);
+								},
+							};
 
 							// eslint-disable-next-line no-undef
 							process.send(`command ${topCommand.name}`);
 
-							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].osuNumberTopPlays}`, '--tracking']);
+							topCommand.execute(null, null, interaction);
 							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
 					}
@@ -6948,21 +6977,50 @@ module.exports = {
 							// console.log(`Sending taiko top plays for ${osuUser.osuUserId}...`);
 
 							recentActivity = true;
-							let msg = {
-								guild: guildTrackers[i].guild,
-								channel: guildTrackers[i].channel,
-								guildId: guildTrackers[i].guild.id,
-								author: {
-									id: 0
-								}
-							};
+
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
+
+							//Setup artificial interaction
+							let interaction = {
+								id: null,
+								client: c,
+								channel: guildTrackers[i].channel,
+								user: {
+									id: c.user.id
+								},
+								options: {
+									getString: (string) => {
+										if (string === 'username') {
+											return osuUser.osuUserId.toString();
+										} else if (string === 'sorting') {
+											return 'recent';
+										}
+									},
+									getNumber: () => { },
+									getInteger: (string) => {
+										if (string === 'amount') {
+											return parseInt(guildTrackers[i].osuNumberTopPlays);
+										} else if (string === 'gamemode') {
+											return 1;
+										}
+									},
+									getBoolean: (string) => {
+										if (string === 'tracking') {
+											return true;
+										}
+									},
+								},
+								deferReply: () => { },
+								followUp: async (input) => {
+									return await guildTrackers[i].channel.send(input);
+								},
+							};
 
 							// eslint-disable-next-line no-undef
 							process.send(`command ${topCommand.name}`);
 
-							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].taikoNumberTopPlays}`, '--tracking', '--t']);
+							topCommand.execute(null, null, interaction);
 							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
 					}
@@ -6999,21 +7057,50 @@ module.exports = {
 							// console.log(`Sending catch top plays for ${osuUser.osuUserId}...`);
 
 							recentActivity = true;
-							let msg = {
-								guild: guildTrackers[i].guild,
-								channel: guildTrackers[i].channel,
-								guildId: guildTrackers[i].guild.id,
-								author: {
-									id: 0
-								}
-							};
+
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
+
+							//Setup artificial interaction
+							let interaction = {
+								id: null,
+								client: c,
+								channel: guildTrackers[i].channel,
+								user: {
+									id: c.user.id
+								},
+								options: {
+									getString: (string) => {
+										if (string === 'username') {
+											return osuUser.osuUserId.toString();
+										} else if (string === 'sorting') {
+											return 'recent';
+										}
+									},
+									getNumber: () => { },
+									getInteger: (string) => {
+										if (string === 'amount') {
+											return parseInt(guildTrackers[i].osuNumberTopPlays);
+										} else if (string === 'gamemode') {
+											return 2;
+										}
+									},
+									getBoolean: (string) => {
+										if (string === 'tracking') {
+											return true;
+										}
+									},
+								},
+								deferReply: () => { },
+								followUp: async (input) => {
+									return await guildTrackers[i].channel.send(input);
+								},
+							};
 
 							// eslint-disable-next-line no-undef
 							process.send(`command ${topCommand.name}`);
 
-							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].catchNumberTopPlays}`, '--tracking', '--c']);
+							topCommand.execute(null, null, interaction);
 							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
 					}
@@ -7050,21 +7137,50 @@ module.exports = {
 							// console.log(`Sending mania top plays for ${osuUser.osuUserId}...`);
 
 							recentActivity = true;
-							let msg = {
-								guild: guildTrackers[i].guild,
-								channel: guildTrackers[i].channel,
-								guildId: guildTrackers[i].guild.id,
-								author: {
-									id: 0
-								}
-							};
+
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
+
+							//Setup artificial interaction
+							let interaction = {
+								id: null,
+								client: c,
+								channel: guildTrackers[i].channel,
+								user: {
+									id: c.user.id
+								},
+								options: {
+									getString: (string) => {
+										if (string === 'username') {
+											return osuUser.osuUserId.toString();
+										} else if (string === 'sorting') {
+											return 'recent';
+										}
+									},
+									getNumber: () => { },
+									getInteger: (string) => {
+										if (string === 'amount') {
+											return parseInt(guildTrackers[i].osuNumberTopPlays);
+										} else if (string === 'gamemode') {
+											return 3;
+										}
+									},
+									getBoolean: (string) => {
+										if (string === 'tracking') {
+											return true;
+										}
+									},
+								},
+								deferReply: () => { },
+								followUp: async (input) => {
+									return await guildTrackers[i].channel.send(input);
+								},
+							};
 
 							// eslint-disable-next-line no-undef
 							process.send(`command ${topCommand.name}`);
 
-							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].maniaNumberTopPlays}`, '--tracking', '--m']);
+							topCommand.execute(null, null, interaction);
 							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
 					}
@@ -7169,21 +7285,52 @@ module.exports = {
 							// console.log(`Sending tournament top plays for ${osuUser.osuUserId}...`);
 
 							recentActivity = true;
-							let msg = {
-								guild: guildTrackers[i].guild,
-								channel: guildTrackers[i].channel,
-								guildId: guildTrackers[i].guild.id,
-								author: {
-									id: 0
-								}
-							};
+
 							// eslint-disable-next-line no-undef
 							let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
+
+							//Setup artificial interaction
+							let interaction = {
+								id: null,
+								client: c,
+								channel: guildTrackers[i].channel,
+								user: {
+									id: c.user.id
+								},
+								options: {
+									getString: (string) => {
+										if (string === 'username') {
+											return osuUser.osuUserId.toString();
+										} else if (string === 'sorting') {
+											return 'recent';
+										} else if (string === 'server') {
+											return 'tournaments';
+										}
+									},
+									getNumber: () => { },
+									getInteger: (string) => {
+										if (string === 'amount') {
+											return parseInt(guildTrackers[i].osuNumberTopPlays);
+										} else if (string === 'gamemode') {
+											return 0;
+										}
+									},
+									getBoolean: (string) => {
+										if (string === 'tracking') {
+											return true;
+										}
+									},
+								},
+								deferReply: () => { },
+								followUp: async (input) => {
+									return await guildTrackers[i].channel.send(input);
+								},
+							};
 
 							// eslint-disable-next-line no-undef
 							process.send(`command ${topCommand.name}`);
 
-							topCommand.execute(msg, [osuUser.osuUserId, '--recent', `--${guildTrackers[i].tournamentNumberTopPlays}`, '--tracking', '--tournaments']);
+							topCommand.execute(null, null, interaction);
 							await new Promise(resolve => setTimeout(resolve, 5000));
 						}
 					}

@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores, DBOsuGuildTrackers, DBOsuBeatmaps } = 
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getOsuUserServerMode, getMessageUserDisplayname, getAccuracy, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore } = require('../utils');
+const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -45,15 +45,15 @@ module.exports = {
 				})
 				.setRequired(false)
 				.addChoices(
-					{ name: 'Approach Rate', value: '--ar' },
-					{ name: 'Circle Size', value: '--cs' },
-					{ name: 'Overall Difficulty', value: '--od' },
-					{ name: 'HP Drain', value: '--hp' },
-					{ name: 'Beats Per Minute', value: '--bpm' },
-					{ name: 'Length', value: '--length' },
-					{ name: 'Recent', value: '--new' },
-					{ name: 'Star Rating', value: '--sr' },
-					{ name: 'Accuracy', value: '--acc' },
+					{ name: 'Approach Rate', value: 'ar' },
+					{ name: 'Circle Size', value: 'cs' },
+					{ name: 'Overall Difficulty', value: 'od' },
+					{ name: 'HP Drain', value: 'drain' },
+					{ name: 'Beats Per Minute', value: 'bpm' },
+					{ name: 'Length', value: 'length' },
+					{ name: 'Recent', value: 'recent' },
+					{ name: 'Star Rating', value: 'sr' },
+					{ name: 'Accuracy', value: 'acc' },
 				)
 		)
 		.addStringOption(option =>
@@ -71,7 +71,7 @@ module.exports = {
 				})
 				.setRequired(false)
 				.addChoices(
-					{ name: 'True', value: '--asc' },
+					{ name: 'True', value: 'True' },
 				)
 		)
 		.addIntegerOption(option =>
@@ -88,8 +88,10 @@ module.exports = {
 					'en-US': 'The amount of topplays to be displayed',
 				})
 				.setRequired(false)
+				.setMinValue(1)
+				.setMaxValue(100)
 		)
-		.addStringOption(option =>
+		.addNumberOption(option =>
 			option.setName('gamemode')
 				.setNameLocalizations({
 					'de': 'spielmodus',
@@ -104,10 +106,10 @@ module.exports = {
 				})
 				.setRequired(false)
 				.addChoices(
-					{ name: 'Standard', value: 's' },
-					{ name: 'Taiko', value: 't' },
-					{ name: 'Catch The Beat', value: 'c' },
-					{ name: 'Mania', value: 'm' },
+					{ name: 'Standard', value: 0 },
+					{ name: 'Taiko', value: 1 },
+					{ name: 'Catch The Beat', value: 2 },
+					{ name: 'Mania', value: 3 },
 				)
 		)
 		.addStringOption(option =>
@@ -125,8 +127,8 @@ module.exports = {
 				})
 				.setRequired(false)
 				.addChoices(
-					{ name: 'Bancho', value: 'b' },
-					{ name: 'Ripple', value: 'r' },
+					{ name: 'Bancho', value: 'bancho' },
+					{ name: 'Ripple', value: 'ripple' },
 					{ name: 'Tournaments', value: 'tournaments' },
 					{ name: 'Mixed (Bancho & Tournaments)', value: 'mixed' },
 				)
@@ -222,151 +224,126 @@ module.exports = {
 				.setRequired(false)
 		),
 	async execute(msg, args, interaction) {
-		//TODO: Remove message code and replace with interaction code
-		let csv = false;
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			try {
-				//TODO: Deferreply
-				await interaction.reply('Players are being processed');
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
+		try {
+			await interaction.deferReply();
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
-
-			if (interaction.options.get('csv')) {
-				csv = true;
-			}
-
-			args = [];
-
-			if (interaction.options._hoistedOptions) {
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					if (interaction.options._hoistedOptions[i].name === 'new') {
-						if (interaction.options._hoistedOptions[i].value) {
-							args.push('--new');
-						}
-					} else if (interaction.options._hoistedOptions[i].name === 'amount') {
-						args.push(`--${interaction.options._hoistedOptions[i].value}`);
-					} else if (interaction.options._hoistedOptions[i].name === 'gamemode') {
-						args.push(`--${interaction.options._hoistedOptions[i].value}`);
-					} else if (interaction.options._hoistedOptions[i].name === 'server') {
-						args.push(`--${interaction.options._hoistedOptions[i].value}`);
-					} else if (interaction.options._hoistedOptions[i].name !== 'csv') {
-						args.push(interaction.options._hoistedOptions[i].value);
-					}
-				}
-			}
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
+			return;
 		}
 
-		const commandConfig = await getOsuUserServerMode(msg, args);
-		const commandUser = commandConfig[0];
-		const server = commandConfig[1];
-		const mode = commandConfig[2];
+		let csv = false;
 
-		let limit = 10;
-		let tracking = false;
-		let sorting = null;
+		if (interaction.options.getBoolean('csv')) {
+			csv = true;
+		}
+
+		let sorting = interaction.options.getString('sorting');
+
+		let limit = interaction.options.getInteger('amount') || 10;
+
 		let order = false;
 
-		for (let i = 0; i < args.length; i++) {
-			if (args[i] === '--new' || args[i] === '--recent' || args[i] === '--n') {
-				sorting = 'recent';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--ar' || args[i] === '--approach' || args[i] === '--approachrate') {
-				sorting = 'ar';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--cs' || args[i] === '--size' || args[i] === '--circlesize') {
-				sorting = 'cs';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--od' || args[i] === '--diff' || args[i] === '--overalldifficulty') {
-				sorting = 'od';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--hp' || args[i] === '--hpdrain' || args[i] === '--drain') {
-				sorting = 'drain';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--length') {
-				sorting = 'length';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--bpm' || args[i] === '--beatsperminute') { // who the fuck would use beats per fucking minute smh
-				sorting = 'bpm';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--asc' || args[i] === '--ascending') {
-				order = true;
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--starrating' || args[i] === '--sr') {
-				sorting = 'sr';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--acc') {
-				sorting = 'acc';
-				args.splice(i, 1);
-				i--;
-			} else if (args[i].startsWith('--') && !isNaN(args[i].replace('--', ''))) {
-				limit = parseInt(args[i].replace('--', ''));
-				if (limit > 100) {
-					limit = 100;
-				} else if (limit < 1) {
-					limit = 1;
-				}
-				args.splice(i, 1);
-				i--;
-			} else if (args[i] === '--tracking') {
-				tracking = true;
-				args.splice(i, 1);
-				i--;
+		if (interaction.options.getString('ascending')) {
+			order = true;
+		}
+
+		let tracking = interaction.options.getBoolean('tracking');
+
+		let usernames = [];
+
+		if (interaction.options.getString('username')) {
+			usernames.push(interaction.options.getString('username'));
+		}
+
+		if (interaction.options.getString('username2')) {
+			usernames.push(interaction.options.getString('username2'));
+		}
+
+		if (interaction.options.getString('username3')) {
+			usernames.push(interaction.options.getString('username3'));
+		}
+
+		if (interaction.options.getString('username4')) {
+			usernames.push(interaction.options.getString('username4'));
+		}
+
+		if (interaction.options.getString('username5')) {
+			usernames.push(interaction.options.getString('username5'));
+		}
+
+		logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers commandUser');
+		const commandUser = await DBDiscordUsers.findOne({
+			attributes: ['osuUserId', 'osuMainMode', 'osuMainServer'],
+			where: {
+				userId: interaction.user.id
+			},
+		});
+
+		let gamemode = interaction.options.getNumber('gamemode');
+
+		if (!gamemode) {
+			if (commandUser && commandUser.osuMainMode) {
+				gamemode = commandUser.osuMainMode;
+			} else {
+				gamemode = 0;
 			}
 		}
 
-		if (!args[0]) {
+		let server = interaction.options.getString('server');
+
+		if (!server) {
+			if (commandUser && commandUser.osuMainServer) {
+				server = commandUser.osuMainServer;
+			} else {
+				server = 'bancho';
+			}
+		}
+
+		if (!usernames[0]) {
 			//Get profile by author if no argument
 			if (commandUser && commandUser.osuUserId) {
-				getTopPlays(msg, commandUser.osuUserId, server, mode, false, sorting, limit, tracking, order, csv);
+				getTopPlays(interaction, commandUser.osuUserId, server, gamemode, false, sorting, limit, tracking, order, csv);
 			} else {
-				const userDisplayName = await getMessageUserDisplayname(msg);
-				getTopPlays(msg, userDisplayName, server, mode, false, sorting, limit, tracking, order, csv);
+				let userDisplayName = interaction.user.username;
+
+				if (interaction.member) {
+					userDisplayName = interaction.member.displayName;
+				}
+
+				getTopPlays(interaction, userDisplayName, server, gamemode, false, sorting, limit, tracking, order, csv);
 			}
 		} else {
 			//Get profiles by arguments
-			for (let i = 0; i < args.length; i++) {
-				if (args[i].startsWith('<@') && args[i].endsWith('>')) {
+			for (let i = 0; i < usernames.length; i++) {
+				if (usernames[i].startsWith('<@') && usernames[i].endsWith('>')) {
 					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
 						attributes: ['osuUserId'],
 						where: {
-							userId: args[i].replace('<@', '').replace('>', '').replace('!', '')
+							userId: usernames[i].replace('<@', '').replace('>', '').replace('!', '')
 						},
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getTopPlays(msg, discordUser.osuUserId, server, mode, false, sorting, limit, tracking, order, csv);
+						getTopPlays(interaction, discordUser.osuUserId, server, gamemode, false, sorting, limit, tracking, order, csv);
 					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
-						getTopPlays(msg, args[i], server, mode, false, sorting, limit, tracking, order, csv);
+						await interaction.followUp(`\`${usernames[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
+						getTopPlays(interaction, usernames[i], server, gamemode, false, sorting, limit, tracking, order, csv);
 					}
 				} else {
 
-					if (args.length === 1 && !(args[0].startsWith('<@')) && !(args[0].endsWith('>'))) {
+					if (usernames.length === 1 && !(usernames[0].startsWith('<@')) && !(usernames[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, true, sorting, limit, tracking, order, csv);
+							getTopPlays(interaction, getIDFromPotentialOsuLink(usernames[i]), server, gamemode, true, sorting, limit, tracking, order, csv);
 						} else {
-							getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, sorting, limit, tracking, order, csv);
+							getTopPlays(interaction, getIDFromPotentialOsuLink(usernames[i]), server, gamemode, false, sorting, limit, tracking, order, csv);
 						}
 					} else {
-						getTopPlays(msg, getIDFromPotentialOsuLink(args[i]), server, mode, false, sorting, limit, tracking, order, csv);
+						getTopPlays(interaction, getIDFromPotentialOsuLink(usernames[i]), server, gamemode, false, sorting, limit, tracking, order, csv);
 					}
 				}
 			}
@@ -374,7 +351,7 @@ module.exports = {
 	}
 };
 
-async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting, limit, tracking, order, csv) {
+async function getTopPlays(interaction, username, server, mode, noLinkedAccount, sorting, limit, tracking, order, csv) {
 	if (server === 'bancho') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -388,9 +365,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 		process.send('osu!API');
 		osuApi.getUser({ u: username, m: mode })
 			.then(async (user) => {
-				updateOsuDetailsforUser(msg.client, user, mode);
-
-				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
+				updateOsuDetailsforUser(interaction.client, user, mode);
 
 				const canvasWidth = 1000;
 				const canvasHeight = 83 + limit * 41.66666;
@@ -413,7 +388,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				elements = await drawTitle(elements, server, mode, sorting, order);
 
-				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order, tracking);
+				elements = await drawTopPlays(elements, server, mode, interaction, sorting, limit, order, tracking);
 
 				let scores = elements[3];
 
@@ -433,7 +408,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				//If created by osu-tracking
 				if (tracking) {
-					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
+					await interaction.followUp({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
 				} else {
 					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 2');
 					const linkedUser = await DBDiscordUsers.findOne({
@@ -450,24 +425,22 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 					//Send attachment
 					let sentMessage;
 					if (noLinkedAccount) {
-						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:1064502370710605836> if the specified account is yours.`, files: files });
+						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:1064502370710605836> if the specified account is yours.`, files: files });
 					} else {
-						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
+						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
 					}
 					await sentMessage.react('👤');
 					await sentMessage.react('📈');
 				}
-
-				processingMessage.delete();
 			})
-			.catch(err => {
+			.catch(async (err) => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else if (err.message === 'Missing Permissions') {
 					logDatabaseQueries(4, 'commands/osu-top.js DBOsuGuildTrackers destroy 1');
 					DBOsuGuildTrackers.destroy({
 						where: {
-							channelId: msg.channel.id
+							channelId: interaction.channel.id
 						}
 					});
 				} else {
@@ -475,12 +448,11 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				}
 			});
 	} else if (server === 'ripple') {
-		let processingMessage = await msg.channel.send(`[\`${username.replace(/`/g, '')}\`] Processing...`);
 		fetch(`https://www.ripple.moe/api/get_user?u=${username}&m=${mode}`)
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					return await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				}
 
 				let user = rippleToBanchoUser(responseJson[0]);
@@ -502,7 +474,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				elements = await drawTitle(elements, server, mode, sorting, order);
 
-				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order);
+				elements = await drawTopPlays(elements, server, mode, interaction, sorting, limit, order);
 
 				let scores = elements[3];
 
@@ -521,13 +493,11 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 				}
 
 				//Send attachment
-				await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>`, files: files });
-				processingMessage.delete();
+				await interaction.followUp({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}?mode=${mode}>`, files: files });
 			})
-			.catch(err => {
-				processingMessage.delete();
+			.catch(async (err) => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else {
 					console.error(err);
 				}
@@ -545,9 +515,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 		process.send('osu!API');
 		osuApi.getUser({ u: username, m: mode })
 			.then(async (user) => {
-				updateOsuDetailsforUser(msg.client, user, mode);
-
-				let processingMessage = await msg.channel.send(`[${user.name}] Processing...`);
+				updateOsuDetailsforUser(interaction.client, user, mode);
 
 				const canvasWidth = 1000;
 				const canvasHeight = 83 + limit * 41.66666 + 50;
@@ -570,7 +538,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				elements = await drawTitle(elements, server, mode, sorting, order);
 
-				elements = await drawTopPlays(elements, server, mode, msg, sorting, limit, processingMessage, order, tracking);
+				elements = await drawTopPlays(elements, server, mode, interaction, sorting, limit, order, tracking);
 
 				let scores = elements[3];
 
@@ -590,7 +558,7 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 
 				//If created by osu-tracking
 				if (tracking) {
-					await msg.channel.send({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
+					await interaction.followUp({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
 				} else {
 					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 3');
 					const linkedUser = await DBDiscordUsers.findOne({
@@ -607,9 +575,9 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 					//Send attachment
 					let sentMessage;
 					if (noLinkedAccount) {
-						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:1064502370710605836> if the specified account is yours.`, files: files });
+						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:1064502370710605836> if the specified account is yours.`, files: files });
 					} else {
-						sentMessage = await msg.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
+						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
 					}
 					try {
 						await sentMessage.react('👤');
@@ -618,12 +586,10 @@ async function getTopPlays(msg, username, server, mode, noLinkedAccount, sorting
 						//Nothing
 					}
 				}
-
-				processingMessage.delete();
 			})
-			.catch(err => {
+			.catch(async (err) => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else {
 					console.error(err);
 				}
@@ -704,7 +670,7 @@ async function drawFooter(input) {
 		ctx.textAlign = 'right';
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 5);
 	} catch (err) {
-		console.log(input);
+		console.error(input);
 		console.error(err);
 	}
 
@@ -712,7 +678,7 @@ async function drawFooter(input) {
 	return output;
 }
 
-async function drawTopPlays(input, server, mode, msg, sorting, showLimit, processingMessage, order, tracking) {
+async function drawTopPlays(input, server, mode, interaction, sorting, showLimit, order, tracking) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -746,7 +712,7 @@ async function drawTopPlays(input, server, mode, msg, sorting, showLimit, proces
 		const response = await fetch(`https://www.ripple.moe/api/get_user_best?u=${user.name}&m=${mode}&limit=${limit}`);
 		const responseJson = await response.json();
 		if (!responseJson[0]) {
-			return msg.channel.send(`Could not find user \`${user.name.replace(/`/g, '')}\`.`);
+			return await interaction.followUp(`Could not find user \`${user.name.replace(/`/g, '')}\`.`);
 		}
 
 		for (let i = 0; i < responseJson.length; i++) {
