@@ -6921,6 +6921,7 @@ module.exports = {
 									getNumber: () => { },
 									getInteger: (string) => {
 										if (string === 'amount') {
+											console.log(guildTrackers[i].osuNumberTopPlays);
 											return parseInt(guildTrackers[i].osuNumberTopPlays);
 										} else if (string === 'gamemode') {
 											return 0;
@@ -7000,7 +7001,8 @@ module.exports = {
 									getNumber: () => { },
 									getInteger: (string) => {
 										if (string === 'amount') {
-											return parseInt(guildTrackers[i].osuNumberTopPlays);
+											console.log(guildTrackers[i].taikoNumberTopPlays);
+											return parseInt(guildTrackers[i].taikoNumberTopPlays);
 										} else if (string === 'gamemode') {
 											return 1;
 										}
@@ -7080,7 +7082,8 @@ module.exports = {
 									getNumber: () => { },
 									getInteger: (string) => {
 										if (string === 'amount') {
-											return parseInt(guildTrackers[i].osuNumberTopPlays);
+											console.log(guildTrackers[i].catchNumberTopPlays);
+											return parseInt(guildTrackers[i].catchNumberTopPlays);
 										} else if (string === 'gamemode') {
 											return 2;
 										}
@@ -7160,7 +7163,8 @@ module.exports = {
 									getNumber: () => { },
 									getInteger: (string) => {
 										if (string === 'amount') {
-											return parseInt(guildTrackers[i].osuNumberTopPlays);
+											console.log(guildTrackers[i].maniaNumberTopPlays);
+											return parseInt(guildTrackers[i].maniaNumberTopPlays);
 										} else if (string === 'gamemode') {
 											return 3;
 										}
@@ -7310,7 +7314,8 @@ module.exports = {
 									getNumber: () => { },
 									getInteger: (string) => {
 										if (string === 'amount') {
-											return parseInt(guildTrackers[i].osuNumberTopPlays);
+											console.log(guildTrackers[i].tournamentNumberTopPlays);
+											return parseInt(guildTrackers[i].tournamentNumberTopPlays);
 										} else if (string === 'gamemode') {
 											return 0;
 										}
