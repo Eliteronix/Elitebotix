@@ -6918,13 +6918,14 @@ module.exports = {
 											return 'recent';
 										}
 									},
-									getNumber: () => { },
+									getNumber: (string) => {
+										if (string === 'gamemode') {
+											return 0;
+										}
+									},
 									getInteger: (string) => {
 										if (string === 'amount') {
-											console.log(guildTrackers[i].osuNumberTopPlays);
 											return parseInt(guildTrackers[i].osuNumberTopPlays);
-										} else if (string === 'gamemode') {
-											return 0;
 										}
 									},
 									getBoolean: (string) => {
@@ -6998,13 +6999,14 @@ module.exports = {
 											return 'recent';
 										}
 									},
-									getNumber: () => { },
+									getNumber: (string) => {
+										if (string === 'gamemode') {
+											return 1;
+										}
+									},
 									getInteger: (string) => {
 										if (string === 'amount') {
-											console.log(guildTrackers[i].taikoNumberTopPlays);
 											return parseInt(guildTrackers[i].taikoNumberTopPlays);
-										} else if (string === 'gamemode') {
-											return 1;
 										}
 									},
 									getBoolean: (string) => {
@@ -7079,13 +7081,14 @@ module.exports = {
 											return 'recent';
 										}
 									},
-									getNumber: () => { },
+									getNumber: (string) => {
+										if (string === 'gamemode') {
+											return 2;
+										}
+									},
 									getInteger: (string) => {
 										if (string === 'amount') {
-											console.log(guildTrackers[i].catchNumberTopPlays);
 											return parseInt(guildTrackers[i].catchNumberTopPlays);
-										} else if (string === 'gamemode') {
-											return 2;
 										}
 									},
 									getBoolean: (string) => {
@@ -7160,13 +7163,14 @@ module.exports = {
 											return 'recent';
 										}
 									},
-									getNumber: () => { },
+									getNumber: (string) => {
+										if (string === 'gamemode') {
+											return 3;
+										}
+									},
 									getInteger: (string) => {
 										if (string === 'amount') {
-											console.log(guildTrackers[i].maniaNumberTopPlays);
 											return parseInt(guildTrackers[i].maniaNumberTopPlays);
-										} else if (string === 'gamemode') {
-											return 3;
 										}
 									},
 									getBoolean: (string) => {
@@ -7311,13 +7315,14 @@ module.exports = {
 											return 'tournaments';
 										}
 									},
-									getNumber: () => { },
+									getNumber: (string) => {
+										if (string === 'gamemode') {
+											return 0;
+										}
+									},
 									getInteger: (string) => {
 										if (string === 'amount') {
-											console.log(guildTrackers[i].tournamentNumberTopPlays);
 											return parseInt(guildTrackers[i].tournamentNumberTopPlays);
-										} else if (string === 'gamemode') {
-											return 0;
 										}
 									},
 									getBoolean: (string) => {
