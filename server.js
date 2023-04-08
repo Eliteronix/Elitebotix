@@ -94,5 +94,5 @@ const browserSourceServer = http.createServer(async (req, res) => {
 	}
 });
 
-// Start the HTTP server which exposes the browsersources on http://localhost:80/duelRating/1234
-browserSourceServer.listen(80);
+// Start the HTTP server which exposes the browsersources on http://localhost:443/duelRating/1234
+browserSourceServer.listen(443);
