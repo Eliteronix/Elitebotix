@@ -728,6 +728,14 @@ module.exports = {
 			}
 		});
 
+		lobby.on('playerLeft', async () => {
+			await lobby.updateSettings();
+
+			if (lobby.players.length === 0) {
+				return await lobby.closeLobby();
+			}
+		});
+
 		lobby.on('allPlayersReady', async () => {
 			await channel.sendMessage('!mp start 5');
 		});
