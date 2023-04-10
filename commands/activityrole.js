@@ -166,9 +166,9 @@ module.exports = {
 			let percentage = interaction.options.getInteger('percentage');
 			let points = interaction.options.getInteger('points');
 
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles add');
-			const activityRole = await DBActivityRoles.findOne({
+			const activityRole = await DBActivityRoles.count({
+				attributes: ['roleId'],
 				where: {
 					guildId: interaction.guildId,
 					roleId: role.id
@@ -186,10 +186,9 @@ module.exports = {
 			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles add create');
 			await DBActivityRoles.create({ guildId: interaction.guildId, roleId: role.id, percentageCutoff: percentage, pointsCutoff: points, rankCutoff: rank });
 
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/activityrole.js DBProcessQueue add');
-			const existingTask = await DBProcessQueue.findOne({ where: { guildId: interaction.guildId, task: 'updateActivityRoles', priority: 5 } });
-			if (!existingTask) {
+			const existingTask = await DBProcessQueue.count({ where: { guildId: interaction.guildId, task: 'updateActivityRoles', priority: 5 } });
+			if (existingTask === 0) {
 				logDatabaseQueries(4, 'commands/activityrole.js DBProcessQueue add create');
 				await DBProcessQueue.create({ guildId: interaction.guildId, task: 'updateActivityRoles', priority: 5 });
 			}
@@ -211,9 +210,9 @@ module.exports = {
 				return interaction.editReply(`${role.name} was no activityrole.`);
 			}
 		} else if (interaction.options.getSubcommand() === 'list') {
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles list');
 			const activityRolesList = await DBActivityRoles.findAll({
+				attributes: ['roleId', 'rankCutoff', 'percentageCutoff', 'pointsCutoff'],
 				where: {
 					guildId: interaction.guildId
 				}
