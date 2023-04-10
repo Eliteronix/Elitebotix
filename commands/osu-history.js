@@ -209,9 +209,9 @@ module.exports = {
 			],
 			where: {
 				matchId: multiMatches,
-				warmup: {
-					[Op.not]: true,
-				}
+				// warmup: {
+				// 	[Op.not]: true,
+				// }
 			},
 			order: [
 				['matchStartDate', 'DESC'],
@@ -253,7 +253,31 @@ module.exports = {
 		let gameId = multiScores[0].gameId;
 
 		for (let i = 0; i < multiScores.length; i++) {
-			if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].matchName.toLowerCase().includes('scrim')) {
+			let newMatch = false;
+
+			if (osuUser.osuUserId !== multiScores[i].osuUserId) {
+				let mostPlayedWithPlayer = mostPlayedWith.find(player => player.osuUserId === multiScores[i].osuUserId);
+
+				if (mostPlayedWithPlayer) {
+					// Check if this match has already been counted
+					if (!mostPlayedWithPlayer.matches.includes(multiScores[i].matchId)) {
+						mostPlayedWithPlayer.amount++;
+						mostPlayedWithPlayer.matches.push(multiScores[i].matchId);
+
+						newMatch = true;
+					}
+				} else {
+					mostPlayedWith.push({
+						osuUserId: multiScores[i].osuUserId,
+						amount: 1,
+						matches: [multiScores[i].matchId],
+					});
+
+					newMatch = true;
+				}
+			}
+
+			if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].matchName.toLowerCase().includes('scrim') || multiScores[i].warmup) {
 				continue;
 			}
 
@@ -375,28 +399,6 @@ module.exports = {
 			}
 
 			if (multiScores[i].osuUserId !== osuUser.osuUserId) {
-				let mostPlayedWithPlayer = mostPlayedWith.find(player => player.osuUserId === multiScores[i].osuUserId);
-
-				let newMatch = false;
-
-				if (mostPlayedWithPlayer) {
-					// Check if this match has already been counted
-					if (!mostPlayedWithPlayer.matches.includes(multiScores[i].matchId)) {
-						mostPlayedWithPlayer.amount++;
-						mostPlayedWithPlayer.matches.push(multiScores[i].matchId);
-
-						newMatch = true;
-					}
-				} else {
-					mostPlayedWith.push({
-						osuUserId: multiScores[i].osuUserId,
-						amount: 1,
-						matches: [multiScores[i].matchId],
-					});
-
-					newMatch = true;
-				}
-
 				if (newMatch) {
 					let matchWonAgainst = false;
 					let matchLostAgainst = false;
