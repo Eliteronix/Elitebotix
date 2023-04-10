@@ -1317,7 +1317,7 @@ module.exports = {
 			}
 		}
 
-		content += `\n\nEZ Multiplier: ${ezmultiplier}\nFL Multiplier: ${flmultiplier}\n\n Use </osu-scoreupload fileupload:1084953371435356291> to upload your local scores.\nUse </osu-scoreupload guesstimate:1084953371435356291> to add a guesstimate.`;
+		content += `\n\nEZ Multiplier: ${ezmultiplier}\nFL Multiplier: ${flmultiplier}\n\n Use </osu-scoreupload fileupload:1084953371435356291> to upload your local scores. How to find the correct file: <https://i.imgur.com/Sv8FojI.jpeg>\nUse </osu-scoreupload guesstimate:1084953371435356291> to add a guesstimate.`;
 
 		if (interaction.options.getNumber('updatefor')) {
 			if (interaction.id) {
