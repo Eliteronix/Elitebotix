@@ -1292,7 +1292,6 @@ module.exports = {
 		}
 
 		// TODO: Manual lineup
-		// TODO: FM Lineup (Mods)
 
 		// Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'teamsheet.png' })];
