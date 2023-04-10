@@ -98,10 +98,12 @@ module.exports = {
 			return;
 		}
 
-		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/goodbye-message.js DBGuilds');
 		const guild = await DBGuilds.findOne({
-			where: { guildId: interaction.guildId },
+			attributes: ['id', 'sendGoodbyeMessage', 'goodbyeMessageChannel', 'goodbyeMessageText'],
+			where: {
+				guildId: interaction.guildId
+			},
 		});
 
 		if (interaction.options.getSubcommand() === 'current') {
