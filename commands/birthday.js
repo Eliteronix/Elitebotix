@@ -136,9 +136,9 @@ module.exports = {
 				}
 			}
 
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/birthday.js DBDiscordUsers set');
 			let user = await DBDiscordUsers.findOne({
+				attributes: ['id', 'birthday'],
 				where: {
 					userId: interaction.user.id,
 				},
@@ -154,9 +154,9 @@ module.exports = {
 			user.birthday = date;
 			user.save();
 
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/birthday.js DBBirthdayGuilds set');
 			let guilds = await DBBirthdayGuilds.findAll({
+				attributes: ['id', 'birthdayTime'],
 				where: {
 					userId: interaction.user.id,
 				}
@@ -180,9 +180,8 @@ module.exports = {
 			});
 			return await interaction.editReply({ content: `Your birthday has been set for \`${dateString}\``, ephemeral: true });
 		} else if (interaction.options.getSubcommand() === 'enable') {
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/birthday.js DBBirthdayGuilds enable');
-			let currentGuild = await DBBirthdayGuilds.findOne({
+			let currentGuild = await DBBirthdayGuilds.count({
 				where: {
 					guildId: interaction.guild.id,
 					userId: interaction.user.id,
@@ -193,9 +192,9 @@ module.exports = {
 				return await interaction.editReply({ content: `You are already sharing your birthday on ${interaction.guild.name}`, ephemeral: true });
 			}
 
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/birthday.js DBDiscordUsers enable');
 			let dbDiscordUser = await DBDiscordUsers.findOne({
+				attributes: ['birthday'],
 				where: {
 					userId: interaction.user.id,
 					birthday: {
@@ -224,9 +223,9 @@ module.exports = {
 
 			return await interaction.editReply({ content: `Your birthday will now be shared on ${interaction.guild.name}`, ephemeral: true });
 		} else if (interaction.options.getSubcommand() === 'disable') {
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/birthday.js DBBirthdayGuilds disable');
 			let currentGuild = await DBBirthdayGuilds.findOne({
+				attributes: ['id'],
 				where: {
 					guildId: interaction.guild.id,
 					userId: interaction.user.id,
