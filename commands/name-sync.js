@@ -64,10 +64,13 @@ module.exports = {
 		}
 
 		if (args[0].toLowerCase() === 'disable') {
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/name-sync.js DBProcessQueue disable');
 			let task = await DBProcessQueue.findOne({
-				where: { guildId: msg.guild.id, task: 'nameSync' },
+				attributes: ['id'],
+				where: {
+					guildId: msg.guild.id,
+					task: 'nameSync'
+				},
 			});
 
 			if (task) {
@@ -83,10 +86,13 @@ module.exports = {
 				return interaction.followUp({ content: 'Name Sync is already disabled.', ephemeral: true });
 			}
 		} else if (args[0].toLowerCase() === 'osuname') {
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/name-sync.js DBProcessQueue osuname');
 			let task = await DBProcessQueue.findOne({
-				where: { guildId: msg.guild.id, task: 'nameSync' },
+				attributes: ['id', 'additions', 'date', 'beingExecuted'],
+				where: {
+					guildId: msg.guild.id,
+					task: 'nameSync'
+				},
 			});
 
 			if (task && task.additions === 'osuname') {
@@ -121,10 +127,13 @@ module.exports = {
 			}
 			return interaction.followUp({ content: 'Name Sync is now set to osu! name.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.', ephemeral: true });
 		} else if (args[0].toLowerCase() === 'osunameandrank') {
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/name-sync.js DBProcessQueue osunameandrank');
 			let task = await DBProcessQueue.findOne({
-				where: { guildId: msg.guild.id, task: 'nameSync' },
+				attributes: ['id', 'additions', 'date', 'beingExecuted'],
+				where: {
+					guildId: msg.guild.id,
+					task: 'nameSync'
+				},
 			});
 
 			if (task && task.additions === 'osunameandrank') {

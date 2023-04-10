@@ -118,9 +118,8 @@ module.exports = {
 		let role = interaction.options.getRole('role');
 
 		if (interaction.options.getSubcommand() === 'add') {
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles add');
-			const autoRole = await DBAutoRoles.findOne({
+			const autoRole = await DBAutoRoles.count({
 				where: { guildId: interaction.guildId, roleId: role.id },
 			});
 
@@ -163,9 +162,9 @@ module.exports = {
 				return interaction.editReply(`${role.name} was no autorole.`);
 			}
 		} else if (interaction.options.getSubcommand() === 'list') {
-			//TODO: Attributes
 			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles list');
 			const autoRolesList = await DBAutoRoles.findAll({
+				attributes: ['roleId'],
 				where: {
 					guildId: interaction.guildId
 				}
