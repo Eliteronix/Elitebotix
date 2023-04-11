@@ -1,10 +1,9 @@
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { AttachmentBuilder, PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuMultiScores, DBOsuTeamSheets } = require('../dbObjects');
 const { pause, getAvatar, logDatabaseQueries, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating } = require('../utils');
 const { Op } = require('sequelize');
 const Canvas = require('canvas');
-const Discord = require('discord.js');
 const osu = require('node-osu');
 
 const discordUsers = {};
@@ -1292,7 +1291,7 @@ module.exports = {
 		}
 
 		// Create as an attachment
-		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'teamsheet.png' })];
+		const files = [new AttachmentBuilder(canvas.toBuffer(), { name: 'teamsheet.png' })];
 
 		let links = tourneyMaps.map(map => `[${map.modPool}${map.modPoolCount}](<https://osu.ppy.sh/b/${map.beatmapId}>)`);
 
