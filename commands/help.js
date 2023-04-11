@@ -153,8 +153,8 @@ module.exports = {
 			//filter commands collection for noCooldownMessage and push the result
 			const data = [];
 			data.push(`\`${commands.join('`, `')}\``);
-			data.push('\nYou can use </help category:1064502107832594484> to get a list of commands for a specific category!');
-			data.push('You can send </help command:1064502107832594484> to get info on a specific command!');
+			data.push(`\nYou can use </help category:${interaction.client.slashCommandData.find(command => command.name === 'help').id}> to get a list of commands for a specific category!`);
+			data.push(`You can send </help command:${interaction.client.slashCommandData.find(command => command.name === 'help').id}> to get info on a specific command!`);
 			data.push('To stay informed about changes go to [the official server](https://discord.com/invite/Asz5Gfe) and follow <#804658828883787784>');
 
 			return await interaction.editReply(data.join('\n'));

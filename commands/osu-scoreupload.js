@@ -134,7 +134,7 @@ module.exports = {
 		});
 
 		if (!discordUser || !discordUser.osuUserId || !discordUser.osuVerified) {
-			return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
+			return await interaction.editReply(`Please connect and verify your account first by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 		}
 
 		if (interaction.options.getSubcommand() === 'fileupload') {

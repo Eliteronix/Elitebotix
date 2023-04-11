@@ -116,7 +116,7 @@ module.exports = {
 		const commandUser = commandConfig[0];
 
 		if (!commandUser) {
-			return interaction.editReply('Please use </osu-link connect:1064502370710605836> to connect your osu! account first.');
+			return interaction.editReply(`Please use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect your osu! account first.`);
 		}
 
 		if (interaction.options.getSubcommand() === 'togglenotifications') {

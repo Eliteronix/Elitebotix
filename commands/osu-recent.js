@@ -205,7 +205,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getScore(msg, discordUser.osuUserId, server, mode, false, pass);
 					} else {
-						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
+						msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:${msg.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 						getScore(msg, args[i], server, mode);
 					}
 				} else {
@@ -337,7 +337,7 @@ async function getScore(msg, username, server, mode, noLinkedAccount, pass) {
 
 				//Send attachment
 				if (noLinkedAccount) {
-					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nFeel free to use </osu-link connect:1064502370710605836> if the specified account is yours.`, files: [attachment] });
+					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>\nFeel free to use </osu-link connect:${msg.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: [attachment] });
 				} else {
 					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>`, files: [attachment] });
 				}

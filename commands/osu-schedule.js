@@ -361,7 +361,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						teams[i][j] = discordUser.osuUserId;
 					} else {
-						await interaction.followUp(`\`${teams[i][j].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
+						await interaction.followUp(`\`${teams[i][j].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 						teams[i].splice(j, 1);
 						j--;
 					}

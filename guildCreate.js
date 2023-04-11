@@ -6,18 +6,20 @@ module.exports = async function (guild) {
 		return;
 	}
 
+	let message = `Thanks for adding me to the server!\nUse </help:${guild.client.slashCommandData.find(command => command.name === 'help').id}> to get a list of commands!\nTo provide feedback please use </feedback:${guild.client.slashCommandData.find(command => command.name === 'feedback').id}>`;
+
 	try {
 		const systemChannel = await guild.channels.cache.get(guild.systemChannelId);
 		if (systemChannel) {
-			systemChannel.send('Thanks for adding me to the server!\nUse </help:1064502107832594484> to get a list of commands!\nTo provide feedback please use </feedback:1064502027591364649>');
+			systemChannel.send(message);
 		} else {
 			const generalChannel = await guild.channels.cache.find(channel => channel.name === 'general');
 			if (generalChannel) {
-				generalChannel.send('Thanks for adding me to the server!\nUse </help:1064502107832594484> to get a list of commands!\nTo provide feedback please use </feedback:1064502027591364649>');
+				generalChannel.send(message);
 			} else {
 				const otherChannel = guild.channels.cache.find(channel => channel.type === Discord.ChannelType.GuildText && channel.permissionsFor(guild.members.cache.find(member => member.id === guild.client.user.id)).has('SEND_MESSAGES'));
 				if (otherChannel) {
-					otherChannel.send('Thanks for adding me to the server!\nUse </help:1064502107832594484> to get a list of commands!\nTo provide feedback please use </feedback:1064502027591364649>');
+					otherChannel.send(message);
 				}
 			}
 		}

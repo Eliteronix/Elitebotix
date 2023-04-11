@@ -58,7 +58,7 @@ module.exports = {
 
 			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Dev' || process.env.SERVER === 'QA') {
-				msg.reply({ content: '**Elitebotix has been updated** - Please report any bugs by using </feedback:1064502027591364649>.', files: [attachment] });
+				msg.reply({ content: `**Elitebotix has been updated** - Please report any bugs by using </feedback:${msg.client.slashCommandData.find(command => command.name === 'feedback').id}>.`, files: [attachment] });
 				// eslint-disable-next-line no-undef
 			} else if (process.env.SERVER === 'Live') {
 				if (logBroadcastEval) {
@@ -114,7 +114,7 @@ module.exports = {
 						const Discord = require('discord.js');
 						const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'elitebotix-changelog.png' });
 
-						let sentMessage = await changelogChannel.send({ content: '**Elitebotix has been updated** - Please report any bugs by using </feedback:1064502027591364649>.', files: [attachment] });
+						let sentMessage = await changelogChannel.send({ content: `**Elitebotix has been updated** - Please report any bugs by using </feedback:${c.slashCommandData.find(command => command.name === 'feedback').id}>.`, files: [attachment] });
 						sentMessage.crosspost();
 					}
 				}, { context: { args: args } });

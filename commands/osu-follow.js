@@ -287,7 +287,7 @@ module.exports = {
 			});
 
 			if (!discordUser || !discordUser.osuUserId) {
-				return await interaction.editReply('You have not connected your osu! account. Use </osu-link connect:1064502370710605836> to connect your account');
+				return await interaction.editReply(`You have not connected your osu! account. Use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect your account`);
 			}
 
 			//TODO: Attributes
@@ -354,7 +354,7 @@ module.exports = {
 			});
 
 			if (!discordUser) {
-				return await interaction.editReply('You have not connected and verified your osu! account. Use </osu-link connect:1064502370710605836> to connect your account');
+				return await interaction.editReply(`You have not connected and verified your osu! account. Use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect your account`);
 			}
 
 			if (!allowFollowing) {

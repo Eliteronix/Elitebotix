@@ -338,7 +338,7 @@ module.exports = {
 		const commandUser = commandConfig[0];
 
 		if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
-			return await interaction.editReply('You don\'t have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:1064502370710605836>.');
+			return await interaction.editReply(`You don't have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 		}
 
 		team1.push(commandUser.userId);
@@ -489,7 +489,7 @@ module.exports = {
 			if (discordUser && discordUser.osuUserId) {
 				everyUser.push(discordUser);
 			} else {
-				return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using </osu-link connect:1064502370710605836>.`);
+				return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 			}
 		}
 

@@ -310,7 +310,7 @@ module.exports = {
 		});
 
 		if (!commandUser || !commandUser.osuUserId || !commandUser.osuVerified) {
-			return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
+			return await interaction.editReply(`Please connect and verify your account first by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 		}
 
 		if (interaction.options.getNumber('updatefor') && (interaction.options.getString('bans') || interaction.options.getString('matchlink'))) {
@@ -419,7 +419,7 @@ module.exports = {
 		});
 
 		if (mappool.length === 0) {
-			return await interaction.editReply(`Could not find mappool \`${mappoolName.replace(/`/g, '')}\`.\nMake sure you have the correct name and that you are the creator of the mappool.\nYou can check your mappools with </osu-mappool list:1084953371435356290>.`);
+			return await interaction.editReply(`Could not find mappool \`${mappoolName.replace(/`/g, '')}\`.\nMake sure you have the correct name and that you are the creator of the mappool.\nYou can check your mappools with </osu-mappool list:${interaction.client.slashCommandData.find(command => command.name === 'osu-mappool').id}>.`);
 		}
 
 		let spreadsheetId = mappool[0].spreadsheetId;
@@ -443,7 +443,7 @@ module.exports = {
 				let access = poolAccesses.find(access => access.accessGiverId === player.osuUserId);
 
 				if (!access) {
-					return await interaction.followUp(`User \`${player.osuName}\` did not give you access to the scores for the spreadsheet of the mappool \`${mappoolName.replace(/`/g, '')}\`.\nYou can give access by using </osu-scoreaccess grantspreadsheetaccess:1234>`);
+					return await interaction.followUp(`User \`${player.osuName}\` did not give you access to the scores for the spreadsheet of the mappool \`${mappoolName.replace(/`/g, '')}\`.\nYou can give access by using </osu-scoreaccess grantspreadsheetaccess:${interaction.client.slashCommandData.find(command => command.name === 'osu-scoreaccess').id}>`);
 				}
 			}
 		} else {
@@ -466,7 +466,7 @@ module.exports = {
 				let access = poolAccesses.find(access => access.accessGiverId === player.osuUserId);
 
 				if (!access) {
-					return await interaction.followUp(`User \`${player.osuName}\` did not give you access to the scores for the mappool \`${mappoolName.replace(/`/g, '')}\`.\nYou can give access by using </osu-scoreaccess grantmappoolaccess:1234>`);
+					return await interaction.followUp(`User \`${player.osuName}\` did not give you access to the scores for the mappool \`${mappoolName.replace(/`/g, '')}\`.\nYou can give access by using </osu-scoreaccess grantmappoolaccess:${interaction.client.slashCommandData.find(command => command.name === 'osu-scoreaccess').id}>`);
 				}
 			}
 		}
@@ -1349,7 +1349,7 @@ module.exports = {
 			}
 		}
 
-		content += `\n\nEZ Multiplier: ${ezmultiplier}\nFL Multiplier: ${flmultiplier}\n\n Use </osu-scoreupload fileupload:1084953371435356291> to upload your local scores. How to find the correct file: <https://i.imgur.com/Sv8FojI.jpeg>\nUse </osu-scoreupload guesstimate:1084953371435356291> to add a guesstimate.`;
+		content += `\n\nEZ Multiplier: ${ezmultiplier}\nFL Multiplier: ${flmultiplier}\n\n Use </osu-scoreupload fileupload:${interaction.client.slashCommandData.find(command => command.name === 'osu-scoreupload').id}> to upload your local scores. How to find the correct file: <https://i.imgur.com/Sv8FojI.jpeg>\nUse </osu-scoreupload guesstimate:${interaction.client.slashCommandData.find(command => command.name === 'osu-scoreupload').id}> to add a guesstimate.`;
 
 		if (interaction.options.getNumber('updatefor')) {
 			if (interaction.id) {

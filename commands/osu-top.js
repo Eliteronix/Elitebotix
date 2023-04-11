@@ -331,7 +331,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getTopPlays(interaction, discordUser.osuUserId, server, gamemode, false, sorting, limit, tracking, order, csv);
 					} else {
-						await interaction.followUp(`\`${usernames[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
+						await interaction.followUp(`\`${usernames[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 						getTopPlays(interaction, usernames[i], server, gamemode, false, sorting, limit, tracking, order, csv);
 					}
 				} else {
@@ -425,7 +425,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 					//Send attachment
 					let sentMessage;
 					if (noLinkedAccount) {
-						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:1064502370710605836> if the specified account is yours.`, files: files });
+						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: files });
 					} else {
 						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
 					}
@@ -575,7 +575,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 					//Send attachment
 					let sentMessage;
 					if (noLinkedAccount) {
-						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:1064502370710605836> if the specified account is yours.`, files: files });
+						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: files });
 					} else {
 						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
 					}

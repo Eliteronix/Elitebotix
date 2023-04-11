@@ -769,9 +769,9 @@ module.exports = {
 			if (discordUser && discordUser.osuUserId) {
 				if (discordUser.osuMOTDRegistered) {
 					if (msg.id) {
-						return sendMessage(msg, 'You are already registered for the `Maps of the Day` competition.\nBe sure to join the server if you didn\'t already. (</osu-motd server:1064502462448410644>)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!');
+						return sendMessage(msg, `You are already registered for the \`Maps of the Day\` competition.\nBe sure to join the server if you didn't already. (</osu-motd server:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`);
 					}
-					return interaction.followUp({ content: 'You are already registered for the `Maps of the Day` competition.\nBe sure to join the server if you didn\'t already. (</osu-motd server:1064502462448410644>)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!', ephemeral: true });
+					return interaction.followUp({ content: `You are already registered for the \`Maps of the Day\` competition.\nBe sure to join the server if you didn't already. (</osu-motd server:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`, ephemeral: true });
 				}
 				if (discordUser.osuVerified) {
 					discordUser.osuMOTDRegistered = true;
@@ -781,20 +781,20 @@ module.exports = {
 					discordUser.osuMOTDmutedUntil = null;
 					discordUser.save();
 					if (msg.id) {
-						return sendMessage(msg, 'You successfully registered for the `Maps of the Day` competition.\nBe sure to join the server and read <#834833321438740490> if you didn\'t already. (</osu-motd server:1064502462448410644>)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!');
+						return sendMessage(msg, `You successfully registered for the \`Maps of the Day\` competition.\nBe sure to join the server and read <#834833321438740490> if you didn't already. (</osu-motd server:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`);
 					}
-					return interaction.followUp({ content: 'You successfully registered for the `Maps of the Day` competition.\nBe sure to join the server and read <#834833321438740490> if you didn\'t already. (</osu-motd server:1064502462448410644>)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!', ephemeral: true });
+					return interaction.followUp({ content: `You successfully registered for the \`Maps of the Day\` competition.\nBe sure to join the server and read <#834833321438740490> if you didn't already. (</osu-motd server:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`, ephemeral: true });
 				} else {
 					if (msg.id) {
-						return sendMessage(msg, 'It seems like you don\'t have your connected osu! account verified.\nPlease use </osu-link verify:1064502370710605836> to send a verification code to your osu! dms, follow the instructions and try again afterwards.');
+						return sendMessage(msg, `It seems like you don't have your connected osu! account verified.\nPlease use </osu-link verify:${msg.client.slashCommandData.find(command => command.name === 'osu-link').id}> to send a verification code to your osu! dms, follow the instructions and try again afterwards.`);
 					}
-					return interaction.followUp({ content: 'It seems like you don\'t have your connected osu! account verified.\nPlease use </osu-link verify:1064502370710605836> to send a verification code to your osu! dms, follow the instructions and try again afterwards.', ephemeral: true });
+					return interaction.followUp({ content: `It seems like you don't have your connected osu! account verified.\nPlease use </osu-link verify:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> to send a verification code to your osu! dms, follow the instructions and try again afterwards.`, ephemeral: true });
 				}
 			} else {
 				if (msg.id) {
-					return sendMessage(msg, 'It seems like you don\'t have your osu! account connected to the bot.\nPlease use </osu-link connect:1064502370710605836> to connect you account and verify it.');
+					return sendMessage(msg, `It seems like you don't have your osu! account connected to the bot.\nPlease use </osu-link connect:${msg.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect you account and verify it.`);
 				}
-				return interaction.followUp({ content: 'It seems like you don\'t have your osu! account connected to the bot.\nPlease use </osu-link connect:1064502370710605836> to connect you account and verify it.', ephemeral: true });
+				return interaction.followUp({ content: `It seems like you don't have your osu! account connected to the bot.\nPlease use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect you account and verify it.`, ephemeral: true });
 			}
 		} else if (args[0].toLowerCase() === 'unregister') {
 			//get discordUser from db
@@ -808,14 +808,14 @@ module.exports = {
 				discordUser.osuMOTDRegistered = false;
 				discordUser.save();
 				if (msg.id) {
-					return sendMessage(msg, 'You have been unregistered from the `Maps of the Day` competition.\nStill thank you for showing interest!\nYou can always register again by using </osu-motd register:1064502462448410644>!');
+					return sendMessage(msg, `You have been unregistered from the \`Maps of the Day\` competition.\nStill thank you for showing interest!\nYou can always register again by using </osu-motd register:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`);
 				}
-				return interaction.followUp({ content: 'You have been unregistered from the `Maps of the Day` competition.\nStill thank you for showing interest!\nYou can always register again by using </osu-motd register:1064502462448410644>!', ephemeral: true });
+				return interaction.followUp({ content: `You have been unregistered from the \`Maps of the Day\` competition.\nStill thank you for showing interest!\nYou can always register again by using </osu-motd register:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`, ephemeral: true });
 			} else {
 				if (msg.id) {
-					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using </osu-motd register:1064502462448410644>!');
+					return sendMessage(msg, `You aren't signed up for the \`Maps of the Day\` competition at the moment.\nYou can always register by using </osu-motd register:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`);
 				}
-				return interaction.followUp({ content: 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using </osu-motd register:1064502462448410644>!', ephemeral: true });
+				return interaction.followUp({ content: `You aren't signed up for the \`Maps of the Day\` competition at the moment.\nYou can always register by using </osu-motd register:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`, ephemeral: true });
 			}
 		} else if (args[0].toLowerCase() === 'mute') {
 			//get discordUser from db
@@ -865,9 +865,9 @@ module.exports = {
 						}
 					}
 					if (msg.id) {
-						return sendMessage(msg, 'The `Maps of the Day` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use </osu-motd unmute:1064502462448410644>.');
+						return sendMessage(msg, `The \`Maps of the Day\` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use </osu-motd unmute:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>.`);
 					}
-					return interaction.followUp({ content: 'The `Maps of the Day` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use </osu-motd unmute:1064502462448410644>.', ephemeral: true });
+					return interaction.followUp({ content: `The \`Maps of the Day\` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use </osu-motd unmute:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>.`, ephemeral: true });
 				} else {
 					if (args[1]) {
 						let years = 0;
@@ -919,15 +919,15 @@ module.exports = {
 					discordUser.osuMOTDMuted = true;
 					discordUser.save();
 					if (msg.id) {
-						return sendMessage(msg, 'The `Maps of the Day` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use </osu-motd unmute:1064502462448410644>.');
+						return sendMessage(msg, `The \`Maps of the Day\` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use </osu-motd unmute:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>.`);
 					}
-					return interaction.followUp({ content: 'The `Maps of the Day` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use </osu-motd unmute:1064502462448410644>.', ephemeral: true });
+					return interaction.followUp({ content: `The \`Maps of the Day\` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use </osu-motd unmute:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>.`, ephemeral: true });
 				}
 			} else {
 				if (msg.id) {
-					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using </osu-motd register:1064502462448410644>!');
+					return sendMessage(msg, `You aren't signed up for the \`Maps of the Day\` competition at the moment.\nYou can always register by using </osu-motd register:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`);
 				}
-				return interaction.followUp({ content: 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using </osu-motd register:1064502462448410644>!', ephemeral: true });
+				return interaction.followUp({ content: `You aren't signed up for the \`Maps of the Day\` competition at the moment.\nYou can always register by using </osu-motd register:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`, ephemeral: true });
 			}
 		} else if (args[0].toLowerCase() === 'unmute') {
 			//get discordUser from db
@@ -954,14 +954,14 @@ module.exports = {
 				}
 			} else {
 				if (msg.id) {
-					return sendMessage(msg, 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using </osu-motd register:1064502462448410644>!');
+					return sendMessage(msg, `You aren't signed up for the \`Maps of the Day\` competition at the moment.\nYou can always register by using </osu-motd register:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`);
 				}
-				return interaction.followUp({ content: 'You aren\'t signed up for the `Maps of the Day` competition at the moment.\nYou can always register by using </osu-motd register:1064502462448410644>!', ephemeral: true });
+				return interaction.followUp({ content: `You aren't signed up for the \`Maps of the Day\` competition at the moment.\nYou can always register by using </osu-motd register:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`, ephemeral: true });
 			}
 		} else if (args[0].toLowerCase() === 'custom-fixed-players') {
 			//Return if its not triggered by a slash command
 			if (msg.id) {
-				return msg.reply('Please use </osu-motd custom-fixed-players:1064502462448410644> to set up the custom MOTD');
+				return msg.reply(`Please use </osu-motd custom-fixed-players:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}> to set up the custom MOTD`);
 			}
 			args.shift();
 
@@ -1381,12 +1381,12 @@ module.exports = {
 		} else if (args[0].toLowerCase() === 'custom-react-to-play') {
 			//Return if its not triggered by a slash command
 			if (msg.id) {
-				return msg.reply('Please use </osu-motd custom-react-to-play:1064502462448410644> to set up the custom MOTD.');
+				return msg.reply(`Please use </osu-motd custom-react-to-play:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}> to set up the custom MOTD.`);
 			}
 
 			//Return if triggered in DMs
 			if (msg.channel.type === Discord.ChannelType.DM) {
-				return msg.reply('Please use </osu-motd custom-react-to-play:1064502462448410644> in a server to set up the custom MOTD.');
+				return msg.reply(`Please use </osu-motd custom-react-to-play:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}> in a server to set up the custom MOTD.`);
 			}
 
 			args.shift();
@@ -1743,7 +1743,7 @@ module.exports = {
 					interaction.editReply({ embeds: [mappoolEmbed] });
 				} else {
 					reaction.users.remove(user.id);
-					let hintMessage = await embedMessage.channel.send(`It seems like you don't have your account connected and verified to the bot <@${user.id}>.\nPlease do so by using </osu-link connect:1064502370710605836> and try again.`);
+					let hintMessage = await embedMessage.channel.send(`It seems like you don't have your account connected and verified to the bot <@${user.id}>.\nPlease do so by using </osu-link connect:${embedMessage.client.slashCommandData.find(command => command.name === 'osu-link').id}> and try again.`);
 					await pause(10000);
 					hintMessage.delete();
 				}

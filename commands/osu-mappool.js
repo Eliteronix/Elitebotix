@@ -617,7 +617,7 @@ module.exports = {
 			});
 
 			if (!discordUser) {
-				return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
+				return await interaction.editReply(`Please connect and verify your account first by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 			}
 
 			let mappoolName = interaction.options.getString('name');
@@ -777,7 +777,7 @@ module.exports = {
 			});
 
 			if (!discordUser) {
-				return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
+				return await interaction.editReply(`Please connect and verify your account first by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 			}
 
 			let mappoolName = interaction.options.getString('name');
@@ -814,7 +814,7 @@ module.exports = {
 			});
 
 			if (!discordUser) {
-				return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
+				return await interaction.editReply(`Please connect and verify your account first by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 			}
 
 			let mappoolName = interaction.options.getString('name');
@@ -878,7 +878,7 @@ module.exports = {
 			});
 
 			if (!discordUser) {
-				return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
+				return await interaction.editReply(`Please connect and verify your account first by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 			}
 
 			let sheetId = interaction.options.getString('sheetid').replace('https://docs.google.com/spreadsheets/d/', '').replace(/\/.*/g, '');

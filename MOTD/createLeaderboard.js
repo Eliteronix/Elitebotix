@@ -167,7 +167,7 @@ module.exports = {
 
 						c.users.fetch(registeredUsers[i].userId)
 							.then(async (user) => {
-								user.send('It seems like you removed your connected osu! account and have been removed as a player for the `Maps of the Day` competition because of that.\nIf you want to take part again please reconnect your osu! account and use </osu-motd register:1064502462448410644> again.');
+								user.send(`It seems like you removed your connected osu! account and have been removed as a player for the \`Maps of the Day\` competition because of that.\nIf you want to take part again please reconnect your osu! account and use </osu-motd register:${c.slashCommandData.find(command => command.name === 'osu-motd').id}> again.`);
 							});
 					}
 				}

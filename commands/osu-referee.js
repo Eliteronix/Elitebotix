@@ -741,7 +741,7 @@ module.exports = {
 								// Add the user to the team
 								team.push(dbDiscordUser.id);
 							} else {
-								return interaction.followUp(`\`${user.name}\` doesn't have their account connected. Please tell them to connect their account using </osu-link connect:1064502370710605836>.`);
+								return interaction.followUp(`\`${user.name}\` doesn't have their account connected. Please tell them to connect their account using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 							}
 						})
 						.catch(err => {
@@ -816,7 +816,7 @@ module.exports = {
 
 			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue create');
 			DBProcessQueue.create({ guildId: interaction.guildId, task: 'tourneyMatchNotification', priority: 10, additions: `${interaction.user.id};${channel.id};${dbMaps.join(',')};${dbPlayers.join('|')};${useNoFail};${matchname};${mappoolReadable};${scoreMode};${freemodMessage};${teamsize}`, date: date });
-			return interaction.editReply('The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use </osu-referee scheduled:1064502493226225664>');
+			return interaction.editReply(`The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use </osu-referee scheduled:${interaction.client.slashCommandData.find(command => command.name === 'osu-referee').id}>`);
 		} else if (interaction.options.getSubcommand() === 'scheduled') {
 			let scheduledMatches = [];
 			//Get all scheduled matches that still need to notify
@@ -956,7 +956,7 @@ module.exports = {
 				return processQueueTask.destroy();
 			}
 
-			return interaction.followUp('I couldn\'t find a scheduled match created by you with that internal ID.\nTo see what ID you need to put please use </osu-referee scheduled:1064502493226225664>');
+			return interaction.followUp(`I couldn't find a scheduled match created by you with that internal ID.\nTo see what ID you need to put please use </osu-referee scheduled:${interaction.client.slashCommandData.find(command => command.name === 'osu-referee').id}>`);
 		}
 	},
 };

@@ -261,7 +261,7 @@ module.exports = {
 					if (discordUser && discordUser.osuUserId) {
 						getOsuSkills(interaction, discordUser.osuUserId, scaled, scoringType, tourneyMatch, runningAverage);
 					} else {
-						await interaction.followUp(`\`${usernames[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:1064502370710605836>.`);
+						await interaction.followUp(`\`${usernames[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 						continue;
 					}
 				} else {

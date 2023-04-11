@@ -219,7 +219,7 @@ module.exports = {
 			commandUser = commandConfig[0];
 
 			if (!commandUser || commandUser && !commandUser.osuUserId || commandUser && commandUser.osuVerified !== true) {
-				return interaction.editReply('Please connect and verify your account with the bot on discord as a backup by using: </osu-link connect:1064502370710605836> [https://discord.gg/Asz5Gfe Discord]');
+				return interaction.editReply(`Please connect and verify your account with the bot on discord as a backup by using: </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> [https://discord.gg/Asz5Gfe Discord]`);
 			}
 		} else {
 			await msg.user.fetchFromAPI();
@@ -233,7 +233,7 @@ module.exports = {
 			});
 
 			if (!commandUser) {
-				return msg.user.sendMessage('Please connect and verify your account with the bot on discord as a backup by using: </osu-link connect:1064502370710605836> [https://discord.gg/Asz5Gfe Discord]');
+				return msg.user.sendMessage(`Please connect and verify your account with the bot on discord as a backup by using: </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> [https://discord.gg/Asz5Gfe Discord]`);
 			}
 		}
 

@@ -147,7 +147,7 @@ module.exports = {
 			});
 
 			if (!commandUser) {
-				return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
+				return await interaction.editReply(`Please connect and verify your account first by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 			}
 
 			const captain = interaction.options.getString('captain');
@@ -245,7 +245,7 @@ module.exports = {
 			});
 
 			if (!commandUser) {
-				return await interaction.editReply('Please connect and verify your account first by using </osu-link connect:1064502370710605836>.');
+				return await interaction.editReply(`Please connect and verify your account first by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 			}
 
 			const captain = interaction.options.getString('captain');

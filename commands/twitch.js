@@ -125,7 +125,7 @@ module.exports = {
 			});
 
 			if (!discordUser || !discordUser.osuUserId || !discordUser.osuVerified) {
-				return await interaction.editReply('You don\'t have an osu! account linked and verified to your discord account. Please do so first by using </osu-link connect:1064502370710605836>. This is required as all twitch commands are linked to your osu! account.');
+				return await interaction.editReply(`You don't have an osu! account linked and verified to your discord account. Please do so first by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>. This is required as all twitch commands are linked to your osu! account.`);
 			}
 
 			let twitchName = interaction.options.getString('username');
@@ -224,11 +224,11 @@ module.exports = {
 			});
 
 			if (!discordUser || !discordUser.osuUserId) {
-				return await interaction.editReply('You don\'t have an osu! account linked to your discord account. Please do so by using </osu-link connect:1064502370710605836>');
+				return await interaction.editReply(`You don't have an osu! account linked to your discord account. Please do so by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>`);
 			}
 
 			if (!discordUser.twitchName) {
-				return await interaction.editReply('You don\'t have a twitch account linked to your discord account. Use </feedback:1064502027591364649> with type `question` to request access.');
+				return await interaction.editReply(`You don't have a twitch account linked to your discord account. Use </feedback:${interaction.client.slashCommandData.find(command => command.name === 'feedback').id}> with type \`question\` to request access.`);
 			}
 
 			if (!discordUser.twitchVerified) {
@@ -264,11 +264,11 @@ module.exports = {
 			});
 
 			if (!discordUser || !discordUser.osuUserId) {
-				return await interaction.editReply('You don\'t have an osu! account linked to your discord account. Please do so by using </osu-link connect:1064502370710605836>');
+				return await interaction.editReply(`You don't have an osu! account linked to your discord account. Please do so by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>`);
 			}
 
 			if (!discordUser.twitchName) {
-				return await interaction.editReply('You don\'t have a twitch account linked to your discord account. Use </feedback:1064502027591364649> with type `question` to request access.');
+				return await interaction.editReply(`You don't have a twitch account linked to your discord account. Use </feedback:${interaction.client.slashCommandData.find(command => command.name === 'feedback').id}> with type \`question\` to request access.`);
 			}
 
 			if (!discordUser.twitchVerified) {

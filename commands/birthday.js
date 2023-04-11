@@ -204,7 +204,7 @@ module.exports = {
 			});
 
 			if (!dbDiscordUser || dbDiscordUser && !dbDiscordUser.birthday) {
-				return await interaction.editReply({ content: 'You currently don\'t have your birthday set. Please set your birthday first by using </birthday set:1064501937875202091>', ephemeral: true });
+				return await interaction.editReply({ content: `You currently don't have your birthday set. Please set your birthday first by using </birthday set:${interaction.client.slashCommandData.find(command => command.name === 'birthday').id}>`, ephemeral: true });
 			}
 
 			let now = new Date();
