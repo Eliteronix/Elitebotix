@@ -1,6 +1,6 @@
 const { PermissionsBitField, SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
-const { showUnknownInteractionError, developers } = require('../config.json');
-const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMappools } = require('../dbObjects');
+const { showUnknownInteractionError } = require('../config.json');
+const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMappools, DBOsuPoolAccess } = require('../dbObjects');
 const { getMods, getModBits, getIDFromPotentialOsuLink, getOsuBeatmap, getBeatmapSlimcover, pause, logDatabaseQueries } = require('../utils.js');
 const { Op } = require('sequelize');
 const Canvas = require('canvas');
@@ -579,19 +579,6 @@ module.exports = {
 		}
 	},
 	async execute(msg, args, interaction) {
-		if (!developers.includes(interaction.user.id)) {
-			try {
-				return await interaction.reply({ content: 'Only developers may use this command at the moment. As soon as development is finished it will be made public.', ephemeral: true });
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
-			}
-		}
-
 		try {
 			await interaction.deferReply();
 		} catch (error) {
@@ -800,6 +787,17 @@ module.exports = {
 			}
 
 			await interaction.editReply(`Successfully removed mappool \`${mappoolName.replace(/`/g, '')}\`.`);
+
+			let poolAccesses = await DBOsuPoolAccess.destroy({
+				where: {
+					mappoolName: mappoolName.toLowerCase(),
+					accessTakerId: discordUser.osuUserId,
+				},
+			});
+
+			if (poolAccesses > 0) {
+				await interaction.followUp(`Removed \`${poolAccesses}\` pool accesses.`);
+			}
 		} else if (interaction.options.getSubcommand() === 'view') {
 			logDatabaseQueries(1, 'commands/osu-mappool.js (view) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({

@@ -451,7 +451,7 @@ module.exports = {
 				attributes: ['accessGiverId'],
 				where: {
 					spreadsheetId: null,
-					mappoolName: mappoolName,
+					mappoolName: mappoolName.toLowerCase(),
 					accessTakerId: commandUser.osuUserId,
 				}
 			});
@@ -466,7 +466,7 @@ module.exports = {
 				let access = poolAccesses.find(access => access.accessGiverId === player.osuUserId);
 
 				if (!access) {
-					return await interaction.followUp(`User \`${player.osuName}\` did not give you access to the scores for the mappool \`${mappoolName.replace(/`/g, '')}\`.\nYou can give access by using </osu-scoreaccess grantmappoolaccess:${interaction.client.slashCommandData.find(command => command.name === 'osu-scoreaccess').id}>`);
+					return await interaction.followUp(`User \`${player.osuName}\` did not give you access to the scores for the mappool \`${mappoolName.replace(/`/g, '')}\`.\nYou can give access by using </osu-scoreaccess grantpoolaccess:${interaction.client.slashCommandData.find(command => command.name === 'osu-scoreaccess').id}>`);
 				}
 			}
 		}
@@ -1465,6 +1465,8 @@ module.exports = {
 			};
 
 			module.exports.execute(null, null, newInteraction);
+		} else {
+			await interaction.followUp({ content: content, files: files });
 		}
 	},
 };
