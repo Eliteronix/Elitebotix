@@ -177,7 +177,6 @@ module.exports = {
 			}
 		}
 
-		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/logging.js DBGuilds');
 		let guild = await DBGuilds.findOne({
 			attributes: [
