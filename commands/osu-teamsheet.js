@@ -1291,8 +1291,6 @@ module.exports = {
 			ctx.strokeRect(24 + i * 250, 128 + 100 * tourneyMaps.length, 200, 60);
 		}
 
-		// TODO: Manual lineup
-
 		// Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'teamsheet.png' })];
 
