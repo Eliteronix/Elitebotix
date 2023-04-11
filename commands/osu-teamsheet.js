@@ -1,6 +1,6 @@
 const { AttachmentBuilder, PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { showUnknownInteractionError, developers } = require('../config.json');
-const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuMultiScores, DBOsuTeamSheets } = require('../dbObjects');
+const { showUnknownInteractionError } = require('../config.json');
+const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuMultiScores, DBOsuTeamSheets, DBOsuPoolAccess } = require('../dbObjects');
 const { pause, getAvatar, logDatabaseQueries, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating } = require('../utils');
 const { Op } = require('sequelize');
 const Canvas = require('canvas');
@@ -290,19 +290,6 @@ module.exports = {
 		}
 	},
 	async execute(msg, args, interaction) {
-		if (!developers.includes(interaction.user.id)) {
-			try {
-				return await interaction.reply({ content: 'Only developers may use this command at the moment. As soon as development is finished it will be made public.', ephemeral: true });
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
-			}
-		}
-
 		try {
 			await interaction.deferReply();
 		} catch (error) {
@@ -421,7 +408,7 @@ module.exports = {
 
 		logDatabaseQueries(4, 'commands/osu-teamsheet.js DBOsuMappools');
 		let mappool = await DBOsuMappools.findAll({
-			attributes: ['beatmapId', 'modPool', 'tieBreaker', 'freeMod', 'modPoolNumber'],
+			attributes: ['beatmapId', 'modPool', 'tieBreaker', 'freeMod', 'modPoolNumber', 'spreadsheetId'],
 			where: {
 				name: mappoolName,
 				creatorId: commandUser.osuUserId
@@ -433,6 +420,55 @@ module.exports = {
 
 		if (mappool.length === 0) {
 			return await interaction.editReply(`Could not find mappool \`${mappoolName.replace(/`/g, '')}\`.\nMake sure you have the correct name and that you are the creator of the mappool.\nYou can check your mappools with </osu-mappool list:1084953371435356290>.`);
+		}
+
+		let spreadsheetId = mappool[0].spreadsheetId;
+
+		if (spreadsheetId) {
+			let poolAccesses = await DBOsuPoolAccess.findAll({
+				attributes: ['accessGiverId'],
+				where: {
+					spreadsheetId: spreadsheetId,
+					accessTakerId: commandUser.osuUserId,
+				}
+			});
+
+			for (let i = 0; i < players.length; i++) {
+				let player = players[i];
+
+				if (player.osuUserId === commandUser.osuUserId) {
+					continue;
+				}
+
+				let access = poolAccesses.find(access => access.accessGiverId === player.osuUserId);
+
+				if (!access) {
+					return await interaction.followUp(`User \`${player.osuName}\` did not give you access to the scores for the spreadsheet of the mappool \`${mappoolName.replace(/`/g, '')}\`.\nYou can give access by using </osu-scoreaccess grantspreadsheetaccess:1234>`);
+				}
+			}
+		} else {
+			let poolAccesses = await DBOsuPoolAccess.findAll({
+				attributes: ['accessGiverId'],
+				where: {
+					spreadsheetId: null,
+					mappoolName: mappoolName,
+					accessTakerId: commandUser.osuUserId,
+				}
+			});
+
+			for (let i = 0; i < players.length; i++) {
+				let player = players[i];
+
+				if (player.osuUserId === commandUser.osuUserId) {
+					continue;
+				}
+
+				let access = poolAccesses.find(access => access.accessGiverId === player.osuUserId);
+
+				if (!access) {
+					return await interaction.followUp(`User \`${player.osuName}\` did not give you access to the scores for the mappool \`${mappoolName.replace(/`/g, '')}\`.\nYou can give access by using </osu-scoreaccess grantmappoolaccess:1234>`);
+				}
+			}
 		}
 
 		let tourneyMaps = [];
@@ -1338,7 +1374,7 @@ module.exports = {
 				EZMultiplier: ezmultiplier,
 				FLMultiplier: flmultiplier,
 			});
-		} else {
+		} else if (interaction.options.getString('matchlink')) {
 			await interaction.followUp({ content: content, files: files });
 
 			// Wait for the match to be over or for a new map to be played
