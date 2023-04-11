@@ -180,7 +180,40 @@ module.exports = {
 		//TODO: Attributes
 		logDatabaseQueries(4, 'commands/logging.js DBGuilds');
 		let guild = await DBGuilds.findOne({
-			where: { guildId: msg.guildId }
+			attributes: [
+				'id',
+				'loggingChannel',
+				'loggingNicknames',
+				'loggingUsernames',
+				'loggingDiscriminators',
+				'loggingAvatars',
+				'loggingUserroles',
+				'loggingMemberAdd',
+				'loggingMemberRemove',
+				'loggingRoleCreate',
+				'loggingRoleUpdate',
+				'loggingRoleDelete',
+				'loggingBanAdd',
+				'loggingBanRemove',
+				'loggingGuildUpdate',
+				'loggingServerMute',
+				'loggingServerDeaf',
+				'loggingJoinVoice',
+				'loggingLeaveVoice',
+				'loggingChannelCreate',
+				'loggingChannelUpdate',
+				'loggingChannelDelete',
+				'loggingInviteCreate',
+				'loggingInviteDelete',
+				'loggingMessageUpdate',
+				'loggingMessageDelete',
+				'loggingEmojiCreate',
+				'loggingEmojiUpdate',
+				'loggingEmojiDelete',
+			],
+			where: {
+				guildId: msg.guildId
+			}
 		});
 		if (args[0].toLowerCase() === 'list') {
 			let channel = 'Not yet set.';
