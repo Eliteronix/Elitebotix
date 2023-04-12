@@ -6844,6 +6844,7 @@ module.exports = {
 										let msg = {
 											guild: guildTrackers[i].guild,
 											channel: guildTrackers[i].channel,
+											client: c,
 											guildId: guildTrackers[i].guild.id,
 											author: {
 												id: 0
