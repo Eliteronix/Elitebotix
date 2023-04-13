@@ -63,10 +63,18 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log('matchtracks', matchtracks);
 
-		let output = `\`\`\`Cur.: ${interaction.client.shardId} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | HostCmd | Update\n`;
+		const dividingLine = '---------|------------------|--------|-------|-------|------------|-------|---------|--------\n';
+
+		let output = `\`\`\`Cur.: ${interaction.client.shardId.toString().padStart(2, '0')} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | HostCmd | Update\n`;
 		for (let i = 0; i < guildSizes.length; i++) {
 			try {
-				output = output + '--------|------------------|--------|-------|-------|------------|-------|---------|--------\n';
+				if ((output + dividingLine).length > 1997) {
+					output = output + '```';
+					await interaction.followUp(output);
+					output = '```';
+				}
+
+				output = output + dividingLine;
 				let startDate = new Date(startDates[i]);
 				let startedString = `${startDate.getUTCHours().toString().padStart(2, '0')}:${startDate.getUTCMinutes().toString().padStart(2, '0')} ${startDate.getUTCDate().toString().padStart(2, '0')}.${(startDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${startDate.getUTCFullYear()}`;
 				let guildSize = guildSizes[i].toString().padStart(6, ' ');
@@ -76,13 +84,30 @@ module.exports = {
 				let bingoMatchSize = bingoMatches[i].length.toString().padStart(5, ' ');
 				let hostCommandSize = hostCommands[i].length.toString().padStart(7, ' ');
 				let updateString = update[i].toString().padStart(6, ' ');
-				output = output + `Shard ${i} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize} | ${hostCommandSize} | ${updateString}\n`;
+
+				const shardLine = `Shard ${i.toString().padStart(2, '0')} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize} | ${hostCommandSize} | ${updateString}\n`;
+
+				if ((output + shardLine).length > 1997) {
+					output = output + '```';
+					await interaction.followUp(output);
+					output = '```';
+				}
+
+				output = output + shardLine;
 			} catch (error) {
+				const errorLine = `Shard ${i} | Error: ${error.message}\n`;
+
+				if ((output + errorLine).length > 1997) {
+					output = output + '```';
+					await interaction.followUp(output);
+					output = '```';
+				}
+
 				output = output + `Shard ${i} | Error: ${error.message}\n`;
 			}
 		}
 		output = output + '```';
-		await interaction.editReply(output);
+		await interaction.followUp(output);
 
 		if (logBroadcastEval) {
 			// eslint-disable-next-line no-console
