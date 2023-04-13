@@ -6732,7 +6732,7 @@ module.exports = {
 							continue;
 						}
 
-						console.error(err);
+						console.error('Error fetching channel for osu-track', err);
 						continue;
 					}
 
@@ -6752,7 +6752,7 @@ module.exports = {
 									i--;
 									continue;
 								} else {
-									console.error(err);
+									console.error(`Grabbing osu! user for ${osuUser.osuUserId}...`, err);
 									await new Promise(resolve => setTimeout(resolve, 60000));
 									i--;
 									continue;
