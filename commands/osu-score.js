@@ -418,6 +418,31 @@ async function getScore(msg, beatmap, username, server, mode, noLinkedAccount, m
 
 						let user = rippleToBanchoUser(responseJson[0]);
 
+						let mapRank = 0;
+						//Get the map leaderboard and fill the maprank if found
+						await fetch(`https://www.ripple.moe/api/get_scores?b=${beatmap.beatmapId}&m=${mode}&limit=100`)
+							.then(async (response) => {
+								const responseJson = await response.json();
+
+								//Order by score
+								responseJson.sort((a, b) => {
+									return parseInt(b.score) - parseInt(a.score);
+								});
+
+								for (let j = 0; j < responseJson.length && !mapRank; j++) {
+									if (score.raw_mods === responseJson[j].enabled_mods && score.user.id === responseJson[j].user_id && score.score === responseJson[j].score) {
+										mapRank = j + 1;
+									}
+								}
+							})
+							.catch(err => {
+								if (err.message === 'Not found') {
+									msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+								} else {
+									console.error(err);
+								}
+							});
+
 						const input = {
 							beatmap: beatmap,
 							score: score,
