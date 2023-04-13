@@ -4,7 +4,7 @@ const cooldowns = new Discord.Collection();
 const { developers } = require('./config.json');
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { isWrongSystem, getMods, logDatabaseQueries, getOsuBeatmap, pause } = require('./utils');
+const { isWrongSystem, getMods, logDatabaseQueries, getOsuBeatmap, pause, getBeatmapModeId } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user, additionalObjects) {
@@ -246,32 +246,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 		return reaction.message.delete();
 	}
 
-	const didYouMeanRegex = /I could not find the command `.+`.\nDid you mean `.+`?/gm;
-	if (reaction.message.content && reaction.message.mentions.repliedUser && reaction.message.mentions.repliedUser.id && reaction.message.mentions.repliedUser.id === user.id && reaction.message.content.match(didYouMeanRegex)
-		|| reaction.message.content && reaction.message.mentions.repliedUser && reaction.message.mentions.repliedUser.id && reaction.message.mentions.repliedUser.id === user.id && reaction.message.content.match(didYouMeanRegex)) {
-		if (reaction._emoji.name === '✅') {
-			//Grab old message and change content instead
-			reaction.message.channel.messages.fetch({ message: reaction.message.reference.messageId }).then(async (message) => {
-
-				if (message) {
-					const didYouMeanBeginningRegex = /I could not find the command `.+`.\nDid you mean `/gm;
-					message.content = reaction.message.content.substring(0, reaction.message.content.length - 2).replace(didYouMeanBeginningRegex, '');
-
-					//Get gotMessage
-					const gotMessage = require('./gotMessage');
-
-					gotMessage(message);
-
-					return reaction.message.delete();
-				} else {
-					reaction.message.channel.send(`<@${user.id}>, the autocorrected message seems to be too old to retrieve. Please send a new one.`);
-				}
-			});
-		} else if (reaction._emoji.name === '❌') {
-			return reaction.message.delete();
-		}
-	}
-
 	//For the compare emoji
 	if (reaction._emoji.id === '827974793365159997') {
 		if (reaction.message.attachments.first().name.startsWith('osu-recent') || reaction.message.attachments.first().name.startsWith('osu-score')) {
@@ -287,106 +261,111 @@ module.exports = async function (reaction, user, additionalObjects) {
 				return;
 			}
 
-			//Set author of a temporary message copy to the reacting user to not break the commands
-			let guildId = null;
-
-			if (reaction.message.guild) {
-				guildId = reaction.message.guild.id;
-			}
-
-			let tempMessage = {
-				guild: reaction.message.guild,
-				guildId: guildId,
-				content: `e!osu-score ${beatmapId} --${beatmap.mode}`,
-				author: user,
+			//Setup artificial interaction
+			let interaction = {
+				id: null,
+				commandName: 'osu-score',
 				channel: reaction.message.channel,
+				client: reaction.message.client,
+				guild: reaction.message.guild,
+				user: user,
+				options: {
+					getString: (string) => {
+						if (string === 'beatmap') {
+							return beatmapId;
+						}
+					},
+					getNumber: (string) => {
+						if (string === 'gamemode') {
+							return getBeatmapModeId(beatmap);
+						}
+					},
+					getInteger: () => { },
+				},
+				deferReply: () => { },
+				followUp: async (input) => {
+					return await reaction.message.channel.send(input);
+				},
 			};
 
-			try {
-				// eslint-disable-next-line no-undef
-				process.send(`command ${command.name}`);
+			// eslint-disable-next-line no-undef
+			process.send(`command ${command.name}`);
 
-				command.execute(tempMessage, args, null, additionalObjects);
-			} catch (error) {
-				console.error(error);
-				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
-				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
-			}
+			command.execute(null, null, interaction, additionalObjects);
 		} else if (reaction.message.attachments.first().name.startsWith('osu-beatmap')) {
 			const beatmapId = reaction.message.attachments.first().name.replace('osu-beatmap-', '').replace(/-.+/gm, '');
 
-			let args = [beatmapId];
-
 			const command = require('./commands/osu-score.js');
 
 			if (checkCooldown(reaction, command, user, beatmapId) !== undefined) {
 				return;
 			}
 
-			//Set author of a temporary message copy to the reacting user to not break the commands
-			let guildId = null;
-
-			if (reaction.message.guild) {
-				guildId = reaction.message.guild.id;
-			}
-
-			let tempMessage = {
-				guild: reaction.message.guild,
-				guildId: guildId,
-				content: `e!osu-score ${beatmapId}`,
-				author: user,
+			//Setup artificial interaction
+			let interaction = {
+				id: null,
+				commandName: 'osu-score',
 				channel: reaction.message.channel,
+				client: reaction.message.client,
+				guild: reaction.message.guild,
+				user: user,
+				options: {
+					getString: (string) => {
+						if (string === 'beatmap') {
+							return beatmapId;
+						}
+					},
+					getNumber: () => { },
+					getInteger: () => { },
+				},
+				deferReply: () => { },
+				followUp: async (input) => {
+					return await reaction.message.channel.send(input);
+				},
 			};
 
-			try {
-				// eslint-disable-next-line no-undef
-				process.send(`command ${command.name}`);
+			// eslint-disable-next-line no-undef
+			process.send(`command ${command.name}`);
 
-				command.execute(tempMessage, args, null, additionalObjects);
-			} catch (error) {
-				console.error(error);
-				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
-				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
-			}
+			command.execute(null, null, interaction, additionalObjects);
 		} else if (reaction.message.attachments.first().name.startsWith('osu-game-')) {
 			const beatmapId = reaction.message.attachments.first().name.replace(/osu-game-\d+-/gm, '').replace(/-.*/gm, '');
 
-			let args = [beatmapId, '--tournaments'];
-
 			const command = require('./commands/osu-score.js');
 
 			if (checkCooldown(reaction, command, user, beatmapId) !== undefined) {
 				return;
 			}
 
-			//Set author of a temporary message copy to the reacting user to not break the commands
-			let guildId = null;
-
-			if (reaction.message.guild) {
-				guildId = reaction.message.guild.id;
-			}
-
-			let tempMessage = {
-				guild: reaction.message.guild,
-				guildId: guildId,
-				content: `e!osu-score ${beatmapId} --tournaments`,
-				author: user,
+			//Setup artificial interaction
+			let interaction = {
+				id: null,
+				commandName: 'osu-score',
 				channel: reaction.message.channel,
+				client: reaction.message.client,
+				guild: reaction.message.guild,
+				user: user,
+				options: {
+					getString: (string) => {
+						if (string === 'beatmap') {
+							return beatmapId;
+						} else if (string === 'server') {
+							return 'tournaments';
+						}
+					},
+					getNumber: () => { },
+					getInteger: () => { },
+				},
+				deferReply: () => { },
+				followUp: async (input) => {
+					return await reaction.message.channel.send(input);
+				},
 			};
 
-			try {
-				// eslint-disable-next-line no-undef
-				process.send(`command ${command.name}`);
+			// eslint-disable-next-line no-undef
+			process.send(`command ${command.name}`);
 
-				command.execute(tempMessage, args, null, additionalObjects);
-			} catch (error) {
-				console.error(error);
-				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
-				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
-			}
+			command.execute(null, null, interaction, additionalObjects);
 		}
 	}
 

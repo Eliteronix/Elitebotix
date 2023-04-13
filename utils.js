@@ -6841,26 +6841,57 @@ module.exports = {
 										// console.log(`Sending leaderboard scores for ${osuUser.osuUserId}...`);
 
 										recentActivity = true;
-										let msg = {
-											guild: guildTrackers[i].guild,
+
+										//Setup artificial interaction
+										let interaction = {
+											id: null,
+											commandName: 'osu-score',
 											channel: guildTrackers[i].channel,
 											client: c,
-											guildId: guildTrackers[i].guild.id,
-											author: {
-												id: 0
-											}
+											guild: guildTrackers[i].guild,
+											user: {
+												id: c.user.id
+											},
+											options: {
+												getString: (string) => {
+													if (string === 'beatmap') {
+														return osuUser.osuUser.events[j].beatmapId;
+													} else if (string === 'username') {
+														return osuUser.osuUser.name;
+													}
+												},
+												getNumber: (string) => {
+													if (string === 'gamemode') {
+														if (modeName === 'osu!') {
+															return 0;
+														} else if (modeName.toLowerCase() === 'taiko') {
+															return 1;
+														} else if (modeName.toLowerCase() === 'catch') {
+															return 2;
+														} else if (modeName.toLowerCase() === 'mania') {
+															return 3;
+														}
+													}
+												},
+												getInteger: (string) => {
+													if (string === 'mapRank') {
+														return parseInt(mapRank);
+													}
+												},
+											},
+											deferReply: () => { },
+											followUp: async (input) => {
+												return await guildTrackers[i].channel.send(input);
+											},
 										};
-										let newArgs = [osuUser.osuUser.events[j].beatmapId, osuUser.osuUser.name, `--event${mapRank}`];
-										if (modeName !== 'osu!') {
-											newArgs.push(`--${modeName.substring(0, 1)}`);
-										}
+
 										// eslint-disable-next-line no-undef
 										let scoreCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-score.js`);
 
 										// eslint-disable-next-line no-undef
 										process.send(`command ${scoreCommand.name}`);
 
-										scoreCommand.execute(msg, newArgs);
+										scoreCommand.execute(null, null, interaction);
 										await new Promise(resolve => setTimeout(resolve, 5000));
 									}
 								}
@@ -8549,7 +8580,13 @@ module.exports = {
 
 		module.exports.roundedImage(ctx, userBackground, canvas.width / 900 * 50, canvas.height / 500 * 375, userBackground.width / 10 * 2, userBackground.height / 10 * 2, 5);
 
-		let userAvatar = await module.exports.getAvatar(input.user.id);
+		let userAvatar = null;
+
+		if (input.server === 'ripple') {
+			userAvatar = await Canvas.loadImage(`https://a.ripple.moe/${input.user.id}`);
+		} else {
+			userAvatar = await module.exports.getAvatar(input.user.id);
+		}
 
 		module.exports.roundedRect(ctx, canvas.width / 900 * 50 + userBackground.height / 10 * 2, canvas.height / 500 * 375 + 5, userBackground.width / 10 * 2 - userBackground.height / 10 * 2 - 5, userBackground.height / 10 * 2 - 10, 5, '00', '00', '00', 0.5);
 
