@@ -424,7 +424,7 @@ module.exports = {
 		return outputScore;
 	},
 	gatariToBanchoScore: function (inputScore) {
-		let date = new Date(inputScore.time);
+		let date = new Date(inputScore.time * 1000);
 
 		let outputScore = {
 			score: inputScore.score,
