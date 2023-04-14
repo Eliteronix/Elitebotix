@@ -12,6 +12,7 @@ module.exports = {
 				matchName: {
 					[Op.startsWith]: 'o!mm'
 				},
+				verifiedAt: null,
 			},
 			group: ['matchId'],
 		});
