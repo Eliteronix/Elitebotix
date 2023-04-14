@@ -451,6 +451,10 @@ module.exports = {
 			beatmap: undefined
 		};
 
+		if (!outputScore.rank && inputScore.ranking) {
+			outputScore.rank = inputScore.ranking;
+		}
+
 		if (inputScore.beatmap_max_combo === inputScore.max_combo.toString()) {
 			outputScore.perfect = true;
 		}
@@ -8605,8 +8609,9 @@ module.exports = {
 			ctx.save();
 			//ctx.translate(newx, newy);
 			ctx.rotate(-Math.PI / 2);
+			ctx.font = '18px comfortaa, sans-serif';
 			ctx.textAlign = 'center';
-			ctx.fillText(`[${input.server}]`, -canvas.height / 500 * 425, 50);
+			ctx.fillText(`[${input.server}]`, -canvas.height / 500 * 425, 50, 100);
 			ctx.restore();
 		}
 
